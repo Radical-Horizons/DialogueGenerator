@@ -143,7 +143,14 @@ def _first_missing_choice_id_path(document: dict) -> str | None:
     sv = document.get("schemaVersion")
     if sv is None:
         return None
-    if isinstance(sv, str) and sv < "1.1.0":
+    try:
+        sv_str = str(sv).strip() if sv is not None else ""
+    except (TypeError, ValueError):
+        return None
+    if not sv_str:
+        return None
+    # Exiger choiceId pour schemaVersion >= 1.1.0 (ou "1.1" comme alias)
+    if sv_str < "1.1.0" and sv_str != "1.1":
         return None
     nodes = document.get("nodes") or []
     for i, node in enumerate(nodes):
@@ -426,6 +433,24 @@ async def put_document(
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"validationReport": validation_report, "message": "Validation export échouée"},
+            )
+
+        # Story 16.5 AC3 : refus en draft pour document v1.1.0 sans choiceId (non contournable, ADR-008)
+        has_missing_choice_id = any(e.get("code") == "missing_choice_id" for e in errors_structured)
+        doc_sv = doc.get("schemaVersion") if isinstance(doc, dict) else None
+        doc_sv_str = (str(doc_sv).strip() if doc_sv is not None else "") or ""
+        refuse_draft_v1_1_0 = (
+            not is_valid
+            and has_missing_choice_id
+            and (doc_sv_str >= "1.1.0" or doc_sv_str == "1.1")
+        )
+        if validation_mode == "draft" and refuse_draft_v1_1_0:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={
+                    "validationReport": validation_report,
+                    "message": "Ce dialogue doit être migré avec l'outil de migration choiceId (document v1.1.0 sans choiceId non accepté en draft).",
+                },
             )
 
         # Persistance : ne pas modifier choiceId, ordre choices[], node.id (document tel quel)

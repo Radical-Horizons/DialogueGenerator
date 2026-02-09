@@ -1,6 +1,6 @@
 # Story 16.5: Migration choiceId, tolérance minimale, refus sans choiceId
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -123,6 +123,7 @@ so that **la migration soit propre et le format courant soit strict (robustesse 
 - ValidationException : paramètre optionnel `code` (défaut "VALIDATION_ERROR") pour missing_choice_id.
 - Frontend `graphStore.ts` : catch 422/400 + code missing_choice_id → throw Error("Ce dialogue doit être migré...").
 - Tests : tests/scripts/test_migrate_choiceid.py (4 tests unitaires) ; test_documents.py test_get_document_v1_1_0_without_choice_id_returns_422. Tous les tests documents + migration passent.
+- **Code review (AI) corrections** : PUT draft refuse document v1.1.0 sans choiceId (400 + validationReport, AC3 non contournable) ; `_first_missing_choice_id_path` normalise schemaVersion en string (robustesse) ; test `test_put_draft_mode_rejects_v1_1_0_without_choice_id_400` remplace l’ancien test draft qui persistait.
 
 ### File List
 

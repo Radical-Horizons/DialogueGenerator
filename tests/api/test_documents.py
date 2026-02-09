@@ -259,10 +259,10 @@ class TestPutDocumentDraftVsExport:
             ],
         }
 
-    def test_put_draft_mode_persists_despite_validation_errors(
+    def test_put_draft_mode_rejects_v1_1_0_without_choice_id_400(
         self, client, mock_config_service, tmp_path
     ):
-        """Mode draft : validation échoue mais persistance autorisée, 200 + validationReport."""
+        """Mode draft : document v1.1.0 sans choiceId refusé (Story 16.5 AC3, non contournable en draft)."""
         tmp_path.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
         doc = self._doc_with_missing_choice_id()
@@ -272,12 +272,11 @@ class TestPutDocumentDraftVsExport:
             json={"document": doc, "revision": 1, "validationMode": "draft"},
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 400
         data = response.json()
-        assert data["revision"] == 1
         assert "validationReport" in data
         assert len(data["validationReport"]) > 0
-        assert (tmp_path / "draft-doc.json").exists()
+        assert not (tmp_path / "draft-doc.json").exists()
 
     def test_put_export_mode_rejects_on_validation_failure_400(
         self, client, mock_config_service, tmp_path
