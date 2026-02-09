@@ -388,9 +388,17 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
             syncStatus: 'synced',
             lastAckSeq: null,
           })
-        } catch (error) {
+        } catch (error: unknown) {
           console.error('Erreur chargement document:', error)
           set({ isLoading: false })
+          // Story 16.5 (AC3) : message clair si document v1.1.0 sans choiceId (migration requise)
+          const err = error as { response?: { status?: number; data?: { error?: { code?: string } } } }
+          if (
+            (err?.response?.status === 422 || err?.response?.status === 400) &&
+            err?.response?.data?.error?.code === 'missing_choice_id'
+          ) {
+            throw new Error('Ce dialogue doit être migré avec l\'outil de migration choiceId.')
+          }
           throw error
         }
       },

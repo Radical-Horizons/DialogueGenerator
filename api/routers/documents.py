@@ -136,6 +136,26 @@ def _layout_exists(base_dir: Path, document_id: str) -> bool:
     return (base_dir / f"{document_id}.layout.json").exists()
 
 
+def _first_missing_choice_id_path(document: dict) -> str | None:
+    """Retourne le chemin du premier choice sans choiceId, ou None (Story 16.5, refus GET v1.1.0 sans choiceId)."""
+    if not isinstance(document, dict):
+        return None
+    sv = document.get("schemaVersion")
+    if sv is None:
+        return None
+    if isinstance(sv, str) and sv < "1.1.0":
+        return None
+    nodes = document.get("nodes") or []
+    for i, node in enumerate(nodes):
+        if not isinstance(node, dict):
+            continue
+        choices = node.get("choices") or []
+        for j, choice in enumerate(choices):
+            if isinstance(choice, dict) and not choice.get("choiceId"):
+                return f"nodes.{i}.choices.{j}"
+    return None
+
+
 def _resolve_document_base(
     document_id: str,
     config_service: ConfigurationService,
@@ -184,6 +204,16 @@ async def get_document(
         document = _read_document_blob(base_dir, doc_id)
         revision = _read_meta(base_dir, doc_id)
         schema_version = (document.get("schemaVersion") or "1.1.0") if isinstance(document, dict) else "1.1.0"
+
+        # Story 16.5 (AC3) : refus strict document v1.1.0 sans choiceId en flux normal
+        missing_path = _first_missing_choice_id_path(document)
+        if missing_path is not None:
+            raise ValidationException(
+                message="Ce dialogue doit être migré avec l'outil de migration choiceId.",
+                details={"path": missing_path},
+                request_id=request_id,
+                code="missing_choice_id",
+            )
 
         logger.info(f"GET document {doc_id} revision={revision} (request_id: {request_id})")
         return DocumentGetResponse(

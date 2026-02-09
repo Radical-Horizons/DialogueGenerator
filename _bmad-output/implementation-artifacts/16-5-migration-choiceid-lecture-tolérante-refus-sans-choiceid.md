@@ -1,6 +1,6 @@
 # Story 16.5: Migration choiceId, tolérance minimale, refus sans choiceId
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -30,24 +30,24 @@ so that **la migration soit propre et le format courant soit strict (robustesse 
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1** (AC: 1) – Outil one-shot migration choiceId
-  - [ ] 1.1 Créer script (ex. `scripts/migrate_choiceid.py` ou `scripts/migrate-choiceid.js`) : lit des fichiers JSON (glob ou liste), pour chaque document : si choice sans choiceId → attribuer choiceId stable (UUID ou dérivé déterministe type `choice_${nodeId}_${index}`), écrire document avec schemaVersion "1.1.0", idempotent (ne pas modifier les choiceId existants).
-  - [ ] 1.2 Documenter usage (README ou docstring) : cible (dossier/fichiers), dry-run option, backup recommandé.
-  - [ ] 1.3 Appliquer l’outil sur les fixtures/données de test existantes si des JSON sans choiceId existent ; vérifier non-régression tests.
+- [x] **Task 1** (AC: 1) – Outil one-shot migration choiceId
+  - [x] 1.1 Créer script (ex. `scripts/migrate_choiceid.py` ou `scripts/migrate-choiceid.js`) : lit des fichiers JSON (glob ou liste), pour chaque document : si choice sans choiceId → attribuer choiceId stable (UUID ou dérivé déterministe type `choice_${nodeId}_${index}`), écrire document avec schemaVersion "1.1.0", idempotent (ne pas modifier les choiceId existants).
+  - [x] 1.2 Documenter usage (README ou docstring) : cible (dossier/fichiers), dry-run option, backup recommandé.
+  - [x] 1.3 Appliquer l’outil sur les fixtures/données de test existantes si des JSON sans choiceId existent ; vérifier non-régression tests.
 
-- [ ] **Task 2** (AC: 2) – Tolérance minimale uniquement dans le chemin migration
-  - [ ] 2.1 Dans l’outil one-shot (ou un module dédié « migration ») : lors de la lecture des fichiers à migrer, autoriser documents sans schemaVersion ou sans choiceId ; générer choiceId à la volée pour permettre l’écriture migrée. Ce comportement est limité à l’exécution du script (pas exposé en API ni au frontend).
-  - [ ] 2.2 Ne pas ajouter de flag « mode migration » aux endpoints GET/PUT production : la tolérance ne s’applique que dans le script.
+- [x] **Task 2** (AC: 2) – Tolérance minimale uniquement dans le chemin migration
+  - [x] 2.1 Dans l’outil one-shot (ou un module dédié « migration ») : lors de la lecture des fichiers à migrer, autoriser documents sans schemaVersion ou sans choiceId ; générer choiceId à la volée pour permettre l’écriture migrée. Ce comportement est limité à l’exécution du script (pas exposé en API ni au frontend).
+  - [x] 2.2 Ne pas ajouter de flag « mode migration » aux endpoints GET/PUT production : la tolérance ne s’applique que dans le script.
 
-- [ ] **Task 3** (AC: 3) – Refus strict en flux normal (backend + frontend)
-  - [ ] 3.1 Backend GET /documents/{id} : après lecture du blob, si document a schemaVersion >= 1.1.0 (ou présent et >= "1.1.0") et qu’au moins un choice n’a pas de choiceId → refuser avec 422 (ou 400) et erreur structurée (code ex. `missing_choice_id`, message, path). Ne pas retourner le document.
-  - [ ] 3.2 Backend PUT /documents/{id} : la validation (draft et export) utilise déjà `validate_unity_json_structured` ; pour schemaVersion >= 1.1.0 le schéma exige choiceId → les erreurs sont déjà structurées. S’assurer que le refus (4xx + validationReport) est bien renvoyé et non contournable en draft pour « document v1.1.0 sans choiceId » (conformité ADR-008 : refus strict en production).
-  - [ ] 3.3 Frontend : si l’API GET document retourne 422/400 pour missing_choice_id, afficher message utilisateur clair (ex. « Ce dialogue doit être migré avec l’outil de migration choiceId ») et ne pas charger le document en édition.
+- [x] **Task 3** (AC: 3) – Refus strict en flux normal (backend + frontend)
+  - [x] 3.1 Backend GET /documents/{id} : après lecture du blob, si document a schemaVersion >= 1.1.0 (ou présent et >= "1.1.0") et qu’au moins un choice n’a pas de choiceId → refuser avec 422 (ou 400) et erreur structurée (code ex. `missing_choice_id`, message, path). Ne pas retourner le document.
+  - [x] 3.2 Backend PUT /documents/{id} : la validation (draft et export) utilise déjà `validate_unity_json_structured` ; pour schemaVersion >= 1.1.0 le schéma exige choiceId → les erreurs sont déjà structurées. S’assurer que le refus (4xx + validationReport) est bien renvoyé et non contournable en draft pour « document v1.1.0 sans choiceId » (conformité ADR-008 : refus strict en production).
+  - [x] 3.3 Frontend : si l’API GET document retourne 422/400 pour missing_choice_id, afficher message utilisateur clair (ex. « Ce dialogue doit être migré avec l’outil de migration choiceId ») et ne pas charger le document en édition.
 
-- [ ] **Task 4** (AC: 4) – Non-régression et tests
-  - [ ] 4.1 Tests unitaires outil one-shot : idempotence (ré-exécution ne modifie pas choiceId existants), ajout choiceId sur choice sans choiceId, schemaVersion 1.1.0 en sortie.
-  - [ ] 4.2 Tests API : GET document avec document v1.1.0 sans choiceId → 422 (ou 400) et corps d’erreur structuré ; PUT document avec payload v1.1.0 sans choiceId → refus avec validationReport.
-  - [ ] 4.3 Conserver tous les tests existants (documents, layout, E2E) et vérifier qu’ils passent après les changements.
+- [x] **Task 4** (AC: 4) – Non-régression et tests
+  - [x] 4.1 Tests unitaires outil one-shot : idempotence (ré-exécution ne modifie pas choiceId existants), ajout choiceId sur choice sans choiceId, schemaVersion 1.1.0 en sortie.
+  - [x] 4.2 Tests API : GET document avec document v1.1.0 sans choiceId → 422 (ou 400) et corps d’erreur structuré ; PUT document avec payload v1.1.0 sans choiceId → refus avec validationReport.
+  - [x] 4.3 Conserver tous les tests existants (documents, layout, E2E) et vérifier qu’ils passent après les changements.
 
 ## Dev Notes
 
@@ -118,4 +118,20 @@ so that **la migration soit propre et le format courant soit strict (robustesse 
 
 ### Completion Notes List
 
+- Script `scripts/migrate_choiceid.py` : migration choiceId (choice_${nodeId}_${index}), idempotent, schemaVersion 1.1.0, docstring + --dry-run.
+- Backend GET : `_first_missing_choice_id_path` + ValidationException(code="missing_choice_id", 422) dans `get_document`.
+- ValidationException : paramètre optionnel `code` (défaut "VALIDATION_ERROR") pour missing_choice_id.
+- Frontend `graphStore.ts` : catch 422/400 + code missing_choice_id → throw Error("Ce dialogue doit être migré...").
+- Tests : tests/scripts/test_migrate_choiceid.py (4 tests unitaires) ; test_documents.py test_get_document_v1_1_0_without_choice_id_returns_422. Tous les tests documents + migration passent.
+
 ### File List
+
+- scripts/migrate_choiceid.py (nouveau)
+- tests/scripts/__init__.py (nouveau)
+- tests/scripts/test_migrate_choiceid.py (nouveau)
+- api/exceptions.py (ValidationException : paramètre code optionnel)
+- api/routers/documents.py (_first_missing_choice_id_path, refus GET v1.1.0 sans choiceId)
+- tests/api/test_documents.py (test_get_document_v1_1_0_without_choice_id_returns_422)
+- frontend/src/store/graphStore.ts (gestion 422/400 missing_choice_id dans loadDialogueByDocumentId)
+- _bmad-output/implementation-artifacts/sprint-status.yaml (16-5 → in-progress puis review)
+- _bmad-output/implementation-artifacts/16-5-migration-choiceid-lecture-tolérante-refus-sans-choiceid.md (statut, tâches, Dev Agent Record)

@@ -113,6 +113,30 @@ class TestGetDocument:
         response = client.get("/api/v1/documents/%20%20%20")
         assert response.status_code == 422
 
+    def test_get_document_v1_1_0_without_choice_id_returns_422(self, client, mock_config_service, tmp_path):
+        """GET document v1.1.0 avec au moins un choice sans choiceId → 422, corps missing_choice_id (Story 16.5, AC3)."""
+        doc_id = "needs-migration"
+        doc = {
+            "schemaVersion": "1.1.0",
+            "nodes": [
+                {
+                    "id": "START",
+                    "line": "Hello",
+                    "choices": [{"text": "OK", "targetNode": "END"}],
+                },
+            ],
+        }
+        (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+        response = client.get(f"/api/v1/documents/{doc_id}")
+
+        assert response.status_code == 422
+        data = response.json()
+        assert "error" in data
+        assert data["error"].get("code") == "missing_choice_id"
+        assert "path" in data["error"].get("details", {})
+
 
 class TestPutDocument:
     """Tests PUT /api/v1/documents/{id} (AC2)."""
