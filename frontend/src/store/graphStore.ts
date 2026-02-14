@@ -21,7 +21,7 @@ import {
 import type { Choice } from '../schemas/nodeEditorSchema'
 import {
   buildChoiceEdge,
-  choiceEdgeId,
+  stableChoiceEdgeId,
   truncateChoiceLabel,
 } from '../utils/graphEdgeBuilders'
 import {
@@ -975,18 +975,6 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           actualSourceHandle = connectionType.replace('test-', '')
         }
         
-        // Générer un ID unique pour l'edge
-        const edgeId = actualSourceHandle
-          ? `${sourceId}-${actualSourceHandle}-${targetId}`
-          : choiceIndex !== undefined
-          ? `${sourceId}-choice${choiceIndex}->${targetId}`
-          : `${sourceId}->${targetId}`
-        
-        // Vérifier si l'edge existe déjà
-        if (state.edges.some((e) => e.id === edgeId)) {
-          return
-        }
-
         // Connexion via choix (panneau Détails ou drag) : edge via buildChoiceEdge (DRY)
         const isChoiceConnection =
           choiceIndex !== undefined && !actualSourceHandle
@@ -996,6 +984,23 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
         const choiceAt = sourceNodeForChoice?.data?.choices?.[choiceIndex != null ? choiceIndex : 0] as (Choice & { choiceId?: string }) | undefined
         const choiceText = choiceAt?.text
         const choiceId = choiceAt?.choiceId
+        const choiceStableId = choiceId ?? (choiceIndex !== undefined ? `__idx_${choiceIndex}` : 'unknown')
+
+        // Générer un ID canonique pour l'edge
+        const edgeId = isChoiceConnection
+          ? stableChoiceEdgeId(sourceId, choiceStableId)
+          : actualSourceHandle
+          ? `${sourceId}-${actualSourceHandle}-${targetId}`
+          : choiceIndex !== undefined
+          ? `${sourceId}-choice${choiceIndex}->${targetId}`
+          : `${sourceId}->${targetId}`
+
+        // Vérifier si l'edge existe déjà
+        // Note: pour les choix ADR-008 (edgeId stable), un "re-connect" doit retargeter l'edge, pas le bloquer.
+        const existingEdgeIndex = state.edges.findIndex((e) => e.id === edgeId)
+        if (existingEdgeIndex !== -1 && !isChoiceConnection) {
+          return
+        }
         const newEdge: Edge = isChoiceConnection
           ? buildChoiceEdge({
               sourceId,
@@ -1003,7 +1008,6 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
               choiceIndex: choiceIndex!,
               choiceText,
               choiceId,
-              edgeId: choiceId ? `e:${sourceId}:choice:${choiceId}:${targetId}` : choiceEdgeId(sourceId, choiceIndex!, targetId),
             })
           : {
               id: edgeId,
@@ -1017,7 +1021,9 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
               },
             }
         
-        let newEdges = [...state.edges, newEdge]
+        let newEdges = isChoiceConnection && existingEdgeIndex !== -1
+          ? [...state.edges.filter((e) => e.id !== edgeId), newEdge]
+          : [...state.edges, newEdge]
 
         // Mettre à jour les nœuds selon le type de connexion
         let updatedNodes = [...state.nodes]

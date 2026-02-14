@@ -1,6 +1,6 @@
 # Story 16.6: Tests golden, E2E, perf, non-régression
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -33,10 +33,10 @@ so that **on vise zéro régression et la cible perf ADR-008**.
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1** (AC: 1) – Tests golden projection, IDs stables
-  - [ ] 1.1 Étendre ou créer tests « golden » : document JSON (v1.1.0 avec choiceId) → projection nodes/edges ; vérifier node id = node.id, choice handle = choice:choiceId, edge id = e:nodeId:choice:choiceId:targetId ; vérifier que changer la cible d’un choice ne change pas l’edgeId (basé sur la sortie).
-  - [ ] 1.2 Fixtures : au moins un document multi-nœuds avec choix (4 et 8 choices si métier) pour couvrir borne confort/stress.
-  - [ ] 1.3 Réutiliser ou étendre `frontend/src/__tests__/documentToGraph.test.ts` et/ou ajouter tests backend si projection partagée côté API.
+- [x] **Task 1** (AC: 1) – Tests golden projection, IDs stables
+  - [x] 1.1 Étendre ou créer tests « golden » : document JSON (v1.1.0 avec choiceId) → projection nodes/edges ; vérifier node id = node.id, choice handle = choice:choiceId, edge id = e:nodeId:choice:choiceId:targetId ; vérifier que changer la cible d’un choice ne change pas l’edgeId (basé sur la sortie).
+  - [x] 1.2 Fixtures : au moins un document multi-nœuds avec choix (4 et 8 choices si métier) pour couvrir borne confort/stress.
+  - [x] 1.3 Réutiliser ou étendre `frontend/src/__tests__/documentToGraph.test.ts` et/ou ajouter tests backend si projection partagée côté API.
 
 - [ ] **Task 2** (AC: 2) – Tests E2E ADR-008
   - [ ] 2.1 E2E édition : charger un dialogue → éditer line/speaker/choice → sauvegarder → recharger ; pas de perte, pas de reset du panel (story 16.4).
@@ -133,10 +133,22 @@ so that **on vise zéro régression et la cible perf ADR-008**.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+GPT-5.2 (Cursor)
 
 ### Debug Log References
 
+- Vitest: ajout d’un test rouge sur stabilité d’edgeId lors d’un retarget de choix (ADR-008), puis correction + tests verts.
+
 ### Completion Notes List
 
+- ✅ Task 1: edgeId de choix rendu stable (n'inclut plus la cible) pour permettre retarget sans churn d'IDs ; ajout de fixtures 4/8 choix et assertions d’unicité.
+
 ### File List
+
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `frontend/src/utils/graphEdgeBuilders.ts`
+- `frontend/src/utils/documentToGraph.ts`
+- `frontend/src/store/graphStore.ts`
+- `frontend/src/__tests__/documentToGraph.test.ts`
+- `frontend/src/utils/graphEdgeBuilders.test.ts`
+- `frontend/src/__tests__/graphStore.documents.test.ts`

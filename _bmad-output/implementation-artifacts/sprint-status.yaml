@@ -56,8 +56,13 @@ development_status:
   16-2-backend-document-get-put-revision-409: done
   16-3-backend-layout-sidecar-concurrence: done
   16-4-frontend-sot-document-layout-projection-ids-stables: done
+<<<<<<< Updated upstream
   16-5-migration-choiceid-lecture-tolérante-refus-sans-choiceid: done
   16-6-tests-golden-e2e-perf-non-régression: ready-for-dev
+=======
+  16-5-migration-choiceid-lecture-tolérante-refus-sans-choiceid: review
+  16-6-tests-golden-e2e-perf-non-régression: in-progress
+>>>>>>> Stashed changes
   epic-16-retrospective: optional
   epic-1: backlog
   1-1-générer-un-nœud-de-dialogue-single-depuis-un-nœud-parent-dans-le-graphe-fr1: done

@@ -27,6 +27,50 @@ class OpenAIParameterBuilder:
     """
 
     @staticmethod
+    def _enforce_strict_schema(schema: Any) -> Any:
+        """Normalise récursivement un JSON Schema pour le mode strict d'OpenAI.
+
+        Règles strictes (``strict: true``, doc OpenAI Structured Outputs) :
+
+        1. **additionalProperties** doit être ``false`` sur chaque objet.
+        2. **required** doit lister **toutes** les clés de ``properties``
+           (les champs optionnels utilisent ``anyOf: [..., {type: "null"}]``
+           avec ``default: null``).
+        3. Un nœud contenant ``$ref`` ne peut porter **aucune** autre clé
+           (Pydantic v2 ajoute souvent ``description`` à côté de ``$ref``).
+           On déplace le ``$ref`` dans un ``allOf: [{$ref: ...}]`` et on
+           conserve les clés annexes.
+        """
+        if isinstance(schema, dict):
+            # --- Règle 3 : $ref ne doit avoir aucune clé sœur ---
+            # Pydantic v2 ajoute souvent "description", "title", "default" à côté
+            # de $ref.  OpenAI strict mode rejette toute clé annexe.
+            # Solution : on ne conserve que $ref (la description est déjà dans
+            # la définition référencée dans $defs).
+            if "$ref" in schema and len(schema) > 1:
+                ref_value = schema["$ref"]
+                schema.clear()
+                schema["$ref"] = ref_value
+                return schema  # rien d'autre à traiter
+
+            # --- Règle 1 & 2 : objets ---
+            if schema.get("type") == "object":
+                schema["additionalProperties"] = False
+                props = schema.get("properties")
+                if isinstance(props, dict) and props:
+                    schema["required"] = sorted(props.keys())
+
+            # --- Descente récursive ---
+            for key in list(schema.keys()):
+                schema[key] = OpenAIParameterBuilder._enforce_strict_schema(schema[key])
+            return schema
+
+        if isinstance(schema, list):
+            return [OpenAIParameterBuilder._enforce_strict_schema(item) for item in schema]
+
+        return schema
+
+    @staticmethod
     def build_tool_definition(response_model: Type[BaseModel]) -> Optional[Dict[str, Any]]:
         """Construit la définition du tool pour Responses API.
         
@@ -40,15 +84,19 @@ class OpenAIParameterBuilder:
             return None
         
         model_schema_for_tool = response_model.model_json_schema()
-        
-        # S'assurer que additionalProperties est False
-        model_schema_for_tool["additionalProperties"] = False
+
+        # Normaliser le schéma pour le mode strict OpenAI (additionalProperties + required)
+        model_schema_for_tool = OpenAIParameterBuilder._enforce_strict_schema(
+            model_schema_for_tool
+        )
         
         tool_definition_responses = {
             "type": "function",
             "name": "generate_interaction",
             "description": "Génère une interaction de dialogue structurée.",
             "parameters": model_schema_for_tool,
+            # Mode strict (doc OpenAI) : force l'adhérence au schéma dans les arguments du tool.
+            "strict": True,
         }
         
         logger.debug(
@@ -293,8 +341,8 @@ class OpenAIParameterBuilder:
                 logger.debug(f"Utilisation de top_p={top_p} pour {model_name}")
         
         # Streaming
-        # NOTE: Responses API n'utilise pas stream_options (c'est pour Chat Completions API uniquement)
-        # Le streaming fonctionne simplement avec stream=True
+        # Responses API : seul `stream=True` est nécessaire.
+        # (`stream_options` n'existe que pour Chat Completions API)
         if stream:
             responses_params["stream"] = True
             logger.info(f"Streaming natif activé pour {model_name}")

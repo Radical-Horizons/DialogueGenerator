@@ -190,8 +190,7 @@ class TestOpenAIParameterBuilder:
         )
         
         assert params["stream"] is True
-        assert "stream_options" in params
-        assert "reasoning" in params["stream_options"]["include"]
+        assert "stream_options" not in params  # Responses API n'utilise pas stream_options
     
     def test_build_responses_params_top_p_validation(self):
         """Test que top_p hors limites est ignoré."""
@@ -300,8 +299,7 @@ class TestOpenAIParameterBuilder:
         )
         
         assert params["stream"] is True
-        assert "stream_options" in params
-        assert "reasoning" in params["stream_options"]["include"]
+        assert "stream_options" not in params  # Responses API n'utilise pas stream_options
     
     def test_build_responses_params_top_p_validation(self):
         """Test que top_p hors limites est ignoré."""

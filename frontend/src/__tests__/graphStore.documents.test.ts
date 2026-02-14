@@ -132,6 +132,36 @@ describe('graphStore - document SoT load/save', () => {
         })
       )
     })
+
+    it('updates revisions and clears hasUnsavedChanges on success', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 7,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 9 })
+      vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 8 })
+      vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 10 })
+
+      const { loadDialogueByDocumentId, saveDialogue, updateNode } = useGraphStore.getState()
+      await loadDialogueByDocumentId('test-doc')
+
+      // Mark unsaved changes
+      updateNode('START', { data: { line: 'Dirty', speaker: 'NPC' } })
+      expect(useGraphStore.getState().hasUnsavedChanges).toBe(true)
+
+      await saveDialogue()
+
+      const state = useGraphStore.getState()
+      expect(documentsAPI.putDocument).toHaveBeenCalledTimes(1)
+      expect(documentsAPI.putLayout).toHaveBeenCalledTimes(1)
+      expect(state.documentRevision).toBe(8)
+      expect(state.layoutRevision).toBe(10)
+      expect(state.hasUnsavedChanges).toBe(false)
+      expect(state.lastSaveError).toBeNull()
+      expect(state.syncStatus).toBe('synced')
+      expect(typeof state.lastSavedAt).toBe('number')
+    })
   })
 
   describe('Task 2.2 - edit via document then re-project', () => {
@@ -299,7 +329,7 @@ describe('graphStore - document SoT load/save', () => {
         (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'accept'
       )
       expect(choiceEdge?.sourceHandle).toBe('choice:accept')
-      expect(choiceEdge?.id).toMatch(/e:START:choice:accept:END/)
+      expect(choiceEdge?.id).toBe('e:START:choice:accept')
     })
   })
 })

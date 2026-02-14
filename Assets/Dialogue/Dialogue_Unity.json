@@ -5,11 +5,12 @@
     "line": "test",
     "choices": [
       {
-        "text": "",
+        "text": "E2E_EDGE_1770672820424",
         "condition": "",
         "test": "",
         "influenceDelta": null,
-        "respectDelta": null
+        "respectDelta": null,
+        "targetNode": "manual-b9f951d8-358e-4605-b7d3-3fbd28f15cbb"
       },
       {
         "text": "",
@@ -38,5 +39,33 @@
     "speaker": "",
     "line": "",
     "choices": []
+  },
+  {
+    "id": "manual-b9f951d8-358e-4605-b7d3-3fbd28f15cbb",
+    "speaker": "",
+    "line": "",
+    "choices": [
+      {
+        "text": "E2E_EDGE_1770672820424",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
+      },
+      {
+        "text": "",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
+      },
+      {
+        "text": "",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
+      }
+    ]
   }
 ]

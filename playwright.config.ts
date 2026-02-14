@@ -19,7 +19,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'python -m api.main',
+      command: 'node scripts/getPythonPath.js -m api.main',
       url: 'http://localhost:4243/health',
       reuseExistingServer: !process.env.CI,
       env: { API_PORT: '4243', HEALTH_CHECK_LLM_PING: 'true' },

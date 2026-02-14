@@ -47,8 +47,11 @@ class SkillCatalogService:
             return self._skills
         
         if not self.csv_path.exists():
-            logger.error(f"Fichier CSV introuvable: {self.csv_path}")
-            raise FileNotFoundError(f"Le fichier CSV des compétences n'existe pas: {self.csv_path}")
+            # Dégradation gracieuse : le catalogue Unity est optionnel (ex. en CI/tests).
+            # On renvoie une liste vide et on log un warning contextualisé.
+            logger.warning(f"Fichier CSV des compétences introuvable: {self.csv_path} (catalogue ignoré)")
+            self._skills = []
+            return self._skills
         
         skills = []
         

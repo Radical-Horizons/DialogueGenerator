@@ -28,7 +28,7 @@ describe('documentToGraph', () => {
       expect(ids).toContain('END')
     })
 
-    it('uses choice:choiceId for choice sourceHandle and edge id e:nodeId:choice:choiceId:targetId', () => {
+    it('uses choice:choiceId for choice sourceHandle and stable edge id e:nodeId:choice:choiceId', () => {
       const doc: UnityDocument = {
         schemaVersion: '1.1.0',
         nodes: [
@@ -50,13 +50,81 @@ describe('documentToGraph', () => {
       )
       expect(acceptEdge).toBeDefined()
       expect(acceptEdge?.sourceHandle).toBe('choice:accept')
-      expect(acceptEdge?.id).toBe('e:START:choice:accept:END')
+      expect(acceptEdge?.id).toBe('e:START:choice:accept')
       const refuseEdge = edges.find(
         (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'refuse'
       )
       expect(refuseEdge?.sourceHandle).toBe('choice:refuse')
-      expect(refuseEdge?.id).toBe('e:START:choice:refuse:END')
+      expect(refuseEdge?.id).toBe('e:START:choice:refuse')
       expect(nodes.some((n) => n.type === 'testNode')).toBe(false)
+    })
+
+    it('keeps stable choice edge id when the choice target changes (ADR-008)', () => {
+      const docV1: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'START',
+            line: 'Choose',
+            choices: [{ choiceId: 'accept', text: 'Accept', targetNode: 'END' }],
+          },
+          { id: 'END', line: '' },
+          { id: 'ALT', line: '' },
+        ],
+      }
+      const docV2: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'START',
+            line: 'Choose',
+            choices: [{ choiceId: 'accept', text: 'Accept', targetNode: 'ALT' }],
+          },
+          { id: 'END', line: '' },
+          { id: 'ALT', line: '' },
+        ],
+      }
+      const layout: LayoutPositions = {
+        nodes: { START: { x: 0, y: 0 }, END: { x: 0, y: 150 }, ALT: { x: 0, y: 300 } },
+      }
+      const g1 = documentToGraph(docV1, layout)
+      const g2 = documentToGraph(docV2, layout)
+      const e1 = g1.edges.find((e) => e.source === 'START' && e.sourceHandle === 'choice:accept')
+      const e2 = g2.edges.find((e) => e.source === 'START' && e.sourceHandle === 'choice:accept')
+      expect(e1).toBeDefined()
+      expect(e2).toBeDefined()
+      expect(e1?.id).toBe(e2?.id)
+    })
+
+    it('projects 4 and 8 choices with unique stable handles/edge ids (fixtures comfort/stress)', () => {
+      const mkDoc = (choiceCount: number): UnityDocument => ({
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'START',
+            line: 'Choose',
+            choices: Array.from({ length: choiceCount }, (_, i) => ({
+              choiceId: `c${i + 1}`,
+              text: `Choice ${i + 1}`,
+              targetNode: 'END',
+            })),
+          },
+          { id: 'END', line: '' },
+        ],
+      })
+      const layout: LayoutPositions = { nodes: { START: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
+
+      for (const n of [4, 8]) {
+        const { edges } = documentToGraph(mkDoc(n), layout)
+        const choiceEdges = edges.filter((e) => e.source === 'START' && e.target === 'END')
+        expect(choiceEdges).toHaveLength(n)
+        const handles = choiceEdges.map((e) => e.sourceHandle)
+        const ids = choiceEdges.map((e) => e.id)
+        expect(new Set(handles).size).toBe(n)
+        expect(new Set(ids).size).toBe(n)
+        expect(handles.every((h) => typeof h === 'string' && h.startsWith('choice:c'))).toBe(true)
+        expect(ids.every((id) => /^e:START:choice:c\d+$/.test(id))).toBe(true)
+      }
     })
 
     it('uses test:choiceId for TestNode id and e:nodeId:choice:choiceId:test for choice→test edge', () => {
@@ -113,12 +181,12 @@ describe('documentToGraph', () => {
         (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceIndex === 0
       )
       expect(firstEdge?.sourceHandle).toBe('choice:__idx_0')
-      expect(firstEdge?.id).toBe('e:START:choice:__idx_0:END')
+      expect(firstEdge?.id).toBe('e:START:choice:__idx_0')
       const secondEdge = edges.find(
         (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceIndex === 1
       )
       expect(secondEdge?.sourceHandle).toBe('choice:__idx_1')
-      expect(secondEdge?.id).toBe('e:START:choice:__idx_1:END')
+      expect(secondEdge?.id).toBe('e:START:choice:__idx_1')
     })
   })
 

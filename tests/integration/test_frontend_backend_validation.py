@@ -281,7 +281,7 @@ class TestPydanticValidators:
             request = GenerateUnityDialogueRequest(
                 user_instructions="Test",
                 context_selections=context_selection,
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
             # Le validator doit être appelé lors de la création
             pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
@@ -305,7 +305,7 @@ class TestPydanticValidators:
                 user_instructions="Test",
                 context_selections=context_selection,
                 max_context_tokens=50,  # Invalide
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
             pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
         except ValueError as e:
@@ -318,7 +318,7 @@ class TestPydanticValidators:
                 user_instructions="Test",
                 context_selections=context_selection,
                 max_context_tokens=Defaults.MAX_CONTEXT_TOKENS + 1000,  # Trop grand
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
             pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
         except ValueError as e:
@@ -339,7 +339,7 @@ class TestPydanticValidators:
                 user_instructions="Test",
                 context_selections=context_selection,
                 max_completion_tokens=50,  # Invalide
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
         # THEN: message doit mentionner la limite minimum
         error_text = str(exc_info.value)
@@ -351,7 +351,7 @@ class TestPydanticValidators:
                 user_instructions="Test",
                 context_selections=context_selection,
                 max_completion_tokens=60000,  # Trop grand
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
         # THEN: message doit mentionner la limite maximum
         error_text2 = str(exc_info2.value)

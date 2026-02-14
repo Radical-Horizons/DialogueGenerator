@@ -60,7 +60,7 @@ describe('buildChoiceEdge', () => {
       choiceIndex: 0,
       choiceText: 'Mon choix',
     })
-    expect(edge.id).toBe('src-choice0->tgt')
+    expect(edge.id).toBe('e:src:choice:__idx_0')
     expect(edge.source).toBe('src')
     expect(edge.target).toBe('tgt')
     expect(edge.sourceHandle).toBe('choice:__idx_0')
@@ -78,7 +78,7 @@ describe('buildChoiceEdge', () => {
       choiceId: 'accept',
     })
     expect(edge.sourceHandle).toBe('choice:accept')
-    expect(edge.id).toBe('e:NODE_A:choice:accept:NODE_B')
+    expect(edge.id).toBe('e:NODE_A:choice:accept')
     expect(edge.data).toMatchObject({ choiceId: 'accept' })
   })
 

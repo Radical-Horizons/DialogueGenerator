@@ -3,7 +3,7 @@
  * Story 16.4 Task 2.1 : IDs stables ADR-008 (node.id, choice:choiceId, test:choiceId, edge e:...).
  */
 import type { Node, Edge } from 'reactflow'
-import { truncateChoiceLabel } from './graphEdgeBuilders'
+import { stableChoiceEdgeId, truncateChoiceLabel } from './graphEdgeBuilders'
 import { TEST_RESULT_EDGE_CONFIG } from './graphEdgeBuilders'
 
 /** Résout l’identité stable d’un choix (choiceId ou fallback index). */
@@ -147,7 +147,7 @@ export function documentToGraph(
           const choiceText = choice.text ?? `Choix ${choiceIndex + 1}`
           const label = truncateChoiceLabel(choiceText, choiceIndex)
           edges.push({
-            id: `e:${nodeId}:choice:${cid}:${targetNode}`,
+            id: stableChoiceEdgeId(nodeId, cid),
             source: nodeId,
             target: targetNode,
             sourceHandle,

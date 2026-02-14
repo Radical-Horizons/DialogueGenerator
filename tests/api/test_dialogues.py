@@ -284,7 +284,7 @@ class TestGenerateUnityDialogue:
                 "communities_full": []
             },
             "user_instructions": "Test instructions",
-            "llm_model_identifier": "gpt-4o-mini",
+            "llm_model_identifier": "gpt-5-mini",
             "max_context_tokens": 1000,
             "max_choices": 2
         }
@@ -310,7 +310,7 @@ class TestGenerateUnityDialogue:
                 "communities_full": []
             },
             "user_instructions": "Test instructions",
-            "llm_model_identifier": "gpt-4o-mini"
+            "llm_model_identifier": "gpt-5-mini"
         }
         
         response = client.post("/api/v1/dialogues/generate/unity-dialogue", json=request_data)

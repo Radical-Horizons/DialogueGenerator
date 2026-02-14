@@ -217,7 +217,16 @@ class UnityDialogueOrchestrator:
             unity_service = UnityDialogueGenerationService()
             
             # Vérifier si le client supporte le streaming natif
-            has_streaming = hasattr(llm_client, 'generate_variants_streaming')
+            # NOTE: `hasattr(mock, "generate_variants_streaming")` retourne True avec unittest.mock,
+            # ce qui fait basculer à tort en mode streaming dans certains tests.
+            # On exige donc une callable async (coroutine ou async generator).
+            import inspect
+            streaming_attr = getattr(llm_client, 'generate_variants_streaming', None)
+            has_streaming = (
+                streaming_attr is not None
+                and callable(streaming_attr)
+                and (inspect.isasyncgenfunction(streaming_attr) or asyncio.iscoroutinefunction(streaming_attr))
+            )
             
             if has_streaming:
                 # Utiliser le streaming natif

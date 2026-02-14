@@ -68,6 +68,17 @@ export function choiceToTestEdgeId(sourceId: string, choiceIndex: number): strin
   return `${sourceId}-choice-${choiceIndex}-to-test`
 }
 
+/**
+ * ID stable ADR-008 pour un edge de choix (DialogueNode → cible).
+ * Important: n'inclut PAS la cible, afin que retargeter un choix conserve le même edgeId.
+ *
+ * Format: e:{sourceId}:choice:{stableChoiceId}
+ * où stableChoiceId = choiceId (v1.1.0) ou fallback "__idx_N" (legacy).
+ */
+export function stableChoiceEdgeId(sourceId: string, stableChoiceId: string): string {
+  return `e:${sourceId}:choice:${stableChoiceId}`
+}
+
 export interface BuildChoiceEdgeParams {
   sourceId: string
   targetId: string
@@ -81,12 +92,12 @@ export interface BuildChoiceEdgeParams {
 
 /**
  * Construit un edge de type choix (DialogueNode → cible ou TestNode).
- * Si choiceId fourni : sourceHandle = choice:choiceId, id = e:sourceId:choice:choiceId:targetId (ADR-008).
+ * Si choiceId fourni : sourceHandle = choice:choiceId, id = e:sourceId:choice:choiceId (ADR-008).
  */
 export function buildChoiceEdge(params: BuildChoiceEdgeParams): Edge {
   const { sourceId, targetId, choiceIndex, choiceText, choiceId, edgeId } = params
   const stableId = choiceId ?? `__idx_${choiceIndex}`
-  const id = edgeId ?? (choiceId ? `e:${sourceId}:choice:${choiceId}:${targetId}` : choiceEdgeId(sourceId, choiceIndex, targetId))
+  const id = edgeId ?? stableChoiceEdgeId(sourceId, stableId)
   const label = truncateChoiceLabel(choiceText, choiceIndex)
   return {
     id,

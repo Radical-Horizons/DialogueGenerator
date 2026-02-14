@@ -27,7 +27,7 @@ import {
   type EndNodeData,
   type Choice,
 } from '../../schemas/nodeEditorSchema'
-import { choiceEdgeId } from '../../utils/graphEdgeBuilders'
+import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
 import { ChoiceEditor } from './ChoiceEditor'
 
 export const NodeEditorPanel = memo(function NodeEditorPanel() {
@@ -332,7 +332,8 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     const currentChoice = choices[choiceIndex]
     const oldTargetNode = currentChoice?.targetNode
     if (oldTargetNode && oldTargetNode !== 'END') {
-      const edgeId = choiceEdgeId(selectedNodeId, choiceIndex, oldTargetNode)
+      const stableId = (currentChoice as Choice & { choiceId?: string })?.choiceId ?? `__idx_${choiceIndex}`
+      const edgeId = stableChoiceEdgeId(selectedNodeId, stableId)
       if (state.edges.some((e) => e.id === edgeId)) {
         disconnectNodes(edgeId)
       }

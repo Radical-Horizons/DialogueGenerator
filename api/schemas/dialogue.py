@@ -1,6 +1,6 @@
 """Schémas Pydantic pour la génération de dialogues."""
 from typing import Optional, List, Dict, Any, Literal
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 import sys
 from pathlib import Path
 
@@ -153,15 +153,31 @@ class EstimateTokensResponse(BaseModel):
     Attributes:
         context_tokens: Nombre de tokens du contexte.
         token_count: Nombre total de tokens (contexte + prompt).
+        total_estimated_tokens: Alias rétrocompatible de token_count (contexte + prompt).
         raw_prompt: Le prompt brut réel qui sera envoyé au LLM.
         prompt_hash: Hash SHA-256 du prompt pour validation.
         structured_prompt: Structure JSON du prompt (optionnel).
     """
     context_tokens: int = Field(..., description="Nombre de tokens du contexte")
     token_count: int = Field(..., description="Nombre total de tokens")
+    total_estimated_tokens: Optional[int] = Field(
+        default=None,
+        description="Nombre total de tokens (alias rétrocompatible). Si absent, dérivé de token_count.",
+    )
     raw_prompt: str = Field(..., description="Le prompt brut réel qui sera envoyé au LLM")
     prompt_hash: str = Field(..., description="Hash SHA-256 du prompt")
     structured_prompt: Optional[Dict[str, Any]] = Field(None, description="Structure JSON du prompt pour affichage structuré")
+
+    @model_validator(mode="after")
+    def _fill_total_estimated_tokens(self) -> "EstimateTokensResponse":
+        """Renseigne total_estimated_tokens si non fourni.
+
+        Objectif: rétrocompatibilité avec d'anciens handlers/tests qui attendent
+        un champ `total_estimated_tokens`.
+        """
+        if self.total_estimated_tokens is None:
+            self.total_estimated_tokens = self.token_count
+        return self
 
 
 class PreviewPromptRequest(BasePromptRequest):
@@ -194,6 +210,28 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
     reasoning_effort: Optional[Literal["none", "low", "medium", "high", "xhigh"]] = Field(None, description="Niveau de raisonnement pour GPT-5.2 (none=rapide, xhigh=très approfondi). Disponible uniquement pour GPT-5.2 et GPT-5.2-pro.")
     reasoning_summary: Optional[Literal["auto"]] = Field(None, description="Format du résumé de reasoning (thinking summary). Uniquement 'auto' disponible (les résumés 'detailed' nécessitent une organisation OpenAI vérifiée Tier 2/3, non disponible actuellement). Si None, 'auto' est utilisé par défaut.")
     top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Nucleus sampling (0.0-1.0). Alternative/complément à temperature. 0.0=focalisé, 1.0=diversifié.")
+
+    @field_validator("llm_model_identifier", mode="before")
+    @classmethod
+    def validate_llm_model_identifier_for_structured_output(cls, v: str) -> str:
+        """Restreint les modèles autorisés pour garantir le structured output.
+
+        Objectif: fiabiliser la génération Unity (Structured Output obligatoire) sur les
+        modèles validés en prod. D'autres modèles peuvent être proposés ailleurs dans
+        l'app (tests/coûts), mais cette route doit rester robuste.
+        """
+        allowed = {
+            ModelNames.GPT_5_2,
+            ModelNames.GPT_5_2_PRO,
+            ModelNames.GPT_5_MINI,
+        }
+        if v not in allowed:
+            raise ValueError(
+                "Modèle non supporté pour la génération Unity (structured output requis). "
+                f"Modèles autorisés: {', '.join(sorted(allowed))}. "
+                f"Reçu: {v}"
+            )
+        return v
     
     @field_validator('reasoning_summary', mode='before')
     @classmethod
