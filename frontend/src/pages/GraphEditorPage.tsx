@@ -8,7 +8,7 @@ import { ReactFlowProvider } from 'reactflow'
 import { GraphCanvas } from '../components/graph/GraphCanvas'
 import { NodeEditorPanel } from '../components/graph/NodeEditorPanel'
 import { DeleteNodeConfirmModal } from '../components/graph/DeleteNodeConfirmModal'
-import { useGraphStore, undo, redo } from '../store/graphStore'
+import { useGraphStore } from '../store/graphStore'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useToast } from '../components/shared'
 import { theme } from '../theme'
@@ -50,6 +50,12 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
   // Handler pour sauvegarder
   const handleSave = useCallback(async () => {
     try {
+      // Flush du panneau Détails vers le store avant sauvegarde (évite perte speaker/line des nœuds manuels)
+      window.dispatchEvent(new CustomEvent('flush-node-editor-form'))
+      await new Promise<void>((resolve) => {
+        const timeout = setTimeout(resolve, 1500)
+        window.addEventListener('node-editor-flushed', () => { clearTimeout(timeout); resolve() }, { once: true })
+      })
       const response = await saveDialogue()
       toast(`Dialogue sauvegardé: ${response.filename}`, 'success', 3000)
     } catch (error: unknown) {
@@ -57,6 +63,13 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
       toast(`Erreur lors de la sauvegarde: ${message}`, 'error')
     }
   }, [saveDialogue, toast])
+
+  // Sauvegarder quand le panneau Détails envoie "request-save-dialogue" (bouton Sauvegarder du panneau)
+  useEffect(() => {
+    const onRequestSave = () => { handleSave() }
+    window.addEventListener('request-save-dialogue', onRequestSave)
+    return () => window.removeEventListener('request-save-dialogue', onRequestSave)
+  }, [handleSave])
   
   // Handler pour valider
   const handleValidate = useCallback(async () => {
@@ -75,8 +88,9 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
         )
         setShowValidationPanel(true)
       }
-    } catch (error: any) {
-      toast(`Erreur lors de la validation: ${error.message}`, 'error')
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error)
+      toast(`Erreur lors de la validation: ${msg}`, 'error')
     }
   }, [validateGraph, validationErrors, toast])
   
@@ -85,8 +99,9 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
     try {
       await applyAutoLayout('dagre', 'TB')
       toast('Layout appliqué', 'success', 2000)
-    } catch (error: any) {
-      toast(`Erreur lors du layout: ${error.message}`, 'error')
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error)
+      toast(`Erreur lors du layout: ${msg}`, 'error')
     }
   }, [applyAutoLayout, toast])
   
@@ -108,18 +123,6 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
         handler: handleSave,
         description: 'Sauvegarder le dialogue',
         enabled: !isSaving,
-      },
-      {
-        key: 'ctrl+z',
-        handler: () => undo(),
-        description: 'Annuler',
-        enabled: true,
-      },
-      {
-        key: 'ctrl+shift+z',
-        handler: () => redo(),
-        description: 'Refaire',
-        enabled: true,
       },
       {
         key: 'ctrl+l',

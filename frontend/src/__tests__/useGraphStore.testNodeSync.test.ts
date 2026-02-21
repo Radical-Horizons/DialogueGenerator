@@ -10,6 +10,7 @@ import type { Choice } from '../schemas/nodeEditorSchema'
 vi.mock('../api/graph', () => ({
   loadGraph: vi.fn(),
   saveGraph: vi.fn(),
+  saveGraphAndWrite: vi.fn(),
   generateNode: vi.fn(),
   validateGraph: vi.fn(),
   calculateLayout: vi.fn(),

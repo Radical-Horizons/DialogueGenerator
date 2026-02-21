@@ -236,7 +236,7 @@ describe('testNodeSync', () => {
       expect(dialogueToTestEdge).not.toBeUndefined()
       expect(dialogueToTestEdge?.source).toBe('dialogue-1')
       expect(dialogueToTestEdge?.target).toBe('test-node-dialogue-1-choice-0')
-      expect(dialogueToTestEdge?.sourceHandle).toBe('choice-0')
+      expect(dialogueToTestEdge?.sourceHandle).toBe('choice:__idx_0')
     })
 
     it('should truncate long choice text in edge label', () => {

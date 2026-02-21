@@ -89,5 +89,13 @@ export const theme = {
     hover: {
       background: '#333333',
     },
+    /** Bordure nœuds pending (générés, non validés) — Story 1.4 */
+    pending: {
+      border: '#F5A623',
+    },
+    /** Bordure nœuds accepted (validés) — Story 1.4 */
+    accepted: {
+      border: '#27AE60',
+    },
   },
 } as const

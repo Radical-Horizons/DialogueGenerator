@@ -1,6 +1,8 @@
 """Router API pour la gestion de graphes de dialogues."""
 import logging
-from typing import Annotated
+import re
+from pathlib import Path
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, status
 from api.schemas.graph import (
     LoadGraphRequest,
@@ -15,11 +17,18 @@ from api.schemas.graph import (
     ValidateGraphResponse,
     ValidationErrorDetail,
     CalculateLayoutRequest,
-    CalculateLayoutResponse
+    CalculateLayoutResponse,
+    AcceptNodeRequest,
+    RejectNodeRequest
 )
-from api.exceptions import InternalServerException, ValidationException
-from api.dependencies import get_request_id
+from api.exceptions import InternalServerException, NotFoundException, ValidationException
+from api.dependencies import get_config_service, get_request_id
+from services.configuration_service import ConfigurationService
 from services.graph_conversion_service import GraphConversionService
+from services.unity_dialogue_export_service import (
+    write_unity_dialogue_to_file,
+    read_last_seq,
+)
 from services.graph_validation_service import GraphValidationService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.graph_generation_service import GraphGenerationService
@@ -109,6 +118,7 @@ async def save_graph(
         
     Returns:
         Nom de fichier et contenu JSON Unity généré.
+        Si seq/document_id fournis (ADR-006), ack_seq et last_seq dans la réponse.
         
     Raises:
         ValidationException: Si la conversion échoue.
@@ -122,34 +132,144 @@ async def save_graph(
         )
         
         # Générer un nom de fichier (titre sanitizé)
-        import re
         sanitized_title = re.sub(r'[^\w\s-]', '', request_data.metadata.title)
         sanitized_title = re.sub(r'[-\s]+', '_', sanitized_title)
         filename = f"{sanitized_title}.json"
         
+        # ADR-006: réponse ack_seq / last_seq si seq fourni (pas de persistance pour /save)
+        extra: dict = {}
+        if request_data.seq is not None:
+            extra["ack_seq"] = request_data.seq
+            extra["last_seq"] = request_data.seq
+        
         logger.info(
-            f"Graphe sauvegardé: {filename}, "
-            f"{request_data.metadata.node_count} nœuds (request_id: {request_id})"
+            "Graphe sauvegardé: %s, %s nœuds (request_id: %s)",
+            filename,
+            request_data.metadata.node_count,
+            request_id,
         )
         
         return SaveGraphResponse(
             success=True,
             filename=filename,
-            json_content=json_content
+            json_content=json_content,
+            **extra,
         )
         
     except ValueError as e:
-        logger.warning(f"Validation error lors de la sauvegarde (request_id: {request_id}): {e}")
+        logger.warning("Validation error lors de la sauvegarde (request_id: %s): %s", request_id, e)
         raise ValidationException(
             message=str(e),
             request_id=request_id
         )
     except Exception as e:
-        logger.exception(f"Erreur lors de la sauvegarde du graphe (request_id: {request_id})")
+        logger.exception("Erreur lors de la sauvegarde du graphe (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de la sauvegarde du graphe",
             details={"error": str(e)},
             request_id=request_id
+        )
+
+
+@router.post(
+    "/save-and-write",
+    response_model=SaveGraphResponse,
+    status_code=status.HTTP_200_OK
+)
+async def save_graph_and_write(
+    request_data: SaveGraphRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)] = None
+) -> SaveGraphResponse:
+    """Convertit le graphe en Unity JSON, valide et écrit le fichier sur disque (un seul appel).
+    
+    ADR-006: Si seq/document_id fournis, seq <= last_seq → ne pas écraser (200 + ack(last_seq));
+    seq > last_seq → écriture atomique + persistance last_seq + ack(seq).
+    
+    Args:
+        request_data: Nœuds et edges ReactFlow avec métadonnées.
+        config_service: Service de configuration (chemin Unity).
+        request_id: ID de la requête.
+        
+    Returns:
+        Nom de fichier et contenu JSON Unity généré.
+        
+    Raises:
+        ValidationException: Si la conversion ou la validation échoue.
+        InternalServerException: Si l'écriture échoue.
+    """
+    try:
+        json_content = GraphConversionService.graph_to_unity_json(
+            request_data.nodes,
+            request_data.edges
+        )
+        sanitized_title = re.sub(r"[^\w\s-]", "", request_data.metadata.title)
+        sanitized_title = re.sub(r"[-\s]+", "_", sanitized_title)
+        filename_without_ext = sanitized_title[:100] if sanitized_title else "dialogue"
+        filename = filename_without_ext + ".json" if not filename_without_ext.endswith(".json") else filename_without_ext
+        if not filename.endswith(".json"):
+            filename += ".json"
+        document_key = filename[:-5] if filename.endswith(".json") else filename
+
+        # ADR-006: seq / last_seq — si seq fourni, comparer à last_seq
+        seq = request_data.seq
+        last_seq: Optional[int] = None
+        if seq is not None:
+            unity_path = config_service.get_unity_dialogues_path()
+            if unity_path:
+                unity_dir = Path(unity_path)
+                last_seq = read_last_seq(unity_dir, document_key)
+            if last_seq is not None and seq <= last_seq:
+                    logger.info(
+                        "save-and-write: seq %s <= last_seq %s, pas d'écriture (request_id: %s)",
+                        seq,
+                        last_seq,
+                        request_id,
+                    )
+                    return SaveGraphResponse(
+                        success=True,
+                        filename=filename,
+                        json_content=json_content,
+                        ack_seq=last_seq,
+                        last_seq=last_seq,
+                    )
+
+        file_path, filename_out = write_unity_dialogue_to_file(
+            config_service=config_service,
+            json_content=json_content,
+            filename=filename_without_ext,
+            request_id=request_id,
+            last_seq_after_write=seq,
+        )
+
+        extra: dict = {}
+        if seq is not None:
+            extra["ack_seq"] = seq
+            extra["last_seq"] = seq
+
+        logger.info(
+            "Graphe sauvegardé et écrit: %s, %s nœuds (request_id: %s)",
+            filename_out,
+            request_data.metadata.node_count,
+            request_id,
+        )
+        return SaveGraphResponse(
+            success=True,
+            filename=filename_out,
+            json_content=json_content,
+            **extra,
+        )
+    except ValidationException:
+        raise
+    except ValueError as e:
+        logger.warning("Validation error lors de save-and-write (request_id: %s): %s", request_id, e)
+        raise ValidationException(message=str(e), request_id=request_id)
+    except Exception as e:
+        logger.exception("Erreur lors de la sauvegarde du graphe (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de la sauvegarde du graphe",
+            details={"error": str(e)},
+            request_id=request_id,
         )
 
 
@@ -689,6 +809,137 @@ async def calculate_layout(
         logger.exception(f"Erreur lors du calcul de layout (request_id: {request_id})")
         raise InternalServerException(
             message="Erreur lors du calcul de layout",
+            details={"error": str(e)},
+            request_id=request_id
+        )
+
+
+def _validate_dialogue_exists(
+    dialogue_id: str,
+    config_service: ConfigurationService,
+    request_id: Optional[str],
+) -> None:
+    """Vérifie que le dialogue existe (fichier Unity). Skip si dialogue_id == 'current'."""
+    if dialogue_id == "current":
+        return
+    fname = dialogue_id
+    if ".." in fname or "/" in fname or "\\" in fname:
+        raise ValidationException(
+            message="Nom de fichier invalide (caractères interdits)",
+            details={"dialogue_id": dialogue_id},
+            request_id=request_id,
+        )
+    unity_path = config_service.get_unity_dialogues_path()
+    if not unity_path:
+        raise ValidationException(
+            message="Le chemin Unity dialogues n'est pas configuré.",
+            details={"field": "unity_dialogues_path"},
+            request_id=request_id,
+        )
+    if not fname.endswith(".json"):
+        fname = fname + ".json"
+    path = Path(unity_path) / fname
+    if not path.exists():
+        raise NotFoundException(
+            resource_type="Dialogue Unity",
+            resource_id=fname,
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/nodes/{node_id}/accept",
+    status_code=status.HTTP_200_OK
+)
+async def accept_node(
+    node_id: str,
+    request_data: AcceptNodeRequest,
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)] = None,
+):
+    """Accepte un nœud généré (passe de "pending" à "accepted").
+    
+    Validation-only: vérifie que le dialogue existe. La persistance (mise à jour
+    du JSON avec status "accepted") est faite par le frontend via saveDialogue()
+    après mise à jour optimiste du store.
+    
+    Args:
+        node_id: ID du nœud à accepter.
+        request_data: ID du dialogue.
+        request_id: ID de la requête.
+        config_service: Service de configuration (injecté).
+        
+    Returns:
+        Succès de l'opération.
+        
+    Raises:
+        NotFoundException: Si le dialogue est introuvable.
+        ValidationException: Si dialogue_id invalide.
+    """
+    try:
+        _validate_dialogue_exists(
+            request_data.dialogue_id, config_service, request_id
+        )
+        logger.info(
+            f"Nœud accepté: {node_id}, dialogue: {request_data.dialogue_id} "
+            f"(request_id: {request_id})"
+        )
+        return {"success": True, "node_id": node_id, "status": "accepted"}
+    except (NotFoundException, ValidationException):
+        raise
+    except Exception as e:
+        logger.exception(f"Erreur lors de l'acceptation du nœud (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors de l'acceptation du nœud",
+            details={"error": str(e)},
+            request_id=request_id
+        )
+
+
+@router.post(
+    "/nodes/{node_id}/reject",
+    status_code=status.HTTP_200_OK
+)
+async def reject_node(
+    node_id: str,
+    request_data: RejectNodeRequest,
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)] = None,
+):
+    """Rejette un nœud généré (supprime le nœud).
+    
+    Validation-only: vérifie que le dialogue existe. La persistance (suppression
+    du nœud du JSON) est faite par le frontend après succès: mise à jour locale
+    puis saveDialogue() pour persister immédiatement (AC#3).
+    
+    Args:
+        node_id: ID du nœud à rejeter.
+        request_data: ID du dialogue.
+        request_id: ID de la requête.
+        config_service: Service de configuration (injecté).
+        
+    Returns:
+        Succès de l'opération.
+        
+    Raises:
+        NotFoundException: Si le dialogue est introuvable.
+        ValidationException: Si dialogue_id invalide.
+    """
+    try:
+        _validate_dialogue_exists(
+            request_data.dialogue_id, config_service, request_id
+        )
+        logger.info(
+            f"Nœud rejeté: {node_id}, dialogue: {request_data.dialogue_id} "
+            f"(request_id: {request_id})"
+        )
+        return {"success": True, "node_id": node_id, "status": "rejected"}
+    except (NotFoundException, ValidationException):
+        raise
+    except Exception as e:
+        logger.exception(f"Erreur lors du rejet du nœud (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors du rejet du nœud",
             details={"error": str(e)},
             request_id=request_id
         )

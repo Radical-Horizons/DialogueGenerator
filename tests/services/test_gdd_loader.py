@@ -2,7 +2,7 @@
 import pytest
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 from services.gdd_loader import GDDLoader, GDDData
 
 

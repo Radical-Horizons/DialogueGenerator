@@ -37,6 +37,7 @@ alwaysApply: false
   - Tests API : utiliser `TestClient` de FastAPI, pas de serveur réel
   - Mocks : `pytest-mock` pour services externes (LLM, fichiers GDD)
   - Configuration : `pytest.ini` définit les options (asyncio_mode, testpaths, etc.)
+  - **E2E (Playwright)** : `npm run test:e2e`. Pour les specs avec appels LLM (ex. `graph-node-accept-reject`) : `.env` + `OPENAI_API_KEY`, budget utilisable, **gpt-5-nano**. Voir `docs/troubleshooting/e2e-llm.md` pour prérequis, preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
 
 - **Avant commit** : `npm test` (backend, utilise venv) + `npm run test:frontend` (frontend). Si vert : commit + push.
 

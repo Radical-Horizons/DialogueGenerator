@@ -28,6 +28,8 @@ class SaveGraphRequest(BaseModel):
     nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
     edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
     metadata: GraphMetadata = Field(..., description="Métadonnées du graphe")
+    seq: Optional[int] = Field(None, description="Séquence monotone côté client (ADR-006)")
+    document_id: Optional[str] = Field(None, description="ID stable du document (ex. filename)")
 
 
 class SaveGraphResponse(BaseModel):
@@ -35,6 +37,8 @@ class SaveGraphResponse(BaseModel):
     success: bool = Field(..., description="Succès de l'opération")
     filename: str = Field(..., description="Nom du fichier sauvegardé")
     json_content: str = Field(..., description="Contenu Unity JSON généré")
+    ack_seq: Optional[int] = Field(None, description="Séquence reconnue par le serveur (ADR-006)")
+    last_seq: Optional[int] = Field(None, description="Dernier seq connu pour ce document (ADR-006)")
 
 
 class GenerateNodeRequest(BaseModel):
@@ -121,3 +125,13 @@ class CalculateLayoutRequest(BaseModel):
 class CalculateLayoutResponse(BaseModel):
     """Réponse après calcul de layout."""
     nodes: List[Dict[str, Any]] = Field(..., description="Nœuds avec positions calculées")
+
+
+class AcceptNodeRequest(BaseModel):
+    """Requête pour accepter un nœud généré."""
+    dialogue_id: str = Field(..., description="ID du dialogue (filename)")
+
+
+class RejectNodeRequest(BaseModel):
+    """Requête pour rejeter un nœud généré."""
+    dialogue_id: str = Field(..., description="ID du dialogue (filename)")

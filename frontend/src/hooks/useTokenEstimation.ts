@@ -59,7 +59,6 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   const {
     userInstructions,
     maxContextTokens,
-    maxCompletionTokens,
     maxChoices,
     choicesMode,
     narrativeTags,
@@ -71,7 +70,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   const [estimationError, setEstimationError] = useState<string | null>(null)
 
   const { selections } = useContextStore()
-  const { sceneSelection, dialogueStructure, systemPromptOverride, promptHash, tokenCount, setRawPrompt } = useGenerationStore()
+  const { sceneSelection, dialogueStructure, systemPromptOverride, tokenCount, setRawPrompt } = useGenerationStore()
   const { vocabularyConfig } = useVocabularyStore()
   const { includeNarrativeGuides } = useNarrativeGuidesStore()
   const { authorProfile } = useAuthorProfile()
@@ -142,10 +141,10 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     
     // Calculer le hash AVANT l'appel API pour vérifier le cache
     const computedHash = await computeStateHash(promptParams)
-    const currentHash = promptHash
-    
+    const { promptHash: currentHash, tokenCount: currentTokenCount } = useGenerationStore.getState()
+
     // Si le hash est identique et qu'on a déjà un tokenCount, skip l'appel API
-    if (computedHash === currentHash && tokenCount !== null) {
+    if (computedHash === currentHash && currentTokenCount !== null) {
       // Cache hit: pas besoin d'appeler l'API
       return
     }
@@ -153,7 +152,16 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     // Ne pas effacer le prompt existant pendant l'estimation
     setIsEstimating(true)
     setEstimationError(null)
-    
+    // Mettre à jour le store pour afficher "Construction du prompt..." dans le panneau Détails
+    const stateBeforeCall = useGenerationStore.getState()
+    setRawPrompt(
+      stateBeforeCall.rawPrompt,
+      stateBeforeCall.tokenCount,
+      stateBeforeCall.promptHash,
+      true,
+      stateBeforeCall.structuredPrompt
+    )
+
     try {
       // Appel API seulement si le hash a changé
       const response = await dialoguesAPI.previewPrompt(promptParams)
@@ -174,6 +182,10 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       
       if (currentHash !== response.prompt_hash || currentHash === null) {
         setRawPrompt(response.raw_prompt, estimatedTokenCount, response.prompt_hash, false, response.structured_prompt || null)
+      } else {
+        // Même hash : ne pas remplacer le contenu mais remettre isEstimating à false dans le store
+        const stateAfter = useGenerationStore.getState()
+        setRawPrompt(stateAfter.rawPrompt, stateAfter.tokenCount, stateAfter.promptHash, false, stateAfter.structuredPrompt)
       }
     } catch (err: unknown) {
       // Ne logger que les erreurs non liées à la connexion (backend non accessible)
@@ -210,13 +222,11 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     sceneSelection.characterB,
     toast,
     choicesMode,
-    promptHash,
-    tokenCount,
   ])
 
-  // Debounce automatique de l'estimation (500ms)
+  // Debounce automatique de l'estimation (500ms, ou 100ms si on a des critères mais pas encore de prompt)
   useEffect(() => {
-    const hasAnySelections = 
+    const hasAnySelections =
       selections.characters_full.length > 0 ||
       selections.characters_excerpt.length > 0 ||
       selections.locations_full.length > 0 ||
@@ -228,16 +238,19 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.communities_full.length > 0 ||
       selections.communities_excerpt.length > 0 ||
       selections.dialogues_examples.length > 0
-    
+
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
-    
+    const hasCriteria = Boolean(userInstructions.trim() || hasAnySelections || hasSystemPrompt)
+    const hasNoPromptYet = useGenerationStore.getState().rawPrompt == null
+    const debounceMs = hasCriteria && hasNoPromptYet ? 100 : 500
+
     const timeoutId = setTimeout(() => {
-      if (userInstructions.trim() || hasAnySelections || hasSystemPrompt) {
+      if (hasCriteria) {
         void estimateTokens()
       } else {
         setRawPrompt(null, null, null, false, null)
       }
-    }, 500)
+    }, debounceMs)
 
     return () => clearTimeout(timeoutId)
   }, [

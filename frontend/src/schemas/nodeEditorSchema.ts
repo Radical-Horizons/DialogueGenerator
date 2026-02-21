@@ -15,6 +15,7 @@ export const traitRequirementSchema = z.object({
  * Schéma pour un choix de dialogue.
  */
 export const choiceSchema = z.object({
+  choiceId: z.string().optional(), // ADR-008 / v1.1.0 : identité stable pour handles et edges
   text: z.string().min(1, 'Le texte du choix est requis'),
   targetNode: z.string().optional(),
   condition: z.string().optional(),

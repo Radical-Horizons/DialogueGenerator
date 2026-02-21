@@ -1,13 +1,18 @@
 /**
  * Panel pour éditer les propriétés d'un nœud sélectionné.
  * Version avec React Hook Form + Zod pour validation.
+ *
+ * Story 16.4 Task 3 (AC 4) : Lecture depuis la projection (nodes), écriture via updateNode
+ * qui en mode document SoT met à jour le document puis recalcule la projection. Les identités
+ * stables (node.id, choiceId) évitent un reset du panel après édition. Debounce/throttle inchangés.
  */
-import { memo, useEffect, useState, useCallback } from 'react'
-import { useForm, FormProvider, useFormContext, useFieldArray } from 'react-hook-form'
+import { memo, useEffect, useState, useCallback, useRef } from 'react'
+import { useForm, FormProvider, useFormContext, useFieldArray, type FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useShallow } from 'zustand/react/shallow'
 import { useGraphStore } from '../../store/graphStore'
 import { useContextStore } from '../../store/contextStore'
-import { useToast, WarningBanner } from '../shared'
+import { useToast } from '../shared'
 import { theme } from '../../theme'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
@@ -22,10 +27,15 @@ import {
   type EndNodeData,
   type Choice,
 } from '../../schemas/nodeEditorSchema'
+import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
 import { ChoiceEditor } from './ChoiceEditor'
 
 export const NodeEditorPanel = memo(function NodeEditorPanel() {
-  const { selectedNodeId, nodes, updateNode, generateFromNode, isGenerating, setSelectedNode, autoRestoredDraft, clearAutoRestoredDraft, setShowDeleteNodeConfirm } = useGraphStore()
+  const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
+  const selectedNode = useGraphStore(
+    useShallow((s) => s.nodes.find((n) => n.id === s.selectedNodeId) ?? null)
+  )
+  const { updateNode, generateFromNode, isGenerating, setSelectedNode, setShowDeleteNodeConfirm, createEmptyNode, addNode, connectNodes, disconnectNodes } = useGraphStore()
   const { selections } = useContextStore()
   const toast = useToast()
   
@@ -45,8 +55,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         console.error('Erreur lors du chargement des modèles:', err)
       })
   }, [])
-  
-  const selectedNode = nodes.find((n) => n.id === selectedNodeId)
   
   const nodeType = selectedNode?.type || 'dialogueNode'
   
@@ -84,10 +92,93 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   })
   
   const { register, handleSubmit, formState: { errors }, reset, watch } = form
-  
-  // Synchroniser avec le nœud sélectionné
+  const isFlushingRef = useRef(false)
+  const previousSelectedNodeIdRef = useRef<string | null>(null)
+  const debouncePushRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const DEBOUNCE_MS = 100
+
+  /** Merge form values into node data for store push (ADR-006). Preserves connection fields (targetNode, test*Node) for choices. */
+  const mergeFormDataIntoNodeData = useCallback(
+    (
+      nType: string,
+      nodeData: Record<string, unknown>,
+      formValues: DialogueNodeData | TestNodeData | EndNodeData
+    ): Record<string, unknown> => {
+      if (nType === 'dialogueNode') {
+        const storeChoices = (nodeData.choices || []) as Choice[]
+        const formChoices = (formValues as DialogueNodeData).choices || []
+        const mergedChoices: Choice[] = formChoices.map((fc, i) => {
+          const storeChoice = storeChoices[i]
+          return {
+            ...fc,
+            targetNode: storeChoice?.targetNode ?? fc.targetNode,
+            testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
+            testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
+            testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,
+            testCriticalSuccessNode: storeChoice?.testCriticalSuccessNode ?? fc.testCriticalSuccessNode,
+          }
+        })
+        return { ...nodeData, ...formValues, choices: mergedChoices }
+      }
+      if (nType === 'testNode') {
+        return { ...nodeData, ...formValues }
+      }
+      return { ...nodeData, ...formValues }
+    },
+    []
+  )
+
+  // ADR-006 : pousser le formulaire vers le store à la saisie (debounce ≤ 100 ms), pas de brouillon.
+  // getState() dans le callback : lecture de l'état au moment de l'exécution (après 100 ms), pas dans le render.
+  const watchedValues = watch()
   useEffect(() => {
-    if (selectedNode?.data) {
+    if (!selectedNodeId) return
+    if (debouncePushRef.current) clearTimeout(debouncePushRef.current)
+    debouncePushRef.current = setTimeout(() => {
+      debouncePushRef.current = null
+      const state = useGraphStore.getState()
+      if (state.selectedNodeId !== selectedNodeId) return
+      const node = state.nodes.find((n) => n.id === selectedNodeId)
+      if (!node?.data) return
+      const formValues = form.getValues()
+      const merged = mergeFormDataIntoNodeData(nodeType, node.data as Record<string, unknown>, formValues)
+      updateNode(selectedNodeId, { data: merged })
+    }, DEBOUNCE_MS)
+    return () => {
+      if (debouncePushRef.current) {
+        clearTimeout(debouncePushRef.current)
+        debouncePushRef.current = null
+      }
+    }
+  }, [watchedValues, selectedNodeId, nodeType, form, updateNode, mergeFormDataIntoNodeData])
+
+  // Synchroniser avec le nœud sélectionné ; au changement de nœud, flusher le formulaire vers l’ancien nœud (ADR-006 : filet de sécurité)
+  useEffect(() => {
+    const prevId = previousSelectedNodeIdRef.current
+    const currentId = selectedNodeId ?? null
+    const selectionChanged = prevId !== currentId
+
+    if (selectionChanged && prevId != null) {
+      const values = form.getValues()
+      const state = useGraphStore.getState()
+      const prevNode = state.nodes.find((n) => n.id === prevId)
+      if (prevNode?.data) {
+        updateNode(prevId, {
+          data: {
+            ...prevNode.data,
+            ...values,
+          },
+        })
+      }
+      if (debouncePushRef.current) {
+        clearTimeout(debouncePushRef.current)
+        debouncePushRef.current = null
+      }
+    }
+    previousSelectedNodeIdRef.current = currentId
+
+    if (selectionChanged && selectedNode?.data) {
       if (nodeType === 'dialogueNode') {
         const choices = (selectedNode.data.choices || []) as Choice[]
         
@@ -114,18 +205,39 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         })
       }
     }
-  }, [selectedNode, nodeType, reset])
-  
-  const onSubmit = (data: DialogueNodeData | TestNodeData | EndNodeData) => {
+  }, [selectedNodeId, selectedNode, nodeType, reset, form, updateNode])
+
+  const onSubmit = useCallback((data: DialogueNodeData | TestNodeData | EndNodeData) => {
     if (!selectedNodeId) return
-    
+    if (nodeType === 'dialogueNode') {
+      const line = (data as DialogueNodeData).line ?? ''
+      if (typeof line === 'string' && line.trim() === '') {
+        toast('Nœud vide - ajouter du texte', 'warning')
+      }
+    }
     updateNode(selectedNodeId, {
       data: {
         ...selectedNode?.data,
         ...data,
       },
     })
-  }
+    if (!isFlushingRef.current) {
+      window.dispatchEvent(new CustomEvent('request-save-dialogue'))
+    }
+  }, [selectedNodeId, nodeType, selectedNode?.data, updateNode, toast])
+
+  // Flush du formulaire vers le store quand le graphe demande une sauvegarde (évite perte des edits non soumis)
+  useEffect(() => {
+    const onFlush = () => {
+      isFlushingRef.current = true
+      form.handleSubmit(onSubmit)()
+        .then(() => { window.dispatchEvent(new CustomEvent('node-editor-flushed')) })
+        .catch(() => { window.dispatchEvent(new CustomEvent('node-editor-flushed')) })
+        .finally(() => { isFlushingRef.current = false })
+    }
+    window.addEventListener('flush-node-editor-form', onFlush)
+    return () => window.removeEventListener('flush-node-editor-form', onFlush)
+  }, [form, onSubmit])
   
   const handleDelete = () => {
     if (!selectedNodeId) return
@@ -183,7 +295,56 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     } catch (err) {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
-  }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
+  }, [selectedNodeId, selectedNode?.data?.choices, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
+
+  /** Créer un nœud vide et le lier comme cible du choix (panneau Détails, par choix). */
+  const handleCreateEmptyNodeForChoice = useCallback((choiceIndex: number) => {
+    if (!selectedNodeId || !selectedNode) return
+    const storeChoices = (selectedNode.data?.choices || []) as Choice[]
+    const formData = form.getValues() as DialogueNodeData
+    const formChoices = formData.choices || []
+    // Synchroniser la structure des choix (longueur / champs éditables) depuis le formulaire,
+    // tout en conservant les champs de connexion du store pour chaque choix (targetNode, test*Node)
+    // pour ne pas déconnecter les autres choix (ex. choix #1) ni perdre la persistance.
+    if (nodeType === 'dialogueNode' && formChoices.length >= storeChoices.length) {
+      const mergedChoices: Choice[] = formChoices.map((fc, i) => {
+        const storeChoice = storeChoices[i]
+        return {
+          ...fc,
+          targetNode: storeChoice?.targetNode ?? fc.targetNode,
+          testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
+          testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
+          testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,
+          testCriticalSuccessNode: storeChoice?.testCriticalSuccessNode ?? fc.testCriticalSuccessNode,
+        }
+      })
+      updateNode(selectedNodeId, {
+        data: {
+          ...selectedNode.data,
+          ...formData,
+          choices: mergedChoices,
+        },
+      })
+    }
+    const state = useGraphStore.getState()
+    const parentAfterSync = state.nodes.find((n) => n.id === selectedNodeId)
+    const choices = (parentAfterSync?.data?.choices || []) as Choice[]
+    const currentChoice = choices[choiceIndex]
+    const oldTargetNode = currentChoice?.targetNode
+    if (oldTargetNode && oldTargetNode !== 'END') {
+      const stableId = (currentChoice as Choice & { choiceId?: string })?.choiceId ?? `__idx_${choiceIndex}`
+      const edgeId = stableChoiceEdgeId(selectedNodeId, stableId)
+      if (state.edges.some((e) => e.id === edgeId)) {
+        disconnectNodes(edgeId)
+      }
+    }
+    const pos = parentAfterSync?.position ?? selectedNode.position
+    const position = { x: pos.x + 300, y: pos.y + choiceIndex * 80 }
+    const node = createEmptyNode(position)
+    addNode(node)
+    connectNodes(selectedNodeId, node.id, choiceIndex)
+    setSelectedNode(node.id)
+  }, [selectedNodeId, selectedNode, nodeType, form, updateNode, createEmptyNode, addNode, connectNodes, disconnectNodes, setSelectedNode])
   
   // Handler pour générer pour un choix spécifique
   const handleGenerateForChoice = useCallback(async (choiceIndex: number) => {
@@ -279,14 +440,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     }
   }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
   
-  // Handler pour charger le fichier plus ancien (doit être avant le return conditionnel)
-  const handleLoadOlderFile = useCallback(() => {
-    // Émettre un événement pour que GraphEditor charge le fichier plus ancien
-    const event = new CustomEvent('load-older-file')
-    window.dispatchEvent(event)
-    clearAutoRestoredDraft()
-  }, [clearAutoRestoredDraft])
-  
   if (!selectedNode) {
     return (
       <div
@@ -315,16 +468,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           overflow: 'auto',
         }}
       >
-        {/* Bandeau d'avertissement pour brouillon restauré automatiquement */}
-        {autoRestoredDraft && (
-          <WarningBanner
-            message={`Brouillon local plus récent (${new Date(autoRestoredDraft.timestamp).toLocaleString()}) restauré automatiquement. Fichier sur disque plus ancien (${new Date(autoRestoredDraft.fileTimestamp).toLocaleString()}).`}
-            actionLabel="Charger le fichier plus ancien"
-            onAction={handleLoadOlderFile}
-            onDismiss={() => clearAutoRestoredDraft()}
-          />
-        )}
-        
         {/* ID du nœud (readonly) */}
         <div>
           <label
@@ -405,7 +548,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 width: '100%',
                 padding: '0.5rem',
-                border: `1px solid ${errors.speaker ? theme.state.error.border : theme.border.primary}`,
+                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).speaker ? theme.state.error.border : theme.border.primary}`,
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
@@ -436,7 +579,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 width: '100%',
                 padding: '0.5rem',
-                border: `1px solid ${errors.line ? theme.state.error.border : theme.border.primary}`,
+                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).line ? theme.state.error.border : theme.border.primary}`,
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
@@ -469,7 +612,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 width: '100%',
                 padding: '0.5rem',
-                border: `1px solid ${errors.test ? theme.state.error.border : theme.border.primary}`,
+                border: `1px solid ${(errors as FieldErrors<TestNodeData>).test ? theme.state.error.border : theme.border.primary}`,
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
@@ -477,9 +620,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 fontFamily: 'monospace',
               }}
             />
-            {errors.test && (
+            {(errors as FieldErrors<TestNodeData>).test && (
               <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.state.error.color }}>
-                {errors.test.message}
+                {(errors as FieldErrors<TestNodeData>).test?.message}
               </div>
             )}
             <div
@@ -634,7 +777,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         
         {/* Choix (pour dialogue nodes) */}
         {nodeType === 'dialogueNode' && (
-          <ChoicesEditor onGenerateForChoice={handleGenerateForChoice} />
+          <ChoicesEditor
+            onGenerateForChoice={handleGenerateForChoice}
+            onCreateEmptyNodeForChoice={handleCreateEmptyNodeForChoice}
+          />
         )}
         
         {/* Section Génération IA */}
@@ -802,7 +948,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               fontWeight: 'bold',
             }}
           >
-            💾
+            💾 Sauvegarder
           </button>
           
           <button
@@ -832,17 +978,63 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
  */
 interface ChoicesEditorProps {
   onGenerateForChoice?: (choiceIndex: number) => void
+  onCreateEmptyNodeForChoice?: (choiceIndex: number) => void
 }
 
-function ChoicesEditor({ onGenerateForChoice }: ChoicesEditorProps) {
-  const { control, watch } = useFormContext<DialogueNodeData>()
+function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: ChoicesEditorProps) {
+  const { control, getValues, handleSubmit } = useFormContext<DialogueNodeData>()
+  const { selectedNodeId, updateNode, selectedNode } = useGraphStore()
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'choices',
   })
   
-  // choices non utilisé directement - gardé pour usage futur si nécessaire
-  // const choices = watch('choices') || []
+  // Handler pour supprimer un choix et synchroniser avec le store
+  const handleRemoveChoice = useCallback((index: number) => {
+    if (!selectedNodeId || !selectedNode) return
+    
+    const storeChoices = (selectedNode.data?.choices || []) as Choice[]
+    if (index < 0 || index >= storeChoices.length) return
+    
+    // Obtenir les données du formulaire avant suppression
+    const formData = getValues() as DialogueNodeData
+    
+    // Supprimer le choix du tableau des choix du store
+    const updatedChoices = storeChoices.filter((_, i) => i !== index)
+    
+    // Construire les données mises à jour en fusionnant les données du formulaire avec les choix mis à jour
+    // (pour préserver les champs du formulaire comme line, speaker, etc.)
+    const updatedData: DialogueNodeData = {
+      ...formData,
+      choices: updatedChoices.map((sc, i) => {
+        // Fusionner avec les données du formulaire pour les choix restants
+        const formChoice = formData.choices?.[i < index ? i : i + 1] // Décaler l'index si après l'index supprimé
+        return {
+          ...(formChoice || {}),
+          // Préserver les champs de connexion du store
+          targetNode: sc.targetNode,
+          testCriticalFailureNode: sc.testCriticalFailureNode,
+          testFailureNode: sc.testFailureNode,
+          testSuccessNode: sc.testSuccessNode,
+          testCriticalSuccessNode: sc.testCriticalSuccessNode,
+          // Préserver choiceId si présent
+          choiceId: (sc as Choice & { choiceId?: string })?.choiceId ?? formChoice?.choiceId,
+        }
+      }),
+    }
+    
+    // Mettre à jour le nœud dans le store avec les choix mis à jour
+    // updateNode gérera automatiquement la suppression des TestNodes associés si nécessaire
+    updateNode(selectedNodeId, {
+      data: {
+        ...selectedNode.data,
+        ...updatedData,
+      },
+    })
+    
+    // Supprimer le choix du formulaire après la mise à jour du store
+    remove(index)
+  }, [selectedNodeId, selectedNode, remove, getValues, updateNode])
   
   return (
     <div>
@@ -893,8 +1085,9 @@ function ChoicesEditor({ onGenerateForChoice }: ChoicesEditorProps) {
           <ChoiceEditor
             key={field.id}
             choiceIndex={index}
-            onRemove={fields.length > 1 ? () => remove(index) : undefined}
+            onRemove={fields.length > 1 ? () => handleRemoveChoice(index) : undefined}
             onGenerateForChoice={onGenerateForChoice}
+            onCreateEmptyNodeForChoice={onCreateEmptyNodeForChoice}
           />
         ))
       )}

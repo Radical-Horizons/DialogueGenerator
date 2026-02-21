@@ -155,8 +155,10 @@ def test_update_budget_concurrent_requests(budget_repository, temp_storage_file)
     """Teste update_budget avec requêtes concurrentes (protection race condition)."""
     from datetime import datetime
     
+    month = datetime.now().strftime("%Y-%m")
+    
     # Setup: créer un budget initial
-    budget_repository.update_budget("user_1", "2026-01", 50.0, 100.0)
+    budget_repository.update_budget("user_1", month, 50.0, 100.0)
     
     # Simuler 10 requêtes concurrentes qui ajoutent chacune 1€
     results = []
@@ -165,14 +167,9 @@ def test_update_budget_concurrent_requests(budget_repository, temp_storage_file)
     def update_budget_thread(thread_id: int):
         """Thread qui met à jour le budget."""
         try:
-            # Lire le budget actuel
-            current_budget = budget_repository.get_budget("user_1", "2026-01")
-            if current_budget:
-                current_amount = current_budget.get("amount", 0.0)
-                # Ajouter 1€
-                new_amount = current_amount + 1.0
-                budget_repository.update_budget("user_1", "2026-01", new_amount, 100.0)
-                results.append(thread_id)
+            # Opération atomique (read-modify-write sous lock)
+            budget_repository.add_cost("user_1", month, 1.0, 100.0)
+            results.append(thread_id)
         except Exception as e:
             errors.append((thread_id, str(e)))
     
@@ -191,7 +188,7 @@ def test_update_budget_concurrent_requests(budget_repository, temp_storage_file)
     assert len(errors) == 0, f"Erreurs lors des updates concurrents: {errors}"
     
     # Vérifier que le montant final est correct (50 + 10 = 60€)
-    final_budget = budget_repository.get_budget("user_1", "2026-01")
+    final_budget = budget_repository.get_budget("user_1", month)
     assert final_budget is not None
     # Le montant devrait être 50 + 10 = 60€ (toutes les updates ont été appliquées)
     # Note: Avec le lock, toutes les updates sont sérialisées, donc le résultat devrait être exact
@@ -203,16 +200,18 @@ def test_update_budget_concurrent_users(budget_repository, temp_storage_file):
     """Teste update_budget avec plusieurs utilisateurs concurrents."""
     from datetime import datetime
     
+    month = datetime.now().strftime("%Y-%m")
+    
     # Créer des budgets pour 3 utilisateurs différents
     users = ["user_1", "user_2", "user_3"]
     for user_id in users:
-        budget_repository.update_budget(user_id, "2026-01", 0.0, 100.0)
+        budget_repository.update_budget(user_id, month, 0.0, 100.0)
     
     # Simuler des updates concurrents pour chaque utilisateur
     def update_user_budget(user_id: str, amount: float):
         """Mise à jour du budget d'un utilisateur."""
         try:
-            budget_repository.update_budget(user_id, "2026-01", amount, 100.0)
+            budget_repository.update_budget(user_id, month, amount, 100.0)
         except Exception as e:
             return str(e)
         return None
@@ -230,6 +229,6 @@ def test_update_budget_concurrent_users(budget_repository, temp_storage_file):
     
     # Vérifier que tous les budgets ont été mis à jour correctement
     for user_id in users:
-        budget = budget_repository.get_budget(user_id, "2026-01")
+        budget = budget_repository.get_budget(user_id, month)
         assert budget is not None
         assert budget["amount"] == 25.0

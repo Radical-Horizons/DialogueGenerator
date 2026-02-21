@@ -68,7 +68,7 @@ export function Dashboard() {
   const commandPalette = useCommandPalette()
   
   // État du graphe pour détecter si un nœud est sélectionné et si une génération est en cours
-  const { selectedNodeId, isGenerating: isGraphGenerating } = useGraphStore()
+  const { selectedNodeId, nodes: graphNodes, isGenerating: isGraphGenerating } = useGraphStore()
 
   // Boutons replier/déplier panneaux gauche & droite (layout 3 panneaux)
   const panelsRef = useRef<ResizablePanelsRef>(null)
@@ -268,7 +268,7 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedNodeId, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
+  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
   
   // Basculer automatiquement vers l'onglet "Édition de nœud" quand un NOUVEAU nœud est sélectionné dans le graphe
   // (seulement lors de la sélection initiale, pas à chaque changement d'onglet manuel)
@@ -286,6 +286,13 @@ export function Dashboard() {
     // Ne pas inclure rightPanelTab dans les dépendances pour éviter les basculements
     // lors des changements manuels d'onglet
   }, [selectedNodeId, centerPanelTab])
+
+  // À l'ouverture du graphe avec des nœuds chargés, afficher le panneau "Édition de nœud" si on est encore sur Prompt
+  useEffect(() => {
+    if (centerPanelTab === 'graph' && graphNodes.length > 0 && rightPanelTab === 'prompt') {
+      setRightPanelTab('node')
+    }
+  }, [centerPanelTab, graphNodes.length, rightPanelTab])
 
   const applyCollapsedLayout = useCallback(
     (nextLeftCollapsed: boolean, nextRightCollapsed: boolean) => {
@@ -560,15 +567,8 @@ export function Dashboard() {
                       <UnityDialogueDetails
                         filename={selectedDialogue.filename}
                         onClose={() => setSelectedDialogue(null)}
-                        onDeleted={() => {
-                          // onClose() gère déjà la fermeture (setSelectedDialogue(null))
-                          // On ne fait que rafraîchir la liste pour retirer le dialogue supprimé
-                          if (dialogueListRef.current) {
-                            console.log('[Dashboard] Rafraîchissement de la liste des dialogues')
-                            dialogueListRef.current.refresh()
-                          } else {
-                            console.error('[Dashboard] dialogueListRef.current est null, impossible de rafraîchir')
-                          }
+                        onDeleted={async () => {
+                          await dialogueListRef.current?.refresh()
                         }}
                         onGenerateContinuation={() => {
                           // Basculer vers l'onglet Génération

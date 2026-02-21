@@ -1,0 +1,55 @@
+[
+  {
+    "id": "START",
+    "speaker": "Genka Lien, le bouffon",
+    "line": "*Suspendu, puis retombant en pirouette asymétrique, Genka essuie un doigt bleu-lac sur une gravure osseuse.*\nAlors. Ici, contre là-bas. Les Gardiens-Calligraphes veulent des lignes qui ne bougent pas, des légendes qui se tiennent au garde-à-vous.\nMais toi, Uresaïr, tu es une légende qui marche. Ça leur fait une bosse dans la gorge.\n\nChez les Tisseurs de Khol, on dit que tu raccommodes le temps comme on recoud une tente après la tempête. Amusant, les moines lacustres jurent que tu es un poisson qui refuse les eaux stagnantes. Et ici. Ici, on te range dans une boîte en os, avec une étiquette propre.\n\nMoi, je prends les étiquettes, je les colle sur mon manteau, et je danse jusqu'à ce qu'elles se décollent toutes seules.\nDis. Tu veux que je te raconte ta version d'ici, ou tu préfères une version d'ailleurs, pour respirer un peu ?",
+    "choices": [
+      {
+        "text": "Raconte la version d'ici. Je veux entendre ce qu'ils se répètent quand ils croient que je ne les écoute pas.",
+        "respectDelta": 1,
+        "condition": "",
+        "test": "",
+        "influenceDelta": null
+      },
+      {
+        "text": "Donne-moi une version d'ailleurs. Quelque chose qui ne sent pas la poussière de leurs bibliothèques.",
+        "influenceDelta": 1,
+        "condition": "",
+        "test": "",
+        "respectDelta": null,
+        "targetNode": "manual-5b65113b-400b-4b7a-8a05-8859b25509c4"
+      },
+      {
+        "text": "Pourquoi tu repeins ces gravures, Genka ? Tu provoques Qalamtû, ou tu cherches autre chose ?",
+        "traitRequirements": [
+          {
+            "trait": "Lucide",
+            "minValue": 5
+          }
+        ],
+        "respectDelta": 1,
+        "condition": "",
+        "test": "",
+        "influenceDelta": null
+      }
+    ]
+  },
+  {
+    "id": "manual-cf5a5f39-0ea4-4d64-8873-ad4812f07168",
+    "speaker": "test",
+    "line": "test",
+    "choices": []
+  },
+  {
+    "id": "manual-eb9bf9d8-6743-4ddc-b109-ddd7fcf38785",
+    "speaker": "",
+    "line": "",
+    "choices": []
+  },
+  {
+    "id": "manual-5b65113b-400b-4b7a-8a05-8859b25509c4",
+    "speaker": "",
+    "line": "",
+    "choices": []
+  }
+]

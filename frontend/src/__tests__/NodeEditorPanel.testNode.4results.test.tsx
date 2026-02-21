@@ -42,8 +42,10 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
     },
   }
 
+  let mockState: ReturnType<typeof useGraphStore>
+
   beforeEach(() => {
-    vi.mocked(useGraphStore).mockReturnValue({
+    mockState = {
       selectedNodeId: 'test-node-1',
       nodes: [mockTestNode, ...mockNodes],
       updateNode: vi.fn(),
@@ -52,11 +54,20 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       isGenerating: false,
       setSelectedNode: vi.fn(),
       setShowDeleteNodeConfirm: vi.fn(),
-    } as any)
+      createEmptyNode: vi.fn(),
+      addNode: vi.fn(),
+      connectNodes: vi.fn(),
+      disconnectNodes: vi.fn(),
+    } as ReturnType<typeof useGraphStore>
+    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+      if (typeof selector === 'function') return selector(mockState)
+      return mockState
+    })
+    ;(useGraphStore as { getState: () => typeof mockState }).getState = vi.fn(() => mockState)
 
     vi.mocked(useContextStore).mockReturnValue({
       selections: {},
-    } as any)
+    } as ReturnType<typeof useContextStore>)
   })
 
   it('devrait afficher les 4 champs de connexion pour un TestNode', async () => {
@@ -110,7 +121,7 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       },
     }
 
-    vi.mocked(useGraphStore).mockReturnValue({
+    const state2 = {
       selectedNodeId: 'test-node-2',
       nodes: [testNodeWith2Results, ...mockNodes],
       updateNode: vi.fn(),
@@ -119,7 +130,16 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       isGenerating: false,
       setSelectedNode: vi.fn(),
       setShowDeleteNodeConfirm: vi.fn(),
-    } as any)
+      createEmptyNode: vi.fn(),
+      addNode: vi.fn(),
+      connectNodes: vi.fn(),
+      disconnectNodes: vi.fn(),
+    } as ReturnType<typeof useGraphStore>
+    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof state2) => unknown) => {
+      if (typeof selector === 'function') return selector(state2)
+      return state2
+    })
+    ;(useGraphStore as { getState: () => typeof state2 }).getState = vi.fn(() => state2)
 
     // WHEN: Rendu du NodeEditorPanel
     render(

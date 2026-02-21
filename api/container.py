@@ -29,7 +29,17 @@ class ServiceContainer:
     """
     
     def __init__(self):
-        """Initialise le container avec tous les services None (lazy loading)."""
+        """Initialise le container avec tous les services None (lazy loading).
+        
+        Les services sont créés à la demande lors du premier accès via les méthodes
+        get_* correspondantes. Cette approche de lazy loading permet :
+        - D'éviter la création de services non utilisés
+        - De réduire le temps de démarrage de l'application
+        - De faciliter les tests en permettant l'injection de mocks
+        
+        Tous les services sont initialisés à None et seront créés au premier appel
+        à leur méthode get_* respective.
+        """
         self._config_service: Optional[ConfigurationService] = None
         self._context_builder: Optional[ContextBuilder] = None
         self._vocab_service: Optional[VocabularyService] = None
@@ -202,11 +212,15 @@ class ServiceContainer:
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.
         
+        Utilise le pattern Factory pour créer une nouvelle instance d'orchestrateur
+        à chaque appel, injectant toutes les dépendances nécessaires depuis le container.
+        Chaque requête obtient sa propre instance avec un request_id unique pour le logging.
+        
         Args:
-            request_id: ID de la requête pour logging.
+            request_id: ID unique de la requête pour le logging et le suivi.
             
         Returns:
-            Instance de UnityDialogueOrchestrator.
+            Instance de UnityDialogueOrchestrator configurée avec toutes les dépendances.
         """
         from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
         

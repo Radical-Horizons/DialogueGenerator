@@ -11,12 +11,14 @@ export interface ChoiceEditorProps {
   choiceIndex: number
   onRemove?: () => void
   onGenerateForChoice?: (choiceIndex: number) => void
+  onCreateEmptyNodeForChoice?: (choiceIndex: number) => void
 }
 
 export const ChoiceEditor = memo(function ChoiceEditor({
   choiceIndex,
   onRemove,
   onGenerateForChoice,
+  onCreateEmptyNodeForChoice,
 }: ChoiceEditorProps) {
   const { register, formState: { errors }, control, watch } = useFormContext<DialogueNodeData>()
   const { isGenerating } = useGraphStore()
@@ -63,6 +65,24 @@ export const ChoiceEditor = memo(function ChoiceEditor({
               title="Générer la suite pour ce choix"
             >
               {isGenerating ? 'Génération...' : '✨ Générer'}
+            </button>
+          )}
+          {onCreateEmptyNodeForChoice && !isConnected && (
+            <button
+              type="button"
+              onClick={() => onCreateEmptyNodeForChoice(choiceIndex)}
+              style={{
+                padding: '0.25rem 0.5rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: 4,
+                backgroundColor: theme.button.default.background,
+                color: theme.button.default.color,
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+              }}
+              title="Créer un nœud vide et le lier à ce choix"
+            >
+              ➕ Nouveau nœud
             </button>
           )}
           {onRemove && (

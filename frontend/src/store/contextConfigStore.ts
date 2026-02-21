@@ -274,37 +274,32 @@ export const useContextConfigStore = create<ContextConfigState>()(
       const hasExistingConfigs = Object.values(state.fieldConfigs).some(fields => fields.length > 0)
       if (!hasExistingConfigs) {
         // Si aucun champ n'est sélectionné, initialiser avec "tous les champs" par défaut
-        // Pour cela, on doit d'abord détecter les champs disponibles
-        const elementTypes = ['character', 'location', 'item', 'species', 'community']
+        const elementTypes = ['character', 'location', 'item', 'species', 'community'] as const
         const allFieldsDetected: Record<string, string[]> = {}
         const newAvailableFields: Record<string, Record<string, FieldInfo>> = {}
-        
-        // Détecter les champs pour chaque type d'élément en appelant directement l'API
-        for (const elementType of elementTypes) {
-          try {
-            // Invalider le cache pour forcer une nouvelle détection
-            try {
-              await configAPI.invalidateContextFieldsCache(elementType)
-            } catch (err) {
-              console.warn(`Impossible d'invalider le cache pour ${elementType}:`, err)
-            }
-            
-            // Appeler directement l'API pour détecter les champs
-            const fieldsResponse = await configAPI.getContextFields(elementType)
+
+        // Détecter les champs pour tous les types en parallèle (une requête par type)
+        const results = await Promise.allSettled(
+          elementTypes.map((elementType) =>
+            configAPI.getContextFields(elementType).then((fieldsResponse) => ({ elementType, fieldsResponse }))
+          )
+        )
+
+        for (let i = 0; i < results.length; i++) {
+          const elementType = elementTypes[i]
+          const result = results[i]
+          if (result.status === 'fulfilled') {
+            const { fieldsResponse } = result.value
             newAvailableFields[elementType] = fieldsResponse.fields
-            
             const allFieldPaths = Object.keys(fieldsResponse.fields)
             const essentialFieldsForType = response.essential_fields[elementType] || []
-            
-            // Sélectionner tous les champs (essentiels + tous les autres)
             allFieldsDetected[elementType] = [...new Set([...essentialFieldsForType, ...allFieldPaths])]
-          } catch (err) {
-            console.warn(`Impossible de détecter les champs pour ${elementType}:`, err)
-            // En cas d'erreur, utiliser les champs par défaut de l'API
+          } else {
+            console.warn(`Impossible de détecter les champs pour ${elementType}:`, result.reason)
             allFieldsDetected[elementType] = response.default_fields[elementType] || []
           }
         }
-        
+
         // Mettre à jour le store avec les champs détectés et disponibles
         set((state) => ({
           fieldConfigs: allFieldsDetected,

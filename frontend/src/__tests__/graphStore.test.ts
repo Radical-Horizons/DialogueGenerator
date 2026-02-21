@@ -165,7 +165,7 @@ describe('graphStore - Intentional Cycles', () => {
 
   describe('filtering intentional cycles in validation errors', () => {
     it('should filter out intentional cycles from warnings display', () => {
-      const { markCycleAsIntentional, validateGraph } = useGraphStore.getState()
+      const { markCycleAsIntentional } = useGraphStore.getState()
       
       // Marquer un cycle comme intentionnel
       markCycleAsIntentional('cycle_abc123')

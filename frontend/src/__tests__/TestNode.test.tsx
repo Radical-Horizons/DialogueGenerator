@@ -6,7 +6,7 @@ import { render } from '@testing-library/react'
 import { ReactFlowProvider } from 'reactflow'
 import { TestNode } from '../components/graph/nodes/TestNode'
 
-const TestNodeWrapper = ({ data, selected = false }: { data: any; selected?: boolean }) => (
+const TestNodeWrapper = ({ data, selected = false }: { data: Record<string, unknown>; selected?: boolean }) => (
   <ReactFlowProvider>
     <TestNode data={data} selected={selected} id="test-node-1" />
   </ReactFlowProvider>

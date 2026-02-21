@@ -12,6 +12,8 @@ Les utilisateurs peuvent utiliser une application stable, fluide et prête pour 
 
 **Dépendances:** Epic 0 (doit être terminé ou presque terminé)
 
+**Contrainte architecture (ADR-007):** Toute tâche touchant GraphCanvas ou le flux nodes/edges doit respecter le mode controlled (canvas piloté uniquement par le store). Détails : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (ADR-007).
+
 **Implementation Priority:** Story 0.9.1 (Correction bugs comportement) - **CRITIQUE** car bloque la mise en production
 
 ---

@@ -10,7 +10,7 @@ import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
 interface UnityDialogueDetailsProps {
   filename: string
   onClose: () => void
-  onDeleted?: () => void
+  onDeleted?: () => void | Promise<void>
   onGenerateContinuation?: (dialogueJson: string, dialogueTitle: string) => void
 }
 
@@ -67,15 +67,12 @@ export function UnityDialogueDetails({
     setIsDeleting(true)
     try {
       await unityDialoguesAPI.deleteUnityDialogue(filename)
-      // Notifier la suppression AVANT de fermer pour s'assurer que le rafraîchissement se fait
-      // pendant que le composant est encore monté et que la ref est disponible
+      // Notifier tous les consommateurs (ex. éditeur de graphe) pour synchroniser liste + canvas
+      window.dispatchEvent(new CustomEvent('unity-dialogue-deleted', { detail: { filename } }))
+      // Rafraîchir la liste puis fermer : attendre le refresh pour que la liste soit à jour avant de fermer le panneau
       if (onDeleted) {
-        console.log('[UnityDialogueDetails] Appel de onDeleted pour rafraîchir la liste')
-        onDeleted()
-      } else {
-        console.warn('[UnityDialogueDetails] onDeleted n\'est pas défini, la liste ne sera pas rafraîchie')
+        await Promise.resolve(onDeleted())
       }
-      // Fermer après pour éviter que le composant reste monté avec un fichier supprimé
       onClose()
     } catch (err) {
       setError(getErrorMessage(err))

@@ -14,7 +14,7 @@ interface UnityDialogueListProps {
 }
 
 export interface UnityDialogueListRef {
-  refresh: () => void
+  refresh: () => void | Promise<void>
 }
 
 export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueListProps>(
@@ -150,7 +150,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div data-testid="unity-dialogue-list" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div
         style={{
           padding: '0.75rem 0.75rem 0.5rem 0.75rem',

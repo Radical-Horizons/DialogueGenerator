@@ -29,7 +29,6 @@
     "react-window": "^2.2.3",
     "reactflow": "^11.11.4",
     "zod": "^4.2.1",
-    "zundo": "^2.3.0",
     "zustand": "^4.4.0"
   },
   "devDependencies": {

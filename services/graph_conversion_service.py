@@ -24,10 +24,10 @@ class GraphConversionService:
         """
         try:
             unity_nodes = json.loads(json_content)
-            
+
             if not isinstance(unity_nodes, list):
                 raise ValueError("Le JSON Unity doit être un tableau de nœuds")
-            
+
             # Convertir les nœuds Unity en nœuds ReactFlow
             reactflow_nodes: List[Dict[str, Any]] = []
             reactflow_edges: List[Dict[str, Any]] = []
@@ -49,11 +49,12 @@ class GraphConversionService:
                 node_type = GraphConversionService._determine_node_type(unity_node)
                 
                 # Créer le nœud ReactFlow
+                # Préserver le champ status (métadonnée éditeur) si présent (Task 6 - Story 1.4)
                 reactflow_node = {
                     "id": node_id,
                     "type": node_type,
                     "position": {"x": x_offset, "y": y_offset},
-                    "data": unity_node  # Toutes les données Unity stockées dans data
+                    "data": unity_node  # Toutes les données Unity stockées dans data (inclut status si présent)
                 }
                 
                 # Position suivante (layout basique en cascade)
@@ -179,26 +180,29 @@ class GraphConversionService:
     @staticmethod
     def _determine_node_type(unity_node: Dict[str, Any]) -> str:
         """Détermine le type de nœud ReactFlow basé sur les propriétés Unity.
-        
+
         Args:
             unity_node: Nœud Unity JSON.
-            
+
         Returns:
             Type de nœud: 'dialogueNode', 'testNode', 'endNode'.
         """
+        node_id = unity_node.get("id", "")
+        choices = unity_node.get("choices")
+        next_node = unity_node.get("nextNode")
+        has_choices = bool(choices and len(choices) > 0)
+        has_next = bool(next_node)
+
         # Nœud avec test d'attribut (success/failure branching)
         if unity_node.get("test"):
             return "testNode"
-        
-        # Nœud "END" spécial
-        if unity_node.get("id") == "END":
+
+        # Nœud "END" spécial uniquement (ne pas classer en endNode les nœuds sans choix/nextNode :
+        # un nœud manuel ou une cible de choix a choices=[] et pas de nextNode mais reste un dialogueNode)
+        if node_id == "END":
             return "endNode"
-        
-        # Nœud de fin (ni choix ni nextNode)
-        if not unity_node.get("choices") and not unity_node.get("nextNode"):
-            return "endNode"
-        
-        # Nœud de dialogue par défaut
+
+        # Nœud de dialogue (y compris nœuds manuels et cibles sans choix/nextNode)
         return "dialogueNode"
     
     @staticmethod
@@ -327,6 +331,11 @@ class GraphConversionService:
                 unity_node.pop("successNode", None)
                 unity_node.pop("failureNode", None)
                 
+                # Retirer le champ status avant export Unity (métadonnée éditeur uniquement) (Task 6 - Story 1.4)
+                # Le status est préservé dans le dialogue JSON de l'éditeur (via saveDialogue),
+                # mais retiré lors de l'export Unity final car non supporté par Unity
+                unity_node.pop("status", None)
+                
                 # Nettoyer les targetNode et test*Node des choix (seront recréés depuis les edges)
                 if "choices" in unity_node:
                     for choice in unity_node["choices"]:
@@ -340,10 +349,10 @@ class GraphConversionService:
             
             # Reconstruire les connexions depuis les edges
             GraphConversionService._rebuild_connections(unity_nodes, edges)
-            
+
             # Convertir en JSON
             json_content = json.dumps(unity_nodes, indent=2, ensure_ascii=False)
-            
+
             logger.info(f"Conversion réussie: {len(unity_nodes)} nœuds Unity")
             return json_content
             
@@ -361,7 +370,7 @@ class GraphConversionService:
         """
         # Créer un index des nœuds par ID
         nodes_by_id = {node["id"]: node for node in unity_nodes}
-        
+
         # Map pour trouver le choix correspondant à un TestNode
         # key: testNodeId, value: (dialogueNodeId, choiceIndex)
         test_node_to_choice_map: Dict[str, Tuple[str, int]] = {}

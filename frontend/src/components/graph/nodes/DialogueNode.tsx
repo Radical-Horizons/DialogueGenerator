@@ -4,6 +4,7 @@
 import { memo, useState } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
+import { useGraphStore } from '../../../store/graphStore'
 
 interface ValidationError {
   type: string
@@ -25,6 +26,7 @@ interface DialogueNodeData {
   validationErrors?: ValidationError[]
   validationWarnings?: ValidationError[]
   isHighlighted?: boolean
+  status?: "pending" | "accepted"  // Métadonnée éditeur, non Unity
   [key: string]: unknown
 }
 
@@ -43,11 +45,59 @@ export const DialogueNode = memo(function DialogueNode({
   const hasErrors = errors.length > 0
   const hasWarnings = warnings.length > 0
   const isHighlighted = data.isHighlighted || false
+  const nodeStatus = data.status  // "pending" | "accepted" | undefined
+  const isPending = nodeStatus === "pending"
+  const isAccepted = nodeStatus === "accepted"
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
   
+  // Store pour accept/reject
+  const acceptNode = useGraphStore((state) => state.acceptNode)
+  const rejectNode = useGraphStore((state) => state.rejectNode)
+  
   // Tronquer le texte pour l'aperçu
   const truncatedLine = line.length > 100 ? `${line.substring(0, 100)}...` : line
+  
+  // Handlers pour accept/reject avec prévention du double-clic
+  const [isProcessing, setIsProcessing] = useState(false)
+  
+  const handleAccept = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    // Prévenir le double-clic
+    if (isProcessing) {
+      return
+    }
+    
+    setIsProcessing(true)
+    try {
+      await acceptNode(data.id)
+    } catch (error) {
+      console.error('Erreur lors de l\'acceptation:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+  
+  const handleReject = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    // Prévenir le double-clic
+    if (isProcessing) {
+      return
+    }
+    
+    setIsProcessing(true)
+    try {
+      await rejectNode(data.id)
+    } catch (error) {
+      console.error('Erreur lors du rejet:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
   
   const handleGenerateClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -58,15 +108,24 @@ export const DialogueNode = memo(function DialogueNode({
     window.dispatchEvent(event)
   }
   
-  // Couleur du speaker (hash du nom pour consistance)
-  const speakerColor = getSpeakerColor(speaker)
+  // Couleur du speaker (hash de l'ID du nœud pour consistance - évite changement de couleur)
+  // Utiliser l'ID du nœud plutôt que le speaker pour avoir une couleur stable
+  const speakerColor = getSpeakerColor(data.id)
   
-  // Déterminer la couleur de la bordure selon les erreurs
+  // Déterminer la couleur et le style de la bordure selon le statut et les erreurs
   let borderColor = selected ? '#27AE60' : '#4A90E2'
+  let borderStyle: 'solid' | 'dashed' = 'solid'
+  
   if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
     borderColor = theme.state.warning.color
+  } else if (isPending) {
+    borderColor = theme.state.pending.border
+    borderStyle = 'dashed'
+  } else if (isAccepted) {
+    borderColor = theme.state.accepted.border
+    borderStyle = 'solid'
   }
 
   const getChoiceHandleLeftPercent = (index: number): number => {
@@ -76,11 +135,12 @@ export const DialogueNode = memo(function DialogueNode({
   
   return (
     <div
+      data-status={nodeStatus ?? undefined}
       style={{
         width: NODE_WIDTH,
         minHeight: 100,
         maxHeight: 500,
-        border: `2px solid ${borderColor}`,
+        border: `2px ${borderStyle} ${borderColor}`,
         borderRadius: 8,
         backgroundColor: isHighlighted ? theme.state.selected.background : theme.background.tertiary,
         boxShadow: selected
@@ -245,12 +305,14 @@ export const DialogueNode = memo(function DialogueNode({
         choices.map((choice, index) => {
           const leftPercent = getChoiceHandleLeftPercent(index)
           const label = choice.text || `Choix ${index + 1}`
+          const stableId = (choice as { choiceId?: string }).choiceId ?? `__idx_${index}`
+          const handleId = `choice:${stableId}`
           return (
             <Handle
-              key={index}
+              key={stableId}
               type="source"
               position={Position.Bottom}
-              id={`choice-${index}`}
+              id={handleId}
               title={label}
               onMouseEnter={() => setHoveredChoiceIndex(index)}
               onMouseLeave={() => setHoveredChoiceIndex((prev) => (prev === index ? null : prev))}
@@ -283,7 +345,7 @@ export const DialogueNode = memo(function DialogueNode({
       )}
       
       {/* Bouton "Générer" visible au hover */}
-      {(isHovered || selected) && (
+      {(isHovered || selected) && !isPending && (
         <button
           onClick={handleGenerateClick}
           style={{
@@ -319,14 +381,91 @@ export const DialogueNode = memo(function DialogueNode({
           <span>Générer</span>
         </button>
       )}
+      
+      {/* Boutons Accept/Reject visibles au hover pour nœuds pending (Task 2 - Story 1.4) */}
+      {isPending && (isHovered || selected) && !isProcessing && (
+        <>
+          <button
+            onClick={handleAccept}
+            disabled={isProcessing}
+            style={{
+              position: 'absolute',
+              top: 34,
+              right: 8,
+              padding: '0.4rem 0.6rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#27AE60',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+              zIndex: 15,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+            }}
+            title="Accepter le nœud"
+          >
+            <span>✓</span>
+            <span>Accepter</span>
+          </button>
+          <button
+            onClick={handleReject}
+            disabled={isProcessing}
+            style={{
+              position: 'absolute',
+              top: 34,
+              left: 8,
+              padding: '0.4rem 0.6rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#E74C3C',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+              zIndex: 15,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+            }}
+            title="Rejeter le nœud"
+          >
+            <span>✗</span>
+            <span>Rejeter</span>
+          </button>
+        </>
+      )}
     </div>
   )
 })
 
 /**
- * Génère une couleur consistante pour un speaker.
+ * Génère une couleur consistante basée sur un identifiant (ID du nœud ou nom du speaker).
+ * Utilise l'ID du nœud pour garantir une couleur stable même si le speaker change.
  */
-function getSpeakerColor(speaker: string): string {
+function getSpeakerColor(identifier: string): string {
   const colors = [
     '#4A90E2', // Bleu
     '#9013FE', // Violet
@@ -338,10 +477,10 @@ function getSpeakerColor(speaker: string): string {
     '#D35400', // Orange foncé
   ]
   
-  // Hash simple du nom pour sélectionner une couleur
+  // Hash simple de l'identifiant pour sélectionner une couleur stable
   let hash = 0
-  for (let i = 0; i < speaker.length; i++) {
-    hash = speaker.charCodeAt(i) + ((hash << 5) - hash)
+  for (let i = 0; i < identifier.length; i++) {
+    hash = identifier.charCodeAt(i) + ((hash << 5) - hash)
   }
   
   return colors[Math.abs(hash) % colors.length]

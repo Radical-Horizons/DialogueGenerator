@@ -4,7 +4,7 @@ alwaysApply: false
 ---
 - Tu es autonome pour les tests frontend via l'outil browser. Tu peux te connecter avec le login admin et le mot de passe admin123.
 - **Tests unitaires**: Vitest + React Testing Library dans `frontend/src/test/` et `frontend/src/**/*.test.ts`. Tests rapides, isolation complète, mocks pour API. Tests de parsing dans `frontend/src/hooks/usePromptPreview.test.ts`.
-- **Tests E2E**: Playwright dans `e2e/`. Tests critiques (auth, navigation, génération), nécessite serveurs lancés.
+- **Tests E2E**: Playwright dans `e2e/`. Tests critiques (auth, navigation, génération), nécessite serveurs lancés. Certains specs (ex. `graph-node-accept-reject`) appellent le LLM : `.env` + `OPENAI_API_KEY`, budget, **gpt-5-nano**. Voir `docs/troubleshooting/e2e-llm.md` pour prérequis et dépannage. Post-mortem (causes, correctifs) : `docs/troubleshooting/post-mortem-e2e-llm.md`.
 - **Vérifications automatiques après modification frontend**:
   1. Build check : `cd frontend && npm run build` (détecte erreurs TypeScript)
   2. Lint check : `cd frontend && npm run lint` (détecte erreurs de code)

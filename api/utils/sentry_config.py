@@ -7,6 +7,17 @@ logger = logging.getLogger(__name__)
 
 _sentry_initialized = False
 
+# Import optionnel au niveau module pour permettre le patching en tests
+# (ex: patch("api.utils.sentry_config.sentry_sdk")).
+try:
+    import sentry_sdk  # type: ignore
+    from sentry_sdk.integrations.fastapi import FastApiIntegration  # type: ignore
+    from sentry_sdk.integrations.asyncio import AsyncioIntegration  # type: ignore
+except ImportError:  # pragma: no cover
+    sentry_sdk = None  # type: ignore
+    FastApiIntegration = None  # type: ignore
+    AsyncioIntegration = None  # type: ignore
+
 
 def init_sentry() -> bool:
     """Initialise Sentry si configuré.
@@ -27,9 +38,15 @@ def init_sentry() -> bool:
         return False
     
     try:
-        import sentry_sdk
-        from sentry_sdk.integrations.fastapi import FastApiIntegration
-        from sentry_sdk.integrations.asyncio import AsyncioIntegration
+        # Vérifier explicitement la disponibilité au runtime.
+        # Utile en tests où `__import__` est patché pour simuler l'absence de sentry-sdk.
+        try:
+            __import__("sentry_sdk")
+        except ImportError:
+            raise
+
+        if sentry_sdk is None or FastApiIntegration is None or AsyncioIntegration is None:
+            raise ImportError("sentry-sdk non disponible")
         
         environment = os.getenv("SENTRY_ENVIRONMENT", os.getenv("ENVIRONMENT", "development"))
         traces_sample_rate = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
@@ -48,7 +65,7 @@ def init_sentry() -> bool:
                 AsyncioIntegration()
             ],
             # Filtrer les informations sensibles
-            before_send=lambda event, hint: filter_sensitive_data(event)
+            before_send=lambda event, _hint: filter_sensitive_data(event)
         )
         
         _sentry_initialized = True
@@ -97,7 +114,8 @@ def capture_exception(error: Exception, **kwargs) -> None:
         return
     
     try:
-        import sentry_sdk
+        if sentry_sdk is None:
+            return
         
         # Ajouter le contexte
         with sentry_sdk.push_scope() as scope:

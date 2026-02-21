@@ -107,7 +107,7 @@ describe('GenerationOptionsModal', () => {
     const generalTab = screen.getByText(/général/i)
     await user.click(generalTab)
     
-    expect(screen.getByText(/configuration unity/i)).toBeInTheDocument()
+    // L'onglet Général affiche Organisation du Prompt (pas "Configuration Unity" qui n'existe plus)
     expect(screen.getByText(/organisation du prompt/i)).toBeInTheDocument()
   })
 
@@ -161,7 +161,7 @@ describe('GenerationOptionsModal', () => {
     expect(mockOnClose).toHaveBeenCalled()
   })
 
-  it('devrait charger le chemin Unity au montage', async () => {
+  it('devrait charger la config par défaut à l\'ouverture', async () => {
     render(
       <GenerationOptionsModal
         isOpen={true}
@@ -170,12 +170,8 @@ describe('GenerationOptionsModal', () => {
       />
     )
     
-    // Changer vers l'onglet Général
-    const generalTab = screen.getByText(/général/i)
-    await userEvent.click(generalTab)
-    
     await waitFor(() => {
-      expect(mockConfigAPI.getUnityDialoguesPath).toHaveBeenCalled()
+      expect(mockLoadDefaultConfig).toHaveBeenCalled()
     })
   })
 })

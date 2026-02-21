@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://alteir.game/dialogue-format.schema.json",
+  "title": "Alteir Dialogue JSON Format",
+  "description": "Format JSON pour les dialogues du jeu Alteir. v1.1.0 : racine objet avec schemaVersion et nodes. Pseudo-nœud END : nœud virtuel de fin de dialogue ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes ; documenté pour cohérence avec ADR-008.",
+  "version": "1.1.0",
+  "type": "object",
+  "required": ["schemaVersion", "nodes"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.1.0",
+      "description": "Version du schéma du document. Requis pour identifier le format (v1.1.0)."
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Liste des nœuds du dialogue. Chaque nœud a un id unique (SCREAMING_SNAKE_CASE). Le pseudo-nœud END peut être référencé sans être présent dans la liste.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "title": "Dialogue Node",
+        "description": "Un nœud de dialogue représentant une ligne de dialogue ou un point de décision. id en SCREAMING_SNAKE_CASE (ex. START, END).",
+        "required": ["id"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifiant unique du nœud (SCREAMING_SNAKE_CASE). Obligatoire. Exemples : START, END, NODE_NAME. END désigne le pseudo-nœud de fin de dialogue (ADR-008).",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "examples": ["START", "END", "GREETING", "CHOICE_1_SUCCESS"]
+          },
+          "speaker": {
+            "type": "string",
+            "description": "ID du personnage qui parle (CHARACTER_ID). Optionnel mais recommandé.",
+            "examples": ["NPC_1", "Player", "Narrator"]
+          },
+          "line": {
+            "type": "string",
+            "description": "Texte du dialogue à afficher. Optionnel mais recommandé.",
+            "examples": ["Bonjour, voyageur !", "Que voulez-vous ?"]
+          },
+          "nextNode": {
+            "type": "string",
+            "description": "ID du nœud suivant (si pas de choix). Ignoré si choices est présent. Peut être END.",
+            "examples": ["NEXT_NODE", "END"]
+          },
+          "choices": {
+            "type": "array",
+            "description": "Liste des choix disponibles pour ce nœud. Si présent, nextNode est ignoré. En mode cutscene (cutsceneMode: true), maximum 4 choix. Chaque choix doit avoir un choiceId stable (v1.1.0).",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "title": "Dialogue Choice",
+              "description": "Un choix disponible dans un nœud de dialogue. choiceId obligatoire (identité stable, v1.1.0).",
+              "required": ["choiceId", "text", "targetNode"],
+              "properties": {
+                "choiceId": {
+                  "type": "string",
+                  "description": "Identifiant stable du choix (format libre). Obligatoire en v1.1.0. Utilisé pour les edges et la projection UI (ADR-008).",
+                  "examples": ["choice_1", "accept", "refuse"]
+                },
+                "text": {
+                  "type": "string",
+                  "description": "Texte du choix affiché au joueur. Obligatoire.",
+                  "examples": ["Accepter", "Refuser", "(Partir)"]
+                },
+                "targetNode": {
+                  "type": "string",
+                  "description": "ID du nœud cible lorsque ce choix est sélectionné. Obligatoire. Peut être END.",
+                  "examples": ["ACCEPT", "REFUSE", "END"]
+                },
+                "traitRequirements": {
+                  "type": "array",
+                  "description": "Liste des exigences de traits pour débloquer ce choix. Optionnel.",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "title": "Trait Requirement",
+                    "required": ["trait", "minValue"],
+                    "properties": {
+                      "trait": { "type": "string", "examples": ["Courageux", "Diplomate"] },
+                      "minValue": { "type": "integer", "minimum": -100, "maximum": 100 }
+                    }
+                  }
+                },
+                "allowInfluenceForcing": { "type": "boolean", "default": false },
+                "influenceThreshold": { "type": "integer", "default": 0, "minimum": 0 },
+                "influenceDelta": { "type": "integer", "default": 0 },
+                "respectDelta": { "type": "integer", "default": 0 },
+                "test": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z]+\\+[A-Za-z]+:\\d+$",
+                  "examples": ["Raison+Logique:8", "Puissance+Combat:5"]
+                },
+                "testCriticalSuccessNode": { "type": "string", "examples": ["CHOICE_CRITICAL_SUCCESS", "NEXT"] },
+                "testSuccessNode": { "type": "string", "examples": ["CHOICE_SUCCESS", "NEXT"] },
+                "testFailureNode": { "type": "string", "examples": ["CHOICE_FAILURE", "FALLBACK"] },
+                "testCriticalFailureNode": { "type": "string", "examples": ["CHOICE_CRITICAL_FAILURE", "FALLBACK"] },
+                "condition": {
+                  "type": "string",
+                  "pattern": "^(NOT )?[A-Z][A-Z0-9_]*$",
+                  "examples": ["FLAG_COMPLETED", "NOT FLAG_LOCKED"]
+                }
+              }
+            }
+          },
+          "test": {
+            "type": "string",
+            "pattern": "^[A-Za-z]+\\+[A-Za-z]+:\\d+$",
+            "examples": ["Raison+Logique:8", "Puissance+Combat:5"]
+          },
+          "criticalSuccessNode": { "type": "string", "examples": ["TEST_CRITICAL_SUCCESS", "NEXT"] },
+          "successNode": { "type": "string", "examples": ["TEST_SUCCESS", "NEXT"] },
+          "failureNode": { "type": "string", "examples": ["TEST_FAILURE", "FALLBACK"] },
+          "criticalFailureNode": { "type": "string", "examples": ["TEST_CRITICAL_FAILURE", "FALLBACK"] },
+          "isLongRest": { "type": "boolean", "default": false },
+          "startState": { "type": "integer", "default": 0, "minimum": 0 },
+          "cutsceneMode": { "type": "boolean", "default": false },
+          "cutsceneImageId": { "type": "string", "examples": ["scene_1", "portrait_npc"] },
+          "cutsceneId": { "type": "string", "examples": ["cutscene_intro", "cutscene_ending"] },
+          "exitCutsceneMode": { "type": "boolean", "default": false },
+          "consequences": {
+            "type": "object",
+            "properties": {
+              "flag": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "examples": ["CADRAN_EMPORTE", "QUEST_COMPLETED"] },
+              "description": { "type": "string" }
+            },
+            "required": ["flag"]
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "cutsceneMode": { "const": true } } },
+            "then": { "properties": { "choices": { "maxItems": 4 } } },
+            "else": true
+          }
+        ]
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": "1.1.0",
+      "nodes": [
+        {
+          "id": "START",
+          "speaker": "Personnage",
+          "line": "Bonjour !",
+          "choices": [
+            { "choiceId": "reply", "text": "Répondre", "targetNode": "REPLY" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -29,7 +29,6 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
   raw_prompt,
   isEstimating = false,
   tokenCount,
-  promptHash: _promptHash, // Préfixé avec _ car intentionnellement non utilisé
   structuredPrompt: structuredPromptProp,
 }: EstimatedPromptPanelProps) {
   const [viewMode, setViewMode] = useState<'raw' | 'structured'>('structured')
@@ -245,6 +244,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
             <StructuredPromptView 
               prompt={raw_prompt} 
               structuredPrompt={structuredPrompt}
+              sections={sections}
               onToggleStateChange={(expanded, toggleFn) => {
                 setAllExpanded(expanded)
                 setToggleAllFn(() => toggleFn)

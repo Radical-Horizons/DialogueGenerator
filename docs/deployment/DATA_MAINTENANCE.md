@@ -70,7 +70,7 @@ Les **dialogues Unity JSON générés** sont exportés vers un **chemin configur
 ### Schéma JSON Unity
 
 Le **schéma JSON Unity** utilisé pour la validation est situé dans :
-- `docs/JsonDocUnity/Documentation/dialogue-format.schema.json`
+- `docs/resources/dialogue-format.schema.json`
 
 Ce schéma est utilisé pour valider les dialogues avant export (uniquement en développement, pas en production).
 
@@ -139,6 +139,10 @@ Pour vérifier que les données sont correctement chargées :
 ### Unity
 - Export des dialogues : `api/routers/dialogues.py` (endpoint `/api/v1/dialogues/unity/export`)
 - Configuration du chemin Unity : `services/configuration_service.py` (méthode `get_unity_dialogues_path()`)
-- Schéma JSON Unity : `docs/JsonDocUnity/Documentation/dialogue-format.schema.json`
+- Schéma JSON Unity : `docs/resources/dialogue-format.schema.json`
 - Validateur de schéma : `api/utils/unity_schema_validator.py`
 - Catalogues Unity (CSV) : `data/UnityData/` (TraitCatalog.csv, SkillCatalog.csv, FlagCatalog.csv)
+
+---
+
+**Dernière mise à jour** : 2026-01-25 (correction chemin schéma JSON Unity)

@@ -1,7 +1,7 @@
 /**
  * Nœud personnalisé pour afficher un nœud de test d'attribut dans le graphe.
  */
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 
@@ -62,7 +62,6 @@ export const TestNode = memo(function TestNode({
 }: NodeProps<TestNodeData>) {
   const test = data.test || 'Test non défini'
   const formattedTest = formatTest(test)
-  const line = data.line || ''
   const errors = data.validationErrors || []
   const warnings = data.validationWarnings || []
   const hasErrors = errors.length > 0

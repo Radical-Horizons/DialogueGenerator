@@ -9,7 +9,7 @@ import { useContextStore } from '../store/contextStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
 import { filterObsoleteReferences } from '../utils/presetUtils'
 import { getErrorMessage } from '../types/errors'
-import type { Preset } from '../types/preset'
+import type { Preset, PresetValidationResult } from '../types/preset'
 
 export interface UsePresetManagementReturn {
   /** Charger un preset avec validation */
@@ -17,11 +17,11 @@ export interface UsePresetManagementReturn {
   /** Appliquer un preset directement */
   applyPreset: (preset: Preset) => void
   /** Obtenir la configuration actuelle pour sauvegarde */
-  getCurrentConfiguration: () => any
+  getCurrentConfiguration: () => Record<string, unknown>
   /** État du modal de validation */
   isValidationModalOpen: boolean
   /** Résultat de validation */
-  validationResult: any
+  validationResult: PresetValidationResult | null
   /** Preset en attente d'application */
   pendingPreset: Preset | null
   /** Ouvrir/fermer le modal de validation */
@@ -81,29 +81,20 @@ export function usePresetManagement(
     setIsDirty,
     setSaveStatus,
     toast,
-    topP,
     setTopP,
-    reasoningEffort,
     setReasoningEffort,
-    maxCompletionTokens,
     setMaxCompletionTokens,
-    maxChoices,
     setMaxChoices,
-    llmModel,
     setLlmModel,
   } = options
 
   const [isValidationModalOpen, setIsValidationModalOpen] = useState(false)
-  const [validationResult, setValidationResult] = useState<any>(null)
+  const [validationResult, setValidationResult] = useState<PresetValidationResult | null>(null)
   const [pendingPreset, setPendingPreset] = useState<Preset | null>(null)
 
   const {
     sceneSelection,
     setSceneSelection,
-    setDialogueStructure,
-    setSystemPromptOverride,
-    // setUnityDialogueResponse non utilisé - gardé pour usage futur
-    // setUnityDialogueResponse,
   } = useGenerationStore()
 
   const applyPreset = useCallback((preset: Preset) => {

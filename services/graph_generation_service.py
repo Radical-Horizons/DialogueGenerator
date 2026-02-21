@@ -152,11 +152,15 @@ Instructions pour la suite:
                 )
                 return (choice_index, None, {"error": str(e), "choice_text": choice.get("text", "")})
         
-        # Générer tous les nœuds en parallèle
-        tasks = [
-            generate_single_node(choice_index, choice)
-            for choice_index, choice in choices_to_generate
-        ]
+        # Générer tous les nœuds en parallèle.
+        #
+        # Note: on crée explicitement des Tasks et on yield une fois entre créations afin que
+        # chaque task atteigne son premier `await` dans un ordre déterministe (utile pour les tests
+        # qui mockent `generate_dialogue_node` / `enrich_with_ids` via side_effect liste).
+        tasks: List[asyncio.Task] = []
+        for choice_index, choice in choices_to_generate:
+            tasks.append(asyncio.create_task(generate_single_node(choice_index, choice)))
+            await asyncio.sleep(0)
         
         # Exécuter en parallèle avec suivi de progression
         completed_count = 0
@@ -194,84 +198,6 @@ Instructions pour la suite:
                     "choice_text": connection_or_error.get("choice_text", ""),
                     "error": connection_or_error.get("error", "Unknown error")
                 })
-            choice_text = choice.get("text", "")
-            parent_speaker = parent_node.get("speaker", "PNJ")
-            parent_line = parent_node.get("line", "")
-            
-            # Construire le prompt enrichi avec le contexte du choix
-            enriched_instructions = f"""Contexte précédent:
-{parent_speaker}: {parent_line}
-
-Réponse du joueur:
-{choice_text}
-
-Instructions pour la suite:
-{instructions}
-"""
-            
-            # Générer le nœud
-            try:
-                response = await self.generation_service.generate_dialogue_node(
-                    llm_client=llm_client,
-                    prompt=enriched_instructions,
-                    system_prompt_override=system_prompt_override,
-                    max_choices=max_choices
-                )
-                
-                # Enrichir avec ID au format NODE_{parent_id}_CHOICE_{index}
-                # parent_id peut déjà contenir "NODE_" ou non, on l'utilise tel quel
-                if parent_id.startswith("NODE_"):
-                    # parent_id est déjà au format "NODE_XXX", on l'utilise directement
-                    start_id = f"{parent_id}_CHOICE_{choice_index}"
-                else:
-                    # parent_id est juste "XXX", on ajoute le préfixe
-                    start_id = f"NODE_{parent_id}_CHOICE_{choice_index}"
-                enriched_nodes = self.generation_service.enrich_with_ids(
-                    content=response,
-                    start_id=start_id
-                )
-                
-                if enriched_nodes:
-                    generated_node = enriched_nodes[0]
-                    # Valider que le nœud a un ID avant de l'ajouter
-                    if not generated_node.get("id"):
-                        logger.error(
-                            f"Nœud généré pour choix {choice_index} n'a pas d'ID - ignoré"
-                        )
-                        continue
-                    
-                    generated_nodes.append(generated_node)
-                    
-                    # Créer la connexion suggérée
-                    suggested_connections.append({
-                        "from": parent_id,
-                        "to": generated_node["id"],
-                        "via_choice_index": choice_index,
-                        "connection_type": "choice"
-                    })
-                    
-                    logger.debug(
-                        f"Nœud généré pour choix {choice_index}: {generated_node['id']}"
-                    )
-                else:
-                    logger.warning(
-                        f"Aucun nœud enrichi retourné pour choix {choice_index} du parent {parent_id}"
-                    )
-                    
-            except Exception as e:
-                logger.error(
-                    f"Erreur lors de la génération du nœud pour choix {choice_index} "
-                    f"du parent {parent_id}: {e}",
-                    exc_info=True
-                )
-                # Tracker l'échec pour rapport
-                failed_choices.append({
-                    "choice_index": choice_index,
-                    "choice_text": choice.get("text", ""),
-                    "error": str(e)
-                })
-                # Continuer avec les autres choix même si un échoue
-                continue
         
         # Logger un avertissement si des échecs partiels
         if failed_choices:

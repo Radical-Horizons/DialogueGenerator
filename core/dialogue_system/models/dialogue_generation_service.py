@@ -1,2 +1,2 @@
-from constants import UIText, FilePaths, Defaults
+from constants import FilePaths, Defaults
 # ... existing code ... 

@@ -38,6 +38,22 @@ class ContextTruncator:
             self.tokenizer = None
             logger.warning("tiktoken n'est pas installé. La gestion précise du nombre de tokens sera désactivée.")
     
+    def estimate_tokens(self, text: str) -> int:
+        """Estimation rapide du nombre de tokens sans appeler tiktoken.
+        
+        Utilisé dans les boucles (par élément) pour éviter N encodages coûteux.
+        Approximation typique : ~4 caractères par token (cl100k_base).
+        
+        Args:
+            text: Texte à estimer.
+            
+        Returns:
+            Estimation du nombre de tokens.
+        """
+        if not text:
+            return 0
+        return max(1, len(text) // 4)
+
     def count_tokens(self, text: str) -> int:
         """Compte le nombre de tokens dans un texte.
         

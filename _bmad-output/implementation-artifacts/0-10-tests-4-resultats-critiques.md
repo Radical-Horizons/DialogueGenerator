@@ -2,6 +2,8 @@
 
 Status: done
 
+**Architecture (ADR-007):** Toute modification du canvas éditeur (GraphCanvas) ou du flux nodes/edges doit respecter le mode controlled React Flow. GraphView (vue read-only) est hors périmètre ADR-007. Voir `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`.
+
 **Note** : Synchronisation bidirectionnelle TestNode ↔ choix parent implémentée (voir section "Synchronisation TestNode ↔ Choix Parent" dans Dev Notes).
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->

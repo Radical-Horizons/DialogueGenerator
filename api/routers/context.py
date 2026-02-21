@@ -480,6 +480,7 @@ async def estimate_context_tokens(
         return EstimateTokensResponse(
             context_tokens=context_tokens,
             token_count=built.token_count,
+            total_estimated_tokens=built.token_count,
             raw_prompt=built.raw_prompt,
             prompt_hash=built.prompt_hash,
             structured_prompt=structured_prompt_dict

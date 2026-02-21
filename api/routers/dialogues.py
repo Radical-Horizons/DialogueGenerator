@@ -31,6 +31,7 @@ from services.dialogue_generation_service import DialogueGenerationService
 from services.configuration_service import ConfigurationService
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
+from services.unity_dialogue_export_service import write_unity_dialogue_to_file
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
@@ -454,87 +455,26 @@ async def export_unity_dialogue(
         InternalServerException: Si l'écriture du fichier échoue.
     """
     try:
-        # 1. Récupérer le chemin Unity configuré
-        unity_path = config_service.get_unity_dialogues_path()
-        if not unity_path:
-            raise ValidationException(
-                message="Le chemin Unity dialogues n'est pas configuré. Configurez-le dans les paramètres.",
-                details={"field": "unity_dialogues_path"},
-                request_id=request_id
-            )
-        
-        unity_dir = Path(unity_path)
-        
-        # Créer le dossier s'il n'existe pas
-        unity_dir.mkdir(parents=True, exist_ok=True)
-        
-        # 2. Valider que le JSON est valide et conforme au schéma Unity
-        try:
-            json_data = json.loads(request_data.json_content)
-            if not isinstance(json_data, list):
-                raise ValidationException(
-                    message="Le JSON Unity doit être un tableau de nœuds",
-                    details={"json_content": "Doit être un tableau []"},
-                    request_id=request_id
-                )
-        except json.JSONDecodeError as e:
-            raise ValidationException(
-                message="Le JSON fourni n'est pas valide",
-                details={"json_content": f"Erreur JSON: {str(e)}"},
-                request_id=request_id
-            )
-        
-        # 3. Valider le schéma Unity (IDs uniques, références valides, etc.)
-        from services.json_renderer.unity_json_renderer import UnityJsonRenderer
-        renderer = UnityJsonRenderer()
-        is_valid, validation_errors = renderer.validate_nodes(json_data)
-        if not is_valid:
-            raise ValidationException(
-                message="Le dialogue Unity contient des erreurs de validation",
-                details={
-                    "validation_errors": validation_errors,
-                    "json_content": "Le JSON ne respecte pas le schéma Unity (IDs uniques, références valides, etc.)"
-                },
-                request_id=request_id
-            )
-        
-        # 4. Générer le nom de fichier
-        if request_data.filename:
-            # Utiliser le nom fourni (sans extension)
-            filename = request_data.filename
-        else:
-            # Générer un slug à partir du titre
-            # Convertir en minuscules, remplacer espaces et caractères spéciaux par underscores
-            slug = re.sub(r'[^\w\s-]', '', request_data.title.lower())
-            slug = re.sub(r'[-\s]+', '_', slug)
-            filename = slug[:100]  # Limiter la longueur
-        
-        # Ajouter l'extension .json si pas présente
-        if not filename.endswith('.json'):
-            filename += '.json'
-        
-        file_path = unity_dir / filename
-        
-        # 5. Écrire le fichier JSON (pretty-print avec 2 espaces)
-        json_content_formatted = json.dumps(json_data, indent=2, ensure_ascii=False)
-        file_path.write_text(json_content_formatted, encoding='utf-8')
-        
-        logger.info(f"Dialogue Unity exporté: {file_path} (request_id: {request_id})")
-        
+        file_path, filename = write_unity_dialogue_to_file(
+            config_service=config_service,
+            json_content=request_data.json_content,
+            filename=request_data.filename,
+            title=request_data.title,
+            request_id=request_id,
+        )
         return ExportUnityDialogueResponse(
             file_path=str(file_path.absolute()),
             filename=filename,
-            success=True
+            success=True,
         )
-        
     except ValidationException:
         raise
     except Exception as e:
-        logger.exception(f"Erreur lors de l'export Unity JSON (request_id: {request_id})")
+        logger.exception("Erreur lors de l'export Unity JSON (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de l'export du dialogue Unity JSON",
             details={"error": str(e)},
-            request_id=request_id
+            request_id=request_id,
         )
 
 

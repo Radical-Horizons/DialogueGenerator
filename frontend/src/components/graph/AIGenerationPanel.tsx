@@ -2,7 +2,7 @@
  * Panel pour générer un nœud de dialogue avec l'IA depuis un nœud parent.
  * Permet de générer une suite ou une branche alternative.
  */
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useGraphStore } from '../../store/graphStore'
 import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
@@ -107,7 +107,7 @@ export function AIGenerationPanel({
     if (generateAllChoices || isTestNode) {
       const totalChoices = isTestNode 
         ? 4  // TestNodes génèrent toujours 4 nœuds (critical-failure, failure, success, critical-success)
-        : (parentNode?.data?.choices || []).filter((c: any) => !c.targetNode || c.targetNode === 'END').length
+        : (parentNode?.data?.choices || []).filter((c: { targetNode?: string }) => !c.targetNode || c.targetNode === 'END').length
       setBatchProgress({ current: 0, total: totalChoices })
     }
     
@@ -181,6 +181,16 @@ export function AIGenerationPanel({
     parentNode,
     checkBudget,
   ])
+
+  // Fermer la modale quand la génération se termine (doit être avant tout return conditionnel)
+  useEffect(() => {
+    if (!isGenerating && batchProgress) {
+      const timer = setTimeout(() => {
+        setBatchProgress(null)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [isGenerating, batchProgress])
   
   if (!parentNodeId || !parentNode) {
     return (
@@ -208,17 +218,6 @@ export function AIGenerationPanel({
   // Détecter si c'est un TestNode (pour afficher la modal même si generateAllChoices est false)
   const isTestNode = parentNodeId?.startsWith('test-node-') ?? false
   const shouldShowProgressModal = isGenerating && (generateAllChoices || isTestNode) && batchProgress
-  
-  // Fermer la modale quand la génération se termine
-  useEffect(() => {
-    if (!isGenerating && batchProgress) {
-      // Délai court pour laisser le temps de voir "4/4" avant fermeture
-      const timer = setTimeout(() => {
-        setBatchProgress(null)
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [isGenerating, batchProgress])
   
   return (
     <>
@@ -464,6 +463,7 @@ export function AIGenerationPanel({
                 return (
                   <div
                     key={index}
+                    data-testid={!isConnected ? `ai-gen-choice-${index}` : undefined}
                     style={{
                       padding: '0.5rem',
                       backgroundColor: theme.background.panel,
@@ -545,6 +545,7 @@ export function AIGenerationPanel({
           Modèle LLM
         </label>
         <select
+          data-testid="llm-model-select"
           value={llmModel}
           onChange={(e) => setLlmModel(e.target.value)}
           style={{
