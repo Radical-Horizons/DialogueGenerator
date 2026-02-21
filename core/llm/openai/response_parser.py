@@ -80,7 +80,7 @@ class OpenAIResponseParser:
                                     parsed_output = response_model.model_validate(raw_obj)
                                     logger.info(
                                         f"Variante {variant_index} validée après normalisation "
-                                        f"(node.consequences list→object, Responses API)."
+                                        f"(node.consequences list->object, Responses API)."
                                     )
                                     normalized_ok = True
                                     return parsed_output, None, True
@@ -90,7 +90,7 @@ class OpenAIResponseParser:
                                     parsed_output = response_model.model_validate(raw_obj)
                                     logger.info(
                                         f"Variante {variant_index} validée après normalisation "
-                                        f"(node.consequences list[{len(cons)}]→object, premier élément, Responses API)."
+                                        f"(node.consequences list[{len(cons)}]->object, premier élément, Responses API)."
                                     )
                                     normalized_ok = True
                                     return parsed_output, None, True

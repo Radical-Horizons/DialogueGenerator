@@ -13,7 +13,7 @@ const DRAFT_STORAGE_KEY = 'generation_draft'
 
 interface DraftData {
   userInstructions: string
-  authorProfile: any
+  authorProfile: unknown
   systemPromptOverride: string | null
   dialogueStructure: string[]
   sceneSelection: {
@@ -30,7 +30,7 @@ interface DraftData {
   maxChoices: number | null
   choicesMode: 'free' | 'capped'
   narrativeTags: string[]
-  contextSelections: any
+  contextSelections: unknown
   selectedRegion: string | null
   selectedSubLocations: string[]
   timestamp: number
@@ -87,7 +87,7 @@ export interface UseGenerationDraftOptions {
   /** Callback pour mettre à jour narrativeTags */
   setNarrativeTags: (tags: string[]) => void
   /** Callback pour mettre à jour authorProfile */
-  updateAuthorProfile: (profile: any) => void
+  updateAuthorProfile: (profile: unknown) => void
 }
 
 /**
@@ -262,6 +262,7 @@ export function useGenerationDraft(
     setMaxCompletionTokens,
     setLlmModel,
     setReasoningEffort,
+    setTopP,
     setMaxChoices,
     setNarrativeTags,
     restoreContextState,

@@ -145,7 +145,7 @@ class CostGovernanceService:
         if quota == 0.0:
             percentage = 0.0
         else:
-            percentage = (amount / quota) * 100.0
+            percentage = min(100.0, (amount / quota) * 100.0)
         
         remaining = max(0.0, quota - amount)
         
@@ -164,8 +164,19 @@ class CostGovernanceService:
             cost: Coût réel de la génération.
         """
         current_month = datetime.now().strftime("%Y-%m")
+        # Mise à jour atomique si disponible (thread-safe)
+        if hasattr(self.repository, "add_cost"):
+            try:
+                # quota: si existant, sera préservé par le repository
+                new_amount = self.repository.add_cost(user_id, current_month, cost, quota=0.0)  # type: ignore[attr-defined]
+                logger.debug(f"Budget mis à jour (atomique) pour {user_id}: {new_amount:.2f}€")
+                return
+            except Exception:
+                # Fallback sur l'ancienne logique si le repository ne supporte pas correctement add_cost
+                logger.exception("Fallback update_budget: add_cost a échoué")
+
         budget = self.repository.get_budget(user_id, current_month)
-        
+
         # Si pas de budget, créer un budget par défaut
         if budget is None:
             quota = 0.0
@@ -179,7 +190,7 @@ class CostGovernanceService:
             else:
                 quota = budget.get("quota", 0.0)
                 amount = budget.get("amount", 0.0) + cost
-        
+
         self.repository.update_budget(user_id, current_month, amount, quota)
         logger.debug(f"Budget mis à jour pour {user_id}: {amount:.2f}€ / {quota:.2f}€")
     

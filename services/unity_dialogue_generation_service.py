@@ -375,7 +375,9 @@ Instructions pour la suite:
                         choice_dict["testSuccessNode"] = test_result_node_ids.get("success")
                         choice_dict["testCriticalSuccessNode"] = test_result_node_ids.get("critical-success")
                 if choice_content.traitRequirements:
-                    choice_dict["traitRequirements"] = choice_content.traitRequirements
+                    choice_dict["traitRequirements"] = [
+                        tr.model_dump(mode="json") for tr in choice_content.traitRequirements
+                    ]
                 if choice_content.allowInfluenceForcing is not None:
                     choice_dict["allowInfluenceForcing"] = choice_content.allowInfluenceForcing
                 if choice_content.influenceThreshold is not None:

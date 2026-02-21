@@ -1,7 +1,7 @@
 """Tests pour les health checks."""
 import os
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock
 from pathlib import Path
 from api.utils.health_check import (
     HealthCheckResult,

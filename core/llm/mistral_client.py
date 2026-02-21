@@ -207,7 +207,7 @@ class MistralClient(ILLMClient):
                                                     parsed_output = response_model.model_validate(raw_obj)
                                                     generated_results.append(parsed_output)
                                                     logger.info(
-                                                        f"Variante {i+1} validée après normalisation (node.consequences list→object)."
+                                                        f"Variante {i+1} validée après normalisation (node.consequences list->object)."
                                                     )
                                                     success = True
                                                     normalized_ok = True

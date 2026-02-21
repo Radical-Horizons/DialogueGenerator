@@ -11,7 +11,7 @@
  */
 export interface PromptStateParams {
   user_instructions: string
-  context_selections: any
+  context_selections: unknown
   npc_speaker_id?: string
   max_context_tokens: number
   system_prompt_override?: string
@@ -24,7 +24,7 @@ export interface PromptStateParams {
   previous_dialogue_preview?: string
   field_configs?: Record<string, string[]>
   organization_mode?: string
-  in_game_flags?: any[]
+  in_game_flags?: unknown[]
 }
 
 /**
@@ -97,8 +97,8 @@ export async function computeStateHash(params: PromptStateParams): Promise<strin
  * @param params - Paramètres à normaliser
  * @returns Objet normalisé
  */
-function normalizeParams(params: PromptStateParams): Record<string, any> {
-  const normalized: Record<string, any> = {}
+function normalizeParams(params: PromptStateParams): Record<string, unknown> {
+  const normalized: Record<string, unknown> = {}
   
   // Trier les clés pour garantir l'ordre
   const sortedKeys = Object.keys(params).sort()
@@ -143,7 +143,7 @@ function normalizeParams(params: PromptStateParams): Record<string, any> {
  * @param value - Valeur à normaliser
  * @returns Valeur normalisée
  */
-function normalizeValue(value: any): any {
+function normalizeValue(value: unknown): unknown {
   if (value === null || value === undefined) {
     return value
   }
@@ -153,10 +153,10 @@ function normalizeValue(value: any): any {
   }
   
   if (typeof value === 'object') {
-    const normalized: Record<string, any> = {}
-    const sortedKeys = Object.keys(value).sort()
+    const normalized: Record<string, unknown> = {}
+    const sortedKeys = Object.keys(value as Record<string, unknown>).sort()
     for (const key of sortedKeys) {
-      normalized[key] = normalizeValue(value[key])
+      normalized[key] = normalizeValue((value as Record<string, unknown>)[key])
     }
     return normalized
   }

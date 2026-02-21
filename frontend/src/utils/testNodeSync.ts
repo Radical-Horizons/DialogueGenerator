@@ -12,6 +12,12 @@
 import type { Node, Edge } from 'reactflow'
 import type { Choice } from '../schemas/nodeEditorSchema'
 import type { TestNodeParentInfo, TestNodeSyncResult } from '../types/testNode'
+import {
+  buildChoiceEdge,
+  buildTestResultEdge,
+  choiceToTestEdgeId,
+  TEST_RESULT_EDGE_CONFIG,
+} from './graphEdgeBuilders'
 
 /**
  * Mapping handle TestNode → champ choice.
@@ -35,24 +41,43 @@ export const CHOICE_FIELD_TO_HANDLE: Record<string, string> = {
 
 /**
  * Parse l'ID d'un TestNode pour extraire dialogueNodeId et choiceIndex.
- * 
- * Format attendu : `test-node-{dialogueNodeId}-choice-{choiceIndex}`
- * 
+ * Formats supportés (ADR-008) :
+ * - test:choiceId (stable) → nécessite nodes pour résoudre le parent
+ * - test-node-{dialogueNodeId}-choice-{choiceIndex} (legacy)
+ *
  * @param testNodeId - ID du TestNode à parser
+ * @param nodes - Liste des nodes (requise si testNodeId est test:choiceId)
  * @returns Objet avec dialogueNodeId et choiceIndex, ou null si format invalide
  */
-export function parseTestNodeId(testNodeId: string): {
+export function parseTestNodeId(
+  testNodeId: string,
+  nodes: Node[] = []
+): {
   dialogueNodeId: string
   choiceIndex: number
 } | null {
+  if (testNodeId.startsWith('test:')) {
+    const choiceId = testNodeId.slice(5)
+    for (const node of nodes) {
+      if (node.type !== 'dialogueNode' || !node.data?.choices) continue
+      const choices = node.data.choices as Choice[]
+      const choiceIndex = choices.findIndex(
+        (c) => (c as Choice & { choiceId?: string }).choiceId === choiceId
+      )
+      if (choiceIndex >= 0) {
+        return { dialogueNodeId: node.id, choiceIndex }
+      }
+      const fallback = choices.findIndex((_, i) => `__idx_${i}` === choiceId)
+      if (fallback >= 0) return { dialogueNodeId: node.id, choiceIndex: fallback }
+    }
+    return null
+  }
+
   if (!testNodeId.startsWith('test-node-')) {
     return null
   }
 
-  // Enlever le préfixe "test-node-"
   const withoutPrefix = testNodeId.replace('test-node-', '')
-  
-  // Séparer dialogueNodeId et choiceIndex
   const parts = withoutPrefix.split('-choice-')
   if (parts.length !== 2) {
     return null
@@ -79,7 +104,7 @@ export function getParentChoiceForTestNode(
   testNodeId: string,
   nodes: Node[]
 ): TestNodeParentInfo | null {
-  const parsed = parseTestNodeId(testNodeId)
+  const parsed = parseTestNodeId(testNodeId, nodes)
   if (!parsed) {
     return null
   }
@@ -131,12 +156,12 @@ export function syncTestNodeFromChoice(
   existingEdges: Edge[],
   nodes: Node[] = []
 ): TestNodeSyncResult {
-  const testNodeId = `test-node-${dialogueNodeId}-choice-${choiceIndex}`
+  const choiceId = (choice as Choice & { choiceId?: string }).choiceId
+  const testNodeId = choiceId ? `test:${choiceId}` : `test-node-${dialogueNodeId}-choice-${choiceIndex}`
 
   // Si le choix n'a pas de test, supprimer le TestNode s'il existe
   if (!choice.test) {
     if (existingTestNode) {
-      // Supprimer toutes les edges liées au TestNode
       const filteredEdges = existingEdges.filter(
         (e) => e.source !== testNodeId && e.target !== testNodeId
       )
@@ -166,23 +191,26 @@ export function syncTestNodeFromChoice(
     },
   }
 
-  // Créer/mettre à jour les edges
   const edges = [...existingEdges]
-
-  // Edge DialogueNode → TestNode
-  const dialogueToTestEdgeId = `${dialogueNodeId}-choice-${choiceIndex}-to-test`
-  const existingDialogueToTestEdge = edges.find((e) => e.id === dialogueToTestEdgeId)
-  if (!existingDialogueToTestEdge) {
-    const choiceText = choice.text || `Choix ${choiceIndex + 1}`
-    const truncatedLabel = choiceText.length > 30 ? `${choiceText.substring(0, 30)}...` : choiceText
-    edges.push({
-      id: dialogueToTestEdgeId,
-      source: dialogueNodeId,
-      target: testNodeId,
-      sourceHandle: `choice-${choiceIndex}`,
-      type: 'smoothstep',
-      label: truncatedLabel,
-    })
+  const dialogueToTestEdgeId = choiceId
+    ? `e:${dialogueNodeId}:choice:${choiceId}:test`
+    : choiceToTestEdgeId(dialogueNodeId, choiceIndex)
+  const choiceEdge = buildChoiceEdge({
+    sourceId: dialogueNodeId,
+    targetId: testNodeId,
+    choiceIndex,
+    choiceText: choice.text,
+    choiceId: choiceId ?? undefined,
+    edgeId: dialogueToTestEdgeId,
+  })
+  const existingDialogueToTestEdgeIndex = edges.findIndex((e) => e.id === dialogueToTestEdgeId)
+  if (existingDialogueToTestEdgeIndex === -1) {
+    edges.push(choiceEdge)
+  } else if (edges[existingDialogueToTestEdgeIndex].label !== choiceEdge.label) {
+    edges[existingDialogueToTestEdgeIndex] = {
+      ...edges[existingDialogueToTestEdgeIndex],
+      label: choiceEdge.label,
+    }
   }
 
   // Edges TestNode → nœuds de résultat
@@ -244,36 +272,8 @@ export function syncTestNodeResultEdges(
 ): Edge[] {
   const edges = [...existingEdges]
 
-  // Configuration des 4 résultats de test
-  const testResults = [
-    {
-      field: 'testCriticalFailureNode' as const,
-      handleId: 'critical-failure',
-      color: '#C0392B',
-      label: 'Échec critique',
-    },
-    {
-      field: 'testFailureNode' as const,
-      handleId: 'failure',
-      color: '#E74C3C',
-      label: 'Échec',
-    },
-    {
-      field: 'testSuccessNode' as const,
-      handleId: 'success',
-      color: '#27AE60',
-      label: 'Réussite',
-    },
-    {
-      field: 'testCriticalSuccessNode' as const,
-      handleId: 'critical-success',
-      color: '#229954',
-      label: 'Réussite critique',
-    },
-  ]
-
-  // Pour chaque résultat de test
-  testResults.forEach((result) => {
+  // Pour chaque résultat de test (config centralisée dans graphEdgeBuilders)
+  TEST_RESULT_EDGE_CONFIG.forEach((result) => {
     const targetNodeId = choice[result.field] as string | undefined
 
     if (targetNodeId) {
@@ -294,16 +294,15 @@ export function syncTestNodeResultEdges(
       )
 
       if (!existingEdge) {
-        // Créer l'edge
-        edges.push({
-          id: `${testNodeId}-${result.handleId}-${targetNodeId}`,
-          source: testNodeId,
-          target: targetNodeId,
-          sourceHandle: result.handleId,
-          type: 'smoothstep',
-          label: result.label,
-          style: { stroke: result.color },
-        })
+        edges.push(
+          buildTestResultEdge(
+            testNodeId,
+            targetNodeId,
+            result.handleId,
+            result.label,
+            result.color
+          )
+        )
       }
     } else {
       // Supprimer l'edge si le champ test*Node n'existe plus

@@ -11,7 +11,7 @@ import { useGenerationStore } from '../store/generationStore'
 
 export interface UseSSEStreamingOptions {
   /** Callback appelé lors de l'événement 'complete' avec le résultat */
-  onComplete?: (result: any) => Promise<void> | void
+  onComplete?: (result: unknown) => Promise<void> | void
   /** Callback appelé lors de l'événement 'metadata' avec les tokens */
   onMetadata?: (metadata: { tokens?: number }) => void
   /** Callback appelé lors d'une erreur (après debounce) */

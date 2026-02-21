@@ -22,6 +22,8 @@ export interface StructuredPromptViewProps {
   prompt: string
   /** Structure JSON du prompt (prioritaire si disponible) */
   structuredPrompt?: PromptStructure | null
+  /** Sections déjà parsées par le parent (évite le double parsing) */
+  sections?: PromptSection[]
   /** Callback pour exposer l'état allExpanded et la fonction toggleAll (pour le bouton externe) */
   onToggleStateChange?: (allExpanded: boolean, toggleAll: () => void) => void
 }
@@ -254,15 +256,19 @@ function collectAllKeys(sections: PromptSection[], prefix: string = ''): string[
   return keys
 }
 
-export function StructuredPromptView({ prompt, structuredPrompt, onToggleStateChange }: StructuredPromptViewProps) {
+export function StructuredPromptView({ prompt, structuredPrompt, sections: sectionsProp, onToggleStateChange }: StructuredPromptViewProps) {
   const sections = useMemo(() => {
+    // Réutiliser les sections fournies par le parent (évite le double parsing)
+    if (sectionsProp && sectionsProp.length > 0) {
+      return sectionsProp
+    }
     // Priorité au JSON structuré si disponible
     if (structuredPrompt) {
       return parsePromptFromJson(structuredPrompt)
     }
     // Fallback sur parsing texte
     return parsePromptSections(prompt)
-  }, [prompt, structuredPrompt])
+  }, [sectionsProp, prompt, structuredPrompt])
   
   const [allExpanded, setAllExpanded] = useState(false)
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set())

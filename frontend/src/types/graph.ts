@@ -14,14 +14,14 @@ export interface LoadGraphRequest {
 }
 
 export interface LoadGraphResponse {
-  nodes: any[]
-  edges: any[]
+  nodes: unknown[]
+  edges: unknown[]
   metadata: GraphMetadata
 }
 
 export interface SaveGraphRequest {
-  nodes: any[]
-  edges: any[]
+  nodes: unknown[]
+  edges: unknown[]
   metadata: GraphMetadata
 }
 
@@ -33,9 +33,9 @@ export interface SaveGraphResponse {
 
 export interface GenerateNodeRequest {
   parent_node_id: string
-  parent_node_content: Record<string, any>
+  parent_node_content: Record<string, unknown>
   user_instructions: string
-  context_selections: Record<string, any>
+  context_selections: Record<string, unknown>
   max_choices?: number | null
   npc_speaker_id?: string
   system_prompt_override?: string
@@ -53,8 +53,8 @@ export interface SuggestedConnection {
 }
 
 export interface GenerateNodeResponse {
-  node?: Record<string, any> // Pour backward compatibility
-  nodes?: Record<string, any>[] // Liste de nœuds générés (pour génération batch)
+  node?: Record<string, unknown> // Pour backward compatibility
+  nodes?: Record<string, unknown>[] // Liste de nœuds générés (pour génération batch)
   suggested_connections: SuggestedConnection[]
   parent_node_id: string
   batch_count?: number // Nombre total de nœuds générés en batch (si applicable)
@@ -65,8 +65,8 @@ export interface GenerateNodeResponse {
 }
 
 export interface ValidateGraphRequest {
-  nodes: any[]
-  edges: any[]
+  nodes: unknown[]
+  edges: unknown[]
 }
 
 export interface ValidationErrorDetail {
@@ -87,12 +87,12 @@ export interface ValidateGraphResponse {
 }
 
 export interface CalculateLayoutRequest {
-  nodes: any[]
-  edges: any[]
+  nodes: unknown[]
+  edges: unknown[]
   algorithm: string
   direction: string
 }
 
 export interface CalculateLayoutResponse {
-  nodes: any[]
+  nodes: unknown[]
 }

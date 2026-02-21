@@ -54,6 +54,9 @@ playwright/.cache/
 # IDE specific files
 .vscode/
 .idea/
+# VSCode Counter: auto-generated metrics (do not commit)
+.VSCodeCounter/
+.VSCodeCounter/**
 *.suo
 *.user
 
@@ -75,6 +78,11 @@ data/UnityData/
 *.tmp
 *.bak
 *.swp
+test_prompt_output.txt
+# VSCode Counter report names (anywhere)
+details.md
+diff.md
+diff-details.md
 
 # User interface settings file
 ui_settings.json
@@ -82,9 +90,6 @@ app_config.json
 
 # Données locales et générées (fichiers JSON de logs uniquement, pas les configs)
 # Note: data/config/*.json peut être versionné selon besoin
-
-# BMAD artifacts (_bmad est ignoré, _bmad-output reste versionné)
-_bmad/
 
 # Development lock files (machine-specific, transient state)
 .dev/ 

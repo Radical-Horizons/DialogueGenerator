@@ -2,7 +2,7 @@
  * Tests pour SaveStatusIndicator - Indicateur de statut de sauvegarde
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import { SaveStatusIndicator } from '../components/shared/SaveStatusIndicator'
 
 // Mock le theme
@@ -29,22 +29,22 @@ describe('SaveStatusIndicator', () => {
   describe('Status display', () => {
     it('should display "Sauvegardé" when status is saved', () => {
       render(<SaveStatusIndicator status="saved" />)
-      expect(screen.getByText('Sauvegardé')).toBeInTheDocument()
+      expect(screen.getByTitle('Sauvegardé')).toBeInTheDocument()
     })
 
-    it('should display "En cours..." when status is saving', () => {
+    it('should display "Sauvegarde…" when status is saving', () => {
       render(<SaveStatusIndicator status="saving" />)
-      expect(screen.getByText('En cours...')).toBeInTheDocument()
+      expect(screen.getByTitle('Sauvegarde…')).toBeInTheDocument()
     })
 
-    it('should display "Non sauvegardé" when status is unsaved', () => {
+    it('should display "En attente" when status is unsaved', () => {
       render(<SaveStatusIndicator status="unsaved" />)
-      expect(screen.getByText('Non sauvegardé')).toBeInTheDocument()
+      expect(screen.getByTitle('En attente')).toBeInTheDocument()
     })
 
     it('should display "Erreur" when status is error', () => {
       render(<SaveStatusIndicator status="error" />)
-      expect(screen.getByText('Erreur')).toBeInTheDocument()
+      expect(screen.getByTitle('Erreur')).toBeInTheDocument()
     })
   })
 
@@ -52,41 +52,39 @@ describe('SaveStatusIndicator', () => {
     it('should display "à l\'instant" when lastSavedAt is less than 5 seconds ago', () => {
       const now = Date.now()
       render(<SaveStatusIndicator status="saved" lastSavedAt={now - 2000} />)
-      expect(screen.getByText(/Sauvegardé à l'instant/)).toBeInTheDocument()
+      expect(screen.getByTitle(/Sauvegardé à l'instant/)).toBeInTheDocument()
     })
 
     it('should display "il y a Xs" when lastSavedAt is less than 60 seconds ago', () => {
       const now = Date.now()
       render(<SaveStatusIndicator status="saved" lastSavedAt={now - 15000} />)
-      expect(screen.getByText(/Sauvegardé il y a \d+s/)).toBeInTheDocument()
+      expect(screen.getByTitle(/Sauvegardé il y a \d+s/)).toBeInTheDocument()
     })
 
     it('should display "il y a Xmin" when lastSavedAt is less than 60 minutes ago', () => {
       const now = Date.now()
       render(<SaveStatusIndicator status="saved" lastSavedAt={now - 30 * 60 * 1000} />)
-      expect(screen.getByText(/Sauvegardé il y a \d+min/)).toBeInTheDocument()
+      expect(screen.getByTitle(/Sauvegardé il y a \d+min/)).toBeInTheDocument()
     })
 
     it('should display "il y a Xh" when lastSavedAt is less than 24 hours ago', () => {
       const now = Date.now()
       render(<SaveStatusIndicator status="saved" lastSavedAt={now - 5 * 60 * 60 * 1000} />)
-      expect(screen.getByText(/Sauvegardé il y a \d+h/)).toBeInTheDocument()
+      expect(screen.getByTitle(/Sauvegardé il y a \d+h/)).toBeInTheDocument()
     })
 
     it('should update relative time every 10 seconds', async () => {
       const now = Date.now()
       render(<SaveStatusIndicator status="saved" lastSavedAt={now - 10000} />)
       
-      // Vérifier initial
-      expect(screen.getByText(/Sauvegardé il y a \d+s/)).toBeInTheDocument()
+      expect(screen.getByTitle(/Sauvegardé il y a \d+s/)).toBeInTheDocument()
       
-      // Avancer de 15 secondes (5 secondes de plus)
-      vi.advanceTimersByTime(15000)
-      
-      await waitFor(() => {
-        // Le temps relatif devrait être mis à jour (10s + 15s = 25s)
-        expect(screen.getByText(/Sauvegardé il y a \d+s/)).toBeInTheDocument()
+      act(() => {
+        vi.advanceTimersByTime(15000)
       })
+      
+      // Après 15s, le titre devrait toujours afficher un temps relatif (25s)
+      expect(screen.getByTitle(/Sauvegardé il y a \d+s/)).toBeInTheDocument()
     })
   })
 
@@ -95,29 +93,78 @@ describe('SaveStatusIndicator', () => {
       const errorMessage = 'Quota exceeded'
       render(<SaveStatusIndicator status="error" errorMessage={errorMessage} />)
       
-      const indicator = screen.getByText('Erreur').closest('div')
-      expect(indicator).toHaveAttribute('title', errorMessage)
+      expect(screen.getByTitle(errorMessage)).toBeInTheDocument()
     })
 
     it('should not display error message in title when status is not error', () => {
       render(<SaveStatusIndicator status="saved" errorMessage="Some error" />)
       
-      const indicator = screen.getByText('Sauvegardé').closest('div')
-      expect(indicator).not.toHaveAttribute('title')
+      // Quand status is saved, le title est le label (Sauvegardé), pas le errorMessage
+      expect(screen.getByTitle('Sauvegardé')).toBeInTheDocument()
     })
   })
 
   describe('Status indicator dot', () => {
     it('should show pulsing animation when status is saving', () => {
       render(<SaveStatusIndicator status="saving" />)
-      const dot = screen.getByText('En cours...').previousElementSibling
-      expect(dot).toHaveStyle({ animation: expect.stringContaining('pulse') })
+      const container = screen.getByTitle('Sauvegarde…')
+      const dot = container.firstElementChild as HTMLElement
+      expect(dot).toBeInTheDocument()
+      expect(dot.style.animation).toContain('pulse')
     })
 
     it('should not show pulsing animation when status is not saving', () => {
       render(<SaveStatusIndicator status="saved" />)
-      const dot = screen.getByText('Sauvegardé').previousElementSibling
-      expect(dot).toHaveStyle({ animation: 'none' })
+      const container = screen.getByTitle('Sauvegardé')
+      const dot = container.firstElementChild as HTMLElement
+      expect(dot).toBeInTheDocument()
+      expect(dot.style.animation).toBe('none')
+    })
+  })
+
+  describe('ADR-006 sync status labels', () => {
+    it('should display "Synced (seq N)" when syncStatusDisplay is synced and ackSeq is set', () => {
+      render(
+        <SaveStatusIndicator
+          status="saved"
+          syncStatusDisplay="synced"
+          ackSeq={42}
+        />
+      )
+      expect(screen.getByTitle('Synced (seq 42)')).toBeInTheDocument()
+    })
+
+    it('should display "Offline, N change(s) queued" when syncStatusDisplay is offline and pendingCount > 0', () => {
+      render(
+        <SaveStatusIndicator
+          status="unsaved"
+          syncStatusDisplay="offline"
+          pendingCount={2}
+        />
+      )
+      expect(screen.getByTitle('Offline, 2 change(s) queued')).toBeInTheDocument()
+    })
+
+    it('should display "Offline" when syncStatusDisplay is offline and pendingCount is 0', () => {
+      render(
+        <SaveStatusIndicator
+          status="saved"
+          syncStatusDisplay="offline"
+          pendingCount={0}
+        />
+      )
+      expect(screen.getByTitle('Offline')).toBeInTheDocument()
+    })
+
+    it('should display "Error" when syncStatusDisplay is error', () => {
+      render(
+        <SaveStatusIndicator
+          status="error"
+          syncStatusDisplay="error"
+          errorMessage="Network failed"
+        />
+      )
+      expect(screen.getByTitle('Network failed')).toBeInTheDocument()
     })
   })
 })

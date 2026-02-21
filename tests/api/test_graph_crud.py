@@ -3,15 +3,18 @@
 Suite de tests pour valider les endpoints graph:
 - POST /api/v1/unity-dialogues/graph/load - Charge un graphe depuis Unity JSON
 - POST /api/v1/unity-dialogues/graph/save - Sauvegarde un graphe en Unity JSON
+- POST /api/v1/unity-dialogues/graph/save-and-write - Sauvegarde et écrit le fichier sur disque
 - POST /api/v1/unity-dialogues/graph/validate - Valide un graphe
 - POST /api/v1/unity-dialogues/graph/calculate-layout - Calcule un layout
 """
 import pytest
 import json
+from pathlib import Path
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 
 from api.main import app
+from api.dependencies import get_config_service
 from api.schemas.graph import (
     LoadGraphRequest,
     LoadGraphResponse,
@@ -211,6 +214,140 @@ class TestGraphSave:
         # THEN
         # Peut être 200 avec warning ou 400 selon la validation
         assert response.status_code in [200, 400]
+
+
+class TestGraphSaveAndWrite:
+    """Tests pour POST /api/v1/unity-dialogues/graph/save-and-write - Conversion + écriture fichier [P0]."""
+
+    @pytest.fixture(autouse=True)
+    def _override_config(self, tmp_path):
+        """Override get_config_service pour save-and-write (nécessite un chemin Unity)."""
+        self._save_and_write_tmp_path = tmp_path
+        mock_config = MagicMock()
+        mock_config.get_unity_dialogues_path.return_value = str(tmp_path)
+        app.dependency_overrides[get_config_service] = lambda: mock_config
+        try:
+            yield
+        finally:
+            app.dependency_overrides.pop(get_config_service, None)
+
+    def test_save_and_write_success(
+        self, client: TestClient, sample_graph_nodes_edges
+    ):
+        """GIVEN un graphe valide
+        WHEN je sauvegarde et écris (save-and-write)
+        THEN le fichier est créé et la réponse contient filename et json_content."""
+        nodes, edges = sample_graph_nodes_edges
+        request_data = {
+            "nodes": nodes,
+            "edges": edges,
+            "metadata": {
+                "title": "Test Dialogue",
+                "node_count": len(nodes),
+                "edge_count": len(edges),
+            },
+        }
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write", json=request_data
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert data["filename"] == "Test_Dialogue.json"
+        assert "json_content" in data
+        parsed = json.loads(data["json_content"])
+        assert isinstance(parsed, list)
+        assert len(parsed) == 2
+        written = Path(self._save_and_write_tmp_path) / "Test_Dialogue.json"
+        assert written.exists()
+        content = json.loads(written.read_text(encoding="utf-8"))
+        assert len(content) == 2
+
+    def test_save_and_write_path_not_configured(
+        self, client: TestClient, sample_graph_nodes_edges
+    ):
+        """GIVEN le chemin Unity n'est pas configuré
+        WHEN je sauvegarde et écris
+        THEN 422 ValidationException."""
+        app.dependency_overrides[get_config_service] = lambda: MagicMock(get_unity_dialogues_path=MagicMock(return_value=None))
+        nodes, edges = sample_graph_nodes_edges
+        request_data = {
+            "nodes": nodes,
+            "edges": edges,
+            "metadata": {"title": "T", "node_count": 2, "edge_count": 1},
+        }
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write", json=request_data
+        )
+        assert response.status_code == 422
+
+    def test_save_and_write_with_seq_returns_ack(
+        self, client: TestClient, sample_graph_nodes_edges
+    ):
+        """ADR-006: GIVEN seq and document_id in request
+        WHEN save-and-write succeeds
+        THEN response contains ack_seq and last_seq."""
+        nodes, edges = sample_graph_nodes_edges
+        request_data = {
+            "nodes": nodes,
+            "edges": edges,
+            "metadata": {
+                "title": "Seq Test",
+                "node_count": len(nodes),
+                "edge_count": len(edges),
+            },
+            "seq": 5,
+            "document_id": "Seq_Test.json",
+        }
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write", json=request_data
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["ack_seq"] == 5
+        assert data["last_seq"] == 5
+        assert data["success"] is True
+        sidecar = Path(self._save_and_write_tmp_path) / "Seq_Test.seq"
+        assert sidecar.exists()
+        assert sidecar.read_text(encoding="utf-8").strip() == "5"
+
+    def test_save_and_write_seq_le_last_seq_skips_write(
+        self, client: TestClient, sample_graph_nodes_edges
+    ):
+        """ADR-006: GIVEN seq <= last_seq (already persisted)
+        WHEN save-and-write is called
+        THEN 200 with ack_seq=last_seq, file not overwritten."""
+        nodes, edges = sample_graph_nodes_edges
+        request_data = {
+            "nodes": nodes,
+            "edges": edges,
+            "metadata": {
+                "title": "Skip Write",
+                "node_count": len(nodes),
+                "edge_count": len(edges),
+            },
+            "seq": 3,
+            "document_id": "Skip_Write.json",
+        }
+        # First call: write file and last_seq=3
+        r1 = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write", json=request_data
+        )
+        assert r1.status_code == 200
+        assert r1.json()["ack_seq"] == 3
+        path = Path(self._save_and_write_tmp_path) / "Skip_Write.json"
+        assert path.exists()
+        first_content = path.read_text(encoding="utf-8")
+        # Second call with seq=2 (<= 3): skip write, return ack_seq=3
+        request_data["seq"] = 2
+        r2 = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write", json=request_data
+        )
+        assert r2.status_code == 200
+        data2 = r2.json()
+        assert data2["ack_seq"] == 3
+        assert data2["last_seq"] == 3
+        assert path.read_text(encoding="utf-8") == first_content
 
 
 class TestGraphValidate:

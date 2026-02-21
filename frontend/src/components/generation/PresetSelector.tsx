@@ -238,7 +238,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             whiteSpace: 'nowrap',
           }}
         >
-          💾 Sauvegarder preset
+          💾 Sauvegarder
         </button>
 
         {/* Indicateur de statut de sauvegarde */}

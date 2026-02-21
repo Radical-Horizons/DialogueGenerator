@@ -53,7 +53,8 @@ class ValidationException(APIException):
         self,
         message: str = "Erreur de validation",
         details: Optional[Dict[str, Any]] = None,
-        request_id: Optional[str] = None
+        request_id: Optional[str] = None,
+        code: str = "VALIDATION_ERROR",
     ):
         """Initialise une exception de validation.
         
@@ -61,12 +62,13 @@ class ValidationException(APIException):
             message: Message d'erreur.
             details: Détails des erreurs de validation (champs, messages).
             request_id: ID de la requête.
+            code: Code d'erreur (ex. "missing_choice_id" pour document v1.1.0 sans choiceId).
         """
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            code="VALIDATION_ERROR",
+            code=code,
             message=message,
-            details=details,
+            details=details or {},
             request_id=request_id
         )
 

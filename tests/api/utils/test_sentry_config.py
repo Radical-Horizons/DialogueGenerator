@@ -54,6 +54,10 @@ class TestSentryConfig:
         """Test d'initialisation avec erreur d'import."""
         monkeypatch.setenv("SENTRY_DSN", "https://test@sentry.io/test")
         monkeypatch.setenv("ENVIRONMENT", "production")
+
+        # Réinitialiser le flag global pour éviter l'effet de bord d'un test précédent.
+        import api.utils.sentry_config
+        api.utils.sentry_config._sentry_initialized = False
         
         with patch("builtins.__import__", side_effect=ImportError("No module named 'sentry_sdk'")):
             result = init_sentry()

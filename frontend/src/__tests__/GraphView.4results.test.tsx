@@ -208,9 +208,9 @@ describe('GraphView - 4 résultats de test', () => {
     expect(testNode).toBeDefined()
 
     const choiceToTestEdge = edges.find(
-      (e) => e.source === 'START' && e.target === testNode?.id && e.sourceHandle?.startsWith('choice-')
+      (e) => e.source === 'START' && e.target === testNode?.id && e.sourceHandle?.startsWith('choice:')
     )
     expect(choiceToTestEdge).toBeDefined()
-    expect(choiceToTestEdge?.sourceHandle).toBe('choice-0')
+    expect(choiceToTestEdge?.sourceHandle).toBe('choice:__idx_0')
   })
 })

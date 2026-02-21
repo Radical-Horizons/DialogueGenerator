@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 import logging
 
-from constants import UIText, FilePaths, Defaults
+from constants import FilePaths, Defaults
 
 logger = logging.getLogger(__name__)
 

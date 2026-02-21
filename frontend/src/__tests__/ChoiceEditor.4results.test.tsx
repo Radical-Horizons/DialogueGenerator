@@ -28,7 +28,7 @@ describe('ChoiceEditor - 4 résultats de test', () => {
     vi.mocked(useGraphStore).mockReturnValue({
       nodes: mockNodes,
       isGenerating: false,
-    } as any)
+    } as ReturnType<typeof useGraphStore>)
   })
 
   const TestWrapper = ({ children, defaultValues }: { children: React.ReactNode; defaultValues?: DialogueNodeData }) => {
@@ -68,12 +68,12 @@ describe('ChoiceEditor - 4 résultats de test', () => {
       </TestWrapper>
     )
 
-    // THEN: Les 4 champs de résultat doivent être visibles
+    // THEN: Les 4 champs de résultat doivent être visibles (labels "Échec critique →", "Échec →", etc.)
     await waitFor(() => {
-      expect(screen.getByLabelText('Échec critique')).toBeInTheDocument()
-      expect(screen.getByLabelText('Échec')).toBeInTheDocument()
-      expect(screen.getByLabelText('Réussite')).toBeInTheDocument()
-      expect(screen.getByLabelText('Réussite critique')).toBeInTheDocument()
+      expect(screen.getByLabelText(/Échec critique/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Échec →/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Réussite →/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Réussite critique/)).toBeInTheDocument()
     })
   })
 
@@ -98,10 +98,10 @@ describe('ChoiceEditor - 4 résultats de test', () => {
 
     // THEN: Les 4 champs de résultat ne doivent pas être visibles
     await waitFor(() => {
-      expect(screen.queryByLabelText('Échec critique')).not.toBeInTheDocument()
-      expect(screen.queryByLabelText('Échec')).not.toBeInTheDocument()
-      expect(screen.queryByLabelText('Réussite')).not.toBeInTheDocument()
-      expect(screen.queryByLabelText('Réussite critique')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/Échec critique/)).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/Échec →/)).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/Réussite →/)).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/Réussite critique/)).not.toBeInTheDocument()
     })
   })
 
@@ -131,10 +131,10 @@ describe('ChoiceEditor - 4 résultats de test', () => {
 
     // THEN: Les valeurs doivent être affichées dans les champs
     await waitFor(() => {
-      const criticalFailureField = screen.getByLabelText('Échec critique') as HTMLInputElement
-      const failureField = screen.getByLabelText('Échec') as HTMLInputElement
-      const successField = screen.getByLabelText('Réussite') as HTMLInputElement
-      const criticalSuccessField = screen.getByLabelText('Réussite critique') as HTMLInputElement
+      const criticalFailureField = screen.getByLabelText(/Échec critique/) as HTMLInputElement
+      const failureField = screen.getByLabelText(/Échec →/) as HTMLInputElement
+      const successField = screen.getByLabelText(/Réussite →/) as HTMLInputElement
+      const criticalSuccessField = screen.getByLabelText(/Réussite critique/) as HTMLInputElement
 
       expect(criticalFailureField.value).toBe('NODE_CRITICAL_FAILURE')
       expect(failureField.value).toBe('NODE_FAILURE')

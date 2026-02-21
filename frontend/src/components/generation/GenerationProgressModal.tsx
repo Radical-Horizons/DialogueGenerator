@@ -159,25 +159,18 @@ function formatStreamingContent(rawContent: string): {
         // Chercher toutes les occurrences de "text" dans le contexte des choix
         // (chaque choix a un champ "text")
         let searchIndex = 0
-        while (true) {
+        for (;;) {
           const textValue = extractPartialStringValue(choicesContext.substring(searchIndex), 'text')
           if (!textValue) break
-          
-          // Trouver la position de ce "text" pour chercher "test" après
           const textFieldPos = choicesContext.indexOf(`"text"`, searchIndex)
           if (textFieldPos === -1) break
-          
-          // Chercher "test" après ce "text" (dans le même objet choix)
           const afterText = choicesContext.substring(textFieldPos)
           const testValue = extractPartialStringValue(afterText, 'test')
-          
           choices.push({
             text: textValue,
             test: testValue || undefined,
           })
-          
-          // Continuer la recherche après ce choix
-          searchIndex = textFieldPos + `"text"`.length + textValue.length + 10 // Approximatif
+          searchIndex = textFieldPos + `"text"`.length + textValue.length + 10
           if (searchIndex >= choicesContext.length) break
         }
       }

@@ -6,23 +6,20 @@
     "choices": [
       {
         "text": "Je ne veux pas d’un chemin. Je veux une compréhension. Qu’est-ce que tu appelles une “fréquence”, ici, dans l’os ?",
-        "test": "Raison+Architecture:8",
         "respectDelta": 1,
-        "targetNode": "NODE_START_CHOICE_0"
+        "targetNode": "NODE_START_CHOICE_1"
       },
       {
         "text": "Conduis-moi. Peu importe si tes raccourcis profanent. Je préfère la vitesse au rite.",
         "test": "Volonté+Commandement:9",
         "allowInfluenceForcing": true,
         "influenceThreshold": 2,
-        "influenceDelta": 1,
-        "targetNode": "NODE_START_CHOICE_1"
+        "influenceDelta": 1
       },
       {
         "text": "Si tes cartes “saignent”, c’est que tu les nourris. Dis-moi avec quoi. Et qui paye, dans les Plis.",
         "test": "Perception+Investigation:10",
-        "respectDelta": -1,
-        "targetNode": "END"
+        "respectDelta": -1
       }
     ]
   },
@@ -46,8 +43,7 @@
         "text": "Explique-moi exactement quels risques j'encours.",
         "test": "Raison+Rhétorique:10",
         "influenceDelta": 0,
-        "respectDelta": 0,
-        "targetNode": "END"
+        "respectDelta": 0
       },
       {
         "text": "Non. Je tiens aux Textes. Emmène-moi par le chemin rituel.",
@@ -59,8 +55,7 @@
         "text": "À quel prix ? Tes raccourcis se payent.",
         "test": "Fortune+Crédit:8",
         "influenceDelta": 0,
-        "respectDelta": 0,
-        "targetNode": "END"
+        "respectDelta": 0
       }
     ]
   },
@@ -78,32 +73,28 @@
         "test": "Courage+Endurance:6",
         "allowInfluenceForcing": true,
         "influenceDelta": 1,
-        "respectDelta": 2,
-        "targetNode": "END"
+        "respectDelta": 2
       },
       {
         "text": "Réduis le coût — prends seulement une habitude insignifiante.",
         "test": "Volonté+Persuasion:12",
         "allowInfluenceForcing": true,
         "influenceDelta": 0,
-        "respectDelta": -1,
-        "targetNode": "END"
+        "respectDelta": -1
       },
       {
         "text": "Si quelque chose doit partir, laisse-moi choisir quel souvenir. Je veux en décider.",
         "test": "Mémoire+Occultisme:10",
         "allowInfluenceForcing": false,
         "influenceDelta": -1,
-        "respectDelta": 1,
-        "targetNode": "END"
+        "respectDelta": 1
       },
       {
         "text": "Attends. Explique comment on récupère ce qui est pris, si c'est possible.",
         "test": "Raison+Logique:8",
         "allowInfluenceForcing": true,
         "influenceDelta": 0,
-        "respectDelta": 0,
-        "targetNode": "END"
+        "respectDelta": 0
       },
       {
         "text": "Je change d'avis. Je renonce au raccourci.",
@@ -127,8 +118,7 @@
         "text": "Montre‑moi — fais‑le sentir.",
         "test": "Perception+Sensation:10",
         "allowInfluenceForcing": true,
-        "influenceDelta": 0,
-        "targetNode": "END"
+        "influenceDelta": 0
       },
       {
         "text": "Parle clair : qu'est‑ce que ça signifie pour la Vieille Ville ?",

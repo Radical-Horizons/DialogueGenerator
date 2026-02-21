@@ -1,4 +1,4 @@
-﻿## Epic 2: Éditeur de graphe de dialogues
+## Epic 2: Éditeur de graphe de dialogues
 
 Les utilisateurs peuvent visualiser, naviguer et éditer la structure complète des dialogues dans un graphe interactif. Le système supporte des graphes larges (500+ nœuds), navigation fluide (zoom, pan, search, jump), édition (drag-and-drop, connexions), sélection multiple et actions contextuelles.
 
@@ -9,6 +9,8 @@ Les utilisateurs peuvent visualiser, naviguer et éditer la structure complète 
 **Valeur utilisateur:** Gérer visuellement des dialogues complexes (100+ nœuds) avec workflow fluide et navigation rapide.
 
 **Dépendances:** Epic 0 (infrastructure), Epic 1 (dialogues à visualiser)
+
+**Contrainte architecture (ADR-007):** Le canvas éditeur (GraphCanvas) doit être en mode controlled React Flow : nodes/edges proviennent uniquement du store ; toute modification du canvas doit respecter cette règle. Détails : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (ADR-007).
 
 ---
 

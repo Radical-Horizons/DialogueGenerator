@@ -46,6 +46,22 @@ class ICostBudgetRepository(Protocol):
         """
         ...
 
+    def add_cost(self, user_id: str, month: str, delta: float, quota: float) -> float:
+        """Ajoute un coût au montant dépensé de manière atomique.
+
+        Cette méthode est conçue pour les cas concurrents (read-modify-write sous lock).
+
+        Args:
+            user_id: ID de l'utilisateur.
+            month: Mois au format "YYYY-MM".
+            delta: Coût à ajouter (>= 0).
+            quota: Quota mensuel (conservé si déjà présent).
+
+        Returns:
+            Nouveau montant total après ajout.
+        """
+        ...
+
 
 class FileCostBudgetRepository:
     """Repository de budgets LLM basé sur fichier JSON.
@@ -166,6 +182,43 @@ class FileCostBudgetRepository:
             
             self._save_all_budgets_unlocked(budgets)
             logger.debug(f"Budget mis à jour pour {user_id} ({month}): {amount:.2f}€ / {quota:.2f}€")
+
+    def add_cost(self, user_id: str, month: str, delta: float, quota: float) -> float:
+        """Ajoute un coût au budget (opération atomique, thread-safe).
+
+        Args:
+            user_id: ID de l'utilisateur.
+            month: Mois au format "YYYY-MM".
+            delta: Coût à ajouter (>= 0).
+            quota: Quota mensuel (préservé si déjà présent).
+
+        Returns:
+            Nouveau montant total.
+        """
+        if delta < 0:
+            raise ValueError(f"delta doit être >= 0 (reçu: {delta})")
+
+        with self._lock:
+            budgets = self._load_all_budgets_unlocked()
+            existing = budgets.get(user_id)
+
+            # Si pas de budget ou mois différent, on initialise/reset.
+            if not existing or existing.get("month") != month:
+                current_amount = 0.0
+                current_quota = float(existing.get("quota", quota)) if existing else float(quota)
+            else:
+                current_amount = float(existing.get("amount", 0.0))
+                current_quota = float(existing.get("quota", quota))
+
+            new_amount = current_amount + float(delta)
+            budgets[user_id] = {
+                "month": month,
+                "amount": new_amount,
+                "quota": current_quota,
+                "updated_at": datetime.now().isoformat(),
+            }
+            self._save_all_budgets_unlocked(budgets)
+            return new_amount
     
     def _load_all_budgets_unlocked(self) -> Dict[str, Dict]:
         """Charge tous les budgets (version interne sans lock - appelée depuis méthode déjà verrouillée)."""

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from uuid import uuid4
 from datetime import datetime, timezone
-from typing import cast
 
 from api.schemas.preset import (
     Preset, PresetMetadata, PresetConfiguration, 

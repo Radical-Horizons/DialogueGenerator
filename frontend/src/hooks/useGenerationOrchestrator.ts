@@ -59,8 +59,8 @@ export interface UseGenerationOrchestratorOptions {
 
 export interface UseGenerationOrchestratorReturn {
   // Request
-  buildContextSelections: () => any
-  buildGenerationRequest: (params: any) => any
+  buildContextSelections: () => unknown
+  buildGenerationRequest: (params: unknown) => unknown
   validateModel: (model: string, availableModels: LLMModelResponse[]) => string
   
   // Estimation

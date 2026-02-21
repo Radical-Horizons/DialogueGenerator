@@ -13,7 +13,6 @@ import { UsageDashboard } from '../usage/UsageDashboard'
 import { theme } from '../../theme'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import * as configAPI from '../../api/config'
-import { getErrorMessage } from '../../types/errors'
 import { InfoIcon } from '../shared/Tooltip'
 
 export interface GenerationOptionsModalProps {

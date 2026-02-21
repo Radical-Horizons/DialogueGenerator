@@ -10,7 +10,7 @@ import pytest
 import json
 from pathlib import Path
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 from datetime import datetime
 
 from api.main import app

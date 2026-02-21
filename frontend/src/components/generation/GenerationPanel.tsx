@@ -220,7 +220,7 @@ export function GenerationPanel() {
         setAvailableModels(modelsCacheRef.current.models)
       }
     }
-  }, [llmModel])
+  }, [llmModel, MODELS_CACHE_TTL])
 
   useEffect(() => {
     loadModels()

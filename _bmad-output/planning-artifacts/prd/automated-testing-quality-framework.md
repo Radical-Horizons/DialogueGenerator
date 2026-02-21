@@ -14,7 +14,7 @@ DialogueGenerator implements a **4-layer quality validation system** to maintain
 - **Primary:** Planescape: Torment (150K words, professional CRPG reference) - validates genre-level quality
 - **Secondary:** Character-specific manual baselines (Marc's writing per character) - validates voice consistency
 
-**Key Metrics:** Slop Score (target <13 vs PS:T 10.38), Rubric Score (target >8/10), Acceptance Rate (target >80%)
+**Key Metrics:** Slop Score EQ-bench (60/25/15, target ≤ PS:T+margin, à recalculer), DG Quality Index (méta-métrique), Rubric Score (target >8/10), Acceptance Rate (target >80%)
 
 **Annual Cost:** ~$1,100 for 1M nodes production (Layers 1-2 free, Layer 3 selective, Layer 4 minimal)
 
@@ -54,8 +54,9 @@ The quality framework is organized in **4 layers** with increasing sophisticatio
 
 **Layer 2: Slop Detection (V1.0, $0 cost)**
 - Automated text analysis (no LLM)
-- EQ-Bench slop metrics + CRPG-specific patterns
-- Metrics: Slop words/trigrams, not-x-but-y patterns, lore dump patterns, lexical diversity
+- **Slop Score (EQ-Bench aligned):** 60% slop words + 25% not-x-but-y + 15% slop trigrams, listes officielles (slop-forensics / sam-paech/slop-score)
+- **Métriques DG séparées:** Lore dumps, lexical diversity (MATTR-500), optionnel CRPG slop words
+- **Méta-métrique:** DialogueGenerator Quality Index (Slop Score + métriques DG)
 - **Implementation:** SlopDetector service (NLP library, regex)
 
 **Layer 3: Rubric Scoring (V1.5, $0.01/node, selective)**
@@ -95,13 +96,16 @@ The quality framework is organized in **4 layers** with increasing sophisticatio
 - **Marketing Value:** "AI dialogue achieving Planescape: Torment quality" = investor pitch gold
 
 **Baseline Metrics (calculated from 1000 random samples):**
+- **Slop Score:** Recalculer avec formule EQ-bench (60/25/15) et listes officielles — valeur actuelle 10.38 était avec ancienne formule.
+- **Métriques brutes** (PS:T) : slop_words_per_1k, slop_trigrams_per_1k, not_x_but_y, lexical_diversity, etc. — à recalculer si besoin pour cohérence avec outil slop-score.
+
 ```json
 {
   "source": "Planescape: Torment",
   "sample_size": 1000,
   "total_words": 15420,
   "metrics": {
-    "slop_score": 10.38,
+    "slop_score_eqbench": "à recalculer (60/25/15 + listes officielles)",
     "slop_words_per_1k": 6.90,
     "slop_trigrams_per_1k": 0.09,
     "not_x_but_y_per_1k": 0.04,
@@ -116,7 +120,7 @@ The quality framework is organized in **4 layers** with increasing sophisticatio
 **Usage:**
 - All generated dialogues compared vs PS:T baseline
 - Dashboard displays: "PS:T Quality: 8.6/10 ⭐ (Excellent)"
-- Threshold: Generated slop score <13 (PS:T + 2.5 margin)
+- Threshold: Slop Score (EQ-bench) ≤ PS:T baseline + marge (ex. +2.5) — valeur PS:T à recalculer avec formule 60/25/15
 
 #### Secondary Baseline: Per-Character Manual Samples
 
@@ -133,7 +137,7 @@ The quality framework is organized in **4 layers** with increasing sophisticatio
   "source": "Marc's manual nodes (Articy)",
   "sample_size": 12,
   "metrics": {
-    "slop_score": 8.5,
+    "slop_score_eqbench": "à recalculer (60/25/15 + listes officielles)",
     "vocab_level": 8.2,
     "sentence_length": 28.4,
     "lexical_diversity": 0.58,
@@ -151,11 +155,11 @@ The quality framework is organized in **4 layers** with increasing sophisticatio
 - **Vocab Level:** 8.2 (character baseline) vs 7.8 (PS:T) - Character-specific baselines show elevated vocabulary
 - **Sentence Length:** 28.4 (character baseline) vs 14.59 (PS:T) - Character baselines show longer, complex sentences
 - **Metaphor Density:** 0.42 (character baseline) vs 0.15 (PS:T) - Character baselines show high metaphorical density
-- **Slop Score:** 8.5 (character baseline) vs 10.38 (PS:T) - Manual baseline samples have less slop (as expected)
+- **Slop Score (EQ-bench):** À recalculer avec formule 60/25/15 — manual baseline samples typically have less slop than PS:T
 
 **Usage:**
 - When character baseline exists: Compare generated vs character baseline
-- Threshold: Generated slop ±2, vocab ±0.5, sentence length ±5 (acceptable deltas)
+- Threshold: Slop Score EQ-bench ± marge, vocab ±0.5, sentence length ±5 (acceptable deltas)
 - Alert if deviation >threshold: "Déviation style Uresaïr détectée"
 
 #### Validation Flow (Multi-Tier)
@@ -163,11 +167,11 @@ The quality framework is organized in **4 layers** with increasing sophisticatio
 ```
 User generates node for Uresaïr
   ↓
-Calculate node metrics (slop, vocab, style)
+Calculate node metrics (Slop Score EQ-bench, DG metrics, vocab, style)
   ↓
 Tier 1: Character-specific validation (if baseline exists)
   - Compare vs Uresaïr baseline
-  - Score: 7.8/10 (Slop +2.7 borderline, vocab OK, metaphor OK)
+  - Score: 7.8/10 (Slop Score EQ-bench borderline, vocab OK, metaphor OK)
   ↓
 Tier 2: Genre validation (always)
   - Compare vs PS:T baseline
@@ -246,136 +250,117 @@ class StructuralValidator:
 
 **Goal:** Detect "AI slop" patterns (overused phrases, purple prose, lore dumps) to maintain writing quality.
 
-**Inspiration:** EQ-Bench Creative Writing v3 "Slop Score" methodology
-
 **Cost:** $0 (NLP analysis, regex patterns, no LLM)
 
-#### Slop Score Components
+#### Slop Score (EQ-Bench aligned)
 
-**SD-1: Slop Words (per 1k words)**
+Le **Slop Score** est aligné sur la méthodologie officielle EQ-bench / Slop Score (leaderboard et outil d'analyse). Même formule et listes officielles pour assurer comparabilité avec le benchmark.
 
-**Definition:** Overused words that indicate AI-generated text or lazy writing.
+**Références:**
+- [EQ-Bench Slop Score](https://eqbench.com/slop-score.html) — méthodologie et explication
+- [slop-score (source code)](https://github.com/sam-paech/slop-score) — implémentation de référence
+- Listes produites par **slop-forensics** (mots et trigrams sur-représentés en sortie LLM vs écriture humaine, corpus essays/creative writing, baseline wordfreq)
 
-**EQ-Bench Base List (top 10):**
-- whispered, stared, paused, glow, impossibly, trembling, nodded, shadows, flickered, shimmered
+**Composantes du Slop Score (3 uniquement, poids officiels):**
 
-**CRPG-Specific Additions:**
-- quest, tavern crowded, mysterious stranger, ancient artifact, destiny, prophecy, chosen one, fate
+| Composante | Poids | Description |
+|------------|-------|-------------|
+| Slop Words | **60%** | Fréquence de mots apparaissant anormalement souvent en sortie LLM |
+| Not-x-but-y | **25%** | Fréquence de contrastes du type "not just X, but Y" surutilisés par l'IA |
+| Slop Trigrams | **15%** | Fréquence de phrases de 3 mots surutilisées en sortie LLM |
 
-**Calculation:**
+**Formule (EQ-Bench):**
 ```python
-def count_slop_words(text: str) -> float:
-    word_count = len(text.split())
-    slop_hits = sum(1 for word in SLOP_WORDS if word in text.lower())
-    return (slop_hits / word_count) * 1000  # per 1k words
+# Chaque composante est normalisée selon la méthodologie slop-score (voir doc EQ-bench / repo).
+slop_score = 0.60 * normalized_slop_words + 0.25 * normalized_not_x_but_y + 0.15 * normalized_slop_trigrams
 ```
 
-**Baseline Comparison:**
-- **PS:T baseline:** 6.90 slop words per 1k
-- **Character-specific baseline:** ~6-8 per 1k (manual writing)
-- **Target:** <10 per 1k (acceptable), <15 (borderline), >15 (poor)
+**Listes officielles:** Utiliser les listes Slop Words et Slop Trigrams publiées par EQ-bench / slop-forensics (voir liens ci-dessus). Ne pas substituer de listes maison pour le calcul du Slop Score afin de garder la comparabilité leaderboard.
+
+**Baseline PS:T:** À recalculer avec la formule 60/25/15 et les listes officielles (valeur actuelle 10.38 était avec l’ancienne formule). Cible : Slop Score généré ≤ baseline PS:T + marge (ex. +2.5).
 
 ---
 
-**SD-2: Slop Trigrams (per 1k words)**
+#### Détail des composantes EQ-Bench
 
-**Definition:** Overused 3-word phrases that indicate formulaic writing.
+**SD-1: Slop Words (poids 60%)**
 
-**EQ-Bench Base List:**
-- "something else something", "something else entirely", "one last time", "voice barely audible", "door swung open", "mind already racing"
+- **Définition:** Mots sur-représentés dans les sorties LLM par rapport à l’écriture humaine (slop-forensics).
+- **Unité:** par 1k mots (ou normalisation selon outil slop-score).
+- **Liste:** Slop Words officielle (EQ-bench / slop-score), pas de liste illustrative locale.
 
-**CRPG-Specific Additions:**
-- "you must help", "but be warned", "time is short", "listen carefully now"
+**SD-2: Not-x-but-y (poids 25%)**
 
-**Baseline Comparison:**
-- **PS:T baseline:** 0.09 trigrams per 1k
-- **Target:** <0.20 (good), <0.50 (acceptable), >0.50 (poor)
+- **Définition:** Patterns de contraste du type "not X, but Y" surutilisés par l’IA.
+- **Détection:** regex ou logique équivalente à l’outil slop-score (ex. `(not|wasn't|isn't) .{1,50} (but|it was|it's)`).
+- **Unité:** par 1k caractères (ou normalisation selon outil).
 
----
+**SD-3: Slop Trigrams (poids 15%)**
 
-**SD-3: Not-X-But-Y Patterns (per 1k chars)**
-
-**Definition:** Overused rhetorical pattern that indicates AI tendency to hedge or add unnecessary complexity.
-
-**Pattern Detection (regex):**
-```regex
-(not|wasn't|isn't) .{1,50} (but|it was|it's)
-```
-
-**Examples:**
-- "It wasn't the kind of kiss that promised to fix everything, it was something else entirely"
-- "This wasn't the pleasant fog of endorphins. This was something closer to genuine amnesia."
-
-**Baseline Comparison:**
-- **PS:T baseline:** 0.04 per 1k chars
-- **Target:** <0.10 (good), <0.20 (acceptable), >0.20 (poor)
+- **Définition:** Phrases de 3 mots sur-représentées en sortie LLM (slop-forensics).
+- **Liste:** Slop Trigrams officielle (EQ-bench / slop-score).
+- **Unité:** par 1k mots (ou normalisation selon outil).
 
 ---
 
-**SD-4: Lore Dump Patterns (DialogueGenerator-Specific)**
+#### Métriques DialogueGenerator (hors Slop Score)
 
-**Definition:** Patterns indicating explicit exposition or "lore dumping" (violates "show don't tell").
+Ces métriques restent **séparées** du Slop Score EQ-bench. Elles alimentent la méta-métrique DG et le dashboard.
+
+**SD-4: Lore Dump Patterns (DG-specific)**
+
+**Definition:** Patterns d’exposition explicite ou "lore dumping" (violation show-don’t-tell).
 
 **Pattern Detection (regex):**
 ```regex
 (you know|as you remember|as you may recall|it is said that|allow me to explain|let me tell you)
 ```
 
-**Examples:**
-- "As you know, the Eternal Return is..."
-- "You remember that Uresaïr is..."
-- "Let me explain what happened..."
-
-**Rationale:** CRPG dialogues should integrate lore naturally, not dump exposition.
-
 **Target:** <2 patterns per dialogue (acceptable), >5 (poor)
-
----
 
 **SD-5: Lexical Diversity (MATTR-500)**
 
-**Definition:** Moving-Average Type-Token Ratio measures vocabulary richness (low diversity = repetitive).
+**Definition:** Moving-Average Type-Token Ratio (richesse du vocabulaire). Baseline humaine PS:T : 0.5065.
 
-**Calculation:**
-- Sliding window of 500 words
-- Calculate unique words / total words per window
-- Average across all windows
+**Target:** >0.55 (excellent), >0.50 (good), <0.45 (poor)
 
-**Baseline Comparison:**
-- **PS:T baseline:** 0.5065 (human writing)
-- **Target:** >0.55 (excellent), >0.50 (good), <0.45 (poor - too repetitive)
+**SD-6 (optionnel): CRPG Slop Words**
 
-**Implementation:** NLTK or spaCy library
+**Definition:** Mots/phrases génériques CRPG (quest, destiny, chosen one, "but be warned", etc.). Suivi **à part** pour le style CRPG ; **non inclus** dans le Slop Score EQ-bench.
 
 ---
 
-#### Composite Slop Score
+#### Méta-métrique : DialogueGenerator Quality Index
 
-**Formula (EQ-Bench inspired):**
+Combinaison du Slop Score (EQ-bench) et des métriques DG pour un indicateur unique de qualité dialogue.
+
+**Composantes:**
+- **Slop Score (EQ-bench)** — aligné 60/25/15, comparabilité leaderboard
+- **Lore Dumps** — score normalisé (ex. 0–1 selon seuils)
+- **Lexical Diversity (MATTR-500)** — score normalisé (ex. 0–1 selon seuils)
+- **CRPG Slop (optionnel)** — pénalité ou bonus selon politique
+
+**Formule (exemple, à affiner en implémentation):**
 ```python
-slop_score = (slop_words * 0.5) + (slop_trigrams * 2.0) + (not_x_but_y * 1.5) + (lore_dumps * 1.0)
+# Poids et normalisation à définir (ex. seuils PS:T + character baseline).
+dg_quality_index = f(slop_score_eqbench, lore_dumps_score, lexical_diversity_score [, crpg_slop_score])
 ```
 
-**Interpretation:**
-- **<12:** Excellent (comparable to human baseline)
-- **12-15:** Good (acceptable for production)
-- **15-20:** Borderline (review recommended)
-- **>20:** Poor (needs revision)
+**Interprétation:** Badge dashboard "DG Quality: Good / Borderline / Poor" selon seuils sur la méta-métrique et/ou sur chaque composante (slop < seuil, lore < 2, diversity > 0.50).
 
-**Dashboard Display:**
+**Dashboard Display (exemple):**
 ```
-Slop Score: 12.3 (Good)
+Slop Score (EQ-bench): 10.2 ✓ (aligné leaderboard, target ≤ PS:T+2.5)
+├─ Slop Words: 60% contribution
+├─ Not-X-But-Y: 25% contribution
+└─ Slop Trigrams: 15% contribution
 
-Details:
-├─ Slop Words: 8.2 per 1k ✓ (target <10)
-├─ Slop Trigrams: 0.15 per 1k ✓ (target <0.20)
-├─ Not-X-But-Y: 0.08 per 1k chars ✓ (target <0.10)
-├─ Lore Dumps: 1 detected ✓ (target <2)
-└─ Lexical Diversity: 0.56 ⭐ (target >0.55)
+DG metrics:
+├─ Lore Dumps: 1 ✓ (target <2)
+├─ Lexical Diversity: 0.56 ✓ (target >0.55)
+└─ CRPG Slop (opt.): 2 hits
 
-Comparison:
-- vs PS:T baseline: +1.9 (acceptable)
-- vs Uresaïr baseline: +3.8 (borderline)
+DG Quality Index: Good — vs PS:T baseline: +0.8
 ```
 
 ---
@@ -723,7 +708,7 @@ Response format:
 - ✅ Layer 2: Slop detection (words, trigrams, patterns, lexical diversity)
 - ✅ Baseline comparison engine (dual-tier validation)
 - ✅ SQLite migration (metrics storage, historical tracking)
-- ✅ Dashboard: Slop Score + baseline comparison display
+- ✅ Dashboard: Slop Score (EQ-bench) + DG Quality Index + baseline comparison display
 
 **Dependencies:**
 - NLP library (NLTK or spaCy for MATTR calculation)
@@ -778,7 +763,7 @@ Response format:
 **Quality Metrics (tracked in dashboard):**
 
 **QM-1: Slop Score Trend**
-- **Metric:** Average slop score per dialogue (over time)
+- **Metric:** Average Slop Score (EQ-bench) per dialogue (over time)
 - **Target:** Decreasing trend (improvement via template optimization)
 - **Baseline:** PS:T 10.38, Marc's ~8.5
 
@@ -864,4 +849,4 @@ Response format:
 - **Challenge:** Latency (1-2s LLM call), cost (every node = $0.01)
 
 ---
-
+

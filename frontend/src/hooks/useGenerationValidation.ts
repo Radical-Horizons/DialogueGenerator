@@ -4,10 +4,7 @@
  * Extrait la logique de validation depuis GenerationPanel.
  */
 import { useState, useEffect, useMemo } from 'react'
-import { useGenerationStore } from '../store/generationStore'
-import { useContextStore } from '../store/contextStore'
 import { CONTEXT_TOKENS_LIMITS } from '../constants'
-import { useGenerationRequest } from './useGenerationRequest'
 
 export interface ValidationError {
   field: string

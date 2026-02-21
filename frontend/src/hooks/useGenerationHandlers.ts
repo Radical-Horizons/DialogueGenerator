@@ -111,7 +111,6 @@ export function useGenerationHandlers(
     setMaxChoices,
     setNarrativeTags,
     toast,
-    tokenCount,
     connectSSE,  // Passé depuis orchestrator pour éviter duplication
   } = options
 
@@ -155,8 +154,8 @@ export function useGenerationHandlers(
     setError(null)
 
     try {
-      const contextSelections = buildContextSelections()
-      
+      buildContextSelections() // appel pour cohérence; la requête utilise buildGenerationRequest qui lit les stores
+
       // NOTE: La validation métier (personnages requis, etc.) est maintenant effectuée par le backend
       // via les validators Pydantic. Le backend rejettera avec un message clair si la requête est invalide.
       
@@ -219,6 +218,7 @@ export function useGenerationHandlers(
     maxCompletionTokens,
     llmModel,
     reasoningEffort,
+    topP,
     maxChoices,
     choicesMode,
     narrativeTags,

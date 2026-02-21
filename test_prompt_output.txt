@@ -17,11 +17,6 @@ Ne génère PAS de séquence de nœuds. Le Structured Output garantit le format 
 - Choix (choices) : Options du joueur (URESAIR)
 - Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire.
 - Nombre de choix : L'IA décide librement entre 2 et 8 choix selon ce qui est approprié pour la scène. Le nœud DOIT avoir au moins 2 choix.</generation_instructions>
-  <available_skills>Compétences disponibles: Acrobaties, Adaptabilité, Affaires, Alchimie, Altération biologique avancée, Arbalètes, Architecture, Archéologie, Arcs, Armement de siège, Armes Contondantes, Armes Perforantes, Armes Tranchantes, Armes de Poing, Armes d’Épaule, Armes à poudre noire, Armes à système de visée, Armure symbiotique, Armures lourdes, Armures légères, Armures spirituelles, Artisanat, Aviation, Biologie, Biotechnologies, Bénédictions religieuses, Chimie, Commandement, Conduite, Conjuration divine, Connaissances de l’Armement, Construction orbitale, Contrôle génétique, Course, Crochetage, Croyances, Création d’armes psychiques, Création d’artefacts, Cybernétique, Diplomatie, Dissimulation, Distorsion de la réalité, Divertissement, Divination, Duperie, Déplacement silencieux, Effet placebo, Elasticité, Endurance, Escalade (et 83 autres compétences)
-Utilise ces compétences dans les tests d'attributs (format: 'AttributeType+NomCompétence:DD').</available_skills>
-  <available_traits>Traits disponibles: Autoritaire, Colérique, Conciliant, Courageux, Cynique, Diplomate, Défaitiste, Empathique, Fiable, Généreux, Honnête, Humble, Idéaliste, Impatient, Imprudent, Insensible, Instable, Intolérant, Irrespectueux, Loyal, Lucide, Lâche, Malhonnête, Manipulateur, Naïf, Obstiné, Orgueilleux, Ouvert, Patient, Persévérant (et 10 autres traits)
-Utilise ces traits dans traitRequirements des choix (format: [{'trait': 'NomTrait', 'minValue': 5}]).
-Les traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche').</available_traits>
   </technical>
 <context>
     <characters>
@@ -160,10 +155,10 @@ Les traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche').
     </dialogue_guide>
   <narrative_guide />
   <extracted_rules>STRUCTURE:
-- Narration systémique
 - Narration environnementale
-- La Prémisse (John Truby)
 - Narration linéaire / directe
+- Narration systémique
+- La Prémisse (John Truby)
 </extracted_rules>
   </narrative_guides>
 <scene_instructions>Test de vérification du prompt brut</scene_instructions>

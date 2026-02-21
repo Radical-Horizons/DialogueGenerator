@@ -84,6 +84,8 @@ Located in [`troubleshooting/`](./troubleshooting/)
 - [Scrollbar Fix](./troubleshooting/SCROLLBAR_FIX.md) - Scrollbar issue resolution
 - [Diagnostic Extraction Fiches](./troubleshooting/DIAGNOSTIC_EXTRACTION_FICHES.md) - Diagnostic extraction
 - [Prompt Parsing Issue](./troubleshooting/PROMPT_PARSING_ISSUE.md) - Prompt parsing troubleshooting
+- [E2E avec LLM](./troubleshooting/e2e-llm.md) - Prérequis, preflight, dépannage des tests E2E qui appellent le LLM
+- [Post-mortem E2E LLM](./troubleshooting/post-mortem-e2e-llm.md) - Causes, correctifs et leçons des tests graph-node-accept-reject
 
 ### Prompts Documentation
 

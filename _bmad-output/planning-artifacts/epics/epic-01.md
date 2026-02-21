@@ -1,14 +1,22 @@
-﻿### Epic 1: Génération de dialogues assistée par IA
+### Epic 1: Amélioration et peaufinage de la génération de dialogues
 
-Les utilisateurs peuvent générer des nœuds de dialogue de qualité professionnelle avec assistance LLM, gérer les coûts et itérer rapidement. Le système permet la génération single/batch, l'édition manuelle, l'auto-link, et fournit transparence complète sur les coûts et prompts utilisés.
+**Objectif :** Améliorer l'expérience utilisateur et la robustesse de la génération de dialogues existante.
+
+**Contexte :** La génération de dialogues assistée par IA est déjà fonctionnelle (génération single/batch, édition manuelle, auto-link). Cet Epic se concentre sur les améliorations qui réduisent la friction dans le workflow et donnent plus de contrôle à l'utilisateur.
+
+**Valeur utilisateur :** Réduire la friction dans le workflow de génération, améliorer la qualité des dialogues générés, et donner plus de contrôle à l'utilisateur sur l'itération et l'optimisation.
 
 **FRs covered:** FR1-10 (génération, édition, auto-link, régénération), FR72-79 (estimation coûts, logs, fallback provider)
 
 **NFRs covered:** NFR-P2 (LLM Generation <30s single, <2min batch), NFR-I2 (LLM API Reliability >99%), NFR-R4 (Error Recovery LLM >95%)
 
-**Valeur utilisateur:** Produire des dialogues CRPG qualité Disco Elysium en 1H au lieu de 1 semaine, avec contrôle total sur la qualité et les coûts.
-
 **Dépendances:** Epic 0 (infrastructure), Epic 3 (contexte GDD requis pour génération)
+
+**Statut des US :**
+- ✅ **DONE (8)** : US 1.1, 1.2, 1.3, 1.5, 1.8, 1.9, 1.13
+- 🔴 **PRIORITÉ A - Critiques (4)** : US 1.4, 1.6, 1.10, 1.17
+- 🟡 **PRIORITÉ B - Importantes (3)** : US 1.7, 1.11, 1.15
+- 🟢 **PRIORITÉ C - Nice-to-have (3)** : US 1.12, 1.14, 1.16
 
 ---
 
@@ -47,90 +55,148 @@ Les utilisateurs peuvent générer des nœuds de dialogue de qualité profession
 
 ---
 
-### Story 1.1: Générer un nœud de dialogue single avec LLM (FR1)
+### Story 1.1: Générer un nœud de dialogue single depuis un nœud parent dans le graphe (FR1)
 
-As a **utilisateur créant des dialogues**,
-I want **générer un nœud de dialogue unique avec assistance LLM basé sur le contexte GDD sélectionné**,
-So that **je peux créer rapidement des dialogues de qualité professionnelle sans écrire manuellement chaque ligne**.
+**Status:** ✅ **DÉJÀ IMPLÉMENTÉ**
+
+**Note:** Cette fonctionnalité existe déjà complètement. Cette US sert de documentation de référence.
+- ✅ Endpoint `/api/v1/unity-dialogues/graph/generate-node` implémenté
+- ✅ Composant `AIGenerationPanel.tsx` avec toutes les fonctionnalités
+- ✅ Contexte parent intégré, streaming, auto-layout, auto-link
+
+As a **utilisateur créant des dialogues dans le graphe**,
+I want **générer un nœud de dialogue unique depuis un nœud parent existant avec assistance LLM**,
+So that **je peux itérer rapidement sur la création de dialogues en construisant le graphe nœud par nœud**.
 
 **Acceptance Criteria:**
 
-**Given** j'ai sélectionné un contexte GDD (personnages, lieux, région) et saisi des instructions
-**When** je clique sur "Générer"
+**Given** j'ai un dialogue ouvert dans l'éditeur de graphe avec au moins un nœud existant
+**When** je sélectionne un nœud parent et clique sur "✨ Générer nœud IA"
+**Then** le modal `AIGenerationPanel` s'ouvre avec le contexte du nœud parent (speaker + line tronquée)
+**And** je peux sélectionner un choix spécifique du parent ou laisser libre
+**And** je peux saisir des instructions optionnelles (tone, style, theme)
+
+**Given** j'ai configuré la génération (choix cible + instructions optionnelles)
+**When** je clique sur "✨ Générer"
 **Then** un nœud de dialogue est généré avec texte, speaker, et choix (si applicable)
 **And** le nœud apparaît dans le graphe avec un stableID unique
 **And** la génération se termine en <30 secondes (NFR-P2)
 
-**Given** je lance une génération single
+**Given** je lance une génération single depuis le graphe
 **When** la génération est en cours
 **Then** la modal de progression (Epic 0 Story 0.2) affiche le streaming en temps réel
 **And** je peux interrompre la génération si nécessaire
 
 **Given** la génération réussit
-**When** le nœud est créé
-**Then** le nœud est automatiquement lié au graphe (auto-link, voir Story 1.9)
+**When** le nœud est créé dans le graphe
+**Then** le nœud est automatiquement positionné visuellement (auto-layout)
+**And** le nœud est automatiquement lié au nœud parent si un choix a été sélectionné (auto-link, voir Story 1.9)
 **And** je peux accepter ou rejeter le nœud (voir Story 1.4)
 
 **Given** je spécifie des instructions de génération (tone, style, theme)
 **When** le nœud est généré
 **Then** le nœud respecte les instructions (tone cohérent, style demandé, theme présent)
-**And** les instructions sont incluses dans le prompt LLM
+**And** les instructions sont incluses dans le prompt LLM avec le contexte du nœud parent
 
 **Technical Requirements:**
-- Backend : Endpoint `/api/v1/dialogues/generate/unity-dialogue` (existant, à améliorer)
-- Service : `UnityDialogueGenerationService.generate_dialogue_node()` avec Structured Output
+- Backend : Endpoint `/api/v1/unity-dialogues/graph/generate-node` (existant, à consolider)
+  - Utilise `UnityDialogueOrchestrator` qui coordonne les services
+  - Service : `UnityDialogueGenerationService.generate_dialogue_node()` avec Structured Output
+  - Intègre le contexte du nœud parent dans le prompt (speaker + line + choix si applicable)
 - LLM : Utilise provider sélectionné (OpenAI/Mistral via Epic 0 Story 0.3)
-- Frontend : Composant `GenerationPanel.tsx` avec bouton "Générer"
+- Frontend : 
+  - Composant `AIGenerationPanel.tsx` (existant, à améliorer) : Modal de génération depuis graphe
+  - Composant `GenerationPanel.tsx` : Génération standalone (hors scope de cette story)
 - Integration : Epic 0 Story 0.2 (Progress Modal) pour feedback streaming
-- Tests : Unit (génération nœud), Integration (API génération), E2E (workflow complet)
+- Auto-layout : Positionnement automatique du nouveau nœud dans le graphe (React Flow)
+- Tests : Unit (génération nœud avec contexte parent), Integration (API génération graphe), E2E (workflow complet depuis graphe)
+
+**Dev Notes:**
+- **Différence avec génération standalone :** La génération depuis le graphe utilise le contexte du nœud parent (speaker, line, choix) pour créer une continuité narrative. La génération standalone (`GenerationPanel.tsx`) génère un nœud isolé sans contexte de graphe.
+- **Architecture :** L'endpoint utilise `UnityDialogueOrchestrator` qui orchestre plusieurs services (prompt building, LLM generation, cost tracking). Ne pas appeler directement `UnityDialogueGenerationService` depuis l'endpoint.
+- **Dépendances :** Story 1.4 (accept/reject) et Story 1.9 (auto-link) sont des améliorations qui s'appliquent après la génération. Cette story se concentre sur la génération elle-même.
 
 **References:** FR1 (génération single), FR3 (instructions), NFR-P2 (LLM Generation <30s), Epic 0 Story 0.2 (Progress Modal)
 
 ---
 
-### Story 1.2: Générer batch de nœuds (3-8) depuis choix existants (FR2)
+### Story 1.2: Générer batch de nœuds depuis tous les choix existants (FR2)
 
-As a **utilisateur créant des dialogues**,
-I want **générer plusieurs nœuds (3-8) en une seule requête depuis des choix joueur existants**,
+**Status:** ✅ **DÉJÀ IMPLÉMENTÉ**
+
+**Note:** Cette fonctionnalité existe déjà. Cette US sert de documentation de référence.
+- ✅ Endpoint avec `generate_all_choices=True` implémenté
+- ✅ Service `GraphGenerationService` avec génération parallèle
+- ✅ Frontend avec bouton "✨ Générer pour tous les choix"
+- ✅ Progression batch dans la modal
+- ⚠️ Améliorations possibles : gestion des échecs partiels, interruption batch (peuvent être dans des US futures)
+
+As a **utilisateur créant des dialogues dans le graphe**,
+I want **générer automatiquement un nœud pour chaque choix non connecté d'un nœud parent en une seule requête**,
 So that **je peux créer rapidement des branches de dialogue complètes sans générer chaque nœud individuellement**.
 
 **Acceptance Criteria:**
 
-**Given** j'ai un nœud avec des choix joueur (ex: "Accepter", "Refuser", "Questionner")
-**When** je sélectionne "Générer batch" et choisis 3-8 choix
-**Then** un nœud est généré pour chaque choix sélectionné
-**And** tous les nœuds sont générés en <2 minutes (NFR-P2 batch)
-**And** chaque nœud est automatiquement lié au nœud parent (connexion parent→enfant)
+**Given** j'ai un nœud avec des choix joueur (ex: "Accepter", "Refuser", "Questionner") dont certains n'ont pas de `targetNode` (ou `targetNode === "END"`)
+**When** je sélectionne le nœud et clique sur "✨ Générer pour tous les choix"
+**Then** un nœud est généré pour chaque choix non connecté
+**And** tous les nœuds sont générés en <2 minutes (NFR-P2 batch, génération parallèle)
+**And** chaque nœud est automatiquement lié au nœud parent (connexion parent→enfant via `via_choice_index`, voir Story 1.9)
 
 **Given** je lance une génération batch
 **When** la génération est en cours
-**Then** la modal de progression affiche "Génération batch : 3/8 nœuds" avec progression
-**And** je peux interrompre la génération batch (tous les nœuds en cours sont annulés)
+**Then** la modal de progression affiche "Génération batch : X/Y nœuds" avec progression en temps réel
+**And** je peux interrompre la génération batch (tous les nœuds en cours sont annulés, voir Epic 0 Story 0.8)
 
-**Given** la génération batch réussit partiellement (5/8 nœuds générés, 3 échecs)
+**Given** la génération batch réussit partiellement (ex: 5/8 nœuds générés, 3 échecs)
 **When** les résultats sont affichés
-**Then** les 5 nœuds réussis sont ajoutés au graphe
-**And** un message d'erreur liste les 3 choix qui ont échoué
-**And** je peux régénérer individuellement les choix échoués
+**Then** les 5 nœuds réussis sont ajoutés au graphe avec auto-link
+**And** un message d'erreur liste les 3 choix qui ont échoué avec raison (ex: "Choix 'Questionner' : timeout LLM")
+**And** je peux régénérer individuellement les choix échoués (voir Story 1.10)
 
 **Given** je génère un batch avec contexte GDD
 **When** les nœuds sont générés
 **Then** chaque nœud utilise le même contexte GDD (cohérence narrative)
 **And** les nœuds sont variés (pas de répétition, chaque choix mène à un dialogue unique)
+**And** chaque nœud est généré avec le contexte du choix spécifique (texte du choix inclus dans le prompt)
+
+**Given** certains choix du nœud parent ont déjà un `targetNode` connecté
+**When** je lance une génération batch
+**Then** seuls les choix non connectés sont générés (pas de régénération des choix déjà connectés)
+**And** un message informatif s'affiche "X choix déjà connecté(s), Y nouveau(x) nœud(s) généré(s)"
 
 **Technical Requirements:**
-- Backend : Endpoint `/api/v1/dialogues/generate/batch` (nouveau) avec paramètre `choices: List[str]`
-- Service : `UnityDialogueGenerationService.generate_batch_nodes()` avec boucle génération + gestion erreurs
-- Frontend : Composant `BatchGenerationPanel.tsx` avec sélection choix multiples (checkboxes)
-- Progress : Modal affiche progression batch (X/Y nœuds générés)
-- Auto-link : Chaque nœud généré est connecté au parent (voir Story 1.9)
-- Tests : Unit (batch génération), Integration (API batch), E2E (workflow batch complet)
+- Backend : Endpoint `/api/v1/unity-dialogues/graph/generate-node` (existant) avec paramètre `generate_all_choices: bool`
+  - Utilise `GraphGenerationService.generate_nodes_for_all_choices()` avec génération parallèle (asyncio.gather)
+  - Filtre automatiquement les choix déjà connectés (targetNode existe et ≠ "END")
+- Service : `GraphGenerationService` avec gestion erreurs par choix (échec d'un choix n'arrête pas les autres)
+- Frontend : 
+  - Composant `AIGenerationPanel.tsx` (existant) avec bouton "✨ Générer pour tous les choix"
+  - Progression batch : `batchProgress` state avec `{current, total}` mis à jour en temps réel
+- Progress : Modal `GenerationProgressModal` affiche progression batch (X/Y nœuds générés)
+- Auto-link : Chaque nœud généré est connecté au parent via `suggested_connections` avec `via_choice_index` (voir Story 1.9)
+- Interruption : Support interruption batch (Epic 0 Story 0.8) - annule toutes les générations en cours
+- Tests : Unit (batch génération parallèle), Integration (API batch avec échecs partiels), E2E (workflow batch complet)
 
-**References:** FR2 (génération batch), NFR-P2 (LLM Generation <2min batch), Story 1.9 (auto-link)
+**Dev Notes:**
+- **Génération parallèle :** Les nœuds sont générés en parallèle avec `asyncio.gather()` pour optimiser le temps de génération. Si un choix échoue, les autres continuent.
+- **Filtrage automatique :** Seuls les choix sans `targetNode` (ou avec `targetNode === "END"`) sont générés. Les choix déjà connectés sont ignorés.
+- **Limite de choix :** Pas de limite artificielle (3-8). Tous les choix non connectés sont générés. Si un nœud a 10 choix non connectés, 10 nœuds seront générés.
+- **Sélection manuelle :** La sélection manuelle de 3-8 choix spécifiques n'est pas dans le scope. Si besoin, créer une story séparée "Story 1.2b: Générer batch avec sélection manuelle de choix".
+
+**References:** FR2 (génération batch), NFR-P2 (LLM Generation <2min batch), Story 1.9 (auto-link), Story 1.10 (régénération), Epic 0 Story 0.8 (interruption)
 
 ---
 
 ### Story 1.3: Spécifier instructions de génération (tone, style, theme) (FR3)
+
+**Status:** ✅ **DÉJÀ IMPLÉMENTÉ** (améliorations mineures possibles)
+
+**Note:** Cette fonctionnalité existe déjà. Les champs `userInstructions` sont disponibles dans `AIGenerationPanel.tsx` et `GenerationPanel.tsx`, et sont intégrés dans le prompt LLM.
+
+**Améliorations mineures possibles :**
+- Warning si instructions >500 mots
+- Message "Instructions par défaut utilisées" si vide
 
 As a **utilisateur générant des dialogues**,
 I want **spécifier des instructions de génération (tone, style, theme) pour chaque génération**,
@@ -170,6 +236,10 @@ So that **les dialogues générés correspondent exactement à l'ambiance et au 
 ---
 
 ### Story 1.4: Accepter ou rejeter nœuds générés inline (FR4)
+
+**Status:** 🔴 **PRIORITÉ A - À IMPLÉMENTER**
+
+**Valeur :** Permet l'itération rapide sur la qualité des dialogues sans workflow complexe. Bloque l'US 1.10 (régénération).
 
 As a **utilisateur générant des dialogues**,
 I want **accepter ou rejeter les nœuds générés directement dans le graphe**,
@@ -217,6 +287,10 @@ So that **je peux itérer rapidement sur la qualité des dialogues sans workflow
 
 ### Story 1.5: Éditer manuellement le contenu des nœuds générés (FR5)
 
+**Status:** ✅ **DÉJÀ IMPLÉMENTÉ**
+
+**Note:** Cette fonctionnalité existe déjà. Le composant `NodeEditorPanel.tsx` permet l'édition complète des nœuds (texte, speaker, metadata).
+
 As a **utilisateur créant des dialogues**,
 I want **éditer manuellement le contenu des nœuds générés (texte, speaker, metadata)**,
 So that **je peux affiner et personnaliser les dialogues générés par l'IA**.
@@ -263,6 +337,12 @@ So that **je peux affiner et personnaliser les dialogues générés par l'IA**.
 
 ### Story 1.6: Créer manuellement des nœuds sans LLM (FR6)
 
+**Status:** 🔴 **PRIORITÉ A - À IMPLÉMENTER**
+
+**Valeur :** Complète le workflow de création en permettant d'ajouter des dialogues spécifiques sans utiliser l'IA.
+
+**Note:** La méthode `addNode()` existe dans le store, mais il manque un bouton "Nouveau nœud" visible dans l'UI.
+
 As a **utilisateur créant des dialogues**,
 I want **créer des nœuds de dialogue manuellement sans génération LLM**,
 So that **je peux ajouter des dialogues spécifiques ou corriger des nœuds sans utiliser l'IA**.
@@ -308,6 +388,10 @@ So that **je peux ajouter des dialogues spécifiques ou corriger des nœuds sans
 
 ### Story 1.7: Dupliquer des nœuds existants pour créer des variantes (FR7)
 
+**Status:** 🟡 **PRIORITÉ B - À IMPLÉMENTER**
+
+**Valeur :** Gain de productivité en permettant de créer rapidement des variantes sans recréer depuis zéro.
+
 As a **utilisateur créant des dialogues**,
 I want **dupliquer des nœuds existants pour créer des variantes rapidement**,
 So that **je peux itérer sur des versions alternatives sans recréer le nœud depuis zéro**.
@@ -349,11 +433,17 @@ So that **je peux itérer sur des versions alternatives sans recréer le nœud d
 - Metadata : Copie profonde (deep copy) de toutes les propriétés sauf stableID et connexions
 - Tests : Unit (duplication logique), Integration (API duplicate), E2E (workflow duplication)
 
+**Risque bug nœuds invisibles (post 1.17) :** En mode controlled React Flow (ADR-007), tout nœud ajouté au store doit laisser React Flow émettre et traiter les changements `dimensions` ; le store doit refléter `width`/`height` après mesure. Si `duplicateNode()` ajoute un nœud au store, le même flux que pour « Nouveau nœud » s'applique ; ne pas contourner GraphCanvas ou onNodesChange. Voir post-mortem dans `_bmad-output/implementation-artifacts/1-17-adr-007-react-flow-controlled.md`.
+
 **References:** FR7 (duplication), FR31-32 (sélection multiple), Epic 0 Story 0.1 (stableID)
 
 ---
 
 ### Story 1.8: Supprimer des nœuds du dialogue (FR8)
+
+**Status:** ✅ **DÉJÀ IMPLÉMENTÉ**
+
+**Note:** Cette fonctionnalité existe déjà. La méthode `deleteNode()` existe avec modal de confirmation.
 
 As a **utilisateur créant des dialogues**,
 I want **supprimer des nœuds du dialogue**,
@@ -401,6 +491,10 @@ So that **je peux nettoyer et réorganiser le graphe en supprimant les nœuds no
 
 ### Story 1.9: Auto-link des nœuds générés au graphe existant (FR9)
 
+**Status:** ✅ **DÉJÀ IMPLÉMENTÉ**
+
+**Note:** Cette fonctionnalité existe déjà. Les connexions automatiques sont créées via `suggested_connections` dans l'API de génération.
+
 As a **utilisateur générant des dialogues**,
 I want **que les nœuds générés soient automatiquement liés à la structure du graphe existante**,
 So that **je n'ai pas à créer manuellement les connexions après chaque génération**.
@@ -447,6 +541,12 @@ So that **je n'ai pas à créer manuellement les connexions après chaque géné
 
 ### Story 1.10: Régénérer des nœuds rejetés avec instructions ajustées (FR10)
 
+**Status:** 🔴 **PRIORITÉ A - À IMPLÉMENTER**
+
+**Valeur :** Permet l'itération sur la qualité sans perdre le contexte. Dépend de l'US 1.4 (accept/reject).
+
+**Note:** Nécessite l'implémentation de l'US 1.4 en premier.
+
 As a **utilisateur générant des dialogues**,
 I want **régénérer des nœuds rejetés avec des instructions ajustées**,
 So that **je peux itérer sur la qualité des dialogues sans perdre le contexte de la génération précédente**.
@@ -487,11 +587,19 @@ So that **je peux itérer sur la qualité des dialogues sans perdre le contexte 
 - Connexions : Préservation connexions lors remplacement nœud (même stableID ou mapping)
 - Tests : Unit (régénération logique), Integration (API regenerate), E2E (workflow régénération)
 
+**Risque bug nœuds invisibles (post 1.17) :** Remplacer un nœud (rejet → régénération) doit conserver le même flux store/React Flow ; le nouveau nœud doit recevoir les dimensions via onNodesChange type `dimensions` (width/height reflétés dans le store). Ne pas contourner GraphCanvas. Voir post-mortem dans `_bmad-output/implementation-artifacts/1-17-adr-007-react-flow-controlled.md`.
+
 **References:** FR10 (régénération), Story 1.4 (rejeter nœuds), FR3 (instructions), Story 1.1 (génération)
 
 ---
 
 ### Story 1.11: Estimer le coût LLM avant génération (FR72)
+
+**Status:** 🟡 **PRIORITÉ B - À IMPLÉMENTER** (UI manquante)
+
+**Valeur :** Donne le contrôle sur le budget avant de lancer une génération coûteuse.
+
+**Note:** L'estimation existe dans le middleware, mais il manque une UI dédiée pour afficher l'estimation avant génération.
 
 As a **utilisateur générant des dialogues**,
 I want **voir une estimation du coût LLM avant de lancer la génération**,
@@ -532,11 +640,17 @@ So that **je peux gérer mon budget et décider si je veux procéder avec la gé
 - Integration : Epic 0 Story 0.7 (cost governance) pour vérification budget
 - Tests : Unit (calcul estimation), Integration (API estimation), E2E (workflow estimation)
 
+**Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe (pas de changement nodes/edges ou du canvas).
+
 **References:** FR72 (estimation coût), Epic 0 Story 0.7 (cost governance), FR77 (prompt transparency)
 
 ---
 
 ### Story 1.12: Afficher breakdown des coûts par dialogue (FR73)
+
+**Status:** 🟢 **PRIORITÉ C - NICE-TO-HAVE**
+
+**Valeur :** Analytics avancés pour optimiser les coûts. Utile mais pas critique pour le workflow principal.
 
 As a **utilisateur générant des dialogues**,
 I want **voir le breakdown détaillé des coûts par dialogue (coût total, coût par nœud)**,
@@ -577,11 +691,17 @@ So that **je peux analyser où mes coûts LLM sont concentrés et optimiser mes 
 - Integration : Epic 0 Story 0.7 (cost governance) pour données coûts
 - Tests : Unit (agrégation coûts), Integration (API costs), E2E (affichage breakdown)
 
+**Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe.
+
 **References:** FR73 (breakdown coûts), Epic 0 Story 0.7 (cost governance), Story 1.14 (logs génération)
 
 ---
 
 ### Story 1.13: Afficher coûts LLM cumulatifs (daily, monthly) (FR74)
+
+**Status:** ✅ **DÉJÀ IMPLÉMENTÉ**
+
+**Note:** Cette fonctionnalité existe déjà. Le composant `UsageDashboard.tsx` et l'endpoint `/api/v1/costs/usage` sont implémentés.
 
 As a **utilisateur générant des dialogues**,
 I want **voir mes coûts LLM cumulatifs (quotidien, mensuel)**,
@@ -628,6 +748,10 @@ So that **je peux suivre mon budget global et identifier les tendances de consom
 
 ### Story 1.14: Afficher prompt transparency (prompt exact envoyé au LLM) (FR77)
 
+**Status:** 🟢 **PRIORITÉ C - NICE-TO-HAVE**
+
+**Valeur :** Utile pour le debug avancé, mais pas critique pour le workflow principal.
+
 As a **utilisateur générant des dialogues**,
 I want **voir le prompt exact envoyé au LLM pour chaque génération**,
 So that **je peux comprendre comment le contexte GDD et les instructions sont utilisés et déboguer les générations**.
@@ -668,11 +792,19 @@ So that **je peux comprendre comment le contexte GDD et les instructions sont ut
 - Integration : Story 1.15 (generation logs) pour stockage prompts
 - Tests : Unit (formatage prompt), Integration (API prompt), E2E (affichage prompt)
 
+**Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe (modal/panneau détail uniquement).
+
 **References:** FR77 (prompt transparency), Story 1.15 (generation logs), FR78 (logs)
 
 ---
 
 ### Story 1.15: Afficher logs de génération (prompts, réponses, coûts) (FR78)
+
+**Status:** 🟡 **PRIORITÉ B - À IMPLÉMENTER** (UI manquante)
+
+**Valeur :** Transparence et debug. Le tracking existe déjà, mais il manque une UI de consultation.
+
+**Note:** Le tracking des coûts existe déjà (`LLMUsageService`), mais il manque une interface pour consulter les logs.
 
 As a **utilisateur générant des dialogues**,
 I want **consulter les logs de génération (prompts, réponses LLM, coûts) pour chaque nœud**,
@@ -719,11 +851,19 @@ So that **je peux analyser l'historique des générations et comprendre les patt
 - Export : Fonction export CSV/JSON côté frontend (download blob)
 - Tests : Unit (filtrage logs), Integration (API logs), E2E (affichage + export logs)
 
+**Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe (panneau logs uniquement).
+
 **References:** FR78 (generation logs), Story 1.14 (prompt transparency), FR72-74 (coûts), Epic 0 Story 0.7 (cost governance)
 
 ---
 
 ### Story 1.16: Fallback vers provider LLM alternatif en cas d'échec (FR79)
+
+**Status:** 🟢 **PRIORITÉ C - NICE-TO-HAVE**
+
+**Valeur :** Robustesse système. Utile mais peut être reporté à un Epic futur (robustesse infrastructure).
+
+**Note:** Peut être déplacé vers Epic 0 (infrastructure) si plus logique.
 
 As a **utilisateur générant des dialogues**,
 I want **que le système bascule automatiquement vers un provider LLM alternatif si le provider principal échoue**,
@@ -768,7 +908,66 @@ So that **mes générations ne sont pas interrompues par des pannes temporaires 
 - Configuration : Paramètres utilisateur pour ordre fallback (localStorage + backend preferences)
 - Tests : Unit (logique fallback), Integration (API fallback), E2E (workflow fallback complet)
 
+**Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe (backend/LLM uniquement).
+
 **References:** FR79 (fallback provider), Epic 0 Story 0.3 (Multi-Provider LLM), NFR-R4 (Error Recovery LLM >95%), NFR-I2 (LLM API Reliability >99%)
+
+---
+
+### Story 1.17: Implémenter ADR-007 — GraphCanvas en mode controlled React Flow
+
+**Status:** 🔴 **PRIORITÉ A - CRITIQUE (architecture)**
+
+**Valeur :** Une seule source de vérité pour le graphe (store) → cohérence autosave, undo/redo, synchro serveur, suppression des bugs de sync (scintillement, liens qui disparaissent). Prérequis pour collaboration future.
+
+**Référence :** ADR-007 dans `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`. Doc : `docs/architecture/state-management-frontend.md`, `docs/architecture/graph-conversion-architecture.md`.
+
+As a **développeur / mainteneur de l'éditeur de graphe**,
+I want **que le canvas éditeur (GraphCanvas) utilise React Flow en mode controlled (nodes/edges provenant uniquement du store)**,
+So that **il n'y ait qu'une seule source de vérité, que l'autosave, l'undo/redo et la synchro serveur soient cohérents, et que les bugs de désynchronisation (étiquettes, edges) disparaissent**.
+
+**Acceptance Criteria:**
+
+**Given** je modifie le graphe (drag, clic, connexion, suppression)
+**When** l'action est effectuée
+**Then** les `nodes` et `edges` affichés par React Flow proviennent **exclusivement** du store (ou de dérivations du store, ex. enrichissement validation/highlight)
+**And** aucun `useNodesState` ni `useEdgesState` n'est utilisé dans le composant principal du canvas graphe (éditeur)
+
+**Given** React Flow émet des changements (onNodesChange, onEdgesChange)
+**When** un changement est émis
+**Then** les handlers ne font qu'appeler des actions du store (updateNodePosition, deleteNode, setSelectedNode, etc.)
+**And** aucun `setNodes` / `setEdges` local n'est utilisé
+
+**Given** je sélectionne un nœud (clic, multi-select ou programmatique)
+**When** la sélection change
+**Then** le store est mis à jour (ex. setSelectedNode) via onNodesChange (type `select`) ou handlers dédiés
+**And** les `nodes` passés à React Flow reflètent la sélection depuis le store (ex. node.selected = (node.id === selectedNodeId))
+
+**Given** je zoome ou panne le canvas
+**When** le viewport change
+**Then** le viewport reste en état local à React Flow (non persisté dans le store document)
+
+**Given** j'ai implémenté le mode controlled
+**When** je clique sur un nœud ou je déplace un nœud
+**Then** aucune régression : les edges restent visibles après clic ; pas de scintillement des étiquettes lors du drag (avec throttling si besoin)
+
+**Technical Requirements:**
+- Frontend : `frontend/src/components/graph/GraphCanvas.tsx` — supprimer `useNodesState(storeNodes)` / `useEdgesState(storeEdges)` ; dériver `nodes` et `edges` du store (useGraphStore) avec enrichissement via useMemo si besoin ; passer ces props à `<ReactFlow nodes={…} edges={…} />`.
+- Handlers : `onNodesChange` et `onEdgesChange` doivent traiter **tous** les types de changement (position, dimension, remove, **select**) et mettre à jour uniquement le store (applyNodeChanges / applyEdgeChanges côté store ou dans les handlers).
+- Sélection : `selectedNodeId` dans le store ; dériver `node.selected` depuis le store dans les nodes passés à React Flow ; gérer type `select` dans onNodesChange pour appeler setSelectedNode.
+- Viewport : ne pas stocker dans le store (laisser React Flow gérer en interne).
+- Performance : si besoin, throttler les appels updateNodePosition pendant le drag (ex. requestAnimationFrame) pour limiter les re-renders.
+- Supprimer le code de contournement existant (stableEnrichedNodes, prevNodesRef, lastSetNodesRef, comparaisons "position seule") une fois le mode controlled en place.
+- GraphView (vue read-only) : hors périmètre ADR-007 ; peut rester uncontrolled.
+- Tests : régression (edges visibles après clic ; positions dans le store après drag) ; unitaire/intégration (sélection mise à jour dans le store).
+
+**Dev Notes:**
+- **Architecture :** ADR-007 impose une seule source de vérité (store). Référence complète : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (section ADR-007).
+- **Pattern React Flow controlled :** état (nodes, edges) dans le parent (store) ; onNodesChange / onEdgesChange mettent à jour ce state uniquement. Doc React Flow : pattern "controlled" (useState + applyNodeChanges/applyEdgeChanges dans les handlers).
+- **Fichiers existants :** GraphCanvas.tsx utilise actuellement useNodesState/useEdgesState ; graphStore.ts a déjà updateNodePosition, deleteNode, setSelectedNode, connectNodes ; à réutiliser dans les handlers.
+- **Bug corrigé (nœuds invisibles) :** En mode controlled, React Flow v11 garde le conteneur des nœuds en `visibility: hidden` tant que les dimensions (width/height) ne sont pas reflétées dans le store. Détail, cause et correctif dans le post-mortem de l'artifact `_bmad-output/implementation-artifacts/1-17-adr-007-react-flow-controlled.md`. Ne pas réintroduire en omettant la propagation des changements type `dimensions` (width/height) vers le store.
+
+**References:** ADR-007, ADR-006 (store = document), docs/architecture/state-management-frontend.md, docs/architecture/graph-conversion-architecture.md
 
 ---
 

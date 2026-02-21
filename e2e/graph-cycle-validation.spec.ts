@@ -14,8 +14,8 @@ test.describe('Graph Cycle Validation (Story 0.6)', () => {
     // Naviguer vers l'application
     await page.goto('http://localhost:3000')
     
-    // Attendre que l'application soit chargée
-    await page.waitForSelector('h2:has-text("Génération de Dialogues")', { timeout: 10000 })
+    // Attendre que l'application soit chargée (onglet Génération = tab button)
+    await page.getByRole('button', { name: 'Génération de Dialogues' }).waitFor({ state: 'visible', timeout: 10000 })
     
     // Naviguer vers l'éditeur de graphe (onglet "📊 Éditeur de Graphe")
     const graphTab = page.locator('button').filter({ hasText: /Éditeur de Graphe|📊/ })
@@ -92,21 +92,13 @@ test.describe('Graph Cycle Validation (Story 0.6)', () => {
   }
 
   /**
-   * Helper: Valider un graphe via l'API
+   * Helper: Valider un graphe via l'API (page.request évite CORS vs fetch depuis la page).
    */
   const validateGraphAPI = async (page: Page, graph: any) => {
-    const response = await page.evaluate(async (graphData) => {
-      const res = await fetch('http://localhost:4242/api/v1/unity-dialogues/graph/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nodes: graphData.nodes,
-          edges: graphData.edges,
-        }),
-      })
-      return res.json()
-    }, graph)
-    return response
+    const res = await page.request.post('http://localhost:4243/api/v1/unity-dialogues/graph/validate', {
+      data: { nodes: graph.nodes, edges: graph.edges },
+    })
+    return res.json()
   }
 
   test('AC#1: API retourne cycle avec chemin complet et cycle_nodes', async ({ page }) => {

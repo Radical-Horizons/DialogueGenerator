@@ -161,7 +161,7 @@ async def test_create_job_and_stream_real_generation(client: TestClient, monkeyp
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-        "llm_model_identifier": "gpt-4o"
+            "llm_model_identifier": "gpt-5-mini"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
@@ -256,7 +256,7 @@ def test_cancel_job(client: TestClient):
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-        "llm_model_identifier": "gpt-4o"
+            "llm_model_identifier": "gpt-5-mini"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
@@ -293,7 +293,7 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-        "llm_model_identifier": "gpt-4o"
+            "llm_model_identifier": "gpt-5-mini"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)

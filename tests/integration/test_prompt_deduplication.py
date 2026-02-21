@@ -73,7 +73,6 @@ class TestPromptDeduplication:
     def test_no_duplicate_xml_tags_in_character(
         self,
         context_builder_with_real_data,
-        extract_xml_fields
     ) -> None:
         """Test qu'un personnage n'a pas de balises XML dupliquées dans son prompt.
         
@@ -147,10 +146,7 @@ class TestPromptDeduplication:
                 f"{fragment[:100]}..."
             )
     
-    def test_extract_all_fields_no_parent_duplication(
-        self,
-        context_construction_service
-    ) -> None:
+    def test_extract_all_fields_no_parent_duplication(self) -> None:
         """Test que extract_all_fields n'extrait pas les parents ET les enfants."""
         # Données de test similaires à Uresaïr
         test_data = {

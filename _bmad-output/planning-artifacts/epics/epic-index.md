@@ -6,6 +6,9 @@
 - **Epic 0.9**: [Production Readiness (Pre-Launch Polish)](epic-00-9.md)  
   Les utilisateurs peuvent utiliser une application stable, fluide et prête pour la production. Le système élimine les derniers bugs de comportement, optimise l'expérience utilisateur, et s'assure que l'application est organisée et prête pour le déploiement.
 
+- **Implémentation ADR-008** (priorité absolue) : [Objectifs et contraintes](objectifs-contraintes-implementation-adr-008.md)  
+  Une seule implémentation cohérente de l’architecture pipeline document canonique (backend propriétaire, SoT document, choiceId, layout partagé). Découpage en US ou jalons : **Scrum Master / équipe**. Référence : ADR-008 dans `architecture/v10-architectural-decisions-adrs.md`.
+
 - **Epic 1**: [Génération de dialogues assistée par IA](epic-01.md)  
   Les utilisateurs peuvent générer des nœuds de dialogue de qualité professionnelle avec assistance LLM, gérer les coûts et itérer rapidement. Le système permet la génération single/batch, l'édition manuelle, l'auto-link, et fournit transparence complète sur les coûts et prompts utilisés.
 

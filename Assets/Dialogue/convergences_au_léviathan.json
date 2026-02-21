@@ -1,0 +1,30 @@
+[
+  {
+    "id": "START",
+    "speaker": "Genka Lien, le bouffon",
+    "line": "Uresaïr, voyageuse des Plis d’Ossements, tu entends ce silence juste au bord des gravures. Je peins des Barvas comme on tisse des routes: chaque lieu a une couleur, chaque vérité un nom différent. Viens, choisissons ensemble une voix parmi les mille. Ta patience pèse plus que ma musique. Montre-moi ce que tu veux entendre, et parlons sans fixations.",
+    "choices": [
+      {
+        "text": "Montre-moi une version des Barvas où l’immortalité est une question, pas une réponse.",
+        "targetNode": "END",
+        "test": "Raison+Dissimulation:8",
+        "traitRequirements": [
+          {
+            "trait": "Diplomate",
+            "minValue": 5
+          }
+        ]
+      },
+      {
+        "text": "J’échangerai une relique contre une explication claire de ta Synthèse et de sa non-fixité.",
+        "targetNode": "END",
+        "test": "Raison+Diplomatie:7"
+      },
+      {
+        "text": "Continue ta démonstration en me guidant vers une convergence rituelle où nous pourrions comprendre ensemble.",
+        "targetNode": "END",
+        "test": "Raison+Course:6"
+      }
+    ]
+  }
+]

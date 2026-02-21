@@ -7,7 +7,7 @@
  * Utilise html-to-image pour capturer le canvas ReactFlow.
  */
 export async function exportGraphToPNG(
-  reactFlowInstance: any,
+  _reactFlowInstance: unknown,
   filename: string = 'graph',
   quality: number = 1.0
 ): Promise<void> {
@@ -51,7 +51,7 @@ export async function exportGraphToPNG(
  * Exporte le graphe visible en SVG.
  */
 export async function exportGraphToSVG(
-  reactFlowInstance: any,
+  _reactFlowInstance: unknown,
   filename: string = 'graph'
 ): Promise<void> {
   try {
@@ -93,7 +93,7 @@ export async function exportGraphToSVG(
  * Ajuste le viewport pour inclure tous les nœuds avant l'export.
  */
 export async function exportFullGraphToPNG(
-  reactFlowInstance: any,
+  _reactFlowInstance: unknown,
   filename: string = 'graph-full',
   quality: number = 1.0
 ): Promise<void> {
