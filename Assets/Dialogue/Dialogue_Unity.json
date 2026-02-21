@@ -1,8 +1,8 @@
 [
   {
     "id": "manual-cf5a5f39-0ea4-4d64-8873-ad4812f07168",
-    "speaker": "test",
-    "line": "test",
+    "speaker": "test2",
+    "line": "test3",
     "choices": [
       {
         "text": "E2E_EDGE_1770672820424",
@@ -11,6 +11,34 @@
         "influenceDelta": null,
         "respectDelta": null,
         "targetNode": "manual-b9f951d8-358e-4605-b7d3-3fbd28f15cbb"
+      },
+      {
+        "text": "Test4",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
+      },
+      {
+        "text": "Test5",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
+      }
+    ]
+  },
+  {
+    "id": "manual-eb9bf9d8-6743-4ddc-b109-ddd7fcf38785",
+    "speaker": "",
+    "line": "",
+    "choices": [
+      {
+        "text": "",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
       },
       {
         "text": "",
@@ -29,16 +57,25 @@
     ]
   },
   {
-    "id": "manual-eb9bf9d8-6743-4ddc-b109-ddd7fcf38785",
-    "speaker": "",
-    "line": "",
-    "choices": []
-  },
-  {
     "id": "manual-5b65113b-400b-4b7a-8a05-8859b25509c4",
     "speaker": "",
     "line": "",
-    "choices": []
+    "choices": [
+      {
+        "text": "Test4",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
+      },
+      {
+        "text": "Test5",
+        "condition": "",
+        "test": "",
+        "influenceDelta": null,
+        "respectDelta": null
+      }
+    ]
   },
   {
     "id": "manual-b9f951d8-358e-4605-b7d3-3fbd28f15cbb",

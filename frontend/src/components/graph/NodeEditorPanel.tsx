@@ -982,14 +982,59 @@ interface ChoicesEditorProps {
 }
 
 function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: ChoicesEditorProps) {
-  const { control } = useFormContext<DialogueNodeData>()
+  const { control, getValues, handleSubmit } = useFormContext<DialogueNodeData>()
+  const { selectedNodeId, updateNode, selectedNode } = useGraphStore()
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'choices',
   })
   
-  // choices non utilisé directement - gardé pour usage futur si nécessaire
-  // const choices = watch('choices') || []
+  // Handler pour supprimer un choix et synchroniser avec le store
+  const handleRemoveChoice = useCallback((index: number) => {
+    if (!selectedNodeId || !selectedNode) return
+    
+    const storeChoices = (selectedNode.data?.choices || []) as Choice[]
+    if (index < 0 || index >= storeChoices.length) return
+    
+    // Obtenir les données du formulaire avant suppression
+    const formData = getValues() as DialogueNodeData
+    
+    // Supprimer le choix du tableau des choix du store
+    const updatedChoices = storeChoices.filter((_, i) => i !== index)
+    
+    // Construire les données mises à jour en fusionnant les données du formulaire avec les choix mis à jour
+    // (pour préserver les champs du formulaire comme line, speaker, etc.)
+    const updatedData: DialogueNodeData = {
+      ...formData,
+      choices: updatedChoices.map((sc, i) => {
+        // Fusionner avec les données du formulaire pour les choix restants
+        const formChoice = formData.choices?.[i < index ? i : i + 1] // Décaler l'index si après l'index supprimé
+        return {
+          ...(formChoice || {}),
+          // Préserver les champs de connexion du store
+          targetNode: sc.targetNode,
+          testCriticalFailureNode: sc.testCriticalFailureNode,
+          testFailureNode: sc.testFailureNode,
+          testSuccessNode: sc.testSuccessNode,
+          testCriticalSuccessNode: sc.testCriticalSuccessNode,
+          // Préserver choiceId si présent
+          choiceId: (sc as Choice & { choiceId?: string })?.choiceId ?? formChoice?.choiceId,
+        }
+      }),
+    }
+    
+    // Mettre à jour le nœud dans le store avec les choix mis à jour
+    // updateNode gérera automatiquement la suppression des TestNodes associés si nécessaire
+    updateNode(selectedNodeId, {
+      data: {
+        ...selectedNode.data,
+        ...updatedData,
+      },
+    })
+    
+    // Supprimer le choix du formulaire après la mise à jour du store
+    remove(index)
+  }, [selectedNodeId, selectedNode, remove, getValues, updateNode])
   
   return (
     <div>
@@ -1040,7 +1085,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
           <ChoiceEditor
             key={field.id}
             choiceIndex={index}
-            onRemove={fields.length > 1 ? () => remove(index) : undefined}
+            onRemove={fields.length > 1 ? () => handleRemoveChoice(index) : undefined}
             onGenerateForChoice={onGenerateForChoice}
             onCreateEmptyNodeForChoice={onCreateEmptyNodeForChoice}
           />

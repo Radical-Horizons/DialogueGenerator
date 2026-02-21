@@ -316,9 +316,18 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           
           // Normaliser pour garantir la synchronisation TestBar ↔ choix après chargement
           const normalized = normalizeTestBars(nodes, edges)
+          
+          // Story 16.4 : Convertir nodes/edges en document canonique pour permettre la sauvegarde via PUT document + layout
+          const document = graphToDocument(normalized.nodes, normalized.edges) as unknown as Record<string, unknown>
+          const layout = buildLayoutFromNodes(normalized.nodes)
+          
           set({
             nodes: normalized.nodes,
             edges: normalized.edges,
+            document: document,
+            layout: layout,
+            documentRevision: 1, // Initialiser à 1 si nouveau document
+            layoutRevision: 1,
             dialogueMetadata: {
               title: response.metadata.title,
               node_count: normalized.nodes.length,
@@ -1746,30 +1755,42 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
             const layoutPayload = state.layout ?? buildLayoutFromNodes(state.nodes)
             const docRev = state.documentRevision ?? 1
             const layoutRev = state.layoutRevision ?? 1
-            const [docRes, layoutRes] = await Promise.all([
-              documentsAPI.putDocument(documentId, { document: doc, revision: docRev }),
-              documentsAPI.putLayout(documentId, { layout: layoutPayload, revision: layoutRev }),
-            ])
-            set({
-              documentRevision: docRes.revision,
-              layoutRevision: layoutRes.revision,
-              isSaving: false,
-              hasUnsavedChanges: false,
-              lastSaveError: null,
-              lastSavedAt: Date.now(),
-              syncStatus: 'synced',
-            })
-            return { success: true, filename: documentId } as SaveGraphResponse
+            
+            try {
+              const [docRes, layoutRes] = await Promise.all([
+                documentsAPI.putDocument(documentId, { document: doc, revision: docRev }),
+                documentsAPI.putLayout(documentId, { layout: layoutPayload, revision: layoutRev }),
+              ])
+              set({
+                documentRevision: docRes.revision,
+                layoutRevision: layoutRes.revision,
+                isSaving: false,
+                hasUnsavedChanges: false,
+                lastSaveError: null,
+                lastSavedAt: Date.now(),
+                syncStatus: 'synced',
+              })
+              return { success: true, filename: documentId } as SaveGraphResponse
+            } catch (docErr: unknown) {
+              const status = (docErr as { response?: { status?: number } })?.response?.status
+              // Si erreur 404 (document n'existe pas encore), utiliser le chemin legacy pour créer le document
+              if (status === 404) {
+                console.warn('Document non trouvé (404), utilisation du chemin legacy saveGraphAndWrite pour créer le document')
+                // Continuer avec le chemin legacy ci-dessous
+              } else if (status === 409) {
+                const msg = 'Conflit de révision (document ou layout modifié ailleurs). Rechargez ou réessayez.'
+                set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
+                throw new Error(msg)
+              } else {
+                // Pour les autres erreurs (réseau, etc.), essayer le chemin legacy comme fallback
+                console.warn('Erreur lors de la sauvegarde via API documents, tentative avec chemin legacy:', docErr)
+                // Continuer avec le chemin legacy ci-dessous
+              }
+            }
           }
         } catch (docErr: unknown) {
-          const status = (docErr as { response?: { status?: number } })?.response?.status
-          if (status === 409) {
-            const msg = 'Conflit de révision (document ou layout modifié ailleurs). Rechargez ou réessayez.'
-            set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
-            throw new Error(msg)
-          }
-          set({ isSaving: false, lastSaveError: (docErr as Error)?.message ?? String(docErr), syncStatus: 'error' })
-          throw docErr
+          // Si erreur avant d'essayer la sauvegarde, logger et continuer avec le chemin legacy
+          console.warn('Erreur lors de la préparation de la sauvegarde via API documents, utilisation du chemin legacy:', docErr)
         }
         const seq = state.clientSeq
         try {
@@ -1807,6 +1828,11 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
               console.warn('Journal IndexedDB (snapshot/clear):', e)
             }
           }
+          // Mettre à jour document et layout après sauvegarde réussie via chemin legacy
+          // (pour que les prochaines sauvegardes utilisent l'API documents)
+          const updatedDocument = state.document ?? graphToDocument(state.nodes, state.edges) as unknown as Record<string, unknown>
+          const updatedLayout = state.layout ?? buildLayoutFromNodes(state.nodes)
+          
           set({
             isSaving: false,
             hasUnsavedChanges: false,
@@ -1816,6 +1842,10 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
             clientSeq: nextSeq,
             syncStatus: 'synced',
             documentId: documentId ?? response.filename ?? state.documentId,
+            document: updatedDocument,
+            layout: updatedLayout,
+            documentRevision: state.documentRevision ?? 1,
+            layoutRevision: state.layoutRevision ?? 1,
             dialogueMetadata: {
               ...state.dialogueMetadata,
               filename: response.filename,

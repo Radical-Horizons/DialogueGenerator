@@ -23,12 +23,18 @@ export type APIError = AxiosError<APIErrorResponse>
 /**
  * Extrait le message d'erreur d'une erreur API avec détails si disponibles.
  * 
- * Améliore l'affichage des erreurs de validation backend (ValidationException).
+ * Améliore l'affichage des erreurs de validation backend (ValidationException)
+ * et des erreurs réseau (backend inaccessible).
  */
 export function getErrorMessage(error: unknown): string {
   if (error && typeof error === 'object' && 'response' in error) {
-    const axiosError = error as APIError
+    const axiosError = error as APIError & { code?: string }
     const errorData = axiosError.response?.data?.error
+    
+    // Gérer les erreurs réseau (backend inaccessible, timeout, etc.)
+    if (axiosError.code === 'ERR_NETWORK' || axiosError.code === 'ECONNREFUSED' || axiosError.code === 'ETIMEDOUT') {
+      return 'Impossible de se connecter au serveur. Vérifiez que le backend est démarré et accessible.'
+    }
     
     if (errorData) {
       let message = errorData.message || axiosError.message || 'Une erreur est survenue'
@@ -81,9 +87,24 @@ export function getErrorMessage(error: unknown): string {
       
       return message
     }
+    
+    // Si pas de réponse (erreur réseau sans code spécifique détecté)
+    if (!axiosError.response) {
+      // Vérifier si le message contient des indices d'erreur réseau
+      const message = axiosError.message || ''
+      if (message.toLowerCase().includes('network') || message.toLowerCase().includes('connection')) {
+        return 'Erreur de connexion au serveur. Vérifiez que le backend est démarré et accessible.'
+      }
+    }
+    
     return axiosError.message || 'Une erreur est survenue'
   }
   if (error instanceof Error) {
+    // Vérifier aussi pour les erreurs Error simples
+    const message = error.message || ''
+    if (message.toLowerCase().includes('network') || message.toLowerCase().includes('connection')) {
+      return 'Erreur de connexion au serveur. Vérifiez que le backend est démarré et accessible.'
+    }
     return error.message
   }
   return 'Une erreur est survenue'

@@ -29,6 +29,7 @@ export function GraphEditor() {
   const loadInFlightRef = useRef(false)
   const canvasWrapperRef = useRef<HTMLDivElement | null>(null)
   const toast = useToast()
+  const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
   
   // États auto-save draft (Task 2 - Story 0.5) - supprimés, maintenant géré automatiquement
   
@@ -141,7 +142,15 @@ export function GraphEditor() {
         })
         .catch((err) => {
           console.error('Erreur lors du chargement du dialogue:', err)
-          toast(`Erreur: ${getErrorMessage(err)}`, 'error')
+          const errorMessage = getErrorMessage(err)
+          // Éviter la redondance "Erreur: Erreur de connexion..." ou "Erreur: Impossible de se connecter..."
+          const isNetworkError = errorMessage.includes('connexion au serveur') || 
+                                  errorMessage.includes('connecter au serveur') ||
+                                  errorMessage.includes('Impossible de se connecter')
+          const displayMessage = isNetworkError || errorMessage.startsWith('Erreur')
+            ? errorMessage 
+            : `Erreur: ${errorMessage}`
+          toast(displayMessage, 'error')
           loadInFlightRef.current = false
           setIsLoadingDialogue(false)
         })
@@ -192,7 +201,27 @@ export function GraphEditor() {
         // #region agent log
         fetch('http://127.0.0.1:7244/ingest/49f0dd36-7e15-4023-914a-f038d74c10fc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'GraphEditor.tsx:auto-save-catch', message: 'save failed', data: { nodesLength: nodes.length, errorMessage: getErrorMessage(err) }, timestamp: Date.now(), sessionId: 'debug-session', hypothesisId: 'H1-H4' }) }).catch(() => {})
         // #endregion
-        toast(`Sauvegarde automatique échouée: ${getErrorMessage(err)}`, 'error')
+        const errorMessage = getErrorMessage(err)
+        const isNetworkError = errorMessage.includes('connexion au serveur') || errorMessage.includes('connecter au serveur')
+        
+        // Éviter de spammer les toasts pour les erreurs réseau persistantes
+        // Afficher un toast seulement si c'est une nouvelle erreur ou si la dernière erreur date de plus de 10 secondes
+        const now = Date.now()
+        const shouldShowToast = !isNetworkError || 
+          !lastNetworkErrorRef.current || 
+          lastNetworkErrorRef.current.message !== errorMessage ||
+          (now - lastNetworkErrorRef.current.timestamp) > 10000
+        
+        if (shouldShowToast) {
+          // Pour les erreurs réseau, utiliser un message plus court et moins alarmant
+          const displayMessage = isNetworkError 
+            ? 'Sauvegarde automatique suspendue (serveur inaccessible)'
+            : `Sauvegarde automatique échouée: ${errorMessage}`
+          toast(displayMessage, 'error', isNetworkError ? 5000 : undefined)
+          if (isNetworkError) {
+            lastNetworkErrorRef.current = { message: errorMessage, timestamp: now }
+          }
+        }
       })
     }, 100)
     return () => clearTimeout(timeoutId)
