@@ -49,6 +49,38 @@ function ensureValidNode(
 }
 
 /**
+ * Normalise les edges chargés depuis l'API (loadGraph) ou un cache legacy :
+ * sourceHandle "choice-N" → "choice:__idx_N" pour correspondre aux handles du DialogueNode (ADR-008).
+ */
+function normalizeChoiceHandleInEdges(edges: Edge[], nodes: Node[]): Edge[] {
+  const nodesById = new Map(nodes.map((n) => [n.id, n]))
+  return edges.map((edge) => {
+    const sh = edge.sourceHandle
+    if (!sh || !sh.startsWith('choice-')) {
+      return edge
+    }
+    const idx = parseInt(sh.replace('choice-', ''), 10)
+    if (Number.isNaN(idx)) {
+      return edge
+    }
+    const sourceNode = nodesById.get(edge.source)
+    const choices = (sourceNode?.data as { choices?: unknown[] })?.choices ?? []
+    const choice = choices[idx] as (Choice & { choiceId?: string }) | undefined
+    const stableId = choice?.choiceId ?? `__idx_${idx}`
+    const newSourceHandle = `choice:${stableId}`
+    return {
+      ...edge,
+      sourceHandle: newSourceHandle,
+      data: {
+        ...(edge.data as object),
+        choiceId: stableId,
+        choiceIndex: idx,
+      },
+    }
+  })
+}
+
+/**
  * Normalise les nodes pour garantir la synchronisation TestBar ↔ choix.
  * 
  * Règle : Pour chaque DialogueNode avec choix ayant un test,
@@ -304,7 +336,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           })
           
           // Convertir les edges
-          const edges: Edge[] = response.edges.map((edge: { id: string; source: string; target: string; sourceHandle?: string; targetHandle?: string; label?: string }) => ({
+          let edges: Edge[] = response.edges.map((edge: { id: string; source: string; target: string; sourceHandle?: string; targetHandle?: string; label?: string }) => ({
             id: edge.id,
             source: edge.source,
             target: edge.target,
@@ -313,7 +345,9 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
             data: edge.data,
             ...(edge.sourceHandle && { sourceHandle: edge.sourceHandle }), // Préserver sourceHandle si présent
           }))
-          
+          // Normaliser sourceHandle legacy "choice-N" → "choice:__idx_N" (ADR-008, évite React Flow #008)
+          edges = normalizeChoiceHandleInEdges(edges, nodes)
+
           // Normaliser pour garantir la synchronisation TestBar ↔ choix après chargement
           const normalized = normalizeTestBars(nodes, edges)
           

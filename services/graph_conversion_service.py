@@ -99,19 +99,23 @@ class GraphConversionService:
                             reactflow_nodes.append(test_node)
                             
                             # Créer l'edge DialogueNode → TestNode (via le handle du choix)
+                            # ADR-008 : sourceHandle = choice:choiceId ou choice:__idx_N (aligné DialogueNode frontend)
+                            choice_id = choice.get("choiceId") or f"__idx_{choice_index}"
+                            edge_id = f"e:{node_id}:choice:{choice_id}:test"
                             choice_text = choice.get("text", f"Choix {choice_index + 1}")
                             # Tronquer le label pour l'affichage (comme pour les autres edges)
                             truncated_label = choice_text[:30] + "..." if len(choice_text) > 30 else choice_text
                             reactflow_edges.append({
-                                "id": f"{node_id}-choice-{choice_index}-to-test",
+                                "id": edge_id,
                                 "source": node_id,
                                 "target": test_node_id,
-                                "sourceHandle": f"choice-{choice_index}",
+                                "sourceHandle": f"choice:{choice_id}",
                                 "type": "smoothstep",
                                 "label": truncated_label,
                                 "data": {
                                     "edgeType": "choice",
                                     "choiceIndex": choice_index,
+                                    "choiceId": choice_id,
                                     "choiceText": choice_text
                                 }
                             })
@@ -259,6 +263,7 @@ class GraphConversionService:
         # Edges depuis choix du joueur
         # NOTE: Les choix avec test sont gérés dans unity_json_to_graph() et créent un TestNode
         # Ici, on ne crée que les edges pour les choix SANS test (targetNode direct)
+        # ADR-008 : sourceHandle = choice:choiceId ou choice:__idx_N (aligné DialogueNode frontend)
         choices = unity_node.get("choices", [])
         for choice_index, choice in enumerate(choices):
             # Ignorer les choix avec test (ils passent par un TestNode, pas de targetNode direct)
@@ -267,20 +272,23 @@ class GraphConversionService:
                 
             target_node = choice.get("targetNode")
             if target_node:
+                choice_id = choice.get("choiceId") or f"__idx_{choice_index}"
+                edge_id = f"e:{source_id}:choice:{choice_id}"
                 choice_text = choice.get("text", f"Choix {choice_index + 1}")
                 # Tronquer le texte pour le label
                 label = choice_text[:30] + "..." if len(choice_text) > 30 else choice_text
                 
                 edges.append({
-                    "id": f"{source_id}-choice{choice_index}->{target_node}",
+                    "id": edge_id,
                     "source": source_id,
                     "target": target_node,
-                    "sourceHandle": f"choice-{choice_index}",  # Correspond à l'ID du handle dans DialogueNode
+                    "sourceHandle": f"choice:{choice_id}",
                     "type": "default",
                     "label": label,
                     "data": {
                         "edgeType": "choice",
                         "choiceIndex": choice_index,
+                        "choiceId": choice_id,
                         "choiceText": choice_text
                     }
                 })

@@ -132,13 +132,20 @@ export const GraphCanvas = memo(function GraphCanvas() {
   }, [storeNodes, selectedNodeId, validationErrors, highlightedNodeIds, highlightedCycleNodes])
 
   // Dériver edges du store avec enrichissement (broken reference) — AC #1
+  // Exclure les edges avec sourceHandle legacy "choice-N" (ADR-008) pour éviter React Flow #008 et permettre l'affichage du graphe
   const edges = useMemo(() => {
     const brokenReferences = validationErrors.filter(
       (err) => err.type === 'broken_reference' && err.target
     )
     const brokenTargets = new Set(brokenReferences.map((err) => err.target!))
 
-    return storeEdges.map((edge) => {
+    const validEdges = storeEdges.filter((edge) => {
+      const sh = edge.sourceHandle
+      if (sh && /^choice-\d+$/.test(sh)) return false
+      return true
+    })
+
+    return validEdges.map((edge) => {
       const isBroken = brokenTargets.has(edge.target)
       if (isBroken) {
         return {

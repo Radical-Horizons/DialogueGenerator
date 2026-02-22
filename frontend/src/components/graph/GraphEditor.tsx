@@ -162,26 +162,6 @@ export function GraphEditor() {
 
   // Auto-save backend : micro-batch 100 ms (ADR-006)
   useEffect(() => {
-    // #region agent log
-    const payload = {
-      location: 'GraphEditor.tsx:auto-save-effect',
-      message: 'auto-save effect run',
-      data: {
-        hasSelectedDialogue: !!selectedDialogue,
-        selectedFilename: selectedDialogue?.filename ?? null,
-        hasUnsavedChanges,
-        isGraphLoading,
-        isGraphSaving,
-        isLoadingDialogue,
-        isGenerating,
-        nodesLength: nodes.length,
-      },
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      hypothesisId: 'H1-H5',
-    }
-    fetch('http://127.0.0.1:7244/ingest/49f0dd36-7e15-4023-914a-f038d74c10fc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(() => {})
-    // #endregion
     if (
       !selectedDialogue ||
       !hasUnsavedChanges ||
@@ -194,13 +174,7 @@ export function GraphEditor() {
       return
     }
     const timeoutId = setTimeout(() => {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/49f0dd36-7e15-4023-914a-f038d74c10fc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'GraphEditor.tsx:auto-save-timeout', message: 'saveDialogue scheduled', data: { nodesLength: nodes.length }, timestamp: Date.now(), sessionId: 'debug-session', hypothesisId: 'H3' }) }).catch(() => {})
-      // #endregion
       saveDialogue().catch((err) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/49f0dd36-7e15-4023-914a-f038d74c10fc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'GraphEditor.tsx:auto-save-catch', message: 'save failed', data: { nodesLength: nodes.length, errorMessage: getErrorMessage(err) }, timestamp: Date.now(), sessionId: 'debug-session', hypothesisId: 'H1-H4' }) }).catch(() => {})
-        // #endregion
         const errorMessage = getErrorMessage(err)
         const isNetworkError = errorMessage.includes('connexion au serveur') || errorMessage.includes('connecter au serveur')
         
