@@ -112,7 +112,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           const storeChoice = storeChoices[i]
           return {
             ...fc,
-            targetNode: storeChoice?.targetNode ?? fc.targetNode,
+            // targetNode, test*Nodes sont des connexions gérées par les edges — jamais par le form.
+            // Utiliser uniquement la valeur du store pour éviter la boucle idle form→store→form.
+            targetNode: storeChoice?.targetNode,
             testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
             testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
             testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,
@@ -143,6 +145,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       if (!node?.data) return
       const formValues = form.getValues()
       const merged = mergeFormDataIntoNodeData(nodeType, node.data as Record<string, unknown>, formValues)
+      // Evite une boucle idle: ne pousse pas au store si le formulaire n'a rien changé.
+      const mergedStr = JSON.stringify(merged)
+      const currentStr = JSON.stringify(node.data)
+      if (mergedStr === currentStr) return
       updateNode(selectedNodeId, { data: merged })
     }, DEBOUNCE_MS)
     return () => {
@@ -311,7 +317,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         const storeChoice = storeChoices[i]
         return {
           ...fc,
-          targetNode: storeChoice?.targetNode ?? fc.targetNode,
+          targetNode: storeChoice?.targetNode,
           testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
           testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
           testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,

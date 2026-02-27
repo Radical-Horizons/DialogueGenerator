@@ -30,6 +30,7 @@ export function GraphEditor() {
   const canvasWrapperRef = useRef<HTMLDivElement | null>(null)
   const toast = useToast()
   const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
+  const saveRetryBlockedUntilRef = useRef<number>(0)
   
   // États auto-save draft (Task 2 - Story 0.5) - supprimés, maintenant géré automatiquement
   
@@ -173,8 +174,18 @@ export function GraphEditor() {
     ) {
       return
     }
+    if (Date.now() < saveRetryBlockedUntilRef.current) {
+      return
+    }
     const timeoutId = setTimeout(() => {
       saveDialogue().catch((err) => {
+        const status = (err as { response?: { status?: number } })?.response?.status
+        // Backoff anti-boucle: éviter un cycle auto-save en erreur qui clignote.
+        if (typeof status === 'number' && status >= 400 && status < 500 && status !== 409) {
+          saveRetryBlockedUntilRef.current = Date.now() + 10000
+        } else {
+          saveRetryBlockedUntilRef.current = Date.now() + 3000
+        }
         const errorMessage = getErrorMessage(err)
         const isNetworkError = errorMessage.includes('connexion au serveur') || errorMessage.includes('connecter au serveur')
         
@@ -672,7 +683,6 @@ export function GraphEditor() {
             ) : (
               <div
                 ref={canvasWrapperRef}
-                key={`graph-${documentId ?? 'empty'}`}
                 style={{ flex: 1, minHeight: 400, overflow: 'hidden' }}
               >
                 <ReactFlowProvider>

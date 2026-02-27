@@ -20,6 +20,8 @@ import { StableLabelSmoothStepEdge } from './edges/StableLabelSmoothStepEdge'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 
+const FITVIEW_AFTER_DIMENSIONS_EVENT = 'graph-request-fitview'
+
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
 const GraphCanvasInner = memo(function GraphCanvasInner() {
   const reactFlowInstance = useReactFlow()
@@ -34,18 +36,21 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   // Fit view once per dialogue when load has finished. Signal: !isGraphLoading + documentId (not nodesLength).
   // Double rAF runs after layout so React Flow has measured nodes; ref prevents duplicate fit per document.
   useEffect(() => {
-    if (isGraphLoading || !documentId) return
+    if (isGraphLoading || !documentId) {
+      return
+    }
     if (alreadyFitForDocumentIdRef.current === documentId) return
     alreadyFitForDocumentIdRef.current = documentId
-    let cancelled = false
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (!cancelled) instanceRef.current?.fitView({ padding: 0.2, duration: 0 })
-      })
-    })
-    return () => {
-      cancelled = true
+    const documentIdToFit = documentId
+    const runFitView = () => {
+      if (useGraphStore.getState().documentId !== documentIdToFit) return
+      const instance = instanceRef.current
+      if (instance) instance.fitView({ padding: 0.2, duration: 0 })
     }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(runFitView)
+    })
+    window.setTimeout(runFitView, 150)
   }, [isGraphLoading, documentId])
 
   useEffect(() => {
@@ -69,6 +74,27 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
     }
   }, [getNode, fitView, setSelectedNodeInner])
 
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    const handler = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          instanceRef.current?.fitView({ padding: 0.2, duration: 200 })
+        })
+      })
+      if (timeoutId) window.clearTimeout(timeoutId)
+      timeoutId = window.setTimeout(() => {
+        instanceRef.current?.fitView({ padding: 0.2, duration: 200 })
+        timeoutId = null
+      }, 120)
+    }
+    window.addEventListener(FITVIEW_AFTER_DIMENSIONS_EVENT, handler)
+    return () => {
+      window.removeEventListener(FITVIEW_AFTER_DIMENSIONS_EVENT, handler)
+      if (timeoutId) window.clearTimeout(timeoutId)
+    }
+  }, [])
+
   return null
 })
 
@@ -80,13 +106,18 @@ export const GraphCanvas = memo(function GraphCanvas() {
     validationErrors,
     highlightedNodeIds,
     highlightedCycleNodes,
+    documentId,
     setSelectedNode,
     updateNodePosition,
-    updateNode,
+    updateNodeDimensions,
     connectNodes,
     deleteNode,
     disconnectNodes,
   } = useGraphStore()
+  const fitViewRequestedAfterDimensionsRef = useRef(false)
+  useEffect(() => {
+    fitViewRequestedAfterDimensionsRef.current = false
+  }, [documentId])
 
   // RAF throttle pour updateNodePosition pendant le drag (évite scintillement)
   const positionRafRef = useRef<number | null>(null)
@@ -209,11 +240,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
           // otherwise React Flow keeps nodes container `visibility:hidden` (nodes not "initialized").
           const dims = (change as { dimensions?: { width?: number; height?: number } }).dimensions
           if (dims && typeof dims.width === 'number' && typeof dims.height === 'number') {
-            updateNode(change.id, {
-              measured: { width: dims.width, height: dims.height },
+            updateNodeDimensions(change.id, {
               width: dims.width,
               height: dims.height,
-            } as Partial<Node>)
+            })
+            if (!fitViewRequestedAfterDimensionsRef.current) {
+              fitViewRequestedAfterDimensionsRef.current = true
+              window.dispatchEvent(new CustomEvent(FITVIEW_AFTER_DIMENSIONS_EVENT))
+            }
           }
           continue
         }
@@ -223,7 +257,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       deleteNode,
       setSelectedNode,
       updateNodePosition,
-      updateNode,
+      updateNodeDimensions,
       schedulePositionUpdate,
     ]
   )
@@ -317,15 +351,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        fitView
-        fitViewOptions={{ padding: 0.2, duration: 0 }}
+        fitView={false}
+        defaultViewport={{ x: 0, y: 120, zoom: 1 }}
         onlyRenderVisibleElements={false}
         onInit={(instance) => {
           const event = new CustomEvent('reactflow-instance-ready', {
             detail: instance,
           })
           window.dispatchEvent(event)
-          // fitView is triggered once per dialogue in GraphCanvasInner (documentId + nodesLength)
         }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

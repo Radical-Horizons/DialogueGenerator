@@ -384,6 +384,9 @@ class GraphConversionService:
         test_node_to_choice_map: Dict[str, Tuple[str, int]] = {}
         
         # Première passe : identifier les TestNodes et leurs choix parents
+        # Supporte les deux formats d'ID:
+        # - legacy: test-node-{dialogueId}-choice-{index}
+        # - stable ADR-008: test:{choiceId} (ou test:__idx_N)
         for edge in edges:
             source_id = edge.get("source")
             target_id = edge.get("target")
@@ -394,7 +397,9 @@ class GraphConversionService:
                 continue
             
             # Si l'edge va d'un DialogueNode vers un TestNode (via choice handle)
-            if edge_type == "choice" and target_id.startswith("test-node-"):
+            if edge_type == "choice" and (
+                target_id.startswith("test-node-") or target_id.startswith("test:")
+            ):
                 choice_index = edge_data.get("choiceIndex")
                 if choice_index is not None:
                     test_node_to_choice_map[target_id] = (source_id, choice_index)
@@ -411,7 +416,10 @@ class GraphConversionService:
                 continue
             
             # Si l'edge part d'un TestNode vers un nœud de résultat
-            if source_id.startswith("test-node-") and source_handle:
+            if (
+                source_handle
+                and (source_id.startswith("test-node-") or source_id.startswith("test:"))
+            ):
                 # Trouver le choix parent
                 parent_info = test_node_to_choice_map.get(source_id)
                 if parent_info:
@@ -444,7 +452,7 @@ class GraphConversionService:
             elif edge_type == "choice":
                 # Ignorer les edges "choice" qui pointent vers un TestNode
                 # (les choix avec test n'ont pas de targetNode direct, seulement les 4 champs test*Node)
-                if target_id.startswith("test-node-"):
+                if target_id.startswith("test-node-") or target_id.startswith("test:"):
                     continue
                 choice_index = edge_data.get("choiceIndex")
                 if choice_index is not None and "choices" in source_node:

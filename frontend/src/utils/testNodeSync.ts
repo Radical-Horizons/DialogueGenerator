@@ -15,7 +15,6 @@ import type { TestNodeParentInfo, TestNodeSyncResult } from '../types/testNode'
 import {
   buildChoiceEdge,
   buildTestResultEdge,
-  choiceToTestEdgeId,
   TEST_RESULT_EDGE_CONFIG,
 } from './graphEdgeBuilders'
 
@@ -191,10 +190,18 @@ export function syncTestNodeFromChoice(
     },
   }
 
-  const edges = [...existingEdges]
-  const dialogueToTestEdgeId = choiceId
-    ? `e:${dialogueNodeId}:choice:${choiceId}:test`
-    : choiceToTestEdgeId(dialogueNodeId, choiceIndex)
+  const stableChoiceId = choiceId ?? `__idx_${choiceIndex}`
+  const dialogueToTestEdgeId = `e:${dialogueNodeId}:choice:${stableChoiceId}:test`
+  const choiceSourceHandle = `choice:${stableChoiceId}`
+  const edges = existingEdges.filter(
+    (e) =>
+      !(
+        e.source === dialogueNodeId &&
+        e.target === testNodeId &&
+        e.sourceHandle === choiceSourceHandle &&
+        e.id !== dialogueToTestEdgeId
+      )
+  )
   const choiceEdge = buildChoiceEdge({
     sourceId: dialogueNodeId,
     targetId: testNodeId,

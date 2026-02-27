@@ -158,7 +158,7 @@ def write_unity_dialogue_to_file(
     tmp_path = unity_dir / (name + ".tmp")
     tmp_path.write_text(formatted, encoding="utf-8")
     try:
-        with open(tmp_path, "rb") as f:
+        with open(tmp_path, "r+b") as f:
             os.fsync(f.fileno())
     except OSError as e:
         logger.warning("Fsync ignoré sur %s: %s", tmp_path, e)

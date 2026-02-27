@@ -13,22 +13,46 @@ export interface LoadGraphRequest {
   json_content: string
 }
 
+export interface GraphNodePayload {
+  id: string
+  type: string
+  position?: { x: number; y: number }
+  data?: Record<string, unknown>
+  [key: string]: unknown
+}
+
+export interface GraphEdgePayload {
+  id: string
+  source: string
+  target: string
+  type?: string
+  label?: string
+  data?: Record<string, unknown>
+  sourceHandle?: string
+  targetHandle?: string
+  [key: string]: unknown
+}
+
 export interface LoadGraphResponse {
-  nodes: unknown[]
-  edges: unknown[]
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
   metadata: GraphMetadata
 }
 
 export interface SaveGraphRequest {
-  nodes: unknown[]
-  edges: unknown[]
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
   metadata: GraphMetadata
+  seq?: number
+  document_id?: string
 }
 
 export interface SaveGraphResponse {
   success: boolean
   filename: string
   json_content: string
+  ack_seq?: number
+  last_seq?: number
 }
 
 export interface GenerateNodeRequest {
@@ -53,8 +77,8 @@ export interface SuggestedConnection {
 }
 
 export interface GenerateNodeResponse {
-  node?: Record<string, unknown> // Pour backward compatibility
-  nodes?: Record<string, unknown>[] // Liste de nœuds générés (pour génération batch)
+  node?: GraphNodePayload // Pour backward compatibility
+  nodes?: GraphNodePayload[] // Liste de nœuds générés (pour génération batch)
   suggested_connections: SuggestedConnection[]
   parent_node_id: string
   batch_count?: number // Nombre total de nœuds générés en batch (si applicable)
@@ -94,5 +118,5 @@ export interface CalculateLayoutRequest {
 }
 
 export interface CalculateLayoutResponse {
-  nodes: unknown[]
+  nodes: Array<{ id: string; position: { x: number; y: number }; [key: string]: unknown }>
 }

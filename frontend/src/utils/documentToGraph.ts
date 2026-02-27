@@ -98,10 +98,20 @@ export function documentToGraph(
     for (let choiceIndex = 0; choiceIndex < choices.length; choiceIndex++) {
       const choice = choices[choiceIndex]
       const cid = choiceStableId(choice, choiceIndex)
+      const hasChoiceId = Boolean((choice as { choiceId?: string }).choiceId)
+      const legacyTestNodeId = `test-node-${nodeId}-choice-${choiceIndex}`
       const sourceHandle = `choice:${cid}`
       if (choice.test) {
-        const testNodeId = `test:${cid}`
-        const testPosition = { x: position.x + 300, y: position.y + choiceIndex * 60 }
+        const testNodeId = hasChoiceId ? `test:${cid}` : legacyTestNodeId
+        const storedTestPosition =
+          layoutPositions?.nodes?.[testNodeId] ??
+          layoutPositions?.nodes?.[legacyTestNodeId]
+        const testPosition =
+          storedTestPosition &&
+          typeof storedTestPosition.x === 'number' &&
+          typeof storedTestPosition.y === 'number'
+            ? { x: storedTestPosition.x, y: storedTestPosition.y }
+            : { x: position.x + 300, y: position.y + choiceIndex * 60 }
         nodes.push({
           id: testNodeId,
           type: 'testNode',

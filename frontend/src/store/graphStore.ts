@@ -156,6 +156,35 @@ function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[], edges
   return { nodes: normalizedNodes, edges: normalizedEdges }
 }
 
+/**
+ * Détecte les documents v1.1.x non migrés (choices sans choiceId).
+ * Ces documents sont explicitement refusés par l'API documents en mode draft.
+ */
+function documentRequiresChoiceIdMigration(document: Record<string, unknown>): boolean {
+  const schemaVersionValue = document.schemaVersion
+  const schemaVersion = typeof schemaVersionValue === 'string'
+    ? schemaVersionValue.trim()
+    : ''
+  if (!(schemaVersion === '1.1' || schemaVersion >= '1.1.0')) {
+    return false
+  }
+  const nodesValue = document.nodes
+  if (!Array.isArray(nodesValue)) return false
+  for (const node of nodesValue) {
+    if (typeof node !== 'object' || node === null) continue
+    const choicesValue = (node as { choices?: unknown }).choices
+    if (!Array.isArray(choicesValue)) continue
+    for (const choice of choicesValue) {
+      if (typeof choice !== 'object' || choice === null) return true
+      const choiceId = (choice as { choiceId?: unknown }).choiceId
+      if (typeof choiceId !== 'string' || choiceId.trim() === '') {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 export interface GraphMetadata {
   title: string
   filename?: string
@@ -217,6 +246,10 @@ export interface GraphState {
   disconnectNodes: (edgeId: string) => void
   setSelectedNode: (nodeId: string | null) => void
   updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void
+  updateNodeDimensions: (
+    nodeId: string,
+    dimensions: { width: number; height: number }
+  ) => void
   
   // Actions IA
   generateFromNode: (
@@ -319,7 +352,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
 
           // Convertir les nœuds en format ReactFlow (position et type garantis pour l'affichage)
           // Priorité : positions localStorage > positions draft (savedPositions) > positions backend
-          const nodes: Node[] = response.nodes.map((node: { id: string; type: string; position?: { x: number; y: number }; data?: unknown }) => {
+          const nodes: Node[] = response.nodes.map((node) => {
             const raw = ensureValidNode({
               id: node.id,
               type: node.type ?? 'dialogueNode',
@@ -336,7 +369,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           })
           
           // Convertir les edges
-          let edges: Edge[] = response.edges.map((edge: { id: string; source: string; target: string; sourceHandle?: string; targetHandle?: string; label?: string }) => ({
+          let edges: Edge[] = response.edges.map((edge) => ({
             id: edge.id,
             source: edge.source,
             target: edge.target,
@@ -353,7 +386,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           
           // Story 16.4 : Convertir nodes/edges en document canonique pour permettre la sauvegarde via PUT document + layout
           const document = graphToDocument(normalized.nodes, normalized.edges) as unknown as Record<string, unknown>
-          const layout = buildLayoutFromNodes(normalized.nodes)
+          const layout = buildLayoutFromNodes(normalized.nodes) as unknown as Record<string, unknown>
           
           set({
             nodes: normalized.nodes,
@@ -892,9 +925,12 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           const dialogueNode = state.nodes.find((n) => n.id === nodeId)
           const testNodePrefix = `test-node-${nodeId}-`
           const byPrefix = state.nodes.filter((n) => n.id.startsWith(testNodePrefix)).map((n) => n.id)
-          const byChoiceId = (dialogueNode?.data?.choices ?? [])
-            .map((c) => (c as Choice & { choiceId?: string }).choiceId ? `test:${(c as Choice & { choiceId?: string }).choiceId}` : null)
-            .filter((id): id is string => id != null)
+          const byChoiceId = ((dialogueNode?.data?.choices ?? []) as Choice[])
+            .map((choice: Choice) => {
+              const stableChoiceId = (choice as Choice & { choiceId?: string }).choiceId
+              return stableChoiceId ? `test:${stableChoiceId}` : null
+            })
+            .filter((testNodeId: string | null): testNodeId is string => testNodeId != null)
           const associatedTestNodeIds = [...new Set([...byPrefix, ...byChoiceId])]
 
           // Supprimer le nœud principal et tous les TestNodes associés
@@ -1231,8 +1267,9 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
                 (choice, idx) => {
                   if (idx === parent.choiceIndex) {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructure to omit field from rest
-                    const { [fieldName]: _removed, ...rest } = choice
-                    return rest
+                    const choiceWithIndex = choice as Choice & Record<string, unknown>
+                    const { [fieldName]: _removed, ...rest } = choiceWithIndex
+                    return rest as Choice
                   }
                   return choice
                 }
@@ -1257,6 +1294,9 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
 
               // Synchroniser le TestNode depuis le choix mis à jour (choice → testNode)
               const updatedChoice = updatedChoices[parent.choiceIndex]
+              if (!updatedChoice) {
+                return state
+              }
               const testNode = updatedNodes.find((n) => n.id === edge.source)
               const syncResult = syncTestNodeFromChoice(
                 updatedChoice,
@@ -1382,6 +1422,36 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           }
         }
       },
+
+      // Mettre à jour les dimensions mesurées d'un nœud sans recalculer le graphe
+      updateNodeDimensions: (nodeId: string, dimensions: { width: number; height: number }) => {
+        set((state) => {
+          const currentNode = state.nodes.find((n) => n.id === nodeId)
+          if (!currentNode) return state
+          const currentMeasured = (currentNode as Node & { measured?: { width?: number; height?: number } })
+            .measured as
+            | { width?: number; height?: number }
+            | undefined
+          const currentWidth = currentMeasured?.width ?? currentNode.width
+          const currentHeight = currentMeasured?.height ?? currentNode.height
+          const widthChanged = Math.abs((currentWidth ?? 0) - dimensions.width) > 0.1
+          const heightChanged = Math.abs((currentHeight ?? 0) - dimensions.height) > 0.1
+          if (!widthChanged && !heightChanged) return state
+
+          return {
+            nodes: state.nodes.map((node) =>
+              node.id === nodeId
+                ? {
+                    ...node,
+                    measured: { width: dimensions.width, height: dimensions.height },
+                    width: dimensions.width,
+                    height: dimensions.height,
+                  }
+                : node
+            ),
+          }
+        })
+      },
       
       // Générer un nœud depuis un parent avec l'IA
       generateFromNode: async (
@@ -1426,29 +1496,50 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           }
           
           // Appeler l'API pour générer le nœud
+          const contextSelections =
+            typeof options.context_selections === 'object' && options.context_selections != null
+              ? (options.context_selections as Record<string, unknown>)
+              : {}
+          const maxChoices = typeof options.max_choices === 'number' ? options.max_choices : null
+          const npcSpeakerId = typeof options.npc_speaker_id === 'string' ? options.npc_speaker_id : undefined
+          const systemPromptOverride = typeof options.system_prompt_override === 'string'
+            ? options.system_prompt_override
+            : undefined
+          const narrativeTags = Array.isArray(options.narrative_tags)
+            ? options.narrative_tags.filter((t): t is string => typeof t === 'string')
+            : undefined
+          const llmModelIdentifier = typeof options.llm_model_identifier === 'string'
+            ? options.llm_model_identifier
+            : undefined
+          const targetChoiceIndex = typeof options.target_choice_index === 'number'
+            ? options.target_choice_index
+            : null
+          const generateAllChoices = options.generate_all_choices === true
+          const onBatchProgress = typeof options.onBatchProgress === 'function'
+            ? (options.onBatchProgress as (current: number, total: number) => void)
+            : undefined
+
           const response = await graphAPI.generateNode({
             parent_node_id: parentNodeId,
             parent_node_content: parentNodeContent,
             user_instructions: instructions,
-            context_selections: options.context_selections || {},
-            max_choices: options.max_choices,
-            npc_speaker_id: options.npc_speaker_id,
-            system_prompt_override: options.system_prompt_override,
-            narrative_tags: options.narrative_tags,
-            llm_model_identifier: options.llm_model_identifier,
-            target_choice_index: options.target_choice_index ?? null,
-            generate_all_choices: options.generate_all_choices ?? false,
+            context_selections: contextSelections,
+            max_choices: maxChoices,
+            npc_speaker_id: npcSpeakerId,
+            system_prompt_override: systemPromptOverride,
+            narrative_tags: narrativeTags,
+            llm_model_identifier: llmModelIdentifier,
+            target_choice_index: targetChoiceIndex,
+            generate_all_choices: generateAllChoices,
           })
           
           // Gérer génération batch (si generate_all_choices, l'API retourne une liste)
           // OU si TestNode (génère toujours 4 nœuds pour les résultats de test)
           // Utiliser response.nodes si disponible (batch ou TestNode), sinon response.node (backward compatibility)
           const isTestNode = parentNodeId.startsWith('test-node-')
-          const isBatch = options.generate_all_choices ?? false
-          const hasMultipleNodes = response.nodes && response.nodes.length > 0
-          
-          const generatedNodes = hasMultipleNodes
-            ? response.nodes 
+          const isBatch = generateAllChoices
+          const generatedNodes = Array.isArray(response.nodes) && response.nodes.length > 0
+            ? response.nodes
             : (response.node ? [response.node] : [])
           
           // Ajouter les nouveaux nœuds avec positionnement en cascade pour batch
@@ -1456,7 +1547,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           
           // Pour TestNodes, les connexions utilisent connection_type au lieu de via_choice_index
           // Pour batch normal, utiliser via_choice_index
-          const connectionMap = new Map<number | string, { node: Record<string, unknown>, conn: { to: string; via_choice_index?: number; connection_type?: string; [key: string]: unknown } }>()
+          const connectionMap = new Map<number | string, { node: { id: string; [key: string]: unknown }, conn: { to: string; via_choice_index?: number; connection_type: string } }>()
           for (const conn of response.suggested_connections) {
             const node = generatedNodes.find((n) => n.id === conn.to)
             if (node) {
@@ -1472,7 +1563,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           // Trier les connexions pour positionnement cascade
           // Pour TestNodes, ordre fixe: critical-failure, failure, success, critical-success
           // Pour batch normal, trier par via_choice_index
-          let nodesToAdd: Array<{ node: Record<string, unknown>, choiceIndex: number }>
+          let nodesToAdd: Array<{ node: { id: string; [key: string]: unknown }, choiceIndex: number }>
           if (isTestNode) {
             // Ordre fixe pour TestNodes
             const testOrder = ['test-critical-failure', 'test-failure', 'test-success', 'test-critical-success']
@@ -1481,7 +1572,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
                 const entry = connectionMap.get(connType)
                 return entry ? { node: entry.node, choiceIndex: index } : null
               })
-              .filter((item): item is { node: Record<string, unknown>, choiceIndex: number } => item !== null)
+              .filter((item): item is { node: { id: string; [key: string]: unknown }, choiceIndex: number } => item !== null)
             // Ajouter les nœuds non mappés
             const mappedNodeIds = new Set(nodesToAdd.map(({ node }) => node.id))
             for (const node of generatedNodes) {
@@ -1502,8 +1593,8 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           const totalToAdd = nodesToAdd.length
           
           // Initialiser la progression si batch ou TestNode avec plusieurs nœuds
-          if ((isBatch || (isTestNode && totalToAdd > 1)) && typeof options.onBatchProgress === 'function' && totalToAdd > 0) {
-            options.onBatchProgress(0, totalToAdd)
+          if ((isBatch || (isTestNode && totalToAdd > 1)) && onBatchProgress && totalToAdd > 0) {
+            onBatchProgress(0, totalToAdd)
           }
           
           // Ajouter les nœuds et mettre à jour la progression
@@ -1511,7 +1602,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           const nodesToAddBatch: Node[] = []
           nodesToAdd.forEach(({ node: generatedNode, choiceIndex }, index) => {
             const isBatchOrTestNode = isBatch || (isTestNode && totalToAdd > 1)
-            const isChoiceSpecific = !isBatchOrTestNode && options.target_choice_index !== undefined && options.target_choice_index !== null
+            const isChoiceSpecific = !isBatchOrTestNode && targetChoiceIndex !== null
             const verticalOffset = isBatchOrTestNode
               ? 150 * choiceIndex
               : (isChoiceSpecific ? (60 * choiceIndex) + 60 : 0)
@@ -1533,8 +1624,8 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
             generatedNodeIds.push(generatedNode.id)
             
             // Mettre à jour la progression (appelé pour chaque nœud pour feedback progressif)
-            if (isBatchOrTestNode && typeof options.onBatchProgress === 'function' && totalToAdd > 0) {
-              options.onBatchProgress(index + 1, totalToAdd)
+            if (isBatchOrTestNode && onBatchProgress && totalToAdd > 0) {
+              onBatchProgress(index + 1, totalToAdd)
             }
           })
           
@@ -1580,15 +1671,15 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           // Retourner le nodeId du premier nouveau nœud pour feedback visuel
           // Note: Pour batch, on retourne l'ID du premier nœud, mais tous les nœuds sont ajoutés
           const firstNodeId = generatedNodeIds[0] || generatedNodes[0]?.id
-          const batchInfo = options.generate_all_choices ? {
+          const batchInfo = generateAllChoices ? {
             generatedChoices: response.generated_choices_count ?? generatedNodes.length,
             connectedChoices: response.connected_choices_count ?? 0,
             failedChoices: response.failed_choices_count ?? 0,
-            totalChoices: response.total_choices_count ?? (parentNode.data?.choices?.length ?? 0),
+            totalChoices: response.total_choices_count ?? ((parentNode.data as { choices?: unknown[] } | undefined)?.choices?.length ?? 0),
           } : undefined
           
           // Logger le résultat batch si applicable
-          if (options.generate_all_choices && response.batch_count) {
+          if (generateAllChoices && response.batch_count) {
             console.log(`Génération batch: ${response.batch_count} nœud(s) généré(s)`)
           }
           
@@ -1780,45 +1871,52 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
         const documentId = state.documentId ?? state.dialogueMetadata.filename ?? null
         if (state.nodes.length === 0) {
           set({ isSaving: false })
-          return
+          return {
+            success: true,
+            filename: documentId ?? state.dialogueMetadata.filename ?? 'dialogue.json',
+            json_content: '[]',
+          }
         }
         try {
           // Story 16.4 : flux principal = PUT document + PUT layout (pas nodes/edges). SoT = document + layout → envoyer state.document et state.layout.
           if (state.document != null && documentId) {
             const doc = state.document
-            const layoutPayload = state.layout ?? buildLayoutFromNodes(state.nodes)
+            const layoutPayload = (state.layout ?? buildLayoutFromNodes(state.nodes)) as Record<string, unknown>
             const docRev = state.documentRevision ?? 1
             const layoutRev = state.layoutRevision ?? 1
-            
-            try {
-              const [docRes, layoutRes] = await Promise.all([
-                documentsAPI.putDocument(documentId, { document: doc, revision: docRev }),
-                documentsAPI.putLayout(documentId, { layout: layoutPayload, revision: layoutRev }),
-              ])
-              set({
-                documentRevision: docRes.revision,
-                layoutRevision: layoutRes.revision,
-                isSaving: false,
-                hasUnsavedChanges: false,
-                lastSaveError: null,
-                lastSavedAt: Date.now(),
-                syncStatus: 'synced',
-              })
-              return { success: true, filename: documentId } as SaveGraphResponse
-            } catch (docErr: unknown) {
-              const status = (docErr as { response?: { status?: number } })?.response?.status
-              // Si erreur 404 (document n'existe pas encore), utiliser le chemin legacy pour créer le document
-              if (status === 404) {
-                console.warn('Document non trouvé (404), utilisation du chemin legacy saveGraphAndWrite pour créer le document')
-                // Continuer avec le chemin legacy ci-dessous
-              } else if (status === 409) {
-                const msg = 'Conflit de révision (document ou layout modifié ailleurs). Rechargez ou réessayez.'
-                set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
-                throw new Error(msg)
-              } else {
-                // Pour les autres erreurs (réseau, etc.), essayer le chemin legacy comme fallback
-                console.warn('Erreur lors de la sauvegarde via API documents, tentative avec chemin legacy:', docErr)
-                // Continuer avec le chemin legacy ci-dessous
+            const requiresChoiceIdMigration = documentRequiresChoiceIdMigration(doc)
+            if (requiresChoiceIdMigration) {
+            } else {
+              try {
+                const [docRes, layoutRes] = await Promise.all([
+                  documentsAPI.putDocument(documentId, { document: doc, revision: docRev }),
+                  documentsAPI.putLayout(documentId, { layout: layoutPayload, revision: layoutRev }),
+                ])
+                set({
+                  documentRevision: docRes.revision,
+                  layoutRevision: layoutRes.revision,
+                  isSaving: false,
+                  hasUnsavedChanges: false,
+                  lastSaveError: null,
+                  lastSavedAt: Date.now(),
+                  syncStatus: 'synced',
+                })
+                return { success: true, filename: documentId } as SaveGraphResponse
+              } catch (docErr: unknown) {
+                const status = (docErr as { response?: { status?: number; data?: unknown } })?.response?.status
+                // Si erreur 404 (document n'existe pas encore), utiliser le chemin legacy pour créer le document
+                if (status === 404) {
+                  console.warn('Document non trouvé (404), utilisation du chemin legacy saveGraphAndWrite pour créer le document')
+                  // Continuer avec le chemin legacy ci-dessous
+                } else if (status === 409) {
+                  const msg = 'Conflit de révision (document ou layout modifié ailleurs). Rechargez ou réessayez.'
+                  set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
+                  throw new Error(msg)
+                } else {
+                  // Pour les autres erreurs (réseau, etc.), essayer le chemin legacy comme fallback
+                  console.warn('Erreur lors de la sauvegarde via API documents, tentative avec chemin legacy:', docErr)
+                  // Continuer avec le chemin legacy ci-dessous
+                }
               }
             }
           }
@@ -1831,7 +1929,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           const response = await graphAPI.saveGraphAndWrite({
             nodes: state.nodes.map((n) => ({
               id: n.id,
-              type: n.type,
+              type: n.type ?? 'dialogueNode',
               position: n.position,
               data: n.data,
             })),
@@ -1840,7 +1938,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
               source: e.source,
               target: e.target,
               type: e.type,
-              label: e.label,
+              label: typeof e.label === 'string' ? e.label : undefined,
               data: e.data,
             })),
             metadata: state.dialogueMetadata,
@@ -1865,7 +1963,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           // Mettre à jour document et layout après sauvegarde réussie via chemin legacy
           // (pour que les prochaines sauvegardes utilisent l'API documents)
           const updatedDocument = state.document ?? graphToDocument(state.nodes, state.edges) as unknown as Record<string, unknown>
-          const updatedLayout = state.layout ?? buildLayoutFromNodes(state.nodes)
+          const updatedLayout = (state.layout ?? buildLayoutFromNodes(state.nodes)) as Record<string, unknown>
           
           set({
             isSaving: false,
@@ -2008,7 +2106,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
           // Mettre à jour les positions
           set((state) => ({
             nodes: state.nodes.map((node) => {
-              const layoutedNode = response.nodes.find((n: { id: string; position: { x: number; y: number }; [key: string]: unknown }) => n.id === node.id)
+              const layoutedNode = response.nodes.find((n) => n.id === node.id)
               return layoutedNode
                 ? { ...node, position: layoutedNode.position }
                 : node
