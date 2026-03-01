@@ -237,7 +237,7 @@ class PromptBuilder:
             try:
                 # Utiliser le ContextBuilder injecté ou en créer un si nécessaire
                 if self._context_builder is None:
-                    from context_builder import ContextBuilder
+                    from core.context.context_builder import ContextBuilder
                     self._context_builder = ContextBuilder()
                 
                 # serialize_to_xml retourne maintenant directement un ET.Element

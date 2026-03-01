@@ -150,6 +150,65 @@ def test_cancel_job(client: TestClient):
     assert cancel_data["job_id"] == job_id
 
 
+def test_stream_job_uses_job_id_as_orchestrator_request_id(client: TestClient, monkeypatch):
+    """Test que le routeur de stream passe le job_id comme request_id orchestrateur."""
+    context_selection = ContextSelection(
+        characters_full=["character_1"],
+        characters_excerpt=[],
+        locations_full=[],
+        locations_excerpt=[],
+        items_full=[],
+        items_excerpt=[],
+        species_full=[],
+        species_excerpt=[],
+        communities_full=[],
+        communities_excerpt=[],
+        dialogues_examples=[],
+        scene_location=None
+    )
+    job_request = {
+        "user_instructions": "Test dialogue",
+        "context_selections": context_selection.model_dump(mode='json'),
+        "llm_model_identifier": "gpt-5-mini"
+    }
+    response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    job_id = response.json()["job_id"]
+
+    received_request_ids = {}
+
+    def fake_get_unity_orchestrator(request, request_id: str):
+        received_request_ids["value"] = request_id
+
+        async def fake_events(request_data, check_cancelled):
+            from services.unity_dialogue_orchestrator import GenerationEvent
+            yield GenerationEvent(
+                type="complete",
+                data={
+                    "result": {
+                        "json_content": "{\"nodes\": []}",
+                        "title": "Test Dialogue",
+                        "raw_prompt": "Test prompt",
+                        "prompt_hash": "hash123",
+                        "estimated_tokens": 100,
+                        "warning": None,
+                        "structured_prompt": None,
+                        "reasoning_trace": None,
+                    }
+                },
+            )
+
+        fake_orchestrator = MagicMock()
+        fake_orchestrator.generate_with_events = fake_events
+        return fake_orchestrator
+
+    monkeypatch.setattr("api.routers.streaming.get_unity_dialogue_orchestrator", fake_get_unity_orchestrator)
+
+    stream_response = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}/stream")
+    assert stream_response.status_code == 200
+    assert '"type": "complete"' in stream_response.text
+    assert received_request_ids.get("value") == job_id
+
+
 @pytest.mark.asyncio
 async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatch, caplog):
     """Test que le cleanup automatique fonctionne après génération normale (Task 5 - Story 0.8)."""

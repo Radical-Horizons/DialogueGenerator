@@ -25,7 +25,7 @@ def sample_character_with_data():
     Sélectionne le premier personnage disponible dans le GDD qui a des données.
     Si aucun personnage n'est disponible, le test échouera avec un message clair.
     """
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     cb = ContextBuilder()
     cb.load_gdd_files()
     all_characters = cb.get_characters_names()

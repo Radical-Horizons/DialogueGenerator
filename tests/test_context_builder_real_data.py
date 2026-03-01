@@ -16,7 +16,7 @@ Pour exécuter uniquement les tests unitaires (plus rapides) :
     pytest tests/test_context_builder.py -m unit
 """
 import pytest
-from context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 from pathlib import Path
 
 

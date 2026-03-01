@@ -1,19 +1,7 @@
 import logging
 from typing import List, Dict, Any, Optional
 
-# Adjusted import based on project structure and import handling rule
-try:
-    from ..context_builder import ContextBuilder
-except ImportError:
-    # Fallback for direct script execution (less likely for a service file, but follows rule)
-    import sys
-    import os
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(os.path.dirname(script_dir)) # Go up two levels from services
-    if str(project_root) not in sys.path:
-        sys.path.insert(0, str(project_root))
-    
-    from core.context.context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 
 logger = logging.getLogger(__name__)
 

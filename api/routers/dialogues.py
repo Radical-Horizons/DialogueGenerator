@@ -23,7 +23,8 @@ from api.dependencies import (
     get_prompt_engine,
     get_config_service,
     get_skill_catalog_service,
-    get_trait_catalog_service
+    get_trait_catalog_service,
+    get_unity_dialogue_orchestrator
 )
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from api.exceptions import InternalServerException, ValidationException, NotFoundException, OpenAIException
@@ -32,6 +33,7 @@ from services.configuration_service import ConfigurationService
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.unity_dialogue_export_service import write_unity_dialogue_to_file
+from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
@@ -151,7 +153,7 @@ def _build_prompt_from_request(
         element_modes=context_selections_dict.get("_element_modes")
     )
     # Sérialiser en texte pour le LLM
-    context_text = context_builder._context_serializer.serialize_to_text(structured_context)
+    context_text = context_builder.serialize_context_to_text(structured_context)
 
     # 5. Construire le prompt unifié via le builder unique (PromptInput)
     prompt_input = PromptInput(
@@ -340,7 +342,7 @@ async def estimate_tokens(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        context_text = context_builder._context_serializer.serialize_to_text(structured_context)
+        context_text = context_builder.serialize_context_to_text(structured_context)
         context_tokens = context_builder._count_tokens(context_text)
         
         # Convertir structured_prompt en dict pour la réponse
@@ -388,11 +390,7 @@ async def estimate_tokens(
 )
 async def generate_unity_dialogue(
     request_data: GenerateUnityDialogueRequest,
-    request: Request,
-    dialogue_service: Annotated[DialogueGenerationService, Depends(get_dialogue_generation_service)],
-    prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
-    skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
-    trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
+    orchestrator: Annotated[UnityDialogueOrchestrator, Depends(get_unity_dialogue_orchestrator)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> GenerateUnityDialogueResponse:
     """Génère un nœud de dialogue au format Unity JSON.
@@ -401,23 +399,6 @@ async def generate_unity_dialogue(
     avec le streaming SSE.
     """
     try:
-        # Créer orchestrateur avec toutes les dépendances
-        from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
-        from api.dependencies import get_config_service, create_llm_usage_service
-        
-        config_service = get_config_service(request)
-        usage_service = create_llm_usage_service()
-        
-        orchestrator = UnityDialogueOrchestrator(
-            dialogue_service=dialogue_service,
-            prompt_engine=prompt_engine,
-            skill_service=skill_service,
-            trait_service=trait_service,
-            config_service=config_service,
-            usage_service=usage_service,
-            request_id=request_id
-        )
-        
         # Appel simple sans streaming (usage REST)
         return await orchestrator.generate(request_data)
         

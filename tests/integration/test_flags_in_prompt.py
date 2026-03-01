@@ -23,8 +23,7 @@ def mock_services():
     mock_dialogue_service = MagicMock(spec=DialogueGenerationService)
     mock_dialogue_service.context_builder = MagicMock()
     mock_dialogue_service.context_builder.build_context_json = MagicMock(return_value={})
-    mock_dialogue_service.context_builder._context_serializer = MagicMock()
-    mock_dialogue_service.context_builder._context_serializer.serialize_to_text = MagicMock(return_value="Test context")
+    mock_dialogue_service.context_builder.serialize_context_to_text = MagicMock(return_value="Test context")
     mock_dialogue_service.context_builder._context_serializer.serialize_to_xml = MagicMock(return_value=ET.Element("context"))
     mock_dialogue_service.context_builder._count_tokens = MagicMock(return_value=100)
     
@@ -59,7 +58,7 @@ def mock_services():
 def test_injection_flags_in_prompt_xml():
     """Test que les flags sont injectés dans le XML du prompt."""
     from services.prompt_builder import PromptBuilder
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     
     prompt_builder = PromptBuilder(context_builder=ContextBuilder())
     
@@ -133,7 +132,7 @@ def test_injection_flags_format():
 def test_flags_in_context_section():
     """Test que les flags sont injectés dans la section <context>."""
     from services.prompt_builder import PromptBuilder
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     import xml.etree.ElementTree as ET
     
     prompt_builder = PromptBuilder(context_builder=ContextBuilder())

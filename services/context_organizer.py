@@ -140,7 +140,7 @@ class ContextOrganizer:
         if fields_to_include:
             try:
                 from services.context_field_detector import ContextFieldDetector
-                from context_builder import ContextBuilder
+                from core.context.context_builder import ContextBuilder
                 
                 # Essayer de récupérer le ContextBuilder depuis le contexte (si disponible)
                 # Sinon, on valide uniquement en extrayant les valeurs

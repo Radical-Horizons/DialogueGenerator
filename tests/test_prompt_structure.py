@@ -1,6 +1,6 @@
 """Tests pour la structure JSON du prompt."""
 import pytest
-from context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 from models.prompt_structure import PromptStructure, PromptSection, ContextCategory, ContextItem
 
 
@@ -91,7 +91,7 @@ def test_serialize_context_to_text(context_builder):
     )
     
     # Sérialiser en texte
-    text = context_builder._context_serializer.serialize_to_text(prompt_structure)
+    text = context_builder.serialize_context_to_text(prompt_structure)
     
     assert isinstance(text, str)
     assert len(text) > 0
@@ -117,7 +117,7 @@ def test_serialize_context_to_text_preserves_structure(context_builder):
         max_tokens=10000
     )
     
-    text = context_builder._context_serializer.serialize_to_text(prompt_structure)
+    text = context_builder.serialize_context_to_text(prompt_structure)
     
     # Vérifier que les sections sont présentes dans le texte
     for section in prompt_structure.sections:

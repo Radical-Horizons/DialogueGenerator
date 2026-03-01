@@ -73,11 +73,14 @@ class DialogueGenerationService:
         logger.debug(f"[_build_context_summary] characters dans context_selections: {context_selections.get('characters', [])}")
         
         # Extraire _element_modes si présent
-        element_modes = context_selections.pop("_element_modes", None) if isinstance(context_selections, dict) else None
+        context_selections_payload = (
+            dict(context_selections) if isinstance(context_selections, dict) else {}
+        )
+        element_modes = context_selections_payload.pop("_element_modes", None)
         
         # Utiliser build_context_json (obligatoire, plus de fallback)
         structured_context = self.context_builder.build_context_json(
-            selected_elements=context_selections,
+            selected_elements=context_selections_payload,
             scene_instruction=user_instructions,
             field_configs=field_configs,
             organization_mode=organization_mode or "narrative",
@@ -86,7 +89,7 @@ class DialogueGenerationService:
             element_modes=element_modes
         )
         # Sérialiser en texte pour compatibilité avec l'ancienne signature
-        return self.context_builder._context_serializer.serialize_to_text(structured_context)
+        return self.context_builder.serialize_context_to_text(structured_context)
 
     def _restore_prompt_on_error(self, original_system_prompt: Optional[str]) -> None:
         """Restaure le prompt système original après une erreur.

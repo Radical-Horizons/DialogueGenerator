@@ -810,7 +810,7 @@ async def preview_context(
             element_modes=element_modes
         )
         # Sérialiser en texte pour compatibilité
-        preview_text = context_builder._context_serializer.serialize_to_text(structured_context)
+        preview_text = context_builder.serialize_context_to_text(structured_context)
         
         # Compter les tokens
         tokens = context_builder._count_tokens(preview_text)

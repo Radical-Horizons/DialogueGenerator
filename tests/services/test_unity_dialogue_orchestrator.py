@@ -66,7 +66,7 @@ async def test_orchestrator_generate_with_events_sequence(orchestrator, sample_r
     # Mock context_builder
     mock_context_builder = Mock()
     mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder._context_serializer.serialize_to_text.return_value = "Context summary"
+    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine
@@ -175,7 +175,7 @@ async def test_orchestrator_cancellation(orchestrator, sample_request_data, mock
     # Mock context_builder
     mock_context_builder = Mock()
     mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder._context_serializer.serialize_to_text.return_value = "Context summary"
+    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine
@@ -225,7 +225,7 @@ async def test_orchestrator_generate_rest_usage(orchestrator, sample_request_dat
     # Mock context_builder
     mock_context_builder = Mock()
     mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder._context_serializer.serialize_to_text.return_value = "Context summary"
+    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine

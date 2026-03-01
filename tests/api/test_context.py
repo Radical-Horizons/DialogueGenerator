@@ -2,7 +2,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-from context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 
 
 @pytest.fixture
@@ -60,8 +60,7 @@ def mock_context_builder():
     from unittest.mock import MagicMock as Mock
     mock_prompt_structure = Mock()
     mock_builder.build_context_json = MagicMock(return_value=mock_prompt_structure)
-    mock_builder._context_serializer = MagicMock()
-    mock_builder._context_serializer.serialize_to_text = MagicMock(return_value="Test context text")
+    mock_builder.serialize_context_to_text = MagicMock(return_value="Test context text")
     
     return mock_builder
 

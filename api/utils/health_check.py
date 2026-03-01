@@ -7,12 +7,12 @@ from pathlib import Path
 from constants import FilePaths
 from api.config.security_config import get_security_config
 
-# Import ContextBuilder uniquement si nécessaire (évite les dépendances circulaires)
+# Import canonique (évite les imports racine dépréciés). Optionnel pour éviter dépendances circulaires.
 try:
-    from context_builder import ContextBuilder, PROJECT_ROOT_DIR
+    from core.context.context_builder import ContextBuilder, PROJECT_ROOT_DIR
 except ImportError:
-    ContextBuilder = None
-    PROJECT_ROOT_DIR = None
+    ContextBuilder = None  # type: ignore[misc, assignment]
+    PROJECT_ROOT_DIR = None  # type: ignore[misc, assignment]
 
 logger = logging.getLogger(__name__)
 

@@ -7,29 +7,20 @@
       {
         "text": "Je ne veux pas d’un chemin. Je veux une compréhension. Qu’est-ce que tu appelles une “fréquence”, ici, dans l’os ?",
         "respectDelta": 1,
-        "condition": "",
-        "test": "",
-        "influenceDelta": null,
         "targetNode": "NODE_START_CHOICE_1"
       },
       {
         "text": "Conduis-moi. Peu importe si tes raccourcis profanent. Je préfère la vitesse au rite.",
-        "test": "Volonté+Commandement:9",
+        "test": "Raison+Diplomatie:7",
         "allowInfluenceForcing": true,
         "influenceThreshold": 2,
-        "influenceDelta": 1,
-        "condition": "",
-        "respectDelta": null
+        "influenceDelta": 1
       },
       {
         "text": "Si tes cartes “saignent”, c’est que tu les nourris. Dis-moi avec quoi. Et qui paye, dans les Plis.",
         "test": "Perception+Investigation:10",
-        "respectDelta": -1,
-        "condition": "",
-        "influenceDelta": null
-      },
-      {},
-      {}
+        "respectDelta": -1
+      }
     ]
   },
   {
@@ -82,34 +73,40 @@
         "test": "Courage+Endurance:6",
         "allowInfluenceForcing": true,
         "influenceDelta": 1,
-        "respectDelta": 2
+        "respectDelta": 2,
+        "condition": ""
       },
       {
         "text": "Réduis le coût — prends seulement une habitude insignifiante.",
         "test": "Volonté+Persuasion:12",
         "allowInfluenceForcing": true,
         "influenceDelta": 0,
-        "respectDelta": -1
+        "respectDelta": -1,
+        "condition": ""
       },
       {
         "text": "Si quelque chose doit partir, laisse-moi choisir quel souvenir. Je veux en décider.",
         "test": "Mémoire+Occultisme:10",
         "allowInfluenceForcing": false,
         "influenceDelta": -1,
-        "respectDelta": 1
+        "respectDelta": 1,
+        "condition": ""
       },
       {
         "text": "Attends. Explique comment on récupère ce qui est pris, si c'est possible.",
         "test": "Raison+Logique:8",
         "allowInfluenceForcing": true,
         "influenceDelta": 0,
-        "respectDelta": 0
+        "respectDelta": 0,
+        "condition": ""
       },
       {
         "text": "Je change d'avis. Je renonce au raccourci.",
         "allowInfluenceForcing": false,
         "influenceDelta": -2,
         "respectDelta": -1,
+        "condition": "",
+        "test": "",
         "targetNode": "END"
       }
     ]

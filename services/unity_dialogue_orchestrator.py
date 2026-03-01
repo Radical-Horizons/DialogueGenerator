@@ -150,7 +150,7 @@ class UnityDialogueOrchestrator:
                 element_modes=context_selections_dict.get("_element_modes")
             )
             # Sérialiser en texte pour le LLM
-            context_summary = context_builder._context_serializer.serialize_to_text(structured_context)
+            context_summary = context_builder.serialize_context_to_text(structured_context)
             
             # 5. Construire le prompt Unity via le builder unique
             prompt_input = PromptInput(

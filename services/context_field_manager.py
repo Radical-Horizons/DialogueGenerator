@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
 
 logger = logging.getLogger(__name__)
 

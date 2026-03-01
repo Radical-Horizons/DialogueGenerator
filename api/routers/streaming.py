@@ -18,12 +18,13 @@ Types d'événements :
 import logging
 import json
 import asyncio
-from typing import AsyncGenerator, Optional, Dict, Any
+from typing import Annotated, AsyncGenerator, Dict, Any
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from api.schemas.generation_jobs import GenerationJobCreate, GenerationJobResponse, GenerationJobStatus
 from api.services.generation_job_manager import get_job_manager
-from api.container import ServiceContainer
+from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
+from api.dependencies import get_unity_dialogue_orchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ def _calculate_duration(job: Dict[str, Any]) -> float:
         return 0.0
 
 
-async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGenerator[str, None]:
+async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator) -> AsyncGenerator[str, None]:
     """Générateur async pour streamer la génération Unity Dialogue.
     
     Pattern :
@@ -69,7 +70,7 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
     
     Args:
         job_id: ID du job à streamer.
-        container: Container de dépendances.
+        orchestrator: Orchestrateur Unity injecté via dépendance.
         
     Yields:
         Chunks SSE au format `data: {...}\n\n`.
@@ -95,9 +96,6 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
             job_manager.register_task(job_id, current_task)
         job_manager.update_status(job_id, "running")
         
-        # Créer orchestrateur via le container (plus propre)
-        orchestrator = container.get_unity_dialogue_orchestrator(job_id)
-        
         # Construire request_data depuis job params
         from api.schemas.dialogue import GenerateUnityDialogueRequest
         
@@ -108,15 +106,10 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
         current_step = "queued"
         
         # Streamer les événements
-        event_count = 0
-        complete_count = 0
         async for event in orchestrator.generate_with_events(
             request_data,
             check_cancelled=lambda: job_manager.is_cancelled(job_id)
         ):
-            event_count += 1
-            if event.type == 'complete':
-                complete_count += 1
             # Convertir GenerationEvent en SSE
             if event.type == 'chunk':
                 chunk_content = event.data.get("content", "")
@@ -227,16 +220,24 @@ async def create_generation_job(
     )
 
 
+def _get_stream_orchestrator(
+    request: Request,
+    job_id: str,
+) -> UnityDialogueOrchestrator:
+    """Fournit un orchestrateur Unity configuré pour le job SSE."""
+    # Conserver le job_id comme request_id pour la traçabilité.
+    return get_unity_dialogue_orchestrator(request=request, request_id=job_id)
+
+
 @router.get("/generate/jobs/{job_id}/stream", response_class=StreamingResponse)
 async def stream_job(
     job_id: str,
-    request: Request,
+    orchestrator: Annotated[UnityDialogueOrchestrator, Depends(_get_stream_orchestrator)],
 ) -> StreamingResponse:
     """Endpoint SSE pour streamer la génération d'un job.
     
     Args:
         job_id: ID du job à streamer.
-        request: Requête HTTP (pour accéder au container).
         
     Returns:
         StreamingResponse avec chunks SSE.
@@ -247,11 +248,8 @@ async def stream_job(
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     
-    # Récupérer le container depuis l'app state
-    container: ServiceContainer = request.app.state.container
-    
     return StreamingResponse(
-        stream_generation(job_id, container),
+        stream_generation(job_id, orchestrator),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

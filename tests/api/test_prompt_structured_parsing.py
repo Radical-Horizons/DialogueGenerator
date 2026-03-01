@@ -31,7 +31,7 @@ def test_prompt_structured_parsing_with_real_data(real_client):
     3. Les sections CHARACTERS sont correctement formatées
     """
     # Récupérer un personnage depuis le GDD (générique, pas hardcodé)
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     cb = ContextBuilder()
     cb.load_gdd_files()
     all_characters = cb.get_characters_names()

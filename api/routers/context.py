@@ -397,7 +397,7 @@ async def build_context(
             element_modes=context_selections_dict.get("_element_modes")
         )
         # Sérialiser en texte
-        context_text = context_builder._context_serializer.serialize_to_text(structured_context)
+        context_text = context_builder.serialize_context_to_text(structured_context)
         token_count = context_builder._count_tokens(context_text)
         
         return BuildContextResponse(
@@ -466,7 +466,7 @@ async def estimate_context_tokens(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        context_text = context_builder._context_serializer.serialize_to_text(structured_context)
+        context_text = context_builder.serialize_context_to_text(structured_context)
         context_tokens = context_builder._count_tokens(context_text)
         
         # Convertir structured_prompt en dict pour la réponse

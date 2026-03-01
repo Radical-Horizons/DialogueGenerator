@@ -16,8 +16,7 @@ def mock_dialogue_service():
     mock_structured_context = MagicMock()
     
     mock_service.context_builder.build_context_json = MagicMock(return_value=mock_structured_context)
-    mock_service.context_builder._context_serializer = MagicMock()
-    mock_service.context_builder._context_serializer.serialize_to_text = MagicMock(return_value="context text")
+    mock_service.context_builder.serialize_context_to_text = MagicMock(return_value="context text")
     
     # Mock de serialize_to_xml pour retourner un élément XML <context>
     import xml.etree.ElementTree as ET

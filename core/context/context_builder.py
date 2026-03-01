@@ -724,6 +724,21 @@ class ContextBuilder:
 
 
 
+    def serialize_context_to_text(self, structured_context: 'PromptStructure') -> str:
+        """Sérialise une structure de contexte en texte exploitable par les prompts.
+
+        Centralise l'accès au sérialiseur interne pour éviter les usages directs de
+        ``_context_serializer`` hors de cette façade.
+
+        Args:
+            structured_context: Structure de contexte construite via
+                ``build_context_json``.
+
+        Returns:
+            Représentation textuelle du contexte.
+        """
+        return self._context_serializer.serialize_to_text(structured_context)
+
     def build_context(self, selected_elements: dict[str, list[str]], scene_instruction: str, max_tokens: int = 70000, include_dialogue_type: bool = True) -> str:
         """Construit un résumé contextuel basé sur les éléments sélectionnés (délègue à ContextConstructionService)."""
         if self._context_construction_service is None:

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Annotated
 from fastapi import Depends
 from starlette.requests import Request
+from api.container import ServiceContainer
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from core.llm.llm_client import ILLMClient
@@ -58,9 +59,7 @@ def get_config_service(request: Request) -> ConfigurationService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_config_service()
 
 
@@ -86,9 +85,7 @@ def get_context_builder(request: Request) -> ContextBuilder:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_context_builder()
 
 
@@ -106,9 +103,7 @@ def get_prompt_engine(request: Request) -> PromptEngine:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_prompt_engine()
 
 
@@ -119,22 +114,18 @@ def get_prompt_engine(request: Request) -> PromptEngine:
 
 
 def get_dialogue_generation_service(
-    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
-    prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)]
+    request: Request
 ) -> DialogueGenerationService:
     """Retourne le service de génération de dialogues.
     
     Args:
-        context_builder: ContextBuilder injecté.
-        prompt_engine: PromptEngine injecté.
+        request: La requête HTTP (injecté par FastAPI).
         
     Returns:
         Instance de DialogueGenerationService.
     """
-    return DialogueGenerationService(
-        context_builder=context_builder,
-        prompt_engine=prompt_engine
-    )
+    container = get_service_container(request)
+    return container.get_dialogue_generation_service()
 
 
 def get_llm_client(
@@ -267,6 +258,49 @@ def get_request_id(request: Request) -> str:
     return getattr(request.state, "request_id", "unknown")
 
 
+def get_service_container(request: Request) -> ServiceContainer:
+    """Retourne le ServiceContainer depuis l'état de l'application.
+
+    Centralise l'accès au container pour éviter les accès directs à
+    ``request.app.state.container`` dans les dépendances métier.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de ServiceContainer stockée dans app.state.container.
+
+    Raises:
+        RuntimeError: Si le ServiceContainer n'est pas initialisé.
+    """
+    container = getattr(request.app.state, "container", None)
+    if container is None:
+        raise RuntimeError(
+            "ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan."
+        )
+    return container
+
+
+def get_unity_dialogue_orchestrator(
+    request: Request,
+    request_id: Annotated[str, Depends(get_request_id)]
+) -> "UnityDialogueOrchestrator":
+    """Retourne l'orchestrateur Unity Dialogue via le container.
+
+    Le ``request_id`` de la requête est injecté pour homogénéiser les
+    métadonnées de logs et faciliter les tests.
+
+    Args:
+        request: La requête HTTP.
+        request_id: Identifiant de la requête.
+
+    Returns:
+        Instance de UnityDialogueOrchestrator.
+    """
+    container = get_service_container(request)
+    return container.get_unity_dialogue_orchestrator(request_id=request_id)
+
+
 # Variables globales _vocab_service et _guides_service supprimées - utilisez ServiceContainer
 
 
@@ -284,9 +318,7 @@ def get_vocabulary_service(request: Request) -> VocabularyService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_vocabulary_service()
 
 
@@ -304,9 +336,7 @@ def get_narrative_guides_service(request: Request) -> NarrativeGuidesService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_narrative_guides_service()
 
 
@@ -333,9 +363,7 @@ def get_skill_catalog_service(request: Request) -> SkillCatalogService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_skill_catalog_service()
 
 
@@ -353,9 +381,7 @@ def get_trait_catalog_service(request: Request) -> TraitCatalogService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_trait_catalog_service()
 
 
@@ -373,8 +399,6 @@ def get_preset_service(request: Request) -> PresetService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_preset_service()
 
