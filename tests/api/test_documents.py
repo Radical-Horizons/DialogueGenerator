@@ -138,6 +138,63 @@ class TestGetDocument:
         assert "path" in data["error"].get("details", {})
 
 
+class TestCheckMigration:
+    """Tests GET /api/v1/documents/check-migration (CI / pre-commit gate)."""
+
+    def test_check_migration_no_path_returns_empty(self, client, mock_config_service):
+        """Sans chemin Unity configuré, retourne needsMigration vide."""
+        mock_config_service.get_unity_dialogues_path.return_value = None
+
+        response = client.get("/api/v1/documents/check-migration")
+
+        assert response.status_code == 200
+        assert response.json()["needsMigration"] == []
+
+    def test_check_migration_lists_docs_without_choice_id(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Liste les documents v1.1.0 ayant au moins un choice sans choiceId."""
+        (tmp_path / "ok-doc.json").write_text(
+            json.dumps(
+                {
+                    "schemaVersion": "1.1.0",
+                    "nodes": [
+                        {
+                            "id": "START",
+                            "line": "Hi",
+                            "choices": [{"choiceId": "yes", "text": "Yes", "targetNode": "END"}],
+                        },
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "needs-migration.json").write_text(
+            json.dumps(
+                {
+                    "schemaVersion": "1.1.0",
+                    "nodes": [
+                        {
+                            "id": "START",
+                            "line": "Hi",
+                            "choices": [{"text": "OK", "targetNode": "END"}],
+                        },
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+        response = client.get("/api/v1/documents/check-migration")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["needsMigration"]) == 1
+        assert data["needsMigration"][0]["documentId"] == "needs-migration"
+        assert "nodes" in data["needsMigration"][0]["path"] and "choices" in data["needsMigration"][0]["path"]
+
+
 class TestPutDocument:
     """Tests PUT /api/v1/documents/{id} (AC2)."""
 

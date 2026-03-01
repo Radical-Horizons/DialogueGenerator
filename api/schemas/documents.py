@@ -67,3 +67,22 @@ class PutLayoutResponse(BaseModel):
     """Réponse PUT /documents/{id}/layout en succès : revision."""
 
     revision: int = Field(..., ge=1, description="Nouvelle révision après persistance")
+
+
+# --- Migration choiceId (Story 16.5, CI / pre-commit) ---
+
+
+class DocumentMigrationItem(BaseModel):
+    """Un document v1.1.0 dont au moins un choice n'a pas de choiceId."""
+
+    documentId: str = Field(..., description="Identifiant du document (ex. filename)")
+    path: str = Field(..., description="Chemin du premier choice sans choiceId (ex. nodes.0.choices.1)")
+
+
+class CheckMigrationResponse(BaseModel):
+    """Réponse GET /documents/check-migration : liste des documents à migrer."""
+
+    needsMigration: List[DocumentMigrationItem] = Field(
+        default_factory=list,
+        description="Documents avec schemaVersion >= 1.1.0 et au moins un choice sans choiceId",
+    )

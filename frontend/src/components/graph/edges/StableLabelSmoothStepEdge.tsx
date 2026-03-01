@@ -2,7 +2,7 @@
  * Edge smoothstep avec label mémoïsé pour éviter le scintillement
  * pendant le déplacement des nœuds : seul le wrapper de position est mis à jour.
  */
-import { memo, useRef, useEffect, useState } from 'react'
+import { memo, useRef, useLayoutEffect, useState } from 'react'
 import {
   getSmoothStepPath,
   BaseEdge,
@@ -31,7 +31,7 @@ const MemoizedLabelContent = memo(function MemoizedLabelContent({
   const textRef = useRef<SVGTextElement>(null)
   const [bbox, setBbox] = useState({ width: 0, height: 0, x: 0, y: 0 })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (textRef.current) {
       const b = textRef.current.getBBox()
       setBbox({ width: b.width, height: b.height, x: b.x, y: b.y })
@@ -48,7 +48,7 @@ const MemoizedLabelContent = memo(function MemoizedLabelContent({
       className="react-flow__edge-textwrapper"
       style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' as const }}
       transform={`translate(${-bbox.x - bbox.width / 2}, ${-bbox.y - bbox.height / 2})`}
-      visibility={bbox.width ? 'visible' : 'hidden'}
+      visibility="visible"
     >
       {showBg && bbox.width > 0 && (
         <rect

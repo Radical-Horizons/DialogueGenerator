@@ -169,6 +169,16 @@ export const GraphCanvas = memo(function GraphCanvas() {
       (err) => err.type === 'broken_reference' && err.target
     )
     const brokenTargets = new Set(brokenReferences.map((err) => err.target!))
+    const hasLegacyChoiceHandles = storeEdges.some((edge) => {
+      const sh = edge.sourceHandle
+      return Boolean(sh && /^choice-\d+$/.test(sh))
+    })
+
+    // Fast path: conserver exactement la même référence d'edges.
+    // Cela évite les remounts d'EdgeLabel pendant le drag si rien ne change côté edges.
+    if (brokenTargets.size === 0 && !hasLegacyChoiceHandles) {
+      return storeEdges
+    }
 
     const validEdges = storeEdges.filter((edge) => {
       const sh = edge.sourceHandle

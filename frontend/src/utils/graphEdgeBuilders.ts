@@ -1,6 +1,11 @@
 /**
  * Builders réutilisables pour les edges du graphe (choix, résultats de test).
  * Source unique pour IDs, labels tronqués et config des edges TestNode → résultat.
+ *
+ * IDs canoniques (ADR-008, éviter régressions double edge / flicker) :
+ * - Choix → cible : e:{sourceId}:choice:{stableChoiceId} (stableChoiceEdgeId)
+ * - Choix → TestNode : e:{sourceId}:choice:{stableChoiceId}:test (documentToGraph + testNodeSync)
+ * - TestNode id : test:{choiceId} ou test-node-{nodeId}-choice-{index} (legacy)
  */
 import type { Edge } from 'reactflow'
 

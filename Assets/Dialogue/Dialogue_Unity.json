@@ -27,7 +27,9 @@
         "respectDelta": -1,
         "condition": "",
         "influenceDelta": null
-      }
+      },
+      {},
+      {}
     ]
   },
   {

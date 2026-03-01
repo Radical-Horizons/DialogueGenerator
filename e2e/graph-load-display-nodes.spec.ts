@@ -55,4 +55,58 @@ test.describe('Graph load – affichage des nœuds', () => {
     const count = await nodes.count()
     expect(count).toBeGreaterThan(0)
   })
+
+  test('drag dialogue node then release – positions stables, pas d’erreurs console en boucle', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await login(page)
+
+    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
+    await expect(graphTab).toBeVisible({ timeout: 15000 })
+    await graphTab.click()
+
+    const list = page.getByTestId('unity-dialogue-list')
+    await expect(list).toBeVisible({ timeout: 15000 })
+    const firstDialogue = list.locator('div').filter({ hasText: /\.json/i }).first()
+    await expect(firstDialogue).toBeVisible({ timeout: 8000 })
+    await firstDialogue.click()
+
+    await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
+    const reactFlow = page.locator('.react-flow')
+    await expect(reactFlow).toBeVisible({ timeout: 5000 })
+    const nodeElements = page.locator('.react-flow__node')
+    await expect(nodeElements.first()).toBeVisible({ timeout: 15000 })
+
+    const consoleErrors: string[] = []
+    page.on('console', (msg) => {
+      const type = msg.type()
+      if (type === 'error') {
+        const text = msg.text()
+        consoleErrors.push(text)
+      }
+    })
+
+    const firstNode = nodeElements.first()
+    const box = await firstNode.boundingBox()
+    if (!box) {
+      throw new Error('First node has no bounding box')
+    }
+    const centerX = box.x + box.width / 2
+    const centerY = box.y + box.height / 2
+    await page.mouse.move(centerX, centerY)
+    await page.mouse.down()
+    await page.mouse.move(centerX + 80, centerY + 40, { steps: 5 })
+    await page.mouse.up()
+    await page.waitForTimeout(500)
+
+    const errorCount = consoleErrors.length
+    const repeated = consoleErrors.filter(
+      (e, i) => consoleErrors.indexOf(e) !== i
+    )
+    expect(
+      repeated.length,
+      `Régression: trop d’erreurs console répétées après drag (${errorCount} erreurs, doublons: ${repeated.length})`
+    ).toBe(0)
+  })
 })

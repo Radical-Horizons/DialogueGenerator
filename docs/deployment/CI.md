@@ -22,3 +22,7 @@ Des valeurs factices sont utilisées pour que les tests passent sans secrets :
 - `OPENAI_API_KEY=sk-dummy`
 
 Pas de secrets GitHub requis pour cette CI.
+
+## Checklist PR graphe
+
+Pour les PR touchant l’éditeur de graphe, voir [PR checklist graph](../../pr-checklist-graph.md). En local : `npm run check:migration` (nécessite l’API démarrée) pour lister les documents v1.1.0 sans choiceId.

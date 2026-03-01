@@ -19,7 +19,9 @@ from fastapi.responses import JSONResponse
 from api.dependencies import get_config_service, get_request_id
 from api.exceptions import APIException, NotFoundException, ValidationException, InternalServerException
 from api.schemas.documents import (
+    CheckMigrationResponse,
     DocumentGetResponse,
+    DocumentMigrationItem,
     LayoutGetResponse,
     PutDocumentRequest,
     PutDocumentResponse,
@@ -161,6 +163,46 @@ def _first_missing_choice_id_path(document: dict) -> str | None:
             if isinstance(choice, dict) and not choice.get("choiceId"):
                 return f"nodes.{i}.choices.{j}"
     return None
+
+
+@router.get(
+    "/check-migration",
+    response_model=CheckMigrationResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def check_migration(
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> CheckMigrationResponse:
+    """Liste les documents v1.1.0 ayant au moins un choice sans choiceId (CI / pre-commit gate)."""
+    try:
+        unity_path = config_service.get_unity_dialogues_path()
+        if not unity_path:
+            return CheckMigrationResponse(needsMigration=[])
+        base_dir = Path(unity_path)
+        if not base_dir.exists():
+            return CheckMigrationResponse(needsMigration=[])
+        needs: list[DocumentMigrationItem] = []
+        for path in base_dir.iterdir():
+            if not path.is_file() or path.suffix.lower() != ".json" or path.name.endswith(".layout.json"):
+                continue
+            document_id = path.stem
+            try:
+                doc = _read_document_blob(base_dir, document_id)
+            except (FileNotFoundError, json.JSONDecodeError):
+                continue
+            missing_path = _first_missing_choice_id_path(doc)
+            if missing_path is not None:
+                needs.append(DocumentMigrationItem(documentId=document_id, path=missing_path))
+        logger.info(f"check-migration: {len(needs)} document(s) à migrer (request_id: {request_id})")
+        return CheckMigrationResponse(needsMigration=needs)
+    except Exception as e:
+        logger.exception(f"Erreur check-migration (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors de la vérification migration choiceId",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
 
 
 def _resolve_document_base(

@@ -30,6 +30,8 @@ export function GraphEditor() {
   const canvasWrapperRef = useRef<HTMLDivElement | null>(null)
   const toast = useToast()
   const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
+  /** Circuit breaker autosave: après 4xx (hors 409), on bloque les retries pendant AUTOSAVE_4XX_BACKOFF_MS. */
+  const AUTOSAVE_4XX_BACKOFF_MS = 10_000
   const saveRetryBlockedUntilRef = useRef<number>(0)
   
   // États auto-save draft (Task 2 - Story 0.5) - supprimés, maintenant géré automatiquement
@@ -75,7 +77,6 @@ export function GraphEditor() {
     setShowDeleteNodeConfirm,
     syncStatus,
     lastAckSeq,
-    documentId,
     resetGraph,
   } = useGraphStore()
   
@@ -180,9 +181,9 @@ export function GraphEditor() {
     const timeoutId = setTimeout(() => {
       saveDialogue().catch((err) => {
         const status = (err as { response?: { status?: number } })?.response?.status
-        // Backoff anti-boucle: éviter un cycle auto-save en erreur qui clignote.
+        // Circuit breaker: 4xx répétés → backoff long pour éviter boucle autosave.
         if (typeof status === 'number' && status >= 400 && status < 500 && status !== 409) {
-          saveRetryBlockedUntilRef.current = Date.now() + 10000
+          saveRetryBlockedUntilRef.current = Date.now() + AUTOSAVE_4XX_BACKOFF_MS
         } else {
           saveRetryBlockedUntilRef.current = Date.now() + 3000
         }

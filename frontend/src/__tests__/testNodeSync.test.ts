@@ -214,7 +214,7 @@ describe('testNodeSync', () => {
       )
     })
 
-    it('should create edge from dialogue node to test node', () => {
+    it('should create edge from dialogue node to test node with canonical id e:nodeId:choice:cid:test', () => {
       const choice: Choice = {
         text: 'Long choice text that should be truncated',
         test: 'Raison+Diplomatie:8',
@@ -231,12 +231,43 @@ describe('testNodeSync', () => {
       )
 
       const dialogueToTestEdge = result.edges.find(
-        (e) => e.id === 'dialogue-1-choice-0-to-test'
+        (e) => e.source === 'dialogue-1' && e.target === 'test-node-dialogue-1-choice-0'
       )
       expect(dialogueToTestEdge).not.toBeUndefined()
+      expect(dialogueToTestEdge?.id).toBe('e:dialogue-1:choice:__idx_0:test')
       expect(dialogueToTestEdge?.source).toBe('dialogue-1')
       expect(dialogueToTestEdge?.target).toBe('test-node-dialogue-1-choice-0')
       expect(dialogueToTestEdge?.sourceHandle).toBe('choice:__idx_0')
+    })
+
+    it('should produce at most one dialogue→test edge per (source, sourceHandle, target)', () => {
+      const choice: Choice = {
+        text: 'One choice',
+        test: 'Raison+Diplomatie:8',
+      }
+      const existingEdges: Edge[] = [
+        {
+          id: 'e:dialogue-1:choice:__idx_0:test',
+          source: 'dialogue-1',
+          target: 'test-node-dialogue-1-choice-0',
+          sourceHandle: 'choice:__idx_0',
+        },
+      ]
+
+      const result = syncTestNodeFromChoice(
+        choice,
+        0,
+        'dialogue-1',
+        dialogueNodePosition,
+        null,
+        existingEdges
+      )
+
+      const dialogueToTest = result.edges.filter(
+        (e) => e.source === 'dialogue-1' && e.target === 'test-node-dialogue-1-choice-0'
+      )
+      expect(dialogueToTest).toHaveLength(1)
+      expect(dialogueToTest[0].id).toBe('e:dialogue-1:choice:__idx_0:test')
     })
 
     it('should truncate long choice text in edge label', () => {
@@ -256,7 +287,7 @@ describe('testNodeSync', () => {
       )
 
       const dialogueToTestEdge = result.edges.find(
-        (e) => e.id === 'dialogue-1-choice-0-to-test'
+        (e) => e.source === 'dialogue-1' && e.target === 'test-node-dialogue-1-choice-0'
       )
       expect(dialogueToTestEdge?.label).toBe('A'.repeat(30) + '...')
     })

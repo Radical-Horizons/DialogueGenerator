@@ -161,7 +161,7 @@ export function documentToGraph(
             source: nodeId,
             target: targetNode,
             sourceHandle,
-            type: 'default',
+            type: 'smoothstep',
             label,
             data: { edgeType: 'choice', choiceIndex, choiceId: cid, choiceText },
           })
@@ -175,7 +175,7 @@ export function documentToGraph(
         id: `${nodeId}->${nextNode}`,
         source: nodeId,
         target: nextNode,
-        type: 'default',
+        type: 'smoothstep',
         label: 'Suivant',
       })
     }

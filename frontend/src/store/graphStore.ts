@@ -1093,7 +1093,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
               source: sourceId,
               target: targetId,
               ...(actualSourceHandle && { sourceHandle: actualSourceHandle }),
-              type: 'default',
+              type: 'smoothstep',
               data: {
                 edgeType: connectionType,
                 choiceIndex,
@@ -1266,9 +1266,9 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
               const updatedChoices = (parent.dialogueNode.data.choices as Choice[]).map(
                 (choice, idx) => {
                   if (idx === parent.choiceIndex) {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructure to omit field from rest
                     const choiceWithIndex = choice as Choice & Record<string, unknown>
                     const { [fieldName]: _removed, ...rest } = choiceWithIndex
+                    void _removed
                     return rest as Choice
                   }
                   return choice
@@ -1396,10 +1396,17 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
             newLayout as { nodes?: Record<string, { x: number; y: number }> }
           )
           const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+          // Conserver la ref edges quand seule la position a changé (évite scintillement des étiquettes pendant le drag).
+          // On garde state.edges si le même ensemble d'IDs est présent (normalizeTestBars peut changer ordre/objets).
+          const newIds = new Set(normalized.edges.map((e) => e.id))
+          const edgesUnchanged =
+            state.edges.length === normalized.edges.length &&
+            state.edges.every((e) => newIds.has(e.id))
+          const edgesToSet = edgesUnchanged ? state.edges : normalized.edges
           set({
             layout: newLayout,
             nodes: normalized.nodes,
-            edges: normalized.edges,
+            edges: edgesToSet,
           })
           if (positionChanged) get().markDirty()
           return
@@ -1886,6 +1893,7 @@ export const useGraphStore = create<GraphState>()((set, get) => ({
             const layoutRev = state.layoutRevision ?? 1
             const requiresChoiceIdMigration = documentRequiresChoiceIdMigration(doc)
             if (requiresChoiceIdMigration) {
+              set({ isSaving: false })
             } else {
               try {
                 const [docRes, layoutRes] = await Promise.all([

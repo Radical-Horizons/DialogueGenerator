@@ -184,72 +184,8 @@ def test_preview_prompt_invalid_request(client):
 
 # test_generate_dialogue_variants et test_generate_dialogue_variants_invalid_request supprimés - système texte libre obsolète, utiliser Unity JSON à la place
 
-@pytest.mark.skip(reason="Endpoint /generate/interactions supprimé. Utiliser /generate/unity-dialogue à la place.")
-@pytest.mark.asyncio
-async def test_generate_interaction_variants(client, mock_dialogue_service, _mock_interaction_service, monkeypatch):
-    """Test de génération d'interactions.
-    
-    NOTE: Ce test est obsolète. L'endpoint /api/v1/dialogues/generate/interactions
-    a été supprimé et remplacé par /api/v1/dialogues/generate/unity-dialogue.
-    """
-    # Mocks d'Interaction supprimés - système obsolète
-    mock_dialogue_service.context_builder = MagicMock()
-    mock_dialogue_service.context_builder.set_previous_dialogue_context = MagicMock()
-    
-    # Mock LLM client factory
-    mock_llm_client = MagicMock()
-    mock_factory = MagicMock()
-    mock_factory.create_client.return_value = mock_llm_client
-    monkeypatch.setattr("factories.llm_factory.LLMClientFactory", mock_factory)
-    
-    response = client.post(
-        "/api/v1/dialogues/generate/interactions",
-        json={
-            "k_variants": 1,
-            "max_context_tokens": 1000,
-            "user_instructions": "Test",
-            "llm_model_identifier": "gpt-5.2-mini",
-            "context_selections": {
-                "characters": [],
-                "locations": [],
-                "items": [],
-                "species": [],
-                "communities": []
-            }
-        }
-    )
-    
-    # Note: Les appels async peuvent nécessiter un serveur réel ou un mock plus complexe
-    assert response.status_code in [200, 500]  # 500 si erreur de mock, 200 si ça passe
-
-
-@pytest.mark.skip(reason="Endpoint /generate/interactions supprimé. Utiliser /generate/unity-dialogue à la place.")
-def test_generate_interaction_variants_invalid_previous_id(client):
-    """Test de génération d'interactions avec previous_interaction_id inexistant.
-    
-    NOTE: Ce test est obsolète. L'endpoint /api/v1/dialogues/generate/interactions
-    a été supprimé et remplacé par /api/v1/dialogues/generate/unity-dialogue.
-    """
-    # mock_interaction_service supprimé - système obsolète
-    
-    response = client.post(
-        "/api/v1/dialogues/generate/interactions",
-        json={
-            "k_variants": 1,
-            "max_context_tokens": 1000,
-            "user_instructions": "Test",
-            "llm_model_identifier": "gpt-5.2-mini",
-            "previous_interaction_id": "non-existent",
-            "context_selections": {
-                "characters": [],
-                "locations": [],
-                "items": [],
-                "species": [],
-                "communities": []
-            }
-        }
-    )
-    assert response.status_code == 404  # Not found
+# Tests pour /generate/interactions (endpoint supprimé) retirés.
+# Remplacé par /generate/unity-dialogue, couvert par TestGenerateUnityDialogue.
 
 
 class TestGenerateUnityDialogue:
@@ -326,47 +262,4 @@ class TestGenerateUnityDialogue:
         assert response.status_code == 422
 
 
-class TestGenerateVariants:
-    """Tests pour l'endpoint POST /api/v1/dialogues/generate/variants."""
-    
-    @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Endpoint /generate/variants n'existe pas dans dialogues.py")
-    async def test_generate_variants_success(self, client, mock_dialogue_service, monkeypatch):
-        """Test de génération de variants avec succès."""
-        # Endpoint non implémenté - test désactivé
-        pass
-
-
-class TestGenerateChoices:
-    """Tests pour l'endpoint POST /api/v1/dialogues/generate/choices."""
-    
-    @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Endpoint /generate/choices n'existe pas dans dialogues.py")
-    async def test_generate_choices_success(self, client, mock_dialogue_service, monkeypatch):
-        """Test de génération de choices avec succès."""
-        # Endpoint non implémenté - test désactivé
-        pass
-        monkeypatch.setattr("api.routers.dialogues.TraitCatalogService", MagicMock)
-        
-        request_data = {
-            "context_selections": {
-                "characters_full": ["Test Character"],
-                "locations_full": [],
-                "items_full": [],
-                "species_full": [],
-                "communities_full": []
-            },
-            "user_instructions": "Test instructions",
-            "llm_model_identifier": "gpt-4o-mini",
-            "max_choices": 2,
-            "max_context_tokens": 1000
-        }
-        
-        response = client.post("/api/v1/dialogues/generate/choices", json=request_data)
-        
-        # Peut retourner 200 si tout est mocké correctement, ou 500 si erreur
-        assert response.status_code in [200, 500]
-        if response.status_code == 200:
-            data = response.json()
-            assert "json_content" in data or "choices" in data
-
+# Classes TestGenerateVariants et TestGenerateChoices retirées (endpoints non exposés dans dialogues.py).

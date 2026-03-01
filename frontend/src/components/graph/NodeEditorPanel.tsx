@@ -988,7 +988,7 @@ interface ChoicesEditorProps {
 }
 
 function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: ChoicesEditorProps) {
-  const { control, getValues, handleSubmit } = useFormContext<DialogueNodeData>()
+  const { control, getValues } = useFormContext<DialogueNodeData>()
   const { selectedNodeId, updateNode, selectedNode } = useGraphStore()
   const { fields, append, remove } = useFieldArray({
     control,

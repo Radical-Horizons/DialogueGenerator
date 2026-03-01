@@ -208,6 +208,109 @@ describe('documentToGraph', () => {
       expect(start?.position).toEqual({ x: 100, y: 200 })
       expect(end?.position).toEqual({ x: 100, y: 350 })
     })
+
+    it('applies layout position for test node (stable id test:choiceId)', () => {
+      const doc: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'N',
+            line: 'Test',
+            choices: [
+              {
+                choiceId: 'skill',
+                text: 'Try',
+                test: { formula: '1d20' },
+                testSuccessNode: 'END',
+              },
+            ],
+          },
+          { id: 'END', line: '' },
+        ],
+      }
+      const layout: LayoutPositions = {
+        nodes: { N: { x: 0, y: 0 }, END: { x: 0, y: 150 }, 'test:skill': { x: 400, y: 100 } },
+      }
+      const { nodes } = documentToGraph(doc, layout)
+      const testNode = nodes.find((n) => n.type === 'testNode')
+      expect(testNode?.id).toBe('test:skill')
+      expect(testNode?.position).toEqual({ x: 400, y: 100 })
+    })
+
+    it('applies layout position for test node (legacy id test-node-...-choice-N)', () => {
+      const doc: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'N',
+            line: 'Test',
+            choices: [
+              { text: 'Try', test: { formula: '1d20' }, testSuccessNode: 'END' },
+            ],
+          },
+          { id: 'END', line: '' },
+        ],
+      }
+      const layout: LayoutPositions = {
+        nodes: { N: { x: 0, y: 0 }, END: { x: 0, y: 150 }, 'test-node-N-choice-0': { x: 350, y: 80 } },
+      }
+      const { nodes } = documentToGraph(doc, layout)
+      const testNode = nodes.find((n) => n.type === 'testNode')
+      expect(testNode?.id).toBe('test-node-N-choice-0')
+      expect(testNode?.position).toEqual({ x: 350, y: 80 })
+    })
+  })
+
+  describe('invariants (regression: no duplicate edges, single dialogue→test)', () => {
+    it('produces no duplicate edges by (source, sourceHandle, target)', () => {
+      const doc: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'START',
+            line: 'Choose',
+            choices: [
+              { choiceId: 'a', text: 'A', targetNode: 'END' },
+              { choiceId: 'b', text: 'B', test: { formula: '1d20' }, testSuccessNode: 'END' },
+            ],
+          },
+          { id: 'END', line: '' },
+        ],
+      }
+      const layout: LayoutPositions = { nodes: { START: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
+      const { edges } = documentToGraph(doc, layout)
+      const key = (e: { source: string; sourceHandle?: string | null; target: string }) =>
+        `${e.source}|${e.sourceHandle ?? ''}|${e.target}`
+      const seen = new Set<string>()
+      for (const e of edges) {
+        const k = key(e)
+        expect(seen.has(k)).toBe(false)
+        seen.add(k)
+      }
+    })
+
+    it('produces exactly one dialogue→test edge per choice with test (canonical id e:...:choice:...:test)', () => {
+      const doc: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'N',
+            line: 'Test',
+            choices: [
+              { choiceId: 'c1', text: 'T1', test: { formula: '1d20' }, testSuccessNode: 'END' },
+            ],
+          },
+          { id: 'END', line: '' },
+        ],
+      }
+      const layout: LayoutPositions = { nodes: { N: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
+      const { edges } = documentToGraph(doc, layout)
+      const dialogueToTest = edges.filter(
+        (e) => e.source === 'N' && e.target === 'test:c1'
+      )
+      expect(dialogueToTest).toHaveLength(1)
+      expect(dialogueToTest[0].id).toBe('e:N:choice:c1:test')
+    })
   })
 })
 
