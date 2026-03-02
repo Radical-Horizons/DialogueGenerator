@@ -71,7 +71,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     })
   }, [storeNodes, validationErrors, highlightedNodeIds, highlightedCycleNodes])
   
-  useMemo(() => {
+  useEffect(() => {
     setNodes(enrichedNodes)
   }, [enrichedNodes, setNodes])
   
@@ -104,7 +104,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
      
   }, [storeEdges, validationErrors])
   
-  useMemo(() => {
+  useEffect(() => {
     setEdges(enrichedEdges)
   }, [enrichedEdges, setEdges])
   
@@ -167,8 +167,9 @@ export const GraphCanvas = memo(function GraphCanvas() {
     [updateNodePosition]
   )
   
-  // Handler pour synchroniser les changements de position depuis ReactFlow vers le store
-  // Cela capture tous les changements de position, y compris pendant le drag
+  // Handler pour synchroniser les changements depuis ReactFlow vers le store
+  // IMPORTANT: Ne PAS synchroniser les positions pendant le drag pour éviter le blinking
+  // Les positions sont mises à jour uniquement sur onNodeDragStop
   const handleNodesChange = useCallback(
     (changes: Array<{ type: string; id?: string; position?: { x: number; y: number }; [key: string]: unknown }>) => {
       // Intercepter les suppressions de nœuds pour synchroniser avec le store
@@ -179,22 +180,13 @@ export const GraphCanvas = memo(function GraphCanvas() {
         }
       }
       
-      // Appeler le handler ReactFlow par défaut
+      // Appeler le handler ReactFlow par défaut (gère l'état local du drag)
       onNodesChange(changes)
       
-      // Synchroniser les changements de position vers le store
-      // ReactFlow envoie des changes avec type 'position' ou 'positionDragging'
-      for (const change of changes) {
-        if ((change.type === 'position' || change.type === 'positionDragging') && 
-            change.position && 
-            change.id) {
-          // Toujours mettre à jour la position dans le store
-          // updateNodePosition gère déjà la vérification de changement
-          updateNodePosition(change.id, change.position)
-        }
-      }
+      // NE PAS synchroniser les positions pendant le drag (évite le blinking)
+      // Les positions sont synchronisées uniquement dans onNodeDragStop
     },
-    [onNodesChange, updateNodePosition, deleteNode]
+    [onNodesChange, deleteNode]
   )
   
   // Composant interne pour utiliser useReactFlow (doit être dans ReactFlowProvider)
