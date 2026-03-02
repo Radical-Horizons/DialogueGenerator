@@ -4,7 +4,7 @@ import pytest
 import asyncio
 import time
 from unittest.mock import patch
-from api.utils.circuit_breaker import (
+from shared.resilience import (
     CircuitBreaker,
     CircuitState,
     CircuitBreakerOpenError,

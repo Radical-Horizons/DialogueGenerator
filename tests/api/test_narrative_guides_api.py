@@ -38,7 +38,7 @@ def mock_notion_import_service():
 @pytest.fixture
 def mock_notion_cache(tmp_path):
     """Mock du NotionCache."""
-    from api.utils.notion_cache import NotionCache
+    from shared.caches import NotionCache
     cache = NotionCache(cache_dir=tmp_path / "notion_cache")
     return cache
 

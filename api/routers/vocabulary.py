@@ -18,7 +18,7 @@ from api.schemas.vocabulary import (
 )
 from services.vocabulary_service import VocabularyService
 from services.notion_import_service import NotionImportService
-from api.utils.notion_cache import get_notion_cache
+from shared.caches import get_notion_cache
 
 logger = logging.getLogger(__name__)
 

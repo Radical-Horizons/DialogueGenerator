@@ -3,7 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch, MagicMock
 from api.main import app
-from api.utils.notion_cache import NotionCache
+from shared.caches import NotionCache
 
 
 @pytest.fixture

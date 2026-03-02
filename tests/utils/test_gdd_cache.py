@@ -4,7 +4,7 @@ import time
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from api.utils.gdd_cache import GDDCache, GDDCacheEntry, get_gdd_cache
+from shared.caches import GDDCache, GDDCacheEntry, get_gdd_cache
 
 
 class TestGDDCacheEntry:
@@ -179,9 +179,9 @@ class TestGetGDDCache:
     def test_check_interval_from_env(self):
         """Test que check_interval est chargé depuis l'environnement."""
         with patch.dict(os.environ, {"GDD_CACHE_CHECK_INTERVAL": "10"}):
-            # Réinitialiser le cache global
-            import api.utils.gdd_cache
-            api.utils.gdd_cache._gdd_cache = None
+            # Réinitialiser le cache global (dans le module source shared.caches.gdd_cache)
+            import shared.caches.gdd_cache
+            shared.caches.gdd_cache._gdd_cache = None
             
             cache = get_gdd_cache()
             assert cache.check_interval == 10.0

@@ -16,19 +16,19 @@ from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
-from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
-from api.exceptions import InternalServerException, ValidationException
+from domain.exceptions import ValidationError, GenerationError
+from domain.dtos import GenerationEvent
 from factories.llm_factory import LLMClientFactory
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueGenerationResponse
 
+# Type alias pour compatibilité avec l'API
+try:
+    from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
+except ImportError:
+    GenerateUnityDialogueRequest = None
+    GenerateUnityDialogueResponse = None
+
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class GenerationEvent:
-    """Événement de génération pour SSE streaming."""
-    type: str  # 'step', 'metadata', 'complete', 'error'
-    data: Dict[str, Any]
 
 
 class UnityDialogueOrchestrator:
@@ -93,7 +93,7 @@ class UnityDialogueOrchestrator:
             context_selections_dict = request_data.context_selections.to_service_dict()
             all_characters = context_selections_dict.get('characters', [])
             if not all_characters:
-                raise ValidationException(
+                raise ValidationError(
                     message="Au moins un personnage doit être sélectionné",
                     request_id=self.request_id
                 )
@@ -353,8 +353,7 @@ class UnityDialogueOrchestrator:
             
             yield GenerationEvent(type='complete', data={'result': result.model_dump(mode='json')})
             
-        except ValidationException:
-            # Re-raise ValidationException sans modification
+        except ValidationError:
             raise
         except Exception as e:
             logger.exception(f"Erreur génération Unity (request_id: {self.request_id}): {e}")
@@ -362,8 +361,8 @@ class UnityDialogueOrchestrator:
     
     async def generate(
         self,
-        request_data: GenerateUnityDialogueRequest
-    ) -> GenerateUnityDialogueResponse:
+        request_data: "GenerateUnityDialogueRequest"
+    ) -> "GenerateUnityDialogueResponse":
         """Génère sans streaming (usage REST).
         
         Args:
@@ -373,9 +372,10 @@ class UnityDialogueOrchestrator:
             GenerateUnityDialogueResponse: Réponse avec dialogue Unity JSON.
             
         Raises:
-            ValidationException: Si validation échoue.
-            InternalServerException: Si génération échoue.
+            ValidationError: Si validation échoue.
+            GenerationError: Si génération échoue.
         """
+        
         result = None
         error_message = None
         
@@ -387,9 +387,9 @@ class UnityDialogueOrchestrator:
         
         if result is None:
             if error_message:
-                raise InternalServerException(message=error_message, request_id=self.request_id)
+                raise GenerationError(message=error_message, request_id=self.request_id)
             else:
-                raise InternalServerException(
+                raise GenerationError(
                     message="Génération échouée sans résultat",
                     request_id=self.request_id
                 )

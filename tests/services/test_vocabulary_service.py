@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 from services.vocabulary_service import VocabularyService, POPULARITY_ORDER, DEFAULT_MIN_POPULARITY
-from api.utils.notion_cache import NotionCache
+from shared.caches import NotionCache
 
 
 @pytest.fixture

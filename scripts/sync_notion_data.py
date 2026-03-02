@@ -20,7 +20,7 @@ from services.notion_import_service import (
     DIALOGUE_GUIDE_PAGE_ID,
     NARRATIVE_GUIDE_PAGE_ID
 )
-from api.utils.notion_cache import get_notion_cache
+from shared.caches import get_notion_cache
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

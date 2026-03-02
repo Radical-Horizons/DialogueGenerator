@@ -15,7 +15,7 @@ from typing import List, Dict, Any, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from services.notion_import_service import NotionImportService, VOCABULARY_DATA_SOURCE_ID
-from api.utils.notion_cache import get_notion_cache
+from shared.caches import get_notion_cache
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

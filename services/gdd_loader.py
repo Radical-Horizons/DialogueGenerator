@@ -96,7 +96,7 @@ class GDDLoader:
             Instance de GDDCache ou None si non disponible.
         """
         try:
-            from api.utils.gdd_cache import get_gdd_cache
+            from shared.caches import get_gdd_cache
             return get_gdd_cache()
         except (ImportError, AttributeError):
             logger.debug("Cache GDD non disponible. Chargement direct depuis fichiers.")

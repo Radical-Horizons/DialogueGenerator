@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 from services.narrative_guides_service import NarrativeGuidesService
-from api.utils.notion_cache import NotionCache
+from shared.caches import NotionCache
 
 
 @pytest.fixture

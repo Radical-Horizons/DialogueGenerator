@@ -1,7 +1,17 @@
-"""Exceptions personnalisées pour l'API REST."""
+"""Exceptions personnalisées pour l'API REST.
+
+Ces exceptions HTTP wrappent les exceptions de domaine pour le layer API.
+"""
 import logging
 from typing import Optional, Dict, Any
 from fastapi import HTTPException, status
+
+from domain.exceptions import (
+    DomainException,
+    ValidationError as DomainValidationError,
+    GenerationError as DomainGenerationError,
+    ResourceNotFoundError as DomainResourceNotFoundError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -193,4 +203,39 @@ class OpenAIException(APIException):
             message=message,
             details=details,
             request_id=request_id
+        )
+
+
+def from_domain_exception(exc: DomainException) -> APIException:
+    """Convertit une exception de domaine en exception API.
+    
+    Args:
+        exc: Exception de domaine à convertir.
+        
+    Returns:
+        Exception API correspondante.
+    """
+    if isinstance(exc, DomainValidationError):
+        return ValidationException(
+            message=exc.message,
+            details=exc.details,
+            request_id=exc.request_id
+        )
+    elif isinstance(exc, DomainResourceNotFoundError):
+        return NotFoundException(
+            resource_type=exc.details.get("resource_type", "Ressource"),
+            resource_id=exc.details.get("resource_id"),
+            request_id=exc.request_id
+        )
+    elif isinstance(exc, DomainGenerationError):
+        return InternalServerException(
+            message=exc.message,
+            details=exc.details,
+            request_id=exc.request_id
+        )
+    else:
+        return InternalServerException(
+            message=exc.message,
+            details=exc.details,
+            request_id=exc.request_id
         )

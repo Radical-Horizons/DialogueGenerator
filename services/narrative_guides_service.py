@@ -3,7 +3,7 @@ import logging
 import re
 from typing import Dict, Any, Optional, List
 
-from api.utils.notion_cache import get_notion_cache
+from shared.caches import get_notion_cache
 
 logger = logging.getLogger(__name__)
 

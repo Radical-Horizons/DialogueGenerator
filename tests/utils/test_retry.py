@@ -5,7 +5,7 @@ import asyncio
 from unittest.mock import patch, AsyncMock
 from openai import APIError, RateLimitError, APITimeoutError
 import httpx
-from api.utils.retry import retry_with_backoff, is_retryable_error, get_retry_config
+from shared.resilience import retry_with_backoff, is_retryable_error, get_retry_config
 
 
 def test_is_retryable_error_rate_limit():

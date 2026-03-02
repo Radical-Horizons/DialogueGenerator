@@ -4,7 +4,7 @@ import re
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 
-from api.utils.notion_cache import get_notion_cache
+from shared.caches import get_notion_cache
 
 logger = logging.getLogger(__name__)
 

@@ -81,8 +81,7 @@ class OpenAIClient(ILLMClient):
         self._retry_with_backoff = None
         self._circuit_breaker = None
         try:
-            from api.utils.retry import retry_with_backoff
-            from api.utils.circuit_breaker import get_llm_circuit_breaker
+            from shared.resilience import retry_with_backoff, get_llm_circuit_breaker
             self._retry_with_backoff = retry_with_backoff
             self._circuit_breaker = get_llm_circuit_breaker()
             if self._circuit_breaker:
