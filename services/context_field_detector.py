@@ -232,6 +232,39 @@ class ContextFieldDetector:
         
         logger.debug(f"Détecté {len(unique_fields_by_item)} fiches avec des champs uniques pour '{element_type}'")
         return dict(unique_fields_by_item)
+
+    def get_sample_data(self, element_type: str) -> List[Dict[str, Any]]:
+        """Récupère des données d'échantillon pour un type d'élément.
+
+        Cette méthode publique évite l'usage direct de l'API interne ``_get_sample_data``
+        depuis les couches appelantes (ex: routeurs API).
+
+        Args:
+            element_type: Type d'élément demandé.
+
+        Returns:
+            Liste des fiches disponibles pour ce type d'élément.
+        """
+        return self._get_sample_data(element_type)
+
+    def identify_essential_fields(
+        self,
+        element_type: str,
+        context_config: Dict[str, Any],
+    ) -> Set[str]:
+        """Identifie les champs essentiels pour un type d'élément.
+
+        Cette méthode publique encapsule l'implémentation interne de détection
+        des champs essentiels.
+
+        Args:
+            element_type: Type d'élément demandé.
+            context_config: Configuration de contexte chargée.
+
+        Returns:
+            Ensemble des chemins de champs considérés essentiels.
+        """
+        return self._identify_essential_fields(element_type, context_config)
     
     def _get_sample_data(self, element_type: str) -> List[Dict]:
         """Récupère les données d'échantillon depuis ContextBuilder."""
