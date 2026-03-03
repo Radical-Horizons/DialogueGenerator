@@ -35,7 +35,7 @@ async def test_generated_node_references_exist(client):
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         # Setup mocks
         mock_service = MagicMock()
@@ -124,8 +124,8 @@ async def test_batch_generation_references_exist(client):
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.GraphGenerationService') as mock_graph_service_class, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.GraphGenerationService') as mock_graph_service_class, \
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         # Setup mocks
         mock_service = MagicMock()
