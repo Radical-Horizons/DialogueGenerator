@@ -199,16 +199,42 @@ function interpretMarkdown(text: string): string {
   if (!text) return ''
   
   // Remplacer \n par de vrais sauts de ligne
-  let result = text.replace(/\\n/g, '\n')
-  
-  // Interpréter le markdown basique
-  // *text* → italique (on utilise _ pour éviter les conflits avec les astérisques)
-  result = result.replace(/\*([^*]+)\*/g, '_$1_')
-  
-  // **text** → gras
-  result = result.replace(/\*\*([^*]+)\*\*/g, '**$1**')
-  
-  return result
+  return text.replace(/\\n/g, '\n')
+}
+
+/**
+ * Échappe les caractères HTML dangereux avant un rendu via innerHTML.
+ */
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;'
+      case '<':
+        return '&lt;'
+      case '>':
+        return '&gt;'
+      case '"':
+        return '&quot;'
+      case '\'':
+        return '&#39;'
+      default:
+        return char
+    }
+  })
+}
+
+/**
+ * Convertit la ligne streamée en HTML sûr (markdown basique uniquement).
+ */
+function renderStreamingLineHtml(text: string): string {
+  const escaped = escapeHtml(interpretMarkdown(text))
+
+  return escaped
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/_([^_]+)_/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>')
 }
 
 export interface GenerationProgressModalProps {
@@ -546,16 +572,14 @@ export function GenerationProgressModal({
                       )}
                       {formattedContent.line && (
                         <div
+                          data-testid="streaming-line"
                           style={{
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word',
                             color: theme.text.primary,
                           }}
                           dangerouslySetInnerHTML={{
-                            __html: interpretMarkdown(formattedContent.line)
-                              .replace(/\n/g, '<br/>')
-                              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                              .replace(/_([^_]+)_/g, '<em>$1</em>'),
+                            __html: renderStreamingLineHtml(formattedContent.line),
                           }}
                         />
                       )}
