@@ -227,6 +227,20 @@ class ContextBuilder:
         """
         return self._context_truncator.count_tokens(text)
 
+    def count_tokens(self, text: str) -> int:
+        """Compte le nombre de tokens via l'API publique.
+
+        Cette méthode évite l'utilisation externe de ``_count_tokens`` qui est
+        une API interne de compatibilité.
+
+        Args:
+            text: Le texte à analyser.
+
+        Returns:
+            Le nombre de tokens estimé.
+        """
+        return self._count_tokens(text)
+
     def load_gdd_files(self):
         """Charge les fichiers JSON du GDD depuis les chemins relatifs au projet.
         

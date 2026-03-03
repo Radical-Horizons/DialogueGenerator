@@ -44,6 +44,7 @@ def mock_context_builder():
     mock_builder = MagicMock(spec=ContextBuilder)
     mock_builder.characters = [{"Nom": "Test Character"}]
     mock_builder._count_tokens = MagicMock(return_value=100)
+    mock_builder.count_tokens = MagicMock(return_value=100)
     mock_builder.build_context = MagicMock(return_value="Test context")
     mock_builder.build_context_with_custom_fields = MagicMock(return_value="Test context with custom fields")
     return mock_builder
@@ -221,6 +222,7 @@ class TestContextFields:
         })
         mock_context_builder.serialize_context_to_text = MagicMock(return_value="Test Character\nTest content for preview")
         mock_context_builder._count_tokens = MagicMock(return_value=10)
+        mock_context_builder.count_tokens = MagicMock(return_value=10)
         
         request_data = {
             "selected_elements": {

@@ -120,6 +120,7 @@ class TestContextFieldsEndpoints:
         })
         mock_context_builder.serialize_context_to_text = MagicMock(return_value="Test Character\nTest content for preview")
         mock_context_builder._count_tokens = MagicMock(return_value=10)
+        mock_context_builder.count_tokens = MagicMock(return_value=10)
         
         def mock_get_context_builder():
             return mock_context_builder

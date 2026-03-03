@@ -1,5 +1,6 @@
 """Tests pour le service ContextFieldDetector."""
 import pytest
+from unittest.mock import MagicMock
 from services.context_field_detector import ContextFieldDetector, FieldInfo
 
 
@@ -65,6 +66,26 @@ class TestContextFieldDetector:
         assert detector._categorize_field("Dialogue Type", "character") == "voice"
         assert detector._categorize_field("Background.Histoire", "character") == "background"
         assert detector._categorize_field("Pouvoirs", "character") == "mechanics"
+
+    def test_get_sample_data_public_api_delegates(self):
+        """Test que get_sample_data délègue à l'implémentation interne."""
+        detector = ContextFieldDetector()
+        detector._get_sample_data = MagicMock(return_value=[{"Nom": "Test"}])  # type: ignore[method-assign]
+
+        result = detector.get_sample_data("character")
+
+        detector._get_sample_data.assert_called_once_with("character")
+        assert result == [{"Nom": "Test"}]
+
+    def test_identify_essential_fields_public_api_delegates(self):
+        """Test que identify_essential_fields délègue à l'implémentation interne."""
+        detector = ContextFieldDetector()
+        detector._identify_essential_fields = MagicMock(return_value={"Nom"})  # type: ignore[method-assign]
+
+        result = detector.identify_essential_fields("character", {"character": {}})
+
+        detector._identify_essential_fields.assert_called_once_with("character", {"character": {}})
+        assert result == {"Nom"}
 
 
 class TestContextOrganizer:
