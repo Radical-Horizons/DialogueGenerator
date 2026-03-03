@@ -1,14 +1,41 @@
 """Tests pour le parsing XML vers PromptStructure dans prompt_engine."""
 import pytest
 import xml.etree.ElementTree as ET
+from unittest.mock import MagicMock
 from core.prompt.prompt_engine import PromptEngine, PromptInput
+from services.prompt_builder import PromptBuilder
 from models.prompt_structure import PromptStructure, PromptSection, ContextCategory, ContextItem, ItemSection
+
+
+def _make_mock_context_builder():
+    """Crée un mock ContextBuilder avec un _context_serializer fonctionnel."""
+    mock_cb = MagicMock()
+
+    def _serialize_to_xml(structured_context):
+        """Sérialise un PromptStructure en <context> XML minimal."""
+        ctx = ET.Element("context")
+        for section in getattr(structured_context, "sections", []):
+            for cat in getattr(section, "categories", []):
+                cat_elem = ET.SubElement(ctx, cat.type)
+                for item in getattr(cat, "items", []):
+                    item_elem = ET.SubElement(cat_elem, "element")
+                    item_elem.set("id", item.id)
+                    item_elem.set("name", item.name)
+                    for sec in getattr(item, "sections", []):
+                        s_elem = ET.SubElement(item_elem, sec.title.lower().replace(" ", "_"))
+                        s_elem.text = sec.content
+        return ctx
+
+    mock_cb._context_serializer.serialize_to_xml.side_effect = _serialize_to_xml
+    return mock_cb
 
 
 @pytest.fixture
 def prompt_engine():
-    """Fixture pour créer un PromptEngine."""
-    return PromptEngine()
+    """Fixture pour créer un PromptEngine avec un mock ContextBuilder injecté."""
+    mock_cb = _make_mock_context_builder()
+    builder = PromptBuilder(context_builder=mock_cb)
+    return PromptEngine(prompt_builder=builder)
 
 
 @pytest.fixture

@@ -59,7 +59,8 @@ class UnityDialogueOrchestrator:
         trait_service: TraitCatalogService,
         config_service: ConfigurationService,
         usage_service: LLMUsageService,
-        request_id: str
+        request_id: str,
+        unity_generation_service: Optional[UnityDialogueGenerationService] = None,
     ):
         """Initialise l'orchestrateur avec toutes les dépendances.
         
@@ -71,6 +72,7 @@ class UnityDialogueOrchestrator:
             config_service: Service de configuration.
             usage_service: Service de tracking usage LLM.
             request_id: ID de la requête pour logging.
+            unity_generation_service: Service de génération Unity (injecté par le container).
         """
         self.dialogue_service = dialogue_service
         self.prompt_engine = prompt_engine
@@ -79,6 +81,7 @@ class UnityDialogueOrchestrator:
         self.config_service = config_service
         self.usage_service = usage_service
         self.request_id = request_id
+        self._unity_generation_service = unity_generation_service
     
     async def generate_with_events(
         self,
@@ -214,7 +217,7 @@ class UnityDialogueOrchestrator:
                 llm_client.top_p = request_data.top_p
             
             # 7. Générer via Structured Output avec streaming natif
-            unity_service = UnityDialogueGenerationService()
+            unity_service = self._unity_generation_service or UnityDialogueGenerationService()
             
             # Vérifier si le client supporte le streaming natif
             # NOTE: `hasattr(mock, "generate_variants_streaming")` retourne True avec unittest.mock,
