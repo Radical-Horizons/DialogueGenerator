@@ -3,7 +3,7 @@ import logging
 import re
 from pathlib import Path
 from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from api.schemas.graph import (
     LoadGraphRequest,
     LoadGraphResponse,
@@ -22,7 +22,11 @@ from api.schemas.graph import (
     RejectNodeRequest
 )
 from api.exceptions import InternalServerException, NotFoundException, ValidationException
-from api.dependencies import get_config_service, get_request_id
+from api.dependencies import (
+    get_config_service,
+    get_request_id,
+    get_graph_node_orchestrator,
+)
 from services.configuration_service import ConfigurationService
 from services.graph_conversion_service import GraphConversionService
 from services.unity_dialogue_export_service import (
@@ -31,7 +35,6 @@ from services.unity_dialogue_export_service import (
 )
 from services.graph_validation_service import GraphValidationService
 from services.graph_node_orchestrator import GraphNodeOrchestrator
-from api.container import ServiceContainer
 
 logger = logging.getLogger(__name__)
 
@@ -276,7 +279,9 @@ async def save_graph_and_write(
 )
 async def generate_node(
     request_data: GenerateNodeRequest,
-    request_id: Annotated[str, Depends(get_request_id)] = None
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
+    request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> GenerateNodeResponse:
     """Génère un nœud en contexte (extension de /generate/unity-dialogue).
     
@@ -287,6 +292,8 @@ async def generate_node(
     
     Args:
         request_data: Contexte parent et instructions de génération.
+        config_service: Service de configuration (injecté par DI).
+        orchestrator: Orchestrateur de nœuds de graphe (injecté par DI).
         request_id: ID de la requête.
         
     Returns:
@@ -297,9 +304,6 @@ async def generate_node(
         InternalServerException: Si la génération échoue.
     """
     try:
-        container = ServiceContainer()
-        config_service = container.get_config_service()
-
         from factories.llm_factory import LLMClientFactory
 
         llm_client = LLMClientFactory.create_client(
@@ -308,7 +312,6 @@ async def generate_node(
             available_models=config_service.get_available_llm_models(),
         )
 
-        orchestrator = GraphNodeOrchestrator()
         result = await orchestrator.generate(
             llm_client=llm_client,
             parent_node_id=request_data.parent_node_id,

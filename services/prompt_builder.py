@@ -235,10 +235,11 @@ class PromptBuilder:
         # Si on a un contexte structuré, utiliser serialize_context_to_xml
         if input.structured_context:
             try:
-                # Utiliser le ContextBuilder injecté ou en créer un si nécessaire
                 if self._context_builder is None:
-                    from core.context.context_builder import ContextBuilder
-                    self._context_builder = ContextBuilder()
+                    raise ValueError(
+                        "ContextBuilder non injecté dans PromptBuilder. "
+                        "Utilisez le ServiceContainer pour créer PromptBuilder avec ses dépendances."
+                    )
                 
                 # serialize_to_xml retourne maintenant directement un ET.Element
                 context_root = self._context_builder._context_serializer.serialize_to_xml(input.structured_context)

@@ -155,18 +155,19 @@ def get_llm_client(
     )
 
 
-def get_linked_selector_service(
-    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)]
-) -> LinkedSelectorService:
+def get_linked_selector_service(request: Request) -> LinkedSelectorService:
     """Retourne le service de sélection d'éléments liés.
     
+    Utilise le ServiceContainer depuis app.state (système unifié).
+    
     Args:
-        context_builder: ContextBuilder injecté.
+        request: La requête HTTP (injecté automatiquement par FastAPI).
         
     Returns:
         Instance de LinkedSelectorService.
     """
-    return LinkedSelectorService(context_builder=context_builder)
+    container = get_service_container(request)
+    return container.get_linked_selector_service()
 
 
 def get_llm_usage_repository() -> FileLLMUsageRepository:
@@ -301,6 +302,19 @@ def get_unity_dialogue_orchestrator(
     return container.get_unity_dialogue_orchestrator(request_id=request_id)
 
 
+def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
+    """Retourne l'orchestrateur de nœuds de graphe via le container.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de GraphNodeOrchestrator avec dépendances injectées.
+    """
+    container = get_service_container(request)
+    return container.get_graph_node_orchestrator()
+
+
 # Variables globales _vocab_service et _guides_service supprimées - utilisez ServiceContainer
 
 
@@ -340,13 +354,19 @@ def get_narrative_guides_service(request: Request) -> NarrativeGuidesService:
     return container.get_narrative_guides_service()
 
 
-def get_notion_import_service() -> NotionImportService:
-    """Retourne le service d'import Notion (singleton).
+def get_notion_import_service(request: Request) -> NotionImportService:
+    """Retourne le service d'import Notion.
     
+    Utilise le ServiceContainer depuis app.state (système unifié).
+    
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+        
     Returns:
         Instance de NotionImportService.
     """
-    return NotionImportService()
+    container = get_service_container(request)
+    return container.get_notion_import_service()
 
 
 def get_skill_catalog_service(request: Request) -> SkillCatalogService:

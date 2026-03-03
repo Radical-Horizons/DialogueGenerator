@@ -17,6 +17,9 @@ from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
+from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.linked_selector import LinkedSelectorService
+from services.notion_import_service import NotionImportService
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +53,10 @@ class ServiceContainer:
         self._preset_service: Optional[PresetService] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
+        self._unity_generation_service: Optional[UnityDialogueGenerationService] = None
+        self._graph_node_orchestrator: Optional["GraphNodeOrchestrator"] = None
+        self._linked_selector_service: Optional[LinkedSelectorService] = None
+        self._notion_import_service: Optional[NotionImportService] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
     def get_config_service(self) -> ConfigurationService:
@@ -209,6 +216,58 @@ class ServiceContainer:
             logger.info("LLMUsageService initialisé dans le container.")
         return self._llm_usage_service
     
+    def get_unity_dialogue_generation_service(self) -> UnityDialogueGenerationService:
+        """Retourne le service de génération Unity Dialogue.
+        
+        Returns:
+            Instance de UnityDialogueGenerationService.
+        """
+        if self._unity_generation_service is None:
+            self._unity_generation_service = UnityDialogueGenerationService()
+            logger.info("UnityDialogueGenerationService initialisé dans le container.")
+        return self._unity_generation_service
+    
+    def get_graph_node_orchestrator(self) -> "GraphNodeOrchestrator":
+        """Retourne l'orchestrateur de nœuds de graphe.
+        
+        Returns:
+            Instance de GraphNodeOrchestrator avec dépendances injectées.
+        """
+        if self._graph_node_orchestrator is None:
+            from services.graph_node_orchestrator import GraphNodeOrchestrator
+            
+            unity_service = self.get_unity_dialogue_generation_service()
+            self._graph_node_orchestrator = GraphNodeOrchestrator(
+                generation_service=unity_service
+            )
+            logger.info("GraphNodeOrchestrator initialisé dans le container.")
+        return self._graph_node_orchestrator
+    
+    def get_linked_selector_service(self) -> LinkedSelectorService:
+        """Retourne le service de sélection d'éléments liés.
+        
+        Returns:
+            Instance de LinkedSelectorService.
+        """
+        if self._linked_selector_service is None:
+            context_builder = self.get_context_builder()
+            self._linked_selector_service = LinkedSelectorService(
+                context_builder=context_builder
+            )
+            logger.info("LinkedSelectorService initialisé dans le container.")
+        return self._linked_selector_service
+    
+    def get_notion_import_service(self) -> NotionImportService:
+        """Retourne le service d'import Notion.
+        
+        Returns:
+            Instance de NotionImportService.
+        """
+        if self._notion_import_service is None:
+            self._notion_import_service = NotionImportService()
+            logger.info("NotionImportService initialisé dans le container.")
+        return self._notion_import_service
+    
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.
         
@@ -231,6 +290,7 @@ class ServiceContainer:
             trait_service=self.get_trait_catalog_service(),
             config_service=self.get_config_service(),
             usage_service=self.get_llm_usage_service(),
+            unity_generation_service=self.get_unity_dialogue_generation_service(),
             request_id=request_id
         )
     
@@ -250,4 +310,8 @@ class ServiceContainer:
         self._preset_service = None
         self._dialogue_generation_service = None
         self._llm_usage_service = None
+        self._unity_generation_service = None
+        self._graph_node_orchestrator = None
+        self._linked_selector_service = None
+        self._notion_import_service = None
         logger.info("ServiceContainer réinitialisé (reload détecté).")
