@@ -59,7 +59,7 @@ async def test_generate_node_with_target_choice_index(client, sample_parent_node
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         # Setup mocks
         mock_service = MagicMock()
@@ -116,8 +116,8 @@ async def test_generate_node_with_generate_all_choices(client, sample_parent_nod
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.GraphGenerationService') as mock_graph_service_class, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.GraphGenerationService') as mock_graph_service_class, \
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         # Setup mocks
         mock_service = MagicMock()
@@ -203,7 +203,7 @@ async def test_generate_node_nextnode_linear(client, sample_parent_node_without_
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         # Setup mocks
         mock_service = MagicMock()
@@ -258,7 +258,7 @@ async def test_generate_node_id_normalization_no_double_prefix(client, sample_pa
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         mock_service = MagicMock()
         mock_service_class.return_value = mock_service
@@ -316,7 +316,7 @@ async def test_generate_node_id_normalization_adds_prefix(client, sample_parent_
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         mock_service = MagicMock()
         mock_service_class.return_value = mock_service
@@ -484,8 +484,8 @@ async def test_generate_node_batch_returns_choice_counts(client, sample_parent_n
     """
     with patch('factories.llm_factory.LLMClientFactory') as mock_factory, \
          patch('api.routers.graph.ServiceContainer') as mock_container, \
-         patch('api.routers.graph.GraphGenerationService') as mock_graph_service_class, \
-         patch('api.routers.graph.UnityDialogueGenerationService') as mock_service_class:
+         patch('services.graph_node_orchestrator.GraphGenerationService') as mock_graph_service_class, \
+         patch('services.graph_node_orchestrator.UnityDialogueGenerationService') as mock_service_class:
         
         mock_service = MagicMock()
         mock_service_class.return_value = mock_service
