@@ -142,13 +142,16 @@ GPT-5.2 (Cursor)
 ### Completion Notes List
 
 - ✅ Task 1: edgeId de choix rendu stable (n'inclut plus la cible) pour permettre retarget sans churn d'IDs ; ajout de fixtures 4/8 choix et assertions d’unicité.
+- **Task 2 (partial):** Spec `e2e/documents-layout-adr008.spec.ts` étendu avec test 2.3 (dupliquer nœud → skip si « Dupliquer » non implémenté, Story 1.7). Tests 2.1, 2.2, 2.4 préexistants ; exécution E2E en run actuel : 3 failed (nodes non visibles après sélection/reload — environnement probablement sans dialogues ou chargement lent), 1 skipped (2.3). **Ne pas marquer Task 2 [x] tant que la batterie E2E ne passe pas** (ex. run local avec dialogues existants ou seed API en CI).
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/16-6-tests-golden-e2e-perf-non-régression.md`
 - `frontend/src/utils/graphEdgeBuilders.ts`
 - `frontend/src/utils/documentToGraph.ts`
 - `frontend/src/store/graphStore.ts`
 - `frontend/src/__tests__/documentToGraph.test.ts`
 - `frontend/src/utils/graphEdgeBuilders.test.ts`
 - `frontend/src/__tests__/graphStore.documents.test.ts`
+- `e2e/documents-layout-adr008.spec.ts`

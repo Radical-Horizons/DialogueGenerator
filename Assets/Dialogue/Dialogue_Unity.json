@@ -32,51 +32,5 @@
         "respectDelta": null
       }
     ]
-  },
-  {
-    "id": "manual-cf5a5f39-0ea4-4d64-8873-ad4812f07168",
-    "speaker": "test",
-    "line": "test",
-    "choices": [
-      {
-        "text": "Montre-moi une version des Barvas où l’immortalité est une question, pas une réponse.",
-        "condition": "",
-        "test": "Raison+Dissimulation:8",
-        "influenceDelta": null,
-        "respectDelta": null,
-        "traitRequirements": [
-          {
-            "trait": "Diplomate",
-            "minValue": 5
-          }
-        ]
-      },
-      {
-        "text": "J’échangerai une relique contre une explication claire de ta Synthèse et de sa non-fixité.",
-        "condition": "",
-        "test": "Raison+Diplomatie:7",
-        "influenceDelta": null,
-        "respectDelta": null
-      },
-      {
-        "text": "Continue ta démonstration en me guidant vers une convergence rituelle où nous pourrions comprendre ensemble.",
-        "condition": "",
-        "test": "Raison+Course:6",
-        "influenceDelta": null,
-        "respectDelta": null
-      }
-    ]
-  },
-  {
-    "id": "manual-eb9bf9d8-6743-4ddc-b109-ddd7fcf38785",
-    "speaker": "",
-    "line": "",
-    "choices": []
-  },
-  {
-    "id": "manual-5b65113b-400b-4b7a-8a05-8859b25509c4",
-    "speaker": "",
-    "line": "",
-    "choices": []
   }
 ]

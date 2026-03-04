@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.1.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "E2E",
+      "line": "Fixture ADR-008",
+      "nextNode": "END",
+      "choices": [
+        {
+          "text": "Go",
+          "choiceId": "choice-start-0",
+          "targetNode": null
+        }
+      ]
+    },
+    {
+      "id": "END",
+      "speaker": "E2E",
+      "line": "Fin.",
+      "nextNode": null,
+      "choices": []
+    }
+  ]
+}

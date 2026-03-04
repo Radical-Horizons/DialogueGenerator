@@ -35,7 +35,18 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const selectedNode = useGraphStore(
     useShallow((s) => s.nodes.find((n) => n.id === s.selectedNodeId) ?? null)
   )
-  const { updateNode, generateFromNode, isGenerating, setSelectedNode, setShowDeleteNodeConfirm, createEmptyNode, addNode, connectNodes, disconnectNodes } = useGraphStore()
+  const {
+    updateNode,
+    generateFromNode,
+    isGenerating,
+    setSelectedNode,
+    setShowDeleteNodeConfirm,
+    createEmptyNode,
+    addNode,
+    connectNodes,
+    disconnectNodes,
+    duplicateNode,
+  } = useGraphStore()
   const { selections } = useContextStore()
   const toast = useToast()
   
@@ -248,6 +259,11 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const handleDelete = () => {
     if (!selectedNodeId) return
     setShowDeleteNodeConfirm(true)
+  }
+
+  const handleDuplicate = () => {
+    if (!selectedNodeId) return
+    duplicateNode(selectedNodeId)
   }
   
   // Handler pour générer la suite (nextNode)
@@ -955,6 +971,24 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             }}
           >
             💾 Sauvegarder
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDuplicate}
+            style={{
+              padding: '0.75rem',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: 4,
+              backgroundColor: theme.button.default.background,
+              color: theme.text.primary,
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+            }}
+            title="Dupliquer ce nœud"
+          >
+            👯
           </button>
           
           <button

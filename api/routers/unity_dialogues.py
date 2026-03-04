@@ -206,12 +206,16 @@ async def read_unity_dialogue(
         try:
             json_content = file_path.read_text(encoding='utf-8')
             
-            # Valider que c'est du JSON valide
+            # Valider que c'est du JSON valide ; accepter liste ou document canonique (schemaVersion + nodes)
             try:
                 json_data = json.loads(json_content)
+                if isinstance(json_data, dict) and "nodes" in json_data:
+                    # Format document (Story 16.2) : renvoyer la liste des nœuds pour compatibilité loadGraph
+                    json_data = json_data["nodes"]
+                    json_content = json.dumps(json_data, ensure_ascii=False, indent=2)
                 if not isinstance(json_data, list):
                     raise ValidationException(
-                        message="Le fichier JSON Unity doit être un tableau de nœuds",
+                        message="Le fichier JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)",
                         details={"filename": filename},
                         request_id=request_id
                     )

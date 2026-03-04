@@ -2,7 +2,7 @@
  * Canvas principal du graphe avec ReactFlow.
  * Mode controlled (ADR-007) : nodes et edges proviennent exclusivement du store.
  */
-import { memo, useCallback, useMemo, useEffect, useRef } from 'react'
+import { memo, useCallback, useMemo, useEffect, useRef, useState } from 'react'
 import ReactFlow, {
   Background,
   Controls,
@@ -17,6 +17,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from './nodes'
 import { StableLabelSmoothStepEdge } from './edges/StableLabelSmoothStepEdge'
+import { NodeContextMenu } from './NodeContextMenu'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 
@@ -75,7 +76,7 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   }, [getNode, fitView, setSelectedNodeInner])
 
   useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    let timeoutId: number | null = null
     const handler = () => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -114,6 +115,34 @@ export const GraphCanvas = memo(function GraphCanvas() {
     deleteNode,
     disconnectNodes,
   } = useGraphStore()
+  const [menu, setMenu] = useState<{ id: string; top: number; left: number; right: number; bottom: number } | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const onNodeContextMenu = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      // Prevent native context menu from showing
+      event.preventDefault()
+
+      // Calculate position of the menu
+      if (ref.current) {
+        const pane = ref.current.getBoundingClientRect()
+        setMenu({
+          id: node.id,
+          top: event.clientY < pane.height - 200 ? event.clientY : undefined as any,
+          left: event.clientX < pane.width - 200 ? event.clientX : undefined as any,
+          right: event.clientX >= pane.width - 200 ? pane.width - event.clientX : undefined as any,
+          bottom: event.clientY >= pane.height - 200 ? pane.height - event.clientY : undefined as any,
+        } as any)
+      }
+    },
+    [setMenu]
+  )
+
+  const onPaneClick = useCallback(() => {
+    setSelectedNode(null)
+    setMenu(null)
+  }, [setSelectedNode, setMenu])
+
   const fitViewRequestedAfterDimensionsRef = useRef(false)
   useEffect(() => {
     fitViewRequestedAfterDimensionsRef.current = false
@@ -291,10 +320,6 @@ export const GraphCanvas = memo(function GraphCanvas() {
     [setSelectedNode]
   )
 
-  const onPaneClick = useCallback(() => {
-    setSelectedNode(null)
-  }, [setSelectedNode])
-
   const onConnect = useCallback(
     (connection: Connection) => {
       if (!connection.source || !connection.target) return
@@ -356,7 +381,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
   )
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
       <GraphCanvasInner />
       <ReactFlow
         nodes={nodes}
@@ -374,6 +399,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onNodeContextMenu={onNodeContextMenu}
         onPaneClick={onPaneClick}
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
@@ -416,6 +442,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
           }}
           maskColor={`${theme.background.panel}80`}
         />
+        {menu && <NodeContextMenu {...menu} onClose={() => setMenu(null)} />}
       </ReactFlow>
     </div>
   )

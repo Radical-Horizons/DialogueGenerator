@@ -580,9 +580,9 @@ So that **je peux itérer sur la qualité des dialogues sans perdre le contexte 
 **And** un message informatif s'affiche "Contexte GDD mis à jour depuis la génération originale"
 
 **Technical Requirements:**
-- Frontend : Bouton "Régénérer" dans menu contextuel `DialogueNode.tsx` pour nœuds rejetés
+- Frontend : Bouton "Régénérer" en **overlay hover inline** dans `DialogueNode.tsx` pour nœuds pending (⚠️ pas de menu contextuel — `DialogueNode.tsx` utilise exclusivement des overlays hover inline, comme les boutons Accept/Reject existants)
 - Composant : `RegenerateNodeModal.tsx` avec champ instructions pré-rempli + historique
-- Backend : Endpoint `/api/v1/dialogues/{id}/nodes/{nodeId}/regenerate` (POST) avec instructions ajustées
+- Backend : Endpoint `/api/v1/unity-dialogues/graph/nodes/{nodeId}/regenerate` (POST) — cohérent avec `/nodes/{nodeId}/accept` et `/nodes/{nodeId}/reject` existants dans `api/routers/graph.py`
 - Historique : Stockage instructions précédentes dans metadata nœud (`regenerationHistory: [...]`)
 - Connexions : Préservation connexions lors remplacement nœud (même stableID ou mapping)
 - Tests : Unit (régénération logique), Integration (API regenerate), E2E (workflow régénération)
@@ -633,11 +633,11 @@ So that **je peux gérer mon budget et décider si je veux procéder avec la gé
 **And** le bouton "Générer" est désactivé si budget 100% dépassé
 
 **Technical Requirements:**
-- Backend : Endpoint `/api/v1/dialogues/estimate-cost` (POST) avec contexte + instructions, retourne estimation
-- Service : `CostEstimationService` calcule tokens (prompt builder) + prix provider (config)
-- Frontend : Composant `CostEstimationBadge.tsx` affiche estimation + bouton "Estimer" dans `GenerationPanel.tsx`
+- Backend : Endpoint `/api/v1/unity-dialogues/graph/estimate-cost` (POST) — nouveau endpoint cohérent avec le namespace graph (⚠️ `/api/v1/dialogues/estimate-cost` n'existe pas ; note : `/api/v1/dialogues/estimate-tokens` existe déjà dans `api/routers/dialogues.py` comme fondation pour le comptage tokens)
+- Services : `TokenEstimationService` (`services/token_estimation_service.py` — ⚠️ **stub vide actuellement** `class TokenEstimationService: pass`, à implémenter) + `LLMPricingService` (`services/llm_pricing_service.py` — ✅ **existe**, calcule le coût €/token depuis `config/llm_pricing.json`) — (⚠️ `CostEstimationService` n'existe pas)
+- Frontend : Composant `CostEstimationBadge.tsx` affiche estimation + bouton "Estimer" dans `AIGenerationPanel.tsx` (⚠️ pas dans `GenerationPanel.tsx` qui est la génération standalone ; le panneau du graphe est `AIGenerationPanel.tsx`)
 - Cache : Estimation mise en cache (hash prompt) pour éviter recalculs inutiles
-- Integration : Epic 0 Story 0.7 (cost governance) pour vérification budget
+- Integration : Epic 0 Story 0.7 (cost governance) — hook `useCostGovernance()` + `CostGovernanceService` (`services/cost_governance_service.py` ✅ existant)
 - Tests : Unit (calcul estimation), Integration (API estimation), E2E (workflow estimation)
 
 **Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe (pas de changement nodes/edges ou du canvas).
@@ -684,11 +684,11 @@ So that **je peux analyser où mes coûts LLM sont concentrés et optimiser mes 
 **And** un indicateur "Nœud supprimé" s'affiche à côté du coût dans le breakdown
 
 **Technical Requirements:**
-- Backend : Endpoint `/api/v1/dialogues/{id}/costs` (GET) retourne breakdown détaillé
-- Service : `CostTrackingService` agrège coûts par dialogue depuis `cost_logs` (table Epic 0 Story 0.7)
+- Backend : Endpoint `/api/v1/llm-usage/dialogue/{id}/costs` (GET) retourne breakdown détaillé — (⚠️ `GET /api/v1/dialogues/{id}/costs` n'existe pas ; utiliser le namespace `llm-usage` existant dans `api/routers/llm_usage.py`)
+- Service : `LLMUsageService` (`services/llm_usage_service.py` ✅ existant) — ⚠️ **PRÉREQUIS CRITIQUE** : le schéma `LLMUsageRecord` actuel (stocké dans `data/llm_usage/usage_YYYY-MM-DD.json`) n'a **pas** de champs `dialogue_id` ni `node_id`. Story 1.15 doit étendre ce schéma avant que cette story soit implémentable. (⚠️ `CostTrackingService` n'existe pas)
 - Frontend : Composant `DialogueCostBreakdown.tsx` avec graphique (Chart.js ou Recharts) + tableau détaillé
 - Graphique : Bar chart coût par nœud, tooltip avec détails au survol
-- Integration : Epic 0 Story 0.7 (cost governance) pour données coûts
+- Integration : `LLMUsageService` pour données coûts + `CostGovernanceService` pour budget
 - Tests : Unit (agrégation coûts), Integration (API costs), E2E (affichage breakdown)
 
 **Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe.
@@ -734,13 +734,13 @@ So that **je peux suivre mon budget global et identifier les tendances de consom
 **Then** un indicateur de progression s'affiche "Budget: 45€ / 100€ (45%)"
 **And** une barre de progression visuelle montre l'avancement (vert <90%, orange 90-100%, rouge >100%)
 
-**Technical Requirements:**
-- Backend : Endpoint `/api/v1/costs/cumulative` (GET) avec paramètre `period: daily/monthly/yearly`
-- Service : `CostTrackingService` agrège coûts depuis `cost_logs` par période (SQL GROUP BY date)
-- Frontend : Composant `CumulativeCostsDashboard.tsx` avec graphique linéaire (Chart.js) + indicateurs
-- Graphique : Ligne temporelle coûts quotidiens/mensuels avec tooltip détails
-- Integration : Epic 0 Story 0.7 (cost governance) pour budget + données coûts
-- Tests : Unit (agrégation périodes), Integration (API cumulative), E2E (affichage dashboard)
+**Technical Requirements (AS IMPLEMENTED — DONE) :**
+- Backend : Endpoints existants : `GET /api/v1/costs/usage` (daily_costs[], total, percentage) + `GET /api/v1/llm-usage/statistics` (stats par période/modèle) dans `api/routers/costs.py` et `api/routers/llm_usage.py` — (⚠️ `/api/v1/costs/cumulative` n'existe pas)
+- Services : `LLMUsageService.get_statistics()` + `CostGovernanceService.get_budget_status()` (✅ existants) — (⚠️ `CostTrackingService` n'existe pas)
+- Frontend : Composant `UsageDashboard.tsx` dans `frontend/src/components/usage/` (✅ existant, affiche budget, graphique barres daily costs, stats grid, UsageHistoryTable) — (⚠️ `CumulativeCostsDashboard.tsx` n'existe pas — c'est le nom de documentation, le vrai composant est `UsageDashboard.tsx`)
+- Graphique : Bar chart coûts quotidiens (mois en cours), tooltip détails — intégré dans `UsageDashboard.tsx`
+- Integration : `costs.ts` API client appelle `GET /api/v1/costs/budget`, `GET /api/v1/costs/usage` ; `llmUsage.ts` appelle `GET /api/v1/llm-usage/statistics`
+- Tests : (à vérifier)
 
 **References:** FR74 (coûts cumulatifs), Epic 0 Story 0.7 (cost governance), FR76 (budgets)
 
@@ -785,11 +785,11 @@ So that **je peux comprendre comment le contexte GDD et les instructions sont ut
 **And** un message informatif s'affiche "Prompt historique - contexte GDD depuis modifié"
 
 **Technical Requirements:**
-- Backend : Stockage prompt dans `generation_logs` (table) avec chaque génération (timestamp, prompt, tokens, cost)
-- API : Endpoint `/api/v1/dialogues/{id}/nodes/{nodeId}/prompt` (GET) retourne prompt historique
+- Backend : Stockage prompt dans `generation_logs` — ⚠️ **n'existe pas encore** ; `LLMUsageRecord` actuel (`data/llm_usage/usage_YYYY-MM-DD.json`) ne stocke que tokens/cost/duration/success, **pas le prompt ni la réponse brute**. Cette story dépend de Story 1.15 qui doit d'abord étendre le schéma de log pour inclure `prompt` et `response`.
+- API : Endpoint `/api/v1/unity-dialogues/graph/nodes/{nodeId}/prompt` (GET) — namespace cohérent avec les autres endpoints graphe (⚠️ `/api/v1/dialogues/{id}/nodes/{nodeId}/prompt` n'est pas le bon namespace)
 - Frontend : Composant `PromptViewerModal.tsx` avec syntaxe highlight (react-syntax-highlighter) + bouton copier
 - Format : Prompt formaté avec sections (System, Context, Instructions) + line numbers
-- Integration : Story 1.15 (generation logs) pour stockage prompts
+- Integration : Story 1.15 (generation logs) **PRÉREQUIS** — à implémenter après Story 1.15
 - Tests : Unit (formatage prompt), Integration (API prompt), E2E (affichage prompt)
 
 **Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe (modal/panneau détail uniquement).
@@ -844,8 +844,8 @@ So that **je peux analyser l'historique des générations et comprendre les patt
 **And** les logs incluent : timestamp, nœud, prompt, réponse, coût, tokens, provider, statut
 
 **Technical Requirements:**
-- Backend : Table `generation_logs` (timestamp, dialogue_id, node_id, prompt, response, tokens, cost, provider, status)
-- API : Endpoint `/api/v1/dialogues/{id}/generation-logs` (GET) avec filtres période/provider
+- Backend : Extension du schéma `LLMUsageRecord` (`services/repositories/llm_usage_repository.py` + `data/llm_usage/usage_YYYY-MM-DD.json`) pour ajouter `dialogue_id`, `node_id`, `prompt`, `response` — ⚠️ **ATTENTION** : le schéma actuel ne contient que `request_id`, `model`, `tokens`, `cost`, `duration`, `success`/`error` — **les champs `dialogue_id`, `node_id`, `prompt` et `response` n'existent pas encore**. Option alternative : nouveau `GenerationLogRepository` séparé pour ne pas casser l'existant. (⚠️ `CostTrackingService` n'existe pas — vrai service : `LLMUsageService`)
+- API : Endpoint `/api/v1/llm-usage/dialogue/{id}/generation-logs` (GET) avec filtres période/provider — cohérent avec le namespace `llm-usage` existant dans `api/routers/llm_usage.py` (⚠️ `/api/v1/dialogues/{id}/generation-logs` n'est pas le bon namespace ; `/api/v1/llm-usage/history` existe déjà pour données globales sans filtrage par dialogue)
 - Frontend : Composant `GenerationLogsPanel.tsx` avec liste chronologique + filtres + export
 - Format : Logs formatés avec timestamps lisibles, coûts en €, statuts colorés (vert=succès, rouge=échec)
 - Export : Fonction export CSV/JSON côté frontend (download blob)
@@ -900,12 +900,11 @@ So that **mes générations ne sont pas interrompues par des pannes temporaires 
 **And** les métriques de fallback sont trackées (nombre de fallbacks par provider)
 
 **Technical Requirements:**
-- Backend : Service `LLMFallbackService` avec logique retry + fallback (provider1 → provider2 → échec)
-- Factory : `LLMClientFactory` avec méthode `createWithFallback(primary, fallback)` retournant client avec retry
-- Retry : Backoff exponentiel (3 tentatives) avant fallback vers provider alternatif
-- Logs : Événement "llm_fallback" dans `generation_logs` avec provider source → provider destination + raison
+- Backend : Logique fallback dans `LLMClientFactory` (`factories/llm_factory.py` ✅ existant) — ⚠️ **`LLMFallbackService` n'existe pas** ; implémenter directement dans la factory ou créer un décorateur/wrapper. Actuellement la factory dégrade vers `DummyLLMClient` sur erreur (dev-only, pas un vrai fallback production). Nouvelle méthode `create_client_with_fallback(primary_model_id, fallback_model_id, config, ...)` à ajouter (⚠️ `createWithFallback()` n'existe pas)
+- Factory : Retry avec backoff exponentiel (3 tentatives) avant basculement vers provider secondaire ; les providers existants : `OpenAIClient` (`core/llm/openai/client.py`) et `MistralClient` (`core/llm/mistral_client.py`)
+- Logs : Événement "llm_fallback" à ajouter dans `LLMUsageService.track_usage()` — ⚠️ `generation_logs` n'existe pas encore (Story 1.15 prérequis pour le log complet) ; utiliser `LLMUsageService` existant avec champ `error_message` pour le fallback
 - Frontend : Message toast informatif "Fallback vers [provider]" (non-bloquant, 5s timeout)
-- Configuration : Paramètres utilisateur pour ordre fallback (localStorage + backend preferences)
+- Configuration : Paramètres ordre fallback en config backend (`config/`) — pas de localStorage pour ce type de config sécurité
 - Tests : Unit (logique fallback), Integration (API fallback), E2E (workflow fallback complet)
 
 **Risque bug nœuds invisibles (1.17) :** Aucun — cette US ne modifie pas l'affichage des nœuds dans le graphe (backend/LLM uniquement).

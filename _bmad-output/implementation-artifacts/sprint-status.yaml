@@ -56,13 +56,8 @@ development_status:
   16-2-backend-document-get-put-revision-409: done
   16-3-backend-layout-sidecar-concurrence: done
   16-4-frontend-sot-document-layout-projection-ids-stables: done
-<<<<<<< Updated upstream
   16-5-migration-choiceid-lecture-tolérante-refus-sans-choiceid: done
-  16-6-tests-golden-e2e-perf-non-régression: ready-for-dev
-=======
-  16-5-migration-choiceid-lecture-tolérante-refus-sans-choiceid: review
   16-6-tests-golden-e2e-perf-non-régression: in-progress
->>>>>>> Stashed changes
   epic-16-retrospective: optional
   epic-1: backlog
   1-1-générer-un-nœud-de-dialogue-single-depuis-un-nœud-parent-dans-le-graphe-fr1: done
@@ -71,17 +66,17 @@ development_status:
   1-4-accepter-ou-rejeter-nœuds-générés-inline-fr4: done
   1-5-éditer-manuellement-le-contenu-des-nœsquds-générés-fr5: done
   1-6-créer-manuellement-des-nœuds-sans-llm-fr6: done
-  1-7-dupliquer-des-nœuds-existants-pour-créer-des-variantes-fr7: ready-for-dev
+  1-7-dupliquer-des-nœuds-existants-pour-créer-des-variantes-fr7: done
   1-8-supprimer-des-nœuds-du-dialogue-fr8: done
   1-9-auto-link-des-nœuds-générés-au-graphe-existant-fr9: done
-  1-10-régénérer-des-nœuds-rejetés-avec-instructions-ajustées-fr10: backlog
+  1-10-régénérer-des-nœuds-rejetés-avec-instructions-ajustées-fr10: ready-for-dev
   1-11-estimer-le-coût-llm-avant-génération-fr72: backlog
   1-12-afficher-breakdown-des-coûts-par-dialogue-fr73: backlog
   1-13-afficher-coûts-llm-cumulatifs-daily-monthly-fr74: done
   1-14-afficher-prompt-transparency-prompt-exact-envoyé-au-llm-fr77: backlog
   1-15-afficher-logs-de-génération-prompts-réponses-coûts-fr78: backlog
   1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79: backlog
-  1-17-adr-007-react-flow-controlled: review
+  1-17-adr-007-react-flow-controlled: done
   epic-1-retrospective: optional
   epic-2: backlog
   2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: backlog

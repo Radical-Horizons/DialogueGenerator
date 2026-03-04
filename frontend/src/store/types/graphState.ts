@@ -1,0 +1,162 @@
+/**
+ * Types et état initial du store graphe de dialogues.
+ * Centralisé ici pour éviter les imports circulaires entre slices.
+ */
+import type { Node, Edge } from 'reactflow'
+import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
+
+export interface GraphMetadata {
+  title: string
+  filename?: string
+  node_count: number
+  edge_count: number
+}
+
+export interface GraphState {
+  // Données
+  nodes: Node[]
+  edges: Edge[]
+  selectedNodeId: string | null
+  dialogueMetadata: GraphMetadata
+
+  // État UI
+  isGenerating: boolean
+  isLoading: boolean
+  isSaving: boolean
+  validationErrors: ValidationErrorDetail[]
+  highlightedNodeIds: string[]
+  highlightedCycleNodes: string[]
+  intentionalCycles: string[]
+
+  // État pending save (auto-save vers backend, pas de draft local)
+  hasUnsavedChanges: boolean
+  lastSaveError: string | null
+  lastSavedAt: number | null
+
+  // ADR-006: seq + journal + statut sync
+  clientSeq: number
+  documentId: string | null
+  syncStatus: 'synced' | 'offline' | 'error'
+  lastAckSeq: number | null
+
+  // Story 16.4 : SoT document + layout (load/save via API documents)
+  document: Record<string, unknown> | null
+  layout: Record<string, unknown> | null
+  documentRevision: number | null
+  layoutRevision: number | null
+
+  // Modale confirmation suppression nœud (Supr.)
+  showDeleteNodeConfirm: boolean
+
+  // Actions CRUD
+  loadDialogue: (
+    jsonContent: string,
+    savedPositions?: Record<string, { x: number; y: number }>,
+    filename?: string
+  ) => Promise<void>
+  loadDialogueByDocumentId: (documentId: string) => Promise<void>
+  addNode: (node: Node) => void
+  /** Crée un nœud vide (sans LLM). Story 1.6 - FR6. */
+  createEmptyNode: (position?: { x: number; y: number }) => Node
+  updateNode: (nodeId: string, updates: Partial<Node>) => void
+  deleteNode: (nodeId: string) => void
+  connectNodes: (
+    sourceId: string,
+    targetId: string,
+    choiceIndex?: number,
+    connectionType?: string
+  ) => void
+  disconnectNodes: (edgeId: string) => void
+  setSelectedNode: (nodeId: string | null) => void
+  duplicateNode: (nodeId: string) => Node | null
+  duplicateNodes: (nodeIds: string[]) => void
+  updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void
+  updateNodeDimensions: (
+    nodeId: string,
+    dimensions: { width: number; height: number }
+  ) => void
+
+  // Actions IA
+  generateFromNode: (
+    parentNodeId: string,
+    instructions: string,
+    options: Record<string, unknown>
+  ) => Promise<{
+    nodeId: string | null
+    batchInfo?: {
+      generatedChoices: number
+      connectedChoices: number
+      failedChoices: number
+      totalChoices: number
+    }
+  }>
+
+  // Accept/Reject nodes (Story 1.4)
+  acceptNode: (nodeId: string) => Promise<void>
+  rejectNode: (nodeId: string) => Promise<void>
+
+  // Validation
+  validateGraph: () => Promise<void>
+
+  // Persistence
+  saveDialogue: () => Promise<SaveGraphResponse>
+  exportToUnity: (opts?: { keepStatusForDraft?: boolean }) => string
+
+  // Layout
+  applyAutoLayout: (algorithm: string, direction: string) => Promise<void>
+
+  // Metadata
+  updateMetadata: (updates: Partial<GraphMetadata>) => void
+
+  // Reset
+  resetGraph: () => void
+
+  // Recherche
+  setHighlightedNodes: (nodeIds: string[]) => void
+
+  // Cycles intentionnels
+  markCycleAsIntentional: (cycleId: string) => void
+  unmarkCycleAsIntentional: (cycleId: string) => void
+
+  // Pending save
+  markDirty: () => void
+
+  setShowDeleteNodeConfirm: (show: boolean) => void
+}
+
+export const initialState = {
+  nodes: [] as Node[],
+  edges: [] as Edge[],
+  selectedNodeId: null as string | null,
+  dialogueMetadata: {
+    title: 'Nouveau Dialogue',
+    node_count: 0,
+    edge_count: 0,
+  } as GraphMetadata,
+  isGenerating: false,
+  isLoading: false,
+  isSaving: false,
+  validationErrors: [] as ValidationErrorDetail[],
+  highlightedNodeIds: [] as string[],
+  highlightedCycleNodes: [] as string[],
+  intentionalCycles: (() => {
+    try {
+      const stored = localStorage.getItem('graph_intentional_cycles')
+      return stored ? (JSON.parse(stored) as string[]) : []
+    } catch {
+      return [] as string[]
+    }
+  })(),
+  hasUnsavedChanges: false,
+  lastSaveError: null as string | null,
+  lastSavedAt: null as number | null,
+  showDeleteNodeConfirm: false,
+  clientSeq: 1,
+  documentId: null as string | null,
+  syncStatus: 'synced' as const,
+  lastAckSeq: null as number | null,
+  document: null as Record<string, unknown> | null,
+  layout: null as Record<string, unknown> | null,
+  documentRevision: null as number | null,
+  layoutRevision: null as number | null,
+}

@@ -1,0 +1,407 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "DialogueGenerator" [level=1] [ref=e6]
+      - 'generic "Date de compilation: 05/03/2026 00:37:02" [ref=e7]': "Build: 05/03/2026 00:37"
+    - generic [ref=e9]: Non connecté
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: Contexte
+          - button "Replier le panneau gauche" [ref=e16] [cursor=pointer]:
+            - img [ref=e17]
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - button "Personnages (41)" [ref=e21] [cursor=pointer]
+            - button "Lieux (47)" [ref=e22] [cursor=pointer]
+            - button "Objets (17)" [ref=e23] [cursor=pointer]
+            - button "Espèces (47)" [ref=e24] [cursor=pointer]
+            - button "Communautés (11)" [ref=e25] [cursor=pointer]
+          - generic [ref=e27]:
+            - generic [ref=e29]:
+              - textbox "Rechercher... (/)" [ref=e30]
+              - combobox "Trier les résultats" [ref=e31]:
+                - option "Nom (A-Z)" [selected]
+                - option "Nom (Z-A)"
+                - option "Sélectionnés en premier"
+            - generic [ref=e32]:
+              - generic [ref=e33] [cursor=pointer]:
+                - checkbox [ref=e34]
+                - generic [ref=e35]: Akthar-Neth Amatru, l’Exégète
+              - generic [ref=e36] [cursor=pointer]:
+                - checkbox [ref=e37]
+                - generic [ref=e38]: Avili de l’Éternel Retour
+              - generic [ref=e39] [cursor=pointer]:
+                - checkbox [ref=e40]
+                - generic [ref=e41]: Barvas le Juge-Mendiant
+              - generic [ref=e42] [cursor=pointer]:
+                - checkbox [ref=e43]
+                - generic [ref=e44]: Cendreveine
+              - generic [ref=e45] [cursor=pointer]:
+                - checkbox [ref=e46]
+                - generic [ref=e47]: Chantier-Doux, Berger de Gedroths
+              - generic [ref=e48] [cursor=pointer]:
+                - checkbox [ref=e49]
+                - generic [ref=e50]: Duq'Sha, L'Archiviste Boiteux
+              - generic [ref=e51] [cursor=pointer]:
+                - checkbox [ref=e52]
+                - generic [ref=e53]: Eonundé Alinen-Egan
+              - generic [ref=e54] [cursor=pointer]:
+                - checkbox [ref=e55]
+                - generic [ref=e56]: Gardien-Calligraphe Qalamtû
+              - generic [ref=e57] [cursor=pointer]:
+                - checkbox [ref=e58]
+                - generic [ref=e59]: Genka Lien, le bouffon
+              - generic [ref=e60] [cursor=pointer]:
+                - checkbox [ref=e61]
+                - generic [ref=e62]: Grish T’vok
+              - generic [ref=e63] [cursor=pointer]:
+                - checkbox [ref=e64]
+                - generic [ref=e65]: Guette-Horizon, Gardienne du périmètre
+              - generic [ref=e66] [cursor=pointer]:
+                - checkbox [ref=e67]
+                - generic [ref=e68]: Jast, l’Inéluctable
+              - generic [ref=e69] [cursor=pointer]:
+                - checkbox [ref=e70]
+                - generic [ref=e71]: Kha'Vareth, L'Artisan d'Éternité
+              - generic [ref=e72] [cursor=pointer]:
+                - checkbox [ref=e73]
+                - generic [ref=e74]: Khair-gul, Le Médecin-Ascétique
+              - generic [ref=e75] [cursor=pointer]:
+                - checkbox [ref=e76]
+                - generic [ref=e77]: Korga l'Effritée, Maçonne-rafistoleuse
+              - generic [ref=e78] [cursor=pointer]:
+                - checkbox [ref=e79]
+                - generic [ref=e80]: L’Arbitre
+              - generic [ref=e81] [cursor=pointer]:
+                - checkbox [ref=e82]
+                - generic [ref=e83]: L’Enlumineur
+              - generic [ref=e84] [cursor=pointer]:
+                - checkbox [ref=e85]
+                - generic [ref=e86]: L'Ensevelie
+              - generic [ref=e87] [cursor=pointer]:
+                - checkbox [ref=e88]
+                - generic [ref=e89]: L'Équipe des Trois-Dos
+              - generic [ref=e90] [cursor=pointer]:
+                - checkbox [ref=e91]
+                - generic [ref=e92]: L'Éthérée
+              - generic [ref=e93] [cursor=pointer]:
+                - checkbox [ref=e94]
+                - generic [ref=e95]: L’Incarnée
+              - generic [ref=e96] [cursor=pointer]:
+                - checkbox [ref=e97]
+                - generic [ref=e98]: Lyro Seph
+              - generic [ref=e99] [cursor=pointer]:
+                - checkbox [ref=e100]
+                - generic [ref=e101]: Murmure-Éteint
+              - generic [ref=e102] [cursor=pointer]:
+                - checkbox [ref=e103]
+                - generic [ref=e104]: Navarre K'ssh, la Stratège Sanguine
+              - generic [ref=e105] [cursor=pointer]:
+                - checkbox [ref=e106]
+                - generic [ref=e107]: Nila Halder
+              - generic [ref=e108] [cursor=pointer]:
+                - checkbox [ref=e109]
+                - generic [ref=e110]: Ori-Bikar 57, l’Enfant-Foudre
+              - generic [ref=e111] [cursor=pointer]:
+                - checkbox [ref=e112]
+                - generic [ref=e113]: Ôrmüd T’lian-Keresh, le Maître-Flagellant
+              - generic [ref=e114] [cursor=pointer]:
+                - checkbox [ref=e115]
+                - generic [ref=e116]: Raki-Biro 58, l’Enfant-Prophète
+              - generic [ref=e117] [cursor=pointer]:
+                - checkbox [ref=e118]
+                - generic [ref=e119]: Ravim Halder
+              - generic [ref=e120] [cursor=pointer]:
+                - checkbox [ref=e121]
+                - generic [ref=e122]: Rêveur du Puits Céleste
+              - generic [ref=e123] [cursor=pointer]:
+                - checkbox [ref=e124]
+                - generic [ref=e125]: Saritha Halder
+              - generic [ref=e126] [cursor=pointer]:
+                - checkbox [ref=e127]
+                - generic [ref=e128]: Seigneuresse Uresaïr
+              - generic [ref=e129] [cursor=pointer]:
+                - checkbox [ref=e130]
+                - generic [ref=e131]: Siphon Argenté et Kresh l'Écaillé
+              - generic [ref=e132] [cursor=pointer]:
+                - checkbox [ref=e133]
+                - generic [ref=e134]: Valkazer Reitar
+              - generic [ref=e135] [cursor=pointer]:
+                - checkbox [ref=e136]
+                - generic [ref=e137]: Varek l’Écorché
+              - generic [ref=e138] [cursor=pointer]:
+                - checkbox [ref=e139]
+                - generic [ref=e140]: Vethraak
+              - generic [ref=e141] [cursor=pointer]:
+                - checkbox [ref=e142]
+                - generic [ref=e143]: Voknir Esh'Maradel, le cartographe
+              - generic [ref=e144] [cursor=pointer]:
+                - checkbox [ref=e145]
+                - generic [ref=e146]: Vol Reitar
+              - generic [ref=e147] [cursor=pointer]:
+                - checkbox [ref=e148]
+                - generic [ref=e149]: Yrthas, la murmuratrice
+              - generic [ref=e150] [cursor=pointer]:
+                - checkbox [ref=e151]
+                - generic [ref=e152]: Ysellor Eonundé du Ressac
+              - generic [ref=e153] [cursor=pointer]:
+                - checkbox [ref=e154]
+                - generic [ref=e155]: Zaehria Neth'Varu, La Gardienne Vertébrale
+          - generic [ref=e157]: Aucune sélection
+      - generic [ref=e161]:
+        - generic [ref=e162]:
+          - button "Génération de Dialogues" [ref=e163] [cursor=pointer]
+          - button "Édition de Dialogues" [ref=e164] [cursor=pointer]
+          - button "📊 Éditeur de Graphe" [ref=e165] [cursor=pointer]
+        - generic [ref=e167]:
+          - generic [ref=e169]:
+            - generic [ref=e170]:
+              - generic [ref=e171]:
+                - textbox "Rechercher un dialogue... (/)" [ref=e172]
+                - combobox "Trier les dialogues" [ref=e173]:
+                  - option "Date (récent)" [selected]
+                  - option "Date (ancien)"
+                  - option "Nom (A-Z)"
+                  - option "Nom (Z-A)"
+              - generic [ref=e174]: 7 dialogues
+            - generic [ref=e175]:
+              - generic [ref=e176] [cursor=pointer]:
+                - generic [ref=e177]: E2e-adr008-fixture
+                - generic [ref=e178]: e2e-adr008-fixture.json
+                - generic [ref=e179]:
+                  - generic [ref=e180]: 449 B
+                  - generic [ref=e181]: •
+                  - generic [ref=e182]: 5 mars 2026, 00:37
+              - generic [ref=e183] [cursor=pointer]:
+                - generic [ref=e184]: Dialogue Unity
+                - generic [ref=e185]: Dialogue_Unity.json
+                - generic [ref=e186]:
+                  - generic [ref=e187]: 990 B
+                  - generic [ref=e188]: •
+                  - generic [ref=e189]: 5 mars 2026, 00:32
+              - generic [ref=e190] [cursor=pointer]:
+                - generic [ref=e191]: Convergences au léviathan
+                - generic [ref=e192]: convergences_au_léviathan.json
+                - generic [ref=e193]:
+                  - generic [ref=e194]: 1.2 KB
+                  - generic [ref=e195]: •
+                  - generic [ref=e196]: 3 mars 2026, 19:51
+              - generic [ref=e197] [cursor=pointer]:
+                - generic [ref=e198]: Tunnel vertébral pigments impossibles
+                - generic [ref=e199]: tunnel_vertébral_pigments_impossibles.json
+                - generic [ref=e200]:
+                  - generic [ref=e201]: 2.3 KB
+                  - generic [ref=e202]: •
+                  - generic [ref=e203]: 3 mars 2026, 19:51
+              - generic [ref=e204] [cursor=pointer]:
+                - generic [ref=e205]: Atelier du cartographe dans les plis dossements
+                - generic [ref=e206]: atelier_du_cartographe_dans_les_plis_dossements.json
+                - generic [ref=e207]:
+                  - generic [ref=e208]: 8.9 KB
+                  - generic [ref=e209]: •
+                  - generic [ref=e210]: 3 mars 2026, 19:51
+              - generic [ref=e211] [cursor=pointer]:
+                - generic [ref=e212]: Dans les plis une carte qui refuse dêtre plate
+                - generic [ref=e213]: dans_les_plis_une_carte_qui_refuse_dêtre_plate.json
+                - generic [ref=e214]:
+                  - generic [ref=e215]: 21.2 KB
+                  - generic [ref=e216]: •
+                  - generic [ref=e217]: 24 janv. 2026, 23:44
+              - generic [ref=e218] [cursor=pointer]:
+                - generic [ref=e219]: Rencontre avec le cartographe
+                - generic [ref=e220]: rencontre_avec_le_cartographe.json
+                - generic [ref=e221]:
+                  - generic [ref=e222]: 2.6 KB
+                  - generic [ref=e223]: •
+                  - generic [ref=e224]: 17 janv. 2026, 20:11
+          - generic [ref=e225]:
+            - generic [ref=e227]:
+              - generic "Graphe valide (validation automatique à chaque sauvegarde)" [ref=e228]:
+                - generic [ref=e229]: ✓
+                - generic [ref=e230]: Graphe valide
+              - generic "Synced (seq 21850)" [ref=e231]
+              - generic [ref=e233]:
+                - combobox "Direction du layout" [disabled] [ref=e234]:
+                  - option "TB (Haut-Bas)" [selected]
+                  - option "LR (Gauche-Droite)"
+                  - option "BT (Bas-Haut)"
+                  - option "RL (Droite-Gauche)"
+                - button "📐 Auto-layout" [disabled] [ref=e235]
+              - button "➕ Nouveau nœud" [disabled] [ref=e236]
+              - button "✨ Générer nœud" [disabled] [ref=e237]
+              - button "📤 Exporter" [disabled] [ref=e238]
+            - generic [ref=e240]: Chargement du graphe...
+      - generic [ref=e243]:
+        - generic [ref=e244]:
+          - generic [ref=e245]: Détails
+          - button "Replier le panneau droit" [ref=e246] [cursor=pointer]:
+            - img [ref=e247]
+        - generic [ref=e250]: ● Brouillon non sauvegardé
+        - generic [ref=e252]:
+          - generic [ref=e253]:
+            - button "Prompt" [ref=e254] [cursor=pointer]
+            - button "Dialogue généré" [ref=e255] [cursor=pointer]
+            - button "Édition de nœud" [ref=e256] [cursor=pointer]
+            - button "Détails" [ref=e257] [cursor=pointer]
+          - generic [ref=e260]:
+            - generic [ref=e261]:
+              - generic [ref=e262]: ID du nœud
+              - textbox [ref=e263]: START
+            - generic [ref=e264]:
+              - generic [ref=e265]: Type
+              - textbox [ref=e266]: dialogueNode
+            - generic [ref=e267]:
+              - generic [ref=e268]: Speaker
+              - textbox "Nom du personnage" [ref=e269]: SPK_1772667434415
+            - generic [ref=e270]:
+              - generic [ref=e271]: Dialogue
+              - textbox "Texte du dialogue..." [ref=e272]: LINE_1772667434415
+            - generic [ref=e273]:
+              - generic [ref=e274]:
+                - generic [ref=e275]: Choix (3)
+                - button "+ Ajouter un choix" [ref=e276] [cursor=pointer]
+              - generic [ref=e277]:
+                - generic [ref=e278]:
+                  - 'heading "Choix #1(connecté)" [level=4] [ref=e279]'
+                  - button "🗑️ Supprimer" [ref=e281] [cursor=pointer]
+                - generic [ref=e282]:
+                  - generic [ref=e283]: Texte du choix *
+                  - textbox "Texte du choix..." [ref=e284]: CHO_1772667434415
+                - generic [ref=e285]:
+                  - generic [ref=e286]: Condition d'affichage
+                  - 'textbox "Ex: FLAG_NAME, NOT FLAG_NAME, startState == 1" [ref=e287]'
+                  - generic [ref=e288]: "Format: FLAG_NAME, NOT FLAG_NAME, ou expression (ex: startState == 1)"
+                - generic [ref=e289]:
+                  - generic [ref=e290]: Test d'attribut
+                  - 'textbox "Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)" [ref=e291]': Raison+Dissimulation:8
+                  - generic [ref=e292]: "Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)"
+                - generic [ref=e293]:
+                  - heading "Destinations du test" [level=5] [ref=e294]
+                  - generic [ref=e295]:
+                    - generic [ref=e296]: Échec critique →
+                    - textbox "Échec critique →" [ref=e297]:
+                      - /placeholder: "ID du nœud (ex: NODE_CRITICAL_FAILURE)"
+                  - generic [ref=e298]:
+                    - generic [ref=e299]: Échec →
+                    - textbox "Échec →" [ref=e300]:
+                      - /placeholder: "ID du nœud (ex: NODE_FAILURE)"
+                  - generic [ref=e301]:
+                    - generic [ref=e302]: Réussite →
+                    - textbox "Réussite →" [ref=e303]:
+                      - /placeholder: "ID du nœud (ex: NODE_SUCCESS)"
+                  - generic [ref=e304]:
+                    - generic [ref=e305]: Réussite critique →
+                    - textbox "Réussite critique →" [ref=e306]:
+                      - /placeholder: "ID du nœud (ex: NODE_CRITICAL_SUCCESS)"
+                - generic [ref=e307]:
+                  - generic [ref=e308]:
+                    - generic [ref=e309]: Modificateur d'influence
+                    - spinbutton [active] [ref=e310]
+                  - generic [ref=e311]:
+                    - generic [ref=e312]: Modificateur de respect
+                    - spinbutton [ref=e313]
+                - generic [ref=e314]:
+                  - generic [ref=e315]: Traits requis (format JSON)
+                  - 'textbox "[{\"trait\": \"Autoritaire\", \"minValue\": 5}]" [ref=e316]': "[ { \"trait\": \"Diplomate\", \"minValue\": 5 } ]"
+                  - generic [ref=e317]: "Format JSON: [{\"trait\": \"NomTrait\", \"minValue\": 5}]"
+              - generic [ref=e318]:
+                - generic [ref=e319]:
+                  - 'heading "Choix #2(connecté)" [level=4] [ref=e320]'
+                  - button "🗑️ Supprimer" [ref=e322] [cursor=pointer]
+                - generic [ref=e323]:
+                  - generic [ref=e324]: Texte du choix *
+                  - textbox "Texte du choix..." [ref=e325]: J’échangerai une relique contre une explication claire de ta Synthèse et de sa non-fixité.
+                - generic [ref=e326]:
+                  - generic [ref=e327]: Condition d'affichage
+                  - 'textbox "Ex: FLAG_NAME, NOT FLAG_NAME, startState == 1" [ref=e328]'
+                  - generic [ref=e329]: "Format: FLAG_NAME, NOT FLAG_NAME, ou expression (ex: startState == 1)"
+                - generic [ref=e330]:
+                  - generic [ref=e331]: Test d'attribut
+                  - 'textbox "Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)" [ref=e332]': Raison+Diplomatie:7
+                  - generic [ref=e333]: "Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)"
+                - generic [ref=e334]:
+                  - heading "Destinations du test" [level=5] [ref=e335]
+                  - generic [ref=e336]:
+                    - generic [ref=e337]: Échec critique →
+                    - textbox "Échec critique →" [ref=e338]:
+                      - /placeholder: "ID du nœud (ex: NODE_CRITICAL_FAILURE)"
+                  - generic [ref=e339]:
+                    - generic [ref=e340]: Échec →
+                    - textbox "Échec →" [ref=e341]:
+                      - /placeholder: "ID du nœud (ex: NODE_FAILURE)"
+                  - generic [ref=e342]:
+                    - generic [ref=e343]: Réussite →
+                    - textbox "Réussite →" [ref=e344]:
+                      - /placeholder: "ID du nœud (ex: NODE_SUCCESS)"
+                  - generic [ref=e345]:
+                    - generic [ref=e346]: Réussite critique →
+                    - textbox "Réussite critique →" [ref=e347]:
+                      - /placeholder: "ID du nœud (ex: NODE_CRITICAL_SUCCESS)"
+                - generic [ref=e348]:
+                  - generic [ref=e349]:
+                    - generic [ref=e350]: Modificateur d'influence
+                    - spinbutton [ref=e351]
+                  - generic [ref=e352]:
+                    - generic [ref=e353]: Modificateur de respect
+                    - spinbutton [ref=e354]
+                - generic [ref=e355]:
+                  - generic [ref=e356]: Traits requis (format JSON)
+                  - 'textbox "[{\"trait\": \"Autoritaire\", \"minValue\": 5}]" [ref=e357]'
+                  - generic [ref=e358]: "Format JSON: [{\"trait\": \"NomTrait\", \"minValue\": 5}]"
+              - generic [ref=e359]:
+                - generic [ref=e360]:
+                  - 'heading "Choix #3(connecté)" [level=4] [ref=e361]'
+                  - button "🗑️ Supprimer" [ref=e363] [cursor=pointer]
+                - generic [ref=e364]:
+                  - generic [ref=e365]: Texte du choix *
+                  - textbox "Texte du choix..." [ref=e366]: Continue ta démonstration en me guidant vers une convergence rituelle où nous pourrions comprendre ensemble.
+                - generic [ref=e367]:
+                  - generic [ref=e368]: Condition d'affichage
+                  - 'textbox "Ex: FLAG_NAME, NOT FLAG_NAME, startState == 1" [ref=e369]'
+                  - generic [ref=e370]: "Format: FLAG_NAME, NOT FLAG_NAME, ou expression (ex: startState == 1)"
+                - generic [ref=e371]:
+                  - generic [ref=e372]: Test d'attribut
+                  - 'textbox "Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)" [ref=e373]': Raison+Course:6
+                  - generic [ref=e374]: "Format: Attribut+Compétence:DD (ex: Raison+Rhétorique:8)"
+                - generic [ref=e375]:
+                  - heading "Destinations du test" [level=5] [ref=e376]
+                  - generic [ref=e377]:
+                    - generic [ref=e378]: Échec critique →
+                    - textbox "Échec critique →" [ref=e379]:
+                      - /placeholder: "ID du nœud (ex: NODE_CRITICAL_FAILURE)"
+                  - generic [ref=e380]:
+                    - generic [ref=e381]: Échec →
+                    - textbox "Échec →" [ref=e382]:
+                      - /placeholder: "ID du nœud (ex: NODE_FAILURE)"
+                  - generic [ref=e383]:
+                    - generic [ref=e384]: Réussite →
+                    - textbox "Réussite →" [ref=e385]:
+                      - /placeholder: "ID du nœud (ex: NODE_SUCCESS)"
+                  - generic [ref=e386]:
+                    - generic [ref=e387]: Réussite critique →
+                    - textbox "Réussite critique →" [ref=e388]:
+                      - /placeholder: "ID du nœud (ex: NODE_CRITICAL_SUCCESS)"
+                - generic [ref=e389]:
+                  - generic [ref=e390]:
+                    - generic [ref=e391]: Modificateur d'influence
+                    - spinbutton [ref=e392]
+                  - generic [ref=e393]:
+                    - generic [ref=e394]: Modificateur de respect
+                    - spinbutton [ref=e395]
+                - generic [ref=e396]:
+                  - generic [ref=e397]: Traits requis (format JSON)
+                  - 'textbox "[{\"trait\": \"Autoritaire\", \"minValue\": 5}]" [ref=e398]'
+                  - generic [ref=e399]: "Format JSON: [{\"trait\": \"NomTrait\", \"minValue\": 5}]"
+            - generic [ref=e401]:
+              - heading "✨ Génération IA" [level=3] [ref=e402]
+              - button "Afficher" [ref=e403] [cursor=pointer]
+            - generic [ref=e404]:
+              - button "💾 Sauvegarder" [ref=e405] [cursor=pointer]
+              - button "👯" [ref=e406] [cursor=pointer]
+              - button "🗑️" [ref=e407] [cursor=pointer]
+```

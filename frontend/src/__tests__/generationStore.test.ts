@@ -2,7 +2,7 @@
  * Tests unitaires pour le store generationStore (extensions streaming).
  */
 import { describe, it, expect, beforeEach } from 'vitest'
-import { useGenerationStore } from '../../frontend/src/store/generationStore'
+import { useGenerationStore } from '@/store/generationStore'
 
 describe('generationStore - Streaming Extensions', () => {
   beforeEach(() => {

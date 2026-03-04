@@ -302,7 +302,6 @@ Aucune erreur rencontrée lors de l'implémentation.
 
 **Tests:**
 - `frontend/src/__tests__/graphStore.acceptReject.test.ts` - Tests unitaires accept/reject (rollback, nettoyage parent targetNode/nextNode)
-- `tests/frontend/graphStore.acceptReject.test.ts` - Idem (legacy emplacement)
 - `tests/api/test_graph_accept_reject.py` - API accept/reject + 404 dialogue not found
 - `e2e/graph-node-accept-reject.spec.ts` - E2E AC#1–AC#3, AC#5 (génération réelle, assertions strictes)
 
