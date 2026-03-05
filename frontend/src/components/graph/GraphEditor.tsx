@@ -358,13 +358,16 @@ export function GraphEditor() {
   )
   
   return (
-    <div style={{ 
-      display: 'flex', 
-      height: '100%', 
-      minHeight: 0,
-      overflow: 'hidden',
-      flex: 1,
-    }}>
+    <div
+      data-testid="graph-editor"
+      style={{
+        display: 'flex',
+        height: '100%',
+        minHeight: 0,
+        overflow: 'hidden',
+        flex: 1,
+      }}
+    >
       {/* Panneau gauche : Liste des dialogues */}
       <div
         style={{

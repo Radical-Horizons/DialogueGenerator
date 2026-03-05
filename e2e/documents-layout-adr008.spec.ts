@@ -62,7 +62,8 @@ async function loginAndGotoGraph(page: Page): Promise<void> {
   const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
   await expect(graphTab).toBeVisible({ timeout: 15000 })
   await graphTab.click()
-  await expect(page.getByTestId('unity-dialogue-list')).toBeVisible({ timeout: 15000 })
+  // Scoper à la liste de l'éditeur de graphe (Dashboard a aussi une liste en onglet Édition)
+  await expect(page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')).toBeVisible({ timeout: 15000 })
 }
 
 /**
@@ -70,7 +71,7 @@ async function loginAndGotoGraph(page: Page): Promise<void> {
  * et retourne le nom du fichier réellement sélectionné.
  */
 async function selectFirst(page: Page): Promise<string> {
-  const list = page.getByTestId('unity-dialogue-list')
+  const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
   await expect(list).toBeVisible({ timeout: 15000 })
   const firstItem = list.locator('div').filter({ hasText: /\.json/i }).first()
   await expect(firstItem).toBeVisible({ timeout: 8000 })

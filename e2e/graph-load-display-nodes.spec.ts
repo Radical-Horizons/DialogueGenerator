@@ -32,8 +32,8 @@ test.describe('Graph load – affichage des nœuds', () => {
     await expect(graphTab).toBeVisible({ timeout: 15000 })
     await graphTab.click()
 
-    // Attendre la liste des dialogues
-    const list = page.getByTestId('unity-dialogue-list')
+    // Attendre la liste des dialogues (scoper à l'éditeur de graphe : même liste en onglet Édition)
+    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
     await expect(list).toBeVisible({ timeout: 15000 })
 
     // Cliquer sur le premier dialogue affiché (item contenant un filename .json)
@@ -66,7 +66,7 @@ test.describe('Graph load – affichage des nœuds', () => {
     await expect(graphTab).toBeVisible({ timeout: 15000 })
     await graphTab.click()
 
-    const list = page.getByTestId('unity-dialogue-list')
+    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
     await expect(list).toBeVisible({ timeout: 15000 })
     const firstDialogue = list.locator('div').filter({ hasText: /\.json/i }).first()
     await expect(firstDialogue).toBeVisible({ timeout: 8000 })

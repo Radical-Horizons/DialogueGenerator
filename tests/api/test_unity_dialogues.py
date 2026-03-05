@@ -260,7 +260,24 @@ class TestReadUnityDialogue:
         data = response.json()
         assert "error" in data
         assert data["error"]["code"] == "VALIDATION_ERROR"
-    
+
+    def test_read_unity_dialogue_document_format(self, client, mock_config_service, tmp_path, sample_unity_dialogue):
+        """GET accepte le format document (schemaVersion + nodes) et renvoie la liste des nœuds (ADR-008)."""
+        test_dir = tmp_path / "test_dialogues_doc_format"
+        test_dir.mkdir(parents=True, exist_ok=True)
+        doc_file = test_dir / "document_format.json"
+        document = {"schemaVersion": "1.1.0", "nodes": sample_unity_dialogue}
+        doc_file.write_text(json.dumps(document), encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = str(test_dir)
+        response = client.get("/api/v1/unity-dialogues/document_format.json")
+        assert response.status_code == 200
+        data = response.json()
+        assert "json_content" in data
+        content = json.loads(data["json_content"])
+        assert isinstance(content, list)
+        assert len(content) == len(sample_unity_dialogue)
+        assert content[0].get("id") == "START"
+
     def test_read_unity_dialogue_path_not_configured(self, client, mock_config_service):
         """Test avec chemin Unity non configuré."""
         mock_config_service.get_unity_dialogues_path.return_value = None

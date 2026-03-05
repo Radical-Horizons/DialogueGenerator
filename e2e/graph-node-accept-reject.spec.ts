@@ -88,7 +88,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await expect(graphTab).toBeVisible({ timeout: 15000 })
     await graphTab.click()
     await page.waitForTimeout(2500)
-    const list = page.getByTestId('unity-dialogue-list')
+    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
     await expect(list).toBeVisible({ timeout: 60_000 })
     let dialogueSelector
     if (dialogueTitleFilter === 'Tunnel vertébral') {
@@ -209,7 +209,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await expect(graphTab).toBeVisible({ timeout: 15000 })
     await graphTab.click()
     await page.waitForTimeout(2500)
-    const list = page.getByTestId('unity-dialogue-list')
+    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
     await expect(list).toBeVisible({ timeout: 60_000 })
     const sameDialogue = list.getByText(/tunnel_vertébral_pigments_impossibles\.json/).first()
     await expect(sameDialogue).toBeVisible({ timeout: 8000 })
