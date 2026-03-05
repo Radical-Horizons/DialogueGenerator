@@ -4,6 +4,8 @@
 **Git vs Story Discrepancies:** 6  
 **Issues Found:** 1 High, 4 Medium, 2 Low  
 
+**Correctifs automatiques appliqués (2026-03-05):** #1 (E2E), #2 (File List), #3 (fixture choiceId), #4 (commentaire Task 2.2). Tests API test_unity_dialogues: 23 passed.  
+
 ---
 
 ## CRITICAL / HIGH

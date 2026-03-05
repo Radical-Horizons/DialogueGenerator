@@ -9,12 +9,18 @@ import { useGenerationStore } from '@/store/generationStore'
 
 // Mock EventSource pour éviter les appels réseau en test
 const mockClose = vi.fn()
-const MockEventSource = vi.fn().mockImplementation(function (this: any) {
+interface MockEventSourceInstance {
+  readyState: number
+  close: () => void
+}
+const MockEventSource = vi.fn().mockImplementation(function (
+  this: MockEventSourceInstance
+) {
   this.readyState = 1
   this.close = mockClose
   return this
 })
-global.EventSource = MockEventSource as any
+global.EventSource = MockEventSource as unknown as typeof EventSource
 
 describe('useSSEStreaming', () => {
   beforeEach(() => {

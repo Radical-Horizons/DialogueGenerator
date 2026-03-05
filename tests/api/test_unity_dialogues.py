@@ -35,22 +35,16 @@ def client(mock_config_service):
 
 @pytest.fixture
 def sample_unity_dialogue():
-    """Contenu JSON Unity de test."""
+    """Contenu JSON Unity de test (v1.1.0 avec choiceId)."""
     return [
         {
             "id": "START",
             "speaker": "TEST_NPC",
             "line": "Bonjour, comment allez-vous ?",
             "choices": [
-                {
-                    "text": "Je vais bien",
-                    "targetNode": "node1"
-                },
-                {
-                    "text": "Pas très bien",
-                    "targetNode": "node2"
-                }
-            ]
+                {"choiceId": "c1", "text": "Je vais bien", "targetNode": "node1"},
+                {"choiceId": "c2", "text": "Pas très bien", "targetNode": "node2"},
+            ],
         },
         {
             "id": "node1",

@@ -49,7 +49,7 @@ describe('graphStore - Duplicate Nodes', () => {
     expect(duplicate!.type).toBe('dialogueNode')
     expect(duplicate!.position).toEqual({ x: 150, y: 150 }) // DUPLICATE_OFFSET_X/Y = 50
 
-    const dupData = duplicate!.data as any
+    const dupData = duplicate!.data as Record<string, unknown>
     expect(dupData.speaker).toBe('Marc')
     expect(dupData.line).toBe('Bonjour')
     expect(dupData.nextNode).toBeUndefined()

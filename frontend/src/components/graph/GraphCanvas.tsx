@@ -128,11 +128,11 @@ export const GraphCanvas = memo(function GraphCanvas() {
         const pane = ref.current.getBoundingClientRect()
         setMenu({
           id: node.id,
-          top: event.clientY < pane.height - 200 ? event.clientY : undefined as any,
-          left: event.clientX < pane.width - 200 ? event.clientX : undefined as any,
-          right: event.clientX >= pane.width - 200 ? pane.width - event.clientX : undefined as any,
-          bottom: event.clientY >= pane.height - 200 ? pane.height - event.clientY : undefined as any,
-        } as any)
+          top: event.clientY < pane.height - 200 ? event.clientY : undefined,
+          left: event.clientX < pane.width - 200 ? event.clientX : undefined,
+          right: event.clientX >= pane.width - 200 ? pane.width - event.clientX : undefined,
+          bottom: event.clientY >= pane.height - 200 ? pane.height - event.clientY : undefined,
+        })
       }
     },
     [setMenu]

@@ -459,7 +459,6 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           const updatedChoices = (parent.dialogueNode.data.choices as Choice[]).map(
             (choice, idx) => {
               if (idx === parent.choiceIndex) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const {
                   test,
                   testCriticalFailureNode,
@@ -468,6 +467,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
                   testCriticalSuccessNode,
                   ...rest
                 } = choice
+                void [test, testCriticalFailureNode, testFailureNode, testSuccessNode, testCriticalSuccessNode]
                 return rest
               }
               return choice

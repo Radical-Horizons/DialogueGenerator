@@ -66,7 +66,7 @@ describe('generationStore - Streaming Extensions', () => {
   })
 
   it('should complete generation successfully', () => {
-    const { startGeneration, complete, isGenerating: initialGen, currentStep: initialStep } = useGenerationStore.getState()
+    const { startGeneration, complete, isGenerating: initialGen } = useGenerationStore.getState()
     expect(initialGen).toBe(false)
 
     startGeneration('job-1')

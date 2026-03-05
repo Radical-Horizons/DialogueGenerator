@@ -255,6 +255,76 @@ class TestPutDocument:
         with open(tmp_path / f"{doc_id}.json", encoding="utf-8") as f:
             assert json.load(f) == current_doc
 
+    def test_put_document_concurrent_two_put_same_revision_first_200_second_409(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Story 16.6 AC3: deux PUT même revision → premier 200, second 409 + dernier état (document, revision)."""
+        doc_id = "concurrent-doc"
+        doc_v1 = _doc_v1_1_0()
+        (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc_v1), encoding="utf-8")
+        (tmp_path / f"{doc_id}.meta").write_text(
+            json.dumps({"revision": 2, "updated_at": "2026-01-30T12:00:00Z"}),
+            encoding="utf-8",
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+        doc_a = {"schemaVersion": "1.1.0", "nodes": [{"id": "START", "line": "Client A", "nextNode": "END"}]}
+        doc_b = {"schemaVersion": "1.1.0", "nodes": [{"id": "START", "line": "Client B", "nextNode": "END"}]}
+
+        r1 = client.put(f"/api/v1/documents/{doc_id}", json={"document": doc_a, "revision": 2})
+        assert r1.status_code == 200
+        assert r1.json()["revision"] == 3
+
+        r2 = client.put(f"/api/v1/documents/{doc_id}", json={"document": doc_b, "revision": 2})
+        assert r2.status_code == 409
+        data2 = r2.json()
+        assert data2["revision"] == 3
+        assert "document" in data2
+        assert data2["document"]["nodes"][0]["line"] == "Client A"
+        assert data2["schemaVersion"] == "1.1.0"
+
+    def test_put_document_after_409_client_can_reload_and_retry(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Story 16.6 AC3: client en 409 peut GET document + GET layout puis PUT avec revision reçue → 200."""
+        doc_id = "retry-doc"
+        current = {"schemaVersion": "1.1.0", "nodes": [{"id": "START", "line": "Current", "nextNode": "END"}]}
+        layout = {"nodes": {"START": {"x": 10, "y": 20}}}
+        (tmp_path / f"{doc_id}.json").write_text(json.dumps(current), encoding="utf-8")
+        (tmp_path / f"{doc_id}.meta").write_text(
+            json.dumps({"revision": 4, "updated_at": "2026-01-30T12:00:00Z"}),
+            encoding="utf-8",
+        )
+        (tmp_path / f"{doc_id}.layout.json").write_text(json.dumps(layout), encoding="utf-8")
+        (tmp_path / f"{doc_id}.layout.meta").write_text(
+            json.dumps({"revision": 2, "updated_at": "2026-01-30T12:00:00Z"}),
+            encoding="utf-8",
+        )
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+        stale_put = client.put(
+            f"/api/v1/documents/{doc_id}",
+            json={"document": {"schemaVersion": "1.1.0", "nodes": [{"id": "START", "line": "Stale", "nextNode": "END"}]}, "revision": 2},
+        )
+        assert stale_put.status_code == 409
+        conflict_body = stale_put.json()
+        received_revision = conflict_body["revision"]
+        received_doc = conflict_body["document"]
+
+        get_doc = client.get(f"/api/v1/documents/{doc_id}")
+        assert get_doc.status_code == 200
+        assert get_doc.json()["revision"] == received_revision
+        get_layout = client.get(f"/api/v1/documents/{doc_id}/layout")
+        assert get_layout.status_code == 200
+
+        updated = {**received_doc, "nodes": [{**received_doc["nodes"][0], "line": "Retry OK"}]}
+        retry = client.put(
+            f"/api/v1/documents/{doc_id}",
+            json={"document": updated, "revision": received_revision},
+        )
+        assert retry.status_code == 200
+        assert retry.json()["revision"] == 5
+
     def test_put_document_new_creates_with_revision_one(
         self, client, mock_config_service, tmp_path
     ):

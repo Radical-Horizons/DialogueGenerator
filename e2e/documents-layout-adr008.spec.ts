@@ -185,6 +185,8 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   })
 
   // ── Task 2.2 : connect/disconnect choix ─────────────────────────────────
+  // Note: ce test vérifie save + cohérence arêtes après interaction ; une action explicite
+  // de déconnexion (clic arête / bouton) pourrait être ajoutée pour couvrir pleinement "déconnecter".
   test('connect/disconnect choix → save → cohérent (Task 2.2)', async ({ page, request }) => {
     await seedFixture(request)
     await loginAndGotoGraph(page)
@@ -257,7 +259,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
     await expect(page.locator('.react-flow__node')).toHaveCount(countBefore + 1, { timeout: 10000 })
     await triggerSave(page)
 
-    const nodes = await readFixtureViaApi(request)
+    const nodes = await readDialogueViaApi(request, FIXTURE_FILENAME)
     expect(nodes.length).toBeGreaterThan(countBefore)
 
     // Vérifier que les IDs sont uniques

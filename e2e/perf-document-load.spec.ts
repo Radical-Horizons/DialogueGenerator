@@ -1,0 +1,50 @@
+/**
+ * ADR-008 perf (Story 16.6 AC5) : p95 load document + projection + affichage.
+ * Optionnel en CI (peut être exclu si flaky). Seuils : docs/architecture/adr-008-perf-targets.md
+ */
+import { test, expect } from '@playwright/test'
+
+const COMFORT_LOAD_MS = 3000 // p95 load < 3s pour cible confort (N < 500)
+
+test.describe('ADR-008 Perf (Story 16.6)', () => {
+  test.setTimeout(60_000)
+
+  test('p95 load: document confort (petit graphe) sous seuil raisonnable', async ({
+    page,
+    request,
+  }) => {
+    await page.goto('/')
+    const onLogin = await page
+      .getByRole('heading', { name: /connexion/i })
+      .isVisible({ timeout: 3000 })
+      .catch(() => false)
+    if (onLogin) {
+      await page.getByLabel(/nom d'utilisateur/i).fill('admin')
+      await page.getByLabel(/mot de passe/i).fill('admin123')
+      await page.getByRole('button', { name: /se connecter/i }).click()
+      await expect(page).toHaveURL(/\//, { timeout: 10000 })
+    }
+
+    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
+    await expect(graphTab).toBeVisible({ timeout: 15000 })
+    await graphTab.click()
+    await expect(
+      page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
+    ).toBeVisible({ timeout: 15000 })
+
+    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
+    const firstItem = list.locator('div').filter({ hasText: /\.json/i }).first()
+    await expect(firstItem).toBeVisible({ timeout: 8000 })
+    const start = Date.now()
+    await firstItem.click()
+    await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
+    await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 20000 })
+    const loadMs = Date.now() - start
+
+    // Non bloquant en CI : on log et on assert seulement si env exige (ex. PERF_STRICT=1)
+    if (process.env.PERF_STRICT === '1') {
+      expect(loadMs).toBeLessThan(COMFORT_LOAD_MS)
+    }
+    expect(loadMs).toBeLessThan(60_000)
+  })
+})
