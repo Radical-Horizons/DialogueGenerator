@@ -9,6 +9,8 @@ import type {
   SaveGraphResponse,
   GenerateNodeRequest,
   GenerateNodeResponse,
+  RegenerateNodeRequest,
+  RegenerateNodeResponse,
   ValidateGraphRequest,
   ValidateGraphResponse,
   CalculateLayoutRequest,
@@ -114,4 +116,19 @@ export async function rejectNode(
     `/api/v1/unity-dialogues/graph/nodes/${nodeId}/reject`,
     { dialogue_id: dialogueId }
   )
+}
+
+/**
+ * Régénère un nœud avec de nouvelles instructions (Story 1.10).
+ */
+export async function regenerateNode(
+  nodeId: string,
+  request: RegenerateNodeRequest
+): Promise<RegenerateNodeResponse> {
+  const response = await apiClient.post<RegenerateNodeResponse>(
+    `/api/v1/unity-dialogues/graph/nodes/${nodeId}/regenerate`,
+    request,
+    { timeout: 120000 }
+  )
+  return response.data
 }

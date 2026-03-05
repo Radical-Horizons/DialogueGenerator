@@ -69,6 +69,15 @@ export interface GenerateNodeRequest {
   generate_all_choices?: boolean
 }
 
+/** Entrée d'historique de régénération (Story 1.10 - AC#3). */
+export interface RegenerationEntry {
+  timestamp: string
+  instructions: string
+  generationId: string
+  cost?: number
+  provider?: string
+}
+
 export interface SuggestedConnection {
   from: string
   to: string
@@ -86,6 +95,23 @@ export interface GenerateNodeResponse {
   connected_choices_count?: number
   failed_choices_count?: number
   total_choices_count?: number
+}
+
+export interface RegenerateNodeRequest {
+  dialogue_id: string
+  new_instructions: string
+  preserve_connections?: boolean
+  parent_node_id: string
+  parent_node_content: Record<string, unknown>
+  context_selections?: Record<string, unknown>
+  system_prompt_override?: string
+  llm_model_identifier?: string
+  via_choice_index?: number
+}
+
+export interface RegenerateNodeResponse {
+  node: Record<string, unknown>
+  suggested_connections: SuggestedConnection[]
 }
 
 export interface ValidateGraphRequest {

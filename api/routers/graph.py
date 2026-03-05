@@ -19,7 +19,9 @@ from api.schemas.graph import (
     CalculateLayoutRequest,
     CalculateLayoutResponse,
     AcceptNodeRequest,
-    RejectNodeRequest
+    RejectNodeRequest,
+    RegenerateNodeRequest,
+    RegenerateNodeResponse,
 )
 from api.exceptions import InternalServerException, NotFoundException, ValidationException
 from api.dependencies import (
@@ -545,6 +547,88 @@ async def accept_node(
             message="Erreur lors de l'acceptation du nœud",
             details={"error": str(e)},
             request_id=request_id
+        )
+
+
+@router.post(
+    "/nodes/{node_id}/regenerate",
+    response_model=RegenerateNodeResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def regenerate_node(
+    node_id: str,
+    request_data: RegenerateNodeRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> RegenerateNodeResponse:
+    """Régénère un nœud avec de nouvelles instructions (Story 1.10).
+
+    Préserve le même node_id (remplacement in-place). Utilise le contexte parent
+    envoyé par le client pour appeler la même logique que generate-node.
+    """
+    try:
+        _validate_dialogue_exists(
+            request_data.dialogue_id, config_service, request_id
+        )
+        from factories.llm_factory import LLMClientFactory
+
+        llm_client = LLMClientFactory.create_client(
+            model_id=request_data.llm_model_identifier,
+            config=config_service.get_llm_config(),
+            available_models=config_service.get_available_llm_models(),
+        )
+
+        result = await orchestrator.generate(
+            llm_client=llm_client,
+            parent_node_id=request_data.parent_node_id,
+            parent_node_content=request_data.parent_node_content,
+            user_instructions=request_data.new_instructions,
+            context_selections=request_data.context_selections,
+            system_prompt_override=request_data.system_prompt_override,
+            max_choices=None,
+            target_choice_index=request_data.via_choice_index,
+            generate_all_choices=False,
+        )
+
+        if not result.nodes:
+            raise InternalServerException(
+                message="Aucun nœud généré lors de la régénération",
+                request_id=request_id,
+            )
+
+        new_node = dict(result.nodes[0])
+        new_node["id"] = node_id
+
+        suggested_connections = [
+            SuggestedConnection(
+                **{
+                    "from": c.get("from", c.get("from_node", "")),
+                    "to": node_id,
+                    "via_choice_index": c.get("via_choice_index"),
+                    "connection_type": c.get("connection_type", "choice"),
+                }
+            )
+            for c in result.suggested_connections
+        ]
+
+        logger.info(
+            "Nœud régénéré: %s, parent: %s (request_id: %s)",
+            node_id,
+            request_data.parent_node_id,
+            request_id,
+        )
+        return RegenerateNodeResponse(node=new_node, suggested_connections=suggested_connections)
+    except (NotFoundException, ValidationException):
+        raise
+    except InternalServerException:
+        raise
+    except Exception as e:
+        logger.exception("Erreur lors de la régénération du nœud (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de la régénération du nœud",
+            details={"error": str(e)},
+            request_id=request_id,
         )
 
 

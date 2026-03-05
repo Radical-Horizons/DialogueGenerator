@@ -95,6 +95,10 @@ export interface GraphState {
   acceptNode: (nodeId: string) => Promise<void>
   rejectNode: (nodeId: string) => Promise<void>
 
+  // Régénération (Story 1.10) - historique instructions
+  addToRegenerationHistory: (nodeId: string, instructions: string) => void
+  regenerateNode: (nodeId: string, newInstructions: string) => Promise<void>
+
   // Validation
   validateGraph: () => Promise<void>
 

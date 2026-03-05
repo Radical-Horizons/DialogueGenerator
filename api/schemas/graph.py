@@ -135,3 +135,22 @@ class AcceptNodeRequest(BaseModel):
 class RejectNodeRequest(BaseModel):
     """Requête pour rejeter un nœud généré."""
     dialogue_id: str = Field(..., description="ID du dialogue (filename)")
+
+
+class RegenerateNodeRequest(BaseModel):
+    """Requête pour régénérer un nœud avec de nouvelles instructions (Story 1.10)."""
+    dialogue_id: str = Field(..., description="ID du dialogue (filename)")
+    new_instructions: str = Field(..., description="Nouvelles instructions pour la régénération")
+    preserve_connections: bool = Field(True, description="Préserver les connexions du nœud")
+    parent_node_id: str = Field(..., description="ID du nœud parent (contexte de génération)")
+    parent_node_content: Dict[str, Any] = Field(..., description="Contenu du nœud parent")
+    context_selections: Dict[str, Any] = Field(default_factory=dict, description="Sélection de contexte GDD")
+    system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
+    llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
+    via_choice_index: Optional[int] = Field(None, description="Index du choix parent (si connexion par choix)")
+
+
+class RegenerateNodeResponse(BaseModel):
+    """Réponse après régénération d'un nœud (remplacement in-place, même ID)."""
+    node: Dict[str, Any] = Field(..., description="Nœud régénéré (id = node_id demandé)")
+    suggested_connections: List[SuggestedConnection] = Field(..., description="Connexions suggérées (parent → nouveau nœud)")

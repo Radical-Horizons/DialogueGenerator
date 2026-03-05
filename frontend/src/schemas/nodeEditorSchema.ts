@@ -32,6 +32,17 @@ export const choiceSchema = z.object({
 })
 
 /**
+ * Schéma pour une entrée d'historique de régénération (Story 1.10).
+ */
+export const regenerationEntrySchema = z.object({
+  timestamp: z.string(),
+  instructions: z.string(),
+  generationId: z.string(),
+  cost: z.number().optional(),
+  provider: z.string().optional(),
+})
+
+/**
  * Schéma pour les données d'un nœud de dialogue.
  */
 export const dialogueNodeDataSchema = z.object({
@@ -40,6 +51,9 @@ export const dialogueNodeDataSchema = z.object({
   line: z.string().optional(),
   choices: z.array(choiceSchema).optional(),
   nextNode: z.string().optional(),
+  lastGenerationInstructions: z.string().optional(),
+  regenerationHistory: z.array(regenerationEntrySchema).optional(),
+  contextGddHash: z.string().optional(),
 })
 
 /**
@@ -61,6 +75,11 @@ export const testNodeDataSchema = z.object({
 export const endNodeDataSchema = z.object({
   id: z.string(),
 })
+
+/**
+ * Type inféré pour une entrée d'historique de régénération.
+ */
+export type RegenerationEntry = z.infer<typeof regenerationEntrySchema>
 
 /**
  * Type inféré pour un choix.

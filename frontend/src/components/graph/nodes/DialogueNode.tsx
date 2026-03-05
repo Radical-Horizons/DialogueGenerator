@@ -5,6 +5,7 @@ import { memo, useState } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
+import { RegenerateNodeModal } from '../RegenerateNodeModal'
 
 interface ValidationError {
   type: string
@@ -12,6 +13,15 @@ interface ValidationError {
   message: string
   severity: string
   target?: string
+}
+
+/** Entrée d'historique de régénération (Story 1.10). */
+interface RegenerationEntry {
+  timestamp: string
+  instructions: string
+  generationId: string
+  cost?: number
+  provider?: string
 }
 
 interface DialogueNodeData {
@@ -27,6 +37,9 @@ interface DialogueNodeData {
   validationWarnings?: ValidationError[]
   isHighlighted?: boolean
   status?: "pending" | "accepted"  // Métadonnée éditeur, non Unity
+  lastGenerationInstructions?: string
+  regenerationHistory?: RegenerationEntry[]
+  contextGddHash?: string
   [key: string]: unknown
 }
 
@@ -51,9 +64,11 @@ export const DialogueNode = memo(function DialogueNode({
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
   
-  // Store pour accept/reject
+  // Store pour accept/reject et régénération (Story 1.10)
   const acceptNode = useGraphStore((state) => state.acceptNode)
   const rejectNode = useGraphStore((state) => state.rejectNode)
+  const regenerateNode = useGraphStore((state) => state.regenerateNode)
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false)
   
   // Tronquer le texte pour l'aperçu
   const truncatedLine = line.length > 100 ? `${line.substring(0, 100)}...` : line
@@ -106,6 +121,17 @@ export const DialogueNode = memo(function DialogueNode({
       detail: { nodeId: data.id } 
     })
     window.dispatchEvent(event)
+  }
+
+  const handleOpenRegenerateModal = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setShowRegenerateModal(true)
+  }
+
+  const handleRegenerate = async (nodeId: string, newInstructions: string) => {
+    await regenerateNode(nodeId, newInstructions)
+    setShowRegenerateModal(false)
   }
   
   // Couleur du speaker (hash de l'ID du nœud pour consistance - évite changement de couleur)
@@ -382,7 +408,7 @@ export const DialogueNode = memo(function DialogueNode({
         </button>
       )}
       
-      {/* Boutons Accept/Reject visibles au hover pour nœuds pending (Task 2 - Story 1.4) */}
+      {/* Boutons Accept / Régénérer / Reject visibles au hover pour nœuds pending (Story 1.4, 1.10) */}
       {isPending && (isHovered || selected) && !isProcessing && (
         <>
           <button
@@ -455,8 +481,54 @@ export const DialogueNode = memo(function DialogueNode({
             <span>✗</span>
             <span>Rejeter</span>
           </button>
+          <button
+            onClick={handleOpenRegenerateModal}
+            disabled={isProcessing}
+            style={{
+              position: 'absolute',
+              top: 34,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              padding: '0.4rem 0.6rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#F5A623',
+              color: theme.text.inverse,
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+              zIndex: 15,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateX(-50%) scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateX(-50%) scale(1)'
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+            }}
+            title="Régénérer avec d'autres instructions"
+          >
+            <span>🔄</span>
+            <span>Régénérer</span>
+          </button>
         </>
       )}
+
+      <RegenerateNodeModal
+        isOpen={showRegenerateModal}
+        nodeId={data.id}
+        initialInstructions={data.lastGenerationInstructions ?? ''}
+        history={data.regenerationHistory ?? []}
+        contextGddChanged={false}
+        onRegenerate={handleRegenerate}
+        onClose={() => setShowRegenerateModal(false)}
+      />
     </div>
   )
 })

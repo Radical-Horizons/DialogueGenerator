@@ -7,6 +7,7 @@ import type { StateCreator } from 'zustand'
 import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
+import type { RegenerationEntry } from '../../types/graph'
 import {
   getParentChoiceForTestNode,
   syncTestNodeFromChoice,
@@ -17,6 +18,9 @@ import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
 import { documentToGraph } from '../../utils/documentToGraph'
 
+/** Nombre max d'entrées dans l'historique de régénération (Story 1.10 - AC#3). */
+const MAX_REGENERATION_HISTORY = 10
+
 export type NodeSlice = Pick<
   GraphState,
   | 'addNode'
@@ -25,6 +29,7 @@ export type NodeSlice = Pick<
   | 'deleteNode'
   | 'duplicateNode'
   | 'duplicateNodes'
+  | 'addToRegenerationHistory'
 >
 
 // ---------------------------------------------------------------------------
@@ -662,5 +667,28 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     if (lastAddedId != null) {
       get().setSelectedNode(lastAddedId)
     }
+  },
+
+  addToRegenerationHistory: (nodeId: string, instructions: string) => {
+    const state = get()
+    const node = state.nodes.find((n) => n.id === nodeId)
+    if (!node) return
+
+    const entry: RegenerationEntry = {
+      timestamp: new Date().toISOString(),
+      instructions,
+      generationId: crypto.randomUUID(),
+    }
+    const currentHistory =
+      (node.data as { regenerationHistory?: RegenerationEntry[] }).regenerationHistory ?? []
+    const newHistory = [...currentHistory, entry].slice(-MAX_REGENERATION_HISTORY)
+
+    set((s) => ({
+      nodes: s.nodes.map((n) =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, regenerationHistory: newHistory } }
+          : n
+      ),
+    }))
   },
 })

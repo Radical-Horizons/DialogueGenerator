@@ -340,8 +340,8 @@ class GraphConversionService:
                 unity_node.pop("failureNode", None)
                 
                 # Retirer le champ status avant export Unity (métadonnée éditeur uniquement) (Task 6 - Story 1.4)
-                # Le status est préservé dans le dialogue JSON de l'éditeur (via saveDialogue),
-                # mais retiré lors de l'export Unity final car non supporté par Unity
+                # lastGenerationInstructions, regenerationHistory, contextGddHash (Story 1.10) restent dans le JSON
+                # éditeur pour persistance save/load ; retirés uniquement si export final pour Unity.
                 unity_node.pop("status", None)
                 
                 # Nettoyer les targetNode et test*Node des choix (seront recréés depuis les edges)

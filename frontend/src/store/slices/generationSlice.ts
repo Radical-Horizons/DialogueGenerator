@@ -1,5 +1,5 @@
 /**
- * Slice génération IA du store graphe : generateFromNode, acceptNode, rejectNode.
+ * Slice génération IA du store graphe : generateFromNode, acceptNode, rejectNode, regenerateNode.
  */
 import type { StateCreator } from 'zustand'
 import type { Node } from 'reactflow'
@@ -7,10 +7,18 @@ import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import * as graphAPI from '../../api/graph'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
+import { syncDocAndLayout } from '../../utils/syncDocLayout'
+
+/** Hash simple pour contexte GDD (Story 1.10 AC#5 - stockage). */
+function simpleHash(s: string): string {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0
+  return String(Math.abs(h))
+}
 
 export type GenerationSlice = Pick<
   GraphState,
-  'generateFromNode' | 'acceptNode' | 'rejectNode'
+  'generateFromNode' | 'acceptNode' | 'rejectNode' | 'regenerateNode'
 >
 
 export const createGenerationSlice: StateCreator<
@@ -195,6 +203,10 @@ export const createGenerationSlice: StateCreator<
           : isChoiceSpecific
           ? 60 * choiceIndex + 60
           : 0
+        const contextGddHash =
+          Object.keys(contextSelections).length > 0
+            ? simpleHash(JSON.stringify(contextSelections))
+            : undefined
         const newNode: Node = {
           id: generatedNode.id,
           type: 'dialogueNode',
@@ -205,6 +217,8 @@ export const createGenerationSlice: StateCreator<
           data: {
             ...generatedNode,
             status: 'pending' as const,
+            lastGenerationInstructions: instructions,
+            ...(contextGddHash !== undefined && { contextGddHash }),
           },
         }
         nodesToAddBatch.push(newNode)
@@ -304,6 +318,85 @@ export const createGenerationSlice: StateCreator<
         'error',
         5000
       )
+      throw err
+    }
+  },
+
+  regenerateNode: async (nodeId: string, newInstructions: string) => {
+    const state = get()
+    const node = state.nodes.find((n) => n.id === nodeId)
+    if (!node) throw new Error(`Nœud ${nodeId} introuvable`)
+
+    const incomingEdge = state.edges.find((e) => e.target === nodeId)
+    const parentId = incomingEdge?.source
+    const parentNode = parentId ? state.nodes.find((n) => n.id === parentId) : null
+    if (!parentNode) throw new Error(`Nœud parent introuvable pour ${nodeId}`)
+
+    set({ isGenerating: true })
+    try {
+      const dialogueId = state.dialogueMetadata.filename || 'current'
+      const via_choice_index =
+        incomingEdge?.data != null &&
+        typeof (incomingEdge.data as { via_choice_index?: number }).via_choice_index === 'number'
+          ? (incomingEdge.data as { via_choice_index: number }).via_choice_index
+          : undefined
+
+      const response = await graphAPI.regenerateNode(nodeId, {
+        dialogue_id: dialogueId,
+        new_instructions: newInstructions,
+        preserve_connections: true,
+        parent_node_id: parentNode.id,
+        parent_node_content: parentNode.data as Record<string, unknown>,
+        context_selections: {},
+        via_choice_index,
+      })
+
+      const existingData = node.data as Record<string, unknown>
+      const existingHistory = (existingData.regenerationHistory as Array<{ instructions: string; timestamp: string; generationId: string }>) ?? []
+      const newEntry = {
+        timestamp: new Date().toISOString(),
+        instructions: newInstructions,
+        generationId: crypto.randomUUID(),
+      }
+      const regenerationHistory = [...existingHistory, newEntry].slice(-10)
+      const newData = {
+        ...response.node,
+        id: nodeId,
+        status: 'pending' as const,
+        lastGenerationInstructions: newInstructions,
+        regenerationHistory,
+        contextGddHash: existingData.contextGddHash ?? (response.node as Record<string, unknown>).contextGddHash,
+      }
+
+      set((s) => {
+        const nextNodes = s.nodes.map((n) =>
+          n.id === nodeId
+            ? {
+                ...n,
+                position: n.position,
+                data: newData,
+              }
+            : n
+        )
+        const nextEdges = s.edges
+        const doc = s.document
+        const layout = s.layout
+        const synced =
+          doc != null && layout != null
+            ? syncDocAndLayout(nextNodes, nextEdges, layout as Record<string, unknown>)
+            : null
+        return {
+          nodes: nextNodes,
+          ...(synced && { document: synced.document, layout: synced.layout }),
+          isGenerating: false,
+        }
+      })
+      get().markDirty()
+    } catch (err) {
+      set({ isGenerating: false })
+      console.error('Erreur lors de la régénération du nœud:', err)
+      const { toastManager } = await import('../../components/shared/Toast')
+      toastManager.show('Régénération échouée. Réessayez.', 'error', 5000)
       throw err
     }
   },
