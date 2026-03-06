@@ -153,10 +153,18 @@ async def update_llm_config(
         Configuration LLM mise à jour.
     """
     try:
-        # TODO: Implémenter la mise à jour dans ConfigurationService
-        # Pour l'instant, on retourne juste la config actuelle
+        current_config = config_service.get_llm_config()
+        current_config.update(config_data)
+        if not config_service.save_llm_config(current_config):
+            raise InternalServerException(
+                message="Échec de la sauvegarde de la configuration LLM",
+                details={"error": "save_llm_config returned False"},
+                request_id=request_id
+            )
         llm_config = config_service.get_llm_config()
         return LLMConfigResponse(config=llm_config)
+    except InternalServerException:
+        raise
     except Exception as e:
         logger.exception(f"Erreur lors de la mise à jour de la config LLM (request_id: {request_id})")
         raise InternalServerException(
