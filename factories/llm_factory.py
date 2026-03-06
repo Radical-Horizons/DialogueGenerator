@@ -2,12 +2,14 @@ import os
 import json
 import time
 import logging
-from typing import Optional, Any
+from typing import Optional, Any, List
 from core.llm.llm_client import ILLMClient, DummyLLMClient
 from core.llm.openai.client import OpenAIClient
 from core.llm.mistral_client import MistralClient
+from core.llm.fallback_client import FallbackLLMClient
 
 logger = logging.getLogger(__name__)
+
 
 class LLMClientFactory:
     @staticmethod
@@ -135,4 +137,41 @@ class LLMClientFactory:
         #     pass
 
         logger.warning(f"Type de client LLM inconnu ou non supporté: '{client_type}' pour model_id '{model_id}'. Utilisation de DummyLLMClient.")
-        return DummyLLMClient() 
+        return DummyLLMClient()
+
+    @staticmethod
+    def create_client_with_fallback(
+        primary_model_id: str,
+        fallback_model_ids: List[str],
+        config: dict,
+        available_models: list,
+        usage_service: Optional[Any] = None,
+        request_id: Optional[str] = None,
+        endpoint: Optional[str] = None,
+    ) -> ILLMClient:
+        """Crée un client avec chaîne de fallback (primary + fallbacks).
+
+        Si fallback_model_ids est vide, retourne un client simple pour primary_model_id.
+        Sinon retourne un FallbackLLMClient qui essaie primary puis chaque fallback.
+        """
+        chain = [primary_model_id] + [m for m in fallback_model_ids if m != primary_model_id]
+        if len(chain) < 2:
+            return LLMClientFactory.create_client(
+                model_id=primary_model_id,
+                config=config,
+                available_models=available_models,
+                usage_service=usage_service,
+                request_id=request_id,
+                endpoint=endpoint,
+            )
+        return FallbackLLMClient(
+            model_ids=chain,
+            create_client_fn=LLMClientFactory.create_client,
+            create_client_kwargs={
+                "config": config,
+                "available_models": available_models,
+                "endpoint": endpoint,
+            },
+            usage_service=usage_service,
+            request_id=request_id,
+        ) 

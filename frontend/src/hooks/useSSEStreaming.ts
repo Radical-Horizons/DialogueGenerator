@@ -12,8 +12,13 @@ import { useGenerationStore } from '../store/generationStore'
 export interface UseSSEStreamingOptions {
   /** Callback appelé lors de l'événement 'complete' avec le résultat */
   onComplete?: (result: unknown) => Promise<void> | void
-  /** Callback appelé lors de l'événement 'metadata' avec les tokens */
-  onMetadata?: (metadata: { tokens?: number }) => void
+  /** Callback appelé lors de l'événement 'metadata' avec les tokens et éventuellement fallback (Story 1.16) */
+  onMetadata?: (metadata: {
+    tokens?: number
+    used_fallback?: boolean
+    fallback_from?: string
+    fallback_to?: string
+  }) => void
   /** Callback appelé lors d'une erreur (après debounce) */
   onError?: (error: string) => void
   /** Callback appelé quand isLoading doit changer */
@@ -143,7 +148,16 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
             }
             // Appeler callback personnalisé si fourni
             if (onMetadata) {
-              onMetadata({ tokens: data.tokens })
+              onMetadata({
+                tokens: data.tokens,
+                used_fallback: data.used_fallback,
+                fallback_from: data.fallback_from,
+                fallback_to: data.fallback_to,
+              })
+            }
+            // Story 1.16: toast informatif quand fallback utilisé
+            if (data.used_fallback && toast && data.fallback_from && data.fallback_to) {
+              toast(`${data.fallback_from} indisponible - bascule vers ${data.fallback_to}`, 'info')
             }
             break
             

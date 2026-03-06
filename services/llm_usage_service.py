@@ -53,6 +53,8 @@ class LLMUsageService:
         node_id: Optional[str] = None,
         prompt: Optional[str] = None,
         response: Optional[str] = None,
+        fallback_from: Optional[str] = None,
+        fallback_reason: Optional[str] = None,
     ) -> None:
         """Enregistre un appel LLM.
         
@@ -71,6 +73,8 @@ class LLMUsageService:
             node_id: ID du nœud généré associé (optionnel).
             prompt: Prompt complet envoyé au LLM (optionnel, Story 1.15).
             response: Réponse brute du LLM (optionnel, Story 1.15).
+            fallback_from: model_id du provider initial en échec (optionnel, Story 1.16).
+            fallback_reason: Raison de l'échec du provider initial (optionnel, Story 1.16).
         """
         try:
             # Calculer le coût estimé (0€ pour génération échouée, Story 1.15 AC#5)
@@ -101,6 +105,8 @@ class LLMUsageService:
                 node_id=node_id,
                 prompt=prompt,
                 response=response,
+                fallback_from=fallback_from,
+                fallback_reason=fallback_reason,
             )
             
             # Sauvegarder
@@ -295,6 +301,8 @@ class LLMUsageService:
                 "cost_eur": round(r.estimated_cost * self._USD_TO_EUR_RATE, 8),
                 "success": r.success,
                 "deleted": r.deleted,
+                "fallback_from": r.fallback_from,
+                "fallback_reason": r.fallback_reason,
             }
             for r in records
         ]
@@ -361,6 +369,8 @@ class LLMUsageService:
                 "error_message": r.error_message,
                 "prompt": r.prompt,
                 "response": r.response,
+                "fallback_from": r.fallback_from,
+                "fallback_reason": r.fallback_reason,
             }
             for r in records
         ]

@@ -2,7 +2,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Union # Added Union
+from typing import Optional, Dict, Any, List, Union
 import logging
 
 logger = logging.getLogger(__name__)
@@ -159,6 +159,16 @@ class ConfigurationService:
     def get_available_llm_models(self) -> List[Dict[str, Any]]:
         """Retrieves the list of available LLM models from the LLM config."""
         return self.llm_config.get("available_models", [])
+
+    def get_llm_fallback_chain(self) -> List[str]:
+        """Returns the ordered list of api_identifiers for LLM fallback (primary first).
+
+        When absent or empty, no fallback is used. Backend-only; not exposed to frontend.
+        """
+        chain = self.llm_config.get("fallback_chain", [])
+        if not isinstance(chain, list):
+            return []
+        return [str(x) for x in chain]
 
     # --- Context Config specific methods ---
     def get_context_config(self) -> Dict[str, Any]:

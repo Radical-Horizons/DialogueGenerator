@@ -40,6 +40,8 @@ class NodeCostEntry(BaseModel):
     cost_eur: float = Field(..., ge=0.0, description="Coût en EUR")
     success: bool = Field(..., description="Génération réussie")
     deleted: bool = Field(default=False, description="Nœud supprimé du graphe")
+    fallback_from: Optional[str] = Field(default=None, description="Provider initial en échec si fallback utilisé (Story 1.16)")
+    fallback_reason: Optional[str] = Field(default=None, description="Raison de l'échec du provider initial (Story 1.16)")
 
 
 class DialogueCostResponse(BaseModel):
@@ -86,6 +88,8 @@ class GenerationLogEntry(BaseModel):
     error_message: Optional[str] = Field(default=None, description="Message d'erreur si échec")
     prompt: Optional[str] = Field(default=None, description="Prompt complet envoyé au LLM")
     response: Optional[str] = Field(default=None, description="Réponse brute du LLM")
+    fallback_from: Optional[str] = Field(default=None, description="Provider initial en échec si fallback utilisé (Story 1.16)")
+    fallback_reason: Optional[str] = Field(default=None, description="Raison de l'échec du provider initial (Story 1.16)")
 
     @field_serializer('timestamp')
     def serialize_timestamp(self, value: datetime) -> str:

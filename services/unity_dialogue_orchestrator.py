@@ -186,15 +186,29 @@ class UnityDialogueOrchestrator:
                 yield GenerationEvent(type='error', data={'message': 'Génération annulée', 'code': 'cancelled'})
                 return
             
-            # 6. Créer le client LLM
-            llm_client = LLMClientFactory.create_client(
-                model_id=request_data.llm_model_identifier,
-                config=self.config_service.get_llm_config(),
-                available_models=self.config_service.get_available_llm_models(),
-                usage_service=self.usage_service,
-                request_id=self.request_id,
-                endpoint="generate/unity-dialogue"
-            )
+            # 6. Créer le client LLM (avec fallback si configuré, Story 1.16)
+            fallback_chain = self.config_service.get_llm_fallback_chain()
+            if not isinstance(fallback_chain, list):
+                fallback_chain = []
+            if len(fallback_chain) >= 2 and fallback_chain[0] == request_data.llm_model_identifier:
+                llm_client = LLMClientFactory.create_client_with_fallback(
+                    primary_model_id=request_data.llm_model_identifier,
+                    fallback_model_ids=fallback_chain[1:],
+                    config=self.config_service.get_llm_config(),
+                    available_models=self.config_service.get_available_llm_models(),
+                    usage_service=self.usage_service,
+                    request_id=self.request_id,
+                    endpoint="generate/unity-dialogue",
+                )
+            else:
+                llm_client = LLMClientFactory.create_client(
+                    model_id=request_data.llm_model_identifier,
+                    config=self.config_service.get_llm_config(),
+                    available_models=self.config_service.get_available_llm_models(),
+                    usage_service=self.usage_service,
+                    request_id=self.request_id,
+                    endpoint="generate/unity-dialogue",
+                )
             
             # Configurer max_tokens : utiliser la valeur fournie ou la valeur par défaut
             from constants import Defaults
@@ -358,11 +372,14 @@ class UnityDialogueOrchestrator:
             elif hasattr(self.usage_service, 'get_last_call_cost'):
                 cost = self.usage_service.get_last_call_cost() or 0.0
             
-            # Metadata
-            yield GenerationEvent(type='metadata', data={
-                'tokens': estimated_tokens,
-                'cost': cost
-            })
+            # Metadata (Story 1.16: fallback si utilisé)
+            metadata_data: Dict[str, Any] = {'tokens': estimated_tokens, 'cost': cost}
+            fallback_info = getattr(llm_client, '_last_used_fallback', None)
+            if fallback_info and isinstance(fallback_info, (list, tuple)) and len(fallback_info) >= 2:
+                metadata_data['used_fallback'] = True
+                metadata_data['fallback_from'] = fallback_info[0]
+                metadata_data['fallback_to'] = fallback_info[1]
+            yield GenerationEvent(type='metadata', data=metadata_data)
             
             # Étape 4: Complete
             result = GenerateUnityDialogueResponse(

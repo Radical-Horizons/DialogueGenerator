@@ -30,7 +30,12 @@ from api.schemas.graph import (
     RegenerateNodeRequest,
     RegenerateNodeResponse,
 )
-from api.exceptions import InternalServerException, NotFoundException, ValidationException
+from api.exceptions import (
+    AllLLMProvidersUnavailableError,
+    InternalServerException,
+    NotFoundException,
+    ValidationException,
+)
 from api.dependencies import (
     get_config_service,
     get_request_id,
@@ -393,12 +398,26 @@ async def generate_node(
     try:
         from factories.llm_factory import LLMClientFactory
 
-        llm_client = LLMClientFactory.create_client(
-            model_id=request_data.llm_model_identifier,
-            config=config_service.get_llm_config(),
-            available_models=config_service.get_available_llm_models(),
-            request_id=request_id,
-        )
+        fallback_chain = config_service.get_llm_fallback_chain()
+        if not isinstance(fallback_chain, list):
+            fallback_chain = []
+        if len(fallback_chain) >= 2 and fallback_chain[0] == request_data.llm_model_identifier:
+            llm_client = LLMClientFactory.create_client_with_fallback(
+                primary_model_id=request_data.llm_model_identifier,
+                fallback_model_ids=fallback_chain[1:],
+                config=config_service.get_llm_config(),
+                available_models=config_service.get_available_llm_models(),
+                usage_service=usage_service,
+                request_id=request_id,
+            )
+        else:
+            llm_client = LLMClientFactory.create_client(
+                model_id=request_data.llm_model_identifier,
+                config=config_service.get_llm_config(),
+                available_models=config_service.get_available_llm_models(),
+                usage_service=usage_service,
+                request_id=request_id,
+            )
 
         result = await orchestrator.generate(
             llm_client=llm_client,
@@ -457,6 +476,8 @@ async def generate_node(
             request_id=request_id,
         )
     except ValidationException:
+        raise
+    except AllLLMProvidersUnavailableError:
         raise
     except Exception as e:
         logger.exception("Erreur lors de la génération de nœud (request_id: %s)", request_id)
@@ -961,6 +982,7 @@ async def regenerate_node(
     request_data: RegenerateNodeRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> RegenerateNodeResponse:
     """Régénère un nœud avec de nouvelles instructions (Story 1.10).
@@ -974,12 +996,26 @@ async def regenerate_node(
         )
         from factories.llm_factory import LLMClientFactory
 
-        llm_client = LLMClientFactory.create_client(
-            model_id=request_data.llm_model_identifier,
-            config=config_service.get_llm_config(),
-            available_models=config_service.get_available_llm_models(),
-            request_id=request_id,
-        )
+        fallback_chain = config_service.get_llm_fallback_chain()
+        if not isinstance(fallback_chain, list):
+            fallback_chain = []
+        if len(fallback_chain) >= 2 and fallback_chain[0] == request_data.llm_model_identifier:
+            llm_client = LLMClientFactory.create_client_with_fallback(
+                primary_model_id=request_data.llm_model_identifier,
+                fallback_model_ids=fallback_chain[1:],
+                config=config_service.get_llm_config(),
+                available_models=config_service.get_available_llm_models(),
+                usage_service=usage_service,
+                request_id=request_id,
+            )
+        else:
+            llm_client = LLMClientFactory.create_client(
+                model_id=request_data.llm_model_identifier,
+                config=config_service.get_llm_config(),
+                available_models=config_service.get_available_llm_models(),
+                usage_service=usage_service,
+                request_id=request_id,
+            )
 
         result = await orchestrator.generate(
             llm_client=llm_client,
@@ -1022,6 +1058,8 @@ async def regenerate_node(
         )
         return RegenerateNodeResponse(node=new_node, suggested_connections=suggested_connections)
     except (NotFoundException, ValidationException):
+        raise
+    except AllLLMProvidersUnavailableError:
         raise
     except InternalServerException:
         raise

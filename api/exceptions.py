@@ -171,6 +171,22 @@ class InternalServerException(APIException):
         )
 
 
+class AllLLMProvidersUnavailableError(APIException):
+    """Tous les providers LLM de la chaîne ont échoué (Story 1.16)."""
+
+    def __init__(
+        self,
+        message: str = "Tous les providers LLM sont indisponibles",
+        request_id: Optional[str] = None,
+    ):
+        super().__init__(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            code="ALL_LLM_PROVIDERS_UNAVAILABLE",
+            message=message,
+            request_id=request_id,
+        )
+
+
 class OpenAIException(APIException):
     """Exception levée lors d'erreurs OpenAI avec codes spécifiques."""
     

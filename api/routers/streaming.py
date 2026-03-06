@@ -124,7 +124,12 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
                 current_step = event.data.get("step", "unknown")
                 yield f'data: {json.dumps({"type": "step", "step": current_step})}\n\n'
             elif event.type == 'metadata':
-                yield f'data: {json.dumps({"type": "metadata", "tokens": event.data["tokens"], "cost": event.data["cost"]})}\n\n'
+                meta = {"type": "metadata", "tokens": event.data["tokens"], "cost": event.data["cost"]}
+                if event.data.get("used_fallback"):
+                    meta["used_fallback"] = True
+                    meta["fallback_from"] = event.data.get("fallback_from", "")
+                    meta["fallback_to"] = event.data.get("fallback_to", "")
+                yield f'data: {json.dumps(meta)}\n\n'
             elif event.type == 'complete':
                 # Stocker résultat dans job
                 job_manager.update_status(job_id, "completed", result=event.data['result'])

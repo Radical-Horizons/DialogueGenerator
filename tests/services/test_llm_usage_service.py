@@ -80,6 +80,26 @@ def test_track_usage_with_prompt_and_response(usage_service, mock_repository):
     assert saved_record.response == "LLM raw response"
 
 
+def test_track_usage_with_fallback_from_reason(usage_service, mock_repository):
+    """Story 1.16: track_usage accepte fallback_from et fallback_reason et les enregistre."""
+    usage_service.track_usage(
+        request_id="req_fallback",
+        model_name="labs-mistral-small-creative",
+        prompt_tokens=100,
+        completion_tokens=50,
+        total_tokens=150,
+        duration_ms=100,
+        success=True,
+        endpoint="generate/unity-dialogue",
+        k_variants=1,
+        fallback_from="gpt-5.2",
+        fallback_reason="Timeout",
+    )
+    saved_record = mock_repository.save.call_args[0][0]
+    assert saved_record.fallback_from == "gpt-5.2"
+    assert saved_record.fallback_reason == "Timeout"
+
+
 def test_track_usage_without_prompt_response_backward_compat(usage_service, mock_repository):
     """Story 1.15: track_usage sans prompt/response laisse None (rétrocompat)."""
     usage_service.track_usage(

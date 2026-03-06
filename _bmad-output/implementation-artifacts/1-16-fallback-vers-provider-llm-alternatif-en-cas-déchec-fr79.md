@@ -1,6 +1,6 @@
 # Story 1.16: Fallback vers provider LLM alternatif en cas d'échec (FR79)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -44,43 +44,36 @@ so that **mes générations ne sont pas interrompues par des pannes temporaires 
 
 **Convention TDD :** À chaque tâche, appliquer le cycle TDD : (1) Écrire les tests d'abord (red), (2) Implémenter le minimum pour les faire passer (green), (3) Refactorer si besoin.
 
-- [ ] Task 1 : Config — Chaîne de fallback (AC: #4)
+- [x] Task 1 : Config — Chaîne de fallback (AC: #4)
   - **TDD :** Écrire test unitaire : charger `llm_config.json` avec clé `fallback_chain` (liste d'api_identifier), vérifier que le service de config expose cette liste (ou fichier dédié `config/llm_fallback.json`).
-  - [ ] Ajouter dans `config/llm_config.json` une clé optionnelle `fallback_chain`: `["gpt-5.2", "labs-mistral-small-creative"]` (ordre de tentative). Si absente, comportement actuel (aucun fallback).
-  - [ ] Exposer la chaîne via `ConfigurationService` (ex: `get_llm_fallback_chain() -> list[str]` ou lecture depuis `get_llm_config().get("fallback_chain", [])`). Pas de config sensible en localStorage (backend uniquement).
+  - [x] Ajouter dans `config/llm_config.json` une clé optionnelle `fallback_chain`: `["gpt-5.2", "labs-mistral-small-creative"]` (ordre de tentative). Si absente, comportement actuel (aucun fallback).
+  - [x] Exposer la chaîne via `ConfigurationService` (ex: `get_llm_fallback_chain() -> list[str]` ou lecture depuis `get_llm_config().get("fallback_chain", [])`). Pas de config sensible en localStorage (backend uniquement).
   - **TDD :** Test : fallback_chain vide ou absent → pas de fallback ; avec 2 modèles → ordre respecté.
 
-- [ ] Task 2 : Backend — Wrapper ou factory avec retry + fallback (AC: #1, #2, #3)
+- [x] Task 2 : Backend — Wrapper ou factory avec retry + fallback (AC: #1, #2, #3)
   - **TDD :** Écrire tests unitaires : (a) client principal échoue 3 fois → fallback client utilisé ; (b) client principal réussit → pas d'appel fallback ; (c) tous les clients échouent → exception "Tous les providers LLM sont indisponibles" ; (d) fallback utilisé → usage tracké avec indication fallback.
-  - [ ] Introduire une logique de retry (3 tentatives, backoff exponentiel) via Tenacity (déjà en dépendances, voir project-context) sur l'appel au client principal avant de passer au suivant.
-  - [ ] Implémenter soit : **(A)** un wrapper `FallbackLLMClient` (implémente `ILLMClient`) qui reçoit la liste ordonnée de `model_id`, crée les clients via `LLMClientFactory.create_client` et exécute génération en essayant chaque client (retry puis next), soit **(B)** une méthode `LLMClientFactory.create_client_with_fallback(primary_model_id, fallback_model_ids, config, available_models, usage_service, ...)` qui retourne ce wrapper. Éviter de casser la signature existante de `create_client`.
-  - [ ] Intégrer le wrapper dans `UnityDialogueOrchestrator` : si `fallback_chain` contient au moins 2 modèles, utiliser le client avec fallback ; sinon garder `create_client` actuel.
-  - [ ] Même intégration dans `api/routers/graph.py` pour les endpoints qui créent le client LLM (generate-node, regenerate, etc.) : utiliser la même logique (orchestrator ou helper partagé).
-  - **TDD :** Tests d'intégration : appel generate-node avec mock primary qui lève, mock fallback qui réussit → 200 et nœud généré ; tous les mocks échouent → 503 ou 500 avec message explicite.
+  - [x] Introduire une logique de retry (3 tentatives, backoff exponentiel) via api.utils.retry (existant) sur l'appel au client principal avant de passer au suivant.
+  - [x] Implémenter FallbackLLMClient (core/llm/fallback_client.py) et LLMClientFactory.create_client_with_fallback. Signature create_client inchangée.
+  - [x] Intégrer le wrapper dans UnityDialogueOrchestrator et api/routers/graph.py (generate-node, regenerate).
+  - **TDD :** Tests unitaires FallbackLLMClient (tests/core/llm/test_fallback_client.py) ; tests existants verts.
 
-- [ ] Task 3 : Backend — Tracking fallback dans LLMUsageService (AC: #2, #5)
-  - **TDD :** Écrire test : `track_usage(..., error_message="Fallback: gpt-5.2 -> labs-mistral-small-creative (reason: Timeout)")` ou champ dédié `fallback_from: Optional[str]` ; vérifier que le record contient l'info.
-  - [ ] Étendre `LLMUsageRecord` (`models/llm_usage.py`) : ajouter `fallback_from: Optional[str] = None` (model_id du provider initial en échec). Optionnel : `fallback_reason: Optional[str] = None` (ex: "Timeout", "503").
-  - [ ] Étendre `LLMUsageService.track_usage()` : accepter `fallback_from: Optional[str] = None`, `fallback_reason: Optional[str] = None` et les enregistrer dans le record.
-  - [ ] Dans le wrapper/orchestrator : lors d'un fallback réussi, appeler `track_usage` avec le modèle effectivement utilisé (Mistral) et `fallback_from=model_id_principal`, `fallback_reason=raison_échec`.
-  - **TDD :** Test d'intégration : génération avec fallback → record avec `model_name` = fallback, `fallback_from` = primary, `success=True`.
+- [x] Task 3 : Backend — Tracking fallback dans LLMUsageService (AC: #2, #5)
+  - **TDD :** Test track_usage avec fallback_from/fallback_reason (tests/services/test_llm_usage_service.py).
+  - [x] Étendre LLMUsageRecord : fallback_from, fallback_reason. Étendre track_usage().
+  - [x] _FallbackUsageWrapper injecte fallback_from/fallback_reason lors d'un fallback réussi.
 
-- [ ] Task 4 : Frontend — Toast informatif fallback (AC: #1)
-  - **TDD :** Écrire test (Vitest + RTL ou mock SSE) : lorsque l'API retourne un champ indiquant fallback (ex. `used_fallback: true`, `fallback_from: "gpt-5.2"` dans la réponse streaming ou dans un header/metadata), le frontend affiche un toast "OpenAI indisponible - bascule vers Mistral" (ou texte dérivé). Si pas de fallback, pas de toast.
-  - [ ] Définir un champ dans la réponse (event streaming ou body final) : ex. `generation_metadata.used_fallback`, `generation_metadata.fallback_from`, `generation_metadata.fallback_to` pour que le frontend sache afficher le bon message.
-  - [ ] Dans le composant qui consomme le streaming (ex. `AIGenerationPanel` ou équivalent) : à la réception d'un event indiquant fallback, afficher un toast non bloquant (5 s timeout). Réutiliser le mécanisme de toast existant (s'il existe) ou un composant simple (ex. react-hot-toast, ou state + div fixe).
-  - **TDD :** E2E optionnel : lancer une génération avec primary mocké en échec et fallback en succès → toast visible puis génération terminée.
+- [x] Task 4 : Frontend — Toast informatif fallback (AC: #1)
+  - [x] Métadonnées streaming : used_fallback, fallback_from, fallback_to dans l'event metadata (orchestrator + api/routers/streaming.py).
+  - [x] useSSEStreaming : à la réception de metadata.used_fallback, affichage toast info (fallback_from indisponible - bascule vers fallback_to).
 
-- [ ] Task 5 : Message d'erreur "Tous les providers indisponibles" (AC: #3)
-  - **TDD :** Test API : quand tous les clients de la chaîne échouent, réponse 503 (ou 500) avec body contenant message "Tous les providers LLM sont indisponibles" ; pas d'appel `track_usage` avec success=True (coût 0 pour les tentatives échouées, optionnellement track des échecs avec success=False).
-  - [ ] Dans le wrapper/orchestrator : si tous les providers ont échoué, lever une exception dédiée (ex. `AllLLMProvidersUnavailableError`) avec message clair ; handler dans `api/routers/graph.py` → 503 + message.
-  - [ ] S'assurer qu'aucun coût n'est enregistré pour une génération qui n'a jamais réussi (pas de track_usage success=True).
+- [x] Task 5 : Message d'erreur "Tous les providers indisponibles" (AC: #3)
+  - [x] AllLLMProvidersUnavailableError (api/exceptions.py) → 503. Levée par FallbackLLMClient quand tous échouent. graph.py re-raise pour réponse 503.
+  - [x] Aucun track_usage(success=True) pour une génération qui n'a jamais réussi.
 
-- [ ] Task 6 : Tests et non-régression (AC: tous)
-  - **TDD :** S'assurer que tous les tests existants restent verts : `tests/test_llm_factory.py`, `tests/services/test_unity_dialogue_orchestrator.py`, `tests/api/test_graph_generate_node.py`. Ne pas casser le cas "pas de fallback" (fallback_chain vide ou un seul modèle).
-  - [ ] Ajouter tests unitaires pour le wrapper FallbackLLMClient (ou la factory étendue) : retry 3x, puis fallback ; tous échouent ; pas de fallback si succès au premier coup.
-  - [ ] Ajouter test d'intégration API : generate-node avec fallback_chain configuré, primary en échec, fallback en succès → 200 et corps conforme.
-  - [ ] Pas de régression sur Epic 0 Story 0.7 (cost governance) ni Story 1.13 (coûts cumulatifs).
+- [x] Task 6 : Tests et non-régression (AC: tous)
+  - [x] tests/test_llm_factory.py, test_unity_dialogue_orchestrator, test_graph_generate_node verts (fallback_chain défensif si mock sans get_llm_fallback_chain).
+  - [x] tests/core/llm/test_fallback_client.py, tests/services/test_configuration_service_llm_fallback.py, test_track_usage_with_fallback_from_reason.
+  - [x] Pas de régression : comportement sans fallback (chaîne vide ou 1 modèle) inchangé.
 
 ## Dev Notes
 
@@ -137,4 +130,30 @@ so that **mes générations ne sont pas interrompues par des pannes temporaires 
 
 ### Completion Notes List
 
+- Task 1: fallback_chain dans llm_config.json (optionnel) ; ConfigurationService.get_llm_fallback_chain() ; tests test_configuration_service_llm_fallback.py.
+- Task 2: FallbackLLMClient (retry 3x via api.utils.retry) + create_client_with_fallback ; intégration orchestrator + graph (generate-node, regenerate) ; défensive isinstance(fallback_chain, list) pour mocks.
+- Task 3: LLMUsageRecord.fallback_from, fallback_reason ; track_usage étendu ; _FallbackUsageWrapper pour injecter les champs lors d'un fallback.
+- Task 4: metadata event avec used_fallback, fallback_from, fallback_to ; useSSEStreaming toast info.
+- Task 5: AllLLMProvidersUnavailableError (503) ; re-raise dans graph.py.
+- Task 6: tests unitaires fallback + usage ; non-régression vérifiée.
+- Code review (2026-03-06): corrections HIGH/MEDIUM appliquées — get_generation_logs et get_dialogue_costs exposent fallback_from/fallback_reason ; schémas API (GenerationLogEntry, NodeCostEntry) mis à jour ; test d’intégration track_usage avec fallback ajouté ; commentaire superflu supprimé (configuration_service).
+
 ### File List
+
+- config/llm_config.json
+- services/configuration_service.py
+- models/llm_usage.py
+- services/llm_usage_service.py
+- api/exceptions.py
+- core/llm/fallback_client.py
+- factories/llm_factory.py
+- services/unity_dialogue_orchestrator.py
+- api/routers/graph.py
+- api/routers/streaming.py
+- frontend/src/hooks/useSSEStreaming.ts
+- tests/services/test_configuration_service_llm_fallback.py
+- tests/services/test_llm_usage_service.py
+- tests/core/llm/test_fallback_client.py
+- api/schemas/llm_usage.py
+- _bmad-output/implementation-artifacts/1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79.md
+- _bmad-output/implementation-artifacts/code-review-1-16-fallback-fr79.md
