@@ -153,6 +153,16 @@ export interface RegenerateNodeResponse {
   suggested_connections: SuggestedConnection[]
 }
 
+/** Réponse GET /graph/prompt — prompt exact ou reconstruit pour un nœud (Story 1.14). */
+export interface NodePromptResponse {
+  raw_prompt: string
+  prompt_tokens?: number | null
+  completion_tokens?: number | null
+  timestamp?: string | null
+  is_historical: boolean
+  message?: string | null
+}
+
 export interface ValidateGraphRequest {
   nodes: unknown[]
   edges: unknown[]

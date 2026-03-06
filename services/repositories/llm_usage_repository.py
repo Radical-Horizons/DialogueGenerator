@@ -99,6 +99,22 @@ class ILLMUsageRepository(Protocol):
         """
         ...
 
+    def get_by_dialogue_and_node(
+        self,
+        dialogue_id: str,
+        node_id: str,
+    ) -> Optional[LLMUsageRecord]:
+        """Récupère l'enregistrement associé à un dialogue et un nœud (Story 1.14/1.15).
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            node_id: ID du nœud généré.
+            
+        Returns:
+            L'enregistrement trouvé, ou None.
+        """
+        ...
+
     def mark_node_deleted(self, node_id: str) -> bool:
         """Marque comme supprimé l'enregistrement associé à un nœud.
         
@@ -359,6 +375,26 @@ class FileLLMUsageRepository:
         matched = [r for r in all_records if r.dialogue_id == dialogue_id]
         matched.sort(key=lambda r: r.timestamp)
         return matched
+
+    def get_by_dialogue_and_node(
+        self,
+        dialogue_id: str,
+        node_id: str,
+    ) -> Optional[LLMUsageRecord]:
+        """Récupère l'enregistrement associé à un dialogue et un nœud (Story 1.14/1.15).
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            node_id: ID du nœud généré.
+            
+        Returns:
+            L'enregistrement trouvé, ou None.
+        """
+        records = self.get_by_dialogue_id(dialogue_id)
+        for record in reversed(records):
+            if record.node_id == node_id and not record.deleted:
+                return record
+        return None
 
     def mark_node_deleted(self, node_id: str) -> bool:
         """Marque comme supprimé l'enregistrement associé à un nœud.

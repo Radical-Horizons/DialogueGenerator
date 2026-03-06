@@ -229,6 +229,19 @@ export function GraphEditor() {
     }
   }, [applyAutoLayout, layoutDirection, toast])
   
+  // Handler pour supprimer le dialogue sélectionné
+  const handleDeleteDialogue = useCallback(async () => {
+    if (!selectedDialogue) return
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer "${selectedDialogue.filename}" ?`)) return
+    try {
+      await unityDialoguesAPI.deleteUnityDialogue(selectedDialogue.filename)
+      window.dispatchEvent(new CustomEvent('unity-dialogue-deleted', { detail: { filename: selectedDialogue.filename } }))
+      toast(`Dialogue "${selectedDialogue.filename}" supprimé`, 'success', 3000)
+    } catch (err) {
+      toast(`Erreur lors de la suppression: ${getErrorMessage(err)}`, 'error')
+    }
+  }, [selectedDialogue, toast])
+
   // Handler pour ouvrir le dialogue de sélection de format
   const handleOpenExportDialog = useCallback(() => {
     if (!reactFlowInstance || !selectedDialogue) {
@@ -661,6 +674,23 @@ export function GraphEditor() {
               title="Afficher le breakdown des coûts LLM pour ce dialogue"
             >
               💰 Coûts
+            </button>
+            <button
+              onClick={handleDeleteDialogue}
+              disabled={!selectedDialogue}
+              style={{
+                padding: '0.5rem 1rem',
+                border: `1px solid ${theme.state.error.border}`,
+                borderRadius: '6px',
+                backgroundColor: 'transparent',
+                color: selectedDialogue ? theme.state.error.color : theme.text.secondary,
+                cursor: !selectedDialogue ? 'not-allowed' : 'pointer',
+                opacity: !selectedDialogue ? 0.6 : 1,
+                fontSize: '0.9rem',
+              }}
+              title="Supprimer le dialogue sélectionné"
+            >
+              🗑️ Supprimer
             </button>
             {/* ADR-006: pas de bouton Sauvegarder (autosave immédiat) */}
           </div>

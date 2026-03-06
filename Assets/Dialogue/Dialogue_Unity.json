@@ -2,34 +2,34 @@
   {
     "id": "START",
     "speaker": "Genka Lien, le bouffon",
-    "line": "Uresaïr, voyageuse des Plis d’Ossements, tu entends ce silence juste au bord des gravures. Je peins des Barvas comme on tisse des routes: chaque lieu a une couleur, chaque vérité un nom différent. Viens, choisissons ensemble une voix parmi les mille. Ta patience pèse plus que ma musique. Montre-moi ce que tu veux entendre, et parlons sans fixations.",
+    "line": "*Suspendu, puis retombant en pirouette asymétrique, Genka essuie un doigt bleu-lac sur une gravure osseuse.*\nAlors. Ici, contre là-bas. Les Gardiens-Calligraphes veulent des lignes qui ne bougent pas, des légendes qui se tiennent au garde-à-vous.\nMais toi, Uresaïr, tu es une légende qui marche. Ça leur fait une bosse dans la gorge.\n\nChez les Tisseurs de Khol, on dit que tu raccommodes le temps comme on recoud une tente après la tempête. Amusant, les moines lacustres jurent que tu es un poisson qui refuse les eaux stagnantes. Et ici. Ici, on te range dans une boîte en os, avec une étiquette propre.\n\nMoi, je prends les étiquettes, je les colle sur mon manteau, et je danse jusqu'à ce qu'elles se décollent toutes seules.\nDis. Tu veux que je te raconte ta version d'ici, ou tu préfères une version d'ailleurs, pour respirer un peu ?",
     "choices": [
       {
-        "text": "Montre-moi une version des Barvas où l’immortalité est une question, pas une réponse.",
-        "test": "Raison+Dissimulation:8",
+        "text": "Raconte la version d'ici. Je veux entendre ce qu'ils se répètent quand ils croient que je ne les écoute pas.",
+        "respectDelta": 1,
+        "condition": "",
+        "test": "",
+        "influenceDelta": null
+      },
+      {
+        "text": "Donne-moi une version d'ailleurs. Quelque chose qui ne sent pas la poussière de leurs bibliothèques.",
+        "influenceDelta": 1,
+        "condition": "",
+        "test": "",
+        "respectDelta": null
+      },
+      {
+        "text": "Pourquoi tu repeins ces gravures, Genka ? Tu provoques Qalamtû, ou tu cherches autre chose ?",
         "traitRequirements": [
           {
-            "trait": "Diplomate",
+            "trait": "Lucide",
             "minValue": 5
           }
         ],
+        "respectDelta": 1,
         "condition": "",
-        "influenceDelta": null,
-        "respectDelta": null
-      },
-      {
-        "text": "J’échangerai une relique contre une explication claire de ta Synthèse et de sa non-fixité.",
-        "test": "Raison+Diplomatie:7",
-        "condition": "",
-        "influenceDelta": null,
-        "respectDelta": null
-      },
-      {
-        "text": "Continue ta démonstration en me guidant vers une convergence rituelle où nous pourrions comprendre ensemble.",
-        "test": "Raison+Course:6",
-        "condition": "",
-        "influenceDelta": null,
-        "respectDelta": null
+        "test": "",
+        "influenceDelta": null
       }
     ]
   }

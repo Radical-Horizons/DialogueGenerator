@@ -101,3 +101,24 @@ def test_filter_by_model(repository, sample_record):
     assert len(records) == 1
     assert records[0].model_name == "gpt-4o"
 
+
+def test_get_by_dialogue_and_node(repository, sample_record):
+    """Teste get_by_dialogue_and_node (Story 1.14) : retourne le record pour dialogue_id + node_id."""
+    r1 = sample_record.model_copy()
+    r1.request_id = "req_1"
+    r1.dialogue_id = "Dialogue_A"
+    r1.node_id = "NODE_1"
+    r2 = sample_record.model_copy()
+    r2.request_id = "req_2"
+    r2.dialogue_id = "Dialogue_A"
+    r2.node_id = "NODE_2"
+    r2.timestamp = sample_record.timestamp + timedelta(seconds=10)
+    repository.save(r1)
+    repository.save(r2)
+    found = repository.get_by_dialogue_and_node("Dialogue_A", "NODE_2")
+    assert found is not None
+    assert found.node_id == "NODE_2"
+    assert found.request_id == "req_2"
+    assert repository.get_by_dialogue_and_node("Dialogue_A", "NODE_3") is None
+    assert repository.get_by_dialogue_and_node("Other", "NODE_1") is None
+

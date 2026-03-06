@@ -73,6 +73,40 @@ export function NodeContextMenu({
         Nœud: {id.substring(0, 15)}{id.length > 15 ? '...' : ''}
       </div>
 
+      {isDialogueNode && (
+        <button
+          type="button"
+          role="menuitem"
+          onClick={(e) => {
+            e.stopPropagation()
+            window.dispatchEvent(new CustomEvent('open-prompt-viewer', { detail: { nodeId: id } }))
+            onClose()
+          }}
+          style={{
+            width: '100%',
+            padding: '8px 12px',
+            textAlign: 'left',
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: theme.text.primary,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          <span>📄</span>
+          <span>Voir le prompt</span>
+        </button>
+      )}
+
       <button
         type="button"
         role="menuitem"

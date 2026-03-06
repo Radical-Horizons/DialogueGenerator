@@ -1,11 +1,14 @@
 /**
  * Nœud personnalisé pour afficher un nœud de dialogue dans le graphe.
  */
-import { memo, useState } from 'react'
+import { memo, useState, useCallback, useEffect } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
+import { getNodePrompt } from '../../../api/graph'
+import type { NodePromptResponse } from '../../../types/graph'
 import { RegenerateNodeModal } from '../RegenerateNodeModal'
+import { PromptViewerModal } from '../PromptViewerModal'
 
 interface ValidationError {
   type: string
@@ -69,7 +72,14 @@ export const DialogueNode = memo(function DialogueNode({
   const rejectNode = useGraphStore((state) => state.rejectNode)
   const regenerateNode = useGraphStore((state) => state.regenerateNode)
   const [showRegenerateModal, setShowRegenerateModal] = useState(false)
-  
+  const [showPromptModal, setShowPromptModal] = useState(false)
+  const [promptData, setPromptData] = useState<NodePromptResponse | null>(null)
+  const [promptError, setPromptError] = useState<string | null>(null)
+  const [promptLoading, setPromptLoading] = useState(false)
+  const dialogueId = useGraphStore(
+    (s) => s.documentId ?? s.dialogueMetadata.filename ?? 'current'
+  )
+
   // Tronquer le texte pour l'aperçu
   const truncatedLine = line.length > 100 ? `${line.substring(0, 100)}...` : line
   
@@ -128,6 +138,47 @@ export const DialogueNode = memo(function DialogueNode({
     e.preventDefault()
     setShowRegenerateModal(true)
   }
+
+  const openAndLoadPromptModal = useCallback(async () => {
+    setShowPromptModal(true)
+    setPromptData(null)
+    setPromptError(null)
+    setPromptLoading(true)
+    try {
+      const res = await getNodePrompt(dialogueId, data.id)
+      setPromptData(res)
+    } catch (err) {
+      setPromptError(
+        err instanceof Error ? err.message : 'Impossible de charger le prompt'
+      )
+    } finally {
+      setPromptLoading(false)
+    }
+  }, [dialogueId, data.id])
+
+  const handleOpenPromptModal = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      e.preventDefault()
+      openAndLoadPromptModal()
+    },
+    [openAndLoadPromptModal]
+  )
+
+  useEffect(() => {
+    const handler = (ev: Event) => {
+      const e = ev as CustomEvent<{ nodeId: string }>
+      if (e.detail?.nodeId === data.id) openAndLoadPromptModal()
+    }
+    window.addEventListener('open-prompt-viewer', handler)
+    return () => window.removeEventListener('open-prompt-viewer', handler)
+  }, [data.id, openAndLoadPromptModal])
+
+  const handleClosePromptModal = useCallback(() => {
+    setShowPromptModal(false)
+    setPromptData(null)
+    setPromptError(null)
+  }, [])
 
   const handleRegenerate = async (nodeId: string, newInstructions: string) => {
     await regenerateNode(nodeId, newInstructions)
@@ -520,6 +571,31 @@ export const DialogueNode = memo(function DialogueNode({
         </>
       )}
 
+      {/* Voir le prompt (Story 1.14) — visible au survol ou sélection pour tout nœud */}
+      {(isHovered || selected) && (
+        <button
+          type="button"
+          onClick={handleOpenPromptModal}
+          style={{
+            position: 'absolute',
+            bottom: 8,
+            left: 8,
+            padding: '0.25rem 0.5rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderRadius: '4px',
+            color: theme.text.secondary,
+            cursor: 'pointer',
+            fontSize: '0.8rem',
+            textDecoration: 'underline',
+            zIndex: 10,
+          }}
+          title="Voir le prompt envoyé au LLM pour ce nœud"
+        >
+          Voir le prompt
+        </button>
+      )}
+
       <RegenerateNodeModal
         isOpen={showRegenerateModal}
         nodeId={data.id}
@@ -528,6 +604,13 @@ export const DialogueNode = memo(function DialogueNode({
         contextGddChanged={false}
         onRegenerate={handleRegenerate}
         onClose={() => setShowRegenerateModal(false)}
+      />
+      <PromptViewerModal
+        isOpen={showPromptModal}
+        data={promptData}
+        error={promptError}
+        isLoading={promptLoading}
+        onClose={handleClosePromptModal}
       />
     </div>
   )

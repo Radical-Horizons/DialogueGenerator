@@ -1,4 +1,5 @@
 """Schémas Pydantic pour l'API de gestion de graphes."""
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 
@@ -199,3 +200,13 @@ class RegenerateNodeResponse(BaseModel):
     """Réponse après régénération d'un nœud (remplacement in-place, même ID)."""
     node: Dict[str, Any] = Field(..., description="Nœud régénéré (id = node_id demandé)")
     suggested_connections: List[SuggestedConnection] = Field(..., description="Connexions suggérées (parent → nouveau nœud)")
+
+
+class NodePromptResponse(BaseModel):
+    """Réponse GET /graph/prompt — prompt exact ou reconstruit pour un nœud (Story 1.14)."""
+    raw_prompt: str = Field(..., description="Prompt brut envoyé au LLM (ou reconstruit)")
+    prompt_tokens: Optional[int] = Field(None, description="Tokens du prompt (si disponible)")
+    completion_tokens: Optional[int] = Field(None, description="Tokens de la réponse (si disponible)")
+    timestamp: Optional[datetime] = Field(None, description="Horodatage de la génération (si stocké)")
+    is_historical: bool = Field(..., description="True si prompt stocké à l'époque, False si reconstruit")
+    message: Optional[str] = Field(None, description="Message informatif (ex: prompt reconstruit, contexte modifié)")

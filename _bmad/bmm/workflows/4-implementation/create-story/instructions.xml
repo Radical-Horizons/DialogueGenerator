@@ -293,6 +293,9 @@
     <template-output
       file="{default_output_file}">story_requirements</template-output>
 
+    <!-- TDD-friendly task structure: avoid "implement then test at the end" -->
+    <critical>🔴 TDD TASK STRUCTURE: The dev agent follows red-green-refactor PER TASK. When writing "Tasks / Subtasks": (1) Either structure each implementation task with explicit subtasks "Write failing tests for X" then "Implement X" so tests come first, OR (2) If you list a separate "Tests" task, make it only integration/E2E/acceptance and add in Dev Notes: "Unit tests are written in red-green-refactor within each implementation task; this task is integration/E2E only." Never list a single "Tests" task at the end that bundles unit + integration + frontend tests without this clarification—it suggests implement-then-test.</critical>
+
     <!-- Developer context section - MOST IMPORTANT PART -->
     <template-output file="{default_output_file}">
     developer_context_section</template-output> **DEV AGENT GUARDRAILS:** <template-output file="{default_output_file}">

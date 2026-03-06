@@ -13,6 +13,7 @@ import type {
   EstimateCostResponse,
   RegenerateNodeRequest,
   RegenerateNodeResponse,
+  NodePromptResponse,
   ValidateGraphRequest,
   ValidateGraphResponse,
   CalculateLayoutRequest,
@@ -144,6 +145,20 @@ export async function regenerateNode(
     `/api/v1/unity-dialogues/graph/nodes/${nodeId}/regenerate`,
     request,
     { timeout: 120000 }
+  )
+  return response.data
+}
+
+/**
+ * Récupère le prompt exact ou reconstruit pour un nœud (Story 1.14).
+ */
+export async function getNodePrompt(
+  dialogueId: string,
+  nodeId: string
+): Promise<NodePromptResponse> {
+  const response = await apiClient.get<NodePromptResponse>(
+    '/api/v1/unity-dialogues/graph/prompt',
+    { params: { dialogue_id: dialogueId, node_id: nodeId } }
   )
   return response.data
 }

@@ -18,6 +18,7 @@ from api.schemas.graph import (
     EstimateCostPerNodeBreakdown,
     GenerateNodeRequest,
     GenerateNodeResponse,
+    NodePromptResponse,
     SuggestedConnection,
     ValidateGraphRequest,
     ValidateGraphResponse,
@@ -719,6 +720,186 @@ def _validate_dialogue_exists(
             resource_id=fname,
             request_id=request_id,
         )
+
+
+# Instructions par défaut pour prompt reconstruit (aligné GraphNodeOrchestrator, Story 1.14).
+_DEFAULT_INSTRUCTIONS = "Ecris la réponse du PNJ à ce que dit le PJ"
+
+
+def _load_unity_nodes_from_dialogue(
+    config_service: ConfigurationService,
+    dialogue_id: str,
+) -> list:
+    """Charge la liste des nœuds Unity d'un dialogue (fichier JSON).
+    
+    Args:
+        config_service: Service de configuration (chemin Unity).
+        dialogue_id: ID du dialogue (nom de fichier sans ou avec .json).
+        
+    Returns:
+        Liste des nœuds (dict).
+        
+    Raises:
+        FileNotFoundError: Si le fichier n'existe pas.
+        ValueError: Si le JSON est invalide.
+    """
+    unity_path = config_service.get_unity_dialogues_path()
+    if not unity_path:
+        raise ValueError("Chemin Unity non configuré")
+    fname = dialogue_id if dialogue_id.endswith(".json") else dialogue_id + ".json"
+    path = Path(unity_path) / fname
+    if not path.exists():
+        raise FileNotFoundError(f"Dialogue {dialogue_id} introuvable")
+    raw = path.read_text(encoding="utf-8")
+    doc = json.loads(raw)
+    if isinstance(doc, list):
+        return doc
+    return doc.get("nodes", [])
+
+
+def _reconstruct_prompt_for_node(
+    config_service: ConfigurationService,
+    dialogue_id: str,
+    node_id: str,
+    request_id: Optional[str] = None,
+) -> str:
+    """Reconstruit le prompt utilisateur pour un nœud à partir du document (Story 1.14).
+    
+    Même format que GraphGenerationService (contexte parent + choix + instructions).
+    Utilisé quand le prompt n'est pas stocké (avant Story 1.15).
+    
+    Args:
+        config_service: Service de configuration.
+        dialogue_id: ID du dialogue.
+        node_id: ID du nœud cible.
+        request_id: ID de requête pour les exceptions (optionnel).
+        
+    Returns:
+        Chaîne du prompt reconstruit.
+        
+    Raises:
+        NotFoundException: Nœud introuvable dans le document.
+    """
+    nodes = _load_unity_nodes_from_dialogue(config_service, dialogue_id)
+    node = next((n for n in nodes if n.get("id") == node_id), None)
+    if not node:
+        raise NotFoundException(
+            resource_type="Node",
+            resource_id=node_id,
+            request_id=request_id,
+        )
+    parent_node: Optional[dict] = None
+    choice_text: Optional[str] = None
+    for n in nodes:
+        choices = n.get("choices") or []
+        for c in choices:
+            if c.get("targetNode") == node_id:
+                parent_node = n
+                choice_text = c.get("text", "")
+                break
+        if parent_node is not None:
+            break
+    if not parent_node:
+        parent_speaker = "PNJ"
+        parent_line = ""
+        choice_text = None
+        instructions = _DEFAULT_INSTRUCTIONS
+    else:
+        parent_speaker = parent_node.get("speaker", "PNJ")
+        parent_line = parent_node.get("line", "")
+        instructions = _DEFAULT_INSTRUCTIONS
+    if choice_text is not None:
+        raw = (
+            f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
+            f"Réponse du joueur:\n{choice_text}\n\n"
+            f"Instructions pour la suite:\n{instructions}\n"
+        )
+    else:
+        raw = (
+            f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
+            f"Instructions pour la suite:\n{instructions}\n"
+        )
+    return raw
+
+
+@router.get(
+    "/prompt",
+    response_model=NodePromptResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_node_prompt(
+    dialogue_id: str,
+    node_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> NodePromptResponse:
+    """Retourne le prompt exact ou reconstruit pour un nœud (Story 1.14).
+    
+    Sans Story 1.15 (stockage prompt), le prompt est reconstruit à partir du document.
+    Retourne aussi tokens/timestamp si un enregistrement LLM existe pour ce dialogue/nœud.
+    """
+    try:
+        _validate_dialogue_exists(dialogue_id, config_service, request_id)
+    except (NotFoundException, ValidationException):
+        raise
+    try:
+        record = usage_service.repository.get_by_dialogue_and_node(dialogue_id, node_id)
+    except Exception as e:
+        logger.debug(
+            "get_node_prompt: impossible de charger le record (dialogue_id=%s, node_id=%s): %s",
+            dialogue_id,
+            node_id,
+            e,
+        )
+        record = None
+
+    # Story 1.15+: si le record contient un prompt stocké, l'utiliser (is_historical=True)
+    stored_prompt = getattr(record, "prompt", None) if record else None
+    if stored_prompt and isinstance(stored_prompt, str) and stored_prompt.strip():
+        return NodePromptResponse(
+            raw_prompt=stored_prompt.strip(),
+            prompt_tokens=record.prompt_tokens if record else None,
+            completion_tokens=record.completion_tokens if record else None,
+            timestamp=record.timestamp if record else None,
+            is_historical=True,
+            message="Prompt historique - contexte GDD depuis modifié",
+        )
+
+    try:
+        raw_prompt = _reconstruct_prompt_for_node(
+            config_service, dialogue_id, node_id, request_id=request_id
+        )
+    except NotFoundException:
+        raise
+    except FileNotFoundError as e:
+        raise NotFoundException(
+            resource_type="Dialogue Unity",
+            resource_id=dialogue_id,
+            request_id=request_id,
+        ) from e
+    except (ValueError, json.JSONDecodeError) as e:
+        logger.warning("Erreur chargement document pour prompt (request_id: %s): %s", request_id, e)
+        raise ValidationException(
+            message="Document invalide ou introuvable pour la reconstruction du prompt",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
+    except Exception as e:
+        logger.exception("Erreur GET prompt (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de la récupération du prompt",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
+    return NodePromptResponse(
+        raw_prompt=raw_prompt,
+        prompt_tokens=record.prompt_tokens if record else None,
+        completion_tokens=record.completion_tokens if record else None,
+        timestamp=record.timestamp if record else None,
+        is_historical=False,
+        message="Prompt reconstruit (contexte actuel)",
+    )
 
 
 @router.post(
