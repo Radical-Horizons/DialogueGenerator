@@ -10,9 +10,18 @@ from api.dependencies import (
     get_token_estimation_service,
     get_llm_pricing_service,
 )
+from api.routers.graph import _estimate_cost_cache
 from services.configuration_service import ConfigurationService
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService
+
+
+@pytest.fixture(autouse=True)
+def clear_estimate_cache():
+    """Vide le cache TTL entre chaque test pour éviter les faux positifs (M2)."""
+    _estimate_cost_cache.clear()
+    yield
+    _estimate_cost_cache.clear()
 
 
 @pytest.fixture
@@ -27,13 +36,17 @@ def mock_config_service():
 
 @pytest.fixture
 def pricing_config_path(tmp_path):
-    """Fichier de prix temporaire pour tests prévisibles."""
+    """Fichier de prix temporaire pour tests prévisibles (gpt-4o + mistral pour comparaison)."""
     config_file = tmp_path / "llm_pricing.json"
     config_file.write_text("""{
   "models": {
     "gpt-4o": {
       "input_price_per_1M": 2.50,
       "output_price_per_1M": 10.00
+    },
+    "mistral-small-latest": {
+      "input_price_per_1M": 0.10,
+      "output_price_per_1M": 0.30
     }
   }
 }""")
@@ -120,3 +133,46 @@ def test_estimate_cost_default_model(client, valid_estimate_body):
     )
     assert response.status_code == 200
     assert response.json()["model_id"] == "gpt-4o"
+
+
+def test_estimate_cost_unknown_model_returns_zero_cost(client, valid_estimate_body):
+    """Modèle absent du pricing → coût 0.0, pas de 500 (L3)."""
+    valid_estimate_body["llm_model_identifier"] = "modele-inexistant"
+    response = client.post(
+        "/api/v1/unity-dialogues/graph/estimate-cost",
+        json=valid_estimate_body,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["estimated_cost_eur"] == 0.0
+
+
+def test_estimate_cost_provider_comparison_present(client, valid_estimate_body):
+    """La réponse contient les champs de comparaison inter-providers (AC #3)."""
+    response = client.post(
+        "/api/v1/unity-dialogues/graph/estimate-cost",
+        json=valid_estimate_body,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "alternative_provider" in data
+    assert "alternative_cost_eur" in data
+    assert "cost_difference_pct" in data
+    assert data["alternative_provider"] == "mistral"
+    assert isinstance(data["cost_difference_pct"], float)
+
+
+def test_estimate_cost_eur_is_converted_from_usd(client, valid_estimate_body):
+    """Le coût EUR est inférieur au coût USD brut (facteur 0.92 appliqué — H2)."""
+    response = client.post(
+        "/api/v1/unity-dialogues/graph/estimate-cost",
+        json=valid_estimate_body,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    tokens_in = data["prompt_tokens"]
+    tokens_out = data["completion_tokens"]
+    # Calcul USD brut gpt-4o : 2.50/1M input + 10.00/1M output
+    cost_usd = (tokens_in / 1_000_000) * 2.50 + (tokens_out / 1_000_000) * 10.00
+    cost_eur_expected = round(cost_usd * 0.92, 6)
+    assert abs(data["estimated_cost_eur"] - cost_eur_expected) < 1e-5

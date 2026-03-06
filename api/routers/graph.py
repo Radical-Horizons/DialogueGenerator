@@ -50,6 +50,15 @@ from services.llm_pricing_service import LLMPricingService
 
 logger = logging.getLogger(__name__)
 
+# Taux de conversion USD → EUR (à mettre à jour périodiquement, voir llm_pricing.json note).
+_USD_TO_EUR_RATE: float = 0.92
+
+# Provider alternatif de comparaison pour l'AC #3 (Mistral: -X% vs OpenAI).
+_ALTERNATIVE_MODEL: dict[str, str] = {
+    "openai": "mistral-small-latest",
+    "mistral": "gpt-4o",
+}
+
 
 def _build_representative_prompt_for_estimate(
     parent_node_content: dict,
@@ -477,22 +486,25 @@ async def estimate_cost(
         cost_usd = pricing_service.calculate_cost(
             model_id, prompt_tokens, total_completion_tokens
         )
-        # Note: llm_pricing.json est en USD ; on expose en "eur" pour l'UI (même valeur, affichage €)
-        estimated_cost_eur = round(cost_usd, 6)
+        estimated_cost_eur = round(cost_usd * _USD_TO_EUR_RATE, 6)
         per_node_breakdown = None
         if batch_count > 1:
-            first_node_cost = pricing_service.calculate_cost(
-                model_id, prompt_tokens, completion_tokens_per_node
+            first_node_cost_eur = round(
+                pricing_service.calculate_cost(model_id, prompt_tokens, completion_tokens_per_node)
+                * _USD_TO_EUR_RATE,
+                6,
             )
-            next_node_cost = pricing_service.calculate_cost(
-                model_id, 0, completion_tokens_per_node
+            next_node_cost_eur = round(
+                pricing_service.calculate_cost(model_id, 0, completion_tokens_per_node)
+                * _USD_TO_EUR_RATE,
+                6,
             )
             per_node_breakdown = [
                 EstimateCostPerNodeBreakdown(
                     choice_index=0,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens_per_node,
-                    estimated_cost_eur=round(first_node_cost, 6),
+                    estimated_cost_eur=first_node_cost_eur,
                 )
             ]
             for i in range(1, batch_count):
@@ -501,9 +513,32 @@ async def estimate_cost(
                         choice_index=i,
                         prompt_tokens=0,
                         completion_tokens=completion_tokens_per_node,
-                        estimated_cost_eur=round(next_node_cost, 6),
+                        estimated_cost_eur=next_node_cost_eur,
                     )
                 )
+
+        # AC #3 : comparaison avec le provider alternatif.
+        alt_model = _ALTERNATIVE_MODEL.get(provider)
+        alternative_provider: Optional[str] = None
+        alternative_model_id: Optional[str] = None
+        alternative_cost_eur: Optional[float] = None
+        cost_difference_pct: Optional[float] = None
+        if alt_model:
+            alt_cost_usd = pricing_service.calculate_cost(
+                alt_model, prompt_tokens, total_completion_tokens
+            )
+            if alt_cost_usd > 0 or estimated_cost_eur == 0:
+                alt_cost_eur = round(alt_cost_usd * _USD_TO_EUR_RATE, 6)
+                alternative_provider = "mistral" if "mistral" in alt_model.lower() else "openai"
+                alternative_model_id = alt_model
+                alternative_cost_eur = alt_cost_eur
+                if estimated_cost_eur > 0:
+                    cost_difference_pct = round(
+                        (alt_cost_eur - estimated_cost_eur) / estimated_cost_eur * 100, 1
+                    )
+                else:
+                    cost_difference_pct = 0.0
+
         response = EstimateCostResponse(
             estimated_cost_eur=estimated_cost_eur,
             prompt_tokens=prompt_tokens,
@@ -512,6 +547,10 @@ async def estimate_cost(
             provider=provider,
             batch_count=batch_count if batch_count > 1 else None,
             per_node_breakdown=per_node_breakdown,
+            alternative_provider=alternative_provider,
+            alternative_model_id=alternative_model_id,
+            alternative_cost_eur=alternative_cost_eur,
+            cost_difference_pct=cost_difference_pct,
         )
         _estimate_cost_cache[cache_key] = response.model_dump()
         return response

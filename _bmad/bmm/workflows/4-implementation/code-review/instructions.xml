@@ -16,8 +16,24 @@
 
 
   <step n="1" goal="Load story and discover changes">
-    <action>Use provided {{story_path}} or ask user which story file to review</action>
-    <action>Read COMPLETE story file</action>
+    <check if="no {{story_path}} provided">
+      <action>Read COMPLETE file: {sprint_status}</action>
+      <action>Scan development_status entries for all keys with value "review"</action>
+      <check if="exactly one review entry found">
+        <action>Set {{story_key}} = that key</action>
+        <action>Set {{story_path}} = "{story_dir}/{{story_key}}.md"</action>
+        <action>Inform user: "Story auto-détectée depuis sprint-status : {{story_key}}"</action>
+      </check>
+      <check if="multiple review entries found">
+        <action>List all entries with value "review" and ask user to choose one</action>
+        <action>Set {{story_path}} from user choice</action>
+      </check>
+      <check if="no review entries found">
+        <action>Inform user: "Aucune story avec statut 'review' dans sprint-status.yaml"</action>
+        <action>Ask user to provide {{story_path}} manually or check sprint-status</action>
+      </check>
+    </check>
+    <action>Read COMPLETE story file from {{story_path}}</action>
     <action>Set {{story_key}} = extracted key from filename (e.g., "1-2-user-authentication.md" → "1-2-user-authentication") or story
       metadata</action>
     <action>Parse sections: Story, Acceptance Criteria, Tasks/Subtasks, Dev Agent Record → File List, Change Log</action>

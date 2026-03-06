@@ -66,7 +66,7 @@ class EstimateCostPerNodeBreakdown(BaseModel):
 
 class EstimateCostResponse(BaseModel):
     """Réponse d'estimation de coût (sans appel LLM)."""
-    estimated_cost_eur: float = Field(..., description="Coût total estimé (€)")
+    estimated_cost_eur: float = Field(..., description="Coût total estimé (€, converti depuis USD)")
     prompt_tokens: int = Field(..., description="Tokens prompt estimés")
     completion_tokens: int = Field(..., description="Tokens completion estimés (total si batch)")
     model_id: str = Field(..., description="Modèle utilisé pour l'estimation")
@@ -75,6 +75,13 @@ class EstimateCostResponse(BaseModel):
     per_node_breakdown: Optional[List[EstimateCostPerNodeBreakdown]] = Field(
         None,
         description="Détail par nœud (si batch)"
+    )
+    alternative_provider: Optional[str] = Field(None, description="Provider alternatif pour comparaison (AC #3)")
+    alternative_model_id: Optional[str] = Field(None, description="Modèle alternatif utilisé pour la comparaison")
+    alternative_cost_eur: Optional[float] = Field(None, description="Coût estimé avec le provider alternatif (€)")
+    cost_difference_pct: Optional[float] = Field(
+        None,
+        description="Différence de coût vs provider actuel en % (négatif = alternatif moins cher)"
     )
 
 

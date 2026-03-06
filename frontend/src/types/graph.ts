@@ -99,6 +99,12 @@ export interface EstimateCostResponse {
   provider: string
   batch_count?: number
   per_node_breakdown?: EstimateCostPerNodeBreakdown[]
+  /** AC #3 — comparaison inter-providers */
+  alternative_provider?: string
+  alternative_model_id?: string
+  alternative_cost_eur?: number
+  /** Différence en % vs provider actuel (négatif = alternatif moins cher) */
+  cost_difference_pct?: number
 }
 
 /** Entrée d'historique de régénération (Story 1.10 - AC#3). */

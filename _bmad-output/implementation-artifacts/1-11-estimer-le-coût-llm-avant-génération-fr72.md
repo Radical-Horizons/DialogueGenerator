@@ -1,6 +1,6 @@
 # Story 1.11: Estimer le coût LLM avant génération (FR72)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -61,13 +61,13 @@ so that **je peux gérer mon budget et décider si je veux procéder avec la gé
   - [x] Affiche: coût estimé (€), tokens (prompt + completion), provider
   - [x] Bouton "Estimer le coût" déclenche appel API estimate-cost
   - [x] Affichage conditionnel warning 90% / 100% (intégration `useCostGovernance()`)
-  - [ ] Option: recalcul auto au changement contexte (debounce 300–500 ms)
+        - [x] Recalcul auto au changement contexte (debounce 400 ms via useEffect)
 
 - [x] Task 5: Intégration AIGenerationPanel (AC: tous)
   - [x] Intégrer `CostEstimationBadge` dans `AIGenerationPanel.tsx` (au-dessus ou à côté du bouton "Générer")
   - [x] Passer en props: parentNodeId, userInstructions, selections (contexte), llmModel, generateAllChoices, targetChoiceIndex / count
   - [x] Désactiver bouton "Générer" si budget 100% dépassé (réutiliser `checkBudget()` + état dérivé de l'estimation)
-  - [ ] Pour batch: afficher coût total + lien "Voir détail" pour breakdown par nœud
+        - [x] Pour batch: afficher coût total + lien "Voir détail" pour breakdown par nœud
 
 - [x] Task 6: Intégration Epic 0.7 cost governance (AC: #5)
   - [x] Réutiliser `useCostGovernance()` et `CostGovernanceService` pour warning 90% / blocage 100%
@@ -179,11 +179,14 @@ Aucune erreur bloquante.
 
 ### Completion Notes List
 
-- TokenEstimationService: implémenté avec ContextTruncator (tiktoken ou fallback //4), `estimate_tokens(prompt_text, model_id)` → (prompt_tokens, completion_tokens). DEFAULT_COMPLETION_TOKENS_PER_NODE = 350.
+- TokenEstimationService: implémenté avec ContextTruncator (tiktoken ou fallback //4), `estimate_tokens(prompt_text, model_id)` → (prompt_tokens, completion_tokens). DEFAULT_COMPLETION_TOKENS_PER_NODE = 350. model_id-aware : char/4 pour Mistral (tiktoken incompatible).
 - Endpoint `POST /api/v1/unity-dialogues/graph/estimate-cost`: schémas EstimateCostRequest, EstimateCostResponse, EstimateCostPerNodeBreakdown ; prompt représentatif = contexte + parent line + instructions ; batch_count et per_node_breakdown pour generate_all_choices.
-- Cache: TTLCache 60s par hash(representative_prompt|model_id|batch_count).
-- CostEstimationBadge: bouton "Estimer le coût", affichage € / tokens / provider, warning 90% / 100% via getBudget() et projection (amount + estimated_cost_eur).
-- AIGenerationPanel: intégration CostEstimationBadge, état budgetExceededByEstimate pour désactiver "Générer" si estimation dépasse 100%.
+- Cache: TTLCache 60s par hash(representative_prompt|model_id|batch_count). Réinitialisé entre chaque test (fixture autouse).
+- Conversion USD→EUR: `_USD_TO_EUR_RATE = 0.92` appliqué sur tous les montants retournés (H2).
+- Comparaison inter-providers (AC #3): champs `alternative_provider`, `alternative_model_id`, `alternative_cost_eur`, `cost_difference_pct` dans EstimateCostResponse. Modèles Mistral ajoutés à llm_pricing.json.
+- CostEstimationBadge: bouton manuel + recalcul auto debounce 400ms (AC #2), affichage comparaison provider (AC #3), breakdown expandable batch (AC #4), warning 90% / 100% via getBudget() (AC #5).
+- AIGenerationPanel: estimateRequest wrappé dans useMemo pour référence stable (évite boucles useEffect).
+- Tests frontend: CostEstimationBadge.test.tsx couvre idle, loading, success, error, warning 90%/100%, debounce annulation, breakdown, comparaison provider.
 
 ### File List
 
@@ -201,5 +204,6 @@ Aucune erreur bloquante.
 
 **Tests:**
 - `tests/services/test_token_estimation_service.py` (nouveau)
-- `tests/api/test_graph_estimate_cost.py` (nouveau)
+- `tests/api/test_graph_estimate_cost.py` (nouveau — +4 tests : modèle inconnu, comparaison provider, conversion EUR, clear cache)
+- `frontend/src/components/graph/CostEstimationBadge.test.tsx` (nouveau — 9 tests unitaires)
 - E2E estimation coût : non ajouté (optionnel)
