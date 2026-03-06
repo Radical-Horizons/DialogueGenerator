@@ -69,6 +69,38 @@ export interface GenerateNodeRequest {
   generate_all_choices?: boolean
 }
 
+/** Requête pour estimer le coût avant génération (même structure que GenerateNodeRequest). */
+export interface EstimateCostRequest {
+  parent_node_id: string
+  parent_node_content: Record<string, unknown>
+  user_instructions: string
+  context_selections: Record<string, unknown>
+  max_choices?: number | null
+  npc_speaker_id?: string
+  system_prompt_override?: string
+  narrative_tags?: string[]
+  llm_model_identifier?: string
+  target_choice_index?: number | null
+  generate_all_choices?: boolean
+}
+
+export interface EstimateCostPerNodeBreakdown {
+  choice_index?: number
+  prompt_tokens: number
+  completion_tokens: number
+  estimated_cost_eur: number
+}
+
+export interface EstimateCostResponse {
+  estimated_cost_eur: number
+  prompt_tokens: number
+  completion_tokens: number
+  model_id: string
+  provider: string
+  batch_count?: number
+  per_node_breakdown?: EstimateCostPerNodeBreakdown[]
+}
+
 /** Entrée d'historique de régénération (Story 1.10 - AC#3). */
 export interface RegenerationEntry {
   timestamp: string

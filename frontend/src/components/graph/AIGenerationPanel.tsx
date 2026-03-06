@@ -8,6 +8,7 @@ import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { useCostGovernance } from '../../hooks/useCostGovernance'
 import { ConfirmDialog } from '../shared'
+import { CostEstimationBadge } from './CostEstimationBadge'
 import { theme } from '../../theme'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
@@ -41,6 +42,7 @@ export function AIGenerationPanel({
   const [targetChoiceIndex, setTargetChoiceIndex] = useState<number | null>(null)
   const [generateAllChoices, setGenerateAllChoices] = useState(false)
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null)
+  const [budgetExceededByEstimate, setBudgetExceededByEstimate] = useState(false)
   
   const availableNarrativeTags = ['tension', 'humour', 'dramatique', 'intime', 'révélation']
   
@@ -203,6 +205,7 @@ export function AIGenerationPanel({
   // Fonction helper pour vérifier si le bouton doit être désactivé
   const isGenerateDisabled = () => {
     if (isGenerating) return true
+    if (budgetExceededByEstimate) return true
     // En mode "suite (nextNode)", si le parent a des choix, il faut en sélectionner au moins un
     const parentChoices = parentNode?.data?.choices || []
     const hasChoices = parentChoices.length > 0
@@ -214,6 +217,20 @@ export function AIGenerationPanel({
     }
     return false
   }
+
+  // Payload pour l'estimation de coût (aligné sur GenerateNodeRequest)
+  const estimateRequest = parentNodeId && parentNode
+    ? {
+        parent_node_id: parentNodeId,
+        parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
+        user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+        context_selections: selections as Record<string, unknown>,
+        max_choices: maxChoices ?? undefined,
+        llm_model_identifier: llmModel,
+        target_choice_index: targetChoiceIndex ?? undefined,
+        generate_all_choices: generateAllChoices,
+      }
+    : null
   
   // Détecter si c'est un TestNode (pour afficher la modal même si generateAllChoices est false)
   const isTestNode = parentNodeId?.startsWith('test-node-') ?? false
@@ -665,6 +682,12 @@ export function AIGenerationPanel({
         </div>
       </div>
       
+      {/* Estimation coût (Story 1.11) */}
+      <CostEstimationBadge
+        estimateRequest={estimateRequest}
+        onBudgetExceeded={setBudgetExceededByEstimate}
+      />
+
       {/* Actions */}
       <div style={{ 
         display: 'flex', 

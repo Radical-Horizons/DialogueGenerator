@@ -9,6 +9,8 @@ import type {
   SaveGraphResponse,
   GenerateNodeRequest,
   GenerateNodeResponse,
+  EstimateCostRequest,
+  EstimateCostResponse,
   RegenerateNodeRequest,
   RegenerateNodeResponse,
   ValidateGraphRequest,
@@ -45,6 +47,19 @@ export async function saveGraph(request: SaveGraphRequest): Promise<SaveGraphRes
 export async function saveGraphAndWrite(request: SaveGraphRequest): Promise<SaveGraphResponse> {
   const response = await apiClient.post<SaveGraphResponse>(
     `/api/v1/unity-dialogues/graph/save-and-write`,
+    request
+  )
+  return response.data
+}
+
+/**
+ * Estime le coût LLM avant génération (pas d'appel LLM).
+ */
+export async function estimateCost(
+  request: EstimateCostRequest
+): Promise<EstimateCostResponse> {
+  const response = await apiClient.post<EstimateCostResponse>(
+    `/api/v1/unity-dialogues/graph/estimate-cost`,
     request
   )
   return response.data

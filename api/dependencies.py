@@ -24,6 +24,7 @@ from services.repositories.llm_usage_repository import FileLLMUsageRepository
 from services.repositories.cost_budget_repository import FileCostBudgetRepository
 from services.llm_usage_service import LLMUsageService
 from services.llm_pricing_service import LLMPricingService
+from services.token_estimation_service import TokenEstimationService
 from services.cost_governance_service import CostGovernanceService
 from factories.llm_factory import LLMClientFactory
 from services.vocabulary_service import VocabularyService
@@ -313,6 +314,30 @@ def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
     """
     container = get_service_container(request)
     return container.get_graph_node_orchestrator()
+
+
+def get_token_estimation_service(request: Request) -> TokenEstimationService:
+    """Retourne le service d'estimation de tokens (prompt + completion sans appel LLM).
+
+    Args:
+        request: La requête HTTP (non utilisé, pour cohérence Depends).
+
+    Returns:
+        Instance de TokenEstimationService.
+    """
+    return TokenEstimationService()
+
+
+def get_llm_pricing_service(request: Request) -> LLMPricingService:
+    """Retourne le service de calcul des prix LLM (config llm_pricing.json).
+
+    Args:
+        request: La requête HTTP (non utilisé, pour cohérence Depends).
+
+    Returns:
+        Instance de LLMPricingService.
+    """
+    return LLMPricingService()
 
 
 # Variables globales _vocab_service et _guides_service supprimées - utilisez ServiceContainer

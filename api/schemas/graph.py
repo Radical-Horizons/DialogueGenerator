@@ -41,6 +41,43 @@ class SaveGraphResponse(BaseModel):
     last_seq: Optional[int] = Field(None, description="Dernier seq connu pour ce document (ADR-006)")
 
 
+class EstimateCostRequest(BaseModel):
+    """Requête pour estimer le coût LLM avant génération (même structure que GenerateNodeRequest)."""
+    parent_node_id: str = Field(..., description="ID du nœud parent")
+    parent_node_content: Dict[str, Any] = Field(..., description="Contenu du nœud parent (pour contexte)")
+    user_instructions: str = Field(..., description="Instructions pour guider l'IA")
+    context_selections: Dict[str, Any] = Field(..., description="Sélection de contexte GDD")
+    max_choices: Optional[int] = Field(None, description="Nombre maximum de choix (0-8)")
+    npc_speaker_id: Optional[str] = Field(None, description="ID du PNJ interlocuteur")
+    system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
+    narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs")
+    llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
+    target_choice_index: Optional[int] = Field(None, description="Index du choix spécifique (si None, tous les choix sans targetNode)")
+    generate_all_choices: bool = Field(False, description="Si True, estimation pour un nœud par choix sans targetNode")
+
+
+class EstimateCostPerNodeBreakdown(BaseModel):
+    """Détail d'estimation par nœud (batch)."""
+    choice_index: Optional[int] = Field(None, description="Index du choix (si batch)")
+    prompt_tokens: int = Field(..., description="Tokens prompt estimés pour ce nœud")
+    completion_tokens: int = Field(..., description="Tokens completion estimés pour ce nœud")
+    estimated_cost_eur: float = Field(..., description="Coût estimé pour ce nœud (€)")
+
+
+class EstimateCostResponse(BaseModel):
+    """Réponse d'estimation de coût (sans appel LLM)."""
+    estimated_cost_eur: float = Field(..., description="Coût total estimé (€)")
+    prompt_tokens: int = Field(..., description="Tokens prompt estimés")
+    completion_tokens: int = Field(..., description="Tokens completion estimés (total si batch)")
+    model_id: str = Field(..., description="Modèle utilisé pour l'estimation")
+    provider: str = Field(..., description="Provider LLM (ex: openai, mistral)")
+    batch_count: Optional[int] = Field(None, description="Nombre de nœuds en batch (1 si single)")
+    per_node_breakdown: Optional[List[EstimateCostPerNodeBreakdown]] = Field(
+        None,
+        description="Détail par nœud (si batch)"
+    )
+
+
 class GenerateNodeRequest(BaseModel):
     """Requête pour générer un nœud en contexte."""
     parent_node_id: str = Field(..., description="ID du nœud parent")

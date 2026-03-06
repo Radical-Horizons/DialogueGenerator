@@ -70,7 +70,7 @@ development_status:
   1-8-supprimer-des-nœuds-du-dialogue-fr8: done
   1-9-auto-link-des-nœuds-générés-au-graphe-existant-fr9: done
   1-10-régénérer-des-nœuds-rejetés-avec-instructions-ajustées-fr10: done
-  1-11-estimer-le-coût-llm-avant-génération-fr72: ready-for-dev
+  1-11-estimer-le-coût-llm-avant-génération-fr72: review
   1-12-afficher-breakdown-des-coûts-par-dialogue-fr73: backlog
   1-13-afficher-coûts-llm-cumulatifs-daily-monthly-fr74: done
   1-14-afficher-prompt-transparency-prompt-exact-envoyé-au-llm-fr77: backlog
