@@ -24,6 +24,8 @@ class LLMUsageRecord(BaseModel):
     dialogue_id: Optional[str] = Field(default=None, description="ID du dialogue associé (annotation post-hoc)")
     node_id: Optional[str] = Field(default=None, description="ID du nœud généré associé (annotation post-hoc)")
     deleted: bool = Field(default=False, description="Nœud supprimé du graphe (marqué lors du rejet)")
+    prompt: Optional[str] = Field(default=None, description="Prompt complet envoyé au LLM (Story 1.15)")
+    response: Optional[str] = Field(default=None, description="Réponse brute du LLM (Story 1.15)")
     
     model_config = ConfigDict(
         json_schema_extra={

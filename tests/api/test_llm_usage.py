@@ -210,6 +210,108 @@ def test_get_dialogue_costs_empty(client, tmp_path):
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
 
+# ── Tests Story 1.15 generation-logs ──────────────────────────────────────────
+
+def test_get_generation_logs_200_returns_list(client, tmp_path):
+    """Story 1.15: GET /dialogue/{id}/generation-logs retourne liste avec prompt, response, timestamp, node_id, cost, tokens, success."""
+    from models.llm_usage import LLMUsageRecord
+    base_time = datetime.now(UTC)
+    repo = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    for i in range(2):
+        r = LLMUsageRecord(
+            request_id=f"req_gl_{i}",
+            timestamp=base_time - timedelta(hours=i),
+            model_name="gpt-5.2",
+            prompt_tokens=100,
+            completion_tokens=50,
+            total_tokens=150,
+            estimated_cost=0.001,
+            duration_ms=200,
+            success=True,
+            endpoint="generate-node",
+            k_variants=1,
+            dialogue_id="dialogue_alpha",
+            node_id=f"node_{i}",
+            prompt="System: Write dialogue.",
+            response='{"node": {}}',
+        )
+        repo.save(r)
+    test_service = LLMUsageService(repository=repo, pricing_service=LLMPricingService())
+    app.dependency_overrides[get_llm_usage_service] = lambda: test_service
+    try:
+        response = client.get("/api/v1/llm-usage/dialogue/dialogue_alpha/generation-logs")
+        assert response.status_code == 200
+        data = response.json()
+        assert "entries" in data
+        logs = data["entries"]
+        assert len(logs) == 2
+        entry = logs[0]
+        assert "timestamp" in entry
+        assert "node_id" in entry
+        assert "prompt" in entry
+        assert "response" in entry
+        assert "estimated_cost" in entry or "cost_eur" in entry
+        assert "prompt_tokens" in entry
+        assert "success" in entry
+        assert entry["prompt"] == "System: Write dialogue."
+        assert entry["response"] == '{"node": {}}'
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
+
+def test_get_generation_logs_with_filters(client, dialogue_records, tmp_path):
+    """Story 1.15: GET generation-logs avec start_date, end_date, model_name filtre les résultats."""
+    from models.llm_usage import LLMUsageRecord
+    base_time = datetime.now(UTC)
+    repo = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    for i, model in enumerate(["gpt-5.2", "mistral-small"]):
+        r = LLMUsageRecord(
+            request_id=f"req_f_{i}",
+            timestamp=base_time - timedelta(days=i),
+            model_name=model,
+            prompt_tokens=100,
+            completion_tokens=50,
+            total_tokens=150,
+            estimated_cost=0.001,
+            duration_ms=200,
+            success=True,
+            endpoint="generate-node",
+            k_variants=1,
+            dialogue_id="diag_f",
+            node_id=f"n_{i}",
+        )
+        repo.save(r)
+    test_service = LLMUsageService(repository=repo, pricing_service=LLMPricingService())
+    app.dependency_overrides[get_llm_usage_service] = lambda: test_service
+    try:
+        response = client.get(
+            "/api/v1/llm-usage/dialogue/diag_f/generation-logs",
+            params={"model_name": "gpt-5.2"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        logs = data["entries"]
+        assert len(logs) == 1
+        assert logs[0]["model_name"] == "gpt-5.2"
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
+
+def test_get_generation_logs_empty_returns_200(client, tmp_path):
+    """Story 1.15: GET generation-logs pour dialogue sans logs retourne 200 et liste vide."""
+    repo = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    test_service = LLMUsageService(repository=repo, pricing_service=LLMPricingService())
+    app.dependency_overrides[get_llm_usage_service] = lambda: test_service
+    try:
+        response = client.get("/api/v1/llm-usage/dialogue/empty_dialogue/generation-logs")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["entries"] == []
+        assert data["total_count"] == 0
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
+
 def test_llm_usage_record_has_dialogue_fields(sample_records):
     """Vérifie que LLMUsageRecord expose dialogue_id, node_id et deleted (rétrocompat)."""
     # Les records existants sans ces champs doivent avoir les valeurs par défaut

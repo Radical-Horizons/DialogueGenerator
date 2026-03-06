@@ -51,6 +51,8 @@ class LLMUsageService:
         error_message: Optional[str] = None,
         dialogue_id: Optional[str] = None,
         node_id: Optional[str] = None,
+        prompt: Optional[str] = None,
+        response: Optional[str] = None,
     ) -> None:
         """Enregistre un appel LLM.
         
@@ -67,14 +69,19 @@ class LLMUsageService:
             error_message: Message d'erreur si success=False.
             dialogue_id: ID du dialogue associé (optionnel).
             node_id: ID du nœud généré associé (optionnel).
+            prompt: Prompt complet envoyé au LLM (optionnel, Story 1.15).
+            response: Réponse brute du LLM (optionnel, Story 1.15).
         """
         try:
-            # Calculer le coût estimé
-            estimated_cost = self.pricing_service.calculate_cost(
-                model_name=model_name,
-                prompt_tokens=prompt_tokens,
-                completion_tokens=completion_tokens
-            )
+            # Calculer le coût estimé (0€ pour génération échouée, Story 1.15 AC#5)
+            if success:
+                estimated_cost = self.pricing_service.calculate_cost(
+                    model_name=model_name,
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens
+                )
+            else:
+                estimated_cost = 0.0
             
             # Créer l'enregistrement
             record = LLMUsageRecord(
@@ -92,6 +99,8 @@ class LLMUsageService:
                 error_message=error_message,
                 dialogue_id=dialogue_id,
                 node_id=node_id,
+                prompt=prompt,
+                response=response,
             )
             
             # Sauvegarder
@@ -302,6 +311,63 @@ class LLMUsageService:
             "node_count": node_count,
             "avg_cost_per_node_eur": avg_cost_per_node_eur,
             "breakdown": breakdown,
+        }
+
+    def get_generation_logs(
+        self,
+        dialogue_id: str,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        model_name: Optional[str] = None,
+    ) -> Dict:
+        """Récupère les logs de génération pour un dialogue (Story 1.15).
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            start_date: Filtre date de début (optionnel).
+            end_date: Filtre date de fin (optionnel).
+            model_name: Filtre par modèle / provider (optionnel).
+            
+        Returns:
+            Dictionnaire avec entries (liste triée par timestamp décroissant),
+            total_count, total_cost_eur.
+        """
+        records = self.repository.get_by_dialogue_id(dialogue_id)
+        if start_date is not None or end_date is not None:
+            records = [
+                r for r in records
+                if (start_date is None or r.timestamp.date() >= start_date)
+                and (end_date is None or r.timestamp.date() <= end_date)
+            ]
+        if model_name is not None and model_name.strip():
+            records = [r for r in records if r.model_name == model_name.strip()]
+        records = sorted(records, key=lambda r: r.timestamp, reverse=True)
+        total_cost_eur = round(
+            sum(r.estimated_cost for r in records) * self._USD_TO_EUR_RATE, 8
+        )
+        entries = [
+            {
+                "request_id": r.request_id,
+                "timestamp": r.timestamp,
+                "node_id": r.node_id,
+                "model_name": r.model_name,
+                "prompt_tokens": r.prompt_tokens,
+                "completion_tokens": r.completion_tokens,
+                "total_tokens": r.total_tokens,
+                "estimated_cost": r.estimated_cost,
+                "cost_eur": round(r.estimated_cost * self._USD_TO_EUR_RATE, 8),
+                "duration_ms": r.duration_ms,
+                "success": r.success,
+                "error_message": r.error_message,
+                "prompt": r.prompt,
+                "response": r.response,
+            }
+            for r in records
+        ]
+        return {
+            "entries": entries,
+            "total_count": len(entries),
+            "total_cost_eur": total_cost_eur,
         }
 
     def get_statistics(

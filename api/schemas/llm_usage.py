@@ -70,6 +70,35 @@ class AllDialoguesCostResponse(BaseModel):
     total_dialogues: int = Field(..., ge=0, description="Nombre de dialogues avec coûts trackés")
 
 
+class GenerationLogEntry(BaseModel):
+    """Une entrée de log de génération pour le panneau Logs (Story 1.15)."""
+    request_id: str = Field(..., description="ID de la requête API")
+    timestamp: datetime = Field(..., description="Horodatage de la génération")
+    node_id: Optional[str] = Field(default=None, description="ID du nœud généré")
+    model_name: str = Field(..., description="Modèle / provider utilisé")
+    prompt_tokens: int = Field(..., ge=0, description="Tokens prompt")
+    completion_tokens: int = Field(..., ge=0, description="Tokens completion")
+    total_tokens: int = Field(..., ge=0, description="Total tokens")
+    estimated_cost: float = Field(..., ge=0.0, description="Coût estimé USD")
+    cost_eur: float = Field(..., ge=0.0, description="Coût en EUR")
+    duration_ms: int = Field(..., ge=0, description="Durée en ms")
+    success: bool = Field(..., description="Génération réussie")
+    error_message: Optional[str] = Field(default=None, description="Message d'erreur si échec")
+    prompt: Optional[str] = Field(default=None, description="Prompt complet envoyé au LLM")
+    response: Optional[str] = Field(default=None, description="Réponse brute du LLM")
+
+    @field_serializer('timestamp')
+    def serialize_timestamp(self, value: datetime) -> str:
+        return value.isoformat() if isinstance(value, datetime) else str(value)
+
+
+class GenerationLogsResponse(BaseModel):
+    """Réponse GET /dialogue/{id}/generation-logs (Story 1.15)."""
+    entries: List[GenerationLogEntry] = Field(..., description="Logs de génération, plus récent en premier")
+    total_count: int = Field(..., ge=0, description="Nombre total d'entrées")
+    total_cost_eur: float = Field(..., ge=0.0, description="Coût total de la période en EUR")
+
+
 class LLMUsageHistoryResponse(BaseModel):
     """Réponse paginée avec liste d'enregistrements d'utilisation."""
     records: List[LLMUsageRecordResponse] = Field(..., description="Liste des enregistrements")

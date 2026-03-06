@@ -1,5 +1,6 @@
 """Client OpenAI refactorisé utilisant Responses API uniquement."""
 
+import json
 import logging
 import os
 import time
@@ -152,17 +153,25 @@ class OpenAIClient(ILLMClient):
             top_p=self.top_p,
         )
         
+        # Prompt complet pour le tracking (Story 1.15)
+        full_prompt_str = f"{system_message_content}\n\n--- Input ---\n{json.dumps(messages, ensure_ascii=False)}"
+        
         # Générer k variantes
         for i in range(k):
             start_time = time.time()
             success = False
             error_message = None
-            
+            raw_response_str = None
+            prompt_tokens = 0
+            completion_tokens = 0
+            total_tokens = 0
+
             try:
                 logger.info(f"Début de la génération de la variante {i+1}/{k} pour le prompt.")
                 
                 # Appel API avec retry et circuit breaker
                 response = await self._make_api_call_with_protection(responses_params)
+                raw_response_str = response.model_dump_json() if hasattr(response, "model_dump_json") else str(response)
                 
                 # Logger la réponse brute
                 try:
@@ -217,20 +226,22 @@ class OpenAIClient(ILLMClient):
                 # Calculer la durée
                 duration_ms = int((time.time() - start_time) * 1000)
                 
-                # Enregistrer l'utilisation si le service est disponible
+                # Enregistrer l'utilisation si le service est disponible (Story 1.15: prompt/response)
                 if self.usage_service:
                     try:
                         self.usage_service.track_usage(
                             request_id=self.request_id,
                             model_name=self.model_name,
-                            prompt_tokens=prompt_tokens if 'prompt_tokens' in locals() else 0,
-                            completion_tokens=completion_tokens if 'completion_tokens' in locals() else 0,
-                            total_tokens=total_tokens if 'total_tokens' in locals() else 0,
+                            prompt_tokens=prompt_tokens,
+                            completion_tokens=completion_tokens,
+                            total_tokens=total_tokens,
                             duration_ms=duration_ms,
                             success=success,
                             endpoint=self.endpoint,
                             k_variants=k,
                             error_message=error_message,
+                            prompt=full_prompt_str,
+                            response=raw_response_str,
                         )
                     except Exception as tracking_error:
                         logger.error(
@@ -294,12 +305,16 @@ class OpenAIClient(ILLMClient):
             stream=True,
         )
         
+        # Prompt complet pour le tracking (Story 1.15)
+        full_prompt_str = f"{system_message_content}\n\n--- Input ---\n{json.dumps(messages, ensure_ascii=False)}"
+        
         # Générer k variantes avec streaming
         for i in range(k):
             start_time = time.time()
             success = False
             error_message = None
             parsed_output: Optional[Union[BaseModel, str]] = None
+            raw_response_str: Optional[str] = None
             
             try:
                 logger.info(f"Début de la génération streaming de la variante {i+1}/{k} pour le prompt.")
@@ -342,6 +357,11 @@ class OpenAIClient(ILLMClient):
                         # Réponse complète reçue
                         completed_response = chunk.data.get("response")
                         if completed_response:
+                            raw_response_str = (
+                                completed_response.model_dump_json()
+                                if hasattr(completed_response, "model_dump_json")
+                                else str(completed_response)
+                            )
                             # Extraire les métriques d'utilisation
                             usage_metrics = OpenAIUsageTracker.extract_usage_metrics(completed_response)
                             prompt_tokens = usage_metrics["prompt_tokens"]
@@ -422,6 +442,8 @@ class OpenAIClient(ILLMClient):
                             endpoint=self.endpoint,
                             k_variants=k,
                             error_message=error_message,
+                            prompt=full_prompt_str,
+                            response=raw_response_str,
                         )
                     except Exception as tracking_error:
                         logger.error(

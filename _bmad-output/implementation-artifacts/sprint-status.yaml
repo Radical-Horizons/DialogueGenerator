@@ -74,7 +74,7 @@ development_status:
   1-12-afficher-breakdown-des-coûts-par-dialogue-fr73: done
   1-13-afficher-coûts-llm-cumulatifs-daily-monthly-fr74: done
   1-14-afficher-prompt-transparency-prompt-exact-envoyé-au-llm-fr77: done
-  1-15-afficher-logs-de-génération-prompts-réponses-coûts-fr78: ready-for-dev
+  1-15-afficher-logs-de-génération-prompts-réponses-coûts-fr78: done
   1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79: ready-for-dev
   1-17-adr-007-react-flow-controlled: done
   epic-1-retrospective: optional

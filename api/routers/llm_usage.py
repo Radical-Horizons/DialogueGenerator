@@ -11,6 +11,8 @@ from api.schemas.llm_usage import (
     AllDialoguesCostResponse,
     DialogueCostResponse,
     DialogueCostSummaryEntry,
+    GenerationLogEntry,
+    GenerationLogsResponse,
     LLMUsageHistoryResponse,
     LLMUsageRecordResponse,
     LLMUsageStatisticsResponse,
@@ -166,6 +168,49 @@ async def get_dialogue_costs(
         )
         raise InternalServerException(
             message="Erreur lors de la récupération des coûts du dialogue",
+            details={"error": str(e), "dialogue_id": dialogue_id},
+            request_id=request_id,
+        )
+
+
+@router.get(
+    "/dialogue/{dialogue_id}/generation-logs",
+    response_model=GenerationLogsResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_generation_logs(
+    dialogue_id: str,
+    request: Request,
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+    start_date: Optional[date] = Query(default=None, description="Date de début (incluse)"),
+    end_date: Optional[date] = Query(default=None, description="Date de fin (incluse)"),
+    model_name: Optional[str] = Query(default=None, alias="model_name", description="Filtrer par modèle / provider"),
+) -> GenerationLogsResponse:
+    """Récupère les logs de génération pour un dialogue (Story 1.15).
+    
+    Liste chronologique (plus récent en premier) avec prompt, réponse, coût, tokens, statut.
+    Filtres optionnels : période (start_date, end_date), provider (model_name).
+    """
+    try:
+        data = usage_service.get_generation_logs(
+            dialogue_id=dialogue_id,
+            start_date=start_date,
+            end_date=end_date,
+            model_name=model_name,
+        )
+        return GenerationLogsResponse(
+            entries=[GenerationLogEntry(**e) for e in data["entries"]],
+            total_count=data["total_count"],
+            total_cost_eur=data["total_cost_eur"],
+        )
+    except Exception as e:
+        logger.exception(
+            f"Erreur lors de la récupération des generation-logs (dialogue_id: {dialogue_id}, "
+            f"request_id: {request_id})"
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération des logs de génération",
             details={"error": str(e), "dialogue_id": dialogue_id},
             request_id=request_id,
         )

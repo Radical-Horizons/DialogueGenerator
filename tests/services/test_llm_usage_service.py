@@ -60,6 +60,44 @@ def test_track_usage(usage_service, mock_repository, mock_pricing_service):
     assert saved_record.total_tokens == 1500
 
 
+def test_track_usage_with_prompt_and_response(usage_service, mock_repository):
+    """Story 1.15: track_usage accepte prompt et response optionnels et les enregistre."""
+    usage_service.track_usage(
+        request_id="req_prompt",
+        model_name="gpt-5.2",
+        prompt_tokens=100,
+        completion_tokens=50,
+        total_tokens=150,
+        duration_ms=100,
+        success=True,
+        endpoint="generate/variants",
+        k_variants=1,
+        prompt="Full prompt text",
+        response="LLM raw response",
+    )
+    saved_record = mock_repository.save.call_args[0][0]
+    assert saved_record.prompt == "Full prompt text"
+    assert saved_record.response == "LLM raw response"
+
+
+def test_track_usage_without_prompt_response_backward_compat(usage_service, mock_repository):
+    """Story 1.15: track_usage sans prompt/response laisse None (rétrocompat)."""
+    usage_service.track_usage(
+        request_id="req_no_prompt",
+        model_name="gpt-5.2",
+        prompt_tokens=100,
+        completion_tokens=50,
+        total_tokens=150,
+        duration_ms=100,
+        success=True,
+        endpoint="generate/variants",
+        k_variants=1,
+    )
+    saved_record = mock_repository.save.call_args[0][0]
+    assert getattr(saved_record, "prompt", None) is None
+    assert getattr(saved_record, "response", None) is None
+
+
 def test_track_usage_with_error(usage_service, mock_repository):
     """Teste l'enregistrement d'un appel en erreur."""
     usage_service.track_usage(
@@ -78,6 +116,8 @@ def test_track_usage_with_error(usage_service, mock_repository):
     saved_record = mock_repository.save.call_args[0][0]
     assert saved_record.success is False
     assert saved_record.error_message == "API Error"
+    # Story 1.15 AC#5: coût 0€ pour génération échouée
+    assert saved_record.estimated_cost == 0.0
 
 
 def test_get_usage_history(usage_service, mock_repository):

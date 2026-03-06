@@ -122,3 +122,47 @@ def test_get_by_dialogue_and_node(repository, sample_record):
     assert repository.get_by_dialogue_and_node("Dialogue_A", "NODE_3") is None
     assert repository.get_by_dialogue_and_node("Other", "NODE_1") is None
 
+
+def test_save_and_load_record_with_prompt_and_response(repository, sample_record):
+    """Story 1.15: sauvegarde et rechargement d'un record avec prompt et response."""
+    sample_record.prompt = "System: You are a writer."
+    sample_record.response = '{"nodes": []}'
+    repository.save(sample_record)
+    records = repository.get_all()
+    assert len(records) == 1
+    assert records[0].prompt == "System: You are a writer."
+    assert records[0].response == '{"nodes": []}'
+
+
+def test_load_old_json_without_prompt_response(repository, tmp_path):
+    """Story 1.15: chargement rétrocompatible d'un JSON sans champs prompt/response."""
+    import json
+    from services.repositories.llm_usage_repository import FileLLMUsageRepository
+    repo = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    target_date = date.today()
+    file_path = tmp_path / f"usage_{target_date.isoformat()}.json"
+    # Ancien format sans prompt ni response
+    data = {
+        "date": target_date.isoformat(),
+        "records": [{
+            "request_id": "req_old",
+            "timestamp": datetime.now(UTC).isoformat(),
+            "model_name": "gpt-4o",
+            "prompt_tokens": 100,
+            "completion_tokens": 50,
+            "total_tokens": 150,
+            "estimated_cost": 0.001,
+            "duration_ms": 500,
+            "success": True,
+            "endpoint": "generate/variants",
+            "k_variants": 1,
+        }]
+    }
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, default=str)
+    records = repo._load_records_for_date(target_date)
+    assert len(records) == 1
+    assert records[0].request_id == "req_old"
+    assert getattr(records[0], "prompt", None) is None
+    assert getattr(records[0], "response", None) is None
+

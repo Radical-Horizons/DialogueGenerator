@@ -105,6 +105,9 @@ class MistralClient(ILLMClient):
 
         logger.debug(f"Messages envoyés au LLM (avant tool): {messages}")
 
+        # Prompt complet pour le tracking (Story 1.15)
+        full_prompt_str = json.dumps(messages, ensure_ascii=False)
+
         tool_definition = None
         if response_model:
             model_schema_for_tool = response_model.model_json_schema()
@@ -135,6 +138,7 @@ class MistralClient(ILLMClient):
             prompt_tokens = 0
             completion_tokens = 0
             total_tokens = 0
+            raw_response_str = None
 
             try:
                 logger.info(f"Début de la génération de la variante {i+1}/{k} pour le prompt.")
@@ -169,6 +173,7 @@ class MistralClient(ILLMClient):
                 else:
                     # Appel API sans streaming
                     response: ChatCompletionResponse = await self.client.chat.complete_async(**chat_params)
+                    raw_response_str = response.model_dump_json() if hasattr(response, "model_dump_json") else str(response)
 
                     # Extraire les métriques d'utilisation
                     if hasattr(response, 'usage') and response.usage:
@@ -279,7 +284,9 @@ class MistralClient(ILLMClient):
                             success=success,
                             endpoint=self.endpoint,
                             k_variants=k,
-                            error_message=error_message
+                            error_message=error_message,
+                            prompt=full_prompt_str,
+                            response=raw_response_str,
                         )
                     except Exception as tracking_error:
                         # Ne pas faire échouer l'appel LLM si le tracking échoue

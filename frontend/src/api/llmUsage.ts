@@ -74,6 +74,37 @@ export interface LLMUsageStatistics {
   model_name?: string | null
 }
 
+/** Entrée de log de génération (Story 1.15). */
+export interface GenerationLogEntry {
+  request_id: string
+  timestamp: string
+  node_id?: string | null
+  model_name: string
+  prompt_tokens: number
+  completion_tokens: number
+  total_tokens: number
+  estimated_cost: number
+  cost_eur: number
+  duration_ms: number
+  success: boolean
+  error_message?: string | null
+  prompt?: string | null
+  response?: string | null
+}
+
+/** Réponse GET /dialogue/{id}/generation-logs (Story 1.15). */
+export interface GenerationLogsResponse {
+  entries: GenerationLogEntry[]
+  total_count: number
+  total_cost_eur: number
+}
+
+export interface GetGenerationLogsParams {
+  start_date?: string | null
+  end_date?: string | null
+  model_name?: string | null
+}
+
 /**
  * Récupère l'historique d'utilisation LLM avec pagination.
  */
@@ -132,6 +163,24 @@ export async function getUsageStatistics(
   if (model) params.append('model', model)
 
   const response = await apiClient.get(`/api/v1/llm-usage/statistics?${params.toString()}`)
+  return response.data
+}
+
+/**
+ * Récupère les logs de génération pour un dialogue (Story 1.15).
+ * Filtres optionnels : start_date, end_date, model_name (provider).
+ */
+export async function getGenerationLogs(
+  dialogueId: string,
+  params?: GetGenerationLogsParams
+): Promise<GenerationLogsResponse> {
+  const search = new URLSearchParams()
+  if (params?.start_date) search.append('start_date', params.start_date)
+  if (params?.end_date) search.append('end_date', params.end_date)
+  if (params?.model_name) search.append('model_name', params.model_name)
+  const qs = search.toString()
+  const url = `/api/v1/llm-usage/dialogue/${encodeURIComponent(dialogueId)}/generation-logs${qs ? `?${qs}` : ''}`
+  const response = await apiClient.get(url)
   return response.data
 }
 
