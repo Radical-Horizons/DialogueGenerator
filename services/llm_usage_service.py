@@ -48,7 +48,9 @@ class LLMUsageService:
         success: bool,
         endpoint: str,
         k_variants: int = 1,
-        error_message: Optional[str] = None
+        error_message: Optional[str] = None,
+        dialogue_id: Optional[str] = None,
+        node_id: Optional[str] = None,
     ) -> None:
         """Enregistre un appel LLM.
         
@@ -63,6 +65,8 @@ class LLMUsageService:
             endpoint: Endpoint appelé.
             k_variants: Nombre de variantes générées.
             error_message: Message d'erreur si success=False.
+            dialogue_id: ID du dialogue associé (optionnel).
+            node_id: ID du nœud généré associé (optionnel).
         """
         try:
             # Calculer le coût estimé
@@ -85,7 +89,9 @@ class LLMUsageService:
                 success=success,
                 endpoint=endpoint,
                 k_variants=k_variants,
-                error_message=error_message
+                error_message=error_message,
+                dialogue_id=dialogue_id,
+                node_id=node_id,
             )
             
             # Sauvegarder
@@ -147,6 +153,157 @@ class LLMUsageService:
         
         return records
     
+    def annotate_usage(
+        self,
+        request_id: str,
+        dialogue_id: str,
+        node_id: str,
+    ) -> None:
+        """Annote post-hoc un enregistrement existant avec le contexte dialogue/nœud.
+        
+        Retrouve l'enregistrement par request_id et met à jour dialogue_id/node_id.
+        Si le record n'est pas trouvé, log un warning sans lever d'exception.
+        
+        Args:
+            request_id: ID de la requête LLM déjà trackée.
+            dialogue_id: ID du dialogue à associer.
+            node_id: ID du nœud généré à associer.
+        """
+        try:
+            record = self.repository.get_by_request_id(request_id)
+            if record is None:
+                logger.warning(
+                    f"annotate_usage: record introuvable pour request_id='{request_id}', no-op."
+                )
+                return
+            record.dialogue_id = dialogue_id
+            record.node_id = node_id
+            self.repository.update(record)
+            logger.debug(
+                f"annotate_usage: request_id='{request_id}' annoté → "
+                f"dialogue='{dialogue_id}', node='{node_id}'"
+            )
+        except Exception as e:
+            logger.error(
+                f"annotate_usage: erreur pour request_id='{request_id}': {e}",
+                exc_info=True,
+            )
+
+    _USD_TO_EUR_RATE: float = 0.92
+
+    def mark_node_deleted(self, node_id: str) -> bool:
+        """Marque un nœud comme supprimé dans l'historique des coûts.
+        
+        Retrouve le record correspondant par node_id et passe deleted=True.
+        Si le record n'est pas trouvé, log un warning sans lever d'exception.
+        
+        Args:
+            node_id: ID du nœud supprimé du graphe.
+            
+        Returns:
+            True si le record a été trouvé et mis à jour, False sinon.
+        """
+        try:
+            found = self.repository.mark_node_deleted(node_id)
+            if not found:
+                logger.warning(
+                    f"mark_node_deleted: aucun record trouvé pour node_id='{node_id}', no-op."
+                )
+            else:
+                logger.debug(f"mark_node_deleted: node_id='{node_id}' marqué comme supprimé.")
+            return found
+        except Exception as e:
+            logger.error(
+                f"mark_node_deleted: erreur pour node_id='{node_id}': {e}", exc_info=True
+            )
+            return False
+
+    def get_all_dialogues_costs(self) -> List[Dict]:
+        """Agrège les coûts LLM pour tous les dialogues, triés par coût décroissant.
+        
+        Retourne une liste de résumés de coûts par dialogue, utile pour la
+        comparaison multi-dialogues (AC#3).
+        
+        Returns:
+            Liste de dictionnaires triés par total_cost_eur décroissant, chacun avec :
+            - dialogue_id: str
+            - total_cost_eur: float
+            - node_count: int
+            - avg_cost_per_node_eur: float
+        """
+        grouped = self.repository.get_all_by_dialogue_ids()
+        summaries = []
+        for dialogue_id, records in grouped.items():
+            total_cost_eur = round(
+                sum(r.estimated_cost for r in records) * self._USD_TO_EUR_RATE, 8
+            )
+            node_count = len(records)
+            avg_cost_per_node_eur = round(total_cost_eur / node_count, 8) if node_count > 0 else 0.0
+            summaries.append({
+                "dialogue_id": dialogue_id,
+                "total_cost_eur": total_cost_eur,
+                "node_count": node_count,
+                "avg_cost_per_node_eur": avg_cost_per_node_eur,
+            })
+        summaries.sort(key=lambda s: s["total_cost_eur"], reverse=True)
+        return summaries
+
+    def get_dialogue_costs(self, dialogue_id: str) -> Dict:
+        """Agrège les coûts LLM pour un dialogue donné.
+        
+        Retourne le coût total, le nombre de nœuds, le coût moyen et le
+        détail par nœud, avec conversion USD → EUR.
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            
+        Returns:
+            Dictionnaire avec :
+            - dialogue_id: str
+            - total_cost_eur: float
+            - node_count: int
+            - avg_cost_per_node_eur: float
+            - breakdown: list[dict] (NodeCostEntry)
+        """
+        records = self.repository.get_by_dialogue_id(dialogue_id)
+        
+        if not records:
+            return {
+                "dialogue_id": dialogue_id,
+                "total_cost_eur": 0.0,
+                "node_count": 0,
+                "avg_cost_per_node_eur": 0.0,
+                "breakdown": [],
+            }
+        
+        breakdown = [
+            {
+                "node_id": r.node_id,
+                "timestamp": r.timestamp.isoformat(),
+                "model_name": r.model_name,
+                "prompt_tokens": r.prompt_tokens,
+                "completion_tokens": r.completion_tokens,
+                "cost_eur": round(r.estimated_cost * self._USD_TO_EUR_RATE, 8),
+                "success": r.success,
+                "deleted": r.deleted,
+            }
+            for r in records
+        ]
+        
+        total_cost_eur = round(
+            sum(r.estimated_cost for r in records) * self._USD_TO_EUR_RATE, 8
+        )
+        node_count = len(records)
+        avg_cost_per_node_eur = round(total_cost_eur / node_count, 8) if node_count > 0 else 0.0
+        
+        return {
+            "dialogue_id": dialogue_id,
+            "total_cost_eur": total_cost_eur,
+            "node_count": node_count,
+            "avg_cost_per_node_eur": avg_cost_per_node_eur,
+            "breakdown": breakdown,
+        }
+
     def get_statistics(
         self,
         start_date: Optional[date] = None,

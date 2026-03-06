@@ -98,6 +98,7 @@ class GenerateNodeRequest(BaseModel):
     llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
     target_choice_index: Optional[int] = Field(None, description="Index du choix spécifique à connecter (si None, génère pour tous les choix sans targetNode)")
     generate_all_choices: bool = Field(False, description="Si True, génère un nœud pour chaque choix sans targetNode")
+    dialogue_id: Optional[str] = Field(None, description="ID du dialogue (pour annotation post-hoc des coûts)")
 
 
 class SuggestedConnection(BaseModel):

@@ -16,6 +16,39 @@ export interface LLMUsageRecord {
   endpoint: string
   k_variants: number
   error_message?: string | null
+  dialogue_id?: string | null
+  node_id?: string | null
+}
+
+export interface NodeCostEntry {
+  node_id?: string | null
+  timestamp: string
+  model_name: string
+  prompt_tokens: number
+  completion_tokens: number
+  cost_eur: number
+  success: boolean
+  deleted: boolean
+}
+
+export interface DialogueCostResponse {
+  dialogue_id: string
+  total_cost_eur: number
+  node_count: number
+  avg_cost_per_node_eur: number
+  breakdown: NodeCostEntry[]
+}
+
+export interface DialogueCostSummaryEntry {
+  dialogue_id: string
+  total_cost_eur: number
+  node_count: number
+  avg_cost_per_node_eur: number
+}
+
+export interface AllDialoguesCostResponse {
+  dialogues: DialogueCostSummaryEntry[]
+  total_dialogues: number
 }
 
 export interface LLMUsageHistoryResponse {
@@ -60,6 +93,29 @@ export async function getUsageHistory(
 
   const response = await apiClient.get(`/api/v1/llm-usage/history?${params.toString()}`)
   return response.data
+}
+
+/**
+ * Récupère le breakdown des coûts LLM pour un dialogue spécifique.
+ */
+export async function getDialogueCosts(dialogueId: string): Promise<DialogueCostResponse> {
+  const response = await apiClient.get(`/api/v1/llm-usage/dialogue/${encodeURIComponent(dialogueId)}/costs`)
+  return response.data
+}
+
+/**
+ * Récupère tous les dialogues avec leurs coûts agrégés, triés par coût décroissant (AC#3).
+ */
+export async function getAllDialoguesCosts(): Promise<AllDialoguesCostResponse> {
+  const response = await apiClient.get('/api/v1/llm-usage/dialogues/costs')
+  return response.data
+}
+
+/**
+ * Marque un nœud comme supprimé dans l'historique des coûts (AC#5).
+ */
+export async function markNodeDeleted(nodeId: string): Promise<void> {
+  await apiClient.post(`/api/v1/llm-usage/nodes/${encodeURIComponent(nodeId)}/mark-deleted`)
 }
 
 /**

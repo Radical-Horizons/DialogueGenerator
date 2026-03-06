@@ -18,6 +18,8 @@ class LLMUsageRecordResponse(BaseModel):
     endpoint: str = Field(..., description="Endpoint appelé")
     k_variants: int = Field(..., ge=1, description="Nombre de variantes générées")
     error_message: Optional[str] = Field(default=None, description="Message d'erreur si success=False")
+    dialogue_id: Optional[str] = Field(default=None, description="ID du dialogue associé")
+    node_id: Optional[str] = Field(default=None, description="ID du nœud généré associé")
     
     model_config = ConfigDict()
     
@@ -25,6 +27,47 @@ class LLMUsageRecordResponse(BaseModel):
     def serialize_timestamp(self, value: datetime) -> str:
         """Sérialise datetime en ISO format."""
         return value.isoformat() if isinstance(value, datetime) else str(value)
+
+
+class NodeCostEntry(BaseModel):
+    """Détail du coût pour un nœud généré."""
+
+    node_id: Optional[str] = Field(default=None, description="ID du nœud généré")
+    timestamp: str = Field(..., description="Horodatage de la génération (ISO)")
+    model_name: str = Field(..., description="Modèle utilisé")
+    prompt_tokens: int = Field(..., ge=0, description="Tokens prompt")
+    completion_tokens: int = Field(..., ge=0, description="Tokens completion")
+    cost_eur: float = Field(..., ge=0.0, description="Coût en EUR")
+    success: bool = Field(..., description="Génération réussie")
+    deleted: bool = Field(default=False, description="Nœud supprimé du graphe")
+
+
+class DialogueCostResponse(BaseModel):
+    """Réponse agrégée des coûts pour un dialogue."""
+
+    dialogue_id: str = Field(..., description="ID du dialogue")
+    total_cost_eur: float = Field(..., ge=0.0, description="Coût total en EUR")
+    node_count: int = Field(..., ge=0, description="Nombre de nœuds générés")
+    avg_cost_per_node_eur: float = Field(..., ge=0.0, description="Coût moyen par nœud en EUR")
+    breakdown: List[NodeCostEntry] = Field(..., description="Détail par nœud, trié par timestamp")
+
+
+class DialogueCostSummaryEntry(BaseModel):
+    """Résumé des coûts pour un dialogue (vue multi-dialogues AC#3)."""
+
+    dialogue_id: str = Field(..., description="ID du dialogue")
+    total_cost_eur: float = Field(..., ge=0.0, description="Coût total en EUR")
+    node_count: int = Field(..., ge=0, description="Nombre de nœuds générés")
+    avg_cost_per_node_eur: float = Field(..., ge=0.0, description="Coût moyen par nœud en EUR")
+
+
+class AllDialoguesCostResponse(BaseModel):
+    """Réponse listant tous les dialogues triés par coût décroissant (AC#3)."""
+
+    dialogues: List[DialogueCostSummaryEntry] = Field(
+        ..., description="Liste des dialogues triés par coût total décroissant"
+    )
+    total_dialogues: int = Field(..., ge=0, description="Nombre de dialogues avec coûts trackés")
 
 
 class LLMUsageHistoryResponse(BaseModel):

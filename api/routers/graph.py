@@ -36,6 +36,7 @@ from api.dependencies import (
     get_graph_node_orchestrator,
     get_token_estimation_service,
     get_llm_pricing_service,
+    get_llm_usage_service,
 )
 from services.configuration_service import ConfigurationService
 from services.graph_conversion_service import GraphConversionService
@@ -47,6 +48,7 @@ from services.graph_validation_service import GraphValidationService
 from services.graph_node_orchestrator import GraphNodeOrchestrator
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService
+from services.llm_usage_service import LLMUsageService
 
 logger = logging.getLogger(__name__)
 
@@ -364,6 +366,7 @@ async def generate_node(
     request_data: GenerateNodeRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> GenerateNodeResponse:
     """Génère un nœud en contexte (extension de /generate/unity-dialogue).
@@ -393,6 +396,7 @@ async def generate_node(
             model_id=request_data.llm_model_identifier,
             config=config_service.get_llm_config(),
             available_models=config_service.get_available_llm_models(),
+            request_id=request_id,
         )
 
         result = await orchestrator.generate(
@@ -417,6 +421,21 @@ async def generate_node(
             result.parent_node_id,
             request_id,
         )
+
+        # Annotation post-hoc des coûts avec le contexte dialogue/nœud.
+        # Pour les générations batch (generate_all_choices), chaque nœud a son propre
+        # request_id dans le LLM client — on annote uniquement le premier ici.
+        # Les appels LLM batch partagent le même request_id de la requête HTTP.
+        if request_data.dialogue_id and result.nodes:
+            first_node_id = (
+                result.nodes[0].get("id")
+                if isinstance(result.nodes[0], dict)
+                else getattr(result.nodes[0], "id", None)
+            )
+            if first_node_id:
+                usage_service.annotate_usage(
+                    request_id, request_data.dialogue_id, str(first_node_id)
+                )
 
         return GenerateNodeResponse(
             node=result.nodes[0] if result.nodes else None,
@@ -778,6 +797,7 @@ async def regenerate_node(
             model_id=request_data.llm_model_identifier,
             config=config_service.get_llm_config(),
             available_models=config_service.get_available_llm_models(),
+            request_id=request_id,
         )
 
         result = await orchestrator.generate(

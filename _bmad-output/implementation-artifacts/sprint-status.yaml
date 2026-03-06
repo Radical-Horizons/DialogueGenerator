@@ -71,7 +71,7 @@ development_status:
   1-9-auto-link-des-nœuds-générés-au-graphe-existant-fr9: done
   1-10-régénérer-des-nœuds-rejetés-avec-instructions-ajustées-fr10: done
   1-11-estimer-le-coût-llm-avant-génération-fr72: done
-  1-12-afficher-breakdown-des-coûts-par-dialogue-fr73: backlog
+  1-12-afficher-breakdown-des-coûts-par-dialogue-fr73: done
   1-13-afficher-coûts-llm-cumulatifs-daily-monthly-fr74: done
   1-14-afficher-prompt-transparency-prompt-exact-envoyé-au-llm-fr77: backlog
   1-15-afficher-logs-de-génération-prompts-réponses-coûts-fr78: backlog

@@ -8,9 +8,13 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from api.dependencies import get_llm_usage_service, get_request_id
 from api.exceptions import InternalServerException
 from api.schemas.llm_usage import (
+    AllDialoguesCostResponse,
+    DialogueCostResponse,
+    DialogueCostSummaryEntry,
     LLMUsageHistoryResponse,
     LLMUsageRecordResponse,
-    LLMUsageStatisticsResponse
+    LLMUsageStatisticsResponse,
+    NodeCostEntry,
 )
 from api.utils.pagination import paginate_list, PaginationParams
 from services.llm_usage_service import LLMUsageService
@@ -97,7 +101,9 @@ async def get_usage_history(
                 success=r.success,
                 endpoint=r.endpoint,
                 k_variants=r.k_variants,
-                error_message=r.error_message
+                error_message=r.error_message,
+                dialogue_id=r.dialogue_id,
+                node_id=r.node_id,
             )
             for r in paginated_records
         ]
@@ -116,6 +122,134 @@ async def get_usage_history(
             message="Erreur lors de la récupération de l'historique d'utilisation LLM",
             details={"error": str(e)},
             request_id=request_id
+        )
+
+
+@router.get(
+    "/dialogue/{dialogue_id}/costs",
+    response_model=DialogueCostResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_dialogue_costs(
+    dialogue_id: str,
+    request: Request,
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> DialogueCostResponse:
+    """Récupère le breakdown détaillé des coûts LLM pour un dialogue.
+
+    Args:
+        dialogue_id: Identifiant du dialogue (nom du fichier JSON Unity).
+        request: La requête HTTP.
+        usage_service: Service de tracking injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        Coût total, nombre de nœuds générés, coût moyen et détail par nœud.
+
+    Raises:
+        InternalServerException: Si la récupération échoue.
+    """
+    try:
+        data = usage_service.get_dialogue_costs(dialogue_id)
+        return DialogueCostResponse(
+            dialogue_id=data["dialogue_id"],
+            total_cost_eur=data["total_cost_eur"],
+            node_count=data["node_count"],
+            avg_cost_per_node_eur=data["avg_cost_per_node_eur"],
+            breakdown=[NodeCostEntry(**entry) for entry in data["breakdown"]],
+        )
+    except Exception as e:
+        logger.exception(
+            f"Erreur lors de la récupération des coûts dialogue (dialogue_id: {dialogue_id}, "
+            f"request_id: {request_id})"
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération des coûts du dialogue",
+            details={"error": str(e), "dialogue_id": dialogue_id},
+            request_id=request_id,
+        )
+
+
+@router.get(
+    "/dialogues/costs",
+    response_model=AllDialoguesCostResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_all_dialogues_costs(
+    request: Request,
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> AllDialoguesCostResponse:
+    """Liste tous les dialogues avec leurs coûts agrégés, triés par coût décroissant (AC#3).
+
+    Args:
+        request: La requête HTTP.
+        usage_service: Service de tracking injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        Liste de résumés de coûts par dialogue, triés du plus coûteux au moins coûteux.
+
+    Raises:
+        InternalServerException: Si la récupération échoue.
+    """
+    try:
+        summaries = usage_service.get_all_dialogues_costs()
+        return AllDialoguesCostResponse(
+            dialogues=[DialogueCostSummaryEntry(**s) for s in summaries],
+            total_dialogues=len(summaries),
+        )
+    except Exception as e:
+        logger.exception(
+            f"Erreur lors de la récupération des coûts multi-dialogues (request_id: {request_id})"
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération des coûts de tous les dialogues",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/nodes/{node_id}/mark-deleted",
+    status_code=status.HTTP_200_OK,
+)
+async def mark_node_deleted(
+    node_id: str,
+    request: Request,
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> dict:
+    """Marque un nœud comme supprimé dans l'historique des coûts (AC#5).
+
+    Appelé lors du rejet d'un nœud pour mettre à jour l'indicateur 'Nœud supprimé'
+    dans le breakdown sans supprimer l'entrée de l'historique.
+
+    Args:
+        node_id: ID du nœud supprimé.
+        request: La requête HTTP.
+        usage_service: Service de tracking injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        Confirmation avec found=True si le record a été mis à jour.
+
+    Raises:
+        InternalServerException: Si la mise à jour échoue.
+    """
+    try:
+        found = usage_service.mark_node_deleted(node_id)
+        return {"success": True, "node_id": node_id, "found": found}
+    except Exception as e:
+        logger.exception(
+            f"Erreur lors du marquage nœud supprimé (node_id: {node_id}, "
+            f"request_id: {request_id})"
+        )
+        raise InternalServerException(
+            message="Erreur lors du marquage du nœud comme supprimé",
+            details={"error": str(e), "node_id": node_id},
+            request_id=request_id,
         )
 
 

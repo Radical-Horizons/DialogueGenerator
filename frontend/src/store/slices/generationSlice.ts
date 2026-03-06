@@ -6,6 +6,7 @@ import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import * as graphAPI from '../../api/graph'
+import { markNodeDeleted } from '../../api/llmUsage'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
 
@@ -100,6 +101,7 @@ export const createGenerationSlice: StateCreator<
           ? (options.onBatchProgress as (current: number, total: number) => void)
           : undefined
 
+      const dialogueIdForCosts = state.dialogueMetadata.filename || undefined
       const response = await graphAPI.generateNode({
         parent_node_id: parentNodeId,
         parent_node_content: parentNodeContent,
@@ -112,6 +114,7 @@ export const createGenerationSlice: StateCreator<
         llm_model_identifier: llmModelIdentifier,
         target_choice_index: targetChoiceIndex,
         generate_all_choices: generateAllChoices,
+        dialogue_id: dialogueIdForCosts,
       })
 
       const isTestNode = parentNodeId.startsWith('test-node-')
@@ -409,6 +412,10 @@ export const createGenerationSlice: StateCreator<
     const dialogueId = state.dialogueMetadata.filename || 'current'
     try {
       await graphAPI.rejectNode(dialogueId, nodeId)
+      // Marquer le nœud comme supprimé dans l'historique des coûts (AC#5)
+      markNodeDeleted(nodeId).catch((err) => {
+        console.warn('mark-node-deleted non-critique:', err)
+      })
     } catch (err) {
       console.error('Erreur lors du rejet du nœud:', err)
       const { toastManager } = await import('../../components/shared/Toast')

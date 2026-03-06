@@ -21,6 +21,9 @@ class LLMUsageRecord(BaseModel):
     endpoint: str = Field(..., description="Endpoint appelé (ex: generate/variants, generate/interactions)")
     k_variants: int = Field(default=1, ge=1, description="Nombre de variantes générées")
     error_message: Optional[str] = Field(default=None, description="Message d'erreur si success=False")
+    dialogue_id: Optional[str] = Field(default=None, description="ID du dialogue associé (annotation post-hoc)")
+    node_id: Optional[str] = Field(default=None, description="ID du nœud généré associé (annotation post-hoc)")
+    deleted: bool = Field(default=False, description="Nœud supprimé du graphe (marqué lors du rejet)")
     
     model_config = ConfigDict(
         json_schema_extra={

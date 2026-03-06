@@ -5,10 +5,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import type { ReactFlowInstance } from 'reactflow'
+import { useQueryClient } from '@tanstack/react-query'
 import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
 import { GraphCanvas } from './GraphCanvas'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
+import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
 import { useGraphStore } from '../../store/graphStore'
 import { exportGraphToPNG, exportGraphToSVG } from '../../utils/graphExport'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
@@ -27,6 +29,7 @@ export function GraphEditor() {
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const prevSelectedDialogueRef = useRef<UnityDialogueMetadata | null>(null)
   const loadInFlightRef = useRef(false)
+  const queryClient = useQueryClient()
   const canvasWrapperRef = useRef<HTMLDivElement | null>(null)
   const toast = useToast()
   const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
@@ -41,6 +44,9 @@ export function GraphEditor() {
   
   // Panneau d'avertissements/erreurs de validation (affiché via clic sur le badge)
   const [showValidationPanel, setShowValidationPanel] = useState(false)
+  
+  // Panneau breakdown des coûts du dialogue (Story 1.12)
+  const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   
   // Écouter l'événement pour obtenir l'instance ReactFlow
   useEffect(() => {
@@ -639,6 +645,23 @@ export function GraphEditor() {
             >
               📤 Exporter
             </button>
+            <button
+              onClick={() => setShowCostBreakdown((v) => !v)}
+              disabled={!selectedDialogue}
+              style={{
+                padding: '0.5rem 1rem',
+                border: `1px solid ${showCostBreakdown ? theme.button.primary.background : theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: showCostBreakdown ? theme.button.primary.background : theme.button.default.background,
+                color: showCostBreakdown ? theme.button.primary.color : theme.button.default.color,
+                cursor: !selectedDialogue ? 'not-allowed' : 'pointer',
+                opacity: !selectedDialogue ? 0.6 : 1,
+                fontSize: '0.9rem',
+              }}
+              title="Afficher le breakdown des coûts LLM pour ce dialogue"
+            >
+              💰 Coûts
+            </button>
             {/* ADR-006: pas de bouton Sauvegarder (autosave immédiat) */}
           </div>
         </div>
@@ -949,6 +972,24 @@ export function GraphEditor() {
               )
             })()}
             
+            {/* Panneau breakdown des coûts (overlay — Story 1.12) */}
+            {showCostBreakdown && selectedDialogue && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '1rem',
+                  left: '1rem',
+                  width: '420px',
+                  maxWidth: 'calc(100vw - 2rem)',
+                  zIndex: 50,
+                  maxHeight: '70vh',
+                  overflowY: 'auto',
+                }}
+              >
+                <DialogueCostBreakdown dialogueId={selectedDialogue.filename} />
+              </div>
+            )}
+
             {/* Panel de génération IA (modal overlay) */}
             {showAIGenerationPanel && (
               <div
@@ -988,8 +1029,14 @@ export function GraphEditor() {
                     parentNodeId={selectedNodeId}
                     onClose={() => setShowAIGenerationPanel(false)}
                     onGenerated={() => {
-                      // Rafraîchir la liste des dialogues si nécessaire
                       dialogueListRef.current?.refresh()
+                      // Invalider le cache des coûts pour rafraîchissement automatique (AC#4)
+                      if (selectedDialogue?.filename) {
+                        queryClient.invalidateQueries({
+                          queryKey: ['dialogue-costs', selectedDialogue.filename],
+                        })
+                      }
+                      queryClient.invalidateQueries({ queryKey: ['all-dialogues-costs'] })
                     }}
                   />
                 </div>

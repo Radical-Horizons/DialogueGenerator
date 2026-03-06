@@ -67,6 +67,7 @@ export interface GenerateNodeRequest {
   llm_model_identifier?: string
   target_choice_index?: number | null
   generate_all_choices?: boolean
+  dialogue_id?: string
 }
 
 /** Requête pour estimer le coût avant génération (même structure que GenerateNodeRequest). */
