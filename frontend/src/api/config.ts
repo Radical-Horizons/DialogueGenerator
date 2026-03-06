@@ -46,15 +46,11 @@ export async function setUnityDialoguesPath(path: string): Promise<UnityDialogue
 }
 
 /**
- * Récupère le system prompt par défaut.
- * TODO: Endpoint à ajouter côté backend
+ * Récupère le system prompt par défaut depuis le backend.
  */
 export async function getDefaultSystemPrompt(): Promise<DefaultSystemPromptResponse> {
-  // Pour l'instant, retourner une valeur par défaut
-  // TODO: Implémenter l'endpoint API /api/v1/config/default-system-prompt
-  return {
-    prompt: "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG).\nTa tâche est de générer un dialogue cohérent avec le contexte fourni et l'instruction utilisateur.\nSi une structure de dialogue spécifique est demandée (ex: PNJ suivi d'un choix PJ), respecte cette structure."
-  }
+  const response = await apiClient.get<DefaultSystemPromptResponse>('/api/v1/config/default-system-prompt')
+  return response.data
 }
 
 /**
