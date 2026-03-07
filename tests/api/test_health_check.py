@@ -30,15 +30,23 @@ def test_health_check_result_to_dict():
     assert result_dict["details"] == {"key": "value"}
 
 
-def test_check_storage_success(tmp_path):
-    """Test que check_storage retourne healthy quand le répertoire est accessible."""
+def test_check_storage_success(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test que check_storage utilise la racine projet pour un chemin relatif."""
+    project_root = tmp_path / "project"
+    monkeypatch.setattr("api.utils.health_check.PROJECT_ROOT_DIR", project_root)
+
     with patch("api.utils.health_check.FilePaths") as mock_filepaths:
-        mock_filepaths.INTERACTIONS_DIR = tmp_path
-        
+        mock_filepaths.INTERACTIONS_DIR = Path("data") / "interactions"
+
         result = check_storage()
-        
+
         assert result.status == "healthy"
         assert result.name == "storage"
+        assert result.details["path"] == str(project_root / "data" / "interactions")
+        assert (project_root / "data" / "interactions").is_dir()
 
 
 def test_check_storage_cannot_create(tmp_path):
@@ -52,6 +60,39 @@ def test_check_storage_cannot_create(tmp_path):
             
             assert result.status == "unhealthy"
             assert "Permission denied" in result.message or "Impossible" in result.message
+
+
+def test_check_gdd_files_accepts_direct_vision_json_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test que check_gdd_files accepte GDD_IMPORT_PATH pointant vers Vision.json."""
+    project_root = tmp_path / "project"
+    categories_dir = project_root / "data" / "GDD_categories"
+    categories_dir.mkdir(parents=True)
+    (categories_dir / "personnages.json").write_text("{}", encoding="utf-8")
+    (categories_dir / "lieux.json").write_text("{}", encoding="utf-8")
+
+    vision_dir = project_root / "import" / "Bible_Narrative"
+    vision_dir.mkdir(parents=True)
+    vision_file = vision_dir / "Vision.json"
+    vision_file.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr("api.utils.health_check.PROJECT_ROOT_DIR", project_root)
+
+    with patch.dict(
+        os.environ,
+        {
+            "GDD_CATEGORIES_PATH": str(categories_dir),
+            "GDD_IMPORT_PATH": str(vision_file),
+        },
+        clear=True,
+    ):
+        result = check_gdd_files()
+
+    assert result.status == "healthy"
+    assert result.details["gdd_path"] == str(categories_dir)
+    assert result.details["vision_path"] == str(vision_file)
 
 
 def test_check_config_development():

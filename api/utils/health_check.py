@@ -1,17 +1,16 @@
 """Health checks pour vérifier les dépendances de l'API."""
-import os
 import logging
-from typing import Dict, Any, Optional
+import os
 from pathlib import Path
-from pathlib import Path
-from constants import FilePaths
+from typing import Any, Dict, Optional
+
 from api.config.security_config import get_security_config
+from constants import FilePaths
 
 # Import canonique (évite les imports racine dépréciés). Optionnel pour éviter dépendances circulaires.
 try:
-    from core.context.context_builder import ContextBuilder, PROJECT_ROOT_DIR
+    from core.context.context_builder import PROJECT_ROOT_DIR
 except ImportError:
-    ContextBuilder = None  # type: ignore[misc, assignment]
     PROJECT_ROOT_DIR = None  # type: ignore[misc, assignment]
 
 logger = logging.getLogger(__name__)
@@ -72,6 +71,38 @@ def _find_file_case_insensitive(directory: Path, filename: str) -> Optional[Path
     return None
 
 
+def _get_project_root() -> Path:
+    """Retourne la racine du projet en privilégiant la constante canonique."""
+    if PROJECT_ROOT_DIR is not None:
+        return Path(PROJECT_ROOT_DIR)
+
+    return Path(__file__).resolve().parents[2]
+
+
+def _resolve_vision_paths(env_import_path: Optional[str], project_root: Path) -> tuple[Path, Path]:
+    """Résout le dossier d'import et le chemin candidat vers Vision.json.
+
+    Args:
+        env_import_path: Valeur de ``GDD_IMPORT_PATH`` si définie.
+        project_root: Racine du projet.
+
+    Returns:
+        Un tuple ``(import_base_path, vision_file_path)``.
+    """
+    if env_import_path:
+        import_path = Path(env_import_path)
+        if import_path.name.lower() == "vision.json":
+            return import_path.parent, import_path
+
+        if import_path.name == "Bible_Narrative":
+            return import_path, import_path / "Vision.json"
+
+        return import_path, import_path / "Vision.json"
+
+    import_base_path = project_root / "data"
+    return import_base_path, import_base_path / "Vision.json"
+
+
 def check_gdd_files() -> HealthCheckResult:
     """Vérifie que les fichiers GDD sont accessibles.
     
@@ -82,34 +113,20 @@ def check_gdd_files() -> HealthCheckResult:
         HealthCheckResult avec le statut de vérification.
     """
     try:
-        import os
-        
         # Utiliser les variables d'environnement si définies, sinon les chemins par défaut
         env_categories_path = os.getenv("GDD_CATEGORIES_PATH")
         if env_categories_path:
             gdd_base_path = Path(env_categories_path)
         else:
             # Chemin par défaut : DialogueGenerator/data/GDD_categories
-            project_root = Path(__file__).resolve().parent.parent.parent
+            project_root = _get_project_root()
             gdd_base_path = project_root / "data" / "GDD_categories"
-        
-        env_import_path = os.getenv("GDD_IMPORT_PATH")
-        if env_import_path:
-            import_base_path = Path(env_import_path)
-            # Si le chemin pointe directement vers Vision.json, c'est bon
-            if import_base_path.name.lower() == "vision.json":
-                vision_file_path = import_base_path
-            # Si le chemin pointe vers Bible_Narrative, chercher Vision.json dedans
-            elif import_base_path.name == "Bible_Narrative":
-                vision_file_path = import_base_path / "Vision.json"
-            # Sinon, chercher Vision.json directement dans le répertoire (data/)
-            else:
-                vision_file_path = import_base_path / "Vision.json"
-        else:
-            # Chemin par défaut : data/Vision.json dans le projet
-            project_root = Path(__file__).resolve().parent.parent.parent
-            vision_file_path = project_root / "data" / "Vision.json"
-            import_base_path = project_root / "data"
+
+        project_root = _get_project_root()
+        import_base_path, vision_file_path = _resolve_vision_paths(
+            os.getenv("GDD_IMPORT_PATH"),
+            project_root,
+        )
         
         # Vérifier que les répertoires existent
         issues = []
@@ -119,8 +136,13 @@ def check_gdd_files() -> HealthCheckResult:
         elif not gdd_base_path.is_dir():
             issues.append(f"Chemin GDD n'est pas un répertoire: {gdd_base_path}")
         
-        # Vérifier Vision.json (case-insensitive)
-        vision_file_found = _find_file_case_insensitive(import_base_path, "Vision.json")
+        # Vérifier Vision.json (case-insensitive) en acceptant aussi un chemin fichier direct.
+        vision_file_found = None
+        if vision_file_path.exists() and vision_file_path.is_file():
+            vision_file_found = vision_file_path
+        else:
+            vision_file_found = _find_file_case_insensitive(import_base_path, "Vision.json")
+
         if vision_file_found is None:
             issues.append(f"Fichier Vision.json non trouvé dans: {import_base_path}")
         else:
@@ -175,7 +197,7 @@ def check_storage() -> HealthCheckResult:
         HealthCheckResult avec le statut de vérification.
     """
     try:
-        project_root = Path(__file__).resolve().parent.parent
+        project_root = _get_project_root()
         storage_dir = project_root / FilePaths.INTERACTIONS_DIR
         
         # Vérifier que le répertoire existe
