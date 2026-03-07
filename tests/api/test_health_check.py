@@ -54,6 +54,20 @@ def test_check_storage_cannot_create(tmp_path):
             assert "Permission denied" in result.message or "Impossible" in result.message
 
 
+def test_check_storage_uses_workspace_root_and_temporary_file(tmp_path):
+    """Test que check_storage utilise la racine du projet et un fichier temporaire."""
+    fake_module_path = tmp_path / "api" / "utils" / "health_check.py"
+    expected_storage_path = tmp_path / "data" / "interactions"
+
+    with patch("api.utils.health_check.__file__", str(fake_module_path)):
+        with patch("api.utils.health_check.tempfile.TemporaryFile") as mock_temporary_file:
+            result = check_storage()
+
+    assert result.status == "healthy"
+    assert result.details["path"] == str(expected_storage_path)
+    mock_temporary_file.assert_called_once_with(dir=expected_storage_path)
+
+
 def test_check_config_development():
     """Test que check_config accepte la valeur par défaut en développement."""
     with patch.dict(os.environ, {"ENVIRONMENT": "development"}, clear=True):

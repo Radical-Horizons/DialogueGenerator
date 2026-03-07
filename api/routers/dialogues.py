@@ -23,7 +23,8 @@ from api.dependencies import (
     get_prompt_engine,
     get_config_service,
     get_skill_catalog_service,
-    get_trait_catalog_service
+    get_trait_catalog_service,
+    require_debug_access,
 )
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from api.exceptions import InternalServerException, ValidationException, NotFoundException, OpenAIException
@@ -562,6 +563,7 @@ async def get_raw_json_context(
     prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
     skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
     trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
+    _: Annotated[None, Depends(require_debug_access)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> RawJsonContextResponse:
     """Expose le JSON brut du contexte structuré pour debug.

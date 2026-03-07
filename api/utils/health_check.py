@@ -1,8 +1,8 @@
 """Health checks pour vérifier les dépendances de l'API."""
 import os
 import logging
+import tempfile
 from typing import Dict, Any, Optional
-from pathlib import Path
 from pathlib import Path
 from constants import FilePaths
 from api.config.security_config import get_security_config
@@ -175,7 +175,7 @@ def check_storage() -> HealthCheckResult:
         HealthCheckResult avec le statut de vérification.
     """
     try:
-        project_root = Path(__file__).resolve().parent.parent
+        project_root = Path(__file__).resolve().parents[2]
         storage_dir = project_root / FilePaths.INTERACTIONS_DIR
         
         # Vérifier que le répertoire existe
@@ -199,11 +199,11 @@ def check_storage() -> HealthCheckResult:
                 details={"path": str(storage_dir)}
             )
         
-        # Vérifier les permissions en écriture
-        test_file = storage_dir / ".health_check_write_test"
+        # Vérifier les permissions en écriture sans laisser de fichier résiduel.
         try:
-            test_file.write_text("test")
-            test_file.unlink()  # Supprimer le fichier de test
+            with tempfile.TemporaryFile(dir=storage_dir) as temporary_file:
+                temporary_file.write(b"health-check")
+                temporary_file.flush()
         except Exception as e:
             return HealthCheckResult(
                 name="storage",
