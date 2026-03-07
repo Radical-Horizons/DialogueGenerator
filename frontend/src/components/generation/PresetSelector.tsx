@@ -116,6 +116,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         {/* Dropdown "Charger preset" */}
         <div style={{ position: 'relative', flex: 1 }}>
           <button
+            type="button"
+            data-testid="preset-dropdown-trigger"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             style={{
               width: '100%',
@@ -167,6 +169,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                 presets.map((preset) => (
                   <div
                     key={preset.id}
+                    data-testid="preset-item"
+                    data-preset-name={preset.name}
                     style={{
                       padding: '0.75rem 1rem',
                       cursor: 'pointer',
@@ -221,6 +225,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
 
         {/* Bouton "Sauvegarder preset" */}
         <button
+          type="button"
+          data-testid="preset-save-btn"
           onClick={() => {
             const cfg = currentConfiguration || getCurrentConfiguration?.() || null;
             setSnapshotConfiguration(cfg);

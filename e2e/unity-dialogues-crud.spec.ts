@@ -19,15 +19,15 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
       await page.getByRole('button', { name: /se connecter/i }).click()
       await Promise.race([
         page.waitForURL('**/', { timeout: 5000 }).catch(() => {}),
-        page.waitForSelector('h2:has-text("Génération")', { timeout: 5000 }).catch(() => {})
+        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
       ])
     }
   }
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000')
+    await page.goto('/')
     await login(page)
-    await page.waitForSelector('h2:has-text("Génération")', { timeout: 10000 })
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
   })
 
   test('[P0] should list Unity dialogues', async ({ page }) => {

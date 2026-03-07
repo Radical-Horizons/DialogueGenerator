@@ -229,6 +229,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
 
   return (
     <div
+      data-testid="context-selector"
       style={{
         display: 'flex',
         flexDirection: 'column',

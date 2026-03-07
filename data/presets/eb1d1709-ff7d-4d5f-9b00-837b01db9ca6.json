@@ -1,0 +1,39 @@
+{
+  "id": "eb1d1709-ff7d-4d5f-9b00-837b01db9ca6",
+  "name": "Preset Obsolètes E2E",
+  "icon": "📋",
+  "metadata": {
+    "created": "2026-03-07T23:13:49.584600Z",
+    "modified": "2026-03-07T23:13:49.584600Z"
+  },
+  "configuration": {
+    "characters": [],
+    "locations": [],
+    "region": "",
+    "subLocation": null,
+    "sceneType": "Generic",
+    "instructions": "",
+    "fieldConfigs": {
+      "character": [],
+      "location": [],
+      "item": [],
+      "species": [],
+      "community": []
+    },
+    "contextSelections": {
+      "characters_full": [],
+      "characters_excerpt": [],
+      "locations_full": [],
+      "locations_excerpt": [],
+      "items_full": [],
+      "items_excerpt": [],
+      "species_full": [],
+      "species_excerpt": [],
+      "communities_full": [],
+      "communities_excerpt": [],
+      "dialogues_examples": []
+    },
+    "selectedRegion": null,
+    "selectedSubLocations": []
+  }
+}

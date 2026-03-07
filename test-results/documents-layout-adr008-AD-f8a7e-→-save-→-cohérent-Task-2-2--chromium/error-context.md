@@ -5,7 +5,7 @@
   - banner [ref=e4]:
     - generic [ref=e5]:
       - heading "DialogueGenerator" [level=1] [ref=e6]
-      - 'generic "Date de compilation: 08/03/2026 00:01:17" [ref=e7]': "Build: 08/03/2026 00:01"
+      - 'generic "Date de compilation: 08/03/2026 00:22:55" [ref=e7]': "Build: 08/03/2026 00:22"
     - generic [ref=e9]:
       - generic [ref=e10]: 🔍
       - generic [ref=e11]: Rechercher des actions, personnages, lieux...
@@ -30,162 +30,163 @@
             - button "Objets (17)" [ref=e33] [cursor=pointer]
             - button "Espèces (47)" [ref=e34] [cursor=pointer]
             - button "Communautés (11)" [ref=e35] [cursor=pointer]
-          - generic [ref=e37]:
-            - generic [ref=e39]:
-              - textbox "Rechercher... (/)" [ref=e40]
-              - combobox "Trier les résultats" [ref=e41]:
+          - generic [ref=e36]: timeout of 30000ms exceeded
+          - generic [ref=e38]:
+            - generic [ref=e40]:
+              - textbox "Rechercher... (/)" [ref=e41]
+              - combobox "Trier les résultats" [ref=e42]:
                 - option "Nom (A-Z)" [selected]
                 - option "Nom (Z-A)"
                 - option "Sélectionnés en premier"
-            - generic [ref=e42]:
-              - generic [ref=e43] [cursor=pointer]:
-                - checkbox [ref=e44]
-                - generic [ref=e45]: Akthar-Neth Amatru, l’Exégète
-              - generic [ref=e46] [cursor=pointer]:
-                - checkbox [ref=e47]
-                - generic [ref=e48]: Avili de l’Éternel Retour
-              - generic [ref=e49] [cursor=pointer]:
-                - checkbox [ref=e50]
-                - generic [ref=e51]: Barvas le Juge-Mendiant
-              - generic [ref=e52] [cursor=pointer]:
-                - checkbox [ref=e53]
-                - generic [ref=e54]: Cendreveine
-              - generic [ref=e55] [cursor=pointer]:
-                - checkbox [ref=e56]
-                - generic [ref=e57]: Chantier-Doux, Berger de Gedroths
-              - generic [ref=e58] [cursor=pointer]:
-                - checkbox [ref=e59]
-                - generic [ref=e60]: Duq'Sha, L'Archiviste Boiteux
-              - generic [ref=e61] [cursor=pointer]:
-                - checkbox [ref=e62]
-                - generic [ref=e63]: Eonundé Alinen-Egan
-              - generic [ref=e64] [cursor=pointer]:
-                - checkbox [ref=e65]
-                - generic [ref=e66]: Gardien-Calligraphe Qalamtû
-              - generic [ref=e67] [cursor=pointer]:
-                - checkbox [ref=e68]
-                - generic [ref=e69]: Genka Lien, le bouffon
-              - generic [ref=e70] [cursor=pointer]:
-                - checkbox [ref=e71]
-                - generic [ref=e72]: Grish T’vok
-              - generic [ref=e73] [cursor=pointer]:
-                - checkbox [ref=e74]
-                - generic [ref=e75]: Guette-Horizon, Gardienne du périmètre
-              - generic [ref=e76] [cursor=pointer]:
-                - checkbox [ref=e77]
-                - generic [ref=e78]: Jast, l’Inéluctable
-              - generic [ref=e79] [cursor=pointer]:
-                - checkbox [ref=e80]
-                - generic [ref=e81]: Kha'Vareth, L'Artisan d'Éternité
-              - generic [ref=e82] [cursor=pointer]:
-                - checkbox [ref=e83]
-                - generic [ref=e84]: Khair-gul, Le Médecin-Ascétique
-              - generic [ref=e85] [cursor=pointer]:
-                - checkbox [ref=e86]
-                - generic [ref=e87]: Korga l'Effritée, Maçonne-rafistoleuse
-              - generic [ref=e88] [cursor=pointer]:
-                - checkbox [ref=e89]
-                - generic [ref=e90]: L’Arbitre
-              - generic [ref=e91] [cursor=pointer]:
-                - checkbox [ref=e92]
-                - generic [ref=e93]: L’Enlumineur
-              - generic [ref=e94] [cursor=pointer]:
-                - checkbox [ref=e95]
-                - generic [ref=e96]: L'Ensevelie
-              - generic [ref=e97] [cursor=pointer]:
-                - checkbox [ref=e98]
-                - generic [ref=e99]: L'Équipe des Trois-Dos
-              - generic [ref=e100] [cursor=pointer]:
-                - checkbox [ref=e101]
-                - generic [ref=e102]: L'Éthérée
-              - generic [ref=e103] [cursor=pointer]:
-                - checkbox [ref=e104]
-                - generic [ref=e105]: L’Incarnée
-              - generic [ref=e106] [cursor=pointer]:
-                - checkbox [ref=e107]
-                - generic [ref=e108]: Lyro Seph
-              - generic [ref=e109] [cursor=pointer]:
-                - checkbox [ref=e110]
-                - generic [ref=e111]: Murmure-Éteint
-              - generic [ref=e112] [cursor=pointer]:
-                - checkbox [ref=e113]
-                - generic [ref=e114]: Navarre K'ssh, la Stratège Sanguine
-              - generic [ref=e115] [cursor=pointer]:
-                - checkbox [ref=e116]
-                - generic [ref=e117]: Nila Halder
-              - generic [ref=e118] [cursor=pointer]:
-                - checkbox [ref=e119]
-                - generic [ref=e120]: Ori-Bikar 57, l’Enfant-Foudre
-              - generic [ref=e121] [cursor=pointer]:
-                - checkbox [ref=e122]
-                - generic [ref=e123]: Ôrmüd T’lian-Keresh, le Maître-Flagellant
-              - generic [ref=e124] [cursor=pointer]:
-                - checkbox [ref=e125]
-                - generic [ref=e126]: Raki-Biro 58, l’Enfant-Prophète
-              - generic [ref=e127] [cursor=pointer]:
-                - checkbox [ref=e128]
-                - generic [ref=e129]: Ravim Halder
-              - generic [ref=e130] [cursor=pointer]:
-                - checkbox [ref=e131]
-                - generic [ref=e132]: Rêveur du Puits Céleste
-              - generic [ref=e133] [cursor=pointer]:
-                - checkbox [ref=e134]
-                - generic [ref=e135]: Saritha Halder
-              - generic [ref=e136] [cursor=pointer]:
-                - checkbox [ref=e137]
-                - generic [ref=e138]: Seigneuresse Uresaïr
-              - generic [ref=e139] [cursor=pointer]:
-                - checkbox [ref=e140]
-                - generic [ref=e141]: Siphon Argenté et Kresh l'Écaillé
-              - generic [ref=e142] [cursor=pointer]:
-                - checkbox [ref=e143]
-                - generic [ref=e144]: Valkazer Reitar
-              - generic [ref=e145] [cursor=pointer]:
-                - checkbox [ref=e146]
-                - generic [ref=e147]: Varek l’Écorché
-              - generic [ref=e148] [cursor=pointer]:
-                - checkbox [ref=e149]
-                - generic [ref=e150]: Vethraak
-              - generic [ref=e151] [cursor=pointer]:
-                - checkbox [ref=e152]
-                - generic [ref=e153]: Voknir Esh'Maradel, le cartographe
-              - generic [ref=e154] [cursor=pointer]:
-                - checkbox [ref=e155]
-                - generic [ref=e156]: Vol Reitar
-              - generic [ref=e157] [cursor=pointer]:
-                - checkbox [ref=e158]
-                - generic [ref=e159]: Yrthas, la murmuratrice
-              - generic [ref=e160] [cursor=pointer]:
-                - checkbox [ref=e161]
-                - generic [ref=e162]: Ysellor Eonundé du Ressac
-              - generic [ref=e163] [cursor=pointer]:
-                - checkbox [ref=e164]
-                - generic [ref=e165]: Zaehria Neth'Varu, La Gardienne Vertébrale
-          - generic [ref=e167]: Aucune sélection
-      - generic [ref=e171]:
-        - generic [ref=e172]:
-          - button "Génération de Dialogues" [ref=e173] [cursor=pointer]
-          - button "Édition de Dialogues" [ref=e174] [cursor=pointer]
-          - button "📊 Éditeur de Graphe" [active] [ref=e175] [cursor=pointer]
-        - generic [ref=e177]:
-          - generic [ref=e180]: Chargement des dialogues Unity...
-          - generic [ref=e181]:
-            - generic [ref=e183]:
-              - generic "Graphe valide (validation automatique à chaque sauvegarde)" [ref=e184]:
-                - generic [ref=e185]: ✓
-                - generic [ref=e186]: Graphe valide
-              - button "📐 Auto-layout ▼" [disabled] [ref=e188]:
+            - generic [ref=e43]:
+              - generic [ref=e44] [cursor=pointer]:
+                - checkbox [ref=e45]
+                - generic [ref=e46]: Akthar-Neth Amatru, l’Exégète
+              - generic [ref=e47] [cursor=pointer]:
+                - checkbox [ref=e48]
+                - generic [ref=e49]: Avili de l’Éternel Retour
+              - generic [ref=e50] [cursor=pointer]:
+                - checkbox [ref=e51]
+                - generic [ref=e52]: Barvas le Juge-Mendiant
+              - generic [ref=e53] [cursor=pointer]:
+                - checkbox [ref=e54]
+                - generic [ref=e55]: Cendreveine
+              - generic [ref=e56] [cursor=pointer]:
+                - checkbox [ref=e57]
+                - generic [ref=e58]: Chantier-Doux, Berger de Gedroths
+              - generic [ref=e59] [cursor=pointer]:
+                - checkbox [ref=e60]
+                - generic [ref=e61]: Duq'Sha, L'Archiviste Boiteux
+              - generic [ref=e62] [cursor=pointer]:
+                - checkbox [ref=e63]
+                - generic [ref=e64]: Eonundé Alinen-Egan
+              - generic [ref=e65] [cursor=pointer]:
+                - checkbox [ref=e66]
+                - generic [ref=e67]: Gardien-Calligraphe Qalamtû
+              - generic [ref=e68] [cursor=pointer]:
+                - checkbox [ref=e69]
+                - generic [ref=e70]: Genka Lien, le bouffon
+              - generic [ref=e71] [cursor=pointer]:
+                - checkbox [ref=e72]
+                - generic [ref=e73]: Grish T’vok
+              - generic [ref=e74] [cursor=pointer]:
+                - checkbox [ref=e75]
+                - generic [ref=e76]: Guette-Horizon, Gardienne du périmètre
+              - generic [ref=e77] [cursor=pointer]:
+                - checkbox [ref=e78]
+                - generic [ref=e79]: Jast, l’Inéluctable
+              - generic [ref=e80] [cursor=pointer]:
+                - checkbox [ref=e81]
+                - generic [ref=e82]: Kha'Vareth, L'Artisan d'Éternité
+              - generic [ref=e83] [cursor=pointer]:
+                - checkbox [ref=e84]
+                - generic [ref=e85]: Khair-gul, Le Médecin-Ascétique
+              - generic [ref=e86] [cursor=pointer]:
+                - checkbox [ref=e87]
+                - generic [ref=e88]: Korga l'Effritée, Maçonne-rafistoleuse
+              - generic [ref=e89] [cursor=pointer]:
+                - checkbox [ref=e90]
+                - generic [ref=e91]: L’Arbitre
+              - generic [ref=e92] [cursor=pointer]:
+                - checkbox [ref=e93]
+                - generic [ref=e94]: L’Enlumineur
+              - generic [ref=e95] [cursor=pointer]:
+                - checkbox [ref=e96]
+                - generic [ref=e97]: L'Ensevelie
+              - generic [ref=e98] [cursor=pointer]:
+                - checkbox [ref=e99]
+                - generic [ref=e100]: L'Équipe des Trois-Dos
+              - generic [ref=e101] [cursor=pointer]:
+                - checkbox [ref=e102]
+                - generic [ref=e103]: L'Éthérée
+              - generic [ref=e104] [cursor=pointer]:
+                - checkbox [ref=e105]
+                - generic [ref=e106]: L’Incarnée
+              - generic [ref=e107] [cursor=pointer]:
+                - checkbox [ref=e108]
+                - generic [ref=e109]: Lyro Seph
+              - generic [ref=e110] [cursor=pointer]:
+                - checkbox [ref=e111]
+                - generic [ref=e112]: Murmure-Éteint
+              - generic [ref=e113] [cursor=pointer]:
+                - checkbox [ref=e114]
+                - generic [ref=e115]: Navarre K'ssh, la Stratège Sanguine
+              - generic [ref=e116] [cursor=pointer]:
+                - checkbox [ref=e117]
+                - generic [ref=e118]: Nila Halder
+              - generic [ref=e119] [cursor=pointer]:
+                - checkbox [ref=e120]
+                - generic [ref=e121]: Ori-Bikar 57, l’Enfant-Foudre
+              - generic [ref=e122] [cursor=pointer]:
+                - checkbox [ref=e123]
+                - generic [ref=e124]: Ôrmüd T’lian-Keresh, le Maître-Flagellant
+              - generic [ref=e125] [cursor=pointer]:
+                - checkbox [ref=e126]
+                - generic [ref=e127]: Raki-Biro 58, l’Enfant-Prophète
+              - generic [ref=e128] [cursor=pointer]:
+                - checkbox [ref=e129]
+                - generic [ref=e130]: Ravim Halder
+              - generic [ref=e131] [cursor=pointer]:
+                - checkbox [ref=e132]
+                - generic [ref=e133]: Rêveur du Puits Céleste
+              - generic [ref=e134] [cursor=pointer]:
+                - checkbox [ref=e135]
+                - generic [ref=e136]: Saritha Halder
+              - generic [ref=e137] [cursor=pointer]:
+                - checkbox [ref=e138]
+                - generic [ref=e139]: Seigneuresse Uresaïr
+              - generic [ref=e140] [cursor=pointer]:
+                - checkbox [ref=e141]
+                - generic [ref=e142]: Siphon Argenté et Kresh l'Écaillé
+              - generic [ref=e143] [cursor=pointer]:
+                - checkbox [ref=e144]
+                - generic [ref=e145]: Valkazer Reitar
+              - generic [ref=e146] [cursor=pointer]:
+                - checkbox [ref=e147]
+                - generic [ref=e148]: Varek l’Écorché
+              - generic [ref=e149] [cursor=pointer]:
+                - checkbox [ref=e150]
+                - generic [ref=e151]: Vethraak
+              - generic [ref=e152] [cursor=pointer]:
+                - checkbox [ref=e153]
+                - generic [ref=e154]: Voknir Esh'Maradel, le cartographe
+              - generic [ref=e155] [cursor=pointer]:
+                - checkbox [ref=e156]
+                - generic [ref=e157]: Vol Reitar
+              - generic [ref=e158] [cursor=pointer]:
+                - checkbox [ref=e159]
+                - generic [ref=e160]: Yrthas, la murmuratrice
+              - generic [ref=e161] [cursor=pointer]:
+                - checkbox [ref=e162]
+                - generic [ref=e163]: Ysellor Eonundé du Ressac
+              - generic [ref=e164] [cursor=pointer]:
+                - checkbox [ref=e165]
+                - generic [ref=e166]: Zaehria Neth'Varu, La Gardienne Vertébrale
+          - generic [ref=e168]: Aucune sélection
+      - generic [ref=e172]:
+        - generic [ref=e173]:
+          - button "Génération de Dialogues" [ref=e174] [cursor=pointer]
+          - button "Édition de Dialogues" [ref=e175] [cursor=pointer]
+          - button "📊 Éditeur de Graphe" [ref=e176] [cursor=pointer]
+        - generic [ref=e178]:
+          - generic [ref=e180]:
+            - text: timeout of 30000ms exceeded
+            - button "Réessayer" [ref=e181] [cursor=pointer]
+          - generic [ref=e182]:
+            - generic [ref=e184]:
+              - generic "Graphe valide (validation automatique à chaque sauvegarde)" [ref=e185]:
+                - generic [ref=e186]: ✓
+                - generic [ref=e187]: Graphe valide
+              - generic "Sauvegardé" [ref=e188]
+              - button "📐 Auto-layout ▼" [disabled] [ref=e191]:
                 - text: 📐 Auto-layout
-                - generic [ref=e189]: ▼
-              - button "Actions ▼" [disabled] [ref=e191]:
-                - text: Actions
                 - generic [ref=e192]: ▼
-              - button "💰 Coûts" [disabled] [ref=e193]
-              - button "?" [ref=e195] [cursor=pointer]
-            - generic [ref=e197]:
-              - generic [ref=e198]: 📊
-              - generic [ref=e199]: Sélectionnez un dialogue Unity
-              - generic [ref=e200]: Choisissez un dialogue dans la liste à gauche pour le visualiser et l'éditer sous forme de graphe
+              - button "Actions ▼" [disabled] [ref=e194]:
+                - text: Actions
+                - generic [ref=e195]: ▼
+              - button "💰 Coûts" [ref=e196] [cursor=pointer]
+              - button "?" [ref=e198] [cursor=pointer]
+            - generic [ref=e200]: Chargement du graphe...
       - generic [ref=e203]:
         - generic [ref=e204]:
           - generic [ref=e205]: Détails

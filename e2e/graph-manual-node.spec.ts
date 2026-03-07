@@ -18,7 +18,7 @@ test.describe('Graph Manual Node (Story 1.6)', () => {
       await page.getByRole('button', { name: /se connecter/i }).click()
       await Promise.race([
         page.waitForURL('**/', { timeout: 5000 }).catch(() => {}),
-        page.waitForSelector('h2:has-text("Génération")', { timeout: 5000 }).catch(() => {}),
+        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
       ])
     }
   }

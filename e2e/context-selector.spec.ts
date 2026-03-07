@@ -6,11 +6,14 @@ test.describe('Sélecteur de contexte', () => {
   })
 
   test('le résumé des sélections doit être entièrement visible en bas du panneau', async ({ page }) => {
-    // Attendre que les données contexte soient chargées (bouton Personnages ou onglet)
     await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible({ timeout: 15000 })
-    
-    // Sélectionner un personnage (première checkbox du panneau contexte)
-    const firstCharacter = page.locator('input[type="checkbox"]').first()
+    const contextPanel = page.getByTestId('context-selector')
+    const checkboxes = contextPanel.locator('input[type="checkbox"]')
+    const count = await checkboxes.count()
+    if (count === 0) {
+      test.skip(true, 'Aucun personnage dans le GDD - test ignoré')
+    }
+    const firstCharacter = checkboxes.first()
     await expect(firstCharacter).toBeVisible({ timeout: 5000 })
     const firstCharacterRow = firstCharacter.locator('xpath=..')
     const selectedCharacterName = ((await firstCharacterRow.textContent()) ?? '')

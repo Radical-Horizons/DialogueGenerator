@@ -25,23 +25,23 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
       // Attendre soit la redirection, soit que le formulaire disparaisse
       await Promise.race([
         page.waitForURL('**/', { timeout: 5000 }).catch(() => {}),
-        page.waitForSelector('h2:has-text("Génération de Dialogues")', { timeout: 5000 }).catch(() => {})
+        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
       ])
     }
   }
 
   test.beforeEach(async ({ page }) => {
     // Naviguer vers l'application
-    await page.goto('http://localhost:3000')
+    await page.goto('/')
     
     // S'authentifier si nécessaire
     await login(page)
     
-    // Attendre que l'application soit chargée
-    await page.waitForSelector('h2:has-text("Génération de Dialogues")', { timeout: 10000 })
+    // Attendre que l'application soit chargée (onglet Génération de Dialogues)
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
     
-    // Naviguer vers l'éditeur de graphe
-    const graphTab = page.locator('button:has-text("Graphe")').or(page.locator('[data-testid="graph-tab"]'))
+    // Naviguer vers l'éditeur de graphe (onglet central)
+    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
     if (await graphTab.isVisible({ timeout: 2000 }).catch(() => false)) {
       await graphTab.click()
       await page.waitForTimeout(500) // Attendre le chargement

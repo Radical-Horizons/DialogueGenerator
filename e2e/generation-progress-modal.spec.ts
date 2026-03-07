@@ -16,11 +16,8 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     await page.keyboard.press('Enter')
   }
   test.beforeEach(async ({ page }) => {
-    // Naviguer vers l'application
-    await page.goto('http://localhost:3000')
-    
-    // Attendre que l'application soit chargée
-    await page.waitForSelector('h2:has-text("Génération de Dialogues")')
+    await page.goto('/')
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 15000 })
   })
 
   test('AC#1: Modal s\'affiche au lancement génération avec streaming visible', async ({ page }) => {

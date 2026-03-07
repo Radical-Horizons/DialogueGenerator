@@ -37,13 +37,18 @@ test.describe('Authentification', () => {
 
   test('doit afficher une erreur avec de mauvaises credentials', async ({ page }) => {
     await page.goto('/login')
-    
+    const loginResponse = page.waitForResponse(
+      (res) => res.url().includes('/api/v1/auth/login') && res.request().method() === 'POST',
+      { timeout: 15000 }
+    )
     await page.getByLabel(/nom d'utilisateur/i).fill('wrong')
     await page.getByLabel(/mot de passe/i).fill('wrong')
     await page.getByRole('button', { name: /se connecter/i }).click()
-    
-    // Attendre le message d'erreur
-    await expect(page.getByText(/incorrect|erreur/i)).toBeVisible({ timeout: 5000 })
+    const res = await loginResponse
+    expect(res.status()).toBe(401)
+    await expect(
+      page.getByText(/nom d'utilisateur ou mot de passe incorrect/i)
+    ).toBeVisible({ timeout: 8000 })
   })
 })
 
