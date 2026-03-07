@@ -6,8 +6,8 @@
  * - AC#3: Reject supprime le nœud et affiche toast
  * - AC#5: Session recovery pour nœuds pending
  *
- * Environnement E2E complet :
- * OPENAI_API_KEY (.env ou variables d'environnement), budget utilisable, modèle gpt-5-mini (panneau ou app_config.json). En cas d'échec : docs/troubleshooting/e2e-llm.md.
+ * Environnement E2E complet : OPENAI_API_KEY (.env ou variables d'environnement), budget utilisable,
+ * modèle gpt-5-mini (panneau ou app_config.json). En cas d'échec : docs/troubleshooting/e2e-llm.md.
  */
 import { test, expect, type Page } from '@playwright/test'
 
