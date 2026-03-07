@@ -111,7 +111,7 @@ export function documentToGraph(
           typeof storedTestPosition.x === 'number' &&
           typeof storedTestPosition.y === 'number'
             ? { x: storedTestPosition.x, y: storedTestPosition.y }
-            : { x: position.x + 300, y: position.y + choiceIndex * 60 }
+            : { x: position.x + choiceIndex * 200, y: position.y + 280 }
         nodes.push({
           id: testNodeId,
           type: 'testNode',

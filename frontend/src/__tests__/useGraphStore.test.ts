@@ -518,11 +518,11 @@ describe('useGraphStore - Pending save state', () => {
         generate_all_choices: true,
       })
       
-      // Vérifier positionnement (pour l'instant un seul nœud, mais position calculée)
+      // Vérifier positionnement : en dessous du parent, centré (un seul nœud)
       const state = useGraphStore.getState()
       const generatedNode = state.nodes.find((n) => n.id === 'generated-1')
-      expect(generatedNode?.position.x).toBe(400) // parent.x + 300
-      expect(generatedNode?.position.y).toBe(100) // parent.y + (150 * 0) pour choix index 0
+      expect(generatedNode?.position.x).toBe(100) // parent.x + 0 (centré)
+      expect(generatedNode?.position.y).toBe(380) // parent.y + OFFSET_BELOW (280)
     })
   })
 })

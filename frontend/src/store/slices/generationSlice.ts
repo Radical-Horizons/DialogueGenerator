@@ -17,6 +17,24 @@ function simpleHash(s: string): string {
   return String(Math.abs(h))
 }
 
+/**
+ * Normalise le contenu parent envoyé à l'API : retire "test" des choix quand il est vide,
+ * pour éviter la branche "4 nœuds" côté backend après suppression du TestNode.
+ */
+function normalizeParentContentForGeneration(content: Record<string, unknown>): Record<string, unknown> {
+  const choices = content.choices as Array<Record<string, unknown>> | undefined
+  if (!Array.isArray(choices)) return content
+  const normalizedChoices = choices.map((c) => {
+    const test = c?.test
+    if (test === '' || (typeof test === 'string' && !test.trim())) {
+      const { test: _t, ...rest } = c ?? {}
+      return rest
+    }
+    return c
+  })
+  return { ...content, choices: normalizedChoices }
+}
+
 export type GenerationSlice = Pick<
   GraphState,
   'generateFromNode' | 'acceptNode' | 'rejectNode' | 'regenerateNode'
@@ -102,9 +120,11 @@ export const createGenerationSlice: StateCreator<
           : undefined
 
       const dialogueIdForCosts = state.dialogueMetadata.filename || undefined
+      // Ne pas envoyer de test vide pour un choix (évite 422 après suppression du TestNode)
+      const normalizedContent = normalizeParentContentForGeneration(parentNodeContent)
       const response = await graphAPI.generateNode({
         parent_node_id: parentNodeId,
-        parent_node_content: parentNodeContent,
+        parent_node_content: normalizedContent,
         user_instructions: instructions,
         context_selections: contextSelections,
         max_choices: maxChoices,
@@ -197,15 +217,20 @@ export const createGenerationSlice: StateCreator<
         onBatchProgress(0, totalToAdd)
       }
 
+      /** Écart vertical sous le nœud parent (éviter superposition à droite). */
+      const OFFSET_BELOW = 280
+      /** Écart horizontal entre nœuds frères (centrage de la rangée). */
+      const HORIZONTAL_STEP = 200
+
       const nodesToAddBatch: Node[] = []
       nodesToAdd.forEach(({ node: generatedNode, choiceIndex }, index) => {
         const isBatchOrTestNode = isBatch || (isTestNode && totalToAdd > 1)
         const isChoiceSpecific = !isBatchOrTestNode && targetChoiceIndex !== null
-        const verticalOffset = isBatchOrTestNode
-          ? 150 * choiceIndex
-          : isChoiceSpecific
-          ? 60 * choiceIndex + 60
-          : 0
+        const horizontalOffset =
+          totalToAdd > 1
+            ? (choiceIndex - (totalToAdd - 1) / 2) * HORIZONTAL_STEP
+            : 0
+        const verticalOffset = isChoiceSpecific && totalToAdd <= 1 ? 60 : 0
         const contextGddHash =
           Object.keys(contextSelections).length > 0
             ? simpleHash(JSON.stringify(contextSelections))
@@ -214,8 +239,8 @@ export const createGenerationSlice: StateCreator<
           id: generatedNode.id,
           type: 'dialogueNode',
           position: {
-            x: parentNode.position.x + 300,
-            y: parentNode.position.y + verticalOffset,
+            x: parentNode.position.x + horizontalOffset,
+            y: parentNode.position.y + OFFSET_BELOW + verticalOffset,
           },
           data: {
             ...generatedNode,

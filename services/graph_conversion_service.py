@@ -75,10 +75,11 @@ class GraphConversionService:
                             test_node_id = f"test-node-{node_id}-choice-{choice_index}"
                             test_node_map[test_node_key] = test_node_id
                             
-                            # Position du TestNode (à droite du DialogueNode)
+                            # Position du TestNode (en dessous du DialogueNode, répartis horizontalement)
+                            # y_offset a déjà été incrémenté pour le prochain nœud → parent à y_offset - 150
                             test_node_position = {
-                                "x": x_offset + 300,
-                                "y": y_offset - 150 + (choice_index * 200)
+                                "x": x_offset + (choice_index * 200),
+                                "y": (y_offset - 150) + 280,
                             }
                             
                             # Créer le TestNode avec les données du test

@@ -8,8 +8,8 @@
  *
  * Prérequis:
  * - .env à la racine avec OPENAI_API_KEY (ou clé dans variables d’environnement Windows).
- * - Pour réduire les coûts en E2E : sélectionner gpt-5-nano dans le panneau de génération, ou mettre
- *   "default_model": "gpt-5-nano" dans app_config.json (gpt-5-nano est dans available_models).
+ * - Pour réduire les coûts en E2E : sélectionner gpt-5-mini dans le panneau de génération, ou mettre
+ *   "default_model": "gpt-5-mini" dans app_config.json (gpt-5-mini est dans available_models).
  * Si la génération échoue ou n’ajoute aucun nœud (API, budget, "Aucun nœud généré", etc.), voir docs/troubleshooting/e2e-llm.md.
  */
 import { test, expect, type Page } from '@playwright/test'
@@ -119,7 +119,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await expect(textarea).toBeVisible({ timeout: 5000 })
     const modelSelect = page.getByTestId('llm-model-select')
     await expect(modelSelect).toBeVisible({ timeout: 3000 })
-    await modelSelect.selectOption({ value: 'gpt-5-nano' })
+    await modelSelect.selectOption({ value: 'gpt-5-mini' })
     await textarea.fill('Réponds brièvement pour ce test E2E.')
     // Mode "Suite" désactive Générer si le nœud a des choix → passer en "Branche" et sélectionner un choix.
     const branchBtn = page.getByRole('button', { name: 'Branche alternative (choice)' })
@@ -141,7 +141,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     const successToast = page.getByText(/Nœud généré avec succès|Nœud généré pour le choix \d+|[1-9]\d* nouveau\(x\) nœud\(s\) généré\(s\)/)
     await expect(
       successToast,
-      'Génération LLM : aucun toast de succès. Vérifier logs frontend/API, budget, modèle gpt-5-nano. Voir docs/troubleshooting/e2e-llm.md.'
+      'Génération LLM : aucun toast de succès. Vérifier logs frontend/API, budget, modèle gpt-5-mini. Voir docs/troubleshooting/e2e-llm.md.'
     ).toBeVisible({ timeout: 360_000 })
     await page.waitForTimeout(3000)
     const countAfter = await page.locator('.react-flow__node').count()

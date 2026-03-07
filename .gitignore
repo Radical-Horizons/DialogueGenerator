@@ -74,6 +74,9 @@ data/notion_cache/
 data/interactions/
 data/UnityData/
 
+# Dialogue JSON (générés / sortie Unity)
+Assets/Dialogue/*.json
+
 # Temporary files
 *.tmp
 *.bak

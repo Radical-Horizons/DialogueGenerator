@@ -3,7 +3,7 @@
  * 
  * Composant refactorisé utilisant des hooks métier et composants UI extraits.
  */
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import * as configAPI from '../../api/config'
 import * as dialoguesAPI from '../../api/dialogues'
 import { useGenerationStore } from '../../store/generationStore'
@@ -30,6 +30,7 @@ import { usePresetManagement } from '../../hooks/usePresetManagement'
 // Composants UI extraits
 import { GenerationPanelControls } from './GenerationPanelControls'
 import { GenerationPanelModals } from './GenerationPanelModals'
+import { EstimationBadge } from '../estimation'
 
 
 export function GenerationPanel() {
@@ -626,6 +627,33 @@ export function GenerationPanel() {
         onDirty={draft.markDirty}
       />
 
+      {/* Estimation unifiée (même composant que graphe) : tokens + coût si backend exposé */
+      (() => {
+        const tokenCount = orchestrator.tokenCount
+        const result = tokenCount != null
+          ? { prompt_tokens: tokenCount, completion_tokens: 0, estimated_cost_eur: null as number | null }
+          : null
+        const state = orchestrator.isEstimating
+          ? 'loading'
+          : orchestrator.estimationError
+            ? 'error'
+            : result != null
+              ? 'success'
+              : 'idle'
+        return (
+          <div style={{ marginTop: '0.75rem' }}>
+            <EstimationBadge
+              result={result}
+              state={state}
+              error={orchestrator.estimationError}
+              onEstimate={orchestrator.estimateTokens}
+              budgetExceeded={false}
+              budgetWarning90={false}
+              showWhenIdle={true}
+            />
+          </div>
+        )
+      })()}
 
 
 

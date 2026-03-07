@@ -340,7 +340,9 @@ class GraphNodeOrchestrator:
 
         choice_data = parent_choices[target_choice_index]
 
-        if choice_data.get("test") is not None:
+        # Ne générer 4 nœuds que si le choix a un test non vide (évite 422 après suppression du TestNode)
+        test_value = choice_data.get("test")
+        if test_value and (not isinstance(test_value, str) or test_value.strip()):
             return await self._generate_choice_with_test(
                 llm_client=llm_client,
                 parent_node_id=parent_node_id,

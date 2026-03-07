@@ -24,6 +24,8 @@ export function GraphEditor() {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const [isLoadingDialogue, setIsLoadingDialogue] = useState(false)
   const [layoutDirection, setLayoutDirection] = useState<'TB' | 'LR' | 'BT' | 'RL'>('TB')
+  const [showAutoLayoutDropdown, setShowAutoLayoutDropdown] = useState(false)
+  const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
   const [showAIGenerationPanel, setShowAIGenerationPanel] = useState(false)
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
@@ -219,15 +221,20 @@ export function GraphEditor() {
     return () => clearTimeout(timeoutId)
   }, [selectedDialogue, hasUnsavedChanges, isGraphLoading, isGraphSaving, isLoadingDialogue, isGenerating, nodes, saveDialogue, toast])
   
-  // Handler pour auto-layout
-  const handleAutoLayout = useCallback(async () => {
-    try {
-      await applyAutoLayout('dagre', layoutDirection)
-      toast('Layout appliqué', 'success', 2000)
-    } catch (err) {
-      toast(`Erreur lors de l'auto-layout: ${getErrorMessage(err)}`, 'error')
-    }
-  }, [applyAutoLayout, layoutDirection, toast])
+  // Handler pour auto-layout (direction optionnelle pour le menu déroulant)
+  const handleAutoLayout = useCallback(
+    async (direction?: 'TB' | 'LR' | 'BT' | 'RL') => {
+      const dir = direction ?? layoutDirection
+      try {
+        await applyAutoLayout('dagre', dir)
+        setLayoutDirection(dir)
+        toast('Layout appliqué', 'success', 2000)
+      } catch (err) {
+        toast(`Erreur lors de l'auto-layout: ${getErrorMessage(err)}`, 'error')
+      }
+    },
+    [applyAutoLayout, layoutDirection, toast]
+  )
   
   // Handler pour supprimer le dialogue sélectionné
   const handleDeleteDialogue = useCallback(async () => {
@@ -334,6 +341,17 @@ export function GraphEditor() {
     window.addEventListener('request-save-dialogue', onRequestSave)
     return () => window.removeEventListener('request-save-dialogue', onRequestSave)
   }, [handleSave])
+
+  // Fermer le menu Auto-layout au clic extérieur
+  useEffect(() => {
+    if (!showAutoLayoutDropdown) return
+    const el = autoLayoutDropdownRef.current
+    const onOutside = (e: MouseEvent) => {
+      if (el && !el.contains(e.target as Node)) setShowAutoLayoutDropdown(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [showAutoLayoutDropdown])
   
   // Raccourcis clavier
   useKeyboardShortcuts(
@@ -546,31 +564,10 @@ export function GraphEditor() {
                 />
               )
             })()}
-            {/* Direction layout + Auto-layout */}
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <select
-                value={layoutDirection}
-                onChange={(e) => setLayoutDirection(e.target.value as 'TB' | 'LR' | 'BT' | 'RL')}
-                disabled={!canEditGraph}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  border: `1px solid ${theme.input.border}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.input.background,
-                  color: theme.input.color,
-                  fontSize: '0.85rem',
-                  cursor: canEditGraph ? 'pointer' : 'not-allowed',
-                  opacity: canEditGraph ? 1 : 0.6,
-                }}
-                title="Direction du layout"
-              >
-                <option value="TB">TB (Haut-Bas)</option>
-                <option value="LR">LR (Gauche-Droite)</option>
-                <option value="BT">BT (Bas-Haut)</option>
-                <option value="RL">RL (Droite-Gauche)</option>
-              </select>
+            {/* Auto-layout avec menu direction */}
+            <div ref={autoLayoutDropdownRef} style={{ position: 'relative' }}>
               <button
-                onClick={handleAutoLayout}
+                onClick={() => canEditGraph && setShowAutoLayoutDropdown((v) => !v)}
                 disabled={!canEditGraph}
                 style={{
                   padding: '0.5rem 1rem',
@@ -581,11 +578,66 @@ export function GraphEditor() {
                   cursor: canEditGraph ? 'pointer' : 'not-allowed',
                   opacity: canEditGraph ? 1 : 0.6,
                   fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
                 }}
-                title="Auto-layout (Dagre)"
+                title="Auto-layout (Dagre) — choisir la direction"
               >
                 📐 Auto-layout
+                <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
               </button>
+              {showAutoLayoutDropdown && (
+                <div
+                  role="listbox"
+                  aria-label="Direction du layout"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    marginTop: '4px',
+                    minWidth: '100%',
+                    padding: '4px 0',
+                    border: `1px solid ${theme.input.border}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.input.background,
+                    color: theme.input.color,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    zIndex: 1000,
+                  }}
+                >
+                  {[
+                    { value: 'TB' as const, label: 'TB (Haut-Bas)' },
+                    { value: 'LR' as const, label: 'LR (Gauche-Droite)' },
+                    { value: 'BT' as const, label: 'BT (Bas-Haut)' },
+                    { value: 'RL' as const, label: 'RL (Droite-Gauche)' },
+                  ].map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      role="option"
+                      aria-selected={layoutDirection === value}
+                      onClick={() => {
+                        setShowAutoLayoutDropdown(false)
+                        handleAutoLayout(value)
+                      }}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: 'none',
+                        background: layoutDirection === value ? theme.button.default.background : 'transparent',
+                        color: theme.input.color,
+                        textAlign: 'left',
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <button
               data-testid="btn-new-manual-node"
@@ -1002,21 +1054,111 @@ export function GraphEditor() {
               )
             })()}
             
-            {/* Panneau breakdown des coûts (overlay — Story 1.12) */}
+            {/* Infobulle coûts : centrée, opaque, avec bouton fermer (Story 1.12) */}
             {showCostBreakdown && selectedDialogue && (
               <div
+                role="dialog"
+                aria-label="Breakdown des coûts du dialogue"
                 style={{
-                  position: 'absolute',
-                  bottom: '1rem',
-                  left: '1rem',
-                  width: '420px',
-                  maxWidth: 'calc(100vw - 2rem)',
-                  zIndex: 50,
-                  maxHeight: '70vh',
-                  overflowY: 'auto',
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1000,
+                  padding: '1rem',
+                }}
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) setShowCostBreakdown(false)
                 }}
               >
-                <DialogueCostBreakdown dialogueId={selectedDialogue.filename} />
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '440px',
+                    maxHeight: '85vh',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    backgroundColor: theme.background.panel,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '10px',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    style={{
+                      flex: '0 0 auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem 1rem',
+                      borderBottom: `1px solid ${theme.border.primary}`,
+                    }}
+                  >
+                    <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: theme.text.primary }}>
+                      Coûts du dialogue
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCostBreakdown(false)}
+                      style={{
+                        padding: '0.25rem 0.5rem',
+                        fontSize: '1.25rem',
+                        lineHeight: 1,
+                        background: 'transparent',
+                        color: theme.text.secondary,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                      }}
+                      aria-label="Fermer"
+                      title="Fermer"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div
+                    style={{
+                      flex: '1 1 auto',
+                      overflowY: 'auto',
+                      padding: '1rem',
+                    }}
+                  >
+                    <DialogueCostBreakdown dialogueId={selectedDialogue.filename} />
+                  </div>
+                  <div
+                    style={{
+                      flex: '0 0 auto',
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      padding: '0.5rem 1rem 1rem',
+                      borderTop: `1px solid ${theme.border.primary}`,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setShowCostBreakdown(false)}
+                      style={{
+                        padding: '0.4rem 0.9rem',
+                        fontSize: '0.875rem',
+                        backgroundColor: theme.button.default.background,
+                        color: theme.button.default.color,
+                        border: `1px solid ${theme.border.primary}`,
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                      aria-label="Fermer le panneau des coûts"
+                    >
+                      Fermer
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 

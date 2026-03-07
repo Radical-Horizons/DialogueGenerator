@@ -6,7 +6,7 @@
  * qui en mode document SoT met à jour le document puis recalcule la projection. Les identités
  * stables (node.id, choiceId) évitent un reset du panel après édition. Debounce/throttle inchangés.
  */
-import { memo, useEffect, useState, useCallback, useRef } from 'react'
+import { memo, useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useForm, FormProvider, useFormContext, useFieldArray, type FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useShallow } from 'zustand/react/shallow'
@@ -29,6 +29,8 @@ import {
 } from '../../schemas/nodeEditorSchema'
 import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
 import { ChoiceEditor } from './ChoiceEditor'
+import { useEstimation } from '../../hooks/useEstimation'
+import { EstimationBadge } from '../estimation'
 
 export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
@@ -361,7 +363,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       }
     }
     const pos = parentAfterSync?.position ?? selectedNode.position
-    const position = { x: pos.x + 300, y: pos.y + choiceIndex * 80 }
+    const position = { x: pos.x + choiceIndex * 200, y: pos.y + 280 }
     const node = createEmptyNode(position)
     addNode(node)
     connectNodes(selectedNodeId, node.id, choiceIndex)
@@ -477,6 +479,25 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   }
   
   const choices = watch('choices') as Choice[] | undefined
+
+  // Requête d'estimation (même forme que AIGenerationPanel) pour le flux graphe
+  const graphEstimateRequest = useMemo(
+    () =>
+      selectedNodeId && selectedNode
+        ? {
+            parent_node_id: selectedNodeId,
+            parent_node_content: (selectedNode.data ?? {}) as Record<string, unknown>,
+            user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+            context_selections: selections as Record<string, unknown>,
+            llm_model_identifier: llmModel,
+          }
+        : null,
+    [selectedNodeId, selectedNode, userInstructions, selections, llmModel]
+  )
+  const { result: estimationResult, state: estimationState, error: estimationError, runEstimate, budgetExceeded, budgetWarning90 } = useEstimation({
+    type: 'graph',
+    request: graphEstimateRequest,
+  })
 
   return (
     <FormProvider {...form}>
@@ -888,13 +909,26 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                   </select>
                 </div>
                 
+                {/* Estimation unifiée (même composant que panneau Générer nœud) */}
+                {graphEstimateRequest && (
+                  <EstimationBadge
+                    result={estimationResult}
+                    state={estimationState}
+                    error={estimationError}
+                    onEstimate={runEstimate}
+                    budgetExceeded={budgetExceeded}
+                    budgetWarning90={budgetWarning90}
+                    showWhenIdle={true}
+                  />
+                )}
+                
                 {/* Boutons de génération */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {/* Bouton "Générer la suite" (nextNode) */}
                   <button
                     type="button"
                     onClick={handleGenerateNext}
-                    disabled={isGenerating}
+                    disabled={isGenerating || budgetExceeded}
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -902,8 +936,8 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       borderRadius: 4,
                       backgroundColor: theme.button.primary.background,
                       color: theme.button.primary.color,
-                      cursor: isGenerating ? 'not-allowed' : 'pointer',
-                      opacity: isGenerating ? 0.6 : 1,
+                      cursor: isGenerating || budgetExceeded ? 'not-allowed' : 'pointer',
+                      opacity: isGenerating || budgetExceeded ? 0.6 : 1,
                       fontSize: '0.9rem',
                       fontWeight: 'bold',
                     }}
@@ -920,7 +954,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       <button
                         type="button"
                         onClick={handleGenerateAllChoices}
-                        disabled={isGenerating}
+                        disabled={isGenerating || budgetExceeded}
                         style={{
                           width: '100%',
                           padding: '0.75rem',
@@ -928,8 +962,8 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                           borderRadius: 4,
                           backgroundColor: theme.button.default.background,
                           color: theme.button.default.color,
-                          cursor: isGenerating ? 'not-allowed' : 'pointer',
-                          opacity: isGenerating ? 0.6 : 1,
+                          cursor: isGenerating || budgetExceeded ? 'not-allowed' : 'pointer',
+                          opacity: isGenerating || budgetExceeded ? 0.6 : 1,
                           fontSize: '0.9rem',
                         }}
                       >

@@ -259,6 +259,31 @@ class TestGraphNodeOrchestrator:
         assert len(result.suggested_connections) == 4
         assert result.suggested_connections[0]["connection_type"] == "test-critical-failure"
 
+    @pytest.mark.asyncio
+    async def test_generate_choice_with_empty_test_uses_single_node(
+        self, orchestrator, mock_generation_service, mock_llm_client
+    ):
+        """Choix avec test vide ou blanc → génération 1 nœud (pas 4), évite 422 après suppression du TestNode."""
+        mock_node = {"id": "NODE_P_CHOICE_0", "speaker": "PNJ", "line": "Ok"}
+        mock_generation_service.generate_dialogue_node.return_value = {"nodes": [mock_node]}
+        mock_generation_service.enrich_with_ids.return_value = [mock_node]
+
+        result = await orchestrator.generate(
+            llm_client=mock_llm_client,
+            parent_node_id="NODE_P",
+            parent_node_content={
+                "speaker": "PNJ",
+                "line": "Q",
+                "choices": [{"text": "A", "test": ""}],
+            },
+            user_instructions="Go",
+            target_choice_index=0,
+        )
+
+        assert len(result.nodes) == 1
+        mock_generation_service.generate_nodes_for_choice_with_test.assert_not_called()
+        mock_generation_service.generate_dialogue_node.assert_called_once()
+
     # --- Test node generation ---
 
     @pytest.mark.asyncio

@@ -169,10 +169,12 @@ export function syncTestNodeFromChoice(
     return { testNode: null, edges: existingEdges }
   }
 
-  // Le choix a un test : créer ou mettre à jour le TestNode
+  // Le choix a un test : créer ou mettre à jour le TestNode (en dessous, répartis horizontalement)
+  const OFFSET_BELOW = 280
+  const HORIZONTAL_STEP = 200
   const testNodePosition = existingTestNode?.position || {
-    x: dialogueNodePosition.x + 300,
-    y: dialogueNodePosition.y - 150 + (choiceIndex * 200),
+    x: dialogueNodePosition.x + choiceIndex * HORIZONTAL_STEP,
+    y: dialogueNodePosition.y + OFFSET_BELOW,
   }
 
   const testNode: Node = {
