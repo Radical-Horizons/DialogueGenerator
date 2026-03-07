@@ -792,6 +792,7 @@ export function GraphEditor() {
             ) : (
               <div
                 ref={canvasWrapperRef}
+                data-testid="graph-canvas"
                 style={{ flex: 1, minHeight: 400, overflow: 'hidden' }}
               >
                 <ReactFlowProvider>

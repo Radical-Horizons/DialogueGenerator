@@ -183,42 +183,17 @@
     <note>Available content: {epics_content}, {prd_content}, {architecture_content}, {ux_content},
     {project_context}</note>
 
-    <!-- CRITICAL: Verify existing codebase to prevent duplicates -->
-    <critical>🚨 EXISTING CODEBASE VERIFICATION - Prevent duplicates and document replacement decisions!</critical>
-    <action>From story requirements, extract ALL files/components/services mentioned:</action>
-    **EXISTING CODEBASE CHECKLIST:**
-    - Extract all "New Files" mentioned in story requirements
-    - Extract all "Modified Files" mentioned in story requirements
-    - Extract all components/stores/services/endpoints mentioned
-    <action>For EACH file/component/service mentioned, verify if it exists:</action>
-    - Use `glob_file_search` to find files by name pattern
-    - Use `codebase_search` to find similar components/services
-    - Use `grep` to find exact matches
-    - Check if paths are correct (e.g., `core/llm/` vs `services/llm/`)
-    - Check if API endpoints follow existing namespace patterns
-    <action>For EACH existing file/component found:</action>
-    - **DECISION REQUIRED**: Extend existing or create new?
-    - **DOCUMENT**: Why extend vs replace in "Dev Notes" section
-    - **CORRECT**: Story requirements if path/name is wrong
-    <action>For EACH pattern mentioned (Zustand, FastAPI, React):</action>
-    - Verify pattern matches existing codebase patterns
-    - Check naming conventions (files, functions, variables)
-    - Verify folder structure consistency
-    <action>Document all findings in story "Dev Notes" section:</action>
-    - List all existing files/components found
-    - Document decisions (extend vs replace) with justification
-    - List all corrections made to story requirements
-
     <!-- Analyze epics file for story foundation -->
     <action>From {epics_content}, extract Epic {{epic_num}} complete context:</action> **EPIC ANALYSIS:** - Epic
     objectives and business value - ALL stories in this epic for cross-story context - Our specific story's requirements, user story
     statement, acceptance criteria - Technical requirements and constraints - Dependencies on other stories/epics - Source hints pointing to
-    original documents - **GARDE-FOUS section** if present (checklist vérification existant) <!-- Extract specific story requirements -->
+    original documents <!-- Extract specific story requirements -->
     <action>Extract our story ({{epic_num}}-{{story_num}}) details:</action> **STORY FOUNDATION:** - User story statement
     (As a, I want, so that) - Detailed acceptance criteria (already BDD formatted) - Technical requirements specific to this story -
     Business context and value - Success criteria <!-- Previous story analysis for context continuity -->
     <check if="story_num > 1">
-      <action>Load previous story file: {{story_dir}}/{{epic_num}}-{{previous_story_num}}-*.md</action> **PREVIOUS STORY INTELLIGENCE:** -
+      <action>Find {{previous_story_num}}: scan {implementation_artifacts} for the story file in epic {{epic_num}} with the highest story number less than {{story_num}}</action>
+      <action>Load previous story file: {implementation_artifacts}/{{epic_num}}-{{previous_story_num}}-*.md</action> **PREVIOUS STORY INTELLIGENCE:** -
     Dev notes and learnings from previous story - Review feedback and corrections needed - Files that were created/modified and their
     patterns - Testing approaches that worked/didn't work - Problems encountered and solutions found - Code patterns established <action>Extract
     all learnings that could impact current story implementation</action>
@@ -284,17 +259,15 @@
 
   <step n="5" goal="Create comprehensive story file">
     <critical>📝 CREATE ULTIMATE STORY FILE - The developer's master implementation guide!</critical>
+    <critical>🧪 TDD INTEGRATED: Tasks/Subtasks MUST follow TDD — for each logical change: (1) write or extend test first, (2) implement to pass, (3) refactor if needed. Do NOT add a single "Phase: testing" or "Write tests" task at the end; tests are integrated per task/subtask.</critical>
 
     <action>Initialize from template.md:
     {default_output_file}</action>
     <template-output file="{default_output_file}">story_header</template-output>
 
-    <!-- Story foundation from epics analysis -->
+    <!-- Story foundation from epics analysis (Tasks/Subtasks with TDD per task, not test phase at end) -->
     <template-output
       file="{default_output_file}">story_requirements</template-output>
-
-    <!-- TDD-friendly task structure: avoid "implement then test at the end" -->
-    <critical>🔴 TDD TASK STRUCTURE: The dev agent follows red-green-refactor PER TASK. When writing "Tasks / Subtasks": (1) Either structure each implementation task with explicit subtasks "Write failing tests for X" then "Implement X" so tests come first, OR (2) If you list a separate "Tests" task, make it only integration/E2E/acceptance and add in Dev Notes: "Unit tests are written in red-green-refactor within each implementation task; this task is integration/E2E only." Never list a single "Tests" task at the end that bundles unit + integration + frontend tests without this clarification—it suggests implement-then-test.</critical>
 
     <!-- Developer context section - MOST IMPORTANT PART -->
     <template-output file="{default_output_file}">
@@ -365,7 +338,7 @@
       1. Review the comprehensive story in {{story_file}}
       2. Run dev agents `dev-story` for optimized implementation
       3. Run `code-review` when complete (auto-marks done)
-      4. Optional: Run TEA `*automate` after `dev-story` to generate guardrail tests
+      4. Optional: If Test Architect module installed, run `/bmad:tea:automate` after `dev-story` to generate guardrail tests
 
       **The developer now has everything needed for flawless implementation!**
     </output>

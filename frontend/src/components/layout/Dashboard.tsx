@@ -269,7 +269,26 @@ export function Dashboard() {
       ),
     },
   ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
-  
+
+  // En mode éditeur de graphe : masquer "Prompt". En mode Génération : masquer "Édition de nœud"
+  const visibleRightPanelTabs = useMemo(() => {
+    if (centerPanelTab === 'graph') {
+      return rightPanelTabs.filter((t) => t.id !== 'prompt')
+    }
+    if (centerPanelTab === 'generation') {
+      return rightPanelTabs.filter((t) => t.id !== 'node')
+    }
+    return rightPanelTabs
+  }, [centerPanelTab, rightPanelTabs])
+
+  // Onglet actif affiché : ne jamais rester sur un onglet caché pour le panneau central actuel
+  const effectiveRightPanelTab =
+    centerPanelTab === 'graph' && rightPanelTab === 'prompt'
+      ? 'node'
+      : centerPanelTab === 'generation' && rightPanelTab === 'node'
+        ? 'prompt'
+        : rightPanelTab
+
   // Basculer automatiquement vers l'onglet "Édition de nœud" quand un NOUVEAU nœud est sélectionné dans le graphe
   // (seulement lors de la sélection initiale, pas à chaque changement d'onglet manuel)
   useEffect(() => {
@@ -287,12 +306,14 @@ export function Dashboard() {
     // lors des changements manuels d'onglet
   }, [selectedNodeId, centerPanelTab])
 
-  // À l'ouverture du graphe avec des nœuds chargés, afficher le panneau "Édition de nœud" si on est encore sur Prompt
+  // Si l'onglet actif est caché pour le panneau central actuel, basculer vers un onglet visible
   useEffect(() => {
-    if (centerPanelTab === 'graph' && graphNodes.length > 0 && rightPanelTab === 'prompt') {
+    if (centerPanelTab === 'graph' && rightPanelTab === 'prompt') {
       setRightPanelTab('node')
+    } else if (centerPanelTab === 'generation' && rightPanelTab === 'node') {
+      setRightPanelTab('prompt')
     }
-  }, [centerPanelTab, graphNodes.length, rightPanelTab])
+  }, [centerPanelTab, rightPanelTab])
 
   const applyCollapsedLayout = useCallback(
     (nextLeftCollapsed: boolean, nextRightCollapsed: boolean) => {
@@ -697,8 +718,8 @@ export function Dashboard() {
           }}
         >
           <Tabs
-            tabs={rightPanelTabs}
-            activeTabId={rightPanelTab}
+            tabs={visibleRightPanelTabs}
+            activeTabId={effectiveRightPanelTab}
             onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
             style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
             // Important: overflow: 'hidden' pour éviter le double scroll, mais scrollbar-gutter réserve l'espace
@@ -707,7 +728,7 @@ export function Dashboard() {
           />
         </div>
         {/* Boutons en bas (visible sur Prompt et Dialogue généré) */}
-        {actions.handleGenerate && (rightPanelTab === 'prompt' || rightPanelTab === 'dialogue') && (
+        {actions.handleGenerate && (effectiveRightPanelTab === 'prompt' || effectiveRightPanelTab === 'dialogue') && (
           <div
             style={{
               padding: '0.75rem 1rem',
@@ -848,7 +869,7 @@ export function Dashboard() {
                   `}</style>
                 </button>
               </div>
-            ) : (rightPanelTab === 'dialogue' || rightPanelTab === 'prompt') ? (
+            ) : (effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt') ? (
               // Sur l'onglet Prompt ou Dialogue généré sans dialogue, afficher le bouton Générer normal
               <button
                 onClick={actions.handleGenerate}

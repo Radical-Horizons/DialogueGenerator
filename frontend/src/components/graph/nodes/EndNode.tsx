@@ -41,6 +41,8 @@ export const EndNode = memo(function EndNode({
   
   return (
     <div
+      data-testid="graph-node-content"
+      data-node-type="end"
       style={{
         width: 200,
         height: 80,

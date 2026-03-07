@@ -33,24 +33,25 @@ test.describe('Graph load – affichage des nœuds', () => {
     await graphTab.click()
 
     // Attendre la liste des dialogues (scoper à l'éditeur de graphe : même liste en onglet Édition)
-    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
+    const list = page.getByTestId('graph-editor').locator('[data-testid="unity-dialogue-list"]:visible').first()
     await expect(list).toBeVisible({ timeout: 15000 })
 
-    // Cliquer sur le premier dialogue affiché (item contenant un filename .json)
-    const firstDialogue = list.locator('div').filter({ hasText: /\.json/i }).first()
+    // Cliquer sur le premier dialogue affiché
+    const firstDialogue = list.locator('[data-testid="unity-dialogue-item"]:visible').first()
     await expect(firstDialogue).toBeVisible({ timeout: 8000 })
     await firstDialogue.click()
+    await expect(firstDialogue).toHaveAttribute('aria-pressed', 'true', { timeout: 5000 })
 
     // Attendre la fin du chargement (disparition de "Chargement du graphe...")
     await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
 
-    // Le canvas React Flow doit être visible (évite assertion sur un élément hors viewport)
-    const reactFlow = page.locator('.react-flow')
-    await expect(reactFlow).toBeVisible({ timeout: 5000 })
+    // Le canvas graphe applicatif doit être visible
+    const graphCanvas = page.getByTestId('graph-editor').locator('[data-testid="graph-canvas"]:visible').first()
+    await expect(graphCanvas).toBeVisible({ timeout: 15000 })
 
     // Vérifier qu'au moins un nœud est affiché à l'écran (régression : bug "aucun nœud au chargement")
     // On exige toBeVisible : si les nœuds ne s'affichent pas, le test doit échouer.
-    const nodes = page.locator('.react-flow__node')
+    const nodes = page.getByTestId('graph-editor').locator('[data-testid="graph-node-content"]:visible')
     await expect(nodes.first()).toBeVisible({ timeout: 15000 })
     const count = await nodes.count()
     expect(count).toBeGreaterThan(0)
@@ -66,16 +67,17 @@ test.describe('Graph load – affichage des nœuds', () => {
     await expect(graphTab).toBeVisible({ timeout: 15000 })
     await graphTab.click()
 
-    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
+    const list = page.getByTestId('graph-editor').locator('[data-testid="unity-dialogue-list"]:visible').first()
     await expect(list).toBeVisible({ timeout: 15000 })
-    const firstDialogue = list.locator('div').filter({ hasText: /\.json/i }).first()
+    const firstDialogue = list.locator('[data-testid="unity-dialogue-item"]:visible').first()
     await expect(firstDialogue).toBeVisible({ timeout: 8000 })
     await firstDialogue.click()
+    await expect(firstDialogue).toHaveAttribute('aria-pressed', 'true', { timeout: 5000 })
 
     await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
-    const reactFlow = page.locator('.react-flow')
-    await expect(reactFlow).toBeVisible({ timeout: 5000 })
-    const nodeElements = page.locator('.react-flow__node')
+    const graphCanvas = page.getByTestId('graph-editor').locator('[data-testid="graph-canvas"]:visible').first()
+    await expect(graphCanvas).toBeVisible({ timeout: 15000 })
+    const nodeElements = page.getByTestId('graph-editor').locator('[data-testid="graph-node-content"]:visible')
     await expect(nodeElements.first()).toBeVisible({ timeout: 15000 })
 
     const consoleErrors: string[] = []

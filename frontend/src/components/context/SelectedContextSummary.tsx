@@ -96,12 +96,28 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
   return (
     <div style={{ padding: '1rem', paddingBottom: isExpanded ? '1.5rem' : '1rem', borderTop: `1px solid ${theme.border.primary}` }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
+        <button
+          type="button"
+          data-testid="selected-context-summary-toggle"
+          aria-expanded={isExpanded}
+          onClick={() => setIsExpanded(!isExpanded)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            flex: 1,
+            cursor: 'pointer',
+            background: 'transparent',
+            border: 'none',
+            padding: 0,
+            textAlign: 'left',
+          }}
+        >
           <span style={{ fontSize: '0.8rem', color: theme.text.secondary, userSelect: 'none' }}>
             {isExpanded ? '▼' : '▶'}
           </span>
           <strong style={{ fontSize: '0.9rem', color: theme.text.primary }}>Sélections actives ({totalSelected})</strong>
-        </div>
+        </button>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button
             onClick={(e) => {

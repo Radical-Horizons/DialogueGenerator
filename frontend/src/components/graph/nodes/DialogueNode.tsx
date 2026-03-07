@@ -212,6 +212,8 @@ export const DialogueNode = memo(function DialogueNode({
   
   return (
     <div
+      data-testid="graph-node-content"
+      data-node-type="dialogue"
       data-status={nodeStatus ?? undefined}
       style={{
         width: NODE_WIDTH,

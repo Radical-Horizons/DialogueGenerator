@@ -14,8 +14,8 @@
 - [ ] Code quality review performed on changed files
 - [ ] Security review performed on changed files and dependencies
 - [ ] Outcome decided (Approve/Changes Requested/Blocked)
-- [ ] Review notes ALWAYS appended under "Senior Developer Review (AI)" in the story file
-- [ ] Change Log ALWAYS updated with review entry
+- [ ] Review notes appended under "Senior Developer Review (AI)"
+- [ ] Change Log updated with review entry
 - [ ] Status updated according to settings (if enabled)
 - [ ] Sprint status synced (if sprint tracking enabled)
 - [ ] Story saved successfully

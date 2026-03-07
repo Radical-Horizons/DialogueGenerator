@@ -99,6 +99,8 @@ export const TestNode = memo(function TestNode({
   // Barre compacte avec 4 handles
   return (
     <div
+      data-testid="graph-node-content"
+      data-node-type="test"
       style={{
         width: 200,
         height: 44, // Hauteur réduite mais suffisante pour les cercles complets

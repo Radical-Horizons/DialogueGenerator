@@ -77,7 +77,7 @@ development_status:
   1-15-afficher-logs-de-génération-prompts-réponses-coûts-fr78: done
   1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79: done
   1-17-adr-007-react-flow-controlled: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
   epic-2: backlog
   2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: backlog
   2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: backlog

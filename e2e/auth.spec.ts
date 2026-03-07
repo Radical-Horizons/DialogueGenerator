@@ -19,7 +19,12 @@ test.describe('Authentification', () => {
     
     // Attendre la redirection vers le dashboard
     await expect(page).toHaveURL('/')
+
+    const userMenuButton = page.getByRole('button', { name: /menu utilisateur admin/i })
+    await expect(userMenuButton).toBeVisible()
+    await userMenuButton.click()
     await expect(page.getByText(/connecté en tant que/i)).toBeVisible()
+    await expect(page.getByText(/^admin$/i)).toBeVisible()
   })
 
   test('doit afficher une erreur avec de mauvaises credentials', async ({ page }) => {

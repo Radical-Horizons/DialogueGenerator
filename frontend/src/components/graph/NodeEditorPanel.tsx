@@ -463,24 +463,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       setBatchProgress(null)
     }
   }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
-  
-  if (!selectedNode) {
-    return (
-      <div
-        style={{
-          padding: '2rem 1rem',
-          textAlign: 'center',
-          color: theme.text.secondary,
-        }}
-      >
-        Sélectionnez un nœud dans le graphe pour l'éditer
-      </div>
-    )
-  }
-  
+
+  // Hooks appelés unconditionnellement pour respecter les Rules of Hooks (ordre stable entre rendus).
   const choices = watch('choices') as Choice[] | undefined
 
-  // Requête d'estimation (même forme que AIGenerationPanel) pour le flux graphe
   const graphEstimateRequest = useMemo(
     () =>
       selectedNodeId && selectedNode
@@ -498,6 +484,20 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     type: 'graph',
     request: graphEstimateRequest,
   })
+
+  if (!selectedNode) {
+    return (
+      <div
+        style={{
+          padding: '2rem 1rem',
+          textAlign: 'center',
+          color: theme.text.secondary,
+        }}
+      >
+        Sélectionnez un nœud dans le graphe pour l'éditer
+      </div>
+    )
+  }
 
   return (
     <FormProvider {...form}>

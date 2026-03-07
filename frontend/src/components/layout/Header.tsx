@@ -302,6 +302,9 @@ export function Header() {
                 e.stopPropagation()
                 setIsUserMenuOpen(!isUserMenuOpen)
               }}
+              aria-label={`Menu utilisateur ${user.username}`}
+              aria-expanded={isUserMenuOpen}
+              aria-haspopup="menu"
               style={{
                 width: '36px',
                 height: '36px',

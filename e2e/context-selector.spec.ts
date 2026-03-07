@@ -16,26 +16,32 @@ test.describe('Sélecteur de contexte', () => {
     
     // Sélectionner un personnage
     const firstCharacter = page.locator('input[type="checkbox"]').first()
+    const firstCharacterRow = firstCharacter.locator('xpath=..')
+    const selectedCharacterName = ((await firstCharacterRow.textContent()) ?? '')
+      .replace(/📄\s*Complet/gi, '')
+      .trim()
     await firstCharacter.click()
     
     // Attendre que le résumé apparaisse
-    await expect(page.getByText(/sélections actives/i)).toBeVisible()
+    const summaryToggle = page.getByTestId('selected-context-summary-toggle')
+    await expect(summaryToggle).toBeVisible()
     
     // Vérifier que le résumé est visible (pas tronqué)
-    const summarySection = page.getByText(/sélections actives/i).locator('..').locator('..')
-    const summaryBox = summarySection.boundingBox()
+    const summarySection = summaryToggle.locator('xpath=../..')
     
     // Vérifier que le bouton "Tout effacer" est visible
     await expect(page.getByRole('button', { name: /tout effacer/i })).toBeVisible()
+
+    // Développer explicitement le résumé pour vérifier son contenu détaillé
+    await summaryToggle.click()
+    await expect(summaryToggle).toHaveAttribute('aria-expanded', 'true')
     
     // Vérifier que le texte "Personnages: 1" est visible
     await expect(page.getByText(/personnages:\s*1/i)).toBeVisible()
     
     // Vérifier que le nom du personnage sélectionné est visible (pas tronqué)
-    // Le nom devrait apparaître sous "Personnages: 1"
-    const characterName = await firstCharacter.locator('..').locator('span').textContent()
-    if (characterName) {
-      await expect(page.getByText(characterName, { exact: false })).toBeVisible()
+    if (selectedCharacterName) {
+      await expect(summarySection.getByText(selectedCharacterName, { exact: false })).toBeVisible()
     }
     
     // Vérifier visuellement que le résumé n'est pas coupé

@@ -13,28 +13,12 @@
   <critical>Tasks marked complete but not done = CRITICAL finding</critical>
   <critical>Acceptance Criteria not implemented = HIGH severity finding</critical>
   <critical>Do not review files that are not part of the application's source code. Always exclude the _bmad/ and _bmad-output/ folders from the review. Always exclude IDE and CLI configuration folders like .cursor/ and .windsurf/ and .claude/</critical>
-  <critical>📂 DIFF MAY INCLUDE UNRELATED FILES: The git diff often contains files that are unrelated to the current user story (e.g. developer's parallel edits, config tweaks, other features). Focus the review ONLY on files that are clearly related to the story (File List, or files in the same modules/endpoints/components as the story). Do NOT report "files in diff but not in File List" for files that are clearly outside the story scope. Do NOT require every file in the diff to be in the File List. Ignore unrelated files in the diff—no finding, no comment.</critical>
+  <critical>🌿 BRANCH TOLERANCE: The branch may contain changes unrelated to this story (e.g. multiple features or fixes). Focus the review on story ACs and the story File List; treat files in the diff that are not in the File List as out of scope — do not report them as documentation failures.</critical>
 
 
   <step n="1" goal="Load story and discover changes">
-    <check if="no {{story_path}} provided">
-      <action>Read COMPLETE file: {sprint_status}</action>
-      <action>Scan development_status entries for all keys with value "review"</action>
-      <check if="exactly one review entry found">
-        <action>Set {{story_key}} = that key</action>
-        <action>Set {{story_path}} = "{story_dir}/{{story_key}}.md"</action>
-        <action>Inform user: "Story auto-détectée depuis sprint-status : {{story_key}}"</action>
-      </check>
-      <check if="multiple review entries found">
-        <action>List all entries with value "review" and ask user to choose one</action>
-        <action>Set {{story_path}} from user choice</action>
-      </check>
-      <check if="no review entries found">
-        <action>Inform user: "Aucune story avec statut 'review' dans sprint-status.yaml"</action>
-        <action>Ask user to provide {{story_path}} manually or check sprint-status</action>
-      </check>
-    </check>
-    <action>Read COMPLETE story file from {{story_path}}</action>
+    <action>Use provided {{story_path}} or ask user which story file to review</action>
+    <action>Read COMPLETE story file</action>
     <action>Set {{story_key}} = extracted key from filename (e.g., "1-2-user-authentication.md" → "1-2-user-authentication") or story
       metadata</action>
     <action>Parse sections: Story, Acceptance Criteria, Tasks/Subtasks, Dev Agent Record → File List, Change Log</action>
@@ -48,13 +32,12 @@
       <action>Compile list of actually changed files from git output</action>
     </check>
 
-    <!-- Cross-reference story File List vs git reality (only story-relevant files) -->
+    <!-- Cross-reference story File List vs git reality -->
     <action>Compare story's Dev Agent Record → File List with actual git changes</action>
-    <action>Identify which git-changed files are clearly related to the story (same modules, endpoints, components as in ACs/Tasks/File List); treat the rest as unrelated and ignore for discrepancy reporting</action>
-    <action>Note discrepancies ONLY for story-relevant scope:
-      - Files in git (and story-relevant) but not in story File List → optional note, low priority
-      - Files in story File List but no git changes → HIGH finding (false claims)
-      - Missing documentation of what was actually changed (for story-relevant files only)
+    <action>Note discrepancies:
+      - Files in git but not in story File List
+      - Files in story File List but no git changes
+      - Missing documentation of what was actually changed
     </action>
 
     <invoke-protocol name="discover_inputs" />
@@ -77,15 +60,15 @@
   <step n="3" goal="Execute adversarial review">
     <critical>VALIDATE EVERY CLAIM - Check git reality vs story claims</critical>
 
-    <!-- Git vs Story Discrepancies (only for story-relevant files) -->
-    <action>Review git vs story File List discrepancies ONLY for files that are clearly within the story scope (same feature/module as ACs and Tasks):
-      1. **Files changed (story-relevant) but not in story File List** → at most LOW or skip (diff often has unrelated files; do not insist)
-      2. **Story lists files but no git changes** → HIGH finding (false claims)
-      3. **Uncommitted changes not documented** (story-relevant only) → MEDIUM if significant
+    <!-- Git vs Story Discrepancies (tolerant of unrelated branch changes) -->
+    <action>Review git vs story File List discrepancies:
+      1. **Files changed but not in story File List** → LOW or INFO only (branch may contain unrelated work; do not treat as documentation failure)
+      2. **Story lists files but no git changes** → HIGH finding (false claims about what was changed for this story)
+      3. **Uncommitted changes not documented** → LOW or INFO when changes could be unrelated to the story; MEDIUM only if clearly story-related and omitted
     </action>
 
-    <!-- Review list = story File List + git changes that are plausibly related to the story; exclude clearly unrelated diff files -->
-    <action>Create comprehensive review file list from story File List and from git changes only those files that are plausibly related to the story (same dirs, feature, or components). Do not add every file in the diff.</action>
+    <!-- Primary review scope: story File List; optionally include git-only files only for code quality, not for "missing from File List" findings -->
+    <action>Create comprehensive review file list from story File List; add git-discovered files only to extend code quality review, not to report as discrepancies</action>
 
     <!-- AC Validation -->
     <action>For EACH Acceptance Criterion:
@@ -144,13 +127,13 @@
       - Security vulnerabilities
 
       ## 🟡 MEDIUM ISSUES
-      - Story-relevant files changed but not documented in story File List (ignore unrelated diff files)
-      - Uncommitted changes not tracked (story scope only)
       - Performance problems
       - Poor test coverage/quality
       - Code maintainability issues
 
       ## 🟢 LOW ISSUES
+      - Files changed but not in story File List (acceptable if branch has unrelated work)
+      - Uncommitted changes not tracked (when possibly unrelated to story)
       - Code style improvements
       - Documentation gaps
       - Git commit message quality
