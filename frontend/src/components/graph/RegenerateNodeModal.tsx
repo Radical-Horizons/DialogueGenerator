@@ -196,7 +196,7 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
                   fontSize: '0.85rem',
                 }}
               >
-                {[...history].reverse().map((entry, idx) => (
+                {[...history].reverse().map((entry) => (
                   <li
                     key={entry.generationId}
                     style={{

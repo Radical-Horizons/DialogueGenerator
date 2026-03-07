@@ -68,7 +68,7 @@ export function Dashboard() {
   const commandPalette = useCommandPalette()
   
   // État du graphe pour détecter si un nœud est sélectionné et si une génération est en cours
-  const { selectedNodeId, nodes: graphNodes, isGenerating: isGraphGenerating } = useGraphStore()
+  const { selectedNodeId, isGenerating: isGraphGenerating } = useGraphStore()
 
   // Boutons replier/déplier panneaux gauche & droite (layout 3 panneaux)
   const panelsRef = useRef<ResizablePanelsRef>(null)

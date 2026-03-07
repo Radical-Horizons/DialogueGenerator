@@ -244,19 +244,6 @@ export function GraphEditor() {
     },
     [applyAutoLayout, layoutDirection, toast]
   )
-  
-  // Handler pour supprimer le dialogue sélectionné
-  const handleDeleteDialogue = useCallback(async () => {
-    if (!selectedDialogue) return
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer "${selectedDialogue.filename}" ?`)) return
-    try {
-      await unityDialoguesAPI.deleteUnityDialogue(selectedDialogue.filename)
-      window.dispatchEvent(new CustomEvent('unity-dialogue-deleted', { detail: { filename: selectedDialogue.filename } }))
-      toast(`Dialogue "${selectedDialogue.filename}" supprimé`, 'success', 3000)
-    } catch (err) {
-      toast(`Erreur lors de la suppression: ${getErrorMessage(err)}`, 'error')
-    }
-  }, [selectedDialogue, toast])
 
   // Handler pour ouvrir le dialogue de sélection de format
   const handleOpenExportDialog = useCallback(() => {

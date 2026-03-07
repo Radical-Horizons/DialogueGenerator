@@ -193,6 +193,26 @@ export function AIGenerationPanel({
       return () => clearTimeout(timer)
     }
   }, [isGenerating, batchProgress])
+
+  // Payload pour l'estimation de coût (aligné sur GenerateNodeRequest).
+  // useMemo évite de recréer l'objet à chaque render (référence stable pour useEffect dans le badge).
+  // Doit être avant tout return conditionnel (règles des hooks React).
+  const estimateRequest = useMemo(
+    () =>
+      parentNodeId && parentNode
+        ? {
+            parent_node_id: parentNodeId,
+            parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
+            user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+            context_selections: selections as Record<string, unknown>,
+            max_choices: maxChoices ?? undefined,
+            llm_model_identifier: llmModel,
+            target_choice_index: targetChoiceIndex ?? undefined,
+            generate_all_choices: generateAllChoices,
+          }
+        : null,
+    [parentNodeId, parentNode, userInstructions, selections, maxChoices, llmModel, targetChoiceIndex, generateAllChoices]
+  )
   
   if (!parentNodeId || !parentNode) {
     return (
@@ -217,26 +237,6 @@ export function AIGenerationPanel({
     }
     return false
   }
-
-  // Payload pour l'estimation de coût (aligné sur GenerateNodeRequest).
-  // useMemo évite de recréer l'objet à chaque render (référence stable pour useEffect dans le badge).
-  const estimateRequest = useMemo(
-    () =>
-      parentNodeId && parentNode
-        ? {
-            parent_node_id: parentNodeId,
-            parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
-            user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
-            context_selections: selections as Record<string, unknown>,
-            max_choices: maxChoices ?? undefined,
-            llm_model_identifier: llmModel,
-            target_choice_index: targetChoiceIndex ?? undefined,
-            generate_all_choices: generateAllChoices,
-          }
-        : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [parentNodeId, parentNode, userInstructions, selections, maxChoices, llmModel, targetChoiceIndex, generateAllChoices]
-  )
   
   // Détecter si c'est un TestNode (pour afficher la modal même si generateAllChoices est false)
   const isTestNode = parentNodeId?.startsWith('test-node-') ?? false

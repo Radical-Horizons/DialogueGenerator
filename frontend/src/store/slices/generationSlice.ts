@@ -27,7 +27,8 @@ function normalizeParentContentForGeneration(content: Record<string, unknown>): 
   const normalizedChoices = choices.map((c) => {
     const test = c?.test
     if (test === '' || (typeof test === 'string' && !test.trim())) {
-      const { test: _t, ...rest } = c ?? {}
+      const { test: _unused, ...rest } = c ?? {}
+      void _unused
       return rest
     }
     return c
