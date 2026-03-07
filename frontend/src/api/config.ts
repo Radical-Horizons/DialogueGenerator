@@ -13,6 +13,11 @@ export interface DefaultSystemPromptResponse {
   prompt: string
 }
 
+interface DefaultSystemPromptApiResponse {
+  prompt?: string
+  system_prompt?: string
+}
+
 export interface ContextPreviewRequest {
   selected_elements: Record<string, string[]>
   field_configs: Record<string, string[]>
@@ -47,13 +52,17 @@ export async function setUnityDialoguesPath(path: string): Promise<UnityDialogue
 
 /**
  * Récupère le system prompt par défaut.
- * TODO: Endpoint à ajouter côté backend
  */
 export async function getDefaultSystemPrompt(): Promise<DefaultSystemPromptResponse> {
-  // Pour l'instant, retourner une valeur par défaut
-  // TODO: Implémenter l'endpoint API /api/v1/config/default-system-prompt
+  const response = await apiClient.get<DefaultSystemPromptApiResponse>('/api/v1/config/default-system-prompt')
+  const prompt = response.data.prompt ?? response.data.system_prompt
+
+  if (!prompt) {
+    throw new Error('La réponse API ne contient pas de prompt par défaut')
+  }
+
   return {
-    prompt: "Tu es un assistant expert en écriture de dialogues pour jeux de rôle (RPG).\nTa tâche est de générer un dialogue cohérent avec le contexte fourni et l'instruction utilisateur.\nSi une structure de dialogue spécifique est demandée (ex: PNJ suivi d'un choix PJ), respecte cette structure."
+    prompt,
   }
 }
 
