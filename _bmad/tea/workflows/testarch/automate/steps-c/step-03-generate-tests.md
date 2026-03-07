@@ -63,7 +63,9 @@ const parseBooleanFlag = (value, defaultValue = true) => {
 };
 
 const subagentContext = {
-  features: /* from Step 2 coverage plan */,
+  features: /* from Step 2 coverage plan (if brownfield: gap list only) */,
+  brownfield: /* from workflow variables: true = generate only for gaps */,
+  existing_tests_summary: /* from Step 2 output when brownfield: { api: [...], services: [...], files: [...] } */,
   knowledge_fragments_loaded: /* list of fragments */,
   config: {
     test_framework: config.test_framework,

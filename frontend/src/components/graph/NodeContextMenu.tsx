@@ -10,8 +10,8 @@ interface NodeContextMenuProps {
   id: string
   top: number
   left: number
-  right: number
-  bottom: number
+  right?: number
+  bottom?: number
   onClose: () => void
 }
 
@@ -37,6 +37,12 @@ export function NodeContextMenu({
     onClose()
   }, [id, setSelectedNode, setShowDeleteNodeConfirm, onClose])
 
+  const handleGenerate = useCallback(() => {
+    setSelectedNode(id)
+    window.dispatchEvent(new CustomEvent('open-ai-generation-panel', { detail: { nodeId: id } }))
+    onClose()
+  }, [id, setSelectedNode, onClose])
+
   const node = getNode(id)
   const isDialogueNode = node?.type === 'dialogueNode'
 
@@ -48,8 +54,8 @@ export function NodeContextMenu({
         position: 'fixed',
         top,
         left,
-        right,
-        bottom,
+        ...(right !== undefined && { right }),
+        ...(bottom !== undefined && { bottom }),
         zIndex: 1000,
         backgroundColor: theme.background.panel,
         border: `1px solid ${theme.border.primary}`,
@@ -74,37 +80,69 @@ export function NodeContextMenu({
       </div>
 
       {isDialogueNode && (
-        <button
-          type="button"
-          role="menuitem"
-          onClick={(e) => {
-            e.stopPropagation()
-            window.dispatchEvent(new CustomEvent('open-prompt-viewer', { detail: { nodeId: id } }))
-            onClose()
-          }}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            textAlign: 'left',
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: theme.text.primary,
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.state.hover.background
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-          }}
-        >
-          <span>📄</span>
-          <span>Voir le prompt</span>
-        </button>
+        <>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleGenerate()
+            }}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              textAlign: 'left',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: theme.text.primary,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.state.hover.background
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }}
+          >
+            <span>✨</span>
+            <span>Générer</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={(e) => {
+              e.stopPropagation()
+              window.dispatchEvent(new CustomEvent('open-prompt-viewer', { detail: { nodeId: id } }))
+              onClose()
+            }}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              textAlign: 'left',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: theme.text.primary,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.state.hover.background
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }}
+          >
+            <span>📄</span>
+            <span>Voir le prompt</span>
+          </button>
+        </>
       )}
 
       <button

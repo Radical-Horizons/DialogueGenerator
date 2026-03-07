@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "subagent": "api-tests",
+  "tests": [
+    {
+      "file": "tests/api/test_health_p0_extended.py",
+      "content": "\"\"\"Tests API P0 pour health et healthcheck (complément couverture critique).\"\"\"\nimport pytest\nfrom fastapi.testclient import TestClient\n\n\n@pytest.fixture\ndef client():\n    from api.main import app\n    return TestClient(app)\n\n\nclass TestHealthP0:\n    \"\"\"[P0] Health endpoints - chemins critiques monitoring/déploiement.\"\"\"\n\n    def test_health_returns_200_and_status_healthy(self, client: TestClient):\n        \"\"\"[P0] GET /health doit retourner 200 et status healthy.\"\"\"\n        response = client.get(\"/health\")\n        assert response.status_code == 200\n        data = response.json()\n        assert data.get(\"status\") == \"healthy\"\n        assert \"timestamp\" in data\n        assert \"service\" in data\n\n    def test_healthcheck_alias_returns_200(self, client: TestClient):\n        \"\"\"[P0] GET /api/v1/healthcheck (alias) doit retourner 200.\"\"\"\n        response = client.get(\"/api/v1/healthcheck\")\n        assert response.status_code == 200\n        data = response.json()\n        assert data.get(\"status\") == \"healthy\"\n\n    def test_health_detailed_returns_200_with_details(self, client: TestClient):\n        \"\"\"[P1] GET /health/detailed doit retourner 200 et détails optionnels.\"\"\"\n        response = client.get(\"/health/detailed\")\n        assert response.status_code == 200\n        data = response.json()\n        assert \"status\" in data or \"healthy\" in str(data).lower()\n\n    def test_health_response_has_expected_structure(self, client: TestClient):\n        \"\"\"[P1] Réponse health a structure attendue pour monitoring.\"\"\"\n        response = client.get(\"/health\")\n        assert response.status_code == 200\n        data = response.json()\n        assert isinstance(data, dict)\n        assert \"status\" in data\n",
+      "description": "API tests P0/P1 pour health et healthcheck",
+      "priority_coverage": {
+        "P0": 2,
+        "P1": 2,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": ["client"],
+  "knowledge_fragments_used": ["test-levels-framework", "test-priorities-matrix", "data-factories"],
+  "test_count": 4,
+  "summary": "Generated 4 API test cases for health/healthcheck (P0/P1)"
+}

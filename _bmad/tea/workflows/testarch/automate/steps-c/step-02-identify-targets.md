@@ -99,13 +99,36 @@ Use `test-priorities-matrix.md`:
 
 ---
 
+## 3b. Brownfield: discover existing coverage and compute gaps
+
+**When `brownfield` is true** (existing test suite present):
+
+1. **Discover existing tests** in `{test_dir}`:
+   - List all test files (e.g. `test_*.py`, `*_test.py`, `*.spec.ts`).
+   - For each file, infer what is covered: route paths (e.g. `/health`, `/api/v1/auth/login`), module/service names (e.g. from `test_health.py` → health; `test_auth.py` → auth; `test_graph_*.py` → graph), or test names/docstrings.
+   - Build a structured **existing_coverage** set: e.g. `{ "api": ["/health", "/api/v1/auth/login", ...], "services": ["configuration_service", "dialogue_generation_service", ...], "files": ["tests/api/test_health.py", ...] }`. Use grep/search for client.get/post, router paths, and import paths to avoid guesswork.
+
+2. **Compute gaps**:
+   - **Gaps = targets from step 1 (routes, services, flows) minus existing_coverage.**
+   - Keep only targets that have no or weak coverage (e.g. route never called in tests, service never imported in tests, or only happy path covered and missing error/edge cases).
+   - If a route/service is already well covered (multiple tests, happy + error paths), do NOT add it to the gap list.
+
+3. **Output for later steps**:
+   - Set **coverage_plan_targets** to the **gap list only** (not the full target list).
+   - Persist **existing_tests_summary** (file list + inferred coverage) in the step output so step 3 and subagents can avoid generating tests for already-covered items.
+
+**When `brownfield` is false:** Skip this block; use the full target list as coverage_plan_targets (greenfield behaviour).
+
+---
+
 ## 4. Coverage Plan
 
 Produce a concise coverage plan:
 
-- Targets by test level
-- Priority assignments
-- Justification for coverage scope (critical-paths/comprehensive/selective)
+- **If brownfield:** Targets = **gaps only** (from 3b). Include existing_tests_summary (files + inferred coverage) in the written output.
+- **If not brownfield:** Targets by test level (full list).
+- Priority assignments (P0–P3) for the chosen targets.
+- Justification for coverage scope (critical-paths/comprehensive/selective).
 
 ---
 

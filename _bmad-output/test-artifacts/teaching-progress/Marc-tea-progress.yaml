@@ -1,0 +1,87 @@
+---
+# TEA Academy Progress Tracking
+user: Marc
+role: Dev
+experience_level: Intermediate
+learning_goals: Comprendre la méthodologie TEA pour l'utiliser correctement dans le workflow BMAD. Bien calibrer les tests E2E ; les IA sont fortes pour les tests unitaires, moins pour le vrai QA.
+pain_points: Environ un millier de tests qui roulent bien, vision très high-level, manque de compréhension fine de ce qu'ils couvrent vraiment.
+
+started_date: '2026-03-07'
+last_session_date: '2026-03-07'
+
+sessions:
+  - id: session-01-quickstart
+    name: 'Quick Start'
+    duration: '30 min'
+    status: completed
+    started_date: '2026-03-07'
+    completed_date: '2026-03-07'
+    score: 100
+    notes_artifact: _bmad-output/test-artifacts/tea-academy/Marc/session-01-notes.md
+
+  - id: session-02-concepts
+    name: 'Core Concepts'
+    duration: '45 min'
+    status: completed
+    started_date: '2026-03-07'
+    completed_date: '2026-03-07'
+    score: 100
+    notes_artifact: _bmad-output/test-artifacts/tea-academy/Marc/session-02-notes.md
+
+  - id: session-03-architecture
+    name: 'Architecture & Patterns'
+    duration: '60 min'
+    status: completed
+    started_date: '2026-03-07'
+    completed_date: '2026-03-07'
+    score: 100
+    notes_artifact: _bmad-output/test-artifacts/tea-academy/Marc/session-03-notes.md
+
+  - id: session-04-test-design
+    name: 'Test Design'
+    duration: '60 min'
+    status: completed
+    started_date: '2026-03-07'
+    completed_date: '2026-03-07'
+    score: 100
+    notes_artifact: _bmad-output/test-artifacts/tea-academy/Marc/session-04-notes.md
+
+  - id: session-05-atdd-automate
+    name: 'ATDD & Automate'
+    duration: '60 min'
+    status: completed
+    started_date: '2026-03-07'
+    completed_date: '2026-03-07'
+    score: 100
+    notes_artifact: _bmad-output/test-artifacts/tea-academy/Marc/session-05-notes.md
+
+  - id: session-06-quality-trace
+    name: 'Quality & Trace'
+    duration: '45 min'
+    status: completed
+    started_date: '2026-03-07'
+    completed_date: '2026-03-07'
+    score: 100
+    notes_artifact: _bmad-output/test-artifacts/tea-academy/Marc/session-06-notes.md
+
+  - id: session-07-advanced
+    name: 'Advanced Patterns'
+    duration: 'ongoing'
+    status: in-progress
+    started_date: '2026-03-07'
+    completed_date: null
+    score: null
+    notes_artifact: null
+
+sessions_completed: 6
+total_sessions: 7
+completion_percentage: 86
+next_recommended: session-07-advanced
+
+stepsCompleted: ['step-01-init', 'step-02-assess', 'step-04-session-01', 'step-04-session-02', 'step-04-session-03', 'step-04-session-04', 'step-04-session-05', 'step-04-session-06']
+lastStep: 'step-04-session-06'
+lastContinued: '2026-03-07'
+
+certificate_generated: false
+certificate_path: null
+completion_date: null

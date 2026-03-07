@@ -18,7 +18,8 @@ Les utilisateurs peuvent visualiser, naviguer et éditer la structure complète 
 
 **OBLIGATOIRE avant création de chaque story de cet epic :**
 
-> **Audit effectué le 2026-03-04** — Toutes les stories ont été alignées avec la codebase réelle.
+> **Audit effectué le 2026-03-04** — Toutes les stories ont été alignées avec la codebase réelle.  
+> **Clarification objectifs le 2026-03-07** — Chaque story comporte une section **Objectif US (vérification existant)** : *enrichissement* / *polish* / *vérification + tests* si la fonctionnalité existe en tout ou partie, *nouvelle fonctionnalité* sinon.
 
 ### Checklist de Vérification
 
@@ -99,6 +100,8 @@ So that **je peux comprendre rapidement la structure narrative et les relations 
 **Dev Notes:**
 - ÉTENDRE `GraphCanvas.tsx` : passer `onlyRenderVisibleElements` à `true` pour la performance sur grands graphes. Tester la rétrocompatibilité avec les nœuds de dimensions variables.
 
+**Objectif US (vérification existant):** La visualisation graphe (nœuds, edges, Minimap, Background, types Dialogue/Test/End) est **déjà en place**. L’US vise un **enrichissement performance** : activer la virtualisation pour 500+ nœuds et valider NFR-P1.
+
 **References:** FR22 (visualisation graphe), NFR-P1 (Graph Rendering <1s), NFR-SC3 (Graph Scalability 100+ nodes)
 
 ---
@@ -147,6 +150,8 @@ So that **je peux travailler sur des dialogues complexes sans perte de performan
 **Dev Notes:**
 - RÉUTILISER le mécanisme `highlightedNodeIds` + `setHighlightedNodes` existant pour le highlight des résultats de recherche (Story 2.7).
 - Pas d'endpoint lazy loading à créer : la cible 500 nœuds est atteignable avec virtualisation React Flow.
+
+**Objectif US (vérification existant):** Navigation (zoom, pan, fitView), highlight et chargement graphe existent. L’US vise un **enrichissement** : activer la virtualisation (Story 2.1), garantir perf &lt;1s / &lt;100ms, et brancher le highlight sur la recherche (Story 2.7).
 
 **References:** FR23 (navigation grands graphes), NFR-P1 (Graph Rendering <1s), NFR-P4 (UI Responsiveness <100ms), NFR-SC3 (Graph Scalability 100+ nodes)
 
@@ -199,6 +204,8 @@ So that **je peux naviguer efficacement dans des graphes complexes et me concent
 - ÉTENDRE `GraphCanvas.tsx` : ajouter `minZoom={0.1}` `maxZoom={2}` et raccourcis clavier zoom/pan dans `useKeyboardShortcuts`.
 - RÉUTILISER l'event `focus-generated-node` + `fitView` existant pour la fonctionnalité de focus sur nœud (double-clic).
 
+**Objectif US (vérification existant):** Zoom, pan, Controls, fitView et focus sur nœud (`focus-generated-node`) sont **déjà en place**. L’US vise un **enrichissement** : bornes min/max zoom, raccourcis clavier (flèches, WASD, Ctrl+0), et double-clic → focus explicite si pas déjà relié.
+
 **References:** FR24 (zoom, pan, focus), NFR-P4 (UI Responsiveness <100ms), NFR-A1 (Keyboard Navigation 100%)
 
 ---
@@ -250,6 +257,8 @@ So that **je peux organiser visuellement le graphe selon ma préférence sans af
 - Pas d'endpoint PUT dédié `/position` : la position est persistée dans le JSON complet via `save-and-write`.
 - La sélection multiple pour déplacer en groupe dépend de Story 2.10 (activer `multiSelectionKeyCode` dans `GraphCanvas.tsx`).
 
+**Objectif US (vérification existant):** Drag-and-drop, snap-to-grid, persistance via auto-save et RAF throttle sont **déjà implémentés**. L’US vise du **polish** : déplacement en groupe (dépend de 2.10), optionnellement ligne guide d’alignement et vérification auto-pan hors viewport.
+
 **References:** FR25 (drag-and-drop), Epic 0 Story 0.5 (auto-save), Story 2.10 (sélection multiple)
 
 ---
@@ -300,6 +309,8 @@ So that **je peux définir le flux narratif et les relations entre les dialogues
 **Dev Notes:**
 - RÉUTILISER entièrement le mécanisme existant — `onConnect` + `connectNodes` + `markDirty` + auto-save.
 - Pas d'endpoint POST dédié `/connections` : la connexion est persistée dans le JSON complet via `save-and-write`.
+
+**Objectif US (vérification existant):** Création de connexions (handles, onConnect, connectNodes, types choice/success/failure), labels edge et persistance sont **déjà en place**. L’US vise **vérification + polish** : édition du label par double-clic sur l’edge si manquante, et affichage warning « Cycle détecté » (Epic 0.6).
 
 **References:** FR26 (créer connexions), Epic 0 Story 0.5 (auto-save), Epic 0 Story 0.6 (validation cycles)
 
@@ -354,6 +365,8 @@ So that **je peux modifier le flux narratif et supprimer des relations non dési
 - Pas d'endpoint DELETE dédié : persistance via `save-and-write`.
 - L'undo est dans Story 2.14 — ce AC n'est pleinement livrable qu'après Story 2.14.
 
+**Objectif US (vérification existant):** La suppression de connexion est **déjà fonctionnelle** : `onEdgesChange` (remove) → `disconnectNodes`, persistance par auto-save. Il **manque** la confirmation utilisateur avant suppression (et confirmation multi-edge). L’US vise un **enrichissement UX** : ajout du modal de confirmation (ConfirmDialog) pour une ou plusieurs edges.
+
 **References:** FR27 (supprimer connexions), Epic 0 Story 0.5 (auto-save), Story 2.14 (undo/redo), Epic 4 (validation)
 
 ---
@@ -406,6 +419,8 @@ So that **je peux trouver rapidement des nœuds spécifiques dans de grands grap
 - RÉUTILISER `setHighlightedNodes` + `highlightedNodeIds` **existants** pour le rendu highlight dans `GraphCanvas.tsx:142`.
 - RÉUTILISER le mécanisme `focus-generated-node` / `fitView` existant pour centrer sur les résultats.
 
+**Objectif US (vérification existant):** **Nouvelle fonctionnalité.** Aucune barre de recherche nœuds ni action `searchNodes` aujourd’hui. Réutilisation de l’existant uniquement pour highlight et focus (setHighlightedNodes, focus-generated-node).
+
 **References:** FR28 (recherche nœuds), NFR-A1 (Keyboard Navigation 100%), Story 2.8 (jump to node)
 
 ---
@@ -456,6 +471,8 @@ So that **je peux naviguer rapidement vers un nœud précis sans chercher manuel
 - CRÉER `jumpToNode` dans `graphStore.ts` — wrapper léger sur `setSelectedNode` + dispatch `focus-generated-node`.
 - RÉUTILISER l'event `focus-generated-node` **existant** dans `GraphCanvasInner` — c'est exactement le mécanisme dont on a besoin.
 - **ATTENTION** : `ctrl+g` est déjà pris par l'AI Generation Panel dans `GraphEditor.tsx` — choisir `ctrl+j` pour jump.
+
+**Objectif US (vérification existant):** **Nouvelle fonctionnalité.** Pas de modal « Jump to Node » ni d’action `jumpToNode`. Réutilisation de `setSelectedNode` et de l’event `focus-generated-node` pour le centrage après sélection.
 
 **References:** FR29 (jump to node), Story 2.7 (recherche), NFR-A1 (Keyboard Navigation 100%)
 
@@ -508,6 +525,8 @@ So that **je peux me concentrer sur des parties spécifiques du dialogue sans di
 - ÉTENDRE `GraphCanvas.tsx` : le filtrage de nodes doit s'intercaler avant la dérivation des nodes enrichis (entre `storeNodes` et le `useMemo` de rendu) — exactement comme le `validationErrors` filter existant ligne 139.
 - Aucun appel backend nécessaire : filtrage 100% client.
 
+**Objectif US (vérification existant):** **Nouvelle fonctionnalité.** Aucun panneau de filtres (types nœuds, speakers) ni état `graphFilters` aujourd’hui. Filtrage 100 % client à créer.
+
 **References:** FR30 (filtrer vue graphe), Story 2.7 (recherche), Story 2.11 (sélection multiple)
 
 ---
@@ -556,6 +575,8 @@ So that **je peux appliquer des opérations en lot sur plusieurs nœuds**.
 - ÉTENDRE `GraphCanvas.tsx` : ajouter `multiSelectionKeyCode`, `selectionOnDrag`, `onSelectionChange` sur le composant `<ReactFlow>`.
 - CRÉER `selectedNodeIds` et `setSelectedNodes` dans `graphStore.ts` — état distinct de `selectedNodeId` (sélection simple existante).
 - React Flow gère le rendu visuel de multi-sélection nativement (pas de `selected: true` à setter manuellement dans le store pour chaque nœud).
+
+**Objectif US (vérification existant):** **Nouvelle fonctionnalité.** Aucune sélection multiple actuellement (`multiSelectionKeyCode`, `selectionOnDrag`, `selectedNodeIds` absents). Seule la sélection simple (`selectedNodeId`) existe.
 
 **References:** FR31 (sélection multiple), Story 2.11 (opérations batch), Story 2.4 (drag-and-drop)
 
@@ -609,6 +630,8 @@ So that **je peux gérer efficacement de grands graphes avec des actions en lot*
 - Pas d'endpoints batch côté backend : `deleteNode` + `save-and-write` suffit.
 - La validation batch réutilise `validateGraph()` complet côté store — filtrer côté UI par `selectedNodeIds`.
 
+**Objectif US (vérification existant):** **Nouvelle fonctionnalité.** Suppression/tag/validation existent au niveau d’un seul nœud ; il n’y a pas de menu d’opérations batch ni d’actions `batchDeleteNodes` / `batchTagNodes`. Dépend de Story 2.10 (sélection multiple).
+
 **References:** FR32 (opérations batch), Story 2.10 (sélection multiple), Epic 4 (validation)
 
 ---
@@ -656,10 +679,12 @@ So that **je peux accéder rapidement aux opérations courantes sans naviguer da
 - Tests : Unit (menu contextuel + actions), Integration (interactions nœuds), E2E (workflow menu contextuel)
 
 **Dev Notes:**
-- CRÉER `ContextMenu.tsx` (aucun composant similaire dans `frontend/src/components/graph/`).
-- ÉTENDRE `GraphCanvas.tsx` : ajouter `onNodeContextMenu`, `onPaneContextMenu` et l'état local de position du menu (pattern `{nodeId, x, y} | null`).
-- Fermer le menu sur `onPaneClick` (déjà géré) et sur `Escape` via `useKeyboardShortcuts`.
-- RÉUTILISER `createEmptyNode` + `addNode` + `setSelectedNode` + `setShowDeleteNodeConfirm` **existants**.
+- Le menu contextuel **nœud** existe déjà : `NodeContextMenu.tsx` (Dupliquer, Supprimer, Générer, Voir le prompt). Ne pas recréer — étendre si besoin.
+- ÉTENDRE `GraphCanvas.tsx` : ajouter `onPaneContextMenu` et état pour menu sur le **pane** (clic droit sur le fond). Menu pane : « Nouveau nœud », « Auto-layout ».
+- Optionnel : ajouter entrée « Éditer » explicite dans le menu nœud (équivalent au clic = ouvrir NodeEditorPanel via `setSelectedNode`).
+- Fermer le menu sur `onPaneClick` et sur `Escape` via `useKeyboardShortcuts`.
+
+**Objectif US (vérification existant):** **Enrichissement.** Le menu contextuel sur nœud est **déjà en place** (`NodeContextMenu.tsx` : Dupliquer, Supprimer, Générer, Voir le prompt). Il manque : menu sur le **pane** (clic droit fond) avec « Nouveau nœud », « Auto-layout », et éventuellement l’entrée « Éditer » explicite.
 
 **References:** FR33 (actions contextuelles), Story 1.5 (éditer), Story 1.7 (dupliquer), Story 1.14 (prompt)
 
@@ -705,6 +730,8 @@ So that **je peux voir clairement la structure narrative sans organiser manuelle
 - L'algorithme de layout est côté backend (pas dagre.js côté client) — ne pas ajouter de dépendance client dagre/elkjs.
 - Le bouton et les raccourcis clavier existent dans `GraphEditor.tsx`.
 - Cette story est en grande partie prête — vérification et tests suffisent.
+
+**Objectif US (vérification existant):** **Vérification + tests.** Auto-layout est **déjà implémenté** : `applyAutoLayout`, `POST /graph/calculate-layout`, bouton et Ctrl+L dans `GraphEditor.tsx`. L’US vise à valider le comportement (AC), documenter si besoin et couvrir par tests (unitaires, intégration, E2E) — pas de dev fonctionnel nouveau.
 
 **References:** FR34 (auto-layout), Story 2.4 (drag-and-drop), NFR-P1 (Graph Rendering <1s)
 
@@ -757,6 +784,8 @@ So that **je peux corriger mes erreurs et itérer sur le design sans crainte**.
 - Pattern : snapshots d'état (Memento) — sauvegarder `{ nodes, edges }` avant chaque mutation. Éviter les snapshots sur `updateNodePosition` pendant le drag (seulement sur `onNodeDragStop`).
 - Ne pas sauvegarder les snapshots lors des rechargements (`loadDialogue`, `resetGraph`) — réinitialiser les stacks.
 - `ctrl+z` n'est pas encore dans `useKeyboardShortcuts` — l'ajouter en vérifiant qu'il ne conflicte pas avec les inputs.
+
+**Objectif US (vérification existant):** **Nouvelle fonctionnalité.** Aucun undo/redo dans le store (pas d’`undoStack` / `redoStack`). À implémenter de bout en bout (snapshots, actions undo/redo, raccourcis, UI).
 
 **References:** FR35 (undo/redo), Story 2.4 (drag-and-drop), Story 2.5 (créer connexions), Story 2.6 (supprimer connexions)
 

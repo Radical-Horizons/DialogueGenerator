@@ -115,28 +115,45 @@ export const GraphCanvas = memo(function GraphCanvas() {
     deleteNode,
     disconnectNodes,
   } = useGraphStore()
-  const [menu, setMenu] = useState<{ id: string; top: number; left: number; right: number; bottom: number } | null>(null)
+  const [menu, setMenu] = useState<{ id: string; top: number; left: number; right?: number; bottom?: number } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
-  const onNodeContextMenu = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      // Prevent native context menu from showing
-      event.preventDefault()
-
-      // Calculate position of the menu
-      if (ref.current) {
-        const pane = ref.current.getBoundingClientRect()
-        setMenu({
-          id: node.id,
-          top: event.clientY < pane.height - 200 ? event.clientY : undefined,
-          left: event.clientX < pane.width - 200 ? event.clientX : undefined,
-          right: event.clientX >= pane.width - 200 ? pane.width - event.clientX : undefined,
-          bottom: event.clientY >= pane.height - 200 ? pane.height - event.clientY : undefined,
-        })
-      }
+  const openContextMenu = useCallback(
+    (nodeId: string, clientX: number, clientY: number) => {
+      const menuWidth = 200
+      const menuHeight = 220
+      const padding = 8
+      // position:fixed → coordonnées viewport ; garder le menu à l'écran
+      let left = clientX + padding
+      let top = clientY + padding
+      if (left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - padding
+      if (top + menuHeight > window.innerHeight) top = window.innerHeight - menuHeight - padding
+      if (left < padding) left = padding
+      if (top < padding) top = padding
+      setMenu({ id: nodeId, top, left, right: undefined, bottom: undefined })
     },
     [setMenu]
   )
+
+  const onNodeContextMenu = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      event.preventDefault()
+      openContextMenu(node.id, event.clientX, event.clientY)
+    },
+    [openContextMenu]
+  )
+
+  // Fallback : si React Flow ne déclenche pas onNodeContextMenu (ex. nœuds custom), écouter l'événement du nœud
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ev = e as CustomEvent<{ nodeId: string; clientX: number; clientY: number }>
+      if (ev.detail?.nodeId) {
+        openContextMenu(ev.detail.nodeId, ev.detail.clientX ?? 0, ev.detail.clientY ?? 0)
+      }
+    }
+    window.addEventListener('graph-node-contextmenu', handler)
+    return () => window.removeEventListener('graph-node-contextmenu', handler)
+  }, [openContextMenu])
 
   const onPaneClick = useCallback(() => {
     setSelectedNode(null)

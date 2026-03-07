@@ -2,6 +2,8 @@
 
 Ces tests vérifient que le flux complet fonctionne :
 prompt → LLM → validation → JSON Unity → export/import
+
+Marqueurs : p0 (flux critique), p1 (export/import, erreurs), p3 (skip documenté).
 """
 import pytest
 import json
@@ -40,7 +42,9 @@ def renderer():
 
 class TestFullGenerationFlow:
     """Tests pour le flux complet de génération Unity Dialogue."""
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p0
     @pytest.mark.asyncio
     async def test_full_flow_prompt_to_valid_json(
         self,
@@ -94,7 +98,9 @@ class TestFullGenerationFlow:
         assert parsed_json[0]["id"] == "START"
         assert parsed_json[0]["speaker"] == "TEST_NPC"
         assert len(parsed_json[0]["choices"]) == 3
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p0
     def test_full_export_import_cycle_with_real_data(self, renderer: UnityJsonRenderer):
         """TEST INTÉGRATION : Cycle export/import complet avec données réelles.
         
@@ -172,7 +178,9 @@ class TestFullGenerationFlow:
         # THEN: Les choix doivent être préservés
         start_node = next(node for node in converted_nodes if node["id"] == "START")
         assert len(start_node["choices"]) == 3
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p1
     def test_export_import_cycle_with_test_results(self, renderer: UnityJsonRenderer):
         """TEST INTÉGRATION : Cycle export/import avec 4 résultats de test.
         
@@ -226,7 +234,9 @@ class TestFullGenerationFlow:
         assert choice["testFailureNode"] == "NODE_F"
         assert choice["testSuccessNode"] == "NODE_S"
         assert choice["testCriticalSuccessNode"] == "NODE_CS"
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p1
     def test_normalization_preserves_required_structure(self, renderer: UnityJsonRenderer):
         """TEST INTÉGRATION : La normalisation préserve la structure requise Unity.
         
@@ -274,7 +284,9 @@ class TestFullGenerationFlow:
 
 class TestErrorHandlingAndFallback:
     """Tests pour la gestion d'erreurs et le fallback multi-provider."""
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p1
     @pytest.mark.asyncio
     async def test_llm_error_handling(self, unity_service: UnityDialogueGenerationService):
         """TEST INTÉGRATION : Gestion d'erreurs LLM doit retourner erreur claire.
@@ -293,7 +305,9 @@ class TestErrorHandlingAndFallback:
                 llm_client=mock_llm_client,
                 prompt="Test prompt"
             )
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p1
     @pytest.mark.asyncio
     async def test_structured_output_fallback(self, unity_service: UnityDialogueGenerationService):
         """TEST INTÉGRATION : Erreur claire si structured output échoue.
@@ -312,7 +326,9 @@ class TestErrorHandlingAndFallback:
                 llm_client=mock_llm_client,
                 prompt="Test prompt"
             )
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p1
     def test_validation_error_messages_clear(self, renderer: UnityJsonRenderer):
         """TEST INTÉGRATION : Messages d'erreur de validation doivent être clairs.
         
@@ -340,7 +356,9 @@ class TestErrorHandlingAndFallback:
         error_messages = " ".join(errors).lower()
         assert "id" in error_messages or "manquant" in error_messages
         assert any("targetNode" in err or "référence" in err.lower() for err in errors)
-    
+
+    @pytest.mark.integration
+    @pytest.mark.p3
     @pytest.mark.skip(reason="Fallback multi-provider pas encore implémenté (Epic 1 Story 1.16)")
     def test_llm_provider_fallback(self):
         """TEST INTÉGRATION : Fallback automatique entre providers LLM (à implémenter).

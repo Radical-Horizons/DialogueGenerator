@@ -17,7 +17,7 @@ export function Header() {
   const { isGenerating: isGraphGenerating } = useGraphStore()
   
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false)
-  const [optionsModalInitialTab, setOptionsModalInitialTab] = useState<'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage'>('context')
+  const [optionsModalInitialTab, setOptionsModalInitialTab] = useState<'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage' | 'logs'>('context')
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)

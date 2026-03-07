@@ -2,6 +2,7 @@
  * Modal pour configurer les options de génération (champs de contexte, Unity, organisation, guidance).
  */
 import { useState, useCallback, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextStore } from '../../store/contextStore'
 import { ContextFieldSelector } from './ContextFieldSelector'
@@ -10,7 +11,9 @@ import { PromptsTab } from './PromptsTab'
 import { ErrorBoundary } from '../shared/ErrorBoundary'
 import { BudgetSettings } from '../settings/BudgetSettings'
 import { UsageDashboard } from '../usage/UsageDashboard'
+import { GenerationLogsPanel } from '../usage/GenerationLogsPanel'
 import { theme } from '../../theme'
+import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import * as configAPI from '../../api/config'
 import { InfoIcon } from '../shared/Tooltip'
@@ -19,10 +22,10 @@ export interface GenerationOptionsModalProps {
   isOpen: boolean
   onClose: () => void
   onApply?: () => void
-  initialTab?: 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage'
+  initialTab?: 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage' | 'logs'
 }
 
-type TabId = 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage'
+type TabId = 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage' | 'logs'
 
 interface Tab {
   id: TabId
@@ -136,6 +139,7 @@ export function GenerationOptionsModal({
     { id: 'prompts', label: 'Prompts' },
     { id: 'shortcuts', label: 'Raccourcis' },
     { id: 'usage', label: 'Usage IA' },
+    { id: 'logs', label: 'Logs' },
   ]
 
   if (!isOpen) return null
@@ -296,6 +300,10 @@ export function GenerationOptionsModal({
 
           {activeTab === 'usage' && (
             <UsageTab />
+          )}
+
+          {activeTab === 'logs' && (
+            <LogsTab />
           )}
         </div>
 
@@ -720,6 +728,65 @@ function UsageTab() {
   return (
     <div>
       <UsageDashboard />
+    </div>
+  )
+}
+
+/**
+ * Onglet "Logs de génération" (US 1-15) : sélecteur de dialogue puis panneau liste + détail, export JSON/CSV.
+ */
+function LogsTab() {
+  const [selectedDialogueId, setSelectedDialogueId] = useState<string>('')
+  const { data, isLoading } = useQuery({
+    queryKey: ['unity-dialogues-list'],
+    queryFn: () => unityDialoguesAPI.listUnityDialogues(),
+    staleTime: 30_000,
+  })
+  const dialogues = data?.dialogues ?? []
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 200 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <label htmlFor="logs-dialogue-select" style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>
+          Dialogue :
+        </label>
+        <select
+          id="logs-dialogue-select"
+          value={selectedDialogueId}
+          onChange={(e) => setSelectedDialogueId(e.target.value)}
+          disabled={isLoading}
+          style={{
+            padding: '0.5rem 0.75rem',
+            border: `1px solid ${theme.border.primary}`,
+            borderRadius: '6px',
+            backgroundColor: theme.input.background,
+            color: theme.input.color,
+            minWidth: 220,
+          }}
+        >
+          <option value="">— Choisir un dialogue —</option>
+          {dialogues.map((d) => (
+            <option key={d.filename} value={d.filename}>
+              {d.title ?? d.filename}
+            </option>
+          ))}
+        </select>
+      </div>
+      {selectedDialogueId ? (
+        <ErrorBoundary
+          fallback={
+            <div style={{ padding: '1rem', color: theme.state.error.color, border: `1px solid ${theme.border.primary}`, borderRadius: 8 }}>
+              Erreur lors du chargement des logs.
+            </div>
+          }
+        >
+          <GenerationLogsPanel dialogueId={selectedDialogueId} />
+        </ErrorBoundary>
+      ) : (
+        <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>
+          Sélectionnez un dialogue pour afficher les logs de génération (prompts, réponses, coûts).
+        </div>
+      )}
     </div>
   )
 }

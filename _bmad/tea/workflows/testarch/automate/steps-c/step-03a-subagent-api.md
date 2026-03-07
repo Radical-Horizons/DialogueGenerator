@@ -20,6 +20,8 @@ This is an **isolated subagent** running in parallel with E2E test generation.
 
 **Your task:** Generate API tests ONLY (not E2E, not fixtures, not other test types).
 
+**Brownfield:** If `brownfield` is true, you receive a **gap-only** coverage plan and `existing_tests_summary`. Generate tests **only** for endpoints/flows in the gap list. Do NOT generate tests for routes or scenarios already listed in existing_tests_summary (would create duplicates).
+
 **If `use_pactjs_utils` is enabled:** Also generate consumer contract tests and provider verification tests alongside API tests. Use the loaded pactjs-utils fragments (`pactjs-utils-overview`, `pactjs-utils-consumer-helpers`, `pactjs-utils-provider-verifier`, `pactjs-utils-request-filter`) for patterns. If `pact_mcp` is `"mcp"`, use SmartBear MCP tools (Fetch Provider States, Generate Pact Tests) to inform test generation.
 
 ---
@@ -42,10 +44,10 @@ This is an **isolated subagent** running in parallel with E2E test generation.
 
 From the coverage plan (Step 2 output), identify:
 
-- Which API endpoints need test coverage
+- Which API endpoints need test coverage (**if brownfield: only endpoints in the gap list**)
 - Expected request/response formats
 - Authentication requirements
-- Error scenarios to test
+- Error scenarios to test (only for gap targets; skip if already covered in existing_tests_summary)
 
 ### 2. Generate API Test Files
 

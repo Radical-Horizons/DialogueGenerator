@@ -299,3 +299,63 @@ async def test_generate_nodes_for_all_choices_empty_choices(mock_llm_client, moc
     
     # Vérifier que generate_dialogue_node n'a pas été appelé
     mock_generation_service.generate_dialogue_node.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_generate_nodes_for_all_choices_partial_failure(
+    mock_llm_client, mock_generation_service, sample_parent_node_with_choices
+):
+    """Test génération batch avec N choix : K succès, N-K échecs.
+
+    AC: #3 (batch) — Lorsqu'un choix échoue (LLM ou enrichissement), les autres sont
+    tout de même retournés et les échecs sont exposés (failed_choices, failed_choices_count).
+    Story 1.2 — Traçabilité Epic 1.
+    """
+    from models.dialogue_structure.unity_dialogue_node import (
+        UnityDialogueGenerationResponse,
+        UnityDialogueNodeContent,
+    )
+
+    service = GraphGenerationService(mock_generation_service)
+
+    mock_ok = [
+        UnityDialogueGenerationResponse(
+            title="Dialogue 1",
+            node=UnityDialogueNodeContent(speaker="PNJ", line="Réponse 1", choices=None),
+        ),
+        UnityDialogueGenerationResponse(
+            title="Dialogue 3",
+            node=UnityDialogueNodeContent(speaker="PNJ", line="Réponse 3", choices=None),
+        ),
+    ]
+    # 1er appel OK, 2e échec, 3e OK
+    def generate_side_effect(*args, **kwargs):
+        generate_side_effect.call_count += 1
+        if generate_side_effect.call_count == 2:
+            raise Exception("LLM error")
+        return mock_ok[0] if generate_side_effect.call_count == 1 else mock_ok[1]
+
+    generate_side_effect.call_count = 0
+    mock_generation_service.generate_dialogue_node = AsyncMock(side_effect=generate_side_effect)
+
+    enriched_0 = [{"id": "NODE_PARENT_1_CHOICE_0", "speaker": "PNJ", "line": "Réponse 1", "choices": []}]
+    enriched_2 = [{"id": "NODE_PARENT_1_CHOICE_2", "speaker": "PNJ", "line": "Réponse 3", "choices": []}]
+    mock_generation_service.enrich_with_ids.side_effect = [enriched_0, enriched_2]
+
+    result = await service.generate_nodes_for_all_choices(
+        parent_node=sample_parent_node_with_choices,
+        instructions="Test",
+        context={},
+        llm_client=mock_llm_client,
+        system_prompt_override=None,
+        max_choices=None,
+    )
+
+    assert result["generated_choices_count"] == 2
+    assert result["failed_choices_count"] == 1
+    assert result["total_choices_count"] == 3
+    assert len(result["nodes"]) == 2
+    assert len(result["failed_choices"]) == 1
+    assert "error" in result["failed_choices"][0]
+    assert "choice_index" in result["failed_choices"][0]
+    assert "LLM error" in result["failed_choices"][0]["error"]

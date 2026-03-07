@@ -20,6 +20,8 @@ This is an **isolated subagent** running in parallel with API test generation (a
 
 **Your task:** Generate backend tests ONLY (unit, integration, contract - not API endpoint tests, not E2E).
 
+**Brownfield:** If `brownfield` is true, you receive a **gap-only** coverage plan and `existing_tests_summary`. Generate tests **only** for services/modules in the gap list. Do NOT generate tests for modules or flows already covered in existing_tests_summary (would create duplicates).
+
 ---
 
 ## MANDATORY EXECUTION RULES
@@ -41,10 +43,10 @@ This is an **isolated subagent** running in parallel with API test generation (a
 
 From the coverage plan (Step 2 output), identify:
 
-- Which services/modules need unit test coverage
-- Which integrations need integration test coverage (database, message queues, external services)
+- Which services/modules need unit test coverage (**if brownfield: only those in the gap list**)
+- Which integrations need integration test coverage (database, message queues, external services), excluding already-covered ones
 - Which service contracts need contract test coverage (Pact, schema validation)
-- Business logic functions requiring edge case coverage
+- Business logic functions requiring edge case coverage (only where not already in existing_tests_summary)
 
 ### 2. Detect Framework & Language
 

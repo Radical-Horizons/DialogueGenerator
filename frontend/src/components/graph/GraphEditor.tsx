@@ -26,6 +26,8 @@ export function GraphEditor() {
   const [layoutDirection, setLayoutDirection] = useState<'TB' | 'LR' | 'BT' | 'RL'>('TB')
   const [showAutoLayoutDropdown, setShowAutoLayoutDropdown] = useState(false)
   const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
+  const [showActionsDropdown, setShowActionsDropdown] = useState(false)
+  const actionsDropdownRef = useRef<HTMLDivElement>(null)
   const [showAIGenerationPanel, setShowAIGenerationPanel] = useState(false)
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
@@ -50,6 +52,9 @@ export function GraphEditor() {
   // Panneau breakdown des coûts du dialogue (Story 1.12)
   const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   
+  // Infobulle raccourcis graphe (au survol du bouton ?)
+  const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
+  
   // Écouter l'événement pour obtenir l'instance ReactFlow
   useEffect(() => {
     const handleInstanceReady = (event: CustomEvent) => {
@@ -64,6 +69,7 @@ export function GraphEditor() {
   
   const {
     nodes,
+    dialogueMetadata,
     loadDialogue,
     saveDialogue,
     validateGraph,
@@ -88,8 +94,11 @@ export function GraphEditor() {
     resetGraph,
   } = useGraphStore()
   
-  /** Désactive les actions graphe si aucun dialogue ou chargement en cours (évite duplication de condition). */
-  const canEditGraph = !!selectedDialogue && !isGraphLoading && !isLoadingDialogue
+  /** Désactive les actions graphe si aucun dialogue ou chargement en cours.
+   * On considère "dialogue actif" soit la sélection liste (selectedDialogue), soit le store qui a déjà
+   * un graphe chargé (retour sur l'onglet sans sélection liste) pour éviter de griser les boutons à tort. */
+  const hasActiveDialogue = !!selectedDialogue || (nodes.length > 0 && !!dialogueMetadata.filename)
+  const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
   /** Offset position pour nœuds manuels (Story 1.6 - éviter chevauchement). */
   const MANUAL_NODE_OFFSET_X = 150
   const MANUAL_NODE_OFFSET_Y = 100
@@ -352,6 +361,17 @@ export function GraphEditor() {
     document.addEventListener('mousedown', onOutside)
     return () => document.removeEventListener('mousedown', onOutside)
   }, [showAutoLayoutDropdown])
+
+  // Fermer le menu Actions au clic extérieur
+  useEffect(() => {
+    if (!showActionsDropdown) return
+    const el = actionsDropdownRef.current
+    const onOutside = (e: MouseEvent) => {
+      if (el && !el.contains(e.target as Node)) setShowActionsDropdown(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [showActionsDropdown])
   
   // Raccourcis clavier
   useKeyboardShortcuts(
@@ -639,111 +659,212 @@ export function GraphEditor() {
                 </div>
               )}
             </div>
-            <button
-              data-testid="btn-new-manual-node"
-              onClick={() => {
-                const count = nodes.filter((n) => n.type === 'dialogueNode').length
-                const position = {
-                  x: MANUAL_NODE_OFFSET_X + count * MANUAL_NODE_STEP,
-                  y: MANUAL_NODE_OFFSET_Y + count * MANUAL_NODE_STEP,
-                }
-                const node = createEmptyNode(position)
-                addNode(node)
-                setSelectedNode(node.id)
-                if (reactFlowInstance) {
-                  requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                      const n = reactFlowInstance.getNode(node.id)
-                      if (n) reactFlowInstance.fitView({ nodes: [n], padding: 0.2, duration: 200 })
-                    })
-                  })
-                }
-              }}
-              disabled={!canEditGraph}
-              style={{
-                padding: '0.5rem 1rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                cursor: canEditGraph ? 'pointer' : 'not-allowed',
-                opacity: canEditGraph ? 1 : 0.6,
-                fontWeight: 600,
-                fontSize: '0.9rem',
-              }}
-              title="Créer un nœud vide (sans IA) et ouvrir l'éditeur"
-            >
-              ➕ Nouveau nœud
-            </button>
-            <button
-              onClick={() => setShowAIGenerationPanel(true)}
-              disabled={!selectedNodeId || !canEditGraph}
-              style={{
-                padding: '0.5rem 1rem',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: theme.button.primary.background,
-                color: theme.button.primary.color,
-                cursor: (!selectedNodeId || !canEditGraph) ? 'not-allowed' : 'pointer',
-                opacity: (!selectedNodeId || !canEditGraph) ? 0.6 : 1,
-                fontWeight: 700,
-                fontSize: '0.9rem',
-              }}
-              title="Générer un nœud avec l'IA depuis le nœud sélectionné"
-            >
-              ✨ Générer nœud
-            </button>
-            <button
-              onClick={handleOpenExportDialog}
-              disabled={!reactFlowInstance || !canEditGraph}
-              style={{
-                padding: '0.5rem 1rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                cursor: (!reactFlowInstance || !canEditGraph) ? 'not-allowed' : 'pointer',
-                opacity: (!reactFlowInstance || !canEditGraph) ? 0.6 : 1,
-                fontSize: '0.9rem',
-              }}
-              title="Exporter le graphe visible"
-            >
-              📤 Exporter
-            </button>
+            <div ref={actionsDropdownRef} style={{ position: 'relative' }}>
+              <button
+                data-testid="btn-actions-dropdown"
+                type="button"
+                onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
+                disabled={!canEditGraph}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: canEditGraph ? 'pointer' : 'not-allowed',
+                  opacity: canEditGraph ? 1 : 0.6,
+                  fontSize: '0.9rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+                title="Actions sur le graphe"
+              >
+                Actions
+                <span style={{ fontSize: '0.7rem' }}>▼</span>
+              </button>
+              {showActionsDropdown && (
+                <div
+                  role="menu"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    marginTop: '4px',
+                    minWidth: '200px',
+                    backgroundColor: theme.background.tertiary,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                    zIndex: 50,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <button
+                    data-testid="btn-new-manual-node"
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowActionsDropdown(false)
+                      const count = nodes.filter((n) => n.type === 'dialogueNode').length
+                      const position = {
+                        x: MANUAL_NODE_OFFSET_X + count * MANUAL_NODE_STEP,
+                        y: MANUAL_NODE_OFFSET_Y + count * MANUAL_NODE_STEP,
+                      }
+                      const node = createEmptyNode(position)
+                      addNode(node)
+                      setSelectedNode(node.id)
+                      if (reactFlowInstance) {
+                        requestAnimationFrame(() => {
+                          requestAnimationFrame(() => {
+                            const n = reactFlowInstance.getNode(node.id)
+                            if (n) reactFlowInstance.fitView({ nodes: [n], padding: 0.2, duration: 200 })
+                          })
+                        })
+                      }
+                    }}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      border: 'none',
+                      background: 'transparent',
+                      color: theme.text.primary,
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.state.hover.background }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    ➕ Nouveau nœud
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowActionsDropdown(false)
+                      setShowAIGenerationPanel(true)
+                    }}
+                    disabled={!selectedNodeId}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      border: 'none',
+                      background: 'transparent',
+                      color: !selectedNodeId ? theme.text.secondary : theme.text.primary,
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      cursor: selectedNodeId ? 'pointer' : 'not-allowed',
+                      opacity: selectedNodeId ? 1 : 0.6,
+                    }}
+                    onMouseEnter={(e) => { if (selectedNodeId) e.currentTarget.style.backgroundColor = theme.state.hover.background }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    ✨ Générer nœud
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowActionsDropdown(false)
+                      handleOpenExportDialog()
+                    }}
+                    disabled={!reactFlowInstance}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      border: 'none',
+                      background: 'transparent',
+                      color: !reactFlowInstance ? theme.text.secondary : theme.text.primary,
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      cursor: reactFlowInstance ? 'pointer' : 'not-allowed',
+                      opacity: reactFlowInstance ? 1 : 0.6,
+                    }}
+                    onMouseEnter={(e) => { if (reactFlowInstance) e.currentTarget.style.backgroundColor = theme.state.hover.background }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    📤 Exporter
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setShowCostBreakdown((v) => !v)}
-              disabled={!selectedDialogue}
+              disabled={!hasActiveDialogue}
               style={{
                 padding: '0.5rem 1rem',
                 border: `1px solid ${showCostBreakdown ? theme.button.primary.background : theme.border.primary}`,
                 borderRadius: '6px',
                 backgroundColor: showCostBreakdown ? theme.button.primary.background : theme.button.default.background,
                 color: showCostBreakdown ? theme.button.primary.color : theme.button.default.color,
-                cursor: !selectedDialogue ? 'not-allowed' : 'pointer',
-                opacity: !selectedDialogue ? 0.6 : 1,
+                cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+                opacity: !hasActiveDialogue ? 0.6 : 1,
                 fontSize: '0.9rem',
               }}
               title="Afficher le breakdown des coûts LLM pour ce dialogue"
             >
               💰 Coûts
             </button>
-            <button
-              onClick={handleDeleteDialogue}
-              disabled={!selectedDialogue}
-              style={{
-                padding: '0.5rem 1rem',
-                border: `1px solid ${theme.state.error.border}`,
-                borderRadius: '6px',
-                backgroundColor: 'transparent',
-                color: selectedDialogue ? theme.state.error.color : theme.text.secondary,
-                cursor: !selectedDialogue ? 'not-allowed' : 'pointer',
-                opacity: !selectedDialogue ? 0.6 : 1,
-                fontSize: '0.9rem',
-              }}
-              title="Supprimer le dialogue sélectionné"
-            >
-              🗑️ Supprimer
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onMouseEnter={() => setShowShortcutsTooltip(true)}
+                onMouseLeave={() => setShowShortcutsTooltip(false)}
+                style={{
+                  width: 28,
+                  height: 28,
+                  padding: 0,
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '50%',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.text.secondary,
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title="Raccourcis du graphe"
+                aria-describedby={showShortcutsTooltip ? 'graph-shortcuts-tooltip' : undefined}
+              >
+                ?
+              </button>
+              {showShortcutsTooltip && (
+                <div
+                  id="graph-shortcuts-tooltip"
+                  role="tooltip"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '4px',
+                    padding: '0.75rem 1rem',
+                    minWidth: '240px',
+                    backgroundColor: theme.background.tertiary,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                    fontSize: '0.8rem',
+                    color: theme.text.primary,
+                    zIndex: 100,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Raccourcis graphe</div>
+                  <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Clic droit</kbd> sur un nœud : menu (Générer, Voir le prompt, Dupliquer, Supprimer)</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+G</kbd> : ouvrir la génération IA</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+S</kbd> : sauvegarder</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Suppr</kbd> : supprimer le nœud sélectionné</li>
+                  </ul>
+                </div>
+              )}
+            </div>
             {/* ADR-006: pas de bouton Sauvegarder (autosave immédiat) */}
           </div>
         </div>
@@ -1056,7 +1177,7 @@ export function GraphEditor() {
             })()}
             
             {/* Infobulle coûts : centrée, opaque, avec bouton fermer (Story 1.12) */}
-            {showCostBreakdown && selectedDialogue && (
+            {showCostBreakdown && (selectedDialogue?.filename ?? dialogueMetadata.filename) && (
               <div
                 role="dialog"
                 aria-label="Breakdown des coûts du dialogue"
@@ -1131,7 +1252,7 @@ export function GraphEditor() {
                       padding: '1rem',
                     }}
                   >
-                    <DialogueCostBreakdown dialogueId={selectedDialogue.filename} />
+                    <DialogueCostBreakdown dialogueId={selectedDialogue?.filename ?? dialogueMetadata.filename ?? ''} />
                   </div>
                   <div
                     style={{

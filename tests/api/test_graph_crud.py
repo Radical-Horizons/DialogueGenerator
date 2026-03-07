@@ -6,6 +6,10 @@ Suite de tests pour valider les endpoints graph:
 - POST /api/v1/unity-dialogues/graph/save-and-write - Sauvegarde et écrit le fichier sur disque
 - POST /api/v1/unity-dialogues/graph/validate - Valide un graphe
 - POST /api/v1/unity-dialogues/graph/calculate-layout - Calcule un layout
+
+Note isolation : TestGraphSaveAndWrite utilise app.dependency_overrides (get_config_service)
+dans une fixture autouse avec cleanup (finally pop). Éviter pytest -n auto avec d'autres
+modules modifiant dependency_overrides.
 """
 import pytest
 import json
@@ -95,9 +99,11 @@ def sample_graph_nodes_edges():
     )
 
 
+@pytest.mark.api
+@pytest.mark.p0
 class TestGraphLoad:
     """Tests pour POST /api/v1/unity-dialogues/graph/load - Charge un graphe [P0]."""
-    
+
     def test_load_graph_success(self, client: TestClient, sample_unity_json):
         """GIVEN un Unity JSON valide
         WHEN je charge le graphe
@@ -136,8 +142,7 @@ class TestGraphLoad:
         response = client.post("/api/v1/unity-dialogues/graph/load", json=request_data)
         
         # THEN
-        # Invalid JSON peut être 422 (validation) ou 400 selon où l'erreur est détectée
-        assert response.status_code in [400, 422]
+        assert response.status_code == 422
         error_data = response.json()
         message = error_data.get("error", {}).get("message", "") if isinstance(error_data.get("error"), dict) else str(error_data.get("message", ""))
         assert "error" in message.lower() or "invalide" in message.lower() or "json" in message.lower()
@@ -161,9 +166,11 @@ class TestGraphLoad:
         assert len(data["edges"]) == 0
 
 
+@pytest.mark.api
+@pytest.mark.p0
 class TestGraphSave:
     """Tests pour POST /api/v1/unity-dialogues/graph/save - Sauvegarde un graphe [P0]."""
-    
+
     def test_save_graph_success(
         self, client: TestClient, sample_graph_nodes_edges
     ):
@@ -215,7 +222,76 @@ class TestGraphSave:
         # Peut être 200 avec warning ou 400 selon la validation
         assert response.status_code in [200, 400]
 
+    def test_save_graph_reflects_edited_node_content(
+        self, client: TestClient, sample_graph_nodes_edges
+    ):
+        """GIVEN un graphe avec un nœud édité (contenu modifié)
+        WHEN je sauvegarde le graphe
+        THEN le JSON Unity retourné contient le contenu édité.
 
+        Story 1.5 — Édition manuelle des nœuds (persistance via save)."""
+        nodes, edges = sample_graph_nodes_edges
+        # Copie avec édition du line du nœud NODE_1
+        edited_line = "Suite du dialogue (éditée manuellement)"
+        nodes_edited = []
+        for n in nodes:
+            n_copy = dict(n)
+            if n_copy.get("id") == "NODE_1":
+                n_copy["data"] = dict(n_copy.get("data", {}))
+                n_copy["data"]["line"] = edited_line
+            nodes_edited.append(n_copy)
+        request_data = {
+            "nodes": nodes_edited,
+            "edges": edges,
+            "metadata": {
+                "title": "Test Dialogue",
+                "node_count": len(nodes_edited),
+                "edge_count": len(edges),
+            },
+        }
+        response = client.post("/api/v1/unity-dialogues/graph/save", json=request_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        unity = json.loads(data["json_content"])
+        node1 = next((n for n in unity if n.get("id") == "NODE_1"), None)
+        assert node1 is not None
+        assert node1.get("line") == edited_line
+
+    def test_save_graph_reflects_deleted_node(
+        self, client: TestClient, sample_graph_nodes_edges
+    ):
+        """GIVEN un graphe avec un nœud supprimé (moins de nœuds/edges)
+        WHEN je sauvegarde le graphe
+        THEN le JSON Unity retourné ne contient que les nœuds restants.
+
+        Story 1.8 — Suppression de nœuds (persistance via save)."""
+        nodes, edges = sample_graph_nodes_edges
+        # Suppression de NODE_1 : garder seulement START, et retirer l'edge vers NODE_1
+        nodes_without_one = [n for n in nodes if n.get("id") != "NODE_1"]
+        edges_without_one = [e for e in edges if e.get("target") != "NODE_1"]
+        assert len(nodes_without_one) == 1
+        assert len(edges_without_one) == 0
+        request_data = {
+            "nodes": nodes_without_one,
+            "edges": edges_without_one,
+            "metadata": {
+                "title": "Test Dialogue",
+                "node_count": len(nodes_without_one),
+                "edge_count": len(edges_without_one),
+            },
+        }
+        response = client.post("/api/v1/unity-dialogues/graph/save", json=request_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        unity = json.loads(data["json_content"])
+        assert len(unity) == 1
+        assert unity[0]["id"] == "START"
+
+
+@pytest.mark.api
+@pytest.mark.p0
 class TestGraphSaveAndWrite:
     """Tests pour POST /api/v1/unity-dialogues/graph/save-and-write - Conversion + écriture fichier [P0]."""
 
@@ -350,9 +426,11 @@ class TestGraphSaveAndWrite:
         assert path.read_text(encoding="utf-8") == first_content
 
 
+@pytest.mark.api
+@pytest.mark.p1
 class TestGraphValidate:
     """Tests pour POST /api/v1/unity-dialogues/graph/validate - Valide un graphe [P1]."""
-    
+
     def test_validate_graph_valid(
         self, client: TestClient, sample_graph_nodes_edges
     ):
@@ -446,9 +524,11 @@ class TestGraphValidate:
         assert len(data["warnings"]) > 0
 
 
+@pytest.mark.api
+@pytest.mark.p1
 class TestGraphCalculateLayout:
     """Tests pour POST /api/v1/unity-dialogues/graph/calculate-layout - Calcule layout [P1]."""
-    
+
     def test_calculate_layout_success(
         self, client: TestClient, sample_graph_nodes_edges
     ):

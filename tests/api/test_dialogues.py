@@ -9,8 +9,13 @@ Types de tests :
 - Tests API : Testent les endpoints FastAPI
 - Tests rapides : Pas de chargement de fichiers réels
 
+Note isolation : Ce module modifie app.dependency_overrides dans les fixtures.
+Ne pas exécuter en parallèle (pytest -n auto) avec d'autres modules qui font de même.
+Le cleanup (yield + clear) est fait dans la fixture client.
+
 Pour exécuter uniquement ces tests :
     pytest tests/api/test_dialogues.py -m "unit and api"
+    pytest tests/api/test_dialogues.py -m p0  # tests critiques uniquement
 
 Pour exécuter les tests d'intégration (avec vraies données) :
     pytest tests/api/test_prompt_raw_verification.py -m integration
@@ -49,6 +54,20 @@ def mock_dialogue_service():
 
 # mock_interaction_service supprimé - système obsolète
 
+
+@pytest.fixture
+def mock_skill_trait_services(monkeypatch):
+    """Fixture partagée : mock SkillCatalogService et TraitCatalogService (évite duplication)."""
+    mock_skill_service = MagicMock()
+    mock_skill_service.load_skills = MagicMock(return_value=["Skill1", "Skill2"])
+    mock_trait_service = MagicMock()
+    mock_trait_service.load_traits = MagicMock(return_value=[])
+    mock_trait_service.get_trait_labels = MagicMock(return_value=["Trait1", "Trait2"])
+    monkeypatch.setattr("api.routers.dialogues.SkillCatalogService", lambda: mock_skill_service)
+    monkeypatch.setattr("api.routers.dialogues.TraitCatalogService", lambda: mock_trait_service)
+    yield mock_skill_service, mock_trait_service
+
+
 @pytest.fixture
 def client(mock_dialogue_service):
     """Fixture pour créer un client de test avec mocks."""
@@ -82,20 +101,13 @@ def client(mock_dialogue_service):
     app.dependency_overrides.clear()
 
 
-def test_estimate_tokens(client, mock_dialogue_service, monkeypatch):
+@pytest.mark.unit
+@pytest.mark.api
+@pytest.mark.p0
+def test_estimate_tokens(client, mock_dialogue_service, mock_skill_trait_services):
     """Test d'estimation de tokens."""
     mock_dialogue_service.context_builder.build_context = MagicMock(return_value="context text")
-    
-    # Mock SkillCatalogService et TraitCatalogService pour estimate_tokens
-    mock_skill_service = MagicMock()
-    mock_skill_service.load_skills = MagicMock(return_value=["Skill1", "Skill2"])
-    mock_trait_service = MagicMock()
-    mock_trait_service.load_traits = MagicMock(return_value=[])
-    mock_trait_service.get_trait_labels = MagicMock(return_value=["Trait1", "Trait2"])
-    
-    monkeypatch.setattr("api.routers.dialogues.SkillCatalogService", lambda: mock_skill_service)
-    monkeypatch.setattr("api.routers.dialogues.TraitCatalogService", lambda: mock_trait_service)
-    
+
     response = client.post(
         "/api/v1/dialogues/estimate-tokens",
         json={
@@ -120,6 +132,7 @@ def test_estimate_tokens(client, mock_dialogue_service, monkeypatch):
 
 @pytest.mark.unit
 @pytest.mark.api
+@pytest.mark.p1
 def test_estimate_tokens_invalid_request(client):
     """Test d'estimation de tokens avec requête invalide."""
     response = client.post(
@@ -131,20 +144,11 @@ def test_estimate_tokens_invalid_request(client):
 
 @pytest.mark.unit
 @pytest.mark.api
-def test_preview_prompt(client, mock_dialogue_service, monkeypatch):
+@pytest.mark.p0
+def test_preview_prompt(client, mock_dialogue_service, mock_skill_trait_services):
     """Test de prévisualisation du prompt."""
     mock_dialogue_service.context_builder.build_context = MagicMock(return_value="context text")
-    
-    # Mock SkillCatalogService et TraitCatalogService pour preview_prompt
-    mock_skill_service = MagicMock()
-    mock_skill_service.load_skills = MagicMock(return_value=["Skill1", "Skill2"])
-    mock_trait_service = MagicMock()
-    mock_trait_service.load_traits = MagicMock(return_value=[])
-    mock_trait_service.get_trait_labels = MagicMock(return_value=["Trait1", "Trait2"])
-    
-    monkeypatch.setattr("api.routers.dialogues.SkillCatalogService", lambda: mock_skill_service)
-    monkeypatch.setattr("api.routers.dialogues.TraitCatalogService", lambda: mock_trait_service)
-    
+
     response = client.post(
         "/api/v1/dialogues/preview-prompt",
         json={
@@ -173,6 +177,7 @@ def test_preview_prompt(client, mock_dialogue_service, monkeypatch):
 
 @pytest.mark.unit
 @pytest.mark.api
+@pytest.mark.p1
 def test_preview_prompt_invalid_request(client):
     """Test de prévisualisation avec requête invalide."""
     response = client.post(
@@ -190,7 +195,10 @@ def test_preview_prompt_invalid_request(client):
 
 class TestGenerateUnityDialogue:
     """Tests pour l'endpoint POST /api/v1/dialogues/generate/unity-dialogue."""
-    
+
+    @pytest.mark.unit
+    @pytest.mark.api
+    @pytest.mark.p0
     @pytest.mark.asyncio
     async def test_generate_unity_dialogue_success(self, client, mock_dialogue_service, monkeypatch):
         """Test de génération Unity dialogue avec succès."""
@@ -226,15 +234,14 @@ class TestGenerateUnityDialogue:
         }
         
         response = client.post("/api/v1/dialogues/generate/unity-dialogue", json=request_data)
-        
-        # Peut retourner 200 si tout est mocké correctement, ou 500 si erreur
-        assert response.status_code in [200, 500]
-        if response.status_code == 200:
-            data = response.json()
-            assert "json_content" in data
-            assert "title" in data
-            assert "raw_prompt" in data
-    
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "json_content" in data
+        assert "title" in data
+        assert "raw_prompt" in data
+
+    @pytest.mark.p1
     def test_generate_unity_dialogue_no_characters(self, client):
         """Test de génération Unity dialogue sans personnages."""
         request_data = {
@@ -255,10 +262,11 @@ class TestGenerateUnityDialogue:
         data = response.json()
         assert "detail" in data or "error" in data
     
+    @pytest.mark.p1
     def test_generate_unity_dialogue_invalid_request(self, client):
         """Test de génération Unity dialogue avec requête invalide."""
         response = client.post("/api/v1/dialogues/generate/unity-dialogue", json={})
-        
+
         assert response.status_code == 422
 
 

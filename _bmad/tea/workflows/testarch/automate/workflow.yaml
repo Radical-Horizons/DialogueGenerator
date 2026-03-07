@@ -23,6 +23,7 @@ variables:
   # Execution mode and targeting
   standalone_mode: true # Can work without BMad artifacts (true) or integrate with BMad (false)
   coverage_target: "critical-paths" # critical-paths, comprehensive, selective
+  brownfield: true # true = existing test suite present; discover existing coverage and generate only for GAPS (no duplicates)
 
   # Directory paths
   test_dir: "{project-root}/tests" # Root test directory

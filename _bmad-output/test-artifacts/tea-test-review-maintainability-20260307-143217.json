@@ -1,0 +1,45 @@
+{
+  "dimension": "maintainability",
+  "score": 78,
+  "max_score": 100,
+  "grade": "B",
+  "violations": [
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 0,
+      "severity": "MEDIUM",
+      "category": "missing-test-ids",
+      "description": "Aucun identifiant de test (ex. 1.3-API-001) ni marqueurs P0/P1/P2/P3 pour la priorisation ou la traçabilité.",
+      "suggestion": "Ajouter des test IDs dans les noms ou via @pytest.mark avec un id ; utiliser @pytest.mark.p0 / p1 pour les tests critiques.",
+      "code_snippet": ""
+    },
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 95,
+      "severity": "LOW",
+      "category": "duplicate-monkeypatch",
+      "description": "Le même bloc monkeypatch (SkillCatalogService, TraitCatalogService) est répété dans test_estimate_tokens et test_preview_prompt.",
+      "suggestion": "Extraire dans une fixture partagée (ex. mock_skill_trait_services) pour réduire la duplication.",
+      "code_snippet": "monkeypatch.setattr(\"api.routers.dialogues.SkillCatalogService\", lambda: mock_skill_service)"
+    },
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 238,
+      "severity": "LOW",
+      "category": "assert-in-branch",
+      "description": "test_generate_unity_dialogue_success utilise assert response.status_code in [200, 500] puis des assertions dans if response.status_code == 200 ; comportement accepté mais peu explicite.",
+      "suggestion": "Pour plus de clarté : soit mock plus strict pour viser 200, soit deux tests (success vs error) avec assertions explicites.",
+      "code_snippet": "assert response.status_code in [200, 500]"
+    }
+  ],
+  "passed_checks": 6,
+  "failed_checks": 3,
+  "total_checks": 9,
+  "violation_summary": { "HIGH": 0, "MEDIUM": 1, "LOW": 2 },
+  "recommendations": [
+    "Introduire des test IDs et marqueurs P0/P1 pour alignement avec test-levels-framework et trace.",
+    "Factoriser les mocks Skill/Trait dans une fixture.",
+    "Renforcer les assertions dans test_generate_unity_dialogue_success (un seul code attendu ou deux cas distincts)."
+  ],
+  "summary": "Fichier 265 lignes (<300), structure claire et markers @pytest.mark.unit/api. Manque test IDs et P0/P1 ; duplication mineure de monkeypatch."
+}

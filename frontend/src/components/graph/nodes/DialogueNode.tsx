@@ -124,15 +124,6 @@ export const DialogueNode = memo(function DialogueNode({
     }
   }
   
-  const handleGenerateClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    // Déclencher un événement custom pour ouvrir le panel de génération
-    const event = new CustomEvent('open-ai-generation-panel', { 
-      detail: { nodeId: data.id } 
-    })
-    window.dispatchEvent(event)
-  }
-
   const handleOpenRegenerateModal = (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
@@ -210,6 +201,19 @@ export const DialogueNode = memo(function DialogueNode({
     return ((index + 1) / (choices.length + 1)) * 100
   }
   
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      window.dispatchEvent(
+        new CustomEvent('graph-node-contextmenu', {
+          detail: { nodeId: data.id, clientX: e.clientX, clientY: e.clientY },
+        })
+      )
+    },
+    [data.id]
+  )
+
   return (
     <div
       data-testid="graph-node-content"
@@ -235,6 +239,7 @@ export const DialogueNode = memo(function DialogueNode({
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onContextMenu={handleContextMenu}
     >
       {/* Badge d'erreur */}
       {hasErrors && (
@@ -421,44 +426,6 @@ export const DialogueNode = memo(function DialogueNode({
             border: '2px solid white',
           }}
         />
-      )}
-      
-      {/* Bouton "Générer" visible au hover */}
-      {(isHovered || selected) && !isPending && (
-        <button
-          onClick={handleGenerateClick}
-          style={{
-            position: 'absolute',
-            top: 34,
-            right: 8,
-            padding: '0.4rem 0.6rem',
-            border: 'none',
-            borderRadius: '6px',
-            backgroundColor: theme.button.primary.background,
-            color: theme.button.primary.color,
-            cursor: 'pointer',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.3rem',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-            zIndex: 15,
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)'
-            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)'
-            e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
-          }}
-          title="Générer la suite avec l'IA"
-        >
-          <span>✨</span>
-          <span>Générer</span>
-        </button>
       )}
       
       {/* Boutons Accept / Régénérer / Reject visibles au hover pour nœuds pending (Story 1.4, 1.10) */}
