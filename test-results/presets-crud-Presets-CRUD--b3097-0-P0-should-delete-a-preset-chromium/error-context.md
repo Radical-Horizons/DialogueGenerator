@@ -5,7 +5,7 @@
   - banner [ref=e4]:
     - generic [ref=e5]:
       - heading "DialogueGenerator" [level=1] [ref=e6]
-      - 'generic "Date de compilation: 07/03/2026 23:53:22" [ref=e7]': "Build: 07/03/2026 23:53"
+      - 'generic "Date de compilation: 08/03/2026 00:01:17" [ref=e7]': "Build: 08/03/2026 00:01"
     - generic [ref=e9]:
       - generic [ref=e10]: 🔍
       - generic [ref=e11]: Rechercher des actions, personnages, lieux...
@@ -122,7 +122,10 @@
               - generic [ref=e173]:
                 - generic [ref=e174]: Modèle
                 - button "?" [ref=e176] [cursor=pointer]
-              - combobox "Modèle" [ref=e177]
+              - combobox "Modèle" [ref=e177]:
+                - option "GPT-5.2" [selected]
+                - option "GPT-5 Mini"
+                - option "Mistral Small Creative"
             - generic [ref=e178]:
               - generic [ref=e179]:
                 - generic [ref=e180]: Niveau de raisonnement

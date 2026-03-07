@@ -5,7 +5,7 @@
   - banner [ref=e4]:
     - generic [ref=e5]:
       - heading "DialogueGenerator" [level=1] [ref=e6]
-      - 'generic "Date de compilation: 07/03/2026 23:53:22" [ref=e7]': "Build: 07/03/2026 23:53"
+      - 'generic "Date de compilation: 08/03/2026 00:01:17" [ref=e7]': "Build: 08/03/2026 00:01"
     - generic [ref=e9]:
       - generic [ref=e10]: 🔍
       - generic [ref=e11]: Rechercher des actions, personnages, lieux...
@@ -25,47 +25,234 @@
             - img [ref=e27]
         - generic [ref=e29]:
           - generic [ref=e30]:
-            - button "Personnages (0)" [ref=e31] [cursor=pointer]
-            - button "Lieux (0)" [ref=e32] [cursor=pointer]
-            - button "Objets (0)" [ref=e33] [cursor=pointer]
-            - button "Espèces (0)" [ref=e34] [cursor=pointer]
-            - button "Communautés (0)" [ref=e35] [cursor=pointer]
-          - generic [ref=e38]: Chargement...
-          - generic [ref=e40]: Aucune sélection
-      - generic [ref=e44]:
-        - generic [ref=e45]:
-          - button "Génération de Dialogues" [ref=e46] [cursor=pointer]
-          - button "Édition de Dialogues" [ref=e47] [cursor=pointer]
-          - button "📊 Éditeur de Graphe" [active] [ref=e48] [cursor=pointer]
-        - generic [ref=e50]:
-          - generic [ref=e53]: Chargement des dialogues Unity...
-          - generic [ref=e54]:
-            - generic [ref=e56]:
-              - generic "Graphe valide (validation automatique à chaque sauvegarde)" [ref=e57]:
-                - generic [ref=e58]: ✓
-                - generic [ref=e59]: Graphe valide
-              - button "📐 Auto-layout ▼" [disabled] [ref=e61]:
+            - button "Personnages (41)" [ref=e31] [cursor=pointer]
+            - button "Lieux (47)" [ref=e32] [cursor=pointer]
+            - button "Objets (17)" [ref=e33] [cursor=pointer]
+            - button "Espèces (47)" [ref=e34] [cursor=pointer]
+            - button "Communautés (11)" [ref=e35] [cursor=pointer]
+          - generic [ref=e37]:
+            - generic [ref=e39]:
+              - textbox "Rechercher... (/)" [ref=e40]
+              - combobox "Trier les résultats" [ref=e41]:
+                - option "Nom (A-Z)" [selected]
+                - option "Nom (Z-A)"
+                - option "Sélectionnés en premier"
+            - generic [ref=e42]:
+              - generic [ref=e43] [cursor=pointer]:
+                - checkbox [ref=e44]
+                - generic [ref=e45]: Akthar-Neth Amatru, l’Exégète
+              - generic [ref=e46] [cursor=pointer]:
+                - checkbox [ref=e47]
+                - generic [ref=e48]: Avili de l’Éternel Retour
+              - generic [ref=e49] [cursor=pointer]:
+                - checkbox [ref=e50]
+                - generic [ref=e51]: Barvas le Juge-Mendiant
+              - generic [ref=e52] [cursor=pointer]:
+                - checkbox [ref=e53]
+                - generic [ref=e54]: Cendreveine
+              - generic [ref=e55] [cursor=pointer]:
+                - checkbox [ref=e56]
+                - generic [ref=e57]: Chantier-Doux, Berger de Gedroths
+              - generic [ref=e58] [cursor=pointer]:
+                - checkbox [ref=e59]
+                - generic [ref=e60]: Duq'Sha, L'Archiviste Boiteux
+              - generic [ref=e61] [cursor=pointer]:
+                - checkbox [ref=e62]
+                - generic [ref=e63]: Eonundé Alinen-Egan
+              - generic [ref=e64] [cursor=pointer]:
+                - checkbox [ref=e65]
+                - generic [ref=e66]: Gardien-Calligraphe Qalamtû
+              - generic [ref=e67] [cursor=pointer]:
+                - checkbox [ref=e68]
+                - generic [ref=e69]: Genka Lien, le bouffon
+              - generic [ref=e70] [cursor=pointer]:
+                - checkbox [ref=e71]
+                - generic [ref=e72]: Grish T’vok
+              - generic [ref=e73] [cursor=pointer]:
+                - checkbox [ref=e74]
+                - generic [ref=e75]: Guette-Horizon, Gardienne du périmètre
+              - generic [ref=e76] [cursor=pointer]:
+                - checkbox [ref=e77]
+                - generic [ref=e78]: Jast, l’Inéluctable
+              - generic [ref=e79] [cursor=pointer]:
+                - checkbox [ref=e80]
+                - generic [ref=e81]: Kha'Vareth, L'Artisan d'Éternité
+              - generic [ref=e82] [cursor=pointer]:
+                - checkbox [ref=e83]
+                - generic [ref=e84]: Khair-gul, Le Médecin-Ascétique
+              - generic [ref=e85] [cursor=pointer]:
+                - checkbox [ref=e86]
+                - generic [ref=e87]: Korga l'Effritée, Maçonne-rafistoleuse
+              - generic [ref=e88] [cursor=pointer]:
+                - checkbox [ref=e89]
+                - generic [ref=e90]: L’Arbitre
+              - generic [ref=e91] [cursor=pointer]:
+                - checkbox [ref=e92]
+                - generic [ref=e93]: L’Enlumineur
+              - generic [ref=e94] [cursor=pointer]:
+                - checkbox [ref=e95]
+                - generic [ref=e96]: L'Ensevelie
+              - generic [ref=e97] [cursor=pointer]:
+                - checkbox [ref=e98]
+                - generic [ref=e99]: L'Équipe des Trois-Dos
+              - generic [ref=e100] [cursor=pointer]:
+                - checkbox [ref=e101]
+                - generic [ref=e102]: L'Éthérée
+              - generic [ref=e103] [cursor=pointer]:
+                - checkbox [ref=e104]
+                - generic [ref=e105]: L’Incarnée
+              - generic [ref=e106] [cursor=pointer]:
+                - checkbox [ref=e107]
+                - generic [ref=e108]: Lyro Seph
+              - generic [ref=e109] [cursor=pointer]:
+                - checkbox [ref=e110]
+                - generic [ref=e111]: Murmure-Éteint
+              - generic [ref=e112] [cursor=pointer]:
+                - checkbox [ref=e113]
+                - generic [ref=e114]: Navarre K'ssh, la Stratège Sanguine
+              - generic [ref=e115] [cursor=pointer]:
+                - checkbox [ref=e116]
+                - generic [ref=e117]: Nila Halder
+              - generic [ref=e118] [cursor=pointer]:
+                - checkbox [ref=e119]
+                - generic [ref=e120]: Ori-Bikar 57, l’Enfant-Foudre
+              - generic [ref=e121] [cursor=pointer]:
+                - checkbox [ref=e122]
+                - generic [ref=e123]: Ôrmüd T’lian-Keresh, le Maître-Flagellant
+              - generic [ref=e124] [cursor=pointer]:
+                - checkbox [ref=e125]
+                - generic [ref=e126]: Raki-Biro 58, l’Enfant-Prophète
+              - generic [ref=e127] [cursor=pointer]:
+                - checkbox [ref=e128]
+                - generic [ref=e129]: Ravim Halder
+              - generic [ref=e130] [cursor=pointer]:
+                - checkbox [ref=e131]
+                - generic [ref=e132]: Rêveur du Puits Céleste
+              - generic [ref=e133] [cursor=pointer]:
+                - checkbox [ref=e134]
+                - generic [ref=e135]: Saritha Halder
+              - generic [ref=e136] [cursor=pointer]:
+                - checkbox [ref=e137]
+                - generic [ref=e138]: Seigneuresse Uresaïr
+              - generic [ref=e139] [cursor=pointer]:
+                - checkbox [ref=e140]
+                - generic [ref=e141]: Siphon Argenté et Kresh l'Écaillé
+              - generic [ref=e142] [cursor=pointer]:
+                - checkbox [ref=e143]
+                - generic [ref=e144]: Valkazer Reitar
+              - generic [ref=e145] [cursor=pointer]:
+                - checkbox [ref=e146]
+                - generic [ref=e147]: Varek l’Écorché
+              - generic [ref=e148] [cursor=pointer]:
+                - checkbox [ref=e149]
+                - generic [ref=e150]: Vethraak
+              - generic [ref=e151] [cursor=pointer]:
+                - checkbox [ref=e152]
+                - generic [ref=e153]: Voknir Esh'Maradel, le cartographe
+              - generic [ref=e154] [cursor=pointer]:
+                - checkbox [ref=e155]
+                - generic [ref=e156]: Vol Reitar
+              - generic [ref=e157] [cursor=pointer]:
+                - checkbox [ref=e158]
+                - generic [ref=e159]: Yrthas, la murmuratrice
+              - generic [ref=e160] [cursor=pointer]:
+                - checkbox [ref=e161]
+                - generic [ref=e162]: Ysellor Eonundé du Ressac
+              - generic [ref=e163] [cursor=pointer]:
+                - checkbox [ref=e164]
+                - generic [ref=e165]: Zaehria Neth'Varu, La Gardienne Vertébrale
+          - generic [ref=e167]: Aucune sélection
+      - generic [ref=e171]:
+        - generic [ref=e172]:
+          - button "Génération de Dialogues" [ref=e173] [cursor=pointer]
+          - button "Édition de Dialogues" [ref=e174] [cursor=pointer]
+          - button "📊 Éditeur de Graphe" [ref=e175] [cursor=pointer]
+        - generic [ref=e177]:
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - generic [ref=e181]:
+                - textbox "Rechercher un dialogue... (/)" [ref=e182]
+                - combobox "Trier les dialogues" [ref=e183]:
+                  - option "Date (récent)" [selected]
+                  - option "Date (ancien)"
+                  - option "Nom (A-Z)"
+                  - option "Nom (Z-A)"
+              - generic [ref=e184]: 7 dialogues
+            - generic [ref=e185]:
+              - button "E2e-adr008-fixture e2e-adr008-fixture.json 449 B • 8 mars 2026, 00:01" [active] [pressed] [ref=e186] [cursor=pointer]:
+                - generic [ref=e187]: E2e-adr008-fixture
+                - generic [ref=e188]: e2e-adr008-fixture.json
+                - generic [ref=e189]:
+                  - generic [ref=e190]: 449 B
+                  - generic [ref=e191]: •
+                  - generic [ref=e192]: 8 mars 2026, 00:01
+              - button "Dialogue Unity Dialogue_Unity.json 1.9 KB • 7 mars 2026, 19:59" [ref=e193] [cursor=pointer]:
+                - generic [ref=e194]: Dialogue Unity
+                - generic [ref=e195]: Dialogue_Unity.json
+                - generic [ref=e196]:
+                  - generic [ref=e197]: 1.9 KB
+                  - generic [ref=e198]: •
+                  - generic [ref=e199]: 7 mars 2026, 19:59
+              - button "Rencontre le mendiant et lexilée rencontre_le_mendiant_et_lexilée.json 1.8 KB • 7 mars 2026, 12:08" [ref=e200] [cursor=pointer]:
+                - generic [ref=e201]: Rencontre le mendiant et lexilée
+                - generic [ref=e202]: rencontre_le_mendiant_et_lexilée.json
+                - generic [ref=e203]:
+                  - generic [ref=e204]: 1.8 KB
+                  - generic [ref=e205]: •
+                  - generic [ref=e206]: 7 mars 2026, 12:08
+              - button "Atelier du cartographe dans les plis dossements atelier_du_cartographe_dans_les_plis_dossements.json 9.0 KB • 7 mars 2026, 12:06" [ref=e207] [cursor=pointer]:
+                - generic [ref=e208]: Atelier du cartographe dans les plis dossements
+                - generic [ref=e209]: atelier_du_cartographe_dans_les_plis_dossements.json
+                - generic [ref=e210]:
+                  - generic [ref=e211]: 9.0 KB
+                  - generic [ref=e212]: •
+                  - generic [ref=e213]: 7 mars 2026, 12:06
+              - button "Convergences au léviathan convergences_au_léviathan.json 1.2 KB • 3 mars 2026, 19:51" [ref=e214] [cursor=pointer]:
+                - generic [ref=e215]: Convergences au léviathan
+                - generic [ref=e216]: convergences_au_léviathan.json
+                - generic [ref=e217]:
+                  - generic [ref=e218]: 1.2 KB
+                  - generic [ref=e219]: •
+                  - generic [ref=e220]: 3 mars 2026, 19:51
+              - button "Dans les plis une carte qui refuse dêtre plate dans_les_plis_une_carte_qui_refuse_dêtre_plate.json 21.2 KB • 24 janv. 2026, 23:44" [ref=e221] [cursor=pointer]:
+                - generic [ref=e222]: Dans les plis une carte qui refuse dêtre plate
+                - generic [ref=e223]: dans_les_plis_une_carte_qui_refuse_dêtre_plate.json
+                - generic [ref=e224]:
+                  - generic [ref=e225]: 21.2 KB
+                  - generic [ref=e226]: •
+                  - generic [ref=e227]: 24 janv. 2026, 23:44
+              - button "Rencontre avec le cartographe rencontre_avec_le_cartographe.json 2.6 KB • 17 janv. 2026, 20:11" [ref=e228] [cursor=pointer]:
+                - generic [ref=e229]: Rencontre avec le cartographe
+                - generic [ref=e230]: rencontre_avec_le_cartographe.json
+                - generic [ref=e231]:
+                  - generic [ref=e232]: 2.6 KB
+                  - generic [ref=e233]: •
+                  - generic [ref=e234]: 17 janv. 2026, 20:11
+          - generic [ref=e235]:
+            - generic [ref=e237]:
+              - generic "Graphe valide (validation automatique à chaque sauvegarde)" [ref=e238]:
+                - generic [ref=e239]: ✓
+                - generic [ref=e240]: Graphe valide
+              - generic "Sauvegardé" [ref=e241]
+              - button "📐 Auto-layout ▼" [disabled] [ref=e244]:
                 - text: 📐 Auto-layout
-                - generic [ref=e62]: ▼
-              - button "Actions ▼" [disabled] [ref=e64]:
+                - generic [ref=e245]: ▼
+              - button "Actions ▼" [disabled] [ref=e247]:
                 - text: Actions
-                - generic [ref=e65]: ▼
-              - button "💰 Coûts" [disabled] [ref=e66]
-              - button "?" [ref=e68] [cursor=pointer]
-            - generic [ref=e70]:
-              - generic [ref=e71]: 📊
-              - generic [ref=e72]: Sélectionnez un dialogue Unity
-              - generic [ref=e73]: Choisissez un dialogue dans la liste à gauche pour le visualiser et l'éditer sous forme de graphe
-      - generic [ref=e76]:
-        - generic [ref=e77]:
-          - generic [ref=e78]: Détails
-          - button "Replier le panneau droit" [ref=e79] [cursor=pointer]:
-            - img [ref=e80]
-        - generic [ref=e83]: ● Brouillon non sauvegardé
-        - generic [ref=e85]:
-          - generic [ref=e86]:
-            - button "Dialogue généré" [ref=e87] [cursor=pointer]
-            - button "Édition de nœud" [ref=e88] [cursor=pointer]
-            - button "Détails" [ref=e89] [cursor=pointer]
-          - generic [ref=e92]: Sélectionnez un nœud dans le graphe pour l'éditer
+                - generic [ref=e248]: ▼
+              - button "💰 Coûts" [ref=e249] [cursor=pointer]
+              - button "?" [ref=e251] [cursor=pointer]
+            - generic [ref=e253]: Chargement du graphe...
+      - generic [ref=e256]:
+        - generic [ref=e257]:
+          - generic [ref=e258]: Détails
+          - button "Replier le panneau droit" [ref=e259] [cursor=pointer]:
+            - img [ref=e260]
+        - generic [ref=e263]: ● Brouillon non sauvegardé
+        - generic [ref=e265]:
+          - generic [ref=e266]:
+            - button "Dialogue généré" [ref=e267] [cursor=pointer]
+            - button "Édition de nœud" [ref=e268] [cursor=pointer]
+            - button "Détails" [ref=e269] [cursor=pointer]
+          - generic [ref=e272]: Sélectionnez un nœud dans le graphe pour l'éditer
 ```

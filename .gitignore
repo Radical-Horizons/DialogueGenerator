@@ -48,6 +48,7 @@ frontend/dist/
 frontend/dist-ssr/
 frontend/.vite/
 frontend/test-results/
+test-results/
 playwright-report/
 playwright/.cache/
 e2e/.auth/
