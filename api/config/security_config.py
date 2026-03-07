@@ -67,6 +67,7 @@ class SecurityConfig(BaseSettings):
     
     # Environment
     environment: str = "development"
+    debug_endpoints_enabled: Optional[bool] = None
     
     @property
     def is_production(self) -> bool:
@@ -85,6 +86,18 @@ class SecurityConfig(BaseSettings):
             True si ENVIRONMENT=development (ou non défini), False sinon.
         """
         return not self.is_production
+
+    @property
+    def are_debug_endpoints_enabled(self) -> bool:
+        """Indique si les endpoints de debug peuvent être exposés.
+
+        Returns:
+            True si l'exposition est explicitement autorisée, sinon uniquement
+            en développement par défaut.
+        """
+        if self.debug_endpoints_enabled is not None:
+            return self.debug_endpoints_enabled
+        return self.is_development
     
     def validate_config(self) -> None:
         """Valide la configuration de sécurité.
