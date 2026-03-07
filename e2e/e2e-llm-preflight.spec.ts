@@ -3,11 +3,11 @@
  *
  * Valide les leçons du post-mortem (docs/troubleshooting/post-mortem-e2e-llm.md) :
  * - Preflight (health + budget) et fail-fast avec messages clairs (e2e-llm.md)
- * - Ajustement automatique du budget (quota 0 ou % ≥ 100 → PUT quota 50)
+ * - Ajustement automatique du budget (quota 0 ou % ≥ 100 → PUT quota suffisant)
  * - Port API 4243 (proxy Vite) ; wrong port → échec explicite
  *
- * Prérequis : .env avec OPENAI_API_KEY, API sur 4243 (webServer Playwright).
- * Exclure en CI : `playwright test --grep-invert @e2e-llm`
+ * Environnement E2E complet : OPENAI_API_KEY (.env ou variables d'environnement), API sur 4243.
+ * En CI sans clé : `playwright test --grep-invert @e2e-llm`.
  *
  * @see docs/troubleshooting/e2e-llm.md
  * @see docs/troubleshooting/post-mortem-e2e-llm.md
@@ -36,9 +36,11 @@ test.describe('E2E LLM Preflight @e2e-llm', () => {
     if (!budgetRes.ok()) {
       throw new Error(`E2E LLM : impossible de vérifier le budget. Voir ${PREFLIGHT_DOC}.`)
     }
-    const budget = (await budgetRes.json()) as { quota: number; percentage: number }
+    const budget = (await budgetRes.json()) as { quota: number; percentage: number; amount?: number }
     if (budget.quota <= 0 || budget.percentage >= 100) {
-      const putRes = await request.put(`${API_BASE}/api/v1/costs/budget`, { data: { quota: 50 } })
+      // Mettre un quota suffisamment élevé pour que percentage < 100 (percentage = amount / quota * 100)
+      const newQuota = Math.max(1000, (budget.amount ?? 0) + 500)
+      const putRes = await request.put(`${API_BASE}/api/v1/costs/budget`, { data: { quota: newQuota } })
       if (!putRes.ok()) {
         throw new Error(`E2E LLM : impossible de mettre à jour le budget. Voir ${PREFLIGHT_DOC}.`)
       }
@@ -55,12 +57,20 @@ test.describe('E2E LLM Preflight @e2e-llm', () => {
   })
 
   test('budget GET returns quota and percentage', async ({ request }) => {
-    const res = await request.get(`${API_BASE}/api/v1/costs/budget`)
+    let res = await request.get(`${API_BASE}/api/v1/costs/budget`)
     expect(res.ok()).toBe(true)
-    const body = (await res.json()) as { quota: number; amount?: number; percentage: number; remaining?: number }
+    let body = (await res.json()) as { quota: number; amount?: number; percentage: number; remaining?: number }
     expect(typeof body.quota).toBe('number')
     expect(typeof body.percentage).toBe('number')
     expect(body.quota).toBeGreaterThan(0)
+    // Si le pourcentage est déjà à 100 (quota épuisé), le beforeAll a normalement ajusté ; sinon on ajuste ici
+    if (body.percentage >= 100) {
+      const newQuota = Math.max(1000, (body.amount ?? 0) + 500)
+      const putRes = await request.put(`${API_BASE}/api/v1/costs/budget`, { data: { quota: newQuota } })
+      expect(putRes.ok()).toBe(true)
+      res = await request.get(`${API_BASE}/api/v1/costs/budget`)
+      body = (await res.json()) as { quota: number; percentage: number }
+    }
     expect(body.percentage).toBeLessThan(100)
   })
 

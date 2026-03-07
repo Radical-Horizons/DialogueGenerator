@@ -106,7 +106,7 @@ Tests E2E qui appellent le LLM (accept/reject de nœuds générés). Résolution
 | Haute | Garder **preflight** (clé + budget) et **doc** `docs/troubleshooting/e2e-llm.md` à jour dès qu'on ajoute un prérequis ou un spec E2E LLM. |
 | Haute | Pour tout nouveau spec E2E touchant une liste (dialogues, etc.) : utiliser **filename** ou **data-testid** plutôt qu'un regex sur titre/libellé si l'ordre ou le contenu peut varier. |
 | Moyenne | Éviter **Unicode** dans les messages de log (ou forcer UTF-8 / replace par ASCII) pour éviter `UnicodeEncodeError` sous Windows. |
-| Moyenne | En CI : exclure les specs `@e2e-llm` si `OPENAI_API_KEY` absent ; documenter la commande et les coûts approximatifs. |
+| Moyenne | En CI **sans** environnement complet (ex. PR externes sans secrets) : exclure les specs `@e2e-llm` ; documenter la commande. En local et en CI avec environnement complet, tous les tests E2E sont exécutés. |
 | Basse | Réduire la **pause afterEach** (ex. 5s → 2s) une fois la flakiness résorbée, si la suite reste verte. |
 
 ---

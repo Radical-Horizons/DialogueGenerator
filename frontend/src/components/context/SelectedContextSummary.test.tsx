@@ -73,11 +73,9 @@ describe('SelectedContextSummary', () => {
 
     const { container } = render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
-    // Cliquer pour développer
-    const expandButton = screen.getByText(/sélections actives/i).closest('div')
-    if (expandButton) {
-      await user.click(expandButton)
-    }
+    // Cliquer pour développer (bouton toggle)
+    const expandButton = screen.getByTestId('selected-context-summary-toggle')
+    await user.click(expandButton)
 
     await waitFor(() => {
       // Vérifier que le texte complet contient les catégories
@@ -122,11 +120,9 @@ describe('SelectedContextSummary', () => {
     // Le compteur devrait être 3 (il compte tous les éléments du tableau, même les doublons)
     expect(screen.getByText(/sélections actives \(3\)/i)).toBeInTheDocument()
     
-    // Développer pour voir la liste
-    const expandButton = screen.getByText(/sélections actives/i).closest('div')
-    if (expandButton) {
-      await user.click(expandButton)
-    }
+    // Développer pour voir la liste (bouton toggle)
+    const expandButton = screen.getByTestId('selected-context-summary-toggle')
+    await user.click(expandButton)
 
     await waitFor(() => {
       // La liste affichée contient 3 éléments, mais il y a un doublon conceptuel
@@ -226,11 +222,9 @@ describe('SelectedContextSummary', () => {
 
     const { container } = render(<SelectedContextSummary selections={selections} onClear={mockOnClear} />)
     
-    // Développer
-    const expandButton = screen.getByText(/sélections actives/i).closest('div')
-    if (expandButton) {
-      await user.click(expandButton)
-    }
+    // Développer via le bouton toggle (data-testid)
+    const expandButton = screen.getByTestId('selected-context-summary-toggle')
+    await user.click(expandButton)
 
     await waitFor(() => {
       expect(container.textContent).toContain('Personnages')

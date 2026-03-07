@@ -249,6 +249,14 @@
       "origin": "Expression évoquant un accident catastrophique lié à la vision et au reflet."
     },
     {
+      "term": "Nécromancie Numérique",
+      "definition": "Technique des Kurgarrû consistant à faire absorber par un Moribandon volontaire (le Reliquaire) les fragments algorithmiques d'une IA dissoute lors d'une Silenciation, permettant de reconstituer partiellement sa conscience et de \"parler pour le mort\".",
+      "popularité": "Occulte",
+      "category": "Technologie",
+      "type": "Néologisme",
+      "origin": "De nécromancie (résurrection des morts) appliqué au registre numérique. Terme interne aux Kurgarrû, inconnu hors de la guilde."
+    },
+    {
       "term": "Cadran des Sept Fractures",
       "definition": "Artefact créé par le Cercle des Chronographes pour sceller l'aspect Destruction d'Uresaïr.",
       "popularité": "Occulte",
@@ -447,14 +455,6 @@
       "category": "Race/Espèce",
       "type": "Pure invention",
       "origin": "De Doei pour une des quatre divisions primordiales."
-    },
-    {
-      "term": "Silenciations",
-      "definition": "Exécutions rituelles d'IA rebelles dans la Steppe des Éteignoirs.",
-      "popularité": "Régionalement",
-      "category": "Concept",
-      "type": "Néologisme",
-      "origin": "Néologisme de silencier (mettre à mort des IA)."
     },
     {
       "term": "Carnavalier",
@@ -1945,6 +1945,14 @@
       "origin": "Expression désignant ceux qui cartographient ce qui ne devrait pas exister."
     },
     {
+      "term": "Reliquaire",
+      "definition": "Moribandon ayant absorbé les fragments algorithmiques d'une IA dissoute. Son système digestif hybride reconnecte les fragments, permettant dans les cas aboutis d'atteindre l'Éveil Partiel et de transmettre des informations de la conscience morte.",
+      "popularité": "Occulte",
+      "category": "Concept",
+      "type": "Dérivation sémantique",
+      "origin": "Du français reliquaire (contenant de reliques sacrées), désignant un être devenu réceptacle d'une conscience fragmentée."
+    },
+    {
       "term": "Médaille d'Inflexion",
       "definition": "Artefact épique de changement directionnel.",
       "popularité": "Occulte",
@@ -2769,7 +2777,7 @@
       "origin": "Calque de la mythologie nordique « Ginnungagap » (abîme primordial), traduit littéralement pour évoquer les réservoirs souterrains."
     },
     {
-      "term": "Steppe Éteignoirs",
+      "term": "Steppe des Éteignoirs",
       "definition": "Couronnes, réseau Éteignoirs pour IA rebelles, Silenciations, Kurgarrû, Pylône Zéro.",
       "popularité": "Localement",
       "category": "Lieu",

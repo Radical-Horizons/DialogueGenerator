@@ -1,10 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { Node, Edge } from 'reactflow'
 import { GraphEditor } from '../components/graph/GraphEditor'
 import { useGraphStore, type GraphState } from '../store/graphStore'
 import type { SaveGraphResponse } from '../types/graph'
+
+function makeQueryClient() {
+  return new QueryClient({ defaultOptions: { queries: { retry: false } } })
+}
 
 // Mock composants lourds / non pertinents pour l'autosave
 vi.mock('../components/graph/GraphCanvas', () => ({
@@ -115,7 +120,12 @@ describe('GraphEditor autosave (ADR-006)', () => {
       hasUnsavedChanges: true,
     } satisfies Partial<GraphState>)
 
-    render(React.createElement(GraphEditor))
+    const queryClient = makeQueryClient()
+    render(
+      React.createElement(QueryClientProvider, { client: queryClient },
+        React.createElement(GraphEditor)
+      )
+    )
 
     // L'effet autosave est bloqué pendant le chargement du dialogue (isLoadingDialogue interne).
     // On laisse d'abord la chaîne de promesses (getUnityDialogue -> loadDialogue -> validateGraph) se résoudre.

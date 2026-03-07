@@ -170,7 +170,7 @@ test.describe('Presets CRUD Operations [P0]', () => {
         
         // Note: Test peut être fragile selon l'implémentation UI
         // Alternative: Vérifier un message de succès
-        await expect(page.getByText(/supprimé|deleted/i)).toBeVisible({ timeout: 3000 }).catch(() => {
+        await expect(page.getByText(/supprimé|deleted/i)).toBeVisible({ timeout: 3000 }).catch(async () => {
           // Si pas de message, vérifier que la liste a changé
           const presetCount = await page.locator('[data-testid*="preset"]').count()
           expect(presetCount).toBeLessThanOrEqual(0)

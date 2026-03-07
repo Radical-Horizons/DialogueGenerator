@@ -1,0 +1,334 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "DialogueGenerator" [level=1] [ref=e6]
+      - 'generic "Date de compilation: 07/03/2026 23:53:22" [ref=e7]': "Build: 07/03/2026 23:53"
+    - generic [ref=e9]:
+      - generic [ref=e10]: 🔍
+      - generic [ref=e11]: Rechercher des actions, personnages, lieux...
+      - generic [ref=e12]: Ctrl+K
+    - generic [ref=e13]:
+      - button "Options" [ref=e14] [cursor=pointer]
+      - button "Actions ▼" [ref=e16] [cursor=pointer]:
+        - text: Actions
+        - generic [ref=e17]: ▼
+      - button "Menu utilisateur admin" [ref=e19] [cursor=pointer]: A
+  - main [ref=e20]:
+    - generic [ref=e21]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]: Contexte
+          - button "Replier le panneau gauche" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - button "Personnages (41)" [ref=e31] [cursor=pointer]
+            - button "Lieux (47)" [ref=e32] [cursor=pointer]
+            - button "Objets (17)" [ref=e33] [cursor=pointer]
+            - button "Espèces (47)" [ref=e34] [cursor=pointer]
+            - button "Communautés (11)" [ref=e35] [cursor=pointer]
+          - generic [ref=e37]:
+            - generic [ref=e39]:
+              - textbox "Rechercher... (/)" [ref=e40]
+              - combobox "Trier les résultats" [ref=e41]:
+                - option "Nom (A-Z)" [selected]
+                - option "Nom (Z-A)"
+                - option "Sélectionnés en premier"
+            - generic [ref=e42]:
+              - generic [ref=e43] [cursor=pointer]:
+                - checkbox [ref=e44]
+                - generic [ref=e45]: Akthar-Neth Amatru, l’Exégète
+              - generic [ref=e46] [cursor=pointer]:
+                - checkbox [ref=e47]
+                - generic [ref=e48]: Avili de l’Éternel Retour
+              - generic [ref=e49] [cursor=pointer]:
+                - checkbox [ref=e50]
+                - generic [ref=e51]: Barvas le Juge-Mendiant
+              - generic [ref=e52] [cursor=pointer]:
+                - checkbox [ref=e53]
+                - generic [ref=e54]: Cendreveine
+              - generic [ref=e55] [cursor=pointer]:
+                - checkbox [ref=e56]
+                - generic [ref=e57]: Chantier-Doux, Berger de Gedroths
+              - generic [ref=e58] [cursor=pointer]:
+                - checkbox [ref=e59]
+                - generic [ref=e60]: Duq'Sha, L'Archiviste Boiteux
+              - generic [ref=e61] [cursor=pointer]:
+                - checkbox [ref=e62]
+                - generic [ref=e63]: Eonundé Alinen-Egan
+              - generic [ref=e64] [cursor=pointer]:
+                - checkbox [ref=e65]
+                - generic [ref=e66]: Gardien-Calligraphe Qalamtû
+              - generic [ref=e67] [cursor=pointer]:
+                - checkbox [ref=e68]
+                - generic [ref=e69]: Genka Lien, le bouffon
+              - generic [ref=e70] [cursor=pointer]:
+                - checkbox [ref=e71]
+                - generic [ref=e72]: Grish T’vok
+              - generic [ref=e73] [cursor=pointer]:
+                - checkbox [ref=e74]
+                - generic [ref=e75]: Guette-Horizon, Gardienne du périmètre
+              - generic [ref=e76] [cursor=pointer]:
+                - checkbox [ref=e77]
+                - generic [ref=e78]: Jast, l’Inéluctable
+              - generic [ref=e79] [cursor=pointer]:
+                - checkbox [ref=e80]
+                - generic [ref=e81]: Kha'Vareth, L'Artisan d'Éternité
+              - generic [ref=e82] [cursor=pointer]:
+                - checkbox [ref=e83]
+                - generic [ref=e84]: Khair-gul, Le Médecin-Ascétique
+              - generic [ref=e85] [cursor=pointer]:
+                - checkbox [ref=e86]
+                - generic [ref=e87]: Korga l'Effritée, Maçonne-rafistoleuse
+              - generic [ref=e88] [cursor=pointer]:
+                - checkbox [ref=e89]
+                - generic [ref=e90]: L’Arbitre
+              - generic [ref=e91] [cursor=pointer]:
+                - checkbox [ref=e92]
+                - generic [ref=e93]: L’Enlumineur
+              - generic [ref=e94] [cursor=pointer]:
+                - checkbox [ref=e95]
+                - generic [ref=e96]: L'Ensevelie
+              - generic [ref=e97] [cursor=pointer]:
+                - checkbox [ref=e98]
+                - generic [ref=e99]: L'Équipe des Trois-Dos
+              - generic [ref=e100] [cursor=pointer]:
+                - checkbox [ref=e101]
+                - generic [ref=e102]: L'Éthérée
+              - generic [ref=e103] [cursor=pointer]:
+                - checkbox [ref=e104]
+                - generic [ref=e105]: L’Incarnée
+              - generic [ref=e106] [cursor=pointer]:
+                - checkbox [ref=e107]
+                - generic [ref=e108]: Lyro Seph
+              - generic [ref=e109] [cursor=pointer]:
+                - checkbox [ref=e110]
+                - generic [ref=e111]: Murmure-Éteint
+              - generic [ref=e112] [cursor=pointer]:
+                - checkbox [ref=e113]
+                - generic [ref=e114]: Navarre K'ssh, la Stratège Sanguine
+              - generic [ref=e115] [cursor=pointer]:
+                - checkbox [ref=e116]
+                - generic [ref=e117]: Nila Halder
+              - generic [ref=e118] [cursor=pointer]:
+                - checkbox [ref=e119]
+                - generic [ref=e120]: Ori-Bikar 57, l’Enfant-Foudre
+              - generic [ref=e121] [cursor=pointer]:
+                - checkbox [ref=e122]
+                - generic [ref=e123]: Ôrmüd T’lian-Keresh, le Maître-Flagellant
+              - generic [ref=e124] [cursor=pointer]:
+                - checkbox [ref=e125]
+                - generic [ref=e126]: Raki-Biro 58, l’Enfant-Prophète
+              - generic [ref=e127] [cursor=pointer]:
+                - checkbox [ref=e128]
+                - generic [ref=e129]: Ravim Halder
+              - generic [ref=e130] [cursor=pointer]:
+                - checkbox [ref=e131]
+                - generic [ref=e132]: Rêveur du Puits Céleste
+              - generic [ref=e133] [cursor=pointer]:
+                - checkbox [ref=e134]
+                - generic [ref=e135]: Saritha Halder
+              - generic [ref=e136] [cursor=pointer]:
+                - checkbox [ref=e137]
+                - generic [ref=e138]: Seigneuresse Uresaïr
+              - generic [ref=e139] [cursor=pointer]:
+                - checkbox [ref=e140]
+                - generic [ref=e141]: Siphon Argenté et Kresh l'Écaillé
+              - generic [ref=e142] [cursor=pointer]:
+                - checkbox [ref=e143]
+                - generic [ref=e144]: Valkazer Reitar
+              - generic [ref=e145] [cursor=pointer]:
+                - checkbox [ref=e146]
+                - generic [ref=e147]: Varek l’Écorché
+              - generic [ref=e148] [cursor=pointer]:
+                - checkbox [ref=e149]
+                - generic [ref=e150]: Vethraak
+              - generic [ref=e151] [cursor=pointer]:
+                - checkbox [ref=e152]
+                - generic [ref=e153]: Voknir Esh'Maradel, le cartographe
+              - generic [ref=e154] [cursor=pointer]:
+                - checkbox [ref=e155]
+                - generic [ref=e156]: Vol Reitar
+              - generic [ref=e157] [cursor=pointer]:
+                - checkbox [ref=e158]
+                - generic [ref=e159]: Yrthas, la murmuratrice
+              - generic [ref=e160] [cursor=pointer]:
+                - checkbox [ref=e161]
+                - generic [ref=e162]: Ysellor Eonundé du Ressac
+              - generic [ref=e163] [cursor=pointer]:
+                - checkbox [ref=e164]
+                - generic [ref=e165]: Zaehria Neth'Varu, La Gardienne Vertébrale
+          - generic [ref=e167]: Aucune sélection
+      - generic [ref=e171]:
+        - generic [ref=e172]:
+          - button "Génération de Dialogues" [ref=e173] [cursor=pointer]
+          - button "Édition de Dialogues" [ref=e174] [cursor=pointer]
+          - button "📊 Éditeur de Graphe" [ref=e175] [cursor=pointer]
+        - generic [ref=e179]:
+          - generic [ref=e181]:
+            - button "📋 Charger preset ▼" [ref=e183] [cursor=pointer]:
+              - generic [ref=e184]: 📋 Charger preset
+              - generic [ref=e185]: ▼
+            - button "💾 Sauvegarder" [ref=e186] [cursor=pointer]
+            - generic "Sauvegardé" [ref=e188]
+          - generic [ref=e190]:
+            - heading "Scène Principale" [level=3] [ref=e191]
+            - generic [ref=e192]:
+              - generic [ref=e195]:
+                - generic [ref=e196]: "PJ: (Aucun) - Rechercher..."
+                - generic [ref=e198]: ▼
+              - button "⇄" [disabled] [ref=e199]
+              - generic [ref=e202]:
+                - generic [ref=e203]: "PNJ: (Aucun) - Rechercher..."
+                - generic [ref=e205]: ▼
+            - generic [ref=e206]:
+              - generic [ref=e209]:
+                - generic [ref=e210]: "Région: (Aucune) - Rechercher..."
+                - generic [ref=e212]: ▼
+              - generic [ref=e215]:
+                - generic [ref=e216]: "Lieu: Sélectionnez d'abord une région"
+                - generic [ref=e218]: ▼
+          - generic [ref=e220]:
+            - generic [ref=e221]:
+              - button "Instructions de Scène" [ref=e222] [cursor=pointer]
+              - button "Auteur (global)" [ref=e223] [cursor=pointer]
+              - button "Système LLM (avancé)" [ref=e224] [cursor=pointer]
+            - generic [ref=e226]:
+              - generic [ref=e228]:
+                - generic [ref=e229]: "Templates de scène:"
+                - combobox "Templates de scène:" [ref=e230] [cursor=pointer]:
+                  - option "-- Sélectionner un template --" [selected]
+                  - option "Première rencontre"
+                  - option "Conversation"
+                  - option "Scène d'action"
+                  - option "Moment intime"
+                  - option "Révélation"
+                  - option "Confrontation"
+              - generic [ref=e231]:
+                - generic [ref=e232]: "Brief de scène:"
+                - generic [ref=e233]:
+                  - button "Sauvegarder" [ref=e234] [cursor=pointer]
+                  - button "Restaurer" [ref=e235] [cursor=pointer]
+              - generic [ref=e237]:
+                - textbox "Brief de scène:" [ref=e238]:
+                  - /placeholder: "Ex: Bob doit annoncer à Alice qu'il part à l'aventure. Ton désiré: Héroïque. Inclure une condition sur la compétence 'Charisme' de Bob."
+                - generic [ref=e239]: 0 caractères
+          - generic [ref=e240]:
+            - generic [ref=e241]:
+              - heading "Structure du Dialogue" [level=3] [ref=e242]
+              - button "?" [ref=e244] [cursor=pointer]
+            - generic [ref=e245]:
+              - generic [ref=e247]:
+                - generic [ref=e248]: Position 1
+                - generic [ref=e250] [cursor=pointer]:
+                  - generic [ref=e251]: PNJ
+                  - generic [ref=e253]: ▼
+              - generic [ref=e255]:
+                - generic [ref=e256]: Position 2
+                - generic [ref=e258] [cursor=pointer]:
+                  - generic [ref=e259]: PJ
+                  - generic [ref=e261]: ▼
+              - generic [ref=e263]:
+                - generic [ref=e264]: Position 3
+                - generic [ref=e266] [cursor=pointer]:
+                  - generic [ref=e267]: Stop
+                  - generic [ref=e269]: ▼
+              - generic [ref=e271]:
+                - generic [ref=e272]: Position 4
+                - generic [ref=e274] [cursor=pointer]:
+                  - generic [ref=e275]: (Vide)
+                  - generic [ref=e277]: ▼
+              - generic [ref=e279]:
+                - generic [ref=e280]: Position 5
+                - generic [ref=e282] [cursor=pointer]:
+                  - generic [ref=e283]: (Vide)
+                  - generic [ref=e285]: ▼
+              - generic [ref=e287]:
+                - generic [ref=e288]: Position 6
+                - generic [ref=e290] [cursor=pointer]:
+                  - generic [ref=e291]: (Vide)
+                  - generic [ref=e293]: ▼
+          - generic [ref=e294]:
+            - generic [ref=e295]:
+              - generic [ref=e296]: Flags In-Game
+              - button "🔗 Sélectionner des flags..." [ref=e297] [cursor=pointer]
+            - generic [ref=e298]: Aucun flag sélectionné. Cliquez sur "Sélectionner des flags..." pour ajouter des flags in-game.
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - generic [ref=e302]:
+                - generic [ref=e303]: Modèle
+                - button "?" [ref=e305] [cursor=pointer]
+              - combobox "Modèle" [ref=e306]:
+                - option "GPT-5.2" [selected]
+                - option "GPT-5 Mini"
+                - option "Mistral Small Creative"
+            - generic [ref=e307]:
+              - generic [ref=e308]:
+                - generic [ref=e309]: Niveau de raisonnement
+                - button "?" [ref=e311] [cursor=pointer]
+              - combobox "Niveau de raisonnement" [ref=e312]:
+                - option "Aucun (rapide, latence minimale)" [selected]
+                - option "Faible (raisonnement minimal)"
+                - option "Moyen (équilibré, recommandé)"
+                - option "Élevé (raisonnement approfondi)"
+                - option "Très élevé (raisonnement maximal)"
+            - generic [ref=e313]:
+              - generic [ref=e314]: Top_p (Nucleus Sampling)(non utilisé)
+              - generic [ref=e315]:
+                - slider [ref=e316]: "0.5"
+                - spinbutton [ref=e317]
+                - button "Réinitialiser" [ref=e318] [cursor=pointer]
+              - generic [ref=e319]: Non utilisé (temperature sera utilisée si disponible)
+          - generic [ref=e321]:
+            - generic [ref=e322]:
+              - generic [ref=e323]: Max tokens contexte
+              - generic [ref=e324]:
+                - slider [ref=e325]: "50000"
+                - generic [ref=e326]: 50K
+            - generic [ref=e327]:
+              - generic [ref=e328]: Max tokens génération
+              - generic [ref=e329]:
+                - slider [ref=e330]: "5100"
+                - generic [ref=e331]: Auto (5K)
+          - generic [ref=e332]:
+            - generic [ref=e333]:
+              - generic [ref=e334]: Nombre max de choix
+              - button "?" [ref=e336] [cursor=pointer]
+            - spinbutton [ref=e337]
+          - generic [ref=e338]:
+            - generic [ref=e339]: Tags narratifs
+            - generic [ref=e340]:
+              - generic [ref=e341] [cursor=pointer]:
+                - checkbox "#tension" [ref=e342]
+                - text: "#tension"
+              - generic [ref=e343] [cursor=pointer]:
+                - checkbox "#humour" [ref=e344]
+                - text: "#humour"
+              - generic [ref=e345] [cursor=pointer]:
+                - checkbox "#dramatique" [ref=e346]
+                - text: "#dramatique"
+              - generic [ref=e347] [cursor=pointer]:
+                - checkbox "#intime" [ref=e348]
+                - text: "#intime"
+              - generic [ref=e349] [cursor=pointer]:
+                - checkbox "#révélation" [ref=e350]
+                - text: "#révélation"
+          - button "Estimer le coût" [ref=e354] [cursor=pointer]
+      - generic [ref=e357]:
+        - generic [ref=e358]:
+          - generic [ref=e359]: Détails
+          - button "Replier le panneau droit" [ref=e360] [cursor=pointer]:
+            - img [ref=e361]
+        - generic [ref=e364]:
+          - generic [ref=e365]:
+            - button "Prompt" [ref=e366] [cursor=pointer]
+            - button "Dialogue généré" [ref=e367] [cursor=pointer]
+            - button "Détails" [ref=e368] [cursor=pointer]
+          - generic [ref=e374]: Aucun prompt disponible. Configurez votre génération.
+        - button "Générer Ctrl+Enter" [ref=e376] [cursor=pointer]:
+          - generic [ref=e377]: Générer
+          - generic [ref=e378]: Ctrl+Enter
+```

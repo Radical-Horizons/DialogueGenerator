@@ -6,11 +6,8 @@
  * - AC#3: Reject supprime le nœud et affiche toast
  * - AC#5: Session recovery pour nœuds pending
  *
- * Prérequis:
- * - .env à la racine avec OPENAI_API_KEY (ou clé dans variables d’environnement Windows).
- * - Pour réduire les coûts en E2E : sélectionner gpt-5-mini dans le panneau de génération, ou mettre
- *   "default_model": "gpt-5-mini" dans app_config.json (gpt-5-mini est dans available_models).
- * Si la génération échoue ou n’ajoute aucun nœud (API, budget, "Aucun nœud généré", etc.), voir docs/troubleshooting/e2e-llm.md.
+ * Environnement E2E complet :
+ * OPENAI_API_KEY (.env ou variables d'environnement), budget utilisable, modèle gpt-5-mini (panneau ou app_config.json). En cas d'échec : docs/troubleshooting/e2e-llm.md.
  */
 import { test, expect, type Page } from '@playwright/test'
 

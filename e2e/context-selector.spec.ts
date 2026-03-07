@@ -2,29 +2,25 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Sélecteur de contexte', () => {
   test.beforeEach(async ({ page }) => {
-    // Se connecter
-    await page.goto('/login')
-    await page.getByLabel(/nom d'utilisateur/i).fill('admin')
-    await page.getByLabel(/mot de passe/i).fill('admin123')
-    await page.getByRole('button', { name: /se connecter/i }).click()
-    await expect(page).toHaveURL('/')
+    await page.goto('/')
   })
 
   test('le résumé des sélections doit être entièrement visible en bas du panneau', async ({ page }) => {
-    // Attendre que les données soient chargées
-    await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible()
+    // Attendre que les données contexte soient chargées (bouton Personnages ou onglet)
+    await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible({ timeout: 15000 })
     
-    // Sélectionner un personnage
+    // Sélectionner un personnage (première checkbox du panneau contexte)
     const firstCharacter = page.locator('input[type="checkbox"]').first()
+    await expect(firstCharacter).toBeVisible({ timeout: 5000 })
     const firstCharacterRow = firstCharacter.locator('xpath=..')
     const selectedCharacterName = ((await firstCharacterRow.textContent()) ?? '')
       .replace(/📄\s*Complet/gi, '')
       .trim()
     await firstCharacter.click()
     
-    // Attendre que le résumé apparaisse
+    // Attendre que le résumé apparaisse après sélection
     const summaryToggle = page.getByTestId('selected-context-summary-toggle')
-    await expect(summaryToggle).toBeVisible()
+    await expect(summaryToggle).toBeVisible({ timeout: 10000 })
     
     // Vérifier que le résumé est visible (pas tronqué)
     const summarySection = summaryToggle.locator('xpath=../..')

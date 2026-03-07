@@ -1,12 +1,12 @@
 # E2E avec appels LLM
 
 Tests end-to-end Playwright qui déclenchent des générations LLM (ex. `graph-node-accept-reject`) ou valident le preflight (ex. `e2e-llm-preflight`).  
-Objectif : faire passer ces tests lorsque l'environnement est correctement configuré, et échouer tôt avec des messages clairs sinon.
+**Environnement E2E** : le projet dispose de tout l'environnement nécessaire pour faire passer la suite E2E (clé API, budget, GDD, etc.). Les tests sont conçus pour passer lorsque cet environnement est en place ; en cas de manque (clé, budget saturé), le preflight échoue tôt avec des messages explicites.
 
-## Prérequis
+## Prérequis (environnement E2E complet)
 
-- **`.env`** à la racine du projet avec `OPENAI_API_KEY`, ou variable d'environnement équivalente (ex. Windows).
-- **Budget** utilisable : quota > 0 et non saturé. Le preflight peut ajuster automatiquement le quota en E2E (voir ci‑dessous).
+- **`.env`** à la racine du projet avec `OPENAI_API_KEY`, ou variable d'environnement équivalente (ex. Windows). C'est le cas en local et en CI lorsque les secrets sont fournis.
+- **Budget** utilisable : quota > 0 et pourcentage < 100. Le preflight ajuste automatiquement le quota si besoin (voir ci‑dessous).
 
 ## Lancer les serveurs avant les tests (recommandé)
 
@@ -38,8 +38,7 @@ npm run test:e2e:llm:preflight
 ```
 
 Les specs concernés sont tagués `@e2e-llm` : `graph-node-accept-reject`, `e2e-llm-preflight`.  
-Pour exclure ces tests en CI (sans `OPENAI_API_KEY`) :  
-`playwright test --grep-invert @e2e-llm`.
+Avec l'environnement complet (clé, budget, etc.), tous les tests E2E sont exécutés. En CI **sans** secrets (ex. PR externes), on peut exclure les specs LLM : `playwright test --grep-invert @e2e-llm`.
 
 ## Specs
 

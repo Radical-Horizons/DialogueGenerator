@@ -1,0 +1,192 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "DialogueGenerator" [level=1] [ref=e6]
+      - 'generic "Date de compilation: 07/03/2026 23:53:22" [ref=e7]': "Build: 07/03/2026 23:53"
+    - generic [ref=e9]:
+      - generic [ref=e10]: 🔍
+      - generic [ref=e11]: Rechercher des actions, personnages, lieux...
+      - generic [ref=e12]: Ctrl+K
+    - generic [ref=e13]:
+      - button "Options" [ref=e14] [cursor=pointer]
+      - button "Actions ▼" [ref=e16] [cursor=pointer]:
+        - text: Actions
+        - generic [ref=e17]: ▼
+      - button "Menu utilisateur admin" [ref=e19] [cursor=pointer]: A
+  - main [ref=e20]:
+    - generic [ref=e21]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]: Contexte
+          - button "Replier le panneau gauche" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - button "Personnages (0)" [ref=e31] [cursor=pointer]
+            - button "Lieux (0)" [ref=e32] [cursor=pointer]
+            - button "Objets (0)" [ref=e33] [cursor=pointer]
+            - button "Espèces (0)" [ref=e34] [cursor=pointer]
+            - button "Communautés (0)" [ref=e35] [cursor=pointer]
+          - generic [ref=e38]: Chargement...
+          - generic [ref=e40]: Aucune sélection
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - button "Génération de Dialogues" [ref=e46] [cursor=pointer]
+          - button "Édition de Dialogues" [ref=e47] [cursor=pointer]
+          - button "📊 Éditeur de Graphe" [ref=e48] [cursor=pointer]
+        - generic [ref=e52]:
+          - generic [ref=e54]:
+            - button "📋 Charger preset ▼" [ref=e56] [cursor=pointer]:
+              - generic [ref=e57]: 📋 Charger preset
+              - generic [ref=e58]: ▼
+            - button "💾 Sauvegarder" [ref=e59] [cursor=pointer]
+            - generic "Sauvegardé" [ref=e61]
+          - generic [ref=e63]:
+            - heading "Scène Principale" [level=3] [ref=e64]
+            - generic [ref=e65]:
+              - generic [ref=e68]:
+                - generic [ref=e69]: "PJ: (Aucun) - Rechercher..."
+                - generic [ref=e71]: ▼
+              - button "⇄" [disabled] [ref=e72]
+              - generic [ref=e75]:
+                - generic [ref=e76]: "PNJ: (Aucun) - Rechercher..."
+                - generic [ref=e78]: ▼
+            - generic [ref=e79]:
+              - generic [ref=e82]:
+                - generic [ref=e83]: "Région: (Aucune) - Rechercher..."
+                - generic [ref=e85]: ▼
+              - generic [ref=e88]:
+                - generic [ref=e89]: "Lieu: Sélectionnez d'abord une région"
+                - generic [ref=e91]: ▼
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - button "Instructions de Scène" [ref=e95] [cursor=pointer]
+              - button "Auteur (global)" [ref=e96] [cursor=pointer]
+              - button "Système LLM (avancé)" [ref=e97] [cursor=pointer]
+            - generic [ref=e99]:
+              - generic [ref=e101]: Chargement des templates...
+              - generic [ref=e102]:
+                - generic [ref=e103]: "Brief de scène:"
+                - generic [ref=e104]:
+                  - button "Sauvegarder" [ref=e105] [cursor=pointer]
+                  - button "Restaurer" [ref=e106] [cursor=pointer]
+              - generic [ref=e108]:
+                - textbox "Brief de scène:" [ref=e109]:
+                  - /placeholder: "Ex: Bob doit annoncer à Alice qu'il part à l'aventure. Ton désiré: Héroïque. Inclure une condition sur la compétence 'Charisme' de Bob."
+                - generic [ref=e110]: 0 caractères
+          - generic [ref=e111]:
+            - generic [ref=e112]:
+              - heading "Structure du Dialogue" [level=3] [ref=e113]
+              - button "?" [ref=e115] [cursor=pointer]
+            - generic [ref=e116]:
+              - generic [ref=e118]:
+                - generic [ref=e119]: Position 1
+                - generic [ref=e121] [cursor=pointer]:
+                  - generic [ref=e122]: PNJ
+                  - generic [ref=e124]: ▼
+              - generic [ref=e126]:
+                - generic [ref=e127]: Position 2
+                - generic [ref=e129] [cursor=pointer]:
+                  - generic [ref=e130]: PJ
+                  - generic [ref=e132]: ▼
+              - generic [ref=e134]:
+                - generic [ref=e135]: Position 3
+                - generic [ref=e137] [cursor=pointer]:
+                  - generic [ref=e138]: Stop
+                  - generic [ref=e140]: ▼
+              - generic [ref=e142]:
+                - generic [ref=e143]: Position 4
+                - generic [ref=e145] [cursor=pointer]:
+                  - generic [ref=e146]: (Vide)
+                  - generic [ref=e148]: ▼
+              - generic [ref=e150]:
+                - generic [ref=e151]: Position 5
+                - generic [ref=e153] [cursor=pointer]:
+                  - generic [ref=e154]: (Vide)
+                  - generic [ref=e156]: ▼
+              - generic [ref=e158]:
+                - generic [ref=e159]: Position 6
+                - generic [ref=e161] [cursor=pointer]:
+                  - generic [ref=e162]: (Vide)
+                  - generic [ref=e164]: ▼
+          - generic [ref=e165]:
+            - generic [ref=e166]:
+              - generic [ref=e167]: Flags In-Game
+              - button "🔗 Sélectionner des flags..." [ref=e168] [cursor=pointer]
+            - generic [ref=e169]: Aucun flag sélectionné. Cliquez sur "Sélectionner des flags..." pour ajouter des flags in-game.
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - generic [ref=e173]:
+                - generic [ref=e174]: Modèle
+                - button "?" [ref=e176] [cursor=pointer]
+              - combobox "Modèle" [ref=e177]
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e180]: Niveau de raisonnement
+                - button "?" [ref=e182] [cursor=pointer]
+              - combobox "Niveau de raisonnement" [ref=e183]:
+                - option "Aucun (rapide, latence minimale)" [selected]
+                - option "Faible (raisonnement minimal)"
+                - option "Moyen (équilibré, recommandé)"
+                - option "Élevé (raisonnement approfondi)"
+                - option "Très élevé (raisonnement maximal)"
+            - generic [ref=e184]:
+              - generic [ref=e185]: Top_p (Nucleus Sampling)(non utilisé)
+              - generic [ref=e186]:
+                - slider [ref=e187]: "0.5"
+                - spinbutton [ref=e188]
+                - button "Réinitialiser" [ref=e189] [cursor=pointer]
+              - generic [ref=e190]: Non utilisé (temperature sera utilisée si disponible)
+          - generic [ref=e192]:
+            - generic [ref=e193]:
+              - generic [ref=e194]: Max tokens contexte
+              - generic [ref=e195]:
+                - slider [ref=e196]: "50000"
+                - generic [ref=e197]: 50K
+            - generic [ref=e198]:
+              - generic [ref=e199]: Max tokens génération
+              - generic [ref=e200]:
+                - slider [ref=e201]: "5100"
+                - generic [ref=e202]: Auto (5K)
+          - generic [ref=e203]:
+            - generic [ref=e204]:
+              - generic [ref=e205]: Nombre max de choix
+              - button "?" [ref=e207] [cursor=pointer]
+            - spinbutton [ref=e208]
+          - generic [ref=e209]:
+            - generic [ref=e210]: Tags narratifs
+            - generic [ref=e211]:
+              - generic [ref=e212] [cursor=pointer]:
+                - checkbox "#tension" [ref=e213]
+                - text: "#tension"
+              - generic [ref=e214] [cursor=pointer]:
+                - checkbox "#humour" [ref=e215]
+                - text: "#humour"
+              - generic [ref=e216] [cursor=pointer]:
+                - checkbox "#dramatique" [ref=e217]
+                - text: "#dramatique"
+              - generic [ref=e218] [cursor=pointer]:
+                - checkbox "#intime" [ref=e219]
+                - text: "#intime"
+              - generic [ref=e220] [cursor=pointer]:
+                - checkbox "#révélation" [ref=e221]
+                - text: "#révélation"
+          - button "Estimer le coût" [ref=e225] [cursor=pointer]
+      - generic [ref=e228]:
+        - generic [ref=e229]:
+          - generic [ref=e230]: Détails
+          - button "Replier le panneau droit" [ref=e231] [cursor=pointer]:
+            - img [ref=e232]
+        - generic [ref=e235]:
+          - generic [ref=e236]:
+            - button "Prompt" [ref=e237] [cursor=pointer]
+            - button "Dialogue généré" [ref=e238] [cursor=pointer]
+            - button "Détails" [ref=e239] [cursor=pointer]
+          - generic [ref=e245]: Aucun prompt disponible. Configurez votre génération.
+        - button "Générer Ctrl+Enter" [ref=e247] [cursor=pointer]:
+          - generic [ref=e248]: Générer
+          - generic [ref=e249]: Ctrl+Enter
+```
