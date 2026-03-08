@@ -91,8 +91,12 @@ async def list_unity_dialogues(
         # Créer le dossier s'il n'existe pas
         unity_dir.mkdir(parents=True, exist_ok=True)
         
-        # Lister tous les fichiers .json
-        json_files = list(unity_dir.glob("*.json"))
+        # Lister uniquement les vrais dialogues Unity et ignorer les sidecars techniques.
+        json_files = [
+            path for path in unity_dir.glob("*.json")
+            if not path.name.endswith(".layout.json")
+            and not path.name.endswith(".json.json")
+        ]
         metadata_list = []
         
         for json_file in json_files:

@@ -110,6 +110,33 @@ class TestListUnityDialogues:
         data = response.json()
         assert data["total"] == 0
         assert data["dialogues"] == []
+
+    def test_list_unity_dialogues_ignores_sidecar_files(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Ignore les sidecars layout/document générés par l'éditeur de graphe."""
+        (tmp_path / "dialogue_ok.json").write_text(
+            json.dumps([{"id": "START", "line": "OK"}]),
+            encoding="utf-8",
+        )
+        (tmp_path / "dialogue_ok.json.layout.json").write_text(
+            json.dumps({"nodes": {}}),
+            encoding="utf-8",
+        )
+        (tmp_path / "dialogue_ok.json.json").write_text(
+            json.dumps({"schemaVersion": "1.1.0", "nodes": []}),
+            encoding="utf-8",
+        )
+
+        mock_config_service.get_unity_dialogues_path.return_value = str(tmp_path)
+
+        response = client.get("/api/v1/unity-dialogues")
+
+        assert response.status_code == 200
+        data = response.json()
+        filenames = [d["filename"] for d in data["dialogues"]]
+        assert filenames == ["dialogue_ok.json"]
+        assert data["total"] == 1
     
     def test_list_unity_dialogues_path_not_configured(self, client, mock_config_service):
         """Test avec chemin Unity non configuré."""
