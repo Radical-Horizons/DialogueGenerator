@@ -8,17 +8,15 @@ import os
 import sys
 import json
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, TypeVar
 from fastapi import Depends
 from starlette.requests import Request
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from core.llm.llm_client import ILLMClient
 from services.configuration_service import ConfigurationService
-# InteractionService supprimé - système obsolète
 from services.dialogue_generation_service import DialogueGenerationService
 from services.linked_selector import LinkedSelectorService
-# FileInteractionRepository supprimé - système obsolète
 from services.repositories.llm_usage_repository import FileLLMUsageRepository
 from services.repositories.cost_budget_repository import FileCostBudgetRepository
 from services.llm_usage_service import LLMUsageService
@@ -38,86 +36,43 @@ from api.exceptions import NotFoundException
 
 logger = logging.getLogger(__name__)
 
-# Chemins par défaut
 DIALOGUE_GENERATOR_DIR = Path(__file__).resolve().parent.parent
-# DEFAULT_INTERACTIONS_STORAGE_DIR supprimé - système obsolète
 
-# Les singletons globaux ont été supprimés.
-# Tous les services sont maintenant gérés par ServiceContainer dans app.state.
+
+def _get_container(request: Request):
+    """Récupère le ServiceContainer depuis app.state.
+
+    Args:
+        request: La requête HTTP courante.
+
+    Returns:
+        Le ServiceContainer initialisé.
+
+    Raises:
+        RuntimeError: Si le container n'a pas été initialisé dans le lifespan.
+    """
+    container = getattr(request.app.state, "container", None)
+    if container is None:
+        raise RuntimeError(
+            "ServiceContainer not initialized in app.state. "
+            "Ensure app.state.container is set in lifespan."
+        )
+    return container
 
 
 def get_config_service(request: Request) -> ConfigurationService:
-    """Retourne le service de configuration.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de ConfigurationService.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_config_service()
-
-
-# _get_context_builder_singleton() supprimé - utilisez ServiceContainer via get_context_builder()
+    """Retourne le service de configuration depuis le container."""
+    return _get_container(request).get_config_service()
 
 
 def get_context_builder(request: Request) -> ContextBuilder:
-    """Retourne le ContextBuilder.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Le ContextBuilder charge les fichiers GDD au premier accès.
-    Les chemins GDD peuvent être configurés via les variables d'environnement :
-    - GDD_CATEGORIES_PATH : Chemin vers le répertoire des catégories GDD
-    - GDD_IMPORT_PATH : Chemin vers le répertoire contenant Vision.json (ou directement le fichier Vision.json)
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de ContextBuilder avec données GDD chargées.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_context_builder()
+    """Retourne le ContextBuilder (charge les fichiers GDD au premier accès)."""
+    return _get_container(request).get_context_builder()
 
 
 def get_prompt_engine(request: Request) -> PromptEngine:
-    """Retourne le PromptEngine.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de PromptEngine.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_prompt_engine()
-
-
-# get_interaction_repository supprimé - système obsolète
-# get_interaction_service supprimé - système obsolète
-
-# reset_singletons() supprimé - le ServiceContainer gère déjà le reset via container.reset()
+    """Retourne le PromptEngine depuis le container."""
+    return _get_container(request).get_prompt_engine()
 
 
 def get_dialogue_generation_service(
@@ -289,114 +244,32 @@ def require_debug_access(request: Request) -> None:
     )
 
 
-# Variables globales _vocab_service et _guides_service supprimées - utilisez ServiceContainer
-
-
 def get_vocabulary_service(request: Request) -> VocabularyService:
-    """Retourne le service de vocabulaire.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de VocabularyService.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_vocabulary_service()
+    """Retourne le service de vocabulaire depuis le container."""
+    return _get_container(request).get_vocabulary_service()
 
 
 def get_narrative_guides_service(request: Request) -> NarrativeGuidesService:
-    """Retourne le service des guides narratifs.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de NarrativeGuidesService.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_narrative_guides_service()
+    """Retourne le service des guides narratifs depuis le container."""
+    return _get_container(request).get_narrative_guides_service()
 
 
 def get_notion_import_service() -> NotionImportService:
-    """Retourne le service d'import Notion (singleton).
-    
-    Returns:
-        Instance de NotionImportService.
-    """
+    """Retourne le service d'import Notion."""
     return NotionImportService()
 
 
 def get_skill_catalog_service(request: Request) -> SkillCatalogService:
-    """Retourne le service de catalogue des compétences.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de SkillCatalogService.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_skill_catalog_service()
+    """Retourne le service de catalogue des compétences depuis le container."""
+    return _get_container(request).get_skill_catalog_service()
 
 
 def get_trait_catalog_service(request: Request) -> TraitCatalogService:
-    """Retourne le service de catalogue des traits.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de TraitCatalogService.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_trait_catalog_service()
+    """Retourne le service de catalogue des traits depuis le container."""
+    return _get_container(request).get_trait_catalog_service()
 
 
 def get_preset_service(request: Request) -> PresetService:
-    """Retourne le service de gestion des presets.
-    
-    Utilise le ServiceContainer depuis app.state (système unifié).
-    
-    Args:
-        request: La requête HTTP (injecté automatiquement par FastAPI).
-        
-    Returns:
-        Instance de PresetService.
-        
-    Raises:
-        RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
-    """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
-    return container.get_preset_service()
+    """Retourne le service de gestion des presets depuis le container."""
+    return _get_container(request).get_preset_service()
 
