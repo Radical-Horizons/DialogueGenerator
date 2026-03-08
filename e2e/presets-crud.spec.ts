@@ -11,6 +11,7 @@
 import { test, expect, type Page } from '@playwright/test'
 
 test.describe('Presets CRUD Operations [P0]', () => {
+  test.describe.configure({ mode: 'serial' })
   // Helper pour s'authentifier
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: /connexion/i })
@@ -56,9 +57,9 @@ test.describe('Presets CRUD Operations [P0]', () => {
     await page.locator('#preset-name').fill('Test Preset E2E')
     await page.locator('#preset-icon').fill('🎭')
     await page.getByRole('button', { name: /^créer$/i }).click()
-    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: 5000 })
-    await page.getByTestId('preset-dropdown-trigger').click()
-    await expect(page.getByText('Test Preset E2E').first()).toBeVisible({ timeout: 8000 })
+    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: 20000 })
+    await page.getByTestId('preset-dropdown-trigger').click({ timeout: 10000 })
+    await expect(page.getByText('Test Preset E2E').first()).toBeVisible({ timeout: 15000 })
   })
 
   test('[P0] should load an existing preset', async ({ page }) => {
@@ -146,9 +147,9 @@ test.describe('Presets CRUD Operations [P0]', () => {
     await page.locator('#preset-name').fill('Preset Obsolètes E2E')
     await page.locator('#preset-icon').fill('📋')
     await page.getByRole('button', { name: /^créer$/i }).click()
-    await expect(
-      page.getByText(/preset.*créé|créé avec succès|référence.*obsolète/i)
-    ).toBeVisible({ timeout: 8000 })
+    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: 15000 })
+    await page.getByTestId('preset-dropdown-trigger').click()
+    await expect(page.getByText(/Preset Obsolètes E2E/i)).toBeVisible({ timeout: 5000 })
   })
 
   test('[P1] should cancel loading preset with obsolete references', async ({ page }) => {

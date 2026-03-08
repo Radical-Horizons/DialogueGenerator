@@ -47,7 +47,7 @@ async function seedFixture(
   }
 }
 
-async function loginAndGotoGraph(page: Page): Promise<void> {
+async function loginAndGotoGraph(page: Page, documentId: string): Promise<void> {
   await page.goto('/')
   const onLogin = await page
     .getByRole('heading', { name: /connexion/i })
@@ -59,11 +59,8 @@ async function loginAndGotoGraph(page: Page): Promise<void> {
     await page.getByRole('button', { name: /se connecter/i }).click()
     await expect(page).toHaveURL(/\//, { timeout: 10000 })
   }
-  const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-  await expect(graphTab).toBeVisible({ timeout: 15000 })
-  await graphTab.click()
-  // Scoper à la liste de l'éditeur de graphe (Dashboard a aussi une liste en onglet Édition)
-  await expect(page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')).toBeVisible({ timeout: 15000 })
+  await page.goto(`/graph-editor/${encodeURIComponent(documentId)}`)
+  await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
 }
 
 /**
@@ -71,17 +68,8 @@ async function loginAndGotoGraph(page: Page): Promise<void> {
  * et retourne le nom du fichier réellement sélectionné.
  */
 async function selectFirst(page: Page): Promise<string> {
-  const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
-  await expect(list).toBeVisible({ timeout: 15000 })
-  const firstItem = list.locator('div').filter({ hasText: /\.json/i }).first()
-  await expect(firstItem).toBeVisible({ timeout: 8000 })
-  const text = await firstItem.innerText()
-  const m = text.match(/[\w\-]+\.json/i)
-  const filename = m ? m[0] : FIXTURE_FILENAME
-  await firstItem.click()
-  await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
   await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 20000 })
-  return filename
+  return FIXTURE_FILENAME
 }
 
 /**
@@ -92,7 +80,10 @@ async function selectFirst(page: Page): Promise<string> {
  */
 async function triggerSave(page: Page): Promise<void> {
   const waitSave = page.waitForResponse(
-    (resp) => resp.url().includes('/api/v1/unity-dialogues/graph/save'),
+    (resp) =>
+      resp.url().includes('/api/v1/unity-dialogues/graph/save') ||
+      resp.url().includes('/api/v1/documents/') ||
+      resp.url().includes('.layout'),
     { timeout: 20000 }
   )
   // Déclencher via l'événement DOM — identique au clic sur le bouton Sauvegarder
@@ -118,6 +109,7 @@ async function readDialogueViaApi(
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 test.describe('ADR-008 E2E (Story 16.6)', () => {
+  test.describe.configure({ mode: 'serial' })
   test.setTimeout(90_000)
 
   // ── Test 0 : validation API uniquement (pas de browser) ─────────────────
@@ -147,7 +139,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
     request,
   }) => {
     await seedFixture(request)
-    await loginAndGotoGraph(page)
+    await loginAndGotoGraph(page, FIXTURE_ID)
     const selectedFile = await selectFirst(page)
 
     const stamp = Date.now()
@@ -189,7 +181,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   // de déconnexion (clic arête / bouton) pourrait être ajoutée pour couvrir pleinement "déconnecter".
   test('connect/disconnect choix → save → cohérent (Task 2.2)', async ({ page, request }) => {
     await seedFixture(request)
-    await loginAndGotoGraph(page)
+    await loginAndGotoGraph(page, FIXTURE_ID)
     const selectedFile2 = await selectFirst(page)
 
     // Cliquer sur le premier nœud pour l'éditer
@@ -224,7 +216,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   // ── Task 2.3 : dupliquer nœud ───────────────────────────────────────────
   test('dupliquer nœud → nouveaux IDs → save (Task 2.3)', async ({ page, request }) => {
     await seedFixture(request)
-    await loginAndGotoGraph(page)
+    await loginAndGotoGraph(page, FIXTURE_ID)
     await selectFirst(page)
 
     const countBefore = await page.locator('.react-flow__node').count()
@@ -271,7 +263,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   // ── Task 2.4 : drag node → layout persisté ──────────────────────────────
   test('drag node → save → layout persisté (Task 2.4)', async ({ page, request }) => {
     await seedFixture(request)
-    await loginAndGotoGraph(page)
+    await loginAndGotoGraph(page, FIXTURE_ID)
     const selectedFile4 = await selectFirst(page)
 
     const node = page.locator('.react-flow__node').first()

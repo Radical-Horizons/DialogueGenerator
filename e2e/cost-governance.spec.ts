@@ -9,7 +9,10 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 
+const API_BASE = 'http://127.0.0.1:4243'
+
 test.describe('Cost Governance (Story 0.7)', () => {
+  test.describe.configure({ mode: 'serial' })
   // Helper pour s'authentifier
   const login = async (page: Page) => {
     // Vérifier si on est sur la page de login
@@ -30,10 +33,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
 
   // Helper pour setup le budget via API
   const setupBudget = async (page: Page, quota: number, amount: number = 0) => {
-    // Mettre à jour le quota
-    await page.request.put('http://localhost:4243/api/v1/costs/budget', {
-      data: { quota }
-    })
+    await page.request.put(`${API_BASE}/api/v1/costs/budget`, { data: { quota } })
     
     // Si amount > 0, on doit simuler des dépenses en modifiant directement le fichier
     // ou en utilisant l'API pour mettre à jour (si disponible)
@@ -74,22 +74,22 @@ test.describe('Cost Governance (Story 0.7)', () => {
     }
   })
 
-  test('AC#1: Configuration budget fonctionne', async ({ page }) => {
-    // Test via API directe
-    const response = await page.request.put('http://localhost:4243/api/v1/costs/budget', {
+  test('AC#1: Configuration budget fonctionne', async ({ request }) => {
+    const response = await request.put(`${API_BASE}/api/v1/costs/budget`, {
       data: { quota: 150.0 }
     })
-    
-    expect(response.status()).toBe(200)
+    if (!response.ok()) {
+      const text = await response.text().catch(() => '')
+      throw new Error(`PUT budget failed: ${response.status()} ${text}`)
+    }
     const data = await response.json()
     expect(Number(data.quota)).toBeGreaterThanOrEqual(149)
     expect(Number(data.quota)).toBeLessThanOrEqual(151)
-    expect(data.amount).toBeGreaterThanOrEqual(0)
-    expect(data.percentage).toBeGreaterThanOrEqual(0)
-    expect(data.remaining).toBeGreaterThanOrEqual(0)
-    
-    // Vérifier que le budget a été mis à jour
-    const getResponse = await page.request.get('http://localhost:4243/api/v1/costs/budget')
+    expect(Number(data.amount)).toBeGreaterThanOrEqual(0)
+    expect(Number(data.percentage)).toBeGreaterThanOrEqual(0)
+    expect(Number(data.remaining)).toBeGreaterThanOrEqual(0)
+
+    const getResponse = await request.get(`${API_BASE}/api/v1/costs/budget`)
     expect(getResponse.status()).toBe(200)
     const budgetData = await getResponse.json()
     expect(Number(budgetData.quota)).toBeGreaterThanOrEqual(149)
@@ -99,7 +99,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
   test('AC#1: Toast warning affiché à 90%', async ({ page }) => {
     // Setup : Configurer un budget avec quota très petit
     // Pour atteindre 90% rapidement, on utilise un quota de 0.01€
-    await page.request.put('http://localhost:4243/api/v1/costs/budget', {
+    await page.request.put(`${API_BASE}/api/v1/costs/budget`, {
       data: { quota: 0.01 }
     })
     
@@ -116,7 +116,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
     // Pour l'instant, on teste que le système détecte correctement le pourcentage
     
     // Vérifier le budget actuel
-    const budgetResponse = await page.request.get('http://localhost:4243/api/v1/costs/budget')
+    const budgetResponse = await page.request.get(`${API_BASE}/api/v1/costs/budget`)
     const budget = await budgetResponse.json()
     
     // Si le budget est proche de 90%, tester la génération
@@ -138,7 +138,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
 
   test('AC#2: Modal bloque génération à 100%', async ({ page }) => {
     // Setup : Configurer un budget avec quota très petit pour atteindre 100% rapidement
-    await page.request.put('http://localhost:4243/api/v1/costs/budget', {
+    await page.request.put(`${API_BASE}/api/v1/costs/budget`, {
       data: { quota: 0.001 }
     })
     
@@ -147,13 +147,13 @@ test.describe('Cost Governance (Story 0.7)', () => {
     // Pour ce test, on teste que le middleware bloque correctement
     
     // Vérifier le budget actuel
-    const budgetResponse = await page.request.get('http://localhost:4243/api/v1/costs/budget')
+    const budgetResponse = await page.request.get(`${API_BASE}/api/v1/costs/budget`)
     const budget = await budgetResponse.json()
     
     // Si le budget est à 100%, tester que le middleware bloque
     if (budget.percentage >= 100) {
       // Tester que le middleware bloque avec HTTP 429
-      const generateResponse = await page.request.post('http://localhost:4243/api/v1/dialogues/generate/unity-dialogue', {
+      const generateResponse = await page.request.post(`${API_BASE}/api/v1/dialogues/generate/unity-dialogue`, {
         data: {
           user_instructions: 'Test generation',
           context_selections: {

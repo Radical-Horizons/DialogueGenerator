@@ -1,15 +1,18 @@
 /**
  * Tests E2E pour la modal de progression de génération avec SSE streaming.
- * 
- * Scénarios testés :
- * - AC#1 : Modal s'affiche au lancement génération avec streaming visible
- * - AC#2 : Interruption fonctionne (bouton "Interrompre" → modal ferme)
- * - AC#3 : Réduction fonctionne (icône minimize → badge compact)
- * - AC#4 : Auto-fermeture après succès + nœuds ajoutés au graphe
+ *
+ * Ces tests exigent une génération LLM complète (API key, budget, preflight OK).
+ * Désactivés par défaut pour éviter timeouts/flakiness ; activer manuellement
+ * ou en CI avec env dédié (ex. E2E_FULL_GENERATION=1).
  */
 import { test, expect, type Page } from '@playwright/test'
 
 test.describe('Generation Progress Modal with SSE Streaming', () => {
+  test.skip(
+    () => process.env.E2E_FULL_GENERATION !== '1',
+    'Exige E2E_FULL_GENERATION=1 (génération LLM complète)'
+  )
+
   const selectFirstCharacter = async (page: Page) => {
     await page.getByText('(Aucun) - Rechercher...').first().click()
     await page.keyboard.press('ArrowDown')

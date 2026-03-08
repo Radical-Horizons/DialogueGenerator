@@ -3,12 +3,13 @@
  * Layout avec header, canvas, panel latéral et footer.
  */
 import { memo, useCallback, useState, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ReactFlowProvider } from 'reactflow'
 import { GraphCanvas } from '../components/graph/GraphCanvas'
 import { NodeEditorPanel } from '../components/graph/NodeEditorPanel'
 import { DeleteNodeConfirmModal } from '../components/graph/DeleteNodeConfirmModal'
 import { useGraphStore } from '../store/graphStore'
+import * as unityDialoguesAPI from '../api/unityDialogues'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { useToast } from '../components/shared'
 import { theme } from '../theme'
@@ -16,13 +17,18 @@ import { theme } from '../theme'
 export const GraphEditorPage = memo(function GraphEditorPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { dialogueId } = useParams<{ dialogueId?: string }>()
   const toast = useToast()
   
   const {
     loadDialogue,
+    loadDialogueByDocumentId,
     saveDialogue,
     validateGraph,
     updateMetadata,
+    createEmptyNode,
+    addNode,
+    setSelectedNode,
     dialogueMetadata,
     validationErrors,
     isLoading,
@@ -46,6 +52,50 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
       })
     }
   }, [location.state, loadDialogue, toast])
+
+  // Charger aussi depuis l'URL pour rendre la page autonome et deep-linkable
+  useEffect(() => {
+    const rawDialogueId = dialogueId?.trim()
+    if (!rawDialogueId || location.state?.dialogue) return
+
+    const decodedDialogueId = decodeURIComponent(rawDialogueId)
+    const normalizedDialogueId = decodedDialogueId.replace(/\.json$/i, '')
+    if (!normalizedDialogueId) return
+
+    const currentFilename = dialogueMetadata.filename?.replace(/\.json$/i, '')
+    if (currentFilename === normalizedDialogueId) return
+
+    const loadFromRoute = async () => {
+      if (/\.json$/i.test(decodedDialogueId)) {
+        const response = await unityDialoguesAPI.getUnityDialogue(decodedDialogueId)
+        let parsed: unknown = null
+        try {
+          parsed = JSON.parse(response.json_content)
+        } catch {
+          parsed = null
+        }
+
+        const isCanonicalDocument =
+          !!parsed &&
+          typeof parsed === 'object' &&
+          !Array.isArray(parsed) &&
+          Array.isArray((parsed as { nodes?: unknown[] }).nodes)
+
+        if (isCanonicalDocument) {
+          await loadDialogueByDocumentId(normalizedDialogueId)
+          return
+        }
+
+        await loadDialogue(response.json_content, undefined, decodedDialogueId)
+        return
+      }
+      await loadDialogueByDocumentId(normalizedDialogueId)
+    }
+
+    loadFromRoute().catch((error) => {
+      toast(`Erreur lors du chargement: ${error.message}`, 'error')
+    })
+  }, [dialogueId, location.state, loadDialogue, loadDialogueByDocumentId, dialogueMetadata.filename, toast])
   
   // Handler pour sauvegarder
   const handleSave = useCallback(async () => {
@@ -109,6 +159,17 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
   const handleExportToUnity = useCallback(() => {
     toast('Export Unity non implémenté', 'warning', 2000)
   }, [toast])
+
+  const handleCreateManualNode = useCallback(() => {
+    const count = nodes.length
+    const node = createEmptyNode({
+      x: 180 + count * 24,
+      y: 140 + count * 24,
+    })
+    addNode(node)
+    setSelectedNode(node.id)
+    toast('Nouveau nœud ajouté', 'success', 1500)
+  }, [addNode, createEmptyNode, nodes.length, setSelectedNode, toast])
   
   // Handler pour retour au dashboard
   const handleBack = useCallback(() => {
@@ -241,6 +302,24 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
           >
             ✓ Valider
           </button>
+
+          <button
+            type="button"
+            data-testid="btn-new-manual-node"
+            onClick={handleCreateManualNode}
+            style={{
+              padding: '0.5rem 1rem',
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: 4,
+              backgroundColor: theme.button.default.background,
+              color: theme.button.default.color,
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+            }}
+            title="Créer un nœud vide"
+          >
+            ➕ Nouveau nœud
+          </button>
           
           <button
             onClick={handleSave}
@@ -289,6 +368,7 @@ export const GraphEditorPage = memo(function GraphEditorPage() {
       >
         {/* Canvas */}
         <div
+          data-testid="graph-canvas"
           style={{
             flex: showNodeEditor ? '1 1 70%' : '1 1 100%',
             position: 'relative',

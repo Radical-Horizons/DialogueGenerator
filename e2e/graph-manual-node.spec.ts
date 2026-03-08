@@ -8,6 +8,16 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 
+const API_BASE = 'http://127.0.0.1:4243'
+const FIXTURE_ID = 'e2e-manual-node-fixture'
+const FIXTURE_DOC = {
+  schemaVersion: '1.1.0',
+  nodes: [
+    { id: 'START', speaker: 'E2E', line: 'Start', nextNode: 'END', choices: [] },
+    { id: 'END', speaker: 'E2E', line: 'End', nextNode: null, choices: [] },
+  ],
+}
+
 test.describe('Graph Manual Node (Story 1.6)', () => {
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: /connexion/i })
@@ -24,28 +34,18 @@ test.describe('Graph Manual Node (Story 1.6)', () => {
   }
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000')
+    await page.goto('/')
     await login(page)
-    await page.getByRole('heading', { name: /génération/i }).waitFor({ state: 'visible', timeout: 10000 })
-    const graphTab = page.locator('button:has-text("Graphe")').or(page.locator('[data-testid="graph-tab"]'))
-    if (await graphTab.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await graphTab.click()
-      await page.waitForLoadState('domcontentloaded')
-    }
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
   })
 
-  test('AC#1–#2: Nouveau nœud → panneau d\'édition s\'ouvre', async ({ page }) => {
-    // Sélectionner un dialogue dans la liste (sinon "Nouveau nœud" est désactivé)
-    const firstDialogue = page.locator('[data-testid*="dialogue-list"] li').or(
-      page.locator('div[role="list"] > div').or(page.locator('ul li')).first()
-    ).first()
-    const listItem = page.locator('a, [role="button"], div').filter({ hasText: /\.json|dialogue/i }).first()
-    if (await listItem.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await listItem.click()
-      await page.waitForLoadState('networkidle').catch(() => {})
-    } else {
-      test.skip('Aucun dialogue dans la liste - créer un dialogue ou importer un JSON')
-    }
+  test('AC#1–#2: Nouveau nœud → panneau d\'édition s\'ouvre', async ({ page, request }) => {
+    const seedRes = await request.put(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`, {
+      data: { document: FIXTURE_DOC, revision: 1 },
+    })
+    expect([200, 409]).toContain(seedRes.status())
+    await page.goto(`/graph-editor/${FIXTURE_ID}`)
+    await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 20000 })
 
     // Clic sur "Nouveau nœud" (data-testid prioritaire pour stabilité E2E)
     const newNodeBtn = page.getByTestId('btn-new-manual-node').or(
@@ -55,12 +55,6 @@ test.describe('Graph Manual Node (Story 1.6)', () => {
     await newNodeBtn.click()
 
     // Le panneau d'édition doit s'afficher (champ speaker, line ou titre "Édition")
-    await expect(
-      page.locator('input[name="speaker"]').or(
-        page.locator('input[name="line"]').or(
-          page.getByText(/édition de nœud|speaker|réplique/i)
-        )
-      )
-    ).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: 5000 })
   })
 })

@@ -5,6 +5,16 @@
 import { test, expect } from '@playwright/test'
 
 const COMFORT_LOAD_MS = 3000 // p95 load < 3s pour cible confort (N < 500)
+const API_BASE = 'http://127.0.0.1:4243'
+const FIXTURE_ID = 'e2e-perf-fixture'
+const FIXTURE_DOC = {
+  schemaVersion: '1.1.0',
+  nodes: [
+    { id: 'START', speaker: 'Perf', line: 'Start', nextNode: 'N1', choices: [] },
+    { id: 'N1', speaker: 'Perf', line: 'Middle', nextNode: 'END', choices: [] },
+    { id: 'END', speaker: 'Perf', line: 'End', nextNode: null, choices: [] },
+  ],
+}
 
 test.describe('ADR-008 Perf (Story 16.6)', () => {
   test.setTimeout(60_000)
@@ -25,18 +35,13 @@ test.describe('ADR-008 Perf (Story 16.6)', () => {
       await expect(page).toHaveURL(/\//, { timeout: 10000 })
     }
 
-    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-    await expect(graphTab).toBeVisible({ timeout: 15000 })
-    await graphTab.click()
-    await expect(
-      page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
-    ).toBeVisible({ timeout: 15000 })
+    const seedRes = await request.put(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`, {
+      data: { document: FIXTURE_DOC, revision: 1 },
+    })
+    expect([200, 409]).toContain(seedRes.status())
 
-    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
-    const firstItem = list.locator('div').filter({ hasText: /\.json/i }).first()
-    await expect(firstItem).toBeVisible({ timeout: 8000 })
     const start = Date.now()
-    await firstItem.click()
+    await page.goto(`/graph-editor/${FIXTURE_ID}`)
     await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
     await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 20000 })
     const loadMs = Date.now() - start

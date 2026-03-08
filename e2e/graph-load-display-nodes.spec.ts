@@ -9,6 +9,28 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 
+const API_BASE = 'http://127.0.0.1:4243'
+const FIXTURE_ID = 'e2e-graph-load-fixture'
+const FIXTURE_DOC = {
+  schemaVersion: '1.1.0',
+  nodes: [
+    {
+      id: 'START',
+      speaker: 'E2E',
+      line: 'Fixture graph load',
+      nextNode: 'END',
+      choices: [],
+    },
+    {
+      id: 'END',
+      speaker: 'E2E',
+      line: 'Fin',
+      nextNode: null,
+      choices: [],
+    },
+  ],
+}
+
 test.describe('Graph load – affichage des nœuds', () => {
   test.setTimeout(60_000)
 
@@ -23,35 +45,29 @@ test.describe('Graph load – affichage des nœuds', () => {
     }
   }
 
-  test('ouvrir un dialogue et vérifier que les nœuds du graphe s\'affichent', async ({ page }) => {
+  const seedFixture = async (
+    request: Parameters<Parameters<typeof test>[1]>[0]['request']
+  ): Promise<void> => {
+    const res = await request.put(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`, {
+      data: { document: FIXTURE_DOC, revision: 1 },
+    })
+    if (!(res.ok() || res.status() === 409)) {
+      throw new Error(`Impossible de seed la fixture graphe (${res.status()})`)
+    }
+  }
+
+  test('ouvrir un dialogue et vérifier que les nœuds du graphe s\'affichent', async ({ page, request }) => {
     await page.goto('/')
     await login(page)
-
-    // Aller sur l'éditeur de graphe
-    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-    await expect(graphTab).toBeVisible({ timeout: 15000 })
-    await graphTab.click()
-
-    // Attendre la liste des dialogues (scoper à l'éditeur de graphe : même liste en onglet Édition)
-    const list = page.getByTestId('graph-editor').locator('[data-testid="unity-dialogue-list"]:visible').first()
-    await expect(list).toBeVisible({ timeout: 15000 })
-
-    // Cliquer sur le premier dialogue affiché
-    const firstDialogue = list.locator('[data-testid="unity-dialogue-item"]:visible').first()
-    await expect(firstDialogue).toBeVisible({ timeout: 8000 })
-    await firstDialogue.click()
-    await expect(firstDialogue).toHaveAttribute('aria-pressed', 'true', { timeout: 5000 })
+    await seedFixture(request)
+    await page.goto(`/graph-editor/${FIXTURE_ID}`)
 
     // Attendre la fin du chargement (disparition de "Chargement du graphe...")
     await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
 
-    // Le canvas graphe applicatif doit être visible
-    const graphCanvas = page.getByTestId('graph-editor').locator('[data-testid="graph-canvas"]:visible').first()
-    await expect(graphCanvas).toBeVisible({ timeout: 15000 })
-
     // Vérifier qu'au moins un nœud est affiché à l'écran (régression : bug "aucun nœud au chargement")
     // On exige toBeVisible : si les nœuds ne s'affichent pas, le test doit échouer.
-    const nodes = page.getByTestId('graph-editor').locator('[data-testid="graph-node-content"]:visible')
+    const nodes = page.locator('[data-testid="graph-node-content"]')
     await expect(nodes.first()).toBeVisible({ timeout: 15000 })
     const count = await nodes.count()
     expect(count).toBeGreaterThan(0)
@@ -59,25 +75,15 @@ test.describe('Graph load – affichage des nœuds', () => {
 
   test('drag dialogue node then release – positions stables, pas d’erreurs console en boucle', async ({
     page,
+    request,
   }) => {
     await page.goto('/')
     await login(page)
-
-    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-    await expect(graphTab).toBeVisible({ timeout: 15000 })
-    await graphTab.click()
-
-    const list = page.getByTestId('graph-editor').locator('[data-testid="unity-dialogue-list"]:visible').first()
-    await expect(list).toBeVisible({ timeout: 15000 })
-    const firstDialogue = list.locator('[data-testid="unity-dialogue-item"]:visible').first()
-    await expect(firstDialogue).toBeVisible({ timeout: 8000 })
-    await firstDialogue.click()
-    await expect(firstDialogue).toHaveAttribute('aria-pressed', 'true', { timeout: 5000 })
+    await seedFixture(request)
+    await page.goto(`/graph-editor/${FIXTURE_ID}`)
 
     await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
-    const graphCanvas = page.getByTestId('graph-editor').locator('[data-testid="graph-canvas"]:visible').first()
-    await expect(graphCanvas).toBeVisible({ timeout: 15000 })
-    const nodeElements = page.getByTestId('graph-editor').locator('[data-testid="graph-node-content"]:visible')
+    const nodeElements = page.locator('[data-testid="graph-node-content"]:visible')
     await expect(nodeElements.first()).toBeVisible({ timeout: 15000 })
 
     const consoleErrors: string[] = []

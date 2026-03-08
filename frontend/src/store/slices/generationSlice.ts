@@ -323,11 +323,19 @@ export const createGenerationSlice: StateCreator<
     if (node.data.status === 'accepted') return
 
     // Mise à jour optimiste
-    set((currentState) => ({
-      nodes: currentState.nodes.map((n) =>
+    set((currentState) => {
+      const nextNodes = currentState.nodes.map((n) =>
         n.id === nodeId ? { ...n, data: { ...n.data, status: 'accepted' as const } } : n
-      ),
-    }))
+      )
+      const synced =
+        currentState.document != null && currentState.layout != null
+          ? syncDocAndLayout(nextNodes, currentState.edges, currentState.layout as Record<string, unknown>)
+          : null
+      return {
+        nodes: nextNodes,
+        ...(synced && { document: synced.document, layout: synced.layout }),
+      }
+    })
 
     try {
       const dialogueId = get().dialogueMetadata.filename || 'current'
@@ -336,11 +344,19 @@ export const createGenerationSlice: StateCreator<
       get().markDirty()
     } catch (err) {
       // Rollback
-      set((currentState) => ({
-        nodes: currentState.nodes.map((n) =>
+      set((currentState) => {
+        const nextNodes = currentState.nodes.map((n) =>
           n.id === nodeId ? { ...n, data: { ...n.data, status: 'pending' as const } } : n
-        ),
-      }))
+        )
+        const synced =
+          currentState.document != null && currentState.layout != null
+            ? syncDocAndLayout(nextNodes, currentState.edges, currentState.layout as Record<string, unknown>)
+            : null
+        return {
+          nodes: nextNodes,
+          ...(synced && { document: synced.document, layout: synced.layout }),
+        }
+      })
       const { toastManager } = await import('../../components/shared/Toast')
       toastManager.show(
         'Impossible de sauvegarder l\u2019acceptation. Réessayez.',

@@ -78,6 +78,8 @@ data/UnityData/
 
 # Dialogue JSON (générés / sortie Unity)
 Assets/Dialogue/*.json
+# Unity / éditeur meta
+*.meta
 
 # Temporary files
 *.tmp

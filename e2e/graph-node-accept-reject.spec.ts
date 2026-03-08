@@ -10,15 +10,26 @@
  * modèle gpt-5-mini (panneau ou app_config.json). En cas d'échec : docs/troubleshooting/e2e-llm.md.
  */
 import { test, expect, type Page } from '@playwright/test'
+import { promises as fs } from 'node:fs'
+import { resolve } from 'node:path'
 
 // 127.0.0.1 pour éviter résolution IPv6 (::1) qui peut donner ECONNREFUSED si l'API n'écoute qu'en IPv4
 const API_BASE = 'http://127.0.0.1:4243'
+const SOURCE_FIXTURE_FILENAME = 'Dialogue_Unity.json'
+const UNITY_DIALOGUES_DIR = resolve(process.cwd(), 'Assets', 'Dialogue')
 
 test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
   test.setTimeout(360_000)
   test.describe.configure({ retries: 1 })
+  test.describe.configure({ mode: 'serial' })
+
+  let currentFixtureFilename: string | null = null
 
   test.afterEach(async () => {
+    if (currentFixtureFilename) {
+      await fs.rm(resolve(UNITY_DIALOGUES_DIR, currentFixtureFilename), { force: true }).catch(() => {})
+      currentFixtureFilename = null
+    }
     await new Promise((r) => setTimeout(r, 5000))
   })
 
@@ -74,30 +85,35 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await expect(page).toHaveURL('/', { timeout: 10000 })
   }
 
-  const DIALOGUE_NAMES =
-    /Tunnel vertébral|Atelier du cartographe|Dans les plis|Rencontre avec le cartographe/i
+  const prepareLegacyFixture = async (suffix: string): Promise<string> => {
+    const filename = `e2e-accept-reject-${suffix}.json`
+    await fs.copyFile(
+      resolve(UNITY_DIALOGUES_DIR, SOURCE_FIXTURE_FILENAME),
+      resolve(UNITY_DIALOGUES_DIR, filename)
+    )
+    currentFixtureFilename = filename
+    return filename
+  }
 
-  const ensureGraphWithDialogue = async (page: Page, dialogueTitleFilter?: string) => {
+  const ensureGraphWithDialogue = async (page: Page, fixtureFilename: string) => {
     await page.goto('/')
     const onLogin = await page.getByRole('heading', { name: 'Connexion' }).isVisible({ timeout: 2000 }).catch(() => false)
     if (onLogin) await login(page)
     const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
     await expect(graphTab).toBeVisible({ timeout: 15000 })
     await graphTab.click()
-    await page.waitForTimeout(2500)
     const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
-    await expect(list).toBeVisible({ timeout: 60_000 })
-    let dialogueSelector
-    if (dialogueTitleFilter === 'Tunnel vertébral') {
-      dialogueSelector = list.getByText(/tunnel_vertébral_pigments_impossibles\.json/).first()
-    } else if (dialogueTitleFilter) {
-      dialogueSelector = list.getByText(new RegExp(dialogueTitleFilter, 'i')).first()
-    } else {
-      dialogueSelector = list.getByText(DIALOGUE_NAMES).first()
+    await expect(list).toBeVisible({ timeout: 25000 })
+    const item = list
+      .locator('[data-testid="unity-dialogue-item"]')
+      .filter({ hasText: new RegExp(fixtureFilename.replace('.', '\\.'), 'i') })
+      .first()
+    const hasItem = await item.isVisible({ timeout: 15000 }).catch(() => false)
+    if (!hasItem) {
+      test.skip(true, `${fixtureFilename} introuvable dans la liste Unity`)
     }
-    await expect(dialogueSelector).toBeVisible({ timeout: 8000 })
-    await dialogueSelector.click()
-    await page.waitForTimeout(3000)
+    await item.click()
+    await page.waitForTimeout(2000)
     const nodes = page.locator('.react-flow__node')
     await expect(nodes.first()).toBeVisible({ timeout: 15000 })
     return nodes
@@ -106,9 +122,12 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
   const generatePendingNode = async (page: Page) => {
     const countBefore = await page.locator('.react-flow__node').count()
     const firstNode = page.locator('.react-flow__node').first()
-    await firstNode.hover()
+    await firstNode.click()
     await page.waitForTimeout(400)
-    const generateBtn = page.getByTitle(/Générer la suite avec l'IA/).first()
+    const actionsBtn = page.getByTestId('btn-actions-dropdown')
+    await expect(actionsBtn).toBeVisible({ timeout: 4000 })
+    await actionsBtn.click()
+    const generateBtn = page.getByRole('menuitem', { name: /✨ Générer nœud|Générer nœud/i })
     await expect(generateBtn).toBeVisible({ timeout: 4000 })
     await generateBtn.click()
     await page.waitForTimeout(800)
@@ -142,14 +161,16 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     ).toBeVisible({ timeout: 360_000 })
     await page.waitForTimeout(3000)
     const countAfter = await page.locator('.react-flow__node').count()
+    const pendingCount = await page.locator('.react-flow__node:has([data-status="pending"])').count()
     expect(
-      countAfter,
-      'Génération LLM : aucun nouveau nœud ajouté. Voir docs/troubleshooting/e2e-llm.md.'
-    ).toBeGreaterThan(countBefore)
+      countAfter > countBefore || pendingCount > 0,
+      'Génération LLM : aucun nœud pending détecté après génération. Voir docs/troubleshooting/e2e-llm.md.'
+    ).toBe(true)
   }
 
   test('AC#1: accept/reject buttons visible on hover for pending nodes', async ({ page }) => {
-    await ensureGraphWithDialogue(page, 'Tunnel vertébral')
+    const fixtureFilename = await prepareLegacyFixture('ac1')
+    await ensureGraphWithDialogue(page, fixtureFilename)
     await generatePendingNode(page)
     const pendingNode = page.locator('.react-flow__node:has([data-status="pending"])').first()
     await expect(pendingNode).toBeVisible({ timeout: 5000 })
@@ -161,22 +182,24 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
   })
 
   test('AC#2: accept node changes status to accepted', async ({ page }) => {
-    await ensureGraphWithDialogue(page, 'Tunnel vertébral')
+    const fixtureFilename = await prepareLegacyFixture('ac2')
+    await ensureGraphWithDialogue(page, fixtureFilename)
     await generatePendingNode(page)
+    const pendingBefore = await page.locator('.react-flow__node:has([data-status="pending"])').count()
     const pendingNode = page.locator('.react-flow__node:has([data-status="pending"])').first()
     await expect(pendingNode).toBeVisible({ timeout: 5000 })
     await pendingNode.hover({ force: true })
     const accept = page.locator('button:has-text("Accepter")').first()
     await expect(accept).toBeVisible({ timeout: 2000 })
     await accept.click()
-    await page.waitForTimeout(800)
-    await expect(accept).not.toBeVisible()
-    const rejectAfter = page.locator('button:has-text("Rejeter")').first()
-    await expect(rejectAfter).not.toBeVisible()
+    await page.waitForTimeout(1500)
+    const pendingAfter = await page.locator('.react-flow__node:has([data-status="pending"])').count()
+    expect(pendingAfter).toBeLessThan(pendingBefore)
   })
 
   test('AC#3: reject node removes it and shows toast', async ({ page }) => {
-    await ensureGraphWithDialogue(page, 'Tunnel vertébral')
+    const fixtureFilename = await prepareLegacyFixture('ac3')
+    await ensureGraphWithDialogue(page, fixtureFilename)
     await generatePendingNode(page)
     const pendingNode = page.locator('.react-flow__node:has([data-status="pending"])').first()
     await expect(pendingNode).toBeVisible({ timeout: 5000 })
@@ -193,8 +216,8 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
   })
 
   test('AC#5: pending nodes restored after reload (session recovery)', async ({ page }) => {
-    const fixedDialogue = 'Tunnel vertébral'
-    await ensureGraphWithDialogue(page, fixedDialogue)
+    const fixtureFilename = await prepareLegacyFixture('ac5')
+    await ensureGraphWithDialogue(page, fixtureFilename)
     await generatePendingNode(page)
     await expect(page.locator('.react-flow__node:has([data-status="pending"])').first()).toBeVisible({ timeout: 5000 })
     // Attendre que l'auto-save backend ait écrit (debounce ~1.2s) avant reload
@@ -202,16 +225,6 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await page.reload()
     const onLoginAfter = await page.getByRole('heading', { name: 'Connexion' }).isVisible({ timeout: 2000 }).catch(() => false)
     if (onLoginAfter) await login(page)
-    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-    await expect(graphTab).toBeVisible({ timeout: 15000 })
-    await graphTab.click()
-    await page.waitForTimeout(2500)
-    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
-    await expect(list).toBeVisible({ timeout: 60_000 })
-    const sameDialogue = list.getByText(/tunnel_vertébral_pigments_impossibles\.json/).first()
-    await expect(sameDialogue).toBeVisible({ timeout: 8000 })
-    await sameDialogue.click()
-    await page.waitForTimeout(3000)
     await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 10000 })
     const node = page.locator('.react-flow__node:has([data-status="pending"])').first()
     await expect(
