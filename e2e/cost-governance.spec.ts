@@ -8,6 +8,7 @@
  * - AC#1 : Configuration budget fonctionne
  */
 import { test, expect, type Page } from '@playwright/test'
+import { backendBaseUrl } from './testConfig'
 
 test.describe('Cost Governance (Story 0.7)', () => {
   // Helper pour s'authentifier
@@ -31,7 +32,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
   // Helper pour setup le budget via API
   const setupBudget = async (page: Page, quota: number, amount: number = 0) => {
     // Mettre à jour le quota
-    await page.request.put('http://localhost:4242/api/v1/costs/budget', {
+    await page.request.put(`${backendBaseUrl}/api/v1/costs/budget`, {
       data: { quota }
     })
     
@@ -81,7 +82,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
 
   test('AC#1: Configuration budget fonctionne', async ({ page }) => {
     // Test via API directe
-    const response = await page.request.put('http://localhost:4242/api/v1/costs/budget', {
+    const response = await page.request.put(`${backendBaseUrl}/api/v1/costs/budget`, {
       data: { quota: 150.0 }
     })
     
@@ -93,7 +94,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
     expect(data.remaining).toBeGreaterThanOrEqual(0)
     
     // Vérifier que le budget a été mis à jour
-    const getResponse = await page.request.get('http://localhost:4242/api/v1/costs/budget')
+    const getResponse = await page.request.get(`${backendBaseUrl}/api/v1/costs/budget`)
     expect(getResponse.status()).toBe(200)
     const budgetData = await getResponse.json()
     expect(budgetData.quota).toBe(150.0)
@@ -102,7 +103,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
   test('AC#1: Toast warning affiché à 90%', async ({ page }) => {
     // Setup : Configurer un budget avec quota très petit
     // Pour atteindre 90% rapidement, on utilise un quota de 0.01€
-    await page.request.put('http://localhost:4242/api/v1/costs/budget', {
+    await page.request.put(`${backendBaseUrl}/api/v1/costs/budget`, {
       data: { quota: 0.01 }
     })
     
@@ -119,7 +120,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
     // Pour l'instant, on teste que le système détecte correctement le pourcentage
     
     // Vérifier le budget actuel
-    const budgetResponse = await page.request.get('http://localhost:4242/api/v1/costs/budget')
+    const budgetResponse = await page.request.get(`${backendBaseUrl}/api/v1/costs/budget`)
     const budget = await budgetResponse.json()
     
     // Si le budget est proche de 90%, tester la génération
@@ -141,7 +142,7 @@ test.describe('Cost Governance (Story 0.7)', () => {
 
   test('AC#2: Modal bloque génération à 100%', async ({ page }) => {
     // Setup : Configurer un budget avec quota très petit pour atteindre 100% rapidement
-    await page.request.put('http://localhost:4242/api/v1/costs/budget', {
+    await page.request.put(`${backendBaseUrl}/api/v1/costs/budget`, {
       data: { quota: 0.001 }
     })
     
@@ -150,13 +151,13 @@ test.describe('Cost Governance (Story 0.7)', () => {
     // Pour ce test, on teste que le middleware bloque correctement
     
     // Vérifier le budget actuel
-    const budgetResponse = await page.request.get('http://localhost:4242/api/v1/costs/budget')
+    const budgetResponse = await page.request.get(`${backendBaseUrl}/api/v1/costs/budget`)
     const budget = await budgetResponse.json()
     
     // Si le budget est à 100%, tester que le middleware bloque
     if (budget.percentage >= 100) {
       // Tester que le middleware bloque avec HTTP 429
-      const generateResponse = await page.request.post('http://localhost:4242/api/v1/dialogues/generate/unity-dialogue', {
+      const generateResponse = await page.request.post(`${backendBaseUrl}/api/v1/dialogues/generate/unity-dialogue`, {
         data: {
           user_instructions: 'Test generation',
           context_selections: {

@@ -34,6 +34,7 @@ def mock_config_service():
     mock_service.get_default_field_config = MagicMock(return_value={
         "character": [{"path": "Nom", "label": "Nom"}]
     })
+    mock_service.get_default_system_prompt = MagicMock(return_value="Test system prompt")
     return mock_service
 
 
@@ -329,9 +330,7 @@ class TestDefaultSystemPrompt:
         """Test de récupération du system prompt par défaut."""
         response = client.get("/api/v1/config/default-system-prompt")
         
-        # L'endpoint peut retourner 200 ou 500 selon l'implémentation
-        assert response.status_code in [200, 500]
-        if response.status_code == 200:
-            data = response.json()
-            assert "system_prompt" in data or "prompt" in data
+        assert response.status_code == 200
+        data = response.json()
+        assert data["prompt"] == "Test system prompt"
 

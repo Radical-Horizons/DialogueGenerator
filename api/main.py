@@ -38,6 +38,12 @@ logger = logging.getLogger(__name__)
 limiter = get_limiter()
 
 
+def _get_default_api_port() -> int:
+    """Retourne le port API par defaut selon l'environnement courant."""
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    return 4242 if environment == "production" else 4243
+
+
 def _validate_security_config() -> None:
     """Valide la configuration de sécurité au démarrage.
     
@@ -593,7 +599,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "api.main:app",
         host="0.0.0.0",
-        port=int(os.getenv("API_PORT", "4242")),
+        port=int(os.getenv("API_PORT", str(_get_default_api_port()))),
         log_level="info",
         **reload_config
     )

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { backendBaseUrl } from './e2e/testConfig'
 
 export default defineConfig({
   testDir: './e2e',
@@ -19,8 +20,8 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'python -m api.main',
-      url: 'http://localhost:4242/health',
+      command: 'node scripts/start-playwright-backend.js',
+      url: `${backendBaseUrl}/health`,
       reuseExistingServer: !process.env.CI,
     },
     {

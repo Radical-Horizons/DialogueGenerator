@@ -8,6 +8,7 @@
  * - AC#4 : Graphe sans cycles ne montre pas de warning cycle
  */
 import { test, expect, type Page } from '@playwright/test'
+import { backendBaseUrl } from './testConfig'
 
 test.describe('Graph Cycle Validation (Story 0.6)', () => {
   test.beforeEach(async ({ page }) => {
@@ -96,7 +97,7 @@ test.describe('Graph Cycle Validation (Story 0.6)', () => {
    */
   const validateGraphAPI = async (page: Page, graph: any) => {
     const response = await page.evaluate(async (graphData) => {
-      const res = await fetch('http://localhost:4242/api/v1/unity-dialogues/graph/validate', {
+      const res = await fetch(`${backendBaseUrl}/api/v1/unity-dialogues/graph/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -28,10 +28,12 @@ Les fichiers de production seront dans le dossier `dist/`.
 
 ## Configuration
 
-Créer un fichier `.env` à la racine du projet frontend :
+En développement avec `npm run dev`, garder `VITE_API_BASE_URL` vide pour utiliser le proxy Vite vers le backend local sur `http://localhost:4243`.
+
+Si vous devez cibler directement l'API hors proxy, utilisez par défaut :
 
 ```
-VITE_API_BASE_URL=http://localhost:4242
+VITE_API_BASE_URL=http://localhost:4243
 ```
 
 ## Structure

@@ -13,6 +13,7 @@ alwaysApply: false
 - **Commandes essentielles (donner en une ligne)** :
   - Installation initiale : `npm run setup` (créer venv + installer toutes les dépendances)
   - Développement : `npm run dev` (lance backend sur 4243 + frontend sur 3000 automatiquement, utilise venv)
+  - API seule : `python -m api.main` (utilise 4243 en développement, 4242 en production si `API_PORT` n'est pas défini)
   - Développement avec nettoyage cache : `npm run dev:clean` (nettoie cache Vite avant démarrage, utile si changements non visibles)
   - Vérification processus/ports : `npm run dev:check` (détecte processus zombies, ports bloqués, lockfile stale. Ajouter `--clean` pour nettoyage automatique)
   - Statut services : `npm run dev:status` (affiche statut backend/frontend en tableau formaté)
@@ -26,6 +27,7 @@ alwaysApply: false
     - Tests API : `npm run test:api` ou `pytest tests/api/` (utilise TestClient FastAPI, pas besoin de serveur)
     - Tests unitaires : `pytest tests/ -k "not api"`
   - **Frontend React** : `npm run test:frontend` (build + lint + tests unitaires)
+    - Le script est cross-platform (`scripts/test-frontend.js`), ne pas dépendre de PowerShell pour les checks standards
     - Build check détecte erreurs TypeScript
     - Lint check détecte erreurs de code
     - Tests Vitest vérifient les composants

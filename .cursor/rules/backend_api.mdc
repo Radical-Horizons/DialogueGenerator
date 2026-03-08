@@ -15,5 +15,5 @@ alwaysApply: false
 - **Cache HTTP**: Désactivé automatiquement en développement (middleware `DevNoCacheMiddleware`), activé en production avec TTL configurable. Voir `api/middleware/http_cache.py`.
 - **Documentation**: OpenAPI/Swagger automatique via FastAPI (`/api/docs`), maintenir les docstrings.
 - **Tests**: `tests/api/` avec pytest, tests unitaires routers + intégration API, mocks pour services externes.
-- **Commande dev**: `npm run dev` (depuis racine, lance tout) ou `python -m api.main` (API seul).
+- **Commande dev**: `npm run dev` (depuis racine, lance tout) ou `python -m api.main` (API seule, 4243 en développement par défaut, 4242 en production si `API_PORT` n'est pas défini).
 - **Références**: Voir `README_API.md` pour détails complets, `docs/DEPLOYMENT.md` pour déploiement.
