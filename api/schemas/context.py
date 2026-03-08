@@ -142,15 +142,9 @@ class CommunityListResponse(BaseModel):
     Attributes:
         communities: Liste des communautés.
         total: Nombre total de communautés.
-        page: Numéro de page actuelle (1-indexed, None si pas de pagination).
-        page_size: Taille de la page (None si pas de pagination).
-        total_pages: Nombre total de pages (None si pas de pagination).
     """
     communities: List[CommunityResponse] = Field(..., description="Liste des communautés")
     total: int = Field(..., description="Nombre total de communautés")
-    page: Optional[int] = Field(None, description="Numéro de page actuelle (1-indexed)")
-    page_size: Optional[int] = Field(None, description="Taille de la page")
-    total_pages: Optional[int] = Field(None, description="Nombre total de pages")
 
 
 class RegionListResponse(BaseModel):
