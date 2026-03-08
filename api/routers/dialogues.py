@@ -1,4 +1,5 @@
 """Router pour la génération de dialogues."""
+import asyncio
 import logging
 import re
 import json
@@ -225,9 +226,14 @@ async def preview_prompt(
             organization_mode=request_data.organization_mode,
             in_game_flags=request_data.in_game_flags  # Ajouter les flags
         )
-        
+
+        # Construire le prompt dans un thread pool pour ne pas bloquer l'event loop
+        # (la construction du prompt est CPU-heavy: XML, tiktoken, formatage GDD)
         try:
-            built = _build_prompt_from_request(estimate_request, dialogue_service, prompt_engine, skill_service, trait_service)
+            built = await asyncio.to_thread(
+                _build_prompt_from_request,
+                estimate_request, dialogue_service, prompt_engine, skill_service, trait_service
+            )
         except ValueError as xml_error:
             # Erreur XML détectée - récupérer les détails depuis l'exception
             if "XML invalide" in str(xml_error) and hasattr(xml_error, 'xml_error_details'):
@@ -306,9 +312,13 @@ async def estimate_tokens(
         Estimation du nombre de tokens et prompt brut réel.
     """
     try:
-        # Construire le prompt en réutilisant la fonction helper
+        # Construire le prompt dans un thread pool pour ne pas bloquer l'event loop
+        # (la construction du prompt est CPU-heavy: XML, tiktoken, formatage GDD)
         try:
-            built = _build_prompt_from_request(request_data, dialogue_service, prompt_engine, skill_service, trait_service)
+            built = await asyncio.to_thread(
+                _build_prompt_from_request,
+                request_data, dialogue_service, prompt_engine, skill_service, trait_service
+            )
         except ValueError as xml_error:
             # Erreur XML détectée - récupérer les détails depuis l'exception
             if "XML invalide" in str(xml_error) and hasattr(xml_error, 'xml_error_details'):
@@ -326,25 +336,31 @@ async def estimate_tokens(
                 )
             # Si pas de détails XML, re-lancer l'erreur originale
             raise
-        
-        # Calculer context_tokens (tokens du contexte seul)
+
+        # Calculer context_tokens depuis le contexte déjà construit dans _build_prompt_from_request,
+        # en extrayant le texte du structured_prompt déjà présent dans `built` pour éviter
+        # un second appel coûteux à build_context_json().
         context_builder = dialogue_service.context_builder
-        context_selections_dict = request_data.context_selections.to_service_dict()
-        if request_data.previous_dialogue_preview:
-            context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-        
-        structured_context = context_builder.build_context_json(
-            selected_elements=context_selections_dict,
-            scene_instruction=request_data.user_instructions,
-            field_configs=request_data.field_configs,
-            organization_mode=request_data.organization_mode or "narrative",
-            max_tokens=request_data.max_context_tokens,
-            include_dialogue_type=True,
-            element_modes=context_selections_dict.get("_element_modes")
-        )
-        context_text = context_builder.serialize_context_to_text(structured_context)
-        context_tokens = context_builder._count_tokens(context_text)
-        
+        if built.structured_context is not None:
+            context_text = context_builder.serialize_context_to_text(built.structured_context)
+            context_tokens = context_builder._count_tokens(context_text)
+        else:
+            # Fallback: reconstruire uniquement si structured_context absent (cas dégradé)
+            context_selections_dict = request_data.context_selections.to_service_dict()
+            if request_data.previous_dialogue_preview:
+                context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
+            structured_context = context_builder.build_context_json(
+                selected_elements=context_selections_dict,
+                scene_instruction=request_data.user_instructions,
+                field_configs=request_data.field_configs,
+                organization_mode=request_data.organization_mode or "narrative",
+                max_tokens=request_data.max_context_tokens,
+                include_dialogue_type=True,
+                element_modes=context_selections_dict.get("_element_modes")
+            )
+            context_text = context_builder.serialize_context_to_text(structured_context)
+            context_tokens = context_builder._count_tokens(context_text)
+
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
         if built.structured_prompt:

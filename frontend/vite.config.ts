@@ -129,9 +129,22 @@ export default defineConfig({
         drop_console: true, // Supprimer les console.log en production
       },
     },
-    // Code-splitting automatique par Vite (plus fiable que manualChunks)
-    // Laisser Vite gérer automatiquement pour éviter les problèmes d'ordre de chargement
-    // Le warning sur la taille des chunks est acceptable (< 500 KB après minification)
+    rollupOptions: {
+      output: {
+        // Séparation manuelle des vendor chunks pour maximiser le cache navigateur.
+        // Les dépendances volumineuses sont isolées dans leurs propres chunks.
+        manualChunks: {
+          // React core — change rarement
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // React Query — change rarement
+          'vendor-query': ['@tanstack/react-query'],
+          // ReactFlow — très lourd (~300 KB gzippé), chargé uniquement sur /graph-editor
+          'vendor-reactflow': ['reactflow'],
+          // Zustand state management
+          'vendor-state': ['zustand'],
+        },
+      },
+    },
   },
   // Optimisation pour le développement
   optimizeDeps: {

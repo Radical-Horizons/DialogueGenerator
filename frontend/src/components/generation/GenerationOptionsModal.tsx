@@ -1,7 +1,7 @@
 /**
  * Modal pour configurer les options de génération (champs de contexte, Unity, organisation, guidance).
  */
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextStore } from '../../store/contextStore'
@@ -10,13 +10,17 @@ import { VocabularyGuidesTab } from './VocabularyGuidesTab'
 import { PromptsTab } from './PromptsTab'
 import { ErrorBoundary } from '../shared/ErrorBoundary'
 import { BudgetSettings } from '../settings/BudgetSettings'
-import { UsageDashboard } from '../usage/UsageDashboard'
 import { GenerationLogsPanel } from '../usage/GenerationLogsPanel'
 import { theme } from '../../theme'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import * as configAPI from '../../api/config'
 import { InfoIcon } from '../shared/Tooltip'
+
+// Lazy: UsageDashboard est lourd (charts) et n'est visible que sur l'onglet Statistiques
+const UsageDashboard = lazy(() =>
+  import('../usage/UsageDashboard').then(m => ({ default: m.UsageDashboard }))
+)
 
 export interface GenerationOptionsModalProps {
   isOpen: boolean
@@ -727,7 +731,9 @@ function ShortcutsTab() {
 function UsageTab() {
   return (
     <div>
-      <UsageDashboard />
+      <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', opacity: 0.6 }}>Chargement...</div>}>
+        <UsageDashboard />
+      </Suspense>
     </div>
   )
 }

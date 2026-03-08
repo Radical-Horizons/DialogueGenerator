@@ -1,6 +1,6 @@
 """Middleware pour la gouvernance des coûts LLM."""
-import json
 import logging
+import time
 from typing import Callable
 
 from fastapi import Request, Response, status
@@ -9,7 +9,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from services.cost_governance_service import CostGovernanceService
 from services.llm_pricing_service import LLMPricingService
-from api.dependencies import get_cost_governance_service, get_cost_budget_repository
+from api.dependencies import get_cost_budget_repository
 from constants import ModelNames, Defaults
 
 logger = logging.getLogger(__name__)
@@ -32,54 +32,55 @@ DEFAULT_COMPLETION_TOKENS = 1000  # Estimation conservatrice
 
 class CostGovernanceMiddleware(BaseHTTPMiddleware):
     """Middleware pour vérifier le budget avant génération LLM.
-    
+
     Intercepte les requêtes POST vers les endpoints de génération,
     estime le coût, vérifie le budget, et bloque si nécessaire.
+
+    Les objets ``CostGovernanceService`` et ``FileCostBudgetRepository`` sont
+    des singletons au niveau du middleware pour éviter leur recréation à chaque
+    requête. ``FileCostBudgetRepository`` est thread-safe (verrou interne).
     """
-    
+
     def __init__(self, app):
         """Initialise le middleware.
-        
+
         Args:
             app: L'application ASGI.
         """
         super().__init__(app)
         self.pricing_service = LLMPricingService()
-        # Le service sera créé à chaque requête via dependency injection
-        # pour éviter les problèmes de cycle de vie
-    
+        # Singletons: évite de recréer repository + service à chaque requête.
+        self._repository = get_cost_budget_repository()
+        self._cost_service = CostGovernanceService(repository=self._repository)
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Vérifie le budget avant génération.
-        
+
         Args:
             request: La requête HTTP.
             call_next: La fonction suivante dans la chaîne middleware.
-            
+
         Returns:
             La réponse HTTP (429 si budget dépassé, sinon réponse normale).
         """
         # Vérifier si c'est une requête POST vers un endpoint de génération
         if request.method != "POST":
             return await call_next(request)
-        
+
         path = request.url.path
         if not any(path.startswith(endpoint) for endpoint in GENERATION_ENDPOINTS):
             return await call_next(request)
-        
+
         try:
-            # Créer le service de cost governance
-            repository = get_cost_budget_repository()
-            cost_service = CostGovernanceService(repository=repository)
-            
             # Estimer le coût
             estimated_cost = await self._estimate_cost(request)
-            
-            # Vérifier le budget
-            budget_check = cost_service.check_budget(
+
+            # Vérifier le budget via le service singleton
+            budget_check = self._cost_service.check_budget(
                 user_id=DEFAULT_USER_ID,
                 estimated_cost=estimated_cost
             )
-            
+
             # Si bloqué, retourner HTTP 429
             if not budget_check["allowed"]:
                 logger.warning(
@@ -98,17 +99,17 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
                         }
                     }
                 )
-            
+
             # Si warning (90%), logger mais continuer
             if budget_check.get("warning"):
                 logger.warning(
                     f"Budget warning pour {path}: {budget_check['warning']} "
                     f"({budget_check['percentage']:.1f}%)"
                 )
-            
+
             # Continuer avec la requête
             return await call_next(request)
-            
+
         except FileNotFoundError as e:
             # Fichier de budget n'existe pas encore (première utilisation)
             # Autoriser la génération et laisser le système créer le budget
@@ -141,19 +142,19 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
                     }
                 }
             )
-    
+
     async def _estimate_cost(self, request: Request) -> float:
         """Estime le coût d'une génération basé sur la requête.
-        
+
         NOTE: Le body de la requête FastAPI ne peut pas être lu en middleware
         car il est un stream consommable une seule fois. On utilise donc:
         1. Query parameters pour le modèle (si disponible)
         2. Endpoint-specific defaults (plus précis selon le type de génération)
         3. Valeurs par défaut conservatrices (fallback)
-        
+
         Args:
             request: La requête HTTP.
-            
+
         Returns:
             Coût estimé en USD (estimation conservatrice).
         """
@@ -161,7 +162,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
         model_name = request.query_params.get("model") or request.query_params.get("llm_model")
         if not model_name:
             model_name = Defaults.MODEL_ID
-        
+
         # Estimation selon le type d'endpoint
         path = request.url.path
         if "/generate/variants" in path:
@@ -176,7 +177,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             # Génération standard (unity-dialogue, generate-node)
             prompt_tokens = DEFAULT_PROMPT_TOKENS
             completion_tokens = DEFAULT_COMPLETION_TOKENS
-        
+
         return self.pricing_service.calculate_cost(
             model_name=model_name,
             prompt_tokens=prompt_tokens,

@@ -76,12 +76,15 @@ class BuiltPrompt:
         sections: Dictionnaire des sections (déprécié, conservé pour compatibilité).
         prompt_hash: Hash SHA-256 du prompt pour validation et cache.
         structured_prompt: Structure de prompt en JSON (PromptStructure) optionnel.
+        structured_context: Contexte GDD structuré utilisé pour construire le prompt (évite
+            de reconstruire le contexte dans les appelants qui en ont besoin après coup).
     """
     raw_prompt: str
     token_count: int
     sections: Dict[str, str]
     prompt_hash: str
     structured_prompt: Optional[Any] = None
+    structured_context: Optional[Any] = None
 
 class PromptEngine:
     """
@@ -483,5 +486,6 @@ class PromptEngine:
             token_count=num_tokens,
             sections=sections_content,
             prompt_hash=prompt_hash,
-            structured_prompt=final_structured_prompt
+            structured_prompt=final_structured_prompt,
+            structured_context=structured_context
         ) 

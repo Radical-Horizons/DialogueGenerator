@@ -32,6 +32,10 @@ class ConfigurationService:
         self.author_profile_templates: Dict[str, Any] = self._load_json_file(AUTHOR_PROFILE_TEMPLATES_FILE_PATH, default={"templates": []})
         self.prompts_metadata: Dict[str, Any] = self._load_json_file(PROMPTS_METADATA_FILE_PATH, default={})
 
+        # Cache des fichiers texte (system prompt, templates) — évite les disk reads répétés
+        # Invalidé explicitement lors des opérations de sauvegarde.
+        self._text_file_cache: Dict[str, str] = {}
+
         # Initialiser les chemins importants lors de l'instanciation
         # Ou les récupérer dynamiquement via des getters
         self.unity_dialogues_path: Optional[Path] = self._initialize_unity_dialogues_path()
@@ -188,22 +192,39 @@ class ConfigurationService:
 
     # --- Prompt Templates specific methods ---
     def _load_text_file(self, file_path: Path) -> str:
-        """Loads a text file.
+        """Loads a text file with instance-level caching.
         
+        Le contenu est mis en cache en mémoire après le premier accès.
+        Le cache est invalidé via ``_invalidate_text_cache()``.
+
         Args:
             file_path: The path to the text file.
             
         Returns:
             The content of the file as a string, or empty string if file not found.
         """
+        cache_key = str(file_path)
+        if cache_key in self._text_file_cache:
+            return self._text_file_cache[cache_key]
+
+        content = ""
         if file_path.exists():
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
-                    return f.read().strip()
+                    content = f.read().strip()
             except IOError as e:
                 logger.error(f"Could not read {file_path}: {e}")
-                return ""
-        return ""
+
+        self._text_file_cache[cache_key] = content
+        return content
+
+    def _invalidate_text_cache(self) -> None:
+        """Vide le cache des fichiers texte.
+
+        À appeler après toute opération qui modifie les fichiers de templates
+        (ex: sauvegarde d'un nouveau system prompt ou d'un profil d'auteur).
+        """
+        self._text_file_cache.clear()
     
     def get_default_system_prompt(self) -> str:
         """Gets the default system prompt.
