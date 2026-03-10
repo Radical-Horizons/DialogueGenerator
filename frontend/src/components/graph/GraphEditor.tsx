@@ -2,7 +2,7 @@
  * Éditeur de graphe narratif avec sélecteur de dialogue.
  * Structure : Liste de dialogues à gauche, graphe à droite.
  */
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import type { ReactFlowInstance } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
@@ -19,8 +19,24 @@ import { theme } from '../../theme'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getErrorMessage } from '../../types/errors'
 import type { UnityDialogueMetadata } from '../../types/api'
+import {
+  downloadUnityExport,
+  resolveGraphRouteTarget,
+} from './graphEditorStandalone'
 
-export function GraphEditor() {
+interface GraphEditorProps {
+  mode?: 'embedded' | 'standalone'
+  routeDialogueId?: string
+  onBack?: () => void
+  onDialogueSelected?: (filename: string) => void
+}
+
+export function GraphEditor({
+  mode = 'embedded',
+  routeDialogueId,
+  onBack,
+  onDialogueSelected,
+}: GraphEditorProps) {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const [isLoadingDialogue, setIsLoadingDialogue] = useState(false)
   const [layoutDirection, setLayoutDirection] = useState<'TB' | 'LR' | 'BT' | 'RL'>('TB')
@@ -33,6 +49,8 @@ export function GraphEditor() {
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const prevSelectedDialogueRef = useRef<UnityDialogueMetadata | null>(null)
   const loadInFlightRef = useRef(false)
+  const routeLoadSeqRef = useRef(0)
+  const activeDialogueFilenameRef = useRef<string | null>(null)
   const queryClient = useQueryClient()
   const canvasWrapperRef = useRef<HTMLDivElement | null>(null)
   const toast = useToast()
@@ -54,6 +72,11 @@ export function GraphEditor() {
   
   // Infobulle raccourcis graphe (au survol du bouton ?)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
+  const isStandalone = mode === 'standalone'
+  const routeTarget = useMemo(
+    () => resolveGraphRouteTarget(routeDialogueId),
+    [routeDialogueId]
+  )
   
   // Écouter l'événement pour obtenir l'instance ReactFlow
   useEffect(() => {
@@ -71,7 +94,9 @@ export function GraphEditor() {
     nodes,
     dialogueMetadata,
     loadDialogue,
+    loadDialogueByDocumentId,
     saveDialogue,
+    exportToUnity,
     validateGraph,
     applyAutoLayout,
     setSelectedNode,
@@ -93,16 +118,27 @@ export function GraphEditor() {
     lastAckSeq,
     resetGraph,
   } = useGraphStore()
-  
+  const activeDialogueFilename = selectedDialogue?.filename ?? dialogueMetadata.filename ?? null
+  const activeDialogueTitle = selectedDialogue?.title ?? dialogueMetadata.title
+
   /** Désactive les actions graphe si aucun dialogue ou chargement en cours.
    * On considère "dialogue actif" soit la sélection liste (selectedDialogue), soit le store qui a déjà
    * un graphe chargé (retour sur l'onglet sans sélection liste) pour éviter de griser les boutons à tort. */
-  const hasActiveDialogue = !!selectedDialogue || (nodes.length > 0 && !!dialogueMetadata.filename)
+  const hasActiveDialogue = !!activeDialogueFilename || nodes.length > 0
   const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
   /** Offset position pour nœuds manuels (Story 1.6 - éviter chevauchement). */
   const MANUAL_NODE_OFFSET_X = 150
   const MANUAL_NODE_OFFSET_Y = 100
   const MANUAL_NODE_STEP = 40
+
+  const handleSelectDialogue = useCallback((dialogue: UnityDialogueMetadata) => {
+    setSelectedDialogue(dialogue)
+    onDialogueSelected?.(dialogue.filename)
+  }, [onDialogueSelected])
+
+  useEffect(() => {
+    activeDialogueFilenameRef.current = activeDialogueFilename
+  }, [activeDialogueFilename])
 
   // Écouter l'événement pour ouvrir le panel de génération depuis un nœud
   useEffect(() => {
@@ -179,10 +215,103 @@ export function GraphEditor() {
     }
   }, [selectedDialogue, loadDialogue, validateGraph, toast])
 
+  // En mode standalone, charger aussi depuis l'URL pour conserver un deep-link exploitable.
+  useEffect(() => {
+    if (!routeTarget) return
+    if (
+      activeDialogueFilenameRef.current?.replace(/\.json$/i, '') ===
+      routeTarget.normalizedDialogueId
+    ) {
+      return
+    }
+
+    const loadSeq = ++routeLoadSeqRef.current
+    loadInFlightRef.current = true
+    setIsLoadingDialogue(true)
+
+    const finalizeLoad = async () => {
+      try {
+        await validateGraph()
+      } catch (err) {
+        console.error('Erreur lors de la validation automatique au chargement:', err)
+      }
+
+      if (routeLoadSeqRef.current !== loadSeq) return
+      loadInFlightRef.current = false
+      setIsLoadingDialogue(false)
+      const state = useGraphStore.getState()
+      if (state.nodes.length > 0 && !state.selectedNodeId) {
+        state.setSelectedNode(state.nodes[0].id)
+      }
+    }
+
+    const loadFromRoute = async () => {
+      if (/\.json$/i.test(routeTarget.decodedDialogueId)) {
+        const response = await unityDialoguesAPI.getUnityDialogue(routeTarget.decodedDialogueId)
+        let parsed: unknown = null
+        try {
+          parsed = JSON.parse(response.json_content)
+        } catch {
+          parsed = null
+        }
+
+        const isCanonicalDocument =
+          !!parsed &&
+          typeof parsed === 'object' &&
+          !Array.isArray(parsed) &&
+          Array.isArray((parsed as { nodes?: unknown[] }).nodes)
+
+        if (isCanonicalDocument) {
+          await loadDialogueByDocumentId(routeTarget.normalizedDialogueId)
+          return
+        }
+
+        await loadDialogue(
+          response.json_content,
+          undefined,
+          routeTarget.decodedDialogueId
+        )
+        return
+      }
+
+      try {
+        await loadDialogueByDocumentId(routeTarget.normalizedDialogueId)
+      } catch (err) {
+        try {
+          const canonicalLegacyId = `${routeTarget.normalizedDialogueId}.json`
+          await loadDialogueByDocumentId(canonicalLegacyId)
+        } catch {
+          const legacyFilename = `${routeTarget.normalizedDialogueId}.json`
+          try {
+            const response = await unityDialoguesAPI.getUnityDialogue(legacyFilename)
+            await loadDialogue(response.json_content, undefined, legacyFilename)
+          } catch {
+            throw err
+          }
+        }
+      }
+    }
+
+    loadFromRoute()
+      .then(() => finalizeLoad())
+      .catch((err) => {
+        if (routeLoadSeqRef.current !== loadSeq) return
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+        toast(getErrorMessage(err), 'error')
+      })
+  }, [
+    routeTarget,
+    loadDialogue,
+    loadDialogueByDocumentId,
+    validateGraph,
+    toast,
+  ])
+
   // Auto-save backend : micro-batch 100 ms (ADR-006)
   useEffect(() => {
     if (
-      !selectedDialogue ||
+      !activeDialogueFilename ||
       !hasUnsavedChanges ||
       nodes.length === 0 ||
       isGraphLoading ||
@@ -228,7 +357,7 @@ export function GraphEditor() {
       })
     }, 100)
     return () => clearTimeout(timeoutId)
-  }, [selectedDialogue, hasUnsavedChanges, isGraphLoading, isGraphSaving, isLoadingDialogue, isGenerating, nodes, saveDialogue, toast])
+  }, [activeDialogueFilename, hasUnsavedChanges, isGraphLoading, isGraphSaving, isLoadingDialogue, isGenerating, nodes, saveDialogue, toast])
   
   // Handler pour auto-layout (direction optionnelle pour le menu déroulant)
   const handleAutoLayout = useCallback(
@@ -247,48 +376,63 @@ export function GraphEditor() {
 
   // Handler pour ouvrir le dialogue de sélection de format
   const handleOpenExportDialog = useCallback(() => {
-    if (!reactFlowInstance || !selectedDialogue) {
+    if (!reactFlowInstance || !activeDialogueFilename) {
       toast('Aucun dialogue sélectionné', 'warning')
       return
     }
     setShowExportFormatDialog(true)
-  }, [reactFlowInstance, selectedDialogue, toast])
+  }, [reactFlowInstance, activeDialogueFilename, toast])
+
+  const handleExportUnity = useCallback(() => {
+    if (!activeDialogueFilename) {
+      toast('Aucun dialogue chargé', 'warning')
+      return
+    }
+
+    try {
+      const jsonContent = exportToUnity()
+      downloadUnityExport(jsonContent, activeDialogueFilename)
+      toast(`Export Unity réussi: ${activeDialogueFilename}`, 'success', 2500)
+    } catch (err) {
+      toast(`Erreur lors de l'export Unity: ${getErrorMessage(err)}`, 'error')
+    }
+  }, [activeDialogueFilename, exportToUnity, toast])
   
   // Handler pour exporter en PNG
   const handleExportPNG = useCallback(async () => {
-    if (!reactFlowInstance || !selectedDialogue) {
+    if (!reactFlowInstance || !activeDialogueFilename) {
       toast('Aucun dialogue sélectionné', 'warning')
       return
     }
     try {
       setShowExportFormatDialog(false)
-      const filename = selectedDialogue.filename.replace('.json', '')
+      const filename = activeDialogueFilename.replace(/\.json$/i, '')
       await exportGraphToPNG(reactFlowInstance, filename, 1.0)
       toast('Export PNG réussi', 'success', 2000)
     } catch (err) {
       toast(`Erreur lors de l'export PNG: ${getErrorMessage(err)}`, 'error')
     }
-  }, [reactFlowInstance, selectedDialogue, toast])
+  }, [reactFlowInstance, activeDialogueFilename, toast])
   
   // Handler pour exporter en SVG
   const handleExportSVG = useCallback(async () => {
-    if (!reactFlowInstance || !selectedDialogue) {
+    if (!reactFlowInstance || !activeDialogueFilename) {
       toast('Aucun dialogue sélectionné', 'warning')
       return
     }
     try {
       setShowExportFormatDialog(false)
-      const filename = selectedDialogue.filename.replace('.json', '')
+      const filename = activeDialogueFilename.replace(/\.json$/i, '')
       await exportGraphToSVG(reactFlowInstance, filename)
       toast('Export SVG réussi', 'success', 2000)
     } catch (err) {
       toast(`Erreur lors de l'export SVG: ${getErrorMessage(err)}`, 'error')
     }
-  }, [reactFlowInstance, selectedDialogue, toast])
+  }, [reactFlowInstance, activeDialogueFilename, toast])
   
   // Handler pour sauvegarder
   const handleSave = useCallback(async () => {
-    if (!selectedDialogue) {
+    if (!activeDialogueFilename) {
       toast('Aucun dialogue sélectionné', 'warning')
       return
     }
@@ -329,7 +473,7 @@ export function GraphEditor() {
     } finally {
       setIsLoadingDialogue(false)
     }
-  }, [selectedDialogue, saveDialogue, validateGraph, toast])
+  }, [activeDialogueFilename, saveDialogue, validateGraph, toast])
 
   // Sauvegarder quand le panneau Détails envoie "request-save-dialogue" (bouton Sauvegarder du panneau)
   useEffect(() => {
@@ -367,23 +511,23 @@ export function GraphEditor() {
         key: 'ctrl+s',
         handler: (e) => {
           e.preventDefault()
-          if (selectedDialogue && !isGraphSaving) {
+          if (activeDialogueFilename && !isGraphSaving) {
             handleSave()
           }
         },
         description: 'Sauvegarder',
-        enabled: !!selectedDialogue && !isGraphSaving,
+        enabled: !!activeDialogueFilename && !isGraphSaving,
       },
       {
         key: 'ctrl+g',
         handler: (e) => {
           e.preventDefault()
-          if (selectedNodeId && !isGraphLoading && !isLoadingDialogue && selectedDialogue) {
+          if (selectedNodeId && !isGraphLoading && !isLoadingDialogue && activeDialogueFilename) {
             setShowAIGenerationPanel(true)
           }
         },
         description: 'Générer un nœud avec l\'IA',
-        enabled: !!selectedNodeId && !isGraphLoading && !isLoadingDialogue && !!selectedDialogue,
+        enabled: !!selectedNodeId && !isGraphLoading && !isLoadingDialogue && !!activeDialogueFilename,
       },
       {
         key: 'delete',
@@ -398,7 +542,7 @@ export function GraphEditor() {
         enabled: () => !!useGraphStore.getState().selectedNodeId,
       },
     ],
-    [selectedDialogue, isGraphSaving, handleSave, selectedNodeId, isGraphLoading, isLoadingDialogue, setShowDeleteNodeConfirm]
+    [activeDialogueFilename, isGraphSaving, handleSave, selectedNodeId, isGraphLoading, isLoadingDialogue, setShowDeleteNodeConfirm]
   )
   
   return (
@@ -428,8 +572,8 @@ export function GraphEditor() {
       >
         <UnityDialogueList
           ref={dialogueListRef}
-          onSelectDialogue={setSelectedDialogue}
-          selectedFilename={selectedDialogue?.filename || null}
+          onSelectDialogue={handleSelectDialogue}
+          selectedFilename={activeDialogueFilename || null}
         />
       </div>
       
@@ -466,6 +610,46 @@ export function GraphEditor() {
             flexWrap: 'wrap',
             justifyContent: 'flex-start',
           }}>
+            {isStandalone && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                {onBack && (
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    style={{
+                      padding: '0.45rem 0.8rem',
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: theme.button.default.color,
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    ← Retour
+                  </button>
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 700, color: theme.text.primary }}>
+                    Éditeur de graphe
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '0.8rem',
+                      color: theme.text.secondary,
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '320px',
+                    }}
+                    title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+                  >
+                    {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Badge de santé global du graphe (validation automatique à chaque sauvegarde) */}
             {(() => {
               const errors = graphValidationErrors.filter((e) => e.severity === 'error')
@@ -547,7 +731,7 @@ export function GraphEditor() {
               )
             })()}
             {/* Indicateur sauvegarde ADR-006: Synced (seq …) / Offline, N queued / Error */}
-            {selectedDialogue && (() => {
+            {activeDialogueFilename && (() => {
               const status: 'saved' | 'saving' | 'unsaved' | 'error' = lastSaveError
                 ? 'error'
                 : isGraphSaving
@@ -571,6 +755,24 @@ export function GraphEditor() {
                 />
               )
             })()}
+            <button
+              type="button"
+              onClick={handleExportUnity}
+              disabled={!hasActiveDialogue}
+              style={{
+                padding: '0.5rem 1rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.default.background,
+                color: theme.button.default.color,
+                cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+                opacity: !hasActiveDialogue ? 0.6 : 1,
+                fontSize: '0.9rem',
+              }}
+              title="Télécharger le JSON Unity courant"
+            >
+              📤 Export Unity
+            </button>
             {/* Auto-layout avec menu direction */}
             <div ref={autoLayoutDropdownRef} style={{ position: 'relative' }}>
               <button
@@ -857,7 +1059,7 @@ export function GraphEditor() {
         </div>
         
         {/* Contenu : Graphe + Panneau d'édition. Afficher le canvas si dialogue sélectionné OU si le store a des nœuds (graphe déjà chargé). */}
-        {!selectedDialogue && nodes.length === 0 ? (
+        {!hasActiveDialogue && nodes.length === 0 ? (
           <div style={{ 
             flex: 1,
             display: 'flex',
@@ -870,7 +1072,7 @@ export function GraphEditor() {
             <div>
               <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.7 }}>📊</div>
               <div style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: theme.text.primary }}>
-                Sélectionnez un dialogue Unity
+                {isStandalone ? 'Chargez un dialogue Unity' : 'Sélectionnez un dialogue Unity'}
               </div>
               <div style={{ fontSize: '0.9rem' }}>
                 Choisissez un dialogue dans la liste à gauche pour le visualiser et l'éditer sous forme de graphe
@@ -1164,7 +1366,7 @@ export function GraphEditor() {
             })()}
             
             {/* Infobulle coûts : centrée, opaque, avec bouton fermer (Story 1.12) */}
-            {showCostBreakdown && (selectedDialogue?.filename ?? dialogueMetadata.filename) && (
+            {showCostBreakdown && activeDialogueFilename && (
               <div
                 role="dialog"
                 aria-label="Breakdown des coûts du dialogue"
@@ -1239,7 +1441,7 @@ export function GraphEditor() {
                       padding: '1rem',
                     }}
                   >
-                    <DialogueCostBreakdown dialogueId={selectedDialogue?.filename ?? dialogueMetadata.filename ?? ''} />
+                    <DialogueCostBreakdown dialogueId={activeDialogueFilename} />
                   </div>
                   <div
                     style={{
@@ -1312,9 +1514,9 @@ export function GraphEditor() {
                     onGenerated={() => {
                       dialogueListRef.current?.refresh()
                       // Invalider le cache des coûts pour rafraîchissement automatique (AC#4)
-                      if (selectedDialogue?.filename) {
+                      if (activeDialogueFilename) {
                         queryClient.invalidateQueries({
-                          queryKey: ['dialogue-costs', selectedDialogue.filename],
+                          queryKey: ['dialogue-costs', activeDialogueFilename],
                         })
                       }
                       queryClient.invalidateQueries({ queryKey: ['all-dialogues-costs'] })
