@@ -80,7 +80,7 @@ development_status:
   epic-1-retrospective: done
   epic-2: in-progress
   2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: done
-  2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: ready-for-dev
+  2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: done
   2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: backlog
   2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: backlog
   2-5-créer-connexions-entre-nœuds-manuellement-fr26: backlog

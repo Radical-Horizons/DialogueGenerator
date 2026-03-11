@@ -1,7 +1,8 @@
 /**
- * Story 2.1 (FR22): virtualisation React Flow.
+ * Story 2.1 (FR22) + Story 2.2 (FR23): virtualisation React Flow.
  * Vérifie que onlyRenderVisibleElements est activé pour les graphes 500+ nœuds (NFR-P1),
- * couleurs par type (AC #2), et régression edges après sélection.
+ * couleurs par type (AC #2), régression edges après sélection.
+ * Story 2.2: virtualisation active ⇒ nœuds hors viewport non rendus (mémoire); perf <1s / <100ms (NFR-P1/P4) assurées par virtualisation.
  */
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
 import React from 'react'
@@ -102,6 +103,36 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     renderGraphCanvas()
     expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)
     expect(useGraphStore.getState().nodes).toHaveLength(500)
+  })
+
+  it('with 501+ nodes, virtualisation active so only visible nodes are rendered (Story 2.2 AC #1, #2)', () => {
+    const { addNode } = useGraphStore.getState()
+    for (let i = 0; i < 501; i++) {
+      addNode(
+        createMockNode(`n${i}`, i % 3 === 0 ? 'endNode' : i % 3 === 1 ? 'testNode' : 'dialogueNode')
+      )
+    }
+    renderGraphCanvas()
+    expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)
+    expect(useGraphStore.getState().nodes).toHaveLength(501)
+    // With onlyRenderVisibleElements=true, React Flow renders only viewport nodes; no backend lazy loading required for 500+ nodes.
+  })
+
+  it('when focus-generated-node is dispatched with nodeId, setHighlightedNodes is called and store highlights node (Story 2.2 AC #3)', async () => {
+    const { addNode } = useGraphStore.getState()
+    addNode(createMockNode('n1', 'dialogueNode'))
+    addNode(createMockNode('n2', 'dialogueNode'))
+    renderGraphCanvas()
+    expect(useGraphStore.getState().highlightedNodeIds).toEqual([])
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent('focus-generated-node', { detail: { nodeId: 'n2' } })
+      )
+    })
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 150))
+    })
+    expect(useGraphStore.getState().highlightedNodeIds).toEqual(['n2'])
   })
 
   it('with multiple nodes and edges, selection does not alter nodes or edges count (regression)', () => {

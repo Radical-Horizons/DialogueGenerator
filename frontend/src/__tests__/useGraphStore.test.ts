@@ -331,6 +331,43 @@ describe('useGraphStore - Pending save state', () => {
     })
   })
 
+  describe('Story 2.2 (AC #4): graph unload on dialogue change', () => {
+    it('after loadDialogue(B), state nodes/edges match B only; no leak of previous graph', async () => {
+      const graphAPI = await import('../api/graph')
+      const mockLoadGraph = vi.mocked(graphAPI.loadGraph)
+      const dialogueA = {
+        nodes: [
+          { id: 'nA1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { speaker: 'A', line: 'A1' } },
+          { id: 'nA2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { speaker: 'A', line: 'A2' } },
+        ],
+        edges: [{ id: 'eA1', source: 'nA1', target: 'nA2' }],
+        metadata: { title: 'Dialogue A', node_count: 2, edge_count: 1, filename: 'a.json' },
+      }
+      const dialogueB = {
+        nodes: [
+          { id: 'nB1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { speaker: 'B', line: 'B1' } },
+          { id: 'nB2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { speaker: 'B', line: 'B2' } },
+        ],
+        edges: [{ id: 'eB1', source: 'nB1', target: 'nB2' }],
+        metadata: { title: 'Dialogue B', node_count: 2, edge_count: 1, filename: 'b.json' },
+      }
+      mockLoadGraph
+        .mockResolvedValueOnce(dialogueA as Awaited<ReturnType<typeof graphAPI.loadGraph>>)
+        .mockResolvedValueOnce(dialogueB as Awaited<ReturnType<typeof graphAPI.loadGraph>>)
+      const { loadDialogue } = useGraphStore.getState()
+      await loadDialogue('{"dialogue":"A"}')
+      let state = useGraphStore.getState()
+      expect(state.nodes.map((n) => n.id)).toEqual(expect.arrayContaining(['nA1', 'nA2']))
+      expect(state.edges.some((e) => e.source === 'nA1' && e.target === 'nA2')).toBe(true)
+      await loadDialogue('{"dialogue":"B"}')
+      state = useGraphStore.getState()
+      expect(state.nodes.map((n) => n.id)).toEqual(expect.arrayContaining(['nB1', 'nB2']))
+      expect(state.nodes.some((n) => n.id === 'nA1' || n.id === 'nA2')).toBe(false)
+      expect(state.edges.some((e) => e.source === 'nB1' && e.target === 'nB2')).toBe(true)
+      expect(state.edges.some((e) => e.source === 'nA1')).toBe(false)
+    })
+  })
+
   describe('generateFromNode - Batch generation support', () => {
     beforeEach(() => {
       useGraphStore.getState().resetGraph()

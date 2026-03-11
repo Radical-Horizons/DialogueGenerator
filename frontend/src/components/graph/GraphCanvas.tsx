@@ -30,6 +30,7 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   instanceRef.current = reactFlowInstance
   const { fitView, getNode } = reactFlowInstance
   const setSelectedNodeInner = useGraphStore((s) => s.setSelectedNode)
+  const setHighlightedNodesInner = useGraphStore((s) => s.setHighlightedNodes)
   const isGraphLoading = useGraphStore((s) => s.isLoading)
   const documentId = useGraphStore((s) => s.documentId)
   const alreadyFitForDocumentIdRef = useRef<string | null>(null)
@@ -55,12 +56,20 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   }, [isGraphLoading, documentId])
 
   useEffect(() => {
+    let fitViewTimeoutId: ReturnType<typeof setTimeout> | null = null
     const handleFocusNode = (event: CustomEvent<{ nodeId: string }>) => {
+      if (fitViewTimeoutId !== null) {
+        window.clearTimeout(fitViewTimeoutId)
+        fitViewTimeoutId = null
+      }
       const nodeId = event.detail.nodeId
       const node = getNode(nodeId)
       if (node) {
+        setHighlightedNodesInner([nodeId])
         setSelectedNodeInner(nodeId)
-        setTimeout(() => {
+        // Délai court pour laisser la virtualisation mesurer le nœud avant fitView (centrage fiable).
+        fitViewTimeoutId = window.setTimeout(() => {
+          fitViewTimeoutId = null
           fitView({
             nodes: [node],
             duration: 400,
@@ -72,8 +81,11 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
     window.addEventListener('focus-generated-node', handleFocusNode as EventListener)
     return () => {
       window.removeEventListener('focus-generated-node', handleFocusNode as EventListener)
+      if (fitViewTimeoutId !== null) {
+        window.clearTimeout(fitViewTimeoutId)
+      }
     }
-  }, [getNode, fitView, setSelectedNodeInner])
+  }, [getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
 
   useEffect(() => {
     let timeoutId: number | null = null

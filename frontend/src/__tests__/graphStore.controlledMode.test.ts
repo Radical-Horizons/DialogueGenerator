@@ -105,6 +105,22 @@ describe('graphStore - Controlled mode (ADR-007)', () => {
       expect(useGraphStore.getState().selectedNodeId).toBeNull()
     })
 
+    it('updateNodePosition only replaces the updated node reference (Story 2.2 AC #5 - localized re-render)', () => {
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      const n1: Node = { id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
+      const n2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(n1)
+      addNode(n2)
+      const nodesBefore = useGraphStore.getState().nodes
+      updateNodePosition('n1', { x: 50, y: 50 })
+      const nodesAfter = useGraphStore.getState().nodes
+      expect(nodesAfter).not.toBe(nodesBefore)
+      const node1After = nodesAfter.find((n) => n.id === 'n1')
+      const node2After = nodesAfter.find((n) => n.id === 'n2')
+      expect(node1After?.position).toEqual({ x: 50, y: 50 })
+      expect(node2After).toBe(nodesBefore.find((n) => n.id === 'n2'))
+    })
+
     it('onNodesChange([{ type: "select", id, selected }]) updates store (React Flow event shape)', () => {
       const { addNode, setSelectedNode } = useGraphStore.getState()
       const n1: Node = { id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
