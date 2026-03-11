@@ -1,6 +1,6 @@
 # Story 2.5: Créer connexions entre nœuds manuellement (FR26)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -40,23 +40,23 @@ so that **je peux définir le flux narratif et les relations entre les dialogues
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Vérifier handles, onConnect et persistance (AC: #1, #2, #3)
-  - [ ] 1.1 (TDD) Exécuter ou étendre tests : `onConnect` appelle `connectNodes` avec source, target, choiceIndex, connectionType ; après connexion, `markDirty` déclenché ; auto-save enchaîne
-  - [ ] 1.2 Vérifier dans `GraphCanvas.tsx` que `onConnect` (l.362+) mappe correctement `sourceHandle` (choice:, choice-N, success, failure) vers `connectNodes(source, target, choiceIndex?, connectionType)`
-  - [ ] 1.3 Vérifier que les handles sont présents et visibles dans `DialogueNode.tsx`, `TestNode.tsx`, `EndNode.tsx` (Handle React Flow sur les bords)
-  - [ ] 1.4 (TDD) Exécuter `graphStore.controlledMode.test.ts`, `useGraphStore.test.ts` (connectNodes, markDirty) pour régression
-- [ ] Task 2: Édition du label edge par double-clic (AC: #4)
-  - [ ] 2.1 (TDD) Test : double-clic sur une edge choice ouvre un moyen d’éditer le label (inline ou modal) ; la modification met à jour le store (choix parent ou edge data) et marque dirty
-  - [ ] 2.2 Implémenter `onEdgeDoubleClick` dans `GraphCanvas.tsx` (ou handler délégué) : pour les edges de type choice, ouvrir édition du label (texte du choix) — soit inline sur l’edge, soit modal/popover
-  - [ ] 2.3 S’assurer que la mise à jour du label persiste via le store (mise à jour du choix parent dans `node.data.choices[].text` ou équivalent) et déclenche `markDirty()` ; pas d’endpoint dédié
-  - [ ] 2.4 Vérifier que `StableLabelSmoothStepEdge` affiche bien le label (déjà en place) et que l’édition le reflète après sauvegarde
-- [ ] Task 3: Warning « Cycle détecté » après création (AC: #5)
-  - [ ] 3.1 Vérifier que `validateGraph()` (ou équivalent) est appelé après une connexion créée (post-connect ou au prochain save) et que la réponse inclut les warnings `cycle_detected`
-  - [ ] 3.2 Vérifier que le panneau de validation dans `GraphEditor.tsx` affiche bien « Cycle détecté » pour les cycles (déjà implémenté : type `cycle_detected`, cycle_path, intentionalCycles)
-  - [ ] 3.3 (TDD) Test : créer une connexion qui forme un cycle → validation retourne un warning cycle_detected ; l’edge reste créée (non-bloquant)
-- [ ] Task 4: Régression et qualité
-  - [ ] 4.1 Exécuter tous les tests graphe : `graphStore.controlledMode.test.ts`, `useGraphStore.test.ts` (connectNodes, disconnectNodes), `useGraphStore.testNodeSync.test.ts` (TestNode connections)
-  - [ ] 4.2 Vérifier qu’aucun endpoint dédié `/connections` n’est créé ; persistance uniquement via `saveDialogue()` → `POST /api/v1/unity-dialogues/graph/save-and-write`
+- [x] Task 1: Vérifier handles, onConnect et persistance (AC: #1, #2, #3)
+  - [x] 1.1 (TDD) Exécuter ou étendre tests : `onConnect` appelle `connectNodes` avec source, target, choiceIndex, connectionType ; après connexion, `markDirty` déclenché ; auto-save enchaîne
+  - [x] 1.2 Vérifier dans `GraphCanvas.tsx` que `onConnect` (l.362+) mappe correctement `sourceHandle` (choice:, choice-N, success, failure) vers `connectNodes(source, target, choiceIndex?, connectionType)`
+  - [x] 1.3 Vérifier que les handles sont présents et visibles dans `DialogueNode.tsx`, `TestNode.tsx`, `EndNode.tsx` (Handle React Flow sur les bords)
+  - [x] 1.4 (TDD) Exécuter `graphStore.controlledMode.test.ts`, `useGraphStore.test.ts` (connectNodes, markDirty) pour régression
+- [x] Task 2: Édition du label edge par double-clic (AC: #4)
+  - [x] 2.1 (TDD) Test : double-clic sur une edge choice ouvre un moyen d’éditer le label (inline ou modal) ; la modification met à jour le store (choix parent ou edge data) et marque dirty
+  - [x] 2.2 Implémenter `onEdgeDoubleClick` dans `GraphCanvas.tsx` (ou handler délégué) : pour les edges de type choice, ouvrir édition du label (texte du choix) — soit inline sur l’edge, soit modal/popover
+  - [x] 2.3 S’assurer que la mise à jour du label persiste via le store (mise à jour du choix parent dans `node.data.choices[].text` ou équivalent) et déclenche `markDirty()` ; pas d’endpoint dédié
+  - [x] 2.4 Vérifier que `StableLabelSmoothStepEdge` affiche bien le label (déjà en place) et que l’édition le reflète après sauvegarde
+- [x] Task 3: Warning « Cycle détecté » après création (AC: #5)
+  - [x] 3.1 Vérifier que `validateGraph()` (ou équivalent) est appelé après une connexion créée (post-connect ou au prochain save) et que la réponse inclut les warnings `cycle_detected`
+  - [x] 3.2 Vérifier que le panneau de validation dans `GraphEditor.tsx` affiche bien « Cycle détecté » pour les cycles (déjà implémenté : type `cycle_detected`, cycle_path, intentionalCycles)
+  - [x] 3.3 (TDD) Test : créer une connexion qui forme un cycle → validation retourne un warning cycle_detected ; l’edge reste créée (non-bloquant)
+- [x] Task 4: Régression et qualité
+  - [x] 4.1 Exécuter tous les tests graphe : `graphStore.controlledMode.test.ts`, `useGraphStore.test.ts` (connectNodes, disconnectNodes), `useGraphStore.testNodeSync.test.ts` (TestNode connections)
+  - [x] 4.2 Vérifier qu’aucun endpoint dédié `/connections` n’est créé ; persistance uniquement via `saveDialogue()` → `POST /api/v1/unity-dialogues/graph/save-and-write`
 
 ## Dev Notes
 
@@ -119,10 +119,30 @@ so that **je peux définir le flux narratif et les relations entre les dialogues
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Amelia (Dev Story workflow)
 
 ### Debug Log References
 
+- Handles vérifiés : DialogueNode (choice:, nextNode), TestNode (critical-failure, failure, success, critical-success), EndNode (target).
+- onConnect : mapping sourceHandle → choiceIndex/connectionType + passage de sourceHandle en 5e param pour TestNode ; critical-success / critical-failure ajoutés.
+
 ### Completion Notes List
 
+- Task 1 : onConnect étendu (critical-success, critical-failure), connectNodes reçoit sourceHandle ; test connectNodes + markDirty étendu ; graphState.connectNodes typé avec sourceHandle optionnel.
+- Task 2 : double-clic sur edge choice → événement `edge-label-edit` ; EdgeLabelEditModal + updateChoiceEdgeLabel dans edgeSlice ; StableLabelSmoothStepEdge envoie l’event pour data.edgeType === 'choice'. Tests : updateChoiceEdgeLabel.
+- Task 3 : validateGraph appelé au save (GraphEditor) ; panneau affiche « Cycles détectés » (cycle_detected) ; test : connexion formant cycle → validateGraph retourne cycle_detected, edge conservée.
+- Task 4 : tous les tests graphe passent ; aucun endpoint POST /connections (persistance via save-and-write).
+
+### Code Review (AI) – correctifs appliqués
+
+- **disconnectNodes** (edgeSlice) : pour une edge de type choice (DialogueNode → DialogueNode), nettoyage de `choice.targetNode` sur le nœud source en plus de la suppression de l’edge (cohérence du store). Test ajouté : « disconnectNodes on choice edge clears source choice targetNode ».
+- **EdgeLabelEditModal** : piège à focus (focus initial sur l’input, Tab/Shift+Tab restent dans la modale) pour l’accessibilité.
+
 ### File List
+
+- frontend/src/components/graph/GraphCanvas.tsx
+- frontend/src/components/graph/EdgeLabelEditModal.tsx (new)
+- frontend/src/components/graph/edges/StableLabelSmoothStepEdge.tsx
+- frontend/src/store/slices/edgeSlice.ts
+- frontend/src/store/types/graphState.ts
+- frontend/src/__tests__/useGraphStore.test.ts

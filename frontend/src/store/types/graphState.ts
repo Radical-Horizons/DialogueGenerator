@@ -64,9 +64,12 @@ export interface GraphState {
     sourceId: string,
     targetId: string,
     choiceIndex?: number,
-    connectionType?: string
+    connectionType?: string,
+    sourceHandle?: string
   ) => void
   disconnectNodes: (edgeId: string) => void
+  /** Met à jour le libellé d'une edge de type choice (Story 2.5 AC #4). */
+  updateChoiceEdgeLabel: (edgeId: string, newText: string) => void
   setSelectedNode: (nodeId: string | null) => void
   duplicateNode: (nodeId: string) => Node | null
   duplicateNodes: (nodeIds: string[]) => void

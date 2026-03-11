@@ -13,10 +13,14 @@ import {
 import {
   buildChoiceEdge,
   stableChoiceEdgeId,
+  truncateChoiceLabel,
 } from '../../utils/graphEdgeBuilders'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
 
-export type EdgeSlice = Pick<GraphState, 'connectNodes' | 'disconnectNodes'>
+export type EdgeSlice = Pick<
+  GraphState,
+  'connectNodes' | 'disconnectNodes' | 'updateChoiceEdgeLabel'
+>
 
 export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set, get) => ({
   connectNodes: (
@@ -258,9 +262,30 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
         }
       }
 
-      // Déconnexion standard : supprimer simplement l'edge
+      // Déconnexion standard : supprimer l'edge et pour une edge choice, nettoyer choice.targetNode (cohérence store)
       const newEdges = state.edges.filter((e) => e.id !== edgeId)
-      const updatedNodes = state.nodes
+      let updatedNodes = state.nodes
+      if (
+        edge &&
+        (edge.data as { edgeType?: string })?.edgeType === 'choice' &&
+        typeof (edge.data as { choiceIndex?: number })?.choiceIndex === 'number'
+      ) {
+        const sourceId = edge.source
+        const choiceIndex = (edge.data as { choiceIndex?: number }).choiceIndex!
+        const sourceIdx = state.nodes.findIndex((n) => n.id === sourceId)
+        if (sourceIdx !== -1) {
+          const sourceNode = state.nodes[sourceIdx]
+          const choices = (sourceNode.data?.choices ?? []) as Choice[]
+          if (choiceIndex < choices.length) {
+            const updatedChoices = choices.map((c, i) =>
+              i === choiceIndex ? { ...c, targetNode: undefined } as Choice : c
+            )
+            updatedNodes = state.nodes.map((n) =>
+              n.id === sourceId ? { ...n, data: { ...n.data, choices: updatedChoices } } : n
+            )
+          }
+        }
+      }
 
       const isDocumentSoT = state.document != null && state.layout != null
       const docAndLayout = isDocumentSoT
@@ -268,13 +293,56 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
         : {}
 
       return {
+        nodes: updatedNodes,
         edges: newEdges,
         dialogueMetadata: {
           ...state.dialogueMetadata,
+          node_count: updatedNodes.length,
           edge_count: newEdges.length,
         },
         ...docAndLayout,
       }
+    })
+    get().markDirty()
+  },
+
+  updateChoiceEdgeLabel: (edgeId: string, newText: string) => {
+    const state = get()
+    const edge = state.edges.find((e) => e.id === edgeId)
+    if (!edge || (edge.data as { edgeType?: string })?.edgeType !== 'choice') return
+    const sourceId = edge.source
+    const choiceIndex = (edge.data as { choiceIndex?: number })?.choiceIndex
+    if (choiceIndex == null) return
+    const sourceNodeIndex = state.nodes.findIndex((n) => n.id === sourceId)
+    if (sourceNodeIndex === -1) return
+    const sourceNode = state.nodes[sourceNodeIndex]
+    const choices = (sourceNode.data?.choices ?? []) as Choice[]
+    if (choiceIndex >= choices.length) return
+    const updatedChoices = choices.map((c, i) =>
+      i === choiceIndex ? { ...c, text: newText } : c
+    )
+    const updatedNodes = state.nodes.map((n) =>
+      n.id === sourceId
+        ? { ...n, data: { ...n.data, choices: updatedChoices } }
+        : n
+    )
+    const displayLabel = truncateChoiceLabel(newText, choiceIndex)
+    const updatedEdges = state.edges.map((e) =>
+      e.id === edgeId ? { ...e, label: displayLabel } : e
+    )
+    const isDocumentSoT = state.document != null && state.layout != null
+    const docAndLayout = isDocumentSoT
+      ? syncDocAndLayout(updatedNodes, updatedEdges, state.layout as Record<string, unknown>)
+      : {}
+    set({
+      nodes: updatedNodes,
+      edges: updatedEdges,
+      dialogueMetadata: {
+        ...state.dialogueMetadata,
+        node_count: updatedNodes.length,
+        edge_count: updatedEdges.length,
+      },
+      ...docAndLayout,
     })
     get().markDirty()
   },

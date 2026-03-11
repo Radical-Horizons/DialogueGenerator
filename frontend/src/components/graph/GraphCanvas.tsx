@@ -19,6 +19,7 @@ import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from './nodes'
 import { StableLabelSmoothStepEdge } from './edges/StableLabelSmoothStepEdge'
 import { NodeContextMenu } from './NodeContextMenu'
+import { EdgeLabelEditModal } from './EdgeLabelEditModal'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 
@@ -130,9 +131,16 @@ export const GraphCanvas = memo(function GraphCanvas() {
     connectNodes,
     deleteNode,
     disconnectNodes,
+    updateChoiceEdgeLabel,
   } = useGraphStore()
   const [menu, setMenu] = useState<{ id: string; top: number; left: number; right?: number; bottom?: number } | null>(null)
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
+  const [edgeLabelEdit, setEdgeLabelEdit] = useState<{
+    edgeId: string
+    sourceId: string
+    choiceIndex: number
+    initialText: string
+  } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
   const openContextMenu = useCallback(
@@ -380,8 +388,18 @@ export const GraphCanvas = memo(function GraphCanvas() {
         connectionType = 'success'
       } else if (sourceHandle === 'failure') {
         connectionType = 'failure'
+      } else if (sourceHandle === 'critical-success') {
+        connectionType = 'critical-success'
+      } else if (sourceHandle === 'critical-failure') {
+        connectionType = 'critical-failure'
       }
-      connectNodes(connection.source, connection.target, choiceIndex, connectionType)
+      connectNodes(
+        connection.source,
+        connection.target,
+        choiceIndex,
+        connectionType,
+        connection.sourceHandle ?? undefined
+      )
     },
     [connectNodes]
   )
@@ -413,6 +431,43 @@ export const GraphCanvas = memo(function GraphCanvas() {
       smoothstep: StableLabelSmoothStepEdge,
     }),
     []
+  )
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ edgeId: string }>).detail
+      if (!detail?.edgeId) return
+      const state = useGraphStore.getState()
+      const edge = state.edges.find((e) => e.id === detail.edgeId)
+      if (!edge || (edge.data as { edgeType?: string })?.edgeType !== 'choice') return
+      const sourceNode = state.nodes.find((n) => n.id === edge.source)
+      const choiceIndex = (edge.data as { choiceIndex?: number })?.choiceIndex
+      if (
+        choiceIndex == null ||
+        !sourceNode?.data?.choices ||
+        !Array.isArray(sourceNode.data.choices) ||
+        sourceNode.data.choices[choiceIndex] == null
+      )
+        return
+      const choice = sourceNode.data.choices[choiceIndex] as { text?: string }
+      setEdgeLabelEdit({
+        edgeId: edge.id,
+        sourceId: edge.source,
+        choiceIndex,
+        initialText: choice.text ?? '',
+      })
+    }
+    window.addEventListener('edge-label-edit', handler)
+    return () => window.removeEventListener('edge-label-edit', handler)
+  }, [])
+
+  const handleEdgeLabelConfirm = useCallback(
+    (newText: string) => {
+      if (!edgeLabelEdit) return
+      updateChoiceEdgeLabel(edgeLabelEdit.edgeId, newText.trim())
+      setEdgeLabelEdit(null)
+    },
+    [edgeLabelEdit, updateChoiceEdgeLabel]
   )
 
   const onMove = useCallback((_event: unknown, newViewport: Viewport) => {
@@ -505,6 +560,12 @@ export const GraphCanvas = memo(function GraphCanvas() {
         />
         {menu && <NodeContextMenu {...menu} onClose={() => setMenu(null)} />}
       </ReactFlow>
+      <EdgeLabelEditModal
+        isOpen={edgeLabelEdit != null}
+        initialValue={edgeLabelEdit?.initialText ?? ''}
+        onConfirm={handleEdgeLabelConfirm}
+        onCancel={() => setEdgeLabelEdit(null)}
+      />
     </div>
   )
 })
