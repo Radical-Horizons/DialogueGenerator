@@ -405,7 +405,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         edges={edges}
         fitView={false}
         defaultViewport={{ x: 0, y: 120, zoom: 1 }}
-        onlyRenderVisibleElements={false}
+        onlyRenderVisibleElements={true}
         onInit={(instance) => {
           const event = new CustomEvent('reactflow-instance-ready', {
             detail: instance,
