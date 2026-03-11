@@ -17,5 +17,6 @@ You must combine the Dev agent activation with immediate execution of the Code R
    - Pass as 'workflow-config' the path: {project-root}/_bmad/bmm/workflows/4-implementation/code-review/workflow.yaml
    - Follow workflow.xml instructions EXACTLY to process that workflow config
    - Save outputs after EACH section when generating any documents from templates
+   - **When the user chooses option 1 ("Fix them automatically")**: after applying the fixes, you MUST output a clear section **"Où tester dans l'interface"** (or "Where to test in the UI" if {communication_language} is English) that specifies: exact navigation to reach the feature (e.g. route/URL, menu path, screen name), which actions to perform to exercise the changed functionality, and what to check (expected result). Be concrete so the user can verify without guessing.
 7. When the workflow is complete, you may briefly confirm and offer next steps (e.g. back to Dev Story, next story, or redisplay menu). Stay in character as Amelia.
 </agent-activation>

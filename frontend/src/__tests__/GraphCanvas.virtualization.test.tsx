@@ -16,6 +16,9 @@ import { useGraphStore } from '../store/graphStore'
 const capturedReactFlowProps: {
   onlyRenderVisibleElements?: boolean
   nodeTypes?: Record<string, unknown>
+  minZoom?: number
+  maxZoom?: number
+  onNodeDoubleClick?: (event: unknown, node: { id: string }) => void
 } = {}
 
 vi.mock('reactflow', async (importOriginal) => {
@@ -26,6 +29,9 @@ vi.mock('reactflow', async (importOriginal) => {
     default: function MockReactFlow(props: Record<string, unknown>) {
       capturedReactFlowProps.onlyRenderVisibleElements = props.onlyRenderVisibleElements as boolean
       capturedReactFlowProps.nodeTypes = props.nodeTypes as Record<string, unknown>
+      capturedReactFlowProps.minZoom = props.minZoom as number
+      capturedReactFlowProps.maxZoom = props.maxZoom as number
+      capturedReactFlowProps.onNodeDoubleClick = props.onNodeDoubleClick as (event: unknown, node: { id: string }) => void
       return React.createElement(ActualReactFlow, props)
     },
   }
@@ -77,6 +83,9 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
   beforeEach(() => {
     useGraphStore.getState().resetGraph()
     capturedReactFlowProps.onlyRenderVisibleElements = undefined
+    capturedReactFlowProps.minZoom = undefined
+    capturedReactFlowProps.maxZoom = undefined
+    capturedReactFlowProps.onNodeDoubleClick = undefined
   })
 
   it('passes onlyRenderVisibleElements={true} to ReactFlow for 500+ nodes performance (NFR-P1)', () => {
@@ -133,6 +142,38 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
       await new Promise((r) => setTimeout(r, 150))
     })
     expect(useGraphStore.getState().highlightedNodeIds).toEqual(['n2'])
+  })
+
+  it('passes minZoom and maxZoom to ReactFlow (Story 2.3 AC #1)', () => {
+    renderGraphCanvas()
+    expect(capturedReactFlowProps.minZoom).toBe(0.1)
+    expect(capturedReactFlowProps.maxZoom).toBe(2)
+  })
+
+  it('displays zoom level in UI (Story 2.3 AC #1 - controls/indicator)', () => {
+    renderGraphCanvas()
+    expect(screen.getByText(/100%/)).toBeInTheDocument()
+  })
+
+  it('double-click on node dispatches focus-generated-node (Story 2.3 AC #3)', () => {
+    const { addNode } = useGraphStore.getState()
+    addNode(createMockNode('n1', 'dialogueNode'))
+    addNode(createMockNode('n2', 'dialogueNode'))
+    renderGraphCanvas()
+    let receivedNodeId: string | null = null
+    const handler = (e: Event) => {
+      receivedNodeId = (e as CustomEvent<{ nodeId: string }>).detail.nodeId
+    }
+    window.addEventListener('focus-generated-node', handler)
+    try {
+      expect(capturedReactFlowProps.onNodeDoubleClick).toBeDefined()
+      act(() => {
+        capturedReactFlowProps.onNodeDoubleClick!(null, { id: 'n2' })
+      })
+      expect(receivedNodeId).toBe('n2')
+    } finally {
+      window.removeEventListener('focus-generated-node', handler)
+    }
   })
 
   it('with multiple nodes and edges, selection does not alter nodes or edges count (regression)', () => {

@@ -504,6 +504,9 @@ export function GraphEditor({
     return () => document.removeEventListener('mousedown', onOutside)
   }, [showActionsDropdown])
   
+  // Pan delta pour navigation clavier (Story 2.3 AC #5)
+  const PAN_DELTA = 50
+
   // Raccourcis clavier
   useKeyboardShortcuts(
     [
@@ -541,8 +544,122 @@ export function GraphEditor({
         description: 'Supprimer le nœud sélectionné',
         enabled: () => !!useGraphStore.getState().selectedNodeId,
       },
+      {
+        key: 'ctrl+0',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) reactFlowInstance.fitView({ padding: 0.2, duration: 200 })
+        },
+        description: 'Fit View (tout le graphe visible)',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 'arrowup',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, y: vp.y + PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers le haut',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 'arrowdown',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, y: vp.y - PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers le bas',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 'arrowleft',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, x: vp.x + PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers la gauche',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 'arrowright',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, x: vp.x - PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers la droite',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 'w',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, y: vp.y + PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers le haut (WASD)',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 's',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, y: vp.y - PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers le bas (WASD)',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 'a',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, x: vp.x + PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers la gauche (WASD)',
+        enabled: !!reactFlowInstance,
+      },
+      {
+        key: 'd',
+        handler: (e) => {
+          e.preventDefault()
+          if (reactFlowInstance) {
+            const vp = reactFlowInstance.getViewport()
+            reactFlowInstance.setViewport({ ...vp, x: vp.x - PAN_DELTA })
+          }
+        },
+        description: 'Pan graphe vers la droite (WASD)',
+        enabled: !!reactFlowInstance,
+      },
     ],
-    [activeDialogueFilename, isGraphSaving, handleSave, selectedNodeId, isGraphLoading, isLoadingDialogue, setShowDeleteNodeConfirm]
+    [
+      activeDialogueFilename,
+      isGraphSaving,
+      handleSave,
+      selectedNodeId,
+      isGraphLoading,
+      isLoadingDialogue,
+      setShowDeleteNodeConfirm,
+      reactFlowInstance,
+    ]
   )
   
   return (
@@ -1050,6 +1167,9 @@ export function GraphEditor({
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+G</kbd> : ouvrir la génération IA</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+S</kbd> : sauvegarder</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Suppr</kbd> : supprimer le nœud sélectionné</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+0</kbd> : Fit View (tout le graphe visible)</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Flèches</kbd> ou <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>WASD</kbd> : pan du graphe</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Double-clic</kbd> sur un nœud : focus (centrage + zoom)</li>
                   </ul>
                 </div>
               )}

@@ -13,6 +13,7 @@ import ReactFlow, {
   type NodeChange,
   type EdgeChange,
   type NodeTypes,
+  type Viewport,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from './nodes'
@@ -56,7 +57,7 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   }, [isGraphLoading, documentId])
 
   useEffect(() => {
-    let fitViewTimeoutId: ReturnType<typeof setTimeout> | null = null
+    let fitViewTimeoutId: number | null = null
     const handleFocusNode = (event: CustomEvent<{ nodeId: string }>) => {
       if (fitViewTimeoutId !== null) {
         window.clearTimeout(fitViewTimeoutId)
@@ -68,11 +69,12 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
         setHighlightedNodesInner([nodeId])
         setSelectedNodeInner(nodeId)
         // Délai court pour laisser la virtualisation mesurer le nœud avant fitView (centrage fiable).
+        // AC #3 : animation fluide 300 ms.
         fitViewTimeoutId = window.setTimeout(() => {
           fitViewTimeoutId = null
           fitView({
             nodes: [node],
-            duration: 400,
+            duration: 300,
             padding: 0.3,
           })
         }, 100)
@@ -111,6 +113,8 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   return null
 })
 
+const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 120, zoom: 1 }
+
 export const GraphCanvas = memo(function GraphCanvas() {
   const {
     nodes: storeNodes,
@@ -128,6 +132,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     disconnectNodes,
   } = useGraphStore()
   const [menu, setMenu] = useState<{ id: string; top: number; left: number; right?: number; bottom?: number } | null>(null)
+  const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
 
   const openContextMenu = useCallback(
@@ -171,6 +176,11 @@ export const GraphCanvas = memo(function GraphCanvas() {
     setSelectedNode(null)
     setMenu(null)
   }, [setSelectedNode, setMenu])
+
+  /** Double-clic nœud → focus (centrage + zoom confortable). Réutilise focus-generated-node (Story 2.3 AC #3). */
+  const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: node.id } }))
+  }, [])
 
   const fitViewRequestedAfterDimensionsRef = useRef(false)
   useEffect(() => {
@@ -409,15 +419,23 @@ export const GraphCanvas = memo(function GraphCanvas() {
     []
   )
 
+  const onMove = useCallback((_event: unknown, newViewport: Viewport) => {
+    setViewport(newViewport)
+  }, [])
+
   return (
-    <div ref={ref} style={{ width: '100%', height: '100%' }}>
+    <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
       <GraphCanvasInner />
       <ReactFlow
         nodes={nodes}
         edges={edges}
         fitView={false}
-        defaultViewport={{ x: 0, y: 120, zoom: 1 }}
+        defaultViewport={DEFAULT_VIEWPORT}
+        minZoom={0.1}
+        maxZoom={2}
+        panActivationKeyCode="Space"
         onlyRenderVisibleElements={true}
+        onMove={onMove}
         onInit={(instance) => {
           const event = new CustomEvent('reactflow-instance-ready', {
             detail: instance,
@@ -428,6 +446,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onNodeDoubleClick={onNodeDoubleClick}
         onNodeContextMenu={onNodeContextMenu}
         onPaneClick={onPaneClick}
         onNodeDragStop={onNodeDragStop}
@@ -451,6 +470,22 @@ export const GraphCanvas = memo(function GraphCanvas() {
           style={{ opacity: 0.2 }}
         />
         <Controls />
+        <div
+          aria-label="Zoom level"
+          style={{
+            position: 'absolute',
+            bottom: 48,
+            left: 12,
+            fontSize: 12,
+            color: theme.text.secondary,
+            backgroundColor: theme.background.secondary,
+            padding: '2px 6px',
+            borderRadius: 4,
+            border: `1px solid ${theme.border.primary}`,
+          }}
+        >
+          {Math.round(viewport.zoom * 100)}%
+        </div>
         <MiniMap
           nodeColor={(node) => {
             switch (node.type) {

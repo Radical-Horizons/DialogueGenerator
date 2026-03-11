@@ -81,8 +81,8 @@ development_status:
   epic-2: in-progress
   2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: done
   2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: done
-  2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: backlog
-  2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: backlog
+  2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: done
+  2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: ready-for-dev
   2-5-créer-connexions-entre-nœuds-manuellement-fr26: backlog
   2-6-supprimer-connexions-entre-nœuds-fr27: backlog
   2-7-rechercher-nœuds-par-contenu-texte-ou-nom-speaker-fr28: backlog
