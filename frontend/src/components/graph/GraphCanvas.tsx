@@ -20,6 +20,7 @@ import { DialogueNode, TestNode, EndNode } from './nodes'
 import { StableLabelSmoothStepEdge } from './edges/StableLabelSmoothStepEdge'
 import { NodeContextMenu } from './NodeContextMenu'
 import { EdgeLabelEditModal } from './EdgeLabelEditModal'
+import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 
@@ -131,6 +132,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     connectNodes,
     deleteNode,
     disconnectNodes,
+    markDirty,
     updateChoiceEdgeLabel,
   } = useGraphStore()
   const [menu, setMenu] = useState<{ id: string; top: number; left: number; right?: number; bottom?: number } | null>(null)
@@ -141,6 +143,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
     choiceIndex: number
     initialText: string
   } | null>(null)
+  /** Pending edge delete: ids to remove after user confirmation (AC #1, #4). */
+  const [edgeIdsToDelete, setEdgeIdsToDelete] = useState<string[] | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
   const openContextMenu = useCallback(
@@ -348,17 +352,32 @@ export const GraphCanvas = memo(function GraphCanvas() {
     ]
   )
 
-  // onEdgesChange : uniquement actions du store — AC #2
+  // onEdgesChange : intercepter remove → confirmation avant store (Story 2.6 AC #1, #4)
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      for (const change of changes) {
-        if (change.type === 'remove' && change.id) {
-          disconnectNodes(change.id)
-        }
+      const removeIds = changes
+        .filter((c): c is { type: 'remove'; id: string } => c.type === 'remove' && Boolean(c.id))
+        .map((c) => c.id)
+      if (removeIds.length > 0) {
+        setEdgeIdsToDelete(removeIds)
+        return
       }
     },
-    [disconnectNodes]
+    []
   )
+
+  const onConfirmDeleteEdges = useCallback(() => {
+    if (!edgeIdsToDelete || edgeIdsToDelete.length === 0) return
+    for (const id of edgeIdsToDelete) {
+      disconnectNodes(id, true)
+    }
+    markDirty()
+    setEdgeIdsToDelete(null)
+  }, [edgeIdsToDelete, disconnectNodes, markDirty])
+
+  const onCancelDeleteEdges = useCallback(() => {
+    setEdgeIdsToDelete(null)
+  }, [])
 
   const onNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
@@ -565,6 +584,20 @@ export const GraphCanvas = memo(function GraphCanvas() {
         initialValue={edgeLabelEdit?.initialText ?? ''}
         onConfirm={handleEdgeLabelConfirm}
         onCancel={() => setEdgeLabelEdit(null)}
+      />
+      <ConfirmDialog
+        isOpen={edgeIdsToDelete != null && edgeIdsToDelete.length > 0}
+        title={edgeIdsToDelete?.length === 1 ? 'Supprimer la connexion' : 'Supprimer les connexions'}
+        message={
+          edgeIdsToDelete?.length === 1
+            ? 'Supprimer cette connexion ?'
+            : `Supprimer ${edgeIdsToDelete?.length ?? 0} connexions ?`
+        }
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        onConfirm={onConfirmDeleteEdges}
+        onCancel={onCancelDeleteEdges}
+        variant="danger"
       />
     </div>
   )

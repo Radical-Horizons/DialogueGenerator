@@ -1166,7 +1166,7 @@ export function GraphEditor({
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Clic droit</kbd> sur un nœud : menu (Générer, Voir le prompt, Dupliquer, Supprimer)</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+G</kbd> : ouvrir la génération IA</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+S</kbd> : sauvegarder</li>
-                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Suppr</kbd> : supprimer le nœud sélectionné</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Suppr</kbd> : supprimer le nœud sélectionné ; sur une connexion (edge) : confirmation puis suppression</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+0</kbd> : Fit View (tout le graphe visible)</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Flèches</kbd> ou <kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>WASD</kbd> : pan du graphe</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Double-clic</kbd> sur un nœud : focus (centrage + zoom)</li>
@@ -1273,7 +1273,7 @@ export function GraphEditor({
               
               const getLabelForType = (type: string) => {
                 switch (type) {
-                  case 'orphan_node': return 'Nœuds orphelins'
+                  case 'orphan_node': return 'Nœud orphelin détecté'
                   case 'broken_reference': return 'Références cassées'
                   case 'empty_node': return 'Nœuds vides'
                   case 'missing_test': return 'Tests manquants'

@@ -186,7 +186,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     get().markDirty()
   },
 
-  disconnectNodes: (edgeId: string) => {
+  disconnectNodes: (edgeId: string, skipMarkDirty?: boolean) => {
     set((state) => {
       const edge = state.edges.find((e) => e.id === edgeId)
       if (!edge) return state
@@ -303,7 +303,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
         ...docAndLayout,
       }
     })
-    get().markDirty()
+    if (!skipMarkDirty) get().markDirty()
   },
 
   updateChoiceEdgeLabel: (edgeId: string, newText: string) => {

@@ -67,7 +67,8 @@ export interface GraphState {
     connectionType?: string,
     sourceHandle?: string
   ) => void
-  disconnectNodes: (edgeId: string) => void
+  /** @param skipMarkDirty Si true, n'appelle pas markDirty (utilisé pour batch : appeler markDirty une fois après). */
+  disconnectNodes: (edgeId: string, skipMarkDirty?: boolean) => void
   /** Met à jour le libellé d'une edge de type choice (Story 2.5 AC #4). */
   updateChoiceEdgeLabel: (edgeId: string, newText: string) => void
   setSelectedNode: (nodeId: string | null) => void

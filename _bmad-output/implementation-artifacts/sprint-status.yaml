@@ -84,8 +84,8 @@ development_status:
   2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: done
   2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: done
   2-5-créer-connexions-entre-nœuds-manuellement-fr26: done
-  2-6-supprimer-connexions-entre-nœuds-fr27: backlog
-  2-7-rechercher-nœuds-par-contenu-texte-ou-nom-speaker-fr28: backlog
+  2-6-supprimer-connexions-entre-nœuds-fr27: done
+  2-7-rechercher-nœuds-par-contenu-texte-ou-nom-speaker-fr28: ready-for-dev
   2-8-jump-to-nœud-spécifique-par-id-ou-nom-fr29: backlog
   2-9-filtrer-vue-graphe-show-hide-types-nœuds-speakers-fr30: backlog
   2-10-sélection-multiple-nœuds-shift-click-lasso-selection-fr31: backlog
