@@ -388,17 +388,13 @@ export const GraphCanvas = memo(function GraphCanvas() {
 
   const onNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node) => {
-      // Annuler tout RAF en attente et committer la position finale
+      // Annuler tout RAF en attente ; committer toujours node.position (position finale snapée par React Flow)
       if (positionRafRef.current !== null) {
         cancelAnimationFrame(positionRafRef.current)
         positionRafRef.current = null
       }
-      if (pendingPositionRef.current?.nodeId === node.id) {
-        updateNodePosition(node.id, pendingPositionRef.current.position)
-        pendingPositionRef.current = null
-      } else {
-        updateNodePosition(node.id, node.position)
-      }
+      pendingPositionRef.current = null
+      updateNodePosition(node.id, node.position)
     },
     [updateNodePosition]
   )
@@ -450,6 +446,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onNodeContextMenu={onNodeContextMenu}
         onPaneClick={onPaneClick}
         onNodeDragStop={onNodeDragStop}
+        autoPanOnNodeDrag
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         snapToGrid

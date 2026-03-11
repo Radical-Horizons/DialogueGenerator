@@ -1,5 +1,5 @@
 ---
-name: 'dev-dev-story'
+name: 'dev-story'
 description: 'Developer agent + Dev Story in one command. Loads Dev (Amelia), then runs the dev-story workflow to implement the current story. Use when you want "Dev agent, implement this story" without opening the menu.'
 ---
 

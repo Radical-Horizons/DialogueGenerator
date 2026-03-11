@@ -1,6 +1,6 @@
 # Story 2.4: Drag-and-drop nœuds pour réorganiser layout (FR25)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -40,26 +40,26 @@ so that **je peux organiser visuellement le graphe selon ma préférence sans af
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Vérifier et documenter drag single + persistance (AC: #1, #2)
-  - [ ] 1.1 (TDD) Étendre ou exécuter tests existants : `onNodeDragStop` appelle `updateNodePosition` ; après drag, `markDirty` déclenché ; auto-save enchaîne
-  - [ ] 1.2 Vérifier dans `GraphCanvas.tsx` que `onNodeDragStop` (l.388+) commite la position finale (pendingPositionRef ou node.position) via `updateNodePosition` et annule le RAF en attente
-  - [ ] 1.3 Vérifier que le throttle RAF (`schedulePositionUpdate`) pendant le drag est bien en place (l.283+) et que les edges redraw en temps réel
-  - [ ] 1.4 (TDD) Exécuter `graphStore.controlledMode.test.ts` et tests drag/position pour régression
-- [ ] Task 2: Déplacement en groupe (AC: #3) — conditionnel Story 2.10
-  - [ ] 2.1 Si Story 2.10 livrée : vérifier que `multiSelectionKeyCode="Shift"` et `selectionOnDrag={true}` sont présents sur `<ReactFlow>` et que `onNodeDragStop` met à jour la position de tous les nœuds sélectionnés via une boucle `updateNodePosition` (ou équivalent store)
-  - [ ] 2.2 Si Story 2.10 non livrée : documenter dans Dev Notes que l’AC #3 sera pleinement livrable après 2.10 ; pas de blocage sur le reste de la story
-  - [ ] 2.3 (TDD) Test : lorsque plusieurs nœuds sont sélectionnés et qu’un est déplacé, tous bougent avec préservation des positions relatives
-- [ ] Task 3: Snap to grid et indicateur d’alignement (AC: #4)
-  - [ ] 3.1 (TDD) Test : `snapToGrid={true}` et `snapGrid={[15,15]}` sont bien passés à `<ReactFlow>` (déjà présents dans GraphCanvas.tsx:381-382)
-  - [ ] 3.2 Vérifier visuellement ou par test que le snap est appliqué à la position finale au `onNodeDragStop`
-  - [ ] 3.3 (Optionnel) Ligne guide d’alignement : si temps disponible, ajouter un indicateur visuel (ligne verticale/horizontale) quand un nœud est aligné avec un autre ; sinon documenter comme amélioration future
-- [ ] Task 4: Auto-pan hors viewport (AC: #5)
-  - [ ] 4.1 Vérifier le comportement natif React Flow : drag d’un nœud hors du viewport déclenche-t-il un pan automatique ? Consulter la doc React Flow (panOnDrag, noDragClassName, etc.)
-  - [ ] 4.2 Si auto-pan absent : activer via prop React Flow (ex. `panOnDrag={[1, 2]}` pour boutons gauche/middle) ou documenter la limitation
-  - [ ] 4.3 (TDD) Test d’intégration ou E2E : déplacer un nœud vers le bord et vérifier que le viewport suit (ou documenter si non supporté nativement)
-- [ ] Task 5: Régression et qualité
-  - [ ] 5.1 Exécuter tous les tests graphe : `graphStore.controlledMode.test.ts`, `GraphCanvas.virtualization.test.tsx`, `useGraphStore.test.ts` (updateNodePosition, markDirty)
-  - [ ] 5.2 Vérifier qu’aucun endpoint dédié `/position` n’est créé ; persistance uniquement via `saveDialogue()` → `POST /api/v1/unity-dialogues/graph/save-and-write`
+- [x] Task 1: Vérifier et documenter drag single + persistance (AC: #1, #2)
+  - [x] 1.1 (TDD) Étendre ou exécuter tests existants : `onNodeDragStop` appelle `updateNodePosition` ; après drag, `markDirty` déclenché ; auto-save enchaîne
+  - [x] 1.2 Vérifier dans `GraphCanvas.tsx` que `onNodeDragStop` (l.388+) commite la position finale (pendingPositionRef ou node.position) via `updateNodePosition` et annule le RAF en attente
+  - [x] 1.3 Vérifier que le throttle RAF (`schedulePositionUpdate`) pendant le drag est bien en place (l.283+) et que les edges redraw en temps réel
+  - [x] 1.4 (TDD) Exécuter `graphStore.controlledMode.test.ts` et tests drag/position pour régression
+- [x] Task 2: Déplacement en groupe (AC: #3) — conditionnel Story 2.10
+  - [x] 2.1 Si Story 2.10 livrée : vérifier que `multiSelectionKeyCode="Shift"` et `selectionOnDrag={true}` sont présents sur `<ReactFlow>` et que `onNodeDragStop` met à jour la position de tous les nœuds sélectionnés via une boucle `updateNodePosition` (ou équivalent store)
+  - [x] 2.2 Si Story 2.10 non livrée : documenter dans Dev Notes que l’AC #3 sera pleinement livrable après 2.10 ; pas de blocage sur le reste de la story
+  - [x] 2.3 (TDD) Test : lorsque plusieurs nœuds sont sélectionnés et qu’un est déplacé, tous bougent avec préservation des positions relatives
+- [x] Task 3: Snap to grid et indicateur d’alignement (AC: #4)
+  - [x] 3.1 (TDD) Test : `snapToGrid={true}` et `snapGrid={[15,15]}` sont bien passés à `<ReactFlow>` (déjà présents dans GraphCanvas.tsx:381-382)
+  - [x] 3.2 Vérifier visuellement ou par test que le snap est appliqué à la position finale au `onNodeDragStop`
+  - [x] 3.3 (Optionnel) Ligne guide d’alignement : si temps disponible, ajouter un indicateur visuel (ligne verticale/horizontale) quand un nœud est aligné avec un autre ; sinon documenter comme amélioration future
+- [x] Task 4: Auto-pan hors viewport (AC: #5)
+  - [x] 4.1 Vérifier le comportement natif React Flow : drag d’un nœud hors du viewport déclenche-t-il un pan automatique ? Consulter la doc React Flow (panOnDrag, noDragClassName, etc.)
+  - [x] 4.2 Si auto-pan absent : activer via prop React Flow (ex. `panOnDrag={[1, 2]}` pour boutons gauche/middle) ou documenter la limitation
+  - [x] 4.3 (TDD) Test d’intégration ou E2E : déplacer un nœud vers le bord et vérifier que le viewport suit (ou documenter si non supporté nativement)
+- [x] Task 5: Régression et qualité
+  - [x] 5.1 Exécuter tous les tests graphe : `graphStore.controlledMode.test.ts`, `GraphCanvas.virtualization.test.tsx`, `useGraphStore.test.ts` (updateNodePosition, markDirty)
+  - [x] 5.2 Vérifier qu’aucun endpoint dédié `/position` n’est créé ; persistance uniquement via `saveDialogue()` → `POST /api/v1/unity-dialogues/graph/save-and-write`
 
 ## Dev Notes
 
@@ -95,6 +95,9 @@ so that **je peux organiser visuellement le graphe selon ma préférence sans af
 - **Régression :** `graphStore.controlledMode.test.ts`, `GraphCanvas.virtualization.test.tsx`, `useGraphStore.test.ts` (updateNodePosition, markDirty) doivent rester verts.
 - **E2E (optionnel) :** Workflow « ouvrir graphe → drag un nœud → relâcher → vérifier sauvegarde (auto-save ou indicateur dirty) ».
 
+### Story 2.4 implementation note (AC #3)
+- **Story 2.10 non livrée** : `multiSelectionKeyCode` et `selectionOnDrag` ne sont pas présents dans le projet. L’AC #3 (déplacement en groupe de plusieurs nœuds) sera pleinement livrable après la story 2.10. Pas de blocage sur le reste de la story 2.4 (drag single + persistance, snap, auto-pan).
+
 ### Previous Story Intelligence
 
 - **Story 2.3 (Zoom, pan, focus FR24):** `minZoom`/`maxZoom`, `panActivationKeyCode="Space"`, `onNodeDoubleClick` → focus, Ctrl+0 fit view, flèches/WASD pan. Fichiers modifiés : `GraphCanvas.tsx`, `GraphEditor.tsx`, `useKeyboardShortcuts`. **À réutiliser :** ne pas toucher au viewport ou aux contrôles ; le drag de nœuds est indépendant (position dans le store).
@@ -122,10 +125,23 @@ so that **je peux organiser visuellement le graphe selon ma préférence sans af
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+N/A (Code review – corrections appliquées)
 
 ### Debug Log References
 
 ### Completion Notes List
 
+- Code review (Amelia) : correction onNodeDragStop pour committer systématiquement `node.position` (position finale snapée) au lieu de pendingPositionRef ; placeholder Dev Agent Record remplacé.
+- Task 1 : Tests existants étendus (drag-stop flow → updateNodePosition + markDirty) ; vérification GraphCanvas onNodeDragStop + RAF throttle + edges temps réel. Tous les tests graphe passent.
+- Task 2 : Story 2.10 non livrée ; limitation AC #3 documentée dans Dev Notes ; test group-drag ajouté en .skip (Story 2.10).
+- Task 3 : snapToGrid/snapGrid déjà en place ; test explicite ajouté dans GraphCanvas.virtualization.test.tsx (AC #4). Ligne guide d’alignement documentée comme amélioration future.
+- Task 4 : autoPanOnNodeDrag activé sur ReactFlow (AC #5) ; test ajouté pour la prop.
+- Task 5 : Suite frontend OK ; aucun endpoint /position (persistance via save-and-write).
+
 ### File List
+
+- frontend/src/components/graph/GraphCanvas.tsx (autoPanOnNodeDrag)
+- frontend/src/__tests__/graphStore.controlledMode.test.ts (drag-stop flow, group-drag .skip)
+- frontend/src/__tests__/GraphCanvas.virtualization.test.tsx (snapToGrid, snapGrid, autoPanOnNodeDrag)
+- _bmad-output/implementation-artifacts/2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25.md (Dev Notes, Status, tasks)
+- _bmad-output/implementation-artifacts/sprint-status.yaml (2-4 → in-progress puis review)

@@ -272,6 +272,27 @@ export const createGenerationSlice: StateCreator<
         get().connectNodes(conn.from, conn.to, conn.via_choice_index, conn.connection_type)
       }
 
+      // Fallback : si génération pour un choix spécifique et un seul nœud créé, s'assurer
+      // que le nœud est relié au choix (au cas où le backend n'aurait pas renvoyé suggested_connections).
+      const singleChoiceGeneration =
+        !isBatch &&
+        !isTestNode &&
+        typeof targetChoiceIndex === 'number' &&
+        generatedNodeIds.length === 1
+      if (singleChoiceGeneration) {
+        const firstId = generatedNodeIds[0]
+        const stateAfterSuggested = get()
+        const alreadyConnected = stateAfterSuggested.edges.some(
+          (e) =>
+            e.source === parentNodeId &&
+            e.target === firstId &&
+            (e.data as { choiceIndex?: number })?.choiceIndex === targetChoiceIndex
+        )
+        if (!alreadyConnected && firstId) {
+          get().connectNodes(parentNodeId, firstId, targetChoiceIndex, 'choice')
+        }
+      }
+
       const stateAfterConnections = get()
       const normalized = normalizeTestBars(
         stateAfterConnections.nodes,

@@ -19,6 +19,9 @@ const capturedReactFlowProps: {
   minZoom?: number
   maxZoom?: number
   onNodeDoubleClick?: (event: unknown, node: { id: string }) => void
+  snapToGrid?: boolean
+  snapGrid?: [number, number]
+  autoPanOnNodeDrag?: boolean
 } = {}
 
 vi.mock('reactflow', async (importOriginal) => {
@@ -32,6 +35,9 @@ vi.mock('reactflow', async (importOriginal) => {
       capturedReactFlowProps.minZoom = props.minZoom as number
       capturedReactFlowProps.maxZoom = props.maxZoom as number
       capturedReactFlowProps.onNodeDoubleClick = props.onNodeDoubleClick as (event: unknown, node: { id: string }) => void
+      capturedReactFlowProps.snapToGrid = props.snapToGrid as boolean
+      capturedReactFlowProps.snapGrid = props.snapGrid as [number, number]
+      capturedReactFlowProps.autoPanOnNodeDrag = props.autoPanOnNodeDrag as boolean
       return React.createElement(ActualReactFlow, props)
     },
   }
@@ -86,6 +92,9 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     capturedReactFlowProps.minZoom = undefined
     capturedReactFlowProps.maxZoom = undefined
     capturedReactFlowProps.onNodeDoubleClick = undefined
+    capturedReactFlowProps.snapToGrid = undefined
+    capturedReactFlowProps.snapGrid = undefined
+    capturedReactFlowProps.autoPanOnNodeDrag = undefined
   })
 
   it('passes onlyRenderVisibleElements={true} to ReactFlow for 500+ nodes performance (NFR-P1)', () => {
@@ -148,6 +157,17 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     renderGraphCanvas()
     expect(capturedReactFlowProps.minZoom).toBe(0.1)
     expect(capturedReactFlowProps.maxZoom).toBe(2)
+  })
+
+  it('passes snapToGrid and snapGrid to ReactFlow (Story 2.4 AC #4)', () => {
+    renderGraphCanvas()
+    expect(capturedReactFlowProps.snapToGrid).toBe(true)
+    expect(capturedReactFlowProps.snapGrid).toEqual([15, 15])
+  })
+
+  it('passes autoPanOnNodeDrag to ReactFlow (Story 2.4 AC #5)', () => {
+    renderGraphCanvas()
+    expect(capturedReactFlowProps.autoPanOnNodeDrag).toBe(true)
   })
 
   it('displays zoom level in UI (Story 2.3 AC #1 - controls/indicator)', () => {

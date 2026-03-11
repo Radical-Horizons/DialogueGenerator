@@ -90,6 +90,42 @@ describe('graphStore - Controlled mode (ADR-007)', () => {
       const node = state.nodes.find((n) => n.id === 'n1')
       expect(node?.position).toEqual({ x: 50, y: 60 })
     })
+
+    // Story 2.4 AC #3 deferred until Story 2.10: when multiple nodes are selected and one is dragged,
+    // all should move together with relative positions preserved (multiSelectionKeyCode + selectionOnDrag + batch updateNodePosition).
+    it.skip('group drag: when multiple nodes selected and one dragged, all move with relative positions preserved (Story 2.10)', () => {
+      // To implement when Story 2.10 delivers multiSelectionKeyCode and selectionOnDrag.
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      addNode({ id: 'g1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} })
+      addNode({ id: 'g2', type: 'dialogueNode', position: { x: 50, y: 0 }, data: {} })
+      addNode({ id: 'g3', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} })
+      // Simulate drag of g1 by (100,100) → g2 and g3 should move by same delta
+      updateNodePosition('g1', { x: 100, y: 100 })
+      // When 2.10 is in place: update positions of g2, g3 by same delta
+      const state = useGraphStore.getState()
+      expect(state.nodes.find((n) => n.id === 'g1')?.position).toEqual({ x: 100, y: 100 })
+      // expect(state.nodes.find(n => n.id === 'g2')?.position).toEqual({ x: 150, y: 100 })
+      // expect(state.nodes.find(n => n.id === 'g3')?.position).toEqual({ x: 200, y: 100 })
+    })
+
+    // Story 2.4 AC #1, #2: onNodeDragStop commits via updateNodePosition; markDirty triggers; auto-save chains
+    it('drag-stop flow: updateNodePosition commits position and triggers markDirty (GraphCanvas onNodeDragStop contract)', () => {
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      const n1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {},
+      }
+      addNode(n1)
+
+      // Simulate GraphCanvas onNodeDragStop: commit final position via updateNodePosition
+      updateNodePosition('n1', { x: 100, y: 200 })
+
+      const state = useGraphStore.getState()
+      expect(state.nodes.find((n) => n.id === 'n1')?.position).toEqual({ x: 100, y: 200 })
+      expect(state.hasUnsavedChanges).toBe(true)
+    })
   })
 
   describe('Selection updated in store (onNodesChange type select)', () => {
