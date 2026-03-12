@@ -491,6 +491,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           )
           const newSelectedNodeId =
             state.selectedNodeId === nodeId ? parent.dialogueNodeId : state.selectedNodeId
+          const isDocumentSoT = state.document != null && state.layout != null
+          const docAndLayout =
+            isDocumentSoT
+              ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
+              : {}
 
           return {
             nodes: newNodes,
@@ -501,6 +506,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
               node_count: newNodes.length,
               edge_count: newEdges.length,
             },
+            ...docAndLayout,
           }
         }
 
@@ -509,6 +515,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         const newEdges = state.edges.filter(
           (e) => e.source !== nodeId && e.target !== nodeId
         )
+        const isDocumentSoT = state.document != null && state.layout != null
+        const docAndLayout =
+          isDocumentSoT
+            ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
+            : {}
         return {
           nodes: newNodes,
           edges: newEdges,
@@ -518,6 +529,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
             node_count: newNodes.length,
             edge_count: newEdges.length,
           },
+          ...docAndLayout,
         }
       }
 
@@ -612,6 +624,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         (e) => !nodesToDelete.includes(e.source) && !nodesToDelete.includes(e.target)
       )
       const selectedNodeToRemove = nodesToDelete.includes(state.selectedNodeId || '')
+      const isDocumentSoT = state.document != null && state.layout != null
+      const docAndLayout =
+        isDocumentSoT
+          ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
+          : {}
 
       return {
         nodes: newNodes,
@@ -622,6 +639,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           node_count: newNodes.length,
           edge_count: newEdges.length,
         },
+        ...docAndLayout,
       }
     })
     get().markDirty()

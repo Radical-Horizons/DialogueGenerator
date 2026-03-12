@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
 import { GraphCanvas } from './GraphCanvas'
 import { GraphSearchBar } from './GraphSearchBar'
+import { JumpToNodeModal } from './JumpToNodeModal'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
@@ -75,6 +76,8 @@ export function GraphEditor({
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
   // Barre de recherche nœuds (Story 2.7 - FR28)
   const [showSearchBar, setShowSearchBar] = useState(false)
+  // Modal Jump to Node (Story 2.8 - FR29)
+  const [showJumpToNodeModal, setShowJumpToNodeModal] = useState(false)
   const isStandalone = mode === 'standalone'
   const routeTarget = useMemo(
     () => resolveGraphRouteTarget(routeDialogueId),
@@ -535,6 +538,15 @@ export function GraphEditor({
         },
         description: 'Générer un nœud avec l\'IA',
         enabled: !!selectedNodeId && !isGraphLoading && !isLoadingDialogue && !!activeDialogueFilename,
+      },
+      {
+        key: 'ctrl+j',
+        handler: (e) => {
+          e.preventDefault()
+          setShowJumpToNodeModal(true)
+        },
+        description: 'Aller à un nœud (Jump to Node)',
+        enabled: true,
       },
       {
         key: 'delete',
@@ -1092,6 +1104,29 @@ export function GraphEditor({
                     role="menuitem"
                     onClick={() => {
                       setShowActionsDropdown(false)
+                      setShowJumpToNodeModal(true)
+                    }}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      border: 'none',
+                      background: 'transparent',
+                      color: theme.text.primary,
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.state.hover.background }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    🎯 Aller à un nœud (Ctrl+J)
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setShowActionsDropdown(false)
                       handleOpenExportDialog()
                     }}
                     disabled={!reactFlowInstance}
@@ -1202,6 +1237,7 @@ export function GraphEditor({
                   <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Clic droit</kbd> sur un nœud : menu (Générer, Voir le prompt, Dupliquer, Supprimer)</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+F</kbd> : rechercher dans le graphe</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+J</kbd> : aller à un nœud (Jump to Node)</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+G</kbd> : ouvrir la génération IA</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+S</kbd> : sauvegarder</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Suppr</kbd> : supprimer le nœud sélectionné ; sur une connexion (edge) : confirmation puis suppression</li>
@@ -1791,6 +1827,10 @@ export function GraphEditor({
       )}
 
       <DeleteNodeConfirmModal />
+      <JumpToNodeModal
+        isOpen={showJumpToNodeModal}
+        onClose={() => setShowJumpToNodeModal(false)}
+      />
     </div>
   )
 }

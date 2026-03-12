@@ -4,7 +4,8 @@ globs: ["frontend/**/*", "web/**/*", "client/**/*"]
 alwaysApply: false
 ---
 
-- **Architecture**: React + TypeScript + Vite dans `frontend/`. **Interface principale** du projet. Consomme l'API REST (`/api/v1/*`), n'implémente pas la logique métier. 
+- **Architecture**: React + TypeScript + Vite dans `frontend/`. **Interface principale** du projet. Consomme l'API REST (`/api/v1/*`), n'implémente pas la logique métier.
+- **Déterminisme**: Ne pas s'appuyer sur le backend ou l'IA pour des comportements déterministes. Ex. : si l'utilisateur a sélectionné un choix (ex. "Choix #3") et demande à l'IA de générer un nœud, la liaison parent→nouveau nœud via ce choix doit être faite côté front (état connu : `target_choice_index`), pas déléguée à une "suggestion" API. 
 - **Client API**: `frontend/src/api/client.ts` (axios avec intercepteurs), modules par domaine (`auth.ts`, `dialogues.ts`, `interactions.ts`).
 - **Types**: `frontend/src/types/api.ts` alignés sur les schémas backend Pydantic. Générer depuis OpenAPI si possible.
 - **State Management**: Zustand (`frontend/src/store/`) pour auth et état global. Éviter prop drilling excessif.

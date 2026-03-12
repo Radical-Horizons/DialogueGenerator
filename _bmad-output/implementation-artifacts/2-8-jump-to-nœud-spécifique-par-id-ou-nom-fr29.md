@@ -1,6 +1,6 @@
 # Story 2.8: Jump to nœud spécifique par ID ou nom (FR29)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -39,20 +39,20 @@ so that **je peux naviguer rapidement vers un nœud précis sans chercher manuel
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Action jumpToNode dans le store (AC: #2, #3)
-  - [ ] 1.1 (TDD) Test : `jumpToNode(nodeId)` appelle `setSelectedNode(nodeId)` puis dispatch `CustomEvent('focus-generated-node', { detail: { nodeId } })` ; si nodeId absent dans nodes, ne pas dispatcher (ou no-op)
-  - [ ] 1.2 Dans `graphStore` (uiSlice ou nodeSlice selon où est setSelectedNode), ajouter action `jumpToNode(nodeId: string)`: vérifier que le nœud existe dans `getState().nodes`, appeler `setSelectedNode(nodeId)`, puis `window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId } }))`
-- [ ] Task 2: Helper recherche nœuds par ID ou nom (AC: #3, #4, #5)
-  - [ ] 2.1 (TDD) Test : fonction qui prend une chaîne et retourne des candidats : match exact sur node.id, ou match partiel insensible casse sur "nom" (node.data.displayName ?? première ligne de node.data.line ?? node.id) ; retourner liste ordonnée (exact d'abord, puis partiels)
-  - [ ] 2.2 Implémenter helper `findNodesByQuery(query: string)` (dans le store ou utils) : parcourir `getState().nodes`, matcher id exact ou nom dérivé de data ; exposer pour autocomplete et validation "nœud non trouvé"
-- [ ] Task 3: Composant JumpToNodeModal (AC: #1, #2, #3, #4, #5)
-  - [ ] 3.1 (TDD) Test : rendu champ saisie + liste suggestions ; saisie déclenche recherche et affiche résultats ; Enter sur ID exact appelle jumpToNode ; sélection dans liste appelle jumpToNode puis ferme modal ; "Nœud non trouvé" si aucun résultat et Enter
-  - [ ] 3.2 Créer `frontend/src/components/graph/JumpToNodeModal.tsx` : input contrôlé, appel à findNodesByQuery à chaque changement (debounce ~200 ms), affichage liste suggestions (id + nom/label), Enter valide premier résultat ou sélection ; si aucun résultat et Enter → message "Nœud non trouvé" ; onClose ferme et optionnellement clear selected si souhaité
-  - [ ] 3.3 Gérer accessibilité : focus trap dans le modal, Escape ferme, aria-label "Jump to node"
-- [ ] Task 4: Intégration dans GraphEditor et raccourci Ctrl+J (AC: #1)
-  - [ ] 4.1 (TDD) Test : Ctrl+J ouvre le modal Jump to Node (état visible), Escape ferme
-  - [ ] 4.2 Dans `GraphEditor.tsx`, ajouter état local `showJumpToNodeModal` et rendre `JumpToNodeModal` (position cohérente avec autres modals) ; passer `onClose` → `setShowJumpToNodeModal(false)`
-  - [ ] 4.3 ÉTENDRE `useKeyboardShortcuts` dans `GraphEditor.tsx` : ajouter `ctrl+j` pour ouvrir le modal Jump to Node. **Ne pas utiliser ctrl+g** (déjà réservé à l’ouverture du panneau Génération IA — voir `GraphEditor.tsx` l.525)
+- [x] Task 1: Action jumpToNode dans le store (AC: #2, #3)
+  - [x] 1.1 (TDD) Test : `jumpToNode(nodeId)` appelle `setSelectedNode(nodeId)` puis dispatch `CustomEvent('focus-generated-node', { detail: { nodeId } })` ; si nodeId absent dans nodes, ne pas dispatcher (ou no-op)
+  - [x] 1.2 Dans `graphStore` (uiSlice ou nodeSlice selon où est setSelectedNode), ajouter action `jumpToNode(nodeId: string)`: vérifier que le nœud existe dans `getState().nodes`, appeler `setSelectedNode(nodeId)`, puis `window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId } }))`
+- [x] Task 2: Helper recherche nœuds par ID ou nom (AC: #3, #4, #5)
+  - [x] 2.1 (TDD) Test : fonction qui prend une chaîne et retourne des candidats : match exact sur node.id, ou match partiel insensible casse sur "nom" (node.data.displayName ?? première ligne de node.data.line ?? node.id) ; retourner liste ordonnée (exact d'abord, puis partiels)
+  - [x] 2.2 Implémenter helper `findNodesByQuery(query: string)` (dans le store ou utils) : parcourir `getState().nodes`, matcher id exact ou nom dérivé de data ; exposer pour autocomplete et validation "nœud non trouvé"
+- [x] Task 3: Composant JumpToNodeModal (AC: #1, #2, #3, #4, #5)
+  - [x] 3.1 (TDD) Test : rendu champ saisie + liste suggestions ; saisie déclenche recherche et affiche résultats ; Enter sur ID exact appelle jumpToNode ; sélection dans liste appelle jumpToNode puis ferme modal ; "Nœud non trouvé" si aucun résultat et Enter
+  - [x] 3.2 Créer `frontend/src/components/graph/JumpToNodeModal.tsx` : input contrôlé, appel à findNodesByQuery à chaque changement (debounce ~200 ms), affichage liste suggestions (id + nom/label), Enter valide premier résultat ou sélection ; si aucun résultat et Enter → message "Nœud non trouvé" ; onClose ferme et optionnellement clear selected si souhaité
+  - [x] 3.3 Gérer accessibilité : focus trap dans le modal, Escape ferme, aria-label "Jump to node"
+- [x] Task 4: Intégration dans GraphEditor et raccourci Ctrl+J (AC: #1)
+  - [x] 4.1 (TDD) Test : Ctrl+J ouvre le modal Jump to Node (état visible), Escape ferme
+  - [x] 4.2 Dans `GraphEditor.tsx`, ajouter état local `showJumpToNodeModal` et rendre `JumpToNodeModal` (position cohérente avec autres modals) ; passer `onClose` → `setShowJumpToNodeModal(false)`
+  - [x] 4.3 ÉTENDRE `useKeyboardShortcuts` dans `GraphEditor.tsx` : ajouter `ctrl+j` pour ouvrir le modal Jump to Node. **Ne pas utiliser ctrl+g** (déjà réservé à l’ouverture du panneau Génération IA — voir `GraphEditor.tsx` l.525)
 
 ## Dev Notes
 
@@ -119,10 +119,25 @@ so that **je peux naviguer rapidement vers un nœud précis sans chercher manuel
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+(Dev Story workflow — agent non spécifié)
 
 ### Debug Log References
 
 ### Completion Notes List
 
+- **Task 1–2:** `jumpToNode(nodeId)` et `findNodesByQuery(query)` ajoutés dans `uiSlice.ts` ; types dans `graphState.ts`. Tests unitaires dans `graphStore.jumpToNode.test.ts` (6 tests).
+- **Task 3:** `JumpToNodeModal.tsx` créé : input contrôlé, debounce 200 ms, liste suggestions (id + label), Enter / sélection liste → jumpToNode + onClose ; message "Nœud non trouvé" si aucun résultat et Enter ; Escape ferme ; aria-label et roles (dialog, listbox, option). Tests dans `JumpToNodeModal.test.tsx` (6 tests).
+- **Task 4:** GraphEditor : état `showJumpToNodeModal`, rendu `JumpToNodeModal`, raccourci `ctrl+j` (description "Aller à un nœud (Jump to Node)"). Test Ctrl+J / Escape dans `GraphEditor.keyboard.test.tsx`.
+- Réutilisation de `focus-generated-node` et `setSelectedNode` ; aucun changement à GraphCanvas/GraphCanvasInner. Ctrl+G inchangé (Génération IA).
+- **Code Review (AI):** Correctifs appliqués : entrée menu « Aller à un nœud (Ctrl+J) » dans Actions, Ctrl+J ajouté à la tooltip Raccourcis graphe, focus trap (Tab/Shift+Tab) et scroll into view dans JumpToNodeModal ; garde scrollIntoView pour JSDOM. Rapport : `_bmad-output/implementation-artifacts/code-review-2-8-jump-to-node-fr29.md`.
+
 ### File List
+
+- frontend/src/store/types/graphState.ts (ajout jumpToNode, findNodesByQuery)
+- frontend/src/store/slices/uiSlice.ts (impl jumpToNode, findNodesByQuery)
+- frontend/src/components/graph/JumpToNodeModal.tsx (nouveau)
+- frontend/src/components/graph/GraphEditor.tsx (import JumpToNodeModal, état showJumpToNodeModal, raccourci ctrl+j, rendu modal)
+- frontend/src/__tests__/graphStore.jumpToNode.test.ts (nouveau)
+- frontend/src/__tests__/JumpToNodeModal.test.tsx (nouveau)
+- frontend/src/__tests__/GraphEditor.keyboard.test.tsx (describe Story 2.8 Ctrl+J)
+- _bmad-output/implementation-artifacts/code-review-2-8-jump-to-node-fr29.md (rapport code review)

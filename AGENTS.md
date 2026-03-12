@@ -33,3 +33,17 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 - **Frontend lint**: `cd frontend && npx eslint . --ext ts,tsx`
 - **Frontend tests**: `cd frontend && npx vitest run`
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
+
+## Learned User Preferences
+
+- Never delegate deterministic frontend behavior to the API or LLM; if the user has selected a choice and triggers AI generation, the parent→node connection is the front-end's responsibility, not an API suggestion.
+- Require runtime log evidence before proposing bug fixes; never speculate from code alone.
+- Prefer small, targeted SOLID/KISS fixes over accumulating defensive guards from multiple hypotheses; revert rejected-hypothesis code before pursuing new ones.
+- Create regression unit tests for any non-trivial bug fix, especially in state management code.
+- Do not add comments that narrate what code does; comments must explain non-obvious intent or constraints only.
+
+## Learned Workspace Facts
+
+- Use `mergeFormDataIntoNodeData()` instead of spread (`{ ...nodeData, ...formValues }`) when flushing `NodeEditorPanel` form state on selection change; the spread overwrites `choices[N].targetNode` written by `connectNodes`, breaking the edge connection.
+- Node generation connection flow: API response → `connectNodes(parentId, newId, targetChoiceIndex, 'choice')` in `generationSlice` → `choices[N].targetNode` set in `edgeSlice` → `NodeEditorPanel` selection-change flush must preserve this field via `mergeFormDataIntoNodeData`.
+- Frontend has 7 pre-existing ESLint errors (unused vars) and 4 pre-existing Vitest failures in `SelectedContextSummary.test.tsx`; these are known, do not treat as regressions.

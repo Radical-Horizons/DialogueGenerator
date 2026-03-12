@@ -272,8 +272,9 @@ export const createGenerationSlice: StateCreator<
         get().connectNodes(conn.from, conn.to, conn.via_choice_index, conn.connection_type)
       }
 
-      // Fallback : si génération pour un choix spécifique et un seul nœud créé, s'assurer
-      // que le nœud est relié au choix (au cas où le backend n'aurait pas renvoyé suggested_connections).
+      // Comportement déterministe : l'utilisateur a choisi un choix (ex. "Choix #3") puis demandé
+      // à l'IA de générer un nœud. La liaison parent→nouveau nœud via ce choix n'est pas un
+      // "suggestion" backend : on la fait toujours côté front, sans se reposer sur suggested_connections.
       const singleChoiceGeneration =
         !isBatch &&
         !isTestNode &&
@@ -281,14 +282,7 @@ export const createGenerationSlice: StateCreator<
         generatedNodeIds.length === 1
       if (singleChoiceGeneration) {
         const firstId = generatedNodeIds[0]
-        const stateAfterSuggested = get()
-        const alreadyConnected = stateAfterSuggested.edges.some(
-          (e) =>
-            e.source === parentNodeId &&
-            e.target === firstId &&
-            (e.data as { choiceIndex?: number })?.choiceIndex === targetChoiceIndex
-        )
-        if (!alreadyConnected && firstId) {
+        if (firstId) {
           get().connectNodes(parentNodeId, firstId, targetChoiceIndex, 'choice')
         }
       }
@@ -298,6 +292,15 @@ export const createGenerationSlice: StateCreator<
         stateAfterConnections.nodes,
         stateAfterConnections.edges
       )
+      const isDocumentSoT =
+        stateAfterConnections.document != null && stateAfterConnections.layout != null
+      const docAndLayout = isDocumentSoT
+        ? syncDocAndLayout(
+            normalized.nodes,
+            normalized.edges,
+            stateAfterConnections.layout as Record<string, unknown>
+          )
+        : null
       set({
         nodes: normalized.nodes,
         edges: normalized.edges,
@@ -306,6 +309,10 @@ export const createGenerationSlice: StateCreator<
           node_count: normalized.nodes.length,
           edge_count: normalized.edges.length,
         },
+        ...(docAndLayout != null && {
+          document: docAndLayout.document,
+          layout: docAndLayout.layout,
+        }),
       })
 
       set({ isGenerating: false })

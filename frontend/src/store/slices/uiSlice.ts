@@ -13,6 +13,8 @@ export type UISlice = Pick<
   GraphState,
   | 'validateGraph'
   | 'setSelectedNode'
+  | 'jumpToNode'
+  | 'findNodesByQuery'
   | 'setHighlightedNodes'
   | 'searchNodes'
   | 'getUniqueSpeakers'
@@ -68,6 +70,40 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
 
   setSelectedNode: (nodeId) => {
     set({ selectedNodeId: nodeId })
+  },
+
+  /** Story 2.8 FR29: centre sur le nœud et sélectionne. Dispatch focus-generated-node pour fitView. No-op si nodeId absent. */
+  jumpToNode: (nodeId) => {
+    const state = get()
+    const exists = state.nodes.some((n) => n.id === nodeId)
+    if (!exists) return
+    set({ selectedNodeId: nodeId })
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId } }))
+    }
+  },
+
+  /** Story 2.8 FR29: candidats par ID exact ou nom (displayName ?? première ligne de data.line ?? node.id). Exact d'abord, puis partiels. */
+  findNodesByQuery: (query) => {
+    const state = get()
+    const q = query.trim()
+    if (q === '') return []
+    const qLower = q.toLowerCase()
+    const exact: Array<{ id: string; label: string }> = []
+    const partial: Array<{ id: string; label: string }> = []
+    for (const node of state.nodes) {
+      const data = node.data as { displayName?: string; line?: string }
+      const firstLine =
+        typeof data.line === 'string' ? (data.line.split('\n')[0]?.trim() ?? '') : ''
+      const label = (data.displayName ?? firstLine) || node.id
+      const labelLower = label.toLowerCase()
+      if (node.id === q) {
+        exact.push({ id: node.id, label })
+      } else if (labelLower.includes(qLower) || node.id.toLowerCase().includes(qLower)) {
+        partial.push({ id: node.id, label })
+      }
+    }
+    return [...exact, ...partial]
   },
 
   setHighlightedNodes: (nodeIds) => {

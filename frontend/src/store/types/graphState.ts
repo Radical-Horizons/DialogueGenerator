@@ -72,6 +72,10 @@ export interface GraphState {
   /** Met à jour le libellé d'une edge de type choice (Story 2.5 AC #4). */
   updateChoiceEdgeLabel: (edgeId: string, newText: string) => void
   setSelectedNode: (nodeId: string | null) => void
+  /** Story 2.8 FR29: centre le graphe sur le nœud et le sélectionne (setSelectedNode + focus-generated-node). No-op si nodeId absent. */
+  jumpToNode: (nodeId: string) => void
+  /** Story 2.8 FR29: recherche nœuds par ID exact ou nom (displayName / line). Retourne liste ordonnée (exact d'abord, puis partiels). */
+  findNodesByQuery: (query: string) => Array<{ id: string; label: string }>
   duplicateNode: (nodeId: string) => Node | null
   duplicateNodes: (nodeIds: string[]) => void
   updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void

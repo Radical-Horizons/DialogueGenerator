@@ -87,7 +87,14 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       const edgesUnchanged =
         state.edges.length === normalized.edges.length &&
         state.edges.every((e) => newIds.has(e.id))
-      const edgesToSet = edgesUnchanged ? state.edges : normalized.edges
+      // Ne jamais remplacer par une projection qui a moins d'edges : évite de perdre une connexion
+      // venant d'une génération IA (race : updateNodePosition/dimensions après set() génération).
+      const edgesToSet =
+        edgesUnchanged
+          ? state.edges
+          : normalized.edges.length >= state.edges.length
+            ? normalized.edges
+            : state.edges
 
       set({ layout: newLayout, nodes: normalized.nodes, edges: edgesToSet })
       if (positionChanged) get().markDirty()

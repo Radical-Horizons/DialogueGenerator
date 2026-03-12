@@ -13,6 +13,7 @@ import { render, act, waitFor, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { GraphSearchBar } from '../components/graph/GraphSearchBar'
+import { JumpToNodeModal } from '../components/graph/JumpToNodeModal'
 import { useGraphStore } from '../store/graphStore'
 
 const PAN_DELTA = 50
@@ -260,5 +261,52 @@ describe('GraphEditor search bar (Story 2.7)', () => {
     })
     expect(useGraphStore.getState().highlightedNodeIds).toEqual([])
     unmount()
+  })
+})
+
+describe('GraphEditor Jump to Node (Story 2.8)', () => {
+  beforeEach(() => {
+    useGraphStore.getState().resetGraph()
+  })
+
+  it('Ctrl+J opens Jump to Node modal, Escape closes it (Task 4.1)', async () => {
+    const MockEditor = () => {
+      const [show, setShow] = React.useState(false)
+      useKeyboardShortcuts(
+        [
+          {
+            key: 'ctrl+j',
+            handler: (e) => {
+              e.preventDefault()
+              setShow(true)
+            },
+            description: 'Jump to Node',
+            enabled: true,
+          },
+        ],
+        []
+      )
+      return React.createElement(
+        'div',
+        null,
+        React.createElement(JumpToNodeModal, {
+          isOpen: show,
+          onClose: () => setShow(false),
+        })
+      )
+    }
+    render(React.createElement(MockEditor))
+    expect(screen.queryByRole('dialog', { name: /Jump to node/i })).not.toBeInTheDocument()
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'j', ctrlKey: true, bubbles: true }))
+    })
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /Jump to node/i })).toBeInTheDocument()
+    })
+    const input = screen.getByRole('textbox', { name: /Jump to node/i })
+    fireEvent.keyDown(input, { key: 'Escape' })
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /Jump to node/i })).not.toBeInTheDocument()
+    })
   })
 })

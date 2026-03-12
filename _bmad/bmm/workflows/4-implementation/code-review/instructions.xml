@@ -154,6 +154,7 @@
       <action>Update story Dev Agent Record with fixes applied</action>
       <action>Set {{fixed_count}} = number of HIGH and MEDIUM issues fixed</action>
       <action>Set {{action_count}} = 0</action>
+      <action>Determine where in the application the user can test this story's functionality in the UI (e.g. screen, route, menu, tab, button). Set {{where_to_test_ui}} to a short, concrete description in {document_output_language}. If the story has no UI, set {{where_to_test_ui}} to "N/A (pas d'interface concernée)" or equivalent.</action>
     </check>
 
     <check if="user chooses 2">
@@ -220,6 +221,10 @@
       **Story Status:** {{new_status}}
       **Issues Fixed:** {{fixed_count}}
       **Action Items Created:** {{action_count}}
+      {{#if fixed_count > 0}}
+
+      **Où tester dans l'interface :** {{where_to_test_ui}}
+      {{/if}}
 
       {{#if new_status == "done"}}Code review complete!{{else}}Address the action items and continue development.{{/if}}
     </output>
