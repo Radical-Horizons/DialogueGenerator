@@ -131,16 +131,19 @@ describe('GraphEditor multi-selection toolbar (Story 2.10)', () => {
     renderGraphEditor()
 
     expect(screen.getByText('2 nœuds sélectionnés')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Tagger' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Valider' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Supprimer' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Tagger sélection' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Valider sélection' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Supprimer sélection' })).toBeInTheDocument()
   })
 
   it('tags all selected nodes and shows the confirmation toast', async () => {
     renderGraphEditor()
 
     await act(async () => {
-      screen.getByRole('button', { name: 'Tagger' }).click()
+      screen.getByRole('button', { name: 'Tagger sélection' }).click()
+    })
+    await act(async () => {
+      screen.getByRole('option', { name: 'À réviser' }).click()
     })
 
     expect((useGraphStore.getState().nodes.find((node) => node.id === 'n1')?.data as Record<string, unknown>).tag).toBe('À réviser')
@@ -167,7 +170,7 @@ describe('GraphEditor multi-selection toolbar (Story 2.10)', () => {
     renderGraphEditor()
 
     await act(async () => {
-      screen.getByRole('button', { name: 'Valider' }).click()
+      screen.getByRole('button', { name: 'Valider sélection' }).click()
     })
 
     await waitFor(() => {
@@ -184,19 +187,19 @@ describe('GraphEditor multi-selection toolbar (Story 2.10)', () => {
     renderGraphEditor()
 
     await act(async () => {
-      screen.getByRole('button', { name: 'Supprimer' }).click()
+      screen.getByRole('button', { name: 'Supprimer sélection' }).click()
     })
 
     expect(screen.getByRole('dialog', { name: 'Supprimer les nœuds sélectionnés' })).toBeInTheDocument()
     expect(screen.getByText('Supprimer 2 nœuds ?')).toBeInTheDocument()
 
     await act(async () => {
-      screen.getAllByRole('button', { name: 'Supprimer' })[1].click()
+      screen.getByRole('button', { name: 'Supprimer' }).click()
     })
 
     expect(useGraphStore.getState().nodes).toHaveLength(0)
     expect(useGraphStore.getState().selectedNodeIds).toEqual([])
     expect(useGraphStore.getState().selectedNodeId).toBeNull()
-    expect(toastMock).toHaveBeenCalledWith('Opération appliquée à 2 nœuds', 'success', 3000)
+    expect(toastMock).toHaveBeenCalledWith('2 nœuds supprimés', 'success', 3000)
   })
 })

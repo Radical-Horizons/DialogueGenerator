@@ -74,6 +74,7 @@ export const DialogueNode = memo(function DialogueNode({
   const nodeStatus = data.status  // "pending" | "accepted" | undefined
   const isPending = nodeStatus === "pending"
   const isAccepted = nodeStatus === "accepted"
+  const tag = (data.tag as string) || undefined
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
   
@@ -251,6 +252,31 @@ export const DialogueNode = memo(function DialogueNode({
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
+      {/* Badge tag (Story 2.11 FR32) */}
+      {tag && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 4,
+            left: 4,
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontSize: '0.7rem',
+            fontWeight: 600,
+            backgroundColor: theme.background.primary,
+            color: theme.text.secondary,
+            border: `1px solid ${theme.border.primary}`,
+            zIndex: 10,
+            maxWidth: NODE_WIDTH - 32,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={tag}
+        >
+          {tag}
+        </div>
+      )}
       {/* Badge d'erreur */}
       {hasErrors && (
         <div

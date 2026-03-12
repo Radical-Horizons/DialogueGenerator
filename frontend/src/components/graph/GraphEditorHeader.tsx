@@ -8,6 +8,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
+import { BatchOperationsMenu } from './BatchOperationsMenu'
 
 /** Offsets pour positionner les nœuds créés manuellement sans chevauchement (Story 1.6). */
 const MANUAL_NODE_OFFSET_X = 150
@@ -21,7 +22,7 @@ interface GraphEditorHeaderProps {
   activeDialogueTitle: string | null
   activeDialogueFilename: string | null
   handleSave: () => Promise<void>
-  handleBatchTagSelection: () => void
+  onBatchTagApply: (tag: string) => void
   handleBatchValidateSelection: () => void
   handleBatchDeleteSelection: () => void
   canEditGraph: boolean
@@ -34,7 +35,7 @@ export function GraphEditorHeader({
   hasActiveDialogue,
   activeDialogueTitle,
   activeDialogueFilename,
-  handleBatchTagSelection,
+  onBatchTagApply,
   handleBatchValidateSelection,
   handleBatchDeleteSelection,
   canEditGraph,
@@ -167,86 +168,13 @@ export function GraphEditorHeader({
             </div>
           </div>
         )}
-        {selectedNodeIds.length > 1 && (
-          <>
-            <span
-              style={{
-                padding: '0.35rem 0.6rem',
-                borderRadius: '6px',
-                fontSize: '0.85rem',
-                color: theme.text.primary,
-                backgroundColor: theme.background.tertiary,
-                border: `1px solid ${theme.border.primary}`,
-              }}
-              title="Sélection multiple (shift-clic ou lasso)"
-            >
-              {selectedNodeIds.length} nœuds sélectionnés
-            </span>
-            <div
-              style={{
-                display: 'flex',
-                gap: '0.35rem',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-              }}
-            >
-              <button
-                type="button"
-                onClick={handleBatchTagSelection}
-                disabled={!canEditGraph}
-                style={{
-                  padding: '0.35rem 0.7rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: canEditGraph ? 'pointer' : 'not-allowed',
-                  opacity: canEditGraph ? 1 : 0.6,
-                  fontSize: '0.8rem',
-                }}
-                title='Appliquer le tag "À réviser" aux nœuds sélectionnés'
-              >
-                Tagger
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleBatchValidateSelection()}
-                disabled={!canEditGraph}
-                style={{
-                  padding: '0.35rem 0.7rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: theme.button.default.color,
-                  cursor: canEditGraph ? 'pointer' : 'not-allowed',
-                  opacity: canEditGraph ? 1 : 0.6,
-                  fontSize: '0.8rem',
-                }}
-                title="Valider les nœuds sélectionnés"
-              >
-                Valider
-              </button>
-              <button
-                type="button"
-                onClick={handleBatchDeleteSelection}
-                disabled={!canEditGraph}
-                style={{
-                  padding: '0.35rem 0.7rem',
-                  border: `1px solid ${theme.state.error.border}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.state.error.background,
-                  color: theme.state.error.color,
-                  cursor: canEditGraph ? 'pointer' : 'not-allowed',
-                  opacity: canEditGraph ? 1 : 0.6,
-                  fontSize: '0.8rem',
-                }}
-                title="Supprimer les nœuds sélectionnés"
-              >
-                Supprimer
-              </button>
-            </div>
-          </>
-        )}
+        <BatchOperationsMenu
+          selectedNodeIds={selectedNodeIds}
+          canEditGraph={canEditGraph}
+          onBatchDeleteClick={handleBatchDeleteSelection}
+          onBatchTagApply={onBatchTagApply}
+          onBatchValidateClick={handleBatchValidateSelection}
+        />
         {/* Badge de santé global du graphe */}
         {(() => {
           const errors = graphValidationErrors.filter((e) => e.severity === 'error')

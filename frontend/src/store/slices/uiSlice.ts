@@ -62,10 +62,18 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
       })
 
       const newValidationErrors = [...response.errors, ...response.warnings]
-      set({
-        validationErrors: newValidationErrors,
-        highlightedCycleNodes: Array.from(cycleNodeIds),
-      })
+      const prevErrors = get().validationErrors
+      const prevCycleNodes = get().highlightedCycleNodes
+      const newCycleNodes = Array.from(cycleNodeIds)
+      const errorsUnchanged =
+        prevErrors.length === newValidationErrors.length &&
+        newValidationErrors.every((e, i) => prevErrors[i]?.node_id === e.node_id && prevErrors[i]?.type === e.type && prevErrors[i]?.severity === e.severity)
+      const cyclesUnchanged =
+        prevCycleNodes.length === newCycleNodes.length &&
+        newCycleNodes.every((id) => prevCycleNodes.includes(id))
+      if (!errorsUnchanged || !cyclesUnchanged) {
+        set({ validationErrors: newValidationErrors, highlightedCycleNodes: newCycleNodes })
+      }
     } catch (error) {
       console.error('Erreur lors de la validation:', error)
       throw error
@@ -104,7 +112,7 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
     const state = get()
     const exists = state.nodes.some((n) => n.id === nodeId)
     if (!exists) return
-    set({ selectedNodeId: nodeId })
+    set({ selectedNodeId: nodeId, selectedNodeIds: [nodeId] })
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId } }))
     }
@@ -144,6 +152,8 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
   },
 
   setHighlightedNodes: (nodeIds) => {
+    const current = get().highlightedNodeIds
+    if (current.length === nodeIds.length && nodeIds.every((id, i) => current[i] === id)) return
     set({ highlightedNodeIds: nodeIds })
   },
 

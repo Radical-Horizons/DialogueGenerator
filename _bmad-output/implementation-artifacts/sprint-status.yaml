@@ -89,8 +89,8 @@ development_status:
   2-8-jump-to-nœud-spécifique-par-id-ou-nom-fr29: done
   2-9-filtrer-vue-graphe-show-hide-types-nœuds-speakers-fr30: done
   2-10-sélection-multiple-nœuds-shift-click-lasso-selection-fr31: done
-  2-11-appliquer-opérations-à-nœuds-sélectionnés-delete-tag-validate-fr32: ready-for-dev
-  2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: backlog
+  2-11-appliquer-opérations-à-nœuds-sélectionnés-delete-tag-validate-fr32: done
+  2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: ready-for-dev
   2-13-auto-layout-graphe-pour-lisibilité-fr34: backlog
   2-14-undo-redo-opérations-graphe-fr35: backlog
   epic-2-retrospective: optional

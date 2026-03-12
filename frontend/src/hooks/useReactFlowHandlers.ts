@@ -129,12 +129,10 @@ export function useReactFlowHandlers(
           } else {
             nextIds = currentIds.filter((id) => id !== change.id)
           }
-          if (
-            nextIds.length !== currentIds.length ||
-            nextIds.some((id, i) => currentIds[i] !== id)
-          ) {
-            setSelectedNodes(nextIds)
-          }
+          const currentSet = new Set(currentIds)
+          const changed =
+            currentSet.size !== nextIds.length || nextIds.some((id) => !currentSet.has(id))
+          if (changed) setSelectedNodes(nextIds)
           continue
         }
         if (change.type === 'position' && change.position && change.id) {

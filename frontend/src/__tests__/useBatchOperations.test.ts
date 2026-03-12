@@ -70,7 +70,35 @@ describe('useBatchOperations', () => {
     expect(useGraphStore.getState().nodes).toHaveLength(0)
     expect(useGraphStore.getState().selectedNodeIds).toEqual([])
     expect(result.current.selectedNodeIdsToDelete).toBeNull()
-    expect(toastMock).toHaveBeenCalledWith('Opération appliquée à 2 nœuds', 'success', 3000)
+    expect(toastMock).toHaveBeenCalledWith('2 nœuds supprimés', 'success', 3000)
+  })
+
+  it('handleConfirmBatchDelete on partial failure shows toast with reasons and keeps failed ids in selection', () => {
+    const batchDeleteNodesMock = vi.fn().mockReturnValue({
+      deleted: ['n1'],
+      failed: [
+        { id: 'n2', reason: 'nœud introuvable' },
+      ],
+    })
+    useGraphStore.setState({ batchDeleteNodes: batchDeleteNodesMock })
+
+    const { result } = renderHook(() => useBatchOperations(toastMock))
+
+    act(() => {
+      result.current.handleBatchDeleteSelection()
+    })
+    act(() => {
+      result.current.handleConfirmBatchDelete()
+    })
+
+    expect(batchDeleteNodesMock).toHaveBeenCalledWith(['n1', 'n2'])
+    expect(toastMock).toHaveBeenCalledWith(
+      '1 nœud supprimé(s), 1 échec(s): n2 (nœud introuvable)',
+      'warning',
+      5000
+    )
+    expect(useGraphStore.getState().selectedNodeIds).toEqual(['n2'])
+    expect(result.current.selectedNodeIdsToDelete).toBeNull()
   })
 
   it('handleCancelBatchDelete clears selectedNodeIdsToDelete', () => {
@@ -87,11 +115,11 @@ describe('useBatchOperations', () => {
     expect(useGraphStore.getState().nodes).toHaveLength(2)
   })
 
-  it('handleBatchTagSelection applies "À réviser" tag to all selected nodes', () => {
+  it('handleBatchTagSelection applies given tag to all selected nodes', () => {
     const { result } = renderHook(() => useBatchOperations(toastMock))
 
     act(() => {
-      result.current.handleBatchTagSelection()
+      result.current.handleBatchTagSelection('À réviser')
     })
 
     const nodes = useGraphStore.getState().nodes

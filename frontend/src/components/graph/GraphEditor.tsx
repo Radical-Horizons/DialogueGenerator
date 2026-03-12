@@ -15,6 +15,7 @@ import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { GraphValidationPanel } from './GraphValidationPanel'
+import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
 import { useGraphStore } from '../../store/graphStore'
@@ -62,6 +63,7 @@ export function GraphEditor({
   const {
     nodes,
     selectedNodeId,
+    selectedNodeIds,
     validationErrors: graphValidationErrors,
     isLoading: isGraphLoading,
   } = useGraphStore()
@@ -95,6 +97,8 @@ export function GraphEditor({
     handleCancelBatchDelete,
     handleBatchTagSelection,
     handleBatchValidateSelection,
+    showValidationReportForSelection,
+    setShowValidationReportForSelection,
   } = useBatchOperations(toast)
 
   const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
@@ -159,7 +163,7 @@ export function GraphEditor({
           activeDialogueTitle={activeDialogueTitle}
           activeDialogueFilename={activeDialogueFilename}
           handleSave={handleSave}
-          handleBatchTagSelection={handleBatchTagSelection}
+          onBatchTagApply={handleBatchTagSelection}
           handleBatchValidateSelection={handleBatchValidateSelection}
           handleBatchDeleteSelection={handleBatchDeleteSelection}
           canEditGraph={canEditGraph}
@@ -335,6 +339,12 @@ export function GraphEditor({
         onConfirm={handleConfirmBatchDelete}
         onCancel={handleCancelBatchDelete}
         variant="danger"
+      />
+      <BatchValidationReportModal
+        isOpen={showValidationReportForSelection}
+        onClose={() => setShowValidationReportForSelection(false)}
+        validationErrors={graphValidationErrors}
+        selectedNodeIds={selectedNodeIds}
       />
     </div>
   )

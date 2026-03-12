@@ -72,8 +72,17 @@ export interface GraphState {
   addNode: (node: Node) => void
   /** Crée un nœud vide (sans LLM). Story 1.6 - FR6. */
   createEmptyNode: (position?: { x: number; y: number }) => Node
-  updateNode: (nodeId: string, updates: Partial<Node>) => void
-  deleteNode: (nodeId: string) => void
+  /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
+  updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty?: boolean) => void
+  /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
+  deleteNode: (nodeId: string, skipMarkDirty?: boolean) => void
+  /** Story 2.11 FR32: supprime les nœuds en lot ; retourne deleted/failed (avec raison si dispo) ; appelle markDirty une fois. */
+  batchDeleteNodes: (nodeIds: string[]) => {
+    deleted: string[]
+    failed: Array<{ id: string; reason?: string }>
+  }
+  /** Story 2.11 FR32: applique un tag à tous les nœuds ; appelle markDirty une fois. */
+  batchTagNodes: (nodeIds: string[], tag: string) => void
   connectNodes: (
     sourceId: string,
     targetId: string,
