@@ -8,6 +8,7 @@ import type { ReactFlowInstance } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
 import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
 import { GraphCanvas } from './GraphCanvas'
+import { GraphSearchBar } from './GraphSearchBar'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
@@ -72,6 +73,8 @@ export function GraphEditor({
   
   // Infobulle raccourcis graphe (au survol du bouton ?)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
+  // Barre de recherche nœuds (Story 2.7 - FR28)
+  const [showSearchBar, setShowSearchBar] = useState(false)
   const isStandalone = mode === 'standalone'
   const routeTarget = useMemo(
     () => resolveGraphRouteTarget(routeDialogueId),
@@ -114,6 +117,7 @@ export function GraphEditor({
     lastSaveError,
     lastSavedAt,
     setShowDeleteNodeConfirm,
+    setHighlightedNodes,
     syncStatus,
     lastAckSeq,
     resetGraph,
@@ -545,6 +549,18 @@ export function GraphEditor({
         enabled: () => !!useGraphStore.getState().selectedNodeId,
       },
       {
+        key: 'ctrl+f',
+        handler: (e) => {
+          e.preventDefault()
+          setShowSearchBar((v) => {
+            if (v) setHighlightedNodes([])
+            return !v
+          })
+        },
+        description: 'Ouvrir / fermer la recherche dans le graphe',
+        enabled: true,
+      },
+      {
         key: 'ctrl+0',
         handler: (e) => {
           e.preventDefault()
@@ -658,6 +674,7 @@ export function GraphEditor({
       isGraphLoading,
       isLoadingDialogue,
       setShowDeleteNodeConfirm,
+      setHighlightedNodes,
       reactFlowInstance,
     ]
   )
@@ -1115,6 +1132,26 @@ export function GraphEditor({
             >
               💰 Coûts
             </button>
+            <button
+              type="button"
+              data-testid="btn-search-graph"
+              onClick={() => setShowSearchBar((v) => { if (v) setHighlightedNodes([]); return !v })}
+              disabled={!hasActiveDialogue}
+              style={{
+                padding: '0.5rem 1rem',
+                border: `1px solid ${showSearchBar ? theme.button.primary.background : theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: showSearchBar ? theme.button.primary.background : theme.button.default.background,
+                color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
+                cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+                opacity: !hasActiveDialogue ? 0.6 : 1,
+                fontSize: '0.9rem',
+              }}
+              title="Rechercher dans le graphe (Ctrl+F)"
+              aria-label="Rechercher"
+            >
+              🔍 Rechercher
+            </button>
             <div style={{ position: 'relative' }}>
               <button
                 type="button"
@@ -1164,6 +1201,7 @@ export function GraphEditor({
                   <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Raccourcis graphe</div>
                   <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Clic droit</kbd> sur un nœud : menu (Générer, Voir le prompt, Dupliquer, Supprimer)</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+F</kbd> : rechercher dans le graphe</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+G</kbd> : ouvrir la génération IA</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+S</kbd> : sauvegarder</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Suppr</kbd> : supprimer le nœud sélectionné ; sur une connexion (edge) : confirmation puis suppression</li>
@@ -1223,8 +1261,16 @@ export function GraphEditor({
               <div
                 ref={canvasWrapperRef}
                 data-testid="graph-canvas"
-                style={{ flex: 1, minHeight: 400, overflow: 'hidden' }}
+                style={{ flex: 1, minHeight: 400, overflow: 'hidden', position: 'relative' }}
               >
+                {showSearchBar && (
+                  <GraphSearchBar
+                    onClose={() => {
+                      setHighlightedNodes([])
+                      setShowSearchBar(false)
+                    }}
+                  />
+                )}
                 <ReactFlowProvider>
                   <GraphCanvas />
                 </ReactFlowProvider>

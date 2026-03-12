@@ -119,8 +119,12 @@ export interface GraphState {
   // Reset
   resetGraph: () => void
 
-  // Recherche
+  // Recherche (Story 2.7 - FR28)
   setHighlightedNodes: (nodeIds: string[]) => void
+  /** Filtre les nœuds par contenu texte (data.line) et/ou speaker (data.speaker). Retourne les node.id. */
+  searchNodes: (query: string, filters?: { speaker?: string }) => string[]
+  /** Liste des noms de speakers uniques dérivés des nœuds (pour filtre UI). */
+  getUniqueSpeakers: () => string[]
 
   // Cycles intentionnels
   markCycleAsIntentional: (cycleId: string) => void

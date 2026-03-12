@@ -14,6 +14,8 @@ export type UISlice = Pick<
   | 'validateGraph'
   | 'setSelectedNode'
   | 'setHighlightedNodes'
+  | 'searchNodes'
+  | 'getUniqueSpeakers'
   | 'markCycleAsIntentional'
   | 'unmarkCycleAsIntentional'
   | 'markDirty'
@@ -70,6 +72,30 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
 
   setHighlightedNodes: (nodeIds) => {
     set({ highlightedNodeIds: nodeIds })
+  },
+
+  searchNodes: (query, filters) => {
+    const state = get()
+    const q = query.trim().toLowerCase()
+    const speakerFilter = filters?.speaker?.trim().toLowerCase() ?? null
+    return state.nodes.filter((node) => {
+      const data = node.data as { line?: string; speaker?: string }
+      const line = (data.line ?? '').toLowerCase()
+      const speaker = (data.speaker ?? '').toLowerCase()
+      const textMatch = q === '' || line.includes(q)
+      const speakerMatch = speakerFilter === null || speakerFilter === '' || speaker === speakerFilter
+      return textMatch && speakerMatch
+    }).map((n) => n.id)
+  },
+
+  getUniqueSpeakers: () => {
+    const state = get()
+    const speakerSet = new Set<string>()
+    state.nodes.forEach((node) => {
+      const speaker = (node.data as { speaker?: string })?.speaker?.trim()
+      if (speaker) speakerSet.add(speaker)
+    })
+    return Array.from(speakerSet).sort()
   },
 
   markCycleAsIntentional: (cycleId) => {

@@ -2,15 +2,18 @@
  * Story 2.3 (FR24): Raccourcis clavier zoom/pan dans l'éditeur de graphe.
  * - Fit View (Ctrl+0) appelle fitView() sur l'instance React Flow (Task 4.1).
  * - Flèches / WASD déplacent le viewport (pan) ; pas de déclenchement quand le focus est dans un input (Task 5.1, AC #5).
+ * Story 2.7 (FR28): Ctrl+F ouvre la barre de recherche, Escape la ferme et vide les highlights.
  *
  * On teste le même contrat que GraphEditor (useKeyboardShortcuts + instance fitView/setViewport)
  * via un composant minimal qui enregistre les raccourcis avec instance fournie dès le montage,
  * car useKeyboardShortcuts n'enregistre qu'au montage (deps []).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, act, waitFor } from '@testing-library/react'
+import { render, act, waitFor, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
+import { GraphSearchBar } from '../components/graph/GraphSearchBar'
+import { useGraphStore } from '../store/graphStore'
 
 const PAN_DELTA = 50
 
@@ -196,5 +199,66 @@ describe('GraphEditor keyboard shortcuts (Story 2.3)', () => {
 
     expect(setViewport).not.toHaveBeenCalled()
     document.body.removeChild(input)
+  })
+})
+
+describe('GraphEditor search bar (Story 2.7)', () => {
+  beforeEach(() => {
+    useGraphStore.getState().resetGraph()
+  })
+
+  it('Ctrl+F opens search bar, Escape closes it and clears highlights (Task 3.1)', async () => {
+    const setHighlightedNodes = useGraphStore.getState().setHighlightedNodes
+    let showSearchBar = false
+    const setShowSearchBar = (v: boolean | ((prev: boolean) => boolean)) => {
+      showSearchBar = typeof v === 'function' ? v(showSearchBar) : v
+    }
+    const MockEditor = () => {
+      const [show, setShow] = React.useState(false)
+      React.useEffect(() => {
+        showSearchBar = show
+      }, [show])
+      useKeyboardShortcuts(
+        [
+          {
+            key: 'ctrl+f',
+            handler: (e) => {
+              e.preventDefault()
+              setShow((v) => {
+                if (v) useGraphStore.getState().setHighlightedNodes([])
+                return !v
+              })
+            },
+            description: 'Recherche',
+            enabled: true,
+          },
+        ],
+        []
+      )
+      return React.createElement(
+        'div',
+        null,
+        show && React.createElement(GraphSearchBar, { onClose: () => { useGraphStore.getState().setHighlightedNodes([]); setShow(false) } })
+      )
+    }
+    const { unmount } = render(React.createElement(MockEditor))
+    expect(screen.queryByPlaceholderText(/Rechercher/)).not.toBeInTheDocument()
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true }))
+    })
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/Rechercher/)).toBeInTheDocument()
+    })
+    setHighlightedNodes(['n1'])
+    expect(useGraphStore.getState().highlightedNodeIds).toEqual(['n1'])
+    const searchInput = screen.getByPlaceholderText(/Rechercher/)
+    act(() => {
+      fireEvent.keyDown(searchInput, { key: 'Escape' })
+    })
+    await waitFor(() => {
+      expect(screen.queryByPlaceholderText(/Rechercher/)).not.toBeInTheDocument()
+    })
+    expect(useGraphStore.getState().highlightedNodeIds).toEqual([])
+    unmount()
   })
 })

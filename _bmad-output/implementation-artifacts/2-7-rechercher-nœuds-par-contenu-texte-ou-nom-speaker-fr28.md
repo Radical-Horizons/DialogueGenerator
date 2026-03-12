@@ -1,6 +1,6 @@
 # Story 2.7: Rechercher nœuds par contenu texte ou nom speaker (FR28)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -119,6 +119,12 @@ so that **je peux trouver rapidement des nœuds spécifiques dans de grands grap
 - [Source: frontend/src/store/types/graphState.ts] — highlightedNodeIds, setHighlightedNodes dans GraphState.
 - [Source: frontend/src/components/graph/GraphEditor.tsx] — useKeyboardShortcuts (ctrl+g, ctrl+0, delete, arrows) ; ajouter ctrl+f ici.
 
+## Change Log
+
+| Date       | Author | Change |
+|------------|--------|--------|
+| 2026-03-12 | AI (Code Review) | Review complète. Corrections : AC#3 centrage auto premier résultat (GraphSearchBar), AC#1 bouton « Rechercher » (GraphEditor), renommage speakerSet (uiSlice). Statut → done. |
+
 ## Dev Agent Record
 
 ### Agent Model Used
@@ -129,4 +135,21 @@ so that **je peux trouver rapidement des nœuds spécifiques dans de grands grap
 
 ### Completion Notes List
 
+- Implémentation Story 2.7 (FR28) : recherche nœuds par texte et/ou speaker. Store : `searchNodes(query, filters?)` et `getUniqueSpeakers()` dans uiSlice. Composant `GraphSearchBar.tsx` avec input, filtre speaker (dropdown), compteur "X résultats trouvés", Précédent/Suivant (dispatch `focus-generated-node`), debounce 200 ms. Intégration dans `GraphEditor` avec état `showSearchBar` et raccourci Ctrl+F (toggle). Escape et bouton Fermer vident les highlights et ferment la barre. Tests : graphStore.search, GraphSearchBar, GraphEditor.keyboard (Ctrl+F / Escape).
+
+### Senior Developer Review (AI)
+
+- **Date:** 2026-03-12
+- **Findings:** AC#3 (centrage auto sur premier résultat) — corrigé : dispatch `focus-generated-node` pour le premier résultat dans `GraphSearchBar.runSearch`. AC#1 (bouton « Rechercher ») — corrigé : bouton « 🔍 Rechercher » ajouté dans l’en-tête de `GraphEditor`. Qualité : variable `set` renommée en `speakerSet` dans `getUniqueSpeakers` (uiSlice).
+- **Issues fixed:** 3 (2 HIGH/MEDIUM, 1 LOW). Statut passé à **done**.
+
 ### File List
+
+- frontend/src/store/types/graphState.ts (searchNodes, getUniqueSpeakers types)
+- frontend/src/store/slices/uiSlice.ts (searchNodes, getUniqueSpeakers impl, speakerSet)
+- frontend/src/components/graph/GraphSearchBar.tsx (nouveau, auto-focus premier résultat)
+- frontend/src/components/graph/GraphEditor.tsx (showSearchBar, Ctrl+F, bouton Rechercher, GraphSearchBar, tooltip)
+- frontend/src/hooks/useKeyboardShortcuts.ts (ctrl+f autorisé dans inputs)
+- frontend/src/__tests__/graphStore.search.test.ts (nouveau)
+- frontend/src/__tests__/GraphSearchBar.test.tsx (nouveau)
+- frontend/src/__tests__/GraphEditor.keyboard.test.tsx (Story 2.7 test Ctrl+F/Escape)
