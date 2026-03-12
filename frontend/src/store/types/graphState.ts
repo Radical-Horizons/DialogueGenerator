@@ -26,6 +26,8 @@ export interface GraphState {
   nodes: Node[]
   edges: Edge[]
   selectedNodeId: string | null
+  /** Story 2.10 FR31: IDs des nœuds en multi-sélection (shift-click, lasso). */
+  selectedNodeIds: string[]
   dialogueMetadata: GraphMetadata
 
   // État UI
@@ -84,6 +86,10 @@ export interface GraphState {
   /** Met à jour le libellé d'une edge de type choice (Story 2.5 AC #4). */
   updateChoiceEdgeLabel: (edgeId: string, newText: string) => void
   setSelectedNode: (nodeId: string | null) => void
+  /** Story 2.10 FR31: définit la liste des nœuds sélectionnés (multi-sélection). selectedNodeId = premier de la liste pour l’éditeur. */
+  setSelectedNodes: (nodeIds: string[]) => void
+  /** Story 2.10 FR31: vide la sélection multiple et selectedNodeId. */
+  clearSelection: () => void
   /** Story 2.8 FR29: centre le graphe sur le nœud et le sélectionne (setSelectedNode + focus-generated-node). No-op si nodeId absent. */
   jumpToNode: (nodeId: string) => void
   /** Story 2.8 FR29: recherche nœuds par ID exact ou nom (displayName / line). Retourne liste ordonnée (exact d'abord, puis partiels). */
@@ -94,10 +100,19 @@ export interface GraphState {
   resetFilters: () => void
   duplicateNode: (nodeId: string) => Node | null
   duplicateNodes: (nodeIds: string[]) => void
-  updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void
+  /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
+  updateNodePosition: (
+    nodeId: string,
+    position: { x: number; y: number },
+    skipMarkDirty?: boolean
+  ) => void
   updateNodeDimensions: (
     nodeId: string,
     dimensions: { width: number; height: number }
+  ) => void
+  /** Batch dimension updates in one set() to avoid cascade re-renders (StoreUpdater loop). */
+  updateNodeDimensionsBatch: (
+    updates: Record<string, { width: number; height: number }>
   ) => void
 
   // Actions IA
@@ -160,6 +175,7 @@ export const initialState = {
   nodes: [] as Node[],
   edges: [] as Edge[],
   selectedNodeId: null as string | null,
+  selectedNodeIds: [] as string[],
   dialogueMetadata: {
     title: 'Nouveau Dialogue',
     node_count: 0,

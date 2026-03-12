@@ -13,6 +13,8 @@ export type UISlice = Pick<
   GraphState,
   | 'validateGraph'
   | 'setSelectedNode'
+  | 'setSelectedNodes'
+  | 'clearSelection'
   | 'jumpToNode'
   | 'findNodesByQuery'
   | 'setFilters'
@@ -71,7 +73,30 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
   },
 
   setSelectedNode: (nodeId) => {
-    set({ selectedNodeId: nodeId })
+    const state = get()
+    if (nodeId === null) {
+      if (state.selectedNodeId === null && state.selectedNodeIds.length === 0) return
+      set({ selectedNodeId: null, selectedNodeIds: [] })
+    } else {
+      if (state.selectedNodeId === nodeId && state.selectedNodeIds.length === 1 && state.selectedNodeIds[0] === nodeId) return
+      set({ selectedNodeId: nodeId, selectedNodeIds: [nodeId] })
+    }
+  },
+
+  /** Story 2.10 FR31: multi-sélection. selectedNodeId = premier de la liste pour NodeEditorPanel. */
+  setSelectedNodes: (nodeIds) => {
+    const state = get()
+    const same = state.selectedNodeIds.length === nodeIds.length && nodeIds.every((id, i) => state.selectedNodeIds[i] === id)
+    if (same) return
+    const selectedNodeId = nodeIds.length === 0 ? null : nodeIds[0]
+    set({ selectedNodeIds: nodeIds, selectedNodeId })
+  },
+
+  /** Story 2.10 FR31: vide sélection multiple et selectedNodeId. */
+  clearSelection: () => {
+    const state = get()
+    if (state.selectedNodeIds.length === 0 && state.selectedNodeId === null) return
+    set({ selectedNodeIds: [], selectedNodeId: null })
   },
 
   /** Story 2.8 FR29: centre sur le nœud et sélectionne. Dispatch focus-generated-node pour fitView. No-op si nodeId absent. */

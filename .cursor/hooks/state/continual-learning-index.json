@@ -1,10 +1,6 @@
 {
   "version": 1,
-  "transcripts": {
-    "be79f0d7-b89a-477f-83e8-e9523def5583": {
-      "mtimeMs": 1771684268124,
-      "lastProcessedAt": "2026-03-12T15:00:00.000Z",
-      "note": "session summary only — agent-transcripts folder not present on this system"
-    }
-  }
+  "transcripts": {},
+  "lastProcessedAt": "2026-03-12T23:00:00.000Z",
+  "note": "This project does not have an agent-transcripts/ folder. Use in-context conversation history only per the continual-learning skill spec."
 }

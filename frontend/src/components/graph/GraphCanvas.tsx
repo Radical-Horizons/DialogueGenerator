@@ -1,17 +1,15 @@
 /**
  * Canvas principal du graphe avec ReactFlow.
  * Mode controlled (ADR-007) : nodes et edges proviennent exclusivement du store.
+ * Les handlers événementiels sont délégués à useReactFlowHandlers.
  */
-import { memo, useCallback, useMemo, useEffect, useRef, useState } from 'react'
+import { memo, useMemo, useEffect, useRef, useState } from 'react'
 import ReactFlow, {
   Background,
   Controls,
   MiniMap,
   useReactFlow,
-  type Connection,
   type Node,
-  type NodeChange,
-  type EdgeChange,
   type NodeTypes,
   type Viewport,
 } from 'reactflow'
@@ -24,6 +22,7 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
+import { useReactFlowHandlers } from '../../hooks/useReactFlowHandlers'
 
 const FITVIEW_AFTER_DIMENSIONS_EVENT = 'graph-request-fitview'
 
@@ -42,9 +41,7 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
   // Fit view once per dialogue when load has finished. Signal: !isGraphLoading + documentId (not nodesLength).
   // Double rAF runs after layout so React Flow has measured nodes; ref prevents duplicate fit per document.
   useEffect(() => {
-    if (isGraphLoading || !documentId) {
-      return
-    }
+    if (isGraphLoading || !documentId) return
     if (alreadyFitForDocumentIdRef.current === documentId) return
     alreadyFitForDocumentIdRef.current = documentId
     const documentIdToFit = documentId
@@ -71,24 +68,16 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
       if (node) {
         setHighlightedNodesInner([nodeId])
         setSelectedNodeInner(nodeId)
-        // Délai court pour laisser la virtualisation mesurer le nœud avant fitView (centrage fiable).
-        // AC #3 : animation fluide 300 ms.
         fitViewTimeoutId = window.setTimeout(() => {
           fitViewTimeoutId = null
-          fitView({
-            nodes: [node],
-            duration: 300,
-            padding: 0.3,
-          })
+          fitView({ nodes: [node], duration: 300, padding: 0.3 })
         }, 100)
       }
     }
     window.addEventListener('focus-generated-node', handleFocusNode as EventListener)
     return () => {
       window.removeEventListener('focus-generated-node', handleFocusNode as EventListener)
-      if (fitViewTimeoutId !== null) {
-        window.clearTimeout(fitViewTimeoutId)
-      }
+      if (fitViewTimeoutId !== null) window.clearTimeout(fitViewTimeoutId)
     }
   }, [getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
 
@@ -117,26 +106,20 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
 })
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 120, zoom: 1 }
+const SNAP_GRID: [number, number] = [15, 15]
 
 export const GraphCanvas = memo(function GraphCanvas() {
   const {
     nodes: storeNodes,
     edges: storeEdges,
     graphFilters,
-    selectedNodeId,
+    selectedNodeIds,
     validationErrors,
     highlightedNodeIds,
     highlightedCycleNodes,
     documentId,
-    setSelectedNode,
-    updateNodePosition,
-    updateNodeDimensions,
-    connectNodes,
-    deleteNode,
-    disconnectNodes,
-    markDirty,
-    updateChoiceEdgeLabel,
   } = useGraphStore()
+
   const visibleStoreNodes = useMemo(
     () => applyNodeFilters(storeNodes, graphFilters),
     [storeNodes, graphFilters]
@@ -149,44 +132,57 @@ export const GraphCanvas = memo(function GraphCanvas() {
     () => applyEdgeFilters(storeEdges, visibleStoreNodeIds, graphFilters),
     [storeEdges, visibleStoreNodeIds, graphFilters]
   )
-  const [menu, setMenu] = useState<{ id: string; top: number; left: number; right?: number; bottom?: number } | null>(null)
-  const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
-  const [edgeLabelEdit, setEdgeLabelEdit] = useState<{
-    edgeId: string
-    sourceId: string
-    choiceIndex: number
-    initialText: string
+
+  const [menu, setMenu] = useState<{
+    id: string
+    top: number
+    left: number
+    right?: number
+    bottom?: number
   } | null>(null)
-  /** Pending edge delete: ids to remove after user confirmation (AC #1, #4). */
-  const [edgeIdsToDelete, setEdgeIdsToDelete] = useState<string[] | null>(null)
+  const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
 
-  const openContextMenu = useCallback(
-    (nodeId: string, clientX: number, clientY: number) => {
-      const menuWidth = 200
-      const menuHeight = 220
-      const padding = 8
-      // position:fixed → coordonnées viewport ; garder le menu à l'écran
-      let left = clientX + padding
-      let top = clientY + padding
-      if (left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - padding
-      if (top + menuHeight > window.innerHeight) top = window.innerHeight - menuHeight - padding
-      if (left < padding) left = padding
-      if (top < padding) top = padding
-      setMenu({ id: nodeId, top, left, right: undefined, bottom: undefined })
-    },
-    [setMenu]
-  )
+  const fitViewRequestedAfterDimensionsRef = useRef(false)
+  useEffect(() => {
+    fitViewRequestedAfterDimensionsRef.current = false
+  }, [documentId])
 
-  const onNodeContextMenu = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      event.preventDefault()
-      openContextMenu(node.id, event.clientX, event.clientY)
-    },
-    [openContextMenu]
-  )
+  const {
+    edgeIdsToDelete,
+    edgeLabelEdit,
+    setEdgeLabelEdit,
+    onNodesChange,
+    onEdgesChange,
+    onConfirmDeleteEdges,
+    onCancelDeleteEdges,
+    onNodeClick,
+    onNodeDoubleClick,
+    onPaneClick: onPaneClickBase,
+    onConnect,
+    onNodeDragStart,
+    onNodeDragStop,
+    handleEdgeLabelConfirm,
+  } = useReactFlowHandlers(fitViewRequestedAfterDimensionsRef)
 
-  // Fallback : si React Flow ne déclenche pas onNodeContextMenu (ex. nœuds custom), écouter l'événement du nœud
+  const openContextMenu = (nodeId: string, clientX: number, clientY: number) => {
+    const menuWidth = 200
+    const menuHeight = 220
+    const padding = 8
+    let left = clientX + padding
+    let top = clientY + padding
+    if (left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - padding
+    if (top + menuHeight > window.innerHeight) top = window.innerHeight - menuHeight - padding
+    if (left < padding) left = padding
+    if (top < padding) top = padding
+    setMenu({ id: nodeId, top, left, right: undefined, bottom: undefined })
+  }
+
+  const onNodeContextMenu = (event: React.MouseEvent, node: Node) => {
+    event.preventDefault()
+    openContextMenu(node.id, event.clientX, event.clientY)
+  }
+
   useEffect(() => {
     const handler = (e: Event) => {
       const ev = e as CustomEvent<{ nodeId: string; clientX: number; clientY: number }>
@@ -196,39 +192,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
     }
     window.addEventListener('graph-node-contextmenu', handler)
     return () => window.removeEventListener('graph-node-contextmenu', handler)
-  }, [openContextMenu])
+  }, [])
 
-  const onPaneClick = useCallback(() => {
-    setSelectedNode(null)
+  const onPaneClick = () => {
+    onPaneClickBase()
     setMenu(null)
-  }, [setSelectedNode, setMenu])
+  }
 
-  /** Double-clic nœud → focus (centrage + zoom confortable). Réutilise focus-generated-node (Story 2.3 AC #3). */
-  const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
-    window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: node.id } }))
-  }, [])
-
-  const fitViewRequestedAfterDimensionsRef = useRef(false)
-  useEffect(() => {
-    fitViewRequestedAfterDimensionsRef.current = false
-  }, [documentId])
-
-  // RAF throttle pour updateNodePosition pendant le drag (évite scintillement)
-  const positionRafRef = useRef<number | null>(null)
-  const pendingPositionRef = useRef<{ nodeId: string; position: { x: number; y: number } } | null>(null)
-
-  // Annuler le RAF en attente au démontage (évite updateNodePosition après unmount)
-  useEffect(() => {
-    return () => {
-      if (positionRafRef.current !== null) {
-        cancelAnimationFrame(positionRafRef.current)
-        positionRafRef.current = null
-      }
-    }
-  }, [])
-
-  // Dériver nodes du store avec enrichissement (validation, highlight, sélection) — AC #1, #3
-  // Story 2.9 FR30: filtrage appliqué via visibleStoreNodes (store inchangé, dérivation uniquement).
+  // Dériver nodes du store avec enrichissement (validation, highlight, sélection)
   const nodes = useMemo(() => {
     return visibleStoreNodes.map((node) => {
       const nodeErrors = validationErrors.filter((err) => err.node_id === node.id)
@@ -236,10 +207,9 @@ export const GraphCanvas = memo(function GraphCanvas() {
       const warnings = nodeErrors.filter((err) => err.severity === 'warning')
       const isHighlighted = highlightedNodeIds.includes(node.id)
       const isInCycle = highlightedCycleNodes.includes(node.id)
-
       return {
         ...node,
-        selected: node.id === selectedNodeId,
+        selected: selectedNodeIds.includes(node.id),
         style: {
           ...node.style,
           ...(isInCycle && {
@@ -255,11 +225,9 @@ export const GraphCanvas = memo(function GraphCanvas() {
         },
       }
     })
-  }, [visibleStoreNodes, selectedNodeId, validationErrors, highlightedNodeIds, highlightedCycleNodes])
+  }, [visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes])
 
-  // Dériver edges du store avec enrichissement (broken reference) — AC #1
-  // Story 2.9 FR30: edges déjà filtrés via visibleStoreEdges (source/target dans visibleStoreNodeIds).
-  // Exclure les edges avec sourceHandle legacy "choice-N" (ADR-008) pour éviter React Flow #008 et permettre l'affichage du graphe
+  // Dériver edges du store — Story 2.9 FR30, ADR-008
   const edges = useMemo(() => {
     const brokenReferences = validationErrors.filter(
       (err) => err.type === 'broken_reference' && err.target
@@ -269,19 +237,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
       const sh = edge.sourceHandle
       return Boolean(sh && /^choice-\d+$/.test(sh))
     })
-
-    // Fast path: conserver exactement la même référence d'edges.
-    // Cela évite les remounts d'EdgeLabel pendant le drag si rien ne change côté edges.
     if (brokenTargets.size === 0 && !hasLegacyChoiceHandles) {
       return visibleStoreEdges
     }
-
     const validEdges = visibleStoreEdges.filter((edge) => {
       const sh = edge.sourceHandle
       if (sh && /^choice-\d+$/.test(sh)) return false
       return true
     })
-
     return validEdges.map((edge) => {
       const isBroken = brokenTargets.has(edge.target)
       if (isBroken) {
@@ -300,214 +263,24 @@ export const GraphCanvas = memo(function GraphCanvas() {
     })
   }, [visibleStoreEdges, validationErrors])
 
-  const flushPositionUpdate = useCallback(() => {
-    if (pendingPositionRef.current) {
-      const { nodeId, position } = pendingPositionRef.current
-      pendingPositionRef.current = null
-      updateNodePosition(nodeId, position)
-    }
-    positionRafRef.current = null
-  }, [updateNodePosition])
-
-  const schedulePositionUpdate = useCallback(
-    (nodeId: string, position: { x: number; y: number }) => {
-      pendingPositionRef.current = { nodeId, position }
-      if (positionRafRef.current === null) {
-        positionRafRef.current = requestAnimationFrame(flushPositionUpdate)
-      }
-    },
-    [flushPositionUpdate]
-  )
-
-  // onNodesChange : uniquement actions du store — AC #2, #3
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      for (const change of changes) {
-        if (change.type === 'remove' && change.id) {
-          deleteNode(change.id)
-          continue
-        }
-        if (change.type === 'select' && change.id !== undefined) {
-          setSelectedNode(change.selected ? change.id : null)
-          continue
-        }
-        if (change.type === 'position' && change.position && change.id) {
-          // Pendant le drag, throttler via RAF ; position finale gérée par onNodeDragStop
-          const isDragging = 'dragging' in change && change.dragging
-          if (isDragging) {
-            schedulePositionUpdate(change.id, change.position)
-          } else {
-            updateNodePosition(change.id, change.position)
-          }
-          continue
-        }
-        if (change.type === 'dimensions' && change.id && 'dimensions' in change) {
-          // React Flow controlled mode: we must apply dimension updates back to node state,
-          // otherwise React Flow keeps nodes container `visibility:hidden` (nodes not "initialized").
-          const dims = (change as { dimensions?: { width?: number; height?: number } }).dimensions
-          if (dims && typeof dims.width === 'number' && typeof dims.height === 'number') {
-            updateNodeDimensions(change.id, {
-              width: dims.width,
-              height: dims.height,
-            })
-            if (!fitViewRequestedAfterDimensionsRef.current) {
-              fitViewRequestedAfterDimensionsRef.current = true
-              window.dispatchEvent(new CustomEvent(FITVIEW_AFTER_DIMENSIONS_EVENT))
-            }
-          }
-          continue
-        }
-      }
-    },
-    [
-      deleteNode,
-      setSelectedNode,
-      updateNodePosition,
-      updateNodeDimensions,
-      schedulePositionUpdate,
-    ]
-  )
-
-  // onEdgesChange : intercepter remove → confirmation avant store (Story 2.6 AC #1, #4)
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => {
-      const removeIds = changes
-        .filter((c): c is { type: 'remove'; id: string } => c.type === 'remove' && Boolean(c.id))
-        .map((c) => c.id)
-      if (removeIds.length > 0) {
-        setEdgeIdsToDelete(removeIds)
-        return
-      }
-    },
-    []
-  )
-
-  const onConfirmDeleteEdges = useCallback(() => {
-    if (!edgeIdsToDelete || edgeIdsToDelete.length === 0) return
-    for (const id of edgeIdsToDelete) {
-      disconnectNodes(id, true)
-    }
-    markDirty()
-    setEdgeIdsToDelete(null)
-  }, [edgeIdsToDelete, disconnectNodes, markDirty])
-
-  const onCancelDeleteEdges = useCallback(() => {
-    setEdgeIdsToDelete(null)
-  }, [])
-
-  const onNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      setSelectedNode(node.id)
-    },
-    [setSelectedNode]
-  )
-
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      if (!connection.source || !connection.target) return
-      const sourceHandle = connection.sourceHandle || ''
-      let connectionType = 'default'
-      let choiceIndex: number | undefined
-      if (sourceHandle.startsWith('choice:')) {
-        connectionType = 'choice'
-        const choiceId = sourceHandle.slice(7)
-        const nodes = useGraphStore.getState().nodes
-        const sourceNode = nodes.find((n) => n.id === connection.source)
-        const choices = (sourceNode?.data?.choices as Array<{ choiceId?: string }>) ?? []
-        const idx = choices.findIndex((c, i) => (c?.choiceId ?? `__idx_${i}`) === choiceId)
-        choiceIndex = idx >= 0 ? idx : undefined
-      } else if (sourceHandle.startsWith('choice-')) {
-        connectionType = 'choice'
-        choiceIndex = parseInt(sourceHandle.replace('choice-', ''), 10)
-      } else if (sourceHandle === 'success') {
-        connectionType = 'success'
-      } else if (sourceHandle === 'failure') {
-        connectionType = 'failure'
-      } else if (sourceHandle === 'critical-success') {
-        connectionType = 'critical-success'
-      } else if (sourceHandle === 'critical-failure') {
-        connectionType = 'critical-failure'
-      }
-      connectNodes(
-        connection.source,
-        connection.target,
-        choiceIndex,
-        connectionType,
-        connection.sourceHandle ?? undefined
-      )
-    },
-    [connectNodes]
-  )
-
-  const onNodeDragStop = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      // Annuler tout RAF en attente ; committer toujours node.position (position finale snapée par React Flow)
-      if (positionRafRef.current !== null) {
-        cancelAnimationFrame(positionRafRef.current)
-        positionRafRef.current = null
-      }
-      pendingPositionRef.current = null
-      updateNodePosition(node.id, node.position)
-    },
-    [updateNodePosition]
-  )
-
   const nodeTypes: NodeTypes = useMemo(
+    () => ({ dialogueNode: DialogueNode, testNode: TestNode, endNode: EndNode }),
+    []
+  )
+  const edgeTypes = useMemo(() => ({ smoothstep: StableLabelSmoothStepEdge }), [])
+  const defaultEdgeOptions = useMemo(
     () => ({
-      dialogueNode: DialogueNode,
-      testNode: TestNode,
-      endNode: EndNode,
+      type: 'smoothstep' as const,
+      animated: false,
+      style: { stroke: theme.text.secondary, strokeWidth: 2 },
     }),
     []
   )
+  const reactFlowStyle = useMemo(() => ({ backgroundColor: theme.background.panel }), [])
 
-  const edgeTypes = useMemo(
-    () => ({
-      smoothstep: StableLabelSmoothStepEdge,
-    }),
-    []
-  )
-
-  useEffect(() => {
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<{ edgeId: string }>).detail
-      if (!detail?.edgeId) return
-      const state = useGraphStore.getState()
-      const edge = state.edges.find((e) => e.id === detail.edgeId)
-      if (!edge || (edge.data as { edgeType?: string })?.edgeType !== 'choice') return
-      const sourceNode = state.nodes.find((n) => n.id === edge.source)
-      const choiceIndex = (edge.data as { choiceIndex?: number })?.choiceIndex
-      if (
-        choiceIndex == null ||
-        !sourceNode?.data?.choices ||
-        !Array.isArray(sourceNode.data.choices) ||
-        sourceNode.data.choices[choiceIndex] == null
-      )
-        return
-      const choice = sourceNode.data.choices[choiceIndex] as { text?: string }
-      setEdgeLabelEdit({
-        edgeId: edge.id,
-        sourceId: edge.source,
-        choiceIndex,
-        initialText: choice.text ?? '',
-      })
-    }
-    window.addEventListener('edge-label-edit', handler)
-    return () => window.removeEventListener('edge-label-edit', handler)
-  }, [])
-
-  const handleEdgeLabelConfirm = useCallback(
-    (newText: string) => {
-      if (!edgeLabelEdit) return
-      updateChoiceEdgeLabel(edgeLabelEdit.edgeId, newText.trim())
-      setEdgeLabelEdit(null)
-    },
-    [edgeLabelEdit, updateChoiceEdgeLabel]
-  )
-
-  const onMove = useCallback((_event: unknown, newViewport: Viewport) => {
+  const onMove = (_event: unknown, newViewport: Viewport) => {
     setViewport(newViewport)
-  }, [])
+  }
 
   return (
     <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -523,10 +296,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onlyRenderVisibleElements={true}
         onMove={onMove}
         onInit={(instance) => {
-          const event = new CustomEvent('reactflow-instance-ready', {
-            detail: instance,
-          })
-          window.dispatchEvent(event)
+          window.dispatchEvent(new CustomEvent('reactflow-instance-ready', { detail: instance }))
         }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -535,27 +305,19 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onNodeDoubleClick={onNodeDoubleClick}
         onNodeContextMenu={onNodeContextMenu}
         onPaneClick={onPaneClick}
+        onNodeDragStart={onNodeDragStart}
         onNodeDragStop={onNodeDragStop}
+        multiSelectionKeyCode="Shift"
+        selectionOnDrag
         autoPanOnNodeDrag
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         snapToGrid
-        snapGrid={[15, 15]}
-        defaultEdgeOptions={{
-          type: 'smoothstep',
-          animated: false,
-          style: { stroke: theme.text.secondary, strokeWidth: 2 },
-        }}
-        style={{
-          backgroundColor: theme.background.panel,
-        }}
+        snapGrid={SNAP_GRID}
+        defaultEdgeOptions={defaultEdgeOptions}
+        style={reactFlowStyle}
       >
-        <Background
-          color={theme.text.secondary}
-          gap={15}
-          size={1}
-          style={{ opacity: 0.2 }}
-        />
+        <Background color={theme.text.secondary} gap={15} size={1} style={{ opacity: 0.2 }} />
         <Controls />
         <div
           aria-label="Zoom level"
@@ -576,14 +338,10 @@ export const GraphCanvas = memo(function GraphCanvas() {
         <MiniMap
           nodeColor={(node) => {
             switch (node.type) {
-              case 'dialogueNode':
-                return '#4A90E2'
-              case 'testNode':
-                return '#F5A623'
-              case 'endNode':
-                return '#B8B8B8'
-              default:
-                return '#4A90E2'
+              case 'dialogueNode': return '#4A90E2'
+              case 'testNode': return '#F5A623'
+              case 'endNode': return '#B8B8B8'
+              default: return '#4A90E2'
             }
           }}
           nodeBorderRadius={8}
@@ -603,7 +361,9 @@ export const GraphCanvas = memo(function GraphCanvas() {
       />
       <ConfirmDialog
         isOpen={edgeIdsToDelete != null && edgeIdsToDelete.length > 0}
-        title={edgeIdsToDelete?.length === 1 ? 'Supprimer la connexion' : 'Supprimer les connexions'}
+        title={
+          edgeIdsToDelete?.length === 1 ? 'Supprimer la connexion' : 'Supprimer les connexions'
+        }
         message={
           edgeIdsToDelete?.length === 1
             ? 'Supprimer cette connexion ?'
