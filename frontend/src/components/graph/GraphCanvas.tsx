@@ -23,6 +23,7 @@ import { EdgeLabelEditModal } from './EdgeLabelEditModal'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
+import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
 
 const FITVIEW_AFTER_DIMENSIONS_EVENT = 'graph-request-fitview'
 
@@ -121,6 +122,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
   const {
     nodes: storeNodes,
     edges: storeEdges,
+    graphFilters,
     selectedNodeId,
     validationErrors,
     highlightedNodeIds,
@@ -135,6 +137,18 @@ export const GraphCanvas = memo(function GraphCanvas() {
     markDirty,
     updateChoiceEdgeLabel,
   } = useGraphStore()
+  const visibleStoreNodes = useMemo(
+    () => applyNodeFilters(storeNodes, graphFilters),
+    [storeNodes, graphFilters]
+  )
+  const visibleStoreNodeIds = useMemo(
+    () => new Set(visibleStoreNodes.map((n) => n.id)),
+    [visibleStoreNodes]
+  )
+  const visibleStoreEdges = useMemo(
+    () => applyEdgeFilters(storeEdges, visibleStoreNodeIds, graphFilters),
+    [storeEdges, visibleStoreNodeIds, graphFilters]
+  )
   const [menu, setMenu] = useState<{ id: string; top: number; left: number; right?: number; bottom?: number } | null>(null)
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const [edgeLabelEdit, setEdgeLabelEdit] = useState<{
@@ -214,8 +228,9 @@ export const GraphCanvas = memo(function GraphCanvas() {
   }, [])
 
   // Dériver nodes du store avec enrichissement (validation, highlight, sélection) — AC #1, #3
+  // Story 2.9 FR30: filtrage appliqué via visibleStoreNodes (store inchangé, dérivation uniquement).
   const nodes = useMemo(() => {
-    return storeNodes.map((node) => {
+    return visibleStoreNodes.map((node) => {
       const nodeErrors = validationErrors.filter((err) => err.node_id === node.id)
       const errors = nodeErrors.filter((err) => err.severity === 'error')
       const warnings = nodeErrors.filter((err) => err.severity === 'warning')
@@ -240,16 +255,17 @@ export const GraphCanvas = memo(function GraphCanvas() {
         },
       }
     })
-  }, [storeNodes, selectedNodeId, validationErrors, highlightedNodeIds, highlightedCycleNodes])
+  }, [visibleStoreNodes, selectedNodeId, validationErrors, highlightedNodeIds, highlightedCycleNodes])
 
   // Dériver edges du store avec enrichissement (broken reference) — AC #1
+  // Story 2.9 FR30: edges déjà filtrés via visibleStoreEdges (source/target dans visibleStoreNodeIds).
   // Exclure les edges avec sourceHandle legacy "choice-N" (ADR-008) pour éviter React Flow #008 et permettre l'affichage du graphe
   const edges = useMemo(() => {
     const brokenReferences = validationErrors.filter(
       (err) => err.type === 'broken_reference' && err.target
     )
     const brokenTargets = new Set(brokenReferences.map((err) => err.target!))
-    const hasLegacyChoiceHandles = storeEdges.some((edge) => {
+    const hasLegacyChoiceHandles = visibleStoreEdges.some((edge) => {
       const sh = edge.sourceHandle
       return Boolean(sh && /^choice-\d+$/.test(sh))
     })
@@ -257,10 +273,10 @@ export const GraphCanvas = memo(function GraphCanvas() {
     // Fast path: conserver exactement la même référence d'edges.
     // Cela évite les remounts d'EdgeLabel pendant le drag si rien ne change côté edges.
     if (brokenTargets.size === 0 && !hasLegacyChoiceHandles) {
-      return storeEdges
+      return visibleStoreEdges
     }
 
-    const validEdges = storeEdges.filter((edge) => {
+    const validEdges = visibleStoreEdges.filter((edge) => {
       const sh = edge.sourceHandle
       if (sh && /^choice-\d+$/.test(sh)) return false
       return true
@@ -282,7 +298,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       }
       return edge
     })
-  }, [storeEdges, validationErrors])
+  }, [visibleStoreEdges, validationErrors])
 
   const flushPositionUpdate = useCallback(() => {
     if (pendingPositionRef.current) {

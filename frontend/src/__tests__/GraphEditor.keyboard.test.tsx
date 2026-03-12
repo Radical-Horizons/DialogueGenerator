@@ -14,6 +14,7 @@ import React from 'react'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { GraphSearchBar } from '../components/graph/GraphSearchBar'
 import { JumpToNodeModal } from '../components/graph/JumpToNodeModal'
+import { GraphFiltersPanel } from '../components/graph/GraphFiltersPanel'
 import { useGraphStore } from '../store/graphStore'
 
 const PAN_DELTA = 50
@@ -307,6 +308,55 @@ describe('GraphEditor Jump to Node (Story 2.8)', () => {
     fireEvent.keyDown(input, { key: 'Escape' })
     await waitFor(() => {
       expect(screen.queryByRole('dialog', { name: /Jump to node/i })).not.toBeInTheDocument()
+    })
+  })
+})
+
+describe('GraphEditor Filters panel (Story 2.9)', () => {
+  beforeEach(() => {
+    useGraphStore.getState().resetGraph()
+  })
+
+  it('Ctrl+Shift+F opens filters panel, Escape closes it (Task 4.1)', async () => {
+    const MockEditor = () => {
+      const [show, setShow] = React.useState(false)
+      useKeyboardShortcuts(
+        [
+          {
+            key: 'ctrl+shift+f',
+            handler: (e) => {
+              e.preventDefault()
+              setShow((v) => !v)
+            },
+            description: 'Filtres graphe',
+            enabled: true,
+          },
+        ],
+        []
+      )
+      return React.createElement(
+        'div',
+        null,
+        React.createElement(GraphFiltersPanel, {
+          isOpen: show,
+          onClose: () => setShow(false),
+        })
+      )
+    }
+    render(React.createElement(MockEditor))
+    expect(screen.queryByRole('dialog', { name: /Filtres du graphe/i })).not.toBeInTheDocument()
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'F', ctrlKey: true, shiftKey: true, bubbles: true })
+      )
+    })
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /Filtres du graphe/i })).toBeInTheDocument()
+    })
+    const heading = screen.getByRole('heading', { name: /Filtres du graphe/i })
+    fireEvent.keyDown(heading.closest('div')!, { key: 'Escape' })
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /Filtres du graphe/i })).not.toBeInTheDocument()
     })
   })
 })

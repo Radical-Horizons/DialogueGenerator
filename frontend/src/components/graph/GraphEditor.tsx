@@ -10,6 +10,7 @@ import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/
 import { GraphCanvas } from './GraphCanvas'
 import { GraphSearchBar } from './GraphSearchBar'
 import { JumpToNodeModal } from './JumpToNodeModal'
+import { GraphFiltersPanel } from './GraphFiltersPanel'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
@@ -21,10 +22,7 @@ import { theme } from '../../theme'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getErrorMessage } from '../../types/errors'
 import type { UnityDialogueMetadata } from '../../types/api'
-import {
-  downloadUnityExport,
-  resolveGraphRouteTarget,
-} from './graphEditorStandalone'
+import { resolveGraphRouteTarget } from './graphEditorStandalone'
 
 interface GraphEditorProps {
   mode?: 'embedded' | 'standalone'
@@ -46,6 +44,7 @@ export function GraphEditor({
   const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
   const [showActionsDropdown, setShowActionsDropdown] = useState(false)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
+  const actionsDropdownBtnRef = useRef<HTMLButtonElement>(null)
   const [showAIGenerationPanel, setShowAIGenerationPanel] = useState(false)
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
@@ -78,6 +77,8 @@ export function GraphEditor({
   const [showSearchBar, setShowSearchBar] = useState(false)
   // Modal Jump to Node (Story 2.8 - FR29)
   const [showJumpToNodeModal, setShowJumpToNodeModal] = useState(false)
+  // Story 2.9 FR30: panneau filtres graphe (types nœuds, speakers)
+  const [showFiltersPanel, setShowFiltersPanel] = useState(false)
   const isStandalone = mode === 'standalone'
   const routeTarget = useMemo(
     () => resolveGraphRouteTarget(routeDialogueId),
@@ -98,11 +99,11 @@ export function GraphEditor({
   
   const {
     nodes,
+    graphFilters,
     dialogueMetadata,
     loadDialogue,
     loadDialogueByDocumentId,
     saveDialogue,
-    exportToUnity,
     validateGraph,
     applyAutoLayout,
     setSelectedNode,
@@ -390,21 +391,6 @@ export function GraphEditor({
     setShowExportFormatDialog(true)
   }, [reactFlowInstance, activeDialogueFilename, toast])
 
-  const handleExportUnity = useCallback(() => {
-    if (!activeDialogueFilename) {
-      toast('Aucun dialogue chargé', 'warning')
-      return
-    }
-
-    try {
-      const jsonContent = exportToUnity()
-      downloadUnityExport(jsonContent, activeDialogueFilename)
-      toast(`Export Unity réussi: ${activeDialogueFilename}`, 'success', 2500)
-    } catch (err) {
-      toast(`Erreur lors de l'export Unity: ${getErrorMessage(err)}`, 'error')
-    }
-  }, [activeDialogueFilename, exportToUnity, toast])
-  
   // Handler pour exporter en PNG
   const handleExportPNG = useCallback(async () => {
     if (!reactFlowInstance || !activeDialogueFilename) {
@@ -570,6 +556,15 @@ export function GraphEditor({
           })
         },
         description: 'Ouvrir / fermer la recherche dans le graphe',
+        enabled: true,
+      },
+      {
+        key: 'ctrl+shift+f',
+        handler: (e) => {
+          e.preventDefault()
+          setShowFiltersPanel((v) => !v)
+        },
+        description: 'Ouvrir / fermer le panneau filtres du graphe',
         enabled: true,
       },
       {
@@ -901,24 +896,6 @@ export function GraphEditor({
                 />
               )
             })()}
-            <button
-              type="button"
-              onClick={handleExportUnity}
-              disabled={!hasActiveDialogue}
-              style={{
-                padding: '0.5rem 1rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-                opacity: !hasActiveDialogue ? 0.6 : 1,
-                fontSize: '0.9rem',
-              }}
-              title="Télécharger le JSON Unity courant"
-            >
-              📤 Export Unity
-            </button>
             {/* Auto-layout avec menu direction */}
             <div ref={autoLayoutDropdownRef} style={{ position: 'relative' }}>
               <button
@@ -996,6 +973,7 @@ export function GraphEditor({
             </div>
             <div ref={actionsDropdownRef} style={{ position: 'relative' }}>
               <button
+                ref={actionsDropdownBtnRef}
                 data-testid="btn-actions-dropdown"
                 type="button"
                 onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
@@ -1147,6 +1125,35 @@ export function GraphEditor({
                   >
                     📤 Exporter
                   </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    data-testid="btn-filters-panel"
+                    onClick={() => {
+                      setShowActionsDropdown(false)
+                      setShowFiltersPanel((v) => !v)
+                    }}
+                    disabled={!hasActiveDialogue}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      border: 'none',
+                      background: 'transparent',
+                      color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+                      opacity: hasActiveDialogue ? 1 : 0.6,
+                    }}
+                    onMouseEnter={(e) => { if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    🔽 Filtres
+                    {(graphFilters.hiddenTypes?.length ?? 0) > 0 || (graphFilters.allowedSpeakers?.length ?? 0) > 0 ? (
+                      <span style={{ marginLeft: '0.35rem', fontSize: '0.75rem' }}>•</span>
+                    ) : null}
+                  </button>
                 </div>
               )}
             </div>
@@ -1218,11 +1225,12 @@ export function GraphEditor({
                   role="tooltip"
                   style={{
                     position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '4px',
+                    top: 0,
+                    left: '100%',
+                    marginLeft: '6px',
                     padding: '0.75rem 1rem',
                     minWidth: '240px',
+                    maxWidth: 'min(320px, 90vw)',
                     backgroundColor: theme.background.tertiary,
                     border: `1px solid ${theme.border.primary}`,
                     borderRadius: '8px',
@@ -1237,6 +1245,7 @@ export function GraphEditor({
                   <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Clic droit</kbd> sur un nœud : menu (Générer, Voir le prompt, Dupliquer, Supprimer)</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+F</kbd> : rechercher dans le graphe</li>
+                    <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+Shift+F</kbd> : filtres du graphe (types, speakers)</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+J</kbd> : aller à un nœud (Jump to Node)</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+G</kbd> : ouvrir la génération IA</li>
                     <li><kbd style={{ padding: '0.1rem 0.35rem', background: theme.background.panel, borderRadius: 4 }}>Ctrl+S</kbd> : sauvegarder</li>
@@ -1830,6 +1839,13 @@ export function GraphEditor({
       <JumpToNodeModal
         isOpen={showJumpToNodeModal}
         onClose={() => setShowJumpToNodeModal(false)}
+      />
+      <GraphFiltersPanel
+        isOpen={showFiltersPanel}
+        onClose={() => {
+          setShowFiltersPanel(false)
+          requestAnimationFrame(() => actionsDropdownBtnRef.current?.focus())
+        }}
       />
     </div>
   )

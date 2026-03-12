@@ -2,7 +2,7 @@
  * Slice UI du store graphe : état d'interface, cycles, métadonnées, dirty flag.
  */
 import type { StateCreator } from 'zustand'
-import type { GraphState, GraphMetadata } from '../types/graphState'
+import type { GraphState, GraphMetadata, GraphFilters } from '../types/graphState'
 import { initialState } from '../types/graphState'
 import * as graphAPI from '../../api/graph'
 import {
@@ -15,6 +15,8 @@ export type UISlice = Pick<
   | 'setSelectedNode'
   | 'jumpToNode'
   | 'findNodesByQuery'
+  | 'setFilters'
+  | 'resetFilters'
   | 'setHighlightedNodes'
   | 'searchNodes'
   | 'getUniqueSpeakers'
@@ -81,6 +83,16 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId } }))
     }
+  },
+
+  /** Story 2.9 FR30: appliquer filtres (types, speakers). */
+  setFilters: (filters) => {
+    set({ graphFilters: filters })
+  },
+
+  /** Story 2.9 FR30: réinitialiser les filtres. */
+  resetFilters: () => {
+    set({ graphFilters: {} })
   },
 
   /** Story 2.8 FR29: candidats par ID exact ou nom (displayName ?? première ligne de data.line ?? node.id). Exact d'abord, puis partiels. */

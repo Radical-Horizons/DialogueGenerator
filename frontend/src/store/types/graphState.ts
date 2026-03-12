@@ -5,6 +5,15 @@
 import type { Node, Edge } from 'reactflow'
 import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
 
+/** Story 2.9 FR30: types de nœuds pour filtrage (dialogue / test / end). */
+export type NodeType = 'dialogue' | 'test' | 'end'
+
+/** Story 2.9 FR30: filtres de vue graphe (masquage par type, restriction par speaker). */
+export interface GraphFilters {
+  hiddenTypes?: NodeType[]
+  allowedSpeakers?: string[]
+}
+
 export interface GraphMetadata {
   title: string
   filename?: string
@@ -48,6 +57,9 @@ export interface GraphState {
   // Modale confirmation suppression nœud (Supr.)
   showDeleteNodeConfirm: boolean
 
+  // Story 2.9 FR30: filtres vue graphe (types nœuds, speakers)
+  graphFilters: GraphFilters
+
   // Actions CRUD
   loadDialogue: (
     jsonContent: string,
@@ -76,6 +88,10 @@ export interface GraphState {
   jumpToNode: (nodeId: string) => void
   /** Story 2.8 FR29: recherche nœuds par ID exact ou nom (displayName / line). Retourne liste ordonnée (exact d'abord, puis partiels). */
   findNodesByQuery: (query: string) => Array<{ id: string; label: string }>
+  /** Story 2.9 FR30: appliquer filtres (types, speakers). */
+  setFilters: (filters: GraphFilters) => void
+  /** Story 2.9 FR30: réinitialiser les filtres (équivalent setFilters({})). */
+  resetFilters: () => void
   duplicateNode: (nodeId: string) => Node | null
   duplicateNodes: (nodeIds: string[]) => void
   updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void
@@ -175,4 +191,5 @@ export const initialState = {
   layout: null as Record<string, unknown> | null,
   documentRevision: null as number | null,
   layoutRevision: null as number | null,
+  graphFilters: {} as GraphFilters,
 }
