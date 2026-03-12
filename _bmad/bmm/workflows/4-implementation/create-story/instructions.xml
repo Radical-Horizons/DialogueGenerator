@@ -259,7 +259,35 @@
 
   <step n="5" goal="Create comprehensive story file">
     <critical>📝 CREATE ULTIMATE STORY FILE - The developer's master implementation guide!</critical>
-    <critical>🧪 TDD INTEGRATED: Tasks/Subtasks MUST follow TDD — for each logical change: (1) write or extend test first, (2) implement to pass, (3) refactor if needed. Do NOT add a single "Phase: testing" or "Write tests" task at the end; tests are integrated per task/subtask.</critical>
+    <critical>🧪 TDD — STRICT RED-GREEN-REFACTOR, BEHAVIOR-FIRST DECOMPOSITION:
+
+      GRANULARITY RULE (apply first): Define tasks at BEHAVIOR level, not implementation-step level.
+      A "behavior" = one independently testable user-observable outcome (e.g. "menu appears at cursor", "menu closes on Escape").
+      Multiple implementation steps that are ONLY testable together belong in a single GREEN. Never create a subtask per implementation file/line — that produces implementation-step lists, not TDD cycles.
+      If a task has more than ~4 implementation steps that are independently testable, SPLIT it into 2 tasks, each with its own 🔴/🟢/🔵.
+
+      FORMAT: Every task gets exactly 3 ordered subtasks — dev agent MUST check in order, cannot batch tests at end:
+      🔴 RED: Failing test — one behavioral assertion from the user's perspective (observable outcome, not implementation detail). Must cover all behaviors this task delivers. Example: "🔴 Test échoue : clic droit sur le pane → PaneContextMenu s'affiche ; 'Nouveau nœud' → createEmptyNode() appelé avec la position du clic"
+      🟢 GREEN: Name the component/area to implement — NOT the how. The dev reads Dev Notes for implementation details. Example: "🟢 Implémenter PaneContextMenu + intégration dans GraphCanvas (voir Dev Notes)"
+      🔵 REFACTOR: One concrete, named cleanup opportunity visible from the SM's architecture analysis. Condition + action. If nothing to clean: "no-op". Example: "🔵 Si la logique de fermeture menu est dupliquée en ≥2 handlers dans GraphCanvas, extraire closeAllMenus() ; sinon no-op"
+
+      SEPARATION OF CONCERNS: Tasks/Subtasks = WHAT (behavior, SM territory). Dev Notes = WHERE/HOW hints (files, patterns, constraints — SM shares architecture knowledge). Implementation details = HOW exactly (dev's job, not prescribed in subtasks).
+      NEVER add a testing-phase task at the end of the story. NEVER merge 🔴+🟢. REFACTOR is mandatory — agents skip it when absent.</critical>
+
+    <critical>📋 DEV NOTES — CONSTRAINTS AND CONTEXT ONLY (no implementation prescription):
+
+      PURPOSE: Dev Notes give the developer guardrails and context so they can implement correctly without reinventing or violating architecture. They do NOT tell the developer which files to create or which methods to write step-by-step.
+
+      DO IN DEV NOTES:
+      - Architecture guardrails: ADRs, patterns that must not be violated, source of truth (e.g. store vs local state).
+      - What exists to reuse: name existing components/actions/endpoints the dev should reuse (no reinvention); one or two key references per area, not an exhaustive list.
+      - Quality bar: what behaviors must be covered by tests (outcomes), not how to write the tests.
+      - Conventions: naming, where similar code lives, constraints (e.g. "no new endpoint", "persist via existing save").
+
+      DO NOT IN DEV NOTES:
+      - Exhaustive lists of every file path or method name involved.
+      - Step-by-step implementation instructions ("create method X", "add line Y").
+      - Prescribing exact code structure; the dev decides HOW to implement within the constraints.</critical>
 
     <action>Initialize from template.md:
     {default_output_file}</action>

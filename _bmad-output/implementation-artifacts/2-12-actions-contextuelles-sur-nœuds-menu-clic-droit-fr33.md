@@ -1,6 +1,6 @@
 # Story 2.12: Actions contextuelles sur nœuds (menu clic droit) (FR33)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -45,29 +45,29 @@ so that **je peux accéder rapidement aux opérations courantes (éditer, dupliq
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 : Ajouter "Éditer" dans le menu contextuel de nœud (AC: #1, #2)
-  - [ ] 1.1 (TDD) Test : clic "Éditer" dans `NodeContextMenu` appelle `setSelectedNode(id)` et `onClose()`
-  - [ ] 1.2 Ajouter bouton "Éditer" dans `NodeContextMenu.tsx` (première entrée du menu, avant "Générer") — appelle `setSelectedNode(id)` puis `onClose()`
+- [x] Task 1 : Ajouter "Éditer" dans le menu contextuel de nœud (AC: #1, #2)
+  - [x] 1.1 (TDD) Test : clic "Éditer" dans `NodeContextMenu` appelle `setSelectedNode(id)` et `onClose()`
+  - [x] 1.2 Ajouter bouton "Éditer" dans `NodeContextMenu.tsx` (première entrée du menu, avant "Générer") — appelle `setSelectedNode(id)` puis `onClose()`
 
-- [ ] Task 2 : Créer `PaneContextMenu.tsx` (AC: #3, #4, #5)
-  - [ ] 2.1 (TDD) Test : `PaneContextMenu` affiche "Nouveau nœud" et "Auto-layout" ; clic "Nouveau nœud" appelle `onCreateNode()` ; clic "Auto-layout" appelle `onAutoLayout()` ; `onClose` appelé après chaque action
-  - [ ] 2.2 **CRÉER** `frontend/src/components/graph/PaneContextMenu.tsx` — composant menu avec position absolue, même style que `NodeContextMenu.tsx` ; props : `{ top, left, onCreateNode, onAutoLayout, onClose }`
-  - [ ] 2.3 Bouton "Nouveau nœud" : appelle `onCreateNode()` puis `onClose()`
-  - [ ] 2.4 Bouton "Auto-layout" : appelle `onAutoLayout()` puis `onClose()`
+- [x] Task 2 : Créer `PaneContextMenu.tsx` (AC: #3, #4, #5)
+  - [x] 2.1 (TDD) Test : `PaneContextMenu` affiche "Nouveau nœud" et "Auto-layout" ; clic "Nouveau nœud" appelle `onCreateNode()` ; clic "Auto-layout" appelle `onAutoLayout()` ; `onClose` appelé après chaque action
+  - [x] 2.2 **CRÉER** `frontend/src/components/graph/PaneContextMenu.tsx` — composant menu avec position absolue, même style que `NodeContextMenu.tsx` ; props : `{ top, left, onCreateNode, onAutoLayout, onClose }`
+  - [x] 2.3 Bouton "Nouveau nœud" : appelle `onCreateNode()` puis `onClose()`
+  - [x] 2.4 Bouton "Auto-layout" : appelle `onAutoLayout()` puis `onClose()`
 
-- [ ] Task 3 : Intégrer `onPaneContextMenu` dans `GraphCanvas.tsx` (AC: #3, #4, #5, #6)
-  - [ ] 3.1 (TDD) Test : `onPaneContextMenu` appelle `event.preventDefault()` et ouvre le pane menu avec les bonnes coordonnées ; `onPaneClick` ferme le menu pane ; `setMenu(null)` appelé sur pane click
-  - [ ] 3.2 **ÉTENDRE** `GraphCanvas.tsx` : ajouter `paneMenu` state distinct (`{ top, left, position: { x, y } } | null`) à côté du `menu` existant (nœud)
-  - [ ] 3.3 Ajouter handler `onPaneContextMenu` : `event.preventDefault()`, calculer `position` graphe via `screenToFlowPosition({ x: event.clientX, y: event.clientY })`, stocker dans `paneMenu`
-  - [ ] 3.4 Rendre `<PaneContextMenu>` quand `paneMenu !== null` ; passer `onCreateNode={() => { createEmptyNode(paneMenu.position); setPaneMenu(null) }}` et `onAutoLayout={() => { applyAutoLayout('TB', 'dagre'); setPaneMenu(null) }}`
-  - [ ] 3.5 S'assurer que `onPaneClick` ferme aussi `paneMenu` (appel `setPaneMenu(null)`)
-  - [ ] 3.6 Fermer les deux menus (nœud et pane) sur `Escape` — étendre le `useEffect` ou `useKeyboardShortcuts` existant dans `GraphCanvas`
+- [x] Task 3 : Intégrer `onPaneContextMenu` dans `GraphCanvas.tsx` (AC: #3, #4, #5, #6)
+  - [x] 3.1 (TDD) Test : `onPaneContextMenu` appelle `event.preventDefault()` et ouvre le pane menu avec les bonnes coordonnées ; `onPaneClick` ferme le menu pane ; `setMenu(null)` appelé sur pane click
+  - [x] 3.2 **ÉTENDRE** `GraphCanvas.tsx` : ajouter `paneMenu` state distinct (`{ top, left, position: { x, y } } | null`) à côté du `menu` existant (nœud)
+  - [x] 3.3 Ajouter handler `onPaneContextMenu` : `event.preventDefault()`, calculer `position` graphe via `screenToFlowPosition({ x: event.clientX, y: event.clientY })`, stocker dans `paneMenu`
+  - [x] 3.4 Rendre `<PaneContextMenu>` quand `paneMenu !== null` ; passer `onCreateNode={() => { createEmptyNode(paneMenu.position); setPaneMenu(null) }}` et `onAutoLayout={() => { applyAutoLayout('TB', 'dagre'); setPaneMenu(null) }}`
+  - [x] 3.5 S'assurer que `onPaneClick` ferme aussi `paneMenu` (appel `setPaneMenu(null)`)
+  - [x] 3.6 Fermer les deux menus (nœud et pane) sur `Escape` — useEffect keydown dans `GraphCanvas`
 
-- [ ] Task 4 : Tests et régression (AC: tous)
-  - [ ] 4.1 Tests unitaires `NodeContextMenu` : présence de "Éditer", appel `setSelectedNode` + `onClose`
-  - [ ] 4.2 Tests unitaires `PaneContextMenu` : présence des deux options, callbacks corrects
-  - [ ] 4.3 Tests d'intégration `GraphCanvas` : `onPaneContextMenu` affiche le menu pane ; clic extérieur le ferme ; `onNodeContextMenu` toujours fonctionnel (non-régression)
-  - [ ] 4.4 Non-régression `NodeContextMenu` : options existantes (Générer, Voir le prompt, Dupliquer, Supprimer) toujours présentes après ajout de "Éditer"
+- [x] Task 4 : Tests et régression (AC: tous)
+  - [x] 4.1 Tests unitaires `NodeContextMenu` : présence de "Éditer", appel `setSelectedNode` + `onClose`
+  - [x] 4.2 Tests unitaires `PaneContextMenu` : présence des deux options, callbacks corrects
+  - [x] 4.3 Tests d'intégration `GraphCanvas` : `onPaneContextMenu` affiche le menu pane ; clic extérieur le ferme ; `onNodeContextMenu` toujours fonctionnel (non-régression)
+  - [x] 4.4 Non-régression `NodeContextMenu` : options existantes (Générer, Voir le prompt, Dupliquer, Supprimer) toujours présentes après ajout de "Éditer"
 
 ## Dev Notes
 
@@ -136,9 +136,35 @@ so that **je peux accéder rapidement aux opérations courantes (éditer, dupliq
 ## Dev Agent Record
 
 ### Agent Model Used
+claude-4.6-sonnet-medium-thinking — 2026-03-12
 
 ### Debug Log References
+Aucun blocage. `screenToFlowPosition` appelé via `reactFlowInstanceRef` (stocké dans `onInit`) pour éviter le problème de double contexte ReactFlowProvider (outer provider vs inner ReactFlow context).
 
 ### Completion Notes List
+- Task 1: Bouton "Éditer" ajouté dans `NodeContextMenu.tsx` en première position (avant "Générer"), appelle `setSelectedNode(id)` + `onClose()`. Tests TDD: `NodeContextMenu.test.tsx` (4 tests).
+- Task 2: `PaneContextMenu.tsx` créé avec boutons "Nouveau nœud" et "Auto-layout", style identique à `NodeContextMenu`. Tests TDD: `PaneContextMenu.test.tsx` (4 tests).
+- Task 3: `GraphCanvas.tsx` étendu — state `paneMenu`, handler `onPaneContextMenu` (preventDefault + position via `reactFlowInstanceRef.current.screenToFlowPosition`), `onPaneClick` étend fermeture à `paneMenu`, `useEffect` keydown pour Escape. Tests d'intégration: `GraphCanvas.paneContextMenu.test.tsx` (4 tests).
+- Task 4: Suite complète — 556 tests, 71 fichiers, 100% pass. Aucune régression.
+
+### Code Review Fixes (2026-03-13)
+- H1: `applyAutoLayout('TB', 'dagre')` → `applyAutoLayout('dagre', 'TB')` (ordre algorithm, direction).
+- H2: Type `contains()` : import React Flow `Node` renommé en `ReactFlowNode` ; cast `e.target as globalThis.Node` (DOM).
+- M1: Position pane : si `reactFlowInstanceRef.current` null → `position` undefined (plus de coordonnées écran).
+- M2: Test AC #6 Escape ferme le menu pane ajouté (`GraphCanvas.paneContextMenu.test.tsx`).
+- M3: Test AC #4 createEmptyNode avec position ajouté (nouveau nœud en store avec position x,y).
+- Correctif supplémentaire : appel `addNode(node)` après `createEmptyNode()` dans GraphCanvas (le nœud était créé mais pas ajouté au store).
 
 ### File List
+- `frontend/src/components/graph/NodeContextMenu.tsx` (modifié — ajout bouton "Éditer")
+- `frontend/src/components/graph/PaneContextMenu.tsx` (créé)
+- `frontend/src/components/graph/GraphCanvas.tsx` (modifié — paneMenu state, onPaneContextMenu, Escape handler, PaneContextMenu render, addNode, applyAutoLayout args, type Node, position fallback)
+- `frontend/src/__tests__/NodeContextMenu.test.tsx` (créé)
+- `frontend/src/__tests__/PaneContextMenu.test.tsx` (créé)
+- `frontend/src/__tests__/GraphCanvas.paneContextMenu.test.tsx` (créé)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (mis à jour → review)
+- `_bmad-output/implementation-artifacts/2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33.md` (mis à jour)
+
+## Change Log
+- 2026-03-12: Implémentation story 2.12 — menu contextuel clic droit nœud (bouton "Éditer") + menu contextuel pane (Nouveau nœud, Auto-layout) + fermeture Escape. 12 nouveaux tests ajoutés.
+- 2026-03-13: Code review (AI) — correctifs H1/H2/M1–M3 appliqués + addNode manquant ; 2 tests ajoutés (Escape, createEmptyNode position). Status → done.

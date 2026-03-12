@@ -31,6 +31,11 @@ export function NodeContextMenu({
     onClose()
   }, [id, duplicateNode, onClose])
 
+  const handleEdit = useCallback(() => {
+    setSelectedNode(id)
+    onClose()
+  }, [id, setSelectedNode, onClose])
+
   const handleDelete = useCallback(() => {
     setSelectedNode(id)
     setShowDeleteNodeConfirm(true)
@@ -56,7 +61,7 @@ export function NodeContextMenu({
         left,
         ...(right !== undefined && { right }),
         ...(bottom !== undefined && { bottom }),
-        zIndex: 1000,
+        zIndex: 10001,
         backgroundColor: theme.background.panel,
         border: `1px solid ${theme.border.primary}`,
         borderRadius: '4px',
@@ -78,6 +83,37 @@ export function NodeContextMenu({
       >
         Nœud: {id.substring(0, 15)}{id.length > 15 ? '...' : ''}
       </div>
+
+      <button
+        type="button"
+        role="menuitem"
+        onClick={(e) => {
+          e.stopPropagation()
+          handleEdit()
+        }}
+        style={{
+          width: '100%',
+          padding: '8px 12px',
+          textAlign: 'left',
+          backgroundColor: 'transparent',
+          border: 'none',
+          color: theme.text.primary,
+          fontSize: '0.9rem',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = theme.state.hover.background
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+        }}
+      >
+        <span>✏️</span>
+        <span>Éditer</span>
+      </button>
 
       {isDialogueNode && (
         <>

@@ -9,7 +9,8 @@ import ReactFlow, {
   Controls,
   MiniMap,
   useReactFlow,
-  type Node,
+  type ReactFlowInstance,
+  type Node as ReactFlowNode,
   type NodeTypes,
   type Viewport,
 } from 'reactflow'
@@ -17,6 +18,7 @@ import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from './nodes'
 import { StableLabelSmoothStepEdge } from './edges/StableLabelSmoothStepEdge'
 import { NodeContextMenu } from './NodeContextMenu'
+import { PaneContextMenu } from './PaneContextMenu'
 import { EdgeLabelEditModal } from './EdgeLabelEditModal'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
@@ -140,6 +142,13 @@ export const GraphCanvas = memo(function GraphCanvas() {
     right?: number
     bottom?: number
   } | null>(null)
+  const [paneMenu, setPaneMenu] = useState<{
+    top: number
+    left: number
+    position: { x: number; y: number } | undefined
+  } | null>(null)
+  const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null)
+  const { createEmptyNode, addNode, applyAutoLayout } = useGraphStore()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -175,10 +184,11 @@ export const GraphCanvas = memo(function GraphCanvas() {
     if (top + menuHeight > window.innerHeight) top = window.innerHeight - menuHeight - padding
     if (left < padding) left = padding
     if (top < padding) top = padding
+    setPaneMenu(null)
     setMenu({ id: nodeId, top, left, right: undefined, bottom: undefined })
   }
 
-  const onNodeContextMenu = (event: React.MouseEvent, node: Node) => {
+  const onNodeContextMenu = (event: React.MouseEvent, node: ReactFlowNode) => {
     event.preventDefault()
     openContextMenu(node.id, event.clientX, event.clientY)
   }
@@ -194,9 +204,53 @@ export const GraphCanvas = memo(function GraphCanvas() {
     return () => window.removeEventListener('graph-node-contextmenu', handler)
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenu(null)
+        setPaneMenu(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as globalThis.Node)) {
+        setMenu(null)
+        setPaneMenu(null)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [])
+
+  const onPaneContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault()
+    const padding = 8
+    const menuWidth = 180
+    const menuHeight = 90
+    let left = event.clientX + padding
+    let top = event.clientY + padding
+    if (left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - padding
+    if (top + menuHeight > window.innerHeight) top = window.innerHeight - menuHeight - padding
+    if (left < padding) left = padding
+    if (top < padding) top = padding
+    const position = reactFlowInstanceRef.current
+      ? reactFlowInstanceRef.current.screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        })
+      : undefined
+    setMenu(null)
+    setPaneMenu({ top, left, position })
+  }
+
   const onPaneClick = () => {
     onPaneClickBase()
     setMenu(null)
+    setPaneMenu(null)
   }
 
   // Dériver nodes du store avec enrichissement (validation, highlight, sélection)
@@ -296,6 +350,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onlyRenderVisibleElements={true}
         onMove={onMove}
         onInit={(instance) => {
+          reactFlowInstanceRef.current = instance
           window.dispatchEvent(new CustomEvent('reactflow-instance-ready', { detail: instance }))
         }}
         onNodesChange={onNodesChange}
@@ -304,6 +359,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onNodeClick={onNodeClick}
         onNodeDoubleClick={onNodeDoubleClick}
         onNodeContextMenu={onNodeContextMenu}
+        onPaneContextMenu={onPaneContextMenu}
         onPaneClick={onPaneClick}
         onNodeDragStart={onNodeDragStart}
         onNodeDragStop={onNodeDragStop}
@@ -351,8 +407,24 @@ export const GraphCanvas = memo(function GraphCanvas() {
           }}
           maskColor={`${theme.background.panel}80`}
         />
-        {menu && <NodeContextMenu {...menu} onClose={() => setMenu(null)} />}
       </ReactFlow>
+      {menu && <NodeContextMenu {...menu} onClose={() => setMenu(null)} />}
+      {paneMenu && (
+        <PaneContextMenu
+          top={paneMenu.top}
+          left={paneMenu.left}
+          onCreateNode={() => {
+            const node = createEmptyNode(paneMenu.position ?? undefined)
+            addNode(node)
+            setPaneMenu(null)
+          }}
+          onAutoLayout={() => {
+            applyAutoLayout('dagre', 'TB')
+            setPaneMenu(null)
+          }}
+          onClose={() => setPaneMenu(null)}
+        />
+      )}
       <EdgeLabelEditModal
         isOpen={edgeLabelEdit != null}
         initialValue={edgeLabelEdit?.initialText ?? ''}

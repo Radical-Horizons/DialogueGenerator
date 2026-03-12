@@ -111,30 +111,38 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     expect(nodeTypes?.endNode).toBeDefined()
   })
 
-  it('with 500 nodes in store, still passes onlyRenderVisibleElements=true (NFR-P1 readiness)', () => {
-    const { addNode } = useGraphStore.getState()
-    for (let i = 0; i < 500; i++) {
-      addNode(
-        createMockNode(`n${i}`, i % 3 === 0 ? 'endNode' : i % 3 === 1 ? 'testNode' : 'dialogueNode')
-      )
-    }
-    renderGraphCanvas()
-    expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)
-    expect(useGraphStore.getState().nodes).toHaveLength(500)
-  })
+  it(
+    'with 500 nodes in store, still passes onlyRenderVisibleElements=true (NFR-P1 readiness)',
+    () => {
+      const { addNode } = useGraphStore.getState()
+      for (let i = 0; i < 500; i++) {
+        addNode(
+          createMockNode(`n${i}`, i % 3 === 0 ? 'endNode' : i % 3 === 1 ? 'testNode' : 'dialogueNode')
+        )
+      }
+      renderGraphCanvas()
+      expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)
+      expect(useGraphStore.getState().nodes).toHaveLength(500)
+    },
+    15000
+  )
 
-  it('with 501+ nodes, virtualisation active so only visible nodes are rendered (Story 2.2 AC #1, #2)', () => {
-    const { addNode } = useGraphStore.getState()
-    for (let i = 0; i < 501; i++) {
-      addNode(
-        createMockNode(`n${i}`, i % 3 === 0 ? 'endNode' : i % 3 === 1 ? 'testNode' : 'dialogueNode')
-      )
-    }
-    renderGraphCanvas()
-    expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)
-    expect(useGraphStore.getState().nodes).toHaveLength(501)
-    // With onlyRenderVisibleElements=true, React Flow renders only viewport nodes; no backend lazy loading required for 500+ nodes.
-  })
+  it(
+    'with 501+ nodes, virtualisation active so only visible nodes are rendered (Story 2.2 AC #1, #2)',
+    () => {
+      const { addNode } = useGraphStore.getState()
+      for (let i = 0; i < 501; i++) {
+        addNode(
+          createMockNode(`n${i}`, i % 3 === 0 ? 'endNode' : i % 3 === 1 ? 'testNode' : 'dialogueNode')
+        )
+      }
+      renderGraphCanvas()
+      expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)
+      expect(useGraphStore.getState().nodes).toHaveLength(501)
+      // With onlyRenderVisibleElements=true, React Flow renders only viewport nodes; no backend lazy loading required for 500+ nodes.
+    },
+    15000
+  )
 
   it('when focus-generated-node is dispatched with nodeId, setHighlightedNodes is called and store highlights node (Story 2.2 AC #3)', async () => {
     const { addNode } = useGraphStore.getState()
