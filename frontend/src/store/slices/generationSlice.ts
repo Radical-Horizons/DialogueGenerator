@@ -272,11 +272,35 @@ export const createGenerationSlice: StateCreator<
         get().connectNodes(conn.from, conn.to, conn.via_choice_index, conn.connection_type)
       }
 
+      // Comportement déterministe : l'utilisateur a choisi un choix (ex. "Choix #3") puis demandé
+      // à l'IA de générer un nœud. La liaison parent→nouveau nœud via ce choix n'est pas un
+      // "suggestion" backend : on la fait toujours côté front, sans se reposer sur suggested_connections.
+      const singleChoiceGeneration =
+        !isBatch &&
+        !isTestNode &&
+        typeof targetChoiceIndex === 'number' &&
+        generatedNodeIds.length === 1
+      if (singleChoiceGeneration) {
+        const firstId = generatedNodeIds[0]
+        if (firstId) {
+          get().connectNodes(parentNodeId, firstId, targetChoiceIndex, 'choice')
+        }
+      }
+
       const stateAfterConnections = get()
       const normalized = normalizeTestBars(
         stateAfterConnections.nodes,
         stateAfterConnections.edges
       )
+      const isDocumentSoT =
+        stateAfterConnections.document != null && stateAfterConnections.layout != null
+      const docAndLayout = isDocumentSoT
+        ? syncDocAndLayout(
+            normalized.nodes,
+            normalized.edges,
+            stateAfterConnections.layout as Record<string, unknown>
+          )
+        : null
       set({
         nodes: normalized.nodes,
         edges: normalized.edges,
@@ -285,6 +309,10 @@ export const createGenerationSlice: StateCreator<
           node_count: normalized.nodes.length,
           edge_count: normalized.edges.length,
         },
+        ...(docAndLayout != null && {
+          document: docAndLayout.document,
+          layout: docAndLayout.layout,
+        }),
       })
 
       set({ isGenerating: false })

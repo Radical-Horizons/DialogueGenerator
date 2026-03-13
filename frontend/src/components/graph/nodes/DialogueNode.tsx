@@ -46,12 +46,22 @@ interface DialogueNodeData {
   [key: string]: unknown
 }
 
+// Zones de layout fixes pour éviter toute superposition (handles, lien prompt, tooltip)
+const NODE_WIDTH = 280
+const HEADER_HEIGHT_APPROX = 36
+const BOTTOM_ZONE_HANDLES_PX = 24 // 0–24px : ronds oranges ou handle unique
+const BOTTOM_ZONE_LINK_PX = 28 // au-dessus : "Voir le prompt" (28px depuis le bas)
+const BOTTOM_RESERVED_WITH_CHOICES = 52 // hasChoices : handles + lien
+const BOTTOM_RESERVED_SINGLE = 28 // pas de choix : handle + lien
+const CHOICE_TOOLTIP_BOTTOM_PX = 56 // tooltip au survol d’un choix au-dessus du lien
+const PENDING_BUTTONS_TOP_PX = 34
+const PENDING_BUTTONS_HEIGHT_PX = 28
+const CONTENT_PADDING_TOP_WHEN_PENDING = 32 // pour ne pas passer sous Accepter/Régénérer/Rejeter
+
 export const DialogueNode = memo(function DialogueNode({
   data,
   selected,
 }: NodeProps<DialogueNodeData>) {
-  const NODE_WIDTH = 280
-
   const speaker = data.speaker || 'PNJ'
   const line = data.line || ''
   const choices = data.choices || []
@@ -64,6 +74,7 @@ export const DialogueNode = memo(function DialogueNode({
   const nodeStatus = data.status  // "pending" | "accepted" | undefined
   const isPending = nodeStatus === "pending"
   const isAccepted = nodeStatus === "accepted"
+  const tag = (data.tag as string) || undefined
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
   
@@ -221,7 +232,7 @@ export const DialogueNode = memo(function DialogueNode({
       data-status={nodeStatus ?? undefined}
       style={{
         width: NODE_WIDTH,
-        minHeight: 100,
+        minHeight: 120,
         maxHeight: 500,
         border: `2px ${borderStyle} ${borderColor}`,
         borderRadius: 8,
@@ -241,6 +252,31 @@ export const DialogueNode = memo(function DialogueNode({
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
+      {/* Badge tag (Story 2.11 FR32) */}
+      {tag && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 4,
+            left: 4,
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontSize: '0.7rem',
+            fontWeight: 600,
+            backgroundColor: theme.background.primary,
+            color: theme.text.secondary,
+            border: `1px solid ${theme.border.primary}`,
+            zIndex: 10,
+            maxWidth: NODE_WIDTH - 32,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={tag}
+        >
+          {tag}
+        </div>
+      )}
       {/* Badge d'erreur */}
       {hasErrors && (
         <div
@@ -341,30 +377,34 @@ export const DialogueNode = memo(function DialogueNode({
         </span>
       </div>
       
-      {/* Contenu (dialogue) */}
-      {line && (
-        <div
-          style={{
-            padding: '12px',
-            paddingBottom: hasChoices ? '28px' : '12px', // Espace pour les ronds oranges si des choix existent
-            fontSize: '0.9rem',
-            lineHeight: 1.4,
-            color: theme.text.primary,
-            whiteSpace: 'pre-wrap',
-            wordWrap: 'break-word',
-          }}
-        >
-          {truncatedLine}
-        </div>
-      )}
+      {/* Contenu (dialogue) — padding bas réservé pour handles + "Voir le prompt" */}
+      <div
+        style={{
+          padding: '12px',
+          paddingTop:
+            isPending && (isHovered || selected)
+              ? CONTENT_PADDING_TOP_WHEN_PENDING
+              : 12,
+          paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
+          fontSize: '0.9rem',
+          lineHeight: 1.4,
+          color: theme.text.primary,
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+          flex: '1 1 auto',
+          minHeight: 0,
+        }}
+      >
+        {line ? truncatedLine : null}
+      </div>
       
-      {/* Tooltip au survol d'un rond orange (réponse associée) */}
+      {/* Tooltip au survol d'un rond orange (réponse associée) — au-dessus du lien "Voir le prompt" */}
       {hasChoices && hoveredChoiceIndex !== null && choices[hoveredChoiceIndex] && (
         <div
           style={{
             position: 'absolute',
             left: `${getChoiceHandleLeftPercent(hoveredChoiceIndex)}%`,
-            bottom: 34,
+            bottom: CHOICE_TOOLTIP_BOTTOM_PX,
             transform: 'translateX(-50%)',
             backgroundColor: theme.background.secondary,
             border: '1px solid #F5A623',
@@ -540,14 +580,14 @@ export const DialogueNode = memo(function DialogueNode({
         </>
       )}
 
-      {/* Voir le prompt (Story 1.14) — visible au survol ou sélection pour tout nœud */}
+      {/* Voir le prompt (Story 1.14) — zone dédiée au-dessus des handles, jamais superposé */}
       {(isHovered || selected) && (
         <button
           type="button"
           onClick={handleOpenPromptModal}
           style={{
             position: 'absolute',
-            bottom: 8,
+            bottom: BOTTOM_ZONE_LINK_PX,
             left: 8,
             padding: '0.25rem 0.5rem',
             backgroundColor: 'transparent',

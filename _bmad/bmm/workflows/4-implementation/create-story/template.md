@@ -16,25 +16,37 @@ so that {{benefit}}.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 (AC: #)
-  - [ ] Subtask 1.1
-- [ ] Task 2 (AC: #)
-  - [ ] Subtask 2.1
+<!-- Each task = one independently testable behavior (SM territory: WHAT, not HOW).
+     Dev Notes contains WHERE/HOW context. Implementation details are the dev's job. -->
+
+- [ ] Task 1 : [Behavior description] (AC: #)
+  - [ ] 🔴 Test échoue : [behavioral assertion — observable outcome, not implementation detail]
+  - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
+  - [ ] 🔵 Refactor : [specific named opportunity + condition] ; sinon no-op
+
+- [ ] Task 2 : [Behavior description] (AC: #)
+  - [ ] 🔴 Test échoue : [behavioral assertion]
+  - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
+  - [ ] 🔵 Refactor : [specific named opportunity + condition] ; sinon no-op
 
 ## Dev Notes
 
-- Relevant architecture patterns and constraints
-- Source tree components to touch
-- Testing standards summary
+<!-- Constraints and context only — NOT implementation steps or prescription.
+     DO: guardrails, what to reuse, quality bar (what to test), conventions.
+     DO NOT: exhaustive file/method lists, step-by-step "create this" instructions. -->
+
+- Architecture guardrails : what must not be violated, ADRs applicable
+- What to reuse : existing components, actions, or endpoints (brief; key references only, not an exhaustive list)
+- Quality bar : what behaviors must be covered by tests (outcomes), not how to write them
+- Conventions : naming, where similar code lives, constraints (e.g. persist via existing save)
 
 ### Project Structure Notes
 
-- Alignment with unified project structure (paths, modules, naming)
-- Detected conflicts or variances (with rationale)
+- Relevant paths or modules only when it avoids wrong locations; naming conventions; detected conflicts or variances (with rationale)
 
 ### References
 
-- Cite all technical details with source paths and sections, e.g. [Source: docs/<file>.md#Section]
+- Cite key sources with paths/sections where they add real context, e.g. [Source: docs/<file>.md#Section]. Prefer few precise refs over long lists.
 
 ## Dev Agent Record
 

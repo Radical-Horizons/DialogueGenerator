@@ -177,6 +177,7 @@ You will systematically re-do the entire story creation process, but with a crit
 - **Context overload:** Too much information not directly relevant to implementation
 - **Missing critical signals:** Key requirements buried in verbose text
 - **Poor structure:** Information not organized for efficient LLM processing
+- **Dev Notes over-prescription:** Dev Notes should be constraints and context (guardrails, what to reuse, quality bar), not implementation prescription — flag if they list every file/method or read like a step-by-step implementation spec
 
 **Apply LLM Optimization Principles:**
 
@@ -203,7 +204,7 @@ You will systematically re-do the entire story creation process, but with a crit
 - More detailed technical specifications
 - Better code reuse opportunities
 - Enhanced testing guidance
-- **TDD in tasks:** Tasks/Subtasks should integrate test-then-implement per item (no single "Phase: testing" or "Write tests" task at the end)
+- **TDD in tasks:** Every task must have exactly 3 subtasks in order — 🔴 (failing behavioral test), 🟢 (component/area to implement, not the how), 🔵 (named refactor opportunity or explicit no-op). No separate "Phase: testing" task at the end. Tasks defined at behavior level, not implementation-step level.
 
 #### **5.3 Optimization Suggestions (Nice to Have)**
 
@@ -217,6 +218,7 @@ You will systematically re-do the entire story creation process, but with a crit
 - Clearer structure for LLM processing
 - More actionable and direct instructions
 - Reduced verbosity while maintaining completeness
+- **Dev Notes:** If Dev Notes are over-prescriptive (exhaustive file/method lists, "create X" steps), suggest rewriting as constraints and key references only; implementation details remain the dev's responsibility
 
 ---
 

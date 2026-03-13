@@ -25,6 +25,7 @@ vi.mock('../components/usage/DialogueCostBreakdown', () => ({
 vi.mock('../components/shared', () => ({
   useToast: () => vi.fn(),
   SaveStatusIndicator: () => React.createElement('div', { 'data-testid': 'save-status-indicator' }),
+  ConfirmDialog: () => null,
 }))
 
 vi.mock('../utils/graphExport', () => ({

@@ -78,22 +78,22 @@ development_status:
   1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79: done
   1-17-adr-007-react-flow-controlled: done
   epic-1-retrospective: done
-  epic-2: backlog
-  2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: backlog
-  2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: backlog
-  2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: backlog
-  2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: backlog
-  2-5-créer-connexions-entre-nœuds-manuellement-fr26: backlog
-  2-6-supprimer-connexions-entre-nœuds-fr27: backlog
-  2-7-rechercher-nœuds-par-contenu-texte-ou-nom-speaker-fr28: backlog
-  2-8-jump-to-nœud-spécifique-par-id-ou-nom-fr29: backlog
-  2-9-filtrer-vue-graphe-show-hide-types-nœuds-speakers-fr30: backlog
-  2-10-sélection-multiple-nœuds-shift-click-lasso-selection-fr31: backlog
-  2-11-appliquer-opérations-à-nœuds-sélectionnés-delete-tag-validate-fr32: backlog
-  2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: backlog
-  2-13-auto-layout-graphe-pour-lisibilité-fr34: backlog
-  2-14-undo-redo-opérations-graphe-fr35: backlog
-  epic-2-retrospective: optional
+  epic-2: in-progress
+  2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: done
+  2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: done
+  2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: done
+  2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: done
+  2-5-créer-connexions-entre-nœuds-manuellement-fr26: done
+  2-6-supprimer-connexions-entre-nœuds-fr27: done
+  2-7-rechercher-nœuds-par-contenu-texte-ou-nom-speaker-fr28: done
+  2-8-jump-to-nœud-spécifique-par-id-ou-nom-fr29: done
+  2-9-filtrer-vue-graphe-show-hide-types-nœuds-speakers-fr30: done
+  2-10-sélection-multiple-nœuds-shift-click-lasso-selection-fr31: done
+  2-11-appliquer-opérations-à-nœuds-sélectionnés-delete-tag-validate-fr32: done
+  2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: done
+  2-13-auto-layout-graphe-pour-lisibilité-fr34: done
+  2-14-undo-redo-opérations-graphe-fr35: done
+  epic-2-retrospective: done
   epic-3: backlog
   3-1-parcourir-entités-gdd-disponibles-personnages-lieux-régions-thèmes-fr11: backlog
   3-2-sélectionner-manuellement-contexte-gdd-pertinent-fr12: backlog

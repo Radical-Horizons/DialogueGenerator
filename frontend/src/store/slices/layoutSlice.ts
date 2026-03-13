@@ -1,5 +1,5 @@
 /**
- * Slice layout du store graphe : applyAutoLayout, updateNodePosition, updateNodeDimensions.
+ * Slice layout du store graphe : applyAutoLayout, updateNodePosition, updateNodeDimensions, updateNodeDimensionsBatch.
  */
 import type { StateCreator } from 'zustand'
 import type { Node } from 'reactflow'
@@ -11,7 +11,7 @@ import { normalizeTestBars } from '../../utils/graphNormalizers'
 
 export type LayoutSlice = Pick<
   GraphState,
-  'applyAutoLayout' | 'updateNodePosition' | 'updateNodeDimensions'
+  'applyAutoLayout' | 'updateNodePosition' | 'updateNodeDimensions' | 'updateNodeDimensionsBatch'
 >
 
 export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = (set, get) => ({
@@ -25,6 +25,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
           direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
         })
         set({ nodes: layoutedNodes })
+        get().markDirty()
         return
       }
 
@@ -54,19 +55,29 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
           return layoutedNode ? { ...node, position: layoutedNode.position } : node
         }),
       }))
+      get().markDirty()
     } catch (error) {
       console.error('Erreur lors du calcul de layout:', error)
       throw error
     }
   },
 
-  updateNodePosition: (nodeId: string, position: { x: number; y: number }) => {
+  updateNodePosition: (
+    nodeId: string,
+    position: { x: number; y: number },
+    skipMarkDirty?: boolean,
+    pushUndoSnapshot?: boolean
+  ) => {
+    if (pushUndoSnapshot) get()._pushUndoSnapshot()
     const state = get()
     const node = state.nodes.find((n) => n.id === nodeId)
     const positionChanged =
       !node ||
       Math.abs(node.position.x - position.x) > 0.1 ||
       Math.abs(node.position.y - position.y) > 0.1
+
+    // Guard: skip store update entirely if position hasn't changed to prevent StoreUpdater loops.
+    if (!positionChanged) return
 
     // Mode document SoT : mettre à jour le layout (pas le document) puis recalculer la projection
     if (state.document != null && state.layout != null) {
@@ -87,10 +98,17 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       const edgesUnchanged =
         state.edges.length === normalized.edges.length &&
         state.edges.every((e) => newIds.has(e.id))
-      const edgesToSet = edgesUnchanged ? state.edges : normalized.edges
+      // Ne jamais remplacer par une projection qui a moins d'edges : évite de perdre une connexion
+      // venant d'une génération IA (race : updateNodePosition/dimensions après set() génération).
+      const edgesToSet =
+        edgesUnchanged
+          ? state.edges
+          : normalized.edges.length >= state.edges.length
+            ? normalized.edges
+            : state.edges
 
       set({ layout: newLayout, nodes: normalized.nodes, edges: edgesToSet })
-      if (positionChanged) get().markDirty()
+      if (!skipMarkDirty) get().markDirty()
       return
     }
 
@@ -98,7 +116,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
     set({
       nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
     })
-    if (positionChanged) {
+    if (!skipMarkDirty) {
       get().markDirty()
       const filename = state.dialogueMetadata.filename
       if (filename) {
@@ -136,6 +154,34 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
             : node
         ),
       }
+    })
+  },
+
+  updateNodeDimensionsBatch: (updates) => {
+    if (Object.keys(updates).length === 0) return
+    set((state) => {
+      const nodeIds = new Set(Object.keys(updates))
+      let hasChange = false
+      const nextNodes = state.nodes.map((node) => {
+        const dims = updates[node.id]
+        if (!dims) return node
+        const currentMeasured = (
+          node as Node & { measured?: { width?: number; height?: number } }
+        ).measured as { width?: number; height?: number } | undefined
+        const currentWidth = currentMeasured?.width ?? node.width
+        const currentHeight = currentMeasured?.height ?? node.height
+        const widthChanged = Math.abs((currentWidth ?? 0) - dims.width) > 0.1
+        const heightChanged = Math.abs((currentHeight ?? 0) - dims.height) > 0.1
+        if (!widthChanged && !heightChanged) return node
+        hasChange = true
+        return {
+          ...node,
+          measured: { width: dims.width, height: dims.height },
+          width: dims.width,
+          height: dims.height,
+        }
+      })
+      return hasChange ? { nodes: nextNodes } : state
     })
   },
 })

@@ -100,6 +100,7 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
     markerStart,
     pathOptions,
     interactionWidth,
+    data,
   } = props
 
   const [path, labelX, labelY] = getSmoothStepPath({
@@ -123,7 +124,20 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
         interactionWidth={interactionWidth}
       />
       {label != null && (
-        <g transform={`translate(${labelX}, ${labelY})`}>
+        <g
+          transform={`translate(${labelX}, ${labelY})`}
+          onDoubleClick={(e) => {
+            if ((data as { edgeType?: string })?.edgeType !== 'choice') return
+            e.preventDefault()
+            e.stopPropagation()
+            window.dispatchEvent(
+              new CustomEvent('edge-label-edit', { detail: { edgeId: id } })
+            )
+          }}
+          style={{
+            cursor: (data as { edgeType?: string })?.edgeType === 'choice' ? 'pointer' : undefined,
+          }}
+        >
           <MemoizedLabelContent
             label={label}
             labelStyle={labelStyle}

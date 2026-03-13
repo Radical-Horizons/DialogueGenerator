@@ -98,6 +98,7 @@ export const createPersistenceSlice: StateCreator<
         },
         isLoading: false,
         validationErrors: [],
+        highlightedNodeIds: [],
         highlightedCycleNodes: [],
         hasUnsavedChanges: false,
         lastSaveError: null,
@@ -105,6 +106,8 @@ export const createPersistenceSlice: StateCreator<
         documentId: filename ?? null,
         syncStatus: 'synced',
         lastAckSeq: null,
+        undoStack: [],
+        redoStack: [],
       })
     } catch (error) {
       console.error('Erreur lors du chargement du graphe:', error)
@@ -154,11 +157,15 @@ export const createPersistenceSlice: StateCreator<
         documentId,
         isLoading: false,
         validationErrors: [],
+        highlightedNodeIds: [],
+        highlightedCycleNodes: [],
         hasUnsavedChanges: false,
         lastSaveError: null,
         lastSavedAt: null,
         syncStatus: 'synced',
         lastAckSeq: null,
+        undoStack: [],
+        redoStack: [],
       })
     } catch (error: unknown) {
       console.error('Erreur chargement document:', error)

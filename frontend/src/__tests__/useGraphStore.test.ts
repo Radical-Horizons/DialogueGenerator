@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '../store/graphStore'
 import type { Node } from 'reactflow'
+import * as graphAPI from '../api/graph'
 
 // Mock graphAPI
 vi.mock('../api/graph', () => ({
@@ -260,6 +261,81 @@ describe('useGraphStore - Pending save state', () => {
       expect(state.hasUnsavedChanges).toBe(true)
     })
 
+    it('connectNodes with source, target, choiceIndex, connectionType adds choice edge and marks dirty (Story 2.5 AC #2, #3)', () => {
+      const { addNode, connectNodes } = useGraphStore.getState()
+      const node1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { choices: [{ text: 'Choix A', choiceId: 'c1' }] },
+      }
+      const node2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(node1)
+      addNode(node2)
+      connectNodes('n1', 'n2', 0, 'choice')
+      const state = useGraphStore.getState()
+      expect(state.edges).toHaveLength(1)
+      expect(state.edges[0].source).toBe('n1')
+      expect(state.edges[0].target).toBe('n2')
+      expect(state.hasUnsavedChanges).toBe(true)
+    })
+
+    it('updateChoiceEdgeLabel updates choice text, edge label, and marks dirty (Story 2.5 AC #4)', () => {
+      const { addNode, connectNodes, updateChoiceEdgeLabel } = useGraphStore.getState()
+      const node1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { choices: [{ text: 'Accepter', choiceId: 'c1' }] },
+      }
+      const node2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(node1)
+      addNode(node2)
+      connectNodes('n1', 'n2', 0, 'choice')
+      const edge = useGraphStore.getState().edges[0]
+      expect(edge.label).toBe('Accepter')
+      updateChoiceEdgeLabel(edge.id, 'Refuser')
+      const state = useGraphStore.getState()
+      const src = state.nodes.find((n) => n.id === 'n1')
+      expect((src?.data?.choices as { text?: string }[])?.[0]?.text).toBe('Refuser')
+      expect(state.edges[0].label).toBe('Refuser')
+      expect(state.hasUnsavedChanges).toBe(true)
+    })
+
+    it('creating connection that forms cycle: validateGraph returns cycle_detected warning, edge remains (Story 2.5 AC #5)', async () => {
+      vi.mocked(graphAPI.validateGraph).mockResolvedValueOnce({
+        errors: [],
+        warnings: [
+          {
+            type: 'cycle_detected',
+            cycle_id: 'cycle_1',
+            cycle_path: 'A → B → C → A',
+            cycle_nodes: ['a', 'b', 'c'],
+            message: 'Cycle détecté : A → B → C → A',
+            severity: 'warning',
+          },
+        ],
+        valid: true,
+      })
+      const { addNode, connectNodes, validateGraph } = useGraphStore.getState()
+      const a: Node = { id: 'a', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
+      const b: Node = { id: 'b', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      const c: Node = { id: 'c', type: 'dialogueNode', position: { x: 200, y: 0 }, data: {} }
+      addNode(a)
+      addNode(b)
+      addNode(c)
+      connectNodes('a', 'b')
+      connectNodes('b', 'c')
+      connectNodes('c', 'a')
+      expect(useGraphStore.getState().edges).toHaveLength(3)
+      await validateGraph()
+      const state = useGraphStore.getState()
+      expect(state.edges).toHaveLength(3)
+      const cycleWarn = state.validationErrors.find((e) => e.type === 'cycle_detected')
+      expect(cycleWarn).toBeDefined()
+      expect(cycleWarn?.message).toContain('Cycle détecté')
+    })
+
     it('should mark dirty when disconnectNodes is called', () => {
       const { addNode, connectNodes, disconnectNodes } = useGraphStore.getState()
       const node1: Node = { id: 'node-1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
@@ -274,6 +350,30 @@ describe('useGraphStore - Pending save state', () => {
       }
       const state = useGraphStore.getState()
       expect(state.hasUnsavedChanges).toBe(true)
+    })
+
+    it('disconnectNodes on choice edge clears source choice targetNode (store consistency)', () => {
+      const { addNode, connectNodes, disconnectNodes } = useGraphStore.getState()
+      const node1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { choices: [{ text: 'Choix A', choiceId: 'c1' }] },
+      }
+      const node2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(node1)
+      addNode(node2)
+      connectNodes('n1', 'n2', 0, 'choice')
+      let state = useGraphStore.getState()
+      const edge = state.edges.find((e) => e.source === 'n1' && e.target === 'n2')
+      expect(edge).toBeDefined()
+      const parent = state.nodes.find((n) => n.id === 'n1')
+      expect((parent?.data?.choices as { targetNode?: string }[])?.[0]?.targetNode).toBe('n2')
+      disconnectNodes(edge!.id)
+      state = useGraphStore.getState()
+      const updatedParent = state.nodes.find((n) => n.id === 'n1')
+      expect(state.edges.some((e) => e.source === 'n1' && e.target === 'n2')).toBe(false)
+      expect((updatedParent?.data?.choices as { targetNode?: string }[])?.[0]?.targetNode).toBeUndefined()
     })
 
     it('should mark dirty when updateNodePosition is called', () => {
@@ -328,6 +428,43 @@ describe('useGraphStore - Pending save state', () => {
 
       // Vérifier que loadGraph a été appelé
       expect(mockLoadGraph).toHaveBeenCalledWith({ json_content: '{"id": "START"}' })
+    })
+  })
+
+  describe('Story 2.2 (AC #4): graph unload on dialogue change', () => {
+    it('after loadDialogue(B), state nodes/edges match B only; no leak of previous graph', async () => {
+      const graphAPI = await import('../api/graph')
+      const mockLoadGraph = vi.mocked(graphAPI.loadGraph)
+      const dialogueA = {
+        nodes: [
+          { id: 'nA1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { speaker: 'A', line: 'A1' } },
+          { id: 'nA2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { speaker: 'A', line: 'A2' } },
+        ],
+        edges: [{ id: 'eA1', source: 'nA1', target: 'nA2' }],
+        metadata: { title: 'Dialogue A', node_count: 2, edge_count: 1, filename: 'a.json' },
+      }
+      const dialogueB = {
+        nodes: [
+          { id: 'nB1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { speaker: 'B', line: 'B1' } },
+          { id: 'nB2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { speaker: 'B', line: 'B2' } },
+        ],
+        edges: [{ id: 'eB1', source: 'nB1', target: 'nB2' }],
+        metadata: { title: 'Dialogue B', node_count: 2, edge_count: 1, filename: 'b.json' },
+      }
+      mockLoadGraph
+        .mockResolvedValueOnce(dialogueA as Awaited<ReturnType<typeof graphAPI.loadGraph>>)
+        .mockResolvedValueOnce(dialogueB as Awaited<ReturnType<typeof graphAPI.loadGraph>>)
+      const { loadDialogue } = useGraphStore.getState()
+      await loadDialogue('{"dialogue":"A"}')
+      let state = useGraphStore.getState()
+      expect(state.nodes.map((n) => n.id)).toEqual(expect.arrayContaining(['nA1', 'nA2']))
+      expect(state.edges.some((e) => e.source === 'nA1' && e.target === 'nA2')).toBe(true)
+      await loadDialogue('{"dialogue":"B"}')
+      state = useGraphStore.getState()
+      expect(state.nodes.map((n) => n.id)).toEqual(expect.arrayContaining(['nB1', 'nB2']))
+      expect(state.nodes.some((n) => n.id === 'nA1' || n.id === 'nA2')).toBe(false)
+      expect(state.edges.some((e) => e.source === 'nB1' && e.target === 'nB2')).toBe(true)
+      expect(state.edges.some((e) => e.source === 'nA1')).toBe(false)
     })
   })
 

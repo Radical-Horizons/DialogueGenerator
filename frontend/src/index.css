@@ -106,3 +106,13 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+/* React Flow: sélection multiple type Photoshop (pointillés blancs, sans fond) */
+.react-flow {
+  --xy-selection-background-color-default: transparent;
+  --xy-selection-border-default: 2px dashed rgba(255, 255, 255, 0.9);
+}
+.react-flow .react-flow__selection {
+  background: transparent !important;
+  border: 2px dashed rgba(255, 255, 255, 0.9) !important;
+}
+

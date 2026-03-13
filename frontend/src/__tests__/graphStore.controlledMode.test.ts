@@ -90,6 +90,44 @@ describe('graphStore - Controlled mode (ADR-007)', () => {
       const node = state.nodes.find((n) => n.id === 'n1')
       expect(node?.position).toEqual({ x: 50, y: 60 })
     })
+
+    it('group drag: batch updateNodePosition with skipMarkDirty then markDirty once (Story 2.10)', () => {
+      const { addNode, updateNodePosition, setSelectedNodes, markDirty } =
+        useGraphStore.getState()
+      addNode({ id: 'g1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} })
+      addNode({ id: 'g2', type: 'dialogueNode', position: { x: 50, y: 0 }, data: {} })
+      addNode({ id: 'g3', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} })
+      setSelectedNodes(['g1', 'g2', 'g3'])
+      const delta = { x: 100, y: 100 }
+      updateNodePosition('g1', { x: 0 + delta.x, y: 0 + delta.y }, true)
+      updateNodePosition('g2', { x: 50 + delta.x, y: 0 + delta.y }, true)
+      updateNodePosition('g3', { x: 100 + delta.x, y: 0 + delta.y }, true)
+      markDirty()
+      const state = useGraphStore.getState()
+      expect(state.nodes.find((n) => n.id === 'g1')?.position).toEqual({ x: 100, y: 100 })
+      expect(state.nodes.find((n) => n.id === 'g2')?.position).toEqual({ x: 150, y: 100 })
+      expect(state.nodes.find((n) => n.id === 'g3')?.position).toEqual({ x: 200, y: 100 })
+      expect(state.hasUnsavedChanges).toBe(true)
+    })
+
+    // Story 2.4 AC #1, #2: onNodeDragStop commits via updateNodePosition; markDirty triggers; auto-save chains
+    it('drag-stop flow: updateNodePosition commits position and triggers markDirty (GraphCanvas onNodeDragStop contract)', () => {
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      const n1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {},
+      }
+      addNode(n1)
+
+      // Simulate GraphCanvas onNodeDragStop: commit final position via updateNodePosition
+      updateNodePosition('n1', { x: 100, y: 200 })
+
+      const state = useGraphStore.getState()
+      expect(state.nodes.find((n) => n.id === 'n1')?.position).toEqual({ x: 100, y: 200 })
+      expect(state.hasUnsavedChanges).toBe(true)
+    })
   })
 
   describe('Selection updated in store (onNodesChange type select)', () => {
@@ -103,6 +141,22 @@ describe('graphStore - Controlled mode (ADR-007)', () => {
       expect(useGraphStore.getState().selectedNodeId).toBe('n1')
       setSelectedNode(null)
       expect(useGraphStore.getState().selectedNodeId).toBeNull()
+    })
+
+    it('updateNodePosition only replaces the updated node reference (Story 2.2 AC #5 - localized re-render)', () => {
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      const n1: Node = { id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
+      const n2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(n1)
+      addNode(n2)
+      const nodesBefore = useGraphStore.getState().nodes
+      updateNodePosition('n1', { x: 50, y: 50 })
+      const nodesAfter = useGraphStore.getState().nodes
+      expect(nodesAfter).not.toBe(nodesBefore)
+      const node1After = nodesAfter.find((n) => n.id === 'n1')
+      const node2After = nodesAfter.find((n) => n.id === 'n2')
+      expect(node1After?.position).toEqual({ x: 50, y: 50 })
+      expect(node2After).toBe(nodesBefore.find((n) => n.id === 'n2'))
     })
 
     it('onNodesChange([{ type: "select", id, selected }]) updates store (React Flow event shape)', () => {

@@ -27,6 +27,8 @@ export type NodeSlice = Pick<
   | 'createEmptyNode'
   | 'updateNode'
   | 'deleteNode'
+  | 'batchDeleteNodes'
+  | 'batchTagNodes'
   | 'duplicateNode'
   | 'duplicateNodes'
   | 'addToRegenerationHistory'
@@ -387,6 +389,7 @@ function updateDialogueNodeDirectly(
 
 export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set, get) => ({
   addNode: (node: Node) => {
+    get()._pushUndoSnapshot()
     const state = get()
     const newNodes = [...state.nodes, node]
     const normalized = normalizeTestBars(newNodes, state.edges)
@@ -428,7 +431,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     return node
   },
 
-  updateNode: (nodeId: string, updates: Partial<Node>) => {
+  updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty = false) => {
     set((state) => {
       const node = state.nodes.find((n) => n.id === nodeId)
       if (!node) return state
@@ -451,10 +454,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
       // Branche 3 : DialogueNode direct
       return updateDialogueNodeDirectly(nodeId, updates, state)
     })
-    get().markDirty()
+    if (!skipMarkDirty) get().markDirty()
   },
 
-  deleteNode: (nodeId: string) => {
+  deleteNode: (nodeId: string, skipMarkDirty = false, skipPushUndoSnapshot = false) => {
+    if (!skipPushUndoSnapshot) get()._pushUndoSnapshot()
     set((state) => {
       // TestNode : supprimer le test du choix parent
       if (nodeId.startsWith('test-node-') || nodeId.startsWith('test:')) {
@@ -491,6 +495,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           )
           const newSelectedNodeId =
             state.selectedNodeId === nodeId ? parent.dialogueNodeId : state.selectedNodeId
+          const isDocumentSoT = state.document != null && state.layout != null
+          const docAndLayout =
+            isDocumentSoT
+              ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
+              : {}
 
           return {
             nodes: newNodes,
@@ -501,6 +510,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
               node_count: newNodes.length,
               edge_count: newEdges.length,
             },
+            ...docAndLayout,
           }
         }
 
@@ -509,6 +519,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         const newEdges = state.edges.filter(
           (e) => e.source !== nodeId && e.target !== nodeId
         )
+        const isDocumentSoT = state.document != null && state.layout != null
+        const docAndLayout =
+          isDocumentSoT
+            ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
+            : {}
         return {
           nodes: newNodes,
           edges: newEdges,
@@ -518,6 +533,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
             node_count: newNodes.length,
             edge_count: newEdges.length,
           },
+          ...docAndLayout,
         }
       }
 
@@ -612,6 +628,11 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         (e) => !nodesToDelete.includes(e.source) && !nodesToDelete.includes(e.target)
       )
       const selectedNodeToRemove = nodesToDelete.includes(state.selectedNodeId || '')
+      const isDocumentSoT = state.document != null && state.layout != null
+      const docAndLayout =
+        isDocumentSoT
+          ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
+          : {}
 
       return {
         nodes: newNodes,
@@ -622,9 +643,49 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           node_count: newNodes.length,
           edge_count: newEdges.length,
         },
+        ...docAndLayout,
       }
     })
-    get().markDirty()
+    if (!skipMarkDirty) get().markDirty()
+  },
+
+  batchDeleteNodes: (nodeIds: string[]) => {
+    const deleted: string[] = []
+    const failed: Array<{ id: string; reason?: string }> = []
+    let state = get()
+    const toDelete = nodeIds.filter((id) => state.nodes.some((n) => n.id === id))
+    if (toDelete.length > 0) get()._pushUndoSnapshot()
+    for (const id of nodeIds) {
+      if (!state.nodes.some((n) => n.id === id)) {
+        failed.push({ id, reason: 'nœud introuvable' })
+        continue
+      }
+      try {
+        get().deleteNode(id, true, true)
+        deleted.push(id)
+      } catch (err) {
+        failed.push({
+          id,
+          reason: err instanceof Error ? err.message : String(err),
+        })
+      }
+      state = get()
+    }
+    if (deleted.length > 0) get().markDirty()
+    return { deleted, failed }
+  },
+
+  batchTagNodes: (nodeIds: string[], tag: string) => {
+    const state = get()
+    let updatedCount = 0
+    for (const nodeId of nodeIds) {
+      const node = state.nodes.find((n) => n.id === nodeId)
+      if (!node) continue
+      const currentData = (node.data ?? {}) as Record<string, unknown>
+      get().updateNode(nodeId, { data: { ...currentData, tag } }, true)
+      updatedCount += 1
+    }
+    if (updatedCount > 0) get().markDirty()
   },
 
   duplicateNode: (nodeId: string) => {

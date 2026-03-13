@@ -183,12 +183,13 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const state = useGraphStore.getState()
       const prevNode = state.nodes.find((n) => n.id === prevId)
       if (prevNode?.data) {
-        updateNode(prevId, {
-          data: {
-            ...prevNode.data,
-            ...values,
-          },
-        })
+        const prevNodeType = prevNode.type ?? 'dialogueNode'
+        const merged = mergeFormDataIntoNodeData(
+          prevNodeType,
+          prevNode.data as Record<string, unknown>,
+          values
+        )
+        updateNode(prevId, { data: merged })
       }
       if (debouncePushRef.current) {
         clearTimeout(debouncePushRef.current)
