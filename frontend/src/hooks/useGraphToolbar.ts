@@ -45,6 +45,10 @@ export interface UseGraphToolbarReturn {
   handleOpenExportDialog: () => void
   handleExportPNG: () => Promise<void>
   handleExportSVG: () => Promise<void>
+  undo: () => void
+  redo: () => void
+  canUndoNow: boolean
+  canRedoNow: boolean
 }
 
 export function useGraphToolbar(
@@ -77,6 +81,10 @@ export function useGraphToolbar(
     setShowDeleteNodeConfirm,
     setHighlightedNodes,
     applyAutoLayout,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     isLoading: isGraphLoading,
     isSaving: isGraphSaving,
   } = useGraphStore()
@@ -244,6 +252,33 @@ export function useGraphToolbar(
         enabled: true,
       },
       {
+        key: 'ctrl+z',
+        handler: (e) => {
+          e.preventDefault()
+          if (useGraphStore.getState().canUndo()) useGraphStore.getState().undo()
+        },
+        description: 'Annuler (undo)',
+        enabled: () => useGraphStore.getState().canUndo(),
+      },
+      {
+        key: 'ctrl+y',
+        handler: (e) => {
+          e.preventDefault()
+          if (useGraphStore.getState().canRedo()) useGraphStore.getState().redo()
+        },
+        description: 'Refaire (redo)',
+        enabled: () => useGraphStore.getState().canRedo(),
+      },
+      {
+        key: 'ctrl+shift+z',
+        handler: (e) => {
+          e.preventDefault()
+          if (useGraphStore.getState().canRedo()) useGraphStore.getState().redo()
+        },
+        description: 'Refaire (redo)',
+        enabled: () => useGraphStore.getState().canRedo(),
+      },
+      {
         key: 'ctrl+0',
         handler: (e) => {
           e.preventDefault()
@@ -362,6 +397,9 @@ export function useGraphToolbar(
     ]
   )
 
+  const canUndoNow = canUndo()
+  const canRedoNow = canRedo()
+
   return {
     showAutoLayoutDropdown,
     setShowAutoLayoutDropdown,
@@ -393,5 +431,9 @@ export function useGraphToolbar(
     handleOpenExportDialog,
     handleExportPNG,
     handleExportSVG,
+    undo,
+    redo,
+    canUndoNow,
+    canRedoNow,
   }
 }

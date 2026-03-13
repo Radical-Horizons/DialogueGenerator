@@ -30,6 +30,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     connectionType: string = 'default',
     sourceHandle?: string
   ) => {
+    get()._pushUndoSnapshot()
     const state = get()
 
     // Extraire le sourceHandle depuis connectionType si c'est un type de test
@@ -187,6 +188,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
   },
 
   disconnectNodes: (edgeId: string, skipMarkDirty?: boolean) => {
+    get()._pushUndoSnapshot()
     set((state) => {
       const edge = state.edges.find((e) => e.id === edgeId)
       if (!edge) return state
@@ -318,6 +320,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     const sourceNode = state.nodes[sourceNodeIndex]
     const choices = (sourceNode.data?.choices ?? []) as Choice[]
     if (choiceIndex >= choices.length) return
+    get()._pushUndoSnapshot()
     const updatedChoices = choices.map((c, i) =>
       i === choiceIndex ? { ...c, text: newText } : c
     )

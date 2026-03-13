@@ -15,6 +15,7 @@ import { initialState } from './types/graphState'
 
 import { createNodeSlice } from './slices/nodeSlice'
 import { createEdgeSlice } from './slices/edgeSlice'
+import { createUndoSlice } from './slices/undoSlice'
 import { createPersistenceSlice } from './slices/persistenceSlice'
 import { createGenerationSlice } from './slices/generationSlice'
 import { createLayoutSlice } from './slices/layoutSlice'
@@ -24,6 +25,7 @@ export const useGraphStore = create<GraphState>()((...args) => ({
   ...initialState,
   ...createNodeSlice(...args),
   ...createEdgeSlice(...args),
+  ...createUndoSlice(...args),
   ...createPersistenceSlice(...args),
   ...createGenerationSlice(...args),
   ...createLayoutSlice(...args),

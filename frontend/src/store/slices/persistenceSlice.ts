@@ -106,6 +106,8 @@ export const createPersistenceSlice: StateCreator<
         documentId: filename ?? null,
         syncStatus: 'synced',
         lastAckSeq: null,
+        undoStack: [],
+        redoStack: [],
       })
     } catch (error) {
       console.error('Erreur lors du chargement du graphe:', error)
@@ -162,6 +164,8 @@ export const createPersistenceSlice: StateCreator<
         lastSavedAt: null,
         syncStatus: 'synced',
         lastAckSeq: null,
+        undoStack: [],
+        redoStack: [],
       })
     } catch (error: unknown) {
       console.error('Erreur chargement document:', error)

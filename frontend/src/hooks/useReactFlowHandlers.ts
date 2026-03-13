@@ -48,6 +48,7 @@ export function useReactFlowHandlers(
     updateNodePosition,
     updateNodeDimensionsBatch,
     markDirty,
+    _pushUndoSnapshot,
     connectNodes,
     deleteNode,
     disconnectNodes,
@@ -247,20 +248,24 @@ export function useReactFlowHandlers(
     [connectNodes]
   )
 
-  const onNodeDragStart = useCallback((_event: React.MouseEvent, node: Node) => {
-    const ids = useGraphStore.getState().selectedNodeIds
-    if (ids.length > 1 && ids.includes(node.id)) {
-      const nodes = useGraphStore.getState().nodes
-      const positions: Record<string, { x: number; y: number }> = {}
-      for (const id of ids) {
-        const n = nodes.find((nd) => nd.id === id)
-        if (n) positions[id] = { x: n.position.x, y: n.position.y }
+  const onNodeDragStart = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      _pushUndoSnapshot()
+      const ids = useGraphStore.getState().selectedNodeIds
+      if (ids.length > 1 && ids.includes(node.id)) {
+        const nodes = useGraphStore.getState().nodes
+        const positions: Record<string, { x: number; y: number }> = {}
+        for (const id of ids) {
+          const n = nodes.find((nd) => nd.id === id)
+          if (n) positions[id] = { x: n.position.x, y: n.position.y }
+        }
+        dragStartPositionsRef.current = positions
+      } else {
+        dragStartPositionsRef.current = null
       }
-      dragStartPositionsRef.current = positions
-    } else {
-      dragStartPositionsRef.current = null
-    }
-  }, [])
+    },
+    [_pushUndoSnapshot]
+  )
 
   const onNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node) => {
@@ -280,11 +285,11 @@ export function useReactFlowHandlers(
         }
         markDirty()
       } else {
-        updateNodePosition(node.id, node.position)
+        updateNodePosition(node.id, node.position, undefined, false)
       }
       dragStartPositionsRef.current = null
     },
-    [updateNodePosition, markDirty]
+    [updateNodePosition, markDirty, _pushUndoSnapshot]
   )
 
   const handleEdgeLabelConfirm = useCallback(

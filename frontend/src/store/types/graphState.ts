@@ -5,6 +5,12 @@
 import type { Node, Edge } from 'reactflow'
 import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
 
+/** Story 2.14 FR35: snapshot du graphe pour undo/redo. */
+export interface GraphSnapshot {
+  nodes: Node[]
+  edges: Edge[]
+}
+
 /** Story 2.9 FR30: types de nœuds pour filtrage (dialogue / test / end). */
 export type NodeType = 'dialogue' | 'test' | 'end'
 
@@ -62,6 +68,10 @@ export interface GraphState {
   // Story 2.9 FR30: filtres vue graphe (types nœuds, speakers)
   graphFilters: GraphFilters
 
+  // Story 2.14 FR35: undo/redo
+  undoStack: GraphSnapshot[]
+  redoStack: GraphSnapshot[]
+
   // Actions CRUD
   loadDialogue: (
     jsonContent: string,
@@ -75,7 +85,8 @@ export interface GraphState {
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
   updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty?: boolean) => void
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
-  deleteNode: (nodeId: string, skipMarkDirty?: boolean) => void
+  /** @param skipPushUndoSnapshot Si true, ne pousse pas de snapshot (batch: un snapshot avant le lot). */
+  deleteNode: (nodeId: string, skipMarkDirty?: boolean, skipPushUndoSnapshot?: boolean) => void
   /** Story 2.11 FR32: supprime les nœuds en lot ; retourne deleted/failed (avec raison si dispo) ; appelle markDirty une fois. */
   batchDeleteNodes: (nodeIds: string[]) => {
     deleted: string[]
@@ -110,10 +121,12 @@ export interface GraphState {
   duplicateNode: (nodeId: string) => Node | null
   duplicateNodes: (nodeIds: string[]) => void
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
+  /** @param pushUndoSnapshot Si true, pousse un snapshot avant la modification (ex. onNodeDragStop). */
   updateNodePosition: (
     nodeId: string,
     position: { x: number; y: number },
-    skipMarkDirty?: boolean
+    skipMarkDirty?: boolean,
+    pushUndoSnapshot?: boolean
   ) => void
   updateNodeDimensions: (
     nodeId: string,
@@ -162,6 +175,14 @@ export interface GraphState {
 
   // Reset
   resetGraph: () => void
+
+  // Story 2.14 FR35: undo/redo
+  undo: () => void
+  redo: () => void
+  canUndo: () => boolean
+  canRedo: () => boolean
+  _pushUndoSnapshot: () => void
+  clearUndoHistory: () => void
 
   // Recherche (Story 2.7 - FR28)
   setHighlightedNodes: (nodeIds: string[]) => void
@@ -217,4 +238,6 @@ export const initialState = {
   documentRevision: null as number | null,
   layoutRevision: null as number | null,
   graphFilters: {} as GraphFilters,
+  undoStack: [] as GraphSnapshot[],
+  redoStack: [] as GraphSnapshot[],
 }

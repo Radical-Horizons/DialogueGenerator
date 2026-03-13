@@ -269,7 +269,7 @@
       FORMAT: Every task gets exactly 3 ordered subtasks — dev agent MUST check in order, cannot batch tests at end:
       🔴 RED: Failing test — one behavioral assertion from the user's perspective (observable outcome, not implementation detail). Must cover all behaviors this task delivers. Example: "🔴 Test échoue : clic droit sur le pane → PaneContextMenu s'affiche ; 'Nouveau nœud' → createEmptyNode() appelé avec la position du clic"
       🟢 GREEN: Name the component/area to implement — NOT the how. The dev reads Dev Notes for implementation details. Example: "🟢 Implémenter PaneContextMenu + intégration dans GraphCanvas (voir Dev Notes)"
-      🔵 REFACTOR: One concrete, named cleanup opportunity visible from the SM's architecture analysis. Condition + action. If nothing to clean: "no-op". Example: "🔵 Si la logique de fermeture menu est dupliquée en ≥2 handlers dans GraphCanvas, extraire closeAllMenus() ; sinon no-op"
+      🔵 REFACTOR: Refactor. The SM may optionally add "points to consider" (input from US/architecture vision, e.g. duplication, naming, centralisation) — that is input only, not a prescribed decision. The dev agent decides what to refactor. Example: "🔵 Refactor. (Points à prendre en compte : fermeture menu, cohérence handlers.)"
 
       SEPARATION OF CONCERNS: Tasks/Subtasks = WHAT (behavior, SM territory). Dev Notes = WHERE/HOW hints (files, patterns, constraints — SM shares architecture knowledge). Implementation details = HOW exactly (dev's job, not prescribed in subtasks).
       NEVER add a testing-phase task at the end of the story. NEVER merge 🔴+🟢. REFACTOR is mandatory — agents skip it when absent.</critical>

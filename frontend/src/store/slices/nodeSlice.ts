@@ -389,6 +389,7 @@ function updateDialogueNodeDirectly(
 
 export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set, get) => ({
   addNode: (node: Node) => {
+    get()._pushUndoSnapshot()
     const state = get()
     const newNodes = [...state.nodes, node]
     const normalized = normalizeTestBars(newNodes, state.edges)
@@ -456,7 +457,8 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     if (!skipMarkDirty) get().markDirty()
   },
 
-  deleteNode: (nodeId: string, skipMarkDirty = false) => {
+  deleteNode: (nodeId: string, skipMarkDirty = false, skipPushUndoSnapshot = false) => {
+    if (!skipPushUndoSnapshot) get()._pushUndoSnapshot()
     set((state) => {
       // TestNode : supprimer le test du choix parent
       if (nodeId.startsWith('test-node-') || nodeId.startsWith('test:')) {
@@ -651,13 +653,15 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     const deleted: string[] = []
     const failed: Array<{ id: string; reason?: string }> = []
     let state = get()
+    const toDelete = nodeIds.filter((id) => state.nodes.some((n) => n.id === id))
+    if (toDelete.length > 0) get()._pushUndoSnapshot()
     for (const id of nodeIds) {
       if (!state.nodes.some((n) => n.id === id)) {
         failed.push({ id, reason: 'nœud introuvable' })
         continue
       }
       try {
-        get().deleteNode(id, true)
+        get().deleteNode(id, true, true)
         deleted.push(id)
       } catch (err) {
         failed.push({

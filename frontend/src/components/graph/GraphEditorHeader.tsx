@@ -61,6 +61,8 @@ export function GraphEditorHeader({
     setHighlightedNodes,
     exportToUnity,
   } = useGraphStore()
+  const canUndoNow = useGraphStore((s) => s.undoStack.length > 0)
+  const canRedoNow = useGraphStore((s) => s.redoStack.length > 0)
 
   const handleExportUnity = () => {
     const json = exportToUnity()
@@ -101,6 +103,8 @@ export function GraphEditorHeader({
     reactFlowInstance,
     handleAutoLayout,
     handleOpenExportDialog,
+    undo,
+    redo,
   } = toolbar
 
   return (
@@ -175,6 +179,50 @@ export function GraphEditorHeader({
           onBatchTagApply={onBatchTagApply}
           onBatchValidateClick={handleBatchValidateSelection}
         />
+        {canEditGraph && (
+          <>
+            <button
+              type="button"
+              data-testid="btn-undo"
+              onClick={() => undo()}
+              disabled={!canUndoNow}
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.default.background,
+                color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
+                cursor: canUndoNow ? 'pointer' : 'not-allowed',
+                opacity: canUndoNow ? 1 : 0.6,
+                fontSize: '0.9rem',
+              }}
+              title="Annuler (Ctrl+Z)"
+              aria-label="Annuler"
+            >
+              ↩ Undo
+            </button>
+            <button
+              type="button"
+              data-testid="btn-redo"
+              onClick={() => redo()}
+              disabled={!canRedoNow}
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.default.background,
+                color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
+                cursor: canRedoNow ? 'pointer' : 'not-allowed',
+                opacity: canRedoNow ? 1 : 0.6,
+                fontSize: '0.9rem',
+              }}
+              title="Refaire (Ctrl+Y)"
+              aria-label="Refaire"
+            >
+              ↪ Redo
+            </button>
+          </>
+        )}
         {/* Badge de santé global du graphe */}
         {(() => {
           const errors = graphValidationErrors.filter((e) => e.severity === 'error')
@@ -690,6 +738,40 @@ export function GraphEditorHeader({
             >
               <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Raccourcis graphe</div>
               <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                <li>
+                  <kbd
+                    style={{
+                      padding: '0.1rem 0.35rem',
+                      background: theme.background.panel,
+                      borderRadius: 4,
+                    }}
+                  >
+                    Ctrl+Z
+                  </kbd>{' '}
+                  : annuler
+                </li>
+                <li>
+                  <kbd
+                    style={{
+                      padding: '0.1rem 0.35rem',
+                      background: theme.background.panel,
+                      borderRadius: 4,
+                    }}
+                  >
+                    Ctrl+Y
+                  </kbd>{' '}
+                  /{' '}
+                  <kbd
+                    style={{
+                      padding: '0.1rem 0.35rem',
+                      background: theme.background.panel,
+                      borderRadius: 4,
+                    }}
+                  >
+                    Ctrl+Shift+Z
+                  </kbd>{' '}
+                  : refaire
+                </li>
                 <li>
                   <kbd
                     style={{

@@ -65,8 +65,10 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
   updateNodePosition: (
     nodeId: string,
     position: { x: number; y: number },
-    skipMarkDirty?: boolean
+    skipMarkDirty?: boolean,
+    pushUndoSnapshot?: boolean
   ) => {
+    if (pushUndoSnapshot) get()._pushUndoSnapshot()
     const state = get()
     const node = state.nodes.find((n) => n.id === nodeId)
     const positionChanged =
