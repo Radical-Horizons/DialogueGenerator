@@ -93,7 +93,7 @@ development_status:
   2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: done
   2-13-auto-layout-graphe-pour-lisibilité-fr34: done
   2-14-undo-redo-opérations-graphe-fr35: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
   epic-3: backlog
   3-1-parcourir-entités-gdd-disponibles-personnages-lieux-régions-thèmes-fr11: backlog
   3-2-sélectionner-manuellement-contexte-gdd-pertinent-fr12: backlog
