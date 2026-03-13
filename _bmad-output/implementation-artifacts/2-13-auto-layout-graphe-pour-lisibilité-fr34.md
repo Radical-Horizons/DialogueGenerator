@@ -1,6 +1,6 @@
 # Story 2.13: Auto-layout graphe pour lisibilité (FR34)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -41,20 +41,20 @@ so that **je peux voir clairement la structure narrative sans organiser manuelle
 
 <!-- Chaque task = un comportement testable (TDD). Dev Notes = WHERE/HOW. -->
 
-- [ ] Task 1 : Vérifier que l’auto-layout (Dagre) réorganise les nœuds et persiste (AC: #1, #2)
-  - [ ] 🔴 Test échoue : appel `applyAutoLayout('dagre', 'TB')` avec nœuds/edges de test → les positions des nœuds changent et sont cohérentes (hiérarchie TB) ; après `applyAutoLayout`, le store contient des positions mises à jour
-  - [ ] 🟢 Confirmer/étendre `layoutSlice.applyAutoLayout` et `dagreLayout.calculateDagreLayout` (voir Dev Notes) ; s’assurer que `markDirty()` ou la persistance est déclenchée après mise à jour des positions
-  - [ ] 🔵 Si la logique de "layout puis persistance" est dupliquée entre toolbar et PaneContextMenu, centraliser dans le store ; sinon no-op
+- [x] Task 1 : Vérifier que l’auto-layout (Dagre) réorganise les nœuds et persiste (AC: #1, #2)
+  - [x] 🔴 Test échoue : appel `applyAutoLayout('dagre', 'TB')` avec nœuds/edges de test → les positions des nœuds changent et sont cohérentes (hiérarchie TB) ; après `applyAutoLayout`, le store contient des positions mises à jour
+  - [x] 🟢 Confirmer/étendre `layoutSlice.applyAutoLayout` et `dagreLayout.calculateDagreLayout` (voir Dev Notes) ; s’assurer que `markDirty()` ou la persistance est déclenchée après mise à jour des positions
+  - [x] 🔵 Si la logique de "layout puis persistance" est dupliquée entre toolbar et PaneContextMenu, centraliser dans le store ; sinon no-op
 
-- [ ] Task 2 : Vérifier l’UI (bouton toolbar + menu pane) et direction TB/LR/BT/RL (AC: #1, #5)
-  - [ ] 🔴 Test échoue : clic sur le bouton "Auto-layout" dans GraphEditorHeader ou choix d’une direction (TB/LR/BT/RL) appelle `applyAutoLayout` avec la bonne direction ; clic "Auto-layout" dans PaneContextMenu appelle `applyAutoLayout('dagre', 'TB')` (ou direction par défaut)
-  - [ ] 🟢 Vérifier `useGraphToolbar.handleAutoLayout` et `GraphEditorHeader` (bouton + dropdown direction) ; vérifier `GraphCanvas` + `PaneContextMenu` → `applyAutoLayout('dagre', 'TB')` ; pas de régression sur les points d’entrée existants
-  - [ ] 🔵 Si le libellé ou l’accessibilité du bouton Auto-layout peut être amélioré (aria-label, title), l’ajouter ; sinon no-op
+- [x] Task 2 : Vérifier l’UI (bouton toolbar + menu pane) et direction TB/LR/BT/RL (AC: #1, #5)
+  - [x] 🔴 Test échoue : clic sur le bouton "Auto-layout" dans GraphEditorHeader ou choix d’une direction (TB/LR/BT/RL) appelle `applyAutoLayout` avec la bonne direction ; clic "Auto-layout" dans PaneContextMenu appelle `applyAutoLayout('dagre', 'TB')` (ou direction par défaut)
+  - [x] 🟢 Vérifier `useGraphToolbar.handleAutoLayout` et `GraphEditorHeader` (bouton + dropdown direction) ; vérifier `GraphCanvas` + `PaneContextMenu` → `applyAutoLayout('dagre', 'TB')` ; pas de régression sur les points d’entrée existants
+  - [x] 🔵 Si le libellé ou l’accessibilité du bouton Auto-layout peut être amélioré (aria-label, title), l’ajouter ; sinon no-op
 
-- [ ] Task 3 : Tests d’intégration et E2E (AC: #1–#3)
-  - [ ] 🔴 Test échoue : test d’intégration (store ou composant) : graphe avec 3+ nœuds et edges → applyAutoLayout → positions différentes et pas de chevauchement évident ; test API (si fallback backend utilisé) : POST `/calculate-layout` retourne des positions valides
-  - [ ] 🟢 Ajouter ou compléter tests dans `layoutSlice` / `dagreLayout` et, si pertinent, `tests/api/test_graph_crud.py` pour `calculate-layout` ; documenter le comportement avec cycles (Dagre) dans Dev Notes
-  - [ ] 🔵 Pas de refactor majeur ; no-op ou petit nettoyage de tests
+- [x] Task 3 : Tests d’intégration et E2E (AC: #1–#3)
+  - [x] 🔴 Test échoue : test d’intégration (store ou composant) : graphe avec 3+ nœuds et edges → applyAutoLayout → positions différentes et pas de chevauchement évident ; test API (si fallback backend utilisé) : POST `/calculate-layout` retourne des positions valides
+  - [x] 🟢 Ajouter ou compléter tests dans `layoutSlice` / `dagreLayout` et, si pertinent, `tests/api/test_graph_crud.py` pour `calculate-layout` ; documenter le comportement avec cycles (Dagre) dans Dev Notes
+  - [x] 🔵 Pas de refactor majeur ; no-op ou petit nettoyage de tests
 
 ## Dev Notes
 
@@ -63,7 +63,7 @@ so that **je peux voir clairement la structure narrative sans organiser manuelle
 - **Backend :** `POST /api/v1/unity-dialogues/graph/calculate-layout` dans `api/routers/graph.py` ; `GraphConversionService.calculate_layout` dans `services/graph_conversion_service.py` (fallback cascade pour "dagre"/autres ; le vrai Dagre est côté client).
 - **UI :** Bouton "📐 Auto-layout" et menu direction (TB/LR/BT/RL) dans `GraphEditorHeader` ; `handleAutoLayout(direction)` dans `useGraphToolbar.ts` appelle `applyAutoLayout('dagre', dir)`. `PaneContextMenu` appelle `applyAutoLayout('dagre', 'TB')` depuis `GraphCanvas.tsx`.
 - **Persistance :** Après `set({ nodes: layoutedNodes })`, le store doit marquer le document dirty pour ADR-006. **À vérifier :** `applyAutoLayout` dans `layoutSlice.ts` n’appelle pas `get().markDirty()` après le `set` ; l’ajouter pour les deux branches (dagre et fallback backend) si manquant.
-- **Cycles :** Dagre gère des DAG ; en présence de cycles le comportement dépend de l’implémentation (ex. coupe d’arêtes). Documenter ou tester le comportement observé si pertinent pour les AC.
+- **Cycles :** Dagre gère des DAG ; en présence de cycles le comportement dépend de l’implémentation (ex. coupe d’arêtes). documenté dans dagreLayout.ts (JSDoc).
 - **Raccourci clavier :** L’epic mentionnait Ctrl+L ; aucun raccourci dédié auto-layout n’est trouvé dans `useKeyboardShortcuts`. Optionnel : ajouter Ctrl+L pour déclencher l’auto-layout (hors scope minimal de cette story "vérification + tests").
 
 ### Project Structure Notes
@@ -131,10 +131,26 @@ so that **je peux voir clairement la structure narrative sans organiser manuelle
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+(Amelia / dev-story workflow)
 
 ### Debug Log References
 
 ### Completion Notes List
 
+- Code review (CR): corrections appliquées — tâches cochées [x], aria-label sur bouton Auto-layout (GraphEditorHeader), documentation cycles dans dagreLayout.ts, Dev Notes Cycles mis à jour.
+- Task 1: `layoutSlice.applyAutoLayout` appelle désormais `get().markDirty()` après les deux branches (dagre et fallback backend) pour ADR-006. Tests ajoutés : `graphStore.autoLayout.test.ts` (positions mises à jour, hiérarchie TB, pas de chevauchement, markDirty appelé).
+- Task 2: Tests UI : `useGraphToolbar.autoLayout.test.ts` (handleAutoLayout appelle applyAutoLayout('dagre', dir)) ; `GraphCanvas.paneContextMenu.test.tsx` (clic "Auto-layout" appelle applyAutoLayout('dagre', 'TB')).
+- Task 3: Test d'intégration (3 nœuds, pas de chevauchement) dans graphStore.autoLayout ; backend `test_calculate_layout_success` inchangé et vert.
+
+### Change Log
+
+- 2026-03-13 : Code review — tâches cochées, aria-label, doc cycles, status → done.
+
 ### File List
+
+- frontend/src/store/slices/layoutSlice.ts (modifié : markDirty après dagre et fallback)
+- frontend/src/__tests__/graphStore.autoLayout.test.ts (nouveau)
+- frontend/src/__tests__/useGraphToolbar.autoLayout.test.ts (nouveau)
+- frontend/src/__tests__/GraphCanvas.paneContextMenu.test.tsx (modifié : test Auto-layout)
+- frontend/src/components/graph/GraphEditorHeader.tsx (CR : aria-label bouton Auto-layout)
+- frontend/src/utils/dagreLayout.ts (CR : JSDoc cycles AC3)

@@ -302,6 +302,7 @@ export function GraphEditorHeader({
               gap: '0.35rem',
             }}
             title="Auto-layout (Dagre) — choisir la direction"
+            aria-label="Auto-layout (Dagre) — choisir la direction"
           >
             📐 Auto-layout
             <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>

@@ -27,7 +27,9 @@ function getDagreDirection(direction: DagreDirection): 'TB' | 'LR' | 'BT' | 'RL'
 
 /**
  * Calcule le layout Dagre pour un graphe ReactFlow.
- * 
+ * Dagre est conçu pour les DAG ; en présence de cycles, la lib dagre applique un ordre
+ * interne et produit un layout défini — le graphe reste lisible (AC3).
+ *
  * @param nodes - Nœuds ReactFlow
  * @param edges - Edges ReactFlow
  * @param options - Options de layout

@@ -25,6 +25,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
           direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
         })
         set({ nodes: layoutedNodes })
+        get().markDirty()
         return
       }
 
@@ -54,6 +55,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
           return layoutedNode ? { ...node, position: layoutedNode.position } : node
         }),
       }))
+      get().markDirty()
     } catch (error) {
       console.error('Erreur lors du calcul de layout:', error)
       throw error

@@ -148,4 +148,25 @@ describe('GraphCanvas — pane context menu (Story 2.12)', () => {
     renderGraphCanvas()
     expect(capturedOnNodeContextMenu).toBeDefined()
   })
+
+  it('Story 2.13 AC #1 #5 : clic "Auto-layout" dans PaneContextMenu appelle applyAutoLayout("dagre", "TB")', async () => {
+    const store = useGraphStore.getState()
+    const applySpy = vi.spyOn(store, 'applyAutoLayout').mockResolvedValue(undefined)
+    renderGraphCanvas()
+    await act(async () => {
+      const fakeEvent = {
+        preventDefault: vi.fn(),
+        clientX: 400,
+        clientY: 300,
+      }
+      capturedOnPaneContextMenu?.(fakeEvent as unknown as ReactMouseEvent<Element>)
+    })
+    const autoLayoutItem = screen.getByText('Auto-layout').closest('button')
+    expect(autoLayoutItem).toBeTruthy()
+    await act(async () => {
+      autoLayoutItem!.click()
+    })
+    expect(applySpy).toHaveBeenCalledWith('dagre', 'TB')
+    applySpy.mockRestore()
+  })
 })

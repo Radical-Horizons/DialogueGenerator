@@ -91,7 +91,7 @@ development_status:
   2-10-sélection-multiple-nœuds-shift-click-lasso-selection-fr31: done
   2-11-appliquer-opérations-à-nœuds-sélectionnés-delete-tag-validate-fr32: done
   2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: done
-  2-13-auto-layout-graphe-pour-lisibilité-fr34: ready-for-dev
+  2-13-auto-layout-graphe-pour-lisibilité-fr34: done
   2-14-undo-redo-opérations-graphe-fr35: backlog
   epic-2-retrospective: optional
   epic-3: backlog
