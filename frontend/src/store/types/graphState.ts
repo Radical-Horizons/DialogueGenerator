@@ -55,6 +55,7 @@ export interface GraphState {
   documentId: string | null
   syncStatus: 'synced' | 'offline' | 'error'
   lastAckSeq: number | null
+  activeLoadSeq: number
 
   // Story 16.4 : SoT document + layout (load/save via API documents)
   document: Record<string, unknown> | null
@@ -79,6 +80,22 @@ export interface GraphState {
     filename?: string
   ) => Promise<void>
   loadDialogueByDocumentId: (documentId: string) => Promise<void>
+  /** Charge depuis le JSON brut (projection frontend uniquement). Utilisé quand l’API documents renvoie 404. */
+  loadDialogueFromRawJson: (jsonContent: string, documentId: string) => Promise<void>
+  /** Incrémente la séquence de chargement pour annulation des requêtes obsolètes. */
+  incrementLoadSeq: () => number
+  /** Applique les résultats d'un chargement si la séquence correspond. */
+  applyLoadResult: (params: {
+    nodes: Node[]
+    edges: Edge[]
+    document: Record<string, unknown>
+    layout: Record<string, unknown>
+    metadata: GraphMetadata
+    documentId: string
+    documentRevision: number
+    layoutRevision: number
+    loadSeq: number
+  }) => boolean
   addNode: (node: Node) => void
   /** Crée un nœud vide (sans LLM). Story 1.6 - FR6. */
   createEmptyNode: (position?: { x: number; y: number }) => Node
@@ -233,6 +250,7 @@ export const initialState = {
   documentId: null as string | null,
   syncStatus: 'synced' as const,
   lastAckSeq: null as number | null,
+  activeLoadSeq: 0,
   document: null as Record<string, unknown> | null,
   layout: null as Record<string, unknown> | null,
   documentRevision: null as number | null,

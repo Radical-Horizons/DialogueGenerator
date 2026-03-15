@@ -19,6 +19,7 @@ export interface UseSceneSelectionReturn {
   isLoading: boolean
   updateSelection: (updates: Partial<SceneSelection>) => void
   swapCharacters: () => void
+  randomizeField: (field: keyof SceneSelection) => void
 }
 
 export function useSceneSelection() {
@@ -434,12 +435,43 @@ export function useSceneSelection() {
     }))
   }, [])
 
+  const randomizeField = useCallback(
+    (field: keyof SceneSelection) => {
+      if (field === 'characterA' || field === 'characterB') {
+        if (data.characters.length > 0) {
+          const randomIndex = Math.floor(Math.random() * data.characters.length)
+          const randomChar = data.characters[randomIndex]
+          // Éviter de choisir le même personnage pour A et B si possible
+          const otherField = field === 'characterA' ? 'characterB' : 'characterA'
+          if (randomChar === selection[otherField] && data.characters.length > 1) {
+            const nextIndex = (randomIndex + 1) % data.characters.length
+            updateSelection({ [field]: data.characters[nextIndex] })
+          } else {
+            updateSelection({ [field]: randomChar })
+          }
+        }
+      } else if (field === 'sceneRegion') {
+        if (data.regions.length > 0) {
+          const random = data.regions[Math.floor(Math.random() * data.regions.length)]
+          updateSelection({ sceneRegion: random, subLocation: null })
+        }
+      } else if (field === 'subLocation') {
+        if (data.subLocations.length > 0) {
+          const random = data.subLocations[Math.floor(Math.random() * data.subLocations.length)]
+          updateSelection({ subLocation: random })
+        }
+      }
+    },
+    [data, selection, updateSelection]
+  )
+
   return {
     data,
     selection,
     isLoading,
     updateSelection,
     swapCharacters,
+    randomizeField,
   }
 }
 

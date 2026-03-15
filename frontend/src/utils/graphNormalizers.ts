@@ -66,64 +66,69 @@ export function normalizeChoiceHandleInEdges(edges: Edge[], nodes: Node[]): Edge
  * un TestBar doit exister. Si le choix n'a plus de test, le TestBar doit être supprimé.
  */
 export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]; edges: Edge[] } {
-  let normalizedNodes = [...nodes]
-  let normalizedEdges = [...edges]
+  const normalizedNodes: Node[] = [...nodes]
+  let currentEdges = [...edges]
 
-  normalizedNodes.forEach((node) => {
-    if (node.type === 'dialogueNode') {
-      const choices = (node.data.choices || []) as Choice[]
+  // Phase 1 : Collecter tous les changements nécessaires sans muter la liste pendant le parcours
+  const dialogueNodes = nodes.filter((n) => n.type === 'dialogueNode')
+  const testNodesToKeep = new Map<string, Node>()
+  const nodesToUpdate = new Map<string, Node>()
 
-      choices.forEach((choice, choiceIndex) => {
-        const choiceId = (choice as Choice & { choiceId?: string }).choiceId
-        const testBarId = choiceId
-          ? `test:${choiceId}`
-          : `test-node-${node.id}-choice-${choiceIndex}`
-        const existingTestBar = normalizedNodes.find((n) => n.id === testBarId)
+  dialogueNodes.forEach((node) => {
+    const choices = (node.data.choices || []) as Choice[]
+    const updatedChoices = [...choices]
+    let dialogueNodeModified = false
 
-        const syncResult = syncTestNodeFromChoice(
-          choice,
-          choiceIndex,
-          node.id,
-          node.position,
-          existingTestBar || null,
-          normalizedEdges,
-          normalizedNodes
-        )
+    choices.forEach((choice, choiceIndex) => {
+      const choiceId = (choice as Choice & { choiceId?: string }).choiceId
+      const testBarId = choiceId
+        ? `test:${choiceId}`
+        : `test-node-${node.id}-choice-${choiceIndex}`
+      
+      const existingTestBar = normalizedNodes.find((n) => n.id === testBarId)
 
-        if (syncResult.testNode) {
-          const testBarIndex = normalizedNodes.findIndex((n) => n.id === testBarId)
-          if (testBarIndex !== -1) {
-            normalizedNodes[testBarIndex] = syncResult.testNode
-          } else {
-            normalizedNodes.push(syncResult.testNode)
-          }
-        } else {
-          normalizedNodes = normalizedNodes.filter((n) => n.id !== testBarId)
-        }
+      const syncResult = syncTestNodeFromChoice(
+        choice,
+        choiceIndex,
+        node.id,
+        node.position,
+        existingTestBar || null,
+        currentEdges,
+        normalizedNodes
+      )
 
-        normalizedEdges = syncResult.edges
+      if (syncResult.testNode) {
+        testNodesToKeep.set(testBarId, syncResult.testNode)
+      }
+      currentEdges = syncResult.edges
 
-        if (choice.test && choice.targetNode) {
-          const nodeIndex = normalizedNodes.findIndex((n) => n.id === node.id)
-          if (nodeIndex !== -1) {
-            const updatedDialogueNode = normalizedNodes[nodeIndex]
-            const updatedChoices = (updatedDialogueNode.data.choices as Choice[]).map((c, idx) =>
-              idx === choiceIndex ? { ...c, targetNode: undefined } : c
-            )
-            normalizedNodes[nodeIndex] = {
-              ...updatedDialogueNode,
-              data: {
-                ...updatedDialogueNode.data,
-                choices: updatedChoices,
-              },
-            }
-          }
-        }
+      // Story 16.4 : Si choice.test est présent, targetNode doit être undefined (porté par les edges de test)
+      if (choice.test && choice.targetNode) {
+        updatedChoices[choiceIndex] = { ...choice, targetNode: undefined }
+        dialogueNodeModified = true
+      }
+    })
+
+    if (dialogueNodeModified) {
+      nodesToUpdate.set(node.id, {
+        ...node,
+        data: { ...node.data, choices: updatedChoices },
       })
     }
   })
 
-  return { nodes: normalizedNodes, edges: normalizedEdges }
+  // Phase 2 : Construire la liste finale
+  // Garder uniquement les nodes originaux qui ne sont pas des testNodes (ils seront rajoutés s'ils sont dans testNodesToKeep)
+  const nonTestNodes = normalizedNodes.filter((n) => n.type !== 'testNode')
+  
+  const finalNodes = nonTestNodes.map((n) => nodesToUpdate.get(n.id) || n)
+  
+  // Ajouter les testNodes nécessaires
+  testNodesToKeep.forEach((testNode) => {
+    finalNodes.push(testNode)
+  })
+
+  return { nodes: finalNodes, edges: currentEdges }
 }
 
 /**

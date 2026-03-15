@@ -10,7 +10,6 @@ import type { SaveGraphResponse } from '../../types/graph'
 import * as graphAPI from '../../api/graph'
 import * as documentsAPI from '../../api/documents'
 import { documentToGraph, graphToDocument, buildLayoutFromNodes } from '../../utils/documentToGraph'
-import { loadNodePositions } from '../../utils/nodePositions'
 import {
   writeSnapshot as journalWriteSnapshot,
   clearPending as journalClearPending,
@@ -24,7 +23,13 @@ import {
 
 export type PersistenceSlice = Pick<
   GraphState,
-  'loadDialogue' | 'loadDialogueByDocumentId' | 'saveDialogue' | 'exportToUnity'
+  | 'loadDialogue'
+  | 'loadDialogueByDocumentId'
+  | 'loadDialogueFromRawJson'
+  | 'saveDialogue'
+  | 'exportToUnity'
+  | 'incrementLoadSeq'
+  | 'applyLoadResult'
 >
 
 export const createPersistenceSlice: StateCreator<
@@ -38,12 +43,12 @@ export const createPersistenceSlice: StateCreator<
     savedPositions?: Record<string, { x: number; y: number }>,
     explicitFilename?: string
   ) => {
+    const loadSeq = get().activeLoadSeq
     set({ isLoading: true })
     try {
       const response = await graphAPI.loadGraph({ json_content: jsonContent })
 
       const filename = explicitFilename || response.metadata.filename
-      const persistedPositions = filename ? loadNodePositions(filename) : null
 
       const nodes: Node[] = response.nodes.map((node) => {
         const raw = ensureValidNode({
@@ -52,8 +57,7 @@ export const createPersistenceSlice: StateCreator<
           position: node.position ?? { x: 0, y: 0 },
           data: node.data,
         })
-        const position =
-          persistedPositions?.[node.id] ?? savedPositions?.[node.id] ?? raw.position
+        const position = savedPositions?.[node.id] ?? raw.position
         return {
           ...raw,
           position:
@@ -83,40 +87,87 @@ export const createPersistenceSlice: StateCreator<
         normalized.nodes
       ) as unknown as Record<string, unknown>
 
-      set({
+      get().applyLoadResult({
         nodes: normalized.nodes,
         edges: normalized.edges,
         document,
         layout,
-        documentRevision: 1,
-        layoutRevision: 1,
-        dialogueMetadata: {
+        metadata: {
           title: response.metadata.title,
           node_count: normalized.nodes.length,
           edge_count: normalized.edges.length,
           filename,
         },
-        isLoading: false,
-        validationErrors: [],
-        highlightedNodeIds: [],
-        highlightedCycleNodes: [],
-        hasUnsavedChanges: false,
-        lastSaveError: null,
-        lastSavedAt: null,
-        documentId: filename ?? null,
-        syncStatus: 'synced',
-        lastAckSeq: null,
-        undoStack: [],
-        redoStack: [],
+        documentId: filename ?? '',
+        documentRevision: 1,
+        layoutRevision: 1,
+        loadSeq,
       })
     } catch (error) {
+      if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur lors du chargement du graphe:', error)
       set({ isLoading: false })
       throw error
     }
   },
 
+  /** Charge depuis le JSON brut (frontend uniquement, pas de backend loadGraph). Utilisé quand l’API documents renvoie 404. */
+  loadDialogueFromRawJson: async (jsonContent: string, documentId: string) => {
+    const loadSeq = get().activeLoadSeq
+    set({ isLoading: true })
+    try {
+      let parsed: unknown
+      try {
+        parsed = JSON.parse(jsonContent)
+      } catch {
+        throw new Error('Contenu JSON invalide')
+      }
+      const doc: Record<string, unknown> =
+        Array.isArray(parsed)
+          ? { schemaVersion: '1.1.0', nodes: parsed }
+          : (parsed as Record<string, unknown>)
+
+      let layoutPositions: { nodes: Record<string, { x: number; y: number }> } | undefined
+      try {
+        const layoutRes = await documentsAPI.getLayout(documentId)
+        const nodes = (layoutRes?.layout as { nodes?: Record<string, { x: number; y: number }> })?.nodes
+        if (nodes && typeof nodes === 'object' && Object.keys(nodes).length > 0) {
+          layoutPositions = { nodes }
+        }
+      } catch {
+        // Fallback sessionStorage removed as per plan
+      }
+
+      const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
+      const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+      const layoutBlob = buildLayoutFromNodes(normalized.nodes) as unknown as Record<string, unknown>
+      const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
+
+      get().applyLoadResult({
+        nodes: normalized.nodes,
+        edges: normalized.edges,
+        document: doc,
+        layout: layoutBlob,
+        metadata: {
+          title: 'Dialogue Unity',
+          node_count: nodeCount,
+          edge_count: normalized.edges.length,
+          filename: documentId,
+        },
+        documentId,
+        documentRevision: 1,
+        layoutRevision: 1,
+        loadSeq,
+      })
+    } catch (error) {
+      if (get().activeLoadSeq !== loadSeq) return
+      set({ isLoading: false })
+      throw error
+    }
+  },
+
   loadDialogueByDocumentId: async (documentId: string) => {
+    const loadSeq = get().activeLoadSeq
     set({ isLoading: true })
     try {
       const [docResponse, layoutResponse] = await Promise.all([
@@ -131,6 +182,15 @@ export const createPersistenceSlice: StateCreator<
           }),
       ])
       const doc = docResponse.document as Record<string, unknown>
+      // #region agent log
+      const loadNodesArr = (doc?.nodes as Record<string, unknown>[] | undefined) ?? []
+      const loadChoicesWithTest = loadNodesArr.flatMap((n, i) =>
+        ((n?.choices as Record<string, unknown>[]) ?? []).map((c, j) =>
+          (c as { test?: unknown }).test != null ? { nodeIdx: i, choiceIdx: j } : []
+        )
+      ).flat()
+      fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'persistenceSlice.ts:loadDialogueByDocumentId', message: 'Doc from API', data: { documentId, choicesWithTestCount: loadChoicesWithTest.length }, timestamp: Date.now(), hypothesisId: 'D' }) }).catch(() => {})
+      // #endregion
       const layoutBlob = (layoutResponse?.layout ?? {}) as Record<string, unknown>
       const layoutPositions = layoutBlob?.nodes
         ? { nodes: layoutBlob.nodes as Record<string, { x: number; y: number }> }
@@ -141,33 +201,25 @@ export const createPersistenceSlice: StateCreator<
       )
       const normalized = normalizeTestBars(projectedNodes, projectedEdges)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
-      set({
-        document: doc,
-        layout: layoutBlob,
-        documentRevision: docResponse.revision,
-        layoutRevision: (layoutResponse as { revision: number }).revision ?? 1,
+
+      get().applyLoadResult({
         nodes: normalized.nodes,
         edges: normalized.edges,
-        dialogueMetadata: {
+        document: doc,
+        layout: layoutBlob,
+        metadata: {
           title: 'Dialogue Unity',
           node_count: nodeCount,
           edge_count: normalized.edges.length,
           filename: documentId,
         },
         documentId,
-        isLoading: false,
-        validationErrors: [],
-        highlightedNodeIds: [],
-        highlightedCycleNodes: [],
-        hasUnsavedChanges: false,
-        lastSaveError: null,
-        lastSavedAt: null,
-        syncStatus: 'synced',
-        lastAckSeq: null,
-        undoStack: [],
-        redoStack: [],
+        documentRevision: docResponse.revision,
+        layoutRevision: (layoutResponse as { revision: number }).revision ?? 1,
+        loadSeq,
       })
     } catch (error: unknown) {
+      if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur chargement document:', error)
       set({ isLoading: false })
       const err = error as {
@@ -185,10 +237,59 @@ export const createPersistenceSlice: StateCreator<
     }
   },
 
+  incrementLoadSeq: () => {
+    let nextSeq = 0
+    set((state) => {
+      nextSeq = state.activeLoadSeq + 1
+      return { activeLoadSeq: nextSeq }
+    })
+    return nextSeq
+  },
+
+  applyLoadResult: (params) => {
+    const { loadSeq, ...rest } = params
+    const currentSeq = get().activeLoadSeq
+    if (loadSeq !== currentSeq) {
+      console.warn(`[Persistence] Ignored stale load result (seq ${loadSeq}, current ${currentSeq})`)
+      return false
+    }
+
+    set({
+      nodes: rest.nodes,
+      edges: rest.edges,
+      document: rest.document,
+      layout: rest.layout,
+      dialogueMetadata: rest.metadata,
+      documentId: rest.documentId,
+      documentRevision: rest.documentRevision,
+      layoutRevision: rest.layoutRevision,
+      isLoading: false,
+      validationErrors: [],
+      highlightedNodeIds: [],
+      highlightedCycleNodes: [],
+      hasUnsavedChanges: false,
+      lastSaveError: null,
+      lastSavedAt: null,
+      syncStatus: 'synced',
+      lastAckSeq: null,
+      undoStack: [],
+      redoStack: [],
+    })
+    return true
+  },
+
   saveDialogue: async () => {
     set({ isSaving: true, lastSaveError: null, syncStatus: 'synced' })
     const state = get()
     const documentId = state.documentId ?? state.dialogueMetadata.filename ?? null
+
+    const checkStillActive = () => {
+      const currentId = get().documentId ?? get().dialogueMetadata.filename ?? null
+      if (currentId !== documentId) {
+        return false
+      }
+      return true
+    }
 
     if (state.nodes.length === 0) {
       set({ isSaving: false })
@@ -201,8 +302,18 @@ export const createPersistenceSlice: StateCreator<
 
     try {
       // Flux principal : PUT document + PUT layout (Story 16.4)
+      // Construire le document depuis le graphe courant pour éviter décalage avec state.document (ex. après suppression TestNode).
       if (state.document != null && documentId) {
-        const doc = state.document
+        const doc = graphToDocument(state.nodes, state.edges) as unknown as Record<string, unknown>
+        // #region agent log
+        const nodesArr = (doc?.nodes as Record<string, unknown>[] | undefined) ?? []
+        const saveChoicesWithTest = nodesArr.flatMap((n, i) =>
+          ((n?.choices as Record<string, unknown>[]) ?? []).map((c, j) =>
+            (c as { test?: unknown }).test != null ? { nodeIdx: i, choiceIdx: j } : []
+          )
+        ).flat()
+        fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'persistenceSlice.ts:saveDialogue', message: 'Saving document', data: { documentId, choicesWithTestCount: saveChoicesWithTest.length }, timestamp: Date.now(), hypothesisId: 'B' }) }).catch(() => {})
+        // #endregion
         const layoutPayload = (
           state.layout ?? buildLayoutFromNodes(state.nodes)
         ) as Record<string, unknown>
@@ -219,7 +330,11 @@ export const createPersistenceSlice: StateCreator<
                 revision: layoutRev,
               }),
             ])
+            if (!checkStillActive()) {
+              return { success: true, filename: documentId } as SaveGraphResponse
+            }
             set({
+              document: doc,
               documentRevision: docRes.revision,
               layoutRevision: layoutRes.revision,
               isSaving: false,
@@ -239,7 +354,9 @@ export const createPersistenceSlice: StateCreator<
             } else if (status === 409) {
               const msg =
                 'Conflit de révision (document ou layout modifié ailleurs). Rechargez ou réessayez.'
-              set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
+              if (checkStillActive()) {
+                set({ isSaving: false, lastSaveError: msg, syncStatus: 'error' })
+              }
               throw new Error(msg)
             } else {
               console.warn(
@@ -282,6 +399,10 @@ export const createPersistenceSlice: StateCreator<
         seq,
         document_id: documentId ?? undefined,
       })
+
+      if (!checkStillActive()) {
+        return response
+      }
 
       const ackSeq = response.ack_seq ?? response.last_seq ?? seq
       const nextSeq = (response.last_seq ?? response.ack_seq ?? seq) + 1
@@ -327,6 +448,7 @@ export const createPersistenceSlice: StateCreator<
       })
       return response
     } catch (error) {
+      if (!checkStillActive()) throw error
       const message = error instanceof Error ? error.message : String(error)
       console.error('Erreur lors de la sauvegarde:', error)
       set({ isSaving: false, lastSaveError: message, syncStatus: 'error' })
@@ -380,6 +502,7 @@ export const createPersistenceSlice: StateCreator<
       }
     }
 
-    return JSON.stringify(unityNodes, null, 2)
+    const document = { schemaVersion: '1.1.0', nodes: unityNodes }
+    return JSON.stringify(document, null, 2)
   },
 })

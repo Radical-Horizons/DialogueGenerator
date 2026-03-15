@@ -19,11 +19,21 @@ import type {
   LinkedElementsResponse,
 } from '../types/api'
 
+export interface ListContextParams {
+  page?: number
+  page_size?: number
+}
+
 /**
- * Liste tous les personnages disponibles.
+ * Liste les personnages disponibles (avec pagination optionnelle).
  */
-export async function listCharacters(): Promise<CharacterListResponse> {
-  const response = await apiClient.get<CharacterListResponse>('/api/v1/context/characters')
+export async function listCharacters(params?: ListContextParams): Promise<CharacterListResponse> {
+  const searchParams = new URLSearchParams()
+  if (params?.page != null) searchParams.set('page', String(params.page))
+  if (params?.page_size != null) searchParams.set('page_size', String(params.page_size))
+  const query = searchParams.toString()
+  const url = query ? `/api/v1/context/characters?${query}` : '/api/v1/context/characters'
+  const response = await apiClient.get<CharacterListResponse>(url)
   return response.data
 }
 
@@ -36,10 +46,15 @@ export async function getCharacter(name: string): Promise<CharacterResponse> {
 }
 
 /**
- * Liste tous les lieux disponibles.
+ * Liste les lieux disponibles (avec pagination optionnelle).
  */
-export async function listLocations(): Promise<LocationListResponse> {
-  const response = await apiClient.get<LocationListResponse>('/api/v1/context/locations')
+export async function listLocations(params?: ListContextParams): Promise<LocationListResponse> {
+  const searchParams = new URLSearchParams()
+  if (params?.page != null) searchParams.set('page', String(params.page))
+  if (params?.page_size != null) searchParams.set('page_size', String(params.page_size))
+  const query = searchParams.toString()
+  const url = query ? `/api/v1/context/locations?${query}` : '/api/v1/context/locations'
+  const response = await apiClient.get<LocationListResponse>(url)
   return response.data
 }
 
@@ -52,24 +67,26 @@ export async function getLocation(name: string): Promise<LocationResponse> {
 }
 
 /**
- * Liste tous les objets disponibles.
+ * Liste les objets disponibles (avec pagination optionnelle).
  */
-export async function listItems(): Promise<ItemListResponse> {
-  const response = await apiClient.get<ItemListResponse>('/api/v1/context/items')
+export async function listItems(params?: ListContextParams): Promise<ItemListResponse> {
+  const searchParams = new URLSearchParams()
+  if (params?.page != null) searchParams.set('page', String(params.page))
+  if (params?.page_size != null) searchParams.set('page_size', String(params.page_size))
+  const query = searchParams.toString()
+  const url = query ? `/api/v1/context/items?${query}` : '/api/v1/context/items'
+  const response = await apiClient.get<ItemListResponse>(url)
   return response.data
 }
 
 /**
  * Récupère un objet par son nom.
- * Note: L'endpoint API n'existe pas encore, on filtre depuis la liste.
  */
 export async function getItem(name: string): Promise<ItemResponse> {
-  const listResponse = await listItems()
-  const item = listResponse.items.find((item) => item.name === name)
-  if (!item) {
-    throw new Error(`Item "${name}" not found`)
-  }
-  return item
+  const response = await apiClient.get<ItemResponse>(
+    `/api/v1/context/items/${encodeURIComponent(name)}`
+  )
+  return response.data
 }
 
 /**
@@ -89,10 +106,15 @@ export async function getSpecies(name: string): Promise<SpeciesResponse> {
 }
 
 /**
- * Liste toutes les communautés disponibles.
+ * Liste les communautés disponibles (avec pagination optionnelle).
  */
-export async function listCommunities(): Promise<CommunityListResponse> {
-  const response = await apiClient.get<CommunityListResponse>('/api/v1/context/communities')
+export async function listCommunities(params?: ListContextParams): Promise<CommunityListResponse> {
+  const searchParams = new URLSearchParams()
+  if (params?.page != null) searchParams.set('page', String(params.page))
+  if (params?.page_size != null) searchParams.set('page_size', String(params.page_size))
+  const query = searchParams.toString()
+  const url = query ? `/api/v1/context/communities?${query}` : '/api/v1/context/communities'
+  const response = await apiClient.get<CommunityListResponse>(url)
   return response.data
 }
 

@@ -1,5 +1,9 @@
 /**
  * Composant Tabs réutilisable avec animations.
+ *
+ * keepAliveTabIds : liste d'IDs d'onglets à garder montés même quand inactifs (display:none).
+ * Utile pour les onglets avec état DOM lourd (ex : ReactFlow) qui ne doivent pas être
+ * démontés/remontés à chaque changement d'onglet pour préserver les positions visuelles.
  */
 import { ReactNode } from 'react'
 import { theme } from '../../theme'
@@ -21,10 +25,16 @@ export interface TabsProps {
    * Utile pour désactiver le scroll interne quand le contenu gère déjà son propre overflow.
    */
   contentStyle?: React.CSSProperties
+  /**
+   * IDs des onglets à maintenir montés (via display:none) même quand ils ne sont pas actifs.
+   * Évite les démontages/remontages coûteux pour les onglets avec état DOM lourd.
+   */
+  keepAliveTabIds?: string[]
 }
 
-export function Tabs({ tabs, activeTabId, onTabChange, style, contentStyle }: TabsProps) {
+export function Tabs({ tabs, activeTabId, onTabChange, style, contentStyle, keepAliveTabIds }: TabsProps) {
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
+  const keepAliveSet = new Set(keepAliveTabIds ?? [])
 
   return (
     <div
@@ -84,6 +94,12 @@ export function Tabs({ tabs, activeTabId, onTabChange, style, contentStyle }: Ta
           </button>
         ))}
       </div>
+      {/* Onglets keep-alive : rendus mais masqués via display:none quand inactifs */}
+      {tabs.filter((tab) => keepAliveSet.has(tab.id) && tab.id !== activeTabId).map((tab) => (
+        <div key={tab.id} style={{ display: 'none', flex: 1, minHeight: 0 }}>
+          {tab.content}
+        </div>
+      ))}
       <div
         style={{
           flex: 1,

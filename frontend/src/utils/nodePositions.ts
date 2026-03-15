@@ -1,7 +1,8 @@
 /**
- * Utilitaires pour la persistance des positions des nodes du graphe.
- * Les positions sont stockées dans localStorage avec une clé dédiée,
- * indépendamment du draft de contenu.
+ * Utilitaires pour la persistance des positions des nodes du graphe (localStorage).
+ *
+ * @deprecated La source de vérité des positions est le layout backend (GET/PUT layout, API documents).
+ * Ce module n'est plus utilisé dans le flux principal. Conservé pour migration ou scripts ponctuels.
  */
 
 export interface NodePosition {
@@ -34,12 +35,19 @@ export function saveNodePositions(filename: string, positions: NodePositions): v
 }
 
 /**
- * Charge les positions sauvegardées pour un dialogue
+ * Charge les positions sauvegardées pour un dialogue.
+ * Essaie la clé exacte puis la variante avec/sans .json pour couvrir les différences liste vs API.
  */
 export function loadNodePositions(filename: string): NodePositions | null {
   try {
     const key = getPositionsKey(filename)
-    const stored = localStorage.getItem(key)
+    let stored = localStorage.getItem(key)
+    if (!stored && /\.json$/i.test(filename)) {
+      stored = localStorage.getItem(getPositionsKey(filename.replace(/\.json$/i, '')))
+    }
+    if (!stored && !/\.json$/i.test(filename)) {
+      stored = localStorage.getItem(getPositionsKey(`${filename}.json`))
+    }
     if (!stored) return null
     return JSON.parse(stored) as NodePositions
   } catch (error) {

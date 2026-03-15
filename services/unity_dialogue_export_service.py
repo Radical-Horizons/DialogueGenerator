@@ -83,10 +83,12 @@ def write_unity_dialogue_to_file(
     last_seq_after_write: Optional[int] = None,
 ) -> Tuple[Path, str]:
     """Valide le JSON Unity et l'écrit dans le répertoire configuré (écriture atomique ADR-006).
+    Accepte tableau de nœuds ou document { schemaVersion, nodes } ; écrit toujours en format
+    canonique (même format que document DialogueGenerator / Unity).
 
     Args:
         config_service: Service de configuration (chemin Unity).
-        json_content: Contenu JSON Unity (tableau de nœuds).
+        json_content: Contenu JSON Unity (tableau de nœuds ou document canonique).
         filename: Nom de fichier optionnel (sans ou avec .json).
         title: Titre utilisé pour générer le nom de fichier si filename absent.
         request_id: ID de requête pour les exceptions.
@@ -120,15 +122,28 @@ def write_unity_dialogue_to_file(
             request_id=request_id,
         )
 
-    if not isinstance(json_data, list):
+    # Accepter document canonique (schemaVersion + nodes) ou tableau legacy ; toujours écrire en canonique
+    if isinstance(json_data, list):
+        nodes = json_data
+        document = {"schemaVersion": "1.1.0", "nodes": nodes}
+    elif isinstance(json_data, dict) and "nodes" in json_data:
+        nodes = json_data["nodes"]
+        if not isinstance(nodes, list):
+            raise ValidationException(
+                message="Le document doit contenir un tableau 'nodes'",
+                details={"json_content": "nodes doit être un tableau []"},
+                request_id=request_id,
+            )
+        document = {"schemaVersion": json_data.get("schemaVersion", "1.1.0"), "nodes": nodes}
+    else:
         raise ValidationException(
-            message="Le JSON Unity doit être un tableau de nœuds",
-            details={"json_content": "Doit être un tableau []"},
+            message="Le JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)",
+            details={"json_content": "Format attendu: [] ou { \"schemaVersion\": \"1.1.0\", \"nodes\": [...] }"},
             request_id=request_id,
         )
 
     validate_fn = validator or _default_validator
-    is_valid, validation_errors = validate_fn(json_data)
+    is_valid, validation_errors = validate_fn(nodes)
     if not is_valid:
         raise ValidationException(
             message="Le dialogue Unity contient des erreurs de validation",
@@ -152,7 +167,7 @@ def write_unity_dialogue_to_file(
         name += ".json"
 
     file_path = unity_dir / name
-    formatted = json.dumps(json_data, indent=2, ensure_ascii=False)
+    formatted = json.dumps(document, indent=2, ensure_ascii=False)
 
     # ADR-006: Écriture atomique (tmp → fsync → rename) pour éviter fichier tronqué
     tmp_path = unity_dir / (name + ".tmp")

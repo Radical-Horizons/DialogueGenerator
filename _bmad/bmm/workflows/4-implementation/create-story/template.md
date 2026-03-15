@@ -22,12 +22,12 @@ so that {{benefit}}.
 - [ ] Task 1 : [Behavior description] (AC: #)
   - [ ] 🔴 Test échoue : [behavioral assertion — observable outcome, not implementation detail]
   - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
-  - [ ] 🔵 Refactor : [specific named opportunity + condition] ; sinon no-op
+  - [ ] 🔵 Faire le refactor du code développé pour passer le test afin d'obtenir un code KISS, DRY, SOLID. Autres chantiers possibles : [optionnel — ex. accessibilité, réutilisation modals, nommage].
 
 - [ ] Task 2 : [Behavior description] (AC: #)
   - [ ] 🔴 Test échoue : [behavioral assertion]
   - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
-  - [ ] 🔵 Refactor : [specific named opportunity + condition] ; sinon no-op
+  - [ ] 🔵 Faire le refactor du code développé pour passer le test afin d'obtenir un code KISS, DRY, SOLID. Autres chantiers possibles : [optionnel].
 
 ## Dev Notes
 

@@ -1,5 +1,6 @@
 /**
- * Composant principal de sélection de contexte avec onglets pour personnages, lieux et objets.
+ * Composant principal de sélection de contexte (panneau Contexte GDD) avec onglets par type d'entité.
+ * AC FR11 : Personnages, Lieux, Régions, Objets, Espèces, Communautés. (Thèmes reporté : pas d'API backend.)
  */
 import { useState, useEffect, useCallback } from 'react'
 import * as contextAPI from '../../api/context'
@@ -11,14 +12,26 @@ import type {
   CommunityResponse,
 } from '../../types/api'
 import { ContextList } from './ContextList'
+import type { ContextListItem } from './ContextList'
 import { SelectedContextSummary } from './SelectedContextSummary'
 import { useContextStore } from '../../store/contextStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 
-type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
+type TabType = 'characters' | 'locations' | 'regions' | 'items' | 'species' | 'communities'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
+
+const PAGE_SIZE = 50
+
+const ENTITY_TYPE_LABELS: Record<TabType, string> = {
+  characters: 'Personnage',
+  locations: 'Lieu',
+  regions: 'Région',
+  items: 'Objet',
+  species: 'Espèce',
+  communities: 'Communauté',
+}
 
 interface ContextSelectorProps {
   onItemSelected?: (item: ContextItem | null) => void
@@ -28,12 +41,22 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('characters')
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
   const [locations, setLocations] = useState<LocationResponse[]>([])
+  const [regions, setRegions] = useState<ContextListItem[]>([])
   const [items, setItems] = useState<ItemResponse[]>([])
   const [species, setSpecies] = useState<SpeciesResponse[]>([])
   const [communities, setCommunities] = useState<CommunityResponse[]>([])
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [charactersPage, setCharactersPage] = useState(1)
+  const [charactersTotalPages, setCharactersTotalPages] = useState(1)
+  const [locationsPage, setLocationsPage] = useState(1)
+  const [locationsTotalPages, setLocationsTotalPages] = useState(1)
+  const [itemsPage, setItemsPage] = useState(1)
+  const [itemsTotalPages, setItemsTotalPages] = useState(1)
+  const [communitiesPage, setCommunitiesPage] = useState(1)
+  const [communitiesTotalPages, setCommunitiesTotalPages] = useState(1)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   const { 
     selections, 
@@ -52,20 +75,29 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     setIsLoading(true)
     setError(null)
     try {
-      const [charsRes, locsRes, itemsRes, speciesRes, communitiesRes] = await Promise.all([
-        contextAPI.listCharacters(),
-        contextAPI.listLocations(),
-        contextAPI.listItems(),
+      const [charsRes, locsRes, regionsRes, itemsRes, speciesRes, communitiesRes] = await Promise.all([
+        contextAPI.listCharacters({ page: 1, page_size: PAGE_SIZE }),
+        contextAPI.listLocations({ page: 1, page_size: PAGE_SIZE }),
+        contextAPI.listRegions(),
+        contextAPI.listItems({ page: 1, page_size: PAGE_SIZE }),
         contextAPI.listSpecies(),
-        contextAPI.listCommunities(),
+        contextAPI.listCommunities({ page: 1, page_size: PAGE_SIZE }),
       ])
       setCharacters(charsRes.characters)
+      setCharactersPage(1)
+      setCharactersTotalPages(charsRes.total_pages ?? 1)
       setLocations(locsRes.locations)
+      setLocationsPage(1)
+      setLocationsTotalPages(locsRes.total_pages ?? 1)
+      setRegions(regionsRes.regions.map((name) => ({ name })))
       setItems(itemsRes.items)
+      setItemsPage(1)
+      setItemsTotalPages(itemsRes.total_pages ?? 1)
       setSpecies(speciesRes.species)
       setCommunities(communitiesRes.communities)
-      
-      // Mettre à jour le store avec les listes pour qu'elles soient accessibles partout
+      setCommunitiesPage(1)
+      setCommunitiesTotalPages(communitiesRes.total_pages ?? 1)
+
       setElementLists({
         characters: charsRes.characters,
         locations: locsRes.locations,
@@ -80,17 +112,65 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     }
   }, [setElementLists])
 
+  const loadMore = useCallback(async () => {
+    if (loadingMore) return
+    if (activeTab === 'characters' && charactersPage >= charactersTotalPages) return
+    if (activeTab === 'locations' && locationsPage >= locationsTotalPages) return
+    if (activeTab === 'items' && itemsPage >= itemsTotalPages) return
+    if (activeTab === 'communities' && communitiesPage >= communitiesTotalPages) return
+    if (activeTab === 'regions' || activeTab === 'species') return
+
+    setLoadingMore(true)
+    try {
+      if (activeTab === 'characters') {
+        const res = await contextAPI.listCharacters({ page: charactersPage + 1, page_size: PAGE_SIZE })
+        setCharacters((prev) => [...prev, ...res.characters])
+        setCharactersPage((p) => p + 1)
+      } else if (activeTab === 'locations') {
+        const res = await contextAPI.listLocations({ page: locationsPage + 1, page_size: PAGE_SIZE })
+        setLocations((prev) => [...prev, ...res.locations])
+        setLocationsPage((p) => p + 1)
+      } else if (activeTab === 'items') {
+        const res = await contextAPI.listItems({ page: itemsPage + 1, page_size: PAGE_SIZE })
+        setItems((prev) => [...prev, ...res.items])
+        setItemsPage((p) => p + 1)
+      } else if (activeTab === 'communities') {
+        const res = await contextAPI.listCommunities({ page: communitiesPage + 1, page_size: PAGE_SIZE })
+        setCommunities((prev) => [...prev, ...res.communities])
+        setCommunitiesPage((p) => p + 1)
+      }
+    } catch (err) {
+      setError(getErrorMessage(err))
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [
+    loadingMore,
+    activeTab,
+    charactersPage,
+    charactersTotalPages,
+    locationsPage,
+    locationsTotalPages,
+    itemsPage,
+    itemsTotalPages,
+    communitiesPage,
+    communitiesTotalPages,
+  ])
+
   useEffect(() => {
     void loadData()
   }, [loadData])
 
   const handleItemClick = async (name: string) => {
     try {
-      let item: CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse | null = null
+      let item: ContextItem | { name: string; data: Record<string, unknown> } | null = null
       if (activeTab === 'characters') {
         item = await contextAPI.getCharacter(name)
       } else if (activeTab === 'locations') {
         item = await contextAPI.getLocation(name)
+      } else if (activeTab === 'regions') {
+        const loc = await contextAPI.getLocation(name)
+        item = loc
       } else if (activeTab === 'items') {
         item = await contextAPI.getItem(name)
       } else if (activeTab === 'species') {
@@ -101,10 +181,10 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
 
       if (item && selectedDetail === name) {
         setSelectedDetail(null)
-        onItemSelected?.(null)
+        onItemSelected?.(item as ContextItem)
       } else if (item) {
         setSelectedDetail(name)
-        onItemSelected?.(item)
+        onItemSelected?.(item as ContextItem)
       }
     } catch (err) {
       setError(getErrorMessage(err))
@@ -112,6 +192,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const handleItemToggle = (name: string) => {
+    if (activeTab === 'regions') return
     if (activeTab === 'characters') {
       toggleCharacter(name)
     } else if (activeTab === 'locations') {
@@ -129,9 +210,10 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     }
   }
 
-  const getCurrentItems = (): (CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse)[] => {
+  const getCurrentItems = (): ContextListItem[] => {
     if (activeTab === 'characters') return characters
     if (activeTab === 'locations') return locations
+    if (activeTab === 'regions') return regions
     if (activeTab === 'items') return items
     if (activeTab === 'species') return species
     if (activeTab === 'communities') return communities
@@ -139,6 +221,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const getSelectedCount = (): number => {
+    if (activeTab === 'regions') return 0
     if (activeTab === 'characters') {
       return (Array.isArray(selections.characters_full) ? selections.characters_full.length : 0) +
         (Array.isArray(selections.characters_excerpt) ? selections.characters_excerpt.length : 0)
@@ -163,8 +246,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const getSelectedItems = (): string[] => {
-    // Fusionner les listes full et excerpt pour chaque type
-    // Sécurité: s'assurer que les propriétés sont toujours des tableaux
+    if (activeTab === 'regions') return []
     if (activeTab === 'characters') {
       return [
         ...(Array.isArray(selections.characters_full) ? selections.characters_full : []),
@@ -213,19 +295,16 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const getElementModeForList = (name: string): 'full' | 'excerpt' | null => {
-    if (activeTab === 'characters') {
-      return getElementMode('characters', name)
-    } else if (activeTab === 'locations') {
-      return getElementMode('locations', name)
-    } else if (activeTab === 'items') {
-      return getElementMode('items', name)
-    } else if (activeTab === 'species') {
-      return getElementMode('species', name)
-    } else if (activeTab === 'communities') {
-      return getElementMode('communities', name)
-    }
+    if (activeTab === 'regions') return null
+    if (activeTab === 'characters') return getElementMode('characters', name)
+    if (activeTab === 'locations') return getElementMode('locations', name)
+    if (activeTab === 'items') return getElementMode('items', name)
+    if (activeTab === 'species') return getElementMode('species', name)
+    if (activeTab === 'communities') return getElementMode('communities', name)
     return null
   }
+
+  const showCheckboxes = activeTab !== 'regions'
 
   return (
     <div
@@ -280,6 +359,25 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           }}
         >
           Lieux {activeTab === 'locations' && getSelectedCount() > 0 ? `(${getSelectedCount()}/${locations.length})` : `(${locations.length})`}
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('regions')
+            setSelectedDetail(null)
+            onItemSelected?.(null)
+          }}
+          style={{
+            flex: 1,
+            padding: '0.75rem',
+            border: 'none',
+            borderBottom: activeTab === 'regions' ? `2px solid ${theme.button.primary.background}` : 'none',
+            backgroundColor: activeTab === 'regions' ? theme.background.tertiary : 'transparent',
+            color: theme.text.primary,
+            cursor: 'pointer',
+            fontWeight: activeTab === 'regions' ? 'bold' : 'normal',
+          }}
+        >
+          Régions ({regions.length})
         </button>
         <button
           onClick={() => {
@@ -364,6 +462,10 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           getElementMode={getElementModeForList}
           onModeChange={handleModeChange}
           tabId={activeTab}
+          showCheckboxes={showCheckboxes}
+          entityTypeLabel={ENTITY_TYPE_LABELS[activeTab]}
+          onScrollToBottom={loadMore}
+          loadingMore={loadingMore}
         />
       </div>
       <div style={{ flex: '0 0 auto' }}>

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
+import * as unityDialoguesAPI from '../api/unityDialogues'
 import { useDialogueLoader } from '../hooks/useDialogueLoader'
 import { useGraphStore } from '../store/graphStore'
 
@@ -31,11 +32,9 @@ describe('useDialogueLoader', () => {
   })
 
   it('loads dialogue when selectedDialogue changes', async () => {
-    const loadDialogueMock = vi.fn().mockResolvedValue(undefined)
+    const loadDialogueByDocumentIdMock = vi.fn().mockResolvedValue(undefined)
     const validateGraphMock = vi.fn().mockResolvedValue(undefined)
-    useGraphStore.setState({ loadDialogue: loadDialogueMock, validateGraph: validateGraphMock })
-
-    getUnityDialogueMock.mockResolvedValue({ json_content: '[]' })
+    useGraphStore.setState({ loadDialogueByDocumentId: loadDialogueByDocumentIdMock, validateGraph: validateGraphMock })
 
     const { result } = renderHook(() => useDialogueLoader(toastMock, null))
 
@@ -52,18 +51,18 @@ describe('useDialogueLoader', () => {
       expect(result.current.isLoadingDialogue).toBe(false)
     })
 
-    expect(getUnityDialogueMock).toHaveBeenCalledWith('test.json')
-    expect(loadDialogueMock).toHaveBeenCalledWith('[]', undefined, 'test.json')
+    expect(loadDialogueByDocumentIdMock).toHaveBeenCalledWith('test')
     expect(validateGraphMock).toHaveBeenCalled()
   })
 
   it('shows error toast when load fails', async () => {
-    const loadDialogueMock = vi.fn().mockRejectedValue(new Error('Network error'))
+    const loadDialogueByDocumentIdMock = vi.fn().mockRejectedValue(new Error('Network error'))
+    getUnityDialogueMock.mockRejectedValue(new Error('API error'))
+
     useGraphStore.setState({
-      loadDialogue: loadDialogueMock,
+      loadDialogueByDocumentId: loadDialogueByDocumentIdMock,
       validateGraph: vi.fn().mockResolvedValue(undefined),
     })
-    getUnityDialogueMock.mockResolvedValue({ json_content: '[]' })
 
     const { result } = renderHook(() => useDialogueLoader(toastMock, null))
 

@@ -202,7 +202,9 @@ describe('GraphEditor standalone mode', () => {
 
     renderGraphEditor()
 
-    await userEvent.setup().click(screen.getByRole('button', { name: /export unity/i }))
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /actions/i }))
+    await user.click(screen.getByRole('menuitem', { name: /export unity/i }))
 
     expect(exportToUnityMock).toHaveBeenCalled()
     expect(createObjectURLMock).toHaveBeenCalledOnce()

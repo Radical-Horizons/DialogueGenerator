@@ -113,6 +113,9 @@ export interface CharacterResponse {
 export interface CharacterListResponse {
   characters: CharacterResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface LocationResponse {
@@ -123,6 +126,9 @@ export interface LocationResponse {
 export interface LocationListResponse {
   locations: LocationResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface ItemResponse {
@@ -133,6 +139,9 @@ export interface ItemResponse {
 export interface ItemListResponse {
   items: ItemResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface SpeciesResponse {
@@ -153,6 +162,9 @@ export interface CommunityResponse {
 export interface CommunityListResponse {
   communities: CommunityResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface RegionListResponse {

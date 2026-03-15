@@ -93,7 +93,9 @@ function updateTestNodeInDocumentSoT(
   const doc = JSON.parse(JSON.stringify(state.document)) as Record<string, unknown>
   const nodesArray = (doc.nodes as Record<string, unknown>[]) ?? []
   const parent = getParentChoiceForTestNode(nodeId, state.nodes)
-  if (!parent) return null
+  if (!parent) {
+    return null
+  }
 
   const updatedTestNode = { ...node, ...updates } as Node
   const updatedChoice = syncChoiceFromTestNode(
@@ -464,10 +466,14 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
       if (nodeId.startsWith('test-node-') || nodeId.startsWith('test:')) {
         const parent = getParentChoiceForTestNode(nodeId, state.nodes)
 
+        let newNodes = state.nodes
+        let newEdges = state.edges
+
         if (parent) {
           const updatedChoices = (parent.dialogueNode.data.choices as Choice[]).map(
             (choice, idx) => {
               if (idx === parent.choiceIndex) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const {
                   test,
                   testCriticalFailureNode,
@@ -476,7 +482,6 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
                   testCriticalSuccessNode,
                   ...rest
                 } = choice
-                void [test, testCriticalFailureNode, testFailureNode, testSuccessNode, testCriticalSuccessNode]
                 return rest
               }
               return choice
@@ -487,47 +492,62 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
             ...parent.dialogueNode,
             data: { ...parent.dialogueNode.data, choices: updatedChoices },
           }
-          const newNodes = state.nodes
+          newNodes = state.nodes
             .map((n) => (n.id === parent.dialogueNodeId ? updatedDialogueNode : n))
             .filter((n) => n.id !== nodeId)
-          const newEdges = state.edges.filter(
+          newEdges = state.edges.filter(
             (e) => e.source !== nodeId && e.target !== nodeId
           )
-          const newSelectedNodeId =
-            state.selectedNodeId === nodeId ? parent.dialogueNodeId : state.selectedNodeId
-          const isDocumentSoT = state.document != null && state.layout != null
-          const docAndLayout =
-            isDocumentSoT
-              ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
-              : {}
-
-          return {
-            nodes: newNodes,
-            edges: newEdges,
-            selectedNodeId: newSelectedNodeId,
-            dialogueMetadata: {
-              ...state.dialogueMetadata,
-              node_count: newNodes.length,
-              edge_count: newEdges.length,
-            },
-            ...docAndLayout,
-          }
+        } else {
+          newNodes = state.nodes.map(node => {
+            if (node.type !== 'dialogueNode' || !node.data.choices) return node
+            const choices = node.data.choices as Choice[]
+            let modified = false
+            const updatedChoices = choices.map(c => {
+              // Si le choix a un test et que son ID de TestNode correspondrait à celui supprimé
+              const choiceId = (c as Choice & { choiceId?: string }).choiceId
+              const cid = choiceId ?? `__idx_${choices.indexOf(c)}`
+              const possibleId = choiceId ? `test:${cid}` : `test-node-${node.id}-choice-${choices.indexOf(c)}`
+              
+              if (possibleId === nodeId || c.testSuccessNode === nodeId || c.testFailureNode === nodeId) {
+                modified = true
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { test, testCriticalFailureNode, testFailureNode, testSuccessNode, testCriticalSuccessNode, ...rest } = c
+                return rest
+              }
+              return c
+            })
+            return modified ? { ...node, data: { ...node.data, choices: updatedChoices } } : node
+          }).filter(n => n.id !== nodeId)
+          
+          newEdges = state.edges.filter(
+            (e) => e.source !== nodeId && e.target !== nodeId
+          )
         }
 
-        // Parent non trouvé : supprimer simplement le TestNode
-        const newNodes = state.nodes.filter((n) => n.id !== nodeId)
-        const newEdges = state.edges.filter(
-          (e) => e.source !== nodeId && e.target !== nodeId
-        )
+        const newSelectedNodeId =
+          state.selectedNodeId === nodeId ? (parent?.dialogueNodeId ?? null) : state.selectedNodeId
         const isDocumentSoT = state.document != null && state.layout != null
         const docAndLayout =
           isDocumentSoT
             ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
             : {}
+        // #region agent log
+        const doc = (docAndLayout as { document?: Record<string, unknown> }).document
+        const choicesWithTest = doc?.nodes
+          ? (doc.nodes as Record<string, unknown>[]).flatMap((n, i) =>
+              ((n?.choices as Record<string, unknown>[]) ?? []).map((c, j) =>
+                (c as { test?: unknown }).test != null ? { nodeIdx: i, choiceIdx: j, hasTest: true } : []
+              )
+            ).flat()
+          : []
+        fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'nodeSlice.ts:deleteNode(TestNode)', message: 'After delete TestNode: docAndLayout', data: { nodeId, hasParent: !!parent, isDocumentSoT, choicesWithTestInDoc: choicesWithTest.length }, timestamp: Date.now(), hypothesisId: 'A' }) }).catch(() => {})
+        // #endregion
+
         return {
           nodes: newNodes,
           edges: newEdges,
-          selectedNodeId: state.selectedNodeId === nodeId ? null : state.selectedNodeId,
+          selectedNodeId: newSelectedNodeId,
           dialogueMetadata: {
             ...state.dialogueMetadata,
             node_count: newNodes.length,

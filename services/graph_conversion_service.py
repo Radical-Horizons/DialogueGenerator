@@ -23,10 +23,15 @@ class GraphConversionService:
             ValueError: Si le JSON est invalide ou mal formaté.
         """
         try:
-            unity_nodes = json.loads(json_content)
-
-            if not isinstance(unity_nodes, list):
-                raise ValueError("Le JSON Unity doit être un tableau de nœuds")
+            data = json.loads(json_content)
+            if isinstance(data, list):
+                unity_nodes = data
+            elif isinstance(data, dict) and "nodes" in data:
+                unity_nodes = data["nodes"]
+                if not isinstance(unity_nodes, list):
+                    raise ValueError("Le document doit contenir un tableau 'nodes'")
+            else:
+                raise ValueError("Le JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)")
 
             # Convertir les nœuds Unity en nœuds ReactFlow
             reactflow_nodes: List[Dict[str, Any]] = []
@@ -308,7 +313,7 @@ class GraphConversionService:
             edges: Liste d'edges ReactFlow.
             
         Returns:
-            JSON Unity (tableau de nœuds).
+            JSON Unity (document canonique : schemaVersion + nodes).
             
         Raises:
             ValueError: Si la conversion échoue.
@@ -359,8 +364,9 @@ class GraphConversionService:
             # Reconstruire les connexions depuis les edges
             GraphConversionService._rebuild_connections(unity_nodes, edges)
 
-            # Convertir en JSON
-            json_content = json.dumps(unity_nodes, indent=2, ensure_ascii=False)
+            # Format canonique : même format que document DialogueGenerator / Unity (schemaVersion + nodes)
+            document = {"schemaVersion": "1.1.0", "nodes": unity_nodes}
+            json_content = json.dumps(document, indent=2, ensure_ascii=False)
 
             logger.info(f"Conversion réussie: {len(unity_nodes)} nœuds Unity")
             return json_content

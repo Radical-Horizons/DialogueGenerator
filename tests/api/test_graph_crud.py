@@ -199,10 +199,12 @@ class TestGraphSave:
         assert "filename" in data
         assert "json_content" in data
         
-        # Vérifier que le JSON est valide
+        # Vérifier que le JSON est au format document (schemaVersion + nodes)
         json_content = json.loads(data["json_content"])
-        assert isinstance(json_content, list)
-        assert len(json_content) == 2
+        assert isinstance(json_content, dict)
+        assert json_content.get("schemaVersion") == "1.1.0"
+        assert "nodes" in json_content
+        assert len(json_content["nodes"]) == 2
     
     def test_save_graph_invalid_structure(self, client: TestClient):
         """GIVEN un graphe avec structure invalide
@@ -253,7 +255,8 @@ class TestGraphSave:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        unity = json.loads(data["json_content"])
+        doc = json.loads(data["json_content"])
+        unity = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
         node1 = next((n for n in unity if n.get("id") == "NODE_1"), None)
         assert node1 is not None
         assert node1.get("line") == edited_line
@@ -285,7 +288,8 @@ class TestGraphSave:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        unity = json.loads(data["json_content"])
+        doc = json.loads(data["json_content"])
+        unity = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
         assert len(unity) == 1
         assert unity[0]["id"] == "START"
 
@@ -332,12 +336,15 @@ class TestGraphSaveAndWrite:
         assert data["filename"] == "Test_Dialogue.json"
         assert "json_content" in data
         parsed = json.loads(data["json_content"])
-        assert isinstance(parsed, list)
-        assert len(parsed) == 2
+        assert isinstance(parsed, dict), "Réponse et fichier doivent être au format document (schemaVersion + nodes)"
+        assert parsed.get("schemaVersion") == "1.1.0"
+        assert "nodes" in parsed
+        assert len(parsed["nodes"]) == 2
         written = Path(self._save_and_write_tmp_path) / "Test_Dialogue.json"
         assert written.exists()
         content = json.loads(written.read_text(encoding="utf-8"))
-        assert len(content) == 2
+        assert content.get("schemaVersion") == "1.1.0"
+        assert len(content["nodes"]) == 2
 
     def test_save_and_write_path_not_configured(
         self, client: TestClient, sample_graph_nodes_edges
@@ -522,6 +529,25 @@ class TestGraphValidate:
         data = response.json()
         # Devrait détecter le cycle
         assert len(data["warnings"]) > 0
+
+    def test_validate_graph_start_found_when_id_in_data_only(self, client: TestClient):
+        """GIVEN un graphe où le nœud d'entrée a id uniquement dans data (pas à la racine)
+        WHEN je valide le graphe
+        THEN pas d'erreur 'Aucun nœud START trouvé' (id résolu via data.id)."""
+        nodes = [
+            {
+                "type": "dialogueNode",
+                "data": {"id": "START", "line": "Bonjour", "speaker": "PNJ"},
+                "position": {"x": 0, "y": 0},
+            }
+        ]
+        request_data = {"nodes": nodes, "edges": []}
+        response = client.post("/api/v1/unity-dialogues/graph/validate", json=request_data)
+        assert response.status_code == 200
+        data = response.json()
+        errors = data.get("errors", [])
+        missing_start = [e for e in errors if e.get("type") == "missing_start"]
+        assert not missing_start, f"Ne doit pas avoir d'erreur missing_start quand id est dans data: {errors}"
 
 
 @pytest.mark.api

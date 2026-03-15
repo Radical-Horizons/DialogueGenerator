@@ -1,0 +1,28 @@
+{
+  "nodes": {
+    "START": {
+      "x": 0,
+      "y": 0
+    },
+    "test-node-START-choice-0": {
+      "x": 0,
+      "y": 280
+    },
+    "test-node-START-choice-1": {
+      "x": 200,
+      "y": 280
+    },
+    "test-node-START-choice-2": {
+      "x": 400,
+      "y": 280
+    },
+    "test:__idx_0": {
+      "x": -285,
+      "y": 345
+    },
+    "test:__idx_1": {
+      "x": -30,
+      "y": 495
+    }
+  }
+}

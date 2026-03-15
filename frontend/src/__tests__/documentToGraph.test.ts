@@ -289,6 +289,28 @@ describe('documentToGraph', () => {
       }
     })
 
+    it('creates TestNode when choice has test even without test*Node (attribute tests / formula only)', () => {
+      const doc: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'START',
+            line: 'Choose',
+            choices: [
+              { choiceId: 'a', text: 'A', test: 'Skill:8' },
+              { choiceId: 'b', text: 'B', targetNode: 'END' },
+            ],
+          },
+          { id: 'END', line: '' },
+        ],
+      }
+      const layout: LayoutPositions = { nodes: { START: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
+      const { nodes } = documentToGraph(doc, layout)
+      const testNodes = nodes.filter((n) => n.type === 'testNode')
+      expect(testNodes).toHaveLength(1)
+      expect(testNodes[0].id).toBe('test:a')
+    })
+
     it('produces exactly one dialogue→test edge per choice with test (canonical id e:...:choice:...:test)', () => {
       const doc: UnityDocument = {
         schemaVersion: '1.1.0',
@@ -340,6 +362,37 @@ describe('graphToDocument', () => {
     expect(start?.choices?.[0].targetNode).toBe('END')
     expect(start?.choices?.[1].choiceId).toBe('no')
     expect(start?.choices?.[1].targetNode).toBe('END')
+  })
+
+  it('omits choice.test when no edge links choice to a test node (deleted TestNode does not reappear)', () => {
+    const nodes = [
+      {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'START',
+          choices: [
+            { choiceId: 'a', text: 'A', test: 'Skill:8' },
+            { choiceId: 'b', text: 'B', test: 'Stat:6' },
+          ],
+        },
+      },
+    ]
+    const edges = [
+      {
+        id: 'e:START:choice:b:test',
+        source: 'START',
+        target: 'test:b',
+        sourceHandle: 'choice:b',
+        type: 'smoothstep',
+      },
+    ]
+    const roundTrip = graphToDocument(nodes as never, edges as never)
+    const start = roundTrip.nodes.find((n) => n.id === 'START')
+    expect(start?.choices).toHaveLength(2)
+    expect((start?.choices?.[0] as { test?: unknown }).test).toBeUndefined()
+    expect((start?.choices?.[1] as { test?: unknown }).test).toBe('Stat:6')
   })
 })
 

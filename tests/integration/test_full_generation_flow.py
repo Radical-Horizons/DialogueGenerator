@@ -163,8 +163,9 @@ class TestFullGenerationFlow:
         
         # WHEN: Reconversion vers JSON Unity
         converted_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-        converted_nodes = json.loads(converted_json)
-        
+        doc = json.loads(converted_json)
+        converted_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
         # WHEN: Validation finale
         is_valid, errors = renderer.validate_nodes(converted_nodes)
         
@@ -218,8 +219,9 @@ class TestFullGenerationFlow:
         
         # WHEN: Reconversion vers JSON Unity
         converted_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-        converted_nodes = json.loads(converted_json)
-        
+        doc = json.loads(converted_json)
+        converted_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
         # WHEN: Validation
         is_valid, errors = renderer.validate_nodes(converted_nodes)
         

@@ -6,7 +6,6 @@ import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import * as graphAPI from '../../api/graph'
 import { documentToGraph } from '../../utils/documentToGraph'
-import { saveNodePositions, type NodePositions } from '../../utils/nodePositions'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
 
 export type LayoutSlice = Pick<
@@ -112,21 +111,11 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       return
     }
 
-    // Mode direct
+    // Mode direct : position dans le store uniquement ; persistance via saveDialogue (legacy path).
     set({
       nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
     })
-    if (!skipMarkDirty) {
-      get().markDirty()
-      const filename = state.dialogueMetadata.filename
-      if (filename) {
-        const positions: NodePositions = {}
-        state.nodes.forEach((n) => {
-          positions[n.id] = n.id === nodeId ? position : n.position
-        })
-        saveNodePositions(filename, positions)
-      }
-    }
+    if (!skipMarkDirty) get().markDirty()
   },
 
   updateNodeDimensions: (nodeId: string, dimensions: { width: number; height: number }) => {

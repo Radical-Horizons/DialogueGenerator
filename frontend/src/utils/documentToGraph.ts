@@ -64,6 +64,9 @@ function determineNodeType(unityNode: UnityNode): string {
 
 /**
  * Projection : document (v1.1.0 ou tableau legacy) + layout → { nodes, edges }.
+ * Règle : si un choice a un test, il a FORCÉMENT un TestNode — le TestNode est la représentation
+ * graphique de l'information du test (barre + 4 handles). On ne crée le TestNode qu'à partir de
+ * choice.test ; la réapparition après suppression est gérée côté sauvegarde (graphToDocument).
  */
 export function documentToGraph(
   document: Record<string, unknown> | UnityNode[],
@@ -207,13 +210,18 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
     const unityNode = { ...data, id: node.id } as Record<string, unknown>
     unityNode.nextNode = undefined
     if (Array.isArray(unityNode.choices)) {
-      for (const choice of unityNode.choices as Record<string, unknown>[]) {
-        delete choice.targetNode
-        delete choice.testCriticalFailureNode
-        delete choice.testFailureNode
-        delete choice.testSuccessNode
-        delete choice.testCriticalSuccessNode
-      }
+      unityNode.choices = (unityNode.choices as Record<string, unknown>[]).map((choice, idx) => {
+        const cleanChoice = { ...choice }
+        delete cleanChoice.targetNode
+        delete cleanChoice.testCriticalFailureNode
+        delete cleanChoice.testFailureNode
+        delete cleanChoice.testSuccessNode
+        delete cleanChoice.testCriticalSuccessNode
+        delete cleanChoice.test
+        const existing = (cleanChoice.choiceId as string)?.trim()
+        if (!existing) cleanChoice.choiceId = `__idx_${idx}`
+        return cleanChoice
+      })
     }
     unityNodes.push(unityNode)
   }
@@ -234,12 +242,19 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
       const choiceIndex = findChoiceIndexByChoiceId(sourceNode, choiceId)
       const choices = sourceNode.choices as Record<string, unknown>[] | undefined
       if (choiceIndex >= 0 && choices?.[choiceIndex]) {
-        choices[choiceIndex].targetNode = edge.target
+        // ADR-008 : On ne remplit targetNode que si la cible n'est pas un testNode
+        // Les connexions vers les testNodes sont portées par les champs test*Node du choix
+        if (!edge.target.startsWith('test:') && !edge.target.startsWith('test-node-')) {
+          choices[choiceIndex].targetNode = edge.target
+        }
       }
     } else if (edge.data?.edgeType === 'choice' && typeof edge.data.choiceIndex === 'number') {
       const choices = sourceNode.choices as Record<string, unknown>[] | undefined
       if (choices?.[edge.data.choiceIndex]) {
-        choices[edge.data.choiceIndex].targetNode = edge.target
+        // ADR-008 : On ne remplit targetNode que si la cible n'est pas un testNode
+        if (!edge.target.startsWith('test:') && !edge.target.startsWith('test-node-')) {
+          choices[edge.data.choiceIndex].targetNode = edge.target
+        }
       }
     } else if (edge.sourceHandle && edge.source.startsWith('test:')) {
       const choiceId = edge.source.slice(5)
@@ -269,5 +284,35 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
       sourceNode.nextNode = edge.target
     }
   }
+
+  // Ne garder choice.test que si une arête relie ce choix à un TestNode (évite réapparition après suppression).
+  for (const u of unityNodes) {
+    const choices = u.choices as Record<string, unknown>[] | undefined
+    if (!choices) continue
+    const inputNode = nodes.find((n) => n.id === (u.id as string) && n.type !== 'testNode')
+    for (let i = 0; i < choices.length; i++) {
+      const c = choices[i] as Record<string, unknown> & { choiceId?: string }
+      const choiceId = c.choiceId ?? `__idx_${i}`
+      const sourceHandle = `choice:${choiceId}`
+      const hasEdgeToTestNode = edges.some(
+        (e) =>
+          e.source === u.id &&
+          (e.target.startsWith('test:') || e.target.startsWith('test-node-')) &&
+          (e.sourceHandle === sourceHandle ||
+            (e.data as { choiceIndex?: number })?.choiceIndex === i)
+      )
+      if (hasEdgeToTestNode && inputNode?.data) {
+        const inputChoices = (inputNode.data as { choices?: Record<string, unknown>[] })
+          .choices
+        const inputChoice = inputChoices?.[i]
+        const inputTest =
+          inputChoice && typeof inputChoice === 'object'
+            ? (inputChoice as Record<string, unknown>).test
+            : undefined
+        if (inputTest !== undefined) c.test = inputTest
+      }
+    }
+  }
+
   return { schemaVersion: '1.1.0', nodes: unityNodes as UnityNode[] }
 }

@@ -393,6 +393,36 @@ class TestDeleteUnityDialogue:
         assert "error" in data
         assert data["error"]["code"] == "VALIDATION_ERROR"
 
+    def test_delete_unity_dialogue_also_deletes_layout_and_seq(
+        self, client, mock_config_service, tmp_path, sample_unity_dialogue
+    ):
+        """Suppression d'un dialogue supprime aussi son layout (Assets/Layouts) et le fichier .seq."""
+        dialogue_dir = tmp_path / "Dialogue"
+        dialogue_dir.mkdir(parents=True, exist_ok=True)
+        layouts_dir = tmp_path / "Layouts"
+        layouts_dir.mkdir(parents=True, exist_ok=True)
+
+        doc_id = "to_delete"
+        dialogue_file = dialogue_dir / f"{doc_id}.json"
+        dialogue_file.write_text(json.dumps(sample_unity_dialogue), encoding="utf-8")
+        layout_file = layouts_dir / f"{doc_id}.layout.json"
+        layout_file.write_text(json.dumps({"nodes": {"START": {"x": 0, "y": 0}}}), encoding="utf-8")
+        layout_meta = layouts_dir / f"{doc_id}.layout.meta"
+        layout_meta.write_text(json.dumps({"revision": 1}), encoding="utf-8")
+        seq_file = dialogue_dir / f"{doc_id}.seq"
+        seq_file.write_text("1", encoding="utf-8")
+
+        mock_config_service.get_unity_dialogues_path.return_value = dialogue_dir
+        mock_config_service.get_unity_layouts_path.return_value = layouts_dir
+
+        response = client.delete(f"/api/v1/unity-dialogues/{doc_id}.json")
+
+        assert response.status_code == 204
+        assert not dialogue_file.exists()
+        assert not layout_file.exists()
+        assert not layout_meta.exists()
+        assert not seq_file.exists()
+
 
 class TestPreviewUnityDialogue:
     """Tests pour l'endpoint POST /api/v1/unity-dialogues/preview."""

@@ -2,7 +2,7 @@
  * Slice génération IA du store graphe : generateFromNode, acceptNode, rejectNode, regenerateNode.
  */
 import type { StateCreator } from 'zustand'
-import type { Node } from 'reactflow'
+import type { Node, Edge } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import * as graphAPI from '../../api/graph'
@@ -52,6 +52,7 @@ export const createGenerationSlice: StateCreator<
     instructions: string,
     options: Record<string, unknown>
   ) => {
+    const generationSeq = get().activeLoadSeq
     set({ isGenerating: true })
     try {
       const state = get()
@@ -259,6 +260,10 @@ export const createGenerationSlice: StateCreator<
       })
 
       const currentState = get()
+      if (currentState.activeLoadSeq !== generationSeq) {
+        console.warn('[Generation] Ignored generation result because dialogue changed')
+        return { nodeId: null }
+      }
       const newNodes = [...currentState.nodes, ...nodesToAddBatch]
       set({
         nodes: newNodes,
@@ -268,26 +273,21 @@ export const createGenerationSlice: StateCreator<
         },
       })
 
+      // Une seule voie pour rattacher les nœuds au parent : connexions choice/nextNode
+      // utilisent toujours parentNodeId (source de vérité front), les autres (ex. test-*) gardent conn.from.
       for (const conn of response.suggested_connections) {
-        get().connectNodes(conn.from, conn.to, conn.via_choice_index, conn.connection_type)
-      }
-
-      // Comportement déterministe : l'utilisateur a choisi un choix (ex. "Choix #3") puis demandé
-      // à l'IA de générer un nœud. La liaison parent→nouveau nœud via ce choix n'est pas un
-      // "suggestion" backend : on la fait toujours côté front, sans se reposer sur suggested_connections.
-      const singleChoiceGeneration =
-        !isBatch &&
-        !isTestNode &&
-        typeof targetChoiceIndex === 'number' &&
-        generatedNodeIds.length === 1
-      if (singleChoiceGeneration) {
-        const firstId = generatedNodeIds[0]
-        if (firstId) {
-          get().connectNodes(parentNodeId, firstId, targetChoiceIndex, 'choice')
-        }
+        const sourceId =
+          conn.connection_type === 'choice' || conn.connection_type === 'nextNode'
+            ? parentNodeId
+            : conn.from
+        get().connectNodes(sourceId, conn.to, conn.via_choice_index, conn.connection_type)
       }
 
       const stateAfterConnections = get()
+      if (stateAfterConnections.activeLoadSeq !== generationSeq) {
+        console.warn('[Generation] Ignored generation result after connections because dialogue changed')
+        return { nodeId: null }
+      }
       const normalized = normalizeTestBars(
         stateAfterConnections.nodes,
         stateAfterConnections.edges
@@ -316,6 +316,7 @@ export const createGenerationSlice: StateCreator<
       })
 
       set({ isGenerating: false })
+      get().markDirty()
 
       const firstNodeId = generatedNodeIds[0] || generatedNodes[0]?.id
       const batchInfo = generateAllChoices

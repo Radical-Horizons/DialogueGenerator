@@ -46,13 +46,17 @@ def _safe_document_id(document_id: str) -> str:
     return document_id.strip() or ""
 
 
-def _read_document_blob(base_dir: Path, document_id: str) -> dict:
-    """Lit le fichier JSON du document. Lève FileNotFoundError si absent."""
+def _read_document_blob(base_dir: Path, document_id: str) -> tuple[dict, bool]:
+    """Lit le fichier JSON du document. Lève FileNotFoundError si absent.
+    Retourne (document, was_normalized_from_list)."""
     path = base_dir / f"{document_id}.json"
     if not path.exists():
         raise FileNotFoundError(f"Document {document_id} non trouvé")
     raw = path.read_text(encoding="utf-8")
-    return json.loads(raw)
+    data = json.loads(raw)
+    if isinstance(data, list):
+        return {"schemaVersion": "1.1.0", "nodes": data}, True
+    return data, False
 
 
 def _read_meta(base_dir: Path, document_id: str) -> int:
@@ -188,7 +192,7 @@ async def check_migration(
                 continue
             document_id = path.stem
             try:
-                doc = _read_document_blob(base_dir, document_id)
+                doc, _ = _read_document_blob(base_dir, document_id)
             except (FileNotFoundError, json.JSONDecodeError):
                 continue
             missing_path = _first_missing_choice_id_path(doc)
@@ -235,6 +239,36 @@ def _resolve_document_base(
     return Path(unity_path), doc_id
 
 
+def _resolve_layout_base(
+    document_id: str,
+    config_service: ConfigurationService,
+    request_id: str,
+) -> tuple[Path, str]:
+    """Valide document_id et retourne (layouts_dir, doc_id). Layouts dans Assets/Layouts."""
+    try:
+        doc_id = _safe_document_id(document_id)
+    except ValueError:
+        raise ValidationException(
+            message="Identifiant de document invalide",
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    if not doc_id:
+        raise ValidationException(
+            message="document_id requis",
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    layouts_path = config_service.get_unity_layouts_path()
+    if not layouts_path:
+        raise ValidationException(
+            message="Le chemin Unity dialogues n'est pas configuré.",
+            details={"field": "unity_dialogues_path"},
+            request_id=request_id,
+        )
+    return Path(layouts_path), doc_id
+
+
 @router.get(
     "/{document_id}",
     response_model=DocumentGetResponse,
@@ -250,19 +284,20 @@ async def get_document(
         base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
         base_dir.mkdir(parents=True, exist_ok=True)
 
-        document = _read_document_blob(base_dir, doc_id)
+        document, was_normalized_from_list = _read_document_blob(base_dir, doc_id)
         revision = _read_meta(base_dir, doc_id)
         schema_version = (document.get("schemaVersion") or "1.1.0") if isinstance(document, dict) else "1.1.0"
 
-        # Story 16.5 (AC3) : refus strict document v1.1.0 sans choiceId en flux normal
-        missing_path = _first_missing_choice_id_path(document)
-        if missing_path is not None:
-            raise ValidationException(
-                message="Ce dialogue doit être migré avec l'outil de migration choiceId.",
-                details={"path": missing_path},
-                request_id=request_id,
-                code="missing_choice_id",
-            )
+        # Story 16.5 (AC3) : refus strict document v1.1.0 sans choiceId en flux normal (sauf format legacy tableau)
+        if not was_normalized_from_list:
+            missing_path = _first_missing_choice_id_path(document)
+            if missing_path is not None:
+                raise ValidationException(
+                    message="Ce dialogue doit être migré avec l'outil de migration choiceId.",
+                    details={"path": missing_path},
+                    request_id=request_id,
+                    code="missing_choice_id",
+                )
 
         logger.info(f"GET document {doc_id} revision={revision} (request_id: {request_id})")
         return DocumentGetResponse(
@@ -297,19 +332,20 @@ async def get_layout(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> LayoutGetResponse:
-    """Retourne le layout persisté (sidecar) avec revision. 404 si document ou layout absent."""
+    """Retourne le layout persisté (sidecar) avec revision. 404 si document ou layout absent.
+    Les layouts sont lus depuis Assets/Layouts (séparé de Assets/Dialogue).
+    """
     try:
-        base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
-        base_dir.mkdir(parents=True, exist_ok=True)
-
-        if not _document_exists(base_dir, doc_id):
+        doc_base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
+        if not _document_exists(doc_base_dir, doc_id):
             raise NotFoundException(
                 resource_type="Document",
                 resource_id=document_id,
                 request_id=request_id,
             )
-        layout = _read_layout_blob(base_dir, doc_id)
-        revision = _read_layout_meta(base_dir, doc_id)
+        layout_base_dir, _ = _resolve_layout_base(document_id, config_service, request_id)
+        layout = _read_layout_blob(layout_base_dir, doc_id)
+        revision = _read_layout_meta(layout_base_dir, doc_id)
 
         logger.info(f"GET layout {doc_id} revision={revision} (request_id: {request_id})")
         return LayoutGetResponse(layout=layout, revision=revision)
@@ -348,26 +384,27 @@ async def put_layout(
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> PutLayoutResponse | JSONResponse:
     """Persiste le layout ; revision optimiste ; 409 si conflit (AC1).
+    Les layouts sont écrits dans Assets/Layouts (séparé de Assets/Dialogue).
 
     En production, imposer une limite de taille sur le body (reverse proxy ou
     middleware) pour éviter un DoS par envoi d'un très gros JSON (layout non borné).
     """
     try:
-        base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
-        base_dir.mkdir(parents=True, exist_ok=True)
-
-        if not _document_exists(base_dir, doc_id):
+        doc_base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
+        if not _document_exists(doc_base_dir, doc_id):
             raise NotFoundException(
                 resource_type="Document",
                 resource_id=document_id,
                 request_id=request_id,
             )
+        layout_base_dir, _ = _resolve_layout_base(document_id, config_service, request_id)
+        layout_base_dir.mkdir(parents=True, exist_ok=True)
 
         client_revision = body.revision
-        if _layout_exists(base_dir, doc_id):
-            current_revision = _read_layout_meta(base_dir, doc_id)
+        if _layout_exists(layout_base_dir, doc_id):
+            current_revision = _read_layout_meta(layout_base_dir, doc_id)
             if client_revision != current_revision:
-                current_layout = _read_layout_blob(base_dir, doc_id)
+                current_layout = _read_layout_blob(layout_base_dir, doc_id)
                 payload = LayoutGetResponse(
                     layout=current_layout,
                     revision=current_revision,
@@ -391,8 +428,8 @@ async def put_layout(
                 )
             new_revision = 1
 
-        _write_layout_blob(base_dir, doc_id, body.layout)
-        _write_layout_meta(base_dir, doc_id, new_revision)
+        _write_layout_blob(layout_base_dir, doc_id, body.layout)
+        _write_layout_meta(layout_base_dir, doc_id, new_revision)
 
         logger.info(
             f"PUT layout {doc_id} revision={new_revision} (request_id: {request_id})"
@@ -449,7 +486,7 @@ async def put_document(
         if _document_exists(base_dir, doc_id):
             current_revision = _read_meta(base_dir, doc_id)
             if client_revision != current_revision:
-                current_doc = _read_document_blob(base_dir, doc_id)
+                current_doc, _ = _read_document_blob(base_dir, doc_id)
                 schema_ver = (current_doc.get("schemaVersion") or "1.1.0") if isinstance(current_doc, dict) else "1.1.0"
                 payload = DocumentGetResponse(
                     document=current_doc,

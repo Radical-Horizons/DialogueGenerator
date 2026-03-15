@@ -326,6 +326,18 @@ class ConfigurationService:
         self.unity_dialogues_path = self._initialize_unity_dialogues_path()
         return self.unity_dialogues_path
 
+    def get_unity_layouts_path(self) -> Optional[Path]:
+        """Retourne le répertoire des layouts (Assets/Layouts), frère de Assets/Dialogue.
+        
+        Les layouts sont stockés à part des dialogues pour séparer clairement
+        contenu (.json dans Dialogue) et positions (.layout.json dans Layouts).
+        """
+        dialogue_path = self.get_unity_dialogues_path()
+        if not dialogue_path:
+            return None
+        layouts_path = Path(dialogue_path).parent / "Layouts"
+        return layouts_path
+
     def set_unity_dialogues_path(self, new_path_str: Union[str, Path]) -> bool:
         """Sets and saves the new Unity dialogues path after validation.
         

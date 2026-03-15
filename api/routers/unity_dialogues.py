@@ -318,7 +318,9 @@ async def delete_unity_dialogue(
                 request_id=request_id
             )
         
-        # Supprimer le fichier
+        document_key = filename[:-5] if filename.endswith(".json") else filename
+        
+        # Supprimer le fichier dialogue
         try:
             file_path.unlink()
             logger.info(f"Dialogue Unity supprimé: {filename} (request_id: {request_id})")
@@ -328,6 +330,28 @@ async def delete_unity_dialogue(
                 details={"filename": filename, "error": str(e)},
                 request_id=request_id
             )
+        
+        # Supprimer le layout associé (Assets/Layouts)
+        layouts_path = config_service.get_unity_layouts_path()
+        if layouts_path:
+            layout_dir = Path(layouts_path)
+            for sidecar in (f"{document_key}.layout.json", f"{document_key}.layout.meta"):
+                sidecar_path = layout_dir / sidecar
+                if sidecar_path.is_file():
+                    try:
+                        sidecar_path.unlink()
+                        logger.info(f"Layout supprimé: {sidecar} (request_id: {request_id})")
+                    except (OSError, IOError) as e:
+                        logger.warning("Impossible de supprimer le layout %s: %s", sidecar, e)
+        
+        # Supprimer le sidecar last_seq (ADR-006) s'il existe
+        seq_path = unity_dir / f"{document_key}.seq"
+        if seq_path.is_file():
+            try:
+                seq_path.unlink()
+                logger.info(f"Sidecar .seq supprimé pour {document_key} (request_id: {request_id})")
+            except (OSError, IOError) as e:
+                logger.warning("Impossible de supprimer le fichier .seq %s: %s", document_key, e)
         
     except (ValidationException, NotFoundException):
         raise

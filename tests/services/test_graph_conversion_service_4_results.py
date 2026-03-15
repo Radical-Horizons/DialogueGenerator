@@ -139,8 +139,9 @@ def test_graph_to_unity_json_exports_4_test_results():
     
     # WHEN: Conversion en Unity JSON
     unity_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-    unity_nodes = json.loads(unity_json)
-    
+    doc = json.loads(unity_json)
+    unity_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
     # THEN: Le JSON Unity doit contenir les 4 champs test*Node dans le choix (pas de TestNode)
     start_node = next((n for n in unity_nodes if n["id"] == "START"), None)
     assert start_node is not None
@@ -223,8 +224,9 @@ def test_graph_to_unity_json_exports_2_test_results_retrocompatibilite():
     
     # WHEN: Conversion en Unity JSON
     unity_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-    unity_nodes = json.loads(unity_json)
-    
+    doc = json.loads(unity_json)
+    unity_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
     # THEN: Le choix doit avoir testFailureNode et testSuccessNode (rétrocompatibilité)
     start_node = next((n for n in unity_nodes if n["id"] == "START"), None)
     assert start_node is not None

@@ -246,7 +246,8 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
   },
 
   resetGraph: () => {
-    set(initialState)
+    const currentSeq = get().activeLoadSeq
+    set({ ...initialState, activeLoadSeq: currentSeq })
   },
 
   setShowDeleteNodeConfirm: (show) => {

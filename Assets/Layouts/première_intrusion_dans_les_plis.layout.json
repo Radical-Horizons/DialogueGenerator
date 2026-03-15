@@ -1,0 +1,20 @@
+{
+  "nodes": {
+    "START": {
+      "x": 510,
+      "y": -210
+    },
+    "test-node-START-choice-1": {
+      "x": 200,
+      "y": 280
+    },
+    "test-node-START-choice-2": {
+      "x": 400,
+      "y": 280
+    },
+    "test-node-START-choice-3": {
+      "x": 600,
+      "y": 280
+    }
+  }
+}

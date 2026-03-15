@@ -360,6 +360,41 @@ async def list_items(
         )
 
 
+@router.get(
+    "/items/{name}",
+    response_model=ItemResponse,
+    status_code=status.HTTP_200_OK
+)
+async def get_item(
+    name: str,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)]
+) -> ItemResponse:
+    """Récupère un objet par son nom.
+
+    Args:
+        name: Nom de l'objet.
+        request: La requête HTTP.
+        context_builder: ContextBuilder injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        L'objet demandé.
+
+    Raises:
+        NotFoundException: Si l'objet n'existe pas.
+    """
+    item_data = context_builder.get_item_details_by_name(name)
+    if item_data is None:
+        raise NotFoundException(
+            resource_type="Objet",
+            resource_id=name,
+            request_id=request_id
+        )
+    return ItemResponse(name=name, data=item_data)
+
+
 @router.post(
     "/build",
     response_model=BuildContextResponse,

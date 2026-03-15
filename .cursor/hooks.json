@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "node .cursor/hooks/bmad-chain-before.js"
+      }
+    ],
+    "stop": [
+      {
+        "command": "node .cursor/hooks/bmad-chain.js",
+        "loop_limit": 5
+      }
+    ]
+  }
+}

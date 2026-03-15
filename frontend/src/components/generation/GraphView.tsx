@@ -44,10 +44,14 @@ interface GraphViewProps {
 /* eslint-disable react-refresh/only-export-components -- helper partagé avec le composant, déplacer en fichier séparé si besoin */
 export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: Edge[] } {
   try {
-    const unityNodes: UnityDialogueNode[] = JSON.parse(jsonContent)
-    
-    if (!Array.isArray(unityNodes)) {
-      throw new Error('Le JSON Unity doit être un tableau de nœuds')
+    const parsed: unknown = JSON.parse(jsonContent)
+    let unityNodes: UnityDialogueNode[]
+    if (Array.isArray(parsed)) {
+      unityNodes = parsed
+    } else if (typeof parsed === 'object' && parsed !== null && 'nodes' in parsed && Array.isArray((parsed as { nodes: unknown }).nodes)) {
+      unityNodes = (parsed as { nodes: UnityDialogueNode[] }).nodes
+    } else {
+      throw new Error('Le JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)')
     }
     
     const reactflowNodes: Node[] = []

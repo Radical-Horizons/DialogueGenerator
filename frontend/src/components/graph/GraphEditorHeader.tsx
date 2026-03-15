@@ -579,8 +579,42 @@ export function GraphEditorHeader({
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent'
                 }}
+                title="Exporter le graphe en image (PNG ou SVG)"
               >
-                📤 Exporter
+                📤 Exporter en image (PNG/SVG)
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                data-testid="btn-export-unity"
+                onClick={() => {
+                  setShowActionsDropdown(false)
+                  handleExportUnity()
+                }}
+                disabled={nodes.length === 0}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '0.5rem 1rem',
+                  border: 'none',
+                  background: 'transparent',
+                  color: nodes.length === 0 ? theme.text.secondary : theme.text.primary,
+                  textAlign: 'left',
+                  fontSize: '0.9rem',
+                  cursor: nodes.length === 0 ? 'not-allowed' : 'pointer',
+                  opacity: nodes.length === 0 ? 0.6 : 1,
+                }}
+                onMouseEnter={(e) => {
+                  if (nodes.length > 0)
+                    e.currentTarget.style.backgroundColor = theme.state.hover.background
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+                title="Exporter le dialogue au format Unity JSON"
+                aria-label="Export Unity"
+              >
+                📦 Export Unity
               </button>
               <button
                 type="button"
@@ -669,25 +703,6 @@ export function GraphEditorHeader({
           aria-label="Rechercher"
         >
           🔍 Rechercher
-        </button>
-        <button
-          type="button"
-          onClick={handleExportUnity}
-          disabled={nodes.length === 0}
-          style={{
-            padding: '0.5rem 1rem',
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: '6px',
-            backgroundColor: theme.button.default.background,
-            color: nodes.length === 0 ? theme.text.secondary : theme.button.default.color,
-            cursor: nodes.length === 0 ? 'not-allowed' : 'pointer',
-            opacity: nodes.length === 0 ? 0.6 : 1,
-            fontSize: '0.9rem',
-          }}
-          title="Exporter le dialogue au format Unity JSON"
-          aria-label="Export Unity"
-        >
-          📦 Export Unity
         </button>
         <div style={{ position: 'relative' }}>
           <button

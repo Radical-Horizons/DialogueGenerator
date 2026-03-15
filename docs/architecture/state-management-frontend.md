@@ -168,7 +168,7 @@ Some stores integrate with React Query (`@tanstack/react-query`) for:
 
 ## State Persistence
 
-- **LocalStorage**: Auth tokens, user preferences, positions des nœuds (graph) par fichier. Pour le graphe, les positions sont fusionnées avec localStorage **uniquement au chargement** ; en cours de session, la source pour les positions est le store.
+- **LocalStorage**: Auth tokens, user preferences. Les positions du graphe sont persistées **uniquement** via l'API documents (GET/PUT layout), pas dans localStorage.
 - **Session Storage**: Temporary UI state
 - **URL State**: Some filters/selections in query params
 - **IndexedDB (graph, ADR-006)**: Journal local par document pour résilience (fermeture onglet, crash) ; dernier snapshot + mutations en attente, sync avec serveur au chargement

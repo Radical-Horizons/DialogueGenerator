@@ -5,6 +5,17 @@ import { describe, it, expect } from 'vitest'
 import { unityJsonToGraph } from '../components/generation/GraphView'
 
 describe('GraphView - 4 résultats de test', () => {
+  it('accepte le format document (schemaVersion + nodes) comme le format tableau', () => {
+    const documentJson = JSON.stringify({
+      schemaVersion: '1.1.0',
+      nodes: [{ id: 'START', speaker: 'NPC', line: 'Hello', choices: [] }],
+    })
+    const { nodes } = unityJsonToGraph(documentJson)
+    expect(nodes).toHaveLength(1)
+    expect(nodes[0].id).toBe('START')
+    expect(nodes[0].data).toMatchObject({ line: 'Hello' })
+  })
+
   it('devrait créer un TestNode automatiquement quand un choix contient un test', () => {
     // GIVEN: JSON Unity avec un DialogueNode contenant un choix avec test
     const unityJson = JSON.stringify([

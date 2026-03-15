@@ -191,12 +191,12 @@ export function useGraphToolbar(
         key: 'ctrl+s',
         handler: (e) => {
           e.preventDefault()
-          if (activeDialogueFilename && !isGraphSaving) {
+          if (activeDialogueFilename && !isGraphSaving && !isLoadingDialogue) {
             void handleSave()
           }
         },
         description: 'Sauvegarder',
-        enabled: !!activeDialogueFilename && !isGraphSaving,
+        enabled: !!activeDialogueFilename && !isGraphSaving && !isLoadingDialogue,
       },
       {
         key: 'ctrl+g',
@@ -255,28 +255,28 @@ export function useGraphToolbar(
         key: 'ctrl+z',
         handler: (e) => {
           e.preventDefault()
-          if (useGraphStore.getState().canUndo()) useGraphStore.getState().undo()
+          if (!isLoadingDialogue && useGraphStore.getState().canUndo()) useGraphStore.getState().undo()
         },
         description: 'Annuler (undo)',
-        enabled: () => useGraphStore.getState().canUndo(),
+        enabled: () => !isLoadingDialogue && useGraphStore.getState().canUndo(),
       },
       {
         key: 'ctrl+y',
         handler: (e) => {
           e.preventDefault()
-          if (useGraphStore.getState().canRedo()) useGraphStore.getState().redo()
+          if (!isLoadingDialogue && useGraphStore.getState().canRedo()) useGraphStore.getState().redo()
         },
         description: 'Refaire (redo)',
-        enabled: () => useGraphStore.getState().canRedo(),
+        enabled: () => !isLoadingDialogue && useGraphStore.getState().canRedo(),
       },
       {
         key: 'ctrl+shift+z',
         handler: (e) => {
           e.preventDefault()
-          if (useGraphStore.getState().canRedo()) useGraphStore.getState().redo()
+          if (!isLoadingDialogue && useGraphStore.getState().canRedo()) useGraphStore.getState().redo()
         },
         description: 'Refaire (redo)',
-        enabled: () => useGraphStore.getState().canRedo(),
+        enabled: () => !isLoadingDialogue && useGraphStore.getState().canRedo(),
       },
       {
         key: 'ctrl+0',

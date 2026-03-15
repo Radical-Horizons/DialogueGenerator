@@ -59,10 +59,10 @@ Ce document explique la distinction entre **Source of Truth métier**, **project
 **Définition** : Les **positions** et autres états d'édition (zoom, pan, sélection) sont des données de confort d'édition persistantes, mais **pas** une vérité métier Unity.
 
 **Caractéristiques** :
-- Positions stockées dans localStorage (clé: `node_positions:{filename}`)
-- Priorité de merge : positions localStorage > positions draft > positions backend
-- **Ne doit pas** influencer la sémantique (edges, handles, règles `test*Node`)
-- **En session** : les positions ne sont lues depuis localStorage **qu'au chargement** (merge une fois dans le store). Pendant la session, la seule source pour les positions est le store ; localStorage est mis à jour à chaque changement de position (cache pour la prochaine ouverture).
+- **SoT des positions** : unique = backend via `GET/PUT /api/v1/documents/{id}/layout` (API documents). Les positions ne sont ni lues ni écrites dans localStorage.
+- **En session** : les positions viennent du store (layout → projection `documentToGraph`). Toute modification (drag) met à jour `layout` puis est persistée via `PUT layout` (autosave).
+- **Chemin legacy** (chargement sans document API, ex. 404) : positions fournies par la réponse de l'API (ex. `loadGraph`), pas de merge avec localStorage.
+- **Ne doit pas** influencer la sémantique (edges, handles, règles `test*Node`).
 
 **React Flow et source de vérité (ADR-007)** : Le canvas utilise React Flow en **mode controlled** : les nodes et edges passés à `<ReactFlow>` viennent **uniquement** du store (graphStore). Le **viewport** (zoom, pan, caméra) reste en état **local** à React Flow (non persisté). Détails : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (ADR-007).
 
@@ -79,7 +79,7 @@ API /load → GraphConversionService.unity_json_to_graph()
     ↓
 GraphModel canonique (nodes/edges + métadonnées)
     ↓
-Frontend : Merge avec positions localStorage
+Frontend : positions depuis layout (API documents) ou depuis réponse loadGraph (legacy)
     ↓
 ReactFlow (nodes/edges avec positions)
 ```

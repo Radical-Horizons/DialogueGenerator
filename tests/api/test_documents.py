@@ -137,6 +137,30 @@ class TestGetDocument:
         assert data["error"].get("code") == "missing_choice_id"
         assert "path" in data["error"].get("details", {})
 
+    def test_get_document_raw_array_normalized_and_returned_200(
+        self, client, mock_config_service, tmp_path
+    ):
+        """GET avec fichier tableau Unity brut (sans schemaVersion) → 200, document normalisé (évite 500)."""
+        doc_id = "legacy-array"
+        raw_array = [
+            {
+                "id": "START",
+                "speaker": "NPC",
+                "line": "Hello",
+                "choices": [{"text": "OK", "targetNode": "END"}],
+            }
+        ]
+        (tmp_path / f"{doc_id}.json").write_text(json.dumps(raw_array), encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+        response = client.get(f"/api/v1/documents/{doc_id}")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["document"]["schemaVersion"] == "1.1.0"
+        assert data["document"]["nodes"] == raw_array
+        assert data["schemaVersion"] == "1.1.0"
+
 
 class TestCheckMigration:
     """Tests GET /api/v1/documents/check-migration (CI / pre-commit gate)."""
@@ -295,12 +319,15 @@ class TestPutDocument:
             json.dumps({"revision": 4, "updated_at": "2026-01-30T12:00:00Z"}),
             encoding="utf-8",
         )
-        (tmp_path / f"{doc_id}.layout.json").write_text(json.dumps(layout), encoding="utf-8")
-        (tmp_path / f"{doc_id}.layout.meta").write_text(
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
+        (layout_dir / f"{doc_id}.layout.json").write_text(json.dumps(layout), encoding="utf-8")
+        (layout_dir / f"{doc_id}.layout.meta").write_text(
             json.dumps({"revision": 2, "updated_at": "2026-01-30T12:00:00Z"}),
             encoding="utf-8",
         )
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         stale_put = client.put(
             f"/api/v1/documents/{doc_id}",
@@ -454,14 +481,17 @@ class TestGetLayout:
         doc = _doc_v1_1_0()
         layout = {"viewport": {"x": 0, "y": 0, "zoom": 1}, "nodes": []}
         (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
-        (tmp_path / f"{doc_id}.layout.json").write_text(
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
+        (layout_dir / f"{doc_id}.layout.json").write_text(
             json.dumps(layout), encoding="utf-8"
         )
-        (tmp_path / f"{doc_id}.layout.meta").write_text(
+        (layout_dir / f"{doc_id}.layout.meta").write_text(
             json.dumps({"revision": 2, "updated_at": "2026-01-30T12:00:00Z"}),
             encoding="utf-8",
         )
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         response = client.get(f"/api/v1/documents/{doc_id}/layout")
 
@@ -488,7 +518,10 @@ class TestGetLayout:
         doc_id = "doc-no-layout"
         doc = _doc_v1_1_0()
         (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         response = client.get(f"/api/v1/documents/{doc_id}/layout")
 
@@ -502,10 +535,13 @@ class TestGetLayout:
         doc = _doc_v1_1_0()
         layout = {}
         (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
-        (tmp_path / f"{doc_id}.layout.json").write_text(
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
+        (layout_dir / f"{doc_id}.layout.json").write_text(
             json.dumps(layout), encoding="utf-8"
         )
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         response = client.get(f"/api/v1/documents/{doc_id}/layout")
 
@@ -525,14 +561,17 @@ class TestPutLayout:
         doc = _doc_v1_1_0()
         layout = {"viewport": {"x": 0, "y": 0, "zoom": 1}}
         (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
-        (tmp_path / f"{doc_id}.layout.json").write_text(
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
+        (layout_dir / f"{doc_id}.layout.json").write_text(
             json.dumps(layout), encoding="utf-8"
         )
-        (tmp_path / f"{doc_id}.layout.meta").write_text(
+        (layout_dir / f"{doc_id}.layout.meta").write_text(
             json.dumps({"revision": 2, "updated_at": "2026-01-30T12:00:00Z"}),
             encoding="utf-8",
         )
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         updated_layout = {"viewport": {"x": 10, "y": 10, "zoom": 1.2}}
         response = client.put(
@@ -544,11 +583,11 @@ class TestPutLayout:
         data = response.json()
         assert data["revision"] == 3
         persisted = json.loads(
-            (tmp_path / f"{doc_id}.layout.json").read_text(encoding="utf-8")
+            (layout_dir / f"{doc_id}.layout.json").read_text(encoding="utf-8")
         )
         assert persisted == updated_layout
         meta = json.loads(
-            (tmp_path / f"{doc_id}.layout.meta").read_text(encoding="utf-8")
+            (layout_dir / f"{doc_id}.layout.meta").read_text(encoding="utf-8")
         )
         assert meta["revision"] == 3
 
@@ -560,14 +599,17 @@ class TestPutLayout:
         doc = _doc_v1_1_0()
         current_layout = {"viewport": {"x": 0, "y": 0, "zoom": 1}}
         (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
-        (tmp_path / f"{doc_id}.layout.json").write_text(
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
+        (layout_dir / f"{doc_id}.layout.json").write_text(
             json.dumps(current_layout), encoding="utf-8"
         )
-        (tmp_path / f"{doc_id}.layout.meta").write_text(
+        (layout_dir / f"{doc_id}.layout.meta").write_text(
             json.dumps({"revision": 5, "updated_at": "2026-01-30T12:00:00Z"}),
             encoding="utf-8",
         )
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         response = client.put(
             f"/api/v1/documents/{doc_id}/layout",
@@ -579,7 +621,7 @@ class TestPutLayout:
         assert data["layout"] == current_layout
         assert data["revision"] == 5
         persisted = json.loads(
-            (tmp_path / f"{doc_id}.layout.json").read_text(encoding="utf-8")
+            (layout_dir / f"{doc_id}.layout.json").read_text(encoding="utf-8")
         )
         assert persisted == current_layout
 
@@ -588,7 +630,10 @@ class TestPutLayout:
     ):
         """PUT layout pour document inexistant → 404."""
         tmp_path.mkdir(parents=True, exist_ok=True)
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         response = client.put(
             "/api/v1/documents/nonexistent-id/layout",
@@ -604,7 +649,10 @@ class TestPutLayout:
         doc_id = "doc-no-layout"
         doc = _doc_v1_1_0()
         (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
         layout = {"viewport": {"x": 0, "y": 0, "zoom": 1}}
 
         response = client.put(
@@ -614,10 +662,10 @@ class TestPutLayout:
 
         assert response.status_code == 200
         assert response.json()["revision"] == 1
-        assert (tmp_path / f"{doc_id}.layout.json").exists()
-        assert (tmp_path / f"{doc_id}.layout.meta").exists()
+        assert (layout_dir / f"{doc_id}.layout.json").exists()
+        assert (layout_dir / f"{doc_id}.layout.meta").exists()
         persisted = json.loads(
-            (tmp_path / f"{doc_id}.layout.json").read_text(encoding="utf-8")
+            (layout_dir / f"{doc_id}.layout.json").read_text(encoding="utf-8")
         )
         assert persisted == layout
 
@@ -628,7 +676,10 @@ class TestPutLayout:
         doc_id = "doc-no-layout-yet"
         doc = _doc_v1_1_0()
         (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
+        layout_dir = tmp_path / "Layouts"
+        layout_dir.mkdir(parents=True, exist_ok=True)
         mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        mock_config_service.get_unity_layouts_path.return_value = layout_dir
 
         response = client.put(
             f"/api/v1/documents/{doc_id}/layout",
@@ -639,4 +690,4 @@ class TestPutLayout:
         data = response.json()
         assert data["layout"] == {}
         assert data["revision"] == 1
-        assert not (tmp_path / f"{doc_id}.layout.json").exists()
+        assert not (layout_dir / f"{doc_id}.layout.json").exists()

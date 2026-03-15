@@ -214,8 +214,9 @@ class GraphNodeOrchestrator:
             raise ValueError("Aucun choix disponible pour la génération batch.")
 
         graph_gen = GraphGenerationService(self._generation_service)
+        parent_node = {**parent_node_content, "id": parent_node_id}
         batch_result = await graph_gen.generate_nodes_for_all_choices(
-            parent_node=parent_node_content,
+            parent_node=parent_node,
             instructions=instructions,
             context=context_selections,
             llm_client=llm_client,

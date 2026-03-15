@@ -105,8 +105,9 @@ class TestRegressionStableIDCorruption:
         # WHEN: Conversion vers ReactFlow puis retour
         nodes, edges = GraphConversionService.unity_json_to_graph(unity_json_str)
         converted_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-        converted_nodes = json.loads(converted_json)
-        
+        doc = json.loads(converted_json)
+        converted_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
         # THEN: IDs doivent être préservés
         converted_ids = [node["id"] for node in converted_nodes]
         assert "START" in converted_ids
@@ -221,8 +222,9 @@ class TestRegression4TestResults:
         
         # WHEN: Reconversion vers JSON Unity
         converted_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-        converted_nodes = json.loads(converted_json)
-        
+        doc = json.loads(converted_json)
+        converted_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
         # WHEN: Validation
         is_valid, errors = renderer.validate_nodes(converted_nodes)
         

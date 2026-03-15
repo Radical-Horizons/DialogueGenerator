@@ -1,15 +1,18 @@
 /**
  * Composant pour afficher une liste d'éléments de contexte (personnages, lieux, objets).
+ * Recherche avec debounce 300ms, badge type d'entité, chargement progressif (scroll).
  */
-import { useState, useEffect, useRef, useMemo } from 'react'
-import type { CharacterResponse, LocationResponse, ItemResponse, ElementMode } from '../../types/api'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, ElementMode } from '../../types/api'
 import { theme } from '../../theme'
 import { highlightText } from '../../utils/textHighlight'
+import { getGddEntitySummary } from '../../utils/gddSummary'
+import { useDebounce } from '../../hooks/useDebounce'
 
-type ContextItem = CharacterResponse | LocationResponse | ItemResponse
+export type ContextListItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse | { name: string; data?: Record<string, unknown> }
 
 interface ContextListProps {
-  items: ContextItem[]
+  items: ContextListItem[]
   selectedItems: string[]
   onItemClick: (name: string) => void
   onItemToggle: (name: string) => void
@@ -18,12 +21,24 @@ interface ContextListProps {
   isLoading?: boolean
   getElementMode?: (name: string) => ElementMode | null
   onModeChange?: (name: string, mode: ElementMode) => void
+  /** Afficher les cases à cocher (false pour onglets lecture seule comme Régions, Thèmes). */
+  showCheckboxes?: boolean
+  /** Label du type d'entité pour le badge (ex. "Personnage", "Lieu"). */
+  entityTypeLabel?: string
+  /** Callback quand l'utilisateur scroll en bas (chargement progressif). */
+  onScrollToBottom?: () => void
+  /** Afficher un indicateur de chargement en bas (suite de pages). */
+  loadingMore?: boolean
 }
 
 type SortType = 'name-asc' | 'name-desc' | 'selected-first'
 
 interface ContextListPropsWithTab extends ContextListProps {
   tabId?: string
+}
+
+function hasData(item: ContextListItem): item is ContextListItem & { data: Record<string, unknown> } {
+  return 'data' in item && item.data != null && typeof item.data === 'object'
 }
 
 export function ContextList({
@@ -37,8 +52,13 @@ export function ContextList({
   getElementMode,
   onModeChange,
   tabId,
+  showCheckboxes = true,
+  entityTypeLabel,
+  onScrollToBottom,
+  loadingMore = false,
 }: ContextListPropsWithTab) {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQueryRaw, setSearchQueryRaw] = useState('')
+  const debouncedSearch = useDebounce(searchQueryRaw, 300)
   const [sortType, setSortType] = useState<SortType>('name-asc')
   const searchInputRef = useRef<HTMLInputElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -46,7 +66,7 @@ export function ContextList({
 
   const filteredItems = useMemo(() => {
     let result = items.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      item.name.toLowerCase().includes(debouncedSearch.toLowerCase())
     )
     
     // Appliquer le tri
@@ -69,7 +89,16 @@ export function ContextList({
     })
     
     return result
-  }, [items, searchQuery, selectedItems, sortType])
+  }, [items, debouncedSearch, selectedItems, sortType])
+
+  const handleScroll = useCallback(() => {
+    const el = scrollContainerRef.current
+    if (!el || !onScrollToBottom) return
+    const { scrollTop, scrollHeight, clientHeight } = el
+    if (scrollHeight - (scrollTop + clientHeight) < 80) {
+      onScrollToBottom()
+    }
+  }, [onScrollToBottom])
 
   // Raccourci clavier pour focus sur la recherche (/)
   useEffect(() => {
@@ -130,8 +159,8 @@ export function ContextList({
             ref={searchInputRef}
             type="text"
             placeholder="Rechercher... (/)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQueryRaw}
+            onChange={(e) => setSearchQueryRaw(e.target.value)}
             style={{
               flex: 1,
               padding: '0.5rem',
@@ -160,13 +189,19 @@ export function ContextList({
           </select>
         </div>
       </div>
-      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '0.5rem', minHeight: 0 }}>
+      <div
+        ref={scrollContainerRef}
+        data-testid="context-list-scroll"
+        onScroll={handleScroll}
+        style={{ flex: 1, overflowY: 'auto', padding: '0.5rem', minHeight: 0 }}
+      >
         {filteredItems.length === 0 ? (
           <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
-            {searchQuery ? 'Aucun résultat' : 'Aucun élément'}
+            {debouncedSearch ? 'Aucun résultat' : 'Aucun élément'}
           </div>
         ) : (
-          filteredItems.map((item) => {
+          <>
+          {filteredItems.map((item) => {
             const isSelected = selectedItems.includes(item.name)
             const isDetailSelected = selectedDetail === item.name
             const currentMode = getElementMode ? getElementMode(item.name) : null
@@ -212,18 +247,43 @@ export function ContextList({
                   }
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={(e) => {
-                    e.stopPropagation()
-                    onItemToggle(item.name)
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <span style={{ flex: 1, fontWeight: isSelected ? 'bold' : 'normal' }}>
-                  {highlightText(item.name, searchQuery)}
-                </span>
+                {showCheckboxes && (
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => {
+                      e.stopPropagation()
+                      onItemToggle(item.name)
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>
+                      {highlightText(item.name, debouncedSearch)}
+                    </span>
+                    {entityTypeLabel && (
+                      <span
+                        style={{
+                          fontSize: '0.7rem',
+                          padding: '0.15rem 0.4rem',
+                          borderRadius: '4px',
+                          backgroundColor: theme.background.tertiary,
+                          color: theme.text.secondary,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {entityTypeLabel}
+                      </span>
+                    )}
+                  </span>
+                  {hasData(item) && getGddEntitySummary(item.data) && (
+                    <span style={{ fontSize: '0.8rem', color: theme.text.secondary, lineHeight: 1.2 }}>
+                      {getGddEntitySummary(item.data)}
+                    </span>
+                  )}
+                </div>
                 {isSelected && currentMode && onModeChange && (
                   <button
                     type="button"
@@ -257,7 +317,13 @@ export function ContextList({
                 )}
               </div>
             )
-          })
+          })}
+          {loadingMore && (
+            <div style={{ padding: '0.75rem', textAlign: 'center', color: theme.text.secondary, fontSize: '0.9rem' }}>
+              Chargement…
+            </div>
+          )}
+          </>
         )}
       </div>
     </div>

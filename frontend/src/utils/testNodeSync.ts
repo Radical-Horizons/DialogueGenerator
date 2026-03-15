@@ -255,12 +255,12 @@ export function syncChoiceFromTestNode(
 
   return {
     ...existingChoice,
-    test: testNodeData.test || undefined,
+    test: testNodeData.test ?? existingChoice.test,
     // Note: line du TestNode n'est pas synchronisé vers choice.text (choix.text reste inchangé)
-    testCriticalFailureNode: testNodeData.criticalFailureNode || undefined,
-    testFailureNode: testNodeData.failureNode || undefined,
-    testSuccessNode: testNodeData.successNode || undefined,
-    testCriticalSuccessNode: testNodeData.criticalSuccessNode || undefined,
+    testCriticalFailureNode: testNodeData.criticalFailureNode ?? (existingChoice as Choice & { testCriticalFailureNode?: string }).testCriticalFailureNode,
+    testFailureNode: testNodeData.failureNode ?? (existingChoice as Choice & { testFailureNode?: string }).testFailureNode,
+    testSuccessNode: testNodeData.successNode ?? (existingChoice as Choice & { testSuccessNode?: string }).testSuccessNode,
+    testCriticalSuccessNode: testNodeData.criticalSuccessNode ?? (existingChoice as Choice & { testCriticalSuccessNode?: string }).testCriticalSuccessNode,
   }
 }
 

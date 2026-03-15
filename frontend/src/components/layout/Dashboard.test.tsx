@@ -28,6 +28,10 @@ vi.mock('../generation/GenerationPanel', () => ({
   GenerationPanel: () => <div data-testid="generation-panel">Generation Panel</div>,
 }))
 
+vi.mock('../graph/GraphEditor', () => ({
+  GraphEditor: () => <div data-testid="graph-editor">Graph Editor</div>,
+}))
+
 vi.mock('../context/ContextSelector', () => ({
   ContextSelector: () => <div data-testid="context-selector">Context Selector</div>,
 }))

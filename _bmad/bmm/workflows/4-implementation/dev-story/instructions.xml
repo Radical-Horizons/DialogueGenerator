@@ -236,11 +236,12 @@
     <action>Run tests to confirm they now pass</action>
     <action>Handle error conditions and edge cases as specified in task/subtask</action>
 
-    <!-- REFACTOR PHASE -->
-    <action>Improve code structure while keeping tests green</action>
-    <action>Ensure code follows architecture patterns and coding standards from Dev Notes</action>
-
-    <action>Document technical approach and decisions in Dev Agent Record → Implementation Plan</action>
+    <!-- REFACTOR PHASE (mandatory before marking 🔵 complete) -->
+    <action>For each task that has a 🔵 Refactor subtask: execute the refactor phase before marking that subtask [x].</action>
+    <action>Refactor = at least one of: (a) apply the "points à considérer" from the story (e.g. extract hook, improve naming, reuse existing component), or (b) document in Dev Agent Record → Completion Notes why no refactor was needed (e.g. "Refactor N/A: no duplication; naming already aligned").</action>
+    <action>Improve code structure while keeping tests green; ensure code follows architecture patterns and coding standards from Dev Notes.</action>
+    <action>Document technical approach, refactor actions (or N/A), and decisions in Dev Agent Record → Implementation Plan / Completion Notes.</action>
+    <critical>Do NOT mark a 🔵 Refactor checkbox [x] unless you have either performed a refactor change or written an explicit "Refactor N/A: ..." note in Dev Agent Record for that task.</critical>
 
     <action if="new dependencies required beyond story specifications">HALT: "Additional dependencies need user approval"</action>
     <action if="3 consecutive implementation failures occur">HALT and request guidance</action>
@@ -293,11 +294,14 @@
       <action>Add to Dev Agent Record → Completion Notes: "✅ Resolved review finding [{{severity}}]: {{description}}"</action>
     </check>
 
+    <!-- REFACTOR GATE: do not mark 🔵 [x] without evidence -->
+    <action>For each task that contains a "🔵 Refactor" subtask: before marking that subtask [x], verify that Dev Agent Record already contains either (a) a description of what was refactored for this task, or (b) an explicit "Refactor N/A: [reason]" for this task. If neither is present, perform the refactor or add the N/A note, then mark [x].</action>
+
     <!-- ONLY MARK COMPLETE IF ALL VALIDATION PASS -->
     <check if="ALL validation gates pass AND tests ACTUALLY exist and pass">
       <action>ONLY THEN mark the task (and subtasks) checkbox with [x]</action>
       <action>Update File List section with ALL new, modified, or deleted files (paths relative to repo root)</action>
-      <action>Add completion notes to Dev Agent Record summarizing what was ACTUALLY implemented and tested</action>
+      <action>Add completion notes to Dev Agent Record summarizing what was ACTUALLY implemented, tested, and refactored (or N/A)</action>
     </check>
 
     <check if="ANY validation fails">

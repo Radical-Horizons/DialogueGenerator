@@ -43,7 +43,6 @@ export function useDialogueLoader(
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const prevSelectedDialogueRef = useRef<UnityDialogueMetadata | null>(null)
   const loadInFlightRef = useRef(false)
-  const routeLoadSeqRef = useRef(0)
   const activeDialogueFilenameRef = useRef<string | null>(null)
   const lastNetworkErrorRef = useRef<{ message: string; timestamp: number } | null>(null)
   const saveRetryBlockedUntilRef = useRef<number>(0)
@@ -53,13 +52,16 @@ export function useDialogueLoader(
     dialogueMetadata,
     loadDialogue,
     loadDialogueByDocumentId,
+    loadDialogueFromRawJson,
     saveDialogue,
     validateGraph,
     hasUnsavedChanges,
+    documentId,
     isLoading: isGraphLoading,
     isSaving: isGraphSaving,
     isGenerating,
     resetGraph,
+    incrementLoadSeq,
   } = useGraphStore()
 
   const activeDialogueFilename = selectedDialogue?.filename ?? dialogueMetadata.filename ?? null
@@ -86,44 +88,132 @@ export function useDialogueLoader(
   }, [selectedDialogue?.filename, resetGraph])
 
   useEffect(() => {
-    if (selectedDialogue) {
-      prevSelectedDialogueRef.current = selectedDialogue
+    if (!selectedDialogue) {
+      prevSelectedDialogueRef.current = null
+      return
+    }
+
+    const targetFilename = selectedDialogue.filename
+    
+    const run = async () => {
+      if (loadInFlightRef.current && prevSelectedDialogueRef.current?.filename === targetFilename) {
+        return
+      }
       loadInFlightRef.current = true
       setIsLoadingDialogue(true)
-      unityDialoguesAPI.getUnityDialogue(selectedDialogue.filename)
-        .then((response) => loadDialogue(response.json_content, undefined, selectedDialogue.filename))
-        .then(async () => {
+      prevSelectedDialogueRef.current = selectedDialogue
+
+      const state = useGraphStore.getState()
+      const currentFilename = state.dialogueMetadata?.filename ?? state.documentId ?? null
+      const norm = (s: string) => s.replace(/\.json$/i, '').toLowerCase()
+      const isSameDialogue =
+        !!currentFilename &&
+        !!targetFilename &&
+        norm(currentFilename) === norm(targetFilename)
+      
+      if (isSameDialogue) {
+        setIsLoadingDialogue(false)
+        loadInFlightRef.current = false
+        return
+      }
+
+      const leavingDirty =
+        state.hasUnsavedChanges &&
+        !!currentFilename &&
+        !isSameDialogue
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'useDialogueLoader.ts:switch', message: 'Leaving dialogue', data: { hasUnsavedChanges: state.hasUnsavedChanges, currentFilename, targetFilename, isSameDialogue, willSave: leavingDirty }, timestamp: Date.now(), hypothesisId: 'C' }) }).catch(() => {})
+      // #endregion
+
+      if (leavingDirty) {
+        try {
+          await saveDialogue()
+        } catch (err) {
+          console.error('Erreur sauvegarde avant chargement:', err)
+          toast(`Impossible de sauvegarder avant changement: ${getErrorMessage(err)}`, 'error')
+          loadInFlightRef.current = false
+          setIsLoadingDialogue(false)
+          return
+        }
+      }
+
+      // Reset total de l'état avant de commencer un nouveau chargement
+      resetGraph()
+      const loadSeq = incrementLoadSeq()
+
+      try {
+        let loaded = false
+        const docIdsToTry = /\.json$/i.test(targetFilename)
+          ? [targetFilename.replace(/\.json$/i, ''), targetFilename]
+          : [targetFilename, `${targetFilename}.json`]
+        for (const documentId of docIdsToTry) {
           try {
-            await validateGraph()
-          } catch (err) {
-            console.error('Erreur lors de la validation automatique au chargement:', err)
+            await loadDialogueByDocumentId(documentId)
+            loaded = true
+            break
+          } catch {
+            continue
           }
+        }
+        
+        // Vérification de séquence après les tentatives asynchrones
+        if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
           loadInFlightRef.current = false
           setIsLoadingDialogue(false)
-          const state = useGraphStore.getState()
-          if (state.nodes.length > 0 && !state.selectedNodeId) {
-            state.setSelectedNode(state.nodes[0].id)
+          return
+        }
+
+        if (!loaded) {
+          const response = await unityDialoguesAPI.getUnityDialogue(targetFilename)
+          // Vérification de séquence après l'appel API externe
+          if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+            loadInFlightRef.current = false
+            setIsLoadingDialogue(false)
+            return
           }
-        })
-        .catch((err) => {
-          console.error('Erreur lors du chargement du dialogue:', err)
-          const errorMessage = getErrorMessage(err)
-          const isNetworkError =
-            errorMessage.includes('connexion au serveur') ||
-            errorMessage.includes('connecter au serveur') ||
-            errorMessage.includes('Impossible de se connecter')
-          const displayMessage =
-            isNetworkError || errorMessage.startsWith('Erreur')
-              ? errorMessage
-              : `Erreur: ${errorMessage}`
-          toast(displayMessage, 'error')
+          
+          const stem = /\.json$/i.test(targetFilename) ? targetFilename.replace(/\.json$/i, '') : targetFilename
+          await loadDialogueFromRawJson(response.json_content, stem || targetFilename)
+        }
+        
+        // Vérification finale avant validation et UI update
+        if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
           loadInFlightRef.current = false
           setIsLoadingDialogue(false)
-        })
-    } else {
-      prevSelectedDialogueRef.current = null
+          return
+        }
+
+        try {
+          await validateGraph()
+        } catch (err) {
+          console.error('Erreur lors de la validation automatique au chargement:', err)
+        }
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+        const nextState = useGraphStore.getState()
+        if (nextState.nodes.length > 0 && !nextState.selectedNodeId) {
+          nextState.setSelectedNode(nextState.nodes[0].id)
+        }
+      } catch (err) {
+        if (useGraphStore.getState().activeLoadSeq !== loadSeq) return
+        console.error('Erreur lors du chargement du dialogue:', err)
+        const errorMessage = getErrorMessage(err)
+        const isNetworkError =
+          errorMessage.includes('connexion au serveur') ||
+          errorMessage.includes('connecter au serveur') ||
+          errorMessage.includes('Impossible de se connecter')
+        const displayMessage =
+          isNetworkError || errorMessage.startsWith('Erreur')
+            ? errorMessage
+            : `Erreur: ${errorMessage}`
+        toast(displayMessage, 'error')
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+      }
     }
-  }, [selectedDialogue, loadDialogue, validateGraph, toast])
+
+    void run()
+  }, [selectedDialogue, loadDialogue, loadDialogueByDocumentId, loadDialogueFromRawJson, saveDialogue, validateGraph, toast])
 
   useEffect(() => {
     if (!routeTarget) return
@@ -134,17 +224,17 @@ export function useDialogueLoader(
       return
     }
 
-    const loadSeq = ++routeLoadSeqRef.current
-    loadInFlightRef.current = true
-    setIsLoadingDialogue(true)
-
-    const finalizeLoad = async () => {
+    const finalizeLoad = async (loadSeq: number) => {
       try {
         await validateGraph()
       } catch (err) {
         console.error('Erreur lors de la validation automatique au chargement:', err)
       }
-      if (routeLoadSeqRef.current !== loadSeq) return
+      if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+        return
+      }
       loadInFlightRef.current = false
       setIsLoadingDialogue(false)
       const state = useGraphStore.getState()
@@ -154,58 +244,79 @@ export function useDialogueLoader(
     }
 
     const loadFromRoute = async () => {
-      if (/\.json$/i.test(routeTarget.decodedDialogueId)) {
-        const response = await unityDialoguesAPI.getUnityDialogue(routeTarget.decodedDialogueId)
-        let parsed: unknown = null
-        try {
-          parsed = JSON.parse(response.json_content)
-        } catch {
-          parsed = null
-        }
-        const isCanonicalDocument =
-          !!parsed &&
-          typeof parsed === 'object' &&
-          !Array.isArray(parsed) &&
-          Array.isArray((parsed as { nodes?: unknown[] }).nodes)
-        if (isCanonicalDocument) {
-          await loadDialogueByDocumentId(routeTarget.normalizedDialogueId)
-          return
-        }
-        await loadDialogue(response.json_content, undefined, routeTarget.decodedDialogueId)
+      if (loadInFlightRef.current && activeDialogueFilenameRef.current?.replace(/\.json$/i, '') === routeTarget.normalizedDialogueId) {
         return
       }
-      try {
-        await loadDialogueByDocumentId(routeTarget.normalizedDialogueId)
-      } catch (err) {
+      resetGraph()
+      const loadSeq = incrementLoadSeq()
+      loadInFlightRef.current = true
+      setIsLoadingDialogue(true)
+
+      const docIdsToTry = /\.json$/i.test(routeTarget.decodedDialogueId)
+        ? [routeTarget.normalizedDialogueId, routeTarget.decodedDialogueId]
+        : [routeTarget.normalizedDialogueId, `${routeTarget.normalizedDialogueId}.json`]
+      let loaded = false
+      for (const documentId of docIdsToTry) {
         try {
-          const canonicalLegacyId = `${routeTarget.normalizedDialogueId}.json`
-          await loadDialogueByDocumentId(canonicalLegacyId)
+          await loadDialogueByDocumentId(documentId)
+          loaded = true
+          break
         } catch {
-          const legacyFilename = `${routeTarget.normalizedDialogueId}.json`
-          try {
-            const response = await unityDialoguesAPI.getUnityDialogue(legacyFilename)
-            await loadDialogue(response.json_content, undefined, legacyFilename)
-          } catch {
-            throw err
-          }
+          continue
         }
       }
+
+      if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+        return
+      }
+
+      if (!loaded) {
+        const filename = /\.json$/i.test(routeTarget.decodedDialogueId)
+          ? routeTarget.decodedDialogueId
+          : `${routeTarget.normalizedDialogueId}.json`
+        const response = await unityDialoguesAPI.getUnityDialogue(filename)
+        
+        if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+          loadInFlightRef.current = false
+          setIsLoadingDialogue(false)
+          return
+        }
+
+        const stem = filename.replace(/\.json$/i, '') || filename
+        await loadDialogueFromRawJson(response.json_content, stem)
+      }
+
+      if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+        loadInFlightRef.current = false
+        setIsLoadingDialogue(false)
+        return
+      }
+      await finalizeLoad(loadSeq)
     }
 
     loadFromRoute()
-      .then(() => finalizeLoad())
       .catch((err) => {
-        if (routeLoadSeqRef.current !== loadSeq) return
+        if (useGraphStore.getState().activeLoadSeq !== incrementLoadSeq()) return
         loadInFlightRef.current = false
         setIsLoadingDialogue(false)
         toast(getErrorMessage(err), 'error')
       })
-  }, [routeTarget, loadDialogue, loadDialogueByDocumentId, validateGraph, toast])
+  }, [routeTarget, loadDialogueByDocumentId, loadDialogueFromRawJson, validateGraph, toast])
 
-  // Auto-save backend : micro-batch 100 ms (ADR-006)
+  // Auto-save backend : micro-batch 50 ms (ADR-006, très fréquent pour ne pas perdre d’éditions au changement d’onglet)
   useEffect(() => {
+    // On ne sauvegarde QUE si le dialogue sélectionné dans l'UI correspond au dialogue chargé dans le store.
+    // Cela évite de sauvegarder les restes du dialogue A alors qu'on a déjà cliqué sur le dialogue B.
+    const storeFilename = dialogueMetadata.filename || documentId || null
+    const uiFilename = selectedDialogue?.filename || null
+    
+    const isSelectionChanging = uiFilename && storeFilename && uiFilename !== storeFilename
+
     if (
-      !activeDialogueFilename ||
+      !storeFilename ||
+      isSelectionChanging ||
       !hasUnsavedChanges ||
       nodes.length === 0 ||
       isGraphLoading ||
@@ -245,10 +356,12 @@ export function useDialogueLoader(
           }
         }
       })
-    }, 100)
+    }, 50)
     return () => clearTimeout(timeoutId)
   }, [
-    activeDialogueFilename,
+    selectedDialogue,
+    documentId,
+    dialogueMetadata.filename,
     hasUnsavedChanges,
     isGraphLoading,
     isGraphSaving,
@@ -264,6 +377,8 @@ export function useDialogueLoader(
       toast('Aucun dialogue sélectionné', 'warning')
       return
     }
+    if (isLoadingDialogue) return
+
     try {
       setIsLoadingDialogue(true)
       window.dispatchEvent(new CustomEvent('flush-node-editor-form'))
