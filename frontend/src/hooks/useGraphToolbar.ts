@@ -35,6 +35,9 @@ export interface UseGraphToolbarReturn {
   setShowJumpToNodeModal: (v: boolean) => void
   showFiltersPanel: boolean
   setShowFiltersPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  /** When opening AI panel from a TestNode, pre-select this choice index (cleared on panel close). */
+  initialAIGenerationChoiceIndex: number | null
+  clearInitialAIGenerationChoiceIndex: () => void
   layoutDirection: 'TB' | 'LR' | 'BT' | 'RL'
   autoLayoutDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownRef: RefObject<HTMLDivElement>
@@ -67,8 +70,13 @@ export function useGraphToolbar(
   const [showSearchBar, setShowSearchBar] = useState(false)
   const [showJumpToNodeModal, setShowJumpToNodeModal] = useState(false)
   const [showFiltersPanel, setShowFiltersPanel] = useState(false)
+  const [initialAIGenerationChoiceIndex, setInitialAIGenerationChoiceIndex] = useState<number | null>(null)
   const [layoutDirection, setLayoutDirection] = useState<'TB' | 'LR' | 'BT' | 'RL'>('TB')
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
+
+  const clearInitialAIGenerationChoiceIndex = useCallback(() => {
+    setInitialAIGenerationChoiceIndex(null)
+  }, [])
 
   const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
@@ -100,14 +108,15 @@ export function useGraphToolbar(
   }, [])
 
   useEffect(() => {
-    const handleOpenGenerationPanel = (event: CustomEvent<{ nodeId: string }>) => {
-      const nodeId = event.detail.nodeId
+    const handleOpenGenerationPanel = (event: Event) => {
+      const { nodeId, choiceIndex } = (event as CustomEvent<{ nodeId: string; choiceIndex?: number }>).detail
       setSelectedNode(nodeId)
+      setInitialAIGenerationChoiceIndex(typeof choiceIndex === 'number' ? choiceIndex : null)
       setShowAIGenerationPanel(true)
     }
-    window.addEventListener('open-ai-generation-panel', handleOpenGenerationPanel as EventListener)
+    window.addEventListener('open-ai-generation-panel', handleOpenGenerationPanel)
     return () => {
-      window.removeEventListener('open-ai-generation-panel', handleOpenGenerationPanel as EventListener)
+      window.removeEventListener('open-ai-generation-panel', handleOpenGenerationPanel)
     }
   }, [setSelectedNode])
 
@@ -421,6 +430,8 @@ export function useGraphToolbar(
     setShowJumpToNodeModal,
     showFiltersPanel,
     setShowFiltersPanel,
+    initialAIGenerationChoiceIndex,
+    clearInitialAIGenerationChoiceIndex,
     layoutDirection,
     autoLayoutDropdownRef,
     actionsDropdownRef,

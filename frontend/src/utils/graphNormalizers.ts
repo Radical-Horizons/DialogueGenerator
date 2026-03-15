@@ -80,10 +80,7 @@ export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]
     let dialogueNodeModified = false
 
     choices.forEach((choice, choiceIndex) => {
-      const choiceId = (choice as Choice & { choiceId?: string }).choiceId
-      const testBarId = choiceId
-        ? `test:${choiceId}`
-        : `test-node-${node.id}-choice-${choiceIndex}`
+      const testBarId = `test-node-${node.id}-choice-${choiceIndex}`
       
       const existingTestBar = normalizedNodes.find((n) => n.id === testBarId)
 

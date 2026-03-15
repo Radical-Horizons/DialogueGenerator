@@ -3,7 +3,7 @@
  * Mode controlled (ADR-007) : nodes et edges proviennent exclusivement du store.
  * Les handlers événementiels sont délégués à useReactFlowHandlers.
  */
-import { memo, useMemo, useEffect, useRef, useState } from 'react'
+import { memo, useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import ReactFlow, {
   Background,
   Controls,
@@ -20,13 +20,43 @@ import { StableLabelSmoothStepEdge } from './edges/StableLabelSmoothStepEdge'
 import { NodeContextMenu } from './NodeContextMenu'
 import { PaneContextMenu } from './PaneContextMenu'
 import { EdgeLabelEditModal } from './EdgeLabelEditModal'
+import { DropChoiceModal } from './DropChoiceModal'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
+import { useContextStore } from '../../store/contextStore'
 import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
 import { useReactFlowHandlers } from '../../hooks/useReactFlowHandlers'
+import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
+import { useToast } from '../shared'
+import { getErrorMessage } from '../../types/errors'
+import { DEFAULT_MODEL } from '../../constants'
 
 const FITVIEW_AFTER_DIMENSIONS_EVENT = 'graph-request-fitview'
+
+/** Déduit l'index du choix à partir du sourceHandle (choice:N ou choice:__idx_N ou choice:choiceId). */
+function getChoiceIndexFromHandle(
+  sourceNodeId: string,
+  sourceHandleId: string,
+  nodes: Array<{ id: string; data?: { choices?: Array<{ choiceId?: string }> } }>
+): number | undefined {
+  if (sourceHandleId.startsWith('choice-')) {
+    const n = parseInt(sourceHandleId.replace('choice-', ''), 10)
+    return Number.isNaN(n) ? undefined : n
+  }
+  if (sourceHandleId.startsWith('choice:')) {
+    const id = sourceHandleId.slice(7)
+    if (id.startsWith('__idx_')) {
+      const n = parseInt(id.replace('__idx_', ''), 10)
+      return Number.isNaN(n) ? undefined : n
+    }
+    const source = nodes.find((n) => n.id === sourceNodeId)
+    const choices = (source?.data?.choices ?? []) as Array<{ choiceId?: string }>
+    const idx = choices.findIndex((c, i) => (c?.choiceId ?? `__idx_${i}`) === id)
+    return idx >= 0 ? idx : undefined
+  }
+  return undefined
+}
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
 const GraphCanvasInner = memo(function GraphCanvasInner() {
@@ -148,14 +178,45 @@ export const GraphCanvas = memo(function GraphCanvas() {
     position: { x: number; y: number } | undefined
   } | null>(null)
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null)
-  const { createEmptyNode, addNode, applyAutoLayout } = useGraphStore()
+  const {
+    createEmptyNode,
+    addNode,
+    applyAutoLayout,
+    connectNodes,
+    disconnectNodes,
+    setSelectedNode,
+    generateFromNode,
+    nodes: storeNodesForChoice,
+    isGenerating,
+  } = useGraphStore()
+  const { selections } = useContextStore()
+  const toast = useToast()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
+
+  const [dropChoiceMenu, setDropChoiceMenu] = useState<{
+    sourceNodeId: string
+    sourceHandleId: string
+    position: { x: number; y: number }
+  } | null>(null)
 
   const fitViewRequestedAfterDimensionsRef = useRef(false)
   useEffect(() => {
     fitViewRequestedAfterDimensionsRef.current = false
   }, [documentId])
+
+  const handleChoiceDropOnPane = useCallback(
+    (position: { x: number; y: number }, pending: { sourceNodeId: string; sourceHandleId: string }) => {
+      setDropChoiceMenu({ ...pending, position })
+    },
+    []
+  )
+
+  const getFlowPosition = useCallback((event: MouseEvent | TouchEvent) => {
+    const clientX = 'changedTouches' in event ? event.changedTouches[0].clientX : event.clientX
+    const clientY = 'changedTouches' in event ? event.changedTouches[0].clientY : event.clientY
+    return reactFlowInstanceRef.current?.screenToFlowPosition({ x: clientX, y: clientY }) ?? { x: 0, y: 0 }
+  }, [])
 
   const {
     edgeIdsToDelete,
@@ -169,10 +230,63 @@ export const GraphCanvas = memo(function GraphCanvas() {
     onNodeDoubleClick,
     onPaneClick: onPaneClickBase,
     onConnect,
+    onConnectStart,
+    onConnectEnd,
     onNodeDragStart,
     onNodeDragStop,
     handleEdgeLabelConfirm,
-  } = useReactFlowHandlers(fitViewRequestedAfterDimensionsRef)
+  } = useReactFlowHandlers(fitViewRequestedAfterDimensionsRef, {
+    getFlowPosition,
+    onChoiceDropOnPane: handleChoiceDropOnPane,
+  })
+
+  const choiceIndexFromDrop = dropChoiceMenu
+    ? getChoiceIndexFromHandle(dropChoiceMenu.sourceNodeId, dropChoiceMenu.sourceHandleId, storeNodesForChoice)
+    : undefined
+
+  const handleDropChoiceCreateEmpty = useCallback(() => {
+    if (!dropChoiceMenu || choiceIndexFromDrop === undefined) return
+    const state = useGraphStore.getState()
+    const sourceNode = state.nodes.find((n) => n.id === dropChoiceMenu.sourceNodeId)
+    const choices = (sourceNode?.data?.choices ?? []) as Array<{ targetNode?: string; choiceId?: string }>
+    const currentChoice = choices[choiceIndexFromDrop]
+    const stableId = currentChoice?.choiceId ?? `__idx_${choiceIndexFromDrop}`
+    const edgeId = stableChoiceEdgeId(dropChoiceMenu.sourceNodeId, stableId)
+    if (currentChoice?.targetNode && currentChoice.targetNode !== 'END' && state.edges.some((e) => e.id === edgeId)) {
+      disconnectNodes(edgeId)
+    }
+    const node = createEmptyNode(dropChoiceMenu.position)
+    addNode(node)
+    connectNodes(dropChoiceMenu.sourceNodeId, node.id, choiceIndexFromDrop, 'choice', dropChoiceMenu.sourceHandleId)
+    setSelectedNode(node.id)
+    setDropChoiceMenu(null)
+  }, [dropChoiceMenu, choiceIndexFromDrop, createEmptyNode, addNode, connectNodes, disconnectNodes, setSelectedNode])
+
+  const handleDropChoiceGenerate = useCallback(async () => {
+    if (!dropChoiceMenu || choiceIndexFromDrop === undefined) return
+    try {
+      const allCharacters = [
+        ...(selections.characters_full || []),
+        ...(selections.characters_excerpt || []),
+      ]
+      const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+      const instructions = 'Continue la conversation de manière naturelle'
+      const result = await generateFromNode(dropChoiceMenu.sourceNodeId, instructions, {
+        context_selections: selections,
+        npc_speaker_id: npcSpeakerId,
+        llm_model_identifier: DEFAULT_MODEL,
+        target_choice_index: choiceIndexFromDrop,
+      })
+      toast('Nœud généré avec succès', 'success', 2000)
+      if (result.nodeId) {
+        setSelectedNode(result.nodeId)
+        window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: result.nodeId } }))
+      }
+      setDropChoiceMenu(null)
+    } catch (err) {
+      toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
+    }
+  }, [dropChoiceMenu, choiceIndexFromDrop, selections, generateFromNode, setSelectedNode, toast])
 
   const openContextMenu = (nodeId: string, clientX: number, clientY: number) => {
     const menuWidth = 200
@@ -209,6 +323,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       if (e.key === 'Escape') {
         setMenu(null)
         setPaneMenu(null)
+        setDropChoiceMenu(null)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -220,6 +335,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       if (ref.current && !ref.current.contains(e.target as globalThis.Node)) {
         setMenu(null)
         setPaneMenu(null)
+        setDropChoiceMenu(null)
       }
     }
     document.addEventListener('mousedown', handleMouseDown)
@@ -356,6 +472,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectStart={onConnectStart}
+        onConnectEnd={onConnectEnd}
         onNodeClick={onNodeClick}
         onNodeDoubleClick={onNodeDoubleClick}
         onNodeContextMenu={onNodeContextMenu}
@@ -430,6 +548,13 @@ export const GraphCanvas = memo(function GraphCanvas() {
         initialValue={edgeLabelEdit?.initialText ?? ''}
         onConfirm={handleEdgeLabelConfirm}
         onCancel={() => setEdgeLabelEdit(null)}
+      />
+      <DropChoiceModal
+        isOpen={dropChoiceMenu != null && choiceIndexFromDrop !== undefined}
+        onClose={() => setDropChoiceMenu(null)}
+        onCreateEmpty={handleDropChoiceCreateEmpty}
+        onGenerate={handleDropChoiceGenerate}
+        isGenerating={isGenerating}
       />
       <ConfirmDialog
         isOpen={edgeIdsToDelete != null && edgeIdsToDelete.length > 0}

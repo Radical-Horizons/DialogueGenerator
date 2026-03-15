@@ -155,8 +155,8 @@ export function syncTestNodeFromChoice(
   existingEdges: Edge[],
   nodes: Node[] = []
 ): TestNodeSyncResult {
+  const testNodeId = `test-node-${dialogueNodeId}-choice-${choiceIndex}`
   const choiceId = (choice as Choice & { choiceId?: string }).choiceId
-  const testNodeId = choiceId ? `test:${choiceId}` : `test-node-${dialogueNodeId}-choice-${choiceIndex}`
 
   // Si le choix n'a pas de test, supprimer le TestNode s'il existe
   if (!choice.test) {

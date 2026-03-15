@@ -28,6 +28,7 @@ import {
   type Choice,
 } from '../../schemas/nodeEditorSchema'
 import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
+import { getParentChoiceForTestNode } from '../../utils/testNodeSync'
 import { ChoiceEditor } from './ChoiceEditor'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
@@ -48,6 +49,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     connectNodes,
     disconnectNodes,
     duplicateNode,
+    nodes,
   } = useGraphStore()
   const { selections } = useContextStore()
   const toast = useToast()
@@ -818,6 +820,50 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             </div>
           </div>
         )}
+
+        {/* Raccourci génération pour TestNode : ouvre le panneau IA avec le choix parent pré-sélectionné */}
+        {nodeType === 'testNode' && selectedNodeId && (() => {
+          const parentInfo = getParentChoiceForTestNode(selectedNodeId, nodes)
+          if (!parentInfo) return null
+          return (
+            <div
+              style={{
+                padding: '1rem',
+                backgroundColor: theme.background.secondary,
+                borderRadius: 6,
+                border: `1px solid ${theme.border.primary}`,
+              }}
+            >
+              <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 'bold', color: theme.text.primary }}>
+                ✨ Génération IA
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedNode(parentInfo.dialogueNodeId)
+                  window.dispatchEvent(
+                    new CustomEvent('open-ai-generation-panel', {
+                      detail: { nodeId: parentInfo.dialogueNodeId, choiceIndex: parentInfo.choiceIndex },
+                    })
+                  )
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: 'none',
+                  borderRadius: 4,
+                  backgroundColor: theme.button.primary.background,
+                  color: theme.button.primary.color,
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                }}
+              >
+                ✨ Générer la suite pour ce test
+              </button>
+            </div>
+          )
+        })()}
         
         {/* Choix (pour dialogue nodes) */}
         {nodeType === 'dialogueNode' && (

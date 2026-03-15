@@ -76,6 +76,8 @@ export function GraphEditor({
     setShowCostBreakdown,
     showAIGenerationPanel,
     setShowAIGenerationPanel,
+    initialAIGenerationChoiceIndex,
+    clearInitialAIGenerationChoiceIndex,
     showExportFormatDialog,
     setShowExportFormatDialog,
     showSearchBar,
@@ -284,7 +286,11 @@ export function GraphEditor({
                 >
                   <AIGenerationPanel
                     parentNodeId={selectedNodeId}
-                    onClose={() => setShowAIGenerationPanel(false)}
+                    initialChoiceIndex={initialAIGenerationChoiceIndex}
+                    onClose={() => {
+                      clearInitialAIGenerationChoiceIndex()
+                      setShowAIGenerationPanel(false)
+                    }}
                     onGenerated={() => {
                       dialogueListRef.current?.refresh()
                       if (activeDialogueFilename) {

@@ -1,6 +1,7 @@
 /**
  * Projection document canonique + layout → nodes/edges React Flow.
- * Story 16.4 Task 2.1 : IDs stables ADR-008 (node.id, choice:choiceId, test:choiceId, edge e:...).
+ * Story 16.4 Task 2.1 : IDs stables ADR-008 (node.id, choice:choiceId, edge e:...).
+ * TestNode id : toujours test-node-{nodeId}-choice-{index} pour unicité (évite collision entre nœuds parents quand choiceId = __idx_N).
  */
 import type { Node, Edge } from 'reactflow'
 import { stableChoiceEdgeId, truncateChoiceLabel } from './graphEdgeBuilders'
@@ -101,14 +102,13 @@ export function documentToGraph(
     for (let choiceIndex = 0; choiceIndex < choices.length; choiceIndex++) {
       const choice = choices[choiceIndex]
       const cid = choiceStableId(choice, choiceIndex)
-      const hasChoiceId = Boolean((choice as { choiceId?: string }).choiceId)
       const legacyTestNodeId = `test-node-${nodeId}-choice-${choiceIndex}`
       const sourceHandle = `choice:${cid}`
       if (choice.test) {
-        const testNodeId = hasChoiceId ? `test:${cid}` : legacyTestNodeId
+        const testNodeId = legacyTestNodeId
         const storedTestPosition =
-          layoutPositions?.nodes?.[testNodeId] ??
-          layoutPositions?.nodes?.[legacyTestNodeId]
+          layoutPositions?.nodes?.[legacyTestNodeId] ??
+          (layoutPositions?.nodes?.[`test:${cid}`] ?? undefined)
         const testPosition =
           storedTestPosition &&
           typeof storedTestPosition.x === 'number' &&
@@ -144,7 +144,7 @@ export function documentToGraph(
           const targetId = choice[config.field] as string | undefined
           if (targetId && nodesArray.some((n) => n?.id === targetId)) {
             edges.push({
-              id: `e:test:${cid}:${config.handleId}:${targetId}`,
+              id: `${testNodeId}-${config.handleId}-${targetId}`,
               source: testNodeId,
               target: targetId,
               sourceHandle: config.handleId,
@@ -235,6 +235,36 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
   }
 
   for (const edge of edges) {
+    // Edges from TestNode: source is test-node-{dialogueId}-choice-{index}; unityNodes has no test nodes, so handle first.
+    if (edge.sourceHandle && edge.source.startsWith('test-node-')) {
+      const match = edge.source.match(/^test-node-(.+)-choice-(\d+)$/)
+      if (match) {
+        const [, sourceId, idxStr] = match
+        const choiceIndex = parseInt(idxStr, 10)
+        const sourceUnity = unityNodes.find((n) => n.id === sourceId)
+        const choices = sourceUnity?.choices as Record<string, unknown>[] | undefined
+        const config = TEST_RESULT_EDGE_CONFIG.find((c) => c.handleId === edge.sourceHandle)
+        if (config && choices?.[choiceIndex]) {
+          choices[choiceIndex][config.field] = edge.target
+        }
+      }
+      continue
+    }
+    if (edge.sourceHandle && edge.source.startsWith('test:')) {
+      const choiceId = edge.source.slice(5)
+      for (const u of unityNodes) {
+        const choiceIndex = findChoiceIndexByChoiceId(u, choiceId)
+        if (choiceIndex < 0) continue
+        const choices = u.choices as Record<string, unknown>[] | undefined
+        const config = TEST_RESULT_EDGE_CONFIG.find((c) => c.handleId === edge.sourceHandle)
+        if (config && choices?.[choiceIndex]) {
+          choices[choiceIndex][config.field] = edge.target
+        }
+        break
+      }
+      continue
+    }
+
     const sourceNode = unityNodes.find((n) => n.id === edge.source)
     if (!sourceNode) continue
     if (edge.sourceHandle?.startsWith('choice:')) {
@@ -254,30 +284,6 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
         // ADR-008 : On ne remplit targetNode que si la cible n'est pas un testNode
         if (!edge.target.startsWith('test:') && !edge.target.startsWith('test-node-')) {
           choices[edge.data.choiceIndex].targetNode = edge.target
-        }
-      }
-    } else if (edge.sourceHandle && edge.source.startsWith('test:')) {
-      const choiceId = edge.source.slice(5)
-      for (const u of unityNodes) {
-        const choiceIndex = findChoiceIndexByChoiceId(u, choiceId)
-        if (choiceIndex < 0) continue
-        const choices = u.choices as Record<string, unknown>[] | undefined
-        const config = TEST_RESULT_EDGE_CONFIG.find((c) => c.handleId === edge.sourceHandle)
-        if (config && choices?.[choiceIndex]) {
-          choices[choiceIndex][config.field] = edge.target
-        }
-        break
-      }
-    } else if (edge.sourceHandle && edge.source.startsWith('test-node-')) {
-      const match = edge.source.match(/^test-node-(.+)-choice-(\d+)$/)
-      if (match) {
-        const [, sourceId, idxStr] = match
-        const choiceIndex = parseInt(idxStr, 10)
-        const sourceUnity = unityNodes.find((n) => n.id === sourceId)
-        const choices = sourceUnity?.choices as Record<string, unknown>[] | undefined
-        const config = TEST_RESULT_EDGE_CONFIG.find((c) => c.handleId === edge.sourceHandle)
-        if (config && choices?.[choiceIndex]) {
-          choices[choiceIndex][config.field] = edge.target
         }
       }
     } else if (!sourceNode.choices?.length && edge.label === 'Suivant') {

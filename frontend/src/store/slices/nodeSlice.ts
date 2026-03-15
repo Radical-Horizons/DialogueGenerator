@@ -267,10 +267,7 @@ function updateDialogueNodeDirectly(
     const currentChoices = (currentDialogueNode.data.choices || []) as Choice[]
     const currentChoice = currentChoices[choiceIndex] || choice
 
-    const choiceId = (currentChoice as Choice & { choiceId?: string }).choiceId
-    const testNodeId = choiceId
-      ? `test:${choiceId}`
-      : `test-node-${nodeId}-choice-${choiceIndex}`
+    const testNodeId = `test-node-${nodeId}-choice-${choiceIndex}`
     const existingTestNode = newNodes.find((n) => n.id === testNodeId)
 
     const syncResult = syncTestNodeFromChoice(
@@ -505,9 +502,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
             let modified = false
             const updatedChoices = choices.map(c => {
               // Si le choix a un test et que son ID de TestNode correspondrait à celui supprimé
-              const choiceId = (c as Choice & { choiceId?: string }).choiceId
-              const cid = choiceId ?? `__idx_${choices.indexOf(c)}`
-              const possibleId = choiceId ? `test:${cid}` : `test-node-${node.id}-choice-${choices.indexOf(c)}`
+              const possibleId = `test-node-${node.id}-choice-${choices.indexOf(c)}`
               
               if (possibleId === nodeId || c.testSuccessNode === nodeId || c.testFailureNode === nodeId) {
                 modified = true
@@ -560,16 +555,9 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
       // DialogueNode : supprimer le nœud et tous ses TestNodes associés
       const dialogueNode = state.nodes.find((n) => n.id === nodeId)
       const testNodePrefix = `test-node-${nodeId}-`
-      const byPrefix = state.nodes
+      const associatedTestNodeIds = state.nodes
         .filter((n) => n.id.startsWith(testNodePrefix))
         .map((n) => n.id)
-      const byChoiceId = ((dialogueNode?.data?.choices ?? []) as Choice[])
-        .map((choice: Choice) => {
-          const stableChoiceId = (choice as Choice & { choiceId?: string }).choiceId
-          return stableChoiceId ? `test:${stableChoiceId}` : null
-        })
-        .filter((testNodeId: string | null): testNodeId is string => testNodeId != null)
-      const associatedTestNodeIds = [...new Set([...byPrefix, ...byChoiceId])]
       const nodesToDelete = [nodeId, ...associatedTestNodeIds]
 
       let newNodes = state.nodes.filter((n) => !nodesToDelete.includes(n.id))

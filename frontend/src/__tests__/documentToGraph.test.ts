@@ -23,7 +23,7 @@ describe('documentToGraph', () => {
       }
       const layout: LayoutPositions = { nodes: { START: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
       const { nodes } = documentToGraph(doc, layout)
-      const ids = nodes.map((n) => n.id).filter((id) => id !== 'test:__idx_0' && !id.startsWith('test:'));
+      const ids = nodes.filter((n) => n.type !== 'testNode').map((n) => n.id);
       expect(ids).toContain('START')
       expect(ids).toContain('END')
     })
@@ -127,7 +127,7 @@ describe('documentToGraph', () => {
       }
     })
 
-    it('uses test:choiceId for TestNode id and e:nodeId:choice:choiceId:test for choice→test edge', () => {
+    it('uses legacy test node id (test-node-X-choice-Y) and e:nodeId:choice:choiceId:test for choice→test edge', () => {
       const doc: UnityDocument = {
         schemaVersion: '1.1.0',
         nodes: [
@@ -150,9 +150,9 @@ describe('documentToGraph', () => {
       const layout: LayoutPositions = { nodes: { NODE_A: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
       const { nodes, edges } = documentToGraph(doc, layout)
       const testNode = nodes.find((n) => n.type === 'testNode')
-      expect(testNode?.id).toBe('test:skill_check')
+      expect(testNode?.id).toBe('test-node-NODE_A-choice-0')
       const choiceToTest = edges.find(
-        (e) => e.source === 'NODE_A' && e.target === 'test:skill_check'
+        (e) => e.source === 'NODE_A' && e.target === 'test-node-NODE_A-choice-0'
       )
       expect(choiceToTest?.id).toBe('e:NODE_A:choice:skill_check:test')
       expect(choiceToTest?.sourceHandle).toBe('choice:skill_check')
@@ -209,7 +209,7 @@ describe('documentToGraph', () => {
       expect(end?.position).toEqual({ x: 100, y: 350 })
     })
 
-    it('applies layout position for test node (stable id test:choiceId)', () => {
+    it('applies layout position for test node (legacy id; fallback from test:choiceId for old layouts)', () => {
       const doc: UnityDocument = {
         schemaVersion: '1.1.0',
         nodes: [
@@ -233,7 +233,7 @@ describe('documentToGraph', () => {
       }
       const { nodes } = documentToGraph(doc, layout)
       const testNode = nodes.find((n) => n.type === 'testNode')
-      expect(testNode?.id).toBe('test:skill')
+      expect(testNode?.id).toBe('test-node-N-choice-0')
       expect(testNode?.position).toEqual({ x: 400, y: 100 })
     })
 
@@ -308,7 +308,7 @@ describe('documentToGraph', () => {
       const { nodes } = documentToGraph(doc, layout)
       const testNodes = nodes.filter((n) => n.type === 'testNode')
       expect(testNodes).toHaveLength(1)
-      expect(testNodes[0].id).toBe('test:a')
+      expect(testNodes[0].id).toBe('test-node-START-choice-0')
     })
 
     it('produces exactly one dialogue→test edge per choice with test (canonical id e:...:choice:...:test)', () => {
@@ -328,7 +328,7 @@ describe('documentToGraph', () => {
       const layout: LayoutPositions = { nodes: { N: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
       const { edges } = documentToGraph(doc, layout)
       const dialogueToTest = edges.filter(
-        (e) => e.source === 'N' && e.target === 'test:c1'
+        (e) => e.source === 'N' && e.target === 'test-node-N-choice-0'
       )
       expect(dialogueToTest).toHaveLength(1)
       expect(dialogueToTest[0].id).toBe('e:N:choice:c1:test')
@@ -362,6 +362,51 @@ describe('graphToDocument', () => {
     expect(start?.choices?.[0].targetNode).toBe('END')
     expect(start?.choices?.[1].choiceId).toBe('no')
     expect(start?.choices?.[1].targetNode).toBe('END')
+  })
+
+  it('persists test*Node from test-node edges so round-trip preserves TestNode result links', () => {
+    const nodes = [
+      {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'START',
+          choices: [
+            {
+              choiceId: '__idx_0',
+              text: 'Try',
+              test: 'Dex:10',
+              testCriticalFailureNode: 'NODE_CF',
+              testFailureNode: 'NODE_F',
+              testSuccessNode: 'NODE_S',
+              testCriticalSuccessNode: 'NODE_CS',
+            },
+          ],
+        },
+      },
+      { id: 'NODE_CF', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} },
+      { id: 'NODE_F', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} },
+      { id: 'NODE_S', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} },
+      { id: 'NODE_CS', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} },
+    ]
+    const edges = [
+      { id: 'e:START:choice:__idx_0:test', source: 'START', target: 'test-node-START-choice-0', sourceHandle: 'choice:__idx_0', type: 'smoothstep' },
+      { id: 'tn-cf', source: 'test-node-START-choice-0', target: 'NODE_CF', sourceHandle: 'critical-failure', type: 'smoothstep' },
+      { id: 'tn-f', source: 'test-node-START-choice-0', target: 'NODE_F', sourceHandle: 'failure', type: 'smoothstep' },
+      { id: 'tn-s', source: 'test-node-START-choice-0', target: 'NODE_S', sourceHandle: 'success', type: 'smoothstep' },
+      { id: 'tn-cs', source: 'test-node-START-choice-0', target: 'NODE_CS', sourceHandle: 'critical-success', type: 'smoothstep' },
+    ]
+    const doc = graphToDocument(nodes as never, edges as never)
+    const start = doc.nodes.find((n) => n.id === 'START')
+    expect(start?.choices).toHaveLength(1)
+    expect((start?.choices?.[0] as { testCriticalFailureNode?: string }).testCriticalFailureNode).toBe('NODE_CF')
+    expect((start?.choices?.[0] as { testFailureNode?: string }).testFailureNode).toBe('NODE_F')
+    expect((start?.choices?.[0] as { testSuccessNode?: string }).testSuccessNode).toBe('NODE_S')
+    expect((start?.choices?.[0] as { testCriticalSuccessNode?: string }).testCriticalSuccessNode).toBe('NODE_CS')
+    const { edges: roundTripEdges } = documentToGraph(doc as never, undefined)
+    expect(roundTripEdges.some((e) => e.source === 'test-node-START-choice-0' && e.target === 'NODE_CF')).toBe(true)
+    expect(roundTripEdges.some((e) => e.source === 'test-node-START-choice-0' && e.target === 'NODE_CS')).toBe(true)
   })
 
   it('omits choice.test when no edge links choice to a test node (deleted TestNode does not reappear)', () => {

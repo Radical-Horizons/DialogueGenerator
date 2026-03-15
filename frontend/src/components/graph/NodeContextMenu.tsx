@@ -4,6 +4,7 @@
 import { useCallback } from 'react'
 import { useReactFlow } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
+import { getParentChoiceForTestNode } from '../../utils/testNodeSync'
 import { theme } from '../../theme'
 
 interface NodeContextMenuProps {
@@ -23,7 +24,7 @@ export function NodeContextMenu({
   bottom,
   onClose,
 }: NodeContextMenuProps) {
-  const { duplicateNode, setShowDeleteNodeConfirm, setSelectedNode } = useGraphStore()
+  const { duplicateNode, setShowDeleteNodeConfirm, setSelectedNode, nodes } = useGraphStore()
   const { getNode } = useReactFlow()
 
   const handleDuplicate = useCallback(() => {
@@ -42,14 +43,30 @@ export function NodeContextMenu({
     onClose()
   }, [id, setSelectedNode, setShowDeleteNodeConfirm, onClose])
 
-  const handleGenerate = useCallback(() => {
-    setSelectedNode(id)
-    window.dispatchEvent(new CustomEvent('open-ai-generation-panel', { detail: { nodeId: id } }))
-    onClose()
-  }, [id, setSelectedNode, onClose])
-
   const node = getNode(id)
   const isDialogueNode = node?.type === 'dialogueNode'
+  const isTestNode = node?.type === 'testNode'
+  const showGenerate = isDialogueNode || isTestNode
+
+  const handleGenerate = useCallback(() => {
+    if (node?.type === 'testNode') {
+      const parentInfo = getParentChoiceForTestNode(id, nodes)
+      if (!parentInfo) {
+        onClose()
+        return
+      }
+      setSelectedNode(parentInfo.dialogueNodeId)
+      window.dispatchEvent(
+        new CustomEvent('open-ai-generation-panel', {
+          detail: { nodeId: parentInfo.dialogueNodeId, choiceIndex: parentInfo.choiceIndex },
+        })
+      )
+    } else {
+      setSelectedNode(id)
+      window.dispatchEvent(new CustomEvent('open-ai-generation-panel', { detail: { nodeId: id } }))
+    }
+    onClose()
+  }, [id, node?.type, nodes, setSelectedNode, onClose])
 
   return (
     <div
@@ -115,7 +132,7 @@ export function NodeContextMenu({
         <span>Éditer</span>
       </button>
 
-      {isDialogueNode && (
+      {showGenerate && (
         <>
           <button
             type="button"
@@ -189,6 +206,7 @@ export function NodeContextMenu({
           handleDuplicate()
         }}
         disabled={!isDialogueNode}
+        title={!isDialogueNode ? 'Disponible uniquement pour les nœuds de dialogue' : undefined}
         style={{
           width: '100%',
           padding: '8px 12px',

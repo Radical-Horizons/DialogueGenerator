@@ -258,7 +258,7 @@ describe('graphStore - document SoT load/save', () => {
       const { loadDialogueByDocumentId, updateNode } = useGraphStore.getState()
       await loadDialogueByDocumentId('doc-test')
       const testNodeId = useGraphStore.getState().nodes.find((n) => n.type === 'testNode')?.id
-      expect(testNodeId).toBe('test:skill')
+      expect(testNodeId).toBe('test-node-START-choice-0')
 
       updateNode(testNodeId!, { data: { test: { formula: '2d20' } } })
 
@@ -266,7 +266,7 @@ describe('graphStore - document SoT load/save', () => {
       const startNode = state.document?.nodes?.find((n: { id: string }) => n.id === 'START')
       const choice = (startNode?.choices as { test?: { formula?: string } }[])?.[0]
       expect(choice?.test).toEqual({ formula: '2d20' })
-      const testNode = state.nodes.find((n) => n.id === 'test:skill')
+      const testNode = state.nodes.find((n) => n.id === 'test-node-START-choice-0')
       expect(testNode?.data?.test).toEqual({ formula: '2d20' })
     })
   })

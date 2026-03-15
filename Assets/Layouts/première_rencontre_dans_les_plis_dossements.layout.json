@@ -21,8 +21,32 @@
       "y": 345
     },
     "test:__idx_1": {
-      "x": -30,
-      "y": 495
+      "x": -240,
+      "y": 645
+    },
+    "manual-5e915d89-007c-401d-ad46-16e7ad3d3e7b": {
+      "x": 315,
+      "y": 420
+    },
+    "test:__idx_2": {
+      "x": 400,
+      "y": 280
+    },
+    "NODE_START_CHOICE_3": {
+      "x": 210,
+      "y": 360
+    },
+    "test-node-NODE_START_CHOICE_3-choice-0": {
+      "x": 0,
+      "y": 620
+    },
+    "test-node-NODE_START_CHOICE_3-choice-1": {
+      "x": 200,
+      "y": 620
+    },
+    "test-node-NODE_START_CHOICE_3-choice-2": {
+      "x": 400,
+      "y": 620
     }
   }
 }

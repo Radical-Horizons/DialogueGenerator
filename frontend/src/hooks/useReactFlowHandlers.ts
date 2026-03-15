@@ -13,6 +13,16 @@ export interface EdgeLabelEditState {
   initialText: string
 }
 
+export interface PendingChoiceConnection {
+  sourceNodeId: string
+  sourceHandleId: string
+}
+
+export interface UseReactFlowHandlersOptions {
+  getFlowPosition: (event: MouseEvent | TouchEvent) => { x: number; y: number }
+  onChoiceDropOnPane: (position: { x: number; y: number }, pending: PendingChoiceConnection) => void
+}
+
 export interface UseReactFlowHandlersReturn {
   edgeIdsToDelete: string[] | null
   edgeLabelEdit: EdgeLabelEditState | null
@@ -26,17 +36,28 @@ export interface UseReactFlowHandlersReturn {
   onNodeDoubleClick: (event: React.MouseEvent, node: Node) => void
   onPaneClick: () => void
   onConnect: (connection: Connection) => void
+  onConnectStart: (event: React.MouseEvent | React.TouchEvent, params: { nodeId: string | null; handleId: string | null }) => void
+  onConnectEnd: (event: MouseEvent | TouchEvent) => void
   onNodeDragStart: (event: React.MouseEvent, node: Node) => void
   onNodeDragStop: (event: React.MouseEvent, node: Node) => void
   handleEdgeLabelConfirm: (newText: string) => void
 }
 
+function isChoiceHandle(handleId: string | null): boolean {
+  if (!handleId) return false
+  if (handleId.startsWith('choice:')) return true
+  if (/^choice-\d+$/.test(handleId)) return true
+  return false
+}
+
 export function useReactFlowHandlers(
-  fitViewRequestedAfterDimensionsRef: React.MutableRefObject<boolean>
+  fitViewRequestedAfterDimensionsRef: React.MutableRefObject<boolean>,
+  options?: UseReactFlowHandlersOptions
 ): UseReactFlowHandlersReturn {
   const [edgeIdsToDelete, setEdgeIdsToDelete] = useState<string[] | null>(null)
   const [edgeLabelEdit, setEdgeLabelEdit] = useState<EdgeLabelEditState | null>(null)
 
+  const pendingChoiceConnectionRef = useRef<PendingChoiceConnection | null>(null)
   const dragStartPositionsRef = useRef<Record<string, { x: number; y: number }> | null>(null)
   const positionRafRef = useRef<number | null>(null)
   const pendingPositionsRef = useRef<Record<string, { x: number; y: number }>>({})
@@ -213,6 +234,7 @@ export function useReactFlowHandlers(
 
   const onConnect = useCallback(
     (connection: Connection) => {
+      pendingChoiceConnectionRef.current = null
       if (!connection.source || !connection.target) return
       const sourceHandle = connection.sourceHandle || ''
       let connectionType = 'default'
@@ -246,6 +268,31 @@ export function useReactFlowHandlers(
       )
     },
     [connectNodes]
+  )
+
+  const onConnectStart = useCallback(
+    (_event: React.MouseEvent | React.TouchEvent, params: { nodeId: string | null; handleId: string | null }) => {
+      if (!params.nodeId || !isChoiceHandle(params.handleId)) {
+        pendingChoiceConnectionRef.current = null
+        return
+      }
+      pendingChoiceConnectionRef.current = {
+        sourceNodeId: params.nodeId,
+        sourceHandleId: params.handleId,
+      }
+    },
+    []
+  )
+
+  const onConnectEnd = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      const pending = pendingChoiceConnectionRef.current
+      pendingChoiceConnectionRef.current = null
+      if (!pending || !options?.getFlowPosition || !options?.onChoiceDropOnPane) return
+      const position = options.getFlowPosition(event)
+      options.onChoiceDropOnPane(position, pending)
+    },
+    [options]
   )
 
   const onNodeDragStart = useCallback(
@@ -314,6 +361,8 @@ export function useReactFlowHandlers(
     onNodeDoubleClick,
     onPaneClick,
     onConnect,
+    onConnectStart,
+    onConnectEnd,
     onNodeDragStart,
     onNodeDragStop,
     handleEdgeLabelConfirm,
