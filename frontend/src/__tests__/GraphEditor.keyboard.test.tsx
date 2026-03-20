@@ -212,7 +212,7 @@ describe('GraphEditor search bar (Story 2.7)', () => {
   it('Ctrl+F opens search bar, Escape closes it and clears highlights (Task 3.1)', async () => {
     const setHighlightedNodes = useGraphStore.getState().setHighlightedNodes
     let showSearchBar = false
-    const setShowSearchBar = (v: boolean | ((prev: boolean) => boolean)) => {
+    const _setShowSearchBar = (v: boolean | ((prev: boolean) => boolean)): void => {
       showSearchBar = typeof v === 'function' ? v(showSearchBar) : v
     }
     const MockEditor = () => {

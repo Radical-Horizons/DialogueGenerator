@@ -21,6 +21,7 @@ import { NodeContextMenu } from './NodeContextMenu'
 import { PaneContextMenu } from './PaneContextMenu'
 import { EdgeLabelEditModal } from './EdgeLabelEditModal'
 import { DropChoiceModal } from './DropChoiceModal'
+import { GenerationLoaderContent } from './GenerationLoaderContent'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { useContextStore } from '../../store/contextStore'
@@ -199,6 +200,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     sourceHandleId: string
     position: { x: number; y: number }
   } | null>(null)
+  const [showContextMenuGenerationLoader, setShowContextMenuGenerationLoader] = useState(false)
 
   const fitViewRequestedAfterDimensionsRef = useRef(false)
   useEffect(() => {
@@ -287,6 +289,74 @@ export const GraphCanvas = memo(function GraphCanvas() {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
   }, [dropChoiceMenu, choiceIndexFromDrop, selections, generateFromNode, setSelectedNode, toast])
+
+  const handleGenerateForChoiceDirect = useCallback(
+    async (parentNodeId: string, choiceIndex: number) => {
+      try {
+        const allCharacters = [
+          ...(selections.characters_full || []),
+          ...(selections.characters_excerpt || []),
+        ]
+        const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+        const instructions = 'Continue la conversation de manière naturelle'
+        const result = await generateFromNode(parentNodeId, instructions, {
+          context_selections: selections,
+          npc_speaker_id: npcSpeakerId,
+          llm_model_identifier: DEFAULT_MODEL,
+          target_choice_index: choiceIndex,
+        })
+        toast('Nœud généré avec succès', 'success', 2000)
+        if (result.nodeId) {
+          setSelectedNode(result.nodeId)
+          window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: result.nodeId } }))
+        }
+      } catch (err) {
+        toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
+      }
+    },
+    [selections, generateFromNode, setSelectedNode, toast]
+  )
+
+  const handleGenerateForChoiceWithLoader = useCallback(
+    async (parentNodeId: string, choiceIndex: number) => {
+      setShowContextMenuGenerationLoader(true)
+      try {
+        await handleGenerateForChoiceDirect(parentNodeId, choiceIndex)
+      } finally {
+        setShowContextMenuGenerationLoader(false)
+      }
+    },
+    [handleGenerateForChoiceDirect]
+  )
+
+  const handleGenerateFromTestNode = useCallback(
+    async (testNodeId: string) => {
+      setShowContextMenuGenerationLoader(true)
+      try {
+        const allCharacters = [
+          ...(selections.characters_full || []),
+          ...(selections.characters_excerpt || []),
+        ]
+        const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+        const instructions = 'Continue la conversation de manière naturelle'
+        const result = await generateFromNode(testNodeId, instructions, {
+          context_selections: selections,
+          npc_speaker_id: npcSpeakerId,
+          llm_model_identifier: DEFAULT_MODEL,
+        })
+        toast('Nœud généré avec succès', 'success', 2000)
+        if (result.nodeId) {
+          setSelectedNode(result.nodeId)
+          window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: result.nodeId } }))
+        }
+      } catch (err) {
+        toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
+      } finally {
+        setShowContextMenuGenerationLoader(false)
+      }
+    },
+    [selections, generateFromNode, setSelectedNode, toast]
+  )
 
   const openContextMenu = (nodeId: string, clientX: number, clientY: number) => {
     const menuWidth = 200
@@ -526,7 +596,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
           maskColor={`${theme.background.panel}80`}
         />
       </ReactFlow>
-      {menu && <NodeContextMenu {...menu} onClose={() => setMenu(null)} />}
+      {menu && (
+        <NodeContextMenu
+          {...menu}
+          onClose={() => setMenu(null)}
+          onGenerateForChoice={handleGenerateForChoiceWithLoader}
+          onGenerateFromTestNode={handleGenerateFromTestNode}
+        />
+      )}
       {paneMenu && (
         <PaneContextMenu
           top={paneMenu.top}
@@ -556,6 +633,43 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onGenerate={handleDropChoiceGenerate}
         isGenerating={isGenerating}
       />
+      {showContextMenuGenerationLoader && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10001,
+          }}
+          role="status"
+          aria-live="polite"
+          aria-label="Génération en cours"
+        >
+          <div
+            style={{
+              backgroundColor: theme.background.panel,
+              borderRadius: 8,
+              padding: '1.25rem 1.5rem',
+              maxWidth: 360,
+              width: '90%',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+              border: `1px solid ${theme.border.primary}`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1rem',
+            }}
+          >
+            <GenerationLoaderContent />
+          </div>
+        </div>
+      )}
       <ConfirmDialog
         isOpen={edgeIdsToDelete != null && edgeIdsToDelete.length > 0}
         title={

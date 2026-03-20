@@ -4,7 +4,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 from typing import Dict, Any, List
 
 from services.graph_generation_service import GraphGenerationService
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.unity_dialogue_generation_service import UnityDialogueGenerationService, _stable_node_id
 from core.llm.llm_client import ILLMClient
 
 
@@ -216,15 +216,15 @@ async def test_generate_nodes_for_all_choices_id_format(mock_llm_client, mock_ge
         UnityDialogueGenerationResponse(title="Dialogue 3", node=mock_nodes_content[2])
     ]
     
+    stable_ids = [_stable_node_id() for _ in range(3)]
     mock_enriched_nodes = [
-        [{"id": "NODE_PARENT_1_CHOICE_0", "speaker": "PNJ", "line": "Réponse 1", "choices": []}],
-        [{"id": "NODE_PARENT_1_CHOICE_1", "speaker": "PNJ", "line": "Réponse 2", "choices": []}],
-        [{"id": "NODE_PARENT_1_CHOICE_2", "speaker": "PNJ", "line": "Réponse 3", "choices": []}]
+        [{"id": stable_ids[0], "speaker": "PNJ", "line": "Réponse 1", "choices": []}],
+        [{"id": stable_ids[1], "speaker": "PNJ", "line": "Réponse 2", "choices": []}],
+        [{"id": stable_ids[2], "speaker": "PNJ", "line": "Réponse 3", "choices": []}]
     ]
-    
     mock_generation_service.enrich_with_ids.side_effect = mock_enriched_nodes
     mock_generation_service.generate_dialogue_node = AsyncMock(side_effect=mock_responses)
-    
+
     result = await service.generate_nodes_for_all_choices(
         parent_node=sample_parent_node_with_choices,
         instructions="Test",
@@ -233,20 +233,16 @@ async def test_generate_nodes_for_all_choices_id_format(mock_llm_client, mock_ge
         system_prompt_override=None,
         max_choices=None
     )
-    
-    # Vérifier format IDs (3 choix: 2 avec None, 1 avec "END" - tous générés)
+
     assert len(result["nodes"]) == 3
-    assert result["nodes"][0]["id"] == "NODE_PARENT_1_CHOICE_0"
-    assert result["nodes"][1]["id"] == "NODE_PARENT_1_CHOICE_1"
-    assert result["nodes"][2]["id"] == "NODE_PARENT_1_CHOICE_2"
-    
-    # Vérifier que enrich_with_ids a été appelé avec le bon format (arguments nommés)
+    node_ids = [n["id"] for n in result["nodes"]]
+    assert len(set(node_ids)) == 3
+    for nid in node_ids:
+        assert nid.startswith("node-") and len(nid) == 37
     calls = mock_generation_service.enrich_with_ids.call_args_list
     assert len(calls) == 3
-    # enrich_with_ids est appelé avec content=response, start_id=start_id (arguments nommés)
-    assert calls[0].kwargs["start_id"] == "NODE_PARENT_1_CHOICE_0"  # start_id pour premier choix
-    assert calls[1].kwargs["start_id"] == "NODE_PARENT_1_CHOICE_1"  # start_id pour deuxième choix
-    assert calls[2].kwargs["start_id"] == "NODE_PARENT_1_CHOICE_2"  # start_id pour troisième choix
+    for call in calls:
+        assert call.kwargs["start_id"].startswith("node-") and len(call.kwargs["start_id"]) == 37
     
     # Vérifier compteurs batch
     assert "connected_choices_count" in result

@@ -33,10 +33,12 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     get()._pushUndoSnapshot()
     const state = get()
 
-    // Extraire le sourceHandle depuis connectionType si c'est un type de test
     let actualSourceHandle = sourceHandle
     if (!actualSourceHandle && connectionType.startsWith('test-')) {
       actualSourceHandle = connectionType.replace('test-', '')
+    }
+    if (!actualSourceHandle && ['critical-failure', 'failure', 'success', 'critical-success'].includes(connectionType)) {
+      actualSourceHandle = connectionType
     }
 
     const isChoiceConnection = choiceIndex !== undefined && !actualSourceHandle

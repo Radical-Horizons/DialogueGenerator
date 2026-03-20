@@ -66,14 +66,24 @@ export async function estimateCost(
   return response.data
 }
 
+/** Détecte si la génération cible un TestNode (4 nœuds = 4 appels LLM, timeout long). */
+function isTestNodeGeneration(parentNodeId: string): boolean {
+  return parentNodeId.startsWith('test-node-') || parentNodeId.startsWith('test:')
+}
+
 /**
  * Génère un nœud en contexte avec l'IA.
  */
 export async function generateNode(
   request: GenerateNodeRequest
 ): Promise<GenerateNodeResponse> {
-  // Timeout adaptatif : 4 minutes pour batch (parallélisé, mais sécurité), 2 minutes pour single
-  const timeout = request.generate_all_choices ? 240000 : 120000
+  // Timeout adaptatif : 5 min pour batch ou TestNode (plusieurs appels LLM), 2 min pour single
+  const longTimeout = 300000
+  const shortTimeout = 120000
+  const timeout =
+    request.generate_all_choices || isTestNodeGeneration(request.parent_node_id)
+      ? longTimeout
+      : shortTimeout
   const response = await apiClient.post<GenerateNodeResponse>(
     `/api/v1/unity-dialogues/graph/generate-node`,
     request,

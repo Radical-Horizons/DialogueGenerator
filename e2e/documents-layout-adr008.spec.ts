@@ -106,11 +106,25 @@ async function readDialogueViaApi(
   return JSON.parse(body.json_content) as Array<Record<string, unknown>>
 }
 
+async function deleteFixture(
+  request: Parameters<Parameters<typeof test>[1]>[0]['request']
+): Promise<void> {
+  const res = await request.delete(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`)
+  if (!res.ok() && res.status() !== 404) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`Cleanup DELETE failed ${res.status()}: ${text}`)
+  }
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 test.describe('ADR-008 E2E (Story 16.6)', () => {
   test.describe.configure({ mode: 'serial' })
   test.setTimeout(90_000)
+
+  test.afterEach(async ({ request }) => {
+    await deleteFixture(request)
+  })
 
   // ── Test 0 : validation API uniquement (pas de browser) ─────────────────
   test('API: fixture seedée et loadGraph retourne des nœuds', async ({ request }) => {
@@ -195,8 +209,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
     // Tenter de cliquer sur une arête ou de déconnecter un choix
     // Le test vérifie que le graphe peut être sauvegardé sans erreur réseau
     await triggerSave(page)
-    // Attendre la fin du chargement post-save (isLoadingDialogue revient à false)
-    await page.waitForTimeout(1500)
+    await page.getByText(/chargement|loading/i).waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
 
     // L'API doit toujours répondre correctement après sauvegarde
     const nodes = await readDialogueViaApi(request, selectedFile2)
@@ -231,7 +244,6 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
       duplicated = true
     } else {
       await page.locator('.react-flow__node').first().click({ button: 'right' })
-      await page.waitForTimeout(300)
       const menuItem = page.getByRole('menuitem', { name: /dupliquer/i })
       if (await menuItem.isVisible({ timeout: 1500 }).catch(() => false)) {
         try {
@@ -276,7 +288,18 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
     await page.mouse.down()
     await page.mouse.move(cx + 200, cy + 100, { steps: 10 })
     await page.mouse.up()
-    await page.waitForTimeout(300)
+    await expect
+      .poll(
+        async () => {
+          const b = await node.boundingBox()
+          return (
+            b &&
+            Math.abs(b.x - before!.x) + Math.abs(b.y - before!.y) > 20
+          )
+        },
+        { timeout: 3000 }
+      )
+      .toBe(true)
 
     const after = await node.boundingBox()
     expect(after).toBeTruthy()

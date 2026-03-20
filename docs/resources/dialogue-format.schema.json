@@ -2,31 +2,38 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://alteir.game/dialogue-format.schema.json",
   "title": "Alteir Dialogue JSON Format",
-  "description": "Format JSON pour les dialogues du jeu Alteir. v1.1.0 : racine objet avec schemaVersion et nodes. Pseudo-nœud END : nœud virtuel de fin de dialogue ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes ; documenté pour cohérence avec ADR-008.",
-  "version": "1.1.0",
+  "description": "Format JSON pour les dialogues du jeu Alteir. v1.2.0 : id = identifiant stable unique non éditable (préfixe node- ou manual- + alphanum/tirets/underscores). title = libellé éditable. Pseudo-nœud END : seule exception, nœud virtuel de fin ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes.",
+  "version": "1.2.0",
   "type": "object",
   "required": ["schemaVersion", "nodes"],
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "const": "1.1.0",
-      "description": "Version du schéma du document. Requis pour identifier le format (v1.1.0)."
+      "enum": ["1.1.0", "1.2.0"],
+      "description": "Version du schéma du document. 1.1.0 (legacy) ou 1.2.0 (id stable + title)."
     },
     "nodes": {
       "type": "array",
-      "description": "Liste des nœuds du dialogue. Chaque nœud a un id unique (SCREAMING_SNAKE_CASE). Le pseudo-nœud END peut être référencé sans être présent dans la liste.",
+      "description": "Liste des nœuds du dialogue. Chaque nœud a un id unique et stable (non éditable). Le pseudo-nœud END peut être référencé sans être présent dans la liste.",
       "minItems": 1,
       "items": {
         "type": "object",
         "title": "Dialogue Node",
-        "description": "Un nœud de dialogue représentant une ligne de dialogue ou un point de décision. id en SCREAMING_SNAKE_CASE (ex. START, END).",
+        "description": "Un nœud de dialogue. id = identifiant stable unique (toutes références) ; title = libellé affiché (éditable).",
         "required": ["id"],
         "properties": {
           "id": {
             "type": "string",
-            "description": "Identifiant unique du nœud (SCREAMING_SNAKE_CASE). Obligatoire. Exemples : START, END, NODE_NAME. END désigne le pseudo-nœud de fin de dialogue (ADR-008).",
-            "pattern": "^[A-Z][A-Z0-9_]*$",
-            "examples": ["START", "END", "GREETING", "CHOICE_1_SUCCESS"]
+            "description": "Identifiant stable et unique du nœud, non éditable. Préfixe node- ou manual- (ex. node-abc123, manual-uuid). Exception : END pour le pseudo-nœud de fin.",
+            "oneOf": [
+              { "const": "END" },
+              { "pattern": "^(node|manual)-[a-zA-Z0-9_-]+$" }
+            ],
+            "examples": ["node-start", "node-a1b2c3d4e5f6", "manual-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "END"]
+          },
+          "title": {
+            "type": "string",
+            "description": "Libellé affiché dans l'UI (carte nœud, jump-to, panneau). Éditable ; non utilisé pour les références."
           },
           "speaker": {
             "type": "string",
@@ -139,16 +146,18 @@
   },
   "examples": [
     {
-      "schemaVersion": "1.1.0",
+      "schemaVersion": "1.2.0",
       "nodes": [
         {
-          "id": "START",
+          "id": "node-start",
+          "title": "Ouverture",
           "speaker": "Personnage",
           "line": "Bonjour !",
           "choices": [
-            { "choiceId": "reply", "text": "Répondre", "targetNode": "REPLY" }
+            { "choiceId": "reply", "text": "Répondre", "targetNode": "node-reply" }
           ]
-        }
+        },
+        { "id": "node-reply", "line": "Suite..." }
       ]
     }
   ]

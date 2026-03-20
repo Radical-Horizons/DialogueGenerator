@@ -1,7 +1,7 @@
 """Schémas Pydantic pour l'API de gestion de graphes."""
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LoadGraphRequest(BaseModel):
@@ -104,6 +104,8 @@ class GenerateNodeRequest(BaseModel):
 
 class SuggestedConnection(BaseModel):
     """Connexion suggérée entre nœuds."""
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
+
     from_node: str = Field(..., description="ID du nœud source", alias="from")
     to_node: str = Field(..., description="ID du nœud cible", alias="to")
     via_choice_index: Optional[int] = Field(None, description="Index du choix (si applicable)")

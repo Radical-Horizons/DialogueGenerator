@@ -92,15 +92,15 @@ async def test_generate_nodes_for_choice_with_test_creates_4_nodes(unity_service
     # Devrait retourner 4 nœuds enrichis
     assert len(result["nodes"]) == 4
     
-    # Vérifier que les IDs sont corrects
     node_ids = [node["id"] for node in result["nodes"]]
-    assert len(set(node_ids)) == 4  # Tous uniques
-    
-    # Vérifier que les IDs suivent le format attendu
-    assert any("CRITICAL_FAILURE" in node_id for node_id in node_ids)
-    assert any("FAILURE" in node_id for node_id in node_ids)
-    assert any("SUCCESS" in node_id for node_id in node_ids)
-    assert any("CRITICAL_SUCCESS" in node_id for node_id in node_ids)
+    assert len(set(node_ids)) == 4
+    for node_id in node_ids:
+        assert node_id.startswith("node-") and len(node_id) == 37
+    titles = [node.get("title") for node in result["nodes"]]
+    assert "Échec critique" in titles
+    assert "Échec" in titles
+    assert "Réussite" in titles
+    assert "Réussite critique" in titles
     
     # Vérifier que les connexions sont correctes
     assert "connections" in result

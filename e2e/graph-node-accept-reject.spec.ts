@@ -30,7 +30,7 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
       await fs.rm(resolve(UNITY_DIALOGUES_DIR, currentFixtureFilename), { force: true }).catch(() => {})
       currentFixtureFilename = null
     }
-    await new Promise((r) => setTimeout(r, 5000))
+    await new Promise((r) => setTimeout(r, 2000))
   })
 
   test.beforeAll(async ({ request }) => {
@@ -113,7 +113,6 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
       test.skip(true, `${fixtureFilename} introuvable dans la liste Unity`)
     }
     await item.click()
-    await page.waitForTimeout(2000)
     const nodes = page.locator('.react-flow__node')
     await expect(nodes.first()).toBeVisible({ timeout: 15000 })
     return nodes
@@ -123,14 +122,12 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     const countBefore = await page.locator('.react-flow__node').count()
     const firstNode = page.locator('.react-flow__node').first()
     await firstNode.click()
-    await page.waitForTimeout(400)
     const actionsBtn = page.getByTestId('btn-actions-dropdown')
     await expect(actionsBtn).toBeVisible({ timeout: 4000 })
     await actionsBtn.click()
     const generateBtn = page.getByRole('menuitem', { name: /✨ Générer nœud|Générer nœud/i })
     await expect(generateBtn).toBeVisible({ timeout: 4000 })
     await generateBtn.click()
-    await page.waitForTimeout(800)
     const textarea = page.getByPlaceholder(/Décrivez ce que vous voulez générer|instructions?/i)
     await expect(textarea).toBeVisible({ timeout: 5000 })
     const modelSelect = page.getByTestId('llm-model-select')
@@ -141,11 +138,9 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     const branchBtn = page.getByRole('button', { name: 'Branche alternative (choice)' })
     if (await branchBtn.isVisible().catch(() => false)) {
       await branchBtn.click()
-      await page.waitForTimeout(300)
       const firstChoice = page.getByTestId('ai-gen-choice-0')
       if (await firstChoice.isVisible().catch(() => false)) {
         await firstChoice.click()
-        await page.waitForTimeout(200)
       }
     }
     const submitSingle = page.getByRole('button', { name: /^✨ Générer$|^✨ Générer pour choix \d+$/ })
@@ -159,7 +154,9 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
       successToast,
       'Génération LLM : aucun toast de succès. Vérifier logs frontend/API, budget, modèle gpt-5-mini. Voir docs/troubleshooting/e2e-llm.md.'
     ).toBeVisible({ timeout: 360_000 })
-    await page.waitForTimeout(3000)
+    await expect(
+      page.locator('.react-flow__node:has([data-status="pending"])').first()
+    ).toBeVisible({ timeout: 15000 })
     const countAfter = await page.locator('.react-flow__node').count()
     const pendingCount = await page.locator('.react-flow__node:has([data-status="pending"])').count()
     expect(
@@ -192,7 +189,10 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     const accept = page.locator('button:has-text("Accepter")').first()
     await expect(accept).toBeVisible({ timeout: 2000 })
     await accept.click()
-    await page.waitForTimeout(1500)
+    await expect(page.locator('.react-flow__node:has([data-status="pending"])')).toHaveCount(
+      pendingBefore - 1,
+      { timeout: 10000 }
+    )
     const pendingAfter = await page.locator('.react-flow__node:has([data-status="pending"])').count()
     expect(pendingAfter).toBeLessThan(pendingBefore)
   })
@@ -210,7 +210,6 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await reject.click()
     await expect(page.locator('text="Nœud rejeté"')).toBeVisible({ timeout: 4000 })
     await expect(page.locator('.react-flow__node:has([data-status="pending"])')).toHaveCount(0, { timeout: 5000 })
-    await page.waitForTimeout(300)
     const countAfter = await page.locator('.react-flow__node').count()
     expect(countAfter).toBe(countBefore - 1)
   })
@@ -220,8 +219,13 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await ensureGraphWithDialogue(page, fixtureFilename)
     await generatePendingNode(page)
     await expect(page.locator('.react-flow__node:has([data-status="pending"])').first()).toBeVisible({ timeout: 5000 })
-    // Attendre que l'auto-save backend ait écrit (debounce ~1.2s) avant reload
-    await page.waitForTimeout(5000)
+    const savePromise = page.waitForResponse(
+      (r) =>
+        (r.url().includes('/api/v1/documents/') && r.request().method() === 'PUT') ||
+        r.url().includes('/api/v1/unity-dialogues/graph/save'),
+      { timeout: 12000 }
+    )
+    await savePromise
     await page.reload()
     const onLoginAfter = await page.getByRole('heading', { name: 'Connexion' }).isVisible({ timeout: 2000 }).catch(() => false)
     if (onLoginAfter) await login(page)

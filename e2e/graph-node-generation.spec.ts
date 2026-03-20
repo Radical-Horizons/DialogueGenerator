@@ -44,7 +44,7 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
     const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
     if (await graphTab.isVisible({ timeout: 2000 }).catch(() => false)) {
       await graphTab.click()
-      await page.waitForTimeout(500) // Attendre le chargement
+      await page.locator('.react-flow__node').first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {})
     }
   })
 
@@ -222,11 +222,13 @@ test.describe('Graph Node Generation (Story 0.5.5)', () => {
           // Valider le graphe (bouton de validation si disponible)
           const validateButton = page.locator('button:has-text("Valider")').or(page.locator('button:has-text("Validation")'))
           if (await validateButton.isVisible({ timeout: 2000 })) {
+            const validateResponsePromise = page.waitForResponse(
+              (r) => r.url().includes('/api/v1/unity-dialogues/graph/validate') && r.status() === 200,
+              { timeout: 8000 }
+            )
             await validateButton.click()
-            
-            // Attendre les résultats de validation
-            await page.waitForTimeout(1000)
-            
+            await validateResponsePromise.catch(() => {})
+
             // Vérifier qu'il n'y a pas d'erreurs de référence cassée
             const brokenRefErrors = page.locator('text=/référence cassée|targetNode invalide|nextNode invalide/i')
             const errorCount = await brokenRefErrors.count()

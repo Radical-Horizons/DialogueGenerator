@@ -46,7 +46,10 @@ test.describe('Multi-Provider LLM Selection', () => {
     await page.selectOption('#model-select', valueToSelect);
     await page.reload();
     await page.locator('#model-select').waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1500);
+    await page.waitForFunction(
+      () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length > 0,
+      { timeout: 8000 }
+    );
     const selectedValue = await page.inputValue('#model-select');
     if (!selectedValue) {
       test.skip(true, 'Sélection réinitialisée après reload (liste modèles asynchrone)');

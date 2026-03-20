@@ -9,10 +9,7 @@ import { useGraphStore } from '../store/graphStore'
 import { exportGraphToPNG, exportGraphToSVG } from '../utils/graphExport'
 import { useKeyboardShortcuts } from './useKeyboardShortcuts'
 import { getErrorMessage } from '../types/errors'
-
-interface UseToastFn {
-  (message: string, variant?: string, duration?: number): void
-}
+import type { UseToastFn } from '../components/shared'
 
 export interface UseGraphToolbarReturn {
   showAutoLayoutDropdown: boolean
@@ -35,9 +32,6 @@ export interface UseGraphToolbarReturn {
   setShowJumpToNodeModal: (v: boolean) => void
   showFiltersPanel: boolean
   setShowFiltersPanel: (v: boolean | ((prev: boolean) => boolean)) => void
-  /** When opening AI panel from a TestNode, pre-select this choice index (cleared on panel close). */
-  initialAIGenerationChoiceIndex: number | null
-  clearInitialAIGenerationChoiceIndex: () => void
   layoutDirection: 'TB' | 'LR' | 'BT' | 'RL'
   autoLayoutDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownRef: RefObject<HTMLDivElement>
@@ -70,13 +64,8 @@ export function useGraphToolbar(
   const [showSearchBar, setShowSearchBar] = useState(false)
   const [showJumpToNodeModal, setShowJumpToNodeModal] = useState(false)
   const [showFiltersPanel, setShowFiltersPanel] = useState(false)
-  const [initialAIGenerationChoiceIndex, setInitialAIGenerationChoiceIndex] = useState<number | null>(null)
   const [layoutDirection, setLayoutDirection] = useState<'TB' | 'LR' | 'BT' | 'RL'>('TB')
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
-
-  const clearInitialAIGenerationChoiceIndex = useCallback(() => {
-    setInitialAIGenerationChoiceIndex(null)
-  }, [])
 
   const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
@@ -109,9 +98,8 @@ export function useGraphToolbar(
 
   useEffect(() => {
     const handleOpenGenerationPanel = (event: Event) => {
-      const { nodeId, choiceIndex } = (event as CustomEvent<{ nodeId: string; choiceIndex?: number }>).detail
+      const nodeId = (event as CustomEvent<{ nodeId: string }>).detail.nodeId
       setSelectedNode(nodeId)
-      setInitialAIGenerationChoiceIndex(typeof choiceIndex === 'number' ? choiceIndex : null)
       setShowAIGenerationPanel(true)
     }
     window.addEventListener('open-ai-generation-panel', handleOpenGenerationPanel)
@@ -430,8 +418,6 @@ export function useGraphToolbar(
     setShowJumpToNodeModal,
     showFiltersPanel,
     setShowFiltersPanel,
-    initialAIGenerationChoiceIndex,
-    clearInitialAIGenerationChoiceIndex,
     layoutDirection,
     autoLayoutDropdownRef,
     actionsDropdownRef,

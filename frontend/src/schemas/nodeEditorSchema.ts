@@ -47,6 +47,7 @@ export const regenerationEntrySchema = z.object({
  */
 export const dialogueNodeDataSchema = z.object({
   id: z.string(),
+  title: z.string().optional(),
   speaker: z.string().optional(),
   line: z.string().optional(),
   choices: z.array(choiceSchema).optional(),

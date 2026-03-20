@@ -14,6 +14,10 @@ interface NodeContextMenuProps {
   right?: number
   bottom?: number
   onClose: () => void
+  /** Génération directe pour un choix (drop handle). */
+  onGenerateForChoice?: (parentNodeId: string, choiceIndex: number) => void
+  /** Génération depuis un TestNode : on envoie l’id du TestNode, le backend renvoie les connexions avec ce même id (source de vérité unique). */
+  onGenerateFromTestNode?: (testNodeId: string) => void
 }
 
 export function NodeContextMenu({
@@ -23,6 +27,8 @@ export function NodeContextMenu({
   right,
   bottom,
   onClose,
+  onGenerateForChoice,
+  onGenerateFromTestNode,
 }: NodeContextMenuProps) {
   const { duplicateNode, setShowDeleteNodeConfirm, setSelectedNode, nodes } = useGraphStore()
   const { getNode } = useReactFlow()
@@ -50,23 +56,21 @@ export function NodeContextMenu({
 
   const handleGenerate = useCallback(() => {
     if (node?.type === 'testNode') {
-      const parentInfo = getParentChoiceForTestNode(id, nodes)
-      if (!parentInfo) {
-        onClose()
-        return
+      if (onGenerateFromTestNode) {
+        onGenerateFromTestNode(id)
+      } else {
+        const parentInfo = getParentChoiceForTestNode(id, nodes)
+        if (parentInfo) {
+          setSelectedNode(parentInfo.dialogueNodeId)
+          window.dispatchEvent(new CustomEvent('open-ai-generation-panel', { detail: { nodeId: parentInfo.dialogueNodeId } }))
+        }
       }
-      setSelectedNode(parentInfo.dialogueNodeId)
-      window.dispatchEvent(
-        new CustomEvent('open-ai-generation-panel', {
-          detail: { nodeId: parentInfo.dialogueNodeId, choiceIndex: parentInfo.choiceIndex },
-        })
-      )
     } else {
       setSelectedNode(id)
       window.dispatchEvent(new CustomEvent('open-ai-generation-panel', { detail: { nodeId: id } }))
     }
     onClose()
-  }, [id, node?.type, nodes, setSelectedNode, onClose])
+  }, [id, node?.type, nodes, setSelectedNode, onClose, onGenerateForChoice, onGenerateFromTestNode])
 
   return (
     <div

@@ -333,10 +333,46 @@ describe('documentToGraph', () => {
       expect(dialogueToTest).toHaveLength(1)
       expect(dialogueToTest[0].id).toBe('e:N:choice:c1:test')
     })
+
+    it('treats node with root-level test as dialogueNode so START is not skipped (validation finds start)', () => {
+      const doc: UnityDocument = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'START',
+            speaker: 'NPC',
+            line: 'Line',
+            test: 'Raison+Duperie:12',
+            choices: [{ choiceId: 'c0', text: 'Choice', targetNode: 'END' }],
+          },
+          { id: 'END', line: '' },
+        ],
+      }
+      const layout: LayoutPositions = { nodes: { START: { x: 0, y: 0 }, END: { x: 0, y: 150 } } }
+      const { nodes } = documentToGraph(doc, layout)
+      const startNode = nodes.find((n) => n.id === 'START')
+      expect(startNode).toBeDefined()
+      expect(startNode?.type).toBe('dialogueNode')
+    })
   })
 })
 
 describe('graphToDocument', () => {
+  it('persists title from node.data (schema v1.2.0)', () => {
+    const nodes = [
+      {
+        id: 'node-abc123',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'node-abc123', title: 'Ouverture', speaker: 'PNJ', line: 'Hi', choices: [] },
+      },
+    ]
+    const edges: never[] = []
+    const doc = graphToDocument(nodes as never, edges)
+    expect(doc.nodes).toHaveLength(1)
+    expect((doc.nodes[0] as { title?: string }).title).toBe('Ouverture')
+  })
+
   it('reconstructs document with choiceId from stable sourceHandle', () => {
     const doc: UnityDocument = {
       schemaVersion: '1.1.0',

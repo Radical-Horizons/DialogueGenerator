@@ -64,6 +64,7 @@ export const DialogueNode = memo(function DialogueNode({
 }: NodeProps<DialogueNodeData>) {
   const speaker = data.speaker || 'PNJ'
   const line = data.line || ''
+  const title = (data.title as string) || ''
   const choices = data.choices || []
   const hasChoices = choices.length > 0
   const errors = data.validationErrors || []
@@ -346,6 +347,22 @@ export const DialogueNode = memo(function DialogueNode({
         }}
       />
       
+      {title ? (
+        <div
+          style={{
+            padding: '4px 12px',
+            borderBottom: `1px solid ${theme.border.primary}`,
+            fontSize: '0.8rem',
+            color: theme.text.secondary,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={title}
+        >
+          {title}
+        </div>
+      ) : null}
       {/* Header avec speaker */}
       <div
         style={{

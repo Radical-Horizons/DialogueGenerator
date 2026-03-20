@@ -17,15 +17,12 @@ import type { LLMModelResponse } from '../../types/api'
 
 interface AIGenerationPanelProps {
   parentNodeId: string | null
-  /** When opening from a TestNode shortcut: pre-select this choice index and switch to branch mode. */
-  initialChoiceIndex?: number | null
   onClose: () => void
   onGenerated?: () => void
 }
 
 export function AIGenerationPanel({
   parentNodeId,
-  initialChoiceIndex = null,
   onClose,
   onGenerated,
 }: AIGenerationPanelProps) {
@@ -59,13 +56,6 @@ export function AIGenerationPanel({
         console.error('Erreur lors du chargement des modèles:', err)
       })
   }, [])
-
-  // Raccourci TestNode : pré-sélectionner le choix et passer en mode branche
-  useEffect(() => {
-    if (parentNodeId == null || initialChoiceIndex == null) return
-    setTargetChoiceIndex(initialChoiceIndex)
-    setGenerationMode('branch')
-  }, [parentNodeId, initialChoiceIndex])
 
   // Trouver le nœud parent
   const parentNode = parentNodeId ? nodes.find((n) => n.id === parentNodeId) : null

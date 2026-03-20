@@ -56,6 +56,20 @@ test.describe('Graph load – affichage des nœuds', () => {
     }
   }
 
+  const deleteFixture = async (
+    request: Parameters<Parameters<typeof test>[1]>[0]['request']
+  ): Promise<void> => {
+    const res = await request.delete(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`)
+    if (!res.ok() && res.status() !== 404) {
+      const text = await res.text().catch(() => '')
+      throw new Error(`Cleanup DELETE failed ${res.status()}: ${text}`)
+    }
+  }
+
+  test.afterEach(async ({ request }) => {
+    await deleteFixture(request)
+  })
+
   test('ouvrir un dialogue et vérifier que les nœuds du graphe s\'affichent', async ({ page, request }) => {
     await page.goto('/')
     await login(page)
@@ -106,7 +120,7 @@ test.describe('Graph load – affichage des nœuds', () => {
     await page.mouse.down()
     await page.mouse.move(centerX + 80, centerY + 40, { steps: 5 })
     await page.mouse.up()
-    await page.waitForTimeout(500)
+    await firstNode.waitFor({ state: 'visible', timeout: 3000 })
 
     const errorCount = consoleErrors.length
     const repeated = consoleErrors.filter(

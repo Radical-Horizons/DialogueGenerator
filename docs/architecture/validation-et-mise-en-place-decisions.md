@@ -34,6 +34,7 @@ Valider que l'implémentation de l'ADR-008 respecte les six décisions associée
 - [x] Tests unitaires : structure schéma, document valide/invalide, refus sans choiceId
 - [x] Tests non-régression : `test_frontend_backend_validation.py` (9 tests passent)
 - [x] Doc architecture : `pipeline-unity-backend-front-architecture.md` créé
+- [x] Schéma v1.2.0 : `id` = identifiant stable (legacy SCREAMING_SNAKE_CASE ou préfixe `node-`/`manual-` + alphanum), `title` optionnel (libellé éditable). `schemaVersion` accepte 1.1.0 ou 1.2.0.
 
 **Status:** ✅ **Complété** (Story 16.1)
 

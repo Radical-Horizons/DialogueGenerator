@@ -85,6 +85,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     defaultValues: nodeType === 'dialogueNode'
       ? {
           id: selectedNode?.id || '',
+          title: (selectedNode?.data?.title as string) ?? '',
           speaker: selectedNode?.data?.speaker || '',
           line: selectedNode?.data?.line || '',
           choices: (selectedNode?.data?.choices || []) as Choice[],
@@ -139,7 +140,22 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         return { ...nodeData, ...formValues, choices: mergedChoices }
       }
       if (nType === 'testNode') {
-        return { ...nodeData, ...formValues }
+        const tv = formValues as TestNodeData
+        // Même principe que dialogueNode/choices : les IDs de sortie du test sont pilotés par les edges ;
+        // le form n’est pas resynchronisé pendant la génération, donc préférer le store s’il a une valeur non vide.
+        const pickTestConnection = (storeVal: unknown, formVal: unknown): string => {
+          if (typeof storeVal === 'string' && storeVal.trim() !== '') return storeVal
+          if (typeof formVal === 'string') return formVal
+          return ''
+        }
+        return {
+          ...nodeData,
+          ...formValues,
+          criticalFailureNode: pickTestConnection(nodeData.criticalFailureNode, tv.criticalFailureNode),
+          failureNode: pickTestConnection(nodeData.failureNode, tv.failureNode),
+          successNode: pickTestConnection(nodeData.successNode, tv.successNode),
+          criticalSuccessNode: pickTestConnection(nodeData.criticalSuccessNode, tv.criticalSuccessNode),
+        }
       }
       return { ...nodeData, ...formValues }
     },
@@ -206,6 +222,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         
         reset({
           id: selectedNode.id,
+          title: (selectedNode.data.title as string) ?? '',
           speaker: selectedNode.data.speaker || '',
           line: selectedNode.data.line || '',
           choices,
@@ -415,7 +432,64 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
   }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
-  
+
+  // Même logique que handleGenerateForChoice mais avec parentNodeId explicite (drop / choix ciblé).
+  const handleGenerateForChoiceAt = useCallback(
+    async (parentNodeId: string, choiceIndex: number) => {
+      const instructions = userInstructions.trim() || 'Continue la conversation de manière naturelle'
+      try {
+        const allCharacters = [
+          ...(selections.characters_full || []),
+          ...(selections.characters_excerpt || []),
+        ]
+        const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+        const generationResult = await generateFromNode(parentNodeId, instructions, {
+          context_selections: selections,
+          npc_speaker_id: npcSpeakerId,
+          llm_model_identifier: llmModel,
+          target_choice_index: choiceIndex,
+        })
+        toast('Nœud généré avec succès', 'success', 2000)
+        if (generationResult.nodeId) {
+          setSelectedNode(generationResult.nodeId)
+          window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: generationResult.nodeId } }))
+        }
+        setShowGenerationOptions(false)
+        setUserInstructions('')
+      } catch (err) {
+        toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
+      }
+    },
+    [userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast]
+  )
+
+  /** Génération depuis le TestNode sélectionné : on envoie son id, le backend renvoie les connexions avec ce même id. */
+  const handleGenerateFromTestNode = useCallback(async () => {
+    if (!selectedNodeId) return
+    const instructions = userInstructions.trim() || 'Continue la conversation de manière naturelle'
+    try {
+      const allCharacters = [
+        ...(selections.characters_full || []),
+        ...(selections.characters_excerpt || []),
+      ]
+      const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+      const generationResult = await generateFromNode(selectedNodeId, instructions, {
+        context_selections: selections,
+        npc_speaker_id: npcSpeakerId,
+        llm_model_identifier: llmModel,
+      })
+      toast('Nœud généré avec succès', 'success', 2000)
+      if (generationResult.nodeId) {
+        setSelectedNode(generationResult.nodeId)
+        window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: generationResult.nodeId } }))
+      }
+      setShowGenerationOptions(false)
+      setUserInstructions('')
+    } catch (err) {
+      toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
+    }
+  }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
+
   // Handler pour générer pour tous les choix
   const handleGenerateAllChoices = useCallback(async () => {
     if (!selectedNodeId) {
@@ -514,7 +588,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           overflow: 'auto',
         }}
       >
-        {/* ID du nœud (readonly) */}
+        {/* ID du nœud (readonly, stable) */}
         <div>
           <label
             style={{
@@ -525,7 +599,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               color: theme.text.secondary,
             }}
           >
-            ID du nœud
+            ID (stable)
           </label>
           <input
             type="text"
@@ -543,7 +617,38 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             }}
           />
         </div>
-        
+
+        {/* Titre (éditable, pour dialogueNode) */}
+        {nodeType === 'dialogueNode' && (
+          <div>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontSize: '0.85rem',
+                fontWeight: 'bold',
+                color: theme.text.primary,
+              }}
+            >
+              Titre
+            </label>
+            <input
+              type="text"
+              {...register('title')}
+              placeholder="Libellé du nœud (affichage)"
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: 4,
+                backgroundColor: theme.background.tertiary,
+                color: theme.text.primary,
+                fontSize: '0.9rem',
+              }}
+            />
+          </div>
+        )}
+
         {/* Type de nœud */}
         <div>
           <label
@@ -821,49 +926,41 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           </div>
         )}
 
-        {/* Raccourci génération pour TestNode : ouvre le panneau IA avec le choix parent pré-sélectionné */}
-        {nodeType === 'testNode' && selectedNodeId && (() => {
-          const parentInfo = getParentChoiceForTestNode(selectedNodeId, nodes)
-          if (!parentInfo) return null
-          return (
-            <div
+        {/* Raccourci génération pour TestNode : on envoie l’id du TestNode, le backend renvoie les connexions avec ce même id. */}
+        {nodeType === 'testNode' && selectedNodeId && (
+          <div
+            style={{
+              padding: '1rem',
+              backgroundColor: theme.background.secondary,
+              borderRadius: 6,
+              border: `1px solid ${theme.border.primary}`,
+            }}
+          >
+            <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 'bold', color: theme.text.primary }}>
+              ✨ Génération IA
+            </h3>
+            <button
+              type="button"
+              data-testid="generate-from-test-node"
+              onClick={() => handleGenerateFromTestNode()}
+              disabled={isGenerating}
               style={{
-                padding: '1rem',
-                backgroundColor: theme.background.secondary,
-                borderRadius: 6,
-                border: `1px solid ${theme.border.primary}`,
+                width: '100%',
+                padding: '0.75rem',
+                border: 'none',
+                borderRadius: 4,
+                backgroundColor: theme.button.primary.background,
+                color: theme.button.primary.color,
+                cursor: isGenerating ? 'not-allowed' : 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 'bold',
+                opacity: isGenerating ? 0.7 : 1,
               }}
             >
-              <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 'bold', color: theme.text.primary }}>
-                ✨ Génération IA
-              </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedNode(parentInfo.dialogueNodeId)
-                  window.dispatchEvent(
-                    new CustomEvent('open-ai-generation-panel', {
-                      detail: { nodeId: parentInfo.dialogueNodeId, choiceIndex: parentInfo.choiceIndex },
-                    })
-                  )
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: 'none',
-                  borderRadius: 4,
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: 'bold',
-                }}
-              >
-                ✨ Générer la suite pour ce test
-              </button>
-            </div>
-          )
-        })()}
+              {isGenerating ? 'Génération...' : '✨ Générer la suite pour ce test'}
+            </button>
+          </div>
+        )}
         
         {/* Choix (pour dialogue nodes) */}
         {nodeType === 'dialogueNode' && (

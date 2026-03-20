@@ -76,12 +76,9 @@ export function GraphEditor({
     setShowCostBreakdown,
     showAIGenerationPanel,
     setShowAIGenerationPanel,
-    initialAIGenerationChoiceIndex,
-    clearInitialAIGenerationChoiceIndex,
     showExportFormatDialog,
     setShowExportFormatDialog,
     showSearchBar,
-    setShowSearchBar,
     showJumpToNodeModal,
     setShowJumpToNodeModal,
     showFiltersPanel,
@@ -162,7 +159,7 @@ export function GraphEditor({
           toolbar={toolbar}
           isLoadingDialogue={isLoadingDialogue}
           hasActiveDialogue={hasActiveDialogue}
-          activeDialogueTitle={activeDialogueTitle}
+          activeDialogueTitle={activeDialogueTitle ?? null}
           activeDialogueFilename={activeDialogueFilename}
           handleSave={handleSave}
           onBatchTagApply={handleBatchTagSelection}
@@ -286,11 +283,7 @@ export function GraphEditor({
                 >
                   <AIGenerationPanel
                     parentNodeId={selectedNodeId}
-                    initialChoiceIndex={initialAIGenerationChoiceIndex}
-                    onClose={() => {
-                      clearInitialAIGenerationChoiceIndex()
-                      setShowAIGenerationPanel(false)
-                    }}
+                    onClose={() => setShowAIGenerationPanel(false)}
                     onGenerated={() => {
                       dialogueListRef.current?.refresh()
                       if (activeDialogueFilename) {

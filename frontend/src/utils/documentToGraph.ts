@@ -58,7 +58,6 @@ function getPosition(
 }
 
 function determineNodeType(unityNode: UnityNode): string {
-  if (unityNode.test) return 'testNode'
   if (unityNode.id === 'END') return 'endNode'
   return 'dialogueNode'
 }
@@ -208,6 +207,7 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
     if (node.type === 'testNode') continue
     const data = (node.data ?? {}) as Record<string, unknown>
     const unityNode = { ...data, id: node.id } as Record<string, unknown>
+    if (node.data?.title !== undefined) unityNode.title = node.data.title
     unityNode.nextNode = undefined
     if (Array.isArray(unityNode.choices)) {
       unityNode.choices = (unityNode.choices as Record<string, unknown>[]).map((choice, idx) => {

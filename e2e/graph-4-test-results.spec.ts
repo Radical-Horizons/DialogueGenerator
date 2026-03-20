@@ -34,7 +34,7 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
     const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
     if (await graphTab.isVisible({ timeout: 2000 }).catch(() => false)) {
       await graphTab.click()
-      await page.waitForTimeout(500)
+      await page.locator('.react-flow__node').first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {})
     }
   })
 
@@ -171,12 +171,16 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
       const saveButton = page.locator('button:has-text("Sauvegarder")').or(
         page.locator('button:has-text("Enregistrer")')
       )
+      const saveResponsePromise = page.waitForResponse(
+        (r) =>
+          r.url().includes('/api/v1/documents/') ||
+          r.url().includes('/api/v1/unity-dialogues/graph/save'),
+        { timeout: 8000 }
+      )
       await saveButton.click()
-      
+      await saveResponsePromise.catch(() => {})
+
       // THEN: Les connexions doivent être mises à jour dans le graphe
-      await page.waitForTimeout(500) // Attendre la mise à jour
-      
-      // Vérifier que les edges sont visibles (selon l'implémentation ReactFlow)
     } else {
       test.skip('Aucun TestNode trouvé - test ignoré')
     }

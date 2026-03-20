@@ -4,6 +4,7 @@
  */
 import { memo } from 'react'
 import { theme } from '../../theme'
+import { GenerationLoaderContent } from './GenerationLoaderContent'
 
 export interface DropChoiceModalProps {
   isOpen: boolean
@@ -84,19 +85,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
             role="status"
             aria-live="polite"
           >
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                border: `3px solid ${theme.border.primary}`,
-                borderTopColor: theme.button.primary.background,
-                borderRadius: '50%',
-                animation: 'drop-choice-spin 0.8s linear infinite',
-              }}
-            />
-            <span style={{ fontSize: '0.875rem', color: theme.text.secondary }}>
-              Génération en cours…
-            </span>
+            <GenerationLoaderContent />
             <button
               type="button"
               onClick={onClose}
@@ -113,12 +102,6 @@ export const DropChoiceModal = memo(function DropChoiceModal({
             >
               Annuler
             </button>
-            <style>{`
-              @keyframes drop-choice-spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-              }
-            `}</style>
           </div>
         ) : (
           <div

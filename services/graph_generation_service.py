@@ -3,7 +3,7 @@ import asyncio
 import logging
 from typing import List, Dict, Any, Optional, Callable
 
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.unity_dialogue_generation_service import UnityDialogueGenerationService, _stable_node_id
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
@@ -108,11 +108,7 @@ Instructions pour la suite:
                     max_choices=max_choices
                 )
                 
-                # Enrichir avec ID au format NODE_{parent_id}_CHOICE_{index}
-                if parent_id.startswith("NODE_"):
-                    start_id = f"{parent_id}_CHOICE_{choice_index}"
-                else:
-                    start_id = f"NODE_{parent_id}_CHOICE_{choice_index}"
+                start_id = _stable_node_id()
                 enriched_nodes = self.generation_service.enrich_with_ids(
                     content=response,
                     start_id=start_id

@@ -52,6 +52,8 @@ function cloneNodeData(
 ): Record<string, unknown> {
   const data = JSON.parse(JSON.stringify(originalData)) as Record<string, unknown>
   data.id = newId
+  const origTitle = originalData.title as string | undefined
+  data.title = typeof origTitle === 'string' && origTitle.length > 0 ? `${origTitle} (copie)` : ''
   delete data.nextNode
   if (data.choices && Array.isArray(data.choices)) {
     data.choices = (data.choices as Array<Choice & { targetNode?: string; testSuccessNode?: string; testFailureNode?: string; testCriticalSuccessNode?: string; testCriticalFailureNode?: string }>).map((choice) => {
@@ -425,7 +427,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
       id,
       type: 'dialogueNode',
       position: pos,
-      data: { id, speaker: '', line: '', choices: [] },
+      data: { id, title: '', speaker: '', line: '', choices: [] },
     }
     return node
   },
@@ -527,17 +529,6 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           isDocumentSoT
             ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
             : {}
-        // #region agent log
-        const doc = (docAndLayout as { document?: Record<string, unknown> }).document
-        const choicesWithTest = doc?.nodes
-          ? (doc.nodes as Record<string, unknown>[]).flatMap((n, i) =>
-              ((n?.choices as Record<string, unknown>[]) ?? []).map((c, j) =>
-                (c as { test?: unknown }).test != null ? { nodeIdx: i, choiceIdx: j, hasTest: true } : []
-              )
-            ).flat()
-          : []
-        fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'nodeSlice.ts:deleteNode(TestNode)', message: 'After delete TestNode: docAndLayout', data: { nodeId, hasParent: !!parent, isDocumentSoT, choicesWithTestInDoc: choicesWithTest.length }, timestamp: Date.now(), hypothesisId: 'A' }) }).catch(() => {})
-        // #endregion
 
         return {
           nodes: newNodes,

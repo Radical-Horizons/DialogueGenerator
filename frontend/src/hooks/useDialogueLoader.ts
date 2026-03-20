@@ -9,10 +9,7 @@ import * as unityDialoguesAPI from '../api/unityDialogues'
 import { getErrorMessage } from '../types/errors'
 import type { UnityDialogueMetadata } from '../types/api'
 import type { UnityDialogueListRef } from '../components/unityDialogues/UnityDialogueList'
-
-interface UseToastFn {
-  (message: string, variant?: string, duration?: number): void
-}
+import type { UseToastFn } from '../components/shared'
 
 interface RouteTarget {
   normalizedDialogueId: string
@@ -121,9 +118,6 @@ export function useDialogueLoader(
         state.hasUnsavedChanges &&
         !!currentFilename &&
         !isSameDialogue
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'useDialogueLoader.ts:switch', message: 'Leaving dialogue', data: { hasUnsavedChanges: state.hasUnsavedChanges, currentFilename, targetFilename, isSameDialogue, willSave: leavingDirty }, timestamp: Date.now(), hypothesisId: 'C' }) }).catch(() => {})
-      // #endregion
 
       if (leavingDirty) {
         try {

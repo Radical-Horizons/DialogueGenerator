@@ -147,3 +147,119 @@ describe('NodeEditorPanel - flush on selection change preserves targetNode', () 
     }
   })
 })
+
+describe('NodeEditorPanel - flush on selection change preserves TestNode result connections', () => {
+  const testNodeEmpty = {
+    id: 'test-node-START-choice-0',
+    type: 'testNode' as const,
+    position: { x: 100, y: 50 },
+    data: {
+      id: 'test-node-START-choice-0',
+      test: 'Raison+Architecture:8',
+      line: '',
+      criticalFailureNode: '',
+      failureNode: '',
+      successNode: '',
+      criticalSuccessNode: '',
+    },
+  }
+  const generatedNode = {
+    id: 'node-gen-1',
+    type: 'dialogueNode' as const,
+    position: { x: 200, y: 200 },
+    data: { id: 'node-gen-1', speaker: 'PNJ', line: 'Suite', choices: [], nextNode: '' },
+  }
+
+  let updateNodeMock: ReturnType<typeof vi.fn>
+  let mockState: Record<string, unknown>
+
+  beforeEach(() => {
+    updateNodeMock = vi.fn()
+    mockState = {
+      selectedNodeId: testNodeEmpty.id,
+      nodes: [testNodeEmpty, generatedNode],
+      edges: [],
+      updateNode: updateNodeMock,
+      deleteNode: vi.fn(),
+      generateFromNode: vi.fn(),
+      isGenerating: false,
+      setSelectedNode: vi.fn(),
+      setShowDeleteNodeConfirm: vi.fn(),
+      createEmptyNode: vi.fn(),
+      addNode: vi.fn(),
+      connectNodes: vi.fn(),
+      disconnectNodes: vi.fn(),
+      duplicateNode: vi.fn(),
+      validationErrors: [],
+      highlightedNodeIds: [],
+      selectedNode: testNodeEmpty,
+    }
+    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+      if (typeof selector === 'function') return selector(mockState)
+      return mockState
+    })
+    ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
+      () => mockState
+    )
+    vi.mocked(useContextStore).mockReturnValue({ selections: {} } as ReturnType<typeof useContextStore>)
+  })
+
+  it('should NOT overwrite criticalFailureNode etc. when store was updated by generation but form is still empty', async () => {
+    const { rerender } = render(
+      <ReactFlowProvider>
+        <NodeEditorPanel />
+      </ReactFlowProvider>
+    )
+
+    // Simuler generateFromNode : le store Zustand a les IDs, le formulaire react-hook-form non resynchronisé
+    const testNodeFilled = {
+      ...testNodeEmpty,
+      data: {
+        ...testNodeEmpty.data,
+        criticalFailureNode: 'node-cf',
+        failureNode: 'node-f',
+        successNode: 'node-s',
+        criticalSuccessNode: 'node-cs',
+      },
+    }
+    mockState = {
+      ...mockState,
+      nodes: [testNodeFilled, generatedNode],
+    }
+
+    await act(async () => {
+      mockState = {
+        ...mockState,
+        selectedNodeId: generatedNode.id,
+        selectedNode: generatedNode,
+      }
+      vi.mocked(useGraphStore).mockImplementation(
+        (selector?: (s: typeof mockState) => unknown) => {
+          if (typeof selector === 'function') return selector(mockState)
+          return mockState
+        }
+      )
+      ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
+        () => mockState
+      )
+      rerender(
+        <ReactFlowProvider>
+          <NodeEditorPanel />
+        </ReactFlowProvider>
+      )
+    })
+
+    const callsForTest = updateNodeMock.mock.calls.filter(
+      ([nodeId]) => nodeId === testNodeEmpty.id
+    )
+    expect(callsForTest.length).toBeGreaterThan(0)
+
+    for (const [, updates] of callsForTest) {
+      const d = (updates as { data: Record<string, unknown> }).data
+      expect(d.criticalFailureNode).toBe('node-cf')
+      expect(d.failureNode).toBe('node-f')
+      expect(d.successNode).toBe('node-s')
+      expect(d.criticalSuccessNode).toBe('node-cs')
+    }
+  })
+})

@@ -661,5 +661,53 @@ describe('useGraphStore - Pending save state', () => {
       expect(generatedNode?.position.x).toBe(100) // parent.x + 0 (centré)
       expect(generatedNode?.position.y).toBe(380) // parent.y + OFFSET_BELOW (280)
     })
+
+    it('should set parent choice test*Node fields when generating from TestNode (4 results)', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+      const startNode: Node = {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'START',
+          speaker: 'PNJ',
+          line: 'Hello',
+          choices: [{ text: 'Tenter', test: 'Raison+Diplomatie:8' }],
+        },
+      }
+      addNode(startNode)
+      const testNode: Node = {
+        id: 'test-node-START-choice-0',
+        type: 'testNode',
+        position: { x: 0, y: 280 },
+        data: { id: 'test-node-START-choice-0', test: 'Raison+Diplomatie:8', line: 'Tenter' },
+      }
+      addNode(testNode)
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode.mockResolvedValueOnce({
+        nodes: [
+          { id: 'NODE_CF', speaker: 'PNJ', line: 'Échec critique' },
+          { id: 'NODE_F', speaker: 'PNJ', line: 'Échec' },
+          { id: 'NODE_S', speaker: 'PNJ', line: 'Réussite' },
+          { id: 'NODE_CS', speaker: 'PNJ', line: 'Réussite critique' },
+        ],
+        suggested_connections: [
+          { from: 'test-node-START-choice-0', to: 'NODE_CF', connection_type: 'test-critical-failure' },
+          { from: 'test-node-START-choice-0', to: 'NODE_F', connection_type: 'test-failure' },
+          { from: 'test-node-START-choice-0', to: 'NODE_S', connection_type: 'test-success' },
+          { from: 'test-node-START-choice-0', to: 'NODE_CS', connection_type: 'test-critical-success' },
+        ],
+        parent_node_id: 'test-node-START-choice-0',
+      })
+      await generateFromNode('test-node-START-choice-0', 'Instructions', {})
+      const state = useGraphStore.getState()
+      const start = state.nodes.find((n) => n.id === 'START')
+      const choice0 = (start?.data?.choices as Array<{ testCriticalFailureNode?: string; testFailureNode?: string; testSuccessNode?: string; testCriticalSuccessNode?: string }>)?.[0]
+      expect(choice0?.testCriticalFailureNode).toBe('NODE_CF')
+      expect(choice0?.testFailureNode).toBe('NODE_F')
+      expect(choice0?.testSuccessNode).toBe('NODE_S')
+      expect(choice0?.testCriticalSuccessNode).toBe('NODE_CS')
+    })
   })
 })

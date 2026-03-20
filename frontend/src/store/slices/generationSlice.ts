@@ -17,6 +17,16 @@ function simpleHash(s: string): string {
   return String(Math.abs(h))
 }
 
+/** API peut renvoyer from_node/to_node (noms Pydantic) au lieu de from/to (alias). */
+function normalizedConn(conn: { from?: string; to?: string; from_node?: string; to_node?: string; via_choice_index?: number; connection_type: string }) {
+  return {
+    from: conn.from ?? conn.from_node ?? '',
+    to: conn.to ?? conn.to_node ?? '',
+    via_choice_index: conn.via_choice_index,
+    connection_type: conn.connection_type,
+  }
+}
+
 /**
  * Normalise le contenu parent envoyé à l'API : retire "test" des choix quand il est vide,
  * pour éviter la branche "4 nœuds" côté backend après suppression du TestNode.
@@ -157,7 +167,8 @@ export const createGenerationSlice: StateCreator<
         }
       >()
 
-      for (const conn of response.suggested_connections) {
+      for (const rawConn of response.suggested_connections) {
+        const conn = normalizedConn(rawConn as Parameters<typeof normalizedConn>[0])
         const node = generatedNodes.find((n) => n.id === conn.to)
         if (node) {
           const mapKey =
@@ -237,6 +248,7 @@ export const createGenerationSlice: StateCreator<
           Object.keys(contextSelections).length > 0
             ? simpleHash(JSON.stringify(contextSelections))
             : undefined
+        const nodeStatus = totalToAdd === 1 ? ('pending' as const) : ('accepted' as const)
         const newNode: Node = {
           id: generatedNode.id,
           type: 'dialogueNode',
@@ -246,7 +258,7 @@ export const createGenerationSlice: StateCreator<
           },
           data: {
             ...generatedNode,
-            status: 'pending' as const,
+            status: nodeStatus,
             lastGenerationInstructions: instructions,
             ...(contextGddHash !== undefined && { contextGddHash }),
           },
@@ -273,14 +285,21 @@ export const createGenerationSlice: StateCreator<
         },
       })
 
-      // Une seule voie pour rattacher les nœuds au parent : connexions choice/nextNode
-      // utilisent toujours parentNodeId (source de vérité front), les autres (ex. test-*) gardent conn.from.
-      for (const conn of response.suggested_connections) {
+      const testHandleTypes = ['critical-failure', 'failure', 'success', 'critical-success'] as const
+      for (const rawConn of response.suggested_connections ?? []) {
+        const conn = normalizedConn(rawConn as Parameters<typeof normalizedConn>[0])
         const sourceId =
           conn.connection_type === 'choice' || conn.connection_type === 'nextNode'
             ? parentNodeId
             : conn.from
-        get().connectNodes(sourceId, conn.to, conn.via_choice_index, conn.connection_type)
+        if (!sourceId || !conn.to) continue
+        const sourceHandle =
+          conn.connection_type?.startsWith('test-')
+            ? conn.connection_type.replace('test-', '')
+            : testHandleTypes.includes(conn.connection_type as (typeof testHandleTypes)[number])
+              ? conn.connection_type
+              : undefined
+        get().connectNodes(sourceId, conn.to, conn.via_choice_index, conn.connection_type, sourceHandle)
       }
 
       const stateAfterConnections = get()
@@ -288,7 +307,7 @@ export const createGenerationSlice: StateCreator<
         console.warn('[Generation] Ignored generation result after connections because dialogue changed')
         return { nodeId: null }
       }
-      const normalized = normalizeTestBars(
+      let normalized = normalizeTestBars(
         stateAfterConnections.nodes,
         stateAfterConnections.edges
       )

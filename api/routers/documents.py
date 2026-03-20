@@ -547,3 +547,45 @@ async def put_document(
             details={"error": str(e)},
             request_id=request_id,
         )
+
+
+@router.delete(
+    "/{document_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_document(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+):
+    """Supprime un document et son layout. Réservé aux fixtures E2E (document_id doit commencer par e2e-)."""
+    doc_id = _safe_document_id(document_id)
+    if not doc_id.startswith("e2e-"):
+        raise ValidationException(
+            message="Suppression réservée aux documents E2E (id commençant par e2e-).",
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    try:
+        base_dir, resolved_id = _resolve_document_base(document_id, config_service, request_id)
+        layout_base_dir, _ = _resolve_layout_base(document_id, config_service, request_id)
+        removed = 0
+        for path in [
+            base_dir / f"{resolved_id}.json",
+            base_dir / f"{resolved_id}{META_FILENAME_SUFFIX}",
+            layout_base_dir / f"{resolved_id}.layout.json",
+            layout_base_dir / f"{resolved_id}{LAYOUT_META_SUFFIX}",
+        ]:
+            if path.exists():
+                path.unlink()
+                removed += 1
+        logger.info(f"DELETE document {resolved_id} ({removed} fichier(s)) (request_id: {request_id})")
+    except (ValidationException, NotFoundException):
+        raise
+    except Exception as e:
+        logger.exception(f"Erreur DELETE document {document_id} (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors de la suppression du document",
+            details={"error": str(e)},
+            request_id=request_id,
+        )

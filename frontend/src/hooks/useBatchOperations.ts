@@ -5,10 +5,7 @@
 import { useState, useCallback } from 'react'
 import { useGraphStore } from '../store/graphStore'
 import { getErrorMessage } from '../types/errors'
-
-interface UseToastFn {
-  (message: string, variant?: string, duration?: number): void
-}
+import type { UseToastFn } from '../components/shared'
 
 interface BatchOperationOptions {
   variant?: 'success' | 'warning'

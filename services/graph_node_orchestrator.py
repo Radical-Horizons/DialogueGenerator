@@ -398,7 +398,8 @@ class GraphNodeOrchestrator:
         generated_nodes = result["nodes"]
         connection_data = result["connections"][0]
 
-        test_node_id = f"test-node-{normalized_parent_id}-choice-{choice_index}"
+        # Utiliser parent_node_id brut pour que suggested_connections.from corresponde à l’id du TestNode côté client
+        test_node_id = f"test-node-{parent_node_id}-choice-{choice_index}"
         connections = _build_test_connections(test_node_id, connection_data)
 
         logger.info(

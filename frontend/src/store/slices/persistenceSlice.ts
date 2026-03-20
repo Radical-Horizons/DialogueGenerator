@@ -182,15 +182,6 @@ export const createPersistenceSlice: StateCreator<
           }),
       ])
       const doc = docResponse.document as Record<string, unknown>
-      // #region agent log
-      const loadNodesArr = (doc?.nodes as Record<string, unknown>[] | undefined) ?? []
-      const loadChoicesWithTest = loadNodesArr.flatMap((n, i) =>
-        ((n?.choices as Record<string, unknown>[]) ?? []).map((c, j) =>
-          (c as { test?: unknown }).test != null ? { nodeIdx: i, choiceIdx: j } : []
-        )
-      ).flat()
-      fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'persistenceSlice.ts:loadDialogueByDocumentId', message: 'Doc from API', data: { documentId, choicesWithTestCount: loadChoicesWithTest.length }, timestamp: Date.now(), hypothesisId: 'D' }) }).catch(() => {})
-      // #endregion
       const layoutBlob = (layoutResponse?.layout ?? {}) as Record<string, unknown>
       const layoutPositions = layoutBlob?.nodes
         ? { nodes: layoutBlob.nodes as Record<string, { x: number; y: number }> }
@@ -305,15 +296,6 @@ export const createPersistenceSlice: StateCreator<
       // Construire le document depuis le graphe courant pour éviter décalage avec state.document (ex. après suppression TestNode).
       if (state.document != null && documentId) {
         const doc = graphToDocument(state.nodes, state.edges) as unknown as Record<string, unknown>
-        // #region agent log
-        const nodesArr = (doc?.nodes as Record<string, unknown>[] | undefined) ?? []
-        const saveChoicesWithTest = nodesArr.flatMap((n, i) =>
-          ((n?.choices as Record<string, unknown>[]) ?? []).map((c, j) =>
-            (c as { test?: unknown }).test != null ? { nodeIdx: i, choiceIdx: j } : []
-          )
-        ).flat()
-        fetch('http://127.0.0.1:7244/ingest/901338c0-1de8-416e-b532-246f7007aa65', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '5caec0' }, body: JSON.stringify({ sessionId: '5caec0', location: 'persistenceSlice.ts:saveDialogue', message: 'Saving document', data: { documentId, choicesWithTestCount: saveChoicesWithTest.length }, timestamp: Date.now(), hypothesisId: 'B' }) }).catch(() => {})
-        // #endregion
         const layoutPayload = (
           state.layout ?? buildLayoutFromNodes(state.nodes)
         ) as Record<string, unknown>

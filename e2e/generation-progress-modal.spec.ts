@@ -107,12 +107,9 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     
     // Vérifier que le bouton "Fermer" est visible
     await expect(page.locator('button:has-text("Fermer")')).toBeVisible()
-    
-    // Attendre l'auto-fermeture (3 secondes)
-    await page.waitForTimeout(3500)
-    
-    // Vérifier que la modal s'est fermée automatiquement
-    await expect(page.locator('h2:has-text("Génération terminée")')).not.toBeVisible()
+
+    // Attendre l'auto-fermeture (event-based)
+    await expect(page.locator('h2:has-text("Génération terminée")')).not.toBeVisible({ timeout: 8000 })
     
     // Vérifier que les nœuds ont été ajoutés au graphe
     // Note : Ceci dépend de l'implémentation du graphe

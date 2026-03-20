@@ -60,7 +60,7 @@ class TestUnitySchemaValidator:
     def test_validate_unity_json_no_schema(self, tmp_path):
         """Test de validation sans schéma (graceful degradation)."""
         with patch("api.utils.unity_schema_validator.load_unity_schema", return_value=None):
-            json_data = [{"id": "START", "line": "Test"}]
+            json_data = [{"id": "node-start", "line": "Test"}]
             
             is_valid, errors = validate_unity_json(json_data)
             
@@ -91,7 +91,7 @@ class TestUnitySchemaValidator:
                 
                 mock_import.side_effect = import_side_effect
                 
-                json_data = [{"id": "START", "line": "Test"}]
+                json_data = [{"id": "node-start", "line": "Test"}]
                 
                 is_valid, errors = validate_unity_json(json_data)
                 
@@ -142,7 +142,7 @@ class TestUnitySchemaValidator:
         
         with patch("api.utils.unity_schema_validator.load_unity_schema", return_value=mock_schema):
             with patch("builtins.__import__", side_effect=ImportError("No module named 'jsonschema'")):
-                json_data = [{"id": "START"}]
+                json_data = [{"id": "node-start"}]
                 
                 is_valid, errors = validate_unity_json(json_data)
                 
@@ -170,7 +170,8 @@ class TestUnitySchemaV1_1_0:
         assert schema is not None
         assert schema.get("type") == "object", "Racine doit être un objet (v1.1.0)"
         assert "schemaVersion" in schema.get("required", []), "schemaVersion requis"
-        assert schema.get("properties", {}).get("schemaVersion", {}).get("const") == "1.1.0"
+        sv = schema.get("properties", {}).get("schemaVersion", {})
+        assert sv.get("const") == "1.1.0" or (sv.get("enum") and "1.1.0" in sv.get("enum", []))
         assert "nodes" in schema.get("required", [])
         # choices[].choiceId requis
         nodes_def = schema.get("properties", {}).get("nodes", {})
@@ -184,10 +185,10 @@ class TestUnitySchemaV1_1_0:
         if not real_schema_path.exists():
             pytest.skip("Schéma dialogue-format.schema.json absent")
         document = {
-            "schemaVersion": "1.1.0",
+            "schemaVersion": "1.2.0",
             "nodes": [
                 {
-                    "id": "START",
+                    "id": "node-start",
                     "speaker": "PNJ",
                     "line": "Test",
                     "choices": [
@@ -201,7 +202,7 @@ class TestUnitySchemaV1_1_0:
             import api.utils.unity_schema_validator
             api.utils.unity_schema_validator._schema_cache = None
             is_valid, errors = validate_unity_json(document)
-        assert is_valid, f"Document v1.1.0 valide attendu ; erreurs : {errors}"
+        assert is_valid, f"Document valide attendu ; erreurs : {errors}"
         assert errors == []
 
     def test_validate_unity_json_v1_1_0_document_missing_schema_version(self, real_schema_path):
@@ -210,7 +211,7 @@ class TestUnitySchemaV1_1_0:
             pytest.skip("Schéma dialogue-format.schema.json absent")
         document = {
             "nodes": [
-                {"id": "START", "line": "Test"},
+                {"id": "node-start", "line": "Test"},
                 {"id": "END", "line": ""}
             ]
         }
@@ -226,10 +227,10 @@ class TestUnitySchemaV1_1_0:
         if not real_schema_path.exists():
             pytest.skip("Schéma dialogue-format.schema.json absent")
         document = {
-            "schemaVersion": "1.1.0",
+            "schemaVersion": "1.2.0",
             "nodes": [
                 {
-                    "id": "START",
+                    "id": "node-start",
                     "line": "Test",
                     "choices": [
                         {"text": "Accepter", "targetNode": "END"}
@@ -250,10 +251,10 @@ class TestUnitySchemaV1_1_0:
         if not real_schema_path.exists():
             pytest.skip("Schéma dialogue-format.schema.json absent")
         document = {
-            "schemaVersion": "1.1.0",
+            "schemaVersion": "1.2.0",
             "nodes": [
                 {
-                    "id": "START",
+                    "id": "node-start",
                     "line": "Test",
                     "choices": [
                         {"text": "Accepter", "targetNode": "END"}
@@ -277,10 +278,10 @@ class TestUnitySchemaV1_1_0:
         if not real_schema_path.exists():
             pytest.skip("Schéma dialogue-format.schema.json absent")
         document = {
-            "schemaVersion": "1.1.0",
+            "schemaVersion": "1.2.0",
             "nodes": [
                 {
-                    "id": "START",
+                    "id": "node-start",
                     "speaker": "PNJ",
                     "line": "Test",
                     "choices": [
@@ -296,3 +297,29 @@ class TestUnitySchemaV1_1_0:
             is_valid, errors_structured = validate_unity_json_structured(document)
         assert is_valid, f"Document valide attendu ; erreurs : {errors_structured}"
         assert errors_structured == []
+
+    def test_validate_unity_json_v1_2_0_document_with_stable_id_and_title(self, real_schema_path):
+        """Document v1.2.0 avec id stable (node-xxx) et title doit être valide."""
+        if not real_schema_path.exists():
+            pytest.skip("Schéma dialogue-format.schema.json absent")
+        document = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": "node-a1b2c3d4e5f6789012345678abcdef01",
+                    "title": "Ouverture",
+                    "speaker": "PNJ",
+                    "line": "Bonjour !",
+                    "choices": [
+                        {"choiceId": "reply", "text": "Répondre", "targetNode": "END"}
+                    ]
+                },
+                {"id": "END", "line": ""}
+            ]
+        }
+        with patch("api.utils.unity_schema_validator._SCHEMA_PATH", real_schema_path):
+            import api.utils.unity_schema_validator
+            api.utils.unity_schema_validator._schema_cache = None
+            is_valid, errors = validate_unity_json(document)
+        assert is_valid, f"Document v1.2.0 avec id stable et title attendu valide ; erreurs : {errors}"
+        assert errors == []

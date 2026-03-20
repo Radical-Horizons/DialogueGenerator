@@ -137,10 +137,10 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
     const exact: Array<{ id: string; label: string }> = []
     const partial: Array<{ id: string; label: string }> = []
     for (const node of state.nodes) {
-      const data = node.data as { displayName?: string; line?: string }
+      const data = node.data as { title?: string; displayName?: string; line?: string }
       const firstLine =
         typeof data.line === 'string' ? (data.line.split('\n')[0]?.trim() ?? '') : ''
-      const label = (data.displayName ?? firstLine) || node.id
+      const label = (data.title ?? data.displayName ?? firstLine) || node.id
       const labelLower = label.toLowerCase()
       if (node.id === q) {
         exact.push({ id: node.id, label })

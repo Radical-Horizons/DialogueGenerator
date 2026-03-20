@@ -231,7 +231,7 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
   })
 
   describe('generateFromNode - pending status', () => {
-    it('should mark generated nodes as pending', async () => {
+    it('should mark generated nodes as pending when a single node is generated', async () => {
       const parentNode: Node = {
         id: 'parent-1',
         type: 'dialogueNode',
@@ -254,6 +254,43 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
 
       const generatedNode = useGraphStore.getState().nodes.find((n) => n.id === 'generated-1')
       expect(generatedNode?.data.status).toBe('pending')
+    })
+
+    it('should mark generated nodes as accepted when multiple nodes are generated', async () => {
+      const parentNode: Node = {
+        id: 'parent-1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'parent-1',
+          speaker: 'Parent',
+          line: 'Parent line',
+          choices: [
+            { text: 'Choix 1', targetNode: undefined },
+            { text: 'Choix 2', targetNode: undefined },
+          ],
+        },
+      }
+      useGraphStore.getState().addNode(parentNode)
+      vi.mocked(graphAPI.generateNode).mockResolvedValue({
+        node: null,
+        nodes: [
+          { id: 'generated-1', speaker: 'PNJ', line: 'Réponse 1' },
+          { id: 'generated-2', speaker: 'PNJ', line: 'Réponse 2' },
+        ],
+        suggested_connections: [
+          { from: 'parent-1', to: 'generated-1', via_choice_index: 0, connection_type: 'choice' },
+          { from: 'parent-1', to: 'generated-2', via_choice_index: 1, connection_type: 'choice' },
+        ],
+        parent_node_id: 'parent-1',
+      })
+
+      await useGraphStore.getState().generateFromNode('parent-1', 'instructions', {})
+
+      const node1 = useGraphStore.getState().nodes.find((n) => n.id === 'generated-1')
+      const node2 = useGraphStore.getState().nodes.find((n) => n.id === 'generated-2')
+      expect(node1?.data.status).toBe('accepted')
+      expect(node2?.data.status).toBe('accepted')
     })
   })
 })
