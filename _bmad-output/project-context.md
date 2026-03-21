@@ -10,6 +10,8 @@ existing_patterns_found: 12
 
 _This file contains critical rules and patterns that AI agents must follow when implementing code in this project. Focus on unobvious details that agents might otherwise miss._
 
+**Documentation — hiérarchie :** Décisions récentes, ADRs canoniques, épics/stories et suivi d’implémentation → **`_bmad-output/`**. Guides, specs techniques, architecture détaillée, troubleshooting → **`docs/`**. Entrée rapide → **`README.md`** / **`README_API.md`**.
+
 ---
 
 ## Technology Stack & Versions
@@ -48,7 +50,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 - **Dev:** `npm run dev` (racine) ou `python -m api.main` (API seule), `cd frontend && npm run dev` (frontend seule). Cache Vite : `npm run dev:clean` si changements non visibles.
 - **Tests:** `npm run test` (pytest), `npm run test:frontend` (Vitest), `npm run test:e2e` (Playwright). Vérification venv : `npm run verify:venv` ; setup : `npm run setup`.
-- **Références:** `README_API.md`, `docs/`, `.cursor/rules/*.mdc` pour détails (backend_api, frontend, logging, tests, gdd_paths, field_classification).
+- **Références:** `README_API.md`, `_bmad-output/` (planning + ADRs), `docs/` (technique), `.cursor/rules/*.mdc` (backend_api, frontend, logging, tests, gdd_paths, field_classification).
 
 ### Critical Don't-Miss Rules
 

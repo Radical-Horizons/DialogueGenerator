@@ -58,6 +58,9 @@ Le store est la source de vérité du document (pas de mode draft/save). À chaq
 **React Flow controlled (ADR-007):**  
 Le canvas graphe utilise React Flow en **mode controlled** : les `nodes` et `edges` affichés proviennent uniquement du store (aucun `useNodesState` / `useEdgesState`). Les handlers `onNodesChange` / `onEdgesChange` ne font qu’appeler des actions du store. Le viewport (zoom/pan) reste en état local à React Flow. Une seule source de vérité pour le document affiché → cohérence autosave, undo/redo, synchro. Undo/redo (zundo) restaure l'état du store ; avec le canvas en controlled, l'affichage suit automatiquement. Détails : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (ADR-007).
 
+**Connexions / panel (suivi 2026-03) :**  
+Les changements de cible depuis le panel passent par `connectNodes` / `disconnectNodes` ; merge formulaire → store dans `mergeNodeEditorForm.ts` ; resync connexions dans `NodeEditorPanel`. La page standalone `/graph-editor` n’embarque pas `NodeEditorPanel` — édition complète via le Dashboard (onglet graphe). Voir [`adr-graph-connection-targets-ui-shell.md`](./adr-graph-connection-targets-ui-shell.md).
+
 ### `authStore.ts`
 Manages authentication state.
 

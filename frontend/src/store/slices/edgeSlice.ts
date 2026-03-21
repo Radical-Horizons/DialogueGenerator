@@ -121,7 +121,8 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
             updatedDialogueNode.position,
             sourceNode,
             newEdges,
-            updatedNodes
+            updatedNodes,
+            updatedChoices
           )
 
           if (syncResult.testNode) {
@@ -235,7 +236,8 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
             updatedDialogueNode.position,
             testNode || null,
             newEdges,
-            updatedNodes
+            updatedNodes,
+            updatedChoices
           )
 
           if (syncResult.testNode) {

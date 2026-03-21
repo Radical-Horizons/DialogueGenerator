@@ -17,6 +17,13 @@ import {
   buildTestResultEdge,
   TEST_RESULT_EDGE_CONFIG,
 } from './graphEdgeBuilders'
+import {
+  childNodeTopLeftX,
+  GRAPH_DIALOGUE_NODE_WIDTH,
+  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+  GRAPH_SIBLING_COLUMN_STEP,
+  GRAPH_TEST_NODE_WIDTH,
+} from './graphNodeLayout'
 
 /**
  * Mapping handle TestNode → champ choice.
@@ -144,6 +151,7 @@ export function getParentChoiceForTestNode(
  * @param existingTestNode - TestNode existant (null si à créer)
  * @param existingEdges - Liste des edges existants
  * @param nodes - Liste de tous les nodes (pour vérifier existence des nœuds cibles, optionnel)
+ * @param allChoices - Liste complète des choix du dialogue (pour espacer les barres de test entre elles)
  * @returns TestNode synchronisé (ou null si pas de test) et edges mis à jour
  */
 export function syncTestNodeFromChoice(
@@ -153,7 +161,8 @@ export function syncTestNodeFromChoice(
   dialogueNodePosition: { x: number; y: number },
   existingTestNode: Node | null,
   existingEdges: Edge[],
-  nodes: Node[] = []
+  nodes: Node[] = [],
+  allChoices?: Choice[]
 ): TestNodeSyncResult {
   const testNodeId = `test-node-${dialogueNodeId}-choice-${choiceIndex}`
   const choiceId = (choice as Choice & { choiceId?: string }).choiceId
@@ -170,12 +179,25 @@ export function syncTestNodeFromChoice(
   }
 
   // Le choix a un test : créer ou mettre à jour le TestNode (en dessous, répartis horizontalement)
-  const OFFSET_BELOW = 280
-  const HORIZONTAL_STEP = 200
-  const testNodePosition = existingTestNode?.position || {
-    x: dialogueNodePosition.x + choiceIndex * HORIZONTAL_STEP,
-    y: dialogueNodePosition.y + OFFSET_BELOW,
+  const choicesForLayout = allChoices ?? []
+  const testedIndices = choicesForLayout
+    .map((c, i) => (c?.test ? i : -1))
+    .filter((i) => i >= 0)
+  const siblingCount = testedIndices.length > 0 ? testedIndices.length : 1
+  const rank = testedIndices.length > 0 ? testedIndices.indexOf(choiceIndex) : 0
+  const siblingIndex = rank >= 0 ? rank : 0
+  const defaultNewPosition = {
+    x: childNodeTopLeftX({
+      parentX: dialogueNodePosition.x,
+      parentWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+      childWidth: GRAPH_TEST_NODE_WIDTH,
+      siblingIndex,
+      siblingCount,
+      columnStep: GRAPH_SIBLING_COLUMN_STEP,
+    }),
+    y: dialogueNodePosition.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y,
   }
+  const testNodePosition = existingTestNode?.position || defaultNewPosition
 
   const testNode: Node = {
     id: testNodeId,

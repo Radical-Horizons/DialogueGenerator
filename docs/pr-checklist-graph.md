@@ -11,7 +11,9 @@
 ## Tests
 
 - [ ] Tests unitaires : `frontend/src/__tests__/documentToGraph.test.ts`, `testNodeSync.test.ts` (invariants « no duplicate edges », « position from layout »).
+- [ ] Merge / cibles UI : `frontend/src/__tests__/mergeNodeEditorForm.test.ts`, `ConnectionTargetSelect.test.tsx`, `nodeTargetLabel.test.ts` si le PR touche panel ou connexions.
 - [ ] E2E smoke : `e2e/graph-load-display-nodes.spec.ts` (chargement + drag, pas d’erreurs console en boucle).
+- [ ] E2E combobox cible (optionnel mais recommandé si changement sur `ConnectionTargetSelect` / autosave chargement) : `e2e/graph-connection-target-dropdown.spec.ts` — **Dashboard** requis (pas le seul `/graph-editor` standalone pour le panel ; voir `docs/architecture/adr-graph-connection-targets-ui-shell.md`).
 
 ## Migration choiceId
 

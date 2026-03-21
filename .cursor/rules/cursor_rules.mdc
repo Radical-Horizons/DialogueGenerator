@@ -9,4 +9,4 @@ alwaysApply: true
 - **Format**: Frontmatter YAML (`description`, `globs`, `alwaysApply`), contenu concis, références vers docs détaillées.
 - **Organisation**: Une règle par domaine. `alwaysApply: true` pour générales, `false` + `globs` pour spécifiques.
 - **Maintenance**: Mettre à jour quand l'architecture évolue, supprimer les règles obsolètes.
-- **Documentation**: `README*.md` à la racine uniquement. Autres `.md` dans `docs/` (sous-dossiers appropriés).
+- **Documentation**: `README*.md` à la racine (entrée projet). Suivi planification, épics/stories, **ADRs canoniques** : `_bmad-output/` (`planning-artifacts/`, `implementation-artifacts/`). Référence technique, guides, specs longue durée : `docs/` (sous-dossiers). Éviter de présenter `docs/` comme unique source de vérité pour les décisions récentes.

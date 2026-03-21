@@ -644,6 +644,35 @@ Un seul **format de document canonique** partagé par tout le pipeline : **Unity
 
 ---
 
+### ADR-009: Cibles de connexion dans le panel graphe (combobox + SoT edges) & coque standalone vs Dashboard
+
+**Context:**  
+Les IDs de cibles (`targetNode`, `nextNode`, sorties TestNode) sont portés par le **graphe** (edges + projection document, ADR-007/008). Des champs texte RHF seuls ont créé des fenêtres où le **flush** au changement de nœud ou une **génération** écrasaient ou divergeaient du store. Par ailleurs, la page **`/graph-editor`** (standalone) et l’onglet **Dashboard « Éditeur de Graphe »** n’exposent pas le même chrome : le **`NodeEditorPanel`** n’est monté que dans le Dashboard.
+
+**Decision:**  
+1. **Sélecteurs dédiés** (`ConnectionTargetSelect`) : un changement de cible appelle **`connectNodes` / `disconnectNodes`** (même sémantique qu’un branchement au drag), pas seulement `setValue` sur un champ « possédé par les edges ».  
+2. **Libellés** : options avec libellé lisible (titre / displayName / première ligne de `line` / id) ; entrée **`Fin (END)`** ; helpers `nodeTargetLabel` / `targetPickerOptions`.  
+3. **Merge formulaire → store** : logique centralisée dans **`mergeNodeEditorForm.ts`** pour préserver les champs sensibles aux edges au flush.  
+4. **Resync** : si le nœud sélectionné est inchangé mais les connexions en store changent, réaligner le formulaire (empreinte des champs de connexion) ; pour ces clés, la **vérité graphe** prime sur une saisie form concurrente.  
+5. **Coque UI** : documenter explicitement que **`GraphEditorPage` (`/graph-editor`)** = canvas + liste Unity + header, **sans** `NodeEditorPanel` ; édition complète (speaker, ligne, combobox de cibles, choix) via **Dashboard** → onglet graphe → panneau droit « Édition de nœud ».  
+6. **Autosave** : comparer l’identité du dialogue sélectionné et celle du store **sans extension `.json`** (casse normalisée) pour ne pas bloquer l’autosave (`useDialogueLoader`).
+
+**Constraints:**  
+- Tout nouveau flux « cible » dans le panel doit passer par les primitives edge du store.  
+- Les E2E Playwright qui supposent `input[name="speaker"]` ou combobox de cible sur la **seule** URL `/graph-editor` sont invalides ; utiliser le **Dashboard** ou router vers l’onglet graphe.
+
+**Rationale:**  
+Alignement ADR-007 (mutations graphe via store) et ADR-008 (projection document) ; réduction des courses form/store ; clarté produit sur où éditer.
+
+**Tests Required:**  
+- Unit : `mergeNodeEditorForm`, `nodeTargetLabel`, `ConnectionTargetSelect` (RTL).  
+- E2E : `e2e/graph-connection-target-dropdown.spec.ts` (seed API → Dashboard → combobox « Nœud suivant » → `Fin (END)` → save → GET document).
+
+**Artifact suivi implémentation :** `_bmad-output/implementation-artifacts/graph-connection-targets-ui-dashboard-vs-standalone-2026-03.md`  
+**Miroir technique `docs/` (optionnel) :** `docs/architecture/adr-graph-connection-targets-ui-shell.md`
+
+---
+
 ### Integration Patterns (V1.0 ↔ Baseline)
 
 #### Pattern 1: New API Endpoints (Streaming, Presets)

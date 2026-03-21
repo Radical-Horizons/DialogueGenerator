@@ -9,6 +9,12 @@ import * as graphAPI from '../../api/graph'
 import { markNodeDeleted } from '../../api/llmUsage'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
+import {
+  childNodeTopLeftX,
+  GRAPH_DIALOGUE_NODE_WIDTH,
+  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+  graphParentNodeWidth,
+} from '../../utils/graphNodeLayout'
 
 /** Hash simple pour contexte GDD (Story 1.10 AC#5 - stockage). */
 function simpleHash(s: string): string {
@@ -230,19 +236,18 @@ export const createGenerationSlice: StateCreator<
         onBatchProgress(0, totalToAdd)
       }
 
-      /** Écart vertical sous le nœud parent (éviter superposition à droite). */
-      const OFFSET_BELOW = 280
-      /** Écart horizontal entre nœuds frères (centrage de la rangée). */
-      const HORIZONTAL_STEP = 200
-
       const nodesToAddBatch: Node[] = []
-      nodesToAdd.forEach(({ node: generatedNode, choiceIndex }, index) => {
+      const parentWidth = graphParentNodeWidth(parentNode.type)
+      nodesToAdd.forEach(({ node: generatedNode }, index) => {
         const isBatchOrTestNode = isBatch || (isTestNode && totalToAdd > 1)
         const isChoiceSpecific = !isBatchOrTestNode && targetChoiceIndex !== null
-        const horizontalOffset =
-          totalToAdd > 1
-            ? (choiceIndex - (totalToAdd - 1) / 2) * HORIZONTAL_STEP
-            : 0
+        const childX = childNodeTopLeftX({
+          parentX: parentNode.position.x,
+          parentWidth,
+          childWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+          siblingIndex: index,
+          siblingCount: totalToAdd,
+        })
         const verticalOffset = isChoiceSpecific && totalToAdd <= 1 ? 60 : 0
         const contextGddHash =
           Object.keys(contextSelections).length > 0
@@ -253,8 +258,8 @@ export const createGenerationSlice: StateCreator<
           id: generatedNode.id,
           type: 'dialogueNode',
           position: {
-            x: parentNode.position.x + horizontalOffset,
-            y: parentNode.position.y + OFFSET_BELOW + verticalOffset,
+            x: childX,
+            y: parentNode.position.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y + verticalOffset,
           },
           data: {
             ...generatedNode,

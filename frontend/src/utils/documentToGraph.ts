@@ -6,6 +6,12 @@
 import type { Node, Edge } from 'reactflow'
 import { stableChoiceEdgeId, truncateChoiceLabel } from './graphEdgeBuilders'
 import { TEST_RESULT_EDGE_CONFIG } from './graphEdgeBuilders'
+import {
+  childNodeTopLeftX,
+  GRAPH_DIALOGUE_NODE_WIDTH,
+  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+  GRAPH_TEST_NODE_WIDTH,
+} from './graphNodeLayout'
 
 /** Résout l’identité stable d’un choix (choiceId ou fallback index). */
 function choiceStableId(choice: UnityChoice, choiceIndex: number): string {
@@ -98,6 +104,9 @@ export function documentToGraph(
     })
 
     const choices = unityNode.choices ?? []
+    const testedChoiceIndices = choices
+      .map((c, idx) => (c.test ? idx : -1))
+      .filter((idx) => idx >= 0)
     for (let choiceIndex = 0; choiceIndex < choices.length; choiceIndex++) {
       const choice = choices[choiceIndex]
       const cid = choiceStableId(choice, choiceIndex)
@@ -108,12 +117,22 @@ export function documentToGraph(
         const storedTestPosition =
           layoutPositions?.nodes?.[legacyTestNodeId] ??
           (layoutPositions?.nodes?.[`test:${cid}`] ?? undefined)
+        const rank = testedChoiceIndices.indexOf(choiceIndex)
         const testPosition =
           storedTestPosition &&
           typeof storedTestPosition.x === 'number' &&
           typeof storedTestPosition.y === 'number'
             ? { x: storedTestPosition.x, y: storedTestPosition.y }
-            : { x: position.x + choiceIndex * 200, y: position.y + 280 }
+            : {
+                x: childNodeTopLeftX({
+                  parentX: position.x,
+                  parentWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+                  childWidth: GRAPH_TEST_NODE_WIDTH,
+                  siblingIndex: rank >= 0 ? rank : 0,
+                  siblingCount: Math.max(testedChoiceIndices.length, 1),
+                }),
+                y: position.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+              }
         nodes.push({
           id: testNodeId,
           type: 'testNode',

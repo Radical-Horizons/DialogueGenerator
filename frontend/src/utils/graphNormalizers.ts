@@ -91,7 +91,8 @@ export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]
         node.position,
         existingTestBar || null,
         currentEdges,
-        normalizedNodes
+        normalizedNodes,
+        choices
       )
 
       if (syncResult.testNode) {

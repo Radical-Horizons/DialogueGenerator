@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '../store/graphStore'
 import type { Node } from 'reactflow'
 import * as graphAPI from '../api/graph'
+import { GRAPH_SIBLING_COLUMN_STEP } from '../utils/graphNodeLayout'
 
 // Mock graphAPI
 vi.mock('../api/graph', () => ({
@@ -660,6 +661,62 @@ describe('useGraphStore - Pending save state', () => {
       const generatedNode = state.nodes.find((n) => n.id === 'generated-1')
       expect(generatedNode?.position.x).toBe(100) // parent.x + 0 (centré)
       expect(generatedNode?.position.y).toBe(380) // parent.y + OFFSET_BELOW (280)
+    })
+
+    it('should space multiple generated siblings by GRAPH_SIBLING_COLUMN_STEP', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+
+      const parentNode: Node = {
+        id: 'parent-5',
+        type: 'dialogueNode',
+        position: { x: 100, y: 100 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Test',
+          choices: [
+            { text: 'Choix 1', targetNode: null },
+            { text: 'Choix 2', targetNode: null },
+          ],
+        },
+      }
+      addNode(parentNode)
+
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode.mockResolvedValueOnce({
+        nodes: [
+          { id: 'gen-a', speaker: 'PNJ', line: 'A' },
+          { id: 'gen-b', speaker: 'PNJ', line: 'B' },
+        ],
+        suggested_connections: [
+          {
+            from: 'parent-5',
+            to: 'gen-a',
+            via_choice_index: 0,
+            connection_type: 'choice',
+          },
+          {
+            from: 'parent-5',
+            to: 'gen-b',
+            via_choice_index: 1,
+            connection_type: 'choice',
+          },
+        ],
+        parent_node_id: 'parent-5',
+      })
+
+      await generateFromNode('parent-5', 'Instructions', {
+        generate_all_choices: true,
+      })
+
+      const state = useGraphStore.getState()
+      const a = state.nodes.find((n) => n.id === 'gen-a')
+      const b = state.nodes.find((n) => n.id === 'gen-b')
+      expect(a).toBeDefined()
+      expect(b).toBeDefined()
+      expect(b!.position.x - a!.position.x).toBe(GRAPH_SIBLING_COLUMN_STEP)
+      expect(a!.position.y).toBe(380)
+      expect(b!.position.y).toBe(380)
     })
 
     it('should set parent choice test*Node fields when generating from TestNode (4 results)', async () => {

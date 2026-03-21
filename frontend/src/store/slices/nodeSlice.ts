@@ -214,7 +214,8 @@ function updateTestNodeDirectly(
     updatedDialogueNode.position,
     updatedTestNode,
     state.edges,
-    newNodes
+    newNodes,
+    (updatedDialogueNode.data.choices || []) as Choice[]
   )
 
   let finalNodes = newNodes
@@ -279,7 +280,8 @@ function updateDialogueNodeDirectly(
       currentDialogueNode.position,
       existingTestNode || null,
       newEdges,
-      newNodes
+      newNodes,
+      currentChoices
     )
 
     if (syncResult.testNode) {

@@ -28,6 +28,11 @@ import {
   type Choice,
 } from '../../schemas/nodeEditorSchema'
 import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
+import {
+  childNodeTopLeftX,
+  GRAPH_DIALOGUE_NODE_WIDTH,
+  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+} from '../../utils/graphNodeLayout'
 import { getParentChoiceForTestNode } from '../../utils/testNodeSync'
 import {
   mergeNodeFormIntoStoreData,
@@ -375,7 +380,16 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       }
     }
     const pos = parentAfterSync?.position ?? selectedNode.position
-    const position = { x: pos.x + choiceIndex * 200, y: pos.y + 280 }
+    const position = {
+      x: childNodeTopLeftX({
+        parentX: pos.x,
+        parentWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+        childWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+        siblingIndex: choiceIndex,
+        siblingCount: Math.max(choices.length, 1),
+      }),
+      y: pos.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y,
+    }
     const node = createEmptyNode(position)
     addNode(node)
     connectNodes(selectedNodeId, node.id, choiceIndex)
