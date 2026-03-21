@@ -4,16 +4,25 @@
  * Appelle useGraphStore() en interne pour éviter le prop drilling sur les données du store.
  */
 import type React from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useGraphStore } from '../../store/graphStore'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
+import { NODE_DRAG_TOOLTIP } from './nodeDragTooltip'
 
 /** Offsets pour positionner les nœuds créés manuellement sans chevauchement (Story 1.6). */
 const MANUAL_NODE_OFFSET_X = 150
 const MANUAL_NODE_OFFSET_Y = 100
 const MANUAL_NODE_STEP = 40
+
+/** Au-dessus des modales graphe (10001) : le tooltip est rendu en portail pour éviter le clip du panneau redimensionnable. */
+const GRAPH_SHORTCUTS_TOOLTIP_Z = 10050
+
+const GRAPH_SHORTCUTS_TOOLTIP_GAP_PX = 6
+const GRAPH_SHORTCUTS_TOOLTIP_ESTIMATE_WIDTH_PX = 320
 
 interface GraphEditorHeaderProps {
   toolbar: UseGraphToolbarReturn
@@ -106,6 +115,64 @@ export function GraphEditorHeader({
     undo,
     redo,
   } = toolbar
+
+  const shortcutsButtonRef = useRef<HTMLButtonElement>(null)
+  const hideShortcutsTooltipTimeoutRef = useRef<number | null>(null)
+  const [shortcutsTooltipPos, setShortcutsTooltipPos] = useState<{
+    top: number
+    left: number
+  } | null>(null)
+
+  const clearHideShortcutsTooltip = useCallback(() => {
+    if (hideShortcutsTooltipTimeoutRef.current != null) {
+      window.clearTimeout(hideShortcutsTooltipTimeoutRef.current)
+      hideShortcutsTooltipTimeoutRef.current = null
+    }
+  }, [])
+
+  const scheduleHideShortcutsTooltip = useCallback(() => {
+    clearHideShortcutsTooltip()
+    hideShortcutsTooltipTimeoutRef.current = window.setTimeout(() => {
+      setShowShortcutsTooltip(false)
+      hideShortcutsTooltipTimeoutRef.current = null
+    }, 200)
+  }, [clearHideShortcutsTooltip, setShowShortcutsTooltip])
+
+  const updateShortcutsTooltipPos = useCallback(() => {
+    const el = shortcutsButtonRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const vw = window.innerWidth
+    let left = r.right + GRAPH_SHORTCUTS_TOOLTIP_GAP_PX
+    if (left + GRAPH_SHORTCUTS_TOOLTIP_ESTIMATE_WIDTH_PX > vw - 8) {
+      left = Math.max(
+        8,
+        r.left - GRAPH_SHORTCUTS_TOOLTIP_ESTIMATE_WIDTH_PX - GRAPH_SHORTCUTS_TOOLTIP_GAP_PX
+      )
+    }
+    setShortcutsTooltipPos({ top: r.top, left })
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!showShortcutsTooltip) {
+      setShortcutsTooltipPos(null)
+      return
+    }
+    updateShortcutsTooltipPos()
+    const onReposition = () => {
+      updateShortcutsTooltipPos()
+    }
+    window.addEventListener('scroll', onReposition, true)
+    window.addEventListener('resize', onReposition)
+    return () => {
+      window.removeEventListener('scroll', onReposition, true)
+      window.removeEventListener('resize', onReposition)
+    }
+  }, [showShortcutsTooltip, updateShortcutsTooltipPos])
+
+  useLayoutEffect(() => {
+    return () => clearHideShortcutsTooltip()
+  }, [clearHideShortcutsTooltip])
 
   return (
     <div
@@ -706,9 +773,13 @@ export function GraphEditorHeader({
         </button>
         <div style={{ position: 'relative' }}>
           <button
+            ref={shortcutsButtonRef}
             type="button"
-            onMouseEnter={() => setShowShortcutsTooltip(true)}
-            onMouseLeave={() => setShowShortcutsTooltip(false)}
+            onMouseEnter={() => {
+              clearHideShortcutsTooltip()
+              setShowShortcutsTooltip(true)
+            }}
+            onMouseLeave={() => scheduleHideShortcutsTooltip()}
             style={{
               width: 28,
               height: 28,
@@ -729,64 +800,37 @@ export function GraphEditorHeader({
           >
             ?
           </button>
-          {showShortcutsTooltip && (
-            <div
-              id="graph-shortcuts-tooltip"
-              role="tooltip"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: '100%',
-                marginLeft: '6px',
-                padding: '0.75rem 1rem',
-                minWidth: '240px',
-                maxWidth: 'min(320px, 90vw)',
-                backgroundColor: theme.background.tertiary,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '8px',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-                fontSize: '0.8rem',
-                color: theme.text.primary,
-                zIndex: 100,
-                lineHeight: 1.6,
-              }}
-            >
+          {showShortcutsTooltip &&
+            shortcutsTooltipPos &&
+            createPortal(
+              <div
+                id="graph-shortcuts-tooltip"
+                role="tooltip"
+                style={{
+                  position: 'fixed',
+                  top: shortcutsTooltipPos.top,
+                  left: shortcutsTooltipPos.left,
+                  padding: '0.75rem 1rem',
+                  minWidth: '240px',
+                  maxWidth: 'min(320px, 90vw)',
+                  backgroundColor: theme.background.tertiary,
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                  fontSize: '0.8rem',
+                  color: theme.text.primary,
+                  zIndex: GRAPH_SHORTCUTS_TOOLTIP_Z,
+                  lineHeight: 1.6,
+                  pointerEvents: 'auto',
+                }}
+                onMouseEnter={() => {
+                  clearHideShortcutsTooltip()
+                  setShowShortcutsTooltip(true)
+                }}
+                onMouseLeave={() => scheduleHideShortcutsTooltip()}
+              >
               <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Raccourcis graphe</div>
               <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
-                <li>
-                  <kbd
-                    style={{
-                      padding: '0.1rem 0.35rem',
-                      background: theme.background.panel,
-                      borderRadius: 4,
-                    }}
-                  >
-                    Ctrl+Z
-                  </kbd>{' '}
-                  : annuler
-                </li>
-                <li>
-                  <kbd
-                    style={{
-                      padding: '0.1rem 0.35rem',
-                      background: theme.background.panel,
-                      borderRadius: 4,
-                    }}
-                  >
-                    Ctrl+Y
-                  </kbd>{' '}
-                  /{' '}
-                  <kbd
-                    style={{
-                      padding: '0.1rem 0.35rem',
-                      background: theme.background.panel,
-                      borderRadius: 4,
-                    }}
-                  >
-                    Ctrl+Shift+Z
-                  </kbd>{' '}
-                  : refaire
-                </li>
                 <li>
                   <kbd
                     style={{
@@ -799,6 +843,7 @@ export function GraphEditorHeader({
                   </kbd>{' '}
                   sur un nœud : menu (Générer, Voir le prompt, Dupliquer, Supprimer)
                 </li>
+                <li style={{ whiteSpace: 'normal' }}>{NODE_DRAG_TOOLTIP}</li>
                 <li>
                   <kbd
                     style={{
@@ -919,8 +964,9 @@ export function GraphEditorHeader({
                   sur un nœud : focus (centrage + zoom)
                 </li>
               </ul>
-            </div>
-          )}
+              </div>,
+              document.body
+            )}
         </div>
       </div>
     </div>

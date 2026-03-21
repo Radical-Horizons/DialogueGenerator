@@ -12,6 +12,7 @@ import { useVocabularyStore } from '../store/vocabularyStore'
 import { useNarrativeGuidesStore } from '../store/narrativeGuidesStore'
 import { useFlagsStore } from '../store/flagsStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
+import { COMPLETION_TOKENS_LIMITS } from '../constants'
 import type { ContextSelection, GenerateUnityDialogueRequest } from '../types/api'
 import type { LLMModelResponse } from '../types/api'
 
@@ -134,7 +135,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
     
     // Clamp maxCompletionTokens si nécessaire
     const safeMaxCompletionTokens = params.maxCompletionTokens !== null
-      ? Math.min(Math.max(params.maxCompletionTokens, 100), 16000)
+      ? Math.min(Math.max(params.maxCompletionTokens, COMPLETION_TOKENS_LIMITS.MIN), COMPLETION_TOKENS_LIMITS.MAX)
       : null
 
     // Utiliser une valeur par défaut si userInstructions est vide (backend exige min_length=1)

@@ -206,7 +206,7 @@ class PreviewPromptResponse(BaseModel):
 class GenerateUnityDialogueRequest(BasePromptRequest):
     """Requête pour générer un nœud de dialogue au format Unity JSON."""
     llm_model_identifier: str = Field(default=ModelNames.GPT_5_MINI, description="Identifiant du modèle LLM")
-    max_completion_tokens: Optional[int] = Field(None, ge=500, le=50000, description="Nombre maximum de tokens pour la génération. Recommandation OpenAI: 25000+ tokens pour reasoning summary.")
+    max_completion_tokens: Optional[int] = Field(None, ge=1000, le=128000, description="Nombre maximum de tokens pour la génération. Recommandation OpenAI: 25000+ tokens pour reasoning summary.")
     reasoning_effort: Optional[Literal["none", "low", "medium", "high", "xhigh"]] = Field(None, description="Niveau de raisonnement pour GPT-5.2 (none=rapide, xhigh=très approfondi). Disponible uniquement pour GPT-5.2 et GPT-5.2-pro.")
     reasoning_summary: Optional[Literal["auto"]] = Field(None, description="Format du résumé de reasoning (thinking summary). Uniquement 'auto' disponible (les résumés 'detailed' nécessitent une organisation OpenAI vérifiée Tier 2/3, non disponible actuellement). Si None, 'auto' est utilisé par défaut.")
     top_p: Optional[float] = Field(None, ge=0.0, le=1.0, description="Nucleus sampling (0.0-1.0). Alternative/complément à temperature. 0.0=focalisé, 1.0=diversifié.")

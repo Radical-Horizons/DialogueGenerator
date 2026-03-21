@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
-import { CONTEXT_TOKENS_LIMITS } from '../constants'
+import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS } from '../constants'
 import type { SaveStatus } from '../components/shared/SaveStatusIndicator'
 
 const DRAFT_STORAGE_KEY = 'generation_draft'
@@ -215,8 +215,8 @@ export function useGenerationDraft(
         }
         if (draft.maxCompletionTokens !== undefined) {
           const clampedMaxCompletionTokens = Math.min(
-            Math.max(draft.maxCompletionTokens, 100),
-            16000
+            Math.max(draft.maxCompletionTokens, COMPLETION_TOKENS_LIMITS.MIN),
+            COMPLETION_TOKENS_LIMITS.MAX
           )
           setMaxCompletionTokens(clampedMaxCompletionTokens)
         }

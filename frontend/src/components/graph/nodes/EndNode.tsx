@@ -4,6 +4,7 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
+import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 
 interface ValidationError {
   type: string
@@ -43,6 +44,7 @@ export const EndNode = memo(function EndNode({
     <div
       data-testid="graph-node-content"
       data-node-type="end"
+      title={NODE_DRAG_TOOLTIP}
       style={{
         width: 200,
         height: 80,

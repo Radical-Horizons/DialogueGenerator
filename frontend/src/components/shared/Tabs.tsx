@@ -4,8 +4,11 @@
  * keepAliveTabIds : liste d'IDs d'onglets à garder montés même quand inactifs (display:none).
  * Utile pour les onglets avec état DOM lourd (ex : ReactFlow) qui ne doivent pas être
  * démontés/remontés à chaque changement d'onglet pour préserver les positions visuelles.
+ *
+ * Lazy keepAlive : un onglet keepAlive n'est monté qu'après sa première activation,
+ * évitant de rendre dans un conteneur de dimensions nulles (ex : warnings React Flow).
  */
-import { ReactNode } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import { theme } from '../../theme'
 
 export interface Tab {
@@ -35,6 +38,19 @@ export interface TabsProps {
 export function Tabs({ tabs, activeTabId, onTabChange, style, contentStyle, keepAliveTabIds }: TabsProps) {
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
   const keepAliveSet = new Set(keepAliveTabIds ?? [])
+
+  // Lazy keepAlive : ne monter un onglet keepAlive qu'après sa première activation.
+  // Empêche React Flow (et d'autres composants) de se rendre dans un conteneur display:none
+  // aux dimensions nulles (warning "parent container needs a width and a height").
+  const [activatedTabIds, setActivatedTabIds] = useState<Set<string>>(() => new Set([activeTabId]))
+  useEffect(() => {
+    setActivatedTabIds((prev) => {
+      if (prev.has(activeTabId)) return prev
+      const next = new Set(prev)
+      next.add(activeTabId)
+      return next
+    })
+  }, [activeTabId])
 
   return (
     <div
@@ -94,8 +110,9 @@ export function Tabs({ tabs, activeTabId, onTabChange, style, contentStyle, keep
           </button>
         ))}
       </div>
-      {/* Onglets keep-alive : rendus mais masqués via display:none quand inactifs */}
-      {tabs.filter((tab) => keepAliveSet.has(tab.id) && tab.id !== activeTabId).map((tab) => (
+      {/* Onglets keep-alive : rendus mais masqués via display:none quand inactifs.
+          Seulement après première activation (lazy) pour éviter les warnings React Flow. */}
+      {tabs.filter((tab) => keepAliveSet.has(tab.id) && tab.id !== activeTabId && activatedTabIds.has(tab.id)).map((tab) => (
         <div key={tab.id} style={{ display: 'none', flex: 1, minHeight: 0 }}>
           {tab.content}
         </div>

@@ -5,6 +5,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Connection, Node, NodeChange, EdgeChange } from 'reactflow'
 import { useGraphStore } from '../store/graphStore'
+import { collectOutgoingDescendantIds } from '../utils/collectOutgoingDescendantIds'
+
+type DragGroupMode = 'multi' | 'with-children' | null
 
 export interface EdgeLabelEditState {
   edgeId: string
@@ -59,6 +62,7 @@ export function useReactFlowHandlers(
 
   const pendingChoiceConnectionRef = useRef<PendingChoiceConnection | null>(null)
   const dragStartPositionsRef = useRef<Record<string, { x: number; y: number }> | null>(null)
+  const dragGroupModeRef = useRef<DragGroupMode>(null)
   const positionRafRef = useRef<number | null>(null)
   const pendingPositionsRef = useRef<Record<string, { x: number; y: number }>>({})
 
@@ -159,6 +163,32 @@ export function useReactFlowHandlers(
         }
         if (change.type === 'position' && change.position && change.id) {
           const isDragging = 'dragging' in change && change.dragging
+          const groupMode = dragGroupModeRef.current
+          const groupStarts = dragStartPositionsRef.current
+
+          if (
+            isDragging &&
+            groupMode === 'with-children' &&
+            groupStarts &&
+            groupStarts[change.id]
+          ) {
+            const primaryId = change.id
+            const origin = groupStarts[primaryId]
+            const dx = change.position.x - origin.x
+            const dy = change.position.y - origin.y
+            schedulePositionUpdate(primaryId, change.position)
+            for (const id of Object.keys(groupStarts)) {
+              if (id === primaryId) continue
+              const s = groupStarts[id]
+              schedulePositionUpdate(id, { x: s.x + dx, y: s.y + dy })
+            }
+            continue
+          }
+
+          if (!isDragging && groupMode === 'with-children') {
+            continue
+          }
+
           if (isDragging) {
             schedulePositionUpdate(change.id, change.position)
           } else {
@@ -296,20 +326,39 @@ export function useReactFlowHandlers(
   )
 
   const onNodeDragStart = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
+    (event: React.MouseEvent, node: Node) => {
       _pushUndoSnapshot()
-      const ids = useGraphStore.getState().selectedNodeIds
+      const state = useGraphStore.getState()
+      const ids = state.selectedNodeIds
+      const nodes = state.nodes
+      const edges = state.edges
+
       if (ids.length > 1 && ids.includes(node.id)) {
-        const nodes = useGraphStore.getState().nodes
         const positions: Record<string, { x: number; y: number }> = {}
         for (const id of ids) {
           const n = nodes.find((nd) => nd.id === id)
           if (n) positions[id] = { x: n.position.x, y: n.position.y }
         }
         dragStartPositionsRef.current = positions
-      } else {
-        dragStartPositionsRef.current = null
+        dragGroupModeRef.current = 'multi'
+        return
       }
+
+      if (event.ctrlKey) {
+        dragStartPositionsRef.current = null
+        dragGroupModeRef.current = null
+        return
+      }
+
+      const descendantIds = collectOutgoingDescendantIds(node.id, edges)
+      const dragIds = [node.id, ...descendantIds]
+      const positions: Record<string, { x: number; y: number }> = {}
+      for (const id of dragIds) {
+        const n = nodes.find((nd) => nd.id === id)
+        if (n) positions[id] = { x: n.position.x, y: n.position.y }
+      }
+      dragStartPositionsRef.current = positions
+      dragGroupModeRef.current = 'with-children'
     },
     [_pushUndoSnapshot]
   )
@@ -322,6 +371,7 @@ export function useReactFlowHandlers(
       }
       pendingPositionsRef.current = {}
       const startPositions = dragStartPositionsRef.current
+      const groupMode = dragGroupModeRef.current
       const ids = useGraphStore.getState().selectedNodeIds
       if (startPositions && ids.length > 1 && ids.includes(node.id)) {
         const dx = node.position.x - startPositions[node.id].x
@@ -331,12 +381,25 @@ export function useReactFlowHandlers(
           if (start) updateNodePosition(id, { x: start.x + dx, y: start.y + dy }, true)
         }
         markDirty()
+      } else if (
+        groupMode === 'with-children' &&
+        startPositions &&
+        startPositions[node.id]
+      ) {
+        const dx = node.position.x - startPositions[node.id].x
+        const dy = node.position.y - startPositions[node.id].y
+        for (const id of Object.keys(startPositions)) {
+          const start = startPositions[id]
+          updateNodePosition(id, { x: start.x + dx, y: start.y + dy }, true)
+        }
+        markDirty()
       } else {
         updateNodePosition(node.id, node.position, undefined, false)
       }
       dragStartPositionsRef.current = null
+      dragGroupModeRef.current = null
     },
-    [updateNodePosition, markDirty, _pushUndoSnapshot]
+    [updateNodePosition, markDirty]
   )
 
   const handleEdgeLabelConfirm = useCallback(

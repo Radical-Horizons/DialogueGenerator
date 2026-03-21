@@ -10,7 +10,7 @@ class GenerationJobCreate(BaseModel):
     context_selections: dict
     npc_speaker_id: Optional[str] = None
     max_context_tokens: int = Field(default=8000, ge=1000, le=128000)
-    max_completion_tokens: Optional[int] = Field(default=None, ge=100, le=16000)
+    max_completion_tokens: Optional[int] = Field(default=None, ge=1000, le=128000)
     system_prompt_override: Optional[str] = None
     author_profile: Optional[str] = None
     llm_model_identifier: str = Field(default="gpt-4o")

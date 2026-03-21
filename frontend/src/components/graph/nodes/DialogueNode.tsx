@@ -9,6 +9,7 @@ import { getNodePrompt } from '../../../api/graph'
 import type { NodePromptResponse } from '../../../types/graph'
 import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
+import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 
 interface ValidationError {
   type: string
@@ -231,6 +232,7 @@ export const DialogueNode = memo(function DialogueNode({
       data-testid="graph-node-content"
       data-node-type="dialogue"
       data-status={nodeStatus ?? undefined}
+      title={NODE_DRAG_TOOLTIP}
       style={{
         width: NODE_WIDTH,
         minHeight: 120,

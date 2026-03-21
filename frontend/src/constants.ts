@@ -49,14 +49,14 @@ export const CONTEXT_TOKENS_LIMITS = {
  * Limites pour les tokens de completion (génération).
  */
 export const COMPLETION_TOKENS_LIMITS = {
-  /** Minimum autorisé (100) */
-  MIN: 100,
-  /** Maximum autorisé (16K) */
-  MAX: 16000,
-  /** Pas du slider (500) */
-  STEP: 500,
-  /** Valeur par défaut (5K) */
-  DEFAULT: 5000,
+  /** Minimum autorisé (5K) */
+  MIN: 5000,
+  /** Maximum autorisé (64K) */
+  MAX: 64000,
+  /** Pas du slider (5K) */
+  STEP: 5000,
+  /** Valeur par défaut (20K) */
+  DEFAULT: 20000,
 } as const
 
 /**

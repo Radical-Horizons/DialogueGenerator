@@ -132,4 +132,60 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     expect(state.nodes.find((node) => node.id === 'g2')?.position).toEqual({ x: 150, y: 100 })
     expect(state.nodes.find((node) => node.id === 'g3')?.position).toEqual({ x: 200, y: 100 })
   })
+
+  it('dragging a node moves outgoing descendants by the same delta (default)', async () => {
+    useGraphStore.setState({
+      nodes: [
+        { id: 'p', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { id: 'p' } },
+        { id: 'c', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { id: 'c' } },
+      ],
+      edges: [{ id: 'e-p-c', source: 'p', target: 'c', type: 'smoothstep' }],
+      selectedNodeIds: [],
+    })
+
+    render(React.createElement(GraphCanvas))
+
+    await act(async () => {
+      ;(capturedReactFlowProps?.onNodeDragStart as (event: { ctrlKey?: boolean }, node: { id: string }) => void)(
+        {},
+        { id: 'p' }
+      )
+      ;(capturedReactFlowProps?.onNodeDragStop as (
+        event: unknown,
+        node: { id: string; position: { x: number; y: number } }
+      ) => void)({}, { id: 'p', position: { x: 40, y: 30 } })
+    })
+
+    const state = useGraphStore.getState()
+    expect(state.nodes.find((n) => n.id === 'p')?.position).toEqual({ x: 40, y: 30 })
+    expect(state.nodes.find((n) => n.id === 'c')?.position).toEqual({ x: 140, y: 30 })
+  })
+
+  it('Ctrl at drag start moves only the dragged node', async () => {
+    useGraphStore.setState({
+      nodes: [
+        { id: 'p', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { id: 'p' } },
+        { id: 'c', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { id: 'c' } },
+      ],
+      edges: [{ id: 'e-p-c', source: 'p', target: 'c', type: 'smoothstep' }],
+      selectedNodeIds: [],
+    })
+
+    render(React.createElement(GraphCanvas))
+
+    await act(async () => {
+      ;(capturedReactFlowProps?.onNodeDragStart as (event: { ctrlKey?: boolean }, node: { id: string }) => void)(
+        { ctrlKey: true },
+        { id: 'p' }
+      )
+      ;(capturedReactFlowProps?.onNodeDragStop as (
+        event: unknown,
+        node: { id: string; position: { x: number; y: number } }
+      ) => void)({}, { id: 'p', position: { x: 40, y: 30 } })
+    })
+
+    const state = useGraphStore.getState()
+    expect(state.nodes.find((n) => n.id === 'p')?.position).toEqual({ x: 40, y: 30 })
+    expect(state.nodes.find((n) => n.id === 'c')?.position).toEqual({ x: 100, y: 0 })
+  })
 })
