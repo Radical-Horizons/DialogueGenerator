@@ -69,13 +69,21 @@ vi.mock('../components/unityDialogues/UnityDialogueList', () => {
   }
 })
 
-// Mock API unityDialogues: évite réseau
+// Mock API documents : rejets immédiats (fake timers + axios sinon peuvent laisser des promesses en suspens).
+vi.mock('../api/documents', () => ({
+  getDocument: vi.fn().mockRejectedValue(new Error('no document')),
+  getLayout: vi.fn().mockRejectedValue(new Error('no layout')),
+  putDocument: vi.fn().mockResolvedValue({ revision: 2 }),
+  putLayout: vi.fn().mockResolvedValue({ revision: 2 }),
+}))
+
+// Mock API unityDialogues : json_content doit être une chaîne JSON (type API).
 vi.mock('../api/unityDialogues', () => ({
   getUnityDialogue: vi.fn().mockResolvedValue({
-    json_content: [
+    json_content: JSON.stringify([
       { id: 'START', speaker: 'PNJ', line: 'Hello', choices: [] },
       { id: 'END', line: '' },
-    ],
+    ]),
   }),
 }))
 
@@ -134,7 +142,17 @@ describe('GraphEditor autosave (ADR-006)', () => {
       await Promise.resolve()
     })
 
-    // Puis, l'effet autosave dans GraphEditor est un setTimeout(100ms).
+    const afterLoad = useGraphStore.getState()
+    expect(afterLoad.nodes.length).toBeGreaterThan(0)
+    expect(afterLoad.documentId).toBeTruthy()
+
+    // applyLoadResult remet hasUnsavedChanges à false après chargement : pour tester l’autosave,
+    // on simule une édition post-chargement (scénario réel).
+    await act(async () => {
+      useGraphStore.setState({ hasUnsavedChanges: true })
+    })
+
+    // Effet autosave : setTimeout ~50 ms (ADR-006).
     await act(async () => {
       await vi.advanceTimersByTimeAsync(250)
     })

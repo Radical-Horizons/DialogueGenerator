@@ -291,6 +291,14 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
         }
       }
 
+      if (edge?.label === 'Suivant' && edge.source) {
+        updatedNodes = updatedNodes.map((n) =>
+          n.id === edge.source
+            ? { ...n, data: { ...n.data, nextNode: '' } }
+            : n
+        )
+      }
+
       const isDocumentSoT = state.document != null && state.layout != null
       const docAndLayout = isDocumentSoT
         ? syncDocAndLayout(updatedNodes, newEdges, state.layout as Record<string, unknown>)

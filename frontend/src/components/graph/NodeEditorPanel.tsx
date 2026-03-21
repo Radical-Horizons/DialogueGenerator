@@ -29,7 +29,13 @@ import {
 } from '../../schemas/nodeEditorSchema'
 import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
 import { getParentChoiceForTestNode } from '../../utils/testNodeSync'
+import {
+  mergeNodeFormIntoStoreData,
+  connectionFingerprintFromNodeData,
+  applyStoreConnectionFieldsToDialogueFormChoices,
+} from '../../utils/mergeNodeEditorForm'
 import { ChoiceEditor } from './ChoiceEditor'
+import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
 
@@ -107,60 +113,14 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     mode: 'onChange',
   })
   
-  const { register, handleSubmit, formState: { errors }, reset, watch } = form
+  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = form
   const isFlushingRef = useRef(false)
   const previousSelectedNodeIdRef = useRef<string | null>(null)
   const debouncePushRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** Dernière empreinte des champs « connexion » du nœud sélectionné (évite resync inutile + boucles). */
+  const prevConnectionFingerprintRef = useRef<string>('')
 
   const DEBOUNCE_MS = 100
-
-  /** Merge form values into node data for store push (ADR-006). Preserves connection fields (targetNode, test*Node) for choices. */
-  const mergeFormDataIntoNodeData = useCallback(
-    (
-      nType: string,
-      nodeData: Record<string, unknown>,
-      formValues: DialogueNodeData | TestNodeData | EndNodeData
-    ): Record<string, unknown> => {
-      if (nType === 'dialogueNode') {
-        const storeChoices = (nodeData.choices || []) as Choice[]
-        const formChoices = (formValues as DialogueNodeData).choices || []
-        const mergedChoices: Choice[] = formChoices.map((fc, i) => {
-          const storeChoice = storeChoices[i]
-          return {
-            ...fc,
-            // targetNode, test*Nodes sont des connexions gérées par les edges — jamais par le form.
-            // Utiliser uniquement la valeur du store pour éviter la boucle idle form→store→form.
-            targetNode: storeChoice?.targetNode,
-            testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
-            testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
-            testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,
-            testCriticalSuccessNode: storeChoice?.testCriticalSuccessNode ?? fc.testCriticalSuccessNode,
-          }
-        })
-        return { ...nodeData, ...formValues, choices: mergedChoices }
-      }
-      if (nType === 'testNode') {
-        const tv = formValues as TestNodeData
-        // Même principe que dialogueNode/choices : les IDs de sortie du test sont pilotés par les edges ;
-        // le form n’est pas resynchronisé pendant la génération, donc préférer le store s’il a une valeur non vide.
-        const pickTestConnection = (storeVal: unknown, formVal: unknown): string => {
-          if (typeof storeVal === 'string' && storeVal.trim() !== '') return storeVal
-          if (typeof formVal === 'string') return formVal
-          return ''
-        }
-        return {
-          ...nodeData,
-          ...formValues,
-          criticalFailureNode: pickTestConnection(nodeData.criticalFailureNode, tv.criticalFailureNode),
-          failureNode: pickTestConnection(nodeData.failureNode, tv.failureNode),
-          successNode: pickTestConnection(nodeData.successNode, tv.successNode),
-          criticalSuccessNode: pickTestConnection(nodeData.criticalSuccessNode, tv.criticalSuccessNode),
-        }
-      }
-      return { ...nodeData, ...formValues }
-    },
-    []
-  )
 
   // ADR-006 : pousser le formulaire vers le store à la saisie (debounce ≤ 100 ms), pas de brouillon.
   // getState() dans le callback : lecture de l'état au moment de l'exécution (après 100 ms), pas dans le render.
@@ -175,7 +135,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const node = state.nodes.find((n) => n.id === selectedNodeId)
       if (!node?.data) return
       const formValues = form.getValues()
-      const merged = mergeFormDataIntoNodeData(nodeType, node.data as Record<string, unknown>, formValues)
+      const merged = mergeNodeFormIntoStoreData(nodeType, node.data as Record<string, unknown>, formValues)
       // Evite une boucle idle: ne pousse pas au store si le formulaire n'a rien changé.
       const mergedStr = JSON.stringify(merged)
       const currentStr = JSON.stringify(node.data)
@@ -188,7 +148,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         debouncePushRef.current = null
       }
     }
-  }, [watchedValues, selectedNodeId, nodeType, form, updateNode, mergeFormDataIntoNodeData])
+  }, [watchedValues, selectedNodeId, nodeType, form, updateNode])
 
   // Synchroniser avec le nœud sélectionné ; au changement de nœud, flusher le formulaire vers l’ancien nœud (ADR-006 : filet de sécurité)
   useEffect(() => {
@@ -202,7 +162,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const prevNode = state.nodes.find((n) => n.id === prevId)
       if (prevNode?.data) {
         const prevNodeType = prevNode.type ?? 'dialogueNode'
-        const merged = mergeFormDataIntoNodeData(
+        const merged = mergeNodeFormIntoStoreData(
           prevNodeType,
           prevNode.data as Record<string, unknown>,
           values
@@ -243,8 +203,40 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           id: selectedNode.id,
         })
       }
+      prevConnectionFingerprintRef.current = connectionFingerprintFromNodeData(
+        nodeType,
+        selectedNode.data as Record<string, unknown>
+      )
+    } else if (selectionChanged) {
+      prevConnectionFingerprintRef.current = ''
     }
   }, [selectedNodeId, selectedNode, nodeType, reset, form, updateNode])
+
+  // Même nœud sélectionné : le store peut mettre à jour les connexions (génération, edges) sans resélection.
+  useEffect(() => {
+    if (!selectedNodeId || !selectedNode?.data) return
+    const fp = connectionFingerprintFromNodeData(
+      nodeType,
+      selectedNode.data as Record<string, unknown>
+    )
+    if (fp === prevConnectionFingerprintRef.current) return
+    prevConnectionFingerprintRef.current = fp
+    if (nodeType === 'testNode') {
+      const d = selectedNode.data as Record<string, unknown>
+      setValue('criticalFailureNode', (d.criticalFailureNode as string) || '', { shouldDirty: false })
+      setValue('failureNode', (d.failureNode as string) || '', { shouldDirty: false })
+      setValue('successNode', (d.successNode as string) || '', { shouldDirty: false })
+      setValue('criticalSuccessNode', (d.criticalSuccessNode as string) || '', { shouldDirty: false })
+      return
+    }
+    if (nodeType === 'dialogueNode') {
+      const storeChoices = (selectedNode.data.choices || []) as Choice[]
+      const formChoices = (form.getValues() as DialogueNodeData).choices || []
+      const merged = applyStoreConnectionFieldsToDialogueFormChoices(storeChoices, formChoices)
+      setValue('choices', merged, { shouldDirty: false })
+      setValue('nextNode', (selectedNode.data.nextNode as string) || '', { shouldDirty: false })
+    }
+  }, [selectedNodeId, selectedNode, nodeType, form, setValue])
 
   const onSubmit = useCallback((data: DialogueNodeData | TestNodeData | EndNodeData) => {
     if (!selectedNodeId) return
@@ -790,139 +782,43 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         )}
         
         {/* Résultats de test (pour test nodes) */}
-        {nodeType === 'testNode' && (
+        {nodeType === 'testNode' && selectedNodeId && (
           <div style={{ marginBottom: '0.75rem', padding: '0.75rem', backgroundColor: theme.background.secondary, borderRadius: 6, border: `1px solid ${theme.border.primary}` }}>
             <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', fontWeight: 'bold', color: theme.text.primary }}>
               Connexions de test
             </h5>
-            
-            {/* Échec critique */}
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label
-                htmlFor="test-critical-failure-node"
-                style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: theme.text.secondary,
-                }}
-              >
-                Échec critique
-              </label>
-              <input
-                id="test-critical-failure-node"
-                type="text"
-                {...register('criticalFailureNode' as const)}
-                placeholder="ID du nœud (ex: NODE_CRITICAL_FAILURE)"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: 4,
-                  backgroundColor: theme.background.tertiary,
-                  color: theme.text.primary,
-                  fontSize: '0.85rem',
-                  fontFamily: 'monospace',
-                }}
-              />
-            </div>
-            
-            {/* Échec */}
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label
-                htmlFor="test-failure-node"
-                style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: theme.text.secondary,
-                }}
-              >
-                Échec
-              </label>
-              <input
-                id="test-failure-node"
-                type="text"
-                {...register('failureNode' as const)}
-                placeholder="ID du nœud (ex: NODE_FAILURE)"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: 4,
-                  backgroundColor: theme.background.tertiary,
-                  color: theme.text.primary,
-                  fontSize: '0.85rem',
-                  fontFamily: 'monospace',
-                }}
-              />
-            </div>
-            
-            {/* Réussite */}
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label
-                htmlFor="test-success-node"
-                style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: theme.text.secondary,
-                }}
-              >
-                Réussite
-              </label>
-              <input
-                id="test-success-node"
-                type="text"
-                {...register('successNode' as const)}
-                placeholder="ID du nœud (ex: NODE_SUCCESS)"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: 4,
-                  backgroundColor: theme.background.tertiary,
-                  color: theme.text.primary,
-                  fontSize: '0.85rem',
-                  fontFamily: 'monospace',
-                }}
-              />
-            </div>
-            
-            {/* Réussite critique */}
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label
-                htmlFor="test-critical-success-node"
-                style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  color: theme.text.secondary,
-                }}
-              >
-                Réussite critique
-              </label>
-              <input
-                id="test-critical-success-node"
-                type="text"
-                {...register('criticalSuccessNode' as const)}
-                placeholder="ID du nœud (ex: NODE_CRITICAL_SUCCESS)"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: 4,
-                  backgroundColor: theme.background.tertiary,
-                  color: theme.text.primary,
-                  fontSize: '0.85rem',
-                  fontFamily: 'monospace',
-                }}
-              />
-            </div>
+            <ConnectionTargetSelect
+              variant="testHandle"
+              testSourceNodeId={selectedNodeId}
+              handle="critical-failure"
+              label="Échec critique"
+              value={watch('criticalFailureNode') as string | undefined}
+              data-testid="panel-test-cf"
+            />
+            <ConnectionTargetSelect
+              variant="testHandle"
+              testSourceNodeId={selectedNodeId}
+              handle="failure"
+              label="Échec"
+              value={watch('failureNode') as string | undefined}
+              data-testid="panel-test-f"
+            />
+            <ConnectionTargetSelect
+              variant="testHandle"
+              testSourceNodeId={selectedNodeId}
+              handle="success"
+              label="Réussite"
+              value={watch('successNode') as string | undefined}
+              data-testid="panel-test-s"
+            />
+            <ConnectionTargetSelect
+              variant="testHandle"
+              testSourceNodeId={selectedNodeId}
+              handle="critical-success"
+              label="Réussite critique"
+              value={watch('criticalSuccessNode') as string | undefined}
+              data-testid="panel-test-cs"
+            />
           </div>
         )}
 
@@ -962,6 +858,16 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           </div>
         )}
         
+        {nodeType === 'dialogueNode' && selectedNodeId && !(watch('choices') as Choice[] | undefined)?.length && (
+          <ConnectionTargetSelect
+            variant="nextNode"
+            dialogueNodeId={selectedNodeId}
+            label="Nœud suivant"
+            value={(watch('nextNode') as string | undefined) || undefined}
+            data-testid="connection-target-next-node"
+          />
+        )}
+
         {/* Choix (pour dialogue nodes) */}
         {nodeType === 'dialogueNode' && (
           <ChoicesEditor
@@ -1299,15 +1205,18 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
           Aucun choix. Cliquez sur "Ajouter un choix" pour en créer un.
         </div>
       ) : (
-        fields.map((field, index) => (
-          <ChoiceEditor
-            key={field.id}
-            choiceIndex={index}
-            onRemove={fields.length > 1 ? () => handleRemoveChoice(index) : undefined}
-            onGenerateForChoice={onGenerateForChoice}
-            onCreateEmptyNodeForChoice={onCreateEmptyNodeForChoice}
-          />
-        ))
+        fields.map((field, index) =>
+          selectedNodeId ? (
+            <ChoiceEditor
+              key={field.id}
+              dialogueNodeId={selectedNodeId}
+              choiceIndex={index}
+              onRemove={fields.length > 1 ? () => handleRemoveChoice(index) : undefined}
+              onGenerateForChoice={onGenerateForChoice}
+              onCreateEmptyNodeForChoice={onCreateEmptyNodeForChoice}
+            />
+          ) : null
+        )
       )}
     </div>
   )

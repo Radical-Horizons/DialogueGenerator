@@ -347,23 +347,7 @@ export const DialogueNode = memo(function DialogueNode({
         }}
       />
       
-      {title ? (
-        <div
-          style={{
-            padding: '4px 12px',
-            borderBottom: `1px solid ${theme.border.primary}`,
-            fontSize: '0.8rem',
-            color: theme.text.secondary,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-          title={title}
-        >
-          {title}
-        </div>
-      ) : null}
-      {/* Header avec speaker */}
+      {/* En-tête : titre en avant-plan, speaker en second plan */}
       <div
         style={{
           padding: '8px 12px',
@@ -382,16 +366,45 @@ export const DialogueNode = memo(function DialogueNode({
             backgroundColor: 'white',
           }}
         />
-        <span
+        <div
           style={{
-            fontSize: '0.85rem',
-            fontWeight: 'bold',
-            color: 'white',
-            textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0,
+            flex: 1,
+            gap: 2,
           }}
         >
-          {speaker}
-        </span>
+          <span
+            style={{
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+              color: 'white',
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={title ? `${title} (${speaker})` : speaker}
+          >
+            {title ? title : speaker}
+          </span>
+          {title ? (
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 'normal',
+                color: 'rgba(255,255,255,0.9)',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ({speaker})
+            </span>
+          ) : null}
+        </div>
       </div>
       
       {/* Contenu (dialogue) — padding bas réservé pour handles + "Voir le prompt" */}

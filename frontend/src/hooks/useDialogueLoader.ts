@@ -19,6 +19,11 @@ interface RouteTarget {
 /** Circuit breaker: backoff après 4xx non-409 pour éviter la boucle d'autosave. */
 const AUTOSAVE_4XX_BACKOFF_MS = 10_000
 
+/** Compare dialogue ids whether stored with or without `.json` (liste UI vs documentId stem). */
+function normalizeDialogueFilenameKey(filename: string): string {
+  return filename.replace(/\.json$/i, '').toLowerCase()
+}
+
 export interface UseDialogueLoaderReturn {
   selectedDialogue: UnityDialogueMetadata | null
   setSelectedDialogue: (d: UnityDialogueMetadata | null) => void
@@ -305,8 +310,11 @@ export function useDialogueLoader(
     // Cela évite de sauvegarder les restes du dialogue A alors qu'on a déjà cliqué sur le dialogue B.
     const storeFilename = dialogueMetadata.filename || documentId || null
     const uiFilename = selectedDialogue?.filename || null
-    
-    const isSelectionChanging = uiFilename && storeFilename && uiFilename !== storeFilename
+
+    const isSelectionChanging =
+      !!uiFilename &&
+      !!storeFilename &&
+      normalizeDialogueFilenameKey(uiFilename) !== normalizeDialogueFilenameKey(storeFilename)
 
     if (
       !storeFilename ||

@@ -1,15 +1,14 @@
 /**
- * Tests pour ChoiceEditor avec 4 résultats de test.
+ * Tests pour ChoiceEditor avec 4 résultats de test (Combobox cibles).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ChoiceEditor } from '../components/graph/ChoiceEditor'
 import { dialogueNodeDataSchema, type DialogueNodeData } from '../schemas/nodeEditorSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphStore } from '../store/graphStore'
 
-// Mock useGraphStore
 vi.mock('../store/graphStore', () => ({
   useGraphStore: vi.fn(),
 }))
@@ -25,13 +24,25 @@ describe('ChoiceEditor - 4 résultats de test', () => {
   ]
 
   beforeEach(() => {
-    vi.mocked(useGraphStore).mockReturnValue({
-      nodes: mockNodes,
-      isGenerating: false,
-    } as ReturnType<typeof useGraphStore>)
+    vi.mocked(useGraphStore).mockImplementation((selector) => {
+      const state = {
+        nodes: mockNodes,
+        edges: [],
+        isGenerating: false,
+        connectNodes: vi.fn(),
+        disconnectNodes: vi.fn(),
+      }
+      return (selector as (s: typeof state) => unknown)(state)
+    })
   })
 
-  const TestWrapper = ({ children, defaultValues }: { children: React.ReactNode; defaultValues?: DialogueNodeData }) => {
+  const TestWrapper = ({
+    children,
+    defaultValues,
+  }: {
+    children: React.ReactNode
+    defaultValues?: DialogueNodeData
+  }) => {
     const form = useForm<DialogueNodeData>({
       resolver: zodResolver(dialogueNodeDataSchema),
       defaultValues: defaultValues || {
@@ -48,8 +59,7 @@ describe('ChoiceEditor - 4 résultats de test', () => {
     return <FormProvider {...form}>{children}</FormProvider>
   }
 
-  it('devrait afficher les 4 champs de résultat de test quand test est défini', async () => {
-    // GIVEN: Un choix avec un attribut test
+  it('devrait afficher les 4 combobox de résultat quand test est défini', async () => {
     const defaultValues: DialogueNodeData = {
       id: 'START',
       type: 'dialogueNode',
@@ -61,24 +71,21 @@ describe('ChoiceEditor - 4 résultats de test', () => {
       ],
     }
 
-    // WHEN: Rendu du ChoiceEditor
     render(
       <TestWrapper defaultValues={defaultValues}>
-        <ChoiceEditor choiceIndex={0} />
+        <ChoiceEditor dialogueNodeId="START" choiceIndex={0} />
       </TestWrapper>
     )
 
-    // THEN: Les 4 champs de résultat doivent être visibles (labels "Échec critique →", "Échec →", etc.)
     await waitFor(() => {
-      expect(screen.getByLabelText(/Échec critique/)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Échec →/)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Réussite →/)).toBeInTheDocument()
-      expect(screen.getByLabelText(/Réussite critique/)).toBeInTheDocument()
+      expect(screen.getByTestId('choice-test-cf-0')).toBeInTheDocument()
+      expect(screen.getByTestId('choice-test-f-0')).toBeInTheDocument()
+      expect(screen.getByTestId('choice-test-s-0')).toBeInTheDocument()
+      expect(screen.getByTestId('choice-test-cs-0')).toBeInTheDocument()
     })
   })
 
-  it('ne devrait pas afficher les 4 champs de résultat quand test n\'est pas défini', async () => {
-    // GIVEN: Un choix sans attribut test
+  it('ne devrait pas afficher les 4 combobox quand test n\'est pas défini', async () => {
     const defaultValues: DialogueNodeData = {
       id: 'START',
       type: 'dialogueNode',
@@ -89,24 +96,21 @@ describe('ChoiceEditor - 4 résultats de test', () => {
       ],
     }
 
-    // WHEN: Rendu du ChoiceEditor
     render(
       <TestWrapper defaultValues={defaultValues}>
-        <ChoiceEditor choiceIndex={0} />
+        <ChoiceEditor dialogueNodeId="START" choiceIndex={0} />
       </TestWrapper>
     )
 
-    // THEN: Les 4 champs de résultat ne doivent pas être visibles
     await waitFor(() => {
-      expect(screen.queryByLabelText(/Échec critique/)).not.toBeInTheDocument()
-      expect(screen.queryByLabelText(/Échec →/)).not.toBeInTheDocument()
-      expect(screen.queryByLabelText(/Réussite →/)).not.toBeInTheDocument()
-      expect(screen.queryByLabelText(/Réussite critique/)).not.toBeInTheDocument()
+      expect(screen.queryByTestId('choice-test-cf-0')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('choice-test-f-0')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('choice-test-s-0')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('choice-test-cs-0')).not.toBeInTheDocument()
     })
   })
 
-  it('devrait afficher les valeurs existantes des 4 champs de résultat', async () => {
-    // GIVEN: Un choix avec test et les 4 nœuds de résultat déjà définis
+  it('devrait afficher les libellés des cibles sélectionnées dans les combobox', async () => {
     const defaultValues: DialogueNodeData = {
       id: 'START',
       type: 'dialogueNode',
@@ -122,24 +126,17 @@ describe('ChoiceEditor - 4 résultats de test', () => {
       ],
     }
 
-    // WHEN: Rendu du ChoiceEditor
     render(
       <TestWrapper defaultValues={defaultValues}>
-        <ChoiceEditor choiceIndex={0} />
+        <ChoiceEditor dialogueNodeId="START" choiceIndex={0} />
       </TestWrapper>
     )
 
-    // THEN: Les valeurs doivent être affichées dans les champs
     await waitFor(() => {
-      const criticalFailureField = screen.getByLabelText(/Échec critique/) as HTMLInputElement
-      const failureField = screen.getByLabelText(/Échec →/) as HTMLInputElement
-      const successField = screen.getByLabelText(/Réussite →/) as HTMLInputElement
-      const criticalSuccessField = screen.getByLabelText(/Réussite critique/) as HTMLInputElement
-
-      expect(criticalFailureField.value).toBe('NODE_CRITICAL_FAILURE')
-      expect(failureField.value).toBe('NODE_FAILURE')
-      expect(successField.value).toBe('NODE_SUCCESS')
-      expect(criticalSuccessField.value).toBe('NODE_CRITICAL_SUCCESS')
+      expect(within(screen.getByTestId('choice-test-cf-0')).getByText('NODE_CRITICAL_FAILURE')).toBeInTheDocument()
+      expect(within(screen.getByTestId('choice-test-f-0')).getByText('NODE_FAILURE')).toBeInTheDocument()
+      expect(within(screen.getByTestId('choice-test-s-0')).getByText('NODE_SUCCESS')).toBeInTheDocument()
+      expect(within(screen.getByTestId('choice-test-cs-0')).getByText('NODE_CRITICAL_SUCCESS')).toBeInTheDocument()
     })
   })
 })

@@ -8,6 +8,7 @@ import * as graphAPI from '../../api/graph'
 import {
   setPending as journalSetPending,
 } from '../../utils/graphJournal'
+import { nodeTargetDisplayLabel } from '../../utils/nodeTargetLabel'
 
 export type UISlice = Pick<
   GraphState,
@@ -137,10 +138,7 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
     const exact: Array<{ id: string; label: string }> = []
     const partial: Array<{ id: string; label: string }> = []
     for (const node of state.nodes) {
-      const data = node.data as { title?: string; displayName?: string; line?: string }
-      const firstLine =
-        typeof data.line === 'string' ? (data.line.split('\n')[0]?.trim() ?? '') : ''
-      const label = (data.title ?? data.displayName ?? firstLine) || node.id
+      const label = nodeTargetDisplayLabel(node)
       const labelLower = label.toLowerCase()
       if (node.id === q) {
         exact.push({ id: node.id, label })

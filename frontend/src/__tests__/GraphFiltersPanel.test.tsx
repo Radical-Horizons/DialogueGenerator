@@ -28,6 +28,20 @@ function addNode(
   })
 }
 
+/** Dialogue avec choix + test : le TestNode est créé par normalizeTestBars (pas d’orphelin supprimé). */
+function addDialogueWithTestChoice(id: string) {
+  useGraphStore.getState().addNode({
+    id,
+    type: 'dialogueNode',
+    position: { x: 0, y: 0 },
+    data: {
+      id,
+      line: 'Ligne',
+      choices: [{ text: 'Choix test', test: 'Raison+Diplomatie:8' }],
+    },
+  })
+}
+
 describe('GraphFiltersPanel', () => {
   const onClose = vi.fn()
 
@@ -85,19 +99,25 @@ describe('GraphFiltersPanel', () => {
 
   it('shows badge "X nœuds masqués" when hiddenCount > 0', () => {
     addNode('a', 'dialogueNode')
-    addNode('b', 'testNode')
+    addDialogueWithTestChoice('b')
     useGraphStore.getState().setFilters({ hiddenTypes: ['test'] })
     render(<GraphFiltersPanel isOpen={true} onClose={onClose} />)
-    expect(screen.getByText(/1 nœud masqué/)).toBeInTheDocument()
+    const summary = screen
+      .getByRole('dialog', { name: /Filtres du graphe/i })
+      .querySelector('p')
+    expect(summary?.textContent?.replace(/\s+/g, ' ').trim()).toMatch(/1 nœud masqué/)
   })
 
   it('shows "X nœuds masqués" plural when multiple hidden', () => {
     addNode('a', 'dialogueNode')
-    addNode('b', 'testNode')
+    addDialogueWithTestChoice('b')
     addNode('c', 'endNode')
     useGraphStore.getState().setFilters({ hiddenTypes: ['test', 'end'] })
     render(<GraphFiltersPanel isOpen={true} onClose={onClose} />)
-    expect(screen.getByText(/2 nœuds masqués/)).toBeInTheDocument()
+    const summary = screen
+      .getByRole('dialog', { name: /Filtres du graphe/i })
+      .querySelector('p')
+    expect(summary?.textContent?.replace(/\s+/g, ' ').trim()).toMatch(/2 nœuds masqués/)
   })
 
   it('Escape closes panel via onClose', () => {

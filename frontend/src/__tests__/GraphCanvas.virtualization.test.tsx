@@ -115,10 +115,9 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     'with 500 nodes in store, still passes onlyRenderVisibleElements=true (NFR-P1 readiness)',
     () => {
       const { addNode } = useGraphStore.getState()
+      // Pas de testNode orphelin : normalizeTestBars les retire du store (barres de test liées à un choix).
       for (let i = 0; i < 500; i++) {
-        addNode(
-          createMockNode(`n${i}`, i % 3 === 0 ? 'endNode' : i % 3 === 1 ? 'testNode' : 'dialogueNode')
-        )
+        addNode(createMockNode(`n${i}`, i % 2 === 0 ? 'dialogueNode' : 'endNode'))
       }
       renderGraphCanvas()
       expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)
@@ -132,9 +131,7 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     () => {
       const { addNode } = useGraphStore.getState()
       for (let i = 0; i < 501; i++) {
-        addNode(
-          createMockNode(`n${i}`, i % 3 === 0 ? 'endNode' : i % 3 === 1 ? 'testNode' : 'dialogueNode')
-        )
+        addNode(createMockNode(`n${i}`, i % 2 === 0 ? 'dialogueNode' : 'endNode'))
       }
       renderGraphCanvas()
       expect(capturedReactFlowProps.onlyRenderVisibleElements).toBe(true)

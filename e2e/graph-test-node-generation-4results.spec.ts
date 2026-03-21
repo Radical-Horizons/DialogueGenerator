@@ -5,7 +5,8 @@
  * et que les connexions sont bien persistées dans le document (choice.test*Node).
  *
  * Stratégie : fixture document avec choix ayant un test → mock de l’API generate-node
- * → clic droit sur TestNode → "Générer" → assertion sur les 4 nœuds visibles puis lecture
+ * → clic gauche (sélection panel) puis clic droit sur TestNode → "Générer" → vérification
+ * du nombre d’edges React Flow puis les 4 nœuds visibles et lecture
  * du document via API pour vérifier les champs test*Node du choix.
  */
 import { test, expect, type Page } from '@playwright/test'
@@ -150,6 +151,8 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
 
     const testNode = page.locator('[data-id="test-node-START-choice-0"]')
     await expect(testNode).toBeVisible({ timeout: 5000 })
+    const edgesBeforeGen = await page.locator('.react-flow__edge').count()
+    await testNode.click({ button: 'left' })
     await testNode.click({ button: 'right' })
 
     const generateResponsePromise = page.waitForResponse(
@@ -170,6 +173,10 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
         page.locator(`[data-id="${id}"]`).waitFor({ state: 'attached', timeout: 20000 })
       )
     )
+
+    await expect
+      .poll(async () => page.locator('.react-flow__edge').count(), { timeout: 15000 })
+      .toBeGreaterThanOrEqual(edgesBeforeGen + 4)
 
     await triggerSave(page)
 

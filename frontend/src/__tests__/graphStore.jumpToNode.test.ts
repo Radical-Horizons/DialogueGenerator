@@ -106,7 +106,7 @@ describe('graphStore - findNodesByQuery (Story 2.8)', () => {
     expect(byName[0].label.toLowerCase()).toMatch(/scene 1/)
   })
 
-  it('uses displayName ?? first line of data.line ?? node.id for label', () => {
+  it('uses title ?? displayName ?? first line of data.line ?? node.id for label', () => {
     const { addNode, findNodesByQuery } = useGraphStore.getState()
     addNode({
       id: 'id_a',
@@ -130,6 +130,17 @@ describe('graphStore - findNodesByQuery (Story 2.8)', () => {
     expect(findNodesByQuery('Custom Name')[0].label).toBe('Custom Name')
     expect(findNodesByQuery('First line')[0].label).toBe('First line')
     expect(findNodesByQuery('id_c')[0].label).toBe('id_c')
+  })
+
+  it('prefers title over displayName and line for label', () => {
+    const { addNode, findNodesByQuery } = useGraphStore.getState()
+    addNode({
+      id: 'id_t',
+      type: 'dialogueNode',
+      position: { x: 0, y: 0 },
+      data: { title: 'Scene Title', displayName: 'Other', line: 'Spoken line' },
+    })
+    expect(findNodesByQuery('Scene Title')[0].label).toBe('Scene Title')
   })
 
   it('returns empty array for empty query', () => {

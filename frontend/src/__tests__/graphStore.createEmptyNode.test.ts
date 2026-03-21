@@ -20,6 +20,7 @@ describe('graphStore - createEmptyNode (Story 1.6)', () => {
       expect(node.id).toBeDefined()
       expect(node.data).toEqual({
         id: node.id,
+        title: '',
         speaker: '',
         line: '',
         choices: [],
@@ -54,6 +55,7 @@ describe('graphStore - createEmptyNode (Story 1.6)', () => {
       expect(state.nodes[0].id).toBe(node.id)
       expect(state.nodes[0].data).toEqual({
         id: node.id,
+        title: '',
         speaker: '',
         line: '',
         choices: [],

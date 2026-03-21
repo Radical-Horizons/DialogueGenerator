@@ -253,9 +253,11 @@ export function syncChoiceFromTestNode(
     [key: string]: unknown
   }
 
+  const testExplicit = Object.prototype.hasOwnProperty.call(testNodeData, 'test')
+
   return {
     ...existingChoice,
-    test: testNodeData.test ?? existingChoice.test,
+    test: testExplicit ? testNodeData.test : existingChoice.test,
     // Note: line du TestNode n'est pas synchronisé vers choice.text (choix.text reste inchangé)
     testCriticalFailureNode: testNodeData.criticalFailureNode ?? (existingChoice as Choice & { testCriticalFailureNode?: string }).testCriticalFailureNode,
     testFailureNode: testNodeData.failureNode ?? (existingChoice as Choice & { testFailureNode?: string }).testFailureNode,

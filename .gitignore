@@ -71,6 +71,7 @@ logs/
 data/logs/*.json
 
 # Data directories (generated/cache files)
+data/cost_budgets.json
 data/llm_usage/
 data/notion_cache/
 data/interactions/
@@ -102,3 +103,4 @@ app_config.json
 
 # Development lock files (machine-specific, transient state)
 .dev/ 
+data/cost_budgets.json
