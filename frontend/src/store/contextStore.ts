@@ -10,6 +10,8 @@ import type {
   ItemResponse,
   SpeciesResponse,
   CommunityResponse,
+  SuggestionItem,
+  SuggestionEntityType,
 } from '../types/api'
 
 // TTL pour le cache (30 minutes)
@@ -30,6 +32,9 @@ interface ContextState {
   items: ItemResponse[]
   species: SpeciesResponse[]
   communities: CommunityResponse[]
+  // Suggestions automatiques (Story 3.3)
+  suggestions: SuggestionItem[]
+  ignoredSuggestions: string[]  // clés session: "${type}:${name}"
   // Cache pour éviter les appels API redondants
   cachedCharacters: CachedData | null
   cachedRegions: CachedData | null
@@ -55,6 +60,13 @@ interface ContextState {
   applyLinkedElements: (elements: string[]) => void
   clearSelections: () => void
   restoreState: (selections: ContextSelection, region: string | null, subLocations: string[]) => void
+  // Actions suggestions (Story 3.3)
+  setSuggestions: (suggestions: SuggestionItem[]) => void
+  acceptSuggestion: (type: SuggestionEntityType, name: string) => void
+  ignoreSuggestion: (type: SuggestionEntityType, name: string) => void
+  acceptAllSuggestionsByType: (type: SuggestionEntityType) => void
+  ignoreAllSuggestionsByType: (type: SuggestionEntityType) => void
+  isSuggestionIgnored: (type: SuggestionEntityType, name: string) => boolean
   // Actions pour le cache
   setCachedCharacters: (characters: string[]) => void
   setCachedRegions: (regions: string[]) => void
@@ -104,6 +116,9 @@ export const useContextStore = create<ContextState>((set, get) => ({
   items: [],
   species: [],
   communities: [],
+  // Suggestions state initial (Story 3.3)
+  suggestions: [],
+  ignoredSuggestions: [],
   // Cache initial
   cachedCharacters: null,
   cachedRegions: null,
@@ -444,6 +459,8 @@ export const useContextStore = create<ContextState>((set, get) => ({
       selections: defaultSelections,
       selectedRegion: null,
       selectedSubLocations: [],
+      suggestions: [],
+      ignoredSuggestions: [],
     })
   },
 
@@ -453,6 +470,57 @@ export const useContextStore = create<ContextState>((set, get) => ({
       selectedRegion: region,
       selectedSubLocations: subLocations,
     })
+  },
+
+  // ---- Actions suggestions (Story 3.3) ----
+
+  setSuggestions: (suggestions: SuggestionItem[]) => {
+    set((state) => ({
+      suggestions: suggestions.filter(
+        (sg) => !state.ignoredSuggestions.includes(`${sg.type}:${sg.name}`)
+      ),
+    }))
+  },
+
+  acceptSuggestion: (type: SuggestionEntityType, name: string) => {
+    const state = get()
+    // Ajouter à la sélection (seulement si pas déjà sélectionné)
+    const storeTypeMap: Record<SuggestionEntityType, () => void> = {
+      character: () => { if (!state.isElementSelected('characters', name)) state.toggleCharacter(name) },
+      location: () => { if (!state.isElementSelected('locations', name)) state.toggleLocation(name) },
+      item: () => { if (!state.isElementSelected('items', name)) state.toggleItem(name) },
+      species: () => { if (!state.isElementSelected('species', name)) state.toggleSpecies(name) },
+      community: () => { if (!state.isElementSelected('communities', name)) state.toggleCommunity(name) },
+    }
+    storeTypeMap[type]?.()
+    // Retirer des suggestions
+    set((s) => ({ suggestions: s.suggestions.filter((sg) => !(sg.type === type && sg.name === name)) }))
+  },
+
+  ignoreSuggestion: (type: SuggestionEntityType, name: string) => {
+    const key = `${type}:${name}`
+    set((state) => ({
+      suggestions: state.suggestions.filter((sg) => !(sg.type === type && sg.name === name)),
+      ignoredSuggestions: state.ignoredSuggestions.includes(key)
+        ? state.ignoredSuggestions
+        : [...state.ignoredSuggestions, key],
+    }))
+  },
+
+  acceptAllSuggestionsByType: (type: SuggestionEntityType) => {
+    const state = get()
+    const toAccept = state.suggestions.filter((sg) => sg.type === type)
+    toAccept.forEach((sg) => state.acceptSuggestion(type, sg.name))
+  },
+
+  ignoreAllSuggestionsByType: (type: SuggestionEntityType) => {
+    const state = get()
+    const toIgnore = state.suggestions.filter((sg) => sg.type === type)
+    toIgnore.forEach((sg) => state.ignoreSuggestion(type, sg.name))
+  },
+
+  isSuggestionIgnored: (type: SuggestionEntityType, name: string) => {
+    return get().ignoredSuggestions.includes(`${type}:${name}`)
   },
 
   // Actions pour le cache

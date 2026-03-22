@@ -1,5 +1,5 @@
 """Schémas Pydantic pour le contexte GDD."""
-from typing import List, Optional, Dict, Any
+from typing import List, Literal, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from api.schemas.dialogue import ContextSelection
 import sys
@@ -221,4 +221,46 @@ class BuildContextResponse(BaseModel):
     """
     context: str = Field(..., description="Contexte construit")
     token_count: int = Field(..., description="Nombre de tokens")
+
+
+class SuggestionItem(BaseModel):
+    """Un élément suggéré automatiquement basé sur les relations GDD.
+
+    Attributes:
+        type: Type de l'entité suggérée (singular form: character, location, etc.).
+        name: Nom de l'entité.
+    """
+
+    type: Literal["character", "location", "item", "species", "community"] = Field(
+        ..., description="Type de l'entité : character, location, item, species, community"
+    )
+    name: str = Field(..., description="Nom de l'entité suggérée")
+
+
+class SuggestionsRequest(BaseModel):
+    """Requête pour obtenir des suggestions de contexte basées sur l'entité déclencheur.
+
+    Attributes:
+        trigger_type: Type de l'entité qui vient d'être sélectionnée.
+        trigger_name: Nom de l'entité trigger.
+        already_selected: Sélections actuelles (pour filtrer les doublons).
+    """
+
+    trigger_type: Literal["character", "location", "item", "species", "community"] = Field(
+        ..., description="Type du trigger : character, location, item, species, community"
+    )
+    trigger_name: str = Field(..., min_length=1, description="Nom de l'entité trigger")
+    already_selected: Optional[ContextSelection] = Field(
+        None, description="Sélections actuelles à exclure des suggestions"
+    )
+
+
+class SuggestionsResponse(BaseModel):
+    """Réponse contenant les suggestions de contexte GDD.
+
+    Attributes:
+        suggestions: Liste des entités suggérées (non encore sélectionnées, non ignorées).
+    """
+
+    suggestions: List[SuggestionItem] = Field(..., description="Liste des suggestions")
 

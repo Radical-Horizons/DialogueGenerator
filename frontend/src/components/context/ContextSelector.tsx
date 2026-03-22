@@ -2,7 +2,7 @@
  * Composant principal de sélection de contexte (panneau Contexte GDD) avec onglets par type d'entité.
  * AC FR11 : Personnages, Lieux, Régions, Objets, Espèces, Communautés. (Thèmes reporté : pas d'API backend.)
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import * as contextAPI from '../../api/context'
 import type { 
   CharacterResponse, 
@@ -14,6 +14,8 @@ import type {
 import { ContextList } from './ContextList'
 import type { ContextListItem } from './ContextList'
 import { SelectedContextSummary } from './SelectedContextSummary'
+import type { EntityType } from './SelectedContextSummary'
+import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
 import { useContextStore } from '../../store/contextStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
@@ -31,6 +33,24 @@ const ENTITY_TYPE_LABELS: Record<TabType, string> = {
   items: 'Objet',
   species: 'Espèce',
   communities: 'Communauté',
+}
+
+/** Mapping onglet → clé du store (pour isElementSelected). */
+const STORE_TYPE_MAP: Partial<Record<TabType, 'characters' | 'locations' | 'items' | 'species' | 'communities'>> = {
+  characters: 'characters',
+  locations: 'locations',
+  items: 'items',
+  species: 'species',
+  communities: 'communities',
+}
+
+/** Mapping onglet → trigger_type envoyé à l'API suggestions. */
+const TRIGGER_TYPE_MAP: Partial<Record<TabType, string>> = {
+  characters: 'character',
+  locations: 'location',
+  items: 'item',
+  species: 'species',
+  communities: 'community',
 }
 
 interface ContextSelectorProps {
@@ -69,7 +89,13 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     setElementLists,
     getElementMode,
     setElementMode,
+    isElementSelected,
+    setSuggestions,
   } = useContextStore()
+
+  // Ref toujours à jour pour éviter les closures périmées dans fetchAndSetSuggestions.
+  const selectionsRef = useRef(selections)
+  selectionsRef.current = selections
 
   const loadData = useCallback(async () => {
     setIsLoading(true)
@@ -191,8 +217,25 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     }
   }
 
+  const fetchAndSetSuggestions = useCallback(async (triggerType: string, triggerName: string) => {
+    try {
+      const response = await contextAPI.getSuggestions({
+        trigger_type: triggerType,
+        trigger_name: triggerName,
+        already_selected: selectionsRef.current,
+      })
+      setSuggestions(response.suggestions)
+    } catch {
+      // Suggestions sont non-critiques — échec silencieux
+    }
+  }, [setSuggestions])
+
   const handleItemToggle = (name: string) => {
     if (activeTab === 'regions') return
+
+    const storeKey = STORE_TYPE_MAP[activeTab]
+    const wasSelected = storeKey ? isElementSelected(storeKey, name) : false
+
     if (activeTab === 'characters') {
       toggleCharacter(name)
     } else if (activeTab === 'locations') {
@@ -207,6 +250,15 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     if (selectedDetail === name) {
       setSelectedDetail(null)
       onItemSelected?.(null)
+    }
+
+    if (!wasSelected) {
+      const triggerType = TRIGGER_TYPE_MAP[activeTab]
+      if (triggerType) {
+        void fetchAndSetSuggestions(triggerType, name)
+      }
+    } else {
+      setSuggestions([])
     }
   }
 
@@ -293,6 +345,18 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
       setElementMode('communities', name, mode)
     }
   }
+
+  const handleRemoveEntity = useCallback((entityType: EntityType, name: string) => {
+    if (entityType === 'characters') toggleCharacter(name)
+    else if (entityType === 'locations') toggleLocation(name)
+    else if (entityType === 'items') toggleItem(name)
+    else if (entityType === 'species') toggleSpecies(name)
+    else if (entityType === 'communities') toggleCommunity(name)
+  }, [toggleCharacter, toggleLocation, toggleItem, toggleSpecies, toggleCommunity])
+
+  const handleSelectionPanelModeChange = useCallback((entityType: EntityType, name: string, mode: 'full' | 'excerpt') => {
+    setElementMode(entityType, name, mode)
+  }, [setElementMode])
 
   const getElementModeForList = (name: string): 'full' | 'excerpt' | null => {
     if (activeTab === 'regions') return null
@@ -450,6 +514,8 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         </div>
       )}
 
+      <ContextSuggestionsPanel />
+
       <div style={{ flex: '1 1 0', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <ContextList
           items={getCurrentItems()}
@@ -472,6 +538,8 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         <SelectedContextSummary 
           selections={selections} 
           onClear={clearSelections}
+          onRemoveEntity={handleRemoveEntity}
+          onModeChange={handleSelectionPanelModeChange}
           onError={(err) => setError(err)}
           onSuccess={() => setError(null)}
         />

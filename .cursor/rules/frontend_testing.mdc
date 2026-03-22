@@ -22,3 +22,48 @@ alwaysApply: false
   - `npm run test:frontend` : Build + lint + tests unitaires frontend (script PowerShell automatisé)
   - `npm run test:e2e` : Tests E2E Playwright
   - `npm run test:all` : Backend + frontend (unitaires uniquement)
+
+## Anti-patterns à éviter absolument
+
+### Tests vacueux via garde optionnelle
+```typescript
+// ❌ INTERDIT — si querySelector retourne null, le bloc entier est skipé
+//    le test "passe" sans rien vérifier
+const el = container.querySelector('input[type="checkbox"]')
+if (el) {
+  await user.click(el)
+  expect(mock).toHaveBeenCalled()  // jamais atteint si el est null
+}
+
+// ✅ CORRECT — assertion explicite avant l'usage
+const el = screen.getByRole('checkbox')  // lève une erreur si absent
+await user.click(el)
+expect(mock).toHaveBeenCalled()
+```
+
+### Sélecteur DOM fragile via `closest('div')?.querySelector()`
+`getByText('X').closest('div')` retourne le premier div **ancêtre**, pas le conteneur item. Si la checkbox est **sibling** de ce div (pas enfant), `querySelector` ne la trouve pas.
+```typescript
+// ❌ FRAGILE — closest('div') peut ne pas être le bon conteneur
+screen.getByText('Nom').closest('div')?.querySelector('input[type="checkbox"]')
+
+// ✅ ROBUSTE — utiliser getByRole ou remonter d'un niveau
+screen.getByRole('checkbox')                              // si unique dans le scope
+screen.getByLabelText('Sélectionner Nom')                 // si aria-label présent
+getByText('Nom').closest('div')?.parentElement?.querySelector('input[type="checkbox"]')  // si nécessaire
+```
+
+### useCallback avec closure périmée (store Zustand)
+```typescript
+// ❌ STALE — selections est capturé au dernier render, jamais mis à jour
+const fn = useCallback(() => {
+  doSomethingWith(selections)  // périmé si selections a changé sans re-render
+}, [setSuggestions])           // selections absent des dépendances
+
+// ✅ useRef toujours à jour
+const selectionsRef = useRef(selections)
+selectionsRef.current = selections  // mis à jour à chaque render
+const fn = useCallback(() => {
+  doSomethingWith(selectionsRef.current)  // toujours frais
+}, [])
+```

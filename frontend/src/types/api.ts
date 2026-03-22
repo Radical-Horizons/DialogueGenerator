@@ -190,6 +190,23 @@ export interface LinkedElementsResponse {
   total: number
 }
 
+export type SuggestionEntityType = 'character' | 'location' | 'item' | 'species' | 'community'
+
+export interface SuggestionItem {
+  type: SuggestionEntityType
+  name: string
+}
+
+export interface SuggestionsRequest {
+  trigger_type: string
+  trigger_name: string
+  already_selected?: ContextSelection | null
+}
+
+export interface SuggestionsResponse {
+  suggestions: SuggestionItem[]
+}
+
 // Config
 export interface LLMModelResponse {
   model_identifier: string

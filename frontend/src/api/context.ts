@@ -17,6 +17,8 @@ import type {
   SubLocationListResponse,
   LinkedElementsRequest,
   LinkedElementsResponse,
+  SuggestionsRequest,
+  SuggestionsResponse,
 } from '../types/api'
 
 export interface ListContextParams {
@@ -149,6 +151,14 @@ export async function getSubLocations(regionName: string): Promise<SubLocationLi
  */
 export async function getLinkedElements(request: LinkedElementsRequest): Promise<LinkedElementsResponse> {
   const response = await apiClient.post<LinkedElementsResponse>('/api/v1/context/linked-elements', request)
+  return response.data
+}
+
+/**
+ * Retourne des suggestions d'entités GDD liées à l'entité trigger (sélection automatique basée sur règles).
+ */
+export async function getSuggestions(request: SuggestionsRequest): Promise<SuggestionsResponse> {
+  const response = await apiClient.post<SuggestionsResponse>('/api/v1/context/suggestions', request)
   return response.data
 }
 

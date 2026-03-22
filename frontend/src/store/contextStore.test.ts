@@ -327,5 +327,120 @@ describe('contextStore', () => {
       expect(store.selectedSubLocations.length).toBe(0)
     })
   })
+
+  describe('suggestions slice', () => {
+    it('setSuggestions : enregistre les suggestions dans le store', () => {
+      const store = useContextStore.getState()
+      store.setSuggestions([
+        { type: 'character', name: 'Bob' },
+        { type: 'location', name: 'Forêt' },
+      ])
+      const s = useContextStore.getState()
+      expect(s.suggestions).toHaveLength(2)
+      expect(s.suggestions[0]).toEqual({ type: 'character', name: 'Bob' })
+    })
+
+    it('setSuggestions : filtre les suggestions déjà ignorées', () => {
+      const store = useContextStore.getState()
+      store.ignoreSuggestion('character', 'Bob')
+      store.setSuggestions([
+        { type: 'character', name: 'Bob' },
+        { type: 'location', name: 'Forêt' },
+      ])
+      const s = useContextStore.getState()
+      expect(s.suggestions).toHaveLength(1)
+      expect(s.suggestions[0].name).toBe('Forêt')
+    })
+
+    it('acceptSuggestion : retire de suggestions ET ajoute aux sélections', () => {
+      const store = useContextStore.getState()
+      store.setElementLists({
+        characters: [{ name: 'Bob', data: {} }],
+        locations: [],
+        items: [],
+        species: [],
+        communities: [],
+      })
+      store.setSuggestions([
+        { type: 'character', name: 'Bob' },
+        { type: 'location', name: 'Forêt' },
+      ])
+      store.acceptSuggestion('character', 'Bob')
+      const s = useContextStore.getState()
+      expect(s.suggestions.find((sg) => sg.name === 'Bob')).toBeUndefined()
+      expect(s.isElementSelected('characters', 'Bob')).toBe(true)
+    })
+
+    it('ignoreSuggestion : retire de suggestions ET marque comme ignoré', () => {
+      const store = useContextStore.getState()
+      store.setSuggestions([
+        { type: 'character', name: 'Bob' },
+        { type: 'location', name: 'Forêt' },
+      ])
+      store.ignoreSuggestion('character', 'Bob')
+      const s = useContextStore.getState()
+      expect(s.suggestions.find((sg) => sg.name === 'Bob')).toBeUndefined()
+      expect(s.isSuggestionIgnored('character', 'Bob')).toBe(true)
+      expect(s.isSuggestionIgnored('location', 'Forêt')).toBe(false)
+    })
+
+    it('ignoreSuggestion : ne réapparaît pas après un nouveau setSuggestions', () => {
+      const store = useContextStore.getState()
+      store.ignoreSuggestion('character', 'Bob')
+      store.setSuggestions([{ type: 'character', name: 'Bob' }])
+      const s = useContextStore.getState()
+      expect(s.suggestions).toHaveLength(0)
+    })
+
+    it('acceptAllSuggestionsByType : accepte toutes les suggestions du type', () => {
+      const store = useContextStore.getState()
+      store.setElementLists({
+        characters: [
+          { name: 'Alice', data: {} },
+          { name: 'Bob', data: {} },
+        ],
+        locations: [],
+        items: [],
+        species: [],
+        communities: [],
+      })
+      store.setSuggestions([
+        { type: 'character', name: 'Alice' },
+        { type: 'character', name: 'Bob' },
+        { type: 'location', name: 'Forêt' },
+      ])
+      store.acceptAllSuggestionsByType('character')
+      const s = useContextStore.getState()
+      const charSuggestions = s.suggestions.filter((sg) => sg.type === 'character')
+      expect(charSuggestions).toHaveLength(0)
+      expect(s.suggestions.find((sg) => sg.name === 'Forêt')).toBeDefined()
+      expect(s.isElementSelected('characters', 'Alice')).toBe(true)
+      expect(s.isElementSelected('characters', 'Bob')).toBe(true)
+    })
+
+    it('ignoreAllSuggestionsByType : ignore toutes les suggestions du type', () => {
+      const store = useContextStore.getState()
+      store.setSuggestions([
+        { type: 'character', name: 'Alice' },
+        { type: 'character', name: 'Bob' },
+        { type: 'location', name: 'Forêt' },
+      ])
+      store.ignoreAllSuggestionsByType('character')
+      const s = useContextStore.getState()
+      const charSuggestions = s.suggestions.filter((sg) => sg.type === 'character')
+      expect(charSuggestions).toHaveLength(0)
+      expect(s.suggestions.find((sg) => sg.name === 'Forêt')).toBeDefined()
+      expect(s.isSuggestionIgnored('character', 'Alice')).toBe(true)
+      expect(s.isSuggestionIgnored('character', 'Bob')).toBe(true)
+    })
+
+    it('clearSelections : réinitialise aussi ignoredSuggestions (session)', () => {
+      const store = useContextStore.getState()
+      store.ignoreSuggestion('character', 'Bob')
+      expect(useContextStore.getState().isSuggestionIgnored('character', 'Bob')).toBe(true)
+      store.clearSelections()
+      expect(useContextStore.getState().isSuggestionIgnored('character', 'Bob')).toBe(false)
+    })
+  })
 })
 

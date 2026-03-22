@@ -235,13 +235,14 @@
     <action>Implement MINIMAL code to make tests pass</action>
     <action>Run tests to confirm they now pass</action>
     <action>Handle error conditions and edge cases as specified in task/subtask</action>
+    <critical>UI COMPONENT CONFORMITY: Before implementing any UI component or layout change, re-read the Dev Notes section for explicit position, placement, or visual hierarchy constraints (e.g. "panneau X se place ENTRE A et B"). Implement position/layout exactly as specified — do not defer visual placement to refactor.</critical>
 
-    <!-- REFACTOR PHASE (mandatory before marking 🔵 complete) -->
-    <action>For each task that has a 🔵 Refactor subtask: execute the refactor phase before marking that subtask [x].</action>
-    <action>Refactor = at least one of: (a) apply the "points à considérer" from the story (e.g. extract hook, improve naming, reuse existing component), or (b) document in Dev Agent Record → Completion Notes why no refactor was needed (e.g. "Refactor N/A: no duplication; naming already aligned").</action>
+    <!-- REFACTOR PHASE (mandatory, execute inline after GREEN without stopping) -->
+    <action>For each task that has a 🔵 Refactor subtask: execute the refactor immediately after GREEN — do NOT skip or defer to later.</action>
+    <action>Refactor = apply the "chantier principal" listed in the story 🔵 line. If genuinely not applicable, document "Refactor N/A: [specific reason]" in Dev Agent Record for that task.</action>
     <action>Improve code structure while keeping tests green; ensure code follows architecture patterns and coding standards from Dev Notes.</action>
-    <action>Document technical approach, refactor actions (or N/A), and decisions in Dev Agent Record → Implementation Plan / Completion Notes.</action>
-    <critical>Do NOT mark a 🔵 Refactor checkbox [x] unless you have either performed a refactor change or written an explicit "Refactor N/A: ..." note in Dev Agent Record for that task.</critical>
+    <action>Document refactor actions (or N/A with reason) in Dev Agent Record → Completion Notes before marking 🔵 [x].</action>
+    <critical>Do NOT mark a 🔵 Refactor checkbox [x] unless you have either performed a concrete refactor change OR written an explicit "Refactor N/A: [specific reason]" note in Dev Agent Record for that task. Vague notes like "already clean" are not acceptable.</critical>
 
     <action if="new dependencies required beyond story specifications">HALT: "Additional dependencies need user approval"</action>
     <action if="3 consecutive implementation failures occur">HALT and request guidance</action>
@@ -262,12 +263,13 @@
 
   <step n="7" goal="Run validations and tests">
     <action>Determine how to run tests for this repo (infer test framework from project structure)</action>
-    <action>Run all existing tests to ensure no regressions</action>
+    <action>Run tests scoped to the files modified by this task — not the full suite. Example: `npx vitest run src/components/context/` if you modified files in that folder.</action>
     <action>Run the new tests to verify implementation correctness</action>
     <action>Run linting and code quality checks if configured in project</action>
     <action>Validate implementation meets ALL story acceptance criteria; enforce quantitative thresholds explicitly</action>
     <action if="regression tests fail">STOP and fix before continuing - identify breaking changes immediately</action>
     <action if="new tests fail">STOP and fix before continuing - ensure implementation correctness</action>
+    <note>Full suite is run once at the end of ALL tasks (Step 9), not after each individual task.</note>
   </step>
 
   <step n="8" goal="Validate and mark task complete ONLY when fully done">
@@ -277,6 +279,7 @@
     <action>Verify ALL tests for this task/subtask ACTUALLY EXIST and PASS 100%</action>
     <action>Confirm implementation matches EXACTLY what the task/subtask specifies - no extra features</action>
     <action>Validate that ALL acceptance criteria related to this task are satisfied</action>
+    <critical>TEST QUALITY GATE: Scan all new tests for vacuous guard patterns — any `if (element) { expect(...) }` block where a null element would silently skip the assertion. Replace with `expect(element).toBeTruthy()` before the block, or use `getByRole`/`getByLabelText` which throw on absence. A test that passes when its subject is absent is worse than no test.</critical>
     <action>Run full test suite to ensure NO regressions introduced</action>
 
     <!-- REVIEW FOLLOW-UP HANDLING -->
@@ -326,7 +329,11 @@
 
   <step n="9" goal="Story completion and mark for review" tag="sprint-status">
     <action>Verify ALL tasks and subtasks are marked [x] (re-scan the story document now)</action>
-    <action>Run the full regression suite (do not skip)</action>
+    <action>Run the full regression suite scoped to the directories touched by this story.
+      On Windows, NEVER pipe vitest through Select-Object — it buffers stdout and swallows the summary.
+      Instead: `cd frontend &amp;&amp; npx vitest run [scoped-paths] > ..\tmp\vitest-out.txt 2>&amp;1` then read `tmp\vitest-out.txt`.
+      For the full suite with a readable summary: `cd frontend &amp;&amp; npm run test:ci` then `node scripts\vitest-summary.js`.
+    </action>
     <action>Confirm File List includes every changed file</action>
     <action>Execute enhanced definition-of-done validation</action>
     <action>Update the story Status to: "review"</action>

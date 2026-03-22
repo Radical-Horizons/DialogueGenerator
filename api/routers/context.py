@@ -18,7 +18,10 @@ from api.schemas.context import (
     LinkedElementsRequest,
     LinkedElementsResponse,
     BuildContextRequest,
-    BuildContextResponse
+    BuildContextResponse,
+    SuggestionsRequest,
+    SuggestionsResponse,
+    SuggestionItem,
 )
 from api.schemas.dialogue import EstimateTokensRequest, EstimateTokensResponse
 from api.dependencies import (
@@ -739,5 +742,96 @@ async def get_linked_elements(
             message="Erreur lors de la récupération des éléments liés",
             details={"error": str(e)},
             request_id=request_id
+        )
+
+
+def _resolve_already_selected(already_selected: "ContextSelection | None") -> dict[str, set[str]]:
+    """Construit un mapping type → noms sélectionnés à partir de la sélection courante.
+
+    Args:
+        already_selected: Sélection actuelle (peut être None).
+
+    Returns:
+        Dictionnaire {type_singulier: {noms}} pour filtrage des doublons.
+    """
+    if already_selected is None:
+        return {}
+    return {
+        "character": set((already_selected.characters_full or []) + (already_selected.characters_excerpt or [])),
+        "location": set((already_selected.locations_full or []) + (already_selected.locations_excerpt or [])),
+        "item": set((already_selected.items_full or []) + (already_selected.items_excerpt or [])),
+        "species": set((already_selected.species_full or []) + (already_selected.species_excerpt or [])),
+        "community": set((already_selected.communities_full or []) + (already_selected.communities_excerpt or [])),
+    }
+
+
+_LINKED_CATEGORY_TO_SUGGESTION_TYPE: dict[str, str] = {
+    "characters": "character",
+    "locations": "location",
+    "items": "item",
+    "species": "species",
+    "communities": "community",
+}
+
+
+@router.post(
+    "/suggestions",
+    response_model=SuggestionsResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_context_suggestions(
+    request_data: SuggestionsRequest,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> SuggestionsResponse:
+    """Retourne des suggestions d'entités GDD liées à l'entité trigger.
+
+    Déclenché lors de la sélection d'une entité — retourne les entités GDD
+    liées (via les relations du GDD) non encore sélectionnées.
+
+    Args:
+        request_data: Type + nom de l'entité trigger + sélections existantes.
+        request: La requête HTTP.
+        context_builder: ContextBuilder injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        Liste de suggestions groupables par type, sans doublons.
+    """
+    try:
+        # Obtenir les éléments liés selon le type de trigger
+        linked: dict[str, set[str]] = {}
+        if request_data.trigger_type == "character":
+            linked = context_builder.get_linked_elements(character_name=request_data.trigger_name)
+        elif request_data.trigger_type == "location":
+            linked = context_builder.get_linked_elements(location_names=[request_data.trigger_name])
+        # item / species / community non supportés comme triggers → liste vide
+
+        already_selected = _resolve_already_selected(request_data.already_selected)
+
+        suggestions: list[SuggestionItem] = []
+        for category, names in linked.items():
+            suggestion_type = _LINKED_CATEGORY_TO_SUGGESTION_TYPE.get(category)
+            if not suggestion_type:
+                continue  # sauter quests, etc.
+            selected_in_category = already_selected.get(suggestion_type, set())
+            for name in names:
+                if name == request_data.trigger_name:
+                    continue  # ne pas suggérer le trigger lui-même
+                if name in selected_in_category:
+                    continue  # déjà sélectionné
+                suggestions.append(SuggestionItem(type=suggestion_type, name=name))
+
+        return SuggestionsResponse(suggestions=suggestions)
+
+    except Exception as e:
+        logger.exception(
+            f"Erreur lors de la récupération des suggestions (request_id: {request_id})"
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération des suggestions",
+            details={"error": str(e)},
+            request_id=request_id,
         )
 

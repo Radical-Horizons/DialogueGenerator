@@ -31,7 +31,8 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 
 - **Backend tests**: `.venv/bin/python -m pytest tests/ -x --tb=short`
 - **Frontend lint**: `cd frontend && npx eslint . --ext ts,tsx`
-- **Frontend tests**: `cd frontend && npx vitest run`
+- **Frontend tests (ciblés)**: `cd frontend && npx vitest run src/mon/dossier/ > ..\tmp\vitest-out.txt 2>&1` puis lire `tmp\vitest-out.txt` (évite le pipe buffering PowerShell)
+- **Frontend tests (suite complète)**: `cd frontend && npm run test:ci` puis `node scripts/vitest-summary.js` pour le résumé
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
 
 ## Learned User Preferences
@@ -52,3 +53,4 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 - GraphEditor JSX is split into dedicated components in `frontend/src/components/graph/`: `GraphEditorHeader` (toolbar), `GraphValidationPanel` (overlay), `DialogueCostModal`, `GraphExportFormatDialog`. `GraphEditorHeader` calls `useGraphStore()` internally to avoid prop drilling.
 - The `exportToUnity` store action (in `persistenceSlice`) serializes graph nodes to Unity JSON format; its trigger button lives in `GraphEditorHeader` and downloads a `.json` file named after `dialogueMetadata.filename`.
 - The `continual-learning` skill uses **in-context conversation history only** — it never reads from `agent-transcripts/` files on disk (that folder does not exist on this system).
+- **Stale closure React** : dans un `useCallback`, ne jamais capturer des valeurs de store qui changent entre renders. Utiliser `useRef(value)` (mis à jour à chaque render via `ref.current = value`) pour lire la valeur COURANTE au moment de l'appel, sans re-créer le callback. Exemple : `selectionsRef.current` dans `fetchAndSetSuggestions` de `ContextSelector`.
