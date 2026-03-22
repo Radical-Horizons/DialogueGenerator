@@ -1,13 +1,27 @@
 /// <reference types="vite/client" />
 /// <reference types="vite/client" />
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const rootPackageJsonPath = resolve(__dirname, '..', 'package.json')
+const rootPackageVersion = JSON.parse(
+  readFileSync(rootPackageJsonPath, 'utf-8')
+) as { version?: string }
+const appVersion =
+  typeof rootPackageVersion.version === 'string'
+    ? rootPackageVersion.version
+    : '0.0.0'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   define: {
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __APP_VERSION__: JSON.stringify(appVersion),
   },
   server: {
     port: 3000,

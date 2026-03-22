@@ -16,6 +16,7 @@ from api.exceptions import APIException, ValidationException
 from api.dependencies import get_request_id
 from api.config.security_config import get_security_config
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
+from api.app_version import APP_VERSION
 
 # Charger le fichier .env en dev (éviter sous pytest pour des tests déterministes)
 if "pytest" not in sys.modules:
@@ -213,7 +214,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="DialogueGenerator API",
     description="API REST pour la génération de dialogues IA pour jeux de rôle",
-    version="1.0.0",
+    version=APP_VERSION,
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",

@@ -39,6 +39,8 @@ alwaysApply: false
   - Configuration : `pytest.ini` définit les options (asyncio_mode, testpaths, etc.)
   - **E2E (Playwright)** : `npm run test:e2e`. L'environnement nécessaire pour les E2E est disponible (`.env` avec `OPENAI_API_KEY`, budget, modèle gpt-5-mini). Tous les tests E2E sont censés passer avec cet environnement. Voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
 
+- **Version produit (semver)** : Source de vérité = champ `version` du `package.json` racine. Synchroniser `frontend/package.json` et `api/app_version.py` avec `npm run version:sync`. Bump fin d’epic / release : `npm run version:bump:patch` (ou `version:bump:minor` / `version:bump:major`). Vérification : `npm run verify:app-version` (inclus dans `npm run test:all` et `npm run build:check`). Ne pas confondre avec `schemaVersion` des documents dialogue (contrat de données).
+
 - **Avant commit** : `npm test` (backend, utilise venv) + `npm run test:frontend` (frontend). Si vert : commit + push.
 
 - **Déploiement** : `npm run deploy:build` puis uploader + configurer `ENVIRONMENT=production` et `CORS_ORIGINS`.
