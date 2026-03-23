@@ -158,5 +158,84 @@ describe('graphStore - Auto-layout (Story 2.13 FR34)', () => {
       const child = state.nodes.find((n) => n.id === 'child')!
       expect(child.position.y).toBeGreaterThan(root.position.y + 420)
     })
+
+    it('applies a fan distribution for a parent with 3 children', async () => {
+      addDialogueNode('parent', { x: 0, y: 0 })
+      addDialogueNode('c1', { x: 0, y: 0 })
+      addDialogueNode('c2', { x: 0, y: 0 })
+      addDialogueNode('c3', { x: 0, y: 0 })
+      const store = useGraphStore.getState()
+      store.connectNodes('parent', 'c1', 0, 'choice')
+      store.connectNodes('parent', 'c2', 1, 'choice')
+      store.connectNodes('parent', 'c3', 2, 'choice')
+
+      await store.applyAutoLayout('dagre', 'TB')
+
+      const state = useGraphStore.getState()
+      const yValues = ['c1', 'c2', 'c3']
+        .map((id) => state.nodes.find((n) => n.id === id)!.position.y)
+      expect(new Set(yValues).size).toBeGreaterThan(1)
+    })
+
+    it('uses at most two child rows for dense sibling groups', async () => {
+      addDialogueNode('parent', { x: 0, y: 0 })
+      const store = useGraphStore.getState()
+      for (let i = 0; i < 6; i++) {
+        const id = `child-${i}`
+        addDialogueNode(id, { x: 0, y: 0 })
+        store.connectNodes('parent', id, i, 'choice')
+      }
+
+      await store.applyAutoLayout('dagre', 'TB')
+
+      const state = useGraphStore.getState()
+      const yValues = Array.from({ length: 6 }, (_, i) =>
+        state.nodes.find((n) => n.id === `child-${i}`)!.position.y
+      )
+      expect(new Set(yValues).size).toBeLessThanOrEqual(2)
+    })
+
+    it('increases sibling fan amplitude from compact to large mode', async () => {
+      addDialogueNode('parent', { x: 0, y: 0 })
+      addDialogueNode('a', { x: 0, y: 0 })
+      addDialogueNode('b', { x: 0, y: 0 })
+      addDialogueNode('c', { x: 0, y: 0 })
+      const store = useGraphStore.getState()
+      store.connectNodes('parent', 'a', 0, 'choice')
+      store.connectNodes('parent', 'b', 1, 'choice')
+      store.connectNodes('parent', 'c', 2, 'choice')
+
+      store.setLayoutSpacingMode('compact')
+      await store.applyAutoLayout('dagre', 'TB')
+      const compactState = useGraphStore.getState()
+      const compactRange =
+        Math.max(
+          compactState.nodes.find((n) => n.id === 'a')!.position.y,
+          compactState.nodes.find((n) => n.id === 'b')!.position.y,
+          compactState.nodes.find((n) => n.id === 'c')!.position.y
+        ) -
+        Math.min(
+          compactState.nodes.find((n) => n.id === 'a')!.position.y,
+          compactState.nodes.find((n) => n.id === 'b')!.position.y,
+          compactState.nodes.find((n) => n.id === 'c')!.position.y
+        )
+
+      store.setLayoutSpacingMode('large')
+      await store.applyAutoLayout('dagre', 'TB')
+      const largeState = useGraphStore.getState()
+      const largeRange =
+        Math.max(
+          largeState.nodes.find((n) => n.id === 'a')!.position.y,
+          largeState.nodes.find((n) => n.id === 'b')!.position.y,
+          largeState.nodes.find((n) => n.id === 'c')!.position.y
+        ) -
+        Math.min(
+          largeState.nodes.find((n) => n.id === 'a')!.position.y,
+          largeState.nodes.find((n) => n.id === 'b')!.position.y,
+          largeState.nodes.find((n) => n.id === 'c')!.position.y
+        )
+
+      expect(largeRange).toBeGreaterThan(compactRange)
+    })
   })
 })

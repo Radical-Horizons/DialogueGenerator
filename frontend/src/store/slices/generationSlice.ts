@@ -14,6 +14,7 @@ import {
   childNodeTopLeftY,
   GRAPH_DIALOGUE_NODE_WIDTH,
   graphParentNodeWidth,
+  siblingBranchOffset,
 } from '../../utils/graphNodeLayout'
 import { calculateDagreLayout, getLayoutNodeHeight } from '../../utils/dagreLayout'
 
@@ -312,6 +313,12 @@ export const createGenerationSlice: StateCreator<
           siblingIndex,
           siblingCount,
         })
+        const branchOffset = siblingBranchOffset({
+          siblingIndex,
+          siblingCount,
+          spacingMode: state.layoutSpacingMode,
+          direction: 'TB',
+        })
         const contextGddHash =
           Object.keys(contextSelections).length > 0
             ? simpleHash(JSON.stringify(contextSelections))
@@ -321,11 +328,11 @@ export const createGenerationSlice: StateCreator<
           id: generatedNode.id,
           type: 'dialogueNode',
           position: {
-            x: childX,
+            x: childX + branchOffset.dx,
             y: childNodeTopLeftY({
               parentY: parentNode.position.y,
               parentHeight,
-            }),
+            }) + branchOffset.dy,
           },
           data: {
             ...generatedNode,

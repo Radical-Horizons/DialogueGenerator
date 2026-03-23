@@ -7,6 +7,7 @@ import type { Node, Edge } from 'reactflow'
 import {
   GRAPH_DIALOGUE_NODE_WIDTH,
   GRAPH_TEST_NODE_WIDTH,
+  siblingBranchOffset,
 } from './graphNodeLayout'
 
 export type DagreDirection = 'TB' | 'LR' | 'BT' | 'RL'
@@ -156,7 +157,71 @@ export function calculateDagreLayout(
     }
   })
 
-  return layoutedNodes
+  return applySiblingBranchDistribution(layoutedNodes, edges, direction, spacingMode)
+}
+
+function applySiblingBranchDistribution(
+  nodes: Node[],
+  edges: Edge[],
+  direction: DagreDirection,
+  spacingMode: DagreSpacingMode
+): Node[] {
+  const nodeById = new Map(nodes.map((node) => [node.id, node]))
+  const incomingCounts = new Map<string, number>()
+  for (const edge of edges) {
+    incomingCounts.set(edge.target, (incomingCounts.get(edge.target) ?? 0) + 1)
+  }
+
+  const childrenByParent = new Map<string, Edge[]>()
+  for (const edge of edges) {
+    if (!nodeById.has(edge.target)) continue
+    // Uniquement les enfants avec un parent principal clair pour éviter
+    // des déplacements incohérents sur les nœuds multi-entrées.
+    if ((incomingCounts.get(edge.target) ?? 0) !== 1) continue
+    const list = childrenByParent.get(edge.source) ?? []
+    if (!list.some((existingEdge) => existingEdge.target === edge.target)) {
+      list.push(edge)
+    }
+    childrenByParent.set(edge.source, list)
+  }
+
+  const nextNodes = nodes.map((n) => ({ ...n, position: { ...n.position } }))
+  const nextById = new Map(nextNodes.map((n) => [n.id, n]))
+
+  for (const [, childEdges] of childrenByParent.entries()) {
+    if (childEdges.length <= 2) continue
+    const sorted = [...childEdges].sort((left, right) => {
+      const leftIndex = left.data?.choiceIndex
+      const rightIndex = right.data?.choiceIndex
+      if (typeof leftIndex === 'number' && typeof rightIndex === 'number' && leftIndex !== rightIndex) {
+        return leftIndex - rightIndex
+      }
+      const leftNode = nodeById.get(left.target)
+      const rightNode = nodeById.get(right.target)
+      if (!leftNode || !rightNode) {
+        return left.target.localeCompare(right.target)
+      }
+      return direction === 'TB' || direction === 'BT'
+        ? leftNode.position.x - rightNode.position.x
+        : leftNode.position.y - rightNode.position.y
+    })
+    for (let i = 0; i < sorted.length; i++) {
+      const offset = siblingBranchOffset({
+        siblingIndex: i,
+        siblingCount: sorted.length,
+        spacingMode,
+        direction,
+      })
+      const node = nextById.get(sorted[i].target)
+      if (!node) continue
+      node.position = {
+        x: node.position.x + offset.dx,
+        y: node.position.y + offset.dy,
+      }
+    }
+  }
+
+  return nextNodes
 }
 
 /**

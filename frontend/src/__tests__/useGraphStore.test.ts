@@ -824,6 +824,67 @@ describe('useGraphStore - Pending save state', () => {
       expect(b!.position.y).toBeGreaterThanOrEqual(380)
     })
 
+    it('should apply non-rigid sibling rows when generating three choices from the same parent', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+
+      const parentNode: Node = {
+        id: 'parent-fan',
+        type: 'dialogueNode',
+        position: { x: 120, y: 120 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Test',
+          choices: [
+            { text: 'Choix 1', targetNode: null },
+            { text: 'Choix 2', targetNode: null },
+            { text: 'Choix 3', targetNode: null },
+          ],
+        },
+      }
+      addNode(parentNode)
+
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode.mockResolvedValueOnce({
+        nodes: [
+          { id: 'fan-a', type: 'dialogueNode', speaker: 'PNJ', line: 'A' },
+          { id: 'fan-b', type: 'dialogueNode', speaker: 'PNJ', line: 'B' },
+          { id: 'fan-c', type: 'dialogueNode', speaker: 'PNJ', line: 'C' },
+        ],
+        suggested_connections: [
+          {
+            from: 'parent-fan',
+            to: 'fan-a',
+            via_choice_index: 0,
+            connection_type: 'choice',
+          },
+          {
+            from: 'parent-fan',
+            to: 'fan-b',
+            via_choice_index: 1,
+            connection_type: 'choice',
+          },
+          {
+            from: 'parent-fan',
+            to: 'fan-c',
+            via_choice_index: 2,
+            connection_type: 'choice',
+          },
+        ],
+        parent_node_id: 'parent-fan',
+      })
+
+      await generateFromNode('parent-fan', 'Instructions', {
+        generate_all_choices: true,
+      })
+
+      const state = useGraphStore.getState()
+      const yValues = ['fan-a', 'fan-b', 'fan-c'].map(
+        (id) => state.nodes.find((n) => n.id === id)!.position.y
+      )
+      expect(new Set(yValues).size).toBeGreaterThan(1)
+    })
+
     it('should relayout a branched parent to avoid sibling overlap after multiple generations', async () => {
       const { addNode, generateFromNode } = useGraphStore.getState()
 

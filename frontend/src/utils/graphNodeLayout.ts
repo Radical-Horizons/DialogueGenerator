@@ -25,6 +25,9 @@ export const GRAPH_OFFSET_PARENT_TO_CHILD_Y = 280
 /** Marge verticale minimale sous la boîte parent pour éviter les recouvrements. */
 export const GRAPH_PARENT_TO_CHILD_CLEARANCE_Y = 120
 
+export type GraphLayoutSpacingMode = 'compact' | 'normal' | 'large'
+export type GraphLayoutDirection = 'TB' | 'LR' | 'BT' | 'RL'
+
 /**
  * Retourne la largeur visuelle du parent selon son type React Flow.
  *
@@ -76,4 +79,58 @@ export function childNodeTopLeftY(params: {
   const minimumOffset = params.minimumOffset ?? GRAPH_OFFSET_PARENT_TO_CHILD_Y
   const clearanceY = params.clearanceY ?? GRAPH_PARENT_TO_CHILD_CLEARANCE_Y
   return params.parentY + Math.max(minimumOffset, params.parentHeight + clearanceY)
+}
+
+/**
+ * Décale légèrement les frères pour éviter les alignements trop rigides.
+ * - 3-4 frères : éventail léger
+ * - 5+ frères : quinconce sur deux sous-rangs
+ */
+export function siblingBranchOffset(params: {
+  siblingIndex: number
+  siblingCount: number
+  spacingMode: GraphLayoutSpacingMode
+  direction: GraphLayoutDirection
+}): { dx: number; dy: number } {
+  const { siblingIndex, siblingCount, spacingMode, direction } = params
+  if (siblingCount <= 2) return { dx: 0, dy: 0 }
+
+  const mainAmpByMode: Record<GraphLayoutSpacingMode, number> = {
+    compact: 28,
+    normal: 44,
+    large: 62,
+  }
+  const crossAmpByMode: Record<GraphLayoutSpacingMode, number> = {
+    compact: 12,
+    normal: 18,
+    large: 26,
+  }
+  const mainAmplitude = mainAmpByMode[spacingMode]
+  const crossAmplitude = crossAmpByMode[spacingMode]
+  const centeredIndex = siblingIndex - (siblingCount - 1) / 2
+
+  let mainAxisOffset = 0
+  let crossAxisOffset = 0
+  if (siblingCount <= 4) {
+    mainAxisOffset = centeredIndex * mainAmplitude
+    crossAxisOffset = centeredIndex * crossAmplitude
+  } else {
+    const laneIndex = siblingIndex % 2
+    const waveIndex = Math.floor(siblingIndex / 2)
+    const laneCount = Math.ceil(siblingCount / 2)
+    const centeredWaveIndex = waveIndex - (laneCount - 1) / 2
+    mainAxisOffset = laneIndex === 0 ? -mainAmplitude : mainAmplitude
+    crossAxisOffset = centeredWaveIndex * crossAmplitude * 1.2
+  }
+
+  if (direction === 'TB') {
+    return { dx: crossAxisOffset, dy: mainAxisOffset }
+  }
+  if (direction === 'BT') {
+    return { dx: crossAxisOffset, dy: -mainAxisOffset }
+  }
+  if (direction === 'LR') {
+    return { dx: mainAxisOffset, dy: crossAxisOffset }
+  }
+  return { dx: -mainAxisOffset, dy: crossAxisOffset }
 }
