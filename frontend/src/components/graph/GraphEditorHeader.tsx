@@ -106,6 +106,8 @@ export function GraphEditorHeader({
     showFiltersPanel: _showFiltersPanel,
     setShowFiltersPanel,
     layoutDirection,
+    layoutSpacingMode,
+    setLayoutSpacingMode,
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,
@@ -420,6 +422,18 @@ export function GraphEditorHeader({
             aria-label="Auto-layout (Dagre) — choisir la direction"
           >
             📐 Auto-layout
+            <span
+              style={{
+                padding: '0.1rem 0.35rem',
+                borderRadius: '999px',
+                backgroundColor: theme.background.panel,
+                color: theme.text.secondary,
+                fontSize: '0.72rem',
+                textTransform: 'capitalize',
+              }}
+            >
+              {layoutSpacingMode}
+            </span>
             <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
           </button>
           {showAutoLayoutDropdown && (
@@ -441,6 +455,69 @@ export function GraphEditorHeader({
                 zIndex: 1000,
               }}
             >
+              <div
+                style={{
+                  padding: '0.4rem 0.75rem 0.25rem',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: theme.text.secondary,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Espacement
+              </div>
+              {(
+                [
+                  { value: 'compact' as const, label: 'Compact' },
+                  { value: 'normal' as const, label: 'Normal' },
+                  { value: 'large' as const, label: 'Large' },
+                ] as const
+              ).map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="option"
+                  aria-selected={layoutSpacingMode === value}
+                  onClick={() => {
+                    setLayoutSpacingMode(value)
+                    void handleAutoLayout(layoutDirection)
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '0.45rem 0.75rem',
+                    border: 'none',
+                    background:
+                      layoutSpacingMode === value ? theme.button.default.background : 'transparent',
+                    color: theme.input.color,
+                    textAlign: 'left',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                  {layoutSpacingMode === value ? ' ✓' : ''}
+                </button>
+              ))}
+              <div
+                style={{
+                  margin: '0.25rem 0',
+                  borderTop: `1px solid ${theme.border.primary}`,
+                }}
+              />
+              <div
+                style={{
+                  padding: '0.15rem 0.75rem 0.25rem',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: theme.text.secondary,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Direction
+              </div>
               {(
                 [
                   { value: 'TB' as const, label: 'TB (Haut-Bas)' },

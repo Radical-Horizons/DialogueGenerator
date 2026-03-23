@@ -11,10 +11,11 @@ import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
 import {
   childNodeTopLeftX,
+  childNodeTopLeftY,
   GRAPH_DIALOGUE_NODE_WIDTH,
-  GRAPH_OFFSET_PARENT_TO_CHILD_Y,
   graphParentNodeWidth,
 } from '../../utils/graphNodeLayout'
+import { calculateDagreLayout, getLayoutNodeHeight } from '../../utils/dagreLayout'
 
 /** Hash simple pour contexte GDD (Story 1.10 AC#5 - stockage). */
 function simpleHash(s: string): string {
@@ -31,6 +32,56 @@ function normalizedConn(conn: { from?: string; to?: string; from_node?: string; 
     via_choice_index: conn.via_choice_index,
     connection_type: conn.connection_type,
   }
+}
+
+function translateNodesToAnchor(
+  nodes: Node[],
+  anchorNodeId: string,
+  anchorPosition: { x: number; y: number }
+): Node[] {
+  const anchor = nodes.find((node) => node.id === anchorNodeId)
+  if (!anchor) return nodes
+
+  const dx = anchorPosition.x - anchor.position.x
+  const dy = anchorPosition.y - anchor.position.y
+  if (dx === 0 && dy === 0) return nodes
+
+  return nodes.map((node) => ({
+    ...node,
+    position: {
+      x: node.position.x + dx,
+      y: node.position.y + dy,
+    },
+  }))
+}
+
+interface PlannedConnection {
+  sourceId: string
+  targetId: string
+  connectionType: string
+  choiceIndex?: number
+  sourceHandle?: string
+}
+
+function connectionIntentKey(connection: PlannedConnection): string {
+  return [
+    connection.sourceId,
+    connection.targetId,
+    connection.connectionType,
+    connection.choiceIndex ?? '',
+    connection.sourceHandle ?? '',
+  ].join('|')
+}
+
+function appendConnectionIntent(
+  intents: PlannedConnection[],
+  seenKeys: Set<string>,
+  connection: PlannedConnection
+): void {
+  const key = connectionIntentKey(connection)
+  if (seenKeys.has(key)) return
+  seenKeys.add(key)
+  intents.push(connection)
 }
 
 /**
@@ -155,7 +206,10 @@ export const createGenerationSlice: StateCreator<
         dialogue_id: dialogueIdForCosts,
       })
 
-      const isTestNode = parentNodeId.startsWith('test-node-')
+      const isTestNode =
+        parentNode.type === 'testNode' ||
+        parentNodeId.startsWith('test-node-') ||
+        parentNodeId.startsWith('test:')
       const isBatch = generateAllChoices
       const generatedNodes =
         Array.isArray(response.nodes) && response.nodes.length > 0
@@ -173,7 +227,11 @@ export const createGenerationSlice: StateCreator<
         }
       >()
 
-      for (const rawConn of response.suggested_connections) {
+      const suggestedConnections = Array.isArray(response.suggested_connections)
+        ? response.suggested_connections
+        : []
+
+      for (const rawConn of suggestedConnections) {
         const conn = normalizedConn(rawConn as Parameters<typeof normalizedConn>[0])
         const node = generatedNodes.find((n) => n.id === conn.to)
         if (node) {
@@ -238,17 +296,22 @@ export const createGenerationSlice: StateCreator<
 
       const nodesToAddBatch: Node[] = []
       const parentWidth = graphParentNodeWidth(parentNode.type)
+      const parentHeight = getLayoutNodeHeight(parentNode)
+      const parentChoicesCount = Array.isArray(parentNode.data?.choices)
+        ? parentNode.data.choices.length
+        : 0
       nodesToAdd.forEach(({ node: generatedNode }, index) => {
         const isBatchOrTestNode = isBatch || (isTestNode && totalToAdd > 1)
-        const isChoiceSpecific = !isBatchOrTestNode && targetChoiceIndex !== null
+        const isChoiceSpecific = !isBatchOrTestNode && targetChoiceIndex !== null && parentChoicesCount > 0
+        const siblingIndex = isChoiceSpecific ? targetChoiceIndex : index
+        const siblingCount = isChoiceSpecific ? parentChoicesCount : totalToAdd
         const childX = childNodeTopLeftX({
           parentX: parentNode.position.x,
           parentWidth,
           childWidth: GRAPH_DIALOGUE_NODE_WIDTH,
-          siblingIndex: index,
-          siblingCount: totalToAdd,
+          siblingIndex,
+          siblingCount,
         })
-        const verticalOffset = isChoiceSpecific && totalToAdd <= 1 ? 60 : 0
         const contextGddHash =
           Object.keys(contextSelections).length > 0
             ? simpleHash(JSON.stringify(contextSelections))
@@ -259,7 +322,10 @@ export const createGenerationSlice: StateCreator<
           type: 'dialogueNode',
           position: {
             x: childX,
-            y: parentNode.position.y + GRAPH_OFFSET_PARENT_TO_CHILD_Y + verticalOffset,
+            y: childNodeTopLeftY({
+              parentY: parentNode.position.y,
+              parentHeight,
+            }),
           },
           data: {
             ...generatedNode,
@@ -290,8 +356,11 @@ export const createGenerationSlice: StateCreator<
         },
       })
 
+      const plannedConnections: PlannedConnection[] = []
+      const seenConnectionKeys = new Set<string>()
       const testHandleTypes = ['critical-failure', 'failure', 'success', 'critical-success'] as const
-      for (const rawConn of response.suggested_connections ?? []) {
+
+      for (const rawConn of suggestedConnections) {
         const conn = normalizedConn(rawConn as Parameters<typeof normalizedConn>[0])
         const sourceId =
           conn.connection_type === 'choice' || conn.connection_type === 'nextNode'
@@ -304,7 +373,56 @@ export const createGenerationSlice: StateCreator<
             : testHandleTypes.includes(conn.connection_type as (typeof testHandleTypes)[number])
               ? conn.connection_type
               : undefined
-        get().connectNodes(sourceId, conn.to, conn.via_choice_index, conn.connection_type, sourceHandle)
+
+        // Une connexion de choix sans index est ambiguë : on la remplace par le fallback frontend plus bas.
+        if (conn.connection_type === 'choice' && conn.via_choice_index === undefined && !sourceHandle) {
+          continue
+        }
+
+        appendConnectionIntent(plannedConnections, seenConnectionKeys, {
+          sourceId,
+          targetId: conn.to,
+          choiceIndex: conn.via_choice_index,
+          connectionType: conn.connection_type,
+          sourceHandle,
+        })
+      }
+
+      if (!isTestNode) {
+        if (targetChoiceIndex !== null && generatedNodeIds[0]) {
+          appendConnectionIntent(plannedConnections, seenConnectionKeys, {
+            sourceId: parentNodeId,
+            targetId: generatedNodeIds[0],
+            choiceIndex: targetChoiceIndex,
+            connectionType: 'choice',
+          })
+        } else if (generateAllChoices && parentChoicesCount > 0) {
+          nodesToAdd.forEach(({ node, choiceIndex }) => {
+            if (choiceIndex >= parentChoicesCount) return
+            appendConnectionIntent(plannedConnections, seenConnectionKeys, {
+              sourceId: parentNodeId,
+              targetId: node.id,
+              choiceIndex,
+              connectionType: 'choice',
+            })
+          })
+        } else if (parentChoicesCount === 0 && generatedNodeIds[0]) {
+          appendConnectionIntent(plannedConnections, seenConnectionKeys, {
+            sourceId: parentNodeId,
+            targetId: generatedNodeIds[0],
+            connectionType: 'nextNode',
+          })
+        }
+      }
+
+      for (const connection of plannedConnections) {
+        get().connectNodes(
+          connection.sourceId,
+          connection.targetId,
+          connection.choiceIndex,
+          connection.connectionType,
+          connection.sourceHandle
+        )
       }
 
       const stateAfterConnections = get()
@@ -316,6 +434,24 @@ export const createGenerationSlice: StateCreator<
         stateAfterConnections.nodes,
         stateAfterConnections.edges
       )
+      const outgoingFromParentCount = normalized.edges.filter(
+        (edge) => edge.source === parentNodeId
+      ).length
+      const shouldAutoLayoutForReadability =
+        totalToAdd > 1 || outgoingFromParentCount > 1 || generateAllChoices
+
+      if (shouldAutoLayoutForReadability) {
+        const layoutedNodes = calculateDagreLayout(normalized.nodes, normalized.edges, {
+          direction: 'TB',
+          spacingMode: stateAfterConnections.layoutSpacingMode,
+        })
+        const anchoredNodes = translateNodesToAnchor(
+          layoutedNodes,
+          parentNodeId,
+          parentNode.position
+        )
+        normalized = normalizeTestBars(anchoredNodes, normalized.edges)
+      }
       const isDocumentSoT =
         stateAfterConnections.document != null && stateAfterConnections.layout != null
       const docAndLayout = isDocumentSoT

@@ -9,6 +9,7 @@ import {
   type SmoothStepEdgeProps,
 } from 'reactflow'
 import { theme } from '../../../theme'
+import { useGraphViewStore } from '../../../store/graphViewStore'
 
 const defaultLabelBgPadding: [number, number] = [4, 8]
 const defaultLabelBgBorderRadius = 4
@@ -130,9 +131,7 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
             if ((data as { edgeType?: string })?.edgeType !== 'choice') return
             e.preventDefault()
             e.stopPropagation()
-            window.dispatchEvent(
-              new CustomEvent('edge-label-edit', { detail: { edgeId: id } })
-            )
+            useGraphViewStore.getState().requestEdgeLabelEdit(id)
           }}
           style={{
             cursor: (data as { edgeType?: string })?.edgeType === 'choice' ? 'pointer' : undefined,

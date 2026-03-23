@@ -68,17 +68,6 @@ export const TestNode = memo(function TestNode({
   const hasErrors = errors.length > 0
   const hasWarnings = warnings.length > 0
   const isHighlighted = data.isHighlighted || false
-  // isHovered, truncatedLine, handleGenerateClick non utilisés pour l'instant - gardés pour usage futur
-  // const [isHovered, setIsHovered] = useState(false)
-  // const truncatedLine = line.length > 80 ? `${line.substring(0, 80)}...` : line
-  // const handleGenerateClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation()
-  //   // Déclencher un événement custom pour ouvrir le panel de génération
-  //   const event = new CustomEvent('open-ai-generation-panel', { 
-  //     detail: { nodeId: data.id } 
-  //   })
-  //   window.dispatchEvent(event)
-  // }
   
   // Déterminer la couleur de la bordure selon les erreurs
   let borderColor = selected ? '#27AE60' : '#F5A623'

@@ -15,7 +15,7 @@ import {
 } from '../../utils/testNodeSync'
 import { truncateChoiceLabel } from '../../utils/graphEdgeBuilders'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
-import { syncDocAndLayout } from '../../utils/syncDocLayout'
+import { runGraphTransaction } from '../utils/runGraphTransaction'
 import { documentToGraph } from '../../utils/documentToGraph'
 
 /** Nombre max d'entrées dans l'historique de régénération (Story 1.10 - AC#3). */
@@ -392,34 +392,20 @@ function updateDialogueNodeDirectly(
 
 export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set, get) => ({
   addNode: (node: Node) => {
-    get()._pushUndoSnapshot()
-    const state = get()
-    const newNodes = [...state.nodes, node]
-    const normalized = normalizeTestBars(newNodes, state.edges)
-
-    // En ajoutant un dialogueNode, ne pas écraser edges : connectNodes sera appelé juste après.
-    const edgesToSet = node.type === 'dialogueNode' ? state.edges : normalized.edges
-
-    const isDocumentSoT = state.document != null && state.layout != null
-    const docAndLayout = isDocumentSoT
-      ? syncDocAndLayout(
-          normalized.nodes,
-          edgesToSet,
-          state.layout as Record<string, unknown>
-        )
-      : {}
-
-    set({
-      nodes: normalized.nodes,
-      edges: edgesToSet,
-      dialogueMetadata: {
-        ...state.dialogueMetadata,
-        node_count: normalized.nodes.length,
-        edge_count: edgesToSet.length,
-      },
-      ...docAndLayout,
+    runGraphTransaction(get, set, (state) => {
+      const newNodes = [...state.nodes, node]
+      const normalized = normalizeTestBars(newNodes, state.edges)
+      const edgesToSet = node.type === 'dialogueNode' ? state.edges : normalized.edges
+      return {
+        nodes: normalized.nodes,
+        edges: edgesToSet,
+        dialogueMetadata: {
+          ...state.dialogueMetadata,
+          node_count: normalized.nodes.length,
+          edge_count: edgesToSet.length,
+        },
+      }
     })
-    get().markDirty()
   },
 
   createEmptyNode: (position?: { x: number; y: number }) => {
@@ -461,9 +447,7 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
   },
 
   deleteNode: (nodeId: string, skipMarkDirty = false, skipPushUndoSnapshot = false) => {
-    if (!skipPushUndoSnapshot) get()._pushUndoSnapshot()
-    set((state) => {
-      // TestNode : supprimer le test du choix parent
+    runGraphTransaction(get, set, (state) => {
       if (nodeId.startsWith('test-node-') || nodeId.startsWith('test:')) {
         const parent = getParentChoiceForTestNode(nodeId, state.nodes)
 
@@ -505,7 +489,6 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
             const choices = node.data.choices as Choice[]
             let modified = false
             const updatedChoices = choices.map(c => {
-              // Si le choix a un test et que son ID de TestNode correspondrait à celui supprimé
               const possibleId = `test-node-${node.id}-choice-${choices.indexOf(c)}`
               
               if (possibleId === nodeId || c.testSuccessNode === nodeId || c.testFailureNode === nodeId) {
@@ -526,11 +509,6 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
 
         const newSelectedNodeId =
           state.selectedNodeId === nodeId ? (parent?.dialogueNodeId ?? null) : state.selectedNodeId
-        const isDocumentSoT = state.document != null && state.layout != null
-        const docAndLayout =
-          isDocumentSoT
-            ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
-            : {}
 
         return {
           nodes: newNodes,
@@ -541,12 +519,9 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
             node_count: newNodes.length,
             edge_count: newEdges.length,
           },
-          ...docAndLayout,
         }
       }
 
-      // DialogueNode : supprimer le nœud et tous ses TestNodes associés
-      const dialogueNode = state.nodes.find((n) => n.id === nodeId)
       const testNodePrefix = `test-node-${nodeId}-`
       const associatedTestNodeIds = state.nodes
         .filter((n) => n.id.startsWith(testNodePrefix))
@@ -555,7 +530,6 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
 
       let newNodes = state.nodes.filter((n) => !nodesToDelete.includes(n.id))
 
-      // Nettoyer les références dans les nœuds restants
       newNodes = newNodes.map((node) => {
         if (node.type === 'dialogueNode') {
           const data = node.data as { choices?: Choice[]; nextNode?: string }
@@ -629,11 +603,6 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         (e) => !nodesToDelete.includes(e.source) && !nodesToDelete.includes(e.target)
       )
       const selectedNodeToRemove = nodesToDelete.includes(state.selectedNodeId || '')
-      const isDocumentSoT = state.document != null && state.layout != null
-      const docAndLayout =
-        isDocumentSoT
-          ? syncDocAndLayout(newNodes, newEdges, state.layout as Record<string, unknown>)
-          : {}
 
       return {
         nodes: newNodes,
@@ -644,10 +613,8 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           node_count: newNodes.length,
           edge_count: newEdges.length,
         },
-        ...docAndLayout,
       }
-    })
-    if (!skipMarkDirty) get().markDirty()
+    }, { skipUndo: skipPushUndoSnapshot, skipMarkDirty })
   },
 
   batchDeleteNodes: (nodeIds: string[]) => {

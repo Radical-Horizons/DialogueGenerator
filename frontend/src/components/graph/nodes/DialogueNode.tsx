@@ -5,6 +5,7 @@ import { memo, useState, useCallback, useEffect } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
+import { useGraphViewStore } from '../../../store/graphViewStore'
 import { getNodePrompt } from '../../../api/graph'
 import type { NodePromptResponse } from '../../../types/graph'
 import { RegenerateNodeModal } from '../RegenerateNodeModal'
@@ -169,14 +170,13 @@ export const DialogueNode = memo(function DialogueNode({
     [openAndLoadPromptModal]
   )
 
+  const promptViewerNodeId = useGraphViewStore((s) => s.promptViewerNodeId)
   useEffect(() => {
-    const handler = (ev: Event) => {
-      const e = ev as CustomEvent<{ nodeId: string }>
-      if (e.detail?.nodeId === data.id) openAndLoadPromptModal()
+    if (promptViewerNodeId === data.id) {
+      useGraphViewStore.getState().closePromptViewer()
+      openAndLoadPromptModal()
     }
-    window.addEventListener('open-prompt-viewer', handler)
-    return () => window.removeEventListener('open-prompt-viewer', handler)
-  }, [data.id, openAndLoadPromptModal])
+  }, [promptViewerNodeId, data.id, openAndLoadPromptModal])
 
   const handleClosePromptModal = useCallback(() => {
     setShowPromptModal(false)
@@ -218,11 +218,7 @@ export const DialogueNode = memo(function DialogueNode({
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      window.dispatchEvent(
-        new CustomEvent('graph-node-contextmenu', {
-          detail: { nodeId: data.id, clientX: e.clientX, clientY: e.clientY },
-        })
-      )
+      useGraphViewStore.getState().openContextMenu(data.id, e.clientX, e.clientY)
     },
     [data.id]
   )

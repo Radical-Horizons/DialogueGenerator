@@ -1,7 +1,7 @@
 /**
  * Story 2.14 FR35: Undo/Redo buttons in GraphEditorHeader.
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { useGraphStore } from '../store/graphStore'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
@@ -30,6 +30,8 @@ function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGra
     showFiltersPanel: false,
     setShowFiltersPanel: () => {},
     layoutDirection: 'TB',
+    layoutSpacingMode: 'normal',
+    setLayoutSpacingMode: () => {},
     autoLayoutDropdownRef: { current: null },
     actionsDropdownRef: { current: null },
     actionsDropdownBtnRef: { current: null },
@@ -125,5 +127,37 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     })
     rerender(<GraphEditorHeader {...props} />)
     expect(screen.getByTestId('btn-redo')).not.toBeDisabled()
+  })
+
+  it('allows changing spacing mode from auto-layout dropdown', async () => {
+    const setLayoutSpacingMode = vi.fn()
+    const handleAutoLayout = vi.fn().mockResolvedValue(undefined)
+    const toolbar = makeMockToolbar({
+      setLayoutSpacingMode,
+      handleAutoLayout,
+      showAutoLayoutDropdown: true,
+    })
+
+    render(
+      <GraphEditorHeader
+        toolbar={toolbar}
+        isLoadingDialogue={false}
+        hasActiveDialogue={true}
+        activeDialogueTitle="Test"
+        activeDialogueFilename="test.json"
+        handleSave={async () => {}}
+        onBatchTagApply={() => {}}
+        handleBatchValidateSelection={() => {}}
+        handleBatchDeleteSelection={() => {}}
+        canEditGraph={true}
+        isStandalone={false}
+      />
+    )
+
+    const largeButton = screen.getByRole('option', { name: /large/i })
+    largeButton.click()
+
+    expect(setLayoutSpacingMode).toHaveBeenCalledWith('large')
+    expect(handleAutoLayout).toHaveBeenCalledWith('TB')
   })
 })

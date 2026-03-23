@@ -1,6 +1,6 @@
 /**
  * Story 2.8 FR29: Modal "Jump to Node" — saisie ID ou nom, autocomplete, centrage sur le nœud.
- * Raccourci Ctrl+J (géré dans GraphEditor). Réutilise jumpToNode (setSelectedNode + focus-generated-node).
+ * Raccourci Ctrl+J (géré dans GraphEditor). Réutilise jumpToNode (setSelectedNode + graphViewStore.focusNode).
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useGraphStore } from '../../store/graphStore'

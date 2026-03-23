@@ -82,5 +82,81 @@ describe('graphStore - Auto-layout (Story 2.13 FR34)', () => {
       expect(markDirtySpy).toHaveBeenCalledTimes(1)
       expect(useGraphStore.getState().hasUnsavedChanges).toBe(true)
     })
+
+    it('keeps generous vertical spacing between ranks for readability', async () => {
+      addDialogueNode('root', { x: 0, y: 0 })
+      addDialogueNode('child', { x: 0, y: 0 })
+      addDialogueNode('grandchild', { x: 0, y: 0 })
+      const { connectNodes, applyAutoLayout } = useGraphStore.getState()
+      connectNodes('root', 'child', 0, 'choice')
+      connectNodes('child', 'grandchild', 0, 'choice')
+
+      await applyAutoLayout('dagre', 'TB')
+
+      const state = useGraphStore.getState()
+      const root = state.nodes.find((n) => n.id === 'root')
+      const child = state.nodes.find((n) => n.id === 'child')
+      const grandchild = state.nodes.find((n) => n.id === 'grandchild')
+      expect(root).toBeDefined()
+      expect(child).toBeDefined()
+      expect(grandchild).toBeDefined()
+      expect(child!.position.y - root!.position.y).toBeGreaterThanOrEqual(300)
+      expect(grandchild!.position.y - child!.position.y).toBeGreaterThanOrEqual(300)
+    })
+
+    it('adapts spacing when switching between compact and large modes', async () => {
+      addDialogueNode('root', { x: 0, y: 0 })
+      addDialogueNode('child', { x: 0, y: 0 })
+      addDialogueNode('grandchild', { x: 0, y: 0 })
+      const store = useGraphStore.getState()
+      store.connectNodes('root', 'child', 0, 'choice')
+      store.connectNodes('child', 'grandchild', 0, 'choice')
+
+      store.setLayoutSpacingMode('compact')
+      await store.applyAutoLayout('dagre', 'TB')
+      const compactState = useGraphStore.getState()
+      const compactRoot = compactState.nodes.find((n) => n.id === 'root')!
+      const compactChild = compactState.nodes.find((n) => n.id === 'child')!
+      const compactDelta = compactChild.position.y - compactRoot.position.y
+
+      store.setLayoutSpacingMode('large')
+      await store.applyAutoLayout('dagre', 'TB')
+      const largeState = useGraphStore.getState()
+      const largeRoot = largeState.nodes.find((n) => n.id === 'root')!
+      const largeChild = largeState.nodes.find((n) => n.id === 'child')!
+      const largeDelta = largeChild.position.y - largeRoot.position.y
+
+      expect(largeDelta).toBeGreaterThan(compactDelta)
+      expect(largeState.layoutSpacingMode).toBe('large')
+    })
+
+    it('uses measured node heights to keep tall parents from overlapping descendants', async () => {
+      useGraphStore.getState().addNode({
+        id: 'tall-root',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        measured: { width: 280, height: 420 },
+        width: 280,
+        height: 420,
+        data: { id: 'tall-root', speaker: '', line: 'Parent', choices: [] },
+      })
+      useGraphStore.getState().addNode({
+        id: 'child',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        measured: { width: 280, height: 180 },
+        width: 280,
+        height: 180,
+        data: { id: 'child', speaker: '', line: 'Child', choices: [] },
+      })
+      useGraphStore.getState().connectNodes('tall-root', 'child', 0, 'choice')
+
+      await useGraphStore.getState().applyAutoLayout('dagre', 'TB')
+
+      const state = useGraphStore.getState()
+      const root = state.nodes.find((n) => n.id === 'tall-root')!
+      const child = state.nodes.find((n) => n.id === 'child')!
+      expect(child.position.y).toBeGreaterThan(root.position.y + 420)
+    })
   })
 })

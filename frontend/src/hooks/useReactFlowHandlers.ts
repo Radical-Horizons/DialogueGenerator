@@ -5,6 +5,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Connection, Node, NodeChange, EdgeChange } from 'reactflow'
 import { useGraphStore } from '../store/graphStore'
+import { useGraphViewStore } from '../store/graphViewStore'
 import { collectOutgoingDescendantIds } from '../utils/collectOutgoingDescendantIds'
 
 type DragGroupMode = 'multi' | 'with-children' | null
@@ -89,33 +90,31 @@ export function useReactFlowHandlers(
     }
   }, [])
 
+  const edgeLabelEditRequest = useGraphViewStore((s) => s.edgeLabelEditRequest)
   useEffect(() => {
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<{ edgeId: string }>).detail
-      if (!detail?.edgeId) return
-      const state = useGraphStore.getState()
-      const edge = state.edges.find((e) => e.id === detail.edgeId)
-      if (!edge || (edge.data as { edgeType?: string })?.edgeType !== 'choice') return
-      const sourceNode = state.nodes.find((n) => n.id === edge.source)
-      const choiceIndex = (edge.data as { choiceIndex?: number })?.choiceIndex
-      if (
-        choiceIndex == null ||
-        !sourceNode?.data?.choices ||
-        !Array.isArray(sourceNode.data.choices) ||
-        sourceNode.data.choices[choiceIndex] == null
-      )
-        return
-      const choice = sourceNode.data.choices[choiceIndex] as { text?: string }
-      setEdgeLabelEdit({
-        edgeId: edge.id,
-        sourceId: edge.source,
-        choiceIndex,
-        initialText: choice.text ?? '',
-      })
-    }
-    window.addEventListener('edge-label-edit', handler)
-    return () => window.removeEventListener('edge-label-edit', handler)
-  }, [])
+    if (!edgeLabelEditRequest) return
+    const { edgeId } = edgeLabelEditRequest
+    useGraphViewStore.getState().clearEdgeLabelEdit()
+    const state = useGraphStore.getState()
+    const edge = state.edges.find((e) => e.id === edgeId)
+    if (!edge || (edge.data as { edgeType?: string })?.edgeType !== 'choice') return
+    const sourceNode = state.nodes.find((n) => n.id === edge.source)
+    const choiceIndex = (edge.data as { choiceIndex?: number })?.choiceIndex
+    if (
+      choiceIndex == null ||
+      !sourceNode?.data?.choices ||
+      !Array.isArray(sourceNode.data.choices) ||
+      sourceNode.data.choices[choiceIndex] == null
+    )
+      return
+    const choice = sourceNode.data.choices[choiceIndex] as { text?: string }
+    setEdgeLabelEdit({
+      edgeId: edge.id,
+      sourceId: edge.source,
+      choiceIndex,
+      initialText: choice.text ?? '',
+    })
+  }, [edgeLabelEditRequest])
 
   const flushPositionUpdate = useCallback(() => {
     const pendingEntries = Object.entries(pendingPositionsRef.current)
@@ -209,7 +208,7 @@ export function useReactFlowHandlers(
           updateNodeDimensionsBatch(batch)
           if (!fitViewRequestedAfterDimensionsRef.current) {
             fitViewRequestedAfterDimensionsRef.current = true
-            window.dispatchEvent(new CustomEvent('graph-request-fitview'))
+            useGraphViewStore.getState().requestFitView()
           }
         })
       }
@@ -255,7 +254,7 @@ export function useReactFlowHandlers(
   )
 
   const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
-    window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: node.id } }))
+    useGraphViewStore.getState().focusNode(node.id)
   }, [])
 
   const onPaneClick = useCallback(() => {

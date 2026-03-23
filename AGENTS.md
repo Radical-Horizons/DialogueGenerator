@@ -22,7 +22,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 - **`.env` file**: Copy from `.env.example`. Required for JWT auth and config. Default dev credentials: `admin` / `admin123`.
 - **No real LLM key needed for basic dev**: Without `OPENAI_API_KEY`, the backend uses `DummyLLMClient` (mock responses). Set a real key for actual dialogue generation.
 - **Frontend ESLint**: Has 7 pre-existing lint errors (unused vars). This is a known state.
-- **Frontend Vitest**: All 537 tests pass as of last run. If a test suddenly fails, check whether it tests a feature that was silently removed rather than assuming the test is obsolete.
+- **Frontend Vitest**: All 650 tests pass as of last run (excluding `graphStore.autoLayout` which has a known pre-existing timeout). If a test suddenly fails, check whether it tests a feature that was silently removed rather than assuming the test is obsolete.
 - **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
 
 ### Commands reference
@@ -52,3 +52,5 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 - GraphEditor JSX is split into dedicated components in `frontend/src/components/graph/`: `GraphEditorHeader` (toolbar), `GraphValidationPanel` (overlay), `DialogueCostModal`, `GraphExportFormatDialog`. `GraphEditorHeader` calls `useGraphStore()` internally to avoid prop drilling.
 - The `exportToUnity` store action (in `persistenceSlice`) serializes graph nodes to Unity JSON format; its trigger button lives in `GraphEditorHeader` and downloads a `.json` file named after `dialogueMetadata.filename`.
 - The `continual-learning` skill uses **in-context conversation history only** — it never reads from `agent-transcripts/` files on disk (that folder does not exist on this system).
+- Inter-component communication in the graph editor uses `useGraphViewStore` (typed Zustand store), NOT global `window` events. All `CustomEvent` dispatches/listeners have been migrated. See `.cursor/rules/graph_editor.mdc` for the full protocol.
+- Graph mutations in `nodeSlice` and `edgeSlice` use `runGraphTransaction()` helper for consistent undo/sync/dirty handling. `layoutSlice` keeps its own custom sync logic.

@@ -3,6 +3,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
@@ -68,7 +69,7 @@ export function UnityDialogueDetails({
     try {
       await unityDialoguesAPI.deleteUnityDialogue(filename)
       // Notifier tous les consommateurs (ex. éditeur de graphe) pour synchroniser liste + canvas
-      window.dispatchEvent(new CustomEvent('unity-dialogue-deleted', { detail: { filename } }))
+      useGraphViewStore.getState().notifyDialogueDeleted(filename)
       // Rafraîchir la liste puis fermer : attendre le refresh pour que la liste soit à jour avant de fermer le panneau
       if (onDeleted) {
         await Promise.resolve(onDeleted())

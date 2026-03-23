@@ -20,10 +20,18 @@ export function mergeDialogueNodeFormIntoStoreData(
 ): Record<string, unknown> {
   const storeChoices = (nodeData.choices || []) as Choice[]
   const formChoices = formValues.choices || []
+  const storeChoicesById = new Map(
+    storeChoices
+      .filter((choice): choice is Choice & { choiceId: string } => typeof choice.choiceId === 'string')
+      .map((choice) => [choice.choiceId, choice] as const)
+  )
   const mergedChoices: Choice[] = formChoices.map((fc, i) => {
-    const storeChoice = storeChoices[i]
+    const storeChoice =
+      (typeof fc.choiceId === 'string' ? storeChoicesById.get(fc.choiceId) : undefined) ??
+      storeChoices[i]
     return {
       ...fc,
+      choiceId: storeChoice?.choiceId ?? fc.choiceId,
       targetNode: storeChoice?.targetNode,
       testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
       testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
@@ -120,11 +128,19 @@ export function applyStoreConnectionFieldsToDialogueFormChoices(
   storeChoices: Choice[],
   formChoices: Choice[]
 ): Choice[] {
+  const storeChoicesById = new Map(
+    storeChoices
+      .filter((choice): choice is Choice & { choiceId: string } => typeof choice.choiceId === 'string')
+      .map((choice) => [choice.choiceId, choice] as const)
+  )
   return formChoices.map((fc, i) => {
-    const sc = storeChoices[i]
+    const sc =
+      (typeof fc.choiceId === 'string' ? storeChoicesById.get(fc.choiceId) : undefined) ??
+      storeChoices[i]
     if (!sc) return fc
     return {
       ...fc,
+      choiceId: sc.choiceId ?? fc.choiceId,
       targetNode: sc.targetNode,
       testCriticalFailureNode: sc.testCriticalFailureNode ?? fc.testCriticalFailureNode,
       testFailureNode: sc.testFailureNode ?? fc.testFailureNode,

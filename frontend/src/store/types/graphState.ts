@@ -20,6 +20,8 @@ export interface GraphFilters {
   allowedSpeakers?: string[]
 }
 
+export type GraphLayoutSpacingMode = 'compact' | 'normal' | 'large'
+
 export interface GraphMetadata {
   title: string
   filename?: string
@@ -68,6 +70,7 @@ export interface GraphState {
 
   // Story 2.9 FR30: filtres vue graphe (types nœuds, speakers)
   graphFilters: GraphFilters
+  layoutSpacingMode: GraphLayoutSpacingMode
 
   // Story 2.14 FR35: undo/redo
   undoStack: GraphSnapshot[]
@@ -127,7 +130,7 @@ export interface GraphState {
   setSelectedNodes: (nodeIds: string[]) => void
   /** Story 2.10 FR31: vide la sélection multiple et selectedNodeId. */
   clearSelection: () => void
-  /** Story 2.8 FR29: centre le graphe sur le nœud et le sélectionne (setSelectedNode + focus-generated-node). No-op si nodeId absent. */
+  /** Story 2.8 FR29: centre le graphe sur le nœud et le sélectionne (setSelectedNode + graphViewStore.focusNode). No-op si nodeId absent. */
   jumpToNode: (nodeId: string) => void
   /** Story 2.8 FR29: recherche nœuds par ID exact ou nom (displayName / line). Retourne liste ordonnée (exact d'abord, puis partiels). */
   findNodesByQuery: (query: string) => Array<{ id: string; label: string }>
@@ -135,6 +138,7 @@ export interface GraphState {
   setFilters: (filters: GraphFilters) => void
   /** Story 2.9 FR30: réinitialiser les filtres (équivalent setFilters({})). */
   resetFilters: () => void
+  setLayoutSpacingMode: (mode: GraphLayoutSpacingMode) => void
   duplicateNode: (nodeId: string) => Node | null
   duplicateNodes: (nodeIds: string[]) => void
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
@@ -256,6 +260,7 @@ export const initialState = {
   documentRevision: null as number | null,
   layoutRevision: null as number | null,
   graphFilters: {} as GraphFilters,
+  layoutSpacingMode: 'normal' as GraphLayoutSpacingMode,
   undoStack: [] as GraphSnapshot[],
   redoStack: [] as GraphSnapshot[],
 }

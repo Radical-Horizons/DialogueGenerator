@@ -22,6 +22,8 @@ export const GRAPH_SIBLING_COLUMN_STEP = GRAPH_DIALOGUE_NODE_WIDTH + GRAPH_SIBLI
 
 /** Décalage vertical standard parent → enfant (dialogue ou barre de test). */
 export const GRAPH_OFFSET_PARENT_TO_CHILD_Y = 280
+/** Marge verticale minimale sous la boîte parent pour éviter les recouvrements. */
+export const GRAPH_PARENT_TO_CHILD_CLEARANCE_Y = 120
 
 /**
  * Retourne la largeur visuelle du parent selon son type React Flow.
@@ -59,4 +61,19 @@ export function childNodeTopLeftX(params: {
       ? 0
       : (params.siblingIndex - (params.siblingCount - 1) / 2) * step
   return parentCenter - params.childWidth / 2 + offset
+}
+
+/**
+ * Calcule l'ordonnée (top-left) d'un enfant sous le parent en tenant compte
+ * de la hauteur réelle/estimée du parent pour éviter les recouvrements verticaux.
+ */
+export function childNodeTopLeftY(params: {
+  parentY: number
+  parentHeight: number
+  minimumOffset?: number
+  clearanceY?: number
+}): number {
+  const minimumOffset = params.minimumOffset ?? GRAPH_OFFSET_PARENT_TO_CHILD_Y
+  const clearanceY = params.clearanceY ?? GRAPH_PARENT_TO_CHILD_CLEARANCE_Y
+  return params.parentY + Math.max(minimumOffset, params.parentHeight + clearanceY)
 }

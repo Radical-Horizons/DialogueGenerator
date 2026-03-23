@@ -3,6 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import * as unityDialoguesAPI from '../api/unityDialogues'
 import { useDialogueLoader } from '../hooks/useDialogueLoader'
 import { useGraphStore } from '../store/graphStore'
+import { useGraphViewStore } from '../store/graphViewStore'
 
 const toastMock = vi.fn()
 const getUnityDialogueMock = vi.fn()
@@ -142,9 +143,7 @@ describe('useDialogueLoader', () => {
     })
 
     act(() => {
-      window.dispatchEvent(
-        new CustomEvent('unity-dialogue-deleted', { detail: { filename: 'will-delete.json' } })
-      )
+      useGraphViewStore.getState().notifyDialogueDeleted('will-delete.json')
     })
 
     expect(result.current.selectedDialogue).toBeNull()

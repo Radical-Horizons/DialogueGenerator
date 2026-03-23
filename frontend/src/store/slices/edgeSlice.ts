@@ -15,7 +15,7 @@ import {
   stableChoiceEdgeId,
   truncateChoiceLabel,
 } from '../../utils/graphEdgeBuilders'
-import { syncDocAndLayout } from '../../utils/syncDocLayout'
+import { runGraphTransaction } from '../utils/runGraphTransaction'
 
 export type EdgeSlice = Pick<
   GraphState,
@@ -30,9 +30,6 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     connectionType: string = 'default',
     sourceHandle?: string
   ) => {
-    get()._pushUndoSnapshot()
-    const state = get()
-
     let actualSourceHandle = sourceHandle
     if (!actualSourceHandle && connectionType.startsWith('test-')) {
       actualSourceHandle = connectionType.replace('test-', '')
@@ -42,8 +39,17 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     }
 
     const isChoiceConnection = choiceIndex !== undefined && !actualSourceHandle
+    if (connectionType === 'choice' && !isChoiceConnection && !actualSourceHandle) {
+      console.warn('[Graph] Ignoring ambiguous choice connection without choiceIndex', {
+        sourceId,
+        targetId,
+      })
+      return
+    }
+
+    const preState = get()
     const sourceNodeForChoice = isChoiceConnection
-      ? state.nodes.find((n) => n.id === sourceId)
+      ? preState.nodes.find((n) => n.id === sourceId)
       : null
     const choiceAt = sourceNodeForChoice?.data?.choices?.[
       choiceIndex != null ? choiceIndex : 0
@@ -60,143 +66,134 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
       ? `${sourceId}-choice${choiceIndex}->${targetId}`
       : `${sourceId}->${targetId}`
 
-    const existingEdgeIndex = state.edges.findIndex((e) => e.id === edgeId)
+    const existingEdgeIndex = preState.edges.findIndex((e) => e.id === edgeId)
     if (existingEdgeIndex !== -1 && !isChoiceConnection) {
       return
     }
 
-    const newEdge: Edge = isChoiceConnection
-      ? buildChoiceEdge({
-          sourceId,
-          targetId,
-          choiceIndex: choiceIndex!,
-          choiceText,
-          choiceId,
-        })
-      : {
-          id: edgeId,
-          source: sourceId,
-          target: targetId,
-          ...(actualSourceHandle && { sourceHandle: actualSourceHandle }),
-          type: 'smoothstep',
-          data: { edgeType: connectionType, choiceIndex },
-        }
-
-    let newEdges: Edge[] =
-      isChoiceConnection && existingEdgeIndex !== -1
-        ? [...state.edges.filter((e) => e.id !== edgeId), newEdge]
-        : [...state.edges, newEdge]
-
-    let updatedNodes = [...state.nodes]
-    const sourceNodeIndex = updatedNodes.findIndex((n) => n.id === sourceId)
-
-    if (sourceNodeIndex !== -1) {
-      const sourceNode = updatedNodes[sourceNodeIndex]
-
-      // Connexion depuis un TestNode (4 résultats)
-      if (
-        actualSourceHandle &&
-        ['critical-failure', 'failure', 'success', 'critical-success'].includes(actualSourceHandle)
-      ) {
-        const parent = getParentChoiceForTestNode(sourceId, state.nodes)
-        if (parent && TEST_HANDLE_TO_CHOICE_FIELD[actualSourceHandle]) {
-          const fieldName = TEST_HANDLE_TO_CHOICE_FIELD[actualSourceHandle]
-          const updatedChoices = (parent.dialogueNode.data.choices as Choice[]).map(
-            (choice, idx) =>
-              idx === parent.choiceIndex ? { ...choice, [fieldName]: targetId } : choice
-          )
-          const updatedDialogueNode = {
-            ...parent.dialogueNode,
-            data: { ...parent.dialogueNode.data, choices: updatedChoices },
+    runGraphTransaction(get, set, (state) => {
+      const newEdge: Edge = isChoiceConnection
+        ? buildChoiceEdge({
+            sourceId,
+            targetId,
+            choiceIndex: choiceIndex!,
+            choiceText,
+            choiceId,
+          })
+        : {
+            id: edgeId,
+            source: sourceId,
+            target: targetId,
+            ...(actualSourceHandle && { sourceHandle: actualSourceHandle }),
+            type: 'smoothstep',
+            data: { edgeType: connectionType, choiceIndex },
           }
-          updatedNodes = updatedNodes.map((n) =>
-            n.id === parent.dialogueNodeId ? updatedDialogueNode : n
-          )
 
-          const updatedChoice = updatedChoices[parent.choiceIndex]
-          const syncResult = syncTestNodeFromChoice(
-            updatedChoice,
-            parent.choiceIndex,
-            parent.dialogueNodeId,
-            updatedDialogueNode.position,
-            sourceNode,
-            newEdges,
-            updatedNodes,
-            updatedChoices
-          )
+      let newEdges: Edge[] =
+        isChoiceConnection && existingEdgeIndex !== -1
+          ? [...state.edges.filter((e) => e.id !== edgeId), newEdge]
+          : [...state.edges, newEdge]
 
-          if (syncResult.testNode) {
+      let updatedNodes = [...state.nodes]
+      const sourceNodeIndex = updatedNodes.findIndex((n) => n.id === sourceId)
+
+      if (sourceNodeIndex !== -1) {
+        const sourceNode = updatedNodes[sourceNodeIndex]
+
+        if (
+          actualSourceHandle &&
+          ['critical-failure', 'failure', 'success', 'critical-success'].includes(actualSourceHandle)
+        ) {
+          const parent = getParentChoiceForTestNode(sourceId, state.nodes)
+          if (parent && TEST_HANDLE_TO_CHOICE_FIELD[actualSourceHandle]) {
+            const fieldName = TEST_HANDLE_TO_CHOICE_FIELD[actualSourceHandle]
+            const updatedChoices = (parent.dialogueNode.data.choices as Choice[]).map(
+              (choice, idx) =>
+                idx === parent.choiceIndex ? { ...choice, [fieldName]: targetId } : choice
+            )
+            const updatedDialogueNode = {
+              ...parent.dialogueNode,
+              data: { ...parent.dialogueNode.data, choices: updatedChoices },
+            }
             updatedNodes = updatedNodes.map((n) =>
-              n.id === sourceId ? syncResult.testNode! : n
+              n.id === parent.dialogueNodeId ? updatedDialogueNode : n
             )
-          }
-          newEdges = syncResult.edges
-        } else {
-          // Fallback : mettre à jour le champ dans le TestNode directement
-          const fieldMapping: Record<string, string> = {
-            'critical-failure': 'criticalFailureNode',
-            failure: 'failureNode',
-            success: 'successNode',
-            'critical-success': 'criticalSuccessNode',
-          }
-          const fieldName = fieldMapping[actualSourceHandle]
-          if (fieldName) {
-            updatedNodes[sourceNodeIndex] = {
-              ...sourceNode,
-              data: { ...sourceNode.data, [fieldName]: targetId },
-            }
-          }
-        }
-      } else if (choiceIndex !== undefined) {
-        // Connexion via choix (DialogueNode)
-        if (sourceNode.data?.choices && sourceNode.data.choices[choiceIndex]) {
-          const choice = sourceNode.data.choices[choiceIndex] as Choice
-          const isTargetTestBar = targetId.startsWith('test-node-')
-          const choiceHasTest = !!choice.test
 
-          if (!isTargetTestBar && !choiceHasTest) {
-            const newChoices = (sourceNode.data.choices as Choice[]).map((c, idx) =>
-              idx === choiceIndex ? { ...c, targetNode: targetId } : c
+            const updatedChoice = updatedChoices[parent.choiceIndex]
+            const syncResult = syncTestNodeFromChoice(
+              updatedChoice,
+              parent.choiceIndex,
+              parent.dialogueNodeId,
+              updatedDialogueNode.position,
+              sourceNode,
+              newEdges,
+              updatedNodes,
+              updatedChoices
             )
-            updatedNodes[sourceNodeIndex] = {
-              ...sourceNode,
-              data: { ...sourceNode.data, choices: newChoices },
+
+            if (syncResult.testNode) {
+              updatedNodes = updatedNodes.map((n) =>
+                n.id === sourceId ? syncResult.testNode! : n
+              )
+            }
+            newEdges = syncResult.edges
+          } else {
+            const fieldMapping: Record<string, string> = {
+              'critical-failure': 'criticalFailureNode',
+              failure: 'failureNode',
+              success: 'successNode',
+              'critical-success': 'criticalSuccessNode',
+            }
+            const fieldName = fieldMapping[actualSourceHandle]
+            if (fieldName) {
+              updatedNodes[sourceNodeIndex] = {
+                ...sourceNode,
+                data: { ...sourceNode.data, [fieldName]: targetId },
+              }
             }
           }
-        }
-      } else if (connectionType === 'nextNode') {
-        updatedNodes[sourceNodeIndex] = {
-          ...sourceNode,
-          data: { ...sourceNode.data, nextNode: targetId },
+        } else if (choiceIndex !== undefined) {
+          if (sourceNode.data?.choices && sourceNode.data.choices[choiceIndex]) {
+            const choice = sourceNode.data.choices[choiceIndex] as Choice
+            const isTargetTestBar = targetId.startsWith('test-node-')
+            const choiceHasTest = !!choice.test
+
+            if (!isTargetTestBar && !choiceHasTest) {
+              const newChoices = (sourceNode.data.choices as Choice[]).map((c, idx) =>
+                idx === choiceIndex ? { ...c, targetNode: targetId } : c
+              )
+              updatedNodes[sourceNodeIndex] = {
+                ...sourceNode,
+                data: { ...sourceNode.data, choices: newChoices },
+              }
+            }
+          }
+        } else if (connectionType === 'nextNode') {
+          updatedNodes[sourceNodeIndex] = {
+            ...sourceNode,
+            data: { ...sourceNode.data, nextNode: targetId },
+          }
         }
       }
-    }
 
-    const isDocumentSoT = state.document != null && state.layout != null
-    const docAndLayout = isDocumentSoT
-      ? syncDocAndLayout(updatedNodes, newEdges, state.layout as Record<string, unknown>)
-      : {}
-
-    set({
-      nodes: updatedNodes,
-      edges: newEdges,
-      dialogueMetadata: {
-        ...state.dialogueMetadata,
-        node_count: updatedNodes.length,
-        edge_count: newEdges.length,
-      },
-      ...docAndLayout,
+      return {
+        nodes: updatedNodes,
+        edges: newEdges,
+        dialogueMetadata: {
+          ...state.dialogueMetadata,
+          node_count: updatedNodes.length,
+          edge_count: newEdges.length,
+        },
+      }
     })
-    get().markDirty()
   },
 
   disconnectNodes: (edgeId: string, skipMarkDirty?: boolean) => {
-    get()._pushUndoSnapshot()
-    set((state) => {
-      const edge = state.edges.find((e) => e.id === edgeId)
-      if (!edge) return state
+    const preState = get()
+    const edge = preState.edges.find((e) => e.id === edgeId)
+    if (!edge) return
 
-      // Déconnexion depuis un TestNode : mettre à jour le choix parent
+    runGraphTransaction(get, set, (state) => {
       if (
         edge.sourceHandle &&
         (edge.source.startsWith('test-node-') || edge.source.startsWith('test:'))
@@ -226,7 +223,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
           const newEdges = state.edges.filter((e) => e.id !== edgeId)
 
           const updatedChoice = updatedChoices[parent.choiceIndex]
-          if (!updatedChoice) return state
+          if (!updatedChoice) return {}
 
           const testNode = updatedNodes.find((n) => n.id === edge.source)
           const syncResult = syncTestNodeFromChoice(
@@ -246,15 +243,6 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
             )
           }
 
-          const isDocumentSoT = state.document != null && state.layout != null
-          const docAndLayout = isDocumentSoT
-            ? syncDocAndLayout(
-                updatedNodes,
-                syncResult.edges,
-                state.layout as Record<string, unknown>
-              )
-            : {}
-
           return {
             nodes: updatedNodes,
             edges: syncResult.edges,
@@ -263,16 +251,13 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
               node_count: updatedNodes.length,
               edge_count: syncResult.edges.length,
             },
-            ...docAndLayout,
           }
         }
       }
 
-      // Déconnexion standard : supprimer l'edge et pour une edge choice, nettoyer choice.targetNode (cohérence store)
       const newEdges = state.edges.filter((e) => e.id !== edgeId)
       let updatedNodes = state.nodes
       if (
-        edge &&
         (edge.data as { edgeType?: string })?.edgeType === 'choice' &&
         typeof (edge.data as { choiceIndex?: number })?.choiceIndex === 'number'
       ) {
@@ -301,11 +286,6 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
         )
       }
 
-      const isDocumentSoT = state.document != null && state.layout != null
-      const docAndLayout = isDocumentSoT
-        ? syncDocAndLayout(updatedNodes, newEdges, state.layout as Record<string, unknown>)
-        : {}
-
       return {
         nodes: updatedNodes,
         edges: newEdges,
@@ -314,51 +294,45 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
           node_count: updatedNodes.length,
           edge_count: newEdges.length,
         },
-        ...docAndLayout,
       }
-    })
-    if (!skipMarkDirty) get().markDirty()
+    }, { skipMarkDirty: !!skipMarkDirty })
   },
 
   updateChoiceEdgeLabel: (edgeId: string, newText: string) => {
-    const state = get()
-    const edge = state.edges.find((e) => e.id === edgeId)
+    const preState = get()
+    const edge = preState.edges.find((e) => e.id === edgeId)
     if (!edge || (edge.data as { edgeType?: string })?.edgeType !== 'choice') return
     const sourceId = edge.source
     const choiceIndex = (edge.data as { choiceIndex?: number })?.choiceIndex
     if (choiceIndex == null) return
-    const sourceNodeIndex = state.nodes.findIndex((n) => n.id === sourceId)
+    const sourceNodeIndex = preState.nodes.findIndex((n) => n.id === sourceId)
     if (sourceNodeIndex === -1) return
-    const sourceNode = state.nodes[sourceNodeIndex]
+    const sourceNode = preState.nodes[sourceNodeIndex]
     const choices = (sourceNode.data?.choices ?? []) as Choice[]
     if (choiceIndex >= choices.length) return
-    get()._pushUndoSnapshot()
-    const updatedChoices = choices.map((c, i) =>
-      i === choiceIndex ? { ...c, text: newText } : c
-    )
-    const updatedNodes = state.nodes.map((n) =>
-      n.id === sourceId
-        ? { ...n, data: { ...n.data, choices: updatedChoices } }
-        : n
-    )
-    const displayLabel = truncateChoiceLabel(newText, choiceIndex)
-    const updatedEdges = state.edges.map((e) =>
-      e.id === edgeId ? { ...e, label: displayLabel } : e
-    )
-    const isDocumentSoT = state.document != null && state.layout != null
-    const docAndLayout = isDocumentSoT
-      ? syncDocAndLayout(updatedNodes, updatedEdges, state.layout as Record<string, unknown>)
-      : {}
-    set({
-      nodes: updatedNodes,
-      edges: updatedEdges,
-      dialogueMetadata: {
-        ...state.dialogueMetadata,
-        node_count: updatedNodes.length,
-        edge_count: updatedEdges.length,
-      },
-      ...docAndLayout,
+
+    runGraphTransaction(get, set, (state) => {
+      const updatedChoices = choices.map((c, i) =>
+        i === choiceIndex ? { ...c, text: newText } : c
+      )
+      const updatedNodes = state.nodes.map((n) =>
+        n.id === sourceId
+          ? { ...n, data: { ...n.data, choices: updatedChoices } }
+          : n
+      )
+      const displayLabel = truncateChoiceLabel(newText, choiceIndex)
+      const updatedEdges = state.edges.map((e) =>
+        e.id === edgeId ? { ...e, label: displayLabel } : e
+      )
+      return {
+        nodes: updatedNodes,
+        edges: updatedEdges,
+        dialogueMetadata: {
+          ...state.dialogueMetadata,
+          node_count: updatedNodes.length,
+          edge_count: updatedEdges.length,
+        },
+      }
     })
-    get().markDirty()
   },
 })

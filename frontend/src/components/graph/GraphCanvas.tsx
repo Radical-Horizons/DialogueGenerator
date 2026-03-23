@@ -24,6 +24,7 @@ import { DropChoiceModal } from './DropChoiceModal'
 import { GenerationLoaderContent } from './GenerationLoaderContent'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
@@ -32,8 +33,6 @@ import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
 import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
-
-const FITVIEW_AFTER_DIMENSIONS_EVENT = 'graph-request-fitview'
 
 /** Déduit l'index du choix à partir du sourceHandle (choice:N ou choice:__idx_N ou choice:choiceId). */
 function getChoiceIndexFromHandle(
@@ -89,51 +88,43 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
     window.setTimeout(runFitView, 150)
   }, [isGraphLoading, documentId])
 
+  const pendingFocusNodeId = useGraphViewStore((s) => s.pendingFocusNodeId)
+  const fitViewTimeoutRef = useRef<number | null>(null)
   useEffect(() => {
-    let fitViewTimeoutId: number | null = null
-    const handleFocusNode = (event: CustomEvent<{ nodeId: string }>) => {
-      if (fitViewTimeoutId !== null) {
-        window.clearTimeout(fitViewTimeoutId)
-        fitViewTimeoutId = null
-      }
-      const nodeId = event.detail.nodeId
-      const node = getNode(nodeId)
-      if (node) {
-        setHighlightedNodesInner([nodeId])
-        setSelectedNodeInner(nodeId)
-        fitViewTimeoutId = window.setTimeout(() => {
-          fitViewTimeoutId = null
-          fitView({ nodes: [node], duration: 300, padding: 0.3 })
-        }, 100)
-      }
+    if (!pendingFocusNodeId) return
+    useGraphViewStore.getState().clearFocus()
+    if (fitViewTimeoutRef.current !== null) {
+      window.clearTimeout(fitViewTimeoutRef.current)
+      fitViewTimeoutRef.current = null
     }
-    window.addEventListener('focus-generated-node', handleFocusNode as EventListener)
+    const node = getNode(pendingFocusNodeId)
+    if (node) {
+      setHighlightedNodesInner([pendingFocusNodeId])
+      setSelectedNodeInner(pendingFocusNodeId)
+      fitViewTimeoutRef.current = window.setTimeout(() => {
+        fitViewTimeoutRef.current = null
+        fitView({ nodes: [node], duration: 300, padding: 0.3 })
+      }, 100)
+    }
     return () => {
-      window.removeEventListener('focus-generated-node', handleFocusNode as EventListener)
-      if (fitViewTimeoutId !== null) window.clearTimeout(fitViewTimeoutId)
+      if (fitViewTimeoutRef.current !== null) window.clearTimeout(fitViewTimeoutRef.current)
     }
-  }, [getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
+  }, [pendingFocusNodeId, getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
 
+  const pendingFitView = useGraphViewStore((s) => s.pendingFitView)
   useEffect(() => {
-    let timeoutId: number | null = null
-    const handler = () => {
+    if (!pendingFitView) return
+    useGraphViewStore.getState().clearFitView()
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          instanceRef.current?.fitView({ padding: 0.2, duration: 200 })
-        })
-      })
-      if (timeoutId) window.clearTimeout(timeoutId)
-      timeoutId = window.setTimeout(() => {
         instanceRef.current?.fitView({ padding: 0.2, duration: 200 })
-        timeoutId = null
-      }, 120)
-    }
-    window.addEventListener(FITVIEW_AFTER_DIMENSIONS_EVENT, handler)
-    return () => {
-      window.removeEventListener(FITVIEW_AFTER_DIMENSIONS_EVENT, handler)
-      if (timeoutId) window.clearTimeout(timeoutId)
-    }
-  }, [])
+      })
+    })
+    const timeoutId = window.setTimeout(() => {
+      instanceRef.current?.fitView({ padding: 0.2, duration: 200 })
+    }, 120)
+    return () => window.clearTimeout(timeoutId)
+  }, [pendingFitView])
 
   return null
 })
@@ -282,7 +273,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       toast('Nœud généré avec succès', 'success', 2000)
       if (result.nodeId) {
         setSelectedNode(result.nodeId)
-        window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: result.nodeId } }))
+        useGraphViewStore.getState().focusNode(result.nodeId)
       }
       setDropChoiceMenu(null)
     } catch (err) {
@@ -308,7 +299,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         toast('Nœud généré avec succès', 'success', 2000)
         if (result.nodeId) {
           setSelectedNode(result.nodeId)
-          window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: result.nodeId } }))
+          useGraphViewStore.getState().focusNode(result.nodeId)
         }
       } catch (err) {
         toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
@@ -347,7 +338,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         toast('Nœud généré avec succès', 'success', 2000)
         if (result.nodeId) {
           setSelectedNode(result.nodeId)
-          window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: result.nodeId } }))
+          useGraphViewStore.getState().focusNode(result.nodeId)
         }
       } catch (err) {
         toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
@@ -377,16 +368,12 @@ export const GraphCanvas = memo(function GraphCanvas() {
     openContextMenu(node.id, event.clientX, event.clientY)
   }
 
+  const contextMenuRequest = useGraphViewStore((s) => s.contextMenuRequest)
   useEffect(() => {
-    const handler = (e: Event) => {
-      const ev = e as CustomEvent<{ nodeId: string; clientX: number; clientY: number }>
-      if (ev.detail?.nodeId) {
-        openContextMenu(ev.detail.nodeId, ev.detail.clientX ?? 0, ev.detail.clientY ?? 0)
-      }
-    }
-    window.addEventListener('graph-node-contextmenu', handler)
-    return () => window.removeEventListener('graph-node-contextmenu', handler)
-  }, [])
+    if (!contextMenuRequest) return
+    useGraphViewStore.getState().closeContextMenu()
+    openContextMenu(contextMenuRequest.nodeId, contextMenuRequest.x, contextMenuRequest.y)
+  }, [contextMenuRequest])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -537,7 +524,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onMove={onMove}
         onInit={(instance) => {
           reactFlowInstanceRef.current = instance
-          window.dispatchEvent(new CustomEvent('reactflow-instance-ready', { detail: instance }))
+          useGraphViewStore.getState().registerReactFlowInstance(instance)
         }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

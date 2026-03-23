@@ -5,7 +5,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '../store/graphStore'
 import type { Node } from 'reactflow'
 import * as graphAPI from '../api/graph'
-import { GRAPH_SIBLING_COLUMN_STEP } from '../utils/graphNodeLayout'
+import {
+  childNodeTopLeftX,
+  childNodeTopLeftY,
+  GRAPH_DIALOGUE_NODE_WIDTH,
+  GRAPH_SIBLING_COLUMN_STEP,
+} from '../utils/graphNodeLayout'
+import { getLayoutNodeHeight } from '../utils/dagreLayout'
 
 // Mock graphAPI
 vi.mock('../api/graph', () => ({
@@ -499,6 +505,7 @@ describe('useGraphStore - Pending save state', () => {
       mockGenerateNode.mockResolvedValueOnce({
         node: {
           id: 'generated-1',
+          type: 'dialogueNode',
           speaker: 'PNJ',
           line: 'Réponse',
         },
@@ -528,6 +535,52 @@ describe('useGraphStore - Pending save state', () => {
       )
     })
 
+    it('should fallback to a frontend choice connection when target_choice_index is set but API omits suggested_connections', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+
+      const parentNode: Node = {
+        id: 'parent-fallback-choice',
+        type: 'dialogueNode',
+        position: { x: 50, y: 80 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Parent',
+          choices: [
+            { text: 'Choix 1', choiceId: 'choice-a', targetNode: null },
+            { text: 'Choix 2', choiceId: 'choice-b', targetNode: null },
+          ],
+        },
+      }
+      addNode(parentNode)
+
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode.mockResolvedValueOnce({
+        node: {
+          id: 'generated-fallback-choice',
+          type: 'dialogueNode',
+          speaker: 'PNJ',
+          line: 'Réponse fallback',
+        },
+        suggested_connections: [],
+        parent_node_id: 'parent-fallback-choice',
+      })
+
+      await generateFromNode('parent-fallback-choice', 'Instructions', {
+        target_choice_index: 1,
+      })
+
+      const state = useGraphStore.getState()
+      const updatedParent = state.nodes.find((n) => n.id === 'parent-fallback-choice')
+      const generatedNode = state.nodes.find((n) => n.id === 'generated-fallback-choice')
+      const fallbackEdge = state.edges.find((e) => e.target === 'generated-fallback-choice')
+
+      expect(generatedNode).toBeDefined()
+      expect(updatedParent?.data?.choices?.[1]?.targetNode).toBe('generated-fallback-choice')
+      expect(fallbackEdge?.source).toBe('parent-fallback-choice')
+      expect((fallbackEdge?.data as { choiceIndex?: number } | undefined)?.choiceIndex).toBe(1)
+    })
+
     it('should pass generate_all_choices to API when true', async () => {
       const { addNode, generateFromNode } = useGraphStore.getState()
       
@@ -551,6 +604,7 @@ describe('useGraphStore - Pending save state', () => {
       mockGenerateNode.mockResolvedValueOnce({
         node: {
           id: 'generated-1',
+          type: 'dialogueNode',
           speaker: 'PNJ',
           line: 'Réponse',
         },
@@ -567,6 +621,53 @@ describe('useGraphStore - Pending save state', () => {
           generate_all_choices: true,
         })
       )
+    })
+
+    it('should ignore ambiguous choice suggestions and still connect the generated node through the targeted branch', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+
+      const parentNode: Node = {
+        id: 'parent-ambiguous-choice',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Test',
+          choices: [{ text: 'Choix 1', choiceId: 'choice-0', targetNode: null }],
+        },
+      }
+      addNode(parentNode)
+
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode.mockResolvedValueOnce({
+        node: {
+          id: 'generated-ambiguous-choice',
+          type: 'dialogueNode',
+          speaker: 'PNJ',
+          line: 'Réponse',
+        },
+        suggested_connections: [
+          {
+            from: 'parent-ambiguous-choice',
+            to: 'generated-ambiguous-choice',
+            connection_type: 'choice',
+          },
+        ],
+        parent_node_id: 'parent-ambiguous-choice',
+      })
+
+      await generateFromNode('parent-ambiguous-choice', 'Instructions', {
+        target_choice_index: 0,
+      })
+
+      const state = useGraphStore.getState()
+      const updatedParent = state.nodes.find((n) => n.id === 'parent-ambiguous-choice')
+      const edgesToGenerated = state.edges.filter((e) => e.target === 'generated-ambiguous-choice')
+
+      expect(updatedParent?.data?.choices?.[0]?.targetNode).toBe('generated-ambiguous-choice')
+      expect(edgesToGenerated).toHaveLength(1)
+      expect((edgesToGenerated[0].data as { choiceIndex?: number }).choiceIndex).toBe(0)
     })
 
     it('should update targetNode in parent when connecting via choice', async () => {
@@ -591,6 +692,7 @@ describe('useGraphStore - Pending save state', () => {
       mockGenerateNode.mockResolvedValueOnce({
         node: {
           id: 'generated-1',
+          type: 'dialogueNode',
           speaker: 'PNJ',
           line: 'Réponse',
         },
@@ -638,6 +740,7 @@ describe('useGraphStore - Pending save state', () => {
       mockGenerateNode.mockResolvedValueOnce({
         node: {
           id: 'generated-1',
+          type: 'dialogueNode',
           speaker: 'PNJ',
           line: 'Réponse',
         },
@@ -660,7 +763,7 @@ describe('useGraphStore - Pending save state', () => {
       const state = useGraphStore.getState()
       const generatedNode = state.nodes.find((n) => n.id === 'generated-1')
       expect(generatedNode?.position.x).toBe(100) // parent.x + 0 (centré)
-      expect(generatedNode?.position.y).toBe(380) // parent.y + OFFSET_BELOW (280)
+      expect(generatedNode!.position.y).toBeGreaterThanOrEqual(380)
     })
 
     it('should space multiple generated siblings by GRAPH_SIBLING_COLUMN_STEP', async () => {
@@ -685,8 +788,8 @@ describe('useGraphStore - Pending save state', () => {
       const mockGenerateNode = vi.mocked(graphAPI.generateNode)
       mockGenerateNode.mockResolvedValueOnce({
         nodes: [
-          { id: 'gen-a', speaker: 'PNJ', line: 'A' },
-          { id: 'gen-b', speaker: 'PNJ', line: 'B' },
+          { id: 'gen-a', type: 'dialogueNode', speaker: 'PNJ', line: 'A' },
+          { id: 'gen-b', type: 'dialogueNode', speaker: 'PNJ', line: 'B' },
         ],
         suggested_connections: [
           {
@@ -714,9 +817,201 @@ describe('useGraphStore - Pending save state', () => {
       const b = state.nodes.find((n) => n.id === 'gen-b')
       expect(a).toBeDefined()
       expect(b).toBeDefined()
-      expect(b!.position.x - a!.position.x).toBe(GRAPH_SIBLING_COLUMN_STEP)
-      expect(a!.position.y).toBe(380)
-      expect(b!.position.y).toBe(380)
+      expect(b!.position.x - a!.position.x).toBeGreaterThanOrEqual(
+        GRAPH_SIBLING_COLUMN_STEP
+      )
+      expect(a!.position.y).toBeGreaterThanOrEqual(380)
+      expect(b!.position.y).toBeGreaterThanOrEqual(380)
+    })
+
+    it('should relayout a branched parent to avoid sibling overlap after multiple generations', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+
+      const parentNode: Node = {
+        id: 'parent-relayout',
+        type: 'dialogueNode',
+        position: { x: 100, y: 100 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Test',
+          choices: [
+            { text: 'Choix 1', targetNode: null },
+            { text: 'Choix 2', targetNode: null },
+          ],
+        },
+      }
+      addNode(parentNode)
+
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode
+        .mockResolvedValueOnce({
+          node: {
+            id: 'generated-left',
+            type: 'dialogueNode',
+            speaker: 'PNJ',
+            line: 'Réponse gauche',
+          },
+          suggested_connections: [
+            {
+              from: 'parent-relayout',
+              to: 'generated-left',
+              via_choice_index: 0,
+              connection_type: 'choice',
+            },
+          ],
+          parent_node_id: 'parent-relayout',
+        })
+        .mockResolvedValueOnce({
+          node: {
+            id: 'generated-right',
+            type: 'dialogueNode',
+            speaker: 'PNJ',
+            line: 'Réponse droite',
+          },
+          suggested_connections: [
+            {
+              from: 'parent-relayout',
+              to: 'generated-right',
+              via_choice_index: 1,
+              connection_type: 'choice',
+            },
+          ],
+          parent_node_id: 'parent-relayout',
+        })
+
+      await generateFromNode('parent-relayout', 'Instructions', {
+        target_choice_index: 0,
+      })
+      await generateFromNode('parent-relayout', 'Instructions', {
+        target_choice_index: 1,
+      })
+
+      const state = useGraphStore.getState()
+      const left = state.nodes.find((n) => n.id === 'generated-left')
+      const right = state.nodes.find((n) => n.id === 'generated-right')
+      const parent = state.nodes.find((n) => n.id === 'parent-relayout')
+
+      expect(parent?.position).toEqual(parentNode.position)
+      expect(left).toBeDefined()
+      expect(right).toBeDefined()
+      expect(Math.abs((right!.position.x ?? 0) - (left!.position.x ?? 0))).toBeGreaterThanOrEqual(380)
+      expect(left!.position.y).toBeGreaterThan(parentNode.position.y)
+      expect(right!.position.y).toBeGreaterThan(parentNode.position.y)
+    })
+
+    it('should place a choice-specific generated node in the target branch column', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+
+      const parentNode: Node = {
+        id: 'parent-branch',
+        type: 'dialogueNode',
+        position: { x: 100, y: 100 },
+        data: {
+          speaker: 'PNJ',
+          line: 'Test',
+          choices: [
+            { text: 'Choix 1', targetNode: null },
+            { text: 'Choix 2', targetNode: null },
+            { text: 'Choix 3', targetNode: null },
+          ],
+        },
+      }
+      addNode(parentNode)
+
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode.mockResolvedValueOnce({
+        node: {
+          id: 'generated-branch',
+          type: 'dialogueNode',
+          speaker: 'PNJ',
+          line: 'Réponse ciblée',
+        },
+        suggested_connections: [
+          {
+            from: 'parent-branch',
+            to: 'generated-branch',
+            via_choice_index: 1,
+            connection_type: 'choice',
+          },
+        ],
+        parent_node_id: 'parent-branch',
+      })
+
+      await generateFromNode('parent-branch', 'Instructions', {
+        target_choice_index: 1,
+      })
+
+      const state = useGraphStore.getState()
+      const generatedNode = state.nodes.find((n) => n.id === 'generated-branch')
+      expect(generatedNode).toBeDefined()
+      expect(generatedNode!.position.x).toBe(
+        childNodeTopLeftX({
+          parentX: parentNode.position.x,
+          parentWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+          childWidth: GRAPH_DIALOGUE_NODE_WIDTH,
+          siblingIndex: 1,
+          siblingCount: 3,
+        })
+      )
+      expect(generatedNode!.position.y).toBe(
+        childNodeTopLeftY({
+          parentY: parentNode.position.y,
+          parentHeight: getLayoutNodeHeight(parentNode),
+        })
+      )
+      const updatedParent = state.nodes.find((n) => n.id === 'parent-branch')
+      expect(updatedParent?.data?.choices?.[1]?.targetNode).toBe('generated-branch')
+    })
+
+    it('should place a single generated child below a tall parent without overlap', async () => {
+      const { addNode, generateFromNode } = useGraphStore.getState()
+
+      const parentNode = {
+        id: 'parent-tall',
+        type: 'dialogueNode',
+        position: { x: 100, y: 100 },
+        measured: { width: GRAPH_DIALOGUE_NODE_WIDTH, height: 420 },
+        width: GRAPH_DIALOGUE_NODE_WIDTH,
+        height: 420,
+        data: {
+          speaker: 'PNJ',
+          title: 'Parent très long',
+          line: 'Texte long '.repeat(20),
+          status: 'pending',
+          choices: [{ text: 'Choix 1', choiceId: 'choice-tall', targetNode: null }],
+        },
+      } as Node & { measured: { width: number; height: number } }
+      addNode(parentNode)
+
+      const graphAPI = await import('../api/graph')
+      const mockGenerateNode = vi.mocked(graphAPI.generateNode)
+      mockGenerateNode.mockResolvedValueOnce({
+        node: {
+          id: 'generated-tall-child',
+          type: 'dialogueNode',
+          speaker: 'PNJ',
+          line: 'Réponse',
+        },
+        suggested_connections: [],
+        parent_node_id: 'parent-tall',
+      })
+
+      await generateFromNode('parent-tall', 'Instructions', {
+        target_choice_index: 0,
+      })
+
+      const state = useGraphStore.getState()
+      const generatedNode = state.nodes.find((n) => n.id === 'generated-tall-child')
+      expect(generatedNode).toBeDefined()
+      expect(generatedNode!.position.y).toBe(
+        childNodeTopLeftY({
+          parentY: parentNode.position.y,
+          parentHeight: getLayoutNodeHeight(parentNode),
+        })
+      )
+      expect(generatedNode!.position.y).toBeGreaterThan(parentNode.position.y + parentNode.height!)
     })
 
     it('should set parent choice test*Node fields when generating from TestNode (4 results)', async () => {
@@ -744,10 +1039,10 @@ describe('useGraphStore - Pending save state', () => {
       const mockGenerateNode = vi.mocked(graphAPI.generateNode)
       mockGenerateNode.mockResolvedValueOnce({
         nodes: [
-          { id: 'NODE_CF', speaker: 'PNJ', line: 'Échec critique' },
-          { id: 'NODE_F', speaker: 'PNJ', line: 'Échec' },
-          { id: 'NODE_S', speaker: 'PNJ', line: 'Réussite' },
-          { id: 'NODE_CS', speaker: 'PNJ', line: 'Réussite critique' },
+          { id: 'NODE_CF', type: 'dialogueNode', speaker: 'PNJ', line: 'Échec critique' },
+          { id: 'NODE_F', type: 'dialogueNode', speaker: 'PNJ', line: 'Échec' },
+          { id: 'NODE_S', type: 'dialogueNode', speaker: 'PNJ', line: 'Réussite' },
+          { id: 'NODE_CS', type: 'dialogueNode', speaker: 'PNJ', line: 'Réussite critique' },
         ],
         suggested_connections: [
           { from: 'test-node-START-choice-0', to: 'NODE_CF', connection_type: 'test-critical-failure' },
