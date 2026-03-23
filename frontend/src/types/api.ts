@@ -207,6 +207,49 @@ export interface SuggestionsResponse {
   suggestions: SuggestionItem[]
 }
 
+// Context Rules (Story 3.4)
+export type EntityTypeStr = 'character' | 'location' | 'item' | 'species' | 'community'
+
+export interface RuleCondition {
+  entityType: EntityTypeStr
+  entityName?: string | null
+}
+
+export interface ContextRule {
+  id: string
+  name: string
+  enabled: boolean
+  priority: number
+  conditionOperator: 'AND' | 'OR'
+  conditions: RuleCondition[]
+  suggestedTypes: EntityTypeStr[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateRuleRequest {
+  name: string
+  enabled?: boolean
+  priority?: number | null
+  conditionOperator?: 'AND' | 'OR'
+  conditions: RuleCondition[]
+  suggestedTypes: EntityTypeStr[]
+}
+
+export interface UpdateRuleRequest {
+  name?: string | null
+  enabled?: boolean | null
+  priority?: number | null
+  conditionOperator?: 'AND' | 'OR' | null
+  conditions?: RuleCondition[] | null
+  suggestedTypes?: EntityTypeStr[] | null
+}
+
+export interface RulesListResponse {
+  rules: ContextRule[]
+  total: number
+}
+
 // Config
 export interface LLMModelResponse {
   model_identifier: string

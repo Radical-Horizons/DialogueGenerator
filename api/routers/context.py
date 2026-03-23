@@ -23,6 +23,12 @@ from api.schemas.context import (
     SuggestionsResponse,
     SuggestionItem,
 )
+from api.schemas.context_rules import (
+    ContextRule,
+    CreateRuleRequest,
+    UpdateRuleRequest,
+    RulesListResponse,
+)
 from api.schemas.dialogue import EstimateTokensRequest, EstimateTokensResponse
 from api.dependencies import (
     get_context_builder,
@@ -31,12 +37,14 @@ from api.dependencies import (
     get_dialogue_generation_service,
     get_prompt_engine,
     get_skill_catalog_service,
-    get_trait_catalog_service
+    get_trait_catalog_service,
+    get_context_rule_service,
 )
 from api.exceptions import NotFoundException, InternalServerException, ValidationException
 from core.context.context_builder import ContextBuilder
 from services.linked_selector import LinkedSelectorService
 from services.dialogue_generation_service import DialogueGenerationService
+from services.context_rule_service import ContextRuleService
 from core.prompt.prompt_engine import PromptEngine
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
@@ -774,6 +782,41 @@ _LINKED_CATEGORY_TO_SUGGESTION_TYPE: dict[str, str] = {
 }
 
 
+def _filter_suggestions_by_types(
+    linked: dict[str, set[str]],
+    already_selected: dict[str, set[str]],
+    trigger_name: str,
+    allowed_types: "set[str] | None",
+) -> list[SuggestionItem]:
+    """Filtre les entités GDD liées pour construire la liste de suggestions.
+
+    Args:
+        linked: Entités liées groupées par catégorie GDD (ex. "characters": {"Bob"}).
+        already_selected: Mapping type singulier → noms déjà sélectionnés.
+        trigger_name: Nom de l'entité trigger (exclue des suggestions).
+        allowed_types: Types autorisés par les règles, ou None si aucune règle active
+            (→ tous les types sont autorisés).
+
+    Returns:
+        Liste des SuggestionItem filtrés.
+    """
+    suggestions: list[SuggestionItem] = []
+    for category, names in linked.items():
+        suggestion_type = _LINKED_CATEGORY_TO_SUGGESTION_TYPE.get(category)
+        if not suggestion_type:
+            continue
+        if allowed_types is not None and suggestion_type not in allowed_types:
+            continue
+        selected_in_category = already_selected.get(suggestion_type, set())
+        for name in names:
+            if name == trigger_name:
+                continue
+            if name in selected_in_category:
+                continue
+            suggestions.append(SuggestionItem(type=suggestion_type, name=name))
+    return suggestions
+
+
 @router.post(
     "/suggestions",
     response_model=SuggestionsResponse,
@@ -783,6 +826,7 @@ async def get_context_suggestions(
     request_data: SuggestionsRequest,
     request: Request,
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> SuggestionsResponse:
     """Retourne des suggestions d'entités GDD liées à l'entité trigger.
@@ -790,10 +834,16 @@ async def get_context_suggestions(
     Déclenché lors de la sélection d'une entité — retourne les entités GDD
     liées (via les relations du GDD) non encore sélectionnées.
 
+    Si des règles de contexte actives existent et matchent le trigger, seules
+    les entités dont le type est dans les ``suggested_types`` des règles matchées
+    sont retournées. En l'absence de règles actives, toutes les entités liées
+    sont proposées (comportement Story 3.3).
+
     Args:
         request_data: Type + nom de l'entité trigger + sélections existantes.
         request: La requête HTTP.
         context_builder: ContextBuilder injecté.
+        rule_service: ContextRuleService injecté.
         request_id: ID de la requête.
 
     Returns:
@@ -810,18 +860,21 @@ async def get_context_suggestions(
 
         already_selected = _resolve_already_selected(request_data.already_selected)
 
-        suggestions: list[SuggestionItem] = []
-        for category, names in linked.items():
-            suggestion_type = _LINKED_CATEGORY_TO_SUGGESTION_TYPE.get(category)
-            if not suggestion_type:
-                continue  # sauter quests, etc.
-            selected_in_category = already_selected.get(suggestion_type, set())
-            for name in names:
-                if name == request_data.trigger_name:
-                    continue  # ne pas suggérer le trigger lui-même
-                if name in selected_in_category:
-                    continue  # déjà sélectionné
-                suggestions.append(SuggestionItem(type=suggestion_type, name=name))
+        # Évaluation des règles : détermine les types autorisés
+        already_selected_sets: dict[str, set[str]] = already_selected
+        allowed_types = rule_service.evaluate_rules(
+            trigger_type=request_data.trigger_type,
+            trigger_name=request_data.trigger_name,
+            already_selected=already_selected_sets,
+        )
+        # None → pas de règles actives → comportement par défaut (tous les types)
+
+        suggestions: list[SuggestionItem] = _filter_suggestions_by_types(
+            linked=linked,
+            already_selected=already_selected,
+            trigger_name=request_data.trigger_name,
+            allowed_types=allowed_types,
+        )
 
         return SuggestionsResponse(suggestions=suggestions)
 
@@ -832,6 +885,135 @@ async def get_context_suggestions(
         raise InternalServerException(
             message="Erreur lors de la récupération des suggestions",
             details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Règles de sélection de contexte — CRUD (Story 3.4)
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/rules",
+    response_model=RulesListResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def list_context_rules(
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> RulesListResponse:
+    """Liste toutes les règles de sélection de contexte.
+
+    Args:
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        Liste des règles triées par priorité.
+    """
+    rules = rule_service.list_rules()
+    return RulesListResponse(rules=rules, total=len(rules))
+
+
+@router.post(
+    "/rules",
+    response_model=ContextRule,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_context_rule(
+    request_data: CreateRuleRequest,
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ContextRule:
+    """Crée une nouvelle règle de sélection de contexte.
+
+    Args:
+        request_data: Corps de la requête (nom, conditions, types suggérés).
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        La règle créée avec son identifiant généré.
+    """
+    try:
+        return rule_service.create_rule(request_data)
+    except Exception as e:
+        logger.exception(f"Erreur lors de la création d'une règle (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors de la création de la règle",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.put(
+    "/rules/{rule_id}",
+    response_model=ContextRule,
+    status_code=status.HTTP_200_OK,
+)
+async def update_context_rule(
+    rule_id: str,
+    request_data: UpdateRuleRequest,
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ContextRule:
+    """Met à jour une règle de sélection de contexte.
+
+    Args:
+        rule_id: Identifiant de la règle à modifier.
+        request_data: Champs à modifier (tous optionnels).
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        La règle mise à jour.
+
+    Raises:
+        NotFoundException: Si la règle n'existe pas.
+    """
+    updated = rule_service.update_rule(rule_id, request_data)
+    if updated is None:
+        raise NotFoundException(
+            resource_type="Règle de contexte",
+            resource_id=rule_id,
+            request_id=request_id,
+        )
+    return updated
+
+
+@router.delete(
+    "/rules/{rule_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_context_rule(
+    rule_id: str,
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> None:
+    """Supprime une règle de sélection de contexte.
+
+    Args:
+        rule_id: Identifiant de la règle à supprimer.
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Raises:
+        NotFoundException: Si la règle n'existe pas.
+    """
+    deleted = rule_service.delete_rule(rule_id)
+    if not deleted:
+        raise NotFoundException(
+            resource_type="Règle de contexte",
+            resource_id=rule_id,
             request_id=request_id,
         )
 

@@ -239,10 +239,33 @@
 
     <!-- REFACTOR PHASE (mandatory, execute inline after GREEN without stopping) -->
     <action>For each task that has a 🔵 Refactor subtask: execute the refactor immediately after GREEN — do NOT skip or defer to later.</action>
-    <action>Refactor = apply the "chantier principal" listed in the story 🔵 line. If genuinely not applicable, document "Refactor N/A: [specific reason]" in Dev Agent Record for that task.</action>
+    <critical>REFACTOR IS NOT OPTIONAL — skipping refactor or waiving quality criteria is not allowed:
+      The refactor phase MUST produce at least one concrete code edit. There are no exceptions.
+
+      MANDATORY PROCESS:
+      1. Re-read every line of code produced during GREEN for this task — top to bottom.
+      2. Apply the "chantier principal" from the story 🔵 line. If it was already partially done during GREEN, FINISH it or EXTEND it.
+      3. If the chantier principal was truly 100% covered by GREEN, then FIND something else: a variable name that doesn't speak the domain, a comment that narrates instead of explaining intent, a function that does two things, a test assertion that could be clearer, a duplication with existing code. The code is NEVER perfect after a minimal GREEN pass.
+      4. Make the edit. Verify tests still pass.
+      5. Verify REFACTOR QUALITY CRITERIA (below) — if any criterion fails, refactor further until it passes. Dev Notes may tighten numbers or allow a named exception; otherwise defaults apply.
+      6. In Dev Agent Record, write: "🔵 Refactor Task N: [what was changed] — [before] → [after]". A diff fragment or the changed line(s) is required. A description without a code change is NOT acceptable.
+
+      FORBIDDEN: waiving refactor, "already clean", "already done in GREEN", "architecture already correct", "no improvements needed". These phrases block task completion.
+      If you cannot find a single improvement after reading every line: the GREEN was over-engineered. Simplify something.
+    </critical>
+    <critical>REFACTOR QUALITY CRITERIA (defaults; Dev Notes may override thresholds or document an approved exception):
+      SOLID/DRY/KISS are the intent; the following checks make that operational:
+      - Tests: after refactor, tests scoped to this task still pass 100%.
+      - File size: no source file created or substantively modified for this task exceeds 300 lines unless Dev Notes set a different explicit limit.
+      - Function size: no function/method introduced or materially changed in this task exceeds ~60 lines without splitting or documenting why an exception is warranted in Dev Agent Record.
+      - Duplication: no non-trivial duplicated logic across files touched in this task; align with existing helpers/hooks/services per project architecture.
+      - Naming: identifiers reflect domain/story language; avoid vague names (data, temp, handle, process) without clear scope.
+      - Single responsibility: exported/public units (components, hooks, services) do one coherent job — no "god" modules mixing unrelated concerns.
+      - Comments: only for non-obvious intent or constraints — not line-by-line narration of what the code does.
+      - Boundaries: respect layers and patterns in Dev Notes (e.g. no business rules sneaking into UI against project rules); no new dependencies without story approval.
+      - Test code: cases and assertions remain readable; no vacuous conditional assertions (see TEST QUALITY GATE in this workflow).
+    </critical>
     <action>Improve code structure while keeping tests green; ensure code follows architecture patterns and coding standards from Dev Notes.</action>
-    <action>Document refactor actions (or N/A with reason) in Dev Agent Record → Completion Notes before marking 🔵 [x].</action>
-    <critical>Do NOT mark a 🔵 Refactor checkbox [x] unless you have either performed a concrete refactor change OR written an explicit "Refactor N/A: [specific reason]" note in Dev Agent Record for that task. Vague notes like "already clean" are not acceptable.</critical>
 
     <action if="new dependencies required beyond story specifications">HALT: "Additional dependencies need user approval"</action>
     <action if="3 consecutive implementation failures occur">HALT and request guidance</action>
@@ -297,14 +320,14 @@
       <action>Add to Dev Agent Record → Completion Notes: "✅ Resolved review finding [{{severity}}]: {{description}}"</action>
     </check>
 
-    <!-- REFACTOR GATE: do not mark 🔵 [x] without evidence -->
-    <action>For each task that contains a "🔵 Refactor" subtask: before marking that subtask [x], verify that Dev Agent Record already contains either (a) a description of what was refactored for this task, or (b) an explicit "Refactor N/A: [reason]" for this task. If neither is present, perform the refactor or add the N/A note, then mark [x].</action>
+    <!-- REFACTOR GATE: mandatory code change required -->
+    <action>For each task that contains a "🔵 Refactor" subtask: before marking that subtask [x], verify (1) Dev Agent Record contains what was concretely changed with at least one changed line or diff fragment, and (2) REFACTOR QUALITY CRITERIA from step 5 are satisfied. A description without an edit is a failed refactor — perform the edit before marking [x]. Waiving refactor or criteria is not accepted.</action>
 
     <!-- ONLY MARK COMPLETE IF ALL VALIDATION PASS -->
     <check if="ALL validation gates pass AND tests ACTUALLY exist and pass">
       <action>ONLY THEN mark the task (and subtasks) checkbox with [x]</action>
       <action>Update File List section with ALL new, modified, or deleted files (paths relative to repo root)</action>
-      <action>Add completion notes to Dev Agent Record summarizing what was ACTUALLY implemented, tested, and refactored (or N/A)</action>
+      <action>Add completion notes to Dev Agent Record summarizing what was ACTUALLY implemented, tested, and validated against REFACTOR QUALITY CRITERIA for each completed 🔵</action>
     </check>
 
     <check if="ANY validation fails">

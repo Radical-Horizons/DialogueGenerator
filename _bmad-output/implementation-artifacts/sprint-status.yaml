@@ -98,7 +98,7 @@ development_status:
   3-1-parcourir-entités-gdd-disponibles-personnages-lieux-régions-thèmes-fr11: done
   3-2-sélectionner-manuellement-contexte-gdd-pertinent-fr12: done
   3-3-suggestions-automatiques-contexte-gdd-basées-sur-règles-fr13: done
-  3-4-définir-règles-explicites-de-sélection-contexte-lieu-région-personnages-thème-fr14: backlog
+  3-4-définir-règles-explicites-de-sélection-contexte-lieu-région-personnages-thème-fr14: done
   3-5-configurer-règles-contexte-par-type-de-dialogue-fr15: backlog
   3-6-mesurer-pertinence-contexte-gdd-utilisé-dans-dialogue-généré-fr16: backlog
   3-7-voir-sections-gdd-utilisées-dans-génération-nœud-fr17: backlog

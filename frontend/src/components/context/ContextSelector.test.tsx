@@ -26,6 +26,7 @@ describe('ContextSelector', () => {
   const mockGetElementMode = vi.fn(() => null)
   const mockSetElementMode = vi.fn()
   const mockSetSuggestions = vi.fn()
+  const mockRefreshSuggestionsForTrigger = vi.fn()
   const mockIsElementSelected = vi.fn(() => false)
 
   const mockSelections = {
@@ -72,6 +73,7 @@ describe('ContextSelector', () => {
       getElementMode: mockGetElementMode,
       setElementMode: mockSetElementMode,
       setSuggestions: mockSetSuggestions,
+      refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
       isElementSelected: mockIsElementSelected,
       suggestions: [],
     } as ReturnType<typeof useContextStore>)
@@ -117,9 +119,8 @@ describe('ContextSelector', () => {
 
   // --- Tests d'intégration Story 3.3 : suggestions automatiques ---
 
-  it('coche un personnage → appelle getSuggestions avec trigger_type character', async () => {
+  it('coche un personnage → appelle refreshSuggestionsForTrigger (character)', async () => {
     const user = userEvent.setup()
-    vi.mocked(contextAPI.getSuggestions).mockResolvedValue({ suggestions: [] })
 
     render(<ContextSelector />)
     await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
@@ -127,16 +128,14 @@ describe('ContextSelector', () => {
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
     await waitFor(() =>
-      expect(contextAPI.getSuggestions).toHaveBeenCalledWith(
-        expect.objectContaining({ trigger_type: 'character', trigger_name: 'Test Character' })
-      )
+      expect(mockRefreshSuggestionsForTrigger).toHaveBeenCalledWith('character', 'Test Character')
     )
   })
 
-  it('les suggestions retournées sont passées au store via setSuggestions', async () => {
+  it('coche un personnage → le store rafraîchit les suggestions (mock délègue à setSuggestions)', async () => {
     const user = userEvent.setup()
-    vi.mocked(contextAPI.getSuggestions).mockResolvedValue({
-      suggestions: [{ type: 'location', name: 'Nef Centrale' }],
+    mockRefreshSuggestionsForTrigger.mockImplementationOnce(() => {
+      mockSetSuggestions([{ type: 'location', name: 'Nef Centrale' }])
     })
 
     render(<ContextSelector />)
@@ -326,6 +325,7 @@ describe('ContextSelector', () => {
       getElementMode: mockGetElementMode,
       setElementMode: mockSetElementMode,
       setSuggestions: mockSetSuggestions,
+      refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
       isElementSelected: mockIsElementSelected,
       suggestions: [],
     } as ReturnType<typeof useContextStore>)
@@ -402,6 +402,7 @@ describe('ContextSelector', () => {
       getElementMode: mockGetElementMode,
       setElementMode: mockSetElementMode,
       setSuggestions: mockSetSuggestions,
+      refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
       isElementSelected: mockIsElementSelected,
       suggestions: [],
     } as ReturnType<typeof useContextStore>)

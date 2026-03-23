@@ -2,6 +2,7 @@
  * Store Zustand pour gérer les sélections de contexte.
  */
 import { create } from 'zustand'
+import * as contextAPI from '../api/context'
 import type { 
   ContextSelection,
   ElementMode,
@@ -62,6 +63,8 @@ interface ContextState {
   restoreState: (selections: ContextSelection, region: string | null, subLocations: string[]) => void
   // Actions suggestions (Story 3.3)
   setSuggestions: (suggestions: SuggestionItem[]) => void
+  /** Rafraîchit les suggestions (ex. après synchro scène→contexte, hors ContextSelector). */
+  refreshSuggestionsForTrigger: (triggerType: string, triggerName: string) => void
   acceptSuggestion: (type: SuggestionEntityType, name: string) => void
   ignoreSuggestion: (type: SuggestionEntityType, name: string) => void
   acceptAllSuggestionsByType: (type: SuggestionEntityType) => void
@@ -480,6 +483,22 @@ export const useContextStore = create<ContextState>((set, get) => ({
         (sg) => !state.ignoredSuggestions.includes(`${sg.type}:${sg.name}`)
       ),
     }))
+  },
+
+  refreshSuggestionsForTrigger: (triggerType: string, triggerName: string) => {
+    void (async () => {
+      try {
+        const state = get()
+        const response = await contextAPI.getSuggestions({
+          trigger_type: triggerType,
+          trigger_name: triggerName,
+          already_selected: state.selections,
+        })
+        state.setSuggestions(response.suggestions)
+      } catch {
+        // Suggestions non-critiques
+      }
+    })()
   },
 
   acceptSuggestion: (type: SuggestionEntityType, name: string) => {

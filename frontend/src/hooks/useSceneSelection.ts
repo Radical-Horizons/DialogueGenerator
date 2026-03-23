@@ -6,6 +6,7 @@ import * as contextAPI from '../api/context'
 import type { SceneSelection } from '../types/generation'
 import { useContextStore } from '../store/contextStore'
 import { useGenerationStore } from '../store/generationStore'
+import { suggestionRefreshAfterSceneChange } from '../utils/contextSuggestionSync'
 
 export interface SceneSelectionData {
   characters: string[]
@@ -309,6 +310,13 @@ export function useSceneSelection() {
       return
     }
 
+    const prevSnap: SceneSelection = {
+      characterA: prevSelection.current.characterA,
+      characterB: prevSelection.current.characterB,
+      sceneRegion: prevSelection.current.sceneRegion,
+      subLocation: prevSelection.current.subLocation,
+    }
+
     // Détecter si c'est un échange de personnages
     const isSwap = 
       prevSelection.current.characterA === selection.characterB &&
@@ -410,6 +418,15 @@ export function useSceneSelection() {
           toggleLocation(selection.subLocation, 'full')
         }
       }
+    }
+
+    // Même flux que ContextSelector (checkbox) : 🎲 / combobox mettent à jour le store ici, pas via handleItemToggle.
+    const suggestionAction = suggestionRefreshAfterSceneChange(selection, prevSnap)
+    const ctx = useContextStore.getState()
+    if (suggestionAction.kind === 'fetch') {
+      ctx.refreshSuggestionsForTrigger(suggestionAction.triggerType, suggestionAction.triggerName)
+    } else if (suggestionAction.kind === 'clear') {
+      ctx.setSuggestions([])
     }
     
     // Mettre à jour la référence pour la prochaine itération

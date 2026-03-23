@@ -20,6 +20,7 @@ from services.llm_usage_service import LLMUsageService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.linked_selector import LinkedSelectorService
 from services.notion_import_service import NotionImportService
+from services.context_rule_service import ContextRuleService
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,7 @@ class ServiceContainer:
         self._graph_node_orchestrator: Optional["GraphNodeOrchestrator"] = None
         self._linked_selector_service: Optional[LinkedSelectorService] = None
         self._notion_import_service: Optional[NotionImportService] = None
+        self._context_rule_service: Optional[ContextRuleService] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
     def get_config_service(self) -> ConfigurationService:
@@ -267,6 +269,20 @@ class ServiceContainer:
             self._notion_import_service = NotionImportService()
             logger.info("NotionImportService initialisé dans le container.")
         return self._notion_import_service
+
+    def get_context_rule_service(self) -> ContextRuleService:
+        """Retourne le service de règles de sélection de contexte GDD.
+
+        Returns:
+            Instance de ContextRuleService.
+        """
+        if self._context_rule_service is None:
+            from pathlib import Path
+            from constants import FilePaths
+            storage_file = Path(__file__).resolve().parent.parent / FilePaths.CONTEXT_RULES_FILE
+            self._context_rule_service = ContextRuleService(storage_file=storage_file)
+            logger.info("ContextRuleService initialisé dans le container.")
+        return self._context_rule_service
     
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.
@@ -314,4 +330,5 @@ class ServiceContainer:
         self._graph_node_orchestrator = None
         self._linked_selector_service = None
         self._notion_import_service = None
+        self._context_rule_service = None
         logger.info("ServiceContainer réinitialisé (reload détecté).")

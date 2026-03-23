@@ -26,6 +26,7 @@ class FilePaths:
     INTERACTIONS_DIR = DATA_DIR / "interactions"
     LLM_USAGE_DIR = DATA_DIR / "llm_usage"
     COST_BUDGETS_FILE = DATA_DIR / "cost_budgets.json"
+    CONTEXT_RULES_FILE = DATA_DIR / "context-rules" / "rules.json"
     LOGS_DIR = DATA_DIR / "logs"
     LLM_CONFIG = "llm_config.json"
 
