@@ -12,6 +12,10 @@ from api.schemas.llm_usage import (
     ContextRelevanceHistoryEntry,
     ContextRelevanceHistoryResponse,
     ContextRelevanceReportResponse,
+    ContextSectionUsageEntityGroup,
+    ContextSectionUsageFlatItem,
+    ContextSectionUsageItem,
+    ContextSectionUsageReportResponse,
     DialogueCostResponse,
     DialogueCostSummaryEntry,
     GenerationLogEntry,
@@ -21,12 +25,48 @@ from api.schemas.llm_usage import (
     LLMUsageStatisticsResponse,
     NodeCostEntry,
 )
+from services.context_relevance_scoring import extract_generated_plain_text
 from api.utils.pagination import paginate_list, PaginationParams
 from services.llm_usage_service import LLMUsageService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _context_section_usage_to_response(
+    dialogue_id: str,
+    node_id: str,
+    raw: dict,
+    generated_preview: str,
+) -> ContextSectionUsageReportResponse:
+    """Construit le schéma HTTP à partir du dict persisté / calculé."""
+    groups = [
+        ContextSectionUsageEntityGroup(
+            entity_type=g["entity_type"],
+            entity_label=g["entity_label"],
+            sections=[ContextSectionUsageItem(**s) for s in g.get("sections", [])],
+        )
+        for g in raw.get("entity_groups", [])
+    ]
+    weak = [ContextSectionUsageFlatItem(**x) for x in raw.get("weak_sections", [])]
+    refl = [ContextSectionUsageFlatItem(**x) for x in raw.get("reflected_sections", [])]
+    return ContextSectionUsageReportResponse(
+        dialogue_id=dialogue_id,
+        node_id=node_id,
+        request_id=raw.get("request_id"),
+        method=str(raw.get("method", "unknown")),
+        computation_ms=int(raw.get("computation_ms", 0)),
+        computed_at=str(raw.get("computed_at", "")),
+        reflected_threshold_percent=float(raw.get("reflected_threshold_percent", 40.0)),
+        entity_groups=groups,
+        weak_sections=weak,
+        reflected_sections=refl,
+        weak_section_count=int(raw.get("weak_section_count", len(weak))),
+        reflected_section_count=int(raw.get("reflected_section_count", len(refl))),
+        generated_plain_preview=generated_preview,
+        parser_note=raw.get("parser_note"),
+    )
 
 
 @router.get(
@@ -265,6 +305,49 @@ async def get_node_context_relevance(
         )
         raise InternalServerException(
             message="Erreur lors de la récupération de la pertinence contexte",
+            details={"error": str(e), "dialogue_id": dialogue_id, "node_id": node_id},
+            request_id=request_id,
+        )
+
+
+@router.get(
+    "/dialogue/{dialogue_id}/nodes/{node_id}/context-usage",
+    response_model=ContextSectionUsageReportResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_node_context_section_usage(
+    dialogue_id: str,
+    node_id: str,
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ContextSectionUsageReportResponse:
+    """Rapport d’usage des sections GDD injectées pour un nœud (Story 3.7, FR17)."""
+    try:
+        raw = usage_service.get_context_section_usage_for_node(dialogue_id, node_id)
+        if raw is None:
+            raise NotFoundException(
+                resource_type="Usage contexte sections",
+                resource_id=f"{dialogue_id}/{node_id}",
+                request_id=request_id,
+            )
+        record = usage_service.get_record_for_dialogue_node(dialogue_id, node_id)
+        preview = ""
+        if record and record.response:
+            preview = extract_generated_plain_text(record.response)[:4000]
+        return _context_section_usage_to_response(
+            dialogue_id, node_id, raw, preview
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Erreur context-usage (dialogue_id=%s, node_id=%s, request_id=%s)",
+            dialogue_id,
+            node_id,
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération de l’usage contexte par section",
             details={"error": str(e), "dialogue_id": dialogue_id, "node_id": node_id},
             request_id=request_id,
         )

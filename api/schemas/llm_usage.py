@@ -187,3 +187,61 @@ class ContextRelevanceHistoryResponse(BaseModel):
     entries: List[ContextRelevanceHistoryEntry] = Field(default_factory=list)
     total_count: int = Field(..., ge=0, description="Nombre d’entrées")
 
+
+class ContextSectionUsageItem(BaseModel):
+    """Une sous-section GDD analysée pour le recouvrement avec la sortie (FR17)."""
+
+    section_key: str = Field(..., description="Clé stable pour comparaison inter-nœuds")
+    section_title: str = Field(..., description="Titre de sous-section ou « Contenu »")
+    excerpt: str = Field(..., description="Extrait du texte injecté (tronqué)")
+    overlap_percent: float = Field(..., ge=0.0, le=100.0)
+    status: str = Field(..., description="reflected | weak")
+
+
+class ContextSectionUsageEntityGroup(BaseModel):
+    """Regroupement par entité (personnage, lieu, …) dans le prompt."""
+
+    entity_type: str = Field(..., description="Clé type (characters, locations, …)")
+    entity_label: str = Field(..., description="Libellé affichable (entité ou type)")
+    sections: List[ContextSectionUsageItem] = Field(
+        default_factory=list,
+        description="Sous-sections avec score",
+    )
+
+
+class ContextSectionUsageFlatItem(BaseModel):
+    """Vue aplatie d’une section (zones reflected / weak)."""
+
+    entity_type: str
+    entity_label: str
+    section_key: str
+    section_title: str
+    excerpt: str
+    overlap_percent: float = Field(..., ge=0.0, le=100.0)
+    status: str
+
+
+class ContextSectionUsageReportResponse(BaseModel):
+    """Rapport d’usage contexte par section pour un nœud (Story 3.7)."""
+
+    dialogue_id: str
+    node_id: str
+    request_id: Optional[str] = Field(default=None)
+    method: str
+    computation_ms: int = Field(..., ge=0)
+    computed_at: str
+    reflected_threshold_percent: float = Field(..., ge=0.0, le=100.0)
+    entity_groups: List[ContextSectionUsageEntityGroup] = Field(default_factory=list)
+    weak_sections: List[ContextSectionUsageFlatItem] = Field(default_factory=list)
+    reflected_sections: List[ContextSectionUsageFlatItem] = Field(default_factory=list)
+    weak_section_count: int = Field(..., ge=0)
+    reflected_section_count: int = Field(..., ge=0)
+    generated_plain_preview: str = Field(
+        default="",
+        description="Texte généré concaténé (aperçu pour surlignage côté UI)",
+    )
+    parser_note: Optional[str] = Field(
+        default=None,
+        description="Limite du découpage (ex. prompt système XML vs en-têtes markdown ###)",
+    )
+

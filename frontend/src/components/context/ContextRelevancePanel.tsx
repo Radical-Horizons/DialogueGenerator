@@ -25,7 +25,14 @@ function labelForType(key: string): string {
   return TYPE_LABELS[key] ?? key
 }
 
-export function ContextRelevancePanel() {
+export type ContextRelevancePanelProps = {
+  /**
+   * Sans bordure haute : le panneau est regroupé dans un conteneur parent (ex. accordéon).
+   */
+  embedded?: boolean
+}
+
+export function ContextRelevancePanel({ embedded = false }: ContextRelevancePanelProps) {
   const dialogueId = useGraphStore((s) => s.documentId ?? s.dialogueMetadata.filename ?? null)
   const nodeId = useGraphStore((s) => s.selectedNodeId)
 
@@ -84,6 +91,8 @@ export function ContextRelevancePanel() {
     }
   }, [dialogueId, nodeId])
 
+  const topRule = embedded ? 'none' : `1px solid ${theme.border.primary}`
+
   if (!dialogueId) {
     return (
       <div
@@ -92,7 +101,7 @@ export function ContextRelevancePanel() {
           padding: '0.6rem 0.75rem',
           fontSize: '0.8rem',
           color: theme.text.secondary,
-          borderTop: `1px solid ${theme.border.primary}`,
+          borderTop: topRule,
         }}
       >
         Chargez ou enregistrez un dialogue pour afficher la pertinence contexte.
@@ -108,7 +117,7 @@ export function ContextRelevancePanel() {
           padding: '0.6rem 0.75rem',
           fontSize: '0.8rem',
           color: theme.text.secondary,
-          borderTop: `1px solid ${theme.border.primary}`,
+          borderTop: topRule,
         }}
       >
         Sélectionnez un nœud du graphe pour voir la pertinence du contexte GDD.
@@ -120,7 +129,7 @@ export function ContextRelevancePanel() {
     <div
       data-testid="context-relevance-panel"
       style={{
-        borderTop: `1px solid ${theme.border.primary}`,
+        borderTop: topRule,
         padding: '0.6rem 0.75rem',
         flexShrink: 0,
         backgroundColor: theme.background.secondary,
@@ -209,16 +218,27 @@ export function ContextRelevancePanel() {
         </>
       )}
       {history.length > 0 && (
-        <div style={{ marginTop: '0.55rem' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: theme.text.primary }}>
+        <details
+          data-testid="context-relevance-history-details"
+          style={{ marginTop: '0.55rem' }}
+        >
+          <summary
+            style={{
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: theme.text.primary,
+              listStyle: 'none',
+            }}
+          >
             Historique ({history.length})
-          </div>
+          </summary>
           <ul
             data-testid="context-relevance-history"
             style={{
               margin: '0.25rem 0 0',
               paddingLeft: '1rem',
-              maxHeight: '120px',
+              maxHeight: '100px',
               overflowY: 'auto',
               fontSize: '0.7rem',
               color: theme.text.secondary,
@@ -235,7 +255,7 @@ export function ContextRelevancePanel() {
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
     </div>
   )

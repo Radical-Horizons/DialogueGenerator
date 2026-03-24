@@ -225,6 +225,57 @@ export async function getNodeContextRelevance(
   return response.data
 }
 
+/** Section GDD analysée pour un nœud (Story 3.7). */
+export interface ContextSectionUsageItem {
+  section_key: string
+  section_title: string
+  excerpt: string
+  overlap_percent: number
+  status: string
+}
+
+export interface ContextSectionUsageEntityGroup {
+  entity_type: string
+  entity_label: string
+  sections: ContextSectionUsageItem[]
+}
+
+export interface ContextSectionUsageFlatItem {
+  entity_type: string
+  entity_label: string
+  section_key: string
+  section_title: string
+  excerpt: string
+  overlap_percent: number
+  status: string
+}
+
+export interface ContextSectionUsageReport {
+  dialogue_id: string
+  node_id: string
+  request_id?: string | null
+  method: string
+  computation_ms: number
+  computed_at: string
+  reflected_threshold_percent: number
+  entity_groups: ContextSectionUsageEntityGroup[]
+  weak_sections: ContextSectionUsageFlatItem[]
+  reflected_sections: ContextSectionUsageFlatItem[]
+  weak_section_count: number
+  reflected_section_count: number
+  generated_plain_preview: string
+  parser_note?: string | null
+}
+
+export async function getNodeContextSectionUsage(
+  dialogueId: string,
+  nodeId: string
+): Promise<ContextSectionUsageReport> {
+  const url = `/api/v1/llm-usage/dialogue/${encodeURIComponent(dialogueId)}/nodes/${encodeURIComponent(nodeId)}/context-usage`
+  const response = await apiClient.get(url)
+  return response.data
+}
+
 export async function getContextRelevanceHistory(
   dialogueId: string
 ): Promise<ContextRelevanceHistoryResponse> {

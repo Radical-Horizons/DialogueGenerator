@@ -32,6 +32,10 @@ class LLMUsageRecord(BaseModel):
         default=None,
         description="Rapport de pertinence contexte GDD (Story 3.6, FR16)",
     )
+    context_section_usage: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Détail d’usage par section GDD injectée (Story 3.7, FR17)",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={

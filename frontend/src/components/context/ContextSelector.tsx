@@ -18,6 +18,7 @@ import type { EntityType } from './SelectedContextSummary'
 import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
 import { ContextRulesEditor } from './ContextRulesEditor'
 import { ContextRelevancePanel } from './ContextRelevancePanel'
+import { ContextUsagePanel } from './ContextUsagePanel'
 import { useContextStore } from '../../store/contextStore'
 import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
@@ -588,7 +589,31 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           onSuccess={() => setError(null)}
         />
       </div>
-      <ContextRelevancePanel />
+      <details
+        data-testid="context-llm-diagnostics"
+        style={{
+          flexShrink: 0,
+          borderTop: `1px solid ${theme.border.primary}`,
+          backgroundColor: theme.background.secondary,
+        }}
+      >
+        <summary
+          style={{
+            padding: '0.45rem 0.75rem',
+            cursor: 'pointer',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            color: theme.text.primary,
+            listStyle: 'none',
+          }}
+        >
+          Diagnostic LLM — pertinence et sections GDD
+        </summary>
+        <div>
+          <ContextRelevancePanel embedded />
+          <ContextUsagePanel />
+        </div>
+      </details>
     </div>
   )
 }

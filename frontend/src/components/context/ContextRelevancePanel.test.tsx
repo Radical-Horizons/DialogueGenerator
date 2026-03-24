@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ContextRelevancePanel } from './ContextRelevancePanel'
 
@@ -43,7 +44,7 @@ describe('ContextRelevancePanel', () => {
       weak_types: ['characters', 'locations'],
       low_context_warning: true,
       low_threshold_percent: 30,
-      method: 'keyword_overlap_v1',
+      method: 'keyword_overlap_v2',
       computation_ms: 2,
       computed_at: '2020-01-01T00:00:00+00:00',
       suggestions_hints: ['Enrichir les instructions'],
@@ -73,7 +74,7 @@ describe('ContextRelevancePanel', () => {
       weak_types: [],
       low_context_warning: false,
       low_threshold_percent: 30,
-      method: 'keyword_overlap_v1',
+      method: 'keyword_overlap_v2',
       computation_ms: 1,
       computed_at: '2020-01-01T00:00:00+00:00',
       suggestions_hints: [],
@@ -102,7 +103,7 @@ describe('ContextRelevancePanel', () => {
       weak_types: [],
       low_context_warning: false,
       low_threshold_percent: 30,
-      method: 'keyword_overlap_v1',
+      method: 'keyword_overlap_v2',
       computation_ms: 1,
       computed_at: '2020-01-01T00:00:00+00:00',
       suggestions_hints: [],
@@ -124,9 +125,14 @@ describe('ContextRelevancePanel', () => {
 
     render(<ContextRelevancePanel />)
     await waitFor(() => {
-      expect(screen.getByTestId('context-relevance-history')).toBeInTheDocument()
+      expect(screen.getByTestId('context-relevance-history-details')).toBeInTheDocument()
     })
-    expect(screen.getByText(/req a/)).toBeInTheDocument()
+    const historyBlock = screen.getByTestId('context-relevance-history-details')
+    await userEvent.click(within(historyBlock).getByText(/Historique \(1\)/))
+    await waitFor(() => {
+      expect(within(historyBlock).getByTestId('context-relevance-history')).toBeInTheDocument()
+    })
+    expect(within(historyBlock).getByText(/req a/)).toBeInTheDocument()
   })
 
   it('affiche une erreur si l’API échoue (hors 404)', async () => {

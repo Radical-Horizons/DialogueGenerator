@@ -74,7 +74,7 @@ def test_compute_fallback_other_bucket_without_headers() -> None:
 def test_context_relevance_service_delegates() -> None:
     svc = ContextRelevanceService()
     r = svc.compute_result("x", "{}", request_id="r1")
-    assert r["method"] == "keyword_overlap_v1"
+    assert r["method"] == "keyword_overlap_v2"
 
 
 def test_llm_usage_compute_and_persist(tmp_path) -> None:
@@ -109,6 +109,8 @@ def test_llm_usage_compute_and_persist(tmp_path) -> None:
     assert updated is not None
     assert updated.context_relevance is not None
     assert updated.context_relevance["score_percent"] >= 0.0
+    assert updated.context_section_usage is not None
+    assert updated.context_section_usage.get("method") == "section_keyword_overlap_v2"
     hist = usage.list_context_relevance_history("dlg.json")
     assert len(hist) == 1
     assert hist[0]["request_id"] == "req-persist"
@@ -121,3 +123,50 @@ def test_scoring_performance_under_one_second() -> None:
     t0 = time.perf_counter()
     compute_context_relevance_result(prompt, response)
     assert (time.perf_counter() - t0) < 1.0
+
+
+def test_openai_responses_dump_ignores_chaff_uses_only_tool_arguments() -> None:
+    """Le dump API ne doit pas faire croire que le lore est reflété via le bruit (message, schéma)."""
+    system = (
+        "### Personnages\n"
+        "LoreTokenRareQQQ vit dans la forêt.\n\n"
+        "--- Input ---\n"
+        "[]"
+    )
+    args = json.dumps(
+        {
+            "title": "Titre court",
+            "node": {
+                "line": "Sortie sans le mot rare du contexte personnage.",
+                "speaker": "PNJ",
+                "choices": [{"text": "Aller ailleurs"}],
+            },
+        },
+        ensure_ascii=False,
+    )
+    chaff = (
+        "LoreTokenRareQQQ apparaît ici dans du bruit API ou des instructions répétées, "
+        "ce qui ne doit pas compter comme texte généré."
+    )
+    dump = {
+        "id": "resp_test",
+        "output": [
+            {"type": "message", "content": [{"type": "output_text", "text": chaff}]},
+            {"type": "function_call", "name": "generate_interaction", "arguments": args},
+        ],
+    }
+    result = compute_context_relevance_result(system, json.dumps(dump, ensure_ascii=False))
+    assert result["method"] == "keyword_overlap_v2"
+    assert result["breakdown_by_type"].get("characters", 0) < 35.0
+
+
+def test_openai_dump_without_tool_returns_zero_not_full_walk() -> None:
+    """Dump Responses sans function_call : pas de fallback sur toutes les chaînes."""
+    system = "ctxWordRareZZZ\n\n--- Input ---\n[]"
+    dump = {
+        "output": [
+            {"type": "message", "content": [{"text": "ctxWordRareZZZ echoed"}]},
+        ],
+    }
+    result = compute_context_relevance_result(system, json.dumps(dump))
+    assert result["score_percent"] == 0.0
