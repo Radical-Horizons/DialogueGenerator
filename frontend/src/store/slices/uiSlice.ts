@@ -5,7 +5,6 @@ import type { StateCreator } from 'zustand'
 import type {
   GraphState,
   GraphMetadata,
-  GraphFilters,
   GraphLayoutSpacingMode,
 } from '../types/graphState'
 import { initialState } from '../types/graphState'

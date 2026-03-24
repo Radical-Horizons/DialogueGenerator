@@ -33,8 +33,14 @@ describe('useDialogueLoader Race Conditions', () => {
 
   it('ignores previous load result when a new load starts (cancellation via sequence)', async () => {
     // 1. Setup first load to be slow
-    let resolveFirst: (v: any) => void
-    const firstPromise = new Promise((resolve) => {
+    let resolveFirst!: (value: {
+      document: { nodes: Array<{ id: string; line: string }> }
+      revision: number
+    }) => void
+    const firstPromise = new Promise<{
+      document: { nodes: Array<{ id: string; line: string }> }
+      revision: number
+    }>((resolve) => {
       resolveFirst = resolve
     })
     
@@ -88,7 +94,7 @@ describe('useDialogueLoader Race Conditions', () => {
 
     // 3. Resolve first load (stale)
     await act(async () => {
-      resolveFirst!({
+      resolveFirst({
         document: { nodes: [{ id: 'node-first', line: 'First' }] },
         revision: 1
       })

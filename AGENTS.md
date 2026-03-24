@@ -21,7 +21,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 - **`python3-venv` system package required**: On Ubuntu/Debian, install `python3.12-venv` before creating the venv.
 - **`.env` file**: Copy from `.env.example`. Required for JWT auth and config. Default dev credentials: `admin` / `admin123`.
 - **No real LLM key needed for basic dev**: Without `OPENAI_API_KEY`, the backend uses `DummyLLMClient` (mock responses). Set a real key for actual dialogue generation.
-- **Frontend ESLint**: Has 7 pre-existing lint errors (unused vars). This is a known state.
+- **Frontend ESLint**: `npm --prefix frontend run lint` is green. Treat any new lint error as a regression to fix, not as accepted baseline debt.
 - **Frontend Vitest**: All 650 tests pass as of last run (excluding `graphStore.autoLayout` which has a known pre-existing timeout). If a test suddenly fails, check whether it tests a feature that was silently removed rather than assuming the test is obsolete.
 - **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
 
@@ -48,7 +48,7 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 
 - Use `mergeFormDataIntoNodeData()` instead of spread (`{ ...nodeData, ...formValues }`) when flushing `NodeEditorPanel` form state on selection change; the spread overwrites `choices[N].targetNode` written by `connectNodes`, breaking the edge connection.
 - Node generation connection flow: API response → `connectNodes(parentId, newId, targetChoiceIndex, 'choice')` in `generationSlice` → `choices[N].targetNode` set in `edgeSlice` → `NodeEditorPanel` selection-change flush must preserve this field via `mergeFormDataIntoNodeData`.
-- Frontend has 7 pre-existing ESLint errors (unused vars); these are known, do not treat as regressions.
+- Frontend lint baseline is zero error: `npm --prefix frontend run lint` must stay green, and stale `eslint-disable` directives should be removed instead of normalized.
 - GraphEditor JSX is split into dedicated components in `frontend/src/components/graph/`: `GraphEditorHeader` (toolbar), `GraphValidationPanel` (overlay), `DialogueCostModal`, `GraphExportFormatDialog`. `GraphEditorHeader` calls `useGraphStore()` internally to avoid prop drilling.
 - The `exportToUnity` store action (in `persistenceSlice`) serializes graph nodes to Unity JSON format; its trigger button lives in `GraphEditorHeader` and downloads a `.json` file named after `dialogueMetadata.filename`.
 - The `continual-learning` skill uses **in-context conversation history only** — it never reads from `agent-transcripts/` files on disk (that folder does not exist on this system).

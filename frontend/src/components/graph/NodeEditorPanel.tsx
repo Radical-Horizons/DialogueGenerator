@@ -34,7 +34,6 @@ import {
   GRAPH_DIALOGUE_NODE_WIDTH,
   GRAPH_OFFSET_PARENT_TO_CHILD_Y,
 } from '../../utils/graphNodeLayout'
-import { getParentChoiceForTestNode } from '../../utils/testNodeSync'
 import {
   mergeNodeFormIntoStoreData,
   connectionFingerprintFromNodeData,
@@ -61,7 +60,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     connectNodes,
     disconnectNodes,
     duplicateNode,
-    nodes,
   } = useGraphStore()
   const { selections } = useContextStore()
   const toast = useToast()
@@ -430,36 +428,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
   }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
-
-  // Même logique que handleGenerateForChoice mais avec parentNodeId explicite (drop / choix ciblé).
-  const handleGenerateForChoiceAt = useCallback(
-    async (parentNodeId: string, choiceIndex: number) => {
-      const instructions = userInstructions.trim() || 'Continue la conversation de manière naturelle'
-      try {
-        const allCharacters = [
-          ...(selections.characters_full || []),
-          ...(selections.characters_excerpt || []),
-        ]
-        const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
-        const generationResult = await generateFromNode(parentNodeId, instructions, {
-          context_selections: selections,
-          npc_speaker_id: npcSpeakerId,
-          llm_model_identifier: llmModel,
-          target_choice_index: choiceIndex,
-        })
-        toast('Nœud généré avec succès', 'success', 2000)
-        if (generationResult.nodeId) {
-          setSelectedNode(generationResult.nodeId)
-          useGraphViewStore.getState().focusNode(generationResult.nodeId)
-        }
-        setShowGenerationOptions(false)
-        setUserInstructions('')
-      } catch (err) {
-        toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
-      }
-    },
-    [userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast]
-  )
 
   /** Génération depuis le TestNode sélectionné : on envoie son id, le backend renvoie les connexions avec ce même id. */
   const handleGenerateFromTestNode = useCallback(async () => {

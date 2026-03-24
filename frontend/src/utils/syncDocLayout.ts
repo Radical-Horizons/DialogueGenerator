@@ -6,6 +6,28 @@ import type { Node, Edge } from 'reactflow'
 import { graphToDocument, buildLayoutFromNodes } from './documentToGraph'
 
 /**
+ * Fusionne un layout existant avec les positions courantes des nœuds.
+ * Les positions calculées depuis `nodes` priment toujours pour éviter
+ * qu'un layout stale écrase la géométrie réellement affichée.
+ */
+export function mergeLayoutWithNodePositions(
+  currentLayout: Record<string, unknown> | null | undefined,
+  nodes: Node[]
+): Record<string, unknown> {
+  const newPositions = buildLayoutFromNodes(nodes)
+  const layoutNodes = currentLayout?.['nodes'] as
+    | Record<string, { x: number; y: number }>
+    | undefined
+  return {
+    ...(currentLayout ?? {}),
+    nodes: {
+      ...(layoutNodes ?? {}),
+      ...newPositions.nodes,
+    },
+  }
+}
+
+/**
  * Recalcule le document canonique et le layout à partir des nodes/edges ReactFlow courants.
  * Fusionne les positions existantes du layout avec les nouvelles positions calculées.
  *
@@ -20,11 +42,6 @@ export function syncDocAndLayout(
   currentLayout: Record<string, unknown>
 ): { document: Record<string, unknown>; layout: Record<string, unknown> } {
   const doc = graphToDocument(nodes, edges) as unknown as Record<string, unknown>
-  const newPositions = buildLayoutFromNodes(nodes)
-  const layoutNodes = currentLayout?.['nodes'] as
-    | Record<string, { x: number; y: number }>
-    | undefined
-  const mergedNodes = { ...layoutNodes, ...newPositions.nodes }
-  const newLayout = { ...currentLayout, nodes: mergedNodes }
+  const newLayout = mergeLayoutWithNodePositions(currentLayout, nodes)
   return { document: doc, layout: newLayout }
 }

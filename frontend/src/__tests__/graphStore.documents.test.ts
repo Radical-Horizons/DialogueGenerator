@@ -66,9 +66,73 @@ describe('graphStore - document SoT load/save', () => {
       await loadDialogueByDocumentId('test-doc')
       const state = useGraphStore.getState()
       expect(state.document).toEqual(sampleDocument)
-      expect(state.layout).toEqual({})
+      expect(state.layout).toEqual({
+        nodes: {
+          START: { x: 0, y: 0 },
+          END: { x: 0, y: 150 },
+        },
+      })
       expect(state.layoutRevision).toBe(1)
       expect(state.nodes.length).toBeGreaterThanOrEqual(2)
+    })
+
+    it('réinjecte une dispersion verticale pour 5 branches plates au rechargement', async () => {
+      const docWithFiveChoices = {
+        schemaVersion: '1.1.0',
+        nodes: [
+          {
+            id: 'START',
+            speaker: 'NPC',
+            line: 'Choose',
+            choices: Array.from({ length: 5 }, (_, index) => ({
+              choiceId: `choice-${index}`,
+              text: `Option ${index + 1}`,
+              targetNode: `NODE_${index}`,
+            })),
+          },
+          ...Array.from({ length: 5 }, (_, index) => ({
+            id: `NODE_${index}`,
+            speaker: 'NPC',
+            line: `Child ${index + 1}`,
+          })),
+        ],
+      }
+      const flatLayout = {
+        nodes: {
+          START: { x: 0, y: 0 },
+          NODE_0: { x: 0, y: 320 },
+          NODE_1: { x: 220, y: 320 },
+          NODE_2: { x: 440, y: 320 },
+          NODE_3: { x: 660, y: 320 },
+          NODE_4: { x: 880, y: 320 },
+        },
+      }
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: docWithFiveChoices,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: flatLayout,
+        revision: 1,
+      })
+
+      const { loadDialogueByDocumentId } = useGraphStore.getState()
+      await loadDialogueByDocumentId('doc-five-choices')
+
+      const state = useGraphStore.getState()
+      const childYValues = Array.from({ length: 5 }, (_, index) =>
+        state.nodes.find((node) => node.id === `NODE_${index}`)!.position.y
+      )
+      const persistedYValues = Array.from({ length: 5 }, (_, index) =>
+        ((state.layout?.nodes as Record<string, { x: number; y: number }>)?.[`NODE_${index}`] as {
+          x: number
+          y: number
+        }).y
+      )
+
+      expect(new Set(childYValues).size).toBeGreaterThan(1)
+      expect(new Set(persistedYValues).size).toBeGreaterThan(1)
     })
   })
 
@@ -101,7 +165,7 @@ describe('graphStore - document SoT load/save', () => {
       )
     })
 
-    it('sends state.document and state.layout (SoT) to API, not re-serialized projection', async () => {
+    it('reconstruit le layout sauvegardé depuis les positions courantes, même si state.layout est stale', async () => {
       vi.mocked(documentsAPI.getDocument).mockResolvedValue({
         document: sampleDocument,
         schemaVersion: '1.1.0',
@@ -110,24 +174,36 @@ describe('graphStore - document SoT load/save', () => {
       vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 1 })
       vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
       vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
-      const { loadDialogueByDocumentId, saveDialogue, updateNode } = useGraphStore.getState()
+      const { loadDialogueByDocumentId, saveDialogue } = useGraphStore.getState()
       await loadDialogueByDocumentId('test-doc')
-      updateNode('START', { data: { line: 'Patched line', speaker: 'NPC' } })
       const stateBeforeSave = useGraphStore.getState()
-      const expectedDocument = stateBeforeSave.document
-      const expectedLayout = stateBeforeSave.layout
+      const startPosition = stateBeforeSave.nodes.find((node) => node.id === 'START')!.position
+      useGraphStore.setState({
+        layout: {
+          ...sampleLayout,
+          nodes: {
+            ...sampleLayout.nodes,
+            START: { x: 999, y: 999 },
+          },
+        },
+      })
+
       await saveDialogue()
       expect(documentsAPI.putDocument).toHaveBeenCalledWith(
         'test-doc',
         expect.objectContaining({
-          document: expectedDocument,
+          document: stateBeforeSave.document,
           revision: 1,
         })
       )
       expect(documentsAPI.putLayout).toHaveBeenCalledWith(
         'test-doc',
         expect.objectContaining({
-          layout: expectedLayout,
+          layout: expect.objectContaining({
+            nodes: expect.objectContaining({
+              START: startPosition,
+            }),
+          }),
           revision: 1,
         })
       )

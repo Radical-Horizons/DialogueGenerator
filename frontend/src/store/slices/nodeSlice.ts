@@ -458,15 +458,19 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
           const updatedChoices = (parent.dialogueNode.data.choices as Choice[]).map(
             (choice, idx) => {
               if (idx === parent.choiceIndex) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const {
-                  test,
-                  testCriticalFailureNode,
-                  testFailureNode,
-                  testSuccessNode,
-                  testCriticalSuccessNode,
+                  test: removedTest,
+                  testCriticalFailureNode: removedCriticalFailureNode,
+                  testFailureNode: removedFailureNode,
+                  testSuccessNode: removedSuccessNode,
+                  testCriticalSuccessNode: removedCriticalSuccessNode,
                   ...rest
                 } = choice
+                void removedTest
+                void removedCriticalFailureNode
+                void removedFailureNode
+                void removedSuccessNode
+                void removedCriticalSuccessNode
                 return rest
               }
               return choice
@@ -493,8 +497,19 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
               
               if (possibleId === nodeId || c.testSuccessNode === nodeId || c.testFailureNode === nodeId) {
                 modified = true
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { test, testCriticalFailureNode, testFailureNode, testSuccessNode, testCriticalSuccessNode, ...rest } = c
+                const {
+                  test: removedTest,
+                  testCriticalFailureNode: removedCriticalFailureNode,
+                  testFailureNode: removedFailureNode,
+                  testSuccessNode: removedSuccessNode,
+                  testCriticalSuccessNode: removedCriticalSuccessNode,
+                  ...rest
+                } = c
+                void removedTest
+                void removedCriticalFailureNode
+                void removedFailureNode
+                void removedSuccessNode
+                void removedCriticalSuccessNode
                 return rest
               }
               return c

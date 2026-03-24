@@ -94,7 +94,11 @@ describe('GraphCanvas edge delete confirmation (Story 2.6)', () => {
     addNode({ id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { id: 'n1' } })
     addNode({ id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { id: 'n2' } })
     connectNodes('n1', 'n2')
-    const edgeId = useGraphStore.getState().edges[0]?.id!
+    const edgeId = useGraphStore.getState().edges[0]?.id
+    expect(edgeId).toBeDefined()
+    if (!edgeId) {
+      throw new Error('Edge id should be defined in test setup')
+    }
 
     renderGraphCanvas()
     await act(() => {
@@ -114,7 +118,11 @@ describe('GraphCanvas edge delete confirmation (Story 2.6)', () => {
     addNode({ id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: { id: 'n1' } })
     addNode({ id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: { id: 'n2' } })
     connectNodes('n1', 'n2')
-    const edgeId = useGraphStore.getState().edges[0]?.id!
+    const edgeId = useGraphStore.getState().edges[0]?.id
+    expect(edgeId).toBeDefined()
+    if (!edgeId) {
+      throw new Error('Edge id should be defined in test setup')
+    }
 
     renderGraphCanvas()
     await act(() => {

@@ -83,8 +83,8 @@ export function childNodeTopLeftY(params: {
 
 /**
  * Décale légèrement les frères pour éviter les alignements trop rigides.
- * - 3-4 frères : éventail léger
- * - 5+ frères : quinconce sur deux sous-rangs
+ * - 3 frères : éventail léger
+ * - 4+ frères : quinconce renforcé sur deux sous-rangs
  */
 export function siblingBranchOffset(params: {
   siblingIndex: number
@@ -111,16 +111,28 @@ export function siblingBranchOffset(params: {
 
   let mainAxisOffset = 0
   let crossAxisOffset = 0
-  if (siblingCount <= 4) {
+  if (siblingCount <= 3) {
     mainAxisOffset = centeredIndex * mainAmplitude
     crossAxisOffset = centeredIndex * crossAmplitude
   } else {
+    const denseMainMultiplierByMode: Record<GraphLayoutSpacingMode, number> = {
+      compact: 1.5,
+      normal: 1.7,
+      large: 1.85,
+    }
+    const denseCrossMultiplierByMode: Record<GraphLayoutSpacingMode, number> = {
+      compact: 1.5,
+      normal: 1.8,
+      large: 1.95,
+    }
+    const denseMainAmplitude = mainAmplitude * denseMainMultiplierByMode[spacingMode]
+    const denseCrossAmplitude = crossAmplitude * denseCrossMultiplierByMode[spacingMode]
     const laneIndex = siblingIndex % 2
     const waveIndex = Math.floor(siblingIndex / 2)
     const laneCount = Math.ceil(siblingCount / 2)
     const centeredWaveIndex = waveIndex - (laneCount - 1) / 2
-    mainAxisOffset = laneIndex === 0 ? -mainAmplitude : mainAmplitude
-    crossAxisOffset = centeredWaveIndex * crossAmplitude * 1.2
+    mainAxisOffset = laneIndex === 0 ? -denseMainAmplitude : denseMainAmplitude
+    crossAxisOffset = centeredWaveIndex * denseCrossAmplitude
   }
 
   if (direction === 'TB') {

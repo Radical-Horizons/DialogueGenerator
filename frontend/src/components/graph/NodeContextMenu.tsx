@@ -15,8 +15,6 @@ interface NodeContextMenuProps {
   right?: number
   bottom?: number
   onClose: () => void
-  /** Génération directe pour un choix (drop handle). */
-  onGenerateForChoice?: (parentNodeId: string, choiceIndex: number) => void
   /** Génération depuis un TestNode : on envoie l’id du TestNode, le backend renvoie les connexions avec ce même id (source de vérité unique). */
   onGenerateFromTestNode?: (testNodeId: string) => void
 }
@@ -28,7 +26,6 @@ export function NodeContextMenu({
   right,
   bottom,
   onClose,
-  onGenerateForChoice,
   onGenerateFromTestNode,
 }: NodeContextMenuProps) {
   const { duplicateNode, setShowDeleteNodeConfirm, setSelectedNode, nodes } = useGraphStore()
@@ -71,7 +68,7 @@ export function NodeContextMenu({
       useGraphViewStore.getState().openAIGeneration(id)
     }
     onClose()
-  }, [id, node?.type, nodes, setSelectedNode, onClose, onGenerateForChoice, onGenerateFromTestNode])
+  }, [id, node?.type, nodes, setSelectedNode, onClose, onGenerateFromTestNode])
 
   return (
     <div

@@ -10,6 +10,11 @@ import {
 } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphViewStore } from '../../../store/graphViewStore'
+import {
+  getChoiceEdgePathOptions,
+  resolveSmoothStepLabelPosition,
+  type ChoiceEdgeData,
+} from '../../../utils/choiceEdgeGeometry'
 
 const defaultLabelBgPadding: [number, number] = [4, 8]
 const defaultLabelBgBorderRadius = 4
@@ -104,14 +109,33 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
     data,
   } = props
 
-  const [path, labelX, labelY] = getSmoothStepPath({
+  const edgeData = data as ChoiceEdgeData | undefined
+  const isChoice = edgeData?.edgeType === 'choice'
+  const choicePathOpts = isChoice
+    ? getChoiceEdgePathOptions(edgeData?.choiceIndex)
+    : undefined
+  const mergedPathOptions =
+    choicePathOpts != null ? { ...pathOptions, ...choicePathOpts } : pathOptions
+
+  const [path, pathLabelX, pathLabelY] = getSmoothStepPath({
     sourceX,
     sourceY,
     sourcePosition,
     targetX,
     targetY,
     targetPosition,
-    ...pathOptions,
+    ...mergedPathOptions,
+  })
+
+  const { x: labelX, y: labelY } = resolveSmoothStepLabelPosition({
+    edgeType: edgeData?.edgeType,
+    choiceIndex: edgeData?.choiceIndex,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    pathLabelX,
+    pathLabelY,
   })
 
   return (
@@ -128,13 +152,13 @@ function StableLabelSmoothStepEdgeComponent(props: SmoothStepEdgeProps) {
         <g
           transform={`translate(${labelX}, ${labelY})`}
           onDoubleClick={(e) => {
-            if ((data as { edgeType?: string })?.edgeType !== 'choice') return
+            if (edgeData?.edgeType !== 'choice') return
             e.preventDefault()
             e.stopPropagation()
             useGraphViewStore.getState().requestEdgeLabelEdit(id)
           }}
           style={{
-            cursor: (data as { edgeType?: string })?.edgeType === 'choice' ? 'pointer' : undefined,
+            cursor: edgeData?.edgeType === 'choice' ? 'pointer' : undefined,
           }}
         >
           <MemoizedLabelContent

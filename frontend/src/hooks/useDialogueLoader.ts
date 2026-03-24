@@ -53,7 +53,6 @@ export function useDialogueLoader(
   const {
     nodes,
     dialogueMetadata,
-    loadDialogue,
     loadDialogueByDocumentId,
     loadDialogueFromRawJson,
     saveDialogue,
@@ -209,7 +208,16 @@ export function useDialogueLoader(
     }
 
     void run()
-  }, [selectedDialogue, loadDialogue, loadDialogueByDocumentId, loadDialogueFromRawJson, saveDialogue, validateGraph, toast])
+  }, [
+    selectedDialogue,
+    loadDialogueByDocumentId,
+    loadDialogueFromRawJson,
+    saveDialogue,
+    validateGraph,
+    toast,
+    resetGraph,
+    incrementLoadSeq,
+  ])
 
   useEffect(() => {
     if (!routeTarget) return
@@ -299,7 +307,15 @@ export function useDialogueLoader(
         setIsLoadingDialogue(false)
         toast(getErrorMessage(err), 'error')
       })
-  }, [routeTarget, loadDialogueByDocumentId, loadDialogueFromRawJson, validateGraph, toast])
+  }, [
+    routeTarget,
+    loadDialogueByDocumentId,
+    loadDialogueFromRawJson,
+    validateGraph,
+    toast,
+    resetGraph,
+    incrementLoadSeq,
+  ])
 
   // Auto-save backend : micro-batch 50 ms (ADR-006, très fréquent pour ne pas perdre d’éditions au changement d’onglet)
   useEffect(() => {
@@ -423,7 +439,7 @@ export function useDialogueLoader(
     } finally {
       setIsLoadingDialogue(false)
     }
-  }, [activeDialogueFilename, saveDialogue, validateGraph, toast])
+  }, [activeDialogueFilename, isLoadingDialogue, saveDialogue, validateGraph, toast])
 
   const saveRequested = useGraphViewStore((s) => s.saveRequested)
   useEffect(() => {

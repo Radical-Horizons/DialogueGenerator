@@ -2,7 +2,7 @@
  * Slice génération IA du store graphe : generateFromNode, acceptNode, rejectNode, regenerateNode.
  */
 import type { StateCreator } from 'zustand'
-import type { Node, Edge } from 'reactflow'
+import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
 import * as graphAPI from '../../api/graph'
@@ -673,8 +673,8 @@ export const createGenerationSlice: StateCreator<
             if (hasReference) {
               const cleanedChoices = choices.map((choice) => {
                 if (choice.targetNode === nodeId) {
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  const { targetNode, ...rest } = choice
+                  const { targetNode: removedTargetNode, ...rest } = choice
+                  void removedTargetNode
                   return rest
                 }
                 return choice
@@ -683,8 +683,8 @@ export const createGenerationSlice: StateCreator<
             }
           }
           if (n.data.nextNode === nodeId) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { nextNode, ...restData } = n.data
+            const { nextNode: removedNextNode, ...restData } = n.data
+            void removedNextNode
             return { ...n, data: restData }
           }
           return n

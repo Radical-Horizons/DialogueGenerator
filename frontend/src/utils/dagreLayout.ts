@@ -21,6 +21,12 @@ export interface DagreLayoutOptions {
   nodeSpacing?: { x: number; y: number }
 }
 
+export interface RedistributeSiblingBranchOptions {
+  minSiblingCount?: number
+  onlyWhenFlatOnMainAxis?: boolean
+  flatAxisThresholdPx?: number
+}
+
 const DEFAULT_NODE_WIDTH = GRAPH_DIALOGUE_NODE_WIDTH
 const DEFAULT_NODE_HEIGHT = 160
 const DEFAULT_NODE_SPACING = { x: 120, y: 240 }
@@ -157,15 +163,25 @@ export function calculateDagreLayout(
     }
   })
 
-  return applySiblingBranchDistribution(layoutedNodes, edges, direction, spacingMode)
+  return redistributeSiblingBranches(layoutedNodes, edges, direction, spacingMode)
 }
 
-function applySiblingBranchDistribution(
+function getMainAxisPosition(node: Node, direction: DagreDirection): number {
+  return direction === 'TB' || direction === 'BT' ? node.position.y : node.position.x
+}
+
+export function redistributeSiblingBranches(
   nodes: Node[],
   edges: Edge[],
   direction: DagreDirection,
-  spacingMode: DagreSpacingMode
+  spacingMode: DagreSpacingMode,
+  options: RedistributeSiblingBranchOptions = {}
 ): Node[] {
+  const {
+    minSiblingCount = 3,
+    onlyWhenFlatOnMainAxis = false,
+    flatAxisThresholdPx = 8,
+  } = options
   const nodeById = new Map(nodes.map((node) => [node.id, node]))
   const incomingCounts = new Map<string, number>()
   for (const edge of edges) {
@@ -189,7 +205,7 @@ function applySiblingBranchDistribution(
   const nextById = new Map(nextNodes.map((n) => [n.id, n]))
 
   for (const [, childEdges] of childrenByParent.entries()) {
-    if (childEdges.length <= 2) continue
+    if (childEdges.length < minSiblingCount) continue
     const sorted = [...childEdges].sort((left, right) => {
       const leftIndex = left.data?.choiceIndex
       const rightIndex = right.data?.choiceIndex
@@ -205,6 +221,15 @@ function applySiblingBranchDistribution(
         ? leftNode.position.x - rightNode.position.x
         : leftNode.position.y - rightNode.position.y
     })
+    if (onlyWhenFlatOnMainAxis) {
+      const mainAxisValues = sorted
+        .map((edge) => nextById.get(edge.target))
+        .filter((node): node is Node => node != null)
+        .map((node) => getMainAxisPosition(node, direction))
+      if (mainAxisValues.length < minSiblingCount) continue
+      const spread = Math.max(...mainAxisValues) - Math.min(...mainAxisValues)
+      if (spread > flatAxisThresholdPx) continue
+    }
     for (let i = 0; i < sorted.length; i++) {
       const offset = siblingBranchOffset({
         siblingIndex: i,

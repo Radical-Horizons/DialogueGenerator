@@ -29,7 +29,11 @@ import { useContextStore } from '../../store/contextStore'
 import { theme } from '../../theme'
 import { applyNodeFilters, applyEdgeFilters } from './graphFilterUtils'
 import { useReactFlowHandlers } from '../../hooks/useReactFlowHandlers'
-import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
+import {
+  edgeStrokeFromSource,
+  edgeStrokeFromSourceHandle,
+  stableChoiceEdgeId,
+} from '../../utils/graphEdgeBuilders'
 import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
@@ -153,9 +157,28 @@ export const GraphCanvas = memo(function GraphCanvas() {
     [visibleStoreNodes]
   )
   const visibleStoreEdges = useMemo(
-    () => applyEdgeFilters(storeEdges, visibleStoreNodeIds, graphFilters),
-    [storeEdges, visibleStoreNodeIds, graphFilters]
+    () => applyEdgeFilters(storeEdges, visibleStoreNodeIds),
+    [storeEdges, visibleStoreNodeIds]
   )
+  const incomingEdgeColorByTarget = useMemo(() => {
+    const byTarget = new Map<string, string>()
+    const edgesByTarget = new Map<string, typeof visibleStoreEdges>()
+    for (const edge of visibleStoreEdges) {
+      const list = edgesByTarget.get(edge.target) ?? []
+      list.push(edge)
+      edgesByTarget.set(edge.target, list)
+    }
+    for (const [targetId, targetEdges] of edgesByTarget.entries()) {
+      const preferred = [...targetEdges].sort((a, b) => a.id.localeCompare(b.id))[0]
+      const stroke = preferred.style?.stroke
+      const color =
+        (typeof stroke === 'string' ? stroke : undefined) ??
+        edgeStrokeFromSourceHandle(preferred.sourceHandle) ??
+        theme.text.secondary
+      byTarget.set(targetId, color)
+    }
+    return byTarget
+  }, [visibleStoreEdges])
 
   const [menu, setMenu] = useState<{
     id: string
@@ -280,45 +303,6 @@ export const GraphCanvas = memo(function GraphCanvas() {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
   }, [dropChoiceMenu, choiceIndexFromDrop, selections, generateFromNode, setSelectedNode, toast])
-
-  const handleGenerateForChoiceDirect = useCallback(
-    async (parentNodeId: string, choiceIndex: number) => {
-      try {
-        const allCharacters = [
-          ...(selections.characters_full || []),
-          ...(selections.characters_excerpt || []),
-        ]
-        const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
-        const instructions = 'Continue la conversation de manière naturelle'
-        const result = await generateFromNode(parentNodeId, instructions, {
-          context_selections: selections,
-          npc_speaker_id: npcSpeakerId,
-          llm_model_identifier: DEFAULT_MODEL,
-          target_choice_index: choiceIndex,
-        })
-        toast('Nœud généré avec succès', 'success', 2000)
-        if (result.nodeId) {
-          setSelectedNode(result.nodeId)
-          useGraphViewStore.getState().focusNode(result.nodeId)
-        }
-      } catch (err) {
-        toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
-      }
-    },
-    [selections, generateFromNode, setSelectedNode, toast]
-  )
-
-  const handleGenerateForChoiceWithLoader = useCallback(
-    async (parentNodeId: string, choiceIndex: number) => {
-      setShowContextMenuGenerationLoader(true)
-      try {
-        await handleGenerateForChoiceDirect(parentNodeId, choiceIndex)
-      } finally {
-        setShowContextMenuGenerationLoader(false)
-      }
-    },
-    [handleGenerateForChoiceDirect]
-  )
 
   const handleGenerateFromTestNode = useCallback(
     async (testNodeId: string) => {
@@ -449,10 +433,11 @@ export const GraphCanvas = memo(function GraphCanvas() {
           validationErrors: errors,
           validationWarnings: warnings,
           isHighlighted,
+          incomingEdgeColor: incomingEdgeColorByTarget.get(node.id),
         },
       }
     })
-  }, [visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes])
+  }, [visibleStoreNodes, selectedNodeIds, validationErrors, highlightedNodeIds, highlightedCycleNodes, incomingEdgeColorByTarget])
 
   // Dériver edges du store — Story 2.9 FR30, ADR-008
   const edges = useMemo(() => {
@@ -460,19 +445,17 @@ export const GraphCanvas = memo(function GraphCanvas() {
       (err) => err.type === 'broken_reference' && err.target
     )
     const brokenTargets = new Set(brokenReferences.map((err) => err.target!))
-    const hasLegacyChoiceHandles = visibleStoreEdges.some((edge) => {
-      const sh = edge.sourceHandle
-      return Boolean(sh && /^choice-\d+$/.test(sh))
-    })
-    if (brokenTargets.size === 0 && !hasLegacyChoiceHandles) {
-      return visibleStoreEdges
-    }
     const validEdges = visibleStoreEdges.filter((edge) => {
       const sh = edge.sourceHandle
       if (sh && /^choice-\d+$/.test(sh)) return false
       return true
     })
     return validEdges.map((edge) => {
+      const sourceDerivedStroke = edgeStrokeFromSource({
+        sourceHandle: edge.sourceHandle,
+        connectionType: (edge.data as { edgeType?: string } | undefined)?.edgeType,
+        edgeLabel: typeof edge.label === 'string' ? edge.label : undefined,
+      })
       const isBroken = brokenTargets.has(edge.target)
       if (isBroken) {
         return {
@@ -486,7 +469,14 @@ export const GraphCanvas = memo(function GraphCanvas() {
           animated: false,
         }
       }
-      return edge
+      if (!sourceDerivedStroke) return edge
+      return {
+        ...edge,
+        style: {
+          ...edge.style,
+          stroke: sourceDerivedStroke,
+        },
+      }
     })
   }, [visibleStoreEdges, validationErrors])
 
@@ -587,7 +577,6 @@ export const GraphCanvas = memo(function GraphCanvas() {
         <NodeContextMenu
           {...menu}
           onClose={() => setMenu(null)}
-          onGenerateForChoice={handleGenerateForChoiceWithLoader}
           onGenerateFromTestNode={handleGenerateFromTestNode}
         />
       )}

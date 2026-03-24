@@ -12,6 +12,7 @@ import {
 } from '../../utils/testNodeSync'
 import {
   buildChoiceEdge,
+  edgeStrokeFromSource,
   stableChoiceEdgeId,
   truncateChoiceLabel,
 } from '../../utils/graphEdgeBuilders'
@@ -19,7 +20,7 @@ import { runGraphTransaction } from '../utils/runGraphTransaction'
 
 export type EdgeSlice = Pick<
   GraphState,
-  'connectNodes' | 'disconnectNodes' | 'updateChoiceEdgeLabel'
+  'connectNodes' | 'disconnectNodes' | 'updateChoiceEdgeLabel' | 'normalizeEdgeColors'
 >
 
 export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set, get) => ({
@@ -72,6 +73,10 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     }
 
     runGraphTransaction(get, set, (state) => {
+      const strokeColor = edgeStrokeFromSource({
+        sourceHandle: actualSourceHandle,
+        connectionType,
+      })
       const newEdge: Edge = isChoiceConnection
         ? buildChoiceEdge({
             sourceId,
@@ -86,6 +91,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
             target: targetId,
             ...(actualSourceHandle && { sourceHandle: actualSourceHandle }),
             type: 'smoothstep',
+            ...(strokeColor && { style: { stroke: strokeColor } }),
             data: { edgeType: connectionType, choiceIndex },
           }
 
@@ -334,5 +340,42 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
         },
       }
     })
+  },
+
+  normalizeEdgeColors: () => {
+    const state = get()
+    let changed = false
+    const normalizedEdges = state.edges.map((edge) => {
+      const derivedStroke = edgeStrokeFromSource({
+        sourceHandle: edge.sourceHandle,
+        connectionType: (edge.data as { edgeType?: string } | undefined)?.edgeType,
+        edgeLabel: typeof edge.label === 'string' ? edge.label : undefined,
+      })
+      if (!derivedStroke) return edge
+      const currentStroke = edge.style?.stroke
+      if (currentStroke === derivedStroke) return edge
+      changed = true
+      return {
+        ...edge,
+        style: {
+          ...edge.style,
+          stroke: derivedStroke,
+        },
+      }
+    })
+    if (!changed) return false
+    runGraphTransaction(
+      get,
+      set,
+      (s) => ({
+        edges: normalizedEdges,
+        dialogueMetadata: {
+          ...s.dialogueMetadata,
+          edge_count: normalizedEdges.length,
+        },
+      }),
+      { skipUndo: true }
+    )
+    return true
   },
 })

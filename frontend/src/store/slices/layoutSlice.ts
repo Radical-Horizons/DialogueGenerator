@@ -150,7 +150,6 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
   updateNodeDimensionsBatch: (updates) => {
     if (Object.keys(updates).length === 0) return
     set((state) => {
-      const nodeIds = new Set(Object.keys(updates))
       let hasChange = false
       const nextNodes = state.nodes.map((node) => {
         const dims = updates[node.id]
