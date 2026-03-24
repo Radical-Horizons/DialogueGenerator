@@ -207,3 +207,25 @@ class TestContextRuleServiceEvaluation:
         ))
         result = rule_service.evaluate_rules("location", "Nef Centrale", {})
         assert result == {"character", "community"}
+
+    def test_evaluate_rules_prefers_dialogue_type_specific_rules(self, rule_service: ContextRuleService) -> None:
+        """Avec dialogue_type, les règles spécifiques prévalent sur le fallback global."""
+        rule_service.create_rule(_make_create_request(
+            name="Global location -> character",
+            conditions=[RuleCondition(entity_type="location")],
+            suggested_types=["character"],
+        ))
+        rule_service.create_rule(_make_create_request(
+            name="Confrontation location -> item",
+            conditions=[RuleCondition(entity_type="location")],
+            suggested_types=["item"],
+            dialogue_type="confrontation",
+        ))
+
+        result = rule_service.evaluate_rules(
+            "location",
+            "Nef Centrale",
+            {},
+            dialogue_type="confrontation",
+        )
+        assert result == {"item"}

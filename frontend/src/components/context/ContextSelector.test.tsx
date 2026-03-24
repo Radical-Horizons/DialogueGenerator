@@ -128,7 +128,7 @@ describe('ContextSelector', () => {
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
     await waitFor(() =>
-      expect(mockRefreshSuggestionsForTrigger).toHaveBeenCalledWith('character', 'Test Character')
+      expect(mockRefreshSuggestionsForTrigger).toHaveBeenCalledWith('character', 'Test Character', 'salutation')
     )
   })
 

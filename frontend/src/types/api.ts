@@ -201,6 +201,7 @@ export interface SuggestionsRequest {
   trigger_type: string
   trigger_name: string
   already_selected?: ContextSelection | null
+  dialogue_type?: string | null
 }
 
 export interface SuggestionsResponse {
@@ -223,6 +224,7 @@ export interface ContextRule {
   conditionOperator: 'AND' | 'OR'
   conditions: RuleCondition[]
   suggestedTypes: EntityTypeStr[]
+  dialogueType?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -234,6 +236,7 @@ export interface CreateRuleRequest {
   conditionOperator?: 'AND' | 'OR'
   conditions: RuleCondition[]
   suggestedTypes: EntityTypeStr[]
+  dialogueType?: string | null
 }
 
 export interface UpdateRuleRequest {
@@ -243,11 +246,18 @@ export interface UpdateRuleRequest {
   conditionOperator?: 'AND' | 'OR' | null
   conditions?: RuleCondition[] | null
   suggestedTypes?: EntityTypeStr[] | null
+  dialogueType?: string | null
 }
 
 export interface RulesListResponse {
   rules: ContextRule[]
   total: number
+}
+
+export interface DialogueTypeRulesResponse {
+  dialogueType: string
+  source: 'specific' | 'fallback_global'
+  rules: ContextRule[]
 }
 
 // Config

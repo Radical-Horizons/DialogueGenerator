@@ -34,6 +34,11 @@ class ContextRuleService:
         storage_file.parent.mkdir(parents=True, exist_ok=True)
         logger.debug("ContextRuleService initialisé avec %s", storage_file)
 
+    @staticmethod
+    def _normalize_dialogue_type(dialogue_type: str) -> str:
+        """Normalise un type de dialogue pour l'utiliser comme clé stable."""
+        return dialogue_type.strip().lower()
+
     # -------------------------------------------------------------------------
     # API publique
     # -------------------------------------------------------------------------
@@ -82,6 +87,11 @@ class ContextRuleService:
                 condition_operator=data.condition_operator,
                 conditions=data.conditions,
                 suggested_types=data.suggested_types,
+                dialogue_type=(
+                    self._normalize_dialogue_type(data.dialogue_type)
+                    if data.dialogue_type
+                    else None
+                ),
                 created_at=now,
                 updated_at=now,
             )
@@ -122,6 +132,11 @@ class ContextRuleService:
                     if data.suggested_types is not None
                     else existing.suggested_types
                 ),
+                dialogue_type=(
+                    self._normalize_dialogue_type(data.dialogue_type)
+                    if data.dialogue_type is not None and data.dialogue_type != ""
+                    else (None if data.dialogue_type == "" else existing.dialogue_type)
+                ),
                 created_at=existing.created_at,
                 updated_at=datetime.now(timezone.utc).isoformat(),
             )
@@ -153,6 +168,7 @@ class ContextRuleService:
         trigger_type: str,
         trigger_name: str,
         already_selected: dict[str, set[str]],
+        dialogue_type: Optional[str] = None,
     ) -> Optional[set[str]]:
         """Évalue les règles actives contre le trigger et la sélection courante.
 
@@ -171,7 +187,9 @@ class ContextRuleService:
         Returns:
             Ensemble des types suggérés, ou None si aucune règle active (fallback).
         """
-        enabled_rules = [r for r in self.list_rules() if r.enabled]
+        enabled_rules = [
+            r for r in self.list_rules_for_dialogue_type(dialogue_type) if r.enabled
+        ]
         if not enabled_rules:
             return None
 
@@ -183,6 +201,30 @@ class ContextRuleService:
             if self._rule_conditions_met(rule, all_selected):
                 matched_types.update(rule.suggested_types)
         return matched_types
+
+    def list_rules_for_dialogue_type(self, dialogue_type: Optional[str]) -> list[ContextRule]:
+        """Retourne les règles spécifiques d'un type, sinon fallback global."""
+        rules = self._load_rules()
+        if not dialogue_type:
+            global_rules = [rule for rule in rules if rule.dialogue_type is None]
+            return sorted(global_rules, key=lambda r: r.priority)
+
+        normalized = self._normalize_dialogue_type(dialogue_type)
+        specific = [rule for rule in rules if rule.dialogue_type == normalized]
+        if specific:
+            return sorted(specific, key=lambda r: r.priority)
+        global_rules = [rule for rule in rules if rule.dialogue_type is None]
+        return sorted(global_rules, key=lambda r: r.priority)
+
+    def get_rules_for_dialogue_type(self, dialogue_type: str) -> tuple[str, list[ContextRule]]:
+        """Retourne (source, règles) avec fallback global si aucune règle spécifique."""
+        rules = self._load_rules()
+        normalized = self._normalize_dialogue_type(dialogue_type)
+        specific = [rule for rule in rules if rule.dialogue_type == normalized]
+        if specific:
+            return "specific", sorted(specific, key=lambda r: r.priority)
+        global_rules = [rule for rule in rules if rule.dialogue_type is None]
+        return "fallback_global", sorted(global_rules, key=lambda r: r.priority)
 
     # -------------------------------------------------------------------------
     # Logique interne

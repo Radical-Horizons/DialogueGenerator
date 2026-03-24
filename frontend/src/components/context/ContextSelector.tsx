@@ -17,7 +17,9 @@ import { SelectedContextSummary } from './SelectedContextSummary'
 import type { EntityType } from './SelectedContextSummary'
 import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
 import { ContextRulesEditor } from './ContextRulesEditor'
+import { ContextRelevancePanel } from './ContextRelevancePanel'
 import { useContextStore } from '../../store/contextStore'
+import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 
@@ -157,6 +159,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     setSuggestions,
     refreshSuggestionsForTrigger,
   } = useContextStore()
+  const selectedDialogueType = useContextRulesStore((s) => s.selectedDialogueType)
 
   // Ferme le menu overflow si l'utilisateur clique en dehors
   useEffect(() => {
@@ -315,7 +318,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     if (!wasSelected) {
       const triggerType = TRIGGER_TYPE_MAP[activeTab]
       if (triggerType) {
-        refreshSuggestionsForTrigger(triggerType, name)
+        refreshSuggestionsForTrigger(triggerType, name, selectedDialogueType)
       }
     } else {
       setSuggestions([])
@@ -585,6 +588,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           onSuccess={() => setError(null)}
         />
       </div>
+      <ContextRelevancePanel />
     </div>
   )
 }

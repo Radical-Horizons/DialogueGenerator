@@ -23,6 +23,7 @@ import type {
   CreateRuleRequest,
   UpdateRuleRequest,
   RulesListResponse,
+  DialogueTypeRulesResponse,
 } from '../types/api'
 
 export interface ListContextParams {
@@ -199,5 +200,29 @@ export async function updateRule(ruleId: string, request: UpdateRuleRequest): Pr
  */
 export async function deleteRule(ruleId: string): Promise<void> {
   await apiClient.delete(`/api/v1/context/rules/${encodeURIComponent(ruleId)}`)
+}
+
+/**
+ * Lit les règles d'un type de dialogue, avec fallback global.
+ */
+export async function getRulesByDialogueType(dialogueType: string): Promise<DialogueTypeRulesResponse> {
+  const response = await apiClient.get<DialogueTypeRulesResponse>(
+    `/api/v1/context/rules/by-dialogue-type/${encodeURIComponent(dialogueType)}`
+  )
+  return response.data
+}
+
+/**
+ * Remplace l'ensemble des règles d'un type de dialogue.
+ */
+export async function putRulesByDialogueType(
+  dialogueType: string,
+  rules: CreateRuleRequest[]
+): Promise<DialogueTypeRulesResponse> {
+  const response = await apiClient.put<DialogueTypeRulesResponse>(
+    `/api/v1/context/rules/by-dialogue-type/${encodeURIComponent(dialogueType)}`,
+    rules
+  )
+  return response.data
 }
 

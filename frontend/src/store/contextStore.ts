@@ -64,7 +64,7 @@ interface ContextState {
   // Actions suggestions (Story 3.3)
   setSuggestions: (suggestions: SuggestionItem[]) => void
   /** Rafraîchit les suggestions (ex. après synchro scène→contexte, hors ContextSelector). */
-  refreshSuggestionsForTrigger: (triggerType: string, triggerName: string) => void
+  refreshSuggestionsForTrigger: (triggerType: string, triggerName: string, dialogueType?: string | null) => void
   acceptSuggestion: (type: SuggestionEntityType, name: string) => void
   ignoreSuggestion: (type: SuggestionEntityType, name: string) => void
   acceptAllSuggestionsByType: (type: SuggestionEntityType) => void
@@ -485,7 +485,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
     }))
   },
 
-  refreshSuggestionsForTrigger: (triggerType: string, triggerName: string) => {
+  refreshSuggestionsForTrigger: (triggerType: string, triggerName: string, dialogueType?: string | null) => {
     void (async () => {
       try {
         const state = get()
@@ -493,6 +493,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
           trigger_type: triggerType,
           trigger_name: triggerName,
           already_selected: state.selections,
+          dialogue_type: dialogueType ?? undefined,
         })
         state.setSuggestions(response.suggestions)
       } catch {

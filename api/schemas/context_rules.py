@@ -6,6 +6,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 EntityTypeStr = Literal["character", "location", "item", "species", "community"]
+DialogueTypeStr = str
 
 
 class RuleCondition(BaseModel):
@@ -28,6 +29,7 @@ class CreateRuleRequest(BaseModel):
     condition_operator: Literal["AND", "OR"] = "OR"
     conditions: list[RuleCondition] = Field(..., min_length=1)
     suggested_types: list[EntityTypeStr] = Field(..., min_length=1)
+    dialogue_type: Optional[DialogueTypeStr] = None
 
 
 class UpdateRuleRequest(BaseModel):
@@ -39,6 +41,7 @@ class UpdateRuleRequest(BaseModel):
     condition_operator: Optional[Literal["AND", "OR"]] = None
     conditions: Optional[list[RuleCondition]] = Field(None, min_length=1)
     suggested_types: Optional[list[EntityTypeStr]] = Field(None, min_length=1)
+    dialogue_type: Optional[DialogueTypeStr] = None
 
 
 class ContextRule(BaseModel):
@@ -51,6 +54,7 @@ class ContextRule(BaseModel):
     condition_operator: Literal["AND", "OR"]
     conditions: list[RuleCondition]
     suggested_types: list[EntityTypeStr]
+    dialogue_type: Optional[DialogueTypeStr] = None
     created_at: str
     updated_at: str
 
@@ -60,3 +64,11 @@ class RulesListResponse(BaseModel):
 
     rules: list[ContextRule]
     total: int
+
+
+class DialogueTypeRulesResponse(BaseModel):
+    """Réponse de lecture des règles pour un type de dialogue."""
+
+    dialogue_type: DialogueTypeStr
+    source: Literal["specific", "fallback_global"]
+    rules: list[ContextRule]

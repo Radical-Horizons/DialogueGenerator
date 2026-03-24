@@ -253,6 +253,9 @@ class SuggestionsRequest(BaseModel):
     already_selected: Optional[ContextSelection] = Field(
         None, description="Sélections actuelles à exclure des suggestions"
     )
+    dialogue_type: Optional[str] = Field(
+        None, description="Type de dialogue courant (ex: salutation, confrontation)"
+    )
 
 
 class SuggestionsResponse(BaseModel):

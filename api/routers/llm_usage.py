@@ -6,9 +6,12 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Query, Request, status
 
 from api.dependencies import get_llm_usage_service, get_request_id
-from api.exceptions import InternalServerException
+from api.exceptions import InternalServerException, NotFoundException
 from api.schemas.llm_usage import (
     AllDialoguesCostResponse,
+    ContextRelevanceHistoryEntry,
+    ContextRelevanceHistoryResponse,
+    ContextRelevanceReportResponse,
     DialogueCostResponse,
     DialogueCostSummaryEntry,
     GenerationLogEntry,
@@ -211,6 +214,99 @@ async def get_generation_logs(
         )
         raise InternalServerException(
             message="Erreur lors de la récupération des logs de génération",
+            details={"error": str(e), "dialogue_id": dialogue_id},
+            request_id=request_id,
+        )
+
+
+@router.get(
+    "/dialogue/{dialogue_id}/nodes/{node_id}/context-relevance",
+    response_model=ContextRelevanceReportResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_node_context_relevance(
+    dialogue_id: str,
+    node_id: str,
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ContextRelevanceReportResponse:
+    """Rapport de pertinence contexte GDD pour un nœud généré (Story 3.6)."""
+    try:
+        raw = usage_service.get_context_relevance_for_node(dialogue_id, node_id)
+        if raw is None:
+            raise NotFoundException(
+                resource_type="Pertinence contexte",
+                resource_id=f"{dialogue_id}/{node_id}",
+                request_id=request_id,
+            )
+        return ContextRelevanceReportResponse(
+            dialogue_id=dialogue_id,
+            node_id=node_id,
+            request_id=raw.get("request_id"),
+            score_percent=float(raw["score_percent"]),
+            breakdown_by_type=dict(raw.get("breakdown_by_type", {})),
+            reflected_types=list(raw.get("reflected_types", [])),
+            weak_types=list(raw.get("weak_types", [])),
+            low_context_warning=bool(raw.get("low_context_warning", False)),
+            low_threshold_percent=float(raw.get("low_threshold_percent", 30.0)),
+            method=str(raw.get("method", "unknown")),
+            computation_ms=int(raw.get("computation_ms", 0)),
+            computed_at=str(raw.get("computed_at", "")),
+            suggestions_hints=list(raw.get("suggestions_hints", [])),
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Erreur context-relevance (dialogue_id=%s, node_id=%s, request_id=%s)",
+            dialogue_id,
+            node_id,
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération de la pertinence contexte",
+            details={"error": str(e), "dialogue_id": dialogue_id, "node_id": node_id},
+            request_id=request_id,
+        )
+
+
+@router.get(
+    "/dialogue/{dialogue_id}/context-relevance-history",
+    response_model=ContextRelevanceHistoryResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_dialogue_context_relevance_history(
+    dialogue_id: str,
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ContextRelevanceHistoryResponse:
+    """Historique des scores de pertinence pour un dialogue (Story 3.6)."""
+    try:
+        rows = usage_service.list_context_relevance_history(dialogue_id)
+        entries = [
+            ContextRelevanceHistoryEntry(
+                request_id=r["request_id"],
+                node_id=r.get("node_id"),
+                timestamp=r["timestamp"],
+                score_percent=float(r["score_percent"]),
+                low_context_warning=bool(r.get("low_context_warning", False)),
+                breakdown_by_type=dict(r.get("breakdown_by_type", {})),
+            )
+            for r in rows
+        ]
+        return ContextRelevanceHistoryResponse(
+            dialogue_id=dialogue_id,
+            entries=entries,
+            total_count=len(entries),
+        )
+    except Exception as e:
+        logger.exception(
+            "Erreur context-relevance-history (dialogue_id=%s, request_id=%s)",
+            dialogue_id,
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération de l’historique de pertinence",
             details={"error": str(e), "dialogue_id": dialogue_id},
             request_id=request_id,
         )

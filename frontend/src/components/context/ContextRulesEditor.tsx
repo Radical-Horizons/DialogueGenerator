@@ -16,6 +16,12 @@ const ENTITY_TYPE_OPTIONS: { value: EntityTypeStr; label: string }[] = [
   { value: 'community', label: 'Communauté' },
 ]
 
+const DIALOGUE_TYPE_OPTIONS = [
+  { value: 'salutation', label: 'Salutation' },
+  { value: 'confrontation', label: 'Confrontation' },
+  { value: 'revelation', label: 'Révélation' },
+]
+
 // ---------------------------------------------------------------------------
 // RuleItem — sous-composant mémoïsé pour une seule règle (refactor Task 4)
 // ---------------------------------------------------------------------------
@@ -194,15 +200,26 @@ function swapItems<T>(arr: T[], i: number, j: number): T[] {
 }
 
 export function ContextRulesEditor() {
-  const { rules, isLoading, error, loadRules, createRule, toggleRule, reorderRules, deleteRule } =
+  const {
+    rules,
+    selectedDialogueType,
+    source,
+    isLoading,
+    error,
+    loadRulesByDialogueType,
+    createRule,
+    toggleRule,
+    reorderRules,
+    deleteRule,
+  } =
     useContextRulesStore()
 
   const [showForm, setShowForm] = useState(false)
   const { form, setForm, isValid, reset, toggleSuggestedType, addCondition, removeCondition, updateCondition } = useRuleForm()
 
   useEffect(() => {
-    void loadRules()
-  }, [loadRules])
+    void loadRulesByDialogueType(selectedDialogueType)
+  }, [loadRulesByDialogueType, selectedDialogueType])
 
   const handleMoveUp = (idx: number) => {
     if (idx === 0) return
@@ -218,6 +235,7 @@ export function ContextRulesEditor() {
     if (!isValid) return
     await createRule({
       name: form.name.trim(),
+      dialogueType: selectedDialogueType,
       conditionOperator: form.conditionOperator,
       conditions: form.conditions.map(c => ({
         entityType: c.entityType,
@@ -249,6 +267,16 @@ export function ContextRulesEditor() {
         }}
       >
         <span style={{ fontWeight: 600, color: theme.text.primary }}>⚙ Règles de sélection</span>
+        <select
+          aria-label="Type de dialogue"
+          value={selectedDialogueType}
+          onChange={(e) => void loadRulesByDialogueType(e.target.value)}
+          style={{ ...inputStyle, width: 'auto', padding: '2px 6px', marginRight: '0.35rem' }}
+        >
+          {DIALOGUE_TYPE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
         <button
           aria-label="Ajouter règle"
           onClick={() => setShowForm(v => !v)}
@@ -265,6 +293,19 @@ export function ContextRulesEditor() {
           + Ajouter règle
         </button>
       </div>
+
+      {source === 'fallback_global' && (
+        <div
+          style={{
+            padding: '0.35rem 0.5rem',
+            fontSize: '0.78rem',
+            color: theme.text.secondary,
+            borderBottom: `1px solid ${theme.border.primary}`,
+          }}
+        >
+          Règles globales utilisées - configurer des règles spécifiques ?
+        </div>
+      )}
 
       {error && (
         <div style={{ padding: '0.3rem 0.5rem', color: theme.state.error.color, fontSize: '0.8rem' }}>

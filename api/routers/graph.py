@@ -129,6 +129,21 @@ def _estimate_cost_cache_key(representative_prompt: str, model_id: str, batch_co
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
+def _try_compute_context_relevance(
+    usage_service: LLMUsageService,
+    request_id: str,
+) -> None:
+    """Calcule la pertinence contexte sans impacter la réponse HTTP (Story 3.6)."""
+    try:
+        usage_service.compute_and_persist_context_relevance(request_id)
+    except Exception as exc:
+        logger.warning(
+            "Pertinence contexte non enregistrée (request_id=%s): %s",
+            request_id,
+            exc,
+        )
+
+
 router = APIRouter(prefix="/api/v1/unity-dialogues/graph", tags=["Graph Editor"])
 
 
@@ -456,6 +471,7 @@ async def generate_node(
                 usage_service.annotate_usage(
                     request_id, request_data.dialogue_id, str(first_node_id)
                 )
+                _try_compute_context_relevance(usage_service, request_id)
 
         return GenerateNodeResponse(
             node=result.nodes[0] if result.nodes else None,
@@ -1056,6 +1072,8 @@ async def regenerate_node(
             request_data.parent_node_id,
             request_id,
         )
+        usage_service.annotate_usage(request_id, request_data.dialogue_id, str(node_id))
+        _try_compute_context_relevance(usage_service, request_id)
         return RegenerateNodeResponse(node=new_node, suggested_connections=suggested_connections)
     except (NotFoundException, ValidationException):
         raise

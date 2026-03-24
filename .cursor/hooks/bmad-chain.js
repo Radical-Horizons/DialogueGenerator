@@ -2,14 +2,13 @@
 /**
  * Cursor stop hook: chains BMAD workflows only when conversation was marked by beforeSubmitPrompt.
  * After 1st completion (loop_count 0) → send /0-custom-dev-story
- * After 2nd completion (loop_count 1) → send /0-custom-dev-code-review
- * After 3rd completion (loop_count 2) → send "1", then clear state for this conversation.
+ * After 2nd completion (loop_count 1) → send /0-custom-dev-code-review and clear chain state (no trailing "1").
  * Reads state from .cursor/hooks/state/bmad-chain.json; only sends followup if conversation is marked.
  */
 const fs = require('fs');
 const path = require('path');
 
-const CHAIN = ['/0-custom-dev-story', '/0-custom-dev-code-review', '1'];
+const CHAIN = ['/0-custom-dev-story', '/0-custom-dev-code-review'];
 const STATE_PATH = path.join(__dirname, 'state', 'bmad-chain.json');
 
 function main() {

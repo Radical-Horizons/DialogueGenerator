@@ -7,10 +7,14 @@ import type { ContextRule, CreateRuleRequest, UpdateRuleRequest } from '../types
 
 interface ContextRulesState {
   rules: ContextRule[]
+  selectedDialogueType: string
+  source: 'specific' | 'fallback_global'
   isLoading: boolean
   error: string | null
 
   loadRules: () => Promise<void>
+  loadRulesByDialogueType: (dialogueType: string) => Promise<void>
+  saveRulesByDialogueType: (dialogueType: string, rules: CreateRuleRequest[]) => Promise<void>
   createRule: (request: CreateRuleRequest) => Promise<void>
   updateRule: (ruleId: string, request: UpdateRuleRequest) => Promise<void>
   toggleRule: (ruleId: string) => Promise<void>
@@ -21,6 +25,8 @@ interface ContextRulesState {
 
 export const useContextRulesStore = create<ContextRulesState>((set, get) => ({
   rules: [],
+  selectedDialogueType: 'salutation',
+  source: 'fallback_global',
   isLoading: false,
   error: null,
 
@@ -28,9 +34,36 @@ export const useContextRulesStore = create<ContextRulesState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       const { rules } = await contextAPI.listRules()
-      set({ rules, isLoading: false })
+      set({ rules, source: 'specific', isLoading: false })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur de chargement'
+      set({ isLoading: false, error: message })
+    }
+  },
+
+  loadRulesByDialogueType: async (dialogueType: string) => {
+    set({ isLoading: true, error: null, selectedDialogueType: dialogueType })
+    try {
+      const response = await contextAPI.getRulesByDialogueType(dialogueType)
+      set({ rules: response.rules, source: response.source, isLoading: false })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur de chargement des règles'
+      set({ isLoading: false, error: message })
+    }
+  },
+
+  saveRulesByDialogueType: async (dialogueType: string, rules: CreateRuleRequest[]) => {
+    set({ isLoading: true, error: null })
+    try {
+      const response = await contextAPI.putRulesByDialogueType(dialogueType, rules)
+      set({
+        selectedDialogueType: dialogueType,
+        rules: response.rules,
+        source: response.source,
+        isLoading: false,
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur de sauvegarde des règles'
       set({ isLoading: false, error: message })
     }
   },

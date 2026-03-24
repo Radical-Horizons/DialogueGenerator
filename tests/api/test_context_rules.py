@@ -127,6 +127,36 @@ class TestContextRulesCRUD:
         rules_client.delete(f"/api/v1/context/rules/{rule_id}")
         assert rules_client.get("/api/v1/context/rules").json()["total"] == 0
 
+    def test_rules_by_dialogue_type_fallback_then_specific(self, rules_client: TestClient) -> None:
+        """GET by-dialogue-type fallback global, puis spécifique après PUT."""
+        # Règle globale
+        rules_client.post("/api/v1/context/rules", json=SAMPLE_RULE_PAYLOAD)
+
+        fallback = rules_client.get("/api/v1/context/rules/by-dialogue-type/salutation")
+        assert fallback.status_code == 200
+        assert fallback.json()["source"] == "fallback_global"
+        assert len(fallback.json()["rules"]) == 1
+
+        # Règles spécifiques salutation
+        put_resp = rules_client.put(
+            "/api/v1/context/rules/by-dialogue-type/salutation",
+            json=[{
+                "name": "Salut -> personnage",
+                "conditions": [{"entity_type": "location"}],
+                "suggested_types": ["character"],
+            }],
+        )
+        assert put_resp.status_code == 200
+        assert put_resp.json()["source"] == "specific"
+        assert put_resp.json()["dialogue_type"] == "salutation"
+        assert len(put_resp.json()["rules"]) == 1
+        assert put_resp.json()["rules"][0]["dialogue_type"] == "salutation"
+
+        # Un autre type reste en fallback global
+        other = rules_client.get("/api/v1/context/rules/by-dialogue-type/confrontation")
+        assert other.status_code == 200
+        assert other.json()["source"] == "fallback_global"
+
 
 class TestSuggestionsWithRules:
     """Tests d'intégration : règles actives filtrent les suggestions (Task 2)."""
@@ -206,6 +236,33 @@ class TestSuggestionsWithRules:
         # location et item ne sont PAS suggérés (filtrés par la règle)
         assert "location" not in types
         assert "item" not in types
+
+    def test_suggestions_apply_dialogue_type_specific_rules(self, suggestions_client_with_mocks) -> None:
+        """Avec dialogue_type=confrontation, seules les règles de ce type s'appliquent."""
+        client, service = suggestions_client_with_mocks
+        from api.schemas.context_rules import CreateRuleRequest, RuleCondition
+
+        service.create_rule(CreateRuleRequest(
+            name="Global location -> character",
+            conditions=[RuleCondition(entity_type="location")],
+            suggested_types=["character"],
+        ))
+        service.create_rule(CreateRuleRequest(
+            name="Confrontation location -> item",
+            conditions=[RuleCondition(entity_type="location")],
+            suggested_types=["item"],
+            dialogue_type="confrontation",
+        ))
+
+        response = client.post("/api/v1/context/suggestions", json={
+            "trigger_type": "location",
+            "trigger_name": "Nef Centrale",
+            "dialogue_type": "confrontation",
+            "already_selected": self._empty_already_selected(),
+        })
+        assert response.status_code == 200
+        types = {s["type"] for s in response.json()["suggestions"]}
+        assert types == {"item"}
 
     def test_disabled_rule_falls_back_to_default(self, suggestions_client_with_mocks) -> None:
         """Règle désactivée → comportement Story 3.3 préservé."""

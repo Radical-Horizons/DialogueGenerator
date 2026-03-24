@@ -27,9 +27,13 @@ const makeRule = (overrides: Partial<ContextRule> = {}): ContextRule => ({
 
 const makeStoreMock = (rules: ContextRule[]) => ({
   rules,
+  selectedDialogueType: 'salutation',
+  source: 'specific' as const,
   isLoading: false,
   error: null,
   loadRules: vi.fn(),
+  loadRulesByDialogueType: vi.fn(),
+  saveRulesByDialogueType: vi.fn(),
   createRule: vi.fn(),
   updateRule: vi.fn(),
   toggleRule: vi.fn(),
@@ -129,8 +133,8 @@ describe('ContextRulesEditor', () => {
     await user.click(screen.getByRole('button', { name: /ajouter r.gle/i }))
 
     await user.type(screen.getByRole('textbox', { name: /nom de la r.gle/i }), 'Ma règle')
-    // La première condition a son sélecteur de type
-    await user.selectOptions(screen.getAllByRole('combobox')[0], 'location')
+    // Le premier combobox est le type de dialogue, le second est le type de condition.
+    await user.selectOptions(screen.getAllByRole('combobox')[1], 'location')
     // Sélection suggestedTypes (checkbox "Personnage")
     await user.click(screen.getByRole('checkbox', { name: /personnage/i }))
 
@@ -184,13 +188,13 @@ describe('ContextRulesEditor', () => {
     render(<ContextRulesEditor />)
     await user.click(screen.getByRole('button', { name: /ajouter r.gle/i }))
 
-    // Par défaut 1 condition
-    expect(screen.getAllByRole('combobox')).toHaveLength(1)
+    // Par défaut : 1 select type dialogue + 1 select type condition
+    expect(screen.getAllByRole('combobox')).toHaveLength(2)
 
     await user.click(screen.getByRole('button', { name: /\+ condition/i }))
 
-    // Maintenant 2 conditions + sélecteur d'opérateur
-    expect(screen.getAllByRole('combobox')).toHaveLength(3) // 2 types + opérateur
+    // Maintenant : 1 type dialogue + 2 types condition + 1 opérateur
+    expect(screen.getAllByRole('combobox')).toHaveLength(4)
     expect(screen.getByRole('combobox', { name: /op.rateur de conditions/i })).toBeInTheDocument()
   })
 })
