@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-/// <reference types="vite/client" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -11,7 +10,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: 'localhost', // Démarrer sur localhost
+    // true = 0.0.0.0 : joignable en 127.0.0.1 ET localhost (évite ::1-only sous Windows, compatible scripts/dev.js)
+    host: true,
     strictPort: true, // Échoue si le port est déjà utilisé au lieu de prendre un autre port
     open: false, // Ne pas ouvrir automatiquement (géré par scripts/dev.js)
     // Configuration HMR robuste pour garantir le rafraîchissement
@@ -36,8 +36,8 @@ export default defineConfig({
     fs: {
       // Permettre l'accès aux fichiers en dehors de la racine si nécessaire
       strict: false,
-      // Cache des fichiers système désactivé en dev
-      cachedChecks: false,
+      // true = moins de stat() répétés → démarrage / résolution de modules plus rapide (Vite recommandé en dev)
+      cachedChecks: true,
     },
     proxy: {
       '/api': {

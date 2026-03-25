@@ -15,6 +15,12 @@ const shouldClearCache = args.includes('--clear-cache') || args.includes('-c');
 const backendOnly = args.includes('--backend') || args.includes('--back');
 const frontendOnly = args.includes('--frontend') || args.includes('--front');
 const stopOnly = args.includes('--stop');
+const fastStartup =
+  args.includes('--fast') || process.env.DEV_FAST_STARTUP === '1';
+if (fastStartup) {
+  process.env.SKIP_STARTUP_CONTEXT_VALIDATION = 'true';
+  process.env.SKIP_STARTUP_LOG_CLEANUP = 'true';
+}
 
 // Parse log level flags
 let logLevel = null;
@@ -207,6 +213,11 @@ async function handleBackendOnly() {
   const apiPort = parseInt(process.env.API_PORT || '4243', 10);
   
   console.log(`\n📦 Démarrage du backend uniquement...\n`);
+  if (fastStartup) {
+    console.log(
+      '   ⚡ Mode --fast : pas de validate_all_configs ni nettoyage logs au startup API (hors production).\n'
+    );
+  }
   console.log(`   Backend API:  http://localhost:${apiPort}`);
   console.log(`   API Docs:     http://localhost:${apiPort}/api/docs\n`);
   
@@ -269,6 +280,11 @@ async function handleAll() {
   const frontendUrl = `http://localhost:${frontendPort}`;
   
   console.log('\n📦 Démarrage des serveurs...\n');
+  if (fastStartup) {
+    console.log(
+      '   ⚡ Mode --fast : pas de validate_all_configs ni nettoyage logs au startup API (hors production).\n'
+    );
+  }
   console.log(`   Backend API:  http://localhost:${apiPort}`);
   console.log(`   Frontend:     ${frontendUrl}`);
   console.log(`   API Docs:     http://localhost:${apiPort}/api/docs\n`);

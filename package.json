@@ -6,6 +6,7 @@
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-venv.ps1",
     "verify:venv": "powershell -ExecutionPolicy Bypass -File scripts/verify-venv.ps1",
     "dev": "node scripts/dev.js",
+    "dev:fast": "node scripts/dev.js --fast",
     "dev:clean": "node scripts/dev.js --clear-cache",
     "dev:back": "node scripts/dev.js --backend",
     "dev:front": "node scripts/dev.js --frontend",

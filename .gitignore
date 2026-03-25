@@ -74,6 +74,8 @@ data/logs/*.json
 data/cost_budgets.json
 data/llm_usage/
 data/notion_cache/
+# Snapshot pickle GDD (régénéré au chargement si JSON changent)
+data/.gdd_snapshot/
 data/interactions/
 data/UnityData/
 

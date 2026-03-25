@@ -5,11 +5,31 @@
 const http = require('http');
 const services = require('./dev-services');
 
+/** Même stratégie que dev-services : éviter localhost → ::1 sous Windows. */
+function probeUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'localhost') {
+      u.hostname = '127.0.0.1';
+    }
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 // Fonction pour tester la santé d'un service
 async function checkHealth(url, timeout = 2000) {
+  const target = probeUrl(url);
   return new Promise((resolve) => {
-    const req = http.get(url, { timeout }, (res) => {
-      resolve(res.statusCode === 200 || res.statusCode === 304 || res.statusCode === 404);
+    const req = http.get(target, { timeout }, (res) => {
+      res.resume();
+      resolve(
+        res.statusCode === 200 ||
+          res.statusCode === 304 ||
+          res.statusCode === 404 ||
+          res.statusCode === 503
+      );
     });
     
     req.on('error', () => resolve(false));

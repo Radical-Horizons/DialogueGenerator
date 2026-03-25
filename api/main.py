@@ -79,12 +79,13 @@ async def lifespan(app: FastAPI):
             logger.critical("L'application ne peut pas démarrer avec une configuration de sécurité invalide.")
             raise
         
-        # Nettoyer les anciens logs au démarrage
-        try:
-            from api.utils.log_cleanup import cleanup_on_startup
-            cleanup_on_startup()
-        except Exception as e:
-            logger.warning(f"Erreur lors du nettoyage des logs au démarrage: {e}")
+        # Nettoyer les anciens logs au démarrage (désactivable pour accélérer le cold start en dev)
+        if os.getenv("SKIP_STARTUP_LOG_CLEANUP", "").lower() not in ("true", "1", "yes"):
+            try:
+                from api.utils.log_cleanup import cleanup_on_startup
+                cleanup_on_startup()
+            except Exception as e:
+                logger.warning(f"Erreur lors du nettoyage des logs au démarrage: {e}")
         
         # Créer le container une seule fois : chargement GDD + validation puis réutilisation pour les requêtes
         try:
@@ -96,7 +97,13 @@ async def lifespan(app: FastAPI):
             config_service = container.get_config_service()
             context_config = config_service.get_context_config()
 
-            if context_config:
+            environment = os.getenv("ENVIRONMENT", "development").lower().strip()
+            skip_context_validation = (
+                environment != "production"
+                and os.getenv("SKIP_STARTUP_CONTEXT_VALIDATION", "").lower() in ("true", "1", "yes")
+            )
+
+            if context_config and not skip_context_validation:
                 validator = ContextFieldValidator(context_builder)
                 validation_results = validator.validate_all_configs(context_config)
 
@@ -116,12 +123,16 @@ async def lifespan(app: FastAPI):
                         report = validator.get_validation_report(context_config)
                         logger.warning(f"Validation des champs GDD (rapport complet):\n{report}")
 
-                    environment = os.getenv("ENVIRONMENT", "development")
                     if environment == "production" and total_errors > 0:
                         logger.critical("Champs invalides détectés dans context_config.json - l'application ne peut pas démarrer en production.")
                         raise ValueError(f"Configuration invalide: {total_errors} champs invalides détectés")
                 else:
                     logger.info("Validation des champs GDD: tous les champs sont valides")
+            elif context_config and skip_context_validation:
+                logger.info(
+                    "Startup: SKIP_STARTUP_CONTEXT_VALIDATION=1 — pas de validate_all_configs "
+                    "(GDD chargé). Réactiver avant de modifier context_config / champs GDD."
+                )
 
             app.state.container = container
             logger.info("ServiceContainer initialisé dans app.state (GDD chargé une seule fois).")
