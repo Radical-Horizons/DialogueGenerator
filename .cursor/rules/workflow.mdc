@@ -29,6 +29,7 @@ alwaysApply: false
     - Build check détecte erreurs TypeScript
     - Lint check détecte erreurs de code
     - Tests Vitest vérifient les composants
+    - Suite Vitest **rapide** (agents, itérations) : `npm run test:frontend:vitest` → `tmp/vitest-report.json` ; suite **complète** (CI) : `frontend` `npm run test:full` ou `npm run test:frontend:vitest:full`. Éviter `| Select-Object` sur la sortie Vitest ; en arrière-plan si besoin, lire le JSON de rapport une fois généré
   - **Interface web (PRINCIPALE)** : `npm run dev` (démarre tout sur localhost:3000, utilise venv automatiquement)
 
 - **Tests** :

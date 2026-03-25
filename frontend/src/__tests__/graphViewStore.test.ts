@@ -9,7 +9,7 @@ import { useGraphViewStore } from '../store/graphViewStore'
 function reset() {
   useGraphViewStore.setState({
     reactFlowInstance: null,
-    pendingFocusNodeId: null,
+    focusQueue: [],
     pendingFitView: false,
     edgeLabelEditRequest: null,
     contextMenuRequest: null,
@@ -25,13 +25,16 @@ function reset() {
 describe('graphViewStore', () => {
   beforeEach(() => reset())
 
-  describe('focusNode / clearFocus', () => {
-    it('sets and clears pendingFocusNodeId', () => {
-      expect(useGraphViewStore.getState().pendingFocusNodeId).toBeNull()
-      useGraphViewStore.getState().focusNode('node-42')
-      expect(useGraphViewStore.getState().pendingFocusNodeId).toBe('node-42')
+  describe('focusNode / focusQueue / clearFocus', () => {
+    it('enqueue plusieurs focus sans écraser (FIFO)', () => {
+      expect(useGraphViewStore.getState().focusQueue).toEqual([])
+      useGraphViewStore.getState().focusNode('a')
+      useGraphViewStore.getState().focusNode('b')
+      expect(useGraphViewStore.getState().focusQueue).toEqual(['a', 'b'])
+      useGraphViewStore.getState().dequeueFocus()
+      expect(useGraphViewStore.getState().focusQueue).toEqual(['b'])
       useGraphViewStore.getState().clearFocus()
-      expect(useGraphViewStore.getState().pendingFocusNodeId).toBeNull()
+      expect(useGraphViewStore.getState().focusQueue).toEqual([])
     })
   })
 

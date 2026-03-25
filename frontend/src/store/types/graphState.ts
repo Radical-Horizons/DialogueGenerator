@@ -126,7 +126,7 @@ export interface GraphState {
   /** Met à jour le libellé d'une edge de type choice (Story 2.5 AC #4). */
   updateChoiceEdgeLabel: (edgeId: string, newText: string) => void
   /** Normalise les couleurs des edges depuis le handle source parent. Retourne true si l'état a changé. */
-  normalizeEdgeColors: () => boolean
+  normalizeEdgeColors: (opts?: { skipMarkDirty?: boolean }) => boolean
   setSelectedNode: (nodeId: string | null) => void
   /** Story 2.10 FR31: définit la liste des nœuds sélectionnés (multi-sélection). selectedNodeId = premier de la liste pour l’éditeur. */
   setSelectedNodes: (nodeIds: string[]) => void

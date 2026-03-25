@@ -397,11 +397,19 @@ export function useDialogueLoader(
     try {
       setIsLoadingDialogue(true)
       useGraphViewStore.getState().requestFlush()
-      await new Promise<void>((resolve) => {
-        const timeout = setTimeout(resolve, 1500)
+      await new Promise<void>((resolve, reject) => {
+        const FLUSH_WAIT_MS = 1500
+        let settled = false
+        const timeout = window.setTimeout(() => {
+          if (settled) return
+          settled = true
+          unsub()
+          reject(new Error('Flush timeout: éditeur non synchronisé'))
+        }, FLUSH_WAIT_MS)
         const unsub = useGraphViewStore.subscribe((state) => {
-          if (state.flushCompleted) {
-            clearTimeout(timeout)
+          if (state.flushCompleted && !settled) {
+            settled = true
+            window.clearTimeout(timeout)
             unsub()
             resolve()
           }

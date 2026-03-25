@@ -90,9 +90,12 @@ describe('JumpToNodeModal', () => {
     await user.type(input, 'nonexistent')
     await vi.waitFor(() => {
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
-    }, { timeout: 400 })
+    }, { timeout: 600 })
+    await user.click(input)
     await user.keyboard('{Enter}')
-    expect(screen.getByRole('alert')).toHaveTextContent('Nœud non trouvé')
+    await vi.waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Nœud non trouvé')
+    })
     expect(onClose).not.toHaveBeenCalled()
   })
 

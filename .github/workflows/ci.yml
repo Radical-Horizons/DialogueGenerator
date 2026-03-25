@@ -48,6 +48,6 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run tests
-        run: npm run test -- --run
+      - name: Run tests (full Vitest suite)
+        run: npm run test:full
         working-directory: frontend

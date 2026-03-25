@@ -92,19 +92,19 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
     window.setTimeout(runFitView, 150)
   }, [isGraphLoading, documentId])
 
-  const pendingFocusNodeId = useGraphViewStore((s) => s.pendingFocusNodeId)
+  const focusHeadId = useGraphViewStore((s) => s.focusQueue[0] ?? null)
   const fitViewTimeoutRef = useRef<number | null>(null)
   useEffect(() => {
-    if (!pendingFocusNodeId) return
-    useGraphViewStore.getState().clearFocus()
+    if (!focusHeadId) return
+    useGraphViewStore.getState().dequeueFocus()
     if (fitViewTimeoutRef.current !== null) {
       window.clearTimeout(fitViewTimeoutRef.current)
       fitViewTimeoutRef.current = null
     }
-    const node = getNode(pendingFocusNodeId)
+    const node = getNode(focusHeadId)
     if (node) {
-      setHighlightedNodesInner([pendingFocusNodeId])
-      setSelectedNodeInner(pendingFocusNodeId)
+      setHighlightedNodesInner([focusHeadId])
+      setSelectedNodeInner(focusHeadId)
       fitViewTimeoutRef.current = window.setTimeout(() => {
         fitViewTimeoutRef.current = null
         fitView({ nodes: [node], duration: 300, padding: 0.3 })
@@ -113,7 +113,7 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
     return () => {
       if (fitViewTimeoutRef.current !== null) window.clearTimeout(fitViewTimeoutRef.current)
     }
-  }, [pendingFocusNodeId, getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
+  }, [focusHeadId, getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
 
   const pendingFitView = useGraphViewStore((s) => s.pendingFitView)
   useEffect(() => {

@@ -10,7 +10,6 @@ import type { SaveGraphResponse } from '../../types/graph'
 import * as graphAPI from '../../api/graph'
 import * as documentsAPI from '../../api/documents'
 import { documentToGraph, graphToDocument, buildLayoutFromNodes } from '../../utils/documentToGraph'
-import { redistributeSiblingBranches } from '../../utils/dagreLayout'
 import { mergeLayoutWithNodePositions } from '../../utils/syncDocLayout'
 import {
   writeSnapshot as journalWriteSnapshot,
@@ -105,14 +104,7 @@ export const createPersistenceSlice: StateCreator<
         layoutRevision: 1,
         loadSeq,
       })
-      const colorsNormalized = get().normalizeEdgeColors()
-      if (colorsNormalized) {
-        void get()
-          .saveDialogue()
-          .catch((err) => {
-            console.warn('Auto-save après normalisation des couleurs (loadDialogue):', err)
-          })
-      }
+      get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error) {
       if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur lors du chargement du graphe:', error)
@@ -150,21 +142,11 @@ export const createPersistenceSlice: StateCreator<
 
       const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
       const normalized = normalizeTestBars(projectedNodes, projectedEdges)
-      const healedNodes = redistributeSiblingBranches(
-        normalized.nodes,
-        normalized.edges,
-        'TB',
-        get().layoutSpacingMode,
-        {
-          minSiblingCount: 5,
-          onlyWhenFlatOnMainAxis: true,
-        }
-      )
-      const layoutBlob = mergeLayoutWithNodePositions({}, healedNodes)
-      const nodeCount = healedNodes.filter((n) => n.type !== 'testNode').length
+      const layoutBlob = mergeLayoutWithNodePositions({}, normalized.nodes)
+      const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
       get().applyLoadResult({
-        nodes: healedNodes,
+        nodes: normalized.nodes,
         edges: normalized.edges,
         document: doc,
         layout: layoutBlob,
@@ -179,17 +161,7 @@ export const createPersistenceSlice: StateCreator<
         layoutRevision: 1,
         loadSeq,
       })
-      const colorsNormalized = get().normalizeEdgeColors()
-      if (colorsNormalized) {
-        void get()
-          .saveDialogue()
-          .catch((err) => {
-            console.warn(
-              'Auto-save après normalisation des couleurs (loadDialogueFromRawJson):',
-              err
-            )
-          })
-      }
+      get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error) {
       if (get().activeLoadSeq !== loadSeq) return
       set({ isLoading: false })
@@ -222,21 +194,11 @@ export const createPersistenceSlice: StateCreator<
         layoutPositions
       )
       const normalized = normalizeTestBars(projectedNodes, projectedEdges)
-      const healedNodes = redistributeSiblingBranches(
-        normalized.nodes,
-        normalized.edges,
-        'TB',
-        get().layoutSpacingMode,
-        {
-          minSiblingCount: 5,
-          onlyWhenFlatOnMainAxis: true,
-        }
-      )
-      const hydratedLayout = mergeLayoutWithNodePositions(layoutBlob, healedNodes)
-      const nodeCount = healedNodes.filter((n) => n.type !== 'testNode').length
+      const hydratedLayout = mergeLayoutWithNodePositions(layoutBlob, normalized.nodes)
+      const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
       get().applyLoadResult({
-        nodes: healedNodes,
+        nodes: normalized.nodes,
         edges: normalized.edges,
         document: doc,
         layout: hydratedLayout,
@@ -251,17 +213,7 @@ export const createPersistenceSlice: StateCreator<
         layoutRevision: (layoutResponse as { revision: number }).revision ?? 1,
         loadSeq,
       })
-      const colorsNormalized = get().normalizeEdgeColors()
-      if (colorsNormalized) {
-        void get()
-          .saveDialogue()
-          .catch((err) => {
-            console.warn(
-              'Auto-save après normalisation des couleurs (loadDialogueByDocumentId):',
-              err
-            )
-          })
-      }
+      get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error: unknown) {
       if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur chargement document:', error)

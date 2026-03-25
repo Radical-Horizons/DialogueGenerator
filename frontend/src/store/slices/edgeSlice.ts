@@ -17,6 +17,7 @@ import {
   truncateChoiceLabel,
 } from '../../utils/graphEdgeBuilders'
 import { runGraphTransaction } from '../utils/runGraphTransaction'
+import { graphDevWarn } from '../../utils/graphDevLog'
 
 export type EdgeSlice = Pick<
   GraphState,
@@ -41,7 +42,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
 
     const isChoiceConnection = choiceIndex !== undefined && !actualSourceHandle
     if (connectionType === 'choice' && !isChoiceConnection && !actualSourceHandle) {
-      console.warn('[Graph] Ignoring ambiguous choice connection without choiceIndex', {
+      graphDevWarn('[Graph] Ignoring ambiguous choice connection without choiceIndex', {
         sourceId,
         targetId,
       })
@@ -229,7 +230,17 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
           const newEdges = state.edges.filter((e) => e.id !== edgeId)
 
           const updatedChoice = updatedChoices[parent.choiceIndex]
-          if (!updatedChoice) return {}
+          if (!updatedChoice) {
+            return {
+              nodes: updatedNodes,
+              edges: newEdges,
+              dialogueMetadata: {
+                ...state.dialogueMetadata,
+                node_count: updatedNodes.length,
+                edge_count: newEdges.length,
+              },
+            }
+          }
 
           const testNode = updatedNodes.find((n) => n.id === edge.source)
           const syncResult = syncTestNodeFromChoice(
@@ -313,11 +324,14 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     if (choiceIndex == null) return
     const sourceNodeIndex = preState.nodes.findIndex((n) => n.id === sourceId)
     if (sourceNodeIndex === -1) return
-    const sourceNode = preState.nodes[sourceNodeIndex]
-    const choices = (sourceNode.data?.choices ?? []) as Choice[]
-    if (choiceIndex >= choices.length) return
+    const choicesSnapshot = (preState.nodes[sourceNodeIndex].data?.choices ?? []) as Choice[]
+    if (choiceIndex >= choicesSnapshot.length) return
 
     runGraphTransaction(get, set, (state) => {
+      const sourceIdx = state.nodes.findIndex((n) => n.id === sourceId)
+      if (sourceIdx === -1) return {}
+      const choices = (state.nodes[sourceIdx].data?.choices ?? []) as Choice[]
+      if (choiceIndex >= choices.length) return {}
       const updatedChoices = choices.map((c, i) =>
         i === choiceIndex ? { ...c, text: newText } : c
       )
@@ -342,7 +356,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     })
   },
 
-  normalizeEdgeColors: () => {
+  normalizeEdgeColors: (opts?: { skipMarkDirty?: boolean }) => {
     const state = get()
     let changed = false
     const normalizedEdges = state.edges.map((edge) => {
@@ -374,7 +388,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
           edge_count: normalizedEdges.length,
         },
       }),
-      { skipUndo: true }
+      { skipUndo: true, skipMarkDirty: !!opts?.skipMarkDirty }
     )
     return true
   },

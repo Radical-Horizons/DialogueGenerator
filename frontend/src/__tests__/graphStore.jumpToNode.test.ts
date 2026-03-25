@@ -19,13 +19,13 @@ vi.mock('../api/graph', () => ({
 
 function resetStores() {
   useGraphStore.getState().resetGraph()
-  useGraphViewStore.setState({ pendingFocusNodeId: null })
+  useGraphViewStore.getState().clearFocus()
 }
 
 describe('graphStore - jumpToNode (Story 2.8)', () => {
   beforeEach(() => resetStores())
 
-  it('jumpToNode(nodeId) calls setSelectedNode and sets pendingFocusNodeId when node exists', () => {
+  it('jumpToNode(nodeId) calls setSelectedNode and enqueue focus when node exists', () => {
     const { addNode, jumpToNode } = useGraphStore.getState()
     const n1: Node = {
       id: 'node_abc123',
@@ -38,7 +38,7 @@ describe('graphStore - jumpToNode (Story 2.8)', () => {
     jumpToNode('node_abc123')
 
     expect(useGraphStore.getState().selectedNodeId).toBe('node_abc123')
-    expect(useGraphViewStore.getState().pendingFocusNodeId).toBe('node_abc123')
+    expect(useGraphViewStore.getState().focusQueue).toEqual(['node_abc123'])
   })
 
   it('jumpToNode(nodeId) does not set focus when nodeId absent in nodes', () => {
@@ -53,7 +53,7 @@ describe('graphStore - jumpToNode (Story 2.8)', () => {
     jumpToNode('nonexistent_id')
 
     expect(useGraphStore.getState().selectedNodeId).toBeNull()
-    expect(useGraphViewStore.getState().pendingFocusNodeId).toBeNull()
+    expect(useGraphViewStore.getState().focusQueue).toEqual([])
   })
 })
 

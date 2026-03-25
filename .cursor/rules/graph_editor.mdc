@@ -24,7 +24,7 @@ alwaysApply: false
 - **Contrôleur de vue typé (`graphViewStore`)** :
   - Toute commande UI inter-composants (focus nœud, fitView, menu contextuel, édition label d'arête, ouverture panneau IA/prompt, flush/save, notification suppression) passe par `useGraphViewStore` (`frontend/src/store/graphViewStore.ts`).
   - **Ne plus utiliser** `window.dispatchEvent(new CustomEvent(...))` ni `window.addEventListener(...)` pour la communication inter-composants du graphe. Ces patterns ont été intégralement remplacés.
-  - Les producteurs appellent les actions du store (ex: `useGraphViewStore.getState().focusNode(nodeId)`), les consommateurs souscrivent via `useEffect` sur l'état correspondant et appellent le `clear*` après traitement.
+  - Les producteurs appellent les actions du store (ex: `useGraphViewStore.getState().focusNode(nodeId)` qui **enqueue** dans `focusQueue`). `GraphCanvas` consomme la tête via `dequeueFocus()` après `fitView`. `clearFocus()` vide toute la file.
   - Le protocole flush/save fonctionne ainsi : `requestFlush()` → `NodeEditorPanel` exécute le flush → `confirmFlush()` → `useDialogueLoader` détecte `flushCompleted` et déclenche la sauvegarde.
 
 - **Helper de transaction graphe (`runGraphTransaction`)** :
@@ -51,7 +51,7 @@ alwaysApply: false
 - **Undo/redo et auto-layout** :
   - L'historique undo/redo est géré via `undoSlice` (`undoStack` / `redoStack`, `_pushUndoSnapshot`, `undo`, `redo`) avec limite stricte à 50 snapshots.
   - On ne pousse un snapshot qu'aux **entrées de transactions** (add/delete/connect/disconnect/move stop…), jamais sur chaque frame de drag (utiliser le throttling existant).
-  - L'auto-layout reste côté backend (`/graph/calculate-layout`) via `layoutSlice` / `applyAutoLayout`; ne pas introduire de deuxième algorithme côté frontend.
+  - **Layout** : `layoutSlice.applyAutoLayout` avec algorithme `dagre` utilise **dagre côté client** (`utils/dagreLayout`) pour un recalcul local rapide ; les **autres** algorithmes passent par `POST /graph/calculate-layout`. La **génération de nœuds** peut aussi appliquer dagre client pour lisibilité immédiate. Ne pas dupliquer une troisième variante sans aligner tests et epics.
 
 - **Performances et UX (NFR-P1/P4, NFR-SC3, NFR-A1)** :
   - Garder `onlyRenderVisibleElements={true}`, `minZoom` / `maxZoom` et `autoPanOnNodeDrag` activés sur `<ReactFlow>` ; ne pas les désactiver sans raison forte + tests.

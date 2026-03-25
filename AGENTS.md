@@ -22,7 +22,13 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 - **`.env` file**: Copy from `.env.example`. Required for JWT auth and config. Default dev credentials: `admin` / `admin123`.
 - **No real LLM key needed for basic dev**: Without `OPENAI_API_KEY`, the backend uses `DummyLLMClient` (mock responses). Set a real key for actual dialogue generation.
 - **Frontend ESLint**: `npm --prefix frontend run lint` is green. Treat any new lint error as a regression to fix, not as accepted baseline debt.
-- **Frontend Vitest**: All 650 tests pass as of last run (excluding `graphStore.autoLayout` which has a known pre-existing timeout). If a test suddenly fails, check whether it tests a feature that was silently removed rather than assuming the test is obsolete.
+- **Frontend Vitest — règle absolue pour les agents** :
+  - **NE JAMAIS lancer la suite entière depuis l'agent.** Elle ne termine pas proprement (workers qui restent ouverts). La CI s'en charge.
+  - **Protocole agent** :
+    1. **Cibler les fichiers modifiés** : `cd frontend && npx vitest run src/__tests__/Fichier.test.ts --reporter=dot` — termine en < 60s.
+    2. **Sanity check global** (optionnel) : `cd frontend && npx vitest run --bail=1 --reporter=dot` — stoppe au premier échec, < 2 min.
+    3. **Interdits depuis l'agent** : `vitest run` sans filtre, `--changed HEAD`, `npm test`, `npm run test:full`.
+  - Si un test échoue, vérifier qu'une feature n'a pas été silencieusement retirée avant de le considérer obsolète.
 - **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
 
 ### Commands reference
@@ -31,7 +37,9 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 
 - **Backend tests**: `.venv/bin/python -m pytest tests/ -x --tb=short`
 - **Frontend lint**: `cd frontend && npx eslint . --ext ts,tsx`
-- **Frontend tests**: `cd frontend && npx vitest run`
+- **Frontend tests (agent — ciblés)** : `cd frontend && npx vitest run src/__tests__/MonFichier.test.ts --reporter=dot`
+- **Frontend tests (sanity check)** : `cd frontend && npx vitest run --bail=1 --reporter=dot`
+- **Frontend tests (CI/full, humain uniquement)** : `cd frontend && npm run test:full`
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
 
 ## Learned User Preferences

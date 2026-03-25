@@ -12,6 +12,7 @@ import {
   GRAPH_SIBLING_COLUMN_STEP,
 } from '../utils/graphNodeLayout'
 import { getLayoutNodeHeight } from '../utils/dagreLayout'
+import * as graphDevLog from '../utils/graphDevLog'
 
 // Mock graphAPI
 vi.mock('../api/graph', () => ({
@@ -285,6 +286,52 @@ describe('useGraphStore - Pending save state', () => {
       expect(state.edges[0].source).toBe('n1')
       expect(state.edges[0].target).toBe('n2')
       expect(state.hasUnsavedChanges).toBe(true)
+    })
+
+    it('connectNodes ignores ambiguous choice without choiceIndex (no edge; graphDevWarn)', () => {
+      const devSpy = vi.spyOn(graphDevLog, 'graphDevWarn').mockImplementation(() => {})
+      const { addNode, connectNodes } = useGraphStore.getState()
+      const node1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { choices: [{ text: 'A', choiceId: 'c1' }] },
+      }
+      const node2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(node1)
+      addNode(node2)
+      connectNodes('n1', 'n2', undefined, 'choice')
+      expect(useGraphStore.getState().edges).toHaveLength(0)
+      expect(devSpy).toHaveBeenCalled()
+      devSpy.mockRestore()
+    })
+
+    it('updateChoiceEdgeLabel uses current node choices from transaction state (M5)', () => {
+      const { addNode, connectNodes, updateNode, updateChoiceEdgeLabel } = useGraphStore.getState()
+      const node1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'n1',
+          choices: [{ text: 'V1', choiceId: 'c1' }],
+        },
+      }
+      const node2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(node1)
+      addNode(node2)
+      connectNodes('n1', 'n2', 0, 'choice')
+      const edge = useGraphStore.getState().edges[0]
+      updateNode('n1', {
+        data: {
+          id: 'n1',
+          choices: [{ text: 'V2', choiceId: 'c1', targetNode: 'n2' }],
+        },
+      })
+      updateChoiceEdgeLabel(edge.id, 'Libellé final')
+      const src = useGraphStore.getState().nodes.find((n) => n.id === 'n1')
+      expect((src?.data?.choices as { text?: string }[])?.[0]?.text).toBe('Libellé final')
+      expect(useGraphStore.getState().edges[0].label).toBe('Libellé final')
     })
 
     it('updateChoiceEdgeLabel updates choice text, edge label, and marks dirty (Story 2.5 AC #4)', () => {

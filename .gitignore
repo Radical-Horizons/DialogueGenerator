@@ -85,6 +85,8 @@ Assets/Layouts/*.layout.json
 *.meta
 
 # Temporary files
+tmp/vitest-report.json
+tmp/vitest-*.json
 *.tmp
 *.bak
 *.swp

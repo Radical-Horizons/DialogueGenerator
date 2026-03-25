@@ -73,12 +73,18 @@ export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
   )
 
   const handleSubmit = useCallback(() => {
+    // Annule le debounce en cours : s'il se déclenchait après Enter, il effacerait notFoundMessage.
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
     if (suggestions.length > 0) {
       const node = suggestions[highlightedIndex] ?? suggestions[0]
       handleSelect(node.id)
       return
     }
-    if (query.trim() !== '') {
+    const live = (inputRef.current?.value ?? query).trim()
+    if (live !== '') {
       setNotFoundMessage('Nœud non trouvé')
     }
   }, [suggestions, highlightedIndex, query, handleSelect])

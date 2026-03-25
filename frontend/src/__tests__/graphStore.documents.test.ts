@@ -76,7 +76,7 @@ describe('graphStore - document SoT load/save', () => {
       expect(state.nodes.length).toBeGreaterThanOrEqual(2)
     })
 
-    it('réinjecte une dispersion verticale pour 5 branches plates au rechargement', async () => {
+    it('préserve les positions Y du layout fichier pour 5 branches plates (pas de redistribution au load)', async () => {
       const docWithFiveChoices = {
         schemaVersion: '1.1.0',
         nodes: [
@@ -131,8 +131,25 @@ describe('graphStore - document SoT load/save', () => {
         }).y
       )
 
-      expect(new Set(childYValues).size).toBeGreaterThan(1)
-      expect(new Set(persistedYValues).size).toBeGreaterThan(1)
+      expect(childYValues.every((y) => y === 320)).toBe(true)
+      expect(persistedYValues.every((y) => y === 320)).toBe(true)
+    })
+
+    it('ne déclenche pas putDocument/putLayout au seul chargement (pas de save implicite)', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: sampleLayout,
+        revision: 1,
+      })
+      const { loadDialogueByDocumentId } = useGraphStore.getState()
+      await loadDialogueByDocumentId('test-doc')
+      expect(documentsAPI.putDocument).not.toHaveBeenCalled()
+      expect(documentsAPI.putLayout).not.toHaveBeenCalled()
+      expect(useGraphStore.getState().hasUnsavedChanges).toBe(false)
     })
   })
 

@@ -119,6 +119,61 @@ describe('useDialogueLoader', () => {
     ).toBe(true)
   })
 
+  it('handleSave does not call saveDialogue when flush times out (no NodeEditorPanel)', async () => {
+    vi.useFakeTimers()
+    const saveDialogueMock = vi.fn().mockResolvedValue({
+      filename: 'd.json',
+      node_count: 0,
+      edge_count: 0,
+    })
+    const validateGraphMock = vi.fn().mockResolvedValue(undefined)
+    useGraphStore.setState({
+      saveDialogue: saveDialogueMock,
+      validateGraph: validateGraphMock,
+      documentId: 'd',
+      dialogueMetadata: {
+        filename: 'd.json',
+        title: 'D',
+        node_count: 1,
+        edge_count: 0,
+      },
+      nodes: [{ id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }],
+      isLoading: false,
+      isSaving: false,
+      isGenerating: false,
+      hasUnsavedChanges: false,
+    })
+
+    const { result } = renderHook(() => useDialogueLoader(toastMock, null))
+
+    await act(async () => {
+      result.current.setSelectedDialogue({
+        filename: 'd.json',
+        title: 'D',
+        node_count: 1,
+        edge_count: 0,
+      })
+    })
+
+    await act(async () => {
+      const savePromise = result.current.handleSave()
+      await vi.advanceTimersByTimeAsync(2000)
+      await savePromise
+    })
+
+    expect(saveDialogueMock).not.toHaveBeenCalled()
+    expect(
+      toastMock.mock.calls.some(
+        (c) =>
+          c[1] === 'error' &&
+          typeof c[0] === 'string' &&
+          (c[0].includes('sauvegarde') || c[0].includes('Flush') || c[0].includes('synchronis'))
+      )
+    ).toBe(true)
+
+    vi.useRealTimers()
+  })
+
   it('dispatches unity-dialogue-deleted and clears dialogue when matching', async () => {
     const loadDialogueMock = vi.fn().mockResolvedValue(undefined)
     const validateGraphMock = vi.fn().mockResolvedValue(undefined)

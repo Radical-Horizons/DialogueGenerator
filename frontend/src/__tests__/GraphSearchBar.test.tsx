@@ -54,7 +54,7 @@ describe('GraphSearchBar (Story 2.7)', () => {
     expect(screen.getByText(/2 résultats trouvés/)).toBeInTheDocument()
   })
 
-  it('Prev/Next set pendingFocusNodeId via graphViewStore and cycle through results', async () => {
+  it('Prev/Next enqueue focus via graphViewStore and cycle through results', async () => {
     render(<GraphSearchBar onClose={onClose} />)
     const input = screen.getByPlaceholderText(/Rechercher/)
     await act(async () => {
@@ -68,20 +68,20 @@ describe('GraphSearchBar (Story 2.7)', () => {
     await act(async () => {
       fireEvent.click(nextBtn)
     })
-    expect(useGraphViewStore.getState().pendingFocusNodeId).toBe('n3')
+    expect(useGraphViewStore.getState().focusQueue.at(-1)).toBe('n3')
 
-    useGraphViewStore.setState({ pendingFocusNodeId: null })
+    useGraphViewStore.getState().clearFocus()
     await act(async () => {
       fireEvent.click(nextBtn)
     })
-    expect(useGraphViewStore.getState().pendingFocusNodeId).toBe('n1')
+    expect(useGraphViewStore.getState().focusQueue.at(-1)).toBe('n1')
 
-    useGraphViewStore.setState({ pendingFocusNodeId: null })
+    useGraphViewStore.getState().clearFocus()
     const prevBtn = screen.getByLabelText(/Résultat précédent/)
     await act(async () => {
       fireEvent.click(prevBtn)
     })
-    expect(useGraphViewStore.getState().pendingFocusNodeId).toBe('n3')
+    expect(useGraphViewStore.getState().focusQueue.at(-1)).toBe('n3')
   })
 
   it('Escape calls setHighlightedNodes([]) and onClose', async () => {

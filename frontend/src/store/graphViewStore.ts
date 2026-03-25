@@ -19,8 +19,8 @@ export interface GraphViewState {
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
 
-  // --- Focus / FitView ---
-  pendingFocusNodeId: string | null
+  // --- Focus / FitView (FIFO : plusieurs focusNode successifs ne s'écrasent pas) ---
+  focusQueue: string[]
   pendingFitView: boolean
 
   // --- Edge label edit ---
@@ -48,6 +48,8 @@ export interface GraphViewState {
 
   // --- Actions : focus / fitView ---
   focusNode: (nodeId: string) => void
+  /** Retire le premier id de la file (consommé par GraphCanvas après traitement). */
+  dequeueFocus: () => void
   clearFocus: () => void
   requestFitView: () => void
   clearFitView: () => void
@@ -82,7 +84,7 @@ export interface GraphViewState {
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
   reactFlowInstance: null,
-  pendingFocusNodeId: null,
+  focusQueue: [],
   pendingFitView: false,
   edgeLabelEditRequest: null,
   contextMenuRequest: null,
@@ -95,8 +97,15 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
 
   registerReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
 
-  focusNode: (nodeId) => set({ pendingFocusNodeId: nodeId }),
-  clearFocus: () => set({ pendingFocusNodeId: null }),
+  focusNode: (nodeId) =>
+    set((s) => ({
+      focusQueue: [...s.focusQueue, nodeId],
+    })),
+  dequeueFocus: () =>
+    set((s) => ({
+      focusQueue: s.focusQueue.length > 0 ? s.focusQueue.slice(1) : [],
+    })),
+  clearFocus: () => set({ focusQueue: [] }),
 
   requestFitView: () => set({ pendingFitView: true }),
   clearFitView: () => set({ pendingFitView: false }),

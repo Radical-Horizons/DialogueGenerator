@@ -1,0 +1,6 @@
+
+> dialogue-generator-frontend@1.0.0 test:ci
+> vitest run --reporter=json --outputFile=../tmp/vitest-results.json
+
+Not implemented: Window's alert() method
+Not implemented: Window's alert() method
