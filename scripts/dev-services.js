@@ -13,6 +13,7 @@ const execAsync = promisify(exec);
 
 // Import de getPythonPath pour le venv
 const getPythonPath = require('./getPythonPath');
+const devStartupTiming = require('./dev-startup-timing');
 
 // Chemins
 const LOCK_FILE = path.join(__dirname, '..', '.dev', '.dev.lock');
@@ -368,6 +369,7 @@ async function acquireLock() {
       // Vérifier que le lock a bien été créé avec notre PID
       const verifyLock = readLock();
       if (verifyLock && verifyLock.pid === process.pid) {
+        devStartupTiming.mark('lock_acquired');
         return; // Succès
       } else {
         // Race condition : une autre instance a créé le lock entre temps
@@ -447,16 +449,18 @@ async function startBackend(port = 4243) {
   const lock = readLock();
   if (lock && lock.backend && lock.backend.pid) {
     if (await processExists(lock.backend.pid)) {
+      devStartupTiming.mark('backend_reused_existing');
       console.log(`ℹ️  Backend déjà en cours (PID: ${lock.backend.pid})`);
       backendProcess = { pid: lock.backend.pid, killed: false };
       return backendProcess;
     }
   }
-  
+
   // Kill-port avant démarrage
   console.log(`🔍 Nettoyage du port ${port}...`);
   await killPort(port);
-  
+  devStartupTiming.mark('backend_port_cleared');
+
   // Démarrer le backend
   console.log(`🔄 Démarrage du backend sur le port ${port}...`);
   
@@ -473,7 +477,8 @@ async function startBackend(port = 4243) {
     stdio: 'inherit',
     shell: true,
     env: Object.assign({}, process.env, {
-      RELOAD: 'true',
+      // Respecter RELOAD=false depuis l'environnement (mesure perf / prod locale)
+      RELOAD: process.env.RELOAD ?? 'true',
       API_PORT: port.toString(),
       // Forcer un niveau console lisible par défaut (override d'un LOG_LEVEL=DEBUG global)
       LOG_CONSOLE_LEVEL: consoleLevel,
@@ -489,7 +494,8 @@ async function startBackend(port = 4243) {
   const pythonPath = getPythonPath(PROJECT_ROOT);
   
   backendProcess = spawn(pythonPath, ['-m', 'api.main'], spawnOptions);
-  
+  devStartupTiming.mark('backend_process_spawned');
+
   // Mettre à jour le lock
   updateLock({
     backend: {
@@ -498,10 +504,11 @@ async function startBackend(port = 4243) {
       started: Date.now()
     }
   });
-  
+
   // Attendre que le backend soit prêt
   try {
     await waitForBackend(port);
+    devStartupTiming.mark('backend_ready');
     console.log(`✅ Backend démarré et prêt (PID: ${backendProcess.pid})`);
     return backendProcess;
   } catch (error) {
@@ -515,16 +522,18 @@ async function startFrontend(port = 3000) {
   const lock = readLock();
   if (lock && lock.frontend && lock.frontend.pid) {
     if (await processExists(lock.frontend.pid)) {
+      devStartupTiming.mark('frontend_reused_existing');
       console.log(`ℹ️  Frontend déjà en cours (PID: ${lock.frontend.pid})`);
       frontendProcess = { pid: lock.frontend.pid, killed: false };
       return frontendProcess;
     }
   }
-  
+
   // Kill-port avant démarrage
   console.log(`🔍 Nettoyage du port ${port}...`);
   await killPort(port);
-  
+  devStartupTiming.mark('frontend_port_cleared');
+
   // Démarrer le frontend
   console.log(`🔄 Démarrage du frontend sur le port ${port}...`);
   
@@ -538,7 +547,8 @@ async function startFrontend(port = 3000) {
   // Ne pas utiliser detached: true car cela rend le processus orphelin
   // Le kill d'arbre avec pkill -P fonctionnera correctement
   frontendProcess = spawn('npm', ['run', 'dev'], spawnOptions);
-  
+  devStartupTiming.mark('frontend_npm_spawned');
+
   // Mettre à jour le lock
   updateLock({
     frontend: {
@@ -547,10 +557,11 @@ async function startFrontend(port = 3000) {
       started: Date.now()
     }
   });
-  
+
   // Attendre que le frontend soit prêt
   try {
     await waitForFrontend(port);
+    devStartupTiming.mark('frontend_ready');
     console.log(`✅ Frontend démarré et prêt (PID: ${frontendProcess.pid})`);
     return frontendProcess;
   } catch (error) {
