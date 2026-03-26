@@ -74,6 +74,7 @@ data/logs/*.json
 data/cost_budgets.json
 data/llm_usage/
 data/notion_cache/
+data/gdd_notion_sync/notion_token.secret
 data/interactions/
 data/UnityData/
 

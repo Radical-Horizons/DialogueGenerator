@@ -186,6 +186,35 @@ async def lifespan(app: FastAPI):
             logger.info("Cleanup task des jobs de génération démarrée")
         except Exception as e:
             logger.warning(f"Erreur lors du démarrage de la cleanup task: {e}")
+
+        async def gdd_notion_scheduler() -> None:
+            """Sync GDD Notion périodique si activée (FR18, pas de cron OS)."""
+            await asyncio.sleep(20)
+            while True:
+                delay_sec = 3600
+                try:
+                    container = getattr(app.state, "container", None)
+                    if container is not None:
+                        svc = container.get_gdd_notion_sync_service()
+                        delay_sec = svc.poll_interval_seconds()
+                        if svc.is_auto_sync_enabled():
+                            await svc.run_sync(
+                                force_full=False,
+                                request_id="gdd-notion-scheduler",
+                            )
+                except asyncio.CancelledError:
+                    raise
+                except Exception as sched_exc:
+                    logger.warning(
+                        "Planificateur sync GDD Notion: %s",
+                        sched_exc,
+                        exc_info=True,
+                    )
+                await asyncio.sleep(delay_sec)
+
+        app.state._gdd_notion_scheduler_task = asyncio.create_task(
+            gdd_notion_scheduler()
+        )
         
         yield
     except (KeyboardInterrupt, asyncio.CancelledError):
@@ -208,6 +237,14 @@ async def lifespan(app: FastAPI):
             logger.info("Cleanup task des jobs de génération arrêtée")
         except Exception as e:
             logger.warning(f"Erreur lors de l'arrêt de la cleanup task: {e}")
+
+        sched_task = getattr(app.state, "_gdd_notion_scheduler_task", None)
+        if sched_task is not None:
+            sched_task.cancel()
+            try:
+                await sched_task
+            except asyncio.CancelledError:
+                pass
 
 
 # Création de l'application FastAPI
@@ -496,6 +533,10 @@ app.include_router(graph.router)
 
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
+
+from api.routers import gdd_notion_sync
+
+app.include_router(gdd_notion_sync.router)
 
 # Debug endpoint (dev only): inspect PromptEngine code loaded by server
 @app.get("/debug/prompt-engine", tags=["Debug"])

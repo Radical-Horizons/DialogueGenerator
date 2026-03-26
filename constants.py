@@ -27,6 +27,10 @@ class FilePaths:
     LLM_USAGE_DIR = DATA_DIR / "llm_usage"
     COST_BUDGETS_FILE = DATA_DIR / "cost_budgets.json"
     CONTEXT_RULES_FILE = DATA_DIR / "context-rules" / "rules.json"
+    GDD_NOTION_SYNC_DIR = DATA_DIR / "gdd_notion_sync"
+    GDD_NOTION_SYNC_CONFIG_FILE = GDD_NOTION_SYNC_DIR / "settings.json"
+    GDD_NOTION_SYNC_TOKEN_FILE = GDD_NOTION_SYNC_DIR / "notion_token.secret"
+    GDD_NOTION_SYNC_MANIFEST_FILE = DATA_DIR / ".gdd_snapshot" / "manifest.json"
     LOGS_DIR = DATA_DIR / "logs"
     LLM_CONFIG = "llm_config.json"
 

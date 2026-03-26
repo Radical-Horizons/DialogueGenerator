@@ -461,3 +461,19 @@ def get_preset_service(request: Request) -> PresetService:
     container = get_service_container(request)
     return container.get_preset_service()
 
+
+def get_gdd_notion_sync_service(request: Request):
+    """Retourne le service de synchronisation GDD Notion (FR18).
+
+    Args:
+        request: Requête HTTP courante.
+
+    Returns:
+        Instance de GddNotionSyncService depuis le ServiceContainer.
+    """
+    from services.gdd_notion_sync_service import GddNotionSyncService
+
+    container = get_service_container(request)
+    svc: GddNotionSyncService = container.get_gdd_notion_sync_service()
+    return svc
+

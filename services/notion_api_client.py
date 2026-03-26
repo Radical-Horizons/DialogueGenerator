@@ -101,6 +101,21 @@ class NotionAPIClient:
             except Exception as e:
                 logger.error(f"Erreur lors de la récupération de la page: {e}")
                 raise
+
+    async def verify_credentials(self) -> Dict[str, Any]:
+        """Valide le token d'intégration via GET /users/me.
+
+        Returns:
+            Objet JSON utilisateur/bot Notion.
+
+        Raises:
+            httpx.HTTPError: Si le token est invalide ou le réseau indisponible.
+        """
+        url = f"{self.base_url}/users/me"
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(url, headers=self.headers)
+            response.raise_for_status()
+            return response.json()
     
     async def get_page_content(self, page_id: str) -> str:
         """Récupère le contenu markdown d'une page Notion.
