@@ -5,6 +5,7 @@ import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
+import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
 
 interface ValidationError {
   type: string
@@ -25,6 +26,7 @@ interface TestNodeData {
   validationErrors?: ValidationError[]
   validationWarnings?: ValidationError[]
   isHighlighted?: boolean
+  incomingEdgeColor?: string
   [key: string]: unknown
 }
 
@@ -68,17 +70,6 @@ export const TestNode = memo(function TestNode({
   const hasErrors = errors.length > 0
   const hasWarnings = warnings.length > 0
   const isHighlighted = data.isHighlighted || false
-  // isHovered, truncatedLine, handleGenerateClick non utilisés pour l'instant - gardés pour usage futur
-  // const [isHovered, setIsHovered] = useState(false)
-  // const truncatedLine = line.length > 80 ? `${line.substring(0, 80)}...` : line
-  // const handleGenerateClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation()
-  //   // Déclencher un événement custom pour ouvrir le panel de génération
-  //   const event = new CustomEvent('open-ai-generation-panel', { 
-  //     detail: { nodeId: data.id } 
-  //   })
-  //   window.dispatchEvent(event)
-  // }
   
   // Déterminer la couleur de la bordure selon les erreurs
   let borderColor = selected ? '#27AE60' : '#F5A623'
@@ -187,12 +178,11 @@ export const TestNode = memo(function TestNode({
         type="target"
         position={Position.Top}
         style={{
-          background: 'transparent',
+          background: data.incomingEdgeColor ?? '#4A90E2',
           width: 12,
           height: 12,
-          border: 'none',
-          opacity: 0, // Totalement invisible
-          top: -1, // Positionné juste au-dessus du bord pour que la ligne passe à travers la bordure
+          border: '2px solid white',
+          top: -1,
         }}
       />
       
@@ -226,7 +216,7 @@ export const TestNode = memo(function TestNode({
         position={Position.Bottom}
         id="critical-failure"
         style={{
-          background: '#FF4444', // Rouge vif
+          background: TEST_RESULT_EDGE_CONFIG[0].color,
           width: 12,
           height: 12,
           border: '2px solid white',
@@ -240,7 +230,7 @@ export const TestNode = memo(function TestNode({
         position={Position.Bottom}
         id="failure"
         style={{
-          background: '#FF8800', // Orange vif
+          background: TEST_RESULT_EDGE_CONFIG[1].color,
           width: 12,
           height: 12,
           border: '2px solid white',
@@ -254,7 +244,7 @@ export const TestNode = memo(function TestNode({
         position={Position.Bottom}
         id="success"
         style={{
-          background: '#44FF44', // Vert vif
+          background: TEST_RESULT_EDGE_CONFIG[2].color,
           width: 12,
           height: 12,
           border: '2px solid white',
@@ -268,7 +258,7 @@ export const TestNode = memo(function TestNode({
         position={Position.Bottom}
         id="critical-success"
         style={{
-          background: '#0088FF', // Bleu vif
+          background: TEST_RESULT_EDGE_CONFIG[3].color,
           width: 12,
           height: 12,
           border: '2px solid white',

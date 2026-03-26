@@ -13,10 +13,14 @@ const execAsync = promisify(exec);
 
 // Import de getPythonPath pour le venv
 const getPythonPath = require('./getPythonPath');
+const devStartupTiming = require('./dev-startup-timing');
 
 // Chemins
 const LOCK_FILE = path.join(__dirname, '..', '.dev', '.dev.lock');
 const PROJECT_ROOT = path.join(__dirname, '..');
+
+/** Hôte pour les sondes HTTP (éviter `localhost` → ::1 sous Windows quand l’app n’écoute qu’en IPv4). */
+const DEV_LOOPBACK_HOST = '127.0.0.1';
 
 // État global des services
 let backendProcess = null;
@@ -78,64 +82,67 @@ async function isPortInUse(port) {
   });
 }
 
-function waitForBackend(port, maxAttempts = 45, delay = 1000) {
+function waitForBackend(port, maxAttempts = 90, delay = 1000) {
   return new Promise((resolve, reject) => {
     let attempts = 0;
-    
+
     const check = () => {
       attempts++;
-      const req = http.get(`http://localhost:${port}/health`, (res) => {
-        if (res.statusCode === 200) {
+      const req = http.get(`http://${DEV_LOOPBACK_HOST}:${port}/health`, (res) => {
+        res.resume();
+        // 200 = OK ; 503 = API vivante mais /health « unhealthy » (storage, etc.) — on laisse le dev démarrer.
+        if (res.statusCode === 200 || res.statusCode === 503) {
           resolve();
-        } else {
-          if (attempts >= maxAttempts) {
-            reject(new Error(`Le backend n'a pas répondu correctement après ${maxAttempts} tentatives`));
-          } else {
-            setTimeout(check, delay);
-          }
-        }
-      });
-      
-      req.on('error', () => {
-        if (attempts >= maxAttempts) {
-          reject(new Error(`Le backend n'a pas démarré après ${maxAttempts} tentatives`));
+        } else if (attempts >= maxAttempts) {
+          reject(new Error(`Le backend n'a pas répondu correctement après ${maxAttempts} tentatives (HTTP ${res.statusCode})`));
         } else {
           setTimeout(check, delay);
         }
       });
-      
-      req.setTimeout(500, () => {
+
+      req.on('error', () => {
+        if (attempts >= maxAttempts) {
+          reject(
+            new Error(
+              `Le backend n'a pas démarré après ${maxAttempts} tentatives (connexion refusée sur http://${DEV_LOOPBACK_HOST}:${port}/health — vérifier IPv4 / pare-feu / import Python)`
+            )
+          );
+        } else {
+          setTimeout(check, delay);
+        }
+      });
+
+      req.setTimeout(15000, () => {
         req.destroy();
         if (attempts >= maxAttempts) {
-          reject(new Error(`Le backend n'a pas démarré après ${maxAttempts} tentatives`));
+          reject(new Error(`Le backend n'a pas démarré après ${maxAttempts} tentatives (timeout HTTP)`));
         } else {
           setTimeout(check, delay);
         }
       });
     };
-    
+
     check();
   });
 }
 
-function waitForFrontend(port, maxAttempts = 30, delay = 500) {
+function waitForFrontend(port, maxAttempts = 45, delay = 500) {
   return new Promise((resolve, reject) => {
     let attempts = 0;
-    
+
     const check = () => {
       attempts++;
-      const req = http.get(`http://localhost:${port}`, (res) => {
+      const req = http.get(`http://${DEV_LOOPBACK_HOST}:${port}`, (res) => {
+        res.resume();
         if (res.statusCode === 200 || res.statusCode === 304 || res.statusCode === 404) {
           resolve();
+        } else if (attempts >= maxAttempts) {
+          reject(new Error(`Le frontend n'a pas répondu après ${maxAttempts} tentatives (status: ${res.statusCode})`));
         } else {
-          if (attempts >= maxAttempts) {
-            reject(new Error(`Le frontend n'a pas répondu après ${maxAttempts} tentatives (status: ${res.statusCode})`));
-          } else {
-            setTimeout(check, delay);
-          }
+          setTimeout(check, delay);
         }
       });
-      
+
       req.on('error', (err) => {
         if (attempts >= maxAttempts) {
           reject(new Error(`Le frontend n'a pas démarré après ${maxAttempts} tentatives: ${err.message}`));
@@ -143,8 +150,8 @@ function waitForFrontend(port, maxAttempts = 30, delay = 500) {
           setTimeout(check, delay);
         }
       });
-      
-      req.setTimeout(1000, () => {
+
+      req.setTimeout(5000, () => {
         req.destroy();
         if (attempts >= maxAttempts) {
           reject(new Error(`Le frontend n'a pas démarré après ${maxAttempts} tentatives (timeout)`));
@@ -153,7 +160,7 @@ function waitForFrontend(port, maxAttempts = 30, delay = 500) {
         }
       });
     };
-    
+
     setTimeout(() => check(), 500);
   });
 }
@@ -362,6 +369,7 @@ async function acquireLock() {
       // Vérifier que le lock a bien été créé avec notre PID
       const verifyLock = readLock();
       if (verifyLock && verifyLock.pid === process.pid) {
+        devStartupTiming.mark('lock_acquired');
         return; // Succès
       } else {
         // Race condition : une autre instance a créé le lock entre temps
@@ -441,16 +449,18 @@ async function startBackend(port = 4243) {
   const lock = readLock();
   if (lock && lock.backend && lock.backend.pid) {
     if (await processExists(lock.backend.pid)) {
+      devStartupTiming.mark('backend_reused_existing');
       console.log(`ℹ️  Backend déjà en cours (PID: ${lock.backend.pid})`);
       backendProcess = { pid: lock.backend.pid, killed: false };
       return backendProcess;
     }
   }
-  
+
   // Kill-port avant démarrage
   console.log(`🔍 Nettoyage du port ${port}...`);
   await killPort(port);
-  
+  devStartupTiming.mark('backend_port_cleared');
+
   // Démarrer le backend
   console.log(`🔄 Démarrage du backend sur le port ${port}...`);
   
@@ -467,7 +477,8 @@ async function startBackend(port = 4243) {
     stdio: 'inherit',
     shell: true,
     env: Object.assign({}, process.env, {
-      RELOAD: 'true',
+      // Respecter RELOAD=false depuis l'environnement (mesure perf / prod locale)
+      RELOAD: process.env.RELOAD ?? 'true',
       API_PORT: port.toString(),
       // Forcer un niveau console lisible par défaut (override d'un LOG_LEVEL=DEBUG global)
       LOG_CONSOLE_LEVEL: consoleLevel,
@@ -483,7 +494,8 @@ async function startBackend(port = 4243) {
   const pythonPath = getPythonPath(PROJECT_ROOT);
   
   backendProcess = spawn(pythonPath, ['-m', 'api.main'], spawnOptions);
-  
+  devStartupTiming.mark('backend_process_spawned');
+
   // Mettre à jour le lock
   updateLock({
     backend: {
@@ -492,10 +504,11 @@ async function startBackend(port = 4243) {
       started: Date.now()
     }
   });
-  
+
   // Attendre que le backend soit prêt
   try {
     await waitForBackend(port);
+    devStartupTiming.mark('backend_ready');
     console.log(`✅ Backend démarré et prêt (PID: ${backendProcess.pid})`);
     return backendProcess;
   } catch (error) {
@@ -509,16 +522,18 @@ async function startFrontend(port = 3000) {
   const lock = readLock();
   if (lock && lock.frontend && lock.frontend.pid) {
     if (await processExists(lock.frontend.pid)) {
+      devStartupTiming.mark('frontend_reused_existing');
       console.log(`ℹ️  Frontend déjà en cours (PID: ${lock.frontend.pid})`);
       frontendProcess = { pid: lock.frontend.pid, killed: false };
       return frontendProcess;
     }
   }
-  
+
   // Kill-port avant démarrage
   console.log(`🔍 Nettoyage du port ${port}...`);
   await killPort(port);
-  
+  devStartupTiming.mark('frontend_port_cleared');
+
   // Démarrer le frontend
   console.log(`🔄 Démarrage du frontend sur le port ${port}...`);
   
@@ -532,7 +547,8 @@ async function startFrontend(port = 3000) {
   // Ne pas utiliser detached: true car cela rend le processus orphelin
   // Le kill d'arbre avec pkill -P fonctionnera correctement
   frontendProcess = spawn('npm', ['run', 'dev'], spawnOptions);
-  
+  devStartupTiming.mark('frontend_npm_spawned');
+
   // Mettre à jour le lock
   updateLock({
     frontend: {
@@ -541,10 +557,11 @@ async function startFrontend(port = 3000) {
       started: Date.now()
     }
   });
-  
+
   // Attendre que le frontend soit prêt
   try {
     await waitForFrontend(port);
+    devStartupTiming.mark('frontend_ready');
     console.log(`✅ Frontend démarré et prêt (PID: ${frontendProcess.pid})`);
     return frontendProcess;
   } catch (error) {

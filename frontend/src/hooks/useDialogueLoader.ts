@@ -5,6 +5,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { RefObject } from 'react'
 import { useGraphStore } from '../store/graphStore'
+import { useGraphViewStore } from '../store/graphViewStore'
 import * as unityDialoguesAPI from '../api/unityDialogues'
 import { getErrorMessage } from '../types/errors'
 import type { UnityDialogueMetadata } from '../types/api'
@@ -52,7 +53,6 @@ export function useDialogueLoader(
   const {
     nodes,
     dialogueMetadata,
-    loadDialogue,
     loadDialogueByDocumentId,
     loadDialogueFromRawJson,
     saveDialogue,
@@ -74,20 +74,16 @@ export function useDialogueLoader(
     activeDialogueFilenameRef.current = activeDialogueFilename
   }, [activeDialogueFilename])
 
+  const dialogueDeleted = useGraphViewStore((s) => s.dialogueDeleted)
   useEffect(() => {
-    const handleDialogueDeleted = (event: CustomEvent<{ filename: string }>) => {
-      const deletedFilename = event.detail.filename
-      dialogueListRef.current?.refresh()
-      if (selectedDialogue?.filename === deletedFilename) {
-        setSelectedDialogue(null)
-        resetGraph()
-      }
+    if (!dialogueDeleted) return
+    useGraphViewStore.getState().clearDialogueDeleted()
+    dialogueListRef.current?.refresh()
+    if (selectedDialogue?.filename === dialogueDeleted) {
+      setSelectedDialogue(null)
+      resetGraph()
     }
-    window.addEventListener('unity-dialogue-deleted', handleDialogueDeleted as EventListener)
-    return () => {
-      window.removeEventListener('unity-dialogue-deleted', handleDialogueDeleted as EventListener)
-    }
-  }, [selectedDialogue?.filename, resetGraph])
+  }, [dialogueDeleted, selectedDialogue?.filename, resetGraph])
 
   useEffect(() => {
     if (!selectedDialogue) {
@@ -212,7 +208,16 @@ export function useDialogueLoader(
     }
 
     void run()
-  }, [selectedDialogue, loadDialogue, loadDialogueByDocumentId, loadDialogueFromRawJson, saveDialogue, validateGraph, toast])
+  }, [
+    selectedDialogue,
+    loadDialogueByDocumentId,
+    loadDialogueFromRawJson,
+    saveDialogue,
+    validateGraph,
+    toast,
+    resetGraph,
+    incrementLoadSeq,
+  ])
 
   useEffect(() => {
     if (!routeTarget) return
@@ -302,7 +307,15 @@ export function useDialogueLoader(
         setIsLoadingDialogue(false)
         toast(getErrorMessage(err), 'error')
       })
-  }, [routeTarget, loadDialogueByDocumentId, loadDialogueFromRawJson, validateGraph, toast])
+  }, [
+    routeTarget,
+    loadDialogueByDocumentId,
+    loadDialogueFromRawJson,
+    validateGraph,
+    toast,
+    resetGraph,
+    incrementLoadSeq,
+  ])
 
   // Auto-save backend : micro-batch 50 ms (ADR-006, très fréquent pour ne pas perdre d’éditions au changement d’onglet)
   useEffect(() => {
@@ -383,15 +396,26 @@ export function useDialogueLoader(
 
     try {
       setIsLoadingDialogue(true)
-      window.dispatchEvent(new CustomEvent('flush-node-editor-form'))
-      await new Promise<void>((resolve) => {
-        const timeout = setTimeout(resolve, 1500)
-        const onFlushed = () => {
-          clearTimeout(timeout)
-          resolve()
-        }
-        window.addEventListener('node-editor-flushed', onFlushed, { once: true })
+      useGraphViewStore.getState().requestFlush()
+      await new Promise<void>((resolve, reject) => {
+        const FLUSH_WAIT_MS = 1500
+        let settled = false
+        const timeout = window.setTimeout(() => {
+          if (settled) return
+          settled = true
+          unsub()
+          reject(new Error('Flush timeout: éditeur non synchronisé'))
+        }, FLUSH_WAIT_MS)
+        const unsub = useGraphViewStore.subscribe((state) => {
+          if (state.flushCompleted && !settled) {
+            settled = true
+            window.clearTimeout(timeout)
+            unsub()
+            resolve()
+          }
+        })
       })
+      useGraphViewStore.getState().resetFlush()
       const saveResponse = await saveDialogue()
       try {
         await validateGraph()
@@ -423,13 +447,14 @@ export function useDialogueLoader(
     } finally {
       setIsLoadingDialogue(false)
     }
-  }, [activeDialogueFilename, saveDialogue, validateGraph, toast])
+  }, [activeDialogueFilename, isLoadingDialogue, saveDialogue, validateGraph, toast])
 
+  const saveRequested = useGraphViewStore((s) => s.saveRequested)
   useEffect(() => {
-    const onRequestSave = () => { void handleSave() }
-    window.addEventListener('request-save-dialogue', onRequestSave)
-    return () => window.removeEventListener('request-save-dialogue', onRequestSave)
-  }, [handleSave])
+    if (!saveRequested) return
+    useGraphViewStore.getState().clearSaveRequest()
+    void handleSave()
+  }, [saveRequested, handleSave])
 
   return {
     selectedDialogue,

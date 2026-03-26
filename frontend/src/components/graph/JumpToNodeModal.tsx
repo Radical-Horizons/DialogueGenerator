@@ -1,6 +1,6 @@
 /**
  * Story 2.8 FR29: Modal "Jump to Node" — saisie ID ou nom, autocomplete, centrage sur le nœud.
- * Raccourci Ctrl+J (géré dans GraphEditor). Réutilise jumpToNode (setSelectedNode + focus-generated-node).
+ * Raccourci Ctrl+J (géré dans GraphEditor). Réutilise jumpToNode (setSelectedNode + graphViewStore.focusNode).
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useGraphStore } from '../../store/graphStore'
@@ -73,12 +73,18 @@ export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
   )
 
   const handleSubmit = useCallback(() => {
+    // Annule le debounce en cours : s'il se déclenchait après Enter, il effacerait notFoundMessage.
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
     if (suggestions.length > 0) {
       const node = suggestions[highlightedIndex] ?? suggestions[0]
       handleSelect(node.id)
       return
     }
-    if (query.trim() !== '') {
+    const live = (inputRef.current?.value ?? query).trim()
+    if (live !== '') {
       setNotFoundMessage('Nœud non trouvé')
     }
   }, [suggestions, highlightedIndex, query, handleSelect])

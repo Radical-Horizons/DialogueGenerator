@@ -11,6 +11,8 @@ import type { Edge } from 'reactflow'
 
 /** Longueur max du label affiché sur les edges de choix. */
 export const CHOICE_LABEL_MAX_LENGTH = 30
+export const CHOICE_EDGE_COLOR = '#F5A623'
+export const NEXT_EDGE_COLOR = '#4A90E2'
 
 /** Config des 4 résultats de test (TestNode → nœud de résultat). */
 export const TEST_RESULT_EDGE_CONFIG = [
@@ -36,9 +38,29 @@ export const TEST_RESULT_EDGE_CONFIG = [
     field: 'testCriticalSuccessNode' as const,
     handleId: 'critical-success',
     label: 'Réussite critique',
-    color: '#229954',
+    color: '#0088FF',
   },
 ] as const
+
+export function edgeStrokeFromSourceHandle(sourceHandle?: string): string | undefined {
+  if (!sourceHandle) return undefined
+  if (sourceHandle.startsWith('choice:')) return CHOICE_EDGE_COLOR
+  const testConfig = TEST_RESULT_EDGE_CONFIG.find((c) => c.handleId === sourceHandle)
+  return testConfig?.color
+}
+
+export function edgeStrokeFromSource(params: {
+  sourceHandle?: string
+  connectionType?: string
+  edgeLabel?: string
+}): string | undefined {
+  const fromHandle = edgeStrokeFromSourceHandle(params.sourceHandle)
+  if (fromHandle) return fromHandle
+  if (params.connectionType === 'nextNode' || params.edgeLabel === 'Suivant') {
+    return NEXT_EDGE_COLOR
+  }
+  return undefined
+}
 
 /**
  * Tronque le texte du choix pour l'affichage sur l'edge (max 30 caractères).
@@ -111,6 +133,7 @@ export function buildChoiceEdge(params: BuildChoiceEdgeParams): Edge {
     sourceHandle: `choice:${stableId}`,
     type: 'smoothstep',
     label,
+    style: { stroke: CHOICE_EDGE_COLOR },
     data: {
       edgeType: 'choice',
       choiceIndex,
@@ -137,5 +160,6 @@ export function buildTestResultEdge(
     type: 'smoothstep',
     label,
     style: { stroke: color },
+    data: { edgeType: handleId },
   }
 }

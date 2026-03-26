@@ -11,9 +11,14 @@
     "build:check": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:full": "node ../scripts/run-vitest-full.cjs",
+    "test:watch": "vitest",
+    "test:run": "vitest run",
+    "test:run:json": "vitest run --reporter=json --outputFile=../tmp/vitest-report.json",
+    "test:run:json:full": "node ../scripts/run-vitest-full.cjs --reporter=json --outputFile=../tmp/vitest-report-full.json",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "node ../scripts/run-vitest-full.cjs --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -8,6 +8,7 @@ import React from 'react'
 import { act, render } from '@testing-library/react'
 import { GraphCanvas } from '../components/graph/GraphCanvas'
 import { useGraphStore } from '../store/graphStore'
+import { CHOICE_EDGE_COLOR } from '../utils/graphEdgeBuilders'
 
 type ReactFlowProps = Record<string, unknown>
 
@@ -57,7 +58,7 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     render(React.createElement(GraphCanvas))
 
     await act(async () => {
-      ;(capturedReactFlowProps?.onNodesChange as (changes: Array<{ type: string; id: string; selected: boolean }>) => void)([
+      (capturedReactFlowProps?.onNodesChange as (changes: Array<{ type: string; id: string; selected: boolean }>) => void)([
         { type: 'select', id: 'n1', selected: true },
         { type: 'select', id: 'n2', selected: true },
       ])
@@ -73,7 +74,7 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     render(React.createElement(GraphCanvas))
 
     await act(async () => {
-      ;(capturedReactFlowProps?.onPaneClick as () => void)()
+      (capturedReactFlowProps?.onPaneClick as () => void)()
     })
 
     const state = useGraphStore.getState()
@@ -93,7 +94,7 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     render(React.createElement(GraphCanvas))
 
     await act(async () => {
-      ;(capturedReactFlowProps?.onNodeClick as (event: { shiftKey?: boolean }, node: { id: string }) => void)(
+      (capturedReactFlowProps?.onNodeClick as (event: { shiftKey?: boolean }, node: { id: string }) => void)(
         { shiftKey: true },
         { id: 'n2' }
       )
@@ -117,14 +118,14 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     render(React.createElement(GraphCanvas))
 
     await act(async () => {
-      ;(capturedReactFlowProps?.onNodeDragStart as (event: unknown, node: { id: string }) => void)(
-        {},
-        { id: 'g1' }
-      )
-      ;(capturedReactFlowProps?.onNodeDragStop as (
-        event: unknown,
-        node: { id: string; position: { x: number; y: number } }
-      ) => void)({}, { id: 'g1', position: { x: 100, y: 100 } })
+      const onNodeDragStart = capturedReactFlowProps?.onNodeDragStart as
+        | ((event: unknown, node: { id: string }) => void)
+        | undefined
+      const onNodeDragStop = capturedReactFlowProps?.onNodeDragStop as
+        | ((event: unknown, node: { id: string; position: { x: number; y: number } }) => void)
+        | undefined
+      onNodeDragStart?.({}, { id: 'g1' })
+      onNodeDragStop?.({}, { id: 'g1', position: { x: 100, y: 100 } })
     })
 
     const state = useGraphStore.getState()
@@ -146,14 +147,14 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     render(React.createElement(GraphCanvas))
 
     await act(async () => {
-      ;(capturedReactFlowProps?.onNodeDragStart as (event: { ctrlKey?: boolean }, node: { id: string }) => void)(
-        {},
-        { id: 'p' }
-      )
-      ;(capturedReactFlowProps?.onNodeDragStop as (
-        event: unknown,
-        node: { id: string; position: { x: number; y: number } }
-      ) => void)({}, { id: 'p', position: { x: 40, y: 30 } })
+      const onNodeDragStart = capturedReactFlowProps?.onNodeDragStart as
+        | ((event: { ctrlKey?: boolean }, node: { id: string }) => void)
+        | undefined
+      const onNodeDragStop = capturedReactFlowProps?.onNodeDragStop as
+        | ((event: unknown, node: { id: string; position: { x: number; y: number } }) => void)
+        | undefined
+      onNodeDragStart?.({}, { id: 'p' })
+      onNodeDragStop?.({}, { id: 'p', position: { x: 40, y: 30 } })
     })
 
     const state = useGraphStore.getState()
@@ -174,18 +175,48 @@ describe('GraphCanvas multi-selection (Story 2.10)', () => {
     render(React.createElement(GraphCanvas))
 
     await act(async () => {
-      ;(capturedReactFlowProps?.onNodeDragStart as (event: { ctrlKey?: boolean }, node: { id: string }) => void)(
-        { ctrlKey: true },
-        { id: 'p' }
-      )
-      ;(capturedReactFlowProps?.onNodeDragStop as (
-        event: unknown,
-        node: { id: string; position: { x: number; y: number } }
-      ) => void)({}, { id: 'p', position: { x: 40, y: 30 } })
+      const onNodeDragStart = capturedReactFlowProps?.onNodeDragStart as
+        | ((event: { ctrlKey?: boolean }, node: { id: string }) => void)
+        | undefined
+      const onNodeDragStop = capturedReactFlowProps?.onNodeDragStop as
+        | ((event: unknown, node: { id: string; position: { x: number; y: number } }) => void)
+        | undefined
+      onNodeDragStart?.({ ctrlKey: true }, { id: 'p' })
+      onNodeDragStop?.({}, { id: 'p', position: { x: 40, y: 30 } })
     })
 
     const state = useGraphStore.getState()
     expect(state.nodes.find((n) => n.id === 'p')?.position).toEqual({ x: 40, y: 30 })
     expect(state.nodes.find((n) => n.id === 'c')?.position).toEqual({ x: 100, y: 0 })
+  })
+
+  it('normalise en mémoire la couleur des edges legacy selon le handle source parent', async () => {
+    useGraphStore.setState({
+      nodes: [
+        {
+          id: 'p',
+          type: 'dialogueNode',
+          position: { x: 0, y: 0 },
+          data: { id: 'p', choices: [{ text: 'A', choiceId: 'accept' }] },
+        },
+        { id: 'c', type: 'dialogueNode', position: { x: 100, y: 100 }, data: { id: 'c' } },
+      ],
+      edges: [
+        {
+          id: 'e:p:choice:accept',
+          source: 'p',
+          target: 'c',
+          sourceHandle: 'choice:accept',
+          type: 'smoothstep',
+          data: { edgeType: 'choice', choiceIndex: 0 },
+        },
+      ],
+      selectedNodeIds: [],
+    })
+
+    render(React.createElement(GraphCanvas))
+    const edges = capturedReactFlowProps?.edges as Array<{ id: string; style?: { stroke?: string } }>
+    const legacyEdge = edges.find((e) => e.id === 'e:p:choice:accept')
+    expect(legacyEdge?.style?.stroke).toBe(CHOICE_EDGE_COLOR)
   })
 })

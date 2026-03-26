@@ -6,10 +6,12 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import type { RefObject } from 'react'
 import type { ReactFlowInstance } from 'reactflow'
 import { useGraphStore } from '../store/graphStore'
+import { useGraphViewStore } from '../store/graphViewStore'
 import { exportGraphToPNG, exportGraphToSVG } from '../utils/graphExport'
 import { useKeyboardShortcuts } from './useKeyboardShortcuts'
 import { getErrorMessage } from '../types/errors'
 import type { UseToastFn } from '../components/shared'
+import type { GraphLayoutSpacingMode } from '../store/types/graphState'
 
 export interface UseGraphToolbarReturn {
   showAutoLayoutDropdown: boolean
@@ -33,6 +35,8 @@ export interface UseGraphToolbarReturn {
   showFiltersPanel: boolean
   setShowFiltersPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   layoutDirection: 'TB' | 'LR' | 'BT' | 'RL'
+  layoutSpacingMode: GraphLayoutSpacingMode
+  setLayoutSpacingMode: (mode: GraphLayoutSpacingMode) => void
   autoLayoutDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownBtnRef: RefObject<HTMLButtonElement>
@@ -65,12 +69,12 @@ export function useGraphToolbar(
   const [showJumpToNodeModal, setShowJumpToNodeModal] = useState(false)
   const [showFiltersPanel, setShowFiltersPanel] = useState(false)
   const [layoutDirection, setLayoutDirection] = useState<'TB' | 'LR' | 'BT' | 'RL'>('TB')
-  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
-
   const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownBtnRef = useRef<HTMLButtonElement>(null)
   const canvasWrapperRef = useRef<HTMLDivElement>(null)
+
+  const reactFlowInstance = useGraphViewStore((s) => s.reactFlowInstance)
 
   const {
     selectedNodeId,
@@ -78,6 +82,8 @@ export function useGraphToolbar(
     setShowDeleteNodeConfirm,
     setHighlightedNodes,
     applyAutoLayout,
+    layoutSpacingMode,
+    setLayoutSpacingMode,
     undo,
     redo,
     canUndo,
@@ -86,27 +92,13 @@ export function useGraphToolbar(
     isSaving: isGraphSaving,
   } = useGraphStore()
 
+  const aiGenerationNodeId = useGraphViewStore((s) => s.aiGenerationNodeId)
   useEffect(() => {
-    const handleInstanceReady = (event: CustomEvent) => {
-      setReactFlowInstance(event.detail as ReactFlowInstance)
-    }
-    window.addEventListener('reactflow-instance-ready', handleInstanceReady as EventListener)
-    return () => {
-      window.removeEventListener('reactflow-instance-ready', handleInstanceReady as EventListener)
-    }
-  }, [])
-
-  useEffect(() => {
-    const handleOpenGenerationPanel = (event: Event) => {
-      const nodeId = (event as CustomEvent<{ nodeId: string }>).detail.nodeId
-      setSelectedNode(nodeId)
-      setShowAIGenerationPanel(true)
-    }
-    window.addEventListener('open-ai-generation-panel', handleOpenGenerationPanel)
-    return () => {
-      window.removeEventListener('open-ai-generation-panel', handleOpenGenerationPanel)
-    }
-  }, [setSelectedNode])
+    if (!aiGenerationNodeId) return
+    useGraphViewStore.getState().closeAIGeneration()
+    setSelectedNode(aiGenerationNodeId)
+    setShowAIGenerationPanel(true)
+  }, [aiGenerationNodeId, setSelectedNode])
 
   useEffect(() => {
     if (!showAutoLayoutDropdown) return
@@ -419,6 +411,8 @@ export function useGraphToolbar(
     showFiltersPanel,
     setShowFiltersPanel,
     layoutDirection,
+    layoutSpacingMode,
+    setLayoutSpacingMode,
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,

@@ -5,6 +5,7 @@ import { memo, useState, useCallback, useEffect } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
+import { useGraphViewStore } from '../../../store/graphViewStore'
 import { getNodePrompt } from '../../../api/graph'
 import type { NodePromptResponse } from '../../../types/graph'
 import { RegenerateNodeModal } from '../RegenerateNodeModal'
@@ -44,19 +45,16 @@ interface DialogueNodeData {
   lastGenerationInstructions?: string
   regenerationHistory?: RegenerationEntry[]
   contextGddHash?: string
+  incomingEdgeColor?: string
   [key: string]: unknown
 }
 
 // Zones de layout fixes pour éviter toute superposition (handles, lien prompt, tooltip)
 const NODE_WIDTH = 280
-const HEADER_HEIGHT_APPROX = 36
-const BOTTOM_ZONE_HANDLES_PX = 24 // 0–24px : ronds oranges ou handle unique
 const BOTTOM_ZONE_LINK_PX = 28 // au-dessus : "Voir le prompt" (28px depuis le bas)
 const BOTTOM_RESERVED_WITH_CHOICES = 52 // hasChoices : handles + lien
 const BOTTOM_RESERVED_SINGLE = 28 // pas de choix : handle + lien
 const CHOICE_TOOLTIP_BOTTOM_PX = 56 // tooltip au survol d’un choix au-dessus du lien
-const PENDING_BUTTONS_TOP_PX = 34
-const PENDING_BUTTONS_HEIGHT_PX = 28
 const CONTENT_PADDING_TOP_WHEN_PENDING = 32 // pour ne pas passer sous Accepter/Régénérer/Rejeter
 
 export const DialogueNode = memo(function DialogueNode({
@@ -169,14 +167,13 @@ export const DialogueNode = memo(function DialogueNode({
     [openAndLoadPromptModal]
   )
 
+  const promptViewerNodeId = useGraphViewStore((s) => s.promptViewerNodeId)
   useEffect(() => {
-    const handler = (ev: Event) => {
-      const e = ev as CustomEvent<{ nodeId: string }>
-      if (e.detail?.nodeId === data.id) openAndLoadPromptModal()
+    if (promptViewerNodeId === data.id) {
+      useGraphViewStore.getState().closePromptViewer()
+      openAndLoadPromptModal()
     }
-    window.addEventListener('open-prompt-viewer', handler)
-    return () => window.removeEventListener('open-prompt-viewer', handler)
-  }, [data.id, openAndLoadPromptModal])
+  }, [promptViewerNodeId, data.id, openAndLoadPromptModal])
 
   const handleClosePromptModal = useCallback(() => {
     setShowPromptModal(false)
@@ -218,11 +215,7 @@ export const DialogueNode = memo(function DialogueNode({
     (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      window.dispatchEvent(
-        new CustomEvent('graph-node-contextmenu', {
-          detail: { nodeId: data.id, clientX: e.clientX, clientY: e.clientY },
-        })
-      )
+      useGraphViewStore.getState().openContextMenu(data.id, e.clientX, e.clientY)
     },
     [data.id]
   )
@@ -342,7 +335,7 @@ export const DialogueNode = memo(function DialogueNode({
         type="target"
         position={Position.Top}
         style={{
-          background: '#4A90E2',
+          background: data.incomingEdgeColor ?? '#4A90E2',
           width: 12,
           height: 12,
           border: '2px solid white',

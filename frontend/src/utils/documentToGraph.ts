@@ -4,7 +4,12 @@
  * TestNode id : toujours test-node-{nodeId}-choice-{index} pour unicité (évite collision entre nœuds parents quand choiceId = __idx_N).
  */
 import type { Node, Edge } from 'reactflow'
-import { stableChoiceEdgeId, truncateChoiceLabel } from './graphEdgeBuilders'
+import {
+  CHOICE_EDGE_COLOR,
+  NEXT_EDGE_COLOR,
+  stableChoiceEdgeId,
+  truncateChoiceLabel,
+} from './graphEdgeBuilders'
 import { TEST_RESULT_EDGE_CONFIG } from './graphEdgeBuilders'
 import {
   childNodeTopLeftX,
@@ -156,6 +161,7 @@ export function documentToGraph(
           sourceHandle,
           type: 'smoothstep',
           label,
+          style: { stroke: CHOICE_EDGE_COLOR },
           data: { edgeType: 'choice', choiceIndex, choiceId: cid, choiceText },
         })
         for (const config of TEST_RESULT_EDGE_CONFIG) {
@@ -184,6 +190,7 @@ export function documentToGraph(
             sourceHandle,
             type: 'smoothstep',
             label,
+            style: { stroke: CHOICE_EDGE_COLOR },
             data: { edgeType: 'choice', choiceIndex, choiceId: cid, choiceText },
           })
         }
@@ -198,6 +205,7 @@ export function documentToGraph(
         target: nextNode,
         type: 'smoothstep',
         label: 'Suivant',
+        style: { stroke: NEXT_EDGE_COLOR },
       })
     }
   }

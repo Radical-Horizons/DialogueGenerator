@@ -7,6 +7,15 @@
 
 ## 📋 Story 0.1: Fix Graph Editor stableID (ADR-003)
 
+### Précondition 0.1.0 : Générer un premier dialogue Unity
+- [ ] Aller dans l’onglet **Génération de Dialogues**
+- [ ] Sélectionner au moins un personnage et un lieu dans le panneau de gauche
+- [ ] Dans le panneau de droite, onglet **Système LLM (avancé)**, mettre **max_completion_tokens** au maximum (slider tout à droite)
+- [ ] Mettre également **max_generation_tokens** au maximum (slider tout à droite)
+- [ ] Cliquer sur **Générer** (bouton en bas à droite)
+- [ ] Vérifier qu’aucune erreur de validation n’apparaît et qu’un dialogue Unity est bien créé
+- [ ] Vérifier que le dialogue généré apparaît dans **Édition de Dialogues** et est sélectionnable dans **Éditeur de Graphe**
+
 ### Test 0.1.1 : Renommer dialogue ne casse pas connexions
 - [ ] Renommer un dialogue avec nodes connectés
 - [ ] Vérifier que toutes les connexions restent intactes

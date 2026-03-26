@@ -10,6 +10,7 @@ import type { SaveGraphResponse } from '../../types/graph'
 import * as graphAPI from '../../api/graph'
 import * as documentsAPI from '../../api/documents'
 import { documentToGraph, graphToDocument, buildLayoutFromNodes } from '../../utils/documentToGraph'
+import { mergeLayoutWithNodePositions } from '../../utils/syncDocLayout'
 import {
   writeSnapshot as journalWriteSnapshot,
   clearPending as journalClearPending,
@@ -103,6 +104,7 @@ export const createPersistenceSlice: StateCreator<
         layoutRevision: 1,
         loadSeq,
       })
+      get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error) {
       if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur lors du chargement du graphe:', error)
@@ -140,7 +142,7 @@ export const createPersistenceSlice: StateCreator<
 
       const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
       const normalized = normalizeTestBars(projectedNodes, projectedEdges)
-      const layoutBlob = buildLayoutFromNodes(normalized.nodes) as unknown as Record<string, unknown>
+      const layoutBlob = mergeLayoutWithNodePositions({}, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
       get().applyLoadResult({
@@ -159,6 +161,7 @@ export const createPersistenceSlice: StateCreator<
         layoutRevision: 1,
         loadSeq,
       })
+      get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error) {
       if (get().activeLoadSeq !== loadSeq) return
       set({ isLoading: false })
@@ -191,13 +194,14 @@ export const createPersistenceSlice: StateCreator<
         layoutPositions
       )
       const normalized = normalizeTestBars(projectedNodes, projectedEdges)
+      const hydratedLayout = mergeLayoutWithNodePositions(layoutBlob, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
       get().applyLoadResult({
         nodes: normalized.nodes,
         edges: normalized.edges,
         document: doc,
-        layout: layoutBlob,
+        layout: hydratedLayout,
         metadata: {
           title: 'Dialogue Unity',
           node_count: nodeCount,
@@ -209,6 +213,7 @@ export const createPersistenceSlice: StateCreator<
         layoutRevision: (layoutResponse as { revision: number }).revision ?? 1,
         loadSeq,
       })
+      get().normalizeEdgeColors({ skipMarkDirty: true })
     } catch (error: unknown) {
       if (get().activeLoadSeq !== loadSeq) return
       console.error('Erreur chargement document:', error)
@@ -296,8 +301,9 @@ export const createPersistenceSlice: StateCreator<
       // Construire le document depuis le graphe courant pour éviter décalage avec state.document (ex. après suppression TestNode).
       if (state.document != null && documentId) {
         const doc = graphToDocument(state.nodes, state.edges) as unknown as Record<string, unknown>
-        const layoutPayload = (
-          state.layout ?? buildLayoutFromNodes(state.nodes)
+        const layoutPayload = mergeLayoutWithNodePositions(
+          state.layout ?? buildLayoutFromNodes(state.nodes),
+          state.nodes
         ) as Record<string, unknown>
         const docRev = state.documentRevision ?? 1
         const layoutRev = state.layoutRevision ?? 1
@@ -317,6 +323,7 @@ export const createPersistenceSlice: StateCreator<
             }
             set({
               document: doc,
+              layout: layoutPayload,
               documentRevision: docRes.revision,
               layoutRevision: layoutRes.revision,
               isSaving: false,

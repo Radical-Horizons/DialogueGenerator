@@ -11,6 +11,7 @@ import { useForm, FormProvider, useFormContext, useFieldArray, type FieldErrors 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useShallow } from 'zustand/react/shallow'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
@@ -33,7 +34,6 @@ import {
   GRAPH_DIALOGUE_NODE_WIDTH,
   GRAPH_OFFSET_PARENT_TO_CHILD_Y,
 } from '../../utils/graphNodeLayout'
-import { getParentChoiceForTestNode } from '../../utils/testNodeSync'
 import {
   mergeNodeFormIntoStoreData,
   connectionFingerprintFromNodeData,
@@ -60,7 +60,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     connectNodes,
     disconnectNodes,
     duplicateNode,
-    nodes,
   } = useGraphStore()
   const { selections } = useContextStore()
   const toast = useToast()
@@ -251,29 +250,28 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         toast('Nœud vide - ajouter du texte', 'warning')
       }
     }
+    const merged = mergeNodeFormIntoStoreData(
+      nodeType,
+      (selectedNode?.data as Record<string, unknown> | undefined) ?? {},
+      data
+    )
     updateNode(selectedNodeId, {
-      data: {
-        ...selectedNode?.data,
-        ...data,
-      },
+      data: merged,
     })
     if (!isFlushingRef.current) {
-      window.dispatchEvent(new CustomEvent('request-save-dialogue'))
+      useGraphViewStore.getState().requestSave()
     }
   }, [selectedNodeId, nodeType, selectedNode?.data, updateNode, toast])
 
-  // Flush du formulaire vers le store quand le graphe demande une sauvegarde (évite perte des edits non soumis)
+  const flushRequested = useGraphViewStore((s) => s.flushRequested)
   useEffect(() => {
-    const onFlush = () => {
-      isFlushingRef.current = true
-      form.handleSubmit(onSubmit)()
-        .then(() => { window.dispatchEvent(new CustomEvent('node-editor-flushed')) })
-        .catch(() => { window.dispatchEvent(new CustomEvent('node-editor-flushed')) })
-        .finally(() => { isFlushingRef.current = false })
-    }
-    window.addEventListener('flush-node-editor-form', onFlush)
-    return () => window.removeEventListener('flush-node-editor-form', onFlush)
-  }, [form, onSubmit])
+    if (!flushRequested) return
+    isFlushingRef.current = true
+    form.handleSubmit(onSubmit)()
+      .then(() => { useGraphViewStore.getState().confirmFlush() })
+      .catch(() => { useGraphViewStore.getState().confirmFlush() })
+      .finally(() => { isFlushingRef.current = false })
+  }, [flushRequested, form, onSubmit])
   
   const handleDelete = () => {
     if (!selectedNodeId) return
@@ -322,13 +320,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       
       toast('Nœud généré avec succès', 'success', 2000)
       
-      // Focus automatique vers le nouveau nœud
       if (generationResult.nodeId) {
         setSelectedNode(generationResult.nodeId)
-        const event = new CustomEvent('focus-generated-node', {
-          detail: { nodeId: generationResult.nodeId }
-        })
-        window.dispatchEvent(event)
+        useGraphViewStore.getState().focusNode(generationResult.nodeId)
       }
       
       setShowGenerationOptions(false)
@@ -423,13 +417,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       
       toast('Nœud généré avec succès', 'success', 2000)
       
-      // Focus automatique vers le nouveau nœud
       if (generationResult.nodeId) {
         setSelectedNode(generationResult.nodeId)
-        const event = new CustomEvent('focus-generated-node', {
-          detail: { nodeId: generationResult.nodeId }
-        })
-        window.dispatchEvent(event)
+        useGraphViewStore.getState().focusNode(generationResult.nodeId)
       }
       
       setShowGenerationOptions(false)
@@ -438,36 +428,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
   }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
-
-  // Même logique que handleGenerateForChoice mais avec parentNodeId explicite (drop / choix ciblé).
-  const handleGenerateForChoiceAt = useCallback(
-    async (parentNodeId: string, choiceIndex: number) => {
-      const instructions = userInstructions.trim() || 'Continue la conversation de manière naturelle'
-      try {
-        const allCharacters = [
-          ...(selections.characters_full || []),
-          ...(selections.characters_excerpt || []),
-        ]
-        const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
-        const generationResult = await generateFromNode(parentNodeId, instructions, {
-          context_selections: selections,
-          npc_speaker_id: npcSpeakerId,
-          llm_model_identifier: llmModel,
-          target_choice_index: choiceIndex,
-        })
-        toast('Nœud généré avec succès', 'success', 2000)
-        if (generationResult.nodeId) {
-          setSelectedNode(generationResult.nodeId)
-          window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: generationResult.nodeId } }))
-        }
-        setShowGenerationOptions(false)
-        setUserInstructions('')
-      } catch (err) {
-        toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
-      }
-    },
-    [userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast]
-  )
 
   /** Génération depuis le TestNode sélectionné : on envoie son id, le backend renvoie les connexions avec ce même id. */
   const handleGenerateFromTestNode = useCallback(async () => {
@@ -487,7 +447,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       toast('Nœud généré avec succès', 'success', 2000)
       if (generationResult.nodeId) {
         setSelectedNode(generationResult.nodeId)
-        window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId: generationResult.nodeId } }))
+        useGraphViewStore.getState().focusNode(generationResult.nodeId)
       }
       setShowGenerationOptions(false)
       setUserInstructions('')
@@ -529,13 +489,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       
       toast('Nœuds générés avec succès', 'success', 2000)
       
-      // Focus automatique vers le premier nouveau nœud
       if (generationResult.nodeId) {
         setSelectedNode(generationResult.nodeId)
-        const event = new CustomEvent('focus-generated-node', {
-          detail: { nodeId: generationResult.nodeId }
-        })
-        window.dispatchEvent(event)
+        useGraphViewStore.getState().focusNode(generationResult.nodeId)
       }
       
       setShowGenerationOptions(false)

@@ -50,7 +50,6 @@ export function GraphEditor({
   )
 
   const {
-    selectedDialogue: _selectedDialogue,
     setSelectedDialogue,
     isLoadingDialogue,
     activeDialogueFilename,

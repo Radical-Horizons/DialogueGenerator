@@ -22,6 +22,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
         const { calculateDagreLayout } = await import('../../utils/dagreLayout')
         const layoutedNodes = calculateDagreLayout(state.nodes, state.edges, {
           direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
+          spacingMode: state.layoutSpacingMode,
         })
         set({ nodes: layoutedNodes })
         get().markDirty()
@@ -149,7 +150,6 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
   updateNodeDimensionsBatch: (updates) => {
     if (Object.keys(updates).length === 0) return
     set((state) => {
-      const nodeIds = new Set(Object.keys(updates))
       let hasChange = false
       const nextNodes = state.nodes.map((node) => {
         const dims = updates[node.id]
