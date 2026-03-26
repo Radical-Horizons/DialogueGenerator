@@ -26,6 +26,16 @@ import { theme } from '../../theme'
 
 type TabType = 'characters' | 'locations' | 'regions' | 'items' | 'species' | 'communities'
 
+/** Stem fichier catégorie GDD pour l’API historique (Story 3.9). */
+const HISTORY_CATEGORY_BY_TAB: Record<TabType, string> = {
+  characters: 'personnages',
+  locations: 'lieux',
+  regions: 'lieux',
+  items: 'objets',
+  species: 'especes',
+  communities: 'communautes',
+}
+
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 
 const PAGE_SIZE = 50
@@ -116,7 +126,7 @@ function useTabOverflow(containerRef: React.RefObject<HTMLDivElement | null>) {
 }
 
 interface ContextSelectorProps {
-  onItemSelected?: (item: ContextItem | null) => void
+  onItemSelected?: (item: ContextItem | null, historyCategoryStem?: string | null) => void
 }
 
 export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
@@ -282,12 +292,13 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         item = await contextAPI.getCommunity(name)
       }
 
+      const stem = HISTORY_CATEGORY_BY_TAB[activeTab]
       if (item && selectedDetail === name) {
         setSelectedDetail(null)
-        onItemSelected?.(item as ContextItem)
+        onItemSelected?.(item as ContextItem, stem)
       } else if (item) {
         setSelectedDetail(name)
-        onItemSelected?.(item as ContextItem)
+        onItemSelected?.(item as ContextItem, stem)
       }
     } catch (err) {
       setError(getErrorMessage(err))
@@ -313,7 +324,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     }
     if (selectedDetail === name) {
       setSelectedDetail(null)
-      onItemSelected?.(null)
+      onItemSelected?.(null, null)
     }
 
     if (!wasSelected) {
@@ -433,7 +444,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         {TAB_DEFS.slice(0, visibleTabCount).map(({ key, label }) => (
           <button
             key={key}
-            onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null) }}
+            onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null, null) }}
             style={{
               flex: 1,
               padding: '0.75rem 0.4rem',
@@ -498,7 +509,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
                     <button
                       key={key}
                       role="menuitem"
-                      onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null); setShowOverflowMenu(false) }}
+                      onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null, null); setShowOverflowMenu(false) }}
                       style={{
                         display: 'block',
                         width: '100%',

@@ -134,6 +134,8 @@ export interface GenerateNodeResponse {
   connected_choices_count?: number
   failed_choices_count?: number
   total_choices_count?: number
+  /** Empreinte SHA-256 du contexte GDD au moment de la génération (Story 3.9). */
+  context_gdd_content_fingerprint?: string | null
 }
 
 export interface RegenerateNodeRequest {
@@ -151,6 +153,7 @@ export interface RegenerateNodeRequest {
 export interface RegenerateNodeResponse {
   node: Record<string, unknown>
   suggested_connections: SuggestedConnection[]
+  context_gdd_content_fingerprint?: string | null
 }
 
 /** Réponse GET /graph/prompt — prompt exact ou reconstruit pour un nœud (Story 1.14). */

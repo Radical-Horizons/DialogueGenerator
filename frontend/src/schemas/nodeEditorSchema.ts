@@ -55,6 +55,8 @@ export const dialogueNodeDataSchema = z.object({
   lastGenerationInstructions: z.string().optional(),
   regenerationHistory: z.array(regenerationEntrySchema).optional(),
   contextGddHash: z.string().optional(),
+  contextGddContentFingerprint: z.string().optional(),
+  gddContextSelectionsSnapshot: z.record(z.string(), z.unknown()).optional(),
 })
 
 /**

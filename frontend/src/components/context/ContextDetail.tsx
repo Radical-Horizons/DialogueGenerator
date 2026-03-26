@@ -13,11 +13,14 @@ import type {
 import { theme } from '../../theme'
 import { getGddEntitySummary, extractTextFromGddValue, isSerializedNotionRichTextBlock } from '../../utils/gddSummary'
 import { GDD_INLINE_PROPERTY_KEYS } from './constants'
+import { GddEntityHistoryViewer } from './GddEntityHistoryViewer'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 
 interface ContextDetailProps {
   item: ContextItem | null
+  /** Stem catégorie GDD (ex. personnages) pour l’historique local (Story 3.9). */
+  historyCategoryStem?: string | null
 }
 
 function renderValue(value: unknown, depth: number): React.ReactNode {
@@ -70,7 +73,7 @@ function renderValue(value: unknown, depth: number): React.ReactNode {
   return <span style={{ color: theme.text.secondary }}>{String(value)}</span>
 }
 
-export function ContextDetail({ item }: ContextDetailProps) {
+export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps) {
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set())
 
   const toggleSection = (key: string) => {
@@ -269,6 +272,13 @@ export function ContextDetail({ item }: ContextDetailProps) {
             )
           })}
         </div>
+
+        {historyCategoryStem && (
+          <GddEntityHistoryViewer
+            categoryStem={historyCategoryStem}
+            entityName={String((data.Nom as string) || item.name || '').trim() || item.name}
+          />
+        )}
       </div>
     </div>
   )

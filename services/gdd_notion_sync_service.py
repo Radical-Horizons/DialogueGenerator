@@ -47,6 +47,7 @@ from services.gdd_notion_sync_utils import (
     redact_notion_token_from_text,
 )
 from services.notion_api_client import NotionAPIClient
+from services.gdd_context_refresh import clear_gdd_runtime_caches
 
 logger = logging.getLogger(__name__)
 
@@ -206,6 +207,40 @@ class GddNotionSyncService:
         self._sync_progress.update(kwargs)
 
     @staticmethod
+    def _append_entity_history(
+        cat_file: str,
+        shard_list_key: Optional[str],
+        use_shards: bool,
+        written_page_records: List[Tuple[str, Dict[str, Any]]],
+    ) -> None:
+        """Enregistre un snapshot par entité après écriture disque (Story 3.9)."""
+        from core.context.context_builder import PROJECT_ROOT_DIR
+        from services.gdd_entity_history import record_entity_change
+
+        stem = (
+            shard_list_key
+            if use_shards and shard_list_key
+            else Path(cat_file).stem
+        )
+        for _pid, rec_out in written_page_records:
+            nom = str(rec_out.get("Nom") or "").strip() or "unknown"
+            try:
+                record_entity_change(
+                    PROJECT_ROOT_DIR,
+                    stem,
+                    nom,
+                    dict(rec_out),
+                    source="notion_sync",
+                )
+            except OSError as exc:
+                logger.warning(
+                    "Historique entité GDD ignoré (%s / %s): %s",
+                    stem,
+                    nom,
+                    exc,
+                )
+
+    @staticmethod
     def _collect_eligible_sources(
         sources: List[Any],
         included_list: List[str],
@@ -286,16 +321,7 @@ class GddNotionSyncService:
             retention_count=retention if backup_current else None,
         )
         save_manifest(self._manifest_path, GddNotionManifest())
-        try:
-            from api.utils.gdd_cache import get_gdd_cache
-
-            get_gdd_cache().clear()
-        except (ImportError, AttributeError, OSError) as exc:
-            logger.debug(
-                "Invalidation cache GDD après restore: %s",
-                exc,
-                exc_info=True,
-            )
+        clear_gdd_runtime_caches()
         log_sync_event(
             f"GDD restauré depuis archive {archive_id}",
             request_id=request_id,
@@ -663,6 +689,9 @@ class GddNotionSyncService:
                     new_recs_only = [r for _pid, r in written_page_records]
                     merged = merge_records_by_nom(existing, new_recs_only)
                     write_json_atomic(out_path, merged)
+                self._append_entity_history(
+                    cat_file, shard_list_key, use_shards, written_page_records
+                )
             except _SYNC_RECOVERABLE as exc:
                 partial.append(f"{cat_file}: écriture — {exc}")
                 self._sync_progress_update(sources_completed=i)
@@ -689,16 +718,7 @@ class GddNotionSyncService:
                     f"Miroir non appliqué : erreurs bloquantes ({len(partial)}). "
                     f"État GDD inchangé. Snapshot : {archive_rel or '?'}"
                 )
-                try:
-                    from api.utils.gdd_cache import get_gdd_cache
-
-                    get_gdd_cache().clear()
-                except (ImportError, AttributeError, OSError) as exc:
-                    logger.debug(
-                        "Invalidation cache GDD ignorée après sync: %s",
-                        exc,
-                        exc_info=True,
-                    )
+                clear_gdd_runtime_caches()
                 return GddNotionSyncResult(
                     success=False,
                     message=msg,
@@ -723,16 +743,7 @@ class GddNotionSyncService:
                 manifest.last_full_sync_at = datetime.now(timezone.utc).isoformat()
                 save_manifest(self._manifest_path, manifest)
 
-        try:
-            from api.utils.gdd_cache import get_gdd_cache
-
-            get_gdd_cache().clear()
-        except (ImportError, AttributeError, OSError) as exc:
-            logger.debug(
-                "Invalidation cache GDD ignorée après sync: %s",
-                exc,
-                exc_info=True,
-            )
+        clear_gdd_runtime_caches()
 
         success = updated > 0 or not partial
         msg = (

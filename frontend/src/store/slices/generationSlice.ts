@@ -253,6 +253,15 @@ export const createGenerationSlice: StateCreator<
           Object.keys(contextSelections).length > 0
             ? simpleHash(JSON.stringify(contextSelections))
             : undefined
+        const gddSnapshot =
+          Object.keys(contextSelections).length > 0
+            ? (JSON.parse(JSON.stringify(contextSelections)) as Record<string, unknown>)
+            : undefined
+        const apiFp =
+          typeof response.context_gdd_content_fingerprint === 'string' &&
+          response.context_gdd_content_fingerprint.length > 0
+            ? response.context_gdd_content_fingerprint
+            : undefined
         const nodeStatus = totalToAdd === 1 ? ('pending' as const) : ('accepted' as const)
         const newNode: Node = {
           id: generatedNode.id,
@@ -266,6 +275,8 @@ export const createGenerationSlice: StateCreator<
             status: nodeStatus,
             lastGenerationInstructions: instructions,
             ...(contextGddHash !== undefined && { contextGddHash }),
+            ...(apiFp !== undefined && { contextGddContentFingerprint: apiFp }),
+            ...(gddSnapshot !== undefined && { gddContextSelectionsSnapshot: gddSnapshot }),
           },
         }
         nodesToAddBatch.push(newNode)
@@ -439,17 +450,22 @@ export const createGenerationSlice: StateCreator<
           ? (incomingEdge.data as { via_choice_index: number }).via_choice_index
           : undefined
 
+      const existingData = node.data as Record<string, unknown>
+      const snap = existingData.gddContextSelectionsSnapshot
+      const regenSelections =
+        typeof snap === 'object' && snap !== null && !Array.isArray(snap)
+          ? (snap as Record<string, unknown>)
+          : {}
+
       const response = await graphAPI.regenerateNode(nodeId, {
         dialogue_id: dialogueId,
         new_instructions: newInstructions,
         preserve_connections: true,
         parent_node_id: parentNode.id,
         parent_node_content: parentNode.data as Record<string, unknown>,
-        context_selections: {},
+        context_selections: regenSelections,
         via_choice_index,
       })
-
-      const existingData = node.data as Record<string, unknown>
       const existingHistory = (existingData.regenerationHistory as Array<{ instructions: string; timestamp: string; generationId: string }>) ?? []
       const newEntry = {
         timestamp: new Date().toISOString(),
@@ -457,6 +473,12 @@ export const createGenerationSlice: StateCreator<
         generationId: crypto.randomUUID(),
       }
       const regenerationHistory = [...existingHistory, newEntry].slice(-10)
+      const regenFp =
+        typeof response.context_gdd_content_fingerprint === 'string' &&
+        response.context_gdd_content_fingerprint.length > 0
+          ? response.context_gdd_content_fingerprint
+          : (existingData.contextGddContentFingerprint as string | undefined)
+
       const newData = {
         ...response.node,
         id: nodeId,
@@ -464,6 +486,10 @@ export const createGenerationSlice: StateCreator<
         lastGenerationInstructions: newInstructions,
         regenerationHistory,
         contextGddHash: existingData.contextGddHash ?? (response.node as Record<string, unknown>).contextGddHash,
+        ...(regenFp !== undefined && { contextGddContentFingerprint: regenFp }),
+        ...(existingData.gddContextSelectionsSnapshot !== undefined && {
+          gddContextSelectionsSnapshot: existingData.gddContextSelectionsSnapshot,
+        }),
       }
 
       set((s) => {

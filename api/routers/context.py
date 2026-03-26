@@ -31,6 +31,12 @@ from api.schemas.context_rules import (
     DialogueTypeRulesResponse,
 )
 from api.schemas.dialogue import EstimateTokensRequest, EstimateTokensResponse
+from api.schemas.gdd_context_stale import (
+    GddContentFingerprintRequest,
+    GddContentFingerprintResponse,
+    GddEntityHistoryResponse,
+    GddEntityHistoryEventPublic,
+)
 from api.dependencies import (
     get_context_builder,
     get_linked_selector_service,
@@ -1079,5 +1085,95 @@ async def put_context_rules_by_dialogue_type(
         dialogue_type=normalized_type,
         source=source,
         rules=rules,
+    )
+
+
+@router.post(
+    "/gdd-content-fingerprint",
+    response_model=GddContentFingerprintResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def post_gdd_content_fingerprint(
+    request_data: GddContentFingerprintRequest,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> GddContentFingerprintResponse:
+    """Calcule l'empreinte du contenu GDD pour une sélection (Story 3.9, détection stale)."""
+    from services.gdd_context_fingerprint import compute_gdd_content_fingerprint
+
+    try:
+        fp = compute_gdd_content_fingerprint(
+            context_builder,
+            request_data.context_selections,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+        )
+    except Exception as exc:
+        logger.warning(
+            "post_gdd_content_fingerprint échoué (request_id=%s): %s",
+            request_id,
+            exc,
+        )
+        raise ValidationException(
+            message="Impossible de calculer l'empreinte GDD pour cette sélection.",
+            request_id=request_id,
+        ) from exc
+    return GddContentFingerprintResponse(fingerprint=fp)
+
+
+@router.get(
+    "/gdd-entity-history",
+    response_model=GddEntityHistoryResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_gdd_entity_history(
+    category: str,
+    name: str,
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> GddEntityHistoryResponse:
+    """Timeline locale des modifications d'une entité GDD (alimentée par sync Notion)."""
+    from core.context.context_builder import PROJECT_ROOT_DIR
+    from services.gdd_entity_history import diff_snapshots_json, load_entity_history
+
+    cat = (category or "").strip()
+    nom = (name or "").strip()
+    if not cat or not nom:
+        raise ValidationException(
+            message="Paramètres category et name requis.",
+            request_id=request_id,
+        )
+
+    raw = load_entity_history(PROJECT_ROOT_DIR, cat, nom)
+    events_pub = [
+        GddEntityHistoryEventPublic(
+            at=str(e.get("at", "")),
+            source=str(e.get("source", "")),
+            summary=str(e.get("summary", "")),
+        )
+        for e in raw
+        if isinstance(e, dict)
+    ]
+
+    diff_hint: Optional[str] = None
+    prev_snap: Optional[Dict[str, Any]] = None
+    cur_snap: Optional[Dict[str, Any]] = None
+    if len(raw) >= 2:
+        a = raw[-2]
+        b = raw[-1]
+        if isinstance(a, dict) and isinstance(b, dict):
+            sa = a.get("snapshot")
+            sb = b.get("snapshot")
+            if isinstance(sa, dict) and isinstance(sb, dict):
+                prev_snap = sa
+                cur_snap = sb
+                diff_hint = diff_snapshots_json(sa, sb)
+
+    return GddEntityHistoryResponse(
+        category=cat,
+        name=nom,
+        events=events_pub,
+        diff_hint=diff_hint,
+        previous_snapshot=prev_snap,
+        current_snapshot=cur_snap,
     )
 

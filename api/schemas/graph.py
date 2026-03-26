@@ -118,6 +118,10 @@ class GenerateNodeResponse(BaseModel):
     nodes: Optional[List[Dict[str, Any]]] = Field(None, description="Liste de nœuds générés (pour génération batch)")
     suggested_connections: List[SuggestedConnection] = Field(..., description="Connexions suggérées")
     parent_node_id: str = Field(..., description="ID du nœud parent")
+    context_gdd_content_fingerprint: Optional[str] = Field(
+        None,
+        description="Empreinte SHA-256 du contexte GDD structuré au moment de la génération (Story 3.9)",
+    )
     batch_count: Optional[int] = Field(None, description="Nombre total de nœuds générés en batch (si applicable)")
     generated_choices_count: Optional[int] = Field(
         None,
@@ -202,6 +206,10 @@ class RegenerateNodeResponse(BaseModel):
     """Réponse après régénération d'un nœud (remplacement in-place, même ID)."""
     node: Dict[str, Any] = Field(..., description="Nœud régénéré (id = node_id demandé)")
     suggested_connections: List[SuggestedConnection] = Field(..., description="Connexions suggérées (parent → nouveau nœud)")
+    context_gdd_content_fingerprint: Optional[str] = Field(
+        None,
+        description="Empreinte GDD après régénération (Story 3.9)",
+    )
 
 
 class NodePromptResponse(BaseModel):

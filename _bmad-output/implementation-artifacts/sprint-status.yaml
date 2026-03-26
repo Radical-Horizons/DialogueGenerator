@@ -103,8 +103,8 @@ development_status:
   3-6-mesurer-pertinence-contexte-gdd-utilisé-dans-dialogue-généré-fr16: done
   3-7-voir-sections-gdd-utilisées-dans-génération-nœud-fr17: done
   3-8-synchroniser-données-gdd-depuis-notion-v20-fr18: done
-  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: backlog
-  3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: backlog
+  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: in-progress
+  3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: in-progress
   3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: backlog
   epic-3-retrospective: optional
   epic-4: backlog
