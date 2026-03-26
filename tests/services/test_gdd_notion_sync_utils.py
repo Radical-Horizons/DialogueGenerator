@@ -3,6 +3,7 @@ import pytest
 
 from services.gdd_notion_sync_utils import (
     category_file_matches_included,
+    category_stem_to_list_category_key,
     mask_secret,
     normalize_notion_id,
     redact_notion_token_from_text,
@@ -39,6 +40,12 @@ def test_category_file_matches_included_by_stem_or_name() -> None:
     assert category_file_matches_included("lieux.json", ["lieux"]) is True
     assert category_file_matches_included("lieux.json", ["lieux.json"]) is True
     assert category_file_matches_included("lieux.json", ["personnages"]) is False
+
+
+def test_category_stem_to_list_category_key() -> None:
+    assert category_stem_to_list_category_key("Personnages") == "personnages"
+    assert category_stem_to_list_category_key("Communautés") == "communautes"
+    assert category_stem_to_list_category_key("vocab_test") is None
 
 
 def test_redact_notion_token_from_text() -> None:

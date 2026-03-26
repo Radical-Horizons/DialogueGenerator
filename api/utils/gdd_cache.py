@@ -8,20 +8,59 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
+def gdd_shard_directory_fingerprint(dir_path: Path) -> Tuple[float, int]:
+    """Empreinte d'un répertoire de shards JSON (invalidation cache).
+
+    Args:
+        dir_path: Répertoire contenant un fichier JSON par fiche.
+
+    Returns:
+        Couple (mtime max parmi les ``*.json``, nombre de fichiers ``*.json``).
+        Répertoire absent ou sans JSON : ``(0.0, 0)``.
+    """
+    if not dir_path.is_dir():
+        return (0.0, 0)
+    mtimes: list[float] = []
+    count = 0
+    try:
+        for p in dir_path.iterdir():
+            if p.is_file() and p.suffix.lower() == ".json":
+                count += 1
+                try:
+                    mtimes.append(p.stat().st_mtime)
+                except OSError:
+                    pass
+    except OSError as exc:
+        logger.warning("Empreinte shards impossible pour %s: %s", dir_path, exc)
+        return (0.0, 0)
+    return (max(mtimes) if mtimes else 0.0, count)
+
+
 class GDDCacheEntry:
     """Entrée de cache pour un fichier GDD avec métadonnées."""
     
-    def __init__(self, data: Any, file_path: Path, mtime: float):
+    def __init__(
+        self,
+        data: Any,
+        file_path: Path,
+        mtime: float,
+        *,
+        shard_file_count: Optional[int] = None,
+    ):
         """Initialise une entrée de cache.
         
         Args:
             data: Les données chargées depuis le fichier.
-            file_path: Chemin vers le fichier source.
-            mtime: Timestamp de modification du fichier lors du chargement.
+            file_path: Chemin vers le fichier source (ou répertoire shards).
+            mtime: Timestamp de modification du fichier lors du chargement ;
+                pour un répertoire shards, mtime = max mtime des ``*.json``.
+            shard_file_count: Si défini, ``file_path`` est un répertoire shards
+                et cette valeur est le nombre de fichiers ``*.json`` au chargement.
         """
         self.data = data
         self.file_path = file_path
         self.mtime = mtime
+        self.shard_file_count = shard_file_count
         self.cached_at = time.time()
     
     def is_stale(self, check_interval: float = 5.0) -> bool:
@@ -35,6 +74,23 @@ class GDDCacheEntry:
         """
         # Throttle : ne pas vérifier trop souvent
         if time.time() - self.cached_at < check_interval:
+            return False
+
+        if self.shard_file_count is not None:
+            if not self.file_path.exists() or not self.file_path.is_dir():
+                logger.warning("Répertoire GDD shards supprimé ou invalide: %s", self.file_path)
+                return True
+            cur_max, cur_count = gdd_shard_directory_fingerprint(self.file_path)
+            if cur_count != self.shard_file_count or cur_max != self.mtime:
+                logger.info(
+                    "Shards GDD modifiés: %s (count %s→%s, mtime max %s→%s)",
+                    self.file_path,
+                    self.shard_file_count,
+                    cur_count,
+                    self.mtime,
+                    cur_max,
+                )
+                return True
             return False
         
         # Vérifier si le fichier existe toujours
@@ -113,8 +169,14 @@ class GDDCache:
             return
         
         try:
-            mtime = file_path.stat().st_mtime if file_path.exists() else 0.0
-            self._cache[key] = GDDCacheEntry(data, file_path, mtime)
+            if file_path.is_dir():
+                max_m, cnt = gdd_shard_directory_fingerprint(file_path)
+                self._cache[key] = GDDCacheEntry(
+                    data, file_path, max_m, shard_file_count=cnt
+                )
+            else:
+                mtime = file_path.stat().st_mtime if file_path.exists() else 0.0
+                self._cache[key] = GDDCacheEntry(data, file_path, mtime)
             # Log silencieux : les mises en cache sont normales et ne nécessitent pas de log
             # logger.debug(f"Données mises en cache pour '{key}' (mtime: {mtime})")
         except OSError as e:

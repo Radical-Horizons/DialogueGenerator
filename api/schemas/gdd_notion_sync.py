@@ -25,6 +25,11 @@ class GddNotionSyncConfigPublic(BaseModel):
     auto_sync_enabled: bool = False
     sources: List[GddNotionSourceSchema] = Field(default_factory=list)
     included_categories: List[str] = Field(default_factory=list)
+    mirror_rebuild_on_full_sync: bool = Field(
+        default=False,
+        description="Déprécié : ignoré par le serveur (sync complète = miroir automatique).",
+    )
+    archive_retention_count: int = 10
     token_configured: bool = False
 
 
@@ -35,6 +40,15 @@ class GddNotionSyncConfigUpdate(BaseModel):
     auto_sync_enabled: Optional[bool] = None
     sources: Optional[List[GddNotionSourceSchema]] = None
     included_categories: Optional[List[str]] = None
+    mirror_rebuild_on_full_sync: Optional[bool] = Field(
+        default=None,
+        description="Déprécié : sans effet sur le comportement (conservé pour compat. JSON).",
+    )
+    archive_retention_count: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="Nombre max de snapshots sous .archive/ (les plus anciens supprimés).",
+    )
     notion_token: Optional[str] = Field(
         default=None,
         description="Si fourni, remplace le token fichier (jamais renvoyé ensuite)",
@@ -68,9 +82,64 @@ class GddNotionSyncStatusResponse(BaseModel):
     message: str = ""
     updated_entities: int = 0
     partial_errors: List[str] = Field(default_factory=list)
+    last_archive_relative: Optional[str] = None
+    last_mirror_rebuild_used: Optional[bool] = None
+
+
+class GddNotionSyncProgressResponse(BaseModel):
+    """Progression live d'une sync en cours (polling UI)."""
+
+    active: bool = False
+    started_at: Optional[str] = None
+    force_full: Optional[bool] = None
+    mirror_rebuild: Optional[bool] = None
+    phase: str = "idle"
+    sources_total: int = 0
+    sources_completed: int = 0
+    current_source_index: int = 0
+    current_category_file: str = ""
+    pages_total_known: int = 0
+    pages_processed: int = 0
+    pages_in_current_source: int = 0
+    current_page_in_source: int = 0
+    current_page_id_short: str = ""
+    message: str = ""
 
 
 class GddNotionSyncConfigResponse(BaseModel):
     """Config publique pour GET."""
 
     config: GddNotionSyncConfigPublic
+
+
+class GddArchiveEntrySchema(BaseModel):
+    """Une entrée d'historique sous ``GDD_categories/.archive/``."""
+
+    id: str = Field(..., description="Nom du dossier snapshot")
+    created_at: str = Field(..., description="Horodatage UTC ISO (préfixe du run)")
+
+
+class GddArchivesListResponse(BaseModel):
+    """Liste des snapshots disponibles."""
+
+    archives: List[GddArchiveEntrySchema] = Field(default_factory=list)
+
+
+class GddArchiveRestoreRequest(BaseModel):
+    """Corps optionnel pour la restauration."""
+
+    backup_current: bool = Field(
+        default=True,
+        description="Archiver l'état GDD actuel dans .archive/ avant d'appliquer le snapshot.",
+    )
+
+
+class GddArchiveRestoreResponse(BaseModel):
+    """Résultat d'une restauration réussie."""
+
+    ok: bool = True
+    message: str
+    new_backup_id: Optional[str] = Field(
+        default=None,
+        description="Nom du dossier de sauvegarde créé si backup_current était true",
+    )

@@ -4,7 +4,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -136,6 +136,57 @@ class GDDLoader:
                     return file_path
         
         return None
+
+    def _resolve_category_shard_directory(self, category_name: str) -> Optional[Path]:
+        """Retourne le sous-répertoire de shards pour une clé de catégorie (ex. personnages).
+
+        Compare le nom du dossier de façon insensible à la casse.
+
+        Args:
+            category_name: Clé ``CATEGORIES_CONFIG`` (ex. ``personnages``).
+
+        Returns:
+            Chemin du répertoire s'il existe, sinon ``None``.
+        """
+        if not self._categories_path.exists() or not self._categories_path.is_dir():
+            return None
+        direct = self._categories_path / category_name
+        if direct.is_dir():
+            return direct
+        target_lower = category_name.lower()
+        for child in self._categories_path.iterdir():
+            if child.is_dir() and child.name.lower() == target_lower:
+                return child
+        return None
+
+    def _load_list_from_shard_directory(self, shard_dir: Path) -> List[Dict[str, Any]]:
+        """Charge et concatène les objets JSON (un dict par fichier ``*.json``).
+
+        Args:
+            shard_dir: Répertoire des fiches.
+
+        Returns:
+            Liste des objets ; fichiers invalides ou non-dict ignorés avec log.
+        """
+        paths = sorted(
+            p for p in shard_dir.iterdir() if p.is_file() and p.suffix.lower() == ".json"
+        )
+        aggregated: List[Dict[str, Any]] = []
+        for p in paths:
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    raw = json.load(f)
+                if isinstance(raw, dict):
+                    aggregated.append(raw)
+                else:
+                    logger.warning(
+                        "Shard GDD ignoré (attendu un objet JSON): %s", p.name
+                    )
+            except json.JSONDecodeError as e:
+                logger.error("JSON invalide dans shard %s: %s", p.name, e)
+            except OSError as e:
+                logger.error("Lecture shard impossible %s: %s", p.name, e)
+        return aggregated
     
     def load_vision(self) -> Optional[Dict[str, Any]]:
         """Charge le fichier Vision.json.
@@ -206,33 +257,67 @@ class GDDLoader:
             return default_value
         
         config = self.CATEGORIES_CONFIG[category_name]
-        # Privilégier les fichiers avec "_full" dans le nom
-        # Recherche case-insensitive pour compatibilité Windows/Linux
+        json_main_key = config["key"]
+        expected_type = config["type"]
+        default_value = [] if expected_type == list else {}
+
+        gdd_cache = self._get_gdd_cache()
+
+        # Catégories liste : répertoire ``<category>/*.json`` prioritaire s'il contient des fiches
+        if expected_type == list:
+            shard_dir = self._resolve_category_shard_directory(category_name)
+            if shard_dir is not None:
+                try:
+                    shard_files = [
+                        p
+                        for p in shard_dir.iterdir()
+                        if p.is_file() and p.suffix.lower() == ".json"
+                    ]
+                except OSError as exc:
+                    logger.warning("Liste shards impossible pour %s: %s", shard_dir, exc)
+                    shard_files = []
+                if shard_files:
+                    composite_cache_key = f"{category_name}:shards:{shard_dir.resolve()}"
+                    cached_list = (
+                        gdd_cache.get(composite_cache_key, shard_dir) if gdd_cache else None
+                    )
+                    if cached_list is not None:
+                        logger.debug(
+                            "Catégorie %s chargée depuis le cache (shards).",
+                            category_name,
+                        )
+                        return cached_list
+                    aggregated = self._load_list_from_shard_directory(shard_dir)
+                    logger.info(
+                        "Répertoire shards %s chargé. %s fiche(s) pour '%s'.",
+                        shard_dir.name,
+                        len(aggregated),
+                        json_main_key,
+                    )
+                    if gdd_cache:
+                        gdd_cache.set(composite_cache_key, aggregated, shard_dir)
+                    return aggregated
+
+        # Fichier monolithique (_full prioritaire)
         file_path_full = self._find_file_case_insensitive(
-            self._categories_path, 
-            f"{category_name}_full.json"
+            self._categories_path,
+            f"{category_name}_full.json",
         )
         file_path = self._find_file_case_insensitive(
-            self._categories_path, 
-            f"{category_name}.json"
+            self._categories_path,
+            f"{category_name}.json",
         )
-        
-        # Sélectionner le fichier à utiliser : "_full" en priorité, sinon le fichier standard
+
         if file_path_full is not None:
             file_path = file_path_full
             logger.debug(f"Fichier {file_path.name} trouvé (version _full).")
         elif file_path is None:
-            # Les fichiers GDD sont optionnels (sauf personnages.json et lieux.json qui sont recommandés)
-            # Utiliser DEBUG pour éviter les warnings inutiles au démarrage
-            logger.debug(f"Fichier {category_name}.json non trouvé dans {self._categories_path}. Utilisation de la valeur par défaut.")
-            return [] if config["type"] == list else {}
-        
-        json_main_key = config["key"]
-        expected_type = config["type"]
-        default_value = [] if expected_type == list else {}
-        
-        gdd_cache = self._get_gdd_cache()
-        
+            logger.debug(
+                f"Fichier {category_name}.json non trouvé dans {self._categories_path}. "
+                "Utilisation de la valeur par défaut."
+            )
+            return default_value
+
         # Vérifier le cache
         composite_cache_key = f"{category_name}:{file_path.resolve()}"
         cached_data = gdd_cache.get(composite_cache_key, file_path) if gdd_cache else None

@@ -206,3 +206,117 @@ def test_put_config_invalid_source(client: TestClient, tmp_path: Path) -> None:
         assert r.status_code == 422
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_post_sync_mirror_rebuild_without_full_is_ignored(client: TestClient, tmp_path: Path) -> None:
+    """mirror_rebuild est déprécié : sans full=true, sync incrémentale (pas 400)."""
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post("/api/v1/gdd-notion-sync/sync?mirror_rebuild=true")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["success"] is False
+        assert "aucune" in body["message"].lower()
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_get_archives_empty(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.get("/api/v1/gdd-notion-sync/archives")
+        assert r.status_code == 200
+        assert r.json() == {"archives": []}
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_get_archives_lists_snapshots(client: TestClient, tmp_path: Path) -> None:
+    gdd = tmp_path / "gdd"
+    arch = gdd / ".archive" / "20260102T030405Z_a1b2c3d4"
+    arch.mkdir(parents=True)
+    (arch / "note.txt").write_text("x", encoding="utf-8")
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd,
+        status_path=tmp_path / "status.json",
+    )
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.get("/api/v1/gdd-notion-sync/archives?limit=5")
+        assert r.status_code == 200
+        data = r.json()["archives"]
+        assert len(data) == 1
+        assert data[0]["id"] == "20260102T030405Z_a1b2c3d4"
+        assert "2026" in data[0]["created_at"]
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_post_restore_archive_invalid_id(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/archives/not_a_valid_archive_id/restore",
+            json={"backup_current": False},
+        )
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_post_restore_archive_happy_path(client: TestClient, tmp_path: Path) -> None:
+    from services.gdd_notion_sync_mirror import archive_gdd_snapshot
+
+    gdd = tmp_path / "gdd"
+    gdd.mkdir()
+    (gdd / "live.json").write_text('{"v":2}', encoding="utf-8")
+    snap_dir = archive_gdd_snapshot(gdd)
+    (gdd / "live.json").write_text('{"v":3}', encoding="utf-8")
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.save_settings({**store.load_settings(), "archive_retention_count": 10})
+    (tmp_path / "manifest.json").write_text(
+        '{"schema_version":1,"entries":{"x":"y"},"last_full_sync_at":"2020-01-01T00:00:00Z"}',
+        encoding="utf-8",
+    )
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd,
+        status_path=tmp_path / "status.json",
+    )
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        aid = snap_dir.name
+        r = client.post(
+            f"/api/v1/gdd-notion-sync/archives/{aid}/restore",
+            json={"backup_current": False},
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert body["ok"] is True
+        assert (gdd / "live.json").read_text(encoding="utf-8") == '{"v":2}'
+        man = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
+        assert man.get("entries") == {}
+        assert man.get("last_full_sync_at") is None
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_get_sync_progress_idle(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.get("/api/v1/gdd-notion-sync/sync-progress")
+        assert r.status_code == 200
+        body = r.json()
+        assert body.get("active") is False
+        assert body.get("phase") == "idle"
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

@@ -200,6 +200,7 @@ async def lifespan(app: FastAPI):
                         if svc.is_auto_sync_enabled():
                             await svc.run_sync(
                                 force_full=False,
+                                mirror_rebuild=False,
                                 request_id="gdd-notion-scheduler",
                             )
                 except asyncio.CancelledError:

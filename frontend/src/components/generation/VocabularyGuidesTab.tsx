@@ -6,7 +6,6 @@ import { useVocabularyStore, type PopularityLevel, type VocabularyMode } from '.
 import { useNarrativeGuidesStore } from '../../store/narrativeGuidesStore'
 import { useSyncStore } from '../../store/syncStore'
 import { theme } from '../../theme'
-import { GddNotionSyncSection } from './GddNotionSyncSection'
 
 const POPULARITY_LEVELS: PopularityLevel[] = [
   'Mondialement',
@@ -176,8 +175,6 @@ export function VocabularyGuidesTab() {
           </p>
         )}
       </div>
-
-      <GddNotionSyncSection />
 
       {/* Vocabulaire Alteir */}
       <div

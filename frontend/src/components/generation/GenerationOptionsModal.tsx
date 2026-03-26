@@ -1,5 +1,5 @@
 /**
- * Modal pour configurer les options de génération (champs de contexte, Unity, organisation, guidance).
+ * Modal pour configurer les options de génération (contexte, vocabulaire, prompts, budget, sync GDD, suivi).
  */
 import { useState, useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -7,6 +7,7 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextStore } from '../../store/contextStore'
 import { ContextFieldSelector } from './ContextFieldSelector'
 import { VocabularyGuidesTab } from './VocabularyGuidesTab'
+import { GddNotionSyncSection } from './GddNotionSyncSection'
 import { PromptsTab } from './PromptsTab'
 import { ErrorBoundary } from '../shared/ErrorBoundary'
 import { BudgetSettings } from '../settings/BudgetSettings'
@@ -22,10 +23,28 @@ export interface GenerationOptionsModalProps {
   isOpen: boolean
   onClose: () => void
   onApply?: () => void
-  initialTab?: 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage' | 'logs'
+  initialTab?:
+    | 'context'
+    | 'metadata'
+    | 'general'
+    | 'vocabulary'
+    | 'gdd_notion'
+    | 'prompts'
+    | 'shortcuts'
+    | 'usage'
+    | 'logs'
 }
 
-type TabId = 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage' | 'logs'
+type TabId =
+  | 'context'
+  | 'metadata'
+  | 'general'
+  | 'vocabulary'
+  | 'gdd_notion'
+  | 'prompts'
+  | 'shortcuts'
+  | 'usage'
+  | 'logs'
 
 interface Tab {
   id: TabId
@@ -132,14 +151,15 @@ export function GenerationOptionsModal({
   }, [detectFields, loadSuggestions])
 
   const tabs: Tab[] = [
+    { id: 'general', label: 'Général' },
+    { id: 'gdd_notion', label: 'Notion' },
     { id: 'context', label: 'Contexte' },
     { id: 'metadata', label: 'Métadonnées' },
-    { id: 'general', label: 'Général' },
     { id: 'vocabulary', label: 'Vocabulaire & Guides' },
     { id: 'prompts', label: 'Prompts' },
-    { id: 'shortcuts', label: 'Raccourcis' },
     { id: 'usage', label: 'Usage IA' },
     { id: 'logs', label: 'Logs' },
+    { id: 'shortcuts', label: 'Raccourcis' },
   ]
 
   if (!isOpen) return null
@@ -252,20 +272,6 @@ export function GenerationOptionsModal({
             />
           )}
 
-          {activeTab === 'general' && (
-            <GeneralTab
-              organization={organization}
-              setOrganization={setOrganization}
-              previewText={previewText}
-              previewTokens={previewTokens}
-              isLoadingPreview={isLoadingPreview}
-              onPreview={handlePreview}
-              onBudgetUpdated={() => {
-                // Optionnel: recharger les données si nécessaire
-              }}
-            />
-          )}
-
           {activeTab === 'vocabulary' && (
             <ErrorBoundary
               fallback={
@@ -294,8 +300,42 @@ export function GenerationOptionsModal({
             <PromptsTab />
           )}
 
-          {activeTab === 'shortcuts' && (
-            <ShortcutsTab />
+          {activeTab === 'general' && (
+            <GeneralTab
+              organization={organization}
+              setOrganization={setOrganization}
+              previewText={previewText}
+              previewTokens={previewTokens}
+              isLoadingPreview={isLoadingPreview}
+              onPreview={handlePreview}
+              onBudgetUpdated={() => {
+                // Optionnel: recharger les données si nécessaire
+              }}
+            />
+          )}
+
+          {activeTab === 'gdd_notion' && (
+            <ErrorBoundary
+              fallback={
+                <div
+                  style={{
+                    padding: '2rem',
+                    color: theme.text.primary,
+                    backgroundColor: theme.background.secondary,
+                    borderRadius: '8px',
+                    border: `1px solid ${theme.border.primary}`,
+                  }}
+                >
+                  <h3 style={{ marginTop: 0 }}>Erreur lors du chargement</h3>
+                  <p>
+                    Une erreur s&apos;est produite lors du chargement de la synchronisation GDD
+                    Notion. Veuillez réessayer.
+                  </p>
+                </div>
+              }
+            >
+              <GddNotionSyncSection />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'usage' && (
@@ -304,6 +344,10 @@ export function GenerationOptionsModal({
 
           {activeTab === 'logs' && (
             <LogsTab />
+          )}
+
+          {activeTab === 'shortcuts' && (
+            <ShortcutsTab />
           )}
         </div>
 

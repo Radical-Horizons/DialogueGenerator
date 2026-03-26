@@ -59,7 +59,7 @@ development_status:
   16-5-migration-choiceid-lecture-tolérante-refus-sans-choiceid: done
   16-6-tests-golden-e2e-perf-non-régression: done
   epic-16-retrospective: done
-  epic-1: backlog
+  epic-1: done
   1-1-générer-un-nœud-de-dialogue-single-depuis-un-nœud-parent-dans-le-graphe-fr1: done
   1-2-générer-batch-de-nœuds-depuis-tous-les-choix-existants-fr2: done
   1-3-spécifier-instructions-de-génération-tone-style-theme-fr3: done
@@ -78,7 +78,7 @@ development_status:
   1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79: done
   1-17-adr-007-react-flow-controlled: done
   epic-1-retrospective: done
-  epic-2: in-progress
+  epic-2: done
   2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: done
   2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: done
   2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: done
@@ -122,6 +122,14 @@ development_status:
   4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: backlog
   4-13-valider-conformité-schéma-json-unity-100-fr48: backlog
   epic-4-retrospective: optional
+  epic-9: backlog
+  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog
+  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: backlog
+  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: backlog
+  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: backlog
+  9-5-valider-références-variables-détecter-variables-non-définies-fr93: backlog
+  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: backlog
+  epic-9-retrospective: optional
   epic-5: backlog
   5-1-exporter-dialogue-single-vers-format-unity-json-fr49: backlog
   5-2-exporter-batch-plusieurs-dialogues-vers-unity-json-fr50: backlog
@@ -162,14 +170,6 @@ development_status:
   8-8-valider-en-batch-plusieurs-dialogues-fr87: backlog
   8-9-générer-en-batch-depuis-plusieurs-nœuds-de-départ-fr88: backlog
   epic-8-retrospective: optional
-  epic-9: backlog
-  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog
-  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: backlog
-  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: backlog
-  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: backlog
-  9-5-valider-références-variables-détecter-variables-non-définies-fr93: backlog
-  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: backlog
-  epic-9-retrospective: optional
   epic-10: backlog
   10-1-restaurer-session-après-crash-navigateur-fr96: backlog
   10-2-sauvegarder-manuellement-le-progrès-dialogue-fr97: backlog

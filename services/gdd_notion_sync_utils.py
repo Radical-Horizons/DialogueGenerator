@@ -2,9 +2,49 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 import uuid
 from pathlib import PurePath
 from typing import Iterable, Optional
+
+# Clés catégories GDD de type liste (aligné sur ``GDDLoader.CATEGORIES_CONFIG``).
+_GDD_LIST_CATEGORY_KEYS: frozenset[str] = frozenset(
+    {
+        "personnages",
+        "lieux",
+        "objets",
+        "especes",
+        "communautes",
+        "dialogues",
+        "structure_narrative",
+        "quetes",
+    }
+)
+
+
+def _fold_ascii_category_stem(stem: str) -> str:
+    """Normalise un stem de fichier (accents → ASCII) en minuscules."""
+    nk = unicodedata.normalize("NFKD", stem.strip())
+    return "".join(c for c in nk if not unicodedata.combining(c)).lower()
+
+
+def category_stem_to_list_category_key(stem: str) -> Optional[str]:
+    """Associe le stem d'un ``category_file`` (ex. ``Personnages``) à la clé répertoire GDD.
+
+    Utilisé pour l'écriture en shards (``data/GDD_categories/<clé>/*.json``).
+
+    Args:
+        stem: ``PurePath(category_file).stem``.
+
+    Returns:
+        Clé catégorie (ex. ``personnages``) si la catégorie est une liste GDD, sinon ``None``.
+    """
+    if not stem or not stem.strip():
+        return None
+    folded = _fold_ascii_category_stem(stem)
+    if folded in _GDD_LIST_CATEGORY_KEYS:
+        return folded
+    return None
 
 
 def normalize_notion_id(raw: str) -> str:

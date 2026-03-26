@@ -17,6 +17,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "auto_sync_enabled": False,
     "sources": [],
     "included_categories": [],
+    "mirror_rebuild_on_full_sync": False,
+    "archive_retention_count": 10,
 }
 
 
@@ -113,6 +115,10 @@ class GddNotionSyncConfigStore:
             "auto_sync_enabled": bool(s.get("auto_sync_enabled")),
             "sources": list(s.get("sources") or []),
             "included_categories": list(s.get("included_categories") or []),
+            "mirror_rebuild_on_full_sync": bool(s.get("mirror_rebuild_on_full_sync")),
+            "archive_retention_count": max(
+                1, int(s.get("archive_retention_count") or 10)
+            ),
             "token_configured": self.token_configured(),
         }
 

@@ -159,3 +159,34 @@ class TestGDDLoader:
         result = loader.load_category("personnages")
         
         assert result == sample_character_data
+
+    def test_load_category_shards_priority_over_monolith(
+        self, tmp_gdd_categories_dir, sample_character_data
+    ):
+        """Répertoire ``personnages/*.json`` prioritaire sur ``personnages.json``."""
+        shard_dir = tmp_gdd_categories_dir / "personnages"
+        shard_dir.mkdir()
+        a = {"Nom": "Shard A", "x": 1}
+        b = {"Nom": "Shard B", "x": 2}
+        with open(shard_dir / "p1.json", "w", encoding="utf-8") as f:
+            json.dump(a, f, ensure_ascii=False)
+        with open(shard_dir / "p2.json", "w", encoding="utf-8") as f:
+            json.dump(b, f, ensure_ascii=False)
+        with open(tmp_gdd_categories_dir / "personnages.json", "w", encoding="utf-8") as f:
+            json.dump({"personnages": sample_character_data}, f, ensure_ascii=False)
+
+        loader = GDDLoader(categories_path=tmp_gdd_categories_dir)
+        result = loader.load_category("personnages")
+        assert len(result) == 2
+        noms = {r["Nom"] for r in result}
+        assert noms == {"Shard A", "Shard B"}
+
+    def test_load_category_empty_shard_dir_falls_back_to_monolith(
+        self, tmp_gdd_categories_dir, sample_character_data
+    ):
+        """Dossier catégorie vide → monolithe."""
+        (tmp_gdd_categories_dir / "personnages").mkdir()
+        with open(tmp_gdd_categories_dir / "personnages.json", "w", encoding="utf-8") as f:
+            json.dump({"personnages": sample_character_data}, f, ensure_ascii=False)
+        loader = GDDLoader(categories_path=tmp_gdd_categories_dir)
+        assert loader.load_category("personnages") == sample_character_data

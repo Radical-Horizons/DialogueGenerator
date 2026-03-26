@@ -9,6 +9,70 @@ from services.gdd_notion_sync_service import GddNotionSyncService
 
 
 @pytest.mark.asyncio
+async def test_run_sync_list_category_writes_shard_files(tmp_path: Path) -> None:
+    """Les catégories liste (ex. personnages) sont écrites en shards + notion_page_id."""
+    pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+
+    class FakeClient:
+        async def verify_credentials(self) -> dict:
+            return {"id": "bot", "type": "bot"}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-01-01T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "Héros"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return "Corps."
+
+        async def query_database(self, database_id: str) -> list:
+            return []
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "page",
+                    "notion_id": pid,
+                    "category_file": "Personnages.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="unit-shards")
+    assert res.updated_entities == 1
+    assert res.success
+    shard = gdd_dir / "personnages" / f"{pid}.json"
+    assert shard.is_file()
+    out = json.loads(shard.read_text(encoding="utf-8"))
+    assert out["Nom"] == "Héros"
+    assert out["notion_page_id"] == pid
+    assert out["sections"]["_general"] == "Corps."
+
+
+@pytest.mark.asyncio
 async def test_run_sync_page_source_writes_gdd(tmp_path: Path) -> None:
     pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
 
@@ -152,6 +216,81 @@ async def test_run_sync_skips_when_manifest_current(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
+    """Vocabulaire / chronologie : pas d’appel get_page_content, contenu depuis colonnes."""
+    db_id = "2d16e4d2-1b45-8016-ba74-ccb4fbd92b72"
+    row_id = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+
+    class FakeClient:
+        content_calls = 0
+
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "properties": {
+                    "Terme": {
+                        "type": "title",
+                        "title": [{"plain_text": "MotClé"}],
+                    },
+                    "Sens": {
+                        "type": "rich_text",
+                        "rich_text": [{"plain_text": "Définition courte"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            FakeClient.content_calls += 1
+            return "NE_DOIT_PAS_S_IMPORTER"
+
+        async def query_database(self, database_id: str) -> list:
+            return [
+                {
+                    "id": row_id,
+                    "last_edited_time": "2025-06-01T00:00:00.000Z",
+                }
+            ]
+
+    FakeClient.content_calls = 0
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": db_id,
+                    "category_file": "vocab_test.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="vocab-db")
+    assert res.updated_entities == 1
+    assert FakeClient.content_calls == 0
+    out = json.loads((gdd_dir / "vocab_test.json").read_text(encoding="utf-8"))
+    assert out[0]["Nom"] == "MotClé"
+    assert out[0]["values"]["Sens"] == "Définition courte"
+    assert "sections" not in out[0]
+
+
+@pytest.mark.asyncio
 async def test_included_categories_skips_non_matching_sources(tmp_path: Path) -> None:
     pid_a = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
     pid_b = "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
@@ -252,6 +391,141 @@ async def test_included_categories_no_match_returns_error(tmp_path: Path) -> Non
     res = await svc.run_sync(force_full=False, request_id="unit-nomatch")
     assert res.success is False
     assert "included_categories" in res.message
+
+
+@pytest.mark.asyncio
+async def test_run_sync_mirror_rebuild_promotes_and_drops_orphan_shard(
+    tmp_path: Path,
+) -> None:
+    """Miroir : archive, staging, promote — orphelin dans personnages/ supprimé."""
+    pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+    orphan = "1996e4d2-1b45-8039-b51b-eb3826fce1b5"
+
+    class FakeClient:
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-04-01T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "Héros"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return "Corps."
+
+        async def query_database(self, database_id: str) -> list:
+            return []
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "mirror_rebuild_on_full_sync": True,
+            "archive_retention_count": 10,
+            "sources": [
+                {
+                    "kind": "page",
+                    "notion_id": pid,
+                    "category_file": "Personnages.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    pd = gdd_dir / "personnages"
+    pd.mkdir()
+    (pd / f"{orphan}.json").write_text('{"Nom":"Orphelin"}', encoding="utf-8")
+
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(
+        force_full=True,
+        request_id="mirror-ok",
+    )
+    assert res.success
+    assert res.mirror_rebuild_used
+    assert (gdd_dir / ".archive").is_dir()
+    hero = gdd_dir / "personnages" / f"{pid}.json"
+    assert hero.is_file()
+    assert not (gdd_dir / "personnages" / f"{orphan}.json").exists()
+
+
+@pytest.mark.asyncio
+async def test_run_sync_mirror_rebuild_rollback_on_fetch_error(tmp_path: Path) -> None:
+    """Échec fetch : pas de promote, live inchangé."""
+    pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+    orphan = "1996e4d2-1b45-8039-b51b-eb3826fce1b5"
+
+    class FakeClient:
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            raise OSError("simulated fetch failure")
+
+        async def get_page_content(self, page_id: str) -> str:
+            return ""
+
+        async def query_database(self, database_id: str) -> list:
+            return []
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "mirror_rebuild_on_full_sync": True,
+            "archive_retention_count": 10,
+            "sources": [
+                {
+                    "kind": "page",
+                    "notion_id": pid,
+                    "category_file": "Personnages.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    pd = gdd_dir / "personnages"
+    pd.mkdir()
+    orphan_path = pd / f"{orphan}.json"
+    orphan_path.write_text('{"Nom":"Orphelin"}', encoding="utf-8")
+
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(
+        force_full=True,
+        request_id="mirror-fail",
+    )
+    assert res.success is False
+    assert res.mirror_rebuild_used
+    assert orphan_path.is_file()
 
 
 @pytest.mark.asyncio

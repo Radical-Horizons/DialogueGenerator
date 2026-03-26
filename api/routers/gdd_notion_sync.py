@@ -1,21 +1,29 @@
 """Endpoints REST sync GDD depuis Notion (FR18)."""
 from __future__ import annotations
 
+import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.dependencies import get_gdd_notion_sync_service, get_request_id
 from api.routers.auth import get_current_user
 from api.schemas.gdd_notion_sync import (
+    GddArchiveEntrySchema,
+    GddArchiveRestoreRequest,
+    GddArchiveRestoreResponse,
+    GddArchivesListResponse,
     GddNotionConnectionTestResponse,
     GddNotionSyncConfigPublic,
     GddNotionSyncConfigResponse,
     GddNotionSyncConfigUpdate,
+    GddNotionSyncProgressResponse,
     GddNotionSyncRunResponse,
     GddNotionSyncStatusResponse,
 )
 from services.gdd_notion_sync_service import GddNotionSyncService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/gdd-notion-sync", tags=["GDD Notion Sync"])
 
@@ -45,6 +53,8 @@ async def put_gdd_notion_config(
         auto_sync_enabled=body.auto_sync_enabled,
         sources=src,
         included_categories=body.included_categories,
+        mirror_rebuild_on_full_sync=body.mirror_rebuild_on_full_sync,
+        archive_retention_count=body.archive_retention_count,
         notion_token=body.notion_token,
     )
     return GddNotionSyncConfigResponse(
@@ -68,10 +78,20 @@ async def run_gdd_notion_sync(
     _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
     request_id: Annotated[str, Depends(get_request_id)],
-    full: Annotated[bool, Query(description="Re-sync complet (ignore manifeste)")] = False,
+    full: Annotated[bool, Query(description="Sync complète : ignore le manifeste, archive puis miroir Notion→disque")] = False,
+    mirror_rebuild: Annotated[
+        bool,
+        Query(
+            description="Déprécié, sans effet : la sync complète (full=true) applique toujours le miroir.",
+        ),
+    ] = False,
 ) -> GddNotionSyncRunResponse:
     """Déclenche une synchronisation immédiate."""
-    result = await svc.run_sync(force_full=full, request_id=request_id)
+    result = await svc.run_sync(
+        force_full=full,
+        mirror_rebuild=mirror_rebuild,
+        request_id=request_id,
+    )
     return GddNotionSyncRunResponse(
         success=result.success,
         message=result.message,
@@ -88,3 +108,56 @@ async def get_gdd_notion_status(
     """Lit le dernier statut de sync (persisté)."""
     st = svc.read_status()
     return GddNotionSyncStatusResponse.model_validate(st)
+
+
+@router.get("/sync-progress", response_model=GddNotionSyncProgressResponse)
+async def get_gdd_notion_sync_progress(
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+) -> GddNotionSyncProgressResponse:
+    """Lit la progression d'une synchronisation en cours (polling)."""
+    raw = svc.read_sync_progress()
+    return GddNotionSyncProgressResponse.model_validate(raw)
+
+
+@router.get("/archives", response_model=GddArchivesListResponse)
+async def list_gdd_notion_archives(
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+    limit: Annotated[int, Query(ge=1, le=100, description="Nombre max de snapshots")] = 20,
+) -> GddArchivesListResponse:
+    """Liste les derniers snapshots locaux (``.archive/``)."""
+    rows = svc.list_gdd_archive_entries(limit=limit)
+    return GddArchivesListResponse(
+        archives=[GddArchiveEntrySchema.model_validate(r) for r in rows]
+    )
+
+
+@router.post(
+    "/archives/{archive_id}/restore",
+    response_model=GddArchiveRestoreResponse,
+)
+async def restore_gdd_notion_archive(
+    archive_id: str,
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+    body: GddArchiveRestoreRequest | None = None,
+) -> GddArchiveRestoreResponse:
+    """Restaure le GDD local depuis un snapshot ``.archive/<archive_id>``."""
+    backup = True if body is None else body.backup_current
+    try:
+        result = svc.restore_gdd_archive(
+            archive_id,
+            backup_current=backup,
+            request_id=request_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except OSError as exc:
+        logger.warning("Restauration archive GDD échouée: %s", exc, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Échec restauration — {exc}",
+        ) from exc
+    return GddArchiveRestoreResponse.model_validate(result)
