@@ -33,6 +33,8 @@ from services.configuration_service import ConfigurationService
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.unity_dialogue_export_service import write_unity_dialogue_to_file
+from constants import Defaults
+from services.context_token_budget import compute_context_selection_token_metrics
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from core.llm.llm_client import ILLMClient
 
@@ -344,6 +346,15 @@ async def estimate_tokens(
         )
         context_text = context_builder.serialize_context_to_text(structured_context)
         context_tokens = context_builder._count_tokens(context_text)
+
+        metrics = compute_context_selection_token_metrics(
+            context_builder,
+            full_selection=request_data.context_selections,
+            user_instructions=request_data.user_instructions,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+            measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+        )
         
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
@@ -355,6 +366,9 @@ async def estimate_tokens(
 
         return EstimateTokensResponse(
             context_tokens=context_tokens,
+            selection_tokens=metrics.selection_tokens,
+            context_token_breakdown=metrics.breakdown,
+            context_breakdown_note=metrics.breakdown_note,
             token_count=built.token_count,
             raw_prompt=built.raw_prompt,
             prompt_hash=built.prompt_hash,

@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.866277+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Étude des Créatures",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "L'utilisation de cette compétence permet d'obtenir des informations sur la biologie d'une créature (comme ses caractéristiques, ses faiblesses, etc) ainsi que sur son modèle social, son alimentation et ses habitudes en général. Talents liés: Psychodressage.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "2b1e7566-8ff8-46b9-be17-0800be15ed52"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.875093+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Étude des Créatures",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "L'utilisation de cette compétence permet d'obtenir des informations sur la biologie d'une créature (comme ses caractéristiques, ses faiblesses, etc) ainsi que sur son modèle social, son alimentation et ses habitudes en général. Talents liés: Psychodressage.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "2b1e7566-8ff8-46b9-be17-0800be15ed52"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.009387+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Étude des Créatures",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "L'utilisation de cette compétence permet d'obtenir des informations sur la biologie d'une créature (comme ses caractéristiques, ses faiblesses, etc) ainsi que sur son modèle social, son alimentation et ses habitudes en général. Talents liés: Psychodressage.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "2b1e7566-8ff8-46b9-be17-0800be15ed52"
+    }
+  }
+]

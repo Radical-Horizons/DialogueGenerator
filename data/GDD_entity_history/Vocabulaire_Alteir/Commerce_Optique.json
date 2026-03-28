@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.793125+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Commerce Optique",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Système économique des Courtiers d'Observation (340K observations).",
+        "Importance": "Secondaire",
+        "Origine": "De commerce avec optique (vision).",
+        "Popularité": "Localement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "f180aadf-dec1-4317-8795-78e9e1332794"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:16.058183+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Commerce Optique",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Système économique des Courtiers d'Observation (340K observations).",
+        "Importance": "Secondaire",
+        "Origine": "De commerce avec optique (vision).",
+        "Popularité": "Localement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "f180aadf-dec1-4317-8795-78e9e1332794"
+    }
+  }
+]

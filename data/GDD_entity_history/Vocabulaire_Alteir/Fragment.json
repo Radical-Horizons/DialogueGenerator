@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.721580+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Fragment",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Unité de temps équivalant à 3 Battements (30 Veilles). Équivalent d'un mois.",
+        "Importance": "Important",
+        "Origine": "Du français « fragment » (morceau), détourné pour désigner une division temporelle.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "cccaa1b1-6553-481f-a581-e4b9a8d6bd04"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.973852+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Fragment",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Unité de temps équivalant à 3 Battements (30 Veilles). Équivalent d'un mois.",
+        "Importance": "Important",
+        "Origine": "Du français « fragment » (morceau), détourné pour désigner une division temporelle.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "cccaa1b1-6553-481f-a581-e4b9a8d6bd04"
+    }
+  }
+]

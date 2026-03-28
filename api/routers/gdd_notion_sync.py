@@ -13,6 +13,9 @@ from api.schemas.gdd_notion_sync import (
     GddArchiveRestoreRequest,
     GddArchiveRestoreResponse,
     GddArchivesListResponse,
+    GddFullSyncCheckpointAbandonResponse,
+    GddFullSyncCheckpointResponse,
+    GddFullSyncPauseResponse,
     GddNotionConnectionTestResponse,
     GddNotionSyncConfigPublic,
     GddNotionSyncConfigResponse,
@@ -85,12 +88,41 @@ async def run_gdd_notion_sync(
             description="Déprécié, sans effet : la sync complète (full=true) applique toujours le miroir.",
         ),
     ] = False,
+    resume: Annotated[
+        bool,
+        Query(
+            description="Reprendre la dernière sync complète interrompue (full=true requis).",
+        ),
+    ] = False,
+    fresh: Annotated[
+        bool,
+        Query(
+            description="Abandonner le checkpoint et lancer une sync complète neuve (full=true requis).",
+        ),
+    ] = False,
 ) -> GddNotionSyncRunResponse:
     """Déclenche une synchronisation immédiate."""
+    if resume and not full:
+        raise HTTPException(
+            status_code=400,
+            detail="resume=true nécessite full=true (sync complète).",
+        )
+    if fresh and not full:
+        raise HTTPException(
+            status_code=400,
+            detail="fresh=true nécessite full=true (sync complète).",
+        )
+    if resume and fresh:
+        raise HTTPException(
+            status_code=400,
+            detail="resume et fresh sont mutuellement exclusifs.",
+        )
     result = await svc.run_sync(
         force_full=full,
         mirror_rebuild=mirror_rebuild,
         request_id=request_id,
+        resume=resume,
+        fresh=fresh,
     )
     return GddNotionSyncRunResponse(
         success=result.success,
@@ -98,6 +130,74 @@ async def run_gdd_notion_sync(
         updated_entities=result.updated_entities,
         partial_errors=result.partial_errors,
     )
+
+
+@router.get(
+    "/full-sync-checkpoint",
+    response_model=GddFullSyncCheckpointResponse,
+)
+async def get_gdd_full_sync_checkpoint(
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+) -> GddFullSyncCheckpointResponse:
+    """Décrit si une reprise de sync complète est possible."""
+    raw = svc.describe_full_sync_checkpoint()
+    return GddFullSyncCheckpointResponse.model_validate(raw)
+
+
+@router.delete(
+    "/full-sync-checkpoint",
+    response_model=GddFullSyncCheckpointAbandonResponse,
+)
+async def delete_gdd_full_sync_checkpoint(
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+) -> GddFullSyncCheckpointAbandonResponse:
+    """Supprime le checkpoint et le staging associé (sans lancer de sync)."""
+    raw = svc.abandon_full_sync_checkpoint()
+    return GddFullSyncCheckpointAbandonResponse.model_validate(raw)
+
+
+@router.post(
+    "/full-sync/pause",
+    response_model=GddFullSyncPauseResponse,
+)
+async def pause_gdd_full_sync(
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+) -> GddFullSyncPauseResponse:
+    """Met en pause une synchronisation en cours (coopératif)."""
+    ok = svc.request_sync_pause()
+    msg = "Pause demandée." if ok else "Aucune synchronisation active."
+    return GddFullSyncPauseResponse(ok=ok, message=msg)
+
+
+@router.post(
+    "/full-sync/unpause",
+    response_model=GddFullSyncPauseResponse,
+)
+async def unpause_gdd_full_sync(
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+) -> GddFullSyncPauseResponse:
+    """Reprend après une pause."""
+    ok = svc.request_sync_unpause()
+    msg = "Reprise de la synchronisation." if ok else "Aucune synchronisation active."
+    return GddFullSyncPauseResponse(ok=ok, message=msg)
+
+
+@router.post(
+    "/full-sync/cancel",
+    response_model=GddFullSyncPauseResponse,
+)
+async def cancel_gdd_full_sync(
+    _user: Annotated[dict, Depends(get_current_user)],
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+) -> GddFullSyncPauseResponse:
+    """Annule la synchronisation en cours (débloque aussi une pause)."""
+    ok = svc.request_sync_cancel()
+    msg = "Annulation demandée." if ok else "Aucune synchronisation active."
+    return GddFullSyncPauseResponse(ok=ok, message=msg)
 
 
 @router.get("/status", response_model=GddNotionSyncStatusResponse)

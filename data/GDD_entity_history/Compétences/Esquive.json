@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.096191+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Esquive",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Esquive est une compétence de réaction utilisée pour éviter toute attaque sans effet de zone, ou avec un effet de zone réduit. L'esquive force à faire un déplacement d'un mètre dans une direction opposée à l'attaque (l'attaquant suivra le mouvement s'il a attaqué au corps à corps). Une esquive ne permet d'éviter une attaque de zone que si ce mouvement d'1m permet de sortir de sa zone d'effet.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Défense"
+      },
+      "notion_page_id": "f49a2366-276c-443d-8647-b989bf552df6"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.127552+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Esquive",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Esquive est une compétence de réaction utilisée pour éviter toute attaque sans effet de zone, ou avec un effet de zone réduit. L'esquive force à faire un déplacement d'un mètre dans une direction opposée à l'attaque (l'attaquant suivra le mouvement s'il a attaqué au corps à corps). Une esquive ne permet d'éviter une attaque de zone que si ce mouvement d'1m permet de sortir de sa zone d'effet.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Défense"
+      },
+      "notion_page_id": "f49a2366-276c-443d-8647-b989bf552df6"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.206594+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Esquive",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Esquive est une compétence de réaction utilisée pour éviter toute attaque sans effet de zone, ou avec un effet de zone réduit. L'esquive force à faire un déplacement d'un mètre dans une direction opposée à l'attaque (l'attaquant suivra le mouvement s'il a attaqué au corps à corps). Une esquive ne permet d'éviter une attaque de zone que si ce mouvement d'1m permet de sortir de sa zone d'effet.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Défense"
+      },
+      "notion_page_id": "f49a2366-276c-443d-8647-b989bf552df6"
+    }
+  }
+]

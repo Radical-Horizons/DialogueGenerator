@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.431469+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Makumbusho",
+      "values": {
+        "Catégorie": "Artefact",
+        "Définition": "Exuvies Deimos sacrées contenant baraka cristallisée (Plaines de l'Exuvie).",
+        "Importance": "Important",
+        "Origine": "Du swahili makumbusho (reliques/souvenirs).",
+        "Popularité": "Communautaire",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "252fca13-e779-49b6-a880-afa887d6fcfd"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.656919+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Makumbusho",
+      "values": {
+        "Catégorie": "Artefact",
+        "Définition": "Exuvies Deimos sacrées contenant baraka cristallisée (Plaines de l'Exuvie).",
+        "Importance": "Important",
+        "Origine": "Du swahili makumbusho (reliques/souvenirs).",
+        "Popularité": "Communautaire",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "252fca13-e779-49b6-a880-afa887d6fcfd"
+    }
+  }
+]

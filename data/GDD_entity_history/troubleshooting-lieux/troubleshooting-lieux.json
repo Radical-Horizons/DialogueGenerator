@@ -1,0 +1,26 @@
+[
+  {
+    "at": "2026-03-27T21:28:03.001503+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "troubleshooting-lieux",
+      "sections": {
+        "_general": "# Troubleshooting (Lieux)\n\nSolutions aux problèmes fréquents lors de la création et mise à jour de lieux.\n\n## Erreur 1 : Contexte trop chargé\n\n### Symptômes\n\n- Trop de pages ouvertes\n\n- Réponses longues\n\n- Perte de cohérence\n\n### Correctif\n\n- Appliquer strictement : résumés + propriétés (pas de descriptions longues).\n\n- Limiter : 1 parent, 0-2 limitrophes, 0-2 communautés, 0-5 personnages, 0-5 espèces.\n\n- Si besoin : choisir UNE seule fonction narrative prioritaire.\n\n## Erreur 2 : Lieu cliché / twist superficiel\n\n### Symptômes\n\n- \"forêt MAIS...\" / \"taverne cosy\" / ambiance générique\n\n### Correctif\n\n- Appliquer la stratégie : Identifier cliché → inverser → ajouter 2 éléments inattendus.\n\n- Vérifier clichés internes Alteir (cadavre titanesque, zone atemporelle, corruption/mutation).\n\n## Erreur 3 : Hiérarchie incohérente\n\n### Symptômes\n\n- Taille incompatible avec parent\n\n- Confusion Lieu vs Région\n\n### Correctif\n\n- Repartir : Parent → Catégorie → Taille.\n\n- Autoriser sauts hiérarchiques, mais jamais une taille supérieure dans un enfant.\n\n## Erreur 4 : Relations spatiales cassées\n\n### Symptômes\n\n- Contient / Contenu par non réciproques\n\n- Zones limitrophes à sens unique\n\n### Correctif\n\n- Vérifier et corriger la réciprocité systématiquement.\n\n## Erreur 5 : Écologie plaquée\n\n### Symptômes\n\n- Liste d’espèces sans justification\n\n### Correctif\n\n- Ajouter : 1 ressource, 1 danger, 1 cycle, 1 symbiose lieu-espèce.\n\n- Distinguer : endémiques vs migrantes.\n\n## Erreur 6 : Social sans dynamique\n\n### Symptômes\n\n- Communautés présentes sans lois/tensions/économie\n\n### Correctif\n\n- Ajouter : 1 règle locale, 1 tension interne, 1 dépendance économique, 1 relation au voisinage."
+      },
+      "notion_page_id": "3bbdddde-af2e-40e6-9eab-f194f87ff957"
+    }
+  },
+  {
+    "at": "2026-03-28T01:58:52.017286+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "troubleshooting-lieux",
+      "sections": {
+        "_general": "# Troubleshooting (Lieux)\n\nSolutions aux problèmes fréquents lors de la création et mise à jour de lieux.\n\n## Erreur 1 : Contexte trop chargé\n\n### Symptômes\n\n- Trop de pages ouvertes\n\n- Réponses longues\n\n- Perte de cohérence\n\n### Correctif\n\n- Appliquer strictement : résumés + propriétés (pas de descriptions longues).\n\n- Limiter : 1 parent, 0-2 limitrophes, 0-2 communautés, 0-5 personnages, 0-5 espèces.\n\n- Si besoin : choisir UNE seule fonction narrative prioritaire.\n\n## Erreur 2 : Lieu cliché / twist superficiel\n\n### Symptômes\n\n- \"forêt MAIS...\" / \"taverne cosy\" / ambiance générique\n\n### Correctif\n\n- Appliquer la stratégie : Identifier cliché → inverser → ajouter 2 éléments inattendus.\n\n- Vérifier clichés internes Alteir (cadavre titanesque, zone atemporelle, corruption/mutation).\n\n## Erreur 3 : Hiérarchie incohérente\n\n### Symptômes\n\n- Taille incompatible avec parent\n\n- Confusion Lieu vs Région\n\n### Correctif\n\n- Repartir : Parent → Catégorie → Taille.\n\n- Autoriser sauts hiérarchiques, mais jamais une taille supérieure dans un enfant.\n\n## Erreur 4 : Relations spatiales cassées\n\n### Symptômes\n\n- Contient / Contenu par non réciproques\n\n- Zones limitrophes à sens unique\n\n### Correctif\n\n- Vérifier et corriger la réciprocité systématiquement.\n\n## Erreur 5 : Écologie plaquée\n\n### Symptômes\n\n- Liste d’espèces sans justification\n\n### Correctif\n\n- Ajouter : 1 ressource, 1 danger, 1 cycle, 1 symbiose lieu-espèce.\n\n- Distinguer : endémiques vs migrantes.\n\n## Erreur 6 : Social sans dynamique\n\n### Symptômes\n\n- Communautés présentes sans lois/tensions/économie\n\n### Correctif\n\n- Ajouter : 1 règle locale, 1 tension interne, 1 dépendance économique, 1 relation au voisinage."
+      },
+      "notion_page_id": "3bbdddde-af2e-40e6-9eab-f194f87ff957"
+    }
+  }
+]

@@ -1,0 +1,59 @@
+[
+  {
+    "at": "2026-03-27T00:40:36.079818+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Diplomatie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "3",
+        "Source": "Base",
+        "Valeur": "3",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "b28b2086-a85f-42e7-9a96-c1ea4a601c40"
+    }
+  },
+  {
+    "at": "2026-03-27T20:03:48.380625+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Diplomatie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "3",
+        "Source": "Base",
+        "Valeur": "3",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "b28b2086-a85f-42e7-9a96-c1ea4a601c40"
+    }
+  },
+  {
+    "at": "2026-03-28T00:37:42.685439+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Diplomatie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "3",
+        "Source": "Base",
+        "Valeur": "3",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "b28b2086-a85f-42e7-9a96-c1ea4a601c40"
+    }
+  }
+]

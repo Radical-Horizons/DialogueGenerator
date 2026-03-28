@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.297111+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Catalyse d'Uresaïr (apparition des Umcuts)",
+      "values": {
+        "Date de début": "500",
+        "Date de fin": "520",
+        "Description": "Uresaïr crée cinq sanctuaires pour stabiliser des régions chaotiques. Le premier sanctuaire fusionne avec le substrat vivant local et devient un organisme sessile capable de produire des formes mobiles : les premiers Umcuts émergent.",
+        "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+        "Importance": "Majeur",
+        "Type d'événement": "Fondation"
+      },
+      "notion_page_id": "952d658f-1fda-430e-894c-a5d87fc2e31f"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.790090+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Catalyse d'Uresaïr (apparition des Umcuts)",
+      "values": {
+        "Date de début": "500",
+        "Date de fin": "520",
+        "Description": "Uresaïr crée cinq sanctuaires pour stabiliser des régions chaotiques. Le premier sanctuaire fusionne avec le substrat vivant local et devient un organisme sessile capable de produire des formes mobiles : les premiers Umcuts émergent.",
+        "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+        "Importance": "Majeur",
+        "Type d'événement": "Fondation"
+      },
+      "notion_page_id": "952d658f-1fda-430e-894c-a5d87fc2e31f"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.535119+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Catalyse d'Uresaïr (apparition des Umcuts)",
+      "values": {
+        "Date de début": "500",
+        "Date de fin": "520",
+        "Description": "Uresaïr crée cinq sanctuaires pour stabiliser des régions chaotiques. Le premier sanctuaire fusionne avec le substrat vivant local et devient un organisme sessile capable de produire des formes mobiles : les premiers Umcuts émergent.",
+        "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+        "Importance": "Majeur",
+        "Type d'événement": "Fondation"
+      },
+      "notion_page_id": "952d658f-1fda-430e-894c-a5d87fc2e31f"
+    }
+  }
+]

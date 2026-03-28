@@ -12,7 +12,7 @@
     "stop": [
       {
         "command": "node .cursor/hooks/bmad-chain.js",
-        "loop_limit": 5
+        "loop_limit": 10
       }
     ]
   }

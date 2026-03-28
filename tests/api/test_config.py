@@ -233,7 +233,7 @@ class TestContextFields:
             },
             "organization_mode": "default",
             "scene_instruction": "Test scene",
-            "max_tokens": 1000
+            "max_tokens": 10000
         }
         response = client.post("/api/v1/config/context-fields/preview", json=request_data)
         

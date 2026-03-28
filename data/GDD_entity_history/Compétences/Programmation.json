@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.938296+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Programmation",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La Programmation permet de programmer des systèmes de défense, des logiciels ou encore des automates. Un système créé a automatiquement un niveau de sécurité égal au résultat du test. Cette compétence permet d'améliorer un programme déjà existant en augmentant sa qualité ou sa sécurité, voire les deux.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "6b3b200a-3065-40a9-8755-e8d5694ce1fc"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.955350+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Programmation",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La Programmation permet de programmer des systèmes de défense, des logiciels ou encore des automates. Un système créé a automatiquement un niveau de sécurité égal au résultat du test. Cette compétence permet d'améliorer un programme déjà existant en augmentant sa qualité ou sa sécurité, voire les deux.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "6b3b200a-3065-40a9-8755-e8d5694ce1fc"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.068926+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Programmation",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La Programmation permet de programmer des systèmes de défense, des logiciels ou encore des automates. Un système créé a automatiquement un niveau de sécurité égal au résultat du test. Cette compétence permet d'améliorer un programme déjà existant en augmentant sa qualité ou sa sécurité, voire les deux.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "6b3b200a-3065-40a9-8755-e8d5694ce1fc"
+    }
+  }
+]

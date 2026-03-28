@@ -4,22 +4,37 @@
 import type { CSSProperties } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import {
+  deleteGddFullSyncCheckpoint,
+  getGddFullSyncCheckpoint,
   getGddNotionArchives,
   getGddNotionSyncConfig,
   getGddNotionSyncProgress,
   getGddNotionSyncStatus,
+  postGddFullSyncCancel,
+  postGddFullSyncPause,
+  postGddFullSyncUnpause,
   postGddNotionArchiveRestore,
   postGddNotionSync,
   postGddNotionTestConnection,
   putGddNotionSyncConfig,
   type GddArchiveEntry,
+  type GddFullSyncCheckpointResponse,
   type GddNotionSyncConfigPublic,
   type GddNotionSyncProgressResponse,
   type GddNotionSyncStatusResponse,
+  type PostGddNotionSyncOptions,
 } from '../../api/gddNotionSync'
 import { GddNotionSyncProgressModal } from './GddNotionSyncProgressModal'
 import { useGddNotionSyncUi } from '../../hooks/useGddNotionSyncUi'
+import { useContextStore } from '../../store/contextStore'
 import { theme } from '../../theme'
+
+/** Listes contexte + cache scène : recharger après changement des fichiers GDD sur disque. */
+function refreshContextAfterGddDiskChange(): void {
+  const st = useContextStore.getState()
+  st.invalidateCache()
+  st.bumpGddDataRevision()
+}
 
 export function GddNotionSyncSection() {
   const { phase, userMessage, run, resetMessage } = useGddNotionSyncUi()
@@ -47,6 +62,21 @@ export function GddNotionSyncSection() {
   const [archivesLoadError, setArchivesLoadError] = useState<string | null>(null)
   const [restoreTargetId, setRestoreTargetId] = useState<string | null>(null)
   const [restoreBackupCurrent, setRestoreBackupCurrent] = useState(true)
+  const [checkpoint, setCheckpoint] = useState<GddFullSyncCheckpointResponse | null>(null)
+  const [checkpointBannerError, setCheckpointBannerError] = useState<string | null>(null)
+
+  const refreshCheckpoint = useCallback(async () => {
+    setCheckpointBannerError(null)
+    try {
+      const c = await getGddFullSyncCheckpoint()
+      setCheckpoint(c)
+    } catch (e) {
+      setCheckpoint(null)
+      setCheckpointBannerError(
+        e instanceof Error ? e.message : 'Impossible de lire le checkpoint de sync complète',
+      )
+    }
+  }, [])
 
   const refreshStatus = useCallback(async () => {
     setStatusLoadError(null)
@@ -98,6 +128,10 @@ export function GddNotionSyncSection() {
   }, [loadConfig])
 
   useEffect(() => {
+    void refreshCheckpoint()
+  }, [refreshCheckpoint])
+
+  useEffect(() => {
     void refreshStatus()
   }, [refreshStatus, phase])
 
@@ -121,7 +155,7 @@ export function GddNotionSyncSection() {
   void elapsedTick
 
   const runGddSync = useCallback(
-    (full: boolean) => {
+    (full: boolean, syncOpts?: PostGddNotionSyncOptions) => {
       setSyncModeFull(full)
       setProgressOpen(true)
       setProgressSnapshot(null)
@@ -136,10 +170,14 @@ export function GddNotionSyncSection() {
           }
         }, 400)
         try {
-          const r = await postGddNotionSync(full)
+          const r = await postGddNotionSync(full, syncOpts)
           await refreshStatus()
           if (full) {
             await refreshArchives()
+          }
+          await refreshCheckpoint()
+          if (r.success) {
+            refreshContextAfterGddDiskChange()
           }
           return { success: r.success, message: r.message }
         } finally {
@@ -150,7 +188,7 @@ export function GddNotionSyncSection() {
         }
       })
     },
-    [run, refreshStatus, refreshArchives],
+    [run, refreshStatus, refreshArchives, refreshCheckpoint],
   )
 
   const handleSaveSettings = async () => {
@@ -396,7 +434,7 @@ export function GddNotionSyncSection() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.35rem', alignItems: 'flex-start' }}>
           <button
             type="button"
             disabled={busy}
@@ -418,14 +456,210 @@ export function GddNotionSyncSection() {
           >
             {busy ? 'Synchronisation…' : 'Synchroniser (incrémental)'}
           </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => runGddSync(true)}
-            style={buttonStyle(busy)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4rem' }}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => runGddSync(true)}
+                style={buttonStyle(busy)}
+                title={
+                  checkpoint?.resumable
+                    ? 'Démarre une nouvelle sync complète (archive + staging neufs). L’ancien checkpoint est abandonné.'
+                    : 'Lance une sync complète avec archive puis miroir Notion → disque.'
+                }
+              >
+                {busy ? '…' : 'Sync complète'}
+              </button>
+              {checkpoint?.resumable ? (
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    backgroundColor: theme.border.focus,
+                    color: theme.background.panel,
+                    whiteSpace: 'nowrap',
+                  }}
+                  title="Une sync complète est en cours côté serveur (staging). Utilisez Reprendre ci-dessous."
+                >
+                  Incomplet {checkpoint.sources_completed}/{checkpoint.sources_total}
+                </span>
+              ) : null}
+              {checkpoint &&
+              !checkpoint.resumable &&
+              (checkpoint.checkpoint_status === 'stale' || checkpoint.checkpoint_status === 'invalid_file') ? (
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    color: theme.state.error.color,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Checkpoint expiré
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <p
+          style={{
+            margin: '0 0 0.65rem 0',
+            fontSize: '0.78rem',
+            color: theme.text.secondary,
+            lineHeight: 1.4,
+          }}
+        >
+          <strong style={{ color: theme.text.primary }}>Reprendre</strong> continue une sync complète
+          interrompue (veille, timeout). <strong style={{ color: theme.text.primary }}>Sync complète</strong>{' '}
+          sans reprise = nouveau run (l’ancien checkpoint est effacé). L’annulation pendant la sync supprime
+          le checkpoint : il n’y a plus de reprise possible, seulement une nouvelle sync complète.
+        </p>
+
+        <div
+          style={{
+            marginBottom: '1rem',
+            padding: '0.65rem 0.75rem',
+            borderRadius: '6px',
+            backgroundColor: theme.background.panel,
+            border: `1px solid ${
+              checkpoint?.resumable ? theme.border.focus : theme.border.primary
+            }`,
+          }}
+        >
+          <p
+            style={{
+              margin: '0 0 0.35rem 0',
+              color: theme.text.secondary,
+              fontSize: '0.72rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+            }}
           >
-            {busy ? '…' : 'Sync complète'}
-          </button>
+            État reprise (sync complète)
+          </p>
+          {checkpointBannerError ? (
+            <p style={{ margin: '0 0 0.5rem 0', color: theme.state.error.color, fontSize: '0.88rem' }}>
+              {checkpointBannerError}
+            </p>
+          ) : (
+            <p style={{ margin: '0 0 0.5rem 0', color: theme.text.primary, fontSize: '0.88rem', lineHeight: 1.45 }}>
+              {checkpoint?.message ?? 'Chargement de l’état…'}
+            </p>
+          )}
+          {checkpoint && checkpoint.orphan_staging_runs > 0 ? (
+            <p style={{ margin: '0 0 0.5rem 0', color: theme.text.secondary, fontSize: '0.8rem' }}>
+              Dossiers sous <code style={{ fontSize: '0.85em' }}>.staging/</code> :{' '}
+              {checkpoint.orphan_staging_runs} — au plus un run incomplet est conservé ; le serveur supprime
+              les orphelins à l’abandon ou au démarrage d’une nouvelle sync complète.
+            </p>
+          ) : null}
+          {!checkpointBannerError && checkpoint?.resumable && !busy ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => runGddSync(true, { resume: true })}
+                style={buttonStyle(busy, true)}
+              >
+                Reprendre la sync
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => runGddSync(true, { fresh: true })}
+                style={buttonStyle(busy)}
+              >
+                Tout recommencer
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  void (async () => {
+                    try {
+                      await deleteGddFullSyncCheckpoint()
+                      await refreshCheckpoint()
+                    } catch (e) {
+                      setCheckpointBannerError(
+                        e instanceof Error ? e.message : 'Abandon du checkpoint impossible',
+                      )
+                    }
+                  })()
+                }
+                style={buttonStyle(busy)}
+              >
+                Abandonner (checkpoint + staging)
+              </button>
+            </div>
+          ) : null}
+          {!checkpointBannerError &&
+          checkpoint &&
+          !checkpoint.resumable &&
+          !busy &&
+          (checkpoint.checkpoint_status === 'stale' || checkpoint.checkpoint_status === 'invalid_file') ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => runGddSync(true, { fresh: true })}
+                style={buttonStyle(busy, true)}
+              >
+                Tout recommencer
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  void (async () => {
+                    try {
+                      await deleteGddFullSyncCheckpoint()
+                      await refreshCheckpoint()
+                    } catch (e) {
+                      setCheckpointBannerError(
+                        e instanceof Error ? e.message : 'Nettoyage impossible',
+                      )
+                    }
+                  })()
+                }
+                style={buttonStyle(busy)}
+              >
+                Nettoyer checkpoint / staging
+              </button>
+            </div>
+          ) : null}
+          {!checkpointBannerError &&
+          checkpoint &&
+          !checkpoint.resumable &&
+          checkpoint.checkpoint_status === 'none' &&
+          checkpoint.orphan_staging_runs > 0 &&
+          !busy ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  void (async () => {
+                    try {
+                      await deleteGddFullSyncCheckpoint()
+                      await refreshCheckpoint()
+                    } catch (e) {
+                      setCheckpointBannerError(
+                        e instanceof Error ? e.message : 'Nettoyage impossible',
+                      )
+                    }
+                  })()
+                }
+                style={buttonStyle(busy, true)}
+              >
+                Supprimer les dossiers .staging orphelins
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div
@@ -461,7 +695,8 @@ export function GddNotionSyncSection() {
           </div>
           <p style={{ margin: '0 0 0.5rem 0', color: theme.text.secondary, fontSize: '0.85rem' }}>
             Snapshots locaux sous <code style={{ fontSize: '0.82em' }}>.archive/</code>. La sync
-            complète en crée un automatiquement avant mise à jour.
+            complète en crée un avant mise à jour seulement si l’état sur disque diffère du dernier
+            snapshot.
           </p>
           {archivesLoadError && (
             <p style={{ color: theme.state.error.color, fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>
@@ -587,6 +822,10 @@ export function GddNotionSyncSection() {
         modeFull={syncModeFull}
         progress={progressSnapshot}
         elapsedSeconds={elapsedSec}
+        syncActive={phase === 'loading'}
+        onPause={() => void postGddFullSyncPause()}
+        onUnpause={() => void postGddFullSyncUnpause()}
+        onCancel={() => void postGddFullSyncCancel()}
       />
 
       {restoreTargetId ? (
@@ -667,6 +906,9 @@ export function GddNotionSyncSection() {
                       setRestoreTargetId(null)
                       await refreshArchives()
                       await refreshStatus()
+                      if (r.ok) {
+                        refreshContextAfterGddDiskChange()
+                      }
                       return { ok: r.ok, message: r.message }
                     } catch (e) {
                       return { ok: false, message: apiErrorDetail(e) }

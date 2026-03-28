@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.628261+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Fragmentaire",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Adjectif désignant ce qui se produit tous les Fragments. Équivalent de mensuel.",
+        "Importance": "Secondaire",
+        "Origine": "Du français « fragmentaire », détourné pour désigner une périodicité mensuelle.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "91e5fbb2-824d-462e-9b8e-5b0ad0b8d0a1"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.857896+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Fragmentaire",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Adjectif désignant ce qui se produit tous les Fragments. Équivalent de mensuel.",
+        "Importance": "Secondaire",
+        "Origine": "Du français « fragmentaire », détourné pour désigner une périodicité mensuelle.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "91e5fbb2-824d-462e-9b8e-5b0ad0b8d0a1"
+    }
+  }
+]

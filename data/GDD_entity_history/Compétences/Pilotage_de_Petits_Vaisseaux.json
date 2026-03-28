@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.927259+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pilotage de Petits Vaisseaux",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "Pilotage de Petits Vaisseaux permet d'utiliser des vaisseaux suffisamment petits pour être pilotés par une seule personne.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "62747373-73dd-4bc5-8ea0-1658fb0a68e6"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.942534+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pilotage de Petits Vaisseaux",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "Pilotage de Petits Vaisseaux permet d'utiliser des vaisseaux suffisamment petits pour être pilotés par une seule personne.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "62747373-73dd-4bc5-8ea0-1658fb0a68e6"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.058261+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pilotage de Petits Vaisseaux",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "Pilotage de Petits Vaisseaux permet d'utiliser des vaisseaux suffisamment petits pour être pilotés par une seule personne.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "62747373-73dd-4bc5-8ea0-1658fb0a68e6"
+    }
+  }
+]

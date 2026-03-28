@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.106395+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Archéologie",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "La compétence \"Archéologie\" sert à explorer et comprendre les vestiges du passé, permettant ainsi d'enrichir notre connaissance des cultures et des sociétés anciennes.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "fb264847-76ff-4be6-9399-5c7a4f600dfd"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.142508+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Archéologie",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "La compétence \"Archéologie\" sert à explorer et comprendre les vestiges du passé, permettant ainsi d'enrichir notre connaissance des cultures et des sociétés anciennes.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "fb264847-76ff-4be6-9399-5c7a4f600dfd"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.216944+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Archéologie",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "La compétence \"Archéologie\" sert à explorer et comprendre les vestiges du passé, permettant ainsi d'enrichir notre connaissance des cultures et des sociétés anciennes.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "fb264847-76ff-4be6-9399-5c7a4f600dfd"
+    }
+  }
+]

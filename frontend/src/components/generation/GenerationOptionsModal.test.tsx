@@ -89,8 +89,8 @@ describe('GenerationOptionsModal', () => {
       />
     )
     
-    expect(screen.getByText(/contexte/i)).toBeInTheDocument()
-    expect(screen.getByText(/général/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Contexte' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Général' })).toBeInTheDocument()
     expect(screen.getByText(/vocabulaire/i)).toBeInTheDocument()
   })
 

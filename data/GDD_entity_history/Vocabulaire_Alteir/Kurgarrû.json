@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.571828+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Kurgarrû",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Guilde de récupérateurs technologiques de la Steppe des Éteignoirs.",
+        "Importance": "Secondaire",
+        "Origine": "Du sumérien kurgarra (prêtre non-binaire).",
+        "Popularité": "Communautaire",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "72bee598-6483-477a-9539-4f31b2ff30fa"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.790470+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Kurgarrû",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Guilde de récupérateurs technologiques de la Steppe des Éteignoirs.",
+        "Importance": "Secondaire",
+        "Origine": "Du sumérien kurgarra (prêtre non-binaire).",
+        "Popularité": "Communautaire",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "72bee598-6483-477a-9539-4f31b2ff30fa"
+    }
+  }
+]

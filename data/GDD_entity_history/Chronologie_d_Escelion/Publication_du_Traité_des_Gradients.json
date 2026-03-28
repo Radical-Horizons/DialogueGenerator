@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.015547+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Publication du Traité des Gradients",
+      "values": {
+        "Date de début": "3112",
+        "Description": "Vol Reitar publie à Daïlon le premier système rigoureux de cartographie des domaines Rêveurs : méthode de calcul des limites de domaine à partir de mesures de terrain, formules prédictives pour les cycles (Nuées, Souffles) et preuve que les fractures régionales sont des gradients géométriques planifiables — rendant leur traversée calculable pour la première fois. Un appendice spéculatif note que la distribution des portails coïncide trop régulièrement avec les centres de domaines pour être accidentelle ; thèse ignorée à l'époque. Le texte circule jusqu'à la Vieille Ville et devient une référence fondatrice pour les Aedres et les navigateurs inter-domaines.",
+        "Importance": "Important",
+        "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+        "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+        "Type d'événement": "Découverte"
+      },
+      "notion_page_id": "119842ec-7b9a-43c7-ba47-37541481a9a8"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.551942+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Publication du Traité des Gradients",
+      "values": {
+        "Date de début": "3112",
+        "Description": "Vol Reitar publie à Daïlon le premier système rigoureux de cartographie des domaines Rêveurs : méthode de calcul des limites de domaine à partir de mesures de terrain, formules prédictives pour les cycles (Nuées, Souffles) et preuve que les fractures régionales sont des gradients géométriques planifiables — rendant leur traversée calculable pour la première fois. Un appendice spéculatif note que la distribution des portails coïncide trop régulièrement avec les centres de domaines pour être accidentelle ; thèse ignorée à l'époque. Le texte circule jusqu'à la Vieille Ville et devient une référence fondatrice pour les Aedres et les navigateurs inter-domaines.",
+        "Importance": "Important",
+        "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+        "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+        "Type d'événement": "Découverte"
+      },
+      "notion_page_id": "119842ec-7b9a-43c7-ba47-37541481a9a8"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.329954+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Publication du Traité des Gradients",
+      "values": {
+        "Date de début": "3112",
+        "Description": "Vol Reitar publie à Daïlon le premier système rigoureux de cartographie des domaines Rêveurs : méthode de calcul des limites de domaine à partir de mesures de terrain, formules prédictives pour les cycles (Nuées, Souffles) et preuve que les fractures régionales sont des gradients géométriques planifiables — rendant leur traversée calculable pour la première fois. Un appendice spéculatif note que la distribution des portails coïncide trop régulièrement avec les centres de domaines pour être accidentelle ; thèse ignorée à l'époque. Le texte circule jusqu'à la Vieille Ville et devient une référence fondatrice pour les Aedres et les navigateurs inter-domaines.",
+        "Importance": "Important",
+        "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+        "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+        "Type d'événement": "Découverte"
+      },
+      "notion_page_id": "119842ec-7b9a-43c7-ba47-37541481a9a8"
+    }
+  }
+]

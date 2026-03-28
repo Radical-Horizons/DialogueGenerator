@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.640222+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Grand Démembrement",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Mythe symbiotiste du sacrifice des 6 Symbiotes Primordiaux créant l'univers.",
+        "Importance": "Important",
+        "Origine": "Expression mythologique évoquant une destruction créatrice cosmogonique.",
+        "Popularité": "Communautaire",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "9c54b32c-bee8-40d7-9eea-f9337655da01"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.872452+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Grand Démembrement",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Mythe symbiotiste du sacrifice des 6 Symbiotes Primordiaux créant l'univers.",
+        "Importance": "Important",
+        "Origine": "Expression mythologique évoquant une destruction créatrice cosmogonique.",
+        "Popularité": "Communautaire",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "9c54b32c-bee8-40d7-9eea-f9337655da01"
+    }
+  }
+]

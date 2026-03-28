@@ -1,0 +1,59 @@
+[
+  {
+    "at": "2026-03-27T00:40:36.100603+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Armes Tranchantes",
+      "values": {
+        "Cadre": "Technologique",
+        "Compétence": "763d69b6-312c-47b9-b3ce-86da943e1101",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Notes": "Expertise : combat de rue (Enfants des Conduits), insurrections (Dernier Bastion), éliminations ciblées",
+        "Score": "7",
+        "Source": "Base",
+        "Valeur": "7",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "dcc2f236-442f-453c-a917-4863cbc919a2"
+    }
+  },
+  {
+    "at": "2026-03-27T20:03:48.413866+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Armes Tranchantes",
+      "values": {
+        "Cadre": "Technologique",
+        "Compétence": "763d69b6-312c-47b9-b3ce-86da943e1101",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Notes": "Expertise : combat de rue (Enfants des Conduits), insurrections (Dernier Bastion), éliminations ciblées",
+        "Score": "7",
+        "Source": "Base",
+        "Valeur": "7",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "dcc2f236-442f-453c-a917-4863cbc919a2"
+    }
+  },
+  {
+    "at": "2026-03-28T00:37:42.706823+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Armes Tranchantes",
+      "values": {
+        "Cadre": "Technologique",
+        "Compétence": "763d69b6-312c-47b9-b3ce-86da943e1101",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Notes": "Expertise : combat de rue (Enfants des Conduits), insurrections (Dernier Bastion), éliminations ciblées",
+        "Score": "7",
+        "Source": "Base",
+        "Valeur": "7",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "dcc2f236-442f-453c-a917-4863cbc919a2"
+    }
+  }
+]

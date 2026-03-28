@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.414624+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Incident du Miroir Brisé",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Événement de 3198 AG causant la transformation des Courtiers en Observautomatons.",
+        "Importance": "Modéré",
+        "Origine": "Expression évoquant un accident catastrophique lié à la vision et au reflet.",
+        "Popularité": "Localement",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "1a5c0135-7883-4cdc-a813-2a82621612cf"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.635541+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Incident du Miroir Brisé",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Événement de 3198 AG causant la transformation des Courtiers en Observautomatons.",
+        "Importance": "Modéré",
+        "Origine": "Expression évoquant un accident catastrophique lié à la vision et au reflet.",
+        "Popularité": "Localement",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "1a5c0135-7883-4cdc-a813-2a82621612cf"
+    }
+  }
+]

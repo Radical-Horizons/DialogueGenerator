@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.975831+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Armes Contondantes",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "Les Armes Contondantes infligent des dégâts par impact et nécessitent une bonne coordination.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Armes"
+      },
+      "notion_page_id": "95602337-55a0-4431-bb7c-517555cc9334"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.001299+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Armes Contondantes",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "Les Armes Contondantes infligent des dégâts par impact et nécessitent une bonne coordination.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Armes"
+      },
+      "notion_page_id": "95602337-55a0-4431-bb7c-517555cc9334"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.103574+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Armes Contondantes",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "Les Armes Contondantes infligent des dégâts par impact et nécessitent une bonne coordination.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Armes"
+      },
+      "notion_page_id": "95602337-55a0-4431-bb7c-517555cc9334"
+    }
+  }
+]

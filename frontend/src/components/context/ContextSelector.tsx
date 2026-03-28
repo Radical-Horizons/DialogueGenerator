@@ -19,6 +19,7 @@ import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
 import { ContextRulesEditor } from './ContextRulesEditor'
 import { ContextRelevancePanel } from './ContextRelevancePanel'
 import { ContextUsagePanel } from './ContextUsagePanel'
+import { ContextTokenBudgetSection } from './ContextTokenBudgetSection'
 import { useContextStore } from '../../store/contextStore'
 import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
@@ -169,6 +170,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     isElementSelected,
     setSuggestions,
     refreshSuggestionsForTrigger,
+    gddDataRevision,
   } = useContextStore()
   const selectedDialogueType = useContextRulesStore((s) => s.selectedDialogueType)
 
@@ -272,7 +274,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
 
   useEffect(() => {
     void loadData()
-  }, [loadData])
+  }, [loadData, gddDataRevision])
 
   const handleItemClick = async (name: string) => {
     try {
@@ -590,6 +592,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           loadingMore={loadingMore}
         />
       </div>
+      <ContextTokenBudgetSection />
       <div style={{ flex: '0 0 auto' }}>
         <SelectedContextSummary 
           selections={selections} 

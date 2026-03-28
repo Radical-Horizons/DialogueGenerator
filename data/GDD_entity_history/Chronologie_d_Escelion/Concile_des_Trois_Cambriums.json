@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.119608+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Concile des Trois Cambriums",
+      "values": {
+        "Date de début": "298",
+        "Date de fin": "298",
+        "Description": "Concile formalisant la tripartition des Aedres. Le lieu du concile, une clairière forestière, fut l'emplacement d'un sanctuaire stabilisateur d'Uresaïr dont l'influence favorisa l'harmonie nécessaire à cet accord fondateur",
+        "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+        "Importance": "Modéré",
+        "Type d'événement": "Traité"
+      },
+      "notion_page_id": "22c6e4d2-1b45-80a0-a286-d5d23d543f3b"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.594418+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Concile des Trois Cambriums",
+      "values": {
+        "Date de début": "298",
+        "Date de fin": "298",
+        "Description": "Concile formalisant la tripartition des Aedres. Le lieu du concile, une clairière forestière, fut l'emplacement d'un sanctuaire stabilisateur d'Uresaïr dont l'influence favorisa l'harmonie nécessaire à cet accord fondateur",
+        "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+        "Importance": "Modéré",
+        "Type d'événement": "Traité"
+      },
+      "notion_page_id": "22c6e4d2-1b45-80a0-a286-d5d23d543f3b"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.364748+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Concile des Trois Cambriums",
+      "values": {
+        "Date de début": "298",
+        "Date de fin": "298",
+        "Description": "Concile formalisant la tripartition des Aedres. Le lieu du concile, une clairière forestière, fut l'emplacement d'un sanctuaire stabilisateur d'Uresaïr dont l'influence favorisa l'harmonie nécessaire à cet accord fondateur",
+        "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+        "Importance": "Modéré",
+        "Type d'événement": "Traité"
+      },
+      "notion_page_id": "22c6e4d2-1b45-80a0-a286-d5d23d543f3b"
+    }
+  }
+]

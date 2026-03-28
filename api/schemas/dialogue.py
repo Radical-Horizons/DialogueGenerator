@@ -118,7 +118,12 @@ class BasePromptRequest(BaseModel):
     user_instructions: str = Field(..., min_length=1, description="Instructions spécifiques pour la scène")
     context_selections: ContextSelection = Field(..., description="Sélections de contexte GDD")
     npc_speaker_id: Optional[str] = Field(None, description="ID du PNJ interlocuteur (si None, utiliser le premier personnage sélectionné)")
-    max_context_tokens: int = Field(default=1500, ge=100, le=Defaults.MAX_CONTEXT_TOKENS, description="Nombre maximum de tokens pour le contexte")
+    max_context_tokens: int = Field(
+        default=Defaults.CONTEXT_TOKENS,
+        ge=Defaults.MIN_CONTEXT_TOKENS,
+        le=Defaults.MAX_CONTEXT_TOKENS,
+        description="Nombre maximum de tokens pour le contexte",
+    )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     author_profile: Optional[str] = Field(None, description="Profil d'auteur global (style réutilisable entre scènes)")
     max_choices: Optional[int] = Field(None, ge=0, le=8, description="Nombre maximum de choix à générer (0-8, ou None pour laisser l'IA décider librement)")
@@ -133,8 +138,10 @@ class BasePromptRequest(BaseModel):
     @classmethod
     def validate_max_context_tokens(cls, v: int) -> int:
         """Valide que max_context_tokens est dans les limites autorisées (règle métier)."""
-        if v < 100:
-            raise ValueError(f"max_context_tokens doit être au minimum 100 (reçu: {v})")
+        if v < Defaults.MIN_CONTEXT_TOKENS:
+            raise ValueError(
+                f"max_context_tokens doit être au minimum {Defaults.MIN_CONTEXT_TOKENS} (reçu: {v})"
+            )
         if v > Defaults.MAX_CONTEXT_TOKENS:
             raise ValueError(f"max_context_tokens ne peut pas dépasser {Defaults.MAX_CONTEXT_TOKENS} (reçu: {v})")
         return v
@@ -147,11 +154,22 @@ class EstimateTokensRequest(BasePromptRequest):
     field_configs: Optional[Dict[str, List[str]]] = Field(None, description="Configuration des champs de contexte par type d'élément")
     organization_mode: Optional[str] = Field(None, description="Mode d'organisation du contexte (default, narrative, minimal)")
 
+class ContextTokenBreakdownRow(BaseModel):
+    """Tokens estimés pour un compartiment de la sélection (type + mode), build isolé."""
+
+    entity_type: str = Field(..., description="characters | locations | items | species | communities")
+    mode: str = Field(..., description="full | excerpt")
+    token_count: int = Field(..., ge=0, description="Nombre de tokens pour ce compartiment seul")
+
+
 class EstimateTokensResponse(BaseModel):
     """Réponse pour l'estimation de tokens.
     
     Attributes:
         context_tokens: Nombre de tokens du contexte.
+        selection_tokens: Tokens de la sélection GDD mesurés avec un plafond large (sans appliquer le budget utilisateur comme troncature).
+        context_token_breakdown: Détail par type/mode (mesures isolées ; somme potentiellement > selection_tokens).
+        context_breakdown_note: Explication sur la cohérence somme vs total.
         token_count: Nombre total de tokens (contexte + prompt).
         total_estimated_tokens: Alias rétrocompatible de token_count (contexte + prompt).
         raw_prompt: Le prompt brut réel qui sera envoyé au LLM.
@@ -159,6 +177,18 @@ class EstimateTokensResponse(BaseModel):
         structured_prompt: Structure JSON du prompt (optionnel).
     """
     context_tokens: int = Field(..., description="Nombre de tokens du contexte")
+    selection_tokens: int = Field(
+        default=0,
+        description="Tokens de la sélection complète mesurés avec plafond technique (ex. MAX_CONTEXT_TOKENS)",
+    )
+    context_token_breakdown: List[ContextTokenBreakdownRow] = Field(
+        default_factory=list,
+        description="Répartition par type d'entité et mode (full/excerpt)",
+    )
+    context_breakdown_note: str = Field(
+        default="",
+        description="Note sur la cohérence entre total et somme des lignes",
+    )
     token_count: int = Field(..., description="Nombre total de tokens")
     total_estimated_tokens: Optional[int] = Field(
         default=None,

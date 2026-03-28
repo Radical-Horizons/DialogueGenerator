@@ -4,6 +4,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { useContextStore } from '../../store/contextStore'
 import { GddNotionSyncSection } from './GddNotionSyncSection'
 
 const mockGetStatus = vi.fn()
@@ -13,6 +14,11 @@ const mockGetArchives = vi.fn()
 const mockPostSync = vi.fn()
 const mockPostTest = vi.fn()
 const mockPostRestore = vi.fn()
+const mockGetCheckpoint = vi.fn()
+const mockDeleteCheckpoint = vi.fn()
+const mockPostPause = vi.fn()
+const mockPostUnpause = vi.fn()
+const mockPostCancel = vi.fn()
 
 const idleProgressBody = {
   active: false,
@@ -30,6 +36,7 @@ const idleProgressBody = {
   current_page_in_source: 0,
   current_page_id_short: '',
   message: '',
+  paused: false,
 }
 
 vi.mock('../../api/gddNotionSync', () => ({
@@ -37,6 +44,11 @@ vi.mock('../../api/gddNotionSync', () => ({
   getGddNotionSyncConfig: (...a: unknown[]) => mockGetConfig(...a),
   getGddNotionSyncProgress: (...a: unknown[]) => mockGetProgress(...a),
   getGddNotionArchives: (...a: unknown[]) => mockGetArchives(...a),
+  getGddFullSyncCheckpoint: (...a: unknown[]) => mockGetCheckpoint(...a),
+  deleteGddFullSyncCheckpoint: (...a: unknown[]) => mockDeleteCheckpoint(...a),
+  postGddFullSyncPause: (...a: unknown[]) => mockPostPause(...a),
+  postGddFullSyncUnpause: (...a: unknown[]) => mockPostUnpause(...a),
+  postGddFullSyncCancel: (...a: unknown[]) => mockPostCancel(...a),
   putGddNotionSyncConfig: vi.fn(),
   postGddNotionSync: (...a: unknown[]) => mockPostSync(...a),
   postGddNotionTestConnection: (...a: unknown[]) => mockPostTest(...a),
@@ -46,6 +58,7 @@ vi.mock('../../api/gddNotionSync', () => ({
 describe('GddNotionSyncSection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useContextStore.setState({ gddDataRevision: 0 })
     mockGetStatus.mockResolvedValue({
       last_started_at: null,
       last_finished_at: null,
@@ -68,6 +81,23 @@ describe('GddNotionSyncSection', () => {
     })
     mockGetProgress.mockResolvedValue(idleProgressBody)
     mockGetArchives.mockResolvedValue({ archives: [] })
+    mockGetCheckpoint.mockResolvedValue({
+      resumable: false,
+      checkpoint_status: 'none',
+      checkpoint_file_present: false,
+      orphan_staging_runs: 0,
+      message: '',
+      staging_run_name: '',
+      archive_rel: '',
+      sources_total: 0,
+      sources_completed: 0,
+      completed_category_files: [],
+      eligible_category_files: [],
+    })
+    mockDeleteCheckpoint.mockResolvedValue({ ok: true, message: '' })
+    mockPostPause.mockResolvedValue({ ok: false, message: '' })
+    mockPostUnpause.mockResolvedValue({ ok: false, message: '' })
+    mockPostCancel.mockResolvedValue({ ok: false, message: '' })
   })
 
   it('affiche chargement puis succès sur Synchroniser maintenant', async () => {
@@ -85,6 +115,7 @@ describe('GddNotionSyncSection', () => {
       expect(screen.getByText(/1 entité/i)).toBeInTheDocument()
     })
     expect(mockPostSync).toHaveBeenCalled()
+    expect(useContextStore.getState().gddDataRevision).toBe(1)
   })
 
   it('affiche le résumé de configuration chargée depuis l’API', async () => {
@@ -106,7 +137,36 @@ describe('GddNotionSyncSection', () => {
     await screen.findByRole('button', { name: /Sync complète/i })
     await user.click(screen.getByRole('button', { name: /Sync complète/i }))
     await waitFor(() => {
-      expect(mockPostSync).toHaveBeenCalledWith(true)
+      expect(mockPostSync.mock.calls[0]?.[0]).toBe(true)
+    })
+  })
+
+  it('affiche le bandeau reprise et appelle postGddNotionSync avec resume', async () => {
+    const user = userEvent.setup()
+    mockGetCheckpoint.mockResolvedValue({
+      resumable: true,
+      checkpoint_status: 'resumable',
+      checkpoint_file_present: true,
+      orphan_staging_runs: 1,
+      message: 'Reprise possible.',
+      staging_run_name: 'run1',
+      archive_rel: '.archive/x',
+      sources_total: 2,
+      sources_completed: 1,
+      completed_category_files: ['A.json'],
+      eligible_category_files: ['A.json', 'B.json'],
+    })
+    mockPostSync.mockResolvedValue({
+      success: true,
+      message: 'ok',
+      updated_entities: 1,
+      partial_errors: [],
+    })
+    render(<GddNotionSyncSection />)
+    expect(await screen.findByText(/Sync complète interrompue/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Reprendre la sync/i }))
+    await waitFor(() => {
+      expect(mockPostSync).toHaveBeenCalledWith(true, { resume: true })
     })
   })
 
@@ -135,6 +195,7 @@ describe('GddNotionSyncSection', () => {
         backup_current: true,
       })
     })
+    expect(useContextStore.getState().gddDataRevision).toBe(1)
   })
 
   it('affiche erreur lisible si la sync échoue', async () => {
@@ -150,5 +211,6 @@ describe('GddNotionSyncSection', () => {
     await waitFor(() => {
       expect(screen.getByText(/Sync Notion échouée/)).toBeInTheDocument()
     })
+    expect(useContextStore.getState().gddDataRevision).toBe(0)
   })
 })

@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.518389+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Seigneurs Originels",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Dirigeants de Merid avant la destruction.",
+        "Importance": "Modéré",
+        "Origine": "De seigneur originel pour maîtres ancestraux.",
+        "Popularité": "Régionalement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "454dbd36-d37d-4eb4-902d-c7ae45a9bc1c"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.726064+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Seigneurs Originels",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Dirigeants de Merid avant la destruction.",
+        "Importance": "Modéré",
+        "Origine": "De seigneur originel pour maîtres ancestraux.",
+        "Popularité": "Régionalement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "454dbd36-d37d-4eb4-902d-c7ae45a9bc1c"
+    }
+  }
+]

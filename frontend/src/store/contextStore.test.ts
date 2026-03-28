@@ -21,6 +21,16 @@ describe('contextStore', () => {
       species: [],
       communities: [],
     })
+    useContextStore.setState({ gddDataRevision: 0 })
+  })
+
+  it('bumpGddDataRevision incrémente gddDataRevision', () => {
+    const store = useContextStore.getState()
+    expect(store.gddDataRevision).toBe(0)
+    store.bumpGddDataRevision()
+    expect(useContextStore.getState().gddDataRevision).toBe(1)
+    store.bumpGddDataRevision()
+    expect(useContextStore.getState().gddDataRevision).toBe(2)
   })
 
   describe('toggleCharacter', () => {

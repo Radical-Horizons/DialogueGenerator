@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.933922+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Orientation",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "L'Orientation s'utilise automatiquement dès qu'un personnage traverse une distance supérieure à un kilomètre sans pouvoir demander son chemin ou suivre une route correctement balisée. Plus une région est connue, plus le test est facile.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "6740617d-f4dc-4eb8-9aa7-acd892ff942c"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.950723+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Orientation",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "L'Orientation s'utilise automatiquement dès qu'un personnage traverse une distance supérieure à un kilomètre sans pouvoir demander son chemin ou suivre une route correctement balisée. Plus une région est connue, plus le test est facile.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "6740617d-f4dc-4eb8-9aa7-acd892ff942c"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.064567+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Orientation",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "L'Orientation s'utilise automatiquement dès qu'un personnage traverse une distance supérieure à un kilomètre sans pouvoir demander son chemin ou suivre une route correctement balisée. Plus une région est connue, plus le test est facile.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "6740617d-f4dc-4eb8-9aa7-acd892ff942c"
+    }
+  }
+]

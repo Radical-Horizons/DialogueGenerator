@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.035606+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Équilibre",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "L'équilibre s'utilise en réaction lorsque le personnage est sur le point de tomber, que ce soit à cause d'un coup violent, d'un tremblement de terre ou d'un vent violent. On peut utiliser l'équilibre comme compétence active pour traverser des passages étroits, comme une corde raide.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "c3cce6a4-9242-451f-b251-5c0bc9536766"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.065915+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Équilibre",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "L'équilibre s'utilise en réaction lorsque le personnage est sur le point de tomber, que ce soit à cause d'un coup violent, d'un tremblement de terre ou d'un vent violent. On peut utiliser l'équilibre comme compétence active pour traverser des passages étroits, comme une corde raide.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "c3cce6a4-9242-451f-b251-5c0bc9536766"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.155153+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Équilibre",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "L'équilibre s'utilise en réaction lorsque le personnage est sur le point de tomber, que ce soit à cause d'un coup violent, d'un tremblement de terre ou d'un vent violent. On peut utiliser l'équilibre comme compétence active pour traverser des passages étroits, comme une corde raide.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "c3cce6a4-9242-451f-b251-5c0bc9536766"
+    }
+  }
+]

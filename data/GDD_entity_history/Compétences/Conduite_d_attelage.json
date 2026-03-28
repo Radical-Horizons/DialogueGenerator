@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.089720+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Conduite d'attelage",
+      "values": {
+        "Cadre (combiné)": "Technologique — Très faible",
+        "Description": "La Conduite d'Attelage s'utilise pour diriger les véhicules tirés par des créatures de monte. Plus les créatures sont sauvages et plus le terrain est ardu, plus le test est difficile.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Très faible",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "f0ef66d5-eec4-4569-98c4-1323b32d46c9"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.121879+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Conduite d'attelage",
+      "values": {
+        "Cadre (combiné)": "Technologique — Très faible",
+        "Description": "La Conduite d'Attelage s'utilise pour diriger les véhicules tirés par des créatures de monte. Plus les créatures sont sauvages et plus le terrain est ardu, plus le test est difficile.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Très faible",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "f0ef66d5-eec4-4569-98c4-1323b32d46c9"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.200766+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Conduite d'attelage",
+      "values": {
+        "Cadre (combiné)": "Technologique — Très faible",
+        "Description": "La Conduite d'Attelage s'utilise pour diriger les véhicules tirés par des créatures de monte. Plus les créatures sont sauvages et plus le terrain est ardu, plus le test est difficile.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Très faible",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "f0ef66d5-eec4-4569-98c4-1323b32d46c9"
+    }
+  }
+]

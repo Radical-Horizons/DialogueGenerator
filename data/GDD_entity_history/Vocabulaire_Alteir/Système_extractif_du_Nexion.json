@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.479104+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Système extractif du Nexion",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Mécanisme économique de siphonnage des ressources vers le centre de la Vieille Ville.",
+        "Importance": "Modéré",
+        "Origine": "De « extractif » (qui extrait), désignant une économie de prélèvement centralisé.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "325649ba-5d30-41d9-9a68-3e086db23279"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.680360+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Système extractif du Nexion",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Mécanisme économique de siphonnage des ressources vers le centre de la Vieille Ville.",
+        "Importance": "Modéré",
+        "Origine": "De « extractif » (qui extrait), désignant une économie de prélèvement centralisé.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "325649ba-5d30-41d9-9a68-3e086db23279"
+    }
+  }
+]

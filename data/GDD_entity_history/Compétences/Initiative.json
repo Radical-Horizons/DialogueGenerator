@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.004333+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Initiative",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "Le combattant ayant eu le plus petit score a toujours deux secondes d'avance sur le suivant. Les suivants sont classés par résultat. Le dernier a toujours deux secondes de retard sur l'avant-dernier.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "ae6ec6f9-0a38-4eb0-954f-834dd213cb94"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.038147+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Initiative",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "Le combattant ayant eu le plus petit score a toujours deux secondes d'avance sur le suivant. Les suivants sont classés par résultat. Le dernier a toujours deux secondes de retard sur l'avant-dernier.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "ae6ec6f9-0a38-4eb0-954f-834dd213cb94"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.130820+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Initiative",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "Le combattant ayant eu le plus petit score a toujours deux secondes d'avance sur le suivant. Les suivants sont classés par résultat. Le dernier a toujours deux secondes de retard sur l'avant-dernier.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "ae6ec6f9-0a38-4eb0-954f-834dd213cb94"
+    }
+  }
+]

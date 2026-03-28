@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.551149+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Daraq-wa-Dunia",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Site majeur Plaines Exuvie, exuvie 840m, 2.3K hab, Citerne 4M litres.",
+        "Importance": "Modéré",
+        "Origine": "Calque arabe (échelle du monde).",
+        "Popularité": "Localement",
+        "Type": "Calque linguistique"
+      },
+      "notion_page_id": "63f01490-439d-4327-afe0-c213494dbd7b"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.766276+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Daraq-wa-Dunia",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Site majeur Plaines Exuvie, exuvie 840m, 2.3K hab, Citerne 4M litres.",
+        "Importance": "Modéré",
+        "Origine": "Calque arabe (échelle du monde).",
+        "Popularité": "Localement",
+        "Type": "Calque linguistique"
+      },
+      "notion_page_id": "63f01490-439d-4327-afe0-c213494dbd7b"
+    }
+  }
+]

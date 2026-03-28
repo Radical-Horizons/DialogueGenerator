@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.674658+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Organoïdes neuronaux",
+      "values": {
+        "Catégorie": "Technologie",
+        "Définition": "Composants biotech stockant mémoires/connaissances.",
+        "Importance": "Modéré",
+        "Origine": "D'organoïde (structure biologique artificielle) avec neuronal.",
+        "Popularité": "Régionalement",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "b33ade9a-c76e-4cc5-b119-4bdf612e82c1"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.916271+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Organoïdes neuronaux",
+      "values": {
+        "Catégorie": "Technologie",
+        "Définition": "Composants biotech stockant mémoires/connaissances.",
+        "Importance": "Modéré",
+        "Origine": "D'organoïde (structure biologique artificielle) avec neuronal.",
+        "Popularité": "Régionalement",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "b33ade9a-c76e-4cc5-b119-4bdf612e82c1"
+    }
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.060178+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Divination",
+      "values": {
+        "Cadre (combiné)": "Surnaturel — Faible",
+        "Description": "La compétence de divination permet d'obtenir des informations ou des aperçus sur des événements futurs ou cachés à travers des méthodes surnaturelles de faible niveau.",
+        "Famille": "Surnaturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "de5b5993-8867-4478-b445-f4d4a895a8de"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.091166+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Divination",
+      "values": {
+        "Cadre (combiné)": "Surnaturel — Faible",
+        "Description": "La compétence de divination permet d'obtenir des informations ou des aperçus sur des événements futurs ou cachés à travers des méthodes surnaturelles de faible niveau.",
+        "Famille": "Surnaturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "de5b5993-8867-4478-b445-f4d4a895a8de"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.175923+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Divination",
+      "values": {
+        "Cadre (combiné)": "Surnaturel — Faible",
+        "Description": "La compétence de divination permet d'obtenir des informations ou des aperçus sur des événements futurs ou cachés à travers des méthodes surnaturelles de faible niveau.",
+        "Famille": "Surnaturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "de5b5993-8867-4478-b445-f4d4a895a8de"
+    }
+  }
+]

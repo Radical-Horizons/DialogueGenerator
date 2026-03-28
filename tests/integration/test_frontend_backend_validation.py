@@ -61,18 +61,18 @@ class TestBackendRejectsInvalidRequests:
     def test_backend_rejects_invalid_tokens(self, client):
         """TEST INTÉGRATION : Backend rejette les requêtes avec tokens invalides.
         
-        Règle métier : max_context_tokens doit être entre 100 et MAX_CONTEXT_TOKENS.
+        Règle métier : max_context_tokens doit être entre MIN_CONTEXT_TOKENS et MAX_CONTEXT_TOKENS.
         """
         from constants import Defaults
         
-        # GIVEN: Requête avec max_context_tokens < 100
+        # GIVEN: Requête avec max_context_tokens < MIN_CONTEXT_TOKENS
         request_data = {
             "user_instructions": "Test",
             "context_selections": {
                 "characters_full": ["Test Character"],
                 "characters_excerpt": [],
             },
-            "max_context_tokens": 50,  # Trop petit
+            "max_context_tokens": 5000,  # Sous le plancher produit (10k)
             "llm_model_identifier": "gpt-4o-mini"
         }
         
@@ -87,7 +87,7 @@ class TestBackendRejectsInvalidRequests:
         # Vérifier que le message mentionne la limite (dans message ou details)
         error_obj = error_data.get("error", {}) if "error" in error_data else {}
         error_text = f"{error_obj.get('message', '')} {str(error_obj.get('details', {}))} {str(error_data.get('detail', ''))}"
-        assert "100" in error_text or "minimum" in error_text.lower()
+        assert str(Defaults.MIN_CONTEXT_TOKENS) in error_text or "minimum" in error_text.lower()
     
     def test_backend_rejects_invalid_completion_tokens(self, client):
         """TEST INTÉGRATION : Backend rejette les requêtes avec max_completion_tokens invalides.
@@ -299,18 +299,18 @@ class TestPydanticValidators:
             characters_excerpt=[],
         )
         
-        # WHEN: max_context_tokens < 100
+        # WHEN: max_context_tokens < MIN_CONTEXT_TOKENS
         try:
             request = GenerateUnityDialogueRequest(
                 user_instructions="Test",
                 context_selections=context_selection,
-                max_context_tokens=50,  # Invalide
+                max_context_tokens=5000,  # Invalide
                 llm_model_identifier="gpt-5-mini"
             )
             pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
         except ValueError as e:
             # THEN: ValueError doit être levée
-            assert "100" in str(e) or "minimum" in str(e).lower()
+            assert str(Defaults.MIN_CONTEXT_TOKENS) in str(e) or "minimum" in str(e).lower()
         
         # WHEN: max_context_tokens > MAX_CONTEXT_TOKENS
         try:

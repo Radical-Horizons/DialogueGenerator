@@ -1,6 +1,7 @@
 """Archive locale, staging et promotion pour sync GDD « miroir » (Notion = vérité)."""
 from __future__ import annotations
 
+import filecmp
 import logging
 import re
 import shutil
@@ -8,7 +9,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable, List, Optional, Set
+from typing import Dict, Iterable, List, Optional, Set
 
 from services.gdd_notion_sync_utils import category_stem_to_list_category_key
 
@@ -40,6 +41,72 @@ def unique_run_dir_name() -> str:
     """Nom de sous-répertoire unique (triable par préfixe date)."""
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     return f"{ts}_{uuid.uuid4().hex[:8]}"
+
+
+@dataclass(frozen=True)
+class GddArchiveDecision:
+    """Résultat d'une demande de snapshot : nouveau dossier ou réutilisation du dernier."""
+
+    archive_rel: str
+    created_new: bool
+
+
+def _mirror_tree_relative_files(base: Path, *, skip_reserved_top: bool) -> Dict[str, Path]:
+    """Fichiers sous ``base`` avec clé chemin relatif POSIX (hors réserves si racine GDD)."""
+    base = base.resolve()
+    out: Dict[str, Path] = {}
+    for child in base.iterdir():
+        if skip_reserved_top and child.name in GDD_RESERVED_TOP_LEVEL:
+            continue
+        if child.is_file():
+            out[child.name] = child
+        elif child.is_dir():
+            for p in child.rglob("*"):
+                if p.is_file():
+                    out[p.relative_to(base).as_posix()] = p
+    return out
+
+
+def gdd_live_matches_snapshot_dir(gdd_root: Path, snapshot_dir: Path) -> bool:
+    """True si le contenu miroir du live (hors ``.archive`` / ``.staging``) est identique au snapshot.
+
+    Comparaison par chemins relatifs et contenu binaire des fichiers.
+    """
+    gdd_root = gdd_root.resolve()
+    snapshot_dir = snapshot_dir.resolve()
+    live_map = _mirror_tree_relative_files(gdd_root, skip_reserved_top=True)
+    snap_map = _mirror_tree_relative_files(snapshot_dir, skip_reserved_top=False)
+    if set(live_map.keys()) != set(snap_map.keys()):
+        return False
+    for rel in live_map:
+        a, b = live_map[rel], snap_map[rel]
+        if not filecmp.cmp(a, b, shallow=False):
+            return False
+    return True
+
+
+def archive_gdd_snapshot_if_delta(gdd_root: Path) -> GddArchiveDecision:
+    """Archive le live sous ``.archive/<run>/`` seulement s'il diffère du dernier snapshot valide.
+
+    Si le dernier snapshot a le même contenu fichier à fichier, réutilise son ``archive_rel``
+    sans créer de dossier ni copier.
+    """
+    gdd_root = gdd_root.resolve()
+    latest = list_gdd_archives(gdd_root, limit=1)
+    if latest:
+        prev = gdd_root / ".archive" / latest[0].id
+        if prev.is_dir() and gdd_live_matches_snapshot_dir(gdd_root, prev):
+            logger.info(
+                "Snapshot GDD omis (contenu identique au dernier: %s)", latest[0].id
+            )
+            return GddArchiveDecision(
+                archive_rel=f".archive/{latest[0].id}", created_new=False
+            )
+    dest = archive_gdd_snapshot(gdd_root)
+    return GddArchiveDecision(
+        archive_rel=dest.relative_to(gdd_root).as_posix(),
+        created_new=True,
+    )
 
 
 def archive_gdd_snapshot(gdd_root: Path) -> Path:
@@ -197,9 +264,9 @@ def restore_gdd_from_archive(
 
     new_rel: Optional[str] = None
     if backup_current:
-        arch_path = archive_gdd_snapshot(gdd)
-        new_rel = str(arch_path.relative_to(gdd))
-        if retention_count is not None:
+        decision = archive_gdd_snapshot_if_delta(gdd)
+        new_rel = decision.archive_rel
+        if decision.created_new and retention_count is not None:
             prune_archives(gdd, max(1, int(retention_count)))
 
     live_names = {

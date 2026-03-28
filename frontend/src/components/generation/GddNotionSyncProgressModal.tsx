@@ -10,6 +10,11 @@ export interface GddNotionSyncProgressModalProps {
   modeFull: boolean
   progress: GddNotionSyncProgressResponse | null
   elapsedSeconds: number
+  /** Sync vue comme active côté client (requête longue en cours). */
+  syncActive: boolean
+  onPause: () => void
+  onUnpause: () => void
+  onCancel: () => void
 }
 
 function formatMmSs(totalSeconds: number): string {
@@ -24,6 +29,10 @@ export function GddNotionSyncProgressModal({
   modeFull,
   progress,
   elapsedSeconds,
+  syncActive,
+  onPause,
+  onUnpause,
+  onCancel,
 }: GddNotionSyncProgressModalProps) {
   if (!open) {
     return null
@@ -129,9 +138,70 @@ export function GddNotionSyncProgressModal({
         <p style={{ margin: 0, fontSize: '0.78rem', color: theme.text.secondary }}>
           Le total « pages » augmente au fil des sources : ce n’est pas un bug.
         </p>
+
+        {syncActive ? (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+              marginTop: '1rem',
+              paddingTop: '0.75rem',
+              borderTop: `1px solid ${theme.border.primary}`,
+            }}
+          >
+            {!p?.paused ? (
+              <button
+                type="button"
+                onClick={onPause}
+                style={modalButtonStyle}
+              >
+                Pause
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onUnpause}
+                style={modalButtonStylePrimary}
+              >
+                Continuer
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onCancel}
+              style={modalButtonStyleDanger}
+            >
+              Annuler la sync
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   )
+}
+
+const modalButtonStyle: CSSProperties = {
+  padding: '0.45rem 0.85rem',
+  borderRadius: '6px',
+  border: `1px solid ${theme.border.primary}`,
+  backgroundColor: theme.background.secondary,
+  color: theme.text.primary,
+  cursor: 'pointer',
+  fontSize: '0.88rem',
+}
+
+const modalButtonStylePrimary: CSSProperties = {
+  ...modalButtonStyle,
+  borderColor: theme.border.focus,
+  backgroundColor: theme.border.focus,
+  color: theme.background.panel,
+}
+
+const modalButtonStyleDanger: CSSProperties = {
+  ...modalButtonStyle,
+  borderColor: theme.state.error.color,
+  color: theme.state.error.color,
 }
 
 const overlayStyle: CSSProperties = {

@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.272623+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Grand Gwi-shin (Tombeau)",
+      "values": {
+        "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+        "Date de début": "3056",
+        "Description": "Éruption spectrale majeure tue 23 mineurs dans le Tombeau des Lueurs Dissidentes. Protocoles d'évacuation prédictifs existaient mais furent occultés. Catalyse naissance mouvement ouvrier Lueurs Dissidentes. Création filiale Jung-Harmony-Tech comme structure pare-feu.",
+        "Importance": "Notable",
+        "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+        "Type d'événement": "Catastrophe"
+      },
+      "notion_page_id": "44fcead0-c726-446d-944f-6955caeca065"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.769685+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Grand Gwi-shin (Tombeau)",
+      "values": {
+        "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+        "Date de début": "3056",
+        "Description": "Éruption spectrale majeure tue 23 mineurs dans le Tombeau des Lueurs Dissidentes. Protocoles d'évacuation prédictifs existaient mais furent occultés. Catalyse naissance mouvement ouvrier Lueurs Dissidentes. Création filiale Jung-Harmony-Tech comme structure pare-feu.",
+        "Importance": "Notable",
+        "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+        "Type d'événement": "Catastrophe"
+      },
+      "notion_page_id": "44fcead0-c726-446d-944f-6955caeca065"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.516145+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Grand Gwi-shin (Tombeau)",
+      "values": {
+        "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+        "Date de début": "3056",
+        "Description": "Éruption spectrale majeure tue 23 mineurs dans le Tombeau des Lueurs Dissidentes. Protocoles d'évacuation prédictifs existaient mais furent occultés. Catalyse naissance mouvement ouvrier Lueurs Dissidentes. Création filiale Jung-Harmony-Tech comme structure pare-feu.",
+        "Importance": "Notable",
+        "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+        "Type d'événement": "Catastrophe"
+      },
+      "notion_page_id": "44fcead0-c726-446d-944f-6955caeca065"
+    }
+  }
+]

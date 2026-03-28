@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.829994+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Escalade",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Escalade s'utilise à chaque fois qu'un personnage tente de gravir un obstacle. Cette compétence s'utilise également pour monter aux cordes.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "0d7270f5-617b-4ad5-ac1b-689b22e64f0f"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.838650+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Escalade",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Escalade s'utilise à chaque fois qu'un personnage tente de gravir un obstacle. Cette compétence s'utilise également pour monter aux cordes.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "0d7270f5-617b-4ad5-ac1b-689b22e64f0f"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:43.977088+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Escalade",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Escalade s'utilise à chaque fois qu'un personnage tente de gravir un obstacle. Cette compétence s'utilise également pour monter aux cordes.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "0d7270f5-617b-4ad5-ac1b-689b22e64f0f"
+    }
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.556052+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Supplicié Marécages",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Proto-Rêveur fragmentaire, domaine partiel marécageux.",
+        "Importance": "Secondaire",
+        "Origine": "De supplicié (torturé) pour Rêveur incomplet.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "6ab6d631-9acd-4552-8ee4-9351a2175044"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.770488+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Supplicié Marécages",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Proto-Rêveur fragmentaire, domaine partiel marécageux.",
+        "Importance": "Secondaire",
+        "Origine": "De supplicié (torturé) pour Rêveur incomplet.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "6ab6d631-9acd-4552-8ee4-9351a2175044"
+    }
+  }
+]

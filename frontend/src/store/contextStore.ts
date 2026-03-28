@@ -76,6 +76,9 @@ interface ContextState {
   setCachedSubLocations: (regionName: string, subLocations: string[]) => void
   invalidateCache: () => void
   isCacheValid: (cached: CachedData | null) => boolean
+  /** Incrémenté après sync GDD Notion / restauration archive pour forcer le rechargement des listes contexte. */
+  gddDataRevision: number
+  bumpGddDataRevision: () => void
 }
 
 const defaultSelections: ContextSelection = {
@@ -126,6 +129,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
   cachedCharacters: null,
   cachedRegions: null,
   cachedSubLocations: new Map<string, CachedData>(),
+  gddDataRevision: 0,
 
   setSelections: (selections: ContextSelection) => {
     set({ selections: normalizeSelections(selections) })
@@ -579,6 +583,10 @@ export const useContextStore = create<ContextState>((set, get) => ({
       cachedRegions: null,
       cachedSubLocations: new Map<string, CachedData>(),
     })
+  },
+
+  bumpGddDataRevision: () => {
+    set((state) => ({ gddDataRevision: state.gddDataRevision + 1 }))
   },
 
   isCacheValid: (cached: CachedData | null) => {

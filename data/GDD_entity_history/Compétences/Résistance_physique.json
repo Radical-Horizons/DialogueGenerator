@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.979668+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Résistance physique",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Augmente la résistance aux armes naturelles ou artificielles.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Défense"
+      },
+      "notion_page_id": "99aab630-cbf0-42a0-b8bf-66d5c83dadb9"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.007819+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Résistance physique",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Augmente la résistance aux armes naturelles ou artificielles.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Défense"
+      },
+      "notion_page_id": "99aab630-cbf0-42a0-b8bf-66d5c83dadb9"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.107306+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Résistance physique",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "Augmente la résistance aux armes naturelles ou artificielles.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Défense"
+      },
+      "notion_page_id": "99aab630-cbf0-42a0-b8bf-66d5c83dadb9"
+    }
+  }
+]

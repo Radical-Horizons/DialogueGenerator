@@ -11,6 +11,7 @@ describe('contextConfigStore', () => {
   it('devrait initialiser avec des valeurs par défaut', () => {
     const store = useContextConfigStore.getState()
     
+    expect(store.contextTokenBudgetMax).toBe(50_000)
     expect(store.organization).toBe('default')
     expect(store.fieldConfigs).toEqual({
       character: [],
@@ -64,6 +65,17 @@ describe('contextConfigStore', () => {
     
     expect(store.fieldConfigs.character).toEqual([])
     expect(store.organization).toBe('default')
+  })
+
+  it('devrait borner le budget tokens contexte (FR20)', () => {
+    useContextConfigStore.getState().setContextTokenBudgetMax(25_000)
+    expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(25_000)
+    useContextConfigStore.getState().setContextTokenBudgetMax(8000)
+    expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(10_000)
+    useContextConfigStore.getState().setContextTokenBudgetMax(50)
+    expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(10_000)
+    useContextConfigStore.getState().setContextTokenBudgetMax(999_999)
+    expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(100_000)
   })
 
   it('devrait permettre de nettoyer l\'erreur', () => {

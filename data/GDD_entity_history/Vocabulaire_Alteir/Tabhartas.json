@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.686093+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Tabhartas",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Système de don circulaire du Barvasinkul.",
+        "Importance": "Secondaire",
+        "Origine": "Du gaélique tabhartas (don/cadeau).",
+        "Popularité": "Communautaire",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "b9160a39-4708-47ed-bc14-65042141bc26"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.931119+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Tabhartas",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Système de don circulaire du Barvasinkul.",
+        "Importance": "Secondaire",
+        "Origine": "Du gaélique tabhartas (don/cadeau).",
+        "Popularité": "Communautaire",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "b9160a39-4708-47ed-bc14-65042141bc26"
+    }
+  }
+]

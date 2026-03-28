@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.165060+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Ère des Expérimentations",
+      "values": {
+        "Date de début": "3382",
+        "Date de fin": "3390",
+        "Description": "Suite à l'isolement d'Uresaïr dans les Plis d'Ossements (3382), période d'innovations théologiques au sein du Culte de l'Anentropie qui doit s'adapter à l'absence physique de la Théomaque.",
+        "Importance": "Mineur",
+        "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Type d'événement": "Période"
+      },
+      "notion_page_id": "2306e4d2-1b45-8037-9891-ef1989c7b8ad"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.649753+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Ère des Expérimentations",
+      "values": {
+        "Date de début": "3382",
+        "Date de fin": "3390",
+        "Description": "Suite à l'isolement d'Uresaïr dans les Plis d'Ossements (3382), période d'innovations théologiques au sein du Culte de l'Anentropie qui doit s'adapter à l'absence physique de la Théomaque.",
+        "Importance": "Mineur",
+        "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Type d'événement": "Période"
+      },
+      "notion_page_id": "2306e4d2-1b45-8037-9891-ef1989c7b8ad"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.411070+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Ère des Expérimentations",
+      "values": {
+        "Date de début": "3382",
+        "Date de fin": "3390",
+        "Description": "Suite à l'isolement d'Uresaïr dans les Plis d'Ossements (3382), période d'innovations théologiques au sein du Culte de l'Anentropie qui doit s'adapter à l'absence physique de la Théomaque.",
+        "Importance": "Mineur",
+        "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Type d'événement": "Période"
+      },
+      "notion_page_id": "2306e4d2-1b45-8037-9891-ef1989c7b8ad"
+    }
+  }
+]

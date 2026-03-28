@@ -71,6 +71,27 @@ export interface GddNotionSyncProgressResponse {
   current_page_in_source: number
   current_page_id_short: string
   message: string
+  paused?: boolean
+}
+
+export interface GddFullSyncCheckpointResponse {
+  resumable: boolean
+  /** none | resumable | stale | invalid_file */
+  checkpoint_status: string
+  checkpoint_file_present: boolean
+  orphan_staging_runs: number
+  message: string
+  staging_run_name: string
+  archive_rel: string
+  sources_total: number
+  sources_completed: number
+  completed_category_files: string[]
+  eligible_category_files: string[]
+}
+
+export interface GddFullSyncSimpleOkResponse {
+  ok: boolean
+  message: string
 }
 
 export async function getGddNotionSyncConfig(): Promise<GddNotionSyncConfigResponse> {
@@ -97,14 +118,64 @@ export async function postGddNotionTestConnection(): Promise<GddNotionConnection
   return data
 }
 
-export async function postGddNotionSync(full = false): Promise<GddNotionSyncRunResponse> {
+export interface PostGddNotionSyncOptions {
+  resume?: boolean
+  fresh?: boolean
+}
+
+export async function postGddNotionSync(
+  full = false,
+  opts?: PostGddNotionSyncOptions,
+): Promise<GddNotionSyncRunResponse> {
+  const params: Record<string, boolean> = { full }
+  if (opts?.resume) {
+    params.resume = true
+  }
+  if (opts?.fresh) {
+    params.fresh = true
+  }
   const { data } = await apiClient.post<GddNotionSyncRunResponse>(
     '/api/v1/gdd-notion-sync/sync',
     undefined,
     {
-      params: { full },
+      params,
       timeout: API_TIMEOUTS.GDD_NOTION_SYNC,
     },
+  )
+  return data
+}
+
+export async function getGddFullSyncCheckpoint(): Promise<GddFullSyncCheckpointResponse> {
+  const { data } = await apiClient.get<GddFullSyncCheckpointResponse>(
+    '/api/v1/gdd-notion-sync/full-sync-checkpoint',
+  )
+  return data
+}
+
+export async function deleteGddFullSyncCheckpoint(): Promise<GddFullSyncSimpleOkResponse> {
+  const { data } = await apiClient.delete<GddFullSyncSimpleOkResponse>(
+    '/api/v1/gdd-notion-sync/full-sync-checkpoint',
+  )
+  return data
+}
+
+export async function postGddFullSyncPause(): Promise<GddFullSyncSimpleOkResponse> {
+  const { data } = await apiClient.post<GddFullSyncSimpleOkResponse>(
+    '/api/v1/gdd-notion-sync/full-sync/pause',
+  )
+  return data
+}
+
+export async function postGddFullSyncUnpause(): Promise<GddFullSyncSimpleOkResponse> {
+  const { data } = await apiClient.post<GddFullSyncSimpleOkResponse>(
+    '/api/v1/gdd-notion-sync/full-sync/unpause',
+  )
+  return data
+}
+
+export async function postGddFullSyncCancel(): Promise<GddFullSyncSimpleOkResponse> {
+  const { data } = await apiClient.post<GddFullSyncSimpleOkResponse>(
+    '/api/v1/gdd-notion-sync/full-sync/cancel',
   )
   return data
 }

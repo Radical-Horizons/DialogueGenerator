@@ -104,6 +104,40 @@ class GddNotionSyncProgressResponse(BaseModel):
     current_page_in_source: int = 0
     current_page_id_short: str = ""
     message: str = ""
+    paused: bool = False
+
+
+class GddFullSyncCheckpointResponse(BaseModel):
+    """État du checkpoint sync complète (reprise possible ou non)."""
+
+    resumable: bool = False
+    checkpoint_status: str = Field(
+        default="none",
+        description="none | resumable | stale | invalid_file",
+    )
+    checkpoint_file_present: bool = False
+    orphan_staging_runs: int = 0
+    message: str = ""
+    staging_run_name: str = ""
+    archive_rel: str = ""
+    sources_total: int = 0
+    sources_completed: int = 0
+    completed_category_files: List[str] = Field(default_factory=list)
+    eligible_category_files: List[str] = Field(default_factory=list)
+
+
+class GddFullSyncCheckpointAbandonResponse(BaseModel):
+    """Résultat de l'abandon du checkpoint."""
+
+    ok: bool = True
+    message: str = ""
+
+
+class GddFullSyncPauseResponse(BaseModel):
+    """Résultat pause / reprise coopérative."""
+
+    ok: bool = False
+    message: str = ""
 
 
 class GddNotionSyncConfigResponse(BaseModel):

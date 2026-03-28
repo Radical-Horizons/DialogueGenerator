@@ -1,0 +1,34 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.759847+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Dunes Foveales",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Sable vitrifié stratifié de l'Œil Mirimance.",
+        "Importance": "Secondaire",
+        "Origine": "De dune avec fovéal (centre rétine).",
+        "Popularité": "Localement"
+      },
+      "notion_page_id": "defda5b4-75fe-41fd-8edf-bfb1c2d6e153"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:16.020477+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Dunes Foveales",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Sable vitrifié stratifié de l'Œil Mirimance.",
+        "Importance": "Secondaire",
+        "Origine": "De dune avec fovéal (centre rétine).",
+        "Popularité": "Localement"
+      },
+      "notion_page_id": "defda5b4-75fe-41fd-8edf-bfb1c2d6e153"
+    }
+  }
+]

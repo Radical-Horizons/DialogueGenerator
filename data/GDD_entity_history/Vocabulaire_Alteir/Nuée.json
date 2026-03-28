@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.763070+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Nuée",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Ensemble des Souffles nécessaires au retour d'un état temporel identique, formant l'unité de mesure temporelle la plus longue communément admise. Équivalent d'une année (231 à 347 Veilles selon les régions).",
+        "Importance": "Majeur",
+        "Origine": "Du français « nuée » (grand amas, masse compacte), détourné pour évoquer l'accumulation des jours formant une année.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "e04022f2-20f9-4d5c-9770-045b9b1f79e6"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:16.024529+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Nuée",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Ensemble des Souffles nécessaires au retour d'un état temporel identique, formant l'unité de mesure temporelle la plus longue communément admise. Équivalent d'une année (231 à 347 Veilles selon les régions).",
+        "Importance": "Majeur",
+        "Origine": "Du français « nuée » (grand amas, masse compacte), détourné pour évoquer l'accumulation des jours formant une année.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "e04022f2-20f9-4d5c-9770-045b9b1f79e6"
+    }
+  }
+]

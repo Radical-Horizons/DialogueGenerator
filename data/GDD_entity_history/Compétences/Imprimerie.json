@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.867690+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Imprimerie",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez faible",
+        "Description": "La compétence \"Imprimerie\" sert à valider et gérer les processus liés à la production de documents imprimés dans un cadre technologique considéré comme assez faible.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez faible",
+        "Statut": "Retirée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "2c0f1f74-8d69-48bf-8bd3-edb6e72087b3"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.876944+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Imprimerie",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez faible",
+        "Description": "La compétence \"Imprimerie\" sert à valider et gérer les processus liés à la production de documents imprimés dans un cadre technologique considéré comme assez faible.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez faible",
+        "Statut": "Retirée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "2c0f1f74-8d69-48bf-8bd3-edb6e72087b3"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.010639+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Imprimerie",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez faible",
+        "Description": "La compétence \"Imprimerie\" sert à valider et gérer les processus liés à la production de documents imprimés dans un cadre technologique considéré comme assez faible.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez faible",
+        "Statut": "Retirée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "2c0f1f74-8d69-48bf-8bd3-edb6e72087b3"
+    }
+  }
+]

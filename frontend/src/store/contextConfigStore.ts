@@ -4,6 +4,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import * as configAPI from '../api/config'
+import { CONTEXT_TOKENS_LIMITS } from '../constants'
+
+function clampContextTokenBudget(value: number): number {
+  const n = Number.isFinite(value) ? Math.round(value) : CONTEXT_TOKENS_LIMITS.DEFAULT
+  return Math.min(CONTEXT_TOKENS_LIMITS.MAX, Math.max(CONTEXT_TOKENS_LIMITS.MIN, n))
+}
 
 export interface FieldInfo {
   path: string
@@ -80,6 +86,10 @@ interface ContextConfigState {
     maxTokens?: number
   ) => Promise<ContextPreviewResponse>
   clearError: () => void
+
+  /** Budget tokens sélection GDD (FR20) — source de vérité pour max_context_tokens côté génération */
+  contextTokenBudgetMax: number
+  setContextTokenBudgetMax: (value: number) => void
 }
 
 const defaultFieldConfigs: Record<string, string[]> = {
@@ -103,6 +113,11 @@ export const useContextConfigStore = create<ContextConfigState>()(
       suggestions: {},
       isLoading: false,
       error: null,
+      contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
+
+      setContextTokenBudgetMax: (value) => {
+        set({ contextTokenBudgetMax: clampContextTokenBudget(value) })
+      },
 
   setFieldConfig: (elementType, fields) => {
     set((state) => {
@@ -345,6 +360,7 @@ export const useContextConfigStore = create<ContextConfigState>()(
     set({
       fieldConfigs: resetFieldConfigs,
       organization: 'default',
+      contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
     })
   },
 
@@ -385,15 +401,21 @@ export const useContextConfigStore = create<ContextConfigState>()(
       partialize: (state) => ({
         fieldConfigs: state.fieldConfigs,
         organization: state.organization,
+        contextTokenBudgetMax: state.contextTokenBudgetMax,
       }),
       // Toujours reconstituer les clés attendues (même si le localStorage ne les contient pas)
       merge: (persistedState, currentState) => {
         const persisted = persistedState as Partial<ContextConfigState> | undefined
         const persistedFieldConfigs = persisted?.fieldConfigs ?? {}
+        const budget =
+          persisted?.contextTokenBudgetMax !== undefined
+            ? clampContextTokenBudget(persisted.contextTokenBudgetMax)
+            : currentState.contextTokenBudgetMax
         return {
           ...currentState,
           ...persisted,
           fieldConfigs: { ...defaultFieldConfigs, ...persistedFieldConfigs },
+          contextTokenBudgetMax: budget,
         }
       },
     }

@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.985905+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Explosifs à Détonateur",
+      "values": {
+        "Cadre (combiné)": "Technologique — Moyen",
+        "Description": "Les Explosifs à Détonateur sont des armes complexes qu'il faut correctement armer et surtout bien positionner, en attendant que la cible soit à portée.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Moyen",
+        "Statut": "Validée",
+        "Tags": "Armes"
+      },
+      "notion_page_id": "a00c0787-ac78-453c-8486-f8c8d58d51b8"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.015686+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Explosifs à Détonateur",
+      "values": {
+        "Cadre (combiné)": "Technologique — Moyen",
+        "Description": "Les Explosifs à Détonateur sont des armes complexes qu'il faut correctement armer et surtout bien positionner, en attendant que la cible soit à portée.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Moyen",
+        "Statut": "Validée",
+        "Tags": "Armes"
+      },
+      "notion_page_id": "a00c0787-ac78-453c-8486-f8c8d58d51b8"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.113855+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Explosifs à Détonateur",
+      "values": {
+        "Cadre (combiné)": "Technologique — Moyen",
+        "Description": "Les Explosifs à Détonateur sont des armes complexes qu'il faut correctement armer et surtout bien positionner, en attendant que la cible soit à portée.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Moyen",
+        "Statut": "Validée",
+        "Tags": "Armes"
+      },
+      "notion_page_id": "a00c0787-ac78-453c-8486-f8c8d58d51b8"
+    }
+  }
+]

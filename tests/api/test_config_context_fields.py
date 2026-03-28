@@ -141,7 +141,7 @@ class TestContextFieldsEndpoints:
                     },
                     "organization_mode": "default",
                     "scene_instruction": "Test scene",
-                    "max_tokens": 1000
+                    "max_tokens": 10000
                 }
             )
             

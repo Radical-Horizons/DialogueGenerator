@@ -2,6 +2,7 @@
  * API client pour le contexte GDD (personnages, lieux, objets).
  */
 import apiClient from './client'
+import type { EstimateTokensRequest, EstimateTokensResponse } from '../types/api'
 import type {
   CharacterResponse,
   CharacterListResponse,
@@ -223,6 +224,14 @@ export async function putRulesByDialogueType(
     `/api/v1/context/rules/by-dialogue-type/${encodeURIComponent(dialogueType)}`,
     rules
   )
+  return response.data
+}
+
+/**
+ * Estime les tokens du contexte + prompt (identique au flux génération, endpoint contexte).
+ */
+export async function estimateContextTokens(body: EstimateTokensRequest): Promise<EstimateTokensResponse> {
+  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/context/estimate-tokens', body)
   return response.data
 }
 

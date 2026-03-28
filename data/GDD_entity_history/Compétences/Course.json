@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.977053+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Course",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "La Course représente la capacité d'un personnage à courir plus ou moins vite sans perdre l'équilibre, surtout sur un terrain accidenté.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "98d07ad4-42b4-4062-9b4b-26eeb0da06f0"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.003713+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Course",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "La Course représente la capacité d'un personnage à courir plus ou moins vite sans perdre l'équilibre, surtout sur un terrain accidenté.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "98d07ad4-42b4-4062-9b4b-26eeb0da06f0"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.104716+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Course",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "La Course représente la capacité d'un personnage à courir plus ou moins vite sans perdre l'équilibre, surtout sur un terrain accidenté.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Physique"
+      },
+      "notion_page_id": "98d07ad4-42b4-4062-9b4b-26eeb0da06f0"
+    }
+  }
+]

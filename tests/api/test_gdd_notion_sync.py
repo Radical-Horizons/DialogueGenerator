@@ -318,5 +318,67 @@ def test_get_sync_progress_idle(client: TestClient, tmp_path: Path) -> None:
         body = r.json()
         assert body.get("active") is False
         assert body.get("phase") == "idle"
+        assert body.get("paused") is False
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_resume_requires_full(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post("/api/v1/gdd-notion-sync/sync", params={"resume": True})
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_resume_and_fresh_exclusive(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync",
+            params={"full": True, "resume": True, "fresh": True},
+        )
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_get_full_sync_checkpoint(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.get("/api/v1/gdd-notion-sync/full-sync-checkpoint")
+        assert r.status_code == 200
+        data = r.json()
+        assert data.get("resumable") is False
+        assert data.get("checkpoint_status") == "none"
+        assert "sources_total" in data
+        assert "orphan_staging_runs" in data
+        assert "checkpoint_file_present" in data
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_delete_full_sync_checkpoint(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.delete("/api/v1/gdd-notion-sync/full-sync-checkpoint")
+        assert r.status_code == 200
+        assert r.json().get("ok") is True
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_pause_when_no_active_sync(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post("/api/v1/gdd-notion-sync/full-sync/pause")
+        assert r.status_code == 200
+        assert r.json().get("ok") is False
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

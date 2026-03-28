@@ -1,0 +1,62 @@
+[
+  {
+    "at": "2026-03-27T00:40:36.051637+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Diplomatie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Modificateur temporaire": "0",
+        "Notes": "Très faible : refuse les compromis, confrontations directes, sociabilité minimale, préfère la destruction à la négociation",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "55c9d063-684d-43bd-9fc3-89567b8f2fde"
+    }
+  },
+  {
+    "at": "2026-03-27T20:03:48.351549+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Diplomatie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Modificateur temporaire": "0",
+        "Notes": "Très faible : refuse les compromis, confrontations directes, sociabilité minimale, préfère la destruction à la négociation",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "55c9d063-684d-43bd-9fc3-89567b8f2fde"
+    }
+  },
+  {
+    "at": "2026-03-28T00:37:42.657313+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Diplomatie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Modificateur temporaire": "0",
+        "Notes": "Très faible : refuse les compromis, confrontations directes, sociabilité minimale, préfère la destruction à la négociation",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "55c9d063-684d-43bd-9fc3-89567b8f2fde"
+    }
+  }
+]

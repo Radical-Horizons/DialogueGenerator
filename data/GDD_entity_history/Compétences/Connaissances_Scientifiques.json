@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.844884+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Connaissances Scientifiques",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "Connaissances Scientifiques reflète les connaissances académiques d'un personnage dans des domaines tels que les mathématiques et la géométrie. Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "1c65fe91-1737-436d-93c6-fcd98bce2e0d"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.853383+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Connaissances Scientifiques",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "Connaissances Scientifiques reflète les connaissances académiques d'un personnage dans des domaines tels que les mathématiques et la géométrie. Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "1c65fe91-1737-436d-93c6-fcd98bce2e0d"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:43.991361+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Connaissances Scientifiques",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "Connaissances Scientifiques reflète les connaissances académiques d'un personnage dans des domaines tels que les mathématiques et la géométrie. Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "1c65fe91-1737-436d-93c6-fcd98bce2e0d"
+    }
+  }
+]

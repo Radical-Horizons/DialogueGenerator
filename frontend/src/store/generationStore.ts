@@ -27,6 +27,10 @@ interface GenerationState {
   // Résultats de génération
   unityDialogueResponse: GenerateUnityDialogueResponse | null
   tokensUsed: number | null
+
+  /** Instructions scène (panneau génération) — pour estimation budget contexte côté ContextSelector */
+  generationUserInstructions: string
+  setGenerationUserInstructions: (value: string) => void
   
   // État streaming (Task 2 - Story 0.2)
   isGenerating: boolean
@@ -84,6 +88,8 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   isEstimating: false,
   unityDialogueResponse: null,
   tokensUsed: null,
+  generationUserInstructions: '',
+  setGenerationUserInstructions: (value) => set({ generationUserInstructions: value }),
 
   // État streaming initial (Task 2 - Story 0.2)
   isGenerating: false,

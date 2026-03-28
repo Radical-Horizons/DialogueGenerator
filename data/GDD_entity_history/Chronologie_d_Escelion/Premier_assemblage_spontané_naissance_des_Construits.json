@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.309616+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Premier assemblage spontané — naissance des Construits",
+      "values": {
+        "Date de début": "2150",
+        "Description": "En activant le Vahan-Meru, les Imuins déclenchent le premier cycle d'éjection de la Couronne Fluctuante. Le premier fœtus métallique atterrit sur une rive de l'Océan Mécanique et s'assemble sans témoin, sans intention, sans programme. Les Construits existent désormais. Nul ne le sait encore.",
+        "Espèces": "1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+        "Importance": "Majeur",
+        "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-8069-b24d-c263445f6a8e",
+        "Type d'événement": "Naissance"
+      },
+      "notion_page_id": "db3dd32b-18f1-497b-b73d-c7512143805b"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.804135+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Premier assemblage spontané — naissance des Construits",
+      "values": {
+        "Date de début": "2150",
+        "Description": "En activant le Vahan-Meru, les Imuins déclenchent le premier cycle d'éjection de la Couronne Fluctuante. Le premier fœtus métallique atterrit sur une rive de l'Océan Mécanique et s'assemble sans témoin, sans intention, sans programme. Les Construits existent désormais. Nul ne le sait encore.",
+        "Espèces": "1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+        "Importance": "Majeur",
+        "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-8069-b24d-c263445f6a8e",
+        "Type d'événement": "Naissance"
+      },
+      "notion_page_id": "db3dd32b-18f1-497b-b73d-c7512143805b"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.547648+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Premier assemblage spontané — naissance des Construits",
+      "values": {
+        "Date de début": "2150",
+        "Description": "En activant le Vahan-Meru, les Imuins déclenchent le premier cycle d'éjection de la Couronne Fluctuante. Le premier fœtus métallique atterrit sur une rive de l'Océan Mécanique et s'assemble sans témoin, sans intention, sans programme. Les Construits existent désormais. Nul ne le sait encore.",
+        "Espèces": "1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+        "Importance": "Majeur",
+        "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-8069-b24d-c263445f6a8e",
+        "Type d'événement": "Naissance"
+      },
+      "notion_page_id": "db3dd32b-18f1-497b-b73d-c7512143805b"
+    }
+  }
+]

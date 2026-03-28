@@ -1,0 +1,47 @@
+[
+  {
+    "at": "2026-03-27T01:18:17.869834+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Ensi",
+      "values": {
+        "Catégorie": "Nom personnel",
+        "Notes": "Porteur connu : Ensi-Pral.",
+        "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+        "Signification": "Prénom personnel. Placé avant la marque de foyer : Ensi-Pral."
+      },
+      "notion_page_id": "235fcdb8-625f-4697-99f4-d158380d09bd"
+    }
+  },
+  {
+    "at": "2026-03-27T20:38:58.807690+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Ensi",
+      "values": {
+        "Catégorie": "Nom personnel",
+        "Notes": "Porteur connu : Ensi-Pral.",
+        "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+        "Signification": "Prénom personnel. Placé avant la marque de foyer : Ensi-Pral."
+      },
+      "notion_page_id": "235fcdb8-625f-4697-99f4-d158380d09bd"
+    }
+  },
+  {
+    "at": "2026-03-28T01:09:04.610619+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Ensi",
+      "values": {
+        "Catégorie": "Nom personnel",
+        "Notes": "Porteur connu : Ensi-Pral.",
+        "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+        "Signification": "Prénom personnel. Placé avant la marque de foyer : Ensi-Pral."
+      },
+      "notion_page_id": "235fcdb8-625f-4697-99f4-d158380d09bd"
+    }
+  }
+]

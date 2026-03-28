@@ -1,0 +1,44 @@
+[
+  {
+    "at": "2026-03-27T01:18:17.875041+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Gharn",
+      "values": {
+        "Catégorie": "Marque de foyer",
+        "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+        "Signification": "Feu de charbon lent et durable. Associé aux bas-quartiers ; produit des Van'Doei à peau particulièrement sombre, stigmatisés par le colorisme."
+      },
+      "notion_page_id": "2d67d874-07d5-40da-a609-3f593aaccf0d"
+    }
+  },
+  {
+    "at": "2026-03-27T20:38:58.812608+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Gharn",
+      "values": {
+        "Catégorie": "Marque de foyer",
+        "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+        "Signification": "Feu de charbon lent et durable. Associé aux bas-quartiers ; produit des Van'Doei à peau particulièrement sombre, stigmatisés par le colorisme."
+      },
+      "notion_page_id": "2d67d874-07d5-40da-a609-3f593aaccf0d"
+    }
+  },
+  {
+    "at": "2026-03-28T01:09:04.615593+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Gharn",
+      "values": {
+        "Catégorie": "Marque de foyer",
+        "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+        "Signification": "Feu de charbon lent et durable. Associé aux bas-quartiers ; produit des Van'Doei à peau particulièrement sombre, stigmatisés par le colorisme."
+      },
+      "notion_page_id": "2d67d874-07d5-40da-a609-3f593aaccf0d"
+    }
+  }
+]

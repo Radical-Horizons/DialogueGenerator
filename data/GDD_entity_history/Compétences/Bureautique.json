@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.078652+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Bureautique",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La Bureautique désigne l'utilisation d'interfaces informatiques et de tous les logiciels les plus courants.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "ebab9397-250a-41de-ad8d-be362372656e"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.110226+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Bureautique",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La Bureautique désigne l'utilisation d'interfaces informatiques et de tous les logiciels les plus courants.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "ebab9397-250a-41de-ad8d-be362372656e"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.192231+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Bureautique",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La Bureautique désigne l'utilisation d'interfaces informatiques et de tous les logiciels les plus courants.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Retirée",
+        "Tags": "Savoir"
+      },
+      "notion_page_id": "ebab9397-250a-41de-ad8d-be362372656e"
+    }
+  }
+]

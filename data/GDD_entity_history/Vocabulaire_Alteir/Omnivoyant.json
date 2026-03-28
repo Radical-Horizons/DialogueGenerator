@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.604085+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Omnivoyant",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Rêveur primordial des Vastes Plaines, Micro-Révisions (7min).",
+        "Importance": "Important",
+        "Origine": "D'omni- et voyant pour Rêveur de la perception totale.",
+        "Popularité": "Occulte",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "8312d443-973f-4b3e-854b-32ff5065373e"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.828475+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Omnivoyant",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Rêveur primordial des Vastes Plaines, Micro-Révisions (7min).",
+        "Importance": "Important",
+        "Origine": "D'omni- et voyant pour Rêveur de la perception totale.",
+        "Popularité": "Occulte",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "8312d443-973f-4b3e-854b-32ff5065373e"
+    }
+  }
+]

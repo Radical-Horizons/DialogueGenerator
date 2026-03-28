@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import * as configAPI from '../../api/config'
 import * as dialoguesAPI from '../../api/dialogues'
 import { useGenerationStore } from '../../store/generationStore'
+import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useLLMStore } from '../../store/llmStore'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
@@ -64,7 +65,8 @@ export function GenerationPanel() {
   
   // État local UI
   const [userInstructions, setUserInstructions] = useState('')
-  const [maxContextTokens, setMaxContextTokens] = useState<number>(CONTEXT_TOKENS_LIMITS.DEFAULT)
+  const maxContextTokens = useContextConfigStore((s) => s.contextTokenBudgetMax)
+  const setMaxContextTokens = useContextConfigStore((s) => s.setContextTokenBudgetMax)
   const [maxCompletionTokens, setMaxCompletionTokens] = useState<number | null>(null)
   const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
   const [reasoningEffort, setReasoningEffort] = useState<'none' | 'low' | 'medium' | 'high' | 'xhigh' | null>(null)
@@ -84,6 +86,21 @@ export function GenerationPanel() {
   const maxCompletionSliderRef = useRef<HTMLInputElement>(null)
   
   // Hooks métier extraits
+  useEffect(() => {
+    const getState = useGenerationStore.getState
+    if (typeof getState !== 'function') {
+      return
+    }
+    const st = getState() as { setGenerationUserInstructions?: (s: string) => void } | undefined
+    if (!st) {
+      return
+    }
+    const sync = st.setGenerationUserInstructions
+    if (typeof sync === 'function') {
+      sync(userInstructions)
+    }
+  }, [userInstructions])
+
   const draft = useGenerationDraft({
     userInstructions,
     maxContextTokens,

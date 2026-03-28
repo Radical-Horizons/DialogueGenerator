@@ -38,7 +38,14 @@ vi.mock('../../../store/generationActionsStore', () => ({
   })),
 }))
 vi.mock('../../../store/contextStore')
-vi.mock('../../../store/contextConfigStore')
+vi.mock('../../../store/contextConfigStore', () => ({
+  useContextConfigStore: vi.fn((selector: (s: { contextTokenBudgetMax: number; setContextTokenBudgetMax: ReturnType<typeof vi.fn> }) => unknown) =>
+    selector({
+      contextTokenBudgetMax: 50_000,
+      setContextTokenBudgetMax: vi.fn(),
+    })
+  ),
+}))
 vi.mock('../../../store/vocabularyStore', () => ({
   useVocabularyStore: vi.fn(() => ({
     vocabulary: [],
@@ -462,7 +469,7 @@ describe('GenerationPanel - Tests Baseline', () => {
     it('devrait restaurer l\'état depuis localStorage au chargement', async () => {
       const draft = {
         userInstructions: 'Instructions restaurées',
-        maxContextTokens: 4000,
+        maxContextTokens: 12000,
         timestamp: Date.now(),
       }
       localStorage.setItem('generation_draft', JSON.stringify(draft))

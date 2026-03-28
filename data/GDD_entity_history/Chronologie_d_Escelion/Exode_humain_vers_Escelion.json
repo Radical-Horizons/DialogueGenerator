@@ -1,0 +1,59 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.018306+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Exode humain vers Escelion",
+      "values": {
+        "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+        "Date de début": "1",
+        "Date de fin": "25",
+        "Description": "Arrivée par vagues désordonnées de milliers de survivants de Merid (Magocratie d'Iodan-liaqar, Archenroz, Ligue du Sandor, Guelenbur et autres). Petits groupes familiaux sans coordination. Les futurs Aldravinds s'agrègent par nécessité linguistique autour de l'abraldique.",
+        "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
+        "Importance": "Important",
+        "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+        "Type d'événement": "Migration"
+      },
+      "notion_page_id": "1faeddb0-c563-4cfc-8c6a-341e7fc3343a"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.555136+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Exode humain vers Escelion",
+      "values": {
+        "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+        "Date de début": "1",
+        "Date de fin": "25",
+        "Description": "Arrivée par vagues désordonnées de milliers de survivants de Merid (Magocratie d'Iodan-liaqar, Archenroz, Ligue du Sandor, Guelenbur et autres). Petits groupes familiaux sans coordination. Les futurs Aldravinds s'agrègent par nécessité linguistique autour de l'abraldique.",
+        "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
+        "Importance": "Important",
+        "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+        "Type d'événement": "Migration"
+      },
+      "notion_page_id": "1faeddb0-c563-4cfc-8c6a-341e7fc3343a"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.332698+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Exode humain vers Escelion",
+      "values": {
+        "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+        "Date de début": "1",
+        "Date de fin": "25",
+        "Description": "Arrivée par vagues désordonnées de milliers de survivants de Merid (Magocratie d'Iodan-liaqar, Archenroz, Ligue du Sandor, Guelenbur et autres). Petits groupes familiaux sans coordination. Les futurs Aldravinds s'agrègent par nécessité linguistique autour de l'abraldique.",
+        "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
+        "Importance": "Important",
+        "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+        "Type d'événement": "Migration"
+      },
+      "notion_page_id": "1faeddb0-c563-4cfc-8c6a-341e7fc3343a"
+    }
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.608557+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Clans nomades",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "15K aldravinds Plaines, caravanes 50-200, routes tégumentaires.",
+        "Importance": "Secondaire",
+        "Origine": "De clan nomade pour groupes mobiles.",
+        "Popularité": "Régionalement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "870905f0-150e-4963-8d6e-6415f390e45e"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.834010+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Clans nomades",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "15K aldravinds Plaines, caravanes 50-200, routes tégumentaires.",
+        "Importance": "Secondaire",
+        "Origine": "De clan nomade pour groupes mobiles.",
+        "Popularité": "Régionalement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "870905f0-150e-4963-8d6e-6415f390e45e"
+    }
+  }
+]

@@ -1,0 +1,56 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.174381+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pacte Fondateur",
+      "values": {
+        "Date de début": "3155",
+        "Date de fin": "3155",
+        "Description": "Alliance entre Amatru et l'Ensevelie, octroyant au premier une longévité exceptionnelle",
+        "Importance": "Notable",
+        "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Personnages": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+        "Type d'événement": "Traité"
+      },
+      "notion_page_id": "2306e4d2-1b45-803f-a84d-e9642b3a666a"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.659961+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pacte Fondateur",
+      "values": {
+        "Date de début": "3155",
+        "Date de fin": "3155",
+        "Description": "Alliance entre Amatru et l'Ensevelie, octroyant au premier une longévité exceptionnelle",
+        "Importance": "Notable",
+        "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Personnages": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+        "Type d'événement": "Traité"
+      },
+      "notion_page_id": "2306e4d2-1b45-803f-a84d-e9642b3a666a"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.420754+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pacte Fondateur",
+      "values": {
+        "Date de début": "3155",
+        "Date de fin": "3155",
+        "Description": "Alliance entre Amatru et l'Ensevelie, octroyant au premier une longévité exceptionnelle",
+        "Importance": "Notable",
+        "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Personnages": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+        "Type d'événement": "Traité"
+      },
+      "notion_page_id": "2306e4d2-1b45-803f-a84d-e9642b3a666a"
+    }
+  }
+]

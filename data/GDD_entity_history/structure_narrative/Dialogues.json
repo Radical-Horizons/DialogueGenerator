@@ -1,0 +1,26 @@
+[
+  {
+    "at": "2026-03-27T21:11:05.162509+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Dialogues",
+      "sections": {
+        "_general": "**En cas de doute pas de doute !**\nEn cas de divergence entre les dialogues présents ici et ceux du moteur, c’est TOUJOURS ceux présents dans le moteur de jeu qui prévalent. \nCe système pouvant être lourd à maintenir au cours d’une production, cela permet de savoir où regarder. \n\n**Pour les Dialogues & les Barks**\nSe référer au Guide des dialogues \nChaque ligne possède un état  To write : une ligne qui reste à écrire depuis le début. \nPlaceholder : une ligne temporaire qui doit être réécrite. Il indique aux rédacteurs qu'ils doivent la revoir et la réécrire.\nDraft : un premier brouillon d'une ligne, nécessite une autre passe.\nPolished : une deuxième/troisième passe, vérifiée par un rédacteur natif. Prête pour la traduction ou l'enregistrement.\nNeed Rework : marque la ligne comme nécessitant une réécriture.\nFinal : vérifiée, synchronisée avec l'audio et prête à être implémentée.\nChaque ligne doit posséder un identifiant de ligne unique ⇒ NE JAMAIS LE MODIFIER UNE FOIS CHOISI !\n\n**Import/export**\nIl est possible d’importer et d’exporter des bases de données (et donc les dialogues) au format CSV.\nIl est conseillé de le faire sur la page de base de données dédiée à la table que vous voulez exporter.\nCliquez sur la base de donnée à exporter, puis en haut à droite cliquer sur les 3 petits points puis descendez jusqu’à l’action qui vous convient : \n\n**Proposition de nomenclature**\nVisiter la page Untitled."
+      },
+      "notion_page_id": "1886e4d2-1b45-813a-b9ae-deb9758afee4"
+    }
+  },
+  {
+    "at": "2026-03-28T01:40:29.183873+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Dialogues",
+      "sections": {
+        "_general": "**En cas de doute pas de doute !**\nEn cas de divergence entre les dialogues présents ici et ceux du moteur, c’est TOUJOURS ceux présents dans le moteur de jeu qui prévalent. \nCe système pouvant être lourd à maintenir au cours d’une production, cela permet de savoir où regarder. \n\n**Pour les Dialogues & les Barks**\nSe référer au Guide des dialogues \nChaque ligne possède un état  To write : une ligne qui reste à écrire depuis le début. \nPlaceholder : une ligne temporaire qui doit être réécrite. Il indique aux rédacteurs qu'ils doivent la revoir et la réécrire.\nDraft : un premier brouillon d'une ligne, nécessite une autre passe.\nPolished : une deuxième/troisième passe, vérifiée par un rédacteur natif. Prête pour la traduction ou l'enregistrement.\nNeed Rework : marque la ligne comme nécessitant une réécriture.\nFinal : vérifiée, synchronisée avec l'audio et prête à être implémentée.\nChaque ligne doit posséder un identifiant de ligne unique ⇒ NE JAMAIS LE MODIFIER UNE FOIS CHOISI !\n\n**Import/export**\nIl est possible d’importer et d’exporter des bases de données (et donc les dialogues) au format CSV.\nIl est conseillé de le faire sur la page de base de données dédiée à la table que vous voulez exporter.\nCliquez sur la base de donnée à exporter, puis en haut à droite cliquer sur les 3 petits points puis descendez jusqu’à l’action qui vous convient : \n\n**Proposition de nomenclature**\nVisiter la page Untitled."
+      },
+      "notion_page_id": "1886e4d2-1b45-813a-b9ae-deb9758afee4"
+    }
+  }
+]

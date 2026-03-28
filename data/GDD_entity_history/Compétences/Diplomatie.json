@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.876966+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Diplomatie",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "La compétence \"Diplomatie\" sert à gérer les interactions et les relations entre les individus ou les groupes dans un cadre culturel, en favorisant la communication et la compréhension mutuelle.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Social"
+      },
+      "notion_page_id": "32712215-8cc5-466e-82fc-f9ea1893decd"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.889391+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Diplomatie",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "La compétence \"Diplomatie\" sert à gérer les interactions et les relations entre les individus ou les groupes dans un cadre culturel, en favorisant la communication et la compréhension mutuelle.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Social"
+      },
+      "notion_page_id": "32712215-8cc5-466e-82fc-f9ea1893decd"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.017376+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Diplomatie",
+      "values": {
+        "Cadre (combiné)": "Culturel — Faible",
+        "Description": "La compétence \"Diplomatie\" sert à gérer les interactions et les relations entre les individus ou les groupes dans un cadre culturel, en favorisant la communication et la compréhension mutuelle.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Validée",
+        "Tags": "Social"
+      },
+      "notion_page_id": "32712215-8cc5-466e-82fc-f9ea1893decd"
+    }
+  }
+]

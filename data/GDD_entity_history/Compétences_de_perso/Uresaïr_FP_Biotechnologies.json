@@ -1,0 +1,59 @@
+[
+  {
+    "at": "2026-03-27T00:40:36.109906+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Biotechnologies",
+      "values": {
+        "Cadre": "Biologique",
+        "Compétence": "5b0a2fc0-1bc0-4fec-98d9-5f1f8bdf3bde",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "ed9464bc-16c8-4f60-9f93-01555b2391a8"
+    }
+  },
+  {
+    "at": "2026-03-27T20:03:48.427218+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Biotechnologies",
+      "values": {
+        "Cadre": "Biologique",
+        "Compétence": "5b0a2fc0-1bc0-4fec-98d9-5f1f8bdf3bde",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "ed9464bc-16c8-4f60-9f93-01555b2391a8"
+    }
+  },
+  {
+    "at": "2026-03-28T00:37:42.716413+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Biotechnologies",
+      "values": {
+        "Cadre": "Biologique",
+        "Compétence": "5b0a2fc0-1bc0-4fec-98d9-5f1f8bdf3bde",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "ed9464bc-16c8-4f60-9f93-01555b2391a8"
+    }
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.000395+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pistage",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "Le Pistage permet de repérer les traces laissées par un individu ou une créature. Plus les traces sont petites, anciennes ou altérées par les évènements climatiques, plus le test est difficile. Suivre une piste permet de se passer d'un test d'Orientation.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "ac33ee59-a8de-4d7d-b8d3-538602a35507"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.032366+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pistage",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "Le Pistage permet de repérer les traces laissées par un individu ou une créature. Plus les traces sont petites, anciennes ou altérées par les évènements climatiques, plus le test est difficile. Suivre une piste permet de se passer d'un test d'Orientation.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "ac33ee59-a8de-4d7d-b8d3-538602a35507"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.127056+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pistage",
+      "values": {
+        "Cadre (combiné)": "Culturel — Nul",
+        "Description": "Le Pistage permet de repérer les traces laissées par un individu ou une créature. Plus les traces sont petites, anciennes ou altérées par les évènements climatiques, plus le test est difficile. Suivre une piste permet de se passer d'un test d'Orientation.",
+        "Famille": "Culturel",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "ac33ee59-a8de-4d7d-b8d3-538602a35507"
+    }
+  }
+]

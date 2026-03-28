@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.041060+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Artisanat",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "L'Artisanat regroupe l'ensemble des savoir-faire techniques et créatifs permettant de créer, fabriquer et manipuler des objets et éléments divers avec ingéniosité. Cette compétence couvre toutes les professions artisanales ne disposant pas d'une compétence dédiée plus spécialisée.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "c57f3de1-9180-4e5b-83d2-430e53b75d13"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.073383+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Artisanat",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "L'Artisanat regroupe l'ensemble des savoir-faire techniques et créatifs permettant de créer, fabriquer et manipuler des objets et éléments divers avec ingéniosité. Cette compétence couvre toutes les professions artisanales ne disposant pas d'une compétence dédiée plus spécialisée.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "c57f3de1-9180-4e5b-83d2-430e53b75d13"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.160659+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Artisanat",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "L'Artisanat regroupe l'ensemble des savoir-faire techniques et créatifs permettant de créer, fabriquer et manipuler des objets et éléments divers avec ingéniosité. Cette compétence couvre toutes les professions artisanales ne disposant pas d'une compétence dédiée plus spécialisée.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "c57f3de1-9180-4e5b-83d2-430e53b75d13"
+    }
+  }
+]

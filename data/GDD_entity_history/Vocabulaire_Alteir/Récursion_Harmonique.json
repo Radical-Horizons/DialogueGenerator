@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.736646+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Récursion Harmonique",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Festivité mathématique du Xyriad.",
+        "Importance": "Secondaire",
+        "Origine": "De récursion (algorithme) et harmonique.",
+        "Popularité": "Localement",
+        "Type": "Mot-valise"
+      },
+      "notion_page_id": "d38a873b-2bd5-41b1-8e0c-8ba50d842203"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.992504+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Récursion Harmonique",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Festivité mathématique du Xyriad.",
+        "Importance": "Secondaire",
+        "Origine": "De récursion (algorithme) et harmonique.",
+        "Popularité": "Localement",
+        "Type": "Mot-valise"
+      },
+      "notion_page_id": "d38a873b-2bd5-41b1-8e0c-8ba50d842203"
+    }
+  }
+]

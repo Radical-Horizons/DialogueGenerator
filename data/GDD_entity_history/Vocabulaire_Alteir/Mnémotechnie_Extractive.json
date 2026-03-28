@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.410450+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Mnémotechnie Extractive",
+      "values": {
+        "Catégorie": "Technologie",
+        "Définition": "Technique d'extraction de souvenirs des Murmurateurs.",
+        "Importance": "Secondaire",
+        "Origine": "De mnémotechnique avec extractive.",
+        "Popularité": "Occulte",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "15ecf3ff-bc9b-4ee0-835d-90330d44dc5b"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.630244+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Mnémotechnie Extractive",
+      "values": {
+        "Catégorie": "Technologie",
+        "Définition": "Technique d'extraction de souvenirs des Murmurateurs.",
+        "Importance": "Secondaire",
+        "Origine": "De mnémotechnique avec extractive.",
+        "Popularité": "Occulte",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "15ecf3ff-bc9b-4ee0-835d-90330d44dc5b"
+    }
+  }
+]

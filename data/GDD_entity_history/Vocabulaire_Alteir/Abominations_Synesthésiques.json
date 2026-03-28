@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.662252+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Abominations Synesthésiques",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Créatures de l'Antichambre existant simultanément sous toutes formes, temps et états.",
+        "Importance": "Secondaire",
+        "Origine": "Expression évoquant des horreurs percevant tous les sens confondus.",
+        "Popularité": "Occulte",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "ad678bfb-a6cf-43b0-8c2f-b17ad5dd28d3"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.900893+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Abominations Synesthésiques",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Créatures de l'Antichambre existant simultanément sous toutes formes, temps et états.",
+        "Importance": "Secondaire",
+        "Origine": "Expression évoquant des horreurs percevant tous les sens confondus.",
+        "Popularité": "Occulte",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "ad678bfb-a6cf-43b0-8c2f-b17ad5dd28d3"
+    }
+  }
+]

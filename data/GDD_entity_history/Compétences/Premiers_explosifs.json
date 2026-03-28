@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.911113+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Premiers explosifs",
+      "values": {
+        "Cadre (combiné)": "Technologique — Faible",
+        "Description": "La compétence \"Premiers explosifs\" sert à introduire des éléments technologiques de base dans un cadre de jeu de rôle, permettant aux personnages d'interagir avec des dispositifs technologiques à faible niveau de complexité.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Retirée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "589e478f-fa7b-46ce-bb6b-3748cca0ca8c"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.927200+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Premiers explosifs",
+      "values": {
+        "Cadre (combiné)": "Technologique — Faible",
+        "Description": "La compétence \"Premiers explosifs\" sert à introduire des éléments technologiques de base dans un cadre de jeu de rôle, permettant aux personnages d'interagir avec des dispositifs technologiques à faible niveau de complexité.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Retirée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "589e478f-fa7b-46ce-bb6b-3748cca0ca8c"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.046650+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Premiers explosifs",
+      "values": {
+        "Cadre (combiné)": "Technologique — Faible",
+        "Description": "La compétence \"Premiers explosifs\" sert à introduire des éléments technologiques de base dans un cadre de jeu de rôle, permettant aux personnages d'interagir avec des dispositifs technologiques à faible niveau de complexité.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Faible",
+        "Statut": "Retirée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "589e478f-fa7b-46ce-bb6b-3748cca0ca8c"
+    }
+  }
+]

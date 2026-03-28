@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.644444+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Machine Pérégrine",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Rêveur mobile traversant perpétuellement les Plaines de l'Exuvie (cycles 95 Veilles).",
+        "Importance": "Important",
+        "Origine": "De pérégrin (qui voyage) avec Machine.",
+        "Popularité": "Régionalement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "9f51df69-15cc-42d7-b3bd-c96d3a74a3f8"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.877897+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Machine Pérégrine",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Rêveur mobile traversant perpétuellement les Plaines de l'Exuvie (cycles 95 Veilles).",
+        "Importance": "Important",
+        "Origine": "De pérégrin (qui voyage) avec Machine.",
+        "Popularité": "Régionalement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "9f51df69-15cc-42d7-b3bd-c96d3a74a3f8"
+    }
+  }
+]

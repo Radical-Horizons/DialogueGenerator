@@ -1,0 +1,59 @@
+[
+  {
+    "at": "2026-03-27T00:40:36.029459+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Croyances",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "038a5d66-40c5-4c40-8c10-bd50dca9b180",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "0f2e2784-9e57-4410-8b7e-6aca8c720413"
+    }
+  },
+  {
+    "at": "2026-03-27T20:03:48.331638+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Croyances",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "038a5d66-40c5-4c40-8c10-bd50dca9b180",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "0f2e2784-9e57-4410-8b7e-6aca8c720413"
+    }
+  },
+  {
+    "at": "2026-03-28T00:37:42.639184+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Uresaïr — FP — Croyances",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "038a5d66-40c5-4c40-8c10-bd50dca9b180",
+        "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+        "Modificateur temporaire": "0",
+        "Score": "2",
+        "Source": "Base",
+        "Valeur": "2",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "0f2e2784-9e57-4410-8b7e-6aca8c720413"
+    }
+  }
+]

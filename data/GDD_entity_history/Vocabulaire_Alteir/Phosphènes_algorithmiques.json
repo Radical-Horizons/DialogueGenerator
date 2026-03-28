@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.480239+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Phosphènes algorithmiques",
+      "values": {
+        "Catégorie": "Autre",
+        "Définition": "Résidus computationnels des Silenciations perturbant le Xyriad.",
+        "Importance": "Secondaire",
+        "Origine": "De phosphène (phénomène visuel) avec algorithmique.",
+        "Popularité": "Localement",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "338ab0bb-5c4a-4e6f-b440-cf894d13accf"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.681677+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Phosphènes algorithmiques",
+      "values": {
+        "Catégorie": "Autre",
+        "Définition": "Résidus computationnels des Silenciations perturbant le Xyriad.",
+        "Importance": "Secondaire",
+        "Origine": "De phosphène (phénomène visuel) avec algorithmique.",
+        "Popularité": "Localement",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "338ab0bb-5c4a-4e6f-b440-cf894d13accf"
+    }
+  }
+]

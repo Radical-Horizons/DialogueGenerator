@@ -5,7 +5,9 @@ import pytest
 
 from services.gdd_notion_sync_mirror import (
     archive_gdd_snapshot,
+    archive_gdd_snapshot_if_delta,
     collect_sync_targets,
+    gdd_live_matches_snapshot_dir,
     list_gdd_archives,
     partial_errors_block_mirror_promote,
     prune_archives,
@@ -108,3 +110,42 @@ def test_restore_gdd_from_archive_backup_current(tmp_path: Path) -> None:
     after = {p.name for p in (gdd / ".archive").iterdir() if p.is_dir()}
     assert len(after) >= len(before)
     assert (gdd / "data.json").read_text(encoding="utf-8") == "one"
+
+
+def test_gdd_live_matches_snapshot_dir_detects_delta(tmp_path: Path) -> None:
+    gdd = tmp_path / "gdd"
+    gdd.mkdir()
+    (gdd / "a.json").write_text("x", encoding="utf-8")
+    snap = archive_gdd_snapshot(gdd)
+    assert gdd_live_matches_snapshot_dir(gdd, snap) is True
+    (gdd / "a.json").write_text("y", encoding="utf-8")
+    assert gdd_live_matches_snapshot_dir(gdd, snap) is False
+
+
+def test_archive_gdd_snapshot_if_delta_skips_when_same_as_latest(tmp_path: Path) -> None:
+    gdd = tmp_path / "gdd"
+    gdd.mkdir()
+    (gdd / "x.json").write_text("1", encoding="utf-8")
+    first = archive_gdd_snapshot_if_delta(gdd)
+    assert first.created_new is True
+    dirs_after_first = {p.name for p in (gdd / ".archive").iterdir() if p.is_dir()}
+    second = archive_gdd_snapshot_if_delta(gdd)
+    assert second.created_new is False
+    assert second.archive_rel == first.archive_rel
+    dirs_after_second = {p.name for p in (gdd / ".archive").iterdir() if p.is_dir()}
+    assert dirs_after_second == dirs_after_first
+
+
+def test_restore_skips_duplicate_backup_when_live_matches_latest_archive(
+    tmp_path: Path,
+) -> None:
+    gdd = tmp_path / "gdd"
+    gdd.mkdir()
+    (gdd / "data.json").write_text("one", encoding="utf-8")
+    snap = archive_gdd_snapshot(gdd)
+    before = {p.name for p in (gdd / ".archive").iterdir() if p.is_dir()}
+    rel = restore_gdd_from_archive(
+        gdd, snap, backup_current=True, retention_count=10
+    )
+    assert rel == f".archive/{snap.name}"
+    assert {p.name for p in (gdd / ".archive").iterdir() if p.is_dir()} == before

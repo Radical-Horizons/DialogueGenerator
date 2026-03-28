@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.664580+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Meridhalis",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Conteurs-gardiens de la pureté de la langue abraldique.",
+        "Importance": "Secondaire",
+        "Origine": "De Merid (monde d'origine) avec suffixe.",
+        "Popularité": "Communautaire",
+        "Type": "Pure invention"
+      },
+      "notion_page_id": "ad856fa1-6e92-4da5-9589-f07afa6af377"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.903465+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Meridhalis",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Conteurs-gardiens de la pureté de la langue abraldique.",
+        "Importance": "Secondaire",
+        "Origine": "De Merid (monde d'origine) avec suffixe.",
+        "Popularité": "Communautaire",
+        "Type": "Pure invention"
+      },
+      "notion_page_id": "ad856fa1-6e92-4da5-9589-f07afa6af377"
+    }
+  }
+]

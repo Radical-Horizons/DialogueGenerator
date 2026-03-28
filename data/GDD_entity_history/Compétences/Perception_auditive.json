@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:24.047523+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Perception auditive",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "La Perception Auditive représente la capacité à se concentrer pour entendre distinctement un bruit lointain ou à entendre un individu qui essaie de se déplacer furtivement.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "cb35d35a-39c9-4c7c-9bde-e061995e0100"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.079202+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Perception auditive",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "La Perception Auditive représente la capacité à se concentrer pour entendre distinctement un bruit lointain ou à entendre un individu qui essaie de se déplacer furtivement.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "cb35d35a-39c9-4c7c-9bde-e061995e0100"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.165459+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Perception auditive",
+      "values": {
+        "Cadre (combiné)": "Biologique — Nul",
+        "Description": "La Perception Auditive représente la capacité à se concentrer pour entendre distinctement un bruit lointain ou à entendre un individu qui essaie de se déplacer furtivement.",
+        "Famille": "Biologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "cb35d35a-39c9-4c7c-9bde-e061995e0100"
+    }
+  }
+]

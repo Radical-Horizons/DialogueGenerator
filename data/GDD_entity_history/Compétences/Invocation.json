@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.878566+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Invocation",
+      "values": {
+        "Cadre (combiné)": "Surnaturel — Assez faible",
+        "Description": "La compétence \"Invocation\" permet d'appeler et de contrôler des entités surnaturelles pour obtenir leur aide ou réaliser des actions spécifiques dans le cadre d'un jeu de rôle.",
+        "Famille": "Surnaturel",
+        "Niveau de Cadre": "Assez faible",
+        "Statut": "Validée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "33066d89-216e-469b-80c4-d18e0c4f2572"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.890819+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Invocation",
+      "values": {
+        "Cadre (combiné)": "Surnaturel — Assez faible",
+        "Description": "La compétence \"Invocation\" permet d'appeler et de contrôler des entités surnaturelles pour obtenir leur aide ou réaliser des actions spécifiques dans le cadre d'un jeu de rôle.",
+        "Famille": "Surnaturel",
+        "Niveau de Cadre": "Assez faible",
+        "Statut": "Validée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "33066d89-216e-469b-80c4-d18e0c4f2572"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.018637+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Invocation",
+      "values": {
+        "Cadre (combiné)": "Surnaturel — Assez faible",
+        "Description": "La compétence \"Invocation\" permet d'appeler et de contrôler des entités surnaturelles pour obtenir leur aide ou réaliser des actions spécifiques dans le cadre d'un jeu de rôle.",
+        "Famille": "Surnaturel",
+        "Niveau de Cadre": "Assez faible",
+        "Statut": "Validée",
+        "Tags": "Création"
+      },
+      "notion_page_id": "33066d89-216e-469b-80c4-d18e0c4f2572"
+    }
+  }
+]

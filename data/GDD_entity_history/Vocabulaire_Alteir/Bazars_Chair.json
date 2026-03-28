@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.621199+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Bazars Chair",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Marchés clandestins d'organes/membres du Symbiotisme.",
+        "Importance": "Secondaire",
+        "Origine": "De bazar avec chair pour marché corporel.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "8e25333f-1549-452a-bb52-9e18e9d47563"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.848895+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Bazars Chair",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Marchés clandestins d'organes/membres du Symbiotisme.",
+        "Importance": "Secondaire",
+        "Origine": "De bazar avec chair pour marché corporel.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "8e25333f-1549-452a-bb52-9e18e9d47563"
+    }
+  }
+]

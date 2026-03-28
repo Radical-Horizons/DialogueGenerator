@@ -1,0 +1,38 @@
+[
+  {
+    "at": "2026-03-27T00:24:47.415269+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Lieux",
+      "sections": {
+        "_general": "**En cas d’évolution d’un lieu**\nVos lieux peuvent évoluer au cours de l’histoire. Exemple : Village → Ruine → Reconstruction du Village)\n• - Si ses évolutions sont mineures vous pouvez les intégrer directement dans la page lieu dédiée.\n• - Si les évolutions sont majeures, dupliquez le lieu en question, ajoutez son nouvel état à son Nom et modifiez la fiche en conséquence des évolutions."
+      },
+      "notion_page_id": "1886e4d2-1b45-8142-b6f9-fc6612574788"
+    }
+  },
+  {
+    "at": "2026-03-27T19:48:13.695752+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Lieux",
+      "sections": {
+        "_general": "**En cas d’évolution d’un lieu**\nVos lieux peuvent évoluer au cours de l’histoire. Exemple : Village → Ruine → Reconstruction du Village)\n• - Si ses évolutions sont mineures vous pouvez les intégrer directement dans la page lieu dédiée.\n• - Si les évolutions sont majeures, dupliquez le lieu en question, ajoutez son nouvel état à son Nom et modifiez la fiche en conséquence des évolutions."
+      },
+      "notion_page_id": "1886e4d2-1b45-8142-b6f9-fc6612574788"
+    }
+  },
+  {
+    "at": "2026-03-28T00:24:11.698007+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Lieux",
+      "sections": {
+        "_general": "**En cas d’évolution d’un lieu**\nVos lieux peuvent évoluer au cours de l’histoire. Exemple : Village → Ruine → Reconstruction du Village)\n• - Si ses évolutions sont mineures vous pouvez les intégrer directement dans la page lieu dédiée.\n• - Si les évolutions sont majeures, dupliquez le lieu en question, ajoutez son nouvel état à son Nom et modifiez la fiche en conséquence des évolutions."
+      },
+      "notion_page_id": "1886e4d2-1b45-8142-b6f9-fc6612574788"
+    }
+  }
+]

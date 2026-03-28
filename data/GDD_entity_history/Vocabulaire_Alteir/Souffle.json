@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.811459+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Souffle",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Longue période disposant d'une relative constance climatique et écosystémique sur Escelion. Équivalent d'une saison.",
+        "Importance": "Majeur",
+        "Origine": "Du français « souffle » (respiration), détourné pour évoquer les cycles saisonniers comme des respirations du monde.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "fd21796e-243f-4732-bbba-48d713175890"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:16.080380+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Souffle",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Longue période disposant d'une relative constance climatique et écosystémique sur Escelion. Équivalent d'une saison.",
+        "Importance": "Majeur",
+        "Origine": "Du français « souffle » (respiration), détourné pour évoquer les cycles saisonniers comme des respirations du monde.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "fd21796e-243f-4732-bbba-48d713175890"
+    }
+  }
+]

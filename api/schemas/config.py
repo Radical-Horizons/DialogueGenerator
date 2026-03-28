@@ -1,6 +1,14 @@
 """Schémas Pydantic pour les endpoints de configuration."""
+import sys
+from pathlib import Path
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
+
+_root_dir = Path(__file__).parent.parent.parent
+if str(_root_dir) not in sys.path:
+    sys.path.insert(0, str(_root_dir))
+
+from constants import Defaults
 
 
 class FieldInfo(BaseModel):
@@ -91,7 +99,12 @@ class ContextPreviewRequest(BaseModel):
     field_configs: Optional[Dict[str, List[str]]] = Field(None, description="Configuration des champs par type")
     organization_mode: Optional[str] = Field("default", description="Mode d'organisation")
     scene_instruction: Optional[str] = Field(None, description="Instructions de scène")
-    max_tokens: int = Field(default=1500, description="Nombre maximum de tokens")
+    max_tokens: int = Field(
+        default=Defaults.CONTEXT_TOKENS,
+        ge=Defaults.MIN_CONTEXT_TOKENS,
+        le=Defaults.MAX_CONTEXT_TOKENS,
+        description="Nombre maximum de tokens",
+    )
 
 
 class ContextPreviewResponse(BaseModel):

@@ -1,0 +1,62 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.034432+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Fondation du Culte de l'Anentropie",
+      "values": {
+        "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+        "Date de début": "3155",
+        "Date de fin": "3155",
+        "Description": "Après la révélation de l'Ensevelie dans les profondeurs du Léviathan Pétrifié, le jeune Akthar-Neth Amatru conclut un pacte fondateur lui conférant longévité exceptionnelle. Il structure le culte naissant autour d'une interprétation radicale du Barvasinkul, rejetant l'entropie et instaurant la Stasiarchie comme principe de gouvernance.",
+        "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+        "Importance": "Notable",
+        "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+        "Type d'événement": "Fondation"
+      },
+      "notion_page_id": "22c6e4d2-1b45-8082-ba15-d480332e0b03"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.576950+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Fondation du Culte de l'Anentropie",
+      "values": {
+        "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+        "Date de début": "3155",
+        "Date de fin": "3155",
+        "Description": "Après la révélation de l'Ensevelie dans les profondeurs du Léviathan Pétrifié, le jeune Akthar-Neth Amatru conclut un pacte fondateur lui conférant longévité exceptionnelle. Il structure le culte naissant autour d'une interprétation radicale du Barvasinkul, rejetant l'entropie et instaurant la Stasiarchie comme principe de gouvernance.",
+        "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+        "Importance": "Notable",
+        "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+        "Type d'événement": "Fondation"
+      },
+      "notion_page_id": "22c6e4d2-1b45-8082-ba15-d480332e0b03"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.350189+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Fondation du Culte de l'Anentropie",
+      "values": {
+        "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+        "Date de début": "3155",
+        "Date de fin": "3155",
+        "Description": "Après la révélation de l'Ensevelie dans les profondeurs du Léviathan Pétrifié, le jeune Akthar-Neth Amatru conclut un pacte fondateur lui conférant longévité exceptionnelle. Il structure le culte naissant autour d'une interprétation radicale du Barvasinkul, rejetant l'entropie et instaurant la Stasiarchie comme principe de gouvernance.",
+        "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+        "Importance": "Notable",
+        "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+        "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+        "Type d'événement": "Fondation"
+      },
+      "notion_page_id": "22c6e4d2-1b45-8082-ba15-d480332e0b03"
+    }
+  }
+]

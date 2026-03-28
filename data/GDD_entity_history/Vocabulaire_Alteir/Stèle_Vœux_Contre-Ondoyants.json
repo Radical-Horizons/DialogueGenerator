@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.558199+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Stèle Vœux Contre-Ondoyants",
+      "values": {
+        "Catégorie": "Artefact",
+        "Définition": "Monument résistance au Souffle Hakutō-Ah.",
+        "Importance": "Secondaire",
+        "Origine": "De stèle avec contre-ondoyant (résistant aux ondes).",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "6b98092f-0c8a-47d4-bdf7-1935f186b347"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.773130+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Stèle Vœux Contre-Ondoyants",
+      "values": {
+        "Catégorie": "Artefact",
+        "Définition": "Monument résistance au Souffle Hakutō-Ah.",
+        "Importance": "Secondaire",
+        "Origine": "De stèle avec contre-ondoyant (résistant aux ondes).",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "6b98092f-0c8a-47d4-bdf7-1935f186b347"
+    }
+  }
+]

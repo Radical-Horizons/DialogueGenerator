@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.499543+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Chœur Subaquatique",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Rêveur secondaire (891 AG) de 7 océans souterrains, 200m corail.",
+        "Importance": "Secondaire",
+        "Origine": "De chœur pour Rêveur collectif aquatique.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "3a6b1ac3-e45d-4c68-b74a-8dd8b79b9b79"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.703526+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Chœur Subaquatique",
+      "values": {
+        "Catégorie": "Créature",
+        "Définition": "Rêveur secondaire (891 AG) de 7 océans souterrains, 200m corail.",
+        "Importance": "Secondaire",
+        "Origine": "De chœur pour Rêveur collectif aquatique.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "3a6b1ac3-e45d-4c68-b74a-8dd8b79b9b79"
+    }
+  }
+]

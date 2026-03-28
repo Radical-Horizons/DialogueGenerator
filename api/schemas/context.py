@@ -208,7 +208,12 @@ class BuildContextRequest(BaseModel):
     """
     context_selections: ContextSelection = Field(..., description="Sélections de contexte GDD")
     user_instructions: str = Field(default="", description="Instructions utilisateur")
-    max_tokens: int = Field(default=1500, ge=100, le=Defaults.MAX_CONTEXT_TOKENS, description="Nombre maximum de tokens")
+    max_tokens: int = Field(
+        default=Defaults.CONTEXT_TOKENS,
+        ge=Defaults.MIN_CONTEXT_TOKENS,
+        le=Defaults.MAX_CONTEXT_TOKENS,
+        description="Nombre maximum de tokens",
+    )
     include_dialogue_type: bool = Field(default=False, description="Inclure le type de dialogue")
 
 

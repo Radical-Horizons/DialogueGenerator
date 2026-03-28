@@ -1,0 +1,38 @@
+[
+  {
+    "at": "2026-03-27T01:15:15.980163+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Thème de l’Ethérée (la Faim existentielle)",
+      "sections": {
+        "_general": "ID : ALTEIR_CHAR_ETHEREE_v01 · Catégorie : Exploration / Ciné\n\nZone/Scène : L'Éthérée (thème de personnage) · Priorité : P1 · Durée cible : 02:30\n\nIntention (1 phrase) : Vulnérabilité d'une conscience collective qui observe sans pouvoir toucher, mélodie fragmentée cherchant à se compléter.\n\nSuno – prompt tags (V5)\n\n- BPM 75 · Mesure 4/4 · Tonalité Amin\n\n- Palette cello solo rubato, felt piano, prepared piano, sparse strings sul tasto, bowed harmonics, delicate dissonances\n\n- Motif(s) mélodie descendante inachevée (4 notes), accords suspendus non résolus, silences expressifs\n\n- Autres chamber intimacy, free tempo passages, minimal percussion\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Interlude], [Verse], [Bridge], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : None (instrumental)\n\n- Weirdness : 40% · Garde une étrangeté subtile sans dénaturer l'intimité\n\n- Style Influence : 60% · Renforce le caractère chamber music mélancolique\n\n- Exclude styles : orchestral, romantic · Le cello/chamber peuvent déclencher un orchestre large ou un romantisme trop sentimental\n\n- Audio upload : none\n\n- Persona : none\n\n- Inspo : none\n\nSuno – prompt (EN, à coller tel quel)\n\nMelancholic chamber piece opens at 75 BPM in A minor: solo cello whispers a fragmented descending melody, phrases left incomplete and suspended. Felt piano adds sparse harmonic touches with prepared strings rattling softly; bowed harmonics shimmer in the high register. Delicate dissonances emerge and dissolve; intimate rubato passages drift between structured meter. The melody searches for resolution but never finds it, creating wistful longing. Loopable core 0:30-2:00. chamber, intimate, contemplative, sorrowful, introspective\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · Stems si dispo\n\nIntégration\n\n- Event mus/char_etheree · Snapshot/Bus mix/music · Parameters intensity 0–1\n\n- Transitions dialogue → etheree crossfade 800 ms, etheree → ambient fade 1200 ms"
+      },
+      "notion_page_id": "28e6e4d2-1b45-80fd-b35e-d8ff4d5314e8"
+    }
+  },
+  {
+    "at": "2026-03-27T20:36:29.880113+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Thème de l’Ethérée (la Faim existentielle)",
+      "sections": {
+        "_general": "ID : ALTEIR_CHAR_ETHEREE_v01 · Catégorie : Exploration / Ciné\n\nZone/Scène : L'Éthérée (thème de personnage) · Priorité : P1 · Durée cible : 02:30\n\nIntention (1 phrase) : Vulnérabilité d'une conscience collective qui observe sans pouvoir toucher, mélodie fragmentée cherchant à se compléter.\n\nSuno – prompt tags (V5)\n\n- BPM 75 · Mesure 4/4 · Tonalité Amin\n\n- Palette cello solo rubato, felt piano, prepared piano, sparse strings sul tasto, bowed harmonics, delicate dissonances\n\n- Motif(s) mélodie descendante inachevée (4 notes), accords suspendus non résolus, silences expressifs\n\n- Autres chamber intimacy, free tempo passages, minimal percussion\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Interlude], [Verse], [Bridge], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : None (instrumental)\n\n- Weirdness : 40% · Garde une étrangeté subtile sans dénaturer l'intimité\n\n- Style Influence : 60% · Renforce le caractère chamber music mélancolique\n\n- Exclude styles : orchestral, romantic · Le cello/chamber peuvent déclencher un orchestre large ou un romantisme trop sentimental\n\n- Audio upload : none\n\n- Persona : none\n\n- Inspo : none\n\nSuno – prompt (EN, à coller tel quel)\n\nMelancholic chamber piece opens at 75 BPM in A minor: solo cello whispers a fragmented descending melody, phrases left incomplete and suspended. Felt piano adds sparse harmonic touches with prepared strings rattling softly; bowed harmonics shimmer in the high register. Delicate dissonances emerge and dissolve; intimate rubato passages drift between structured meter. The melody searches for resolution but never finds it, creating wistful longing. Loopable core 0:30-2:00. chamber, intimate, contemplative, sorrowful, introspective\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · Stems si dispo\n\nIntégration\n\n- Event mus/char_etheree · Snapshot/Bus mix/music · Parameters intensity 0–1\n\n- Transitions dialogue → etheree crossfade 800 ms, etheree → ambient fade 1200 ms"
+      },
+      "notion_page_id": "28e6e4d2-1b45-80fd-b35e-d8ff4d5314e8"
+    }
+  },
+  {
+    "at": "2026-03-28T01:06:36.810067+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Thème de l’Ethérée (la Faim existentielle)",
+      "sections": {
+        "_general": "ID : ALTEIR_CHAR_ETHEREE_v01 · Catégorie : Exploration / Ciné\n\nZone/Scène : L'Éthérée (thème de personnage) · Priorité : P1 · Durée cible : 02:30\n\nIntention (1 phrase) : Vulnérabilité d'une conscience collective qui observe sans pouvoir toucher, mélodie fragmentée cherchant à se compléter.\n\nSuno – prompt tags (V5)\n\n- BPM 75 · Mesure 4/4 · Tonalité Amin\n\n- Palette cello solo rubato, felt piano, prepared piano, sparse strings sul tasto, bowed harmonics, delicate dissonances\n\n- Motif(s) mélodie descendante inachevée (4 notes), accords suspendus non résolus, silences expressifs\n\n- Autres chamber intimacy, free tempo passages, minimal percussion\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Interlude], [Verse], [Bridge], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : None (instrumental)\n\n- Weirdness : 40% · Garde une étrangeté subtile sans dénaturer l'intimité\n\n- Style Influence : 60% · Renforce le caractère chamber music mélancolique\n\n- Exclude styles : orchestral, romantic · Le cello/chamber peuvent déclencher un orchestre large ou un romantisme trop sentimental\n\n- Audio upload : none\n\n- Persona : none\n\n- Inspo : none\n\nSuno – prompt (EN, à coller tel quel)\n\nMelancholic chamber piece opens at 75 BPM in A minor: solo cello whispers a fragmented descending melody, phrases left incomplete and suspended. Felt piano adds sparse harmonic touches with prepared strings rattling softly; bowed harmonics shimmer in the high register. Delicate dissonances emerge and dissolve; intimate rubato passages drift between structured meter. The melody searches for resolution but never finds it, creating wistful longing. Loopable core 0:30-2:00. chamber, intimate, contemplative, sorrowful, introspective\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · Stems si dispo\n\nIntégration\n\n- Event mus/char_etheree · Snapshot/Bus mix/music · Parameters intensity 0–1\n\n- Transitions dialogue → etheree crossfade 800 ms, etheree → ambient fade 1200 ms"
+      },
+      "notion_page_id": "28e6e4d2-1b45-80fd-b35e-d8ff4d5314e8"
+    }
+  }
+]

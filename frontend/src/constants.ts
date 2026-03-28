@@ -35,15 +35,18 @@ export const DEFAULT_MODEL = MODEL_NAMES.GPT_5_MINI
  * Ces valeurs doivent correspondre à celles définies dans constants.py (Defaults.MAX_CONTEXT_TOKENS, Defaults.MIN_CONTEXT_TOKENS)
  */
 export const CONTEXT_TOKENS_LIMITS = {
-  /** Minimum autorisé pour le slider (10K) */
+  /** Minimum autorisé (aligné API max_context_tokens et budget contexte FR20 — plancher sérieux LLM) */
   MIN: 10000,
   /** Maximum autorisé pour le slider et l'API (100K) */
   MAX: 100000,
-  /** Pas du slider (5K) */
-  STEP: 5000,
+  /** Pas du slider */
+  STEP: 1000,
   /** Valeur par défaut (50K) */
   DEFAULT: 50000,
 } as const
+
+/** Optimisation auto du contexte (FR21) — activer quand l'endpoint existe. */
+export const CONTEXT_OPTIMIZE_API_ENABLED = false
 
 /**
  * Limites pour les tokens de completion (génération).

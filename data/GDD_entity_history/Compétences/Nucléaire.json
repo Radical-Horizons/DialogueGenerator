@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.898959+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Nucléaire",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La compétence \"Nucléaire\" est utilisée pour développer des technologies avancées dans le domaine nucléaire, permettant des applications variées allant de la production d'énergie à la recherche scientifique.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Validée",
+        "Tags": "Création, Savoir"
+      },
+      "notion_page_id": "4a8eba62-8cf3-4532-a049-32df5285e633"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.912011+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Nucléaire",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La compétence \"Nucléaire\" est utilisée pour développer des technologies avancées dans le domaine nucléaire, permettant des applications variées allant de la production d'énergie à la recherche scientifique.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Validée",
+        "Tags": "Création, Savoir"
+      },
+      "notion_page_id": "4a8eba62-8cf3-4532-a049-32df5285e633"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.035390+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Nucléaire",
+      "values": {
+        "Cadre (combiné)": "Technologique — Assez avancé",
+        "Description": "La compétence \"Nucléaire\" est utilisée pour développer des technologies avancées dans le domaine nucléaire, permettant des applications variées allant de la production d'énergie à la recherche scientifique.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Assez avancé",
+        "Statut": "Validée",
+        "Tags": "Création, Savoir"
+      },
+      "notion_page_id": "4a8eba62-8cf3-4532-a049-32df5285e633"
+    }
+  }
+]

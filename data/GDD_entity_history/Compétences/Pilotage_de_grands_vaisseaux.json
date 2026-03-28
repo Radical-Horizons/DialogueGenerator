@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.863840+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pilotage de grands vaisseaux",
+      "values": {
+        "Cadre (combiné)": "Technologique — Avancé",
+        "Description": "Pilotage de Grands Vaisseaux permet d'utiliser des vaisseaux nécessitant plusieurs pilotes.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Avancé",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "28285023-517b-459a-b998-31049da43846"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:44.872279+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pilotage de grands vaisseaux",
+      "values": {
+        "Cadre (combiné)": "Technologique — Avancé",
+        "Description": "Pilotage de Grands Vaisseaux permet d'utiliser des vaisseaux nécessitant plusieurs pilotes.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Avancé",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "28285023-517b-459a-b998-31049da43846"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.006913+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Pilotage de grands vaisseaux",
+      "values": {
+        "Cadre (combiné)": "Technologique — Avancé",
+        "Description": "Pilotage de Grands Vaisseaux permet d'utiliser des vaisseaux nécessitant plusieurs pilotes.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Avancé",
+        "Statut": "Validée",
+        "Tags": "Savoir-faire"
+      },
+      "notion_page_id": "28285023-517b-459a-b998-31049da43846"
+    }
+  }
+]

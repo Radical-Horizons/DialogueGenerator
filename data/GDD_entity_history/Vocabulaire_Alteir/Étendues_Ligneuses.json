@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.521548+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Étendues Ligneuses",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Un des quatre océans élémentaires d'Escelion, correspondant à l'élément bois. Vastes zones de fluide ligneux.",
+        "Importance": "Modéré",
+        "Origine": "De « étendues » avec l'adjectif « ligneuses » (relatif au bois), désignant les océans de fluide végétal.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "45f108a7-da15-43d6-8027-cf57dc38510f"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.730054+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Étendues Ligneuses",
+      "values": {
+        "Catégorie": "Lieu",
+        "Définition": "Un des quatre océans élémentaires d'Escelion, correspondant à l'élément bois. Vastes zones de fluide ligneux.",
+        "Importance": "Modéré",
+        "Origine": "De « étendues » avec l'adjectif « ligneuses » (relatif au bois), désignant les océans de fluide végétal.",
+        "Popularité": "Mondialement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "45f108a7-da15-43d6-8027-cf57dc38510f"
+    }
+  }
+]

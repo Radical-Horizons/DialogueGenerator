@@ -27,7 +27,7 @@ export function Header() {
     | 'shortcuts'
     | 'usage'
     | 'logs'
-  >('context')
+  >('general')
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
@@ -65,7 +65,7 @@ export function Header() {
         key: 'ctrl+,',
         handler: () => {
           if (isAuthenticated && user && actions.handleGenerate) {
-            setOptionsModalInitialTab('context')
+            setOptionsModalInitialTab('general')
             setIsOptionsModalOpen(true)
           }
         },
@@ -168,7 +168,7 @@ export function Header() {
             {/* Bouton Options */}
             <button
               onClick={() => {
-                setOptionsModalInitialTab('context')
+                setOptionsModalInitialTab('general')
                 setIsOptionsModalOpen(true)
               }}
               style={{

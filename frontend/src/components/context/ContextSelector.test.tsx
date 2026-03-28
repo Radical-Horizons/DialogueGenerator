@@ -76,6 +76,7 @@ describe('ContextSelector', () => {
       refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
       isElementSelected: mockIsElementSelected,
       suggestions: [],
+      gddDataRevision: 0,
     } as ReturnType<typeof useContextStore>)
 
     // Mock des appels API par défaut (page, page_size, total_pages pour pagination)
@@ -167,6 +168,7 @@ describe('ContextSelector', () => {
       setSuggestions: mockSetSuggestions,
       isElementSelected: vi.fn((type) => type === 'characters'),
       suggestions: [],
+      gddDataRevision: 0,
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSelector />)
@@ -243,7 +245,7 @@ describe('ContextSelector', () => {
 
     await waitFor(() => {
       expect(contextAPI.getCharacter).toHaveBeenCalledWith('Test Character')
-      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter)
+      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter, 'personnages')
     })
   })
 
@@ -328,6 +330,7 @@ describe('ContextSelector', () => {
       refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
       isElementSelected: mockIsElementSelected,
       suggestions: [],
+      gddDataRevision: 0,
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSelector />)
@@ -366,6 +369,7 @@ describe('ContextSelector', () => {
       setSuggestions: mockSetSuggestions,
       isElementSelected: mockIsElementSelected,
       suggestions: [],
+      gddDataRevision: 0,
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSelector />)
@@ -405,6 +409,7 @@ describe('ContextSelector', () => {
       refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
       isElementSelected: mockIsElementSelected,
       suggestions: [],
+      gddDataRevision: 0,
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSelector />)
@@ -442,7 +447,7 @@ describe('ContextSelector', () => {
     await user.click(characterItem)
 
     await waitFor(() => {
-      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter)
+      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter, 'personnages')
     })
 
     // Changer d'onglet
@@ -451,7 +456,7 @@ describe('ContextSelector', () => {
 
     // La sélection devrait être réinitialisée
     await waitFor(() => {
-      expect(mockOnItemSelected).toHaveBeenCalledWith(null)
+      expect(mockOnItemSelected).toHaveBeenLastCalledWith(null, null)
     })
   })
 })

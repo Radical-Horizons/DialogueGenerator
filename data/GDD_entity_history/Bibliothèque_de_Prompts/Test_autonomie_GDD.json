@@ -1,0 +1,38 @@
+[
+  {
+    "at": "2026-03-27T00:25:54.324514+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Test autonomie GDD",
+      "sections": {
+        "_general": "**Helpful Hints**\n• - Joindre les GDD scrap depuis Notion (ou essayer l’API Notion) - Peut aussi être testé sur d’autres matériaux (ex: guides de présentation)\n• - Real example - Kimi K2.5 agent : fail \n\n## Full prompt (only for complexe prompts)"
+      },
+      "notion_page_id": "2f66e4d2-1b45-8087-ba34-e5a6d7714b13"
+    }
+  },
+  {
+    "at": "2026-03-27T19:49:05.296128+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Test autonomie GDD",
+      "sections": {
+        "_general": "**Helpful Hints**\n• - Joindre les GDD scrap depuis Notion (ou essayer l’API Notion) - Peut aussi être testé sur d’autres matériaux (ex: guides de présentation)\n• - Real example - Kimi K2.5 agent : fail \n\n## Full prompt (only for complexe prompts)"
+      },
+      "notion_page_id": "2f66e4d2-1b45-8087-ba34-e5a6d7714b13"
+    }
+  },
+  {
+    "at": "2026-03-28T00:24:59.288910+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Test autonomie GDD",
+      "sections": {
+        "_general": "**Helpful Hints**\n• - Joindre les GDD scrap depuis Notion (ou essayer l’API Notion) - Peut aussi être testé sur d’autres matériaux (ex: guides de présentation)\n• - Real example - Kimi K2.5 agent : fail \n\n## Full prompt (only for complexe prompts)"
+      },
+      "notion_page_id": "2f66e4d2-1b45-8087-ba34-e5a6d7714b13"
+    }
+  }
+]

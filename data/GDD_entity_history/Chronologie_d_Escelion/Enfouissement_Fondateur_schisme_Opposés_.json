@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:31:06.285512+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Enfouissement Fondateur (schisme Opposés)",
+      "values": {
+        "Date de début": "780",
+        "Date de fin": "780",
+        "Description": "Premier schisme de l'espèce : un groupe dissident refuse la verticalité de La Flèche et migre vers les profondeurs avec des fragments de mur d'incubation. Fondation des tours Opposés à croissance inversée.",
+        "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+        "Importance": "Important",
+        "Type d'événement": "Migration"
+      },
+      "notion_page_id": "6b7bfb64-53c9-48c5-8800-f539d80c7293"
+    }
+  },
+  {
+    "at": "2026-03-27T19:53:11.780874+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Enfouissement Fondateur (schisme Opposés)",
+      "values": {
+        "Date de début": "780",
+        "Date de fin": "780",
+        "Description": "Premier schisme de l'espèce : un groupe dissident refuse la verticalité de La Flèche et migre vers les profondeurs avec des fragments de mur d'incubation. Fondation des tours Opposés à croissance inversée.",
+        "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+        "Importance": "Important",
+        "Type d'événement": "Migration"
+      },
+      "notion_page_id": "6b7bfb64-53c9-48c5-8800-f539d80c7293"
+    }
+  },
+  {
+    "at": "2026-03-28T00:28:44.526557+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Enfouissement Fondateur (schisme Opposés)",
+      "values": {
+        "Date de début": "780",
+        "Date de fin": "780",
+        "Description": "Premier schisme de l'espèce : un groupe dissident refuse la verticalité de La Flèche et migre vers les profondeurs avec des fragments de mur d'incubation. Fondation des tours Opposés à croissance inversée.",
+        "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+        "Importance": "Important",
+        "Type d'événement": "Migration"
+      },
+      "notion_page_id": "6b7bfb64-53c9-48c5-8800-f539d80c7293"
+    }
+  }
+]

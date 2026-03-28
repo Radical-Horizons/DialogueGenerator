@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.417906+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Lame d'ossements",
+      "values": {
+        "Catégorie": "Artefact",
+        "Définition": "Arme unique à ossification progressive.",
+        "Importance": "Secondaire",
+        "Origine": "De lame avec ossements pour arme osseuse.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "1bceda89-76ce-4013-bb51-e9000717eea5"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.639891+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Lame d'ossements",
+      "values": {
+        "Catégorie": "Artefact",
+        "Définition": "Arme unique à ossification progressive.",
+        "Importance": "Secondaire",
+        "Origine": "De lame avec ossements pour arme osseuse.",
+        "Popularité": "Occulte",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "1bceda89-76ce-4013-bb51-e9000717eea5"
+    }
+  }
+]

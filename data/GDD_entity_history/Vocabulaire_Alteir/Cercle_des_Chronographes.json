@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.615849+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Cercle des Chronographes",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Organe de surveillance thaumaturgique d'Iodan-liaqar, chargé de mesurer les conséquences temporelles des décisions d'Uresaïr sur Merid. Collaborateurs circonstanciels lors de la création du Cadran des Sept Fractures.",
+        "Importance": "Important",
+        "Origine": "Expression désignant un groupe d'archivistes du temps et des événements.",
+        "Popularité": "Occulte",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "8cbf3cf8-80b2-4cd1-b683-84f048245f66"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:15.842856+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Cercle des Chronographes",
+      "values": {
+        "Catégorie": "Organisation",
+        "Définition": "Organe de surveillance thaumaturgique d'Iodan-liaqar, chargé de mesurer les conséquences temporelles des décisions d'Uresaïr sur Merid. Collaborateurs circonstanciels lors de la création du Cadran des Sept Fractures.",
+        "Importance": "Important",
+        "Origine": "Expression désignant un groupe d'archivistes du temps et des événements.",
+        "Popularité": "Occulte",
+        "Type": "Néologisme"
+      },
+      "notion_page_id": "8cbf3cf8-80b2-4cd1-b683-84f048245f66"
+    }
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.794210+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Gouvernance Récursive",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Système mathématique auto-régulant du Xyriad.",
+        "Importance": "Modéré",
+        "Origine": "De récursif (qui se répète) pour gouvernement algorithmique.",
+        "Popularité": "Localement",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "f4677852-f395-48e8-b6f5-34a6e6805774"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:16.059565+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Gouvernance Récursive",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Système mathématique auto-régulant du Xyriad.",
+        "Importance": "Modéré",
+        "Origine": "De récursif (qui se répète) pour gouvernement algorithmique.",
+        "Popularité": "Localement",
+        "Type": "Dérivation sémantique"
+      },
+      "notion_page_id": "f4677852-f395-48e8-b6f5-34a6e6805774"
+    }
+  }
+]

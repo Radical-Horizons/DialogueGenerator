@@ -290,7 +290,7 @@ class TestBuildContext:
                 "locations_full": ["Forest"]
             },
             "user_instructions": "Test scene",
-            "max_tokens": 1000
+            "max_tokens": 10000
         }
         
         response = client.post("/api/v1/context/build", json=request_data)
@@ -306,7 +306,7 @@ class TestBuildContext:
         """Test de construction avec sélection vide."""
         request_data = {
             "context_selections": {},
-            "max_tokens": 1000
+            "max_tokens": 10000
         }
         
         response = client.post("/api/v1/context/build", json=request_data)
@@ -328,7 +328,7 @@ class TestEstimateTokens:
                 "locations_full": ["Forest"]
             },
             "user_instructions": "Test scene",
-            "max_tokens": 1000
+            "max_context_tokens": 10000,
         }
         
         response = client.post("/api/v1/context/estimate-tokens", json=request_data)
@@ -340,13 +340,16 @@ class TestEstimateTokens:
             assert "context_tokens" in data
             assert "total_estimated_tokens" in data
             assert isinstance(data["context_tokens"], int)
+            assert "selection_tokens" in data
+            assert "context_token_breakdown" in data
+            assert isinstance(data["context_token_breakdown"], list)
     
     def test_estimate_tokens_empty(self, client, mock_context_builder):
         """Test d'estimation avec sélection vide."""
         request_data = {
             "context_selections": {},
             "user_instructions": "Test instructions",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
         
         response = client.post("/api/v1/context/estimate-tokens", json=request_data)

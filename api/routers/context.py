@@ -37,6 +37,8 @@ from api.schemas.gdd_context_stale import (
     GddEntityHistoryResponse,
     GddEntityHistoryEventPublic,
 )
+from constants import Defaults
+from services.context_token_budget import compute_context_selection_token_metrics
 from api.dependencies import (
     get_context_builder,
     get_linked_selector_service,
@@ -521,6 +523,15 @@ async def estimate_context_tokens(
         )
         context_text = context_builder.serialize_context_to_text(structured_context)
         context_tokens = context_builder._count_tokens(context_text)
+
+        metrics = compute_context_selection_token_metrics(
+            context_builder,
+            full_selection=request_data.context_selections,
+            user_instructions=request_data.user_instructions,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+            measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+        )
         
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
@@ -532,6 +543,9 @@ async def estimate_context_tokens(
         
         return EstimateTokensResponse(
             context_tokens=context_tokens,
+            selection_tokens=metrics.selection_tokens,
+            context_token_breakdown=metrics.breakdown,
+            context_breakdown_note=metrics.breakdown_note,
             token_count=built.token_count,
             total_estimated_tokens=built.token_count,
             raw_prompt=built.raw_prompt,

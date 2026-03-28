@@ -17,6 +17,7 @@ import { theme } from '../../theme'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import * as configAPI from '../../api/config'
+import { type BudgetResponse } from '../../api/costs'
 import { InfoIcon } from '../shared/Tooltip'
 
 export interface GenerationOptionsModalProps {
@@ -55,7 +56,7 @@ export function GenerationOptionsModal({
   isOpen,
   onClose,
   onApply,
-  initialTab = 'context',
+  initialTab = 'general',
 }: GenerationOptionsModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab as TabId)
   
@@ -573,7 +574,7 @@ function GeneralTab({
   previewTokens: number
   isLoadingPreview: boolean
   onPreview: () => void
-  onBudgetUpdated?: (budget: { allowed: boolean; message?: string; [key: string]: unknown }) => void
+  onBudgetUpdated?: (budget: BudgetResponse) => void
 }) {
   return (
     <div>

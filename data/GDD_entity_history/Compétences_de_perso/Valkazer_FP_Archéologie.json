@@ -1,0 +1,62 @@
+[
+  {
+    "at": "2026-03-27T00:40:36.087990+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Archéologie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Modificateur temporaire": "0",
+        "Notes": "Expertise avancée : fouille des archives de Vol, absorption du Glossaire, découverte d'Alteir et Jast, déchiffrage de systèmes anciens",
+        "Score": "8",
+        "Source": "Base",
+        "Valeur": "8",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "bd7e4f30-874d-44d7-886f-0581dee38600"
+    }
+  },
+  {
+    "at": "2026-03-27T20:03:48.396253+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Archéologie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Modificateur temporaire": "0",
+        "Notes": "Expertise avancée : fouille des archives de Vol, absorption du Glossaire, découverte d'Alteir et Jast, déchiffrage de systèmes anciens",
+        "Score": "8",
+        "Source": "Base",
+        "Valeur": "8",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "bd7e4f30-874d-44d7-886f-0581dee38600"
+    }
+  },
+  {
+    "at": "2026-03-28T00:37:42.693267+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Valkazer — FP — Archéologie",
+      "values": {
+        "Cadre": "Culturel",
+        "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
+        "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+        "Modificateur temporaire": "0",
+        "Notes": "Expertise avancée : fouille des archives de Vol, absorption du Glossaire, découverte d'Alteir et Jast, déchiffrage de systèmes anciens",
+        "Score": "8",
+        "Source": "Base",
+        "Valeur": "8",
+        "Verrouillée ?": "non"
+      },
+      "notion_page_id": "bd7e4f30-874d-44d7-886f-0581dee38600"
+    }
+  }
+]

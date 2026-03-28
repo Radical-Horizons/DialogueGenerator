@@ -84,8 +84,17 @@ export interface EstimateTokensRequest extends BasePromptRequest {
   organization_mode?: string
 }
 
+export interface ContextTokenBreakdownRow {
+  entity_type: string
+  mode: string
+  token_count: number
+}
+
 export interface EstimateTokensResponse {
   context_tokens: number
+  selection_tokens: number
+  context_token_breakdown: ContextTokenBreakdownRow[]
+  context_breakdown_note: string
   token_count: number
   raw_prompt: RawPrompt
   prompt_hash: string

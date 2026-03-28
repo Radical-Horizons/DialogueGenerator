@@ -1,0 +1,53 @@
+[
+  {
+    "at": "2026-03-27T00:39:23.994020+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Systèmes de Communication",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "Certains systèmes de communication sont aussi primitifs que les signaux de fumée, tandis que d'autres permettent de communiquer à des milliers de kilomètres de distance.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "a7b8aef4-746a-45a9-a1ca-a6033116f183"
+    }
+  },
+  {
+    "at": "2026-03-27T20:02:45.026534+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Systèmes de Communication",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "Certains systèmes de communication sont aussi primitifs que les signaux de fumée, tandis que d'autres permettent de communiquer à des milliers de kilomètres de distance.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "a7b8aef4-746a-45a9-a1ca-a6033116f183"
+    }
+  },
+  {
+    "at": "2026-03-28T00:36:44.121648+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Systèmes de Communication",
+      "values": {
+        "Cadre (combiné)": "Technologique — Nul",
+        "Description": "Certains systèmes de communication sont aussi primitifs que les signaux de fumée, tandis que d'autres permettent de communiquer à des milliers de kilomètres de distance.",
+        "Famille": "Technologique",
+        "Niveau de Cadre": "Nul",
+        "Statut": "Validée",
+        "Tags": "Investigation"
+      },
+      "notion_page_id": "a7b8aef4-746a-45a9-a1ca-a6033116f183"
+    }
+  }
+]

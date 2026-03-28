@@ -541,3 +541,102 @@ async def test_test_connection_without_token(tmp_path: Path, monkeypatch: pytest
     r = await svc.test_connection()
     assert r["ok"] is False
     assert "Token" in r["message"] or "token" in r["message"].lower()
+
+
+@pytest.mark.asyncio
+async def test_full_sync_resume_skips_completed_source(tmp_path: Path) -> None:
+    """Reprise : les sources déjà dans le checkpoint ne rappellent pas Notion."""
+    from services.gdd_notion_full_sync_checkpoint import (
+        FullSyncCheckpointState,
+        compute_sources_fingerprint,
+        save_checkpoint,
+    )
+
+    pid_a = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+    pid_b = "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+
+    class FakeClient:
+        get_page_ids: list[str] = []
+
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            FakeClient.get_page_ids.append(page_id)
+            title = "A" if page_id == pid_a else "B"
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-01-01T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": title}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return f"body-{page_id}"
+
+        async def query_database(self, database_id: str) -> list:
+            return []
+
+    settings = {
+        "schema_version": 1,
+        "sync_interval_minutes": 60,
+        "auto_sync_enabled": False,
+        "sources": [
+            {"kind": "page", "notion_id": pid_a, "category_file": "a.json"},
+            {"kind": "page", "notion_id": pid_b, "category_file": "b.json"},
+        ],
+        "included_categories": [],
+    }
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(settings)
+    fp = compute_sources_fingerprint(settings["sources"], [])
+
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    sync_dir = tmp_path / "sync"
+    sync_dir.mkdir()
+    status_path = sync_dir / "status.json"
+
+    run_name = "20260101T120000Z_deadbeef"
+    staging = gdd_dir / ".staging" / run_name
+    staging.mkdir(parents=True)
+    (staging / "a.json").write_text(
+        json.dumps([{"Nom": "A", "sections": {"_general": "x"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    from services.gdd_notion_manifest import GddNotionManifest
+
+    man = GddNotionManifest()
+    man.set_edited(pid_a, "2025-01-01T00:00:00.000Z")
+    st = FullSyncCheckpointState(
+        staging_run_name=run_name,
+        archive_rel=".archive/fake",
+        eligible_category_files=["a.json", "b.json"],
+        completed_category_files=["a.json"],
+        sources_fingerprint=fp,
+        updated_entities=1,
+    )
+    save_checkpoint(sync_dir, st, man)
+
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=status_path,
+        client_factory=lambda _k: FakeClient(),
+    )
+    FakeClient.get_page_ids.clear()
+    res = await svc.run_sync(force_full=True, resume=True, request_id="resume-test")
+    assert res.success
+    assert pid_a not in FakeClient.get_page_ids
+    assert all(x == pid_b for x in FakeClient.get_page_ids)
+    assert len(FakeClient.get_page_ids) >= 1
+    assert (gdd_dir / "b.json").is_file()
+    ck_after = (sync_dir / "full_sync_checkpoint.json")
+    assert not ck_after.exists()
