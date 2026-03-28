@@ -29,7 +29,7 @@ def test_record_and_load_entity_history(tmp_path: Path) -> None:
 
 def test_diff_snapshots_json() -> None:
     d = diff_snapshots_json({"a": 1}, {"a": 2})
-    assert "avant" in d and "après" in d
+    assert "@@" in d or ("-" in d and "+" in d)
 
 
 def test_diff_identical() -> None:

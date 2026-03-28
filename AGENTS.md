@@ -22,7 +22,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 - **`.env` file**: Copy from `.env.example`. Required for JWT auth and config. Default dev credentials: `admin` / `admin123`.
 - **No real LLM key needed for basic dev**: Without `OPENAI_API_KEY`, the backend uses `DummyLLMClient` (mock responses). Set a real key for actual dialogue generation.
 - **Frontend ESLint**: Has 7 pre-existing lint errors (unused vars). This is a known state.
-- **Frontend Vitest**: All 537 tests pass as of last run. If a test suddenly fails, check whether it tests a feature that was silently removed rather than assuming the test is obsolete.
+- **Frontend Vitest**: Suite large (~700+ tests) — un run complet prend plusieurs minutes. Préférer `cd frontend && npm run test:quick` (fichiers modifiés vs git) ou `npm run test:bail` (arrêt au 1er échec). Pour tout valider : `npm run test:ci` (affiche la progression **et** écrit `tmp/vitest-results.json`) puis `node scripts/vitest-summary.js`. **Ne pas** piper Vitest dans PowerShell (`| Select-Object`) : tout est bufferisé jusqu’à la fin. Si un test échoue, vérifier si la fonctionnalité a été retirée plutôt que supposer le test obsolète.
 - **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
 
 ### Commands reference
@@ -32,7 +32,8 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 - **Backend tests**: `.venv/bin/python -m pytest tests/ -x --tb=short`
 - **Frontend lint**: `cd frontend && npx eslint . --ext ts,tsx`
 - **Frontend tests (ciblés)**: `cd frontend && npx vitest run src/mon/dossier/ > ..\tmp\vitest-out.txt 2>&1` puis lire `tmp\vitest-out.txt` (évite le pipe buffering PowerShell)
-- **Frontend tests (suite complète)**: `cd frontend && npm run test:ci` puis `node scripts/vitest-summary.js` pour le résumé
+- **Frontend tests (rapide / après edits)**: `cd frontend && npm run test:quick` (`vitest --changed`)
+- **Frontend tests (suite complète)**: `cd frontend && npm run test:ci` puis `node scripts/vitest-summary.js` (ou `test:ci:json-only` si uniquement le JSON)
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
 
 ## Learned User Preferences

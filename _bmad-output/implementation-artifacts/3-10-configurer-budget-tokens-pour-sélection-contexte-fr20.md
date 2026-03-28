@@ -1,6 +1,6 @@
 # Story 3.10 : Configurer budget tokens pour sélection contexte (FR20)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -134,6 +134,8 @@ so that **je contrôle la taille du bloc contexte dans le prompt et je peux mieu
 
 ## Change Log
 
+- 2026-03-28 : Suivi code-review **[1]** — tests `useGenerationRequest.test.tsx` (mapping `max_context_tokens`) ; doc `EstimateTokensResponse` (Pydantic + `frontend/src/types/api.ts`) ; docstring perf `estimate_context_tokens` ; test budget `ContextTokenBudgetSection` aligné plancher 10k ; story → **done**.
+- 2026-03-28 : Code review (BMAD) — outcome **Changes Requested** ; détail dans « Senior Developer Review (AI) ».
 - 2026-03-27 : Implémentation FR20 — budget tokens contexte (Zustand persist), extension `estimate-tokens` (`selection_tokens`, breakdown par type/mode), UI `ContextTokenBudgetSection`, CTA optimisation désactivé + tooltip FR21 (`CONTEXT_OPTIMIZE_API_ENABLED`), politique **soft** pour la génération (avertissement non bloquant, aligné 1.11).
 - 2026-03-27 : **Plancher produit** `max_context_tokens` / budget UI / `Defaults.CONTEXT_TOKENS` portés à **10 000** tokens (plus 100) — alignement epic-03, schémas Pydantic, constantes front.
 
@@ -154,6 +156,7 @@ _(aucun incident bloquant en fin de story)_
 - **Backend** : `services/context_token_budget.py` — `compute_context_selection_token_metrics()` (sélection complète + breakdown isolé par bucket) ; réponse `EstimateTokensResponse` enrichie ; même logique branchée sur `context` et `dialogues` estimate où applicable.
 - **Front** : `useContextSelectionTokenEstimate` (debounce) ; `GenerationPanel` lit/écrit le budget via `contextConfigStore` et synchronise les instructions vers `generationStore` (guards Vitest sur `getState`).
 - **🔵 Refactor** : constantes `CONTEXT_TOKENS_LIMITS`, `CONTEXT_OPTIMIZE_API_ENABLED` ; breakdown documenté via `context_breakdown_note` quand le total agrégé peut différer de la somme des lignes.
+- **Post-revue (option [1])** : test ciblé `useGenerationRequest.test.tsx` pour Task 5 ; clarté `context_tokens` vs `selection_tokens` (schéma + types TS) ; coût multi-build documenté sur l’endpoint estimate.
 
 ### File List
 
@@ -171,13 +174,36 @@ _(aucun incident bloquant en fin de story)_
 - `frontend/src/api/context.ts`
 - `frontend/src/types/api.ts`
 - `frontend/src/hooks/useContextSelectionTokenEstimate.ts`
+- `frontend/src/hooks/useGenerationRequest.test.tsx`
 - `frontend/src/components/context/ContextTokenBudgetSection.tsx`
 - `frontend/src/components/context/ContextTokenBudgetSection.test.tsx`
 - `frontend/src/components/context/ContextSelector.tsx`
 - `frontend/src/components/generation/GenerationPanel.tsx`
 - `frontend/src/components/generation/__tests__/GenerationPanel.integration.test.tsx`
+- _(FR21 / UI budget)_ : `frontend/src/components/context/ContextOptimizeModal.tsx`, `frontend/src/utils/buildContextOptimizeRequest.ts` (hors périmètre strict 3.10 si story 3.11 isolée)
 
 ## Story Completion Status
 
-- **Statut** : review
-- **Note** : Prêt pour workflow code-review ; story 3.11 activera le CTA optimisation quand l’API sera disponible.
+- **Statut** : **done** (correctifs post-revue option **[1]** appliqués)
+- **Note** : CTA « Optimiser » suit `CONTEXT_OPTIMIZE_API_ENABLED` ; composants FR21 listés ci-dessus pour traçabilité.
+
+## Senior Developer Review (AI)
+
+**Reviewer:** Amelia (Dev) — **Date initiale:** 2026-03-28 — **Outcome final:** **Approuvé après correctifs**
+
+### Validation AC
+
+| AC | Verdict |
+|----|---------|
+| #1–#5 | OK (inchangé) |
+
+### Résolution findings
+
+| Id | Gravité | Résolution |
+|----|---------|------------|
+| 1 | MEDIUM | `frontend/src/hooks/useGenerationRequest.test.tsx` — assertion `max_context_tokens` = `maxContextTokens` (42k / 12k) |
+| 2 | MEDIUM | `api/schemas/dialogue.py` (`Field` + doc classe) ; `frontend/src/types/api.ts` JSDoc sur `EstimateTokensResponse` |
+| 3 | MEDIUM | Docstring `estimate_context_tokens` dans `api/routers/context.py` (multi-build breakdown) |
+| 4 | LOW | `ContextTokenBudgetSection.test.tsx` : plafond 10_000 + `selection_tokens` 25_000 |
+| 5 | LOW | File List enrichie (modal FR21 en note) |
+| 6 | LOW | Change log + statut **done** reflètent FR21 actif côté constantes |

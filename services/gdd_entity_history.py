@@ -1,6 +1,7 @@
 """Historique local des versions d'entités GDD (Story 3.9 FR19), alimenté par la sync Notion."""
 from __future__ import annotations
 
+import difflib
 import json
 import re
 from datetime import datetime, timezone
@@ -10,6 +11,7 @@ from typing import Any, Dict, List, Optional
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 
 _MAX_EVENTS_PER_ENTITY = 40
+_MAX_DIFF_OUTPUT_LINES = 180
 
 _HISTORY_ROOT = Path("data") / "GDD_entity_history"
 
@@ -76,9 +78,30 @@ def load_entity_history(
 
 
 def diff_snapshots_json(before: Dict[str, Any], after: Dict[str, Any]) -> str:
-    """Diff texte minimal entre deux snapshots (MVP, pas un vrai diff unifié)."""
-    b = json.dumps(before, sort_keys=True, ensure_ascii=False, indent=2, default=str)
-    a = json.dumps(after, sort_keys=True, ensure_ascii=False, indent=2, default=str)
-    if b == a:
+    """Diff unifié lisible entre deux snapshots JSON (tronqué si très long)."""
+    b_lines = json.dumps(
+        before, sort_keys=True, ensure_ascii=False, indent=2, default=str
+    ).splitlines()
+    a_lines = json.dumps(
+        after, sort_keys=True, ensure_ascii=False, indent=2, default=str
+    ).splitlines()
+    if b_lines == a_lines:
         return "(aucun changement de contenu sérialisé)"
-    return f"--- avant ({len(b)} car.)\n+++ après ({len(a)} car.)\n"
+    ud = list(
+        difflib.unified_diff(
+            b_lines,
+            a_lines,
+            fromfile="avant",
+            tofile="après",
+            lineterm="",
+            n=2,
+        )
+    )
+    if not ud:
+        return "(aucun changement de contenu sérialisé)"
+    if len(ud) <= _MAX_DIFF_OUTPUT_LINES:
+        return "\n".join(ud)
+    head = ud[: _MAX_DIFF_OUTPUT_LINES - 1]
+    omitted = len(ud) - len(head)
+    head.append(f"... ({omitted} lignes omises)")
+    return "\n".join(head)

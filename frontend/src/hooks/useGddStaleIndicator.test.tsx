@@ -55,7 +55,7 @@ describe('useGddStaleIndicator', () => {
         gddContextSelectionsSnapshot: snapshot,
       }),
     )
-    await waitFor(() => expect(result.current.checking).toBe(false))
+    await waitFor(() => expect(result.current.checking).toBe(false), { timeout: 4000 })
     expect(result.current.stale).toBe(true)
     expect(apiPost).toHaveBeenCalled()
   })

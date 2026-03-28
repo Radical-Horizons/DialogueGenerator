@@ -67,6 +67,17 @@ describe('contextConfigStore', () => {
     expect(store.organization).toBe('default')
   })
 
+  it('devrait borner les règles d’optimisation contexte (FR21)', () => {
+    useContextConfigStore.getState().setContextOptimizationPinnedKeys(['a', 'a', 'characters:X'])
+    expect(useContextConfigStore.getState().contextOptimizationPinnedKeys).toEqual(['a', 'characters:X'])
+    useContextConfigStore.getState().setContextOptimizationStrategy('aggressive')
+    expect(useContextConfigStore.getState().contextOptimizationStrategy).toBe('aggressive')
+    useContextConfigStore.getState().setContextOptimizationProxyThreshold(0)
+    expect(useContextConfigStore.getState().contextOptimizationProxyThreshold).toBe(1)
+    useContextConfigStore.getState().setContextOptimizationProxyThreshold(200)
+    expect(useContextConfigStore.getState().contextOptimizationProxyThreshold).toBe(100)
+  })
+
   it('devrait borner le budget tokens contexte (FR20)', () => {
     useContextConfigStore.getState().setContextTokenBudgetMax(25_000)
     expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(25_000)

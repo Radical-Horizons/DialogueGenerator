@@ -45,8 +45,8 @@ export const CONTEXT_TOKENS_LIMITS = {
   DEFAULT: 50000,
 } as const
 
-/** Optimisation auto du contexte (FR21) — activer quand l'endpoint existe. */
-export const CONTEXT_OPTIMIZE_API_ENABLED = false
+/** Optimisation auto du contexte (FR21) — POST /api/v1/context/optimize. */
+export const CONTEXT_OPTIMIZE_API_ENABLED = true
 
 /**
  * Limites pour les tokens de completion (génération).

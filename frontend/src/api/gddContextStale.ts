@@ -19,10 +19,18 @@ export async function postGddContentFingerprint(
   return data
 }
 
+export interface GddEntityHistoryEvent {
+  at: string
+  source: string
+  summary: string
+  snapshot?: Record<string, unknown> | null
+  diff_from_previous?: string | null
+}
+
 export interface GddEntityHistoryResponse {
   category: string
   name: string
-  events: Array<{ at: string; source: string; summary: string }>
+  events: GddEntityHistoryEvent[]
   diff_hint?: string | null
   previous_snapshot?: Record<string, unknown> | null
   current_snapshot?: Record<string, unknown> | null
@@ -31,10 +39,17 @@ export interface GddEntityHistoryResponse {
 export async function getGddEntityHistory(
   category: string,
   name: string,
+  options?: { includeSnapshots?: boolean },
 ): Promise<GddEntityHistoryResponse> {
   const { data } = await apiClient.get<GddEntityHistoryResponse>(
     '/api/v1/context/gdd-entity-history',
-    { params: { category, name } },
+    {
+      params: {
+        category,
+        name,
+        include_snapshots: options?.includeSnapshots === true,
+      },
+    },
   )
   return data
 }

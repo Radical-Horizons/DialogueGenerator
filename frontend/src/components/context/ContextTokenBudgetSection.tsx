@@ -1,11 +1,12 @@
 /**
  * Budget tokens pour la sélection de contexte GDD (FR20).
  */
-import { useId, useState } from 'react'
+import { useId, useState, useCallback } from 'react'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextSelectionTokenEstimate } from '../../hooks/useContextSelectionTokenEstimate'
 import { CONTEXT_OPTIMIZE_API_ENABLED, CONTEXT_TOKENS_LIMITS } from '../../constants'
 import { theme } from '../../theme'
+import { ContextOptimizeModal } from './ContextOptimizeModal'
 
 const ENTITY_LABELS: Record<string, string> = {
   characters: 'Personnages',
@@ -19,11 +20,16 @@ export function ContextTokenBudgetSection() {
   const budgetId = useId()
   const statusId = useId()
   const [detailsOpen, setDetailsOpen] = useState(false)
+  const [optimizeOpen, setOptimizeOpen] = useState(false)
 
   const contextTokenBudgetMax = useContextConfigStore((s) => s.contextTokenBudgetMax)
   const setContextTokenBudgetMax = useContextConfigStore((s) => s.setContextTokenBudgetMax)
 
-  const { data, loading, error } = useContextSelectionTokenEstimate()
+  const { data, loading, error, refresh } = useContextSelectionTokenEstimate()
+
+  const handleOptimizeApplied = useCallback(() => {
+    void refresh()
+  }, [refresh])
 
   const selectionTokens = data?.selection_tokens ?? 0
   const overBudget = selectionTokens > contextTokenBudgetMax
@@ -126,6 +132,7 @@ export function ContextTokenBudgetSection() {
             type="button"
             data-testid="context-optimize-cta"
             disabled={!CONTEXT_OPTIMIZE_API_ENABLED}
+            onClick={() => CONTEXT_OPTIMIZE_API_ENABLED && setOptimizeOpen(true)}
             title={
               CONTEXT_OPTIMIZE_API_ENABLED
                 ? 'Optimiser le contexte (FR21)'
@@ -147,6 +154,12 @@ export function ContextTokenBudgetSection() {
           </button>
         </div>
       )}
+
+      <ContextOptimizeModal
+        open={optimizeOpen}
+        onClose={() => setOptimizeOpen(false)}
+        onApplied={handleOptimizeApplied}
+      />
 
       <details open={detailsOpen} onToggle={(e) => setDetailsOpen((e.target as HTMLDetailsElement).open)}>
         <summary

@@ -27,11 +27,19 @@ class GddContentFingerprintResponse(BaseModel):
 
 
 class GddEntityHistoryEventPublic(BaseModel):
-    """Événement d'historique (sans snapshot complet dans la liste courte)."""
+    """Événement d'historique ; snapshots optionnels selon la requête."""
 
     at: str
     source: str
     summary: str
+    snapshot: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Snapshot GDD à cette entrée si include_snapshots=true",
+    )
+    diff_from_previous: Optional[str] = Field(
+        None,
+        description="Diff texte vs l'entrée précédente (si include_snapshots et index > 0)",
+    )
 
 
 class GddEntityHistoryResponse(BaseModel):

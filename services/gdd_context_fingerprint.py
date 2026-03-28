@@ -4,12 +4,20 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from typing import Any, Dict, List, Optional
+import threading
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
-# Limite haute pour éviter la troncature contextuelle dans l'empreinte (cohérence « contenu entité »).
-_FINGERPRINT_MAX_CONTEXT_TOKENS = 999_999
+# Plafond tokens pour l'empreinte (aligné génération : évite charge excessive tout en couvrant le contenu).
+_FINGERPRINT_MAX_CONTEXT_TOKENS = 200_000
+
+_FINGERPRINT_CACHE_LOCK = threading.Lock()
+_FINGERPRINT_CACHE: Dict[str, Tuple[float, str]] = {}
+_FINGERPRINT_CACHE_TTL_SEC = 4.0
+_FINGERPRINT_CACHE_MAX_ENTRIES = 512
 
 
 def structured_context_fingerprint(structured: Dict[str, Any]) -> str:
@@ -23,6 +31,55 @@ def structured_context_fingerprint(structured: Dict[str, Any]) -> str:
     """
     canonical = json.dumps(structured, sort_keys=True, ensure_ascii=False, default=str)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _repo_root_for_fingerprint_cache(context_builder: Any) -> Path:
+    """Déduit la racine projet depuis le builder (pour mtime manifeste / GDD)."""
+    try:
+        p = getattr(context_builder, "_gdd_categories_path", None)
+        if p is not None:
+            gp = Path(p).resolve()
+            if gp.name.lower() == "gdd_categories" and gp.parent.name.lower() == "data":
+                return gp.parent.parent
+    except (OSError, TypeError, ValueError):
+        pass
+    from core.context.context_builder import PROJECT_ROOT_DIR
+
+    return Path(PROJECT_ROOT_DIR)
+
+
+def _gdd_invalidation_token(repo_root: Path) -> str:
+    """Jeton lié aux écritures GDD (manifeste sync + mtime du dossier catégories)."""
+    parts: List[str] = []
+    manifest = repo_root / "data" / ".gdd_snapshot" / "manifest.json"
+    try:
+        if manifest.is_file():
+            parts.append(str(manifest.stat().st_mtime_ns))
+    except OSError:
+        pass
+    gdd_dir = repo_root / "data" / "GDD_categories"
+    try:
+        if gdd_dir.is_dir():
+            parts.append(str(gdd_dir.stat().st_mtime_ns))
+    except OSError:
+        pass
+    return "|".join(parts) if parts else "0"
+
+
+def _prune_fingerprint_cache(now: float) -> None:
+    """Retire les entrées expirées ; si trop volumineux, vide le cache."""
+    global _FINGERPRINT_CACHE
+    expired_keys = [k for k, (exp, _) in _FINGERPRINT_CACHE.items() if exp <= now]
+    for k in expired_keys:
+        del _FINGERPRINT_CACHE[k]
+    if len(_FINGERPRINT_CACHE) > _FINGERPRINT_CACHE_MAX_ENTRIES:
+        _FINGERPRINT_CACHE = {}
+
+
+def clear_gdd_content_fingerprint_cache() -> None:
+    """Vide le cache d'empreinte (tests ou invalidation explicite)."""
+    with _FINGERPRINT_CACHE_LOCK:
+        _FINGERPRINT_CACHE.clear()
 
 
 def compute_gdd_content_fingerprint(
@@ -50,6 +107,30 @@ def compute_gdd_content_fingerprint(
     Raises:
         RuntimeError: Si le context builder n'est pas initialisé après chargement.
     """
+    repo = _repo_root_for_fingerprint_cache(context_builder)
+    inv = _gdd_invalidation_token(repo)
+    cache_basis = json.dumps(
+        {
+            "sel": context_selections,
+            "fc": field_configs,
+            "org": organization_mode,
+            "em": element_modes,
+            "inv": inv,
+        },
+        sort_keys=True,
+        ensure_ascii=False,
+        default=str,
+    )
+    cache_key = hashlib.sha256(cache_basis.encode("utf-8")).hexdigest()
+    now = time.monotonic()
+    with _FINGERPRINT_CACHE_LOCK:
+        _prune_fingerprint_cache(now)
+        hit = _FINGERPRINT_CACHE.get(cache_key)
+        if hit is not None:
+            expires_at, cached_fp = hit
+            if now < expires_at:
+                return cached_fp
+
     context_builder.load_gdd_files()
     payload = dict(context_selections) if isinstance(context_selections, dict) else {}
     modes = element_modes
@@ -66,4 +147,7 @@ def compute_gdd_content_fingerprint(
         include_dialogue_type=True,
         element_modes=modes,
     )
-    return structured_context_fingerprint(structured)
+    fp = structured_context_fingerprint(structured)
+    with _FINGERPRINT_CACHE_LOCK:
+        _FINGERPRINT_CACHE[cache_key] = (now + _FINGERPRINT_CACHE_TTL_SEC, fp)
+    return fp

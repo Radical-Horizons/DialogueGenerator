@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import { postGddContentFingerprint } from '../api/gddContextStale'
 import { useContextConfigStore } from '../store/contextConfigStore'
 
+const FINGERPRINT_DEBOUNCE_MS = 280
+
 export interface GddStaleNodeDataRef {
   id: string
   contextGddContentFingerprint?: unknown
@@ -36,35 +38,41 @@ export function useGddStaleIndicator(nodeData: GddStaleNodeDataRef): {
     let cancelled = false
     setChecking(true)
 
-    void (async () => {
-      try {
-        const { fieldConfigs, essentialFields, organization } = useContextConfigStore.getState()
-        const field_configs: Record<string, string[]> = {}
-        for (const [elementType, fields] of Object.entries(fieldConfigs)) {
-          const essential = essentialFields[elementType] || []
-          field_configs[elementType] = [...new Set([...essential, ...fields])]
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const { fieldConfigs, essentialFields, organization } = useContextConfigStore.getState()
+          const field_configs: Record<string, string[]> = {}
+          for (const [elementType, fields] of Object.entries(fieldConfigs)) {
+            const essential = essentialFields[elementType] || []
+            field_configs[elementType] = [...new Set([...essential, ...fields])]
+          }
+          const { fingerprint } = await postGddContentFingerprint({
+            context_selections: snap as Record<string, unknown>,
+            field_configs: Object.keys(field_configs).length > 0 ? field_configs : undefined,
+            organization_mode: organization,
+          })
+          if (!cancelled) {
+            setStale(fingerprint !== fp)
+          }
+        } catch (err) {
+          if (import.meta.env.DEV) {
+            console.debug('[useGddStaleIndicator] fingerprint request failed', err)
+          }
+          if (!cancelled) {
+            setStale(false)
+          }
+        } finally {
+          if (!cancelled) {
+            setChecking(false)
+          }
         }
-        const { fingerprint } = await postGddContentFingerprint({
-          context_selections: snap as Record<string, unknown>,
-          field_configs: Object.keys(field_configs).length > 0 ? field_configs : undefined,
-          organization_mode: organization,
-        })
-        if (!cancelled) {
-          setStale(fingerprint !== fp)
-        }
-      } catch {
-        if (!cancelled) {
-          setStale(false)
-        }
-      } finally {
-        if (!cancelled) {
-          setChecking(false)
-        }
-      }
-    })()
+      })()
+    }, FINGERPRINT_DEBOUNCE_MS)
 
     return () => {
       cancelled = true
+      window.clearTimeout(timer)
     }
   }, [
     nodeData.id,

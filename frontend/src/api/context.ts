@@ -2,7 +2,12 @@
  * API client pour le contexte GDD (personnages, lieux, objets).
  */
 import apiClient from './client'
-import type { EstimateTokensRequest, EstimateTokensResponse } from '../types/api'
+import type {
+  EstimateTokensRequest,
+  EstimateTokensResponse,
+  OptimizeContextRequest,
+  OptimizeContextResponse,
+} from '../types/api'
 import type {
   CharacterResponse,
   CharacterListResponse,
@@ -232,6 +237,16 @@ export async function putRulesByDialogueType(
  */
 export async function estimateContextTokens(body: EstimateTokensRequest): Promise<EstimateTokensResponse> {
   const response = await apiClient.post<EstimateTokensResponse>('/api/v1/context/estimate-tokens', body)
+  return response.data
+}
+
+/**
+ * Propose une sélection GDD réduite sous le budget tokens (FR21).
+ */
+export async function optimizeContextSelection(
+  body: OptimizeContextRequest
+): Promise<OptimizeContextResponse> {
+  const response = await apiClient.post<OptimizeContextResponse>('/api/v1/context/optimize', body)
   return response.data
 }
 

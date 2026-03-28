@@ -70,5 +70,41 @@
       },
       "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
     }
+  },
+  {
+    "at": "2026-03-28T11:34:13.924963+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "B",
+      "sections": {
+        "_general": "body-1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+      },
+      "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+    }
+  },
+  {
+    "at": "2026-03-28T11:37:31.272303+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "B",
+      "sections": {
+        "_general": "body-1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+      },
+      "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+    }
+  },
+  {
+    "at": "2026-03-28T12:05:47.208327+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "B",
+      "sections": {
+        "_general": "body-1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+      },
+      "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+    }
   }
 ]

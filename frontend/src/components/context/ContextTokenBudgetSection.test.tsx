@@ -7,7 +7,7 @@ vi.mock('../../hooks/useContextSelectionTokenEstimate', () => ({
   useContextSelectionTokenEstimate: () => ({
     data: {
       context_tokens: 10,
-      selection_tokens: 250,
+      selection_tokens: 25_000,
       context_token_breakdown: [
         { entity_type: 'characters', mode: 'full', token_count: 80 },
       ],
@@ -24,15 +24,15 @@ vi.mock('../../hooks/useContextSelectionTokenEstimate', () => ({
 
 describe('ContextTokenBudgetSection', () => {
   beforeEach(() => {
-    useContextConfigStore.setState({ contextTokenBudgetMax: 100 })
+    useContextConfigStore.setState({ contextTokenBudgetMax: 10_000 })
   })
 
-  it('affiche le dépassement de budget et le CTA optimisation désactivé (FR21)', async () => {
+  it('affiche le dépassement de budget et le CTA optimisation actif quand l’API FR21 est activée', async () => {
     render(<ContextTokenBudgetSection />)
 
     expect(await screen.findByTestId('context-token-budget-warning')).toBeInTheDocument()
     const cta = screen.getByTestId('context-optimize-cta')
-    expect(cta).toBeDisabled()
+    expect(cta).not.toBeDisabled()
     expect(cta.getAttribute('title')).toContain('FR21')
   })
 

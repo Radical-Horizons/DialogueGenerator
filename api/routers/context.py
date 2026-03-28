@@ -1,6 +1,6 @@
 """Router pour le contexte GDD."""
 import logging
-from typing import Annotated, Optional
+from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status
 from api.schemas.context import (
     CharacterListResponse,
@@ -30,7 +30,12 @@ from api.schemas.context_rules import (
     RulesListResponse,
     DialogueTypeRulesResponse,
 )
-from api.schemas.dialogue import EstimateTokensRequest, EstimateTokensResponse
+from api.schemas.dialogue import (
+    EstimateTokensRequest,
+    EstimateTokensResponse,
+    OptimizeContextRequest,
+    OptimizeContextResponse,
+)
 from api.schemas.gdd_context_stale import (
     GddContentFingerprintRequest,
     GddContentFingerprintResponse,
@@ -39,6 +44,7 @@ from api.schemas.gdd_context_stale import (
 )
 from constants import Defaults
 from services.context_token_budget import compute_context_selection_token_metrics
+from services.context_selection_optimizer import optimize_context_selection
 from api.dependencies import (
     get_context_builder,
     get_linked_selector_service,
@@ -485,7 +491,12 @@ async def estimate_context_tokens(
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> EstimateTokensResponse:
     """Estime le nombre de tokens pour un contexte donné.
-    
+
+    Coût: pour le breakdown FR20, ``compute_context_selection_token_metrics`` peut invoquer
+    jusqu'à une construction + sérialisation + comptage par compartiment de sélection non vide
+    (un passage pour la sélection complète, puis un par bucket type/mode), en plus du build
+    prompt complet. Prévoir une charge CPU proportionnelle à la richesse de la sélection.
+
     Args:
         request_data: Données de la requête (sélections, instructions).
         request: La requête HTTP.
@@ -495,9 +506,10 @@ async def estimate_context_tokens(
         skill_service: SkillCatalogService injecté.
         trait_service: TraitCatalogService injecté.
         request_id: ID de la requête.
-        
+
     Returns:
-        Estimation du nombre de tokens.
+        Estimation du nombre de tokens. Voir ``EstimateTokensResponse`` pour la distinction
+        ``context_tokens`` (tronqué au budget requête) vs ``selection_tokens`` (mesure pleine).
     """
     try:
         # Utiliser la même fonction que dialogues.py pour construire le prompt complet
@@ -563,6 +575,51 @@ async def estimate_context_tokens(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+@router.post(
+    "/optimize",
+    response_model=OptimizeContextResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def optimize_context(
+    request_data: OptimizeContextRequest,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> OptimizeContextResponse:
+    """Propose une sélection GDD réduite pour respecter le budget tokens (FR21).
+
+    Mesure via le même pipeline que ``/estimate-tokens`` (``selection_tokens``).
+
+    Args:
+        request_data: Sélection + paramètres alignés estimate-tokens + règles d'optimisation.
+        request: Requête HTTP.
+        context_builder: ContextBuilder injecté.
+        request_id: ID de corrélation.
+
+    Returns:
+        Sélection proposée, métriques et avertissements éventuels.
+    """
+    try:
+        return optimize_context_selection(
+            context_builder,
+            initial_selection=request_data.context_selections,
+            user_instructions=request_data.user_instructions,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+            budget_tokens=request_data.max_context_tokens,
+            rules=request_data.optimization_rules,
+        )
+    except Exception as e:
+        logger.exception(
+            "Erreur lors de l'optimisation de contexte (request_id: %s)", request_id
+        )
+        raise InternalServerException(
+            message="Erreur lors de l'optimisation de contexte",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
 
 
 @router.get(
@@ -1144,9 +1201,11 @@ async def get_gdd_entity_history(
     category: str,
     name: str,
     request_id: Annotated[str, Depends(get_request_id)],
+    include_snapshots: bool = False,
 ) -> GddEntityHistoryResponse:
     """Timeline locale des modifications d'une entité GDD (alimentée par sync Notion)."""
     from core.context.context_builder import PROJECT_ROOT_DIR
+    from services.gdd_category_entity_lookup import live_gdd_entity_exists
     from services.gdd_entity_history import diff_snapshots_json, load_entity_history
 
     cat = (category or "").strip()
@@ -1158,15 +1217,36 @@ async def get_gdd_entity_history(
         )
 
     raw = load_entity_history(PROJECT_ROOT_DIR, cat, nom)
-    events_pub = [
-        GddEntityHistoryEventPublic(
-            at=str(e.get("at", "")),
-            source=str(e.get("source", "")),
-            summary=str(e.get("summary", "")),
+    if not raw and not live_gdd_entity_exists(PROJECT_ROOT_DIR, cat, nom):
+        raise NotFoundException(
+            resource_type="Entité GDD",
+            resource_id=f"{cat}/{nom}",
+            request_id=request_id,
         )
-        for e in raw
-        if isinstance(e, dict)
-    ]
+
+    events_pub: List[GddEntityHistoryEventPublic] = []
+    for i, e in enumerate(raw):
+        if not isinstance(e, dict):
+            continue
+        snap: Optional[Dict[str, Any]] = None
+        diff_prev: Optional[str] = None
+        if include_snapshots:
+            s = e.get("snapshot")
+            if isinstance(s, dict):
+                snap = s
+            if i > 0 and isinstance(raw[i - 1], dict):
+                ps = raw[i - 1].get("snapshot")
+                if isinstance(ps, dict) and isinstance(snap, dict):
+                    diff_prev = diff_snapshots_json(ps, snap)
+        events_pub.append(
+            GddEntityHistoryEventPublic(
+                at=str(e.get("at", "")),
+                source=str(e.get("source", "")),
+                summary=str(e.get("summary", "")),
+                snapshot=snap,
+                diff_from_previous=diff_prev,
+            )
+        )
 
     diff_hint: Optional[str] = None
     prev_snap: Optional[Dict[str, Any]] = None

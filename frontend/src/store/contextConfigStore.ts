@@ -11,6 +11,18 @@ function clampContextTokenBudget(value: number): number {
   return Math.min(CONTEXT_TOKENS_LIMITS.MAX, Math.max(CONTEXT_TOKENS_LIMITS.MIN, n))
 }
 
+const MAX_OPTIMIZATION_PINS = 200
+
+function clampOptimizationPins(keys: string[]): string[] {
+  const uniq = [...new Set(keys.map((k) => k.trim()).filter(Boolean))]
+  return uniq.slice(0, MAX_OPTIMIZATION_PINS)
+}
+
+function clampProxyThreshold(n: number): number {
+  const x = Number.isFinite(n) ? Math.round(n) : 50
+  return Math.min(100, Math.max(1, x))
+}
+
 export interface FieldInfo {
   path: string
   label: string
@@ -90,6 +102,15 @@ interface ContextConfigState {
   /** Budget tokens sélection GDD (FR20) — source de vérité pour max_context_tokens côté génération */
   contextTokenBudgetMax: number
   setContextTokenBudgetMax: (value: number) => void
+
+  /** FR21 — clés « type:nom » à ne pas réduire en premier (max 200 côté API) */
+  contextOptimizationPinnedKeys: string[]
+  setContextOptimizationPinnedKeys: (keys: string[]) => void
+  contextOptimizationStrategy: 'conservative' | 'aggressive'
+  setContextOptimizationStrategy: (s: 'conservative' | 'aggressive') => void
+  /** Seuil d’avertissement proxy pré-génération (1–100) */
+  contextOptimizationProxyThreshold: number
+  setContextOptimizationProxyThreshold: (n: number) => void
 }
 
 const defaultFieldConfigs: Record<string, string[]> = {
@@ -114,9 +135,22 @@ export const useContextConfigStore = create<ContextConfigState>()(
       isLoading: false,
       error: null,
       contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
+      contextOptimizationPinnedKeys: [],
+      contextOptimizationStrategy: 'conservative',
+      contextOptimizationProxyThreshold: 50,
 
       setContextTokenBudgetMax: (value) => {
         set({ contextTokenBudgetMax: clampContextTokenBudget(value) })
+      },
+
+      setContextOptimizationPinnedKeys: (keys) => {
+        set({ contextOptimizationPinnedKeys: clampOptimizationPins(keys) })
+      },
+      setContextOptimizationStrategy: (s) => {
+        set({ contextOptimizationStrategy: s })
+      },
+      setContextOptimizationProxyThreshold: (n) => {
+        set({ contextOptimizationProxyThreshold: clampProxyThreshold(n) })
       },
 
   setFieldConfig: (elementType, fields) => {
@@ -361,6 +395,9 @@ export const useContextConfigStore = create<ContextConfigState>()(
       fieldConfigs: resetFieldConfigs,
       organization: 'default',
       contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
+      contextOptimizationPinnedKeys: [],
+      contextOptimizationStrategy: 'conservative',
+      contextOptimizationProxyThreshold: 50,
     })
   },
 
@@ -402,6 +439,9 @@ export const useContextConfigStore = create<ContextConfigState>()(
         fieldConfigs: state.fieldConfigs,
         organization: state.organization,
         contextTokenBudgetMax: state.contextTokenBudgetMax,
+        contextOptimizationPinnedKeys: state.contextOptimizationPinnedKeys,
+        contextOptimizationStrategy: state.contextOptimizationStrategy,
+        contextOptimizationProxyThreshold: state.contextOptimizationProxyThreshold,
       }),
       // Toujours reconstituer les clés attendues (même si le localStorage ne les contient pas)
       merge: (persistedState, currentState) => {
@@ -411,11 +451,27 @@ export const useContextConfigStore = create<ContextConfigState>()(
           persisted?.contextTokenBudgetMax !== undefined
             ? clampContextTokenBudget(persisted.contextTokenBudgetMax)
             : currentState.contextTokenBudgetMax
+        const pins =
+          persisted?.contextOptimizationPinnedKeys !== undefined
+            ? clampOptimizationPins(persisted.contextOptimizationPinnedKeys)
+            : currentState.contextOptimizationPinnedKeys
+        const strat =
+          persisted?.contextOptimizationStrategy === 'aggressive' ||
+          persisted?.contextOptimizationStrategy === 'conservative'
+            ? persisted.contextOptimizationStrategy
+            : currentState.contextOptimizationStrategy
+        const pthr =
+          persisted?.contextOptimizationProxyThreshold !== undefined
+            ? clampProxyThreshold(persisted.contextOptimizationProxyThreshold)
+            : currentState.contextOptimizationProxyThreshold
         return {
           ...currentState,
           ...persisted,
           fieldConfigs: { ...defaultFieldConfigs, ...persistedFieldConfigs },
           contextTokenBudgetMax: budget,
+          contextOptimizationPinnedKeys: pins,
+          contextOptimizationStrategy: strat,
+          contextOptimizationProxyThreshold: pthr,
         }
       },
     }

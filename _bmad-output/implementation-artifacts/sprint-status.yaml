@@ -103,12 +103,12 @@ development_status:
   3-6-mesurer-pertinence-contexte-gdd-utilisé-dans-dialogue-généré-fr16: done
   3-7-voir-sections-gdd-utilisées-dans-génération-nœud-fr17: done
   3-8-synchroniser-données-gdd-depuis-notion-v20-fr18: done
-  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: in-progress
-  3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: review
-  3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: ready-for-dev
+  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: review
+  3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
+  3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
   epic-3-retrospective: optional
-  epic-4: backlog
-  4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: backlog
+  epic-4: in-progress
+  4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: ready-for-dev
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: backlog
   4-3-détecter-contradictions-lore-explicites-faits-gdd-conflictuels-fr38: backlog
   4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39: backlog

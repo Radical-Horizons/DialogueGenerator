@@ -159,6 +159,17 @@ class GDDLoader:
                 return child
         return None
 
+    def load_shard_json_records(self, shard_dir: Path) -> List[Dict[str, Any]]:
+        """Charge les fiches JSON d'un répertoire de shards (hors ``load_category``).
+
+        Args:
+            shard_dir: Répertoire contenant des ``*.json`` (une fiche par fichier).
+
+        Returns:
+            Liste d'objets dict ; entrées invalides ignorées (voir logs).
+        """
+        return self._load_list_from_shard_directory(shard_dir)
+
     def _load_list_from_shard_directory(self, shard_dir: Path) -> List[Dict[str, Any]]:
         """Charge et concatène les objets JSON (un dict par fichier ``*.json``).
 

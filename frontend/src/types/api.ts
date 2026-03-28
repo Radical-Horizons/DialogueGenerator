@@ -84,14 +84,49 @@ export interface EstimateTokensRequest extends BasePromptRequest {
   organization_mode?: string
 }
 
+/** Règles MVP optimisation contexte (FR21) — alignées Pydantic `ContextOptimizationRules`. */
+export interface ContextOptimizationRules {
+  pinned_entity_keys?: string[]
+  strategy?: 'conservative' | 'aggressive'
+  pre_generation_proxy_warning_threshold_percent?: number
+}
+
+export interface OptimizeContextRequest extends EstimateTokensRequest {
+  optimization_rules?: ContextOptimizationRules
+}
+
+export interface OptimizeContextChange {
+  entity_type: string
+  entity_name: string
+  from_mode: 'full' | 'excerpt'
+  to_mode: 'full' | 'excerpt'
+}
+
+/** Réponse POST /context/optimize — proxy pré-génération distinct du scoring post-génération (3.6). */
+export interface OptimizeContextResponse {
+  proposed_context_selections: ContextSelection
+  selection_tokens_before: number
+  selection_tokens_after: number
+  tokens_saved: number
+  changes: OptimizeContextChange[]
+  pre_generation_context_fidelity_proxy_percent: number
+  warnings: string[]
+  no_op: boolean
+  /** Aligné AC#2 : false si le backend n’a pas pu ramener la sélection sous le plafond. */
+  budget_respected: boolean
+}
+
 export interface ContextTokenBreakdownRow {
   entity_type: string
   mode: string
   token_count: number
 }
 
+/** Réponse POST /context/estimate-tokens — voir schéma Pydantic pour la sémantique exacte. */
 export interface EstimateTokensResponse {
+  /** Contexte GDD tel qu’avec troncature `max_context_tokens` de la requête (budget). */
   context_tokens: number
+  /** Sélection complète mesurée avec plafond technique élevé (sans ce budget comme limite). */
   selection_tokens: number
   context_token_breakdown: ContextTokenBreakdownRow[]
   context_breakdown_note: string

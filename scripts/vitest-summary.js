@@ -4,11 +4,14 @@
  * and prints a human-readable summary. Exit code mirrors vitest pass/fail.
  *
  * Usage (from project root):
- *   cd frontend && npm run test:ci; cd .. && node scripts/vitest-summary.js
+ *   cd frontend && npm run test:ci && cd .. && node scripts/vitest-summary.js
  *
- * Rationale: vitest piped through PowerShell's Select-Object buffers ALL stdout,
- * so the summary line is never captured in CI terminals. This script reads the
- * JSON artefact instead, avoiding any pipe buffering issue.
+ * Iteration quotidienne / agents : `cd frontend && npm run test:quick` (git --changed)
+ * ou `npm run test:bail` (arrêt au premier fichier en échec). Eviter de piper Vitest
+ * dans PowerShell (`| Select-Object`) : le buffer vide la sortie jusqu'à la fin du run.
+ *
+ * Rationale: ce script lit le JSON produit par test:ci pour un résumé fiable sans
+ * dépendre du pipe shell (surtout sous Windows).
  */
 const fs = require('fs')
 const path = require('path')

@@ -1,6 +1,6 @@
 # Story 3.9 : Mettre à jour les données GDD sans régénérer les dialogues existants (FR19)
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -149,6 +149,7 @@ _(aucun incident bloquant en dev-story)_
 - Historique entité : `services/gdd_entity_history.py`, append après sync Notion ; `GET /api/v1/context/gdd-entity-history` ; UI `GddEntityHistoryViewer` dans le panneau contexte (`ContextDetail` / `ContextSelector`).
 - Export Unity : champs éditeur (`contextGddContentFingerprint`, etc.) stripés dans `graph_conversion_service`.
 - AC3 : comportement attendu (ContextBuilder lit le GDD disque au moment du prompt) — test dédié optionnel si besoin de verrouillage explicite.
+- Suivi revue 2026-03-28 : tests isolation + LLM (`test_documents_gdd_isolation.py`) ; `GET gdd-entity-history` → **404** si entité absente du GDD live et sans historique ; `include_snapshots` + diff unifié (`diff_snapshots_json`, `gdd_category_entity_lookup.py`) ; cache TTL empreinte + debounce hook stale ; viewer sélection événement + snapshot/diff ; plafond `_FINGERPRINT_MAX_CONTEXT_TOKENS = 200_000` (empreinte).
 
 ### File List
 
@@ -159,11 +160,13 @@ _(aucun incident bloquant en dev-story)_
 - `frontend/src/store/slices/generationSlice.ts`, `frontend/src/types/graph.ts`, `frontend/src/schemas/nodeEditorSchema.ts`
 - `frontend/src/components/graph/nodes/DialogueNode.tsx`
 - `frontend/src/components/context/GddEntityHistoryViewer.tsx`, `GddEntityHistoryViewer.test.tsx`, `ContextDetail.tsx`, `ContextSelector.tsx`, `Dashboard.tsx`
-- `tests/services/test_gdd_context_fingerprint.py`, `tests/services/test_gdd_entity_history.py`, `tests/api/test_gdd_context_stale.py`, `tests/api/test_documents_gdd_isolation.py`
+- `tests/services/test_gdd_context_fingerprint.py`, `tests/services/test_gdd_entity_history.py`, `tests/services/test_gdd_category_entity_lookup.py`, `tests/api/test_gdd_context_stale.py`, `tests/api/test_documents_gdd_isolation.py`
+- `services/gdd_category_entity_lookup.py`
 
 ## Change Log
 
 - 2026-03-26 — Code review (AI) : revue adversariale post-implémentation ; statut repassé `in-progress`, follow-ups listés ci-dessous.
+- 2026-03-28 — Implémentation follow-ups revue (HIGH/MEDIUM + LOW) : 404 entité, diff unifié, cache empreinte, debounce UI, tests étendus ; statut `review`.
 
 ## Senior Developer Review (AI)
 
@@ -188,16 +191,16 @@ _(aucun incident bloquant en dev-story)_
 
 ### Review Follow-ups (AI)
 
-- [ ] **[AI-Review][HIGH]** Task 1 — sous-tâche 🔴 : élargir les tests ou réduire le libellé de la tâche ; aujourd’hui `test_documents_gdd_isolation` ne vérifie **pas** l’absence d’appel LLM ni le store frontend (`tests/api/test_documents_gdd_isolation.py`).
-- [ ] **[AI-Review][HIGH]** Task 5 — sous-tâche 🔴 : implémenter **sélection d’un événement** dans `GddEntityHistoryViewer.tsx` avec affichage snapshot / diff (ou ajuster la tâche [x] si le MVP accepte uniquement la liste + `diff_hint` global).
-- [ ] **[AI-Review][MEDIUM]** AC3 : ajouter un test d’intégration ou unitaire minimal (ex. mock ContextBuilder + une écriture GDD fixture) prouvant que **nouvelle** génération lit le contenu disque à jour.
-- [ ] **[AI-Review][MEDIUM]** Performance : `postGddContentFingerprint` par nœud avec `load_gdd_files()` — risque de **rafale** sur gros graphes ; envisager debounce, cache serveur court, ou fingerprint par document.
-- [ ] **[AI-Review][MEDIUM]** `diff_snapshots_json` : fournir un diff lisible (ex. diff lignes clés, ou hash par section) pour honorer l’esprit AC5.
-- [ ] **[AI-Review][MEDIUM]** Task 4 🔴 : « erreurs typées si entité inconnue » — l’API retourne **200 + events vides** ; trancher produit (404 vs vide) et tester.
-- [ ] **[AI-Review][LOW]** `useGddStaleIndicator.ts` : `catch` vide — au moins `console.debug` / télémétrie en dev pour diagnostiquer les échecs réseau.
-- [ ] **[AI-Review][LOW]** Charge : `_FINGERPRINT_MAX_CONTEXT_TOKENS = 999_999` — documenter limite ou plafonner côté API pour éviter pics CPU/mémoire.
+- [x] **[AI-Review][HIGH]** Task 1 — sous-tâche 🔴 : élargir les tests ou réduire le libellé de la tâche ; aujourd’hui `test_documents_gdd_isolation` ne vérifie **pas** l’absence d’appel LLM ni le store frontend (`tests/api/test_documents_gdd_isolation.py`).
+- [x] **[AI-Review][HIGH]** Task 5 — sous-tâche 🔴 : implémenter **sélection d’un événement** dans `GddEntityHistoryViewer.tsx` avec affichage snapshot / diff (ou ajuster la tâche [x] si le MVP accepte uniquement la liste + `diff_hint` global).
+- [x] **[AI-Review][MEDIUM]** AC3 : ajouter un test d’intégration ou unitaire minimal (ex. mock ContextBuilder + une écriture GDD fixture) prouvant que **nouvelle** génération lit le contenu disque à jour.
+- [x] **[AI-Review][MEDIUM]** Performance : `postGddContentFingerprint` par nœud avec `load_gdd_files()` — risque de **rafale** sur gros graphes ; envisager debounce, cache serveur court, ou fingerprint par document.
+- [x] **[AI-Review][MEDIUM]** `diff_snapshots_json` : fournir un diff lisible (ex. diff lignes clés, ou hash par section) pour honorer l’esprit AC5.
+- [x] **[AI-Review][MEDIUM]** Task 4 🔴 : « erreurs typées si entité inconnue » — l’API retourne **200 + events vides** ; trancher produit (404 vs vide) et tester.
+- [x] **[AI-Review][LOW]** `useGddStaleIndicator.ts` : `catch` vide — au moins `console.debug` / télémétrie en dev pour diagnostiquer les échecs réseau.
+- [x] **[AI-Review][LOW]** Charge : `_FINGERPRINT_MAX_CONTEXT_TOKENS = 999_999` — documenter limite ou plafonner côté API pour éviter pics CPU/mémoire.
 
 ## Story Completion Status
 
-- **Statut** : in-progress
-- **Note** : Revue code terminée — traiter les **Review Follow-ups (AI)** puis relancer review ou passer en `done` quand HIGH/MEDIUM sont traités.
+- **Statut** : review
+- **Note** : Tous les follow-ups revue AI traités (2026-03-28).

@@ -26,6 +26,8 @@
     "test": "node scripts/getPythonPath.js -m pytest tests/",
     "test:api": "node scripts/getPythonPath.js -m pytest tests/api/",
     "test:frontend": "powershell -ExecutionPolicy Bypass -File scripts/test-frontend.ps1",
+    "test:frontend:quick": "cd frontend && npm run test:quick",
+    "test:frontend:bail": "cd frontend && npm run test:bail",
     "test:e2e": "playwright test",
     "test:e2e:cost": "playwright test e2e/cost-governance.spec.ts --workers=1",
     "test:e2e:llm": "playwright test e2e/e2e-llm-preflight.spec.ts e2e/graph-node-accept-reject.spec.ts --workers=1",
