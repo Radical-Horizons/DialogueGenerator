@@ -93,25 +93,30 @@ export async function exportGraphToSVG(
  * Ajuste le viewport pour inclure tous les nœuds avant l'export.
  */
 export async function exportFullGraphToPNG(
-  _reactFlowInstance: unknown,
+  reactFlowInstance: unknown,
   filename: string = 'graph-full',
   quality: number = 1.0
 ): Promise<void> {
   try {
+    const rf = reactFlowInstance as {
+      getViewport: () => { x: number; y: number; zoom: number }
+      fitView: (opts: { padding: number; duration: number }) => void
+      setViewport: (v: { x: number; y: number; zoom: number }) => void
+    }
     // Sauvegarder le viewport actuel
-    const currentViewport = reactFlowInstance.getViewport()
-    
+    const currentViewport = rf.getViewport()
+
     // Ajuster le viewport pour inclure tous les nœuds
-    reactFlowInstance.fitView({ padding: 0.1, duration: 0 })
-    
+    rf.fitView({ padding: 0.1, duration: 0 })
+
     // Attendre que le viewport soit ajusté
     await new Promise((resolve) => setTimeout(resolve, 200))
-    
+
     // Exporter
     await exportGraphToPNG(reactFlowInstance, filename, quality)
-    
+
     // Restaurer le viewport original
-    reactFlowInstance.setViewport(currentViewport)
+    rf.setViewport(currentViewport)
   } catch (error) {
     console.error('Erreur lors de l\'export du graphe complet:', error)
     throw error

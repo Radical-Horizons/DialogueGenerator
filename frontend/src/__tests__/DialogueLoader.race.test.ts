@@ -2,8 +2,20 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDialogueLoader } from '../hooks/useDialogueLoader'
 import { useGraphStore } from '../store/graphStore'
+import type { UnityDialogueMetadata } from '../types/api'
 
 const toastMock = vi.fn()
+
+function unityDialogueFixture(
+  partial: Pick<UnityDialogueMetadata, 'filename'> & Partial<UnityDialogueMetadata>
+): UnityDialogueMetadata {
+  return {
+    file_path: `/mock/${partial.filename}`,
+    size_bytes: 0,
+    modified_time: '2020-01-01T00:00:00Z',
+    ...partial,
+  }
+}
 const getUnityDialogueMock = vi.fn()
 
 vi.mock('../api/unityDialogues', () => ({
@@ -55,12 +67,14 @@ describe('useDialogueLoader Race Conditions', () => {
 
     // Start first load
     await act(async () => {
-      result.current.setSelectedDialogue({
-        filename: 'first.json',
-        title: 'First',
-        node_count: 0,
-        edge_count: 0,
-      })
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'first.json',
+          title: 'First',
+          node_count: 0,
+          edge_count: 0,
+        })
+      )
       // Give some time for the effect to trigger and increment sequence
       await new Promise(r => setTimeout(r, 20))
     })
@@ -77,12 +91,14 @@ describe('useDialogueLoader Race Conditions', () => {
     })
 
     await act(async () => {
-      result.current.setSelectedDialogue({
-        filename: 'second.json',
-        title: 'Second',
-        node_count: 0,
-        edge_count: 0,
-      })
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'second.json',
+          title: 'Second',
+          node_count: 0,
+          edge_count: 0,
+        })
+      )
       // Give some time for the effect to trigger and increment sequence again
       await new Promise(r => setTimeout(r, 20))
     })

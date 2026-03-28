@@ -24,7 +24,7 @@ describe('ChoiceEditor - 4 résultats de test', () => {
   ]
 
   beforeEach(() => {
-    vi.mocked(useGraphStore).mockImplementation((selector) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       const state = {
         nodes: mockNodes,
         edges: [],
@@ -32,8 +32,8 @@ describe('ChoiceEditor - 4 résultats de test', () => {
         connectNodes: vi.fn(),
         disconnectNodes: vi.fn(),
       }
-      return (selector as (s: typeof state) => unknown)(state)
-    })
+      return selector != null ? selector(state) : state
+    }) as typeof useGraphStore)
   })
 
   const TestWrapper = ({
@@ -47,7 +47,6 @@ describe('ChoiceEditor - 4 résultats de test', () => {
       resolver: zodResolver(dialogueNodeDataSchema),
       defaultValues: defaultValues || {
         id: 'START',
-        type: 'dialogueNode',
         choices: [
           {
             text: 'Choix test',
@@ -62,7 +61,6 @@ describe('ChoiceEditor - 4 résultats de test', () => {
   it('devrait afficher les 4 combobox de résultat quand test est défini', async () => {
     const defaultValues: DialogueNodeData = {
       id: 'START',
-      type: 'dialogueNode',
       choices: [
         {
           text: 'Tenter de convaincre',
@@ -88,7 +86,6 @@ describe('ChoiceEditor - 4 résultats de test', () => {
   it('ne devrait pas afficher les 4 combobox quand test n\'est pas défini', async () => {
     const defaultValues: DialogueNodeData = {
       id: 'START',
-      type: 'dialogueNode',
       choices: [
         {
           text: 'Choix normal',
@@ -113,7 +110,6 @@ describe('ChoiceEditor - 4 résultats de test', () => {
   it('devrait afficher les libellés des cibles sélectionnées dans les combobox', async () => {
     const defaultValues: DialogueNodeData = {
       id: 'START',
-      type: 'dialogueNode',
       choices: [
         {
           text: 'Tenter de convaincre',

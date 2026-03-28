@@ -242,6 +242,8 @@ describe('Node type colors (AC #2) - dialogue=bleu, test=orange, end=gris', () =
     height: 80,
     measured: { width: 200, height: 80 },
     dragging: false,
+    zIndex: 0,
+    isConnectable: true,
   })
 
   it('DialogueNode uses blue border (#4A90E2) when not selected', () => {

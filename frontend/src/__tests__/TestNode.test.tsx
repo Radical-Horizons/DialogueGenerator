@@ -6,9 +6,29 @@ import { render } from '@testing-library/react'
 import { ReactFlowProvider } from 'reactflow'
 import { TestNode } from '../components/graph/nodes/TestNode'
 
-const TestNodeWrapper = ({ data, selected = false }: { data: Record<string, unknown>; selected?: boolean }) => (
+type TestNodeFixture = {
+  id: string
+  test?: string
+  line?: string
+  criticalFailureNode?: string
+  failureNode?: string
+  successNode?: string
+  criticalSuccessNode?: string
+}
+
+const TestNodeWrapper = ({ data, selected = false }: { data: TestNodeFixture; selected?: boolean }) => (
   <ReactFlowProvider>
-    <TestNode data={data} selected={selected} id="test-node-1" />
+    <TestNode
+      data={data}
+      selected={selected}
+      id="test-node-1"
+      type="testNode"
+      zIndex={0}
+      isConnectable
+      xPos={0}
+      yPos={0}
+      dragging={false}
+    />
   </ReactFlowProvider>
 )
 

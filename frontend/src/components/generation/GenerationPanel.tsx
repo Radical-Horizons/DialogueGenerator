@@ -69,7 +69,9 @@ export function GenerationPanel() {
   const setMaxContextTokens = useContextConfigStore((s) => s.setContextTokenBudgetMax)
   const [maxCompletionTokens, setMaxCompletionTokens] = useState<number | null>(null)
   const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
-  const [reasoningEffort, setReasoningEffort] = useState<'none' | 'low' | 'medium' | 'high' | 'xhigh' | null>(null)
+  const [reasoningEffort, setReasoningEffort] = useState<
+    'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  >(null)
   const [topP, setTopP] = useState<number | null>(null)
   const [maxChoices, setMaxChoices] = useState<number | null>(null)
   const choicesMode: 'free' | 'capped' = maxChoices !== null ? 'capped' : 'free'

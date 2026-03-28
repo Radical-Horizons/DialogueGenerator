@@ -74,13 +74,13 @@ describe('useLLMStore', () => {
       {
         api_identifier: 'gpt-5.2',
         display_name: 'GPT-5.2',
-        client_type: 'openai',
+        client_type: 'openai' as const,
         parameters: { default_temperature: 0.7, max_tokens: 4096 },
       },
       {
         api_identifier: 'labs-mistral-small-creative',
         display_name: 'Mistral Small Creative',
-        client_type: 'mistral',
+        client_type: 'mistral' as const,
         parameters: { default_temperature: 0.7, max_tokens: 32000 },
       },
     ];

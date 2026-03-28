@@ -72,7 +72,7 @@ const baseParams = {
   userInstructions: 'Hello',
   maxCompletionTokens: null as number | null,
   llmModel: 'gpt-test',
-  reasoningEffort: null as const,
+  reasoningEffort: null,
   topP: null as number | null,
   maxChoices: null as number | null,
   choicesMode: 'free' as const,

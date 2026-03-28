@@ -275,7 +275,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
         {historyCategoryStem && (
           <GddEntityHistoryViewer
             categoryStem={historyCategoryStem}
-            entityName={String((data.Nom as string) || item.name || '').trim() || item.name}
+            entityName={String((data?.Nom as string) || item?.name || '').trim() || item?.name || ''}
           />
         )}
       </div>

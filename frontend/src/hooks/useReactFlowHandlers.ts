@@ -307,7 +307,7 @@ export function useReactFlowHandlers(
       }
       pendingChoiceConnectionRef.current = {
         sourceNodeId: params.nodeId,
-        sourceHandleId: params.handleId,
+        sourceHandleId: params.handleId as string,
       }
     },
     []

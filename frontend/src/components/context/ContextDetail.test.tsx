@@ -116,7 +116,7 @@ describe('ContextDetail', () => {
     expect(propButton).toBeInTheDocument()
     await user.click(propButton)
     expect(screen.getByRole('region', { name: 'Propriétés' })).toHaveTextContent('Résumé')
-    expect(screen.getByText((content, el) => el?.textContent === 'Résumé:')).toBeInTheDocument()
+    expect(screen.getByText((_content, el) => el?.textContent === 'Résumé:')).toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()
     expect(screen.queryByText(/rich_text/)).not.toBeInTheDocument()
   })

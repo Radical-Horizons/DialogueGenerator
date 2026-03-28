@@ -121,43 +121,42 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
       const blob =
         format === 'json'
           ? new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' })
-          : new Blob(
-              [
+          : (() => {
+              const header = [
+                'timestamp',
+                'node_id',
+                'model_name',
+                'prompt_tokens',
+                'completion_tokens',
+                'total_tokens',
+                'cost_eur',
+                'duration_ms',
+                'success',
+                'error_message',
+                'prompt',
+                'response',
+              ].join(',')
+              const rows = entries.map((e) =>
                 [
-                  'timestamp',
-                  'node_id',
-                  'model_name',
-                  'prompt_tokens',
-                  'completion_tokens',
-                  'total_tokens',
-                  'cost_eur',
-                  'duration_ms',
-                  'success',
-                  'error_message',
-                  'prompt',
-                  'response',
-                ].join(','),
-                ...entries.map((e) =>
-                  [
-                    e.timestamp,
-                    e.node_id ?? '',
-                    e.model_name,
-                    e.prompt_tokens,
-                    e.completion_tokens,
-                    e.total_tokens,
-                    e.cost_eur,
-                    e.duration_ms,
-                    e.success,
-                    e.error_message ?? '',
-                    e.prompt ?? '',
-                    e.response ?? '',
-                  ]
-                    .map(csvEscape)
-                    .join(',')
-                ),
-              ].join('\n'),
-              { type: 'text/csv;charset=utf-8' }
-            )
+                  e.timestamp,
+                  e.node_id ?? '',
+                  e.model_name,
+                  e.prompt_tokens,
+                  e.completion_tokens,
+                  e.total_tokens,
+                  e.cost_eur,
+                  e.duration_ms,
+                  e.success,
+                  e.error_message ?? '',
+                  e.prompt ?? '',
+                  e.response ?? '',
+                ]
+                  .map(csvEscape)
+                  .join(',')
+              )
+              const csv = [header, ...rows].join('\n')
+              return new Blob([csv], { type: 'text/csv;charset=utf-8' })
+            })()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url

@@ -198,7 +198,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                   borderRadius: 4,
                   border: `1px solid ${theme.border.primary}`,
                   backgroundColor: theme.button.secondary.background,
-                  color: theme.button.secondary.text,
+                  color: theme.button.secondary.color,
                   cursor: 'pointer',
                 }}
               >
@@ -303,7 +303,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                   borderRadius: 4,
                   border: 'none',
                   backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.text,
+                  color: theme.button.primary.color,
                   cursor:
                     error || !proposal || (!proposal.no_op && !proposal.budget_respected)
                       ? 'not-allowed'
@@ -352,7 +352,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                   borderRadius: 4,
                   border: 'none',
                   backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.text,
+                  color: theme.button.primary.color,
                   cursor: 'pointer',
                 }}
               >

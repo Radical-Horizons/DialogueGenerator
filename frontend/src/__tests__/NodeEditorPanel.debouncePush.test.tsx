@@ -58,10 +58,10 @@ describe('NodeEditorPanel - ADR-006 debounce push to store', () => {
       connectNodes: vi.fn(),
       disconnectNodes: vi.fn(),
     } as ReturnType<typeof useGraphStore>
-    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       if (typeof selector === 'function') return selector(mockState)
       return mockState
-    })
+    }) as typeof useGraphStore)
     ;(useGraphStore as { getState: () => typeof mockState }).getState = vi.fn(() => mockState)
 
     vi.mocked(useContextStore).mockReturnValue({

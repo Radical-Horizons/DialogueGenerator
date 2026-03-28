@@ -327,8 +327,17 @@ export interface UnityDialoguesPathResponse {
 export interface GenerateUnityDialogueRequest extends BasePromptRequest {
   llm_model_identifier: string
   max_completion_tokens?: number | null
-  reasoning_effort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoning_effort?:
+    | 'none'
+    | 'minimal'
+    | 'low'
+    | 'medium'
+    | 'high'
+    | 'xhigh'
+    | null
   top_p?: number | null
+  field_configs?: Record<string, string[]>
+  organization_mode?: string
 }
 
 export interface ReasoningTrace {
@@ -347,6 +356,8 @@ export interface GenerateUnityDialogueResponse {
   estimated_tokens: number
   warning?: string
   structured_prompt?: import('./prompt').PromptStructure
+  /** Alias legacy / affichage ; préférer raw_prompt. */
+  prompt_used?: string
 }
 
 
@@ -369,6 +380,9 @@ export interface UnityDialogueMetadata {
   size_bytes: number
   modified_time: string
   title?: string
+  /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
+  node_count?: number
+  edge_count?: number
 }
 
 export interface UnityDialogueListResponse {

@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import * as contextAPI from '../api/context'
 import { useContextRulesStore } from './contextRulesStore'
-import type { ContextRule, CreateRuleRequest, RuleCondition } from '../types/api'
+import type { ContextRule } from '../types/api'
 
 const makeRule = (overrides: Partial<ContextRule> = {}): ContextRule => ({
   id: 'rule-1',

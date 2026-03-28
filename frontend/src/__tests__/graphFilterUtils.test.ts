@@ -81,12 +81,12 @@ describe('applyEdgeFilters', () => {
       edge('e3', 'c', 'd'),
     ]
     const visible = new Set(['a', 'b', 'c'])
-    const result = applyEdgeFilters(edges, visible, {})
+    const result = applyEdgeFilters(edges, visible)
     expect(result.map((e) => e.id)).toEqual(['e1', 'e2'])
   })
 
   it('returns empty when no visible nodes', () => {
     const edges = [edge('e1', 'a', 'b')]
-    expect(applyEdgeFilters(edges, new Set(), {})).toEqual([])
+    expect(applyEdgeFilters(edges, new Set())).toEqual([])
   })
 })

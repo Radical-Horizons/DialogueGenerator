@@ -202,7 +202,7 @@ export function AIGenerationPanel({
             parent_node_id: parentNodeId,
             parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
             user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
-            context_selections: selections as Record<string, unknown>,
+            context_selections: selections as unknown as Record<string, unknown>,
             max_choices: maxChoices ?? undefined,
             llm_model_identifier: llmModel,
             target_choice_index: targetChoiceIndex ?? undefined,

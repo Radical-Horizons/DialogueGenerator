@@ -32,8 +32,9 @@ export interface FieldInfo {
   suggested: boolean
   category?: string | null
   importance?: string | null
-  is_metadata?: boolean  // Si le champ est une métadonnée (avant "Introduction" dans le JSON)
-  is_essential?: boolean  // Si le champ est essentiel (contexte OU métadonnées) selon ESSENTIAL_*_FIELDS
+  /** API / JSON peuvent renvoyer des booléens ou des chaînes `"true"`. */
+  is_metadata?: boolean | string
+  is_essential?: boolean | string
   is_unique?: boolean  // Si le champ est unique (n'apparaît que dans une seule fiche)
   is_in_config?: boolean  // Si le champ est référencé dans context_config.json
   is_valid?: boolean  // Si le champ existe réellement dans les données GDD

@@ -146,7 +146,7 @@ export function ContextTokenBudgetSection() {
               backgroundColor: CONTEXT_OPTIMIZE_API_ENABLED
                 ? theme.button.primary.background
                 : theme.background.tertiary,
-              color: CONTEXT_OPTIMIZE_API_ENABLED ? theme.button.primary.text : theme.text.secondary,
+              color: CONTEXT_OPTIMIZE_API_ENABLED ? theme.button.primary.color : theme.text.secondary,
               cursor: CONTEXT_OPTIMIZE_API_ENABLED ? 'pointer' : 'not-allowed',
             }}
           >

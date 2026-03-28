@@ -1,7 +1,7 @@
 /**
  * Composant pour afficher le prompt structuré avec sections dépliables.
  */
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { parsePromptSections, parsePromptFromJson, type PromptSection } from '../../hooks/usePromptPreview'
 import { renderMarkdown } from '../../utils/markdownRenderer'
 import { prettifyJsonInText } from '../../utils/jsonPrettifier'

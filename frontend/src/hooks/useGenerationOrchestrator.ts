@@ -10,7 +10,8 @@ import { useGenerationValidation } from './useGenerationValidation'
 import { useSSEStreaming } from './useSSEStreaming'
 import { useGenerationHandlers } from './useGenerationHandlers'
 import { useGraphStore } from '../store/graphStore'
-import type { LLMModelResponse } from '../types/api'
+import type { ContextSelection, LLMModelResponse } from '../types/api'
+import type { UseGenerationRequestReturn } from './useGenerationRequest'
 
 export interface UseGenerationOrchestratorOptions {
   /** Instructions utilisateur */
@@ -22,7 +23,7 @@ export interface UseGenerationOrchestratorOptions {
   /** Modèle LLM sélectionné */
   llmModel: string
   /** Reasoning effort */
-  reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   /** Top_p (nucleus sampling) */
   topP: number | null
   /** Nombre max de choix */
@@ -59,8 +60,8 @@ export interface UseGenerationOrchestratorOptions {
 
 export interface UseGenerationOrchestratorReturn {
   // Request
-  buildContextSelections: () => unknown
-  buildGenerationRequest: (params: unknown) => unknown
+  buildContextSelections: () => ContextSelection
+  buildGenerationRequest: UseGenerationRequestReturn['buildGenerationRequest']
   validateModel: (model: string, availableModels: LLMModelResponse[]) => string
   
   // Estimation
@@ -73,8 +74,7 @@ export interface UseGenerationOrchestratorReturn {
   validationErrors: Record<string, string>
   validate: () => boolean
   hasErrors: boolean
-  validateCharacters: () => boolean
-  
+
   // Handlers
   handleGenerate: () => Promise<void>
   handleReset: () => void
@@ -122,11 +122,11 @@ export function useGenerationOrchestrator(
     tokenCount: estimation.tokenCount,
   })
   const sse = useSSEStreaming({
-    onComplete: async (result) => {
-      // Charger le graphe généré
-      if (result.json_content) {
+    onComplete: async (result: unknown) => {
+      const payload = result as { json_content?: string }
+      if (payload.json_content) {
         try {
-          await loadDialogue(result.json_content)
+          await loadDialogue(payload.json_content)
         } catch (graphError) {
           console.warn('Erreur lors du chargement du graphe généré:', graphError)
         }
