@@ -191,6 +191,32 @@ class TestContextBuilderGDDLoading:
         assert cb.items == []
         assert cb.species == []
 
+    def test_load_gdd_files_twice_refreshes_resolver_after_disk_change(
+        self, mock_gdd_project_root: Path, dummy_context_config_file: Path
+    ) -> None:
+        """Story 3.9 : après mutation disque + invalidation cache, le resolver suit le JSON à jour."""
+        from api.utils.gdd_cache import get_gdd_cache
+
+        cb = ContextBuilder(
+            config_file_path=dummy_context_config_file,
+            gdd_categories_path=mock_gdd_project_root / "GDD" / "categories",
+            gdd_import_path=mock_gdd_project_root / "import" / "Bible_Narrative",
+        )
+        cb.load_gdd_files()
+        assert cb.get_character_details_by_name("PersoTest1") is not None
+        assert cb.get_character_details_by_name("PersoTest1").get("LoreVersion") is None
+
+        char_path = mock_gdd_project_root / "GDD" / "categories" / "personnages.json"
+        char_path.write_text(
+            json.dumps({"personnages": [{"Nom": "PersoTest1", "LoreVersion": 2}]}),
+            encoding="utf-8",
+        )
+        get_gdd_cache().clear()
+        cb.load_gdd_files()
+        updated = cb.get_character_details_by_name("PersoTest1")
+        assert updated is not None
+        assert updated.get("LoreVersion") == 2
+
     def test_load_gdd_files_with_missing_category_file(self, mock_gdd_project_root, dummy_context_config_file, caplog):
         """Tests GDD loading when a specific category JSON file is missing."""
         # mock_gdd_project_root already created dummy GDD/categories and some files.

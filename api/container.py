@@ -309,11 +309,14 @@ class ServiceContainer:
             gdd_dir = self._resolve_gdd_categories_path()
             manifest = root / FilePaths.GDD_NOTION_SYNC_MANIFEST_FILE
             status_path = root / FilePaths.GDD_NOTION_SYNC_DIR / "status.json"
+            from services.gdd_context_refresh import reload_context_builder_if_loaded
+
             self._gdd_notion_sync_service = GddNotionSyncService(
                 config_store=store,
                 manifest_path=manifest,
                 gdd_categories_path=gdd_dir,
                 status_path=status_path,
+                after_gdd_disk_mutation=lambda: reload_context_builder_if_loaded(self),
             )
             logger.info("GddNotionSyncService initialisé dans le container.")
         return self._gdd_notion_sync_service

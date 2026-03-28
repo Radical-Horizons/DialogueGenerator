@@ -1,6 +1,6 @@
 # Story 3.9 : Mettre à jour les données GDD sans régénérer les dialogues existants (FR19)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -150,16 +150,19 @@ _(aucun incident bloquant en dev-story)_
 - Export Unity : champs éditeur (`contextGddContentFingerprint`, etc.) stripés dans `graph_conversion_service`.
 - AC3 : comportement attendu (ContextBuilder lit le GDD disque au moment du prompt) — test dédié optionnel si besoin de verrouillage explicite.
 - Suivi revue 2026-03-28 : tests isolation + LLM (`test_documents_gdd_isolation.py`) ; `GET gdd-entity-history` → **404** si entité absente du GDD live et sans historique ; `include_snapshots` + diff unifié (`diff_snapshots_json`, `gdd_category_entity_lookup.py`) ; cache TTL empreinte + debounce hook stale ; viewer sélection événement + snapshot/diff ; plafond `_FINGERPRINT_MAX_CONTEXT_TOKENS = 200_000` (empreinte).
+- Correctif reload GDD 2026-03-28 : `load_gdd_files()` recrée repository/resolver/linker ; `GddNotionSyncService(after_gdd_disk_mutation=…)` + `reload_context_builder_if_loaded` (ne recharge que si `_context_builder` déjà créé).
 
 ### File List
 
+- `core/context/context_builder.py`, `services/gdd_notion_sync_service.py`, `api/container.py`
 - `services/gdd_context_fingerprint.py`, `services/gdd_entity_history.py`, `services/gdd_context_refresh.py`
-- `services/gdd_notion_sync_service.py`, `services/graph_conversion_service.py`
+- `services/graph_conversion_service.py`
 - `api/schemas/gdd_context_stale.py`, `api/schemas/graph.py`, `api/routers/context.py`, `api/routers/graph.py`
 - `frontend/src/api/gddContextStale.ts`, `frontend/src/hooks/useGddStaleIndicator.ts`, `frontend/src/hooks/useGddStaleIndicator.test.tsx`
 - `frontend/src/store/slices/generationSlice.ts`, `frontend/src/types/graph.ts`, `frontend/src/schemas/nodeEditorSchema.ts`
 - `frontend/src/components/graph/nodes/DialogueNode.tsx`
 - `frontend/src/components/context/GddEntityHistoryViewer.tsx`, `GddEntityHistoryViewer.test.tsx`, `ContextDetail.tsx`, `ContextSelector.tsx`, `Dashboard.tsx`
+- `tests/test_context_builder.py`, `tests/services/test_gdd_notion_sync_service.py`
 - `tests/services/test_gdd_context_fingerprint.py`, `tests/services/test_gdd_entity_history.py`, `tests/services/test_gdd_category_entity_lookup.py`, `tests/api/test_gdd_context_stale.py`, `tests/api/test_documents_gdd_isolation.py`
 - `services/gdd_category_entity_lookup.py`
 
@@ -167,6 +170,9 @@ _(aucun incident bloquant en dev-story)_
 
 - 2026-03-26 — Code review (AI) : revue adversariale post-implémentation ; statut repassé `in-progress`, follow-ups listés ci-dessous.
 - 2026-03-28 — Implémentation follow-ups revue (HIGH/MEDIUM + LOW) : 404 entité, diff unifié, cache empreinte, debounce UI, tests étendus ; statut `review`.
+- 2026-03-28 — Code review (BMAD) : finding HIGH `ElementRepository` / reload GDD ; statut `in-progress` + sprint-status synchronisé ; nouveaux follow-ups.
+- 2026-03-28 — Correctif option [1] : reload complet chaîne GDD + hook sync ; tests ; statut `review`.
+- 2026-03-28 — Clôture revue + epic 3 : story `done`, sprint `3-9` + `epic-3` → `done`.
 
 ## Senior Developer Review (AI)
 
@@ -200,7 +206,40 @@ _(aucun incident bloquant en dev-story)_
 - [x] **[AI-Review][LOW]** `useGddStaleIndicator.ts` : `catch` vide — au moins `console.debug` / télémétrie en dev pour diagnostiquer les échecs réseau.
 - [x] **[AI-Review][LOW]** Charge : `_FINGERPRINT_MAX_CONTEXT_TOKENS = 999_999` — documenter limite ou plafonner côté API pour éviter pics CPU/mémoire.
 
+### Passe revue adversariale — 2026-03-28 (workflow code-review)
+
+**Revue par :** Assistant BMAD (code-review) pour Marc  
+**Décision :** **Changes Requested** — au moins un point **HIGH** structurel non couvert par les tests existants.
+
+**Git :** arbre propre (`git status` vide) ; pas d’écart File List vs modifications non commitées dans cette session.
+
+**Points validés (échantillon) :**
+
+- AC1 côté API : `test_documents_gdd_isolation.py` (stabilité document + absence d’appel LLM sur GET document et POST empreinte).
+- AC2 UI : badge `GDD↑`, `title` aligné FR19, hook avec debounce + `console.debug` en dev.
+- AC4 : `context_gdd_content_fingerprint` branché génération / régénération (`graph.py`, `generationSlice`).
+- AC5 : timeline, 404 entité inconnue sans historique, `diff_snapshots_json` unifié, viewer avec sélection d’événement + diff.
+- AC3 : `test_gdd_context_fingerprint` + `test_load_gdd_files_twice_refreshes_resolver_after_disk_change` (resolver aligné disque après reload).
+
+**Principale finding (HIGH) — corrigée 2026-03-28 (suite option [1]) :** `load_gdd_files()` recrée désormais `ElementRepository`, `ElementResolver` et `ElementLinker` à chaque chargement ; `GddNotionSyncService` appelle un hook `after_gdd_disk_mutation` → `reload_context_builder_if_loaded` depuis `ServiceContainer` après invalidation cache disque. Test `test_load_gdd_files_twice_refreshes_resolver_after_disk_change` verrouille le resolver sur JSON à jour.
+
+**Autres findings :** charge réseau empreintes, `except Exception` sur POST empreinte, migration `contextGddContentFingerprint` — restent des améliorations optionnelles (voir follow-ups ouverts).
+
 ## Story Completion Status
 
-- **Statut** : review
-- **Note** : Tous les follow-ups revue AI traités (2026-03-28).
+- **Statut** : done
+- **Note** : Revue clôturée 2026-03-28 — ACs couverts, correctif reload GDD mergé ; améliorations restantes reportées hors périmètre obligatoire de clôture (voir ci-dessous).
+
+### Review Follow-ups (AI) — suite revue 2026-03-28
+
+- [x] **[AI-Review][HIGH]** Resynchronisation `ElementRepository` / resolver / linker à chaque `load_gdd_files()` ; hook post-sync Notion → `reload_context_builder_if_loaded` (`api/container.py`, `GddNotionSyncService`).
+- [x] **[AI-Review][MEDIUM]** Test intégration resolver : `tests/test_context_builder.py::test_load_gdd_files_twice_refreshes_resolver_after_disk_change` ; tests hook `tests/services/test_gdd_notion_sync_service.py`.
+- [ ] **[AI-Review][MEDIUM]** *(reporté backlog produit)* — Nœuds / documents sans `contextGddContentFingerprint` : accepter absence d’indicateur stale pour légacy ; backfill optionnel si besoin métier.
+- [ ] **[AI-Review][LOW]** *(reporté)* — Rafales `POST /context/gdd-content-fingerprint` sur très gros graphes.
+- [ ] **[AI-Review][LOW]** *(reporté)* — Resserrer `except Exception` sur `post_gdd_content_fingerprint`.
+
+### Clôture code review — 2026-03-28
+
+**Revue par :** Marc (validation) / assistant (synthèse)  
+**Décision :** **Approuvé — done**  
+**Epic 3 :** toutes les stories 3.1–3.11 en `done` ; `epic-3` → `done` dans `sprint-status.yaml`. Rétrospective epic (`epic-3-retrospective`) reste **optional** selon le fichier de suivi.

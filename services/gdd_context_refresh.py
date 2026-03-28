@@ -21,14 +21,18 @@ def clear_gdd_runtime_caches() -> None:
 
 
 def reload_context_builder_if_loaded(container: Any) -> None:
-    """Recharge les fichiers GDD sur le ContextBuilder du container si présent.
+    """Recharge les fichiers GDD sur le ContextBuilder **déjà initialisé** du container.
+
+    N'appelle pas ``get_context_builder()`` si l'instance n'existe pas encore : évite un
+    double chargement au démarrage lorsque la sync Notion précède toute requête contexte.
 
     Args:
-        container: Instance ``ServiceContainer`` (API) ou objet avec
-            ``_context_builder`` et ``get_context_builder``.
+        container: Instance ``ServiceContainer`` (API) avec attribut ``_context_builder``.
     """
     try:
-        cb = container.get_context_builder()
-        cb.load_gdd_files()
+        existing = getattr(container, "_context_builder", None)
+        if existing is None:
+            return
+        existing.load_gdd_files()
     except (AttributeError, OSError, RuntimeError) as exc:
         logger.debug("reload_context_builder_if_loaded: ignoré (%s)", exc)

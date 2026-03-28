@@ -22,6 +22,8 @@ coverage.html
 htmlcov/
 *.cover
 .hypothesis/
+.mypy_cache/
+.ruff_cache/
 
 # Virtual environment
 .env
@@ -47,6 +49,8 @@ lerna-debug.log*
 frontend/dist/
 frontend/dist-ssr/
 frontend/.vite/
+frontend/coverage/
+*.tsbuildinfo
 frontend/test-results/
 test-results/
 playwright-report/
@@ -59,8 +63,9 @@ e2e/.auth/
 .cursor/settings.json
 .cursor/worktrees.json
 
-# IDE specific files
-.vscode/
+# IDE specific files — ignorer le contenu des dossiers .vscode sauf extensions.json (recommandations partagées)
+**/.vscode/*
+!**/.vscode/extensions.json
 .idea/
 # VSCode Counter: auto-generated metrics (do not commit)
 .VSCodeCounter/
@@ -71,10 +76,10 @@ e2e/.auth/
 # macOS specific (often cross-platform)
 .DS_Store
 
-# Logs
-logs/
+# Logs — racine (legacy / scripts) et logs applicatifs (JSON, .log, etc.)
+/logs/
+data/logs/
 *.log
-data/logs/*.json
 
 # Data directories (generated/cache files)
 data/cost_budgets.json
@@ -84,9 +89,14 @@ data/gdd_notion_sync/notion_token.secret
 # État / cache sync Notion (régénérable). Garder settings.json versionné si l’équipe s’en sert.
 data/gdd_notion_sync/notion_search_snapshot.json
 data/gdd_notion_sync/status.json
+data/gdd_notion_sync/full_sync_checkpoint.json
+data/gdd_notion_sync/full_sync_checkpoint.manifest.json
 
 # Snapshot chargeur GDD (cache local)
 data/.gdd_snapshot/
+
+# Historique d’entités GDD (persisté localement par gdd_entity_history)
+data/GDD_entity_history/
 
 # Export catégories GDD (volumineux, souvent resynchronisé depuis Notion en local)
 data/GDD_categories/
@@ -105,10 +115,6 @@ Assets/Layouts/*.layout.json
 *.bak
 *.swp
 test_prompt_output.txt
-# VSCode Counter report names (anywhere)
-details.md
-diff.md
-diff-details.md
 
 # User interface settings file
 ui_settings.json

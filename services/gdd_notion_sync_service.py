@@ -138,6 +138,8 @@ class GddNotionSyncService:
         gdd_categories_path: Path,
         status_path: Path,
         client_factory: Optional[Callable[[str], NotionAPIClient]] = None,
+        *,
+        after_gdd_disk_mutation: Optional[Callable[[], None]] = None,
     ) -> None:
         self._store = config_store
         self._manifest_path = manifest_path
@@ -145,6 +147,7 @@ class GddNotionSyncService:
         self._status_path = status_path
         self._sync_checkpoint_dir = status_path.parent
         self._client_factory = client_factory or (lambda key: NotionAPIClient(api_key=key))
+        self._after_gdd_disk_mutation = after_gdd_disk_mutation
         self._run_lock = asyncio.Lock()
         self._sync_progress: Dict[str, Any] = _gdd_notion_sync_progress_inactive()
         self._sync_unpaused = asyncio.Event()
@@ -199,6 +202,21 @@ class GddNotionSyncService:
     def _write_status(self, payload: Dict[str, Any]) -> None:
         self._status_path.parent.mkdir(parents=True, exist_ok=True)
         write_json_atomic(self._status_path, payload)
+
+    def _clear_gdd_file_cache_and_notify_context(self) -> None:
+        """Vide le cache fichier GDD puis recharge le ContextBuilder si hook configuré (Story 3.9)."""
+        clear_gdd_runtime_caches()
+        hook = self._after_gdd_disk_mutation
+        if hook is None:
+            return
+        try:
+            hook()
+        except Exception as exc:
+            logger.warning(
+                "after_gdd_disk_mutation a échoué (fichiers GDD déjà à jour sur disque): %s",
+                exc,
+                exc_info=True,
+            )
 
     def read_status(self) -> Dict[str, Any]:
         """Lit le dernier statut persisté (aucun secret)."""
@@ -458,7 +476,7 @@ class GddNotionSyncService:
             retention_count=retention if backup_current else None,
         )
         save_manifest(self._manifest_path, GddNotionManifest())
-        clear_gdd_runtime_caches()
+        self._clear_gdd_file_cache_and_notify_context()
         log_sync_event(
             f"GDD restauré depuis archive {archive_id}",
             request_id=request_id,
@@ -984,7 +1002,7 @@ class GddNotionSyncService:
                     f"Miroir non appliqué : erreurs bloquantes ({len(partial)}). "
                     f"État GDD inchangé. Snapshot : {archive_rel or '?'}"
                 )
-                clear_gdd_runtime_caches()
+                self._clear_gdd_file_cache_and_notify_context()
                 self._active_mirror_staging = None
                 return GddNotionSyncResult(
                     success=False,
@@ -1012,7 +1030,7 @@ class GddNotionSyncService:
                 manifest.last_full_sync_at = datetime.now(timezone.utc).isoformat()
                 save_manifest(self._manifest_path, manifest)
 
-        clear_gdd_runtime_caches()
+        self._clear_gdd_file_cache_and_notify_context()
 
         success = updated > 0 or not partial
         msg = (

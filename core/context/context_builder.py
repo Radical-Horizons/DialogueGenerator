@@ -243,35 +243,32 @@ class ContextBuilder:
 
     def load_gdd_files(self):
         """Charge les fichiers JSON du GDD depuis les chemins relatifs au projet.
-        
-        Délègue le chargement à GDDLoader et initialise ElementRepository et ElementResolver.
-        Utilise un cache intelligent avec vérification mtime pour éviter les rechargements inutiles.
+
+        Délègue le chargement à GDDLoader et rattache ElementRepository / ElementResolver /
+        ElementLinker aux données **courantes**. À chaque appel, le repository et la chaîne
+        de résolution sont reconstruits pour suivre le nouvel objet ``GDDData`` renvoyé par
+        ``load_all()`` (évite de servir un snapshot mémoire obsolète après sync disque).
         """
         # Charger via GDDLoader
         self._gdd_data = self._gdd_loader.load_all()
-        
-        # Initialiser ElementRepository si nécessaire
-        if self._element_repository is None:
-            from services.element_repository import ElementRepository
-            self._element_repository = ElementRepository(self._gdd_data)
-        
-        # Initialiser ElementResolver si nécessaire
-        if self._element_resolver is None:
-            from services.element_resolver import ElementResolver
-            self._element_resolver = ElementResolver(self._element_repository)
-        
-        # Initialiser ContextFieldManager si nécessaire
+
+        from services.element_repository import ElementRepository
+        from services.element_resolver import ElementResolver
+        from services.element_linker import ElementLinker
+
+        self._element_repository = ElementRepository(self._gdd_data)
+        self._element_resolver = ElementResolver(self._element_repository)
+
+        # Initialiser ContextFieldManager si nécessaire (référence seulement ce builder)
         if self._context_field_manager is None:
             from services.context_field_manager import ContextFieldManager
+
             self._context_field_manager = ContextFieldManager(self.context_config, self)
-        
-        # Initialiser ElementLinker si nécessaire
-        if self._element_linker is None:
-            from services.element_linker import ElementLinker
-            self._element_linker = ElementLinker(
-                element_repository=self._element_repository,
-                element_resolver=self._element_resolver
-            )
+
+        self._element_linker = ElementLinker(
+            element_repository=self._element_repository,
+            element_resolver=self._element_resolver,
+        )
         
         # Initialiser ou mettre à jour GDDDataAccessor
         if self._gdd_data_accessor is None:

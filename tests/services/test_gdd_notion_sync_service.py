@@ -640,3 +640,61 @@ async def test_full_sync_resume_skips_completed_source(tmp_path: Path) -> None:
     assert (gdd_dir / "b.json").is_file()
     ck_after = (sync_dir / "full_sync_checkpoint.json")
     assert not ck_after.exists()
+
+
+def test_clear_gdd_file_cache_and_notify_context_invokes_hook(tmp_path: Path) -> None:
+    """Hook ``after_gdd_disk_mutation`` appelé après vidage cache (Story 3.9)."""
+    calls: list[str] = []
+
+    def hook() -> None:
+        calls.append("ok")
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        after_gdd_disk_mutation=hook,
+    )
+    svc._clear_gdd_file_cache_and_notify_context()
+    assert calls == ["ok"]
+
+
+def test_clear_gdd_file_cache_hook_failure_does_not_propagate(tmp_path: Path) -> None:
+    """Une erreur dans le hook est journalisée ; pas de propagation (sync déjà persistée)."""
+
+    def bad_hook() -> None:
+        raise RuntimeError("reload simulated failure")
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        after_gdd_disk_mutation=bad_hook,
+    )
+    svc._clear_gdd_file_cache_and_notify_context()

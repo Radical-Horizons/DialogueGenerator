@@ -94,7 +94,7 @@ development_status:
   2-13-auto-layout-graphe-pour-lisibilité-fr34: done
   2-14-undo-redo-opérations-graphe-fr35: done
   epic-2-retrospective: done
-  epic-3: in-progress
+  epic-3: done
   3-1-parcourir-entités-gdd-disponibles-personnages-lieux-régions-thèmes-fr11: done
   3-2-sélectionner-manuellement-contexte-gdd-pertinent-fr12: done
   3-3-suggestions-automatiques-contexte-gdd-basées-sur-règles-fr13: done
@@ -103,10 +103,10 @@ development_status:
   3-6-mesurer-pertinence-contexte-gdd-utilisé-dans-dialogue-généré-fr16: done
   3-7-voir-sections-gdd-utilisées-dans-génération-nœud-fr17: done
   3-8-synchroniser-données-gdd-depuis-notion-v20-fr18: done
-  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: review
+  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: done
   3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
   3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
   epic-4: in-progress
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: ready-for-dev
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: backlog
