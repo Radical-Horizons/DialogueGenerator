@@ -1,10 +1,11 @@
 /**
  * Story 2.8 FR29: jumpToNode et findNodesByQuery.
- * - jumpToNode(nodeId): setSelectedNode + dispatch focus-generated-node ; no-op si nodeId absent.
+ * - jumpToNode(nodeId): setSelectedNode + focusNode via graphViewStore ; no-op si nodeId absent.
  * - findNodesByQuery(query): match exact id, match partiel insensible casse sur nom (displayName ?? line ?? id).
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useGraphStore } from '../store/graphStore'
+import { useGraphViewStore } from '../store/graphViewStore'
 import type { Node } from 'reactflow'
 
 vi.mock('../api/graph', () => ({
@@ -16,12 +17,15 @@ vi.mock('../api/graph', () => ({
   calculateLayout: vi.fn(),
 }))
 
-describe('graphStore - jumpToNode (Story 2.8)', () => {
-  beforeEach(() => {
-    useGraphStore.getState().resetGraph()
-  })
+function resetStores() {
+  useGraphStore.getState().resetGraph()
+  useGraphViewStore.getState().clearFocus()
+}
 
-  it('jumpToNode(nodeId) calls setSelectedNode and dispatches focus-generated-node when node exists', () => {
+describe('graphStore - jumpToNode (Story 2.8)', () => {
+  beforeEach(() => resetStores())
+
+  it('jumpToNode(nodeId) calls setSelectedNode and enqueue focus when node exists', () => {
     const { addNode, jumpToNode } = useGraphStore.getState()
     const n1: Node = {
       id: 'node_abc123',
@@ -31,21 +35,13 @@ describe('graphStore - jumpToNode (Story 2.8)', () => {
     }
     addNode(n1)
 
-    let dispatched: { nodeId: string } | null = null
-    const handler = (e: Event) => {
-      dispatched = (e as CustomEvent<{ nodeId: string }>).detail
-    }
-    window.addEventListener('focus-generated-node', handler)
-
     jumpToNode('node_abc123')
 
     expect(useGraphStore.getState().selectedNodeId).toBe('node_abc123')
-    expect(dispatched).toEqual({ nodeId: 'node_abc123' })
-
-    window.removeEventListener('focus-generated-node', handler)
+    expect(useGraphViewStore.getState().focusQueue).toEqual(['node_abc123'])
   })
 
-  it('jumpToNode(nodeId) does not dispatch when nodeId absent in nodes', () => {
+  it('jumpToNode(nodeId) does not set focus when nodeId absent in nodes', () => {
     const { addNode, jumpToNode } = useGraphStore.getState()
     addNode({
       id: 'n1',
@@ -54,25 +50,15 @@ describe('graphStore - jumpToNode (Story 2.8)', () => {
       data: {},
     })
 
-    let dispatched = false
-    const handler = () => {
-      dispatched = true
-    }
-    window.addEventListener('focus-generated-node', handler)
-
     jumpToNode('nonexistent_id')
 
     expect(useGraphStore.getState().selectedNodeId).toBeNull()
-    expect(dispatched).toBe(false)
-
-    window.removeEventListener('focus-generated-node', handler)
+    expect(useGraphViewStore.getState().focusQueue).toEqual([])
   })
 })
 
 describe('graphStore - findNodesByQuery (Story 2.8)', () => {
-  beforeEach(() => {
-    useGraphStore.getState().resetGraph()
-  })
+  beforeEach(() => resetStores())
 
   it('returns exact id match first, then partial name matches (case insensitive)', () => {
     const { addNode, findNodesByQuery } = useGraphStore.getState()

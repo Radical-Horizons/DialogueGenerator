@@ -5,11 +5,15 @@ import { describe, it, expect } from 'vitest'
 import {
   CHOICE_LABEL_MAX_LENGTH,
   TEST_RESULT_EDGE_CONFIG,
+  CHOICE_EDGE_COLOR,
+  NEXT_EDGE_COLOR,
   truncateChoiceLabel,
   choiceEdgeId,
   choiceToTestEdgeId,
   buildChoiceEdge,
   buildTestResultEdge,
+  edgeStrokeFromSourceHandle,
+  edgeStrokeFromSource,
 } from './graphEdgeBuilders'
 
 describe('truncateChoiceLabel', () => {
@@ -66,6 +70,7 @@ describe('buildChoiceEdge', () => {
     expect(edge.sourceHandle).toBe('choice:__idx_0')
     expect(edge.type).toBe('smoothstep')
     expect(edge.label).toBe('Mon choix')
+    expect(edge.style).toEqual({ stroke: CHOICE_EDGE_COLOR })
     expect(edge.data).toEqual({ edgeType: 'choice', choiceIndex: 0 })
   })
 
@@ -120,6 +125,22 @@ describe('buildTestResultEdge', () => {
     expect(edge.type).toBe('smoothstep')
     expect(edge.label).toBe('Réussite')
     expect(edge.style).toEqual({ stroke: '#27AE60' })
+  })
+})
+
+describe('edgeStrokeFromSourceHandle', () => {
+  it('maps choice and test handles to expected colors', () => {
+    expect(edgeStrokeFromSourceHandle('choice:accept')).toBe(CHOICE_EDGE_COLOR)
+    expect(edgeStrokeFromSourceHandle('success')).toBe('#27AE60')
+    expect(edgeStrokeFromSourceHandle('critical-success')).toBe('#0088FF')
+    expect(edgeStrokeFromSourceHandle(undefined)).toBeUndefined()
+  })
+})
+
+describe('edgeStrokeFromSource', () => {
+  it('maps nextNode/suivant to next handle color', () => {
+    expect(edgeStrokeFromSource({ connectionType: 'nextNode' })).toBe(NEXT_EDGE_COLOR)
+    expect(edgeStrokeFromSource({ edgeLabel: 'Suivant' })).toBe(NEXT_EDGE_COLOR)
   })
 })
 

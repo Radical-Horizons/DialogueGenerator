@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { useCostGovernance } from '../../hooks/useCostGovernance'
@@ -153,10 +154,7 @@ export function AIGenerationPanel({
       
       // Déclencher un événement pour sélectionner et zoomer vers le nouveau nœud
       if (generationResult.nodeId) {
-        const event = new CustomEvent('focus-generated-node', {
-          detail: { nodeId: generationResult.nodeId }
-        })
-        window.dispatchEvent(event)
+        useGraphViewStore.getState().focusNode(generationResult.nodeId)
       }
       
       onGenerated?.()

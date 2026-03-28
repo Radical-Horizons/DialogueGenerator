@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import { GraphSearchBar } from '../components/graph/GraphSearchBar'
 import { useGraphStore } from '../store/graphStore'
+import { useGraphViewStore } from '../store/graphViewStore'
 import type { Node } from 'reactflow'
 
 function makeDialogueNode(id: string, line: string, speaker: string): Node {
@@ -53,7 +54,7 @@ describe('GraphSearchBar (Story 2.7)', () => {
     expect(screen.getByText(/2 résultats trouvés/)).toBeInTheDocument()
   })
 
-  it('Prev/Next dispatch focus-generated-node and cycle through results', async () => {
+  it('Prev/Next enqueue focus via graphViewStore and cycle through results', async () => {
     render(<GraphSearchBar onClose={onClose} />)
     const input = screen.getByPlaceholderText(/Rechercher/)
     await act(async () => {
@@ -62,30 +63,25 @@ describe('GraphSearchBar (Story 2.7)', () => {
     await act(async () => {
       vi.advanceTimersByTime(250)
     })
-    let receivedNodeId: string | null = null
-    const handler = (e: Event) => {
-      receivedNodeId = (e as CustomEvent<{ nodeId: string }>).detail.nodeId
-    }
-    window.addEventListener('focus-generated-node', handler)
 
     const nextBtn = screen.getByLabelText(/Résultat suivant/)
     await act(async () => {
       fireEvent.click(nextBtn)
     })
-    expect(receivedNodeId).toBe('n3')
-    receivedNodeId = null
+    expect(useGraphViewStore.getState().focusQueue.at(-1)).toBe('n3')
+
+    useGraphViewStore.getState().clearFocus()
     await act(async () => {
       fireEvent.click(nextBtn)
     })
-    expect(receivedNodeId).toBe('n1')
+    expect(useGraphViewStore.getState().focusQueue.at(-1)).toBe('n1')
 
+    useGraphViewStore.getState().clearFocus()
     const prevBtn = screen.getByLabelText(/Résultat précédent/)
     await act(async () => {
       fireEvent.click(prevBtn)
     })
-    expect(receivedNodeId).toBe('n3')
-
-    window.removeEventListener('focus-generated-node', handler)
+    expect(useGraphViewStore.getState().focusQueue.at(-1)).toBe('n3')
   })
 
   it('Escape calls setHighlightedNodes([]) and onClose', async () => {

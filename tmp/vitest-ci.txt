@@ -1,0 +1,26 @@
+
+> dialogue-generator-frontend@1.0.0 test:ci
+> vitest run --reporter=json --outputFile=../tmp/vitest-results.json
+
+Not implemented: Window's alert() method
+Not implemented: Window's alert() method
+
+<--- Last few GCs --->
+
+[41528:0000028AFAB92000] 108266653 ms: Scavenge (interleaved) 3611.4 (3703.5) -> 3611.3 (3719.7) MB, pooled: 0 MB, 26.54 / 0.00 ms  (average mu = 0.382, current mu = 0.372) allocation failure; 
+[41528:0000028AFAB92000] 108267667 ms: Mark-Compact (reduce) 3622.0 (3719.7) -> 3289.7 (3579.2) MB, pooled: 0 MB, 120.39 / 0.00 ms  (+ 861.1 ms in 171 steps since start of marking, biggest step 8.1 ms, walltime since start of marking 1015 ms) (average mu 
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF77901AE1F node::OnFatalError+1343
+ 2: 00007FF779C637B7 v8::Function::NewInstance+423
+ 3: 00007FF779A63E77 v8::base::AddressSpaceReservation::AddressSpaceReservation+322071
+ 4: 00007FF779A67B84 v8::base::AddressSpaceReservation::AddressSpaceReservation+337700
+ 5: 00007FF779A76B1C v8::internal::StrongRootAllocatorBase::deallocate_impl+16604
+ 6: 00007FF779A7635B v8::internal::StrongRootAllocatorBase::deallocate_impl+14619
+ 7: 00007FF77AEDEBED v8::base::UnsignedDivisionByConstant<unsigned __int64>+2791309
+ 8: 00007FF779A61940 v8::base::AddressSpaceReservation::AddressSpaceReservation+312544
+ 9: 00007FF779AE5619 v8::Unlocker::~Unlocker+9273
+10: 00007FF77965B1C2 v8::String::Utf8Value::~Utf8Value+142210
+11: 0000028AB7E7733A 
+JSON report written to F:/Projets/Notion_Scrapper/DialogueGenerator/tmp/vitest-results.json

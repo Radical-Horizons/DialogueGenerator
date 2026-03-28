@@ -75,6 +75,19 @@ function renderValue(value: unknown, depth: number): React.ReactNode {
 
 export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps) {
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set())
+  const data = (item?.data as Record<string, unknown> | undefined) ?? undefined
+  const summary = getGddEntitySummary(data)
+
+  const { inlineProperties, expandableSections } = useMemo(() => {
+    const raw = data?.sections as Record<string, unknown> | undefined
+    const entries: [string, unknown][] =
+      raw && typeof raw === 'object' && !Array.isArray(raw)
+        ? Object.entries(raw)
+        : Object.entries(data || {}).filter(([k]) => k !== 'Nom' && k !== 'name')
+    const inlineProperties = entries.filter(([k]) => GDD_INLINE_PROPERTY_KEYS.has(k))
+    const expandableSections = entries.filter(([k]) => !GDD_INLINE_PROPERTY_KEYS.has(k))
+    return { inlineProperties, expandableSections }
+  }, [data])
 
   const toggleSection = (key: string) => {
     setExpandedKeys((prev) => {
@@ -92,20 +105,6 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
       </div>
     )
   }
-
-  const data = item.data as Record<string, unknown>
-  const summary = getGddEntitySummary(data)
-
-  const { inlineProperties, expandableSections } = useMemo(() => {
-    const raw = data?.sections as Record<string, unknown> | undefined
-    const entries: [string, unknown][] =
-      raw && typeof raw === 'object' && !Array.isArray(raw)
-        ? Object.entries(raw)
-        : Object.entries(data || {}).filter(([k]) => k !== 'Nom' && k !== 'name')
-    const inlineProperties = entries.filter(([k]) => GDD_INLINE_PROPERTY_KEYS.has(k))
-    const expandableSections = entries.filter(([k]) => !GDD_INLINE_PROPERTY_KEYS.has(k))
-    return { inlineProperties, expandableSections }
-  }, [data])
 
   return (
     <div style={{ 

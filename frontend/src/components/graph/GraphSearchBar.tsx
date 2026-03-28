@@ -1,10 +1,11 @@
 /**
  * Barre de recherche dans le graphe (Story 2.7 - FR28).
  * Recherche par contenu texte (data.line) et/ou speaker ; met à jour les highlights
- * et permet de naviguer (Précédent/Suivant) avec focus-generated-node.
+ * et permet de naviguer (Précédent/Suivant) via graphViewStore.focusNode().
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { theme } from '../../theme'
 
 const SEARCH_DEBOUNCE_MS = 200
@@ -38,9 +39,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
     setCurrentIndex(ids.length > 0 ? 0 : -1)
     // AC#3 : centrer le graphe sur le premier résultat à l'affichage des résultats
     if (ids.length > 0) {
-      window.dispatchEvent(
-        new CustomEvent('focus-generated-node', { detail: { nodeId: ids[0] } })
-      )
+      useGraphViewStore.getState().focusNode(ids[0])
     }
   }, [query, speaker, searchNodes, setHighlightedNodes])
 
@@ -64,9 +63,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
       if (resultIds.length === 0) return
       const i = (index + resultIds.length) % resultIds.length
       setCurrentIndex(i)
-      window.dispatchEvent(
-        new CustomEvent('focus-generated-node', { detail: { nodeId: resultIds[i] } })
-      )
+      useGraphViewStore.getState().focusNode(resultIds[i])
     },
     [resultIds]
   )
@@ -86,9 +83,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
         const idx = currentIndexRef.current
         const next = e.shiftKey ? (idx - 1 + resultIds.length) % resultIds.length : (idx + 1) % resultIds.length
         setCurrentIndex(next)
-        window.dispatchEvent(
-          new CustomEvent('focus-generated-node', { detail: { nodeId: resultIds[next] } })
-        )
+        useGraphViewStore.getState().focusNode(resultIds[next])
       }
     },
     [onClose, setHighlightedNodes, resultIds]

@@ -19,6 +19,7 @@ interface EndNodeData {
   validationErrors?: ValidationError[]
   validationWarnings?: ValidationError[]
   isHighlighted?: boolean
+  incomingEdgeColor?: string
   [key: string]: unknown
 }
 
@@ -128,7 +129,7 @@ export const EndNode = memo(function EndNode({
         type="target"
         position={Position.Top}
         style={{
-          background: '#B8B8B8',
+          background: data.incomingEdgeColor ?? '#B8B8B8',
           width: 12,
           height: 12,
           border: '2px solid white',

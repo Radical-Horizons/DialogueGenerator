@@ -12,6 +12,10 @@ import { theme } from '../../theme'
 import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import { NODE_DRAG_TOOLTIP } from './nodeDragTooltip'
+import {
+  formatGraphWarningBadgeLabel,
+  summarizeGraphValidationWarnings,
+} from '../../utils/graphValidationSummary'
 
 /** Offsets pour positionner les nœuds créés manuellement sans chevauchement (Story 1.6). */
 const MANUAL_NODE_OFFSET_X = 150
@@ -53,9 +57,11 @@ export function GraphEditorHeader({
 }: GraphEditorHeaderProps) {
   const {
     nodes,
+    edges,
     selectedNodeId,
     selectedNodeIds,
     validationErrors: graphValidationErrors,
+    intentionalCycles,
     isSaving: isGraphSaving,
     hasUnsavedChanges,
     lastSaveError,
@@ -91,7 +97,6 @@ export function GraphEditorHeader({
     setShowAutoLayoutDropdown,
     showActionsDropdown,
     setShowActionsDropdown,
-    showAIGenerationPanel: _showAIGenerationPanel,
     setShowAIGenerationPanel,
     showValidationPanel,
     setShowValidationPanel,
@@ -101,11 +106,11 @@ export function GraphEditorHeader({
     setShowShortcutsTooltip,
     showSearchBar,
     setShowSearchBar,
-    showJumpToNodeModal: _showJumpToNodeModal,
     setShowJumpToNodeModal,
-    showFiltersPanel: _showFiltersPanel,
     setShowFiltersPanel,
     layoutDirection,
+    layoutSpacingMode,
+    setLayoutSpacingMode,
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,
@@ -293,11 +298,18 @@ export function GraphEditorHeader({
         {/* Badge de santé global du graphe */}
         {(() => {
           const errors = graphValidationErrors.filter((e) => e.severity === 'error')
-          const warnings = graphValidationErrors.filter((e) => e.severity === 'warning')
+          const warningSummary = summarizeGraphValidationWarnings(
+            nodes,
+            edges,
+            graphValidationErrors,
+            intentionalCycles
+          )
+          const warnings = warningSummary.visibleWarnings
           const hasErrors = errors.length > 0
           const hasWarnings = warnings.length > 0 && !hasErrors
           const isValid = !hasErrors && !hasWarnings
           const canToggle = hasErrors || hasWarnings
+          const warningLabel = formatGraphWarningBadgeLabel(warningSummary)
           const badgeStyle = {
             padding: '0.4rem 0.75rem',
             borderRadius: '6px',
@@ -333,6 +345,8 @@ export function GraphEditorHeader({
               : 'Cliquer pour afficher les détails'
             : hasErrors
             ? `${errors.length} erreur(s) détectée(s)`
+            : warningSummary.disconnectedBranchCount > 0
+            ? `${warnings.length} avertissement(s), dont ${warningSummary.disconnectedBranchCount} branche(s) déconnectée(s)`
             : `${warnings.length} avertissement(s) détecté(s)`
           const content = (
             <>
@@ -342,7 +356,7 @@ export function GraphEditorHeader({
                   ? 'Graphe valide'
                   : hasErrors
                   ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
-                  : `${warnings.length} avertissement${warnings.length > 1 ? 's' : ''}`}
+                  : warningLabel}
               </span>
             </>
           )
@@ -420,6 +434,18 @@ export function GraphEditorHeader({
             aria-label="Auto-layout (Dagre) — choisir la direction"
           >
             📐 Auto-layout
+            <span
+              style={{
+                padding: '0.1rem 0.35rem',
+                borderRadius: '999px',
+                backgroundColor: theme.background.panel,
+                color: theme.text.secondary,
+                fontSize: '0.72rem',
+                textTransform: 'capitalize',
+              }}
+            >
+              {layoutSpacingMode}
+            </span>
             <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
           </button>
           {showAutoLayoutDropdown && (
@@ -441,6 +467,69 @@ export function GraphEditorHeader({
                 zIndex: 1000,
               }}
             >
+              <div
+                style={{
+                  padding: '0.4rem 0.75rem 0.25rem',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: theme.text.secondary,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Espacement
+              </div>
+              {(
+                [
+                  { value: 'compact' as const, label: 'Compact' },
+                  { value: 'normal' as const, label: 'Normal' },
+                  { value: 'large' as const, label: 'Large' },
+                ] as const
+              ).map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="option"
+                  aria-selected={layoutSpacingMode === value}
+                  onClick={() => {
+                    setLayoutSpacingMode(value)
+                    void handleAutoLayout(layoutDirection)
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '0.45rem 0.75rem',
+                    border: 'none',
+                    background:
+                      layoutSpacingMode === value ? theme.button.default.background : 'transparent',
+                    color: theme.input.color,
+                    textAlign: 'left',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                  {layoutSpacingMode === value ? ' ✓' : ''}
+                </button>
+              ))}
+              <div
+                style={{
+                  margin: '0.25rem 0',
+                  borderTop: `1px solid ${theme.border.primary}`,
+                }}
+              />
+              <div
+                style={{
+                  padding: '0.15rem 0.75rem 0.25rem',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: theme.text.secondary,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Direction
+              </div>
               {(
                 [
                   { value: 'TB' as const, label: 'TB (Haut-Bas)' },

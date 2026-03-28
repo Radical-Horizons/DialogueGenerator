@@ -1,4 +1,8 @@
 """Point d'entrée principal de l'API REST FastAPI."""
+import time
+
+_API_MAIN_MODULE_T0 = time.perf_counter()
+
 import os
 import logging
 import sys
@@ -66,7 +70,15 @@ async def lifespan(app: FastAPI):
         # Startup
         logger.info("Démarrage de l'API DialogueGenerator...")
         logger.info(f"Timestamp: {datetime.now(timezone.utc).isoformat()}Z")
-        
+
+        from api.utils.startup_timing import StartupPhaseTimer, is_startup_timing_enabled
+
+        _startup_timer = StartupPhaseTimer(
+            enabled=is_startup_timing_enabled(),
+            module_import_started_at=_API_MAIN_MODULE_T0,
+        )
+        _startup_timer.log_time_since_module_start("chargement module api.main → entrée lifespan")
+
         # Debug probe optionnel (désactivé par défaut pour éviter le bruit)
         if os.getenv("STARTUP_PROBE", "false").lower() in ("true", "1", "yes"):
             import logging
@@ -79,25 +91,39 @@ async def lifespan(app: FastAPI):
         except ValueError:
             logger.critical("L'application ne peut pas démarrer avec une configuration de sécurité invalide.")
             raise
-        
-        # Nettoyer les anciens logs au démarrage
-        try:
-            from api.utils.log_cleanup import cleanup_on_startup
-            cleanup_on_startup()
-        except Exception as e:
-            logger.warning(f"Erreur lors du nettoyage des logs au démarrage: {e}")
-        
+        _startup_timer.mark("security_config_ok")
+
+        # Nettoyer les anciens logs au démarrage (désactivable pour accélérer le cold start en dev)
+        if os.getenv("SKIP_STARTUP_LOG_CLEANUP", "").lower() not in ("true", "1", "yes"):
+            try:
+                from api.utils.log_cleanup import cleanup_on_startup
+                cleanup_on_startup()
+            except Exception as e:
+                logger.warning(f"Erreur lors du nettoyage des logs au démarrage: {e}")
+        _startup_timer.mark("log_cleanup_done")
+
         # Créer le container une seule fois : chargement GDD + validation puis réutilisation pour les requêtes
         try:
             from api.container import ServiceContainer
             from services.context_field_validator import ContextFieldValidator
 
             container = ServiceContainer()
+            _startup_timer.mark("service_container_created")
+
             context_builder = container.get_context_builder()
+            _startup_timer.mark("context_builder_gdd_loaded")
+
             config_service = container.get_config_service()
             context_config = config_service.get_context_config()
+            _startup_timer.mark("context_config_read")
 
-            if context_config:
+            environment = os.getenv("ENVIRONMENT", "development").lower().strip()
+            skip_context_validation = (
+                environment != "production"
+                and os.getenv("SKIP_STARTUP_CONTEXT_VALIDATION", "").lower() in ("true", "1", "yes")
+            )
+
+            if context_config and not skip_context_validation:
                 validator = ContextFieldValidator(context_builder)
                 validation_results = validator.validate_all_configs(context_config)
 
@@ -117,21 +143,29 @@ async def lifespan(app: FastAPI):
                         report = validator.get_validation_report(context_config)
                         logger.warning(f"Validation des champs GDD (rapport complet):\n{report}")
 
-                    environment = os.getenv("ENVIRONMENT", "development")
                     if environment == "production" and total_errors > 0:
                         logger.critical("Champs invalides détectés dans context_config.json - l'application ne peut pas démarrer en production.")
                         raise ValueError(f"Configuration invalide: {total_errors} champs invalides détectés")
                 else:
                     logger.info("Validation des champs GDD: tous les champs sont valides")
+            elif context_config and skip_context_validation:
+                logger.info(
+                    "Startup: SKIP_STARTUP_CONTEXT_VALIDATION=1 — pas de validate_all_configs "
+                    "(GDD chargé). Réactiver avant de modifier context_config / champs GDD."
+                )
+
+            _startup_timer.mark("context_validation_phase_done")
 
             app.state.container = container
             logger.info("ServiceContainer initialisé dans app.state (GDD chargé une seule fois).")
         except Exception as e:
             logger.error(f"Erreur lors de l'initialisation du container ou de la validation GDD: {e}", exc_info=True)
+            _startup_timer.mark("container_init_failed")
             if "container" in locals() and container is not None:
                 app.state.container = container
                 logger.warning("Container partiellement initialisé stocké dans app.state malgré l'erreur.")
             else:
+                _startup_timer.log_report()
                 raise
         
         # Debug: Liste TOUTES les routes réelles au runtime (seulement si DEBUG_ROUTES=true)
@@ -178,6 +212,8 @@ async def lifespan(app: FastAPI):
                 log_routes.warning("AUCUNE ROUTE estimate-tokens trouvée!")
                 print("AUCUNE ROUTE estimate-tokens trouvée!", file=sys.stderr, flush=True)
             log_routes.warning("=== FIN LISTE ROUTES ===")
+        _startup_timer.mark("before_job_manager_cleanup_task")
+
         # Démarrer la tâche de cleanup des jobs de génération (Story 0.2)
         try:
             from api.services.generation_job_manager import get_job_manager
@@ -216,7 +252,10 @@ async def lifespan(app: FastAPI):
         app.state._gdd_notion_scheduler_task = asyncio.create_task(
             gdd_notion_scheduler()
         )
-        
+
+        _startup_timer.mark("lifespan_startup_complete")
+        _startup_timer.log_report()
+
         yield
     except (KeyboardInterrupt, asyncio.CancelledError):
         # Gérer proprement les interruptions (Ctrl+C, arrêt du serveur)

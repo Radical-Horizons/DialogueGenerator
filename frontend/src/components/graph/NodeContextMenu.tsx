@@ -4,6 +4,7 @@
 import { useCallback } from 'react'
 import { useReactFlow } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { getParentChoiceForTestNode } from '../../utils/testNodeSync'
 import { theme } from '../../theme'
 
@@ -14,8 +15,6 @@ interface NodeContextMenuProps {
   right?: number
   bottom?: number
   onClose: () => void
-  /** Génération directe pour un choix (drop handle). */
-  onGenerateForChoice?: (parentNodeId: string, choiceIndex: number) => void
   /** Génération depuis un TestNode : on envoie l’id du TestNode, le backend renvoie les connexions avec ce même id (source de vérité unique). */
   onGenerateFromTestNode?: (testNodeId: string) => void
 }
@@ -27,7 +26,6 @@ export function NodeContextMenu({
   right,
   bottom,
   onClose,
-  onGenerateForChoice,
   onGenerateFromTestNode,
 }: NodeContextMenuProps) {
   const { duplicateNode, setShowDeleteNodeConfirm, setSelectedNode, nodes } = useGraphStore()
@@ -62,15 +60,15 @@ export function NodeContextMenu({
         const parentInfo = getParentChoiceForTestNode(id, nodes)
         if (parentInfo) {
           setSelectedNode(parentInfo.dialogueNodeId)
-          window.dispatchEvent(new CustomEvent('open-ai-generation-panel', { detail: { nodeId: parentInfo.dialogueNodeId } }))
+          useGraphViewStore.getState().openAIGeneration(parentInfo.dialogueNodeId)
         }
       }
     } else {
       setSelectedNode(id)
-      window.dispatchEvent(new CustomEvent('open-ai-generation-panel', { detail: { nodeId: id } }))
+      useGraphViewStore.getState().openAIGeneration(id)
     }
     onClose()
-  }, [id, node?.type, nodes, setSelectedNode, onClose, onGenerateForChoice, onGenerateFromTestNode])
+  }, [id, node?.type, nodes, setSelectedNode, onClose, onGenerateFromTestNode])
 
   return (
     <div
@@ -173,7 +171,7 @@ export function NodeContextMenu({
             role="menuitem"
             onClick={(e) => {
               e.stopPropagation()
-              window.dispatchEvent(new CustomEvent('open-prompt-viewer', { detail: { nodeId: id } }))
+              useGraphViewStore.getState().openPromptViewer(id)
               onClose()
             }}
             style={{

@@ -88,6 +88,10 @@ class GDDLoader:
             else:
                 # Par défaut, Vision.json est dans data/ du projet
                 self._import_path = context_builder_dir / "data"
+
+        self._project_root_dir = (
+            project_root_dir if project_root_dir is not None else context_builder_dir.parent
+        )
     
     def _get_gdd_cache(self):
         """Récupère l'instance du cache GDD si disponible.
@@ -199,30 +203,54 @@ class GDDLoader:
                 logger.error("Lecture shard impossible %s: %s", p.name, e)
         return aggregated
     
-    def load_vision(self) -> Optional[Dict[str, Any]]:
-        """Charge le fichier Vision.json.
+    def _resolve_vision_json_path(self) -> Optional[Path]:
+        """Résout le chemin vers Vision.json s'il existe (fichier régulier).
         
         Returns:
-            Données Vision.json chargées, ou None si non trouvé/erreur.
+            Chemin absolu logique ou None si absent.
         """
-        gdd_cache = self._get_gdd_cache()
-        
-        # Déterminer le chemin vers Vision.json
-        # Si le chemin pointe directement vers un fichier Vision.json
         if self._import_path.is_file() and self._import_path.name.lower() == "vision.json":
             vision_file_path = self._import_path
-        # Si le chemin pointe vers Bible_Narrative
         elif self._import_path.is_dir() and self._import_path.name == "Bible_Narrative":
             vision_file_path = self._find_file_case_insensitive(self._import_path, "Vision.json")
             if vision_file_path is None:
                 vision_file_path = self._import_path / "Vision.json"
-        # Sinon, chercher Vision.json directement dans le répertoire (data/)
         else:
             vision_file_path = self._find_file_case_insensitive(self._import_path, "Vision.json")
             if vision_file_path is None:
                 vision_file_path = self._import_path / "Vision.json"
         
         if vision_file_path is None or not vision_file_path.exists() or not vision_file_path.is_file():
+            return None
+        return vision_file_path
+
+    def _resolve_category_json_path(self, category_name: str) -> Optional[Path]:
+        """Résout le fichier JSON utilisé pour une catégorie (_full prioritaire), ou None."""
+        if category_name not in self.CATEGORIES_CONFIG:
+            return None
+        file_path_full = self._find_file_case_insensitive(
+            self._categories_path,
+            f"{category_name}_full.json",
+        )
+        file_path = self._find_file_case_insensitive(
+            self._categories_path,
+            f"{category_name}.json",
+        )
+        chosen = file_path_full if file_path_full is not None else file_path
+        if chosen is None or not chosen.is_file():
+            return None
+        return chosen
+
+    def load_vision(self) -> Optional[Dict[str, Any]]:
+        """Charge le fichier Vision.json.
+
+        Returns:
+            Données Vision.json chargées, ou None si non trouvé/erreur.
+        """
+        gdd_cache = self._get_gdd_cache()
+
+        vision_file_path = self._resolve_vision_json_path()
+        if vision_file_path is None:
             logger.warning(f"Fichier Vision.json non trouvé dans {self._import_path}.")
             return None
         
@@ -309,25 +337,16 @@ class GDDLoader:
                         gdd_cache.set(composite_cache_key, aggregated, shard_dir)
                     return aggregated
 
-        # Fichier monolithique (_full prioritaire)
-        file_path_full = self._find_file_case_insensitive(
-            self._categories_path,
-            f"{category_name}_full.json",
-        )
-        file_path = self._find_file_case_insensitive(
-            self._categories_path,
-            f"{category_name}.json",
-        )
-
-        if file_path_full is not None:
-            file_path = file_path_full
-            logger.debug(f"Fichier {file_path.name} trouvé (version _full).")
-        elif file_path is None:
+        file_path = self._resolve_category_json_path(category_name)
+        if file_path is None:
             logger.debug(
                 f"Fichier {category_name}.json non trouvé dans {self._categories_path}. "
                 "Utilisation de la valeur par défaut."
             )
             return default_value
+
+        if "_full" in file_path.stem.lower():
+            logger.debug(f"Fichier {file_path.name} trouvé (version _full).")
 
         # Vérifier le cache
         composite_cache_key = f"{category_name}:{file_path.resolve()}"
@@ -394,6 +413,15 @@ class GDDLoader:
         Returns:
             Instance de GDDData contenant toutes les données chargées.
         """
+        try:
+            from services.gdd_disk_cache import try_load_gdd_from_disk
+
+            cached = try_load_gdd_from_disk(self)
+            if cached is not None:
+                return cached
+        except ImportError:
+            pass
+
         logger.info(
             f"Début du chargement des données du GDD depuis {self._categories_path} et {self._import_path}."
         )
@@ -411,4 +439,12 @@ class GDDLoader:
                 setattr(gdd_data, attribute_name, data)
         
         logger.info("Chargement des fichiers GDD terminé.")
+
+        try:
+            from services.gdd_disk_cache import try_save_gdd_to_disk
+
+            try_save_gdd_to_disk(self, gdd_data)
+        except ImportError:
+            pass
+
         return gdd_data

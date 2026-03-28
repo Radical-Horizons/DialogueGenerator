@@ -138,7 +138,7 @@ describe('GraphView - 4 résultats de test', () => {
 
     const criticalSuccessEdge = testNodeEdges.find((e) => e.target === 'NODE_CRITICAL_SUCCESS')
     expect(criticalSuccessEdge?.label).toBe('Réussite critique')
-    expect(criticalSuccessEdge?.style?.stroke).toBe('#229954')
+    expect(criticalSuccessEdge?.style?.stroke).toBe('#0088FF')
   })
 
   it('devrait créer un TestNode même si les 4 nœuds de résultat ne sont pas encore générés', () => {

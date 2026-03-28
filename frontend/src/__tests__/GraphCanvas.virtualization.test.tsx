@@ -10,6 +10,7 @@ import { render, screen, act } from '@testing-library/react'
 import { ReactFlowProvider } from 'reactflow'
 import type { Node } from 'reactflow'
 import { GraphCanvas } from '../components/graph/GraphCanvas'
+import { useGraphViewStore } from '../store/graphViewStore'
 import { DialogueNode, TestNode, EndNode } from '../components/graph/nodes'
 import { useGraphStore } from '../store/graphStore'
 
@@ -141,16 +142,14 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     15000
   )
 
-  it('when focus-generated-node is dispatched with nodeId, setHighlightedNodes is called and store highlights node (Story 2.2 AC #3)', async () => {
+  it('when focusNode is called via graphViewStore, setHighlightedNodes is called and store highlights node (Story 2.2 AC #3)', async () => {
     const { addNode } = useGraphStore.getState()
     addNode(createMockNode('n1', 'dialogueNode'))
     addNode(createMockNode('n2', 'dialogueNode'))
     renderGraphCanvas()
     expect(useGraphStore.getState().highlightedNodeIds).toEqual([])
     await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent('focus-generated-node', { detail: { nodeId: 'n2' } })
-      )
+      useGraphViewStore.getState().focusNode('n2')
     })
     await act(async () => {
       await new Promise((r) => setTimeout(r, 150))
@@ -180,25 +179,22 @@ describe('GraphCanvas virtualization (Story 2.1)', () => {
     expect(screen.getByText(/100%/)).toBeInTheDocument()
   })
 
-  it('double-click on node dispatches focus-generated-node (Story 2.3 AC #3)', () => {
+  it('double-click on node triggers focusNode via graphViewStore (Story 2.3 AC #3)', () => {
     const { addNode } = useGraphStore.getState()
     addNode(createMockNode('n1', 'dialogueNode'))
     addNode(createMockNode('n2', 'dialogueNode'))
     renderGraphCanvas()
-    let receivedNodeId: string | null = null
-    const handler = (e: Event) => {
-      receivedNodeId = (e as CustomEvent<{ nodeId: string }>).detail.nodeId
-    }
-    window.addEventListener('focus-generated-node', handler)
-    try {
-      expect(capturedReactFlowProps.onNodeDoubleClick).toBeDefined()
-      act(() => {
-        capturedReactFlowProps.onNodeDoubleClick!(null, { id: 'n2' })
-      })
-      expect(receivedNodeId).toBe('n2')
-    } finally {
-      window.removeEventListener('focus-generated-node', handler)
-    }
+    expect(capturedReactFlowProps.onNodeDoubleClick).toBeDefined()
+    const focusSpy = vi.fn()
+    const originalFocusNode = useGraphViewStore.getState().focusNode
+    useGraphViewStore.setState({
+      focusNode: (nodeId: string) => { focusSpy(nodeId); originalFocusNode(nodeId) },
+    })
+    act(() => {
+      capturedReactFlowProps.onNodeDoubleClick!(null, { id: 'n2' })
+    })
+    expect(focusSpy).toHaveBeenCalledWith('n2')
+    useGraphViewStore.setState({ focusNode: originalFocusNode })
   })
 
   it('with multiple nodes and edges, selection does not alter nodes or edges count (regression)', () => {

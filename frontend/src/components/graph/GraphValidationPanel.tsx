@@ -7,6 +7,7 @@ import type { ReactFlowInstance } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 import type { ValidationErrorDetail } from '../../types/graph'
+import { summarizeGraphValidationWarnings } from '../../utils/graphValidationSummary'
 
 const ICON_FOR_TYPE: Record<string, string> = {
   orphan_node: '🔗',
@@ -43,18 +44,23 @@ export function GraphValidationPanel({
   validationErrors,
   reactFlowInstance,
 }: GraphValidationPanelProps) {
-  const { setSelectedNode, intentionalCycles, markCycleAsIntentional, unmarkCycleAsIntentional } =
-    useGraphStore()
+  const {
+    nodes,
+    edges,
+    setSelectedNode,
+    intentionalCycles,
+    markCycleAsIntentional,
+    unmarkCycleAsIntentional,
+  } = useGraphStore()
 
   const errors = validationErrors.filter((e) => e.severity === 'error')
-  const warnings = validationErrors
-    .filter((e) => e.severity === 'warning')
-    .filter((warn) => {
-      if (warn.type === 'cycle_detected' && warn.cycle_id) {
-        return !intentionalCycles.includes(warn.cycle_id)
-      }
-      return true
-    })
+  const warningSummary = summarizeGraphValidationWarnings(
+    nodes,
+    edges,
+    validationErrors,
+    intentionalCycles
+  )
+  const warnings = warningSummary.visibleWarnings
 
   const errorsByType = errors.reduce(
     (acc, err) => {
@@ -114,6 +120,35 @@ export function GraphValidationPanel({
             : `${warnings.length} avertissement${warnings.length > 1 ? 's' : ''}`}
         </span>
       </div>
+
+      {errors.length === 0 && warnings.length > 0 && (
+        <div
+          style={{
+            fontSize: '0.75rem',
+            color: theme.state.warning.color,
+            marginBottom: '0.75rem',
+            opacity: 0.95,
+          }}
+        >
+          {warningSummary.disconnectedBranchCount > 0 && (
+            <span>
+              {warningSummary.disconnectedBranchCount} branche
+              {warningSummary.disconnectedBranchCount > 1 ? 's' : ''} déconnectée
+              {warningSummary.disconnectedBranchCount > 1 ? 's' : ''}
+              {warningSummary.countsByType.unreachable_node
+                ? `, ${warningSummary.countsByType.unreachable_node} nœud${
+                    warningSummary.countsByType.unreachable_node > 1 ? 's' : ''
+                  } inaccessibles`
+                : ''}
+              {warningSummary.countsByType.cycle_detected
+                ? `, ${warningSummary.countsByType.cycle_detected} cycle${
+                    warningSummary.countsByType.cycle_detected > 1 ? 's' : ''
+                  }`
+                : ''}
+            </span>
+          )}
+        </div>
+      )}
 
       {errors.length > 0 &&
         Object.entries(errorsByType).map(([type, typeErrors]) => (

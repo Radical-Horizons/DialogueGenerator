@@ -79,6 +79,7 @@ describe('mergeDialogueNodeFormIntoStoreData', () => {
     }
     const out = mergeDialogueNodeFormIntoStoreData(nodeData, formValues) as DialogueNodeData
     expect(out.choices?.[0]?.targetNode).toBe('TGT')
+    expect(out.choices?.[0]?.choiceId).toBe('0')
     expect(out.line).toBe('edited')
   })
   it('takes nextNode from store when defined on nodeData', () => {
@@ -143,6 +144,28 @@ describe('mergeDialogueNodeFormIntoStoreData', () => {
     }
     const out = mergeDialogueNodeFormIntoStoreData(nodeData, formValues) as DialogueNodeData
     expect(out.choices?.[0]?.testFailureNode).toBe('')
+  })
+
+  it('matches store choices by choiceId when form order differs from store order', () => {
+    const nodeData: Record<string, unknown> = {
+      id: 'D1',
+      choices: [
+        { text: 'first', choiceId: 'choice-a', targetNode: 'NODE_A' },
+        { text: 'second', choiceId: 'choice-b', targetNode: 'NODE_B' },
+      ] as Choice[],
+    }
+    const formValues: DialogueNodeData = {
+      id: 'D1',
+      choices: [
+        { text: 'second edited', choiceId: 'choice-b' },
+        { text: 'first edited', choiceId: 'choice-a' },
+      ],
+    }
+
+    const out = mergeDialogueNodeFormIntoStoreData(nodeData, formValues) as DialogueNodeData
+
+    expect(out.choices?.[0]?.targetNode).toBe('NODE_B')
+    expect(out.choices?.[1]?.targetNode).toBe('NODE_A')
   })
 })
 
@@ -214,7 +237,24 @@ describe('applyStoreConnectionFieldsToDialogueFormChoices', () => {
     const form: Choice[] = [{ text: 'edited', choiceId: '0', targetNode: 'OLD' }]
     const merged = applyStoreConnectionFieldsToDialogueFormChoices(store, form)
     expect(merged[0].text).toBe('edited')
+    expect(merged[0].choiceId).toBe('0')
     expect(merged[0].targetNode).toBe('NEW')
     expect(merged[0].testSuccessNode).toBe('S')
+  })
+
+  it('matches by choiceId instead of index when form choices are reordered', () => {
+    const store: Choice[] = [
+      { text: 'first', choiceId: 'choice-a', targetNode: 'NODE_A' },
+      { text: 'second', choiceId: 'choice-b', targetNode: 'NODE_B' },
+    ]
+    const form: Choice[] = [
+      { text: 'second edited', choiceId: 'choice-b' },
+      { text: 'first edited', choiceId: 'choice-a' },
+    ]
+
+    const merged = applyStoreConnectionFieldsToDialogueFormChoices(store, form)
+
+    expect(merged[0].targetNode).toBe('NODE_B')
+    expect(merged[1].targetNode).toBe('NODE_A')
   })
 })

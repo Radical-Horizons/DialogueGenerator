@@ -45,8 +45,7 @@ export function applyNodeFilters(nodes: Node[], filters: GraphFilters): Node[] {
  */
 export function applyEdgeFilters(
   edges: Edge[],
-  visibleNodeIds: Set<string>,
-  _filters: GraphFilters
+  visibleNodeIds: Set<string>
 ): Edge[] {
   return edges.filter(
     (e) => visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target)

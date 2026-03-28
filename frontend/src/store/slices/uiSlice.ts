@@ -2,12 +2,17 @@
  * Slice UI du store graphe : état d'interface, cycles, métadonnées, dirty flag.
  */
 import type { StateCreator } from 'zustand'
-import type { GraphState, GraphMetadata, GraphFilters } from '../types/graphState'
+import type {
+  GraphState,
+  GraphMetadata,
+  GraphLayoutSpacingMode,
+} from '../types/graphState'
 import { initialState } from '../types/graphState'
 import * as graphAPI from '../../api/graph'
 import {
   setPending as journalSetPending,
 } from '../../utils/graphJournal'
+import { useGraphViewStore } from '../graphViewStore'
 import { nodeTargetDisplayLabel } from '../../utils/nodeTargetLabel'
 
 export type UISlice = Pick<
@@ -20,6 +25,7 @@ export type UISlice = Pick<
   | 'findNodesByQuery'
   | 'setFilters'
   | 'resetFilters'
+  | 'setLayoutSpacingMode'
   | 'setHighlightedNodes'
   | 'searchNodes'
   | 'getUniqueSpeakers'
@@ -108,15 +114,13 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
     set({ selectedNodeIds: [], selectedNodeId: null })
   },
 
-  /** Story 2.8 FR29: centre sur le nœud et sélectionne. Dispatch focus-generated-node pour fitView. No-op si nodeId absent. */
+  /** Story 2.8 FR29: centre sur le nœud et sélectionne. Appelle graphViewStore.focusNode() pour fitView. No-op si nodeId absent. */
   jumpToNode: (nodeId) => {
     const state = get()
     const exists = state.nodes.some((n) => n.id === nodeId)
     if (!exists) return
     set({ selectedNodeId: nodeId, selectedNodeIds: [nodeId] })
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('focus-generated-node', { detail: { nodeId } }))
-    }
+    useGraphViewStore.getState().focusNode(nodeId)
   },
 
   /** Story 2.9 FR30: appliquer filtres (types, speakers). */
@@ -127,6 +131,11 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
   /** Story 2.9 FR30: réinitialiser les filtres. */
   resetFilters: () => {
     set({ graphFilters: {} })
+  },
+
+  setLayoutSpacingMode: (mode: GraphLayoutSpacingMode) => {
+    if (get().layoutSpacingMode === mode) return
+    set({ layoutSpacingMode: mode })
   },
 
   /** Story 2.8 FR29: candidats par ID exact ou nom (displayName ?? première ligne de data.line ?? node.id). Exact d'abord, puis partiels. */
@@ -245,7 +254,12 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
 
   resetGraph: () => {
     const currentSeq = get().activeLoadSeq
-    set({ ...initialState, activeLoadSeq: currentSeq })
+    const currentLayoutSpacingMode = get().layoutSpacingMode
+    set({
+      ...initialState,
+      activeLoadSeq: currentSeq,
+      layoutSpacingMode: currentLayoutSpacingMode,
+    })
   },
 
   setShowDeleteNodeConfirm: (show) => {
