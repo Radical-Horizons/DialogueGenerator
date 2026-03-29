@@ -6,7 +6,7 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Query, Request, status
 
 from api.dependencies import get_llm_usage_service, get_request_id
-from api.exceptions import InternalServerException, NotFoundException
+from api.exceptions import InternalServerException
 from api.schemas.llm_usage import (
     AllDialoguesCostResponse,
     ContextRelevanceHistoryEntry,
@@ -52,6 +52,7 @@ def _context_section_usage_to_response(
     weak = [ContextSectionUsageFlatItem(**x) for x in raw.get("weak_sections", [])]
     refl = [ContextSectionUsageFlatItem(**x) for x in raw.get("reflected_sections", [])]
     return ContextSectionUsageReportResponse(
+        record_present=True,
         dialogue_id=dialogue_id,
         node_id=node_id,
         request_id=raw.get("request_id"),
@@ -274,12 +275,24 @@ async def get_node_context_relevance(
     try:
         raw = usage_service.get_context_relevance_for_node(dialogue_id, node_id)
         if raw is None:
-            raise NotFoundException(
-                resource_type="Pertinence contexte",
-                resource_id=f"{dialogue_id}/{node_id}",
-                request_id=request_id,
+            return ContextRelevanceReportResponse(
+                record_present=False,
+                dialogue_id=dialogue_id,
+                node_id=node_id,
+                request_id=None,
+                score_percent=0.0,
+                breakdown_by_type={},
+                reflected_types=[],
+                weak_types=[],
+                low_context_warning=False,
+                low_threshold_percent=30.0,
+                method="none",
+                computation_ms=0,
+                computed_at="",
+                suggestions_hints=[],
             )
         return ContextRelevanceReportResponse(
+            record_present=True,
             dialogue_id=dialogue_id,
             node_id=node_id,
             request_id=raw.get("request_id"),
@@ -294,8 +307,6 @@ async def get_node_context_relevance(
             computed_at=str(raw.get("computed_at", "")),
             suggestions_hints=list(raw.get("suggestions_hints", [])),
         )
-    except NotFoundException:
-        raise
     except Exception as e:
         logger.exception(
             "Erreur context-relevance (dialogue_id=%s, node_id=%s, request_id=%s)",
@@ -325,10 +336,22 @@ async def get_node_context_section_usage(
     try:
         raw = usage_service.get_context_section_usage_for_node(dialogue_id, node_id)
         if raw is None:
-            raise NotFoundException(
-                resource_type="Usage contexte sections",
-                resource_id=f"{dialogue_id}/{node_id}",
-                request_id=request_id,
+            return ContextSectionUsageReportResponse(
+                record_present=False,
+                dialogue_id=dialogue_id,
+                node_id=node_id,
+                request_id=None,
+                method="none",
+                computation_ms=0,
+                computed_at="",
+                reflected_threshold_percent=40.0,
+                entity_groups=[],
+                weak_sections=[],
+                reflected_sections=[],
+                weak_section_count=0,
+                reflected_section_count=0,
+                generated_plain_preview="",
+                parser_note=None,
             )
         record = usage_service.get_record_for_dialogue_node(dialogue_id, node_id)
         preview = ""
@@ -337,8 +360,6 @@ async def get_node_context_section_usage(
         return _context_section_usage_to_response(
             dialogue_id, node_id, raw, preview
         )
-    except NotFoundException:
-        raise
     except Exception as e:
         logger.exception(
             "Erreur context-usage (dialogue_id=%s, node_id=%s, request_id=%s)",

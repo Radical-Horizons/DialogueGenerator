@@ -62,7 +62,14 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
           llmUsageApi.getContextRelevanceHistory(dialogueId),
         ])
         if (!cancelled) {
-          setDetail(d)
+          const present = d.record_present !== false
+          if (present) {
+            setDetail(d)
+            setDetailMissing(false)
+          } else {
+            setDetail(null)
+            setDetailMissing(true)
+          }
           setHistory(h.entries)
         }
       } catch (e) {

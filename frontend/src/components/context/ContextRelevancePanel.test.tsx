@@ -135,6 +135,37 @@ describe('ContextRelevancePanel', () => {
     expect(within(historyBlock).getByText(/req a/)).toBeInTheDocument()
   })
 
+  it('traite record_present false comme absence de mesure (200)', async () => {
+    mockGetNode.mockResolvedValue({
+      record_present: false,
+      dialogue_id: 'd.json',
+      node_id: 'NODE_1',
+      request_id: null,
+      score_percent: 0,
+      breakdown_by_type: {},
+      reflected_types: [],
+      weak_types: [],
+      low_context_warning: false,
+      low_threshold_percent: 30,
+      method: 'none',
+      computation_ms: 0,
+      computed_at: '',
+      suggestions_hints: [],
+    })
+    mockGetHistory.mockResolvedValue({
+      entries: [],
+      total_count: 0,
+      dialogue_id: 'd.json',
+    })
+    render(<ContextRelevancePanel />)
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Aucune mesure pour ce nœud \(pas encore de génération LLM enregistrée\)/)
+      ).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId('context-relevance-score')).not.toBeInTheDocument()
+  })
+
   it('affiche une erreur si l’API échoue (hors 404)', async () => {
     mockGetNode.mockRejectedValue(new Error('Erreur serveur simulée'))
     mockGetHistory.mockResolvedValue({

@@ -138,6 +138,10 @@ class LLMUsageStatisticsResponse(BaseModel):
 class ContextRelevanceReportResponse(BaseModel):
     """Rapport de pertinence contexte GDD pour un nœud (Story 3.6)."""
 
+    record_present: bool = Field(
+        default=True,
+        description="False si aucune donnée persistée pour ce nœud (pas d’erreur HTTP).",
+    )
     dialogue_id: str = Field(..., description="ID du dialogue")
     node_id: str = Field(..., description="ID du nœud")
     request_id: Optional[str] = Field(default=None, description="Requête LLM associée si connue")
@@ -224,6 +228,10 @@ class ContextSectionUsageFlatItem(BaseModel):
 class ContextSectionUsageReportResponse(BaseModel):
     """Rapport d’usage contexte par section pour un nœud (Story 3.7)."""
 
+    record_present: bool = Field(
+        default=True,
+        description="False si aucune donnée persistée pour ce nœud (pas d’erreur HTTP).",
+    )
     dialogue_id: str
     node_id: str
     request_id: Optional[str] = Field(default=None)

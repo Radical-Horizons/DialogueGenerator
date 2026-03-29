@@ -186,6 +186,8 @@ export async function getGenerationLogs(
 
 /** Rapport de pertinence contexte GDD pour un nœud (Story 3.6). */
 export interface ContextRelevanceReport {
+  /** False si aucune analyse persistée pour ce nœud (réponse 200, pas de 404). */
+  record_present?: boolean
   dialogue_id: string
   node_id: string
   request_id?: string | null
@@ -251,6 +253,8 @@ export interface ContextSectionUsageFlatItem {
 }
 
 export interface ContextSectionUsageReport {
+  /** False si aucune analyse persistée pour ce nœud (réponse 200). */
+  record_present?: boolean
   dialogue_id: string
   node_id: string
   request_id?: string | null

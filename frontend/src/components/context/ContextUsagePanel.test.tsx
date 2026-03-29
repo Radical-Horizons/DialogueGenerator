@@ -95,6 +95,29 @@ describe('ContextUsagePanel', () => {
     expect(within(gen).getAllByTestId('context-usage-highlight-mark').length).toBeGreaterThan(0)
   })
 
+  it('traite record_present false comme absence de rapport (200)', async () => {
+    mockGetUsage.mockResolvedValue({
+      record_present: false,
+      dialogue_id: 'd.json',
+      node_id: 'NODE_1',
+      request_id: null,
+      method: 'none',
+      computation_ms: 0,
+      computed_at: '',
+      reflected_threshold_percent: 40,
+      entity_groups: [],
+      weak_sections: [],
+      reflected_sections: [],
+      weak_section_count: 0,
+      reflected_section_count: 0,
+      generated_plain_preview: '',
+    })
+    render(<ContextUsagePanel />)
+    await waitFor(() => {
+      expect(screen.getByTestId('context-usage-missing')).toBeInTheDocument()
+    })
+  })
+
   it('affiche état 404 sans erreur réseau', async () => {
     const err = Object.assign(new Error('Not found'), {
       isAxiosError: true,

@@ -13,6 +13,22 @@ import type {
 } from '../../types/api'
 import { ContextList } from './ContextList'
 import type { ContextListItem } from './ContextList'
+
+/** Affiche aussi les noms sélectionnés absents du catalogue API (GDD vide / preset). */
+function mergeListWithSelectedNames(
+  items: ContextListItem[],
+  selectedNames: string[],
+): ContextListItem[] {
+  const seen = new Set(items.map((i) => i.name))
+  const prepend: ContextListItem[] = []
+  for (const name of selectedNames) {
+    if (name && !seen.has(name)) {
+      prepend.push({ name, data: {} })
+      seen.add(name)
+    }
+  }
+  return [...prepend, ...items]
+}
 import { SelectedContextSummary } from './SelectedContextSummary'
 import type { EntityType } from './SelectedContextSummary'
 import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
@@ -340,12 +356,37 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const getCurrentItems = (): ContextListItem[] => {
-    if (activeTab === 'characters') return characters
-    if (activeTab === 'locations') return locations
+    if (activeTab === 'characters') {
+      return mergeListWithSelectedNames(characters, [
+        ...(selections.characters_full ?? []),
+        ...(selections.characters_excerpt ?? []),
+      ])
+    }
+    if (activeTab === 'locations') {
+      return mergeListWithSelectedNames(locations, [
+        ...(selections.locations_full ?? []),
+        ...(selections.locations_excerpt ?? []),
+      ])
+    }
     if (activeTab === 'regions') return regions
-    if (activeTab === 'items') return items
-    if (activeTab === 'species') return species
-    if (activeTab === 'communities') return communities
+    if (activeTab === 'items') {
+      return mergeListWithSelectedNames(items, [
+        ...(selections.items_full ?? []),
+        ...(selections.items_excerpt ?? []),
+      ])
+    }
+    if (activeTab === 'species') {
+      return mergeListWithSelectedNames(species, [
+        ...(selections.species_full ?? []),
+        ...(selections.species_excerpt ?? []),
+      ])
+    }
+    if (activeTab === 'communities') {
+      return mergeListWithSelectedNames(communities, [
+        ...(selections.communities_full ?? []),
+        ...(selections.communities_excerpt ?? []),
+      ])
+    }
     return []
   }
 

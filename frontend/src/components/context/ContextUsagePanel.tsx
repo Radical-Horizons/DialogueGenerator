@@ -51,7 +51,15 @@ export function ContextUsagePanel() {
       setMissing(false)
       try {
         const d = await llmUsageApi.getNodeContextSectionUsage(dialogueId, nodeId)
-        if (!cancelled) setDetail(d)
+        if (!cancelled) {
+          if (d.record_present === false) {
+            setDetail(null)
+            setMissing(true)
+          } else {
+            setDetail(d)
+            setMissing(false)
+          }
+        }
       } catch (e) {
         if (cancelled) return
         if (axios.isAxiosError(e) && e.response?.status === 404) {

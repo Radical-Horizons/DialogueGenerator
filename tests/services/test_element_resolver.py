@@ -81,6 +81,9 @@ class TestElementResolver:
         assert resolver.get_category_element_category("communities") == ElementCategory.COMMUNITIES
         assert resolver.get_category_element_category("quests") == ElementCategory.QUESTS
         assert resolver.get_category_element_category("dialogues_examples") == ElementCategory.DIALOGUES
+        assert resolver.get_category_element_category("characters_full") == ElementCategory.CHARACTERS
+        assert resolver.get_category_element_category("characters_excerpt") == ElementCategory.CHARACTERS
+        assert resolver.get_category_element_category("locations_full") == ElementCategory.LOCATIONS
         # Catégorie inconnue retourne None
         assert resolver.get_category_element_category("unknown") is None
     
@@ -139,6 +142,12 @@ class TestElementResolver:
         result = resolver.get_by_name("unknown_category", "Name")
         
         assert result is None
+
+    def test_get_by_name_characters_full_alias(self, resolver):
+        """Clé characters_full (sélection contexte) résout comme characters."""
+        character = resolver.get_by_name("characters_full", "Character 1")
+        assert character is not None
+        assert character["Nom"] == "Character 1"
     
     def test_resolve_element_data(self, resolver):
         """Test de résolution d'éléments (alias de get_by_name)."""

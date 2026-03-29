@@ -430,8 +430,8 @@ def test_usage_history_exposes_dialogue_fields(client, tmp_path):
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
 
-def test_get_context_relevance_404(client, tmp_path):
-    """GET pertinence : 404 si aucun enregistrement pour le nœud."""
+def test_get_context_relevance_missing_200(client, tmp_path):
+    """GET pertinence : 200 + record_present=false si aucun enregistrement (évite 404 bruyants)."""
     repository = FileLLMUsageRepository(storage_dir=str(tmp_path))
     test_service = LLMUsageService(
         repository=repository, pricing_service=LLMPricingService()
@@ -441,7 +441,10 @@ def test_get_context_relevance_404(client, tmp_path):
         response = client.get(
             "/api/v1/llm-usage/dialogue/missing.json/nodes/NODE_X/context-relevance"
         )
-        assert response.status_code == 404
+        assert response.status_code == 200
+        body = response.json()
+        assert body["record_present"] is False
+        assert body["node_id"] == "NODE_X"
     finally:
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
@@ -501,6 +504,7 @@ def test_get_context_relevance_and_history(client, tmp_path):
         )
         assert detail.status_code == 200
         body = detail.json()
+        assert body.get("record_present", True) is True
         assert body["dialogue_id"] == "hist_dialogue.json"
         assert body["node_id"] == "NODE_A"
         assert "score_percent" in body
@@ -518,8 +522,8 @@ def test_get_context_relevance_and_history(client, tmp_path):
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
 
-def test_get_context_section_usage_404(client, tmp_path):
-    """GET usage sections : 404 si aucun enregistrement pour le nœud."""
+def test_get_context_section_usage_missing_200(client, tmp_path):
+    """GET usage sections : 200 + record_present=false si aucun enregistrement."""
     repository = FileLLMUsageRepository(storage_dir=str(tmp_path))
     test_service = LLMUsageService(
         repository=repository, pricing_service=LLMPricingService()
@@ -529,7 +533,10 @@ def test_get_context_section_usage_404(client, tmp_path):
         response = client.get(
             "/api/v1/llm-usage/dialogue/missing.json/nodes/NODE_X/context-usage"
         )
-        assert response.status_code == 404
+        assert response.status_code == 200
+        body = response.json()
+        assert body["record_present"] is False
+        assert body["weak_section_count"] == 0
     finally:
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
