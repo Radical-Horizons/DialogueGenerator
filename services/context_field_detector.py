@@ -113,6 +113,8 @@ class ContextFieldDetector:
                 field_stats[path]["paths"].add(path)
                 if item_name:
                     field_stats[path]["item_names"].add(item_name)
+
+        self._expand_sections_general_subfields(field_stats, sample_data)
         
         # Convertir en FieldInfo
         fields = {}
@@ -125,8 +127,11 @@ class ContextFieldDetector:
             # Déterminer le type principal (le plus fréquent)
             type_str = self._determine_primary_type(stats["types"])
             
-            # Générer un label lisible
+            # Générer un label lisible (titres markdown découpés sous sections._general)
             label = self._generate_label(path)
+            display_title = stats.get("display_title")
+            if isinstance(display_title, str) and display_title.strip():
+                label = f"Sections > {display_title.strip()}"
             
             # Déterminer la catégorie
             category = self._categorize_field(path, element_type)
@@ -150,6 +155,72 @@ class ContextFieldDetector:
         # Log en DEBUG par défaut (visible seulement si LOG_CONSOLE_LEVEL=DEBUG ou --debug)
         logger.debug(f"Détecté {len(fields)} champs pour '{element_type}' sur {total_items} fiches ({unique_count} champs uniques)")
         return fields
+
+    def _expand_sections_general_subfields(
+        self,
+        field_stats: Dict[str, Dict[str, Any]],
+        sample_data: List[Dict],
+    ) -> None:
+        """Ajoute des chemins virtuels ``sections._general.<slug>`` pour le markdown Notion."""
+        from services.gdd_sections_split import split_sections_general_text
+
+        def _raw_is_expandable(raw: str) -> bool:
+            if not isinstance(raw, str) or len(raw.strip()) < 40:
+                return False
+            return len(split_sections_general_text(raw)) >= 2
+
+        items_with_general = 0
+        items_expandable = 0
+        for item in sample_data:
+            if not isinstance(item, dict):
+                continue
+            sections = item.get("sections")
+            if not isinstance(sections, dict):
+                continue
+            raw = sections.get("_general")
+            if not isinstance(raw, str) or not raw.strip():
+                continue
+            items_with_general += 1
+            if _raw_is_expandable(raw):
+                items_expandable += 1
+
+        any_expanded = False
+        for item in sample_data:
+            if not isinstance(item, dict):
+                continue
+            item_name = self._get_item_name(item)
+            sections = item.get("sections")
+            if not isinstance(sections, dict):
+                continue
+            raw = sections.get("_general")
+            if not isinstance(raw, str) or len(raw.strip()) < 40:
+                continue
+            chunks = split_sections_general_text(raw)
+            if len(chunks) < 2:
+                continue
+            any_expanded = True
+            for slug, title, body in chunks:
+                if not (body and body.strip()):
+                    continue
+                path = f"sections._general.{slug}"
+                st = field_stats[path]
+                st["count"] += 1
+                st["types"].add("string")
+                st["max_depth"] = max(st["max_depth"], 3)
+                st["paths"].add(path)
+                if item_name:
+                    st["item_names"].add(item_name)
+                if "display_title" not in st:
+                    st["display_title"] = title
+
+        drop_monolith = (
+            any_expanded
+            and items_with_general > 0
+            and items_expandable == items_with_general
+            and "sections._general" in field_stats
+        )
+        if drop_monolith:
+            del field_stats["sections._general"]
     
     def _get_item_name(self, item: Dict) -> Optional[str]:
         """Extrait le nom d'une fiche pour l'identifier.
@@ -444,46 +515,48 @@ class ContextFieldDetector:
     def _is_metadata_field(self, path: str, root_keys_order: List[str]) -> bool:
         """Détermine si un champ est une métadonnée selon l'ordre dans le JSON.
         
-        Les métadonnées sont tous les champs AVANT "Introduction" dans l'ordre du JSON.
-        "Introduction" et tous les champs qui viennent après sont du contexte narratif.
+        Règles :
+        - Si la racine contient ``Introduction`` : métadonnées = clés avant ``Introduction``
+          (comportement exports classiques).
+        - Sinon, si la racine contient ``sections`` (fiches Notion shard) : métadonnées =
+          clés strictement avant ``sections`` ; ``sections`` et ses descendants = contexte.
+        - Sinon : même heuristique historique (hors branche ``Introduction``).
         
         Args:
             path: Chemin du champ (ex: "Nom", "Espèce", "Introduction.Résumé")
             root_keys_order: Liste des clés racine dans l'ordre du JSON original
             
         Returns:
-            True si le champ est une métadonnée (avant "Introduction")
+            True si le champ est une métadonnée.
         """
         if not root_keys_order:
             return False
-        
+
         root_key = path.split(".")[0]
-        
-        # Si "Introduction" n'est pas dans l'ordre, tout est métadonnée sauf "Introduction" et ses sous-champs
-        if "Introduction" not in root_keys_order:
-            return root_key != "Introduction" and not path.startswith("Introduction.")
-        
-        # Trouver l'index de "Introduction" et de la clé racine du champ
-        try:
-            cutoff_index = root_keys_order.index("Introduction")
-            key_index = root_keys_order.index(root_key)
-            return key_index < cutoff_index
-        except ValueError:
-            # Si la clé n'est pas dans l'ordre, ne pas la considérer comme métadonnée par défaut
-            return False
+
+        if "Introduction" in root_keys_order:
+            try:
+                cutoff_index = root_keys_order.index("Introduction")
+                key_index = root_keys_order.index(root_key)
+                return key_index < cutoff_index
+            except ValueError:
+                return False
+
+        if "sections" in root_keys_order:
+            try:
+                sections_index = root_keys_order.index("sections")
+                key_index = root_keys_order.index(root_key)
+                return key_index < sections_index
+            except ValueError:
+                return False
+
+        return root_key != "Introduction" and not path.startswith("Introduction.")
     
     def _extract_field_value(self, data: Dict, path: str) -> Optional[Any]:
         """Extrait la valeur d'un champ depuis un chemin."""
-        keys = path.split(".")
-        current = data
-        
-        for key in keys:
-            if isinstance(current, dict) and key in current:
-                current = current[key]
-            else:
-                return None
-        
-        return current
+        from services.gdd_sections_split import extract_gdd_field_value
+
+        return extract_gdd_field_value(data, path)
     
     def _value_to_string(self, value: Any) -> str:
         """Convertit une valeur en string pour mesurer sa longueur."""

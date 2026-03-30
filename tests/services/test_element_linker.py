@@ -86,6 +86,20 @@ class TestElementLinker:
             {"Nom": "Zone Mère", "Contient": "Site A, Site B"},
         ]
         assert linker.get_sub_locations("Zone Mère", locs) == ["Site A", "Site B"]
+
+    def test_get_scene_region_names_typed_first(self, linker, sample_gdd_data):
+        """Scène : priorité aux Catégorie Région."""
+        names = linker.get_scene_region_names(sample_gdd_data.locations)
+        assert names == ["Forêt Sombre"]
+
+    def test_get_scene_sub_location_names_fallback_others(self, linker):
+        """Sans Contient, sous-lieux scène = autres fiches."""
+        locs = [
+            {"Nom": "A"},
+            {"Nom": "B"},
+            {"Nom": "C"},
+        ]
+        assert linker.get_scene_sub_location_names("B", locs) == ["A", "C"]
     
     def test_get_sub_locations(self, linker, sample_gdd_data):
         """Test de récupération des sous-lieux."""

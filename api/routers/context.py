@@ -250,6 +250,50 @@ async def list_regions(
 
 
 @router.get(
+    "/locations/scene/regions",
+    response_model=RegionListResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def list_scene_regions(
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> RegionListResponse:
+    """Liste les noms pour le sélecteur « région » (Scène principale).
+
+    Diffère du catalogue « Lieux » : priorité aux régions typées ou aux parents avec ``Contient``.
+    """
+    regions = context_builder.get_scene_region_names()
+    return RegionListResponse(regions=regions, total=len(regions))
+
+
+@router.get(
+    "/locations/scene/sub-locations/{name}",
+    response_model=SubLocationListResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_scene_sub_locations(
+    name: str,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> SubLocationListResponse:
+    """Sous-lieux pour la scène : ``Contient`` du parent ou tous les autres lieux."""
+    if context_builder.get_location_details_by_name(name) is None:
+        raise NotFoundException(
+            resource_type="Lieu",
+            resource_id=name,
+            request_id=request_id,
+        )
+    sub_locations = context_builder.get_scene_sub_location_names(name)
+    return SubLocationListResponse(
+        sub_locations=sub_locations,
+        total=len(sub_locations),
+        region_name=name,
+    )
+
+
+@router.get(
     "/locations/regions/{name}/sub-locations",
     response_model=SubLocationListResponse,
     status_code=status.HTTP_200_OK
@@ -274,15 +318,14 @@ async def get_sub_locations(
     Raises:
         NotFoundException: Si la région n'existe pas.
     """
-    # Vérifier que la région existe
     region_details = context_builder.get_location_details_by_name(name)
-    if region_details is None or region_details.get("Catégorie") != "Région":
+    if region_details is None:
         raise NotFoundException(
-            resource_type="Région",
+            resource_type="Lieu",
             resource_id=name,
             request_id=request_id
         )
-    
+
     sub_locations = context_builder.get_sub_locations(name)
     
     return SubLocationListResponse(

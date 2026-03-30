@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { ContextTokenBudgetSection } from './ContextTokenBudgetSection'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 
@@ -36,15 +36,4 @@ describe('ContextTokenBudgetSection', () => {
     expect(cta.getAttribute('title')).toContain('FR21')
   })
 
-  it('persiste le plafond via le store quand on modifie l’input', async () => {
-    useContextConfigStore.setState({ contextTokenBudgetMax: 25_000 })
-    render(<ContextTokenBudgetSection />)
-
-    const input = screen.getByTestId('context-token-budget-input')
-    fireEvent.change(input, { target: { value: '45000' } })
-
-    await waitFor(() => {
-      expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(45_000)
-    })
-  })
 })

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ContextFieldSelector } from './ContextFieldSelector'
+import { fieldPathTreeHierarchy } from './fieldPathTreeHierarchy'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 
 // Mock du store
@@ -10,6 +11,29 @@ vi.mock('../../store/contextConfigStore', () => ({
 }))
 
 const mockUseContextConfigStore = vi.mocked(useContextConfigStore)
+
+describe('fieldPathTreeHierarchy', () => {
+  it('sections._general.slug : une seule feuille à la racine (pas de dossier Sections)', () => {
+    expect(fieldPathTreeHierarchy('sections._general.preamble')).toEqual({
+      displayParts: ['preamble'],
+      mapKeys: ['sections._general.preamble'],
+    })
+  })
+
+  it('conserve sections._general (monolithe) en deux segments', () => {
+    expect(fieldPathTreeHierarchy('sections._general')).toEqual({
+      displayParts: ['sections', '_general'],
+      mapKeys: ['sections', 'sections._general'],
+    })
+  })
+
+  it('chemins sans sections._general inchangés', () => {
+    expect(fieldPathTreeHierarchy('Background.Histoire')).toEqual({
+      displayParts: ['Background', 'Histoire'],
+      mapKeys: ['Background', 'Background.Histoire'],
+    })
+  })
+})
 
 describe('ContextFieldSelector', () => {
   const mockDetectFields = vi.fn(() => Promise.resolve())
@@ -143,6 +167,49 @@ describe('ContextFieldSelector', () => {
     
     // Le champ "Nom" devrait être visible, "Dialogue Type" ne devrait pas l'être
     expect(screen.getByText(/nom/i)).toBeInTheDocument()
+  })
+
+  it('sections._general.* : pas de groupe Sections, champs visibles à la racine', () => {
+    mockUseContextConfigStore.mockReturnValue({
+      availableFields: {
+        location: {
+          'sections._general.preamble': {
+            path: 'sections._general.preamble',
+            label: 'Sections > Préambule',
+            type: 'string',
+            depth: 3,
+            frequency: 1,
+            suggested: false,
+            is_metadata: false,
+            is_unique: false,
+          },
+          'sections._general.surface': {
+            path: 'sections._general.surface',
+            label: 'Sections > [Surface]',
+            type: 'string',
+            depth: 3,
+            frequency: 1,
+            suggested: false,
+            is_metadata: false,
+            is_unique: false,
+          },
+        },
+      },
+      uniqueFieldsByItem: {},
+      fieldConfigs: { location: [] },
+      suggestions: { location: [] },
+      toggleField: mockToggleField,
+      detectFields: mockDetectFields,
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useContextConfigStore>)
+
+    render(<ContextFieldSelector elementType="location" showOnlyEssential={false} />)
+
+    expect(screen.queryByText(/^Sections$/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^General$/)).not.toBeInTheDocument()
+    expect(screen.getByText(/préambule/i)).toBeInTheDocument()
+    expect(screen.getByText(/\[Surface\]/)).toBeInTheDocument()
   })
 })
 

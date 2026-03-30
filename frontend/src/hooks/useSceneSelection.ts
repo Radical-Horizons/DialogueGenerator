@@ -93,36 +93,33 @@ export function useSceneSelection() {
     }
   }, [])
 
-  const loadRegions = useCallback(async () => {
+  const loadSceneRegions = useCallback(async () => {
     const contextStore = useContextStore.getState()
-    
-    // Vérifier le cache avant l'appel API
-    if (contextStore.isCacheValid(contextStore.cachedRegions)) {
+
+    if (contextStore.isCacheValid(contextStore.cachedSceneRegions)) {
       setData((prev) => ({
         ...prev,
-        regions: contextStore.cachedRegions!.data,
+        regions: contextStore.cachedSceneRegions!.data,
       }))
       return
     }
-    
+
     try {
-      const response = await contextAPI.listRegions()
-      const regionNames = response.regions.sort()
-      
-      // Mettre à jour le cache
-      contextStore.setCachedRegions(regionNames)
-      
+      const response = await contextAPI.listSceneRegions()
+      const regionNames = [...response.regions].sort()
+
+      contextStore.setCachedSceneRegions(regionNames)
+
       setData((prev) => ({
         ...prev,
         regions: regionNames,
       }))
     } catch (err) {
-      console.error('Erreur lors du chargement des lieux (catalogue):', err)
-      // En cas d'erreur, utiliser le cache même s'il est expiré si disponible
-      if (contextStore.cachedRegions) {
+      console.error('Erreur lors du chargement des régions (scène):', err)
+      if (contextStore.cachedSceneRegions) {
         setData((prev) => ({
           ...prev,
-          regions: contextStore.cachedRegions!.data,
+          regions: contextStore.cachedSceneRegions!.data,
         }))
       }
     }
@@ -135,9 +132,8 @@ export function useSceneSelection() {
     }
 
     const contextStore = useContextStore.getState()
-    const cached = contextStore.cachedSubLocations.get(regionName)
-    
-    // Vérifier le cache avant l'appel API
+    const cached = contextStore.cachedSceneSubLocations.get(regionName)
+
     if (cached && contextStore.isCacheValid(cached)) {
       setData((prev) => ({
         ...prev,
@@ -147,11 +143,10 @@ export function useSceneSelection() {
     }
 
     try {
-      const response = await contextAPI.getSubLocations(regionName)
-      const subLocationNames = response.sub_locations.sort()
-      
-      // Mettre à jour le cache pour cette région
-      contextStore.setCachedSubLocations(regionName, subLocationNames)
+      const response = await contextAPI.getSceneSubLocations(regionName)
+      const subLocationNames = [...response.sub_locations].sort()
+
+      contextStore.setCachedSceneSubLocations(regionName, subLocationNames)
       
       setData((prev) => ({
         ...prev,
@@ -160,10 +155,11 @@ export function useSceneSelection() {
     } catch (err) {
       console.error('Erreur lors du chargement des sous-lieux:', err)
       // En cas d'erreur, utiliser le cache même s'il est expiré si disponible
-      if (cached) {
+      const stale = contextStore.cachedSceneSubLocations.get(regionName)
+      if (stale) {
         setData((prev) => ({
           ...prev,
-          subLocations: cached.data,
+          subLocations: stale.data,
         }))
       } else {
         setData((prev) => ({ ...prev, subLocations: [] }))
@@ -171,12 +167,14 @@ export function useSceneSelection() {
     }
   }, [])
 
+  const gddDataRevision = useContextStore((s) => s.gddDataRevision)
+
   useEffect(() => {
     setIsLoading(true)
-    Promise.all([loadCharacters(), loadRegions()]).finally(() => {
+    Promise.all([loadCharacters(), loadSceneRegions()]).finally(() => {
       setIsLoading(false)
     })
-  }, [loadCharacters, loadRegions])
+  }, [loadCharacters, loadSceneRegions, gddDataRevision])
 
   useEffect(() => {
     if (selection.sceneRegion) {

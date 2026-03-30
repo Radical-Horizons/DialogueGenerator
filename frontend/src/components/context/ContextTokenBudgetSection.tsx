@@ -4,7 +4,7 @@
 import { useId, useState, useCallback } from 'react'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextSelectionTokenEstimate } from '../../hooks/useContextSelectionTokenEstimate'
-import { CONTEXT_OPTIMIZE_API_ENABLED, CONTEXT_TOKENS_LIMITS } from '../../constants'
+import { CONTEXT_OPTIMIZE_API_ENABLED } from '../../constants'
 import { theme } from '../../theme'
 import { ContextOptimizeModal } from './ContextOptimizeModal'
 
@@ -23,7 +23,6 @@ export function ContextTokenBudgetSection() {
   const [optimizeOpen, setOptimizeOpen] = useState(false)
 
   const contextTokenBudgetMax = useContextConfigStore((s) => s.contextTokenBudgetMax)
-  const setContextTokenBudgetMax = useContextConfigStore((s) => s.setContextTokenBudgetMax)
 
   const { data, loading, error, refresh } = useContextSelectionTokenEstimate()
 
@@ -53,30 +52,6 @@ export function ContextTokenBudgetSection() {
       >
         Budget tokens contexte
       </h3>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.35rem' }}>
-        <label htmlFor={budgetId} style={{ color: theme.text.secondary }}>
-          Plafond
-        </label>
-        <input
-          id={budgetId}
-          data-testid="context-token-budget-input"
-          type="number"
-          min={CONTEXT_TOKENS_LIMITS.MIN}
-          max={CONTEXT_TOKENS_LIMITS.MAX}
-          step={100}
-          value={contextTokenBudgetMax}
-          onChange={(e) => setContextTokenBudgetMax(Number(e.target.value))}
-          style={{
-            width: '6.5rem',
-            padding: '0.2rem 0.35rem',
-            borderRadius: 4,
-            border: `1px solid ${theme.border.primary}`,
-            backgroundColor: theme.background.primary,
-            color: theme.text.primary,
-          }}
-        />
-        <span style={{ color: theme.text.secondary }}>tokens</span>
-      </div>
 
       <div
         id={statusId}

@@ -5,6 +5,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useContextConfigStore, type FieldInfo } from '../../store/contextConfigStore'
 import { theme } from '../../theme'
 import { InfoIcon } from '../shared/Tooltip'
+import { fieldPathTreeHierarchy } from './fieldPathTreeHierarchy'
 
 export interface ContextFieldSelectorProps {
   elementType: string
@@ -67,18 +68,17 @@ export function ContextFieldSelector({
             fieldInfo.is_metadata !== true && !fieldInfo.is_unique
           )
         )
-    
+
     // Créer tous les nœuds
     for (const [path, fieldInfo] of Object.entries(filteredFields)) {
-      const parts = path.split('.')
-      let currentPath = ''
-      
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i]
-        currentPath = currentPath ? `${currentPath}.${part}` : part
-        
+      const { displayParts, mapKeys } = fieldPathTreeHierarchy(path)
+
+      for (let i = 0; i < displayParts.length; i++) {
+        const part = displayParts[i]
+        const currentPath = mapKeys[i]
+
         if (!nodeMap.has(currentPath)) {
-          const isLeaf = i === parts.length - 1
+          const isLeaf = i === displayParts.length - 1
           // Pour les nœuds feuilles, extraire uniquement le dernier segment du label
           // (le backend génère "Parent > Child" mais on veut juste "Child" ici)
           // Pour les nœuds intermédiaires, générer le label à partir de la partie du path
@@ -104,14 +104,14 @@ export function ContextFieldSelector({
               suggested: false,
             },
             children: [],
-            parent: i > 0 ? nodeMap.get(parts.slice(0, i).join('.')) : undefined,
+            parent: i > 0 ? nodeMap.get(mapKeys[i - 1]) : undefined,
           }
           nodeMap.set(currentPath, node)
           
           if (i === 0) {
             root.push(node)
           } else {
-            const parentPath = parts.slice(0, i).join('.')
+            const parentPath = mapKeys[i - 1]
             const parent = nodeMap.get(parentPath)
             if (parent) {
               parent.children.push(node)

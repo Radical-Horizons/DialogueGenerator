@@ -1,6 +1,7 @@
 """Tests pour le cache des champs de contexte."""
 import pytest
 from datetime import datetime, timedelta
+from api.utils import context_field_cache as cfc_mod
 from api.utils.context_field_cache import ContextFieldCache, get_context_field_cache
 
 
@@ -41,7 +42,8 @@ class TestContextFieldCache:
         cache.cache["character"] = {
             "fields": fields,
             "last_scan": (datetime.now() - timedelta(hours=2)).isoformat(),
-            "gdd_hash": None
+            "gdd_hash": None,
+            "schema_version": cfc_mod._CACHE_SCHEMA_VERSION,
         }
         
         result = cache.get("character")
@@ -108,3 +110,15 @@ class TestContextFieldCache:
         cache2 = get_context_field_cache()
         
         assert cache1 is cache2
+
+    def test_get_rejects_stale_schema_version(self):
+        """Entrées sans version ou version obsolète sont ignorées."""
+        cache = ContextFieldCache()
+        cache.cache["character"] = {
+            "fields": {"Nom": "x"},
+            "last_scan": datetime.now().isoformat(),
+            "gdd_hash": None,
+            "schema_version": 1,
+        }
+        assert cache.get("character") is None
+        assert "character" not in cache.cache

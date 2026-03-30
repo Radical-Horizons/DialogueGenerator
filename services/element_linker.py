@@ -88,6 +88,63 @@ class ElementLinker:
         if isinstance(sub_locations_str, str) and sub_locations_str.strip():
             return [name.strip() for name in sub_locations_str.split(",") if name.strip()]
         return []
+
+    def get_scene_region_names(self, locations: List[Dict]) -> List[str]:
+        """Noms pour le sélecteur « région » de la scène principale.
+
+        Priorité : fiches ``Catégorie == "Région"`` ; sinon lieux avec ``Contient`` non vide ;
+        sinon tous les lieux (même logique que ``get_regions`` sans hiérarchie explicite).
+
+        Args:
+            locations: Liste des lieux GDD.
+
+        Returns:
+            Noms triés (casse ignorée).
+        """
+        if not locations:
+            return []
+        typed = [
+            loc.get("Nom")
+            for loc in locations
+            if isinstance(loc, dict) and loc.get("Nom") and loc.get("Catégorie") == "Région"
+        ]
+        if typed:
+            return sorted(set(typed), key=lambda n: str(n).casefold())
+        with_contient: List[str] = []
+        for loc in locations:
+            if not isinstance(loc, dict) or not loc.get("Nom"):
+                continue
+            raw = loc.get("Contient")
+            if isinstance(raw, str) and raw.strip():
+                with_contient.append(str(loc["Nom"]))
+        if with_contient:
+            return sorted(set(with_contient), key=lambda n: str(n).casefold())
+        return self.get_regions(locations)
+
+    def get_scene_sub_location_names(self, parent_name: str, locations: List[Dict]) -> List[str]:
+        """Noms pour le sélecteur « lieu » sous la région parente (scène principale).
+
+        Utilise ``Contient`` du parent si renseigné ; sinon tous les autres lieux sauf le parent.
+
+        Args:
+            parent_name: Nom de la fiche « région » sélectionnée.
+            locations: Liste des lieux GDD.
+
+        Returns:
+            Noms triés.
+        """
+        if not locations or not parent_name:
+            return []
+        from_contient = self.get_sub_locations(parent_name, locations)
+        if from_contient:
+            return from_contient
+        all_names = [
+            str(loc["Nom"])
+            for loc in locations
+            if isinstance(loc, dict) and loc.get("Nom")
+        ]
+        others = [n for n in all_names if n != parent_name]
+        return sorted(set(others), key=lambda n: n.casefold())
     
     def extract_linked_names(self, text_field: Optional[str], known_names_list: List[str]) -> Set[str]:
         """Extrait les noms liés depuis un champ texte.

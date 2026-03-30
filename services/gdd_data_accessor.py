@@ -233,6 +233,18 @@ class GDDDataAccessor:
         if self._element_linker is None or not self.locations or not region_name:
             return []
         return self._element_linker.get_sub_locations(region_name, self.locations)
+
+    def get_scene_region_names(self) -> List[str]:
+        """Noms « région » pour le widget Scène principale."""
+        if self._element_linker is None or not self.locations:
+            return []
+        return self._element_linker.get_scene_region_names(self.locations)
+
+    def get_scene_sub_location_names(self, parent_name: str) -> List[str]:
+        """Noms « lieu » sous une région pour le widget Scène principale."""
+        if self._element_linker is None or not self.locations or not parent_name:
+            return []
+        return self._element_linker.get_scene_sub_location_names(parent_name, self.locations)
     
     def get_linked_elements(
         self,

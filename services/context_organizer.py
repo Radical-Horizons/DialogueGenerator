@@ -276,16 +276,9 @@ class ContextOrganizer:
     
     def _extract_field_value(self, data: Dict, path: str) -> Optional[any]:
         """Extrait la valeur d'un champ depuis un chemin."""
-        keys = path.split(".")
-        current = data
-        
-        for key in keys:
-            if isinstance(current, dict) and key in current:
-                current = current[key]
-            else:
-                return None
-        
-        return current
+        from services.gdd_sections_split import extract_gdd_field_value
+
+        return extract_gdd_field_value(data, path)
     
     def _format_value(self, value: any, for_json: bool = False) -> any:
         """Formate une valeur pour l'affichage.

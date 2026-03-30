@@ -39,7 +39,10 @@ interface ContextState {
   // Cache pour éviter les appels API redondants
   cachedCharacters: CachedData | null
   cachedRegions: CachedData | null
+  /** Cache pour le widget Scène principale (régions hiérarchiques, pas le catalogue Lieux). */
+  cachedSceneRegions: CachedData | null
   cachedSubLocations: Map<string, CachedData>
+  cachedSceneSubLocations: Map<string, CachedData>
   setSelections: (selections: ContextSelection) => void
   setElementLists: (lists: {
     characters: CharacterResponse[]
@@ -73,7 +76,9 @@ interface ContextState {
   // Actions pour le cache
   setCachedCharacters: (characters: string[]) => void
   setCachedRegions: (regions: string[]) => void
+  setCachedSceneRegions: (regions: string[]) => void
   setCachedSubLocations: (regionName: string, subLocations: string[]) => void
+  setCachedSceneSubLocations: (regionName: string, subLocations: string[]) => void
   invalidateCache: () => void
   isCacheValid: (cached: CachedData | null) => boolean
   /** Incrémenté après sync GDD Notion / restauration archive pour forcer le rechargement des listes contexte. */
@@ -128,7 +133,9 @@ export const useContextStore = create<ContextState>((set, get) => ({
   // Cache initial
   cachedCharacters: null,
   cachedRegions: null,
+  cachedSceneRegions: null,
   cachedSubLocations: new Map<string, CachedData>(),
+  cachedSceneSubLocations: new Map<string, CachedData>(),
   gddDataRevision: 0,
 
   setSelections: (selections: ContextSelection) => {
@@ -566,6 +573,15 @@ export const useContextStore = create<ContextState>((set, get) => ({
     })
   },
 
+  setCachedSceneRegions: (regions: string[]) => {
+    set({
+      cachedSceneRegions: {
+        data: regions,
+        timestamp: Date.now(),
+      },
+    })
+  },
+
   setCachedSubLocations: (regionName: string, subLocations: string[]) => {
     set((state) => {
       const newCache = new Map(state.cachedSubLocations)
@@ -577,11 +593,24 @@ export const useContextStore = create<ContextState>((set, get) => ({
     })
   },
 
+  setCachedSceneSubLocations: (regionName: string, subLocations: string[]) => {
+    set((state) => {
+      const newCache = new Map(state.cachedSceneSubLocations)
+      newCache.set(regionName, {
+        data: subLocations,
+        timestamp: Date.now(),
+      })
+      return { cachedSceneSubLocations: newCache }
+    })
+  },
+
   invalidateCache: () => {
     set({
       cachedCharacters: null,
       cachedRegions: null,
+      cachedSceneRegions: null,
       cachedSubLocations: new Map<string, CachedData>(),
+      cachedSceneSubLocations: new Map<string, CachedData>(),
     })
   },
 

@@ -65,14 +65,12 @@ class ContextFormatter:
         Returns:
             Valeur extraite ou default.
         """
-        keys = path.split('.')
-        current = data
-        for key in keys:
-            if isinstance(current, dict) and key in current:
-                current = current[key]
-            else:
-                return default
-        return current
+        from services.gdd_sections_split import extract_gdd_field_value
+
+        v = extract_gdd_field_value(data, path)
+        if v is not None:
+            return v
+        return default
     
     @staticmethod
     def _format_list(data_list: Any, max_items: int = 5) -> str:

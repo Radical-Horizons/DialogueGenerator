@@ -250,7 +250,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               options={regionOptions}
               value={selection.sceneRegion}
               onChange={handleRegionChange}
-              placeholder="Région: (Aucune) - Rechercher..."
+              placeholder="Région (macro / parent) — Rechercher…"
               disabled={isLoading}
               allowClear
               recentlyUsed={recentRegions}
@@ -287,8 +287,8 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               onChange={handleSubLocationChange}
               placeholder={
                 selection.sceneRegion
-                  ? 'Lieu: (Aucun) - Rechercher...'
-                  : 'Lieu: Sélectionnez d\'abord une région'
+                  ? 'Lieu ou zone détaillée — Rechercher…'
+                  : 'Choisir d’abord une région'
               }
               disabled={isLoading || !selection.sceneRegion}
               allowClear

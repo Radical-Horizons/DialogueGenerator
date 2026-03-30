@@ -24,6 +24,56 @@ class TestContextFieldDetector:
         assert fields["Nom"].type == "string"
         assert fields["Nom"].frequency == 1.0
     
+    def test_shard_sections_not_all_metadata(self):
+        """Fiches Notion (Nom + sections) : le contexte vit sous sections, pas tout en métadonnées."""
+        detector = ContextFieldDetector()
+        sample = [
+            {
+                "Nom": "Lieu Test",
+                "sections": {"_general": "long text"},
+                "notion_page_id": "abc",
+            }
+        ]
+        fields = detector.detect_available_fields("location", sample)
+        assert "sections._general" in fields
+        assert fields["sections._general"].is_metadata is False
+        assert fields["Nom"].is_metadata is True
+
+    def test_shard_sections_general_splits_on_markdown_headings(self):
+        """Plusieurs titres markdown : sous-chemins virtuels, plus de monolithe seul."""
+        detector = ContextFieldDetector()
+        preamble = "Preamble " * 8
+        body_a = "Alpha body " * 4
+        body_b = "Beta body " * 4
+        md = f"{preamble}\n## Section Alpha\n{body_a}\n## Section Beta\n{body_b}"
+        sample = [
+            {
+                "Nom": "Lieu Shard",
+                "sections": {"_general": md},
+                "notion_page_id": "page-1",
+            }
+        ]
+        fields = detector.detect_available_fields("location", sample)
+        assert "sections._general" not in fields
+        assert "sections._general.preamble" in fields
+        assert "sections._general.section_alpha" in fields
+        assert "sections._general.section_beta" in fields
+        assert fields["sections._general.section_alpha"].label == "Sections > Section Alpha"
+        assert fields["sections._general.section_alpha"].is_metadata is False
+
+    def test_shard_mixed_corpus_keeps_monolithic_sections_general(self):
+        """Si une fiche reste monolithique, conserver ``sections._general`` dans la détection."""
+        detector = ContextFieldDetector()
+        preamble = "Preamble " * 8
+        md_long = f"{preamble}\n## Part A\n" + "alpha " * 8
+        sample = [
+            {"Nom": "Tiny", "sections": {"_general": "short"}, "notion_page_id": "1"},
+            {"Nom": "Rich", "sections": {"_general": md_long}, "notion_page_id": "2"},
+        ]
+        fields = detector.detect_available_fields("location", sample)
+        assert "sections._general" in fields
+        assert "sections._general.part_a" in fields
+
     def test_detect_available_fields_nested(self):
         """Test de détection de champs imbriqués."""
         detector = ContextFieldDetector()

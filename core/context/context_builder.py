@@ -793,6 +793,32 @@ class ContextBuilder:
             return []
         return self._gdd_data_accessor.get_sub_locations(region_name)
 
+    def get_scene_region_names(self) -> list[str]:
+        """Noms pour le sélecteur région (Scène principale)."""
+        if self._gdd_data_accessor is None:
+            logger.warning("GDD data accessor not initialized, attempting to load GDD files...")
+            try:
+                self.load_gdd_files()
+            except Exception as e:
+                logger.error(f"Failed to load GDD files: {e}", exc_info=True)
+                return []
+        if self._gdd_data_accessor is None:
+            return []
+        return self._gdd_data_accessor.get_scene_region_names()
+
+    def get_scene_sub_location_names(self, parent_name: str) -> list[str]:
+        """Noms pour le sélecteur lieu sous une région (Scène principale)."""
+        if self._gdd_data_accessor is None:
+            logger.warning("GDD data accessor not initialized, attempting to load GDD files...")
+            try:
+                self.load_gdd_files()
+            except Exception as e:
+                logger.error(f"Failed to load GDD files: {e}", exc_info=True)
+                return []
+        if self._gdd_data_accessor is None:
+            return []
+        return self._gdd_data_accessor.get_scene_sub_location_names(parent_name)
+
     def get_linked_elements(self, character_name: str | None = None, location_names: list[str] | None = None) -> dict[str, set[str]]:
         """Récupère les éléments liés à un personnage et/ou des lieux."""
         if self._gdd_data_accessor is None:

@@ -158,6 +158,24 @@ export async function getSubLocations(regionName: string): Promise<SubLocationLi
 }
 
 /**
+ * Régions pour la scène principale (typées / parents avec Contient, pas le catalogue plat).
+ */
+export async function listSceneRegions(): Promise<RegionListResponse> {
+  const response = await apiClient.get<RegionListResponse>('/api/v1/context/locations/scene/regions')
+  return response.data
+}
+
+/**
+ * Lieux sous une région pour la scène (Contient ou autres fiches hors parent).
+ */
+export async function getSceneSubLocations(regionName: string): Promise<SubLocationListResponse> {
+  const response = await apiClient.get<SubLocationListResponse>(
+    `/api/v1/context/locations/scene/sub-locations/${encodeURIComponent(regionName)}`
+  )
+  return response.data
+}
+
+/**
  * Suggère des éléments liés à partir de personnages et lieux.
  */
 export async function getLinkedElements(request: LinkedElementsRequest): Promise<LinkedElementsResponse> {

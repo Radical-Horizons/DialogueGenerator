@@ -268,7 +268,7 @@ export const useContextConfigStore = create<ContextConfigState>()(
       }
       
       const response = await configAPI.getContextFields(elementType)
-      
+
       set((state) => {
         const newAvailableFields = {
           ...state.availableFields,
