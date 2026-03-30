@@ -764,7 +764,7 @@ class ContextBuilder:
         )
 
     def get_regions(self) -> list[str]:
-        """Retourne une liste de noms de régions uniques à partir des données de localisation."""
+        """Retourne les noms du catalogue lieu (régions typées ou toutes les fiches lieux)."""
         # Lazy-load GDD files if not already loaded
         if self._gdd_data_accessor is None:
             logger.warning("GDD data accessor not initialized, attempting to load GDD files...")

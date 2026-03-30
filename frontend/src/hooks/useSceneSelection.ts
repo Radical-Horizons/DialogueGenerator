@@ -117,7 +117,7 @@ export function useSceneSelection() {
         regions: regionNames,
       }))
     } catch (err) {
-      console.error('Erreur lors du chargement des régions:', err)
+      console.error('Erreur lors du chargement des lieux (catalogue):', err)
       // En cas d'erreur, utiliser le cache même s'il est expiré si disponible
       if (contextStore.cachedRegions) {
         setData((prev) => ({
@@ -437,7 +437,7 @@ export function useSceneSelection() {
       subLocation: selection.subLocation,
     }
     isSwappingRef.current = false
-  }, [selection.characterA, selection.characterB, selection.sceneRegion, selection.subLocation, contextSelections.characters_full, contextSelections.characters_excerpt, contextSelections.locations_full, contextSelections.locations_excerpt, contextRegion, contextSubLocations, toggleCharacter, setRegion, toggleSubLocation, toggleLocation, locations])
+  }, [selection, contextSelections.characters_full, contextSelections.characters_excerpt, contextSelections.locations_full, contextSelections.locations_excerpt, contextRegion, contextSubLocations, toggleCharacter, setRegion, toggleSubLocation, toggleLocation, locations])
 
   const updateSelection = useCallback((updates: Partial<SceneSelection>) => {
     setSelection((prev) => ({ ...prev, ...updates }))

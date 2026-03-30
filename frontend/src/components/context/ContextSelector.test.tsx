@@ -179,13 +179,13 @@ describe('ContextSelector', () => {
     await waitFor(() => expect(mockSetSuggestions).toHaveBeenCalledWith([]))
   })
 
-  it('affiche les onglets Contexte GDD : Personnages, Lieux, Régions, Objets, Espèces, Communautés', async () => {
+  it('affiche les onglets Contexte GDD : Personnages, Lieux (contexte), Lieux, Objets, Espèces, Communautés', async () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
       expect(screen.getByText(/personnages/i)).toBeInTheDocument()
-      expect(screen.getByText(/lieux/i)).toBeInTheDocument()
-      expect(screen.getByText(/régions/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Lieux (contexte)' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Lieux' })).toBeInTheDocument()
       expect(screen.getByText(/objets/i)).toBeInTheDocument()
       expect(screen.getByText(/espèces/i)).toBeInTheDocument()
       expect(screen.getByText(/communautés/i)).toBeInTheDocument()
@@ -221,7 +221,7 @@ describe('ContextSelector', () => {
       expect(screen.getByText(/personnages/i)).toBeInTheDocument()
     })
 
-    const locationsTab = screen.getByText(/lieux/i)
+    const locationsTab = screen.getByRole('button', { name: 'Lieux (contexte)' })
     await user.click(locationsTab)
 
     // L'onglet Lieux devrait être actif
@@ -451,7 +451,7 @@ describe('ContextSelector', () => {
     })
 
     // Changer d'onglet
-    const locationsTab = screen.getByText(/lieux/i)
+    const locationsTab = screen.getByRole('button', { name: 'Lieux (contexte)' })
     await user.click(locationsTab)
 
     // La sélection devrait être réinitialisée

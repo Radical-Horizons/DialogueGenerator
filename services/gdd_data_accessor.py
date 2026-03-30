@@ -223,13 +223,13 @@ class GDDDataAccessor:
     
     # Méthodes de gestion des éléments liés via ElementLinker
     def get_regions(self) -> List[str]:
-        """Retourne une liste de noms de régions uniques à partir des données de localisation."""
+        """Retourne les noms pour le catalogue lieu (régions classiques ou toutes les fiches)."""
         if self._element_linker is None or not self.locations:
             return []
         return self._element_linker.get_regions(self.locations)
     
     def get_sub_locations(self, region_name: str) -> List[str]:
-        """Récupère les sous-lieux d'une région."""
+        """Récupère les noms listés dans ``Contient`` pour la fiche ``region_name``."""
         if self._element_linker is None or not self.locations or not region_name:
             return []
         return self._element_linker.get_sub_locations(region_name, self.locations)

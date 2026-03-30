@@ -53,7 +53,7 @@ export function RegionSelector() {
   return (
     <div style={{ padding: '1rem', borderTop: `1px solid ${theme.border.primary}` }}>
       <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1rem', fontWeight: 'bold' }}>
-        Régions et Sous-lieux
+        Lieux et sous-lieux
       </h3>
       
       {error && (

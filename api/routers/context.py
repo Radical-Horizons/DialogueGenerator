@@ -231,7 +231,7 @@ async def list_regions(
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> RegionListResponse:
-    """Liste toutes les régions disponibles.
+    """Liste les noms du catalogue lieux (régions typées ou toutes les fiches).
     
     Args:
         request: La requête HTTP.
@@ -239,7 +239,7 @@ async def list_regions(
         request_id: ID de la requête.
         
     Returns:
-        Liste des régions.
+        Liste des noms (champ ``regions`` pour compatibilité client).
     """
     regions = context_builder.get_regions()
     
@@ -260,10 +260,10 @@ async def get_sub_locations(
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> SubLocationListResponse:
-    """Récupère les sous-lieux d'une région.
+    """Récupère les noms du champ ``Contient`` pour une fiche lieu.
     
     Args:
-        name: Nom de la région.
+        name: Nom de la fiche lieu.
         request: La requête HTTP.
         context_builder: ContextBuilder injecté.
         request_id: ID de la requête.

@@ -1,6 +1,6 @@
 /**
  * Composant principal de sélection de contexte (panneau Contexte GDD) avec onglets par type d'entité.
- * AC FR11 : Personnages, Lieux, Régions, Objets, Espèces, Communautés. (Thèmes reporté : pas d'API backend.)
+ * AC FR11 : Personnages, Lieux (inclusion contexte), Lieux (catalogue), Objets, Espèces, Communautés.
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import * as contextAPI from '../../api/context'
@@ -59,8 +59,8 @@ const PAGE_SIZE = 50
 
 const TAB_DEFS: { key: TabType; label: string }[] = [
   { key: 'characters', label: 'Personnages' },
-  { key: 'locations',  label: 'Lieux' },
-  { key: 'regions',    label: 'Régions' },
+  { key: 'locations',  label: 'Lieux (contexte)' },
+  { key: 'regions',    label: 'Lieux' },
   { key: 'items',      label: 'Objets' },
   { key: 'species',    label: 'Espèces' },
   { key: 'communities', label: 'Communautés' },
@@ -69,7 +69,7 @@ const TAB_DEFS: { key: TabType; label: string }[] = [
 const ENTITY_TYPE_LABELS: Record<TabType, string> = {
   characters: 'Personnage',
   locations: 'Lieu',
-  regions: 'Région',
+  regions: 'Lieu',
   items: 'Objet',
   species: 'Espèce',
   communities: 'Communauté',

@@ -69,6 +69,23 @@ class TestElementLinker:
         regions = linker.get_regions([])
         
         assert regions == []
+
+    def test_get_regions_shard_mode_all_lieux(self, linker):
+        """Sans Catégorie Région, tous les lieux nommés sont listés (fiches individuelles)."""
+        locs = [
+            {"Nom": "Zeta", "sections": {}},
+            {"Nom": "Alpha", "sections": {}},
+            {"Nom": "Alpha"},
+        ]
+        regions = linker.get_regions(locs)
+        assert regions == ["Alpha", "Zeta"]
+
+    def test_get_sub_locations_from_contient_without_categorie(self, linker):
+        """Contient est lu même sans champ Catégorie (fiche lieu moderne)."""
+        locs = [
+            {"Nom": "Zone Mère", "Contient": "Site A, Site B"},
+        ]
+        assert linker.get_sub_locations("Zone Mère", locs) == ["Site A", "Site B"]
     
     def test_get_sub_locations(self, linker, sample_gdd_data):
         """Test de récupération des sous-lieux."""

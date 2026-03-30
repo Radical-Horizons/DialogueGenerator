@@ -148,14 +148,14 @@ class CommunityListResponse(BaseModel):
 
 
 class RegionListResponse(BaseModel):
-    """Réponse contenant une liste de régions.
+    """Réponse contenant la liste des noms du catalogue lieux (clé API ``regions`` inchangée).
     
     Attributes:
-        regions: Liste des noms de régions.
-        total: Nombre total de régions.
+        regions: Noms (régions typées si présentes, sinon toutes les fiches lieux).
+        total: Nombre d'entrées.
     """
-    regions: List[str] = Field(..., description="Liste des noms de régions")
-    total: int = Field(..., description="Nombre total de régions")
+    regions: List[str] = Field(..., description="Noms de lieux pour le catalogue")
+    total: int = Field(..., description="Nombre de noms")
 
 
 class SubLocationListResponse(BaseModel):

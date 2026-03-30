@@ -140,7 +140,7 @@ export async function getCommunity(name: string): Promise<CommunityResponse> {
 }
 
 /**
- * Liste toutes les régions disponibles.
+ * Liste les noms du catalogue lieux (régions typées ou toutes les fiches selon le GDD).
  */
 export async function listRegions(): Promise<RegionListResponse> {
   const response = await apiClient.get<RegionListResponse>('/api/v1/context/locations/regions')

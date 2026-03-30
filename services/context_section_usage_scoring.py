@@ -25,7 +25,7 @@ EXCERPT_MAX_LEN = 320
 _TYPE_DISPLAY: Dict[str, str] = {
     "characters": "Personnages",
     "locations": "Lieux",
-    "regions": "Régions",
+    "regions": "Lieux",
     "themes": "Thèmes",
     "items": "Objets",
     "species": "Espèces",

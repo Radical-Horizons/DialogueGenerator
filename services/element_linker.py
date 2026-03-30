@@ -34,48 +34,59 @@ class ElementLinker:
         self._element_resolver = element_resolver
     
     def get_regions(self, locations: List[Dict]) -> List[str]:
-        """Retourne une liste de noms de régions uniques à partir des données de localisation.
+        """Retourne des noms de lieux pour l'index « régions » / catalogue.
+        
+        Comportement :
+        - Si au moins une fiche a ``Catégorie == "Région"`` (GDD agrégé classique), ne
+          retourne que ces noms (rétrocompatibilité).
+        - Sinon (fiches Notion individuelles sans champ ``Catégorie``), retourne tous
+          les ``Nom`` non vides, triés (insensible à la casse).
         
         Args:
             locations: Liste des lieux depuis GDDData.
             
         Returns:
-            Liste des noms de régions (catégorie "Région").
+            Noms de régions (mode classique) ou de tous les lieux (mode fiches).
         """
         if not locations:
             return []
-        return [
-            loc.get("Nom") for loc in locations
+        legacy_regions = [
+            loc.get("Nom")
+            for loc in locations
             if isinstance(loc, dict) and loc.get("Nom") and loc.get("Catégorie") == "Région"
         ]
+        if legacy_regions:
+            return sorted(set(legacy_regions), key=lambda n: str(n).casefold())
+        names = [
+            loc.get("Nom")
+            for loc in locations
+            if isinstance(loc, dict) and loc.get("Nom")
+        ]
+        return sorted(set(names), key=lambda n: str(n).casefold())
     
     def get_sub_locations(self, region_name: str, locations: List[Dict]) -> List[str]:
-        """Récupère les sous-lieux d'une région.
+        """Récupère les sous-lieux listés dans le champ ``Contient`` d'une fiche lieu.
         
         Args:
-            region_name: Nom de la région.
+            region_name: Nom du lieu (région classique ou toute fiche avec ``Contient``).
             locations: Liste des lieux depuis GDDData.
             
         Returns:
-            Liste des noms de sous-lieux.
+            Noms issus de ``Contient`` (séparés par des virgules), ou liste vide.
         """
         if not locations or not region_name:
             return []
-        
-        # Trouver la région
         region_details = None
         for loc in locations:
             if isinstance(loc, dict) and loc.get("Nom") == region_name:
                 region_details = loc
                 break
-        
-        if not region_details or region_details.get("Catégorie") != "Région":
-            logger.warning(f"'{region_name}' n'est pas une région valide ou n'a pas été trouvée.")
+        if not region_details:
+            logger.debug("Lieu introuvable pour sous-lieux: %s", region_name)
             return []
-        
         sub_locations_str = region_details.get("Contient")
-        if isinstance(sub_locations_str, str) and sub_locations_str:
-            return [name.strip() for name in sub_locations_str.split(',') if name.strip()]
+        if isinstance(sub_locations_str, str) and sub_locations_str.strip():
+            return [name.strip() for name in sub_locations_str.split(",") if name.strip()]
         return []
     
     def extract_linked_names(self, text_field: Optional[str], known_names_list: List[str]) -> Set[str]:

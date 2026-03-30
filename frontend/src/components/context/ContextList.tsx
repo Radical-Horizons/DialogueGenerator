@@ -21,7 +21,7 @@ interface ContextListProps {
   isLoading?: boolean
   getElementMode?: (name: string) => ElementMode | null
   onModeChange?: (name: string, mode: ElementMode) => void
-  /** Afficher les cases à cocher (false pour onglets lecture seule comme Régions, Thèmes). */
+  /** Afficher les cases à cocher (false pour onglets lecture seule comme catalogue Lieux, Thèmes). */
   showCheckboxes?: boolean
   /** Label du type d'entité pour le badge (ex. "Personnage", "Lieu"). */
   entityTypeLabel?: string

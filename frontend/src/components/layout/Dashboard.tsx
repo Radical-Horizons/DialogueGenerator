@@ -441,7 +441,7 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
+  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
 
   // En mode éditeur de graphe : masquer "Prompt". En mode Génération : masquer "Édition de nœud"
   const visibleRightPanelTabs = useMemo(() => {

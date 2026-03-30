@@ -4,7 +4,7 @@
 const ENTITY_TYPE_LABELS: Record<string, string> = {
   characters: 'Personnages',
   locations: 'Lieux',
-  regions: 'Régions',
+  regions: 'Lieux',
   themes: 'Thèmes',
   items: 'Objets',
   species: 'Espèces',
