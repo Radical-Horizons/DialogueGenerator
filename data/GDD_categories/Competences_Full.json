@@ -1,0 +1,15 @@
+{
+    "competences": [
+        {
+            "Nom": "SansTitre",
+            "ID export": "{'id': 'QRq%3A', 'type': 'rich_text', 'rich_text': []}",
+            "Description": "La compétence \"Espèce individuelle\" permet de classer et de comprendre des organismes biologiques au sein d'un cadre très avancé, facilitant ainsi l'étude et l'interaction avec diverses formes de vie.",
+            "Statut": "Validée",
+            "Cadre": "Biologique — très avancé",
+            "Famille": "Biologique",
+            "Cadre (combiné)": "{'id': 'gM%5Ev', 'type': 'formula', 'formula': {'type': 'string', 'string': 'Biologique'}}",
+            "Compétence": "Espèce individuelle",
+            "Introduction": {}
+        }
+    ]
+}

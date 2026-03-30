@@ -1,0 +1,137 @@
+{
+    "liste_des_features": [
+        {
+            "Nom": "Achat/vente d'objets"
+        },
+        {
+            "Nom": "Aspects d’Uresaïr",
+            "Résumé": "Le système des Aspects d'Uresaïr représente les pouvoirs divins fragmentés de la Seigneuresse. Organisé autour de 7 compétences correspondant aux aspects survivants de sa divinité originelle, il propose 28 pouvoirs répartis sur 4 âges cosmiques (Menog, Gumezishn, Wizarishn, Frashkart). Le système reflète sa nature brisée : privée de l'Aspect de la Destruction, ses pouvoirs engendrent des effets secondaires durables qu'elle ne peut purger."
+        },
+        {
+            "Nom": "Boîte de dialogue (graphismes)",
+            "Résumé": "Le système de dialogue adopte une approche immersive et expressive pour mettre en valeur les interactions entre les personnages. Il est conçu pour être intégré dans un jeu 2D avec une forte composante narrative. Principes : Boîte de Dialogue en Pleine Largeur : - La boîte de dialogue occupe toute la largeur de l'écran, permettant une lecture fluide et mettant l'accent sur le texte. Le fond opaque de la boîte assure une bonne lisibilité, quel que soit l'arrière-plan du jeu. Nom du Personnage : - Le nom du personnage qui parle est mis en valeur en haut à gauche ou à droite de la boîte de dialogue, selon la position du sprite du personnage. Cela permet au joueur d’identifier rapidement l’interlocuteur. Sprites des Personnages : - Les sprites des personnages sont affichés à gauche ou à droite de la boîte de dialogue, en fonction de leur position respective dans la scène. Ces sprites sont des représentations zoomées, issues des animations idle des personnages, et adoptent une pose neutre mais expressive, reflétant la personnalité de chaque personnage. Animations d'Expressions : - Les sprites des personnages peuvent être légèrement animés pour refléter les émotions en cours de dialogue (par exemple, une posture plus tendue, un sourire ou un froncement de sourcils). Ces animations aident à renforcer l'immersion et la connexion émotionnelle avec les personnages. Monologues Intérieurs : - Les pensées ou les monologues intérieurs du personnage principal (l'Ethérée) sont affichés en surimpression directe sur l'écran, sans boîte de dialogue, avec une police mouvante et des effets visuels subtils pour indiquer la nature éthérée et fluide de ces pensées. Doublage : - Tous les dialogues sont intégralement doublés, ajoutant une couche supplémentaire d'immersion et permettant de donner vie aux personnages."
+        },
+        {
+            "Nom": "Boucle de gameplay"
+        },
+        {
+            "Nom": "Caractéristiques et compétences",
+            "Résumé": "Ce système émerge d'une volonté de rompre avec les mécaniques RPG traditionnelles basées sur le hasard et les jets de dés invisibles, offrant aux joueurs un contrôle tactique direct sur leurs actions. Il reflète le principe qu'un personnage agit selon ses compétences réelles plutôt que selon des algorithmes aléatoires – tout en préservant les moments dramatiques où l'on doit puiser dans ses réserves pour dépasser ses limites."
+        },
+        {
+            "Nom": "Combat au tour par tour",
+            "Résumé": "Le système de combat au tour par tour est un élément fondamental des RPG, permettant des affrontements stratégiques. Dans Alteir, ce système doit offrir une base solide pour des combats intéressants et fluides, en intégrant les caractéristiques uniques des personnages et un système de temps basé sur des unités."
+        },
+        {
+            "Nom": "Courbe émotionnelle (debug)",
+            "Résumé": "La courbe émotionnelle trace le parcours affectif du joueur à travers Alteir, cartographiant délibérément tensions et relâchements. Ce système identifie les piliers émotionnels du jeu (aliénation, révélation, empathie transgressive, subversion) et programme leur modulation rythmique pour éviter tant la fatigue que l'accoutumance."
+        },
+        {
+            "Nom": "Création d'objets"
+        },
+        {
+            "Nom": "Croyances fondamentales",
+            "Résumé": "Sous la surface des traits de caractère et des comportements observables des personnages d'Alteir se cachent des structures idéologiques profondes - leurs croyances fondamentales. Ce système transforme les \"défauts\" apparents en manifestations cohérentes de visions du monde, donnant aux personnages une profondeur politique et philosophique qui éclaire leurs actions et leurs choix."
+        },
+        {
+            "Nom": "Décrire les personnages du “village” d’Uresaïr"
+        },
+        {
+            "Nom": "Décrire le lieu sous la protection d’Uresaïr",
+            "Résumé": "Description du premier lieu principal du jeu Cf Léviathan pétrifié"
+        },
+        {
+            "Nom": "Déplacements",
+            "Résumé": "L'exploration de l'environnement est une fonctionnalité de base qui permet de : • Se déplacer dans l'environnement du jeu • Interagir avec des éléments du décor et des personnages • Passer d'une map à une autre"
+        },
+        {
+            "Nom": "Déplacements V1",
+            "Résumé": "L'exploration de l'environnement est une fonctionnalité de base qui permet de : • Se déplacer dans l'environnement du jeu • Interagir avec des éléments du décor et des personnages • Passer d'une map à une autre"
+        },
+        {
+            "Nom": "Exploration des souvenirs",
+            "Résumé": "L'exploration des souvenirs fournit un accès à la psyché des personnages possédés par l'Éthérée, permettant d'approfondir leur histoire personnelle et d'influencer leur développement. Cette fonctionnalité transforme l'évolution introspective des personnages en espaces navigables, donnant une forme concrète aux conflits intérieurs et aux expériences formatrices."
+        },
+        {
+            "Nom": "Hasard optionnel",
+            "Résumé": "Le système de hasard modulé est une option activable qui introduit un élément d'incertitude contrôlée dans la résolution des actions. En augmentant uniformément la difficulté de tous les tests de 3 points et en compensant partiellement cette augmentation par un lancer de dé positif (1D6), cette mécanique crée une tension dynamique entre maîtrise et aléatoire sans jamais rendre les compétences du personnage insignifiantes."
+        },
+        {
+            "Nom": "Influence pour les personnages principaux",
+            "Résumé": "Le système d'influence est une mécanique centrale dans l'interaction entre l'Éthérée et les trois personnages principaux : Uresaïr, Eonundé et Vethraak. Il représente la progression de la possession et les conséquences des choix du joueur sur la relation entre ces entités. L’Influence est la principale “monnaie” de l’Ethérée. Attention, ce système d’influence ne peut pas s’appliquer aux PNJ."
+        },
+        {
+            "Nom": "Infobulles",
+            "Résumé": "Quand les PJ tombent sur un élément qu’ils connaissent dans une discussion (par exemple Uresaïr qui rencontre un membre notable de l’Anentropie), le mot clé est affiché dans une couleur différente et en appuyant sur une touche, on voit un petit avatar du PJ qui explique ce qu’il sait par télépathie à l’Éthérée."
+        },
+        {
+            "Nom": "Inventaire",
+            "Résumé": "Le système d'inventaire d'Alteir utilise une approche par liste catégorisée permettant une gestion fluide et intuitive des objets à la manette. Il introduit un concept d'encombrement unifié plutôt qu'une simulation de poids complexe, privilégiant l'accessibilité tout en maintenant une cohérence narrative. L'interface est conçue pour minimiser les interruptions de gameplay et maximiser l'aisance de navigation."
+        },
+        {
+            "Nom": "Journal des quêtes secondaires"
+        },
+        {
+            "Nom": "Journal de la quête principale",
+            "Résumé": "Le journal de quête principale est une fonctionnalité essentielle dans les RPG narratifs complexes. Elle permet de suivre les étapes majeures du scénario sans perdre le fil des événements, surtout lorsque le rythme de jeu est non-linéaire ou entrecoupé de longues séquences d’exploration."
+        },
+        {
+            "Nom": "Liste de compétences",
+            "Résumé": "Liste des compétences du jeu. Un personnage n’a réellement que les compétences dans lesquelles il a investi au moins 1 point. Toutes ces compétences sont potentiellement accessibles et se débloquent via le sphérier de Progression. Il existe également des compétences exclusives à certains PJ.  Compétence\tDescription courte\tExclusive à Pensée (Manah)\tLire la pensée profonde, déchiffrer les langages inconnus, identifier les influences mentales\tUresaïr Loi (Asha)\tComprendre et manipuler les structures fondamentales de l’ordre cosmique\tUresaïr Pouvoir (Khshatra)\tDéceler l’autorité réelle et ses failles, imposer une domination légitime\tUresaïr Terre (Armaiti)\tIdentifier les liens durables et créer un ancrage émotionnel profond\tUresaïr Harmonie (Haurvat)\tRestaurer l’intégrité essentielle et révéler les manques existentiels\tUresaïr Immortalité (Ameret)\tAccéder à la mémoire éternelle, comprendre les cycles de rémanence\tUresaïr Souffle (Mainyu)\tRévéler les vocations enfouies, déclencher l’acte créateur initial\tUresaïr Note : Cette liste est non définitive, et sujette à évolutions motivées."
+        },
+        {
+            "Nom": "Magie ou sorts"
+        },
+        {
+            "Nom": "Menu principal",
+            "Résumé": "Le menu principal constitue l'unique interface utilisateur pour accéder aux différentes fonctionnalités du jeu. Il est accessible en jeu via la pression d'une touche dédiée (typiquement TAB ou le bouton Options sur manette) ou depuis l'écran d'accueil."
+        },
+        {
+            "Nom": "Moteur de jeu",
+            "Résumé": "Notre jeu nécessite un moteur capable de gérer des dialogues complexes, des animations 2D et un système de quêtes. Unity est un choix naturel pour sa robustesse et ses outils dédiés au 2D."
+        },
+        {
+            "Nom": "Possession",
+            "Résumé": "La possession est le mécanisme d'interaction de l'Éthérée (entité jouée par le joueur) avec le monde d'Escelion. Elle représente l'allégorie directe de la relation joueur-personnage, transformant une convention tacite du médium vidéoludique en élément narratif explicite. Il ne vise cependant pas à faire des effets spectaculaire, l’allégorie se suffit en elle-même. Ce système se décline dans les systèmes Exploration des souvenirs, Influence pour les personnages principaux et Infobulles"
+        },
+        {
+            "Nom": "Progression",
+            "Résumé": "Ce document définit un système de progression pour un jeu de rôle où chaque zone du monde possède un arbre de compétences spécifique, rattaché aux PNJ et factions locales. Les joueurs gagnent des points de progression dans chaque zone et peuvent débloquer des bonus standards librement. Les cases spéciales nécessitent soit des traits de caractère compatibles, soit l'utilisation d'une ressource rare (Influence de l'Éthérée). Ce système renforce l'immersion narrative en liant la progression aux choix moraux et aux relations développées localement, tout en offrant des bonus mineurs et majeurs qui façonnent l'évolution des personnages."
+        },
+        {
+            "Nom": "Quêtes Principales des Personnages",
+            "Résumé": "Le système d'Arcs Narratifs Convergents structure l'évolution personnelle des trois protagonistes à travers des séries de quêtes dédiées à chacun. Ces quêtes principales fonctionnent comme une colonne vertébrale narrative parallèle à l'intrigue principale, permettant d'explorer les motivations profondes et les conflits internes de chaque personnage. Chaque étape majeure franchie débloque des bénéfices concrets pour ce même personnage, créant une boucle de motivation vertueuse et amplifiant sa capacité à contribuer à l'aventure collective."
+        },
+        {
+            "Nom": "Rappel du Core System",
+            "Résumé": "• Tests : Au lieu de jeter des dés, vous comparez la caractéristique de votre personnage à la difficulté (ou au score adverse). • Points d’Effort : Si votre score est inférieur au seuil, vous pouvez dépenser des points d’effort pour l’augmenter. Chaque point d’effort dépensé ajoute +1 à votre total. • Succès / Échec : • Résultats Critiques : Dépasser la difficulté de 5 ou plus donne un succès critique. Tomber en dessous de 5 points par rapport à la difficulté entraîne un échec critique. • Actions Longues : Lorsqu’une action complexe se décompose en plusieurs tests successifs, échouer à une étape peut bloquer l’action ou vous forcer à adopter une nouvelle approche. • Traits : Chaque personnage possède un ou plusieurs traits spéciaux. • Modificateurs Contextuels :"
+        },
+        {
+            "Nom": "Récupération par indulgence",
+            "Résumé": "Dans Alteir, la récupération n'est pas simplement une question de repos physique, mais également une libération psychologique. Le système d'Indulgence transforme les moments de détente en opportunités d'expression authentique des défauts des personnages, créant un équilibre entre la tension narrative et le soulagement nécessaire."
+        },
+        {
+            "Nom": "Réputation",
+            "Résumé": "Le système de réputation représente la perception des factions et communautés d'Escelion envers les personnages contrôlés par l'Éthérée. Dans un monde où les relations sociales sont façonnées par l'admiration, le respect et la crainte, ce système permet des interactions nuancées avec les différentes populations du continent-monde, créant des conséquences tangibles aux actions et choix des joueurs."
+        },
+        {
+            "Nom": "Sauvegarde automatique unique",
+            "Résumé": "Le système de sauvegarde automatique unique, inspiré du mode \"Iron Man\" de certains jeux, est une fonctionnalité qui ajoute un niveau de défi et d'immersion supplémentaire. Cette approche force le joueur à assumer les conséquences de ses choix, renforçant ainsi l'impact de chaque décision dans le monde d'Alteir."
+        },
+        {
+            "Nom": "Système de dialogue",
+            "Résumé": "Le système de dialogue est une fonctionnalité essentielle qui permet : • D'interagir avec les Personnages Non Joueurs (PNJ) • De découvrir l'histoire et les secrets du monde d'Alteir • De prendre des décisions qui influencent le cours de l'histoire"
+        },
+        {
+            "Nom": "Système de mort et de conséquence",
+            "Résumé": "Dans l'univers d'Alteir, la mort n'est pas un concept absolu pour les personnages contrôlés par l'Éthérée. Ce système transforme ce qui serait traditionnellement une condition d'échec (game over) en opportunité narrative et mécanique, reflétant la nature immortelle d'Uresaïr et l'essence incorporelle de l'Éthérée."
+        },
+        {
+            "Nom": "Tests avancés "
+        },
+        {
+            "Nom": "Traits de caractère",
+            "Résumé": "Les personnages joueurs (PJ) et les PNJ disposent de traits de caractère, organisés en paires antinomiques (ex. Loyal / Traître). Chaque trait est défini par une valeur continue allant de -∞ à +∞. Les PJ possédés (Uresaïr, Éomondé, Vétraque) acceptent ou refusent certains choix (dialogue, action) en fonction de leurs traits actuels. Un joueur ne peut pas forcer un choix contraire au caractère d’un PJ sans utiliser l’Influence de l’Éthérée."
+        }
+    ]
+}

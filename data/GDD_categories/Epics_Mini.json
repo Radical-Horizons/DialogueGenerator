@@ -1,0 +1,85 @@
+{
+    "epics": [
+        {
+            "Nom": "Campement & premiers alliés"
+        },
+        {
+            "Nom": "Citadelle personnelle"
+        },
+        {
+            "Nom": "Combat au tour par tour",
+            "Résumé": "Le système de combat au tour par tour est un élément fondamental des RPG, permettant des affrontements stratégiques. Dans Alteir, ce système doit offrir une base solide pour des combats intéressants et fluides, en intégrant les caractéristiques uniques des personnages et un système de temps basé sur des unités."
+        },
+        {
+            "Nom": "Communication au long cours - Année 2 (Production)"
+        },
+        {
+            "Nom": "Communication de sortie & Post-launch - Année 3"
+        },
+        {
+            "Nom": "Doublage intégral"
+        },
+        {
+            "Nom": "Exploration des souvenirs",
+            "Résumé": "L'exploration des souvenirs fournit un accès à la psyché des personnages possédés par l'Éthérée, permettant d'approfondir leur histoire personnelle et d'influencer leur développement. Cette fonctionnalité transforme l'évolution introspective des personnages en espaces navigables, donnant une forme concrète aux conflits intérieurs et aux expériences formatrices."
+        },
+        {
+            "Nom": "Marketing & Communication - Année 1 (Financement)"
+        },
+        {
+            "Nom": "Menu principal"
+        },
+        {
+            "Nom": "PJ : Eonundé"
+        },
+        {
+            "Nom": "PJ : Uresaïr"
+        },
+        {
+            "Nom": "PJ : Vethraak"
+        },
+        {
+            "Nom": "PNJ recrutables - Essentiels"
+        },
+        {
+            "Nom": "PNJ recrutables - Importants"
+        },
+        {
+            "Nom": "PNJ recrutables - Masse"
+        },
+        {
+            "Nom": "Premier lieu optionnel"
+        },
+        {
+            "Nom": "Réputation",
+            "Résumé": "Le système de réputation représente la perception des factions et communautés d'Escelion envers les personnages contrôlés par l'Éthérée. Dans un monde où les relations sociales sont façonnées par l'admiration, le respect et la crainte, ce système permet des interactions nuancées avec les différentes populations du continent-monde, créant des conséquences tangibles aux actions et choix des joueurs."
+        },
+        {
+            "Nom": "Second lieu optionnel"
+        },
+        {
+            "Nom": "Système de mort et de conséquence",
+            "Résumé": "Dans l'univers d'Alteir, la mort n'est pas un concept absolu pour les personnages contrôlés par l'Éthérée. Ce système transforme ce qui serait traditionnellement une condition d'échec (game over) en opportunité narrative et mécanique, reflétant la nature immortelle d'Uresaïr et l'essence incorporelle de l'Éthérée."
+        },
+        {
+            "Nom": "Zone 1b : Léviathan pétrifié",
+            "Résumé": "Résumer la fonctionnalité."
+        },
+        {
+            "Nom": "Zone 2 : Désert des Échos Perdus",
+            "Résumé": "Résumer la fonctionnalité."
+        },
+        {
+            "Nom": "Zone 3 : Puits Céleste",
+            "Résumé": "Résumer la fonctionnalité."
+        },
+        {
+            "Nom": "Zone 4 : Citadelle de Dailon",
+            "Résumé": "Résumer la fonctionnalité."
+        },
+        {
+            "Nom": "Zone 5 : Vieille Ville",
+            "Résumé": "Résumer la fonctionnalité."
+        }
+    ]
+}

@@ -1,0 +1,361 @@
+{
+    "image_prompts__lieux_": [
+        {
+            "Nom": "Alcôve Iridescente",
+            "Prompt": "2D video game landscape digital illustration with toon shading of underground small plaza in front of a grey wall with luminous circuit patterns with a few steps leading to a niche carved the wall, organic walls, environmental storytelling, inspired by legend of mana and Ori and the blind forest and Muramasa: the demon blade, dark fantasy with deep shadows, the niche is the only source of light, organic curves",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Architecture Mémorielle Éphémère",
+            "Prompt": "2D landscape with toon shading inside a giant iridescent sphere where temporary crystalline structures and pathways phase in and out of existence amidst floating light particle swarms, gravity-defying orientation, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, visual hierarchy, no human",
+            "Lieu": "Bibliothèques Veineuses",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Astrolabe",
+            "Prompt": "digital illustration with toon shading of ceremonial altar with ash receptacle beside complex bone astrolabe with moving parts, carved neural circuit patterns surrounding instruments, glowing amber light, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Autel d’Uresaïr",
+            "Prompt": "digital illustration of a sanctuary with a square altar with engravings, yellow geometric walls, red carpet on stairs, two tunnels, toon-shading, legend of mana, ori and the blind forest, in style of H.R. Giger, dark psychedelic",
+            "Lieu": "Plis d’ossements",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Cascade Stasique",
+            "Prompt": "digital illustration with toon shading of a dark cavern with gleaming blue-grey walls and floating acid vapors, featuring an imposing waterfall of acid frozen mid-motion, its iridescent surface subtly shimmering, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Chambre des Circuits Neuronaux",
+            "Prompt": "2D landscape with toon shading of vast open chamber, circuit-like patterns carved into walls and floor, amber light, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, multiple paths and entrance exit, environment art, 2D, visual hierarchy, no human",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Chambre ensevelie (high-tech)",
+            "Prompt": "digital illustration of great collider with organic sphere suspended by nerves inside shattered reality zone with multiple timelines, toon-shading, legend of mana, ori and the blind forest, muramasa the demon blade, dark psychedelic",
+            "Lieu": "Plis d’ossements",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Chambre ensevelie (horreur)",
+            "Prompt": "digital illustration of massive spherical chamber with writhing entity at center, reflective surfaces showing parallel realities, toon-shading, legend of mana, ori and the blind forest, dark fantasy",
+            "Lieu": "Plis d’ossements",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Chemin de champignons",
+            "Prompt": "Across a wide plain, a broken stone path stretches onward, barely visible beneath drifting ash and dust. On both sides, the ground is cracked and pale, carved by time and strange energies. Scattered across this expanse grow colonies of strange mushrooms, grey with bluish-green hues, pulsating softly in the darkness. Bioluminescent spores rise from their surfaces, glowing faintly as they float through the stagnant air. Filaments stretch between the fungal growths like brittle webs.",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Colonie de Lim-lim",
+            "Prompt": "digital illustration with toon shading of  round grey plant with holes insect colony surrounded by moss in the middle of underground natural circular room along curved vertebral walls, glowing red lichen illuminating the scene in red ambient, , seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling, otherwordly",
+            "Lieu": "Tunnel vertébral",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Couloir vers le Nexus Synaptique",
+            "Prompt": "top down fantasy painting of a pit, a descending tunnel into the darkness in a cave. The walls are made of rock with red glowing lichen growing on it and the decaying ground is made of old white yellowish marble.",
+            "Lieu": "Strate IV - Le Nexus Synaptique",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Cristaux et Spores",
+            "Prompt": "digital illustration with toon shading of amber crystal formation surrounded by colored spore mist floating in air, light rays filtering through crystalline structure, creating prismatic patterns, microscopic spores visible in mist, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Cœur Gastrique",
+            "Prompt": "2D landscape with toon shading of a vast cavern center dominated by a towering pillar of solidified, crystalline acid, with precarious platforms spiraling upwards around it, over pools of opalescent acid, purple ambient light, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, visual hierarchy, no human",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Déserts intérieurs",
+            "Prompt": "digital illustration of alcove suspended between temporal streams, glass-like structures containing desert sand, toon-shading, legend of mana, ori and the blind forest, muramasa the demon blade, dark psychedelic",
+            "Lieu": "Plis d’ossements",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Désert d’Uresaïr 1",
+            "Prompt": "top down surealistic fantasy underground cave in the night.  Sand covers the entire floor in dunes. A passage opens naturally in the cave wall, leading to deeper chambers. A single structure made of rock and glass, shaped like a rock pillar, holding luminous golden sand flowing through it, occupies the center of the cave. Video game landscape",
+            "Lieu": "Strate IV - Le Nexus Synaptique",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Désert d’Uresaïr 2",
+            "Prompt": "top down surealistic fantasy dark underground cave in the night.  Sand covers the entire floor in dunes. A passage opens naturally in the cave wall, leading to deeper chambers. A surreal glowing twisted sculpture made of glass, holding luminous golden sand flowing through it, occupies the center of the cave. The raw walls of the cave are white and smooth.",
+            "Lieu": "Strate IV - Le Nexus Synaptique",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Échafaudage Mémoriel",
+            "Prompt": "digital illustration with toon shading of a network of rusty beams, narrow walkways, and unstable platforms suspended over opalescent acid pools, featuring strange fungal structures integrated into the catwalks and thick ropes connecting elements, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Escaliers impossibles",
+            "Prompt": "digital illustration of impossible architecture where staircases fold into themselves, by m.c. escher, glowing runes floating in void, toon-shading, legend of mana, ori and the blind forest, muramasa the demon blade, dark psychedelic",
+            "Lieu": "Plis d’ossements",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Escalier Costal",
+            "Prompt": "digital illustration with toon shading of spiral staircase carved into massive fossilized rib, lanterns casting shadows on curved bone walls, dangling filaments of bone telegraph system, seiken densetsu, ori and the blind forest, muramasa: the demon blade,  environmental storytelling, deep shadows",
+            "Lieu": "Tunnel vertébral",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Escalier Hélicoïdal Descendant",
+            "Prompt": "digital illustration with toon shading looking down a massive helical staircase carved from bone, spiraling down around an empty central shaft into deep darkness, faint eerie sounds suggested, strange mutated Gedroths clinging to walls, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Narthex abyssal",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Essaims Mémoriels Flottants",
+            "Prompt": "digital illustration with toon shading of glowing swarms of light particles suspended in mid-air within an iridescent sphere, forming complex shifting neural-like structures, ethereal atmosphere, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bibliothèques Veineuses",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Galeries des Sarcophages",
+            "Prompt": "2D landscape with toon shading of curved concentric corridors with petrified sarcophagi arranged in stellar patterns along walls, osseous archways connecting paths, amber light filtering through crystal fixtures, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, 2D, visual hierarchy, no human",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Gargouilles et Carillons",
+            "Prompt": "digital illustration with toon shading showing grotesque gargoyles shaped like arthropod Gedroths clinging to the fossilized bone exterior of a tower, with intricate bone chimes hanging nearby against a dark desert sky, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Narthex abyssal",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Gouffre vers le Nexus Synaptique",
+            "Prompt": "2D environmental concept art in high angle of very dark clautrophobic and horrific underground cave that descend deep into darkness. The cave slowly turns more and more organic, ending into pulsing pinkish orange flesh, similar to the insides of a living being. In the distance, there is an open gaping flesh made pit encircling a dark hole. ",
+            "Lieu": "Strate IV - Le Nexus Synaptique",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Grande Porte Osseuse",
+            "Prompt": "digital illustration with toon shading of a massive entrance door made of carved bone, framed by two giant petrified tusks, set into a wall of spiraling fossilized bone and black vitrified sand, desert background, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Narthex abyssal",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Hall des Cristaux",
+            "Prompt": "2D landscape with toon shading of grand hall with towering amber crystal formations rising from floor and descending from ceiling, casting greenish light reflections, cathedral-like space with intricate neural patterns on walls, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, 2D, visual hierarchy, no human",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Instruments d'Observation Stellaire",
+            "Prompt": "digital illustration with toon shading of strange, sophisticated instruments made of bone, crystal lenses, and salvaged metal, set up on a high platform atop a bone tower (Narthex Abyssal), aimed at a dark desert sky, suggesting observation of unseen cosmic entities, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Narthex abyssal",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Intégration Fongique sur Poutre",
+            "Prompt": "digital illustration with toon shading showing a rusty metal beam partially overgrown and reinforced by complex, bioluminescent fungal structures with intricate patterns, bridging organic and decayed materials, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Lichen-Sang Luminescent",
+            "Prompt": "digital illustration with toon shading showing a close-up texture of purple bioluminescent lichen growing on dark, wet cavern stone walls, casting a pulsating eerie glow, detailed organic texture, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Lichen Pourpre sur Vertèbre Colossale",
+            "Prompt": "digital illustration with toon shading showing delicate, pulsating purple bioluminescent lichen growing in the textured crevices of a colossal, ancient, petrified vertebra bone wall, highlighting the contrast in scale and texture, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Tunnel vertébral",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Mur aux Gravures",
+            "Prompt": "digital illustration with toon shading of wall covered with intricate organic patterns resembling neural circuits and ritual scarifications, crystallized pathways glowing with amber light, recursive geometric designs, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Nœud Synaptique",
+            "Prompt": "digital illustration an underground circular chamber with solid ground, three inhuman mummies of different sizes with strips hanging against the wall, trio, triad, dramatic poses, full body, vertebral tunnel, colonies of bioluminescent plants pulsing with light, toon shading, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling,  horror, dark ambient, asymmetry",
+            "Lieu": "Tunnel vertébral",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Observatoire Central",
+            "Prompt": "2D landscape with toon shading of circular platform overlooking iridescent crystalline nucleus, with carved alcoves in surrounding walls, suspended bone walkways extending toward center, flowing energy lines connecting focal points, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, 2D, visual hierarchy, no human",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Passerelle Éclatée Lumineuse",
+            "Prompt": "digital illustration with toon shading of a bridge made of solidified, fractured light extending across a void inside a vast iridescent sphere, connecting floating platforms or doorways, ethereal glow, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bibliothèques Veineuses",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Pierre de Jugement",
+            "Prompt": "digital illustration with toon shading of a large, smooth obsidian monolith standing in the center of a bone hall, reflecting distorted, unsettling shapes from its surroundings, mysterious atmosphere, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Narthex abyssal",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Plateformes aux Champignosquelettes",
+            "Prompt": "2D landscape with toon shading of interconnected platforms covered with glowing mushrooms, bone bridges arching between levels, fungi colonies casting blue-green light, crystal formations protruding from walls, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, 2D, visual hierarchy, no human",
+            "Lieu": "Nef Centrale",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Portail Médullaire",
+            "Prompt": "2D landscape with toon shading of path in tunnel leading to a massive vertebral entrance with round carved ivory doors, purification basin of glowing blue water surrounded by strange statues, seiken densetsu, muramasa: the demon blade, environment art, visual hierarchy, no human, underground, dark",
+            "Lieu": "Tunnel vertébral",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Porte de la Nef Centrale",
+            "Prompt": "digital illustration of path in serpentine tunnel leading to a huge golden door, carved inside a massive vertebral column with ivory walls, flickering bioluminescent red plants, toon shading, seiken densetsu, ori and the blind forest, muramasa: the demon blade,  2D, visual hierarchy, dark atmosphere, red light, blue tiny water trickle",
+            "Lieu": "Tunnel vertébral",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Sanctuaire d’Uresaïr",
+            "Prompt": "Side view of an underground sanctuary. On the wall, an engraving represents a giant creature with vast wings and hundreds of elongated tentacles sprouting from the bottom of its body are reaching out for the pillars on both sides, a small refined ruby is subtly embedded in its chest, while magical runes circle above it. The tentacles of the engraving reach far away to the pillars.  In the middle ground, a few steps lead up to a cubic altar of polished stone on which sits an ornate golden box covered by a magnificent green scarf. the floor itself is made of sand, as if the scene were set in the middle of the desert. The ivory walls on the sides are in arab architecture. Smooth white tentacles climb on the pillars. A narrow arched passage leads deeper into the darkness on the left, while carved steps descend on the right. The whole scene exudes solitude and temporal mystery. A dim light comes from the ceiling.",
+            "Lieu": "Strate IV - Le Nexus Synaptique",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Sphère Mémorielle Irisée",
+            "Prompt": "2D landscape with toon shading inside a vast iridescent sphere with translucent walls, altered gravity allowing walking on all surfaces, floating swarms of luminous particles forming neural patterns, large crystalline racks holding biological computers, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, visual hierarchy, no human",
+            "Lieu": "Bibliothèques Veineuses",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Stockage d'Organoïdes Neuronaux",
+            "Prompt": "digital illustration with toon shading of intricate crystalline or organic racks lining a curved translucent wall, holding numerous glowing biological brain-like computers (organoids), soft iridescent light, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bibliothèques Veineuses",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Tour du Narthex Abyssal",
+            "Prompt": "2D landscape with toon shading of a towering 60-meter vertical structure made of fossilized bone spirals joined by black vitrified sand, mixing ziggurat, stupa, and gothic styles, standing in a dark sand desert, bone chimes hanging, Gedroth-shaped gargoyles, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, visual hierarchy, no human",
+            "Lieu": "Narthex abyssal",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Transition Tunnel-Bibliothèque",
+            "Prompt": "2D landscape with toon shading view from inside a dark, narrow bone tunnel (Vaisseau Mnémonique) opening into a vast, iridescent sphere filled with floating light particles and ethereal structures (Bibliothèque Veineuse), strong contrast between shadow and light, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, visual hierarchy, no human",
+            "Lieu": "Bibliothèques Veineuses",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Trône des Anxiétés Réfractées",
+            "Prompt": "digital illustration with toon shading of an alcove in a jade-grey walled cavern bathed in purple light, featuring a large monolithic seat carved from a shining crystalline outgrowth, surrounded by smaller crystal formations, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Tunnel organique",
+            "Prompt": "digital illustration of twisted organic cave tunnels, path along a small flowing dark blue liquid between stone pillars, bone, toon-shading, legend of mana, ori and the blind forest, in style of H.R. Giger, dark psychedelic",
+            "Lieu": "Plis d’ossements",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vaisseau Mnémonique Connecteur",
+            "Prompt": "2D landscape with toon shading inside a pulsing organic tunnel with faint blue luminescence, connecting two vast iridescent spheres visible at each end, smooth curved bio-walls, ethereal transit, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, visual hierarchy, no human",
+            "Lieu": "Bibliothèques Veineuses",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vascularités Susurrantes",
+            "Prompt": "digital illustration with toon shading of a network of semi-transparent tubes running across gleaming jade-grey cavern walls, showing thick mercurial liquid flowing inside defying gravity, iridescent vapors floating nearby, seiken densetsu, ori and the blind forest, muramasa: the demon blade, environmental storytelling",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vestibule des Échos",
+            "Prompt": "2D landscape with toon shading inside a vast circular entrance hall with walls made of spiraling fossilized bone, featuring acoustic niches, a central obsidian monolith reflecting distorted shapes, and a monumental helical staircase descending into darkness, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, environment art, visual hierarchy, no human",
+            "Lieu": "Narthex abyssal",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vue depuis les Hauteurs",
+            "Prompt": "2D landscape with toon shading looking down from a rusty scaffolding onto opalescent acid pools in a vast cavern lit by a purple glow, featuring semi-transparent tubes with mercurial liquid running along distant walls and dripping green stalactites on the far ceiling, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, multiple paths and entrance exit, environment art, visual hierarchy, no human",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vue Générale des Cavernes Acides",
+            "Prompt": "2D landscape with toon shading of vast interconnected jade-grey streaked caverns with opalescent acid pools releasing iridescent vapors, featuring a complex suspended scaffolding of rusty beams and precarious platforms, and a vertically frozen acid waterfall under a purple ambient glow, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, multiple paths and entrance exit, environment art, visual hierarchy, no human",
+            "Lieu": "Bains parkourétiques",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vue Serpentine",
+            "Prompt": "digital illustration of serpentine tunnel carved inside a massive vertebral column with ivory walls and curved ceiling, sitting dessicated mummies in meditation alcoves, narrow channel running along the floor, flickering bioluminescent red plants, toon shading, seiken densetsu, ori and the blind forest, muramasa: the demon blade, nudge design, multiple paths and entrance exit, environment art, 2D, visual hierarchy, no human",
+            "Lieu": "Tunnel vertébral",
+            "Used": "{'id': 'V%3D%3Cd', 'type': 'checkbox', 'checkbox': True}",
+            "Introduction": {}
+        }
+    ]
+}

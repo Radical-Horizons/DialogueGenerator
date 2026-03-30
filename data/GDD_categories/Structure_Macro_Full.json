@@ -1,0 +1,236 @@
+{
+    "structure_macro": [
+        {
+            "Nom": "Colonne Vertébrale",
+            "Sous Partie": "Rencontre avec Genka Lien, L’exploration du Tunnel vertébral, Rencontre avec Ori-Bikar, Rencontre avec Navarre",
+            "Dialogues": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "Sprint": "Sprint 1",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 10}}",
+            "Barks": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "État": "Pas commencé",
+            "Introduction": {
+                "Résumé de la fiche": "",
+                "Au début de la scène": "Ce que le joueur sait :  Ce que le joueur veut :",
+                "Description de l’ambiance": "",
+                "Bref résumé de l’action": "",
+                "Informations critiques": "",
+                "Informations secondaires/fluff": "",
+                "Personnages présents": "",
+                "À la fin de la scène": "Ce que le joueur sait :  Ce que le joueur veut :"
+            }
+        },
+        {
+            "Nom": "Face à face",
+            "Niveau de production": "Vertical Slice",
+            "Type": "Quête",
+            "Lieux": "Bibliothèques Veineuses",
+            "Sprint": "Sprint 3",
+            "Personnages": "Gardien-Calligraphe Qalamtû, Genka Lien, le bouffon, Duq'Sha, L'Archiviste Boiteux",
+            "Ambiance": "Tristesse",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 3}}",
+            "État": "Brouillon IA",
+            "Introduction": {
+                "Synopsis": "",
+                "Objectifs principaux": "• Convaincre ou contraindre le Gardien-Calligraphe de révéler l'emplacement exact du Codex dans la Bibliothèque Veineuse • Confronter la vérité des dettes ancestrales consignées par Uresaïr elle-même • Accéder à la Chambre des Cicatrices, où le Codex est préservé dans une résine mnémonique • Participer au rituel de Lecture Karmique pour déverrouiller les sceaux mnémoniques du manuscrit • Choisir entre absorber, détruire ou transformer le Codex, déterminant ainsi le destin karmique d'Uresaïr",
+                "Personnages clés": "• Gardien-Calligraphe Qalamtû – Hiérophante du souvenir et septième incarnation d'une conscience antique. Son corps décharné est couvert de runes auto-infligées qui pulsent au rythme des phases lunaires. Tiraillé entre dévotion et devoir de vérité, il offre des indices cryptiques tracés avec son encre-sang tout en accomplissant son rôle de gardien. • Genka Lien, le bouffon – \"Le Désarticulé\", alchimiste du chaos et bouffon subversif, banni de la Bibliothèque pour avoir profané ce lieu avec ses caricatures. Il propose une perspective révolutionnaire : fusionner le Codex avec les Échos du Béhémoth pour créer une \"mémoire vivante\" qui transcenderait le cycle de culpabilité et rédemption. • Yrthas le Murmurateur – Dissident au visage tatoué de formules de silence. Sa voix oscille entre chuchotements séducteurs et cris d'outre-tombe. Il connaît des passages secrets dans la Bibliothèque et désire ardemment la destruction du Codex pour \"libérer les âmes prisonnières des dettes karmiques\". Sa présence inquiète le Gardien-Calligraphe, qui le soupçonne de vouloir effacer l'histoire plutôt que d'en tirer des leçons.",
+                "Contexte et décor": "• La quête se déroule principalement dans la Chambre des Cicatrices, une annexe secrète de la Bibliothèque Veineuse où les parois suintent une résine mnémonique capturant les échos émotionnels des visiteurs. Les étagères, façonnées à partir des côtes fossilisées du Béhémoth, contiennent des codex dont les pages frémissent comme des membranes vivantes. L'air est saturé de poussière d'os illuminée par des lucioles à éclipses, créant un ballet d'ombres qui semblent former des mots fugaces sur les murs. • Dans ce sanctuaire interdit, le Codex des Dettes repose sur un autel d'obsidienne mouvante, ses pages pulsant au rythme d'un cœur endormi. Des filaments de résine karmique le relient aux murs, transformant littéralement la chambre en extension vivante du manuscrit. Chaque pas dans cet espace fait vibrer le Codex, comme s'il reconnaissait la présence de son autrice originelle.",
+                "Choix et conséquences": "Premier dilemme : Révélation de l'Auteur Après investigation, l'Ethérée confirme une vérité troublante : le Codex a été écrit par Uresaïr elle-même durant une période de lucidité et de remords avant la destruction de Merid. • Embrasser cette vérité – Reconnaître la calligraphie comme celle d'Uresaïr, déclenchant un torrent de souvenirs douloureux mais révélateurs. • Contester l'origine – Affirmer que le manuscrit est une falsification, préservant l'image mythique d'Uresaïr mais rejetant une part de sa vérité. Second dilemme : Le Destin du Codex Une fois le Codex déverrouillé par le rituel, l'Ethérée doit décider de son sort, avec trois choix fondamentaux : • Absorber le Codex via le rituel calligraphique Kesh-Varash : • Détruire le Codex en le plongeant dans l'acide des Bains Parkourétiques : • Transformer le Codex en le fusionnant avec les Échos du Béhémoth (solution proposée par Genka Lien) :",
+                "Récompenses": "• La plume karmique - matériel : Artefact permettant de visualiser brièvement les dettes karmiques des êtres environnants • Le Codex Karmique - matériel : Capacité à interagir avec le codex (coût / récompense) • Tabula Rasa - Capacité : efface temporairement les effets des malédictions et liens karmiques • Mémoire Vivante - Capacité : communique brièvement avec le Béhémoth pour obtenir des connaissances oubliées • Narrative : Révélation sur le rôle d'Uresaïr dans la chute de Merid et les civilisations qu'elle a sacrifiées • Relationnelle : Évolution des rapports avec le Culte de l'Anentropie (alliance ou opposition selon votre choix) • Relationnelle : Possibilité d'un pacte avec les Murmurateurs ou renforcement des liens avec Genka Lien",
+                "Dialogues principaux": "I. LA RECONNAISSANCE DE L'ENCRE Dans la Bibliothèque Veineuse, après avoir obtenu la confiance du Gardian-Calligraphe, il révèle qui a écrit le codex. GARDIEN-CALLIGRAPHE: (voix susurrante, comme un bruissement de pages anciennes) Le manuscrit ne vous reconnaît pas, Seigneuresse. Ou peut-être est-ce vous qui refusez de le reconnaître? Sept cycles calligraphiques ont préservé vos confessions, sept gardiens ont porté le poids de vos aveux.  URESAÏR/ETHÉRÉE: (la voix vacillant entre autorité et confusion) Tu mens. Ma main n'a jamais...  GARDIEN-CALLIGRAPHE: L'encre ne ment pas — elle porte votre empreinte karmique. Chaque graphème est une cicatrice que vous avez infligée à Merid. Chaque virgule, une lignée éteinte. Chaque point, une cité effacée.  II. LA PROPOSITION DU DÉSARTICULÉ Dans la Chambre des Cicatrices, Genka Lien se tient en équilibre précaire sur sa prothèse d'élytres, jonglant avec trois sphères qui tournent en captant la lumière des lucioles à éclipses. GENKA LIEN: (sa voix alternant entre chuchotements conspiratifs et éclats de rire) Votre problème, ô Seigneuresse des Souvenirs Embarrassants, c'est que vous pensez qu'une dette se paie ou s'efface! Mais la mémoire n'est pas une comptabilité — c'est une danse ! (fait claquer sa jambe prothétique contre le sol, créant une onde qui fait vibrer les pages du Codex) Entendez-le répondre au rythme ! Il veut danser avec le Léviathan, pas pourrir dans un mausolée de culpabilité ! URESAÏR/ETHÉRÉE: (avec une méfiance teintée de fascination) Tu proposes de fusionner mes crimes avec cette... chose ? Transformer ma culpabilité en spectacle? GENKA LIEN: (attrapant les cristaux de mémoire et les écrasant dans son poing, libérant une lumière qui dessine des constellations mouvantes) Non ! De transformer votre autobiographie morbide en conscience nouvelle ! Ni effacée, ni portée, mais transmutée ! Les civilisations que vous avez détruites méritent mieux qu'un livre que personne ne lit ou un fardeau que vous seule portez — elles méritent de devenir autre chose !"
+            }
+        },
+        {
+            "Nom": "La Rencontre et la Possession",
+            "Sous Partie": "La vision d’Uresaïr, L’Accord",
+            "Débloqué par": "Scène d'introduction",
+            "Niveau de production": "Vertical Slice",
+            "Bloque": "Traversée des Plis d'Ossement, Les Ancres de l'Immortelle",
+            "Dialogues": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "Type": "Scène",
+            "Lieux": "Léviathan pétrifié, Plis d’ossements",
+            "Sprint": "Sprint 1",
+            "Personnages": "Seigneuresse Uresaïr, L'Éthérée",
+            "Ambiance": "Peur",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 1}}",
+            "Barks": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "État": "En cours d'écriture",
+            "Introduction": {
+                "Résumé de la fiche": "Cette scène d'ouverture présente la première rencontre entre l'Éthérée et Uresaïr dans le sanctuaire isolé de cette dernière, au cœur des Plis d'ossements. L'Éthérée émerge de l'Océan de Ténèbres et découvre Uresaïr piégée dans une crise visionnaire. Instinctivement, l'Éthérée pénètre dans sa conscience pour l'aider à échapper à une vision cauchemardesque de la Vieille Ville où elle apparaît pétrifiée et tourmentée par un Vieil Homme (Vol Reitar). Sans comprendre pleinement son propre pouvoir, l'Éthérée possède momentanément Uresaïr pour la sortir de sa transe. Cette possession involontaire marque le début de leur lien symbiotique. S'ensuit un dialogue où elles établissent les termes de leur coexistence – Uresaïr acceptant cette présence étrangère tant qu'elle préserve son autonomie morale, tandis que l'Éthérée découvre sa capacité à habiter d'autres êtres. La scène se conclut par la décision d'Uresaïr de quitter le Léviathan, motivée par l'intensification de ses visions qui semblent l'appeler vers la Vieille Ville, lieu qu'elle n'a jamais visité mais reconnaît instinctivement.",
+                "Au début de la scène": "Ce que le joueur sait : • Absolument rien – c'est l'ouverture du jeu, sans contexte préalable • L'Éthérée est une entité incorporelle qui émerge de l'Océan de Ténèbres Ce que le joueur veut : • Comprendre qui il incarne (l'Éthérée) et quel est son objectif • Explorer ce nouvel environnement étrange et décrypter cette situation",
+                "Description de l’ambiance": "• Le sanctuaire d'Uresaïr est une chambre aux parois jaunes géométriques, qui contient un unique autel auquel mènent quelques marches • Des amibes mémorielles dérivent dans l'espace, créant des zones où la lumière se déforme et où des fragments de souvenirs apparaissent fugacement • Le temps semble ralenti dans certaines poches spatiales et accéléré dans d'autres, créant une sensation de désorientation temporelle",
+                "Bref résumé de l’action": "• L'Éthérée émerge de l'Océan de Ténèbres, se matérialisant dans le sanctuaire d'Uresaïr • Elle découvre Uresaïr figée dans une crise visionnaire, son corps partiellement vitrifié • Elles dialoguent sur ce qui vient de se passer, établissant les termes de leur relation",
+                "Informations critiques": "• L'Éthérée possède le pouvoir de pénétrer dans la conscience d'autres êtres et même de les posséder • Les visions d'Uresaïr se focalisent sur la Vieille Ville et impliquent un Vieil Homme qui pourrait être Vol Reitar • Uresaïr a décidé de quitter le Léviathan après 8 ans d'isolement pour comprendre ses visions • Un accord s'établit : Uresaïr accepte la présence de l'Éthérée tant qu'elle préserve son autonomie morale",
+                "Informations secondaires/fluff": "• Le sanctuaire d'Uresaïr contient un autel rectangulaire qui contient trois objets personnels significatifs • Raki-Biro a conseillé à Uresaïr de s'isoler dans les Plis d'ossements pour atténuer ses visions • Les membres du culte interprètent les crises d'Uresaïr comme des \"communions divines\" • Les distorsions spatiotemporelles des Plis d'ossements s'intensifient lors des crises d'Uresaïr • Des inscriptions dans le sanctuaire révèlent qu'Uresaïr tente de cartographier ses visions récurrentes",
+                "Personnages présents": "• Seigneuresse Uresaïr : Immortelle au corps cristallin, tourmentée par des visions récurrentes • L'Éthérée : Entité amorphe émergée de l'Océan de Ténèbres, découvrant ses pouvoirs de possession • Figures de la vision : Le Vieil Homme décharné (Vol Reitar) et des adorateurs automutilés",
+                "À la fin de la scène": "Ce que le joueur sait : • L'Éthérée peut posséder Uresaïr et potentiellement d'autres êtres • Uresaïr est tourmentée par des visions récurrentes de la Vieille Ville, lieu qu'elle n'a jamais visité • Un accord a été établi entre elles : l'Éthérée peut rester mais doit respecter l'autonomie morale d'Uresaïr • Uresaïr a décidé de quitter le Léviathan pour comprendre l'origine de ses visions Ce que le joueur veut : • Accompagner Uresaïr dans son voyage vers la Vieille Ville • Explorer les limites et possibilités de la possession • Découvrir la véritable nature de l'Éthérée • Comprendre la signification profonde des visions d'Uresaïr"
+            }
+        },
+        {
+            "Nom": "La Sortie du Léviathan",
+            "Sous Partie": "Rencontre avec Genka Lien, L’exploration du Tunnel vertébral, Rencontre avec Ori-Bikar, Rencontre avec Navarre",
+            "Dialogues": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "Sprint": "Sprint 1",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 10}}",
+            "Barks": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "État": "Pas commencé",
+            "Introduction": {
+                "Résumé de la fiche": "",
+                "Au début de la scène": "Ce que le joueur sait :  Ce que le joueur veut :",
+                "Description de l’ambiance": "",
+                "Bref résumé de l’action": "",
+                "Informations critiques": "",
+                "Informations secondaires/fluff": "",
+                "Personnages présents": "",
+                "À la fin de la scène": "Ce que le joueur sait :  Ce que le joueur veut :"
+            }
+        },
+        {
+            "Nom": "Les Ancres de l'Immortelle",
+            "Sous Partie": "Le choix face aux ancres",
+            "Débloqué par": "La Rencontre et la Possession",
+            "Dialogues": "{'type': 'relation', 'relation': []}",
+            "Type": "Quête",
+            "Lieux": "Plis d’ossements",
+            "Sprint": "Sprint 1",
+            "Personnages": "Seigneuresse Uresaïr, L'Éthérée",
+            "Ambiance": "Tristesse",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 9}}",
+            "Barks": "{'type': 'relation', 'relation': []}",
+            "État": "En cours d'écriture",
+            "Introduction": {
+                "Synopsis": "Dans les derniers instants avant leur départ du Léviathan, l'Éthérée remarque un autel rectangulaire où reposent trois artefacts personnels d'Uresaïr, chacun irradiant une puissance singulière et portant le poids d'un fragment de son passé. À travers un rituel d'exploration psychique improvisé, l'Éthérée aide Uresaïr à confronter le symbolisme de ces objets et à prendre une décision cruciale pour chacun : les emporter, les laisser derrière, ou les détruire – choix qui façonneront subtilement leur relation naissante et l'identité qu'Uresaïr emportera au-delà des murs du Léviathan.",
+                "Objectifs principaux": "• Examiner les trois artefacts personnels d'Uresaïr pour comprendre leur signification • Décider du sort de chaque objet (emporter, laisser, détruire) • Assister au rituel de préparation d'Uresaïr avant son départ du Léviathan",
+                "Personnages clés": "• L'Éthérée - Entité curieuse découvrant cette chambre d'artefacts comme une première fenêtre sur l'histoire d'Uresaïr, sans comprendre encore la portée symbolique des choix qui s'offrent à elles. Sa perception unique lui permet de ressentir les échos émotionnels imprégnés dans chaque objet. • Uresaïr - Profondément ambivalente face à ces objets, oscillant entre attachement et désir de rupture. Chaque artefact représente une facette de son identité fragmentée et de ses échecs perçus. Sa décision pour chacun reflète son attitude envers son passé, sa relation avec le culte, et sa vision du futur. • Les objets eux-mêmes - Quasi-sentients, chacun réagissant subtilement à l'approche de l'Éthérée par des manifestations uniques (pulsations du Cadran, chuchotements émanant du Gantelet, ondulations de texte sur la Stèle).",
+                "Contexte et décor": "Dans le sanctuaire d'Uresaïr, un autel rectangulaire taillé dans une vertèbre du Léviathan repose sous un puits de lumière naturelle. L'atmosphère est tendue - la présence simultanée des objets crée des interférences énergétiques inhabituelles. Les Amibes Mémorielles gravitent autour de l'autel à distance, tandis que des cercles concentriques gravés au sol évoquent un ancien rituel de confinement.",
+                "Choix et conséquence": "• Choix du Cadran des Sept Fractures - Emporter le Cadran renforce la connexion d'Uresaïr avec son aspect perdu et facilite la localisation de son fragment de Destruction, mais intensifie ses visions et la rend plus vulnérable aux influences extérieures. Le laisser maintient le statu quo fragmenté de son identité. Le détruire libère une énergie chaotique qui pourrait la déstabiliser mais aussi lui permettre une perception accrue des anomalies temporelles. • Choix du Gantelet du Serment Brisé - L'emporter maintient un lien avec Vol Reitar qui peut s'avérer précieux pour comprendre ses motivations mais tourmente Uresaïr par des réminiscences douloureuses. Le laisser rompt partiellement cette connexion. Le détruire transforme radicalement la nature du lien, créant une compréhension mutuelle imparfaite plutôt qu'une connexion douloureuse. • Choix de la Stèle des Vœux Contre-Ondoyants - L'emporter signifie accepter son rôle au sein du culte, renforçant sa légitimité mais perpétuant aussi la dépendance des fidèles. La laisser crée une crise théologique mais préserve l'autonomie d'Uresaïr. La détruire provoque une catastrophe psychique pour les fidèles mais rompt leur lien de dépendance. • La voie de l’Attachement, la voie du Don et la voie de la Destruction - Si l’Ethérée fait deux fois le même choix (détruire, laisser ou garder) avec deux objets différents puis essaye de faire encore la même chose avec le troisième objet, Uresaïr refusera. Elle ne peut pas se résoudre à tout emporter (trop lourd pour elle), à tout laisser (trop risqué pour le Léviathan) ou à tout détruire (elle n’arrive pas à tout oublier). Avoir suffisamment d’influence peut permettre de lui forcer la main, mais l’Ethérée ne peut pas encore avoir assez d’influence, à moins de quitter le sanctuaire pour revenir plus tard.",
+                "Récompenses": "• Compréhension narrative - Chaque objet examiné révèle un fragment crucial de l'histoire d'Uresaïr, enrichissant la compréhension de l'Éthérée • Transformation relationnelle - Le sort de chaque objet modifie légèrement la jauge d'Influence/Respect entre l'Éthérée et Uresaïr, établissant un équilibre initial qui se répercutera sur leurs interactions futures • Impact systémique - Selon les choix, certaines capacités d'Uresaïr seront légèrement modifiées (sensibilité temporelle accrue, connexion psychique avec certains PNJ, etc.)",
+                "Extraits de dialogues": "Après avoir examiné le Cadran des Sept Fractures: URESAÏR: (voix hésitante) Il y eut un temps où j'étais complète. Sept aspects en parfait équilibre. C'était avant la... fragmentation. ÉTHÉRÉE: La fracture la plus large pulse différemment des autres. Comme si quelque chose cherchait à revenir. URESAÏR: (frissonnant) La Destruction. Mon septième aspect, perdu lors de la traversée. Certains affirmeraient qu'il me manque, mais peut-être est-ce une bénédiction déguisée en perte.  Confrontation face à la Stèle des Vœux: URESAÏR: (avec amertume) Leurs prières. Leurs suppliques. Tout ce qu'ils désirent de moi. Une divinité que j’espérais ne plus jamais être. ÉTHÉRÉE: Pourtant, les inscriptions vibrent en votre présence. Il existe une connexion, que vous le vouliez ou non. URESAÏR: La question n'est pas l'existence de ce lien, mais s'il m'appartient de le rompre. Ai-je le droit de briser leur foi, même si elle repose sur une erreur?  Face au Gantelet, après l'avoir longuement contemplé: URESAÏR: (voix assombrie) Chaque fois que je le touche, je revois son visage. Sa déception. Sa colère. Ce n'est pas uniquement un souvenir... c'est une blessure qui ne cicatrise pas. ÉTHÉRÉE: Pourquoi le conserver, alors? URESAÏR: (effleurant à peine la surface du gantelet) Peut-être est-ce une pénitence. Peut-être le rappel d'une erreur à ne jamais répéter. Ou simplement... l'incapacité d'oublier ceux qu'on a façonnés, fut-ce d’une manière imparfaite."
+            }
+        },
+        {
+            "Nom": "Les Quatre Regards",
+            "Sous Partie": "Le Sablier de l'Enfant-Prophète, Le Vitrage de l'Archiviste Fusionnée, L'Urne du Forgeron d'Éternité, Le Tesson de l'Enfant-Foudre",
+            "Dialogues": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "Type": "Quête",
+            "Sprint": "Sprint 1",
+            "Personnages": "Raki-Biro 58, l’Enfant-Prophète, Ori-Bikar 57, l’Enfant-Foudre, Zaehria Neth'Varu, La Gardienne Vertébrale, Kha'Vareth, L'Artisan d'Éternité",
+            "Ambiance": "Peur",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 11}}",
+            "Barks": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "État": "En cours d'écriture",
+            "Introduction": {
+                "Synopsis": "Dans les Déserts Temporels de la Strate III, l'Éthérée découvre quatre artefacts mystérieux : les Miroirs temporels, constructions de verre fumé fusionné au sable doré. Ces reliques involontaires cristallisent les perceptions qu'ont eues quatre membres du Culte d'Uresaïr lors de moments critiques. Incapable de supporter le poids des regards d'autrui, la Seigneuresse exilée a inconsciemment transformé ces jugements en objets tangibles, créant un kaléidoscope identitaire fragmenté où elle cherche désespérément son propre reflet.  Face à ces miroirs, l'Éthérée doit choisir : respecter l'intimité brisée d'Uresaïr ou plonger dans ces visions pour comprendre la complexité de celle qui l'héberge. Chaque consultation révèle non seulement la nature des témoins — l'enfant-prophète calculateur, l'archiviste fusionnée aux ossements, le forgeron obsédé par l'éternité, l'enfant-foudre chaotique — mais aussi les fractures profondes d'une déesse qui a survécu à la destruction de son monde pour se retrouver prisonnière de sa propre peur.",
+                "Objectifs principaux": "• Découvrir les quatre Miroirs temporels disséminés dans les Déserts Temporels occidentaux et orientaux • Décider du niveau d'intrusion dans les souvenirs cristallisés (vision superficielle gratuite ou immersion profonde coûteuse en Effort) • Comprendre les perceptions multiples que le Culte a d'Uresaïr : vénération, instrumentalisation, terreur, compassion • Gérer la résistance d'Uresaïr face aux consultations trop intrusives (nécessite Influence suffisante) • Collecter des informations stratégiques sur les personnages clés du Léviathan que l'Éthérée rencontrera ultérieurement",
+                "Personnages clés": "Uresaïr — La Seigneuresse Vitrifiée, hôte ambivalente\nAncienne déesse de Merid fragmentée en sept aspects, exilée depuis huit ans dans les Plis d'Ossements. Les Miroirs incarnent sa pathologie : elle les a créés pour fuir les regards mais les consulte obsessionnellement, cherchant dans ces perceptions étrangères une vérité sur elle-même qu'elle ne peut trouver seule. Chaque consultation par l'Éthérée ravive sa honte et sa rage refoulée, testant la relation symbiotique naissante.  Les Quatre Témoins (présents via leurs perceptions cristallisées)\n• Raki-Biro 58 — Enfant-prophète au raisonnement mathématique, dont la vision révèle qu'elle a orchestré l'exil d'Uresaïr par manipulation causale déguisée en prophétie protectrice\n• Zaehria Neth'Varu — Archiviste symbiotique fusionnée aux Plis, qui perçoit Uresaïr comme sœur-en-exil ratant sa transcendance et détient une révélation sur la nature de l'Ensevelie\n• Kha'Vareth — Forgeron d'Éternité instrumentalisant Uresaïr comme \"théorème vivant\", concepteur secret du Sodoir Primordial destiné à l'emprisonner éternellement\n• Ori-Bikar 57 — Enfant-foudre instable reconnaissant en Uresaïr sa propre fracture ontologique, dont la tentative maladroite de \"libération\" faillit causer une catastrophe",
+                "Contexte et décor": "• Déserts Temporels : Vastes étendues de sable doré composé de micro-instants cristallisés, créées par Uresaïr comme espace tampon contre les intrusions perceptives. Le substrat absorbe les pensées intenses la concernant, mais quatre perceptions saturèrent le médium jusqu'à former des structures vitrifiées autonomes • Miroir Occidental 1 : \"Le Sablier de l'Enfant-Prophète\", suspendu près du passage depuis le Sanctuaire, facilement accessible, pulsant d'une lueur analytique froide • Miroir Occidental 2 : \"Le Vitrage de l'Archiviste Fusionnée\", au-dessus d'une dune instable, émettant harmoniques osseuses subtiles, Uresaïr y résiste modérément (compassion plus effrayante que mépris) • Miroir Oriental 1 : \"L'Urne du Forgeron d'Éternité\", au fond d'une crevasse périlleuse, vibrant de géométries obsessives, forte résistance d'Uresaïr (rage face à l'instrumentalisation) • Miroir Oriental 2 : \"Le Tesson de l'Enfant-Foudre\", derrière faille temporelle instable nécessitant timing précis, crépitant d'énergie chaotique, résistance extrême d'Uresaïr (terreur existentielle face à ce qui lui ressemble)",
+                "Choix et conséquences": "Choix 1 : Niveau d'intrusion global\nL'Éthérée peut consulter seulement les visions superficielles (gratuites) ou investir son Effort limité (2-3 points par immersion profonde) pour accéder aux vérités enfouies. Budget total estimé : 8-10 points d'Effort pour toute la Strate III. → Consultation superficielle uniquement : Uresaïr soulagée, +1 Respect pour reconnaissance tacite de son intimité, mais informations critiques manquantes pour négociations futures\n→ 2-3 immersions profondes sélectives : Équilibre stratégique, informations ciblées sur personnages prioritaires, ambivalence d'Uresaïr (entre curiosité et irritation)\n→ Toutes immersions profondes forcées : Colère froide d'Uresaïr, -2 Respect mais +3 Influence (connaissance exhaustive), accès complet aux secrets du Culte mais relation endommagée, dialogue tendu : \"Ta curiosité n'a donc aucune limite. Nous en reparlerons.\"  Choix 2 : Gestion des résistances\nCertains miroirs (Zaehria, Kha'Vareth, Ori-Bikar) déclenchent résistance physique d'Uresaïr (corpo vitrifié pulse, fissures s'étendent). L'Éthérée peut renoncer ou forcer avec Influence suffisante. → Respecter les résistances : Préservation de la relation, mais angles morts stratégiques (ignore projet du Sodoir Primordial, nature de l'Ensevelie, incident catastrophique causé par Ori-Bikar)\n→ Forcer plus de 2 miroirs résistants : Méfiance croissante d'Uresaïr, impact négatif sur quête principale, mais accès aux révélations les plus dangereuses et précieuses",
+                "Récompenses": "Narratives : • Dialogues spéciaux débloqués avec les quatre témoins lors de rencontres ultérieures (confronter Raki-Biro sur sa manipulation, questionner Kha'Vareth sur le Sodoir Primordial, comprendre Ori-Bikar pour +2 Charisme avec lui) • Pour l’immersion profonde Ori-Bikar uniquement : possession temporaire, avec dialogues impromptus, petit bonus de caractéristique temporaire (+2 Force) et effets visuels temporaires Mécaniques : • Pour chaque miroir, +1 point de progression de la faction du PNJ correspondant (Culte de l’Anentropie / Paradigme Esothrope) • Si immersion profonde Relationnelles : • Modification permanente de la jauge Respect/Influence avec Uresaïr selon stratégie adoptée",
+                "Extraits de dialogues": "[Après première consultation — Uresaïr, voix neutre mais tendue]\n\"Tu as vu, alors. Comment ils me perçoivent. Comment ils me cristallisent en concepts — prophétie, symbiose, théorème, chaos. Jamais simplement… moi.\"\n— Choix : [Sympathie] \"Personne ne devrait porter le poids de tous ces regards.\" / [Curiosité] \"Mais qui es-tu, sans eux ?\" / [Pragmatisme] \"Ces perceptions contiennent des informations précieuses.\"  [Si l'Éthérée force le Miroir d'Ori-Bikar malgré résistance extrême]\n\"NON. Pas celui-là. Tu ne COMPRENDS pas ce qu'il a fait. Ce qu'il a vu en moi.\" [Le corpo vitrifié crépite, des fissures lumineuses courent le long des veines de verre]\n\"Il a regardé à l'intérieur et il a reconnu… le même vide. La même fracture. Et il a cru pouvoir me réparer en me BRISANT davantage.\"\n[Si Influence suffisante] \"Très bien. Regarde. Vois ce que c'est que d'être un miroir face à un autre miroir. L'infini qui en résulte. Mais ne me demande pas de t'expliquer ce que tu y trouveras.\"  [Après consultation des quatre miroirs — Uresaïr, amère]\n\"Prophétesse manipulatrice. Archiviste compatissante. Forgeron obsessionnel. Enfant-catastrophe. Quatre tessons d'un reflet que je ne reconnais pas.\"\n[Silence prolongé]\n\"Dis-moi, Éthérée… toi qui as vu tous ces regards… me vois-tu différemment maintenant ? Ou suis-je devenue, pour toi aussi, un kaléidoscope de perceptions contradictoires ?\"\n— Choix déterminant pour la suite de la relation"
+            }
+        },
+        {
+            "Nom": "Le Puits Céleste",
+            "Débloqué par": "Traversée du Désert des Echos",
+            "Niveau de production": "Vertical Slice",
+            "Type": "Scène",
+            "Sprint": "Plus tard",
+            "Personnages": "L'Éthérée, Seigneuresse Uresaïr, Eonundé Alinen-Egan",
+            "Ambiance": "Peur, Colère",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 2}}",
+            "État": "En cours d'écriture",
+            "Introduction": {
+                "_general": "Résumé Uresaïr et l'Ethérée découvrent Eonundé piégée dans une sculpture vivante. Elles l'aident en lui tranchant le bras. L'Ethérée possède Eonundé pour la maintenir consciente. Le groupe confronte L’Enlumineur qui a créé la galerie.",
+                "Au début de la scène": "Ce que le joueur sait :  Ce que le joueur veut :",
+                "Description de l’ambiance": "",
+                "Bref résumé de l’action": "",
+                "Informations critiques": "",
+                "Informations secondaires/fluff": "",
+                "Personnages présents": "",
+                "À la fin de la scène": "Ce que le joueur sait :  Ce que le joueur veut :"
+            }
+        },
+        {
+            "Nom": "Scène d'introduction",
+            "Bloque": "La Rencontre et la Possession",
+            "Sprint": "Plus tard",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 8}}",
+            "État": "Pas commencé",
+            "Introduction": {
+                "Résumé de la fiche": "La scène d’introduction reste à définir. Elle pourrait donner un aperçu du lore et du monde avant l’entrée dans le huis clos du Léviathan.",
+                "Au début de la scène": "Ce que le joueur sait :  Ce que le joueur veut :",
+                "Description de l’ambiance": "",
+                "Bref résumé de l’action": "",
+                "Informations critiques": "",
+                "Informations secondaires/fluff": "",
+                "Personnages présents": "",
+                "À la fin de la scène": "Ce que le joueur sait :  Ce que le joueur veut :"
+            }
+        },
+        {
+            "Nom": "Traversée des Plis d'Ossement",
+            "Sous Partie": "Catacombes Temporelles, L’Atelier du Cartographe, La Périphérie Caudale, Le Dédale Médullaire",
+            "Débloqué par": "La Rencontre et la Possession",
+            "Dialogues": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "Lieux": "Plis d’ossements, Strate III - Les Catacombes Temporelles, Strate IV - Le Nexus Synaptique, Strate II - Le Dédale Médullaire, Strate I - La Périphérie Caudale",
+            "Sprint": "Sprint 1",
+            "Personnages": "Seigneuresse Uresaïr, Voknir Esh'Maradel, le cartographe, Zaehria Neth'Varu, La Gardienne Vertébrale, L'Éthérée",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 7}}",
+            "Barks": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "État": "En cours d'écriture",
+            "Introduction": {
+                "Résumé de la fiche": "",
+                "Au début de la scène": "Ce que le joueur sait : • L'Éthérée peut manipuler Uresaïr avec son consentement • Uresaïr a décidé de quitter le Léviathan après 8 ans d'isolement • Les visions d'Uresaïr semblent l'appeler vers la Vieille Ville • Le Culte de l'Anentropie vénère Uresaïr contre sa volonté Ce que le joueur veut : • Comprendre comment fonctonne le système de possession/influence • Explorer ce labyrinthe étrange et découvrir ses secrets • Échapper aux Plis d'ossements • En apprendre davantage sur le passé d'Uresaïr et sa relation avec Vol Reitar",
+                "Description de l’ambiance": "",
+                "Bref résumé de l’action": "",
+                "Informations critiques": "",
+                "Informations secondaires/fluff": "",
+                "Personnages présents": "",
+                "À la fin de la scène": "Ce que le joueur sait :  Ce que le joueur veut :"
+            }
+        },
+        {
+            "Nom": "Traversée du Désert des Echos",
+            "Sous Partie": "Mort dans le désert (jour 1), L’Oasis des contrebandiers (jour 8), La Tempête du Rêveur (Jour 29), Vue sur le Puits (Jour 33)",
+            "Niveau de production": "Préprod",
+            "Bloque": "Le Puits Céleste",
+            "Dialogues": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "Type": "Scène",
+            "Lieux": "Désert des Echos Perdus, Puits céleste",
+            "Sprint": "Plus tard",
+            "Personnages": "Seigneuresse Uresaïr, Vethraak",
+            "Ambiance": "Joie",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 6}}",
+            "Barks": "{'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}, {'type': 'relation', 'relation': []}",
+            "État": "Brouillon IA",
+            "Introduction": {
+                "Résumé de la fiche": "L'Éthérée et Uresaïr quittent le Léviathan avec une caravane traversant le Désert des Échos vers le Puits Céleste. Après l'empoisonnement du guide principal, Vethraak s'impose comme guide remplaçant. Durant les 33 jours de voyage, une relation complexe se développe entre Uresaïr et Vethraak, ce dernier cherchant à obtenir le savoir d'Uresaïr sur la préservation des souvenirs en échange de son expertise du désert.",
+                "Au début de la scène": "Ce que le joueur sait: • L'Éthérée et Uresaïr ont quitté le Léviathan contre la volonté du culte • Elles voyagent avec une caravane marchande à travers le Désert des Échos • Le voyage jusqu'au Puits Céleste prendra 33 jours Ce que le joueur veut: • Atteindre le Puits Céleste, première étape vers la Vieille Ville • Explorer sa relation avec Uresaïr et comprendre son passé • Survivre aux dangers du désert",
+                "Description de l’ambiance": "• Vastitude oppressante du Désert des Échos, où le sable noir absorbe les sons • Températures extrêmes : chaleur écrasante le jour, froid mordant la nuit • Rythme monotone de la marche brisé par les cycles imprévisibles du Rêveur • Formes spectrales des dunes sculptées par les vents, évoquant des silhouettes figées",
+                "Bref résumé de l’action": "• Départ du Léviathan et découverte du guide empoisonné • Prise de contrôle de la caravane par Vethraak • Série d'étapes clés: points d'eau, oasis, abris contre les tempêtes • Confrontations graduelles entre Vethraak et Uresaïr autour du savoir des soudoirs d'éternité • Arrivée au Puits Céleste après avoir surmonté les derniers obstacles du désert",
+                "Informations critiques": "• Le guide a été empoisonné par un agent du culte pour forcer le retour au Léviathan • Vethraak possède une cargaison de contrebande et des connaissances précieuses du désert • Son intérêt réel concerne les techniques de préservation mémorielle que maîtrise Uresaïr • Des agents du culte suivent discrètement la caravane, attendant un moment de faiblesse • Ce voyage est structuré autour de trois moments cruciaux: la mort du guide, l'oasis des contrebandiers, et la tempête finale",
+                "Informations secondaires/fluff": "• Les cycles du Rêveur du Désert alternent entre Mutisme, Inspiration, Cacophonie et Expiration • Diverses espèces de la caravane réagissent différemment à la crise selon leurs propres intérêts commerciaux • Les Umcut ont une réputation de marchands rusés mais fiables dans leurs transactions • Les cristaux mnémoniques transportés par Vethraak sont particulièrement sensibles aux changements atmosphériques • Une légende du désert prétend que ceux qui meurent lors de la Cacophonie deviennent des Échos Errants",
+                "Personnages présents": "• Vethraak: Umcut opportuniste devenu guide par nécessité • Uresaïr/L'Éthérée: Duo observant et évaluant Vethraak tout au long du voyage • Khet'Maral: Cheffe de caravane Van'Doei, autoritaire mais pragmatique • Narev-Zul: Agent du culte dissimulé parmi les marchands • Orimabad Sek: Aedre marchand influent, allié potentiel",
+                "À la fin de la scène": "Ce que le joueur sait: • Vethraak est compétent mais motivé par son propre intérêt pour les techniques de préservation mémorielle • Le culte continue de vouloir récupérer Uresaïr par tous les moyens • Les soudoirs d'éternité sont liés aux capacités d'Uresaïr et aux Plis d'ossements • Un pacte tacite s'est formé entre Uresaïr et Vethraak, basé sur l'échange d'information Ce que le joueur veut: • Explorer le Puits Céleste et continuer vers la Vieille Ville • Approfondir sa compréhension des motivations de Vethraak • Découvrir comment utiliser le savoir d'Uresaïr comme monnaie d'échange"
+            }
+        },
+        {
+            "Nom": "Un Dernier Voyage",
+            "Type": "Quête",
+            "Lieux": "Léviathan pétrifié",
+            "Sprint": "Sprint 3",
+            "Personnages": "Khair-gul, Le Médecin-Ascétique, Ôrmüd T’lian-Keresh, le Maître-Flagellant, Gardien-Calligraphe Qalamtû, Akthar-Neth Amatru, l’Exégète, Duq'Sha, L'Archiviste Boiteux",
+            "Ambiance": "Horreur",
+            "ID": "{'id': 'mVHG', 'type': 'unique_id', 'unique_id': {'prefix': 'SC', 'number': 5}}",
+            "État": "En cours d'écriture",
+            "Introduction": {
+                "Synopsis": "Dans le Léviathan Pétrifié, un rituel de momification vivante tourne au désastre quand le sujet s'éveille cloué aux parois. Les officiants du culte de l'Anentropie doivent gérer cette crise qui menace leurs dogmes les plus sacrés, tout en démasquant le saboteur qui se cache parmi eux.\nDétails du rituel Le rituel de momification suit plusieurs étapes précises : Purification du Corps : Le sujet boit une infusion de Lichen-Sang pour assécher ses fluides. Tombeau Ourlé : Il est placé dans une alcôve d'os où ses prières sont gravées sur la pierre. Confirmation de l'Ascèse : Le corps, retiré et assis sur une table, est soumis au test de la plume sous le nez pendant trois minutes pour confirmer la mort et \"l'enfermement\" de l'esprit. Malgré la rigidité cadavérique, on l'allonge pour tracer des cicatrices rituelles profondes qui, ne saignant pas, prouvent que le corps sera préservé. L'exposition de la Relique : Le corps est cloué au tunnel vertébral, scellant son union éternelle avec le Léviathan. Le saboteur a remplacé la potion mortelle par un puissant paralysant, provoquant l'éveil traumatique du sujet pendant le clouage. Menaces et intrigues Ôrmüd T’lian-Keresh, le Maître-Flagellant, qui se prend pour Barvas lui-même, manipule subtilement la situation pour provoquer l'effondrement du culte. Son identité et ses véritables motivations restent mystérieuses jusqu'à la fin. Après avoir saboté le rituel, il empoisonne les Gedroth du Léviathan, plongeant celui-ci dans les ténèbres. Profitant de la peur du noir de Ori-Bikar 57, l’Enfant-Foudre, il persuade ce dernier de faire une brèche dans le Léviathan pour faire de la lumière. Ceci cause un désastre qui menace le culte tout entier.",
+                "Objectifs principaux": "• Enquêter sur le sabotage du rituel de momification • Gérer la crise de foi au sein du culte • Démasquer l'infiltré Barvas et ses motivations",
+                "Personnages clés": "• Ôrmüd T’lian-Keresh, le Maître-Flagellant - instigateur du sabotage, se prend pour Barvas • Murmure-Éteint - Sage du culte soumis au rituel, victime du sabotage, dont le réveil traumatique déclenche la crise • Le Saboteur Secret - Un PJ lié aux Murmurateurs, déchiré entre sa loyauté apparente et ses véritables allégeances",
+                "Contexte et décor": "• Le Léviathan Pétrifié : Une forteresse-temple labyrinthique sculptée dans les os d'une créature mythique • La Nef Centrale : Lieu sacré où se déroule le rituel de momification raté • La Bibliothèque Veineuse : Archives vivantes contenant des secrets potentiellement dangereux • Les Plis d'Ossements : Labyrinthe instable où se cachent conspirateurs et dissidents",
+                "Choix et conséquence": "Le Sort du Supplicié\n• L'achever (Perte de confiance des fidèles, mais évite plus de souffrance)\n• Le libérer (Ébranle les fondements du culte, mais ouvre la voie à une réforme)\n• Maintenir le rituel (Préserve le dogme mais traumatise les témoins) La Gestion de la Crise\n• Accuser les Murmurateurs (Renforce l'unité du culte mais accroît les tensions)\n• Réformer les pratiques (Risque de schisme mais modernise le culte)\n• Accepter l'échec (Affaiblit le culte mais permet une évolution)",
+                "Récompenses": "• Découverte de textes anciens révélant des vérités cachées sur l'Anentropie • Influence accrue au sein du culte selon les choix effectués • Déblocage de nouveaux rituels ou leur abolition, selon la résolution",
+                "Extraits de dialogues": "\"Les os du Léviathan murmurent, frère. Ils nous parlent d'une vérité que nous refusons d'entendre... La préservation n'est qu'une autre forme de mort.\" \"Je l'ai vu dans ses yeux, pendant qu'il se tordait sur le mur. Ce n'était pas de la douleur, c'était de la lucidité. Pour la première fois depuis des siècles, quelqu'un voyait vraiment.\" \"Nous nous sommes tant battus contre l'entropie que nous en sommes devenus sa plus pure expression : immobiles, rigides, morts.\""
+            }
+        }
+    ]
+}

@@ -1,0 +1,202 @@
+{
+    "references": [
+        {
+            "Nom": "A Space for the Unbound",
+            "Étiquettes": "Narrative Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Aventure narrative dans l'Indonésie des années 90, suivant deux adolescents dotés de pouvoirs surnaturels. Le jeu aborde la santé mentale, le deuil et l'acceptation de soi.",
+                "En quoi est-ce une source d’inspiration ?": "• Mécanique de \"plongée dans l'âme\" permettant d'explorer les mondes intérieurs des personnages, manifestant visuellement leurs troubles psychologiques • Exploration psychologique psychédélique"
+            }
+        },
+        {
+            "Nom": "Baten Kaitos",
+            "Étiquettes": "Narrative Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Baten Kaitos est un jeu de rôle japonais se déroulant dans un monde où les continents flottent dans le ciel. Le joueur incarne un \"Esprit Gardien\", une entité spirituelle qui guide et accompagne le héros principal, Kalas. Cette approche narrative unique fait du joueur un personnage à part entière qui communique directement avec Kalas et influence ses décisions. L'histoire suit Kalas, un jeune homme doté d'une seule aile artificielle, dans sa quête de vengeance contre l'Empire qui a tué son frère et son grand-père. Au cours de son voyage, il rencontre Xelha, une mystérieuse jeune femme, et découvre progressivement un complot plus vaste impliquant le réveil d'un ancien dieu maléfique.",
+                "En quoi est-ce une source d’inspiration ?": "• L’esprit-gardien comme inspiration pour l’Ethérée • L’illusion de connaître la personne que l’on suit"
+            }
+        },
+        {
+            "Nom": "Berserk",
+            "Étiquettes": "Art 2D / 3D",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Berserk est un manga dark fantasy célèbre créé par Kentaro Miura. Histoire :\nL'histoire suit Guts, un mercenaire solitaire marqué par un passé tragique, dans un monde médiéval-fantastique impitoyable. Le récit se concentre sur sa quête de vengeance contre Griffith, son ancien ami et chef de la Brigade des Faucons, qui l'a trahi lors d'un événement connu sous le nom d'Eclipse. Caractéristiques principales : • Un style artistique exceptionnellement détaillé, avec des illustrations minutieuses • Une atmosphère sombre et mature, mêlant violence, tragédie et horreur • Des thèmes profonds comme la destinée, l'ambition, la trahison et la résilience • Un univers médiéval-fantastique riche incorporant des éléments de dark fantasy et d'horreur",
+                "En quoi est-ce une source d’inspiration ?": "• Design des monstres : L'œuvre est reconnue pour son style artistique exceptionnellement détaillé, notamment dans la représentation des créatures qui peuplent son univers dark fantasy. • Surréalisme horrifique : Le manga mélange habilement des éléments de dark fantasy et d'horreur, créant une atmosphère sombre et mature qui joue sur la peur et le malaise. • Horreur humaine : L'histoire explore des thèmes profonds comme la trahison et l'ambition, illustrés notamment par la trahison dévastatrice de Griffith envers Guts. Les dirigeants qui peuvent avoir une surface bienveillante, comme le roi  de Midland, peuvent devenir des monstres quand leurs intérêts sont attaqués (ici sa propre fille, qu’il désirait secrètement). Cette dimension humaine de l'horreur montre que la cruauté des hommes peut égaler, voire dépasser, celle des monstres."
+            }
+        },
+        {
+            "Nom": "Chained Echoes",
+            "Étiquettes": "Art 2D / 3D",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "RPG avec un monde steampunk/fantasy où un groupe hétéroclite tente de prévenir une nouvelle guerre. Le jeu revisite les conventions du genre avec des systèmes de combat innovants.",
+                "En quoi est-ce une source d’inspiration ?": "• Pixel art détaillé qui fusionne esthétiques médiévales et mécaniques, avec une attention particulière aux transitions entre ces styles visuels • Travail chromatique sophistiqué où chaque région possède une palette distinctive reflétant son histoire et son climat, créant une carte-monde reconnaissable à sa seule coloration"
+            }
+        },
+        {
+            "Nom": "Children of Morta",
+            "Étiquettes": "Narrative Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Action-RPG roguelite centré sur une famille de gardiens combattant une corruption mystique. Le jeu se distingue par son focus sur les relations familiales au milieu du chaos.",
+                "En quoi est-ce une source d’inspiration ?": "• Structure narrative où la maison familiale sert de hub évolutif, reflétant la progression de l'histoire entre les expéditions • Développement de personnages à travers des vignettes narratives intercalées qui se déclenchent organiquement entre les sessions de jeu • Système où les relations entre personnages se traduisent par des synergies mécaniques, rendant tangible le concept de soutien familial"
+            }
+        },
+        {
+            "Nom": "Disco Elysium",
+            "Étiquettes": "Game Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Disco Elysium est un RPG narratif qui suit un détective alcoolique amnésique enquêtant sur un meurtre dans la ville de Revachol. Sans combat traditionnel, le jeu se concentre sur des dialogues complexes et un système de compétences représentant les différentes facettes de la psyché du personnage. L'univers dystopique post-révolutionnaire explore des thèmes sociopolitiques profonds, où idéologies, histoire et traumatismes personnels s'entremêlent.",
+                "En quoi est-ce une source d’inspiration ?": "• Le système de dialogue qui intègre la personnalité fragmentée du protagoniste pourrait inspirer la dynamique entre l'Éthérée et ses hôtes • L'exploration des systèmes d'oppression politique et sociale, en lien direct avec le problème moral central d'Alteir • La représentation des idéologies comme forces quasi-tangibles qui structurent la réalité perçue, similaire au concept des Rêveurs d'Escelion"
+            }
+        },
+        {
+            "Nom": "Eastward",
+            "Étiquettes": "Art 2D / 3D",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Action-aventure où un mineur et une mystérieuse fille voyagent à travers un monde post-apocalyptique. Le jeu se distingue par son esthétique pixel art détaillée et son atmosphère mélancolique.",
+                "En quoi est-ce une source d’inspiration ?": "• Animation minutieuse des environnements où chaque zone possède des \"respirations\" visuelles distinctes (vapeur, poussière, lumière tremblotante) • Utilisation de l'éclairage pixelisé comme élément narratif, où les sources de lumière racontent l'histoire d'un lieu autant que sa structure • Design de personnages secondaires hyper-expressifs capables de communiquer des émotions complexes malgré les contraintes du pixel art"
+            }
+        },
+        {
+            "Nom": "Final Fantasy IX",
+            "Étiquettes": "Narrative Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "JRPG emblématique suivant Djidane et ses compagnons dans leur lutte contre une reine maléfique. Le jeu explore l'identité, l'existence et la mortalité à travers un monde fantasy médiéval. Le thème de la guerre est aussi omniprésent, Kuja étant, in fine, un marchand d’armes.",
+                "En quoi est-ce une source d’inspiration ?": "• Structure narrative en miroir où les questionnements existentiels des protagonistes (Djidane, Bibi) se reflètent dans ceux des antagonistes (Kuja) • Utilisation du théâtre comme métaphore filée tout au long du jeu, transformant les personnages en acteurs conscients de leurs rôles imposés • Progression thématique de la légèreté vers la gravité, où le ton du jeu évolue subtilement pour aborder des questions philosophiques profondes"
+            }
+        },
+        {
+            "Nom": "Final Fantasy X",
+            "Étiquettes": "Art 2D / 3D, Game Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Final Fantasy X est un jeu de rôle japonais emblématique sorti en 2001 sur PlayStation 2. Le jeu suit l'histoire de Tidus, un joueur de blitzball qui se retrouve mystérieusement transporté dans le monde de Spira, où il rejoint la jeune invocatrice Yuna dans son pèlerinage pour sauver le monde d'une entité destructrice appelée Sin. Le jeu est remarquable pour sa diversité culturelle, illustrée à travers les différentes civilisations, religions et traditions de Spira. Il se distingue également par ses innovations en termes d'art 2D/3D et de game design, notamment avec son système de combat au tour par tour stratégique.",
+                "En quoi est-ce une source d’inspiration ?": "Final Fantasy X présente une riche diversité culturelle et visuelle à travers: • Un monde fantastique inspiré de l'Asie du Sud-Est, notamment avec l'île tropicale de Besaid et ses temples • Des traditions spirituelles uniques comme le pèlerinage des Invokeurs et les rituels de Yevon • Une variété d'environnements allant des plages paradisiaques aux ruines technologiques de Zanarkand • Des designs de personnages distincts reflétant différentes cultures et origines : le style urbain de Tidus, les vêtements traditionnels de Yuna, le look tribal des Ronso • Une fusion unique entre technologie futuriste et spiritualité ancestrale qui se reflète dans l'architecture et les costumes"
+            }
+        },
+        {
+            "Nom": "Journey",
+            "Étiquettes": "Level Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Aventure contemplative où un voyageur encapuchonné traverse un désert vers une montagne lointaine. Le jeu explore la communication non-verbale et le périple spirituel à travers une expérience minimaliste.",
+                "En quoi est-ce une source d’inspiration ?": "• Progression environnementale comme métaphore du voyage spirituel, où chaque biome traverse des émotions distinctes (émerveillement, peur, transcendance) • Architecture qui raconte l'histoire d'une civilisation passée par le design visuel et la progression spatiale"
+            }
+        },
+        {
+            "Nom": "Legend of Mana",
+            "Étiquettes": "Level Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "JRPG non linéaire où le joueur construit littéralement le monde en plaçant des artefacts sur une carte. Le jeu propose une structure épisodique de contes interconnectés.",
+                "En quoi est-ce une source d’inspiration ?": "• Système de Land Make où le joueur participe activement à la construction géographique du monde, influençant les ressources et événements disponibles • Architecture visuelle inspirée de livres de contes européens avec une touche japonaise, créant un style fantasy unique et onirique • Narration non-linéaire construite autour de vignettes autonomes qui s'entrelacent progressivement pour révéler une cosmologie plus profonde"
+            }
+        },
+        {
+            "Nom": "Odin Sphere",
+            "Étiquettes": "Art 2D / 3D",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Action-RPG en 2D se déroulant dans un monde inspiré de la mythologie nordique. Le jeu suit cinq protagonistes dont les histoires s'entrelacent vers un Ragnarök inévitable.",
+                "En quoi est-ce une source d’inspiration ?": "• Design visuel théâtral où les niveaux sont présentés comme des scènes mouvantes sur un axe circulaire, évoquant un théâtre de marionnettes • Personnages aux silhouettes immédiatement reconnaissables malgré leur complexité visuelle, permettant une lisibilité parfaite durant l'action • Animation fluide utilisant une technologie hybride entre sprites traditionnels et squelettes animés, créant un mouvement organique unique"
+            }
+        },
+        {
+            "Nom": "Ori and the Will of the Wisps",
+            "Étiquettes": "Sound Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Jeu de plateforme métroidvania où Ori, un esprit gardien, explore un monde en déclin. Le jeu allie fluidité de mouvement et narration émotionnelle dans un univers visuellement époustouflant.",
+                "En quoi est-ce une source d’inspiration ?": "• Intégration parfaite entre animation et audio, où chaque mouvement du personnage génère une réponse sonore qui renforce la sensation kinesthésique • Transitions musicales dynamiques qui évoluent imperceptiblement selon la position du joueur et l'état émotionnel de la scène • Sound design environnemental où chaque biome possède une signature acoustique distinctive, construisant une écologie sonore cohérente"
+            }
+        },
+        {
+            "Nom": "Outer Wilds",
+            "Étiquettes": "Level Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Jeu d'exploration spatiale où un astronaute est piégé dans une boucle temporelle de 22 minutes avant l'explosion de son soleil. Le joueur démêle les mystères d'une ancienne civilisation disparue.",
+                "En quoi est-ce une source d’inspiration ?": "• Architecture cosmique où chaque planète présente un défi environnemental unique (gravité, sable mouvant, tornades) qui change au fil du cycle temporel • Conception d'environnements qui racontent une histoire complète à travers l'archéologie spatiale, où chaque artefact s'inscrit dans un récit cohérent • Progression basée uniquement sur la connaissance du joueur plutôt que sur les statistiques du personnage, transformant la compréhension en véritable ressource"
+            }
+        },
+        {
+            "Nom": "Persona 3 et 5",
+            "Étiquettes": "Game Design, Level Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Persona 3 et 5 sont des jeux de rôle japonais (JRPG) développés par Atlus. Voici leurs principales caractéristiques : Persona 3 : • Un lycéen transféré qui découvre le phénomène de l'Heure Sombre, une période cachée entre minuit et le jour suivant • Combat contre des créatures appelées Shadows en utilisant des Personas, manifestations de la force psychique • Mélange unique de simulation sociale en journée et d'exploration de donjon la nuit Persona 5 : • Suit l'histoire d'un groupe de lycéens qui deviennent les \"Voleurs Fantômes\", utilisant leurs Personas pour réformer la société • Exploration de donjons thématiques appelés \"Palais\" représentant les désirs corrompus des adultes • Système de combat au tour par tour sophistiqué combiné avec des éléments de vie quotidienne et de relations sociales Les deux jeux partagent des thèmes communs sur l'amitié, la croissance personnelle et la lutte contre l'adversité.",
+                "En quoi est-ce une source d’inspiration ?": "Décors surréalistes et psychédéliques : • Dans Persona 3, l'Heure Sombre transforme le monde en un environnement étrange et mystérieux • Dans Persona 5, les Palais sont des manifestations physiques déformées des désirs corrompus, créant des environnements surréalistes uniques Symbolisme : • Les Personas représentent la force psychique des personnages, symbolisant leur développement personnel • Les Palais sont des métaphores directes de la corruption morale des antagonistes Révolte contre l'autorité : • Persona 5 met particulièrement l'accent sur ce thème avec les Voleurs Fantômes qui défient activement le système pour réformer la société en s’opposant aux abus d’autorité de diverses personnalités (un prof de sport et ancien champion, un artiste célèbre, un patron dans l’agro-business, un politicien nationaliste)"
+            }
+        },
+        {
+            "Nom": "Planescape: Torment",
+            "Étiquettes": "Narrative Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Planescape: Torment est un RPG philosophique se déroulant dans un univers de fantasy sombre et surréaliste. Le joueur incarne l'Anonyme, un immortel amnésique qui se réveille à la morgue et part en quête de son identité à travers les plans d'existence. L'intrigue explore des questions existentielles profondes sur la mortalité, l'identité et les conséquences des choix dans un monde où les croyances façonnent littéralement la réalité.",
+                "En quoi est-ce une source d’inspiration ?": "• L'utilisation d'une narration non-manichéenne qui explore des dilemmes moraux complexes sans réponses évidentes résonne avec le problème moral central d'Alteir • Le concept du protagoniste immortel et tourmenté par son passé (comme Uresaïr) et la quête d'identité fragmentée • L'environnement surréaliste où architecture et créatures défient la logique conventionnelle, rappelant l'esthétique crypto-organique baroque d'Escelion"
+            }
+        },
+        {
+            "Nom": "Problème moral central",
+            "Étiquettes": "Game Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "• \"La Zone du Dehors\" (Alain Damasio) : Présente une lutte contre une société où la contestation est intégrée à l’ordre dominant, rendant la résistance à la fois nécessaire et problématique. • \"Bioshock\" avec son interrogation sur le libre arbitre (scène des coups de club de golf dans le visage du père, sur ordre) • \"Papers, Please\" (Lucas Pope) : Montre comment les choix moraux individuels peuvent être anticipés, conditionnés ou intégrés par le système autoritaire lui-même. • Surveiller et punir” (Michel Foucault) : Où Foucault théorise le panoptique comme mécanisme disciplinaire d'intériorisation de la surveillance. • Tyranny - Obsidian Entertainment : L’existence d’un pouvoir absolu rend futile toute tentative d’échapper à son autorité. • Morrowind - Bethesda : La manipulation des récits et de la vérité historique qui grime les traitres en dieux (Vivec, Sotha Sil et Almalexia). Les multiples visages d’une même entité (Vivec, qui est à la fois Mephala, princesse du sexe, du meurtre et du mensonge, et son “évolution transcendante” en poète-guerrier).",
+                "En quoi est-ce une source d’inspiration ?": ""
+            }
+        },
+        {
+            "Nom": "SaGa Frontier 2",
+            "Étiquettes": "Art 2D / 3D",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "SaGa Frontier 2 est un jeu vidéo de rôle (RPG) développé par Square (maintenant Square Enix) et sorti en 1999 sur PlayStation. Il se distingue par son style visuel unique utilisant des graphismes peints à l'aquarelle, lui donnant une esthétique singulière très appréciée. Le jeu suit deux scénarios principaux qui s'entrecroisent : • L'histoire de Gustave XIII, héritier déchu du royaume de Finney, incapable d'utiliser la magie dans un monde où elle est omniprésente, et qui doit reconquérir sa place par la force de sa volonté et son habileté militaire. • L'aventure de Wil Knights, un chasseur de trésors explorant les secrets des anciens artefacts et cherchant la vérité sur une puissante force magique appelée \"The Egg\". Le système de jeu combine des éléments de RPG classiques (exploration, combats au tour par tour) et des mécaniques spécifiques à la série SaGa, telles que la progression non linéaire des personnages, la possibilité d'apprendre des compétences par utilisation en combat, et l'évolution dynamique des scénarios en fonction des choix du joueur. L'ambiance générale du jeu est marquée par des thèmes forts : luttes politiques, destinées familiales, drames personnels et un univers empreint de poésie et de mélancolie.",
+                "En quoi est-ce une source d’inspiration ?": "• Les décors peints à la main • La froide puissance Gustav et sa dérive vers la tyrannie • Le côté surréaliste de l’Oeuf"
+            }
+        },
+        {
+            "Nom": "Sea of Stars",
+            "Étiquettes": "Art 2D / 3D",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "JRPG inspiré des classiques du genre, suivant deux Enfants du Solstice combattant le mal avec des pouvoirs lunaires et solaires. Le jeu modernise les systèmes rétro avec une présentation visuellement somptueuse.",
+                "En quoi est-ce une source d’inspiration ?": "• Pixel art ultra-HD • Éclairage dynamique en temps réel appliqué à des graphismes en pixel art, créant des effets d'illumination et d'ombre impossibles dans les jeux 16-bits originaux • Animations fluides à cadence élevée qui conservent la lisibilité du pixel art classique tout en apportant une fluidité moderne"
+            }
+        },
+        {
+            "Nom": "Suikoden IV",
+            "Étiquettes": "Game Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Suikoden IV est un jeu de rôle japonais sorti en 2004 sur PlayStation 2. C'est le quatrième volet principal de la série Suikoden, se déroulant chronologiquement avant les autres jeux. L'histoire suit un jeune chevalier qui devient le porteur d'une rune puissante et doit rassembler 108 guerriers pour combattre une nation hostile. Le jeu se distingue par ses batailles navales, son système de combat et sa forteresse flottante qui sert de base aux personnages.",
+                "En quoi est-ce une source d’inspiration ?": "• Le recrutement de personnages • La forteresse"
+            }
+        },
+        {
+            "Nom": "The Eternal Cylinder",
+            "Étiquettes": "Game Design",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Jeu d'aventure où vous contrôlez des créatures extraterrestres qui doivent évoluer pour survivre sur une planète menacée par un immense cylindre qui écrase tout sur son passage.",
+                "En quoi est-ce une source d’inspiration ?": "• Un monde alien avec une écologie entièrement originale et cohérente • L'exploration d'un univers étrange et hostile qui raconte sa propre histoire"
+            }
+        },
+        {
+            "Nom": "The Talos Principle",
+            "Étiquettes": "Art 2D / 3D",
+            "URL": "{'id': 'Qm~i', 'type': 'url', 'url': None}",
+            "Introduction": {
+                "Résumé de la source": "Puzzle-game philosophique où une IA explore des ruines antiques tout en réfléchissant à sa propre conscience. Le jeu questionne l'humanité, la conscience artificielle et les limites de l'obéissance.",
+                "En quoi est-ce une source d’inspiration ?": "• Contraste visuel entre ruines antiques classiques et technologie futuriste, créant un anachronisme esthétique qui soutient la dualité thématique du jeu • Utilisation de la lumière méditerranéenne pour créer des environnements contemplatifs où les rayons traversant les colonnes évoquent une dimension spirituelle"
+            }
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "regnes": [
+        {
+            "Nom": "Animaux",
+            "Résumé": "Les animaux au sens strict du “règne animal” de la Terre, correspond aux animaux de Merid (plus quelques espèces originales, ex : vohars et vaideccans). Depuis 3000 ans, quelques croisements ont pu se faire avec des espèces de Les Vifs"
+        },
+        {
+            "Nom": "Bacteria",
+            "Résumé": "Les Bacteria d'Alteir constituent le règne primordial du vivant, regroupant les organismes n'ayant pas réalisé l’endosymbiose. Extrêmement diversifiées, des microscopiques aux macroscopiques, elles sont à l'origine de l'ensemble des écosystèmes et jouent un rôle fondamental dans l'équilibre biochimique planétaire. Les Bacteria se divisent en trois grands phylums historiques - anciennes, nouvelles et deuxerons - et présentent une adaptabilité remarquable à des environnements hostiles."
+        },
+        {
+            "Nom": "Créatures artificielles",
+            "Résumé": "Le règne des Créatures artificielles comprend les êtres vivants directement créés par d'autres espèces conscientes d'Escelion. Bien que façonnées plutôt qu'évoluées naturellement, elles manifestent toutes les caractéristiques du vivant - métabolisme, reproduction et adaptabilité. Contrairement aux autres règnes qui émergent spontanément ou par nécessité écologique, ces créatures naissent à l'intersection des grandes maîtrises - arcanique, technologique et biologique - reflétant les ambitions, besoins ou visions philosophiques de leurs créateurs. Après leur intégration initiale dans les écosystèmes d'Escelion, elles suivent souvent des trajectoires évolutives imprévues, développant des cultures autonomes complexes et redéfinissant leur propre raison d'être, parfois en opposition directe avec les intentions originelles de leurs concepteurs."
+        },
+        {
+            "Nom": "Créatures naturelles",
+            "Résumé": "Le règne des Créatures naturelles englobe les organismes apparus après le Renouveau d'Escelion, descendants des branches nouvelles bactériennes. Contrairement aux êtres primordiaux qui ont lutté contre leur environnement ou aux créatures artificielles façonnées intentionnellement, les Créatures naturelles évoluent par adaptation dynamique et interdépendante avec leur milieu. Caractérisées par une diversité phénoménale allant des humanoïdes aux formes de vie les plus étranges, elles constituent le noyau de la majorité des écosystèmes malgré leur statut minoritaire en termes de nombre d'espèces. Leur évolution permanente et leur capacité à former des relations symbiotiques complexes en font le moteur principal de l'équilibre biologique d'Escelion, où la frontière entre plantes, animaux et formes hybrides reste souvent fluide."
+        },
+        {
+            "Nom": "Enfants du Principe",
+            "Résumé": "Les Enfants du Principe incarnent les forces contradictoires et fondamentales d'Escelion, manifestées directement par la volonté intentionnelle du continent-monde. Contrairement aux créatures biologiques qui évoluent, ils émergent spontanément, chacun selon des conditions spécifiques reflétant leur nature conceptuelle. Manifestations tangibles de principes abstraits cruciaux - douleur, sacrifice, rupture et colère - ils catalysent le changement, l'équilibre ou le déséquilibre selon leur essence. Les quatre grandes familles Doei (Van'Doei, Qadul'Doei, Rash'Doei et Cen'Doei) constituent l'expression principale de ce règne, bien que d'autres manifestations plus rares existent."
+        },
+        {
+            "Nom": "Etres primordiaux",
+            "Résumé": "Les Êtres Primordiaux constituent le règne des descendants directs des branches bactériennes anciennes d'Alteir. Titans biologiques d'une puissance inouïe, ils sont les vestiges vivants de l'ère pré-Renouveau lorsque le monde n'était que chaos et hostilité extrême. Contrairement aux autres formes de vie qui ont évolué par compétition interspécifique, les Primordiaux se sont façonnés dans une lutte perpétuelle contre leur environnement même. Rares mais pratiquement immortels, ces colosses biomécaniques représentent la quintessence de l'endurance évolutive et peuvent atteindre des tailles défiant l'entendement, certains spécimens mesurant plusieurs centaines de kilomètres de longueur."
+        },
+        {
+            "Nom": "Les Vifs",
+            "Résumé": "Le règne des Vifs (nom scientifique, Vif-Formes) englobe les organismes apparus après le Renouveau d'Escelion, descendants des branches nouvelles bactériennes. Contrairement aux êtres primordiaux qui ont lutté contre leur environnement ou aux créatures artificielles façonnées intentionnellement, les Vifs évoluent par adaptation dynamique et interdépendante avec leur milieu. Caractérisés par une diversité phénoménale allant des humanoïdes aux formes de vie les plus étranges, ils constituent le noyau de la majorité des écosystèmes malgré leur statut minoritaire en termes de nombre d'espèces. Leur évolution permanente et leur capacité à former des relations symbiotiques complexes en fait le moteur principal de l'équilibre biologique d'Escelion, où la frontière entre plantes, animaux et formes hybrides reste souvent fluide."
+        },
+        {
+            "Nom": "Rêveurs",
+            "Résumé": "Les Rêveurs représentent la quintessence du règne \"Sans norme\", entités post-mortelles résultant de la Transfiguration des Mondes. Anciens habitants de Merid sacrifiés pour stabiliser Escelion, ils transcendent les frontières de l'individualité pour devenir des architectes de réalité. Chaque Rêveur génère un domaine d'influence où les lois fondamentales de la physique, biologie et conscience se plient à leur essence. Leurs cycles de Nuées (annuels) et de Veille (journaliers) déterminent les rythmes temporels de leurs territoires. Sans leur présence, Escelion régresserait vers son état chaotique originel, rendant impossible toute vie complexe."
+        },
+        {
+            "Nom": "Sans norme",
+            "Résumé": "Les Sans norme constituent le règne le plus énigmatique et contradictoire d'Escelion, échappant aux classifications conventionnelles par leur nature fondamentalement paradoxale. Entités qui dépassent les frontières ontologiques établies, ces êtres manifestent des propriétés qui transcendent les lois fondamentales de la biologie, de la physique et parfois même de la causalité. Les Rêveurs, architectes psychiques de réalité dont le Léviathan constitue l'exemple le plus documenté, représentent leur embranchement le plus connu mais non leur unique expression. Simultanément créateurs et perturbateurs, les Sans norme sont responsables à la fois de la stabilité essentielle d'Escelion et de ses plus grandes incohérences. À travers leur existence impossible mais tangible, ils incarnent la nature fondamentalement protéenne du continent-monde, où les frontières entre le possible et l'impossible restent perpétuellement négociables."
+        },
+        {
+            "Nom": "Tranformateurs",
+            "Résumé": "Les Transformateurs constituent le règne des \"alchimistes naturels\" d'Alteir, êtres spécialisés dans la métamorphose constante de matière et d'énergie. Descendants de souches bactériennes deuxerons ou d'êtres primordiaux dégénérés, l'avènement des Rêveurs a catalysé leur évolution, les transformant en gardiens des équilibres écosystémiques. Structurés en huit branches principales correspondant aux transitions fondamentales de la matière, ils sont à la fois vitaux pour la viabilité des environnements post-Agénèse et potentiellement dévastateurs lorsque déséquilibrés. Un transformateur réalise invariablement le même type de transformation tout au long de son existence, devenant ainsi l'incarnation vivante d'un processus physico-chimique spécifique."
+        }
+    ]
+}

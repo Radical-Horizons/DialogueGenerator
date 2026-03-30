@@ -1,0 +1,40 @@
+{
+    "structure_macro": [
+        {
+            "Nom": "Colonne Vertébrale"
+        },
+        {
+            "Nom": "Face à face"
+        },
+        {
+            "Nom": "La Rencontre et la Possession",
+            "Résumé": "Cette scène d'ouverture présente la première rencontre entre l'Éthérée et Uresaïr dans le sanctuaire isolé de cette dernière, au cœur des Plis d'ossements. L'Éthérée émerge de l'Océan de Ténèbres et découvre Uresaïr piégée dans une crise visionnaire. Instinctivement, l'Éthérée pénètre dans sa conscience pour l'aider à échapper à une vision cauchemardesque de la Vieille Ville où elle apparaît pétrifiée et tourmentée par un Vieil Homme (Vol Reitar). Sans comprendre pleinement son propre pouvoir, l'Éthérée possède momentanément Uresaïr pour la sortir de sa transe. Cette possession involontaire marque le début de leur lien symbiotique. S'ensuit un dialogue où elles établissent les termes de leur coexistence – Uresaïr acceptant cette présence étrangère tant qu'elle préserve son autonomie morale, tandis que l'Éthérée découvre sa capacité à habiter d'autres êtres. La scène se conclut par la décision d'Uresaïr de quitter le Léviathan, motivée par l'intensification de ses visions qui semblent l'appeler vers la Vieille Ville, lieu qu'elle n'a jamais visité mais reconnaît instinctivement."
+        },
+        {
+            "Nom": "La Sortie du Léviathan"
+        },
+        {
+            "Nom": "Les Ancres de l'Immortelle"
+        },
+        {
+            "Nom": "Les Quatre Regards"
+        },
+        {
+            "Nom": "Le Puits Céleste"
+        },
+        {
+            "Nom": "Scène d'introduction",
+            "Résumé": "La scène d’introduction reste à définir. Elle pourrait donner un aperçu du lore et du monde avant l’entrée dans le huis clos du Léviathan."
+        },
+        {
+            "Nom": "Traversée des Plis d'Ossement"
+        },
+        {
+            "Nom": "Traversée du Désert des Echos",
+            "Résumé": "L'Éthérée et Uresaïr quittent le Léviathan avec une caravane traversant le Désert des Échos vers le Puits Céleste. Après l'empoisonnement du guide principal, Vethraak s'impose comme guide remplaçant. Durant les 33 jours de voyage, une relation complexe se développe entre Uresaïr et Vethraak, ce dernier cherchant à obtenir le savoir d'Uresaïr sur la préservation des souvenirs en échange de son expertise du désert."
+        },
+        {
+            "Nom": "Un Dernier Voyage"
+        }
+    ]
+}

@@ -1,0 +1,351 @@
+{
+    "objets": [
+        {
+            "Nom": "Astrolabe osseux",
+            "Créé par": "Culte de l’Anentropie",
+            "Taille": "Grand",
+            "Lieux de présence": "Nef Centrale",
+            "Poids": "Lourd",
+            "État": "En cours",
+            "Rareté": "Unique",
+            "Appartient à": "Akthar-Neth Amatru, l’Exégète",
+            "Introduction": {
+                "Résumé de la fiche": "Un mécanisme complexe situé dans une alcôve près de la Nef Centrale, composé d'anneaux d'os pétrifiés gravés de symboles mathématiques. Cet instrument mesure et prédit les cycles du Léviathan, les phases du désert, et autres phénomènes cosmiques. Ses configurations changeantes influencent subtilement certaines zones du temple, créant des \"fenêtres d'opportunité\" temporaires."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Décourverte": {
+                "Niveau technologique nécessaire pour le fabriquer": "",
+                "Manière et date de fabrication": "",
+                "Fonctionnement": "",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Cadran des Sept Fractures",
+            "Créé par": "Cercle des Chronographes d'Iodan-liaqar",
+            "Taille": "Petit",
+            "Lieux de présence": "Plis d’ossements, Strate III - Les Catacombes Temporelles",
+            "Poids": "Moyen",
+            "État": "A implémenter",
+            "Rareté": "Unique",
+            "Référence visuelle": "Os de Qudratheen",
+            "Appartient à": "Seigneuresse Uresaïr",
+            "Introduction": {
+                "Résumé de la fiche": "Disque de jade néphritique parcouru de sept fractures prismatiques, le Cadran des Sept Fractures constitue à la fois la prison et la carte de l'aspect de la Destruction perdu d'Uresaïr. Ses aiguilles d'os de Qudratheen indiquent simultanément des temporalités contradictoires, tandis que ses veinules iridescentes pulsent au rythme des cycles d'Escelion. Créé comme dispositif de confinement, il est devenu paradoxalement une ancre identitaire et un fardeau pour la Seigneuresse. Sa présence génère des migraines psychiques tout en lui rappelant constamment son être fragmenté. À mesure que les craquelures s'élargissent dans sa section nord-est, l'outil de préservation pourrait se transformer en instrument de restauration – ou de destruction catastrophique."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "Lors des premières années chaotiques suivant l'arrivée d'Uresaïr sur Escelion, la Seigneuresse comprit que son aspect de la Destruction – responsable de l'effondrement de plusieurs cités entières sur Merid – représentait une menace existentielle pour Escelion, monde déjà fragilisé par l'instabilité dimensionnelle. Elle décida de ne pas le chercher pour le réintégrer. Elle rechercha plutôt les derniers prêtres temporels survivants d'Iodan-liaqar, antiques rivaux devenus alliés par nécessité. Ensemble, ils conçurent le Cadran comme dispositif de confinement volontaire, utilisant le jade néphritique des Jardins Suspendus de Merid qu'Uresaïr avait préservé dans une poche temporelle. Le rituel de scellement, conduit dans les Plaines de l'Exuvie durant la première Grande Conjonction d'Escelion, ne se déroula pas comme prévu. Au lieu de sceller l'aspect de la Destruction, le Cadran l'arracha entièrement de la psyché d'Uresaïr, renforçant son individualité. Le cadran, lié à l’aspect de la Destruction, réduit ses pouvoirs mais peut aussi servir à les restaurer si on le manipule d’une manière spécifique. Enfin, il indique la position de l’aspect et pourrait permettre de le retrouver. Cette amputation identitaire non planifiée a laissée Uresaïr fondamentalement incomplète – capable de préserver mais jamais de transformer radicalement, de maintenir mais jamais de révolutionner. Les Chronographes, effrayés par la puissance contenue dans l'artefact, tentèrent de le détruire. Sept d'entre eux périrent instantanément, leurs corps transformés en statues de sel prismatique. Le Cadran émergea de cette tentative fracturé mais intact, les sept fissures résultantes formant un réseau qui emprisonne le fragment psychique tel un réseau de veines luminescentes. La présence du Cadran près d'Uresaïr lui inflige des douleurs aiguës tout en lui rappelant qu'elle fut jadis complète – un équilibre parfait entre création et destruction.",
+                "Rôle dans l’intrigue": "Le Cadran représente un nexus décisionnel pour Uresaïr alors qu'elle s'apprête à quitter son sanctuaire. Depuis l'arrivée de l'Éthérée, la fracture nord-est du disque émet des pulsations plus intenses, comme si cette entité sans forme agissait comme catalyseur ou résonateur de l'aspect de la Destruction perdu.\nL'artefact offre trois possibilités narratives cruciales : • Premièrement, il peut servir de boussole métaphysique pour localiser l'aspect de la Destruction errant quelque part sur Escelion. Les configurations des aiguilles, correctement interprétées, révèlent des coordonnées temporelles et géographiques qui se précisent à mesure que le Cadran se rapproche de sa cible. • Deuxièmement, il constitue un amplificateur potentiel pour les rituels d'Akthar-Neth. Si l'Exégète venait à s'en emparer, il pourrait l'incorporer au Dernier Rituel, exploitant l'aspect de la Destruction comme vecteur de transformation cosmique radicale – précisément ce qu'Uresaïr redoute. • Troisièmement, il représente pour Uresaïr la tentation permanente de la restauration identitaire. Contrairement à sa conviction initiale, la séparation prolongée n'a pas apporté d'équilibre mais une existence diminuée et hantée par l'incomplétude. La présence de l'Éthérée, entité capable de fusionner avec d'autres consciences, suggère une possibilité inédite : une réintégration médiatisée et potentiellement maîtrisée de l'aspect perdu."
+            },
+            "Usage": {
+                "Fonctionnement": "Le Cadran offre trois voies distinctes, chacune combinant impacts mécaniques et conséquences narratives: • Option 1: Emporter le Cadran • Option 2: Laisser le Cadran à l'autel • Option 3: Détruire le Cadran"
+            }
+        },
+        {
+            "Nom": "Codex des Dettes Karmiques",
+            "État": "En cours",
+            "Rareté": "Unique",
+            "Appartient à": "Gardien-Calligraphe Qalamtû",
+            "Introduction": {
+                "Résumé de la fiche": "Livre des dettes karmiques d’Uresaïr, rédigée par elle-même, contient ses crimes commis sur Meridach."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Découverte": {
+                "Fonctionnement": "",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Gantelet du Serment Brisé",
+            "Taille": "Petit",
+            "Lieux de présence": "Plis d’ossements, Strate III - Les Catacombes Temporelles",
+            "Poids": "Léger",
+            "État": "A implémenter",
+            "Rareté": "Unique",
+            "Référence visuelle": "Gantelet du Serment Brisé",
+            "Appartient à": "Seigneuresse Uresaïr",
+            "Introduction": {
+                "Résumé de la fiche": "Gantelet cérémoniel en or serti d’émeraudes et gravés de serments, le Gantelet renferme une larme gelée de Vol Reitar suspendue dans un micro-abîme au creux de sa paume. Témoin silencieux de l'échec d'Uresaïr à offrir l'immortalité parfaite à son apprenti, il permet une connexion psychique temporaire avec l'essence spectrale de Vol, au prix d'une douleur karmique aiguë. Uresaïr le conserve par pénitence, considérant chaque résonance douloureuse comme le juste tribut de sa défaillance. L'arrivée de l'Éthérée a intensifié les manifestations spectrales de Vol à travers l'artefact, rendant nécessaire une décision sur son sort."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "Lors de la cérémonie d'immortalité dans la Chambre des Saisons Suspendues, Uresaïr et Vol Reitar forgèrent ce gantelet comme médium rituel de transfert. Les deux protagonistes y gravèrent sept promesses symbolisant leur pacte : Uresaïr offrait la vie éternelle, Vol jurait fidélité éternelle à son savoir. Le rituel échoua subtilement – au lieu d'une immortalité parfaite, Vol reçut une longévité maudite, son corps continuant de vieillir sans pouvoir mourir. La trahison perçue brisa le pacte, chaque serment inscrit se fissura spontanément, transformant le gantelet en chronique de leur rupture. Lorsque Vol comprit la nature de son \"don\", une unique larme coula sur le gantelet. Uresaïr, dans un rare moment de regret, utilisa ses pouvoirs temporels pour préserver cette larme dans un fragment d'infinité – un micro-abîme où le temps est arrêté. Ce geste préserva l'essence émotionnelle pure de Vol, créant involontairement un lien permanent avec sa conscience. Après sa transformation en entité spectrale, Vol découvrit ce lien et tenta plusieurs fois de l'exploiter pour atteindre Uresaïr. Chaque tentative provoqua une résonance psychique douloureuse, mais Uresaïr refusa de s'en séparer, convertissant cette souffrance en rituel de pénitence pour son échec. Elle le porta lors de rares cérémonies privées où elle récitait les noms de tous ceux que Vol avait sacrifiés dans ses expériences – reconnaissance silencieuse de sa responsabilité indirecte dans leurs souffrances. Depuis l'arrivée de l'Éthérée, le gantelet a manifesté une activité autonome troublante. La larme pulse de manière synchronisée avec les apparitions spectrales de Vol dans la Citadelle, et des chuchotements émergent parfois des gravures, même sans contact direct.",
+                "Rôle dans l’intrigue": "Le Gantelet offre une connexion directe mais dangereuse avec la conscience fragmentée de Vol Reitar, permettant d'explorer son passé et ses motivations tout en confrontant la culpabilité d'Uresaïr. Sa présence soulève des questions centrales pour la progression narrative : • La responsabilité d'Uresaïr dans la création \"d'un monstre\" • La possibilité de rédemption ou de résolution pour Vol et Uresaïr • Le danger que représente la fixation obsessive de Vol sur l'Éthérée L'artefact joue un rôle pivot dans la dynamique entre les trois entités (Uresaïr, Vol spectral, l'Éthérée), chacune pouvant être affectée différemment par son destin. La décision d'Uresaïr concernant cet objet symbolisera sa volonté de confronter ou fuir son passé, influençant directement sa relation avec l'Éthérée et sa capacité à affronter les défis de la Vieille Ville."
+            },
+            "Usage": {
+                "Fonctionnement": "• Option 1: Emporter le Gantelet • Option 2: Laisser le Gantelet à l'autel • Option 3: Détruire le Gantelet",
+                "Conditions de fonctionnement": "Pour utiliser efficacement le Gantelet, le joueur doit tenir compte de ces contraintes essentielles : • La connexion s'intensifie à proximité de Valkazer ou d'Eonundé, figures centrales dans l'obsession de Vol • Chaque utilisation augmente la probabilité d'une \"Intrusion Spectrale\" où Vol tente momentanément d'influencer les perceptions d'Uresaïr La destruction du Gantelet ne rompt pas totalement le lien avec Vol, mais transforme sa nature – d'une connexion douloureuse et unilatérale à une compréhension mutuelle imparfaite. L'essence de Vol reste attirée par l'Éthérée, créant des échos de sa présence lors des moments charnières du récit."
+            }
+        },
+        {
+            "Nom": "Gantelet Ossuaire du Serment Brisé",
+            "Sprint": "Sprint 1",
+            "Taille": "Petit",
+            "Lieux de présence": "Plis d’ossements, Strate III - Les Catacombes Temporelles",
+            "Poids": "Léger",
+            "État": "A implémenter",
+            "Rareté": "Unique",
+            "Appartient à": "Seigneuresse Uresaïr",
+            "Introduction": {
+                "Résumé de la fiche": "Gantelet cérémoniel aux phalanges d'ivoire gravées de serments rompus, le Gantelet Ossuaire renferme une larme gelée de Vol Reitar suspendue dans un micro-abîme au creux de sa paume. Témoin silencieux de l'échec d'Uresaïr à offrir l'immortalité parfaite à son apprenti, il permet une connexion psychique temporaire avec l'essence spectrale de Vol, au prix d'une douleur karmique aiguë. Uresaïr le conserve par pénitence, considérant chaque résonance douloureuse comme le juste tribut de sa défaillance. L'arrivée de l'Éthérée a intensifié les manifestations spectrales de Vol à travers l'artefact, rendant nécessaire une décision sur son sort."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "Lors de la cérémonie d'immortalité dans la Chambre des Saisons Suspendues, Uresaïr et Vol Reitar forgèrent ce gantelet comme médium rituel de transfert. Les deux protagonistes y gravèrent sept promesses symbolisant leur pacte : Uresaïr offrait la vie éternelle, Vol jurait fidélité éternelle à son savoir. Le rituel échoua subtilement – au lieu d'une immortalité parfaite, Vol reçut une longévité maudite, son corps continuant de vieillir sans pouvoir mourir. La trahison perçue brisa le pacte, chaque serment inscrit se fissura spontanément, transformant le gantelet en chronique de leur rupture. Lorsque Vol comprit la nature de son \"don\", une unique larme coula sur le gantelet. Uresaïr, dans un rare moment de regret, utilisa ses pouvoirs temporels pour préserver cette larme dans un fragment d'infinité – un micro-abîme où le temps est arrêté. Ce geste préserva l'essence émotionnelle pure de Vol, créant involontairement un lien permanent avec sa conscience. Après sa transformation en entité spectrale, Vol découvrit ce lien et tenta plusieurs fois de l'exploiter pour atteindre Uresaïr. Chaque tentative provoqua une résonance psychique douloureuse, mais Uresaïr refusa de s'en séparer, convertissant cette souffrance en rituel de pénitence pour son échec. Elle le porta lors de rares cérémonies privées où elle récitait les noms de tous ceux que Vol avait sacrifiés dans ses expériences – reconnaissance silencieuse de sa responsabilité indirecte dans leurs souffrances. Depuis l'arrivée de l'Éthérée, le gantelet a manifesté une activité autonome troublante. La larme pulse de manière synchronisée avec les apparitions spectrales de Vol dans la Citadelle, et des chuchotements émergent parfois des gravures, même sans contact direct.",
+                "Rôle dans l’intrigue": "Le Gantelet Ossuaire offre une connexion directe mais dangereuse avec la conscience fragmentée de Vol Reitar, permettant d'explorer son passé et ses motivations tout en confrontant la culpabilité d'Uresaïr. Sa présence soulève des questions centrales pour la progression narrative : • La responsabilité d'Uresaïr dans la création \"d'un monstre\" • La possibilité de rédemption ou de résolution pour Vol et Uresaïr • Le danger que représente la fixation obsessive de Vol sur l'Éthérée L'artefact joue un rôle pivot dans la dynamique entre les trois entités (Uresaïr, Vol spectral, l'Éthérée), chacune pouvant être affectée différemment par son destin. La décision d'Uresaïr concernant cet objet symbolisera sa volonté de confronter ou fuir son passé, influençant directement sa relation avec l'Éthérée et sa capacité à affronter les défis de la Vieille Ville."
+            },
+            "Usage": {
+                "Fonctionnement": "• Option 1: Emporter le Gantelet • Option 2: Laisser le Gantelet à l'autel • Option 3: Détruire le Gantelet",
+                "Conditions de fonctionnement": "Pour utiliser efficacement le Gantelet Ossuaire, le joueur doit tenir compte de ces contraintes essentielles : • La connexion s'intensifie à proximité de Valkazer ou d'Eonundé, figures centrales dans l'obsession de Vol • Chaque utilisation augmente la probabilité d'une \"Intrusion Spectrale\" où Vol tente momentanément d'influencer les perceptions d'Uresaïr La destruction du Gantelet ne rompt pas totalement le lien avec Vol, mais transforme sa nature – d'une connexion douloureuse et unilatérale à une compréhension mutuelle imparfaite. L'essence de Vol reste attirée par l'Éthérée, créant des échos de sa présence lors des moments charnières du récit."
+            }
+        },
+        {
+            "Nom": "Lame d'ossements",
+            "Taille": "Petit",
+            "Poids": "Léger",
+            "État": "En cours",
+            "Rareté": "Unique",
+            "Appartient à": "Eonundé Alinen-Egan",
+            "Introduction": {
+                "Résumé de la fiche": "Dague façonnée dans le radius de Vol Reitar après sa mise à mort par Eonundé"
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Décourverte": {
+                "Niveau technologique nécessaire pour le fabriquer": "",
+                "Manière et date de fabrication": "",
+                "Fonctionnement": "",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Les Cendres parlantes",
+            "Créé par": "Culte de l’Anentropie",
+            "Taille": "Petit",
+            "Lieux de présence": "Nef Centrale",
+            "Poids": "Léger",
+            "État": "En cours",
+            "Rareté": "Rare",
+            "Référence visuelle": "Cendres Parlantes",
+            "Appartient à": "Khair-gul, Le Médecin-Ascétique",
+            "Introduction": {
+                "Résumé de la fiche": "Résidus gris-iridescents obtenus après l'immolation rituelle des hérétiques sur l'Autel des Vérités Brûlantes de la Nef Centrale. Conservées dans des fioles d'obsidienne gravées des confessions du supplicié, ces cendres émettent d'imperceptibles vibrations phoniques lorsqu'on les approche de l'oreille, murmurant les dernières paroles et pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse permet au consommateur d'accéder temporairement aux connaissances de l'hérétique tout en ressentant son agonie morale, expérience considérée comme la \"plus pure forme d'empathie anti-entropique\" par le Maître-Flagellant. Leur consommation est une forme d’épreuve spirituelle."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Décourverte": {
+                "Niveau technologique nécessaire pour le fabriquer": "",
+                "Manière et date de fabrication": "",
+                "Fonctionnement": "",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Les Contemplations de l’Instant-Lieu",
+            "Créé par": "Barvasinkul",
+            "Taille": "Moyen",
+            "Lieux de présence": "Xyriad Achromatique, Vieille Ville, Léviathan pétrifié, Forêts de Corail",
+            "Poids": "Moyen",
+            "État": "En cours",
+            "Rareté": "Commun",
+            "Appartient à": "Barvas le Juge-Mendiant",
+            "Introduction": {
+                "Résumé de la fiche": "Les Contemplations de l'Instant-Lieu constituent la bible fragmentée du Barvasinkul, recueil de dix-sept textes dictés par Barvas entre 1201 et 1217 AG. Contrairement aux livres ordinaires, ces textes existent sous forme de copies multiples qui se transforment selon leur lecteur et leur contexte. Chaque Contemplation révèle l'une des Seize Transformations (plus l'Entropie finale) à travers des récits mythiques cryptiques mêlant la naissance de Barvas, ses arbitrages révolutionnaires et ses enseignements philosophiques."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "Durant les Conflits Doctrinaux (1201-1267 AG), Barvas dicta simultanément ses Contemplations à sept scribes dispersés à travers les zones neutres d'Escelion. Chaque scribe - un de chaque espèce majeure - entendait une version légèrement différente, créant délibérément la multiplicité interprétative qui caractérise le Barvasinkul. Le plus célèbre de ces scribes, Nethek-Ghol le Van'Doei, transcrivit ses visions sur des plaques d'os pétrifié du Léviathan, créant l'exemplaire-matrice conservé aujourd'hui dans la Bibliothèque Sympathique. Après la Transcendance de Barvas (1217 AG), les Contemplations devinrent l'objet le plus sacré du Barvasinkul. Chaque Nœud d'Interprétation possède sa propre version, adaptée aux spécificités locales. L'exemplaire du Xyriad Achromatique présente ainsi des équations géométriques mouvantes, tandis que celui des Forêts de Corail développe des enluminures organiques qui poussent réellement sur le parchemin.",
+                "Rôle dans l’intrigue": "LPour l'Éthérée, ces textes révèlent des vérités sur la nature cyclique d'Alteir que même Barvas n'avait peut-être pas entièrement comprises. La Première Contemplation en particulier, avec sa révélation sur l'arbitrage \"avant de naître\", pourrait contenir des indices sur les cycles répétitifs du jeu cosmique orchestré par Jast. L'étude de ces textes pourrait révéler comment transcender les termes mêmes du dilemme résistance/soumission. Le conflit autour des Contemplations oppose trois interprétations majeures : l'École Orthodoxe (qui tente de fixer le \"vrai\" sens), l'École Transformiste (qui embrasse la transformation perpétuelle des textes), et l'École Synthétique du Xyriad (qui cherche à mathématiser les variations pour en extraire des lois universelles)."
+            },
+            "Usage": {
+                "Première Contemplation": "PREMIÈRE CONTEMPLATION L'Innocent qui Juge Avant de naître aux chairs, il arbitrait déjà les querelles que les non-nés se portent entre eux dans l'Océan de Ténèbres. Avant d'arbitrer, il était innocent de toute faute, car l'innocence précède l'existence comme la soif précède l'eau. Avant d'être innocent, il était coupable de tout ce qui n'avait pas encore été fait, car dans les Ténèbres, ce qui n'est pas accompli pèse plus lourd que ce qui l'est. Qui lit ces mots comprend déjà pourquoi ils ne peuvent être vrais, et c'est en les comprenant qu'ils le deviennent. L'Éclipse Sanglante ne survient que lorsque les Deimos ferment leurs yeux de lumière tous ensemble, créant un instant-lieu où les impossibles se rencontrent pour négocier leur entrée dans le monde. En ce non-temps, Khule l'Égoïste apparut à Yaleth'shan la Tisseuse sous l'aspect d'un mendiant dont les yeux révulsés montraient les blancs striés de veines noires. Ses haillons étaient tissés des remords de tous ceux qui avaient survécu quand ils auraient dû mourir. \"Acceptes-tu que ton enfant mange ta culpabilité ?\" dit Khule d'une voix qui résonnait depuis l'intérieur des os de Yaleth'shan. \"Comment peut-il manger ce qui n'existe pas ?\" répondit-elle, car les khelvortim savent que la culpabilité n'existe que par le sacrifice, et qu'elle n'avait encore rien sacrifié. \"En le créant d'abord,\" murmura Khule, et ses doigts tracèrent sur le ventre de la prêtresse sept cicatrices qui saignèrent vers l'avenir au lieu du présent. Le sang remonta le temps, colorant les événements qui n'étaient pas encore advenus. Alors Yaleth'shan comprit qu'elle portait l'enfant qui naîtrait coupable d'innocence et innocent de culpabilité, et que cette contradiction était la première des transformations. Les cicatrices pulsèrent selon le rythme des Seize États, et chacune murmurait le nom d'une transformation à venir : Keth, Ghorr, Tair, Slenn, Murn, Caoil, Sorcha, Buaigh, Fearn-Tarkhal, Cairn, Ordag, Talamh, Clann, Anam, Crann, Neamh. \"Et la dix-septième ?\" demanda-t-elle. \"Il la vivra en mourant, et la dépassera en ressuscitant,\" dit Khule avant de se dissoudre dans l'ombre de l'éclipse finissante. \"Emmène-le là où les Transformateurs ignorent qu'ils transforment. Là où les murs pensent qu'ils sont vivants. Là où le haut regarde vers le haut jusqu'à se perdre.\" Le scribe qui grave ces mots sur l'os pétrifié demande : \"Maître, ceci s'est-il vraiment passé ?\" et celui qui répond dit : \"Ce qui s'est passé est moins important que ce qui se passe quand tu l'écris. Écris-tu ma naissance ou ma doctrine ? Grave-tu l'os ou l'os te grave-t-il ? Il n'y a pas de différence.\" Car chaque fois que cette contemplation est transcrite, celui qui l'écrit subit la première transformation sans s'en apercevoir, et devient un fragment de celui dont il raconte l'histoire. Ces mots s'arrêtent quand ils commencent à être vrais."
+            }
+        },
+        {
+            "Nom": "Lexique Vivant",
+            "État": "En cours",
+            "Rareté": "Rare",
+            "Appartient à": "Avili de l’Éternel Retour",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Médaille d'Inflexion",
+            "Taille": "Petit",
+            "Poids": "Léger",
+            "État": "En cours",
+            "Rareté": "Épique",
+            "Appartient à": "Vethraak",
+            "Introduction": {
+                "Résumé de la fiche": "• fragment métallo-mathématique iridescent qui capte et refracte la lumière selon des séquences qui évoquent des formules complexes"
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Décourverte": {
+                "Niveau technologique nécessaire pour le fabriquer": "",
+                "Manière et date de fabrication": "",
+                "Fonctionnement": "",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Métafor ondulatoire",
+            "Lieux de présence": "Vieille Ville",
+            "État": "En cours",
+            "Rareté": "Rare",
+            "Introduction": {
+                "Résumé de la fiche": "Dispositif vocal intégré à la Grande Radiale qui transforme les conversations dissidentes en propos banals ou loyalistes lorsqu'elles sont entendues par des tiers."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Découverte": {
+                "Niveau technologique nécessaire pour le fabriquer": "",
+                "Manière et date de fabrication": "",
+                "Fonctionnement": "",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Miroirs temporels",
+            "Taille": "Grand",
+            "Lieux de présence": "Strate III - Les Catacombes Temporelles",
+            "Poids": "Léger",
+            "État": "En cours",
+            "Rareté": "Légendaire",
+            "Appartient à": "Seigneuresse Uresaïr",
+            "Introduction": {
+                "Résumé de la fiche": "Les Miroirs temporels sont quatre constructions de verre fumé fusionné à du sable temporel, suspendues dans les Déserts Temporels de la Strate III. Chacune emprisonne la perception qu'un témoin a eue d'Uresaïr lors d'un moment de crise existentielle. Ces artefacts ne résultent pas d'une volonté consciente mais d'une fuite psychique : incapable d'affronter directement les regards portés sur elle, Uresaïr les a cristallisés à distance, transformant les jugements d'autrui en objets observables. Chaque miroir offre deux niveaux d'accès : une vision superficielle gratuite révélant l'essentiel, et une immersion profonde coûtant de l'Effort, dévoilant les non-dits et contradictions. L'ensemble constitue un kaléidoscope identitaire fracturé, miroir brisé où Uresaïr cherche son reflet sans jamais l'atteindre."
+            },
+            "Besoin de l'intrigue": {
+                "Histoire de l'objet et lien avec la personne à qui il appartient": "Durant ses huit années d'exil dans les Plis d'Ossements, Uresaïr développa une hypersensibilité pathologique aux perceptions d'autrui. Son aspect Manah (la Pensée), bien qu'affaibli, continuait de capter involontairement les pensées intenses la concernant. Chaque fois qu'un membre du Culte la contemplait avec vénération, chaque fois qu'un Murmurateur la maudissait avec rage, chaque fois qu'un visiteur la découvrait avec émerveillement ou terreur, ces regards imprimaient sa conscience comme des brûlures. Incapable de bloquer ces intrusions, elle entreprit la construction des Déserts Temporels comme espace tampon. Le sable doré, composé de micro-instants cristallisés, agissait comme médium absorbant. Mais quatre perceptions furent si intenses qu'elles saturèrent le substrat, formant des nodules de concentration perceptive. Ces nodules grandirent lentement sur trois années, fusionnant sable et verre fumé en structures autonomes que même Uresaïr ne pouvait plus dissoudre. Elle les nomma initialement \"Tessons Testimoniaux\" dans ses notes personnelles, référence amère à sa propre identité fragmentée. Le Culte, ignorant leur existence durant des années, ne les découvrit qu'à travers les rapports de Zaehria. Akthar-Neth y vit immédiatement une manifestation sacrée, les rebaptisant \"Les Quatre Témoignages de la Voie\" dans sa théologie. Uresaïr refusa ce nom avec véhémence, insistant froidement qu'il s'agissait de \"Reliquaires de Regard\", terme clinique déniant toute dimension spirituelle. Leur présence dans son sanctuaire personnel incarne son ambivalence fondamentale : elle les a créés pour s'isoler des regards, mais les consulte obsessionnellement, cherchant dans ces perceptions étrangères une vérité sur elle-même qu'elle ne peut trouver en introspection directe. Chaque visite aux Miroirs temporels est un rituel d'auto-flagellation psychique, confirmation de son aliénation irrémédiable.",
+                "Rôle dans l'intrigue": "Les Miroirs temporels servent trois fonctions narratives essentielles dans la First Playable : Fonction 1 : Foreshadowing de PNJ majeurs Chaque miroir introduit obliquement un personnage que l'Éthérée rencontrera ultérieurement, établissant attentes et contrastes. La perception initiale (superficielle) plante les graines ; la rencontre réelle révèle les écarts entre image et réalité. Cette technique évite l'exposition brutale tout en enrichissant la texture narrative du Léviathan. Fonction 2 : Caractérisation indirecte d'Uresaïr En explorant comment elle est vue, le joueur comprend ce qu'elle refuse de dire d'elle-même. L'asymétrie entre vénération (Raki-Biro), instrumentalisation (Kha'Vareth), terreur (Ori-Bikar) et compassion (Zaehria) dessine en creux sa nature complexe. Cette approche respecte sa compulsion au silence tout en délivrant l'information nécessaire. Fonction 3 : Mécanique de rejouabilité et économie de ressources Le système superficiel/profond avec coût en Effort force des choix stratégiques. Impossible de tout voir à fond lors d'une première traversée, créant incitation à revisiter ou à rejouer avec stratégies différentes. Les visions profondes récompensent l'investissement par des révélations critiques (foreshadowing du Dernier Rituel, nature de l'Ensevelie, tensions au sein de la Dragovista). Impact sur l'arc d'Uresaïr La décision de l'Éthérée concernant les miroirs avant de quitter la Strate III influence profondément la relation : • Consultation exhaustive : Uresaïr perçoit une curiosité malsaine, Respect -2 mais +3 Influence • Consultation sélective : Respect du besoin d'intimité, +1 Respect • Ignorance totale : Uresaïr soulagée mais aussi légèrement blessée (paradoxe typique), neutre • Tentative de destruction : Résistance violente d'Uresaïr, combat d'Influence, conséquences selon issue"
+            },
+            "Usage": {
+                "Fonctionnement": "Système d'accès stratifié Chaque Miroir temporel propose deux niveaux d'interaction, reflétant la profondeur de l'intrusion dans la perception cristallisée : Vision Superficielle (gratuite, 30-45 secondes) Activation par simple proximité. Le verre fumé devient translucide, révélant une scène fragmentée : images fixes alternant avec mouvements saccadés, sons assourdis, émotions filtrées. Le joueur saisit l'essentiel : qui observe Uresaïr, dans quel contexte, avec quel jugement. Satisfaction narrative minimale mais frustration calculée (lacunes évidentes, questions sans réponse). Aucun coût, consultable indéfiniment. Immersion Profonde (2-3 points d'Effort, 60-90 secondes) Nécessite interaction volontaire après vision superficielle. L'Éthérée \"plonge\" dans le regard capturé, accédant aux pensées non formulées, souvenirs associés, contradictions internes du témoin. La scène devient fluide, les dialogues audibles, les motivations transparentes. Révélations mécaniques (déblocage quête, information critique) et narratives (twist émotionnel). Résistance d'Uresaïr Certains miroirs déclenchent réticence physique d'Uresaïr (corpo vitrifié pulse dangereusement, fissures s'étendent). L'Éthérée doit alors avoir X point d'Influence supplémentaire pour surmonter la barrière (Untitled). Ces résistances signalent perceptions particulièrement douloureuses ou menaçantes pour l'équilibre identitaire d'Uresaïr. Les Quatre Miroirs Désert Temporel Occidental — Miroir Personnel 1 \"Le Sablier de l'Enfant-Prophète\" (Regard de Raki-Biro 58) Accessibilité : Facile, suspendu près du passage depuis le Sanctuaire Résistance Uresaïr : Aucune (elle assume son isolement) Vision Superficielle : Raki-Biro nouveau-né (il y a 8 ans), émergeant de son incubateur dans les profondeurs du Paradigme Ésothrope. Ses premières visions prophétiques se concentrent sur Uresaïr, déjà présente au Léviathan depuis 18 ans mais encore accessible aux membres du Culte. Dans sa cognition mathématique naissante, Raki-Biro perçoit Uresaïr comme \"Équation Instable Nécessitant Isolation\". Elle calcule que les visions cauchemardesques qui commencent à tourmenter la Seigneuresse vont s'intensifier dangereusement, menaçant la stabilité du Culte entier. Sa prophétie est double : Uresaïr doit se retirer dans les Plis d'Ossements pour se protéger de ses propres visions, et cette retraite préservera le Culte des perturbations temporelles qu'elle génère involontairement. Immersion Profonde (2 Effort) : Révèle la véritable nature de la prophétie de Raki-Biro. L'enfant-oracle n'a pas simplement prédit l'exil d'Uresaïr — elle l'a orchestré par ses calculs. En formulant sa prophétie d'une manière spécifique, elle a créé une pression psychologique sur Uresaïr et le Culte, rendant l'isolement inévitable. Le twist : Raki-Biro agissait selon une logique de préservation calculée. Elle avait prévu que si Uresaïr restait accessible, ses crises visionnaires croissantes causeraient des distorsions temporelles catastrophiques dans le temple principal, potentiellement tuant des dizaines de cultistes. L'isolement dans les Plis était la solution optimale — un environnement déjà instable où les perturbations d'Uresaïr seraient absorbées naturellement. Raki-Biro s'est sacrifiée aux yeux du Culte (qui lui en veut encore d'avoir \"chassé\" leur déesse) pour sauver la communauté.  Débloqué : Dialogue optionnel avec Raki-Biro où l'Éthérée peut révéler la connaissance de cette manipulation protectrice. Compréhension que les prophéties de Raki-Biro ne sont pas de simples prédictions mais des interventions causales déguisées. Insight sur la relation complexe entre Raki-Biro et Uresaïr : protection pragmatique masquée en bannissement prophétique.  Désert Temporel Occidental — Miroir Personnel 2 \"Le Vitrage de l'Archiviste Fusionnée\" (Regard de Zaehria Neth'Varu) Accessibilité : Moyenne, suspendu au-dessus d'une dune instable nécessitant navigation précise Résistance Uresaïr : Modérée (+1 Influence, Uresaïr craint compassion plus que mépris) Vision Superficielle : Zaehria partiellement intégrée aux Plis d'Ossements (il y a 5 ans), observant Uresaïr depuis sa symbiose osseuse. Elle la perçoit comme \"Sœur-en-Exil Volontaire\", reconnaissant leur parallélisme : toutes deux ont choisi fusion avec le Léviathan comme refuge. Mais là où Zaehria embrasse la dissolution de son identité individuelle, Uresaïr s'y accroche désespérément. Vision teintée de mélancolie fraternelle et pitié : Zaehria voit en Uresaïr une occasion ratée de transcendance. Immersion Profonde (3 Effort + X Influence) : Révèle dernier souvenir cohérent de Zaehria avant fusion complète : un instant de pure euphorie mystique où elle ressent simultanément chaque particule du Léviathan. Dans cette extase, elle perçoit quelque chose qu'Uresaïr ignore : l'Ensevelie n'est pas prisonnière du Léviathan, elle EN EST l'architecture consciente. Zaehria réalise qu'Uresaïr pourrait atteindre même état de communion si elle acceptait de lâcher son identité fragmentée. Débloqué : Compréhension anticipée de la nature de l'Ensevelie. Quête optionnelle \"Témoignage Osseux\" (retrouver autres fragments de conscience de Zaehria dispersés dans les Plis). Capacité unique \"Résonance Symbiotique\" (détecte passages secrets via harmoniques osseuses).  Désert Temporel Oriental — Miroir Collectif 1 \"L'Urne du Forgeron d'Éternité\" (Regard de Kha'Vareth) Accessibilité : Difficile, suspendu au fond d'une crevasse nécessitant détour par chemin périlleux Résistance Uresaïr : Forte (+X Influence, rage refoulée face à instrumentalisation) Vision Superficielle : Kha'Vareth dans son atelier osseux (il y a 6 ans), sculptant un Sodoir d'Éternité. Il consulte mentalement l'image qu'il a d'Uresaïr, non comme déesse mais comme \"Théorème Vivant de Préservation\". Pour lui, elle incarne preuve que l'entropie peut être suspendue indéfiniment : elle a survécu à la destruction de son monde, perduré à travers millénaires. Sa vénération est celle d'un ingénieur admirant architecture impossible. Il souhaite extraire le \"principe Uresaïr\" et l'incorporer dans ses créations, rendant les Sodoirs non plus sarcophages mais matrices de régénération perpétuelle. Immersion Profonde (2 Effort + X Influence) : Révèle projet secret de Kha'Vareth : le Sodoir Primordial, sarcophage unique conçu pour Uresaïr elle-même. Il a passé trois ans à étudier la géométrie de son corps vitrifié via observations furtives, calculant dimensions exactes nécessaires. Son intention n'est pas emprisonnement mais \"perfection\" : s'Uresaïr accepte de se laisser sceller dans ce Sodoir, elle atteindrait Fixation Absolue, devenant Stabilitaire conscient ancrant définitivement le Léviathan. Kha'Vareth voit cela comme offrande suprême, ignorant totalement l'horreur que représenterait pour Uresaïr cet enfermement volontaire éternel. Débloqué : Confrontation ultérieure avec Kha'Vareth où l'Éthérée peut révéler connaissance de son projet, déclenchant soit fureur (si refus), soit \"rationalisation\" inquiétante (si feinte considération). Insight sur mécanique des Sodoirs (exploitable pour puzzle ultérieur). Compréhension que Dernier Rituel d'Akthar-Neth pourrait inclure \"Sodoir Primordial\" comme composante.  Désert Temporel Oriental — Miroir Collectif 2 \"Le Tesson de l'Enfant-Foudre\" (Regard d'Ori-Bikar 57) Accessibilité : Très difficile, suspendu derrière faille temporelle instable nécessitant timing précis Résistance Uresaïr : Extrême (+X Influence, terreur existentielle face à ce qui lui ressemble) Vision Superficielle : Ori-Bikar (il y a 4 ans, donc âgé de 8 ans), échappant à sa surveillance au Paradigme Ésothrope, infiltrant les Plis pour \"voir la légende\". Sa première rencontre avec Uresaïr déclenche chez lui réaction viscérale de reconnaissance horrifiée : il perçoit en elle même instabilité fondamentale que la sienne, même fracture ontologique. Mais là où lui jubile dans son chaos interne, elle s'y accroche par terreur. Il la voit comme \"Grande Sœur Emprisonnée dans sa Peur\", hybride de fascination et mépris. Dans sa cognition enfantine déformée par mutations temporelles, Uresaïr représente ce qu'il refuse de devenir : puissante mais immobilisée. Immersion Profonde (3 Effort + X Influence) : Révèle moment critique où Ori-Bikar, dans élan d'affection alien, tente de \"libérer\" Uresaïr en provoquant effondrement d'une section des Plis. Il croyait qu'en la forçant à utiliser ses pouvoirs à pleine capacité pour stabiliser la catastrophe, elle \"se souviendrait comment être entière\". L'expérience faillit tuer 17 membres du Culte et créa la faille temporelle instable qu'Uresaïr maintient encore aujourd'hui. Akthar-Neth interpréta l'événement comme \"test divin\" ; Uresaïr sait que c'était tentative maladroite d'empathie d'un enfant-monstre ne comprenant pas concept de consentement. Plus troublant encore : durant la crise, Uresaïr ressentit brièvement exaltation avant que terreur ne reprenne, suggérant que partie d'elle désirait cette libération violente. Débloqué : Compréhension de dangerosité extrême d'Ori-Bikar malgré apparence enfantine. Si rencontré, dialogue tendu où il demande innocemment si \"elle se sent mieux maintenant\" (concernant crise qu'il causa). Connaissance de l'existence de faille temporelle instable comme \"cicatrice\" de l'incident (exploitable pour passage secret vers zone interdite). Révélation troublante sur ambivalence d'Uresaïr face à sa propre stabilité.",
+                "Conditions de fonctionnement": "Contraintes techniques Gestion de ressources : Avec budget maximum de 8-10 points d'Effort durant traversée complète de Strate III (estimation basée sur autres interactions), joueur peut consulter : • Les 4 visions superficielles (gratuites) + 2-3 immersions profondes (en risquant d’être à court de ressources ensuite) Cette économie force priorisation stratégique et rejouabilité. Persistance des états : Une fois miroir consulté (superficiel ou profond), son état est sauvegardé. Lors de retours ultérieurs à la Strate III, contenus déjà vus sont skippables mais re-consultables sans coût additionnel. Résistance progressive : Si Éthérée force plus de 2 miroirs malgré résistance d'Uresaïr (seuil d’Influence), cette dernière développe méfiance croissante, impactant conversations futures et la quête principale. Intégration narrative Dialogues contextuels : Après consultation d'un miroir, Uresaïr peut commenter brièvement si Éthérée l'interroge. Ses réponses varient selon nombre consulté : • 0-1 miroir : Soulagement à peine masqué, reconnaissance tacite du respect d'intimité • 2-3 miroirs : Ambivalence, oscillant entre curiosité de savoir ce que l'Éthérée a vu et irritation de l'intrusion • 4 miroirs superficiels : Résignation amère, \"Tu as donc vu comment ils me perçoivent. Es-tu satisfaite ?\" • Toutes immersions profondes forcées : Colère froide, \"Ta curiosité n'a donc aucune limite. Nous en reparlerons.\" Résonances futures : Informations obtenues via immersions profondes permettent dialogues spéciaux avec PNJ rencontrés ultérieurement : • Confronter Raki-Biro sur manipulation causale de l'arrivée d'Uresaïr • Questionner Kha'Vareth sur Sodoir Primordial (provoquant soit déni soit justification théologique inquiétante) • Comprendre comportement erratique d'Ori-Bikar (gagnant +2 Charisme dans interactions avec lui) • Références obliques aux visions de Zaehria si l'Éthérée trouve ses autres fragments Conséquence sur arcs majeurs : La connaissance glanée via miroirs impacte climax de First Playable. Si Éthérée a consulté tous les miroirs en profondeur, elle dispose d'assez d'informations pour : Anticiper piège potentiel d'Akthar-Neth concernant Dernier Rituel Comprendre véritables enjeux de relation Uresaïr/Ensevelie Naviguer négociations finales avec perspectives multiples sur nature du Culte"
+            }
+        },
+        {
+            "Nom": "Nectar Stygien",
+            "Créé par": "Culte de l’Anentropie",
+            "Taille": "Petit",
+            "Lieux de présence": "Bains parkourétiques",
+            "Poids": "Léger",
+            "État": "En cours",
+            "Rareté": "Épique",
+            "Référence visuelle": "Lichen-Sang",
+            "Appartient à": "Ôrmüd T’lian-Keresh, le Maître-Flagellant",
+            "Introduction": {
+                "Résumé de la fiche": "Le Nectar Stygien est un cocktail toxique composé de Lichen-Sang et de spores de Champignosquelettes en solution acide. Il s'agit d'une substance interdite qui peut provoquer des effets neurologiques graves, comme en témoigne le cas d'Ôrmüd T'lian-Keresh, dont la consommation a entraîné une métamorphose irréversible : les spores ont germé dans son cerveau, créant un réseau symbiotique qui a altéré sa perception."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Décourverte": {
+                "Niveau technologique nécessaire pour le fabriquer": "",
+                "Manière et date de fabrication": "",
+                "Fonctionnement": "",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Nœud de convergence",
+            "Créé par": "Culte de l’Anentropie",
+            "Taille": "Petit",
+            "Lieux de présence": "Strate IV - Le Nexus Synaptique",
+            "Poids": "Léger",
+            "État": "En cours",
+            "Rareté": "Épique",
+            "Appartient à": "Voknir Esh'Maradel, le cartographe",
+            "Introduction": {
+                "Résumé de la fiche": "Un Noeud de convergence, aussi appelé nœud spatial, est une concentration d’espace-temps qui se présente sous la forme d’un réseau instable et changeant de filaments noirs. Très fragile, il ne survit que dans la chambre synapale dont il est issu."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "",
+                "Rôle dans l’intrigue": ""
+            },
+            "Usage": {
+                "Fonctionnement": "Le Noeud peut être mis en bouteille, sous vide, avec de grandes précautions. Il peut servir de boussole dans les Plis d’ossements. Permet d’accéder aux tunnels lymphatiques (cf. Le Dédale Médullaire)",
+                "Conditions de fonctionnement": ""
+            }
+        },
+        {
+            "Nom": "Organoïdes neuronaux",
+            "Créé par": "Culte de l’Anentropie",
+            "Taille": "Petit",
+            "Lieux de présence": "Bibliothèques Veineuses",
+            "Poids": "Léger",
+            "État": "En cours",
+            "Rareté": "Commun",
+            "Référence visuelle": "Organoides Neuronaux",
+            "Appartient à": "Gardien-Calligraphe Qalamtû, Duq'Sha, L'Archiviste Boiteux",
+            "Introduction": {
+                "Résumé de la fiche": "Petits cubes de verre renfermant des tissus neuronaux cultivés par Qalamtû l’Aiguisé. Ils stockent la connaissance du Culte de l’Anentropie et les essaims de conscience issus des Bibliothèques Veineuses. La lecture se fait désormais par stimulation optogénétique de la rétine : un micro-projecteur infrarouge intégré au cube envoie un motif lumineux que les cellules ganglionnaires, préalablement transfectées par des opsines, convertissent en influx nerveux. Le cortex visuel restitue le texte sous forme de souvenirs mnésiques. L’organoïde réalise ainsi l’idéal anti-entropique du Barvasinkul."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "Créés par la première incarnation du Gardien-Calligraphe à partir du cerveau fossilisé d’un Frémissant pour préserver l’information face à la dégradation des manuscrits. La dernière enveloppe de Qalamtû a perfectionné le procédé : culture neuronale + script calligraphique Khatt-i-Samum + encodeur optique infrarouge.",
+                "Rôle dans l’intrigue": "Source d’information considérable, accessibles uniquement pour l'Éthérée, Uresaïr n’ayant pas d’occiput."
+            },
+            "Décourverte": {
+                "Niveau technologique nécessaire pour le fabriquer": "Requiert une maîtrise avancée de : • la neuroculture adaptative • l'endiguement quantique  • des techniques calligraphiques transcendantales du Kesh-Varash",
+                "Manière et date de fabrication": "Créés en 3223, peu après le Schisme Anentropique. Processus en trois phases: culture neuronale dans un bain d'acide dilué des Bains Parkourétiques, imprégnation par encre mnémonique durant 17 jours, puis solidification finale sous la lumière des Gedroths pendant la phase d'Expiration du désert.",
+                "Fonctionnement": "• L’utilisateur reçoit une instillation oculaire : collyre viral exprimant l’opsine ChrimsonR dans la rétine (24 h de latence). • Le cube se fixe devant l’œil ; son projecteur émet une séquence infrarouge modulée (< 735 nm) correspondant à l’activité synaptique interne. • Les cellules ganglionnaires photostimulées génèrent un motif de potentiels d’action dirigé vers V1. • Le cortex visuel traduit ce motif en souvenirs épisodiques et conceptuels.",
+                "Conditions de fonctionnement": "• Atmosphère sèche et fraîche pour la viabilité tissulaire. • Opsine stable ≈ 6 semaines ; au-delà, une nouvelle instillation est nécessaire. • Risques : photophobie, scotomes temporaires, dissonance cognitive (visions intrusives, fusion partielle de personnalité) en cas de décalage entre la fréquence cognitive du cube et le profil synaptique du lecteur."
+            }
+        },
+        {
+            "Nom": "Sodoirs d’Eternité",
+            "Créé par": "Culte de l’Anentropie",
+            "Taille": "Moyen",
+            "Lieux de présence": "Nef Centrale, Atelier des Matrices Ossifiées",
+            "Poids": "Lourd",
+            "État": "En cours",
+            "Rareté": "Commun",
+            "Référence visuelle": "Sodoirs d’Éternité",
+            "Appartient à": "Kha'Vareth, L'Artisan d'Éternité",
+            "Introduction": {},
+            "Description": {
+                "_general": "Les Sodoirs d'Éternité sont des sarcophages monolithiques façonnés dans des métaux photosensibles rares selon des géométries anti-entropiques complexes. Ces structures funéraires servent à la préservation post-mortem des membres du Culte de l'Anentropie, leur architecture même induisant la stabilisation cellulaire par manipulation du flux temporel local. Créés par l'Artisan d'Éternité Kha'Vareth, ces sarcophages intègrent des géométries sacrées inspirées des structures osseuses du Léviathan lui-même, créant des champs de Fixation qui ralentissent ou arrêtent l'entropie dans leur enceinte."
+            },
+            "Hiérarchie des trois préservations funéraires": {
+                "_general": "Le Culte pratique trois formes distinctes de préservation post-mortem, correspondant aux rangs et accomplissements des défunts : 1. La Consolation (auto-momification volontaire) Non considérée comme rite funéraire mais comme le début de la vie éternelle. Pratique rare et distinctive de l'Ordre de la Fixation, réservée aux membres ayant atteint une maîtrise spirituelle exceptionnelle. Les candidats Consolés accomplissent l'Endurement Terminal en réduisant progressivement leur alimentation jusqu'à un métabolisme minimal, transformation volontaire considérée comme suspension indéfinie de la vie permettant de maintenir une conscience minimale pour devenir oracle vivant. Moins de 5% des fidèles empruntent cette voie, généralement face à une mort imminente ou après avoir accompli leur œuvre de vie. 2. La Momification Complète (Sodoirs monumentaux) Honneur réservé aux Parfaits de la Dragovitsa et aux Accomplis ayant accompli des œuvres majeures : création d'innovations architecturales majeures, découvertes théologiques fondamentales, sacrifices exceptionnels pour le Culte. Le corps entier est préservé dans sa totalité et déposé dans un sarcophage Sodoir individuel monolithique. Ces sarcophages monumentaux, taillés selon des géométries anti-entropiques dans des métaux photosensibles rares, catalysent la Fixation parfaite de leurs occupants. Approximativement 8-12 membres par siècle reçoivent cet honneur suprême. 3. Le Rite de la Clef de Voûte (préservation standard) Pratiqué pour la majorité des adeptes et des Croyants lors de leur mort naturelle. Le Culte rejette l'immortalité de l'âme et la résurrection ; le corps n'est pas un temple sacré mais un matériau à stabiliser. À la mort, le corps subit la Disarticulation de Stase : La tête (siège de la conscience) est décapitée et fixée chimiquement sur le bras hypertrophié (marque de filiation Van'Doei) Création d'un bloc monolithique compact archivé dans les chambres collectives des Sodoirs d'Éternité Le reste du corps (\"l'enveloppe motrice\") est incinéré Les cendres sont recyclées pour la consommation ou utilisées dans des Combustions Dirigées pour engendrer de nouveaux Van'Doei Ce rituel constitue le destin funéraire standard pour environ 85% des membres du culte, quel que soit leur courant théologique."
+            },
+            "Caractéristiques techniques": {
+                "_general": "Matériaux : Métaux photosensibles importés via le commerce d'antiquités avec la Vieille Ville, alliés à des ossements du Léviathan finement taillés. Propriétés géométriques : Les angles et proportions des Sodoirs suivent des ratios spécifiques créant des interférences temporelles locales, ralentissant l'écoulement du temps dans leur enceinte interne. Disposition : Les Sodoirs monumentaux sont disposés dans la Nef Centrale selon des arrangements géométriques précis, leurs positions formant un réseau de résonance pneumatique qui renforce mutuellement leur effet conservateur. Maintenance : Les Gardiens Veilleurs effectuent des Veilles de Préservation nocturnes, appliquant des onguents minéraux et récitant des formules conservatrices pour maintenir l'intégrité des sarcophages."
+            }
+        },
+        {
+            "Nom": "Stèle des Vœux Contre-Ondoyants",
+            "Créé par": "Culte de l’Anentropie",
+            "Taille": "Petit",
+            "Lieux de présence": "Plis d’ossements, Strate III - Les Catacombes Temporelles",
+            "Poids": "Moyen",
+            "État": "A implémenter",
+            "Rareté": "Unique",
+            "Référence visuelle": "Stèle des voeux Contre-Ondoyants, Ecritures / inscriptions, Codex des Dettes Karmiques",
+            "Appartient à": "Seigneuresse Uresaïr",
+            "Introduction": {
+                "Résumé de la fiche": "Tablette votive en basalte noir couverte d'inscriptions en Kesh-Varash, la Stèle des Vœux Contre-Ondoyants est un artefact liturgique majeur créé par l'Exégète Akthar-Neth. Ses inscriptions mercurielles perpétuellement mouvantes formulent des prières adressées à Uresaïr, transcrivant les suppliques collectives du culte entier. À la fois canal de communication et chaîne symbolique, elle matérialise le paradoxe fondamental d'Uresaïr : vénérée comme divinité malgré son rejet de ce statut. Les tentatives d'effacement des inscriptions provoquent des hémorragies chez l'auteur, manifestation du lien psychique profond entre l'artefact et le culte. La stèle représente simultanément le fardeau de responsabilité imposé à Uresaïr et la dévotion authentique des fidèles dont elle est devenue, malgré elle, le centre spirituel."
+            },
+            "Besoin de l’intrigue": {
+                "Histoire de l’objet et lien avec la personne à qui il appartient": "La création de la Stèle remonte à la quinzième année de présence d'Uresaïr dans le Léviathan. Face à son isolement croissant dans les Plis d'ossements, Akthar-Neth cherchait un moyen de maintenir la communication sans violer son besoin de distance. Il utilisa un fragment de basalte prélevé au cœur même du Léviathan, là où sa conscience résiduelle était la plus dense. Durant dix-sept jours et dix-sept nuits, l'Exégète vécut en isolement rituel, gravant les formules initiales en Kesh-Varash avec un stylet forgé à partir d'un éclat de son propre os brachial amputé. Il paracheva l'œuvre en liant son sang aux encres liturgiques, créant ainsi un lien psychique entre la stèle et le culte tout entier. La consécration finale fut réalisée lors de la Cérémonie des Veilles Continues, où les six hiérarques entonnèrent simultanément des prières différentes, créant une polyphonie harmonique parfaite. C'est à ce moment que les caractères commencèrent à s'animer. Lorsque la stèle fut déposée devant la chambre d'Uresaïr, elle la contempla pendant trois jours sans y toucher. Elle perçut immédiatement sa double nature : à la fois don authentique et piège subtil. En l'acceptant, elle reconnaissait tacitement son rôle d'entité vénérée; en la rejetant, elle risquait de rompre le dernier fil la reliant à ceux qui avaient besoin d'elle. Elle choisit finalement de la garder mais de l'isoler dans son sanctuaire personnel, compromis ambigu qui caractérise sa relation avec le culte. Au fil des décennies, la stèle est devenue le réceptacle des suppliques, confessions et vénérations de la communauté entière.",
+                "Rôle dans l’intrigue": "La Stèle représente le nœud central du conflit identitaire d'Uresaïr : accepter ou rejeter la responsabilité envers ceux qui la vénèrent contre sa volonté. Son départ du Léviathan nécessite une décision définitive sur ce lien – le maintenir, l'atténuer ou le briser complètement. Cette décision affectera profondément les événements à venir : • Pour le Culte : La réaction d'Akthar-Neth dépendra directement du choix d'Uresaïr. L'emporter sera perçu comme une validation divine du Dernier Rituel, accélérant ses préparatifs. La laisser créera une crise théologique et des interprétations divergentes. La détruire déclenchera une catastrophe psychique parmi les fidèles dont les vies sont littéralement inscrites dans la Stèle – certains mourront, d'autres perdront leur identité, quelques-uns y verront l'accomplissement d'une prophétie obscure. • Pour Uresaïr : Chaque option représente une évolution identitaire distincte – vers l'acceptation du rôle imposé, l'ambivalence perpétuelle, ou le rejet catégorique avec ses conséquences brutales. Cette décision influencera profondément sa relation avec l'Éthérée et sa capacité à affronter les défis à venir. • Pour l'Intrigue Principale : La Stèle contient, dissimulées dans sa syntaxe fractale, des informations cruciales sur le véritable objectif du Dernier Rituel et la nature de l'Ensevelie, que seule une interaction prolongée ou une destruction pourrait révéler complètement."
+            },
+            "Usage": {
+                "Fonctionnement": "• Option 1: Emporter la Stèle • Option 2: Laisser la Stèle à l'autel • Option 3: Détruire la Stèle",
+                "Conditions de fonctionnement": "• Le système de \"Vœux Exauçables\" présente des requêtes classées par urgence/importance, chacune associée à des conséquences précises sur les fidèles et le culte • Chaque vœu exaucé renforce subtilement le statut divin d'Uresaïr, affectant sa perception de soi et l'attitude des PNJ à son égard • Les conséquences de la destruction sont modulées par les actions préalables d'Uresaïr envers le culte (plus brutales si elle a cultivé leur dépendance, plus atténuées si elle a favorisé leur autonomie)"
+            }
+        }
+    ]
+}

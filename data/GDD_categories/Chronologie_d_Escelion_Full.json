@@ -1,0 +1,14 @@
+{
+    "chronologie_d_escelion": [
+        {
+            "Nom": "SansTitre",
+            "Description": "Des Umcuts colonisent les hautes altitudes près de l'Œil de Mirimance. Adaptation aux conditions extrêmes (air raréfié, températures négatives). Naissance de la phonétique à voyelles doublées caractéristique des Vortex.",
+            "Type d'événement": "Migration",
+            "Espèces": "Umcut",
+            "Date de début": "1250",
+            "Importance": "Modéré",
+            "Événement": "Ascension Vortex",
+            "Introduction": {}
+        }
+    ]
+}

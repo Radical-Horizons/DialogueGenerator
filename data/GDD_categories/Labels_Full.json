@@ -1,0 +1,74 @@
+{
+    "labels": [
+        {
+            "Nom": "Accessible.Games",
+            "Objectifs": "Accessibilité pour les joueurs en situation de handicap",
+            "Organisme porteur": "Initiative communautaire",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "BAFTA Games Awards",
+            "Objectifs": "Récompense de l’excellence vidéoludique",
+            "Organisme porteur": "British Academy of Film and Television Arts",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Creative Europe MEDIA – Jeux Vidéo",
+            "Objectifs": "Financement européen pour jeux narratifs et créatifs",
+            "Organisme porteur": "Commission européenne",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Game Connection Selected Projects",
+            "Objectifs": "Mise en valeur de projets prometteurs auprès des éditeurs",
+            "Organisme porteur": "Game Connection",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "IGDA Developer Credit Standards",
+            "Objectifs": "Bonnes pratiques pour le crédit des développeurs",
+            "Organisme porteur": "IGDA",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "IGF Awards (Independent Games Festival)",
+            "Objectifs": "Récompenses pour les meilleurs jeux indépendants",
+            "Organisme porteur": "GDC / IGF",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "IndieCade Selection / Awards",
+            "Objectifs": "Reconnaissance de la créativité dans le jeu indépendant",
+            "Organisme porteur": "IndieCade",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Label jeu vidéo culturel (CNC)",
+            "Objectifs": "Aide à la création de jeux à forte composante culturelle",
+            "Organisme porteur": "CNC (France)",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "PEGI",
+            "Objectifs": "Classification par âge et contenu",
+            "Organisme porteur": "ISFE",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Playing for the Planet / Green Game Jam",
+            "Objectifs": "Sensibilisation à l’environnement via le jeu vidéo",
+            "Organisme porteur": "ONU Environnement + studios partenaires",
+            "Obtenu": "{'id': '%5B%5ETA', 'type': 'checkbox', 'checkbox': False}",
+            "Introduction": {}
+        }
+    ]
+}

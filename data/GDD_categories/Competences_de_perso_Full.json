@@ -1,0 +1,17 @@
+{
+    "competences_de_perso": [
+        {
+            "Nom": "SansTitre",
+            "Source": "Base",
+            "Score": "{'id': '%3Cz%5El', 'type': 'formula', 'formula': {'type': 'number', 'number': 6}}",
+            "Verrouillée ?": "{'id': '%3EkZc', 'type': 'checkbox', 'checkbox': False}",
+            "Valeur": "6",
+            "Feuilles de perso": "Valkazer Reitar — FP",
+            "Compétence": "Neurosciences",
+            "Notes": "Compétence solide : compréhension du système nerveux pour auto-chirurgie, modifications neurologiques liées aux greffes",
+            "Cadre": "{'type': 'select', 'select': {'id': '@pi^', 'name': 'Culturel', 'color': 'brown'}}",
+            "Entrée": "Valkazer — FP — Neurosciences",
+            "Introduction": {}
+        }
+    ]
+}

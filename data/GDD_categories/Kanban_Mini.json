@@ -1,0 +1,454 @@
+{
+    "kanban": [
+        {
+            "Nom": "Aedre"
+        },
+        {
+            "Nom": "Ambiance sonore et musicale Léviathan"
+        },
+        {
+            "Nom": "Ambiance sonore et musicale Plis"
+        },
+        {
+            "Nom": "Amélioration export GDD"
+        },
+        {
+            "Nom": "Améliorer la boite de dialogue"
+        },
+        {
+            "Nom": "Améliorer l’IA Notion"
+        },
+        {
+            "Nom": "Animation de base Uresaïr"
+        },
+        {
+            "Nom": "Animation V1"
+        },
+        {
+            "Nom": "Articles complémentaires (lore)"
+        },
+        {
+            "Nom": "Articles complémentaires :  Barvas le Juge-Mendiant   Barvasinkul   Symbiotisme   Rêveurs primordiaux   Rêveurs Émergents   Rêveurs secondaires  "
+        },
+        {
+            "Nom": "Aspects de support (Armaiti, Haurvat, Ameret, Mainyu)"
+        },
+        {
+            "Nom": "Aspects d'exploration (Asha + Khshatra)"
+        },
+        {
+            "Nom": "Auto-colliders"
+        },
+        {
+            "Nom": "Bastions Oubliés"
+        },
+        {
+            "Nom": "Blocage de choix par traits"
+        },
+        {
+            "Nom": "Carte d’Escelion"
+        },
+        {
+            "Nom": "Choisir le nom du studio"
+        },
+        {
+            "Nom": "Choisir le nom du studio + logo + sous-titre"
+        },
+        {
+            "Nom": "Chronologie"
+        },
+        {
+            "Nom": "Conscience de la possession (dialogues internes)"
+        },
+        {
+            "Nom": "Correctifs Unity"
+        },
+        {
+            "Nom": "Corriger export"
+        },
+        {
+            "Nom": "Création de skills Claude"
+        },
+        {
+            "Nom": "Décors plis d’ossement"
+        },
+        {
+            "Nom": "Décors Strate III (plis d’ossement)"
+        },
+        {
+            "Nom": "Deimos"
+        },
+        {
+            "Nom": "Dépense d'Influence pour forcer une action"
+        },
+        {
+            "Nom": "Désert des Echos Perdus"
+        },
+        {
+            "Nom": "Dialogues"
+        },
+        {
+            "Nom": "Dialogues de la possession d’Uresaïr"
+        },
+        {
+            "Nom": "Dialogues de l’accord"
+        },
+        {
+            "Nom": "Dialogues du cartographe"
+        },
+        {
+            "Nom": "Dialogues du cartographe V1"
+        },
+        {
+            "Nom": "Dialogues/interactions V1"
+        },
+        {
+            "Nom": "Dialogue avec choix"
+        },
+        {
+            "Nom": "Dialogue avec polish UI"
+        },
+        {
+            "Nom": "Dialogue de possession"
+        },
+        {
+            "Nom": "Dialogue qui se souvient"
+        },
+        {
+            "Nom": "Dialogue simple end-to-end"
+        },
+        {
+            "Nom": "Échec critique volontaire"
+        },
+        {
+            "Nom": "Ecrire Guide musical"
+        },
+        {
+            "Nom": "Ecrire  Guide musical  "
+        },
+        {
+            "Nom": "Embranchement : Voknir guide (optionnel)"
+        },
+        {
+            "Nom": "Embranchement : Voknir guide (optionnel)Embranchement : Voknir guide (optionnel)"
+        },
+        {
+            "Nom": "Embranchement : Zaehria négociation (optionnel)"
+        },
+        {
+            "Nom": "Embranchement : Zaehria négociation (optionnel)Embranchement : Zaehria négociation (optionnel)"
+        },
+        {
+            "Nom": "Eonundé"
+        },
+        {
+            "Nom": "Épreuve des Bains parkourétiques"
+        },
+        {
+            "Nom": "Escelion"
+        },
+        {
+            "Nom": "Etudes concurrents"
+        },
+        {
+            "Nom": "Etude commerciale V2"
+        },
+        {
+            "Nom": "Exploration Plis d'Ossements + Ensevelie"
+        },
+        {
+            "Nom": "Faire une plaquette publicitaire"
+        },
+        {
+            "Nom": "Faire une V1 du pitch deck"
+        },
+        {
+            "Nom": "Fonctionnalités 1ere minutes (fiches)"
+        },
+        {
+            "Nom": "Fonctionnalités diverses"
+        },
+        {
+            "Nom": "Forcer un choix via Influence (implémentation)"
+        },
+        {
+            "Nom": "Forêts de corail"
+        },
+        {
+            "Nom": "Formulaire interview"
+        },
+        {
+            "Nom": "Générateur de fiches agentique"
+        },
+        {
+            "Nom": "Illustrations Nef centrale"
+        },
+        {
+            "Nom": "Illustrations Tunnel vertébral"
+        },
+        {
+            "Nom": "Illustration Bains Parkourétiques"
+        },
+        {
+            "Nom": "Implémentation 1eres minutes"
+        },
+        {
+            "Nom": "Implémenter Yarn Spinner"
+        },
+        {
+            "Nom": "Impl: Focus manette et mapping"
+        },
+        {
+            "Nom": "Impl: Shell UI et canevas"
+        },
+        {
+            "Nom": "Intégration première map"
+        },
+        {
+            "Nom": "Inventaire — Consommer ou équiper un objet"
+        },
+        {
+            "Nom": "Inventaire — Ouvrir et naviguer à la manette"
+        },
+        {
+            "Nom": "Inventaire — Tri et recherche basiques"
+        },
+        {
+            "Nom": "Jauges Influence & Respect (Uresaïr)"
+        },
+        {
+            "Nom": "Journal — Afficher chapitres et objectifs actifs"
+        },
+        {
+            "Nom": "Journal — Lisibilité et navigation manette"
+        },
+        {
+            "Nom": "Journal — Mise à jour automatique après événements"
+        },
+        {
+            "Nom": "Jungle Vivarcade"
+        },
+        {
+            "Nom": "Langgraph Notion V1"
+        },
+        {
+            "Nom": "La tanière (fiche)"
+        },
+        {
+            "Nom": "Les puits céleste (fiche)"
+        },
+        {
+            "Nom": "Level design Plis d’ossement"
+        },
+        {
+            "Nom": "Le rêveur du Puits Celeste"
+        },
+        {
+            "Nom": "Le vernissage (fiche)"
+        },
+        {
+            "Nom": "Lieux additionnels"
+        },
+        {
+            "Nom": "L’Enlumineur (fiche)"
+        },
+        {
+            "Nom": "L’Hermogène"
+        },
+        {
+            "Nom": "Machine Pérégrine"
+        },
+        {
+            "Nom": "Marché automaton"
+        },
+        {
+            "Nom": "Menu pause avec écran personnage"
+        },
+        {
+            "Nom": "Murmurateurs"
+        },
+        {
+            "Nom": "Musiques Plis d’ossement"
+        },
+        {
+            "Nom": "Narthex abyssal accessible (entrée + PNJ)"
+        },
+        {
+            "Nom": "Naviguer aux onglets au clavier/souris/manette"
+        },
+        {
+            "Nom": "Nef Centrale + rencontre Akthar-Neth"
+        },
+        {
+            "Nom": "Nouvelles fiches - combler les trous du Léviathan"
+        },
+        {
+            "Nom": "Onboarding"
+        },
+        {
+            "Nom": "Onboarding Véronique"
+        },
+        {
+            "Nom": "Ouvrir/fermer le menu rapidement"
+        },
+        {
+            "Nom": "Partager projet Unity"
+        },
+        {
+            "Nom": "Peaufinage obstacles"
+        },
+        {
+            "Nom": "Perf: mesure et optimisation temps d’ouverture"
+        },
+        {
+            "Nom": "Pitch deck"
+        },
+        {
+            "Nom": "Plan Financier"
+        },
+        {
+            "Nom": "Playtest à la BaC"
+        },
+        {
+            "Nom": "PNJ secondaires"
+        },
+        {
+            "Nom": "PNJ secondaires Léviathan"
+        },
+        {
+            "Nom": "Polish graphique Zone 1 (Plis + Léviathan)"
+        },
+        {
+            "Nom": "Polish visuel Uresaïr (VFX & animations)"
+        },
+        {
+            "Nom": "Première rencontre avec l'Éthérée"
+        },
+        {
+            "Nom": "Premier Aspect : Manah (Lecture des pensées)"
+        },
+        {
+            "Nom": "Préparer la campagne réseaux sociaux"
+        },
+        {
+            "Nom": "Présentation en anglais"
+        },
+        {
+            "Nom": "Qadul’Doei"
+        },
+        {
+            "Nom": "Quête : Les Manuscrits Interdits (Akthar-Neth)"
+        },
+        {
+            "Nom": "Rash’Doei"
+        },
+        {
+            "Nom": "Recruter"
+        },
+        {
+            "Nom": "Réécriture des fiches de l’Anentropie (terminologie + nouveaux templates)"
+        },
+        {
+            "Nom": "Règnes"
+        },
+        {
+            "Nom": "Relier Vethraak aux caravanes (désert des Echos)"
+        },
+        {
+            "Nom": "Remplir le plan financier V0.1"
+        },
+        {
+            "Nom": "Retour au jeu sans fuite d’état"
+        },
+        {
+            "Nom": "Review TypingMind"
+        },
+        {
+            "Nom": "Sauvegarde/chargement de base"
+        },
+        {
+            "Nom": "Sauvegarde de secours anti-corruption"
+        },
+        {
+            "Nom": "Scenarios 1eres minutes"
+        },
+        {
+            "Nom": "Sélectionne les loras"
+        },
+        {
+            "Nom": "Squelette JDR"
+        },
+        {
+            "Nom": "Steppe des Eteignoirs"
+        },
+        {
+            "Nom": "Système de caméra"
+        },
+        {
+            "Nom": "Système de caractéristiques (8 stats)"
+        },
+        {
+            "Nom": "Système de déplacements"
+        },
+        {
+            "Nom": "Système de musiques"
+        },
+        {
+            "Nom": "Système de stabilité d'Uresaïr"
+        },
+        {
+            "Nom": "Système de transition entre zones"
+        },
+        {
+            "Nom": "Système d’obstacles"
+        },
+        {
+            "Nom": "Tableau des références visuelles (Début du Léviathan)"
+        },
+        {
+            "Nom": "Tableau des références visuelles (Léviathan)"
+        },
+        {
+            "Nom": "Tests de compétences avec UI basique"
+        },
+        {
+            "Nom": "Todo list pour IA"
+        },
+        {
+            "Nom": "Traits de base Uresaïr (5 sphères)"
+        },
+        {
+            "Nom": "Tunnel vertébral (scénario)"
+        },
+        {
+            "Nom": "Tutoriel intégré narratif"
+        },
+        {
+            "Nom": "Uresaïr"
+        },
+        {
+            "Nom": "Uresaïr contrôlable"
+        },
+        {
+            "Nom": "Vertical slice playtest externe"
+        },
+        {
+            "Nom": "Vethraak"
+        },
+        {
+            "Nom": "Vieille Ville V2"
+        },
+        {
+            "Nom": "Voies de passage"
+        },
+        {
+            "Nom": "Voir comptable"
+        },
+        {
+            "Nom": "Vol Reitar"
+        },
+        {
+            "Nom": "Zone de tutoriel jouable (Plis)"
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "guides_musicaux_par_lieux": [
+        {
+            "Nom": "Guide musical (Léviathan)",
+            "Mots-clés type": "{'type': 'rich_text', 'rich_text': [{'type': 'text', 'text': {'content': 'brass, triumphant, building, orchestral, resolute, percussion, heroic, anthem, crescendo, determined', 'link': None}, 'annotations': {'bold': False, 'italic': False, 'strikethrough': False, 'underline': False, 'code': False, 'color': 'default'}, 'plain_text': 'brass, triumphant, building, orchestral, resolute, percussion, heroic, anthem, crescendo, determined', 'href': None}]}",
+            "Lieux": "Léviathan pétrifié",
+            "Piliers": "Des liens d’acier",
+            "Genres musicaux + sous-genres": {
+                "_general": "Ambient (Dark ambient, Drone, Industrial ambient, Ritual ambient) Néoclassique (Minimalisme, Post-minimalisme, Musique de chambre contemporaine) Musique traditionnelle rituelle (Chant grégorien, Chants bouddhistes tibétains, Chants diphoniques tuvans) Orchestral avant‑gardiste (Avant‑garde, Musique spectrale, Chœur contemporain) Électroacoustique (Musique concrète, Acousmatique, Field recording, Tape music)"
+            },
+            "Ambiances": {
+                "_general": "Globale : Souterrain, Claustrophobe, Imposant, Fourneaux, Minéral, Mort-vivant, initiatique Principe générique : Plus on est haut dans le Léviathan plus les musiques sont aigues (et potentiellement plus rapides et lumineuses). Ordre : Narthex (très aigu) > Bains parkourétiques + Bibliothèques veineuses + Nef Centrale (aigue)  > Tunnel vertébral + cellules (neutre) > Strate I et II (grave) > Strate III et IV (très grave) Sites religieux : Religieux, Grandiloquent, Sacré Zones d’habitation : mélancolique, Sombre Dans les plis : étrange, alien"
+            },
+            "Morceaux d'Influences": {
+                "_general": "Hollow knight - “Dirt Mouth” : Nostalgique, mélancolique, lent et doux Phurpa – Boiler Room In Stereo : Gong, vocalises Nier: Automata - Significance : Pour le côté dissonnant Le Nom de la Rose - Main theme : Bruits de carillons et de cloche, religieux mais mystérieux Raison d'être - \"Within the Depths of Silence and Phormations\" : ambient industriel méditatif Requiem de Schnittke : Post-moderne, mélange de styles (baroque, avant-garde, tango !), déconstruit la forme traditionnelle du requiem"
+            },
+            "Genres à éviter": {
+                "_general": "Genre similaires et proches des genres cibles (qui risquent de ressortir de façon indésirable) Ambient lumineux/New Age Rock/Metal mélodique accessible Horreur"
+            }
+        },
+        {
+            "Nom": "Guide musical (Plis)",
+            "Mots-clés type": "{'type': 'rich_text', 'rich_text': [{'type': 'text', 'text': {'content': 'theremin, ethereal, ambient, prepared piano, unsettling, granular, microtonal, mysterious, free tempo, otherworldly', 'link': None}, 'annotations': {'bold': False, 'italic': False, 'strikethrough': False, 'underline': False, 'code': False, 'color': 'default'}, 'plain_text': 'theremin, ethereal, ambient, prepared piano, unsettling, granular, microtonal, mysterious, free tempo, otherworldly', 'href': None}]}",
+            "Lieux": "Plis d’ossements",
+            "Piliers": "Voyage au Cœur de l'Étrange",
+            "Genres musicaux + sous-genres": {
+                "_general": "Genres clairs et connus (ex : Musique classique, rock, metal, ambient, jazz, etc) suivis de sous-genres clairs (hard rock, musique de chambre, opéra, dark ambient, jazz impro) entre parenthèses. Ex: Rock (hard rock) Ambient (dark ambient, ritual ambient) Néoclassique (minimal néoclassique, néoclassique intimiste) Folk sombre (folk horror, dark folk) Orchestral minimal (musique de chambre minimale, post‑minimalisme orchestral) Metal atmosphérique (post-metal, folk metal) Expérimental électro‑acoustique (musique concrète, drone expérimental) Par strate : - Strate I : Musique chorale contemporaine + ambient industriel cinématographique - Strate II : Ambient électronique expérimental - Strate III : Néoclassique minimal (piano una corda grave, violoncelles/contrebasses sul tasto) - Strate IV : Choral spectral + drone dark cinématographique"
+            },
+            "Ambiances": {
+                "_general": "Principe générique : Plus on est haut dans le Léviathan plus les musiques sont aigues (et potentiellement plus rapides et lumineuses).  - Ordre : Strate I et II (grave) > Strate III et IV (très grave) Ambiance générale - Minéral, rituel, suspendu. - Pulsations viscérales comme un cœur fossile. - Harmonies modales sombres, timbres boisés et métalliques traités. - Textures lentes, halos bioluminescents, chuchotements. Par strate : - Strate I : rituel froid, autorité, pulsations lentes, drones de « surveillance », low register, contralto, mezzo forte - Strate II : plus bizarre et moins religieux, matière qui se déforme, espace mouvant, very low register, contralto, mezzo forte - Strate III : nostalgique et intime, mémoire, motifs lents et retenus, chaleur contenue, very low register, Bass, piano - Strate IV : très dérangeant, étrange, limites de l’horrifique, gravité centripète, very low register, bass, pianissimo"
+            },
+            "Morceaux d'Influences": {
+                "_general": "Morceaux influents, y compris de jeux vidéo Hollow Knight OST — atmospheres, City of Tears, White Palace Dark Souls/Bloodborne — chœurs traités, sombre liturgie The Witcher 3 — cue “Ladies of the Woods” pour folk horreur Hylics / Annihilation (Ben Salisbury & Geoff Barrow) — textures organiques, drones vivants FFVII Remake — cues texturaux bas-dynamiques, non héroïques Jeremy Soule (Skyrim) — pads choraux discrets, no grandiose Jóhann Jóhannsson — Orphée/Prisoners pour minimalisme sombre Par strate : - Strate I : Philip Glass — Koyaanisqatsi (title track) - Strate II : Ben Salisbury & Geoff Barrow — The Alien (Annihilation), segment ~3:50–4:40 - Strate III : Max Richter — On the Nature of Daylight - Strate IV : György Ligeti — Requiem: Kyrie (ou Lux Aeterna)"
+            },
+            "Genres à éviter": {
+                "_general": "Genre similaires et proches des genres cibles (qui risquent de ressortir de façon indésirable) Epic orchestral, trailer music, braams surdimensionnés EDM, trap, dubstep, synthwave rétro Fantasy celtique joviale, taverne médiévale légère Horror jump-scare staccato caricatural, pizzicati cartoon Par strate : - Strate I : Musique orchestrale épique - Strate II : Synthwave - Strate III : Musique romantique mélodramatique - Strate IV : Horreur percussive"
+            }
+        }
+    ]
+}

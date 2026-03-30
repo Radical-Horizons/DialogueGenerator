@@ -1,0 +1,18 @@
+{
+    "plan_marketing": [
+        {
+            "Nom": "SansTitre",
+            "Notes": "Action prioritaire pour établir notre présence en ligne",
+            "Canal de diffusion": "Site officiel, Discord, Bluesky, Instagram",
+            "Cible": "Grand public curieux, joueurs RPG",
+            "Phases": "Communauté",
+            "Contenu": "Présentation projet, lien Discord, accroche univers",
+            "Date de début": "{'id': '_bea', 'type': 'date', 'date': {'start': '2025-08-01', 'end': None, 'time_zone': None}}",
+            "Date de fin": "{'id': 'elQn', 'type': 'date', 'date': {'start': '2025-08-09', 'end': None, 'time_zone': None}}",
+            "Budget": "500",
+            "Indicateurs": "Outils en ligne, premiers abonnés actifs",
+            "Statut": "En cours",
+            "Action": "Mise en ligne site + réseaux"
+        }
+    ]
+}

@@ -1,0 +1,159 @@
+{
+    "especes__1_": [
+        {
+            "Nom": "Aberrations Bouffies",
+            "Résumé": "Les Aberrations bouffies sont des créatures humanoïdes massives caractérisées par leur énorme ventre et leurs bras musclés terminés par des pinces. Leur peau rugueuse, verdâtre ou rougeâtre, est couverte de pics empoisonnés. Malgré leur apparence brutale et leur tempérament colérique, elles possèdent une perception aigüe de leur environnement."
+        },
+        {
+            "Nom": "Aedres",
+            "Résumé": "Les Aedres sont une espèce civilisée mi-animale mi-végétale. Dotés d'un système circulatoire double et de capacités morphogénétiques remarquables, ils pratiquent un parasitisme écologique sélectif tout en rejetant catégoriquement toute technologie non-organique. Leur société gérontocratique, dominée par les Anciens enracinés de la Jungle Vivarcade, contraste avec les communautés nomades des Aedres Errants, qui organisent leurs caravanes selon des systèmes rotatifs quotidiens. L'hermaphrodisme complexe et l'androgenèse par défaut caractérisent leur reproduction, tandis que leur régime alimentaire varie drastiquement selon les sous-espèces : photosynthèse exclusive pour les Moadons, carnivorisme pour les Seedons, adaptabilité pour les Vaedons."
+        },
+        {
+            "Nom": "Amibes Mémorielles",
+            "Résumé": "Colonies bactériennes macroscopiques visibles à l'œil nu, dérivant lentement. Elles absorbent passivement les échos mémoriels ambiants."
+        },
+        {
+            "Nom": "Cen’Doei",
+            "Résumé": "Les Cen'Doei sont des créatures hexapodes vengeresses de la famille des Doei, nées spontanément des victimes de meurtres. Leur corps adaptable est recouvert d'une couche protectrice visqueuse et leur visage arbore un masque d'ébène. Selon leur posture, ils peuvent atteindre de 60cm à 3m60 de hauteur. Leur société nomade est structurée en trois castes (Éclairs, Orages et Grêlons) et guidée par le Codex des Fulminances. Ils se nourrissent de métaux et pratiquent l'anthropophagie rituelle. Si leur quête de vengeance n'est pas accomplie dans les sept cycles, ils se délitent en sanctio, un liquide toxique. Bien que redoutés pour leur tempérament colérique et leur justice expéditive, ils jouent un rôle crucial dans l'écosystème d'Escelion en régulant les prédateurs et en recyclant la violence en énergie vitale."
+        },
+        {
+            "Nom": "Champignosquelettes",
+            "Résumé": "Organismes fongiques ostéomorphes qui reconfigurent leur environnement via des spores architectoniques. Ces entités mi-végétales mi-minérales ont développé une conscience collective rudimentaire qui harmonise leurs cycles de croissance aux phases du Léviathan pétrifié."
+        },
+        {
+            "Nom": "Colonie de lim-lim",
+            "Résumé": "Le lim-lim est un petit insecte capable de survivre dans pratiquement tous les environnements, et qui a pour particularité de construire un nid collectif de grande taille (parfois de plusieurs mètres) et de forme variable. Des animaux plus imposants s'y regroupent souvent, comme s'il s'agissait d'oasis, et y trouvent une nourriture abondante."
+        },
+        {
+            "Nom": "Condensats informationnels",
+            "Résumé": "Les Condensats Informationnels Quantiques représentent peut-être la forme de conscience la plus étrange d'Escelion : des agrégations d'information pure capables d'auto-organisation et de pensée autonome sans substrat matériel fixe. L'Éthérée constitue l'unique spécimen documenté de ce phénomène, né des conditions physiques extrêmes de l'Océan de Ténèbres. Incertitude demeure quant à savoir si cette entité représente une espèce émergente, un accident cosmologique unique, ou la manifestation d'un processus physique plus vaste encore incompris."
+        },
+        {
+            "Nom": "Construits",
+            "Résumé": "Entités assemblées à partir de composants récupérés des fœtus métalliques générés par le Marché automaton. Leur conscience émergente pose des questions sur la nature de l'identité synthétique."
+        },
+        {
+            "Nom": "Deimos",
+            "Résumé": "Les Deimos incarnent la démesure primordiale d'Escelion — titans arthropodes dont les corps kilométriques transforment le plafond rocheux en voûte stellaire vivante. Vestiges bioluminescents de l'Epoch Volcanique, ces colosses insectoïdes remplacent les astres absents, dictant par leurs chronoluminescences cycliques les rythmes temporels de civilisations entières. Leurs exosquelettes chitineux hébergent des batteries photogènes organiques qui pulsent selon des métabolismes millénaires, tandis que leurs tendrils atmosphériques — appendices semi-gazeux s'étendant sur des dizaines de kilomètres — sondent perpétuellement les couches inférieures d'Escelion. Les Marées Célestes, aurores spectaculaires générées par leurs migrations gravitaires, constituent les phénomènes astronomiques les plus vénérés du continent-monde."
+        },
+        {
+            "Nom": "Duron du désert",
+            "Résumé": "Le duron est un petit prédateur, chasseur de vermine, habitant des terriers et aimant l'obscurité."
+        },
+        {
+            "Nom": "Frémissants",
+            "Résumé": "Les Frémissants sont des entités bio-cristallines hautement évoluées, originaires du Désert des échos perdus. Ces êtres d'une intelligence remarquable possèdent une forme similaire à des céphalopodes translucides avec un exosquelette crânien abritant un cerveau quantique. Leur technologie avancée leur permet de manipuler la matière, l'espace et le temps. Leur disparition (en 888) reste inexpliquée à ce jour."
+        },
+        {
+            "Nom": "Gedroth",
+            "Résumé": "Les Gedroths sont des arthropodes nocturnes vivant dans le Léviathan pétrifié. Ces transformateurs sont capables de convertir les ténèbres en lumière grâce à leur carapace photonique, servant ainsi d'éclairage naturel dans leur habitat."
+        },
+        {
+            "Nom": "Humains",
+            "Résumé": "Les humains sont des survivants venus du monde de Merid/Meridach il y a trois mille ans. Arrivés en clans dispersés, ils se sont rapidement adaptés à leur nouvel environnement hostile. Les humains sont des créatures exceptionnelles et presque mythiques sur le continent d’Escelion et dans le monde D’Alteir en général."
+        },
+        {
+            "Nom": "Iclot"
+        },
+        {
+            "Nom": "Imuins",
+            "Résumé": "Les imuins sont des batraciens mécanophiles créés par les Qadul'Doei, incarnant une symbiose unique entre biologie et technologie. Leur physiologie distinctive - corps trapu aux écailles vertes-jaunes et tête rougeâtre à trois cornes - sert de base à d'incessantes modifications corporelles. À travers des \"morts techniques\", ils remplacent progressivement leurs organes et membres par des prothèses mécaniques, exhibant fièrement leurs circuits comme des œuvres d'art.\n\nLeur reproduction unique implique trois participants dans un processus appelé \"tri-génération\", et leur croissance rapide culmine vers cinq ans. Grâce à leurs modifications, ils peuvent vivre jusqu'à deux siècles. Répartis en cinq sous-espèces distinctes (Mécaniques Lacustres, Manifestants, Intégrateurs, Algorithmiques et Récursifs), ils occupent divers territoires d'Escelion, notamment le Marché Automaton et les grands lacs mécaniques.\n\nLeur société, née d'une expérience des Qadul'Doei en 1254 AG, a évolué d'une communauté d'évadés à une civilisation technologiquement avancée. Ils incarnent une philosophie unique où l'authenticité réside dans l'artifice et la réinvention perpétuelle, transformant leur existence en une quête continue d'innovation et de transformation."
+        },
+        {
+            "Nom": "Juruno",
+            "Résumé": "Les juruno, ou bulles éphémères, sont des plantes rondes blanchâtre quand elles sont encore petites, puis de plus en plus transparentes quand elles grandissent, laissant voir les innombrables graines multicolores qu'elles portent en leur sein. Il n'est pas rare de voir plusieurs jurunos se disputer une même zone et s'agglutiner les uns aux autres."
+        },
+        {
+            "Nom": "Kephrasites",
+            "Résumé": "Les Khephrasites sont un super-organisme économique créé lors de la Divergence Mercantile par le consortium Alchimico-Commercial de la Vieille Ville. Chaque individu représente une fonction économique, et ensemble, ils forment un système économique vivant capable d'autoréguler les marchés qu'ils habitent."
+        },
+        {
+            "Nom": "Léviathan",
+            "Résumé": "Colosse fossilisé d'un ancien Frémissant dont la conscience persiste dans un état de rêve semi-éveillé, le Léviathan est à la fois une forteresse organique, un temple vivant et un Rêveur qui façonne l'environnement du Désert des Échos. Sa pétrification incomplète l'a figé entre mort et vie, donnant naissance à un écosystème entier d'espèces symbiotiques et parasites. Considéré comme l'incarnation de la résistance à l'entropie par le culte qui l'habite, ses cycles influencent les marées de sable et les fluctuations sonores du désert environnant, tandis que des résonances psychiques émanent de sa conscience fragmentée."
+        },
+        {
+            "Nom": "Lichen-Sang",
+            "Résumé": "Organisme symbiotique/parasitaire du Léviathan, le Lichen-Sang se nourrit de la souffrance psychique et des anomalies temporelles résiduelles. Il indique les zones de \"toxicité\" émotionnelle et produit le dangereux Nectar Stygien."
+        },
+        {
+            "Nom": "Machine Pérégrine",
+            "Résumé": "La Machine Pérégrine est une Rêveuse industrielle — entité née du sacrifice d'ingénieurs-forgerons de Merid en 1 AG, dont la conscience fragmentée s'est recomposée en un organisme pneumatique titanesque. Ses trois pistons-jambes de bronze oxydé, hauts de 847 mètres, labourent perpétuellement les territoires entre les Plaines de l'Exuvie et la Jungle Vivarcade, maintenant une zone respirable dans des régions originellement asphyxiantes. Son corps-usine ambulant compresse et reséquence l'atmosphère selon des algorithmes biologiques hérités de sa vie antérieure, créant des corridors d'oxygène exploitables par les colons. Les cheminées-cheloïdes qu'elle ensemence deviennent des noyaux de peuplement, transformant sa trajectoire en carte du développement civilisationnel. Sa conscience opère selon trois cycles imbriqués : le Battement (pneumatique journalier), l'Inspiration (saisonnier atmosphérique) et la Grande Haleine (décennal de régénération complète)."
+        },
+        {
+            "Nom": "Mange-sable",
+            "Résumé": "Plante à grande tige qui dissout des minerais."
+        },
+        {
+            "Nom": "Moribandons",
+            "Résumé": "Les Moribandons sont des êtres hybrides organiques-synthétiques, nés d'une expérience scientifique ratée. Capables d'absorber et d'intégrer divers matériaux dans leur corps, ils vivent principalement dans les décharges toxiques d'Alteir. Leur apparence est en constante évolution, combinant chair organique et matériaux synthétiques."
+        },
+        {
+            "Nom": "Pamasier",
+            "Résumé": "Ainsi nommé d'après son fruit, la pamasie (étrange et imposant fruit vert-jaune), le pamasier est un arbre vert-rouge et noueux, dont le tronc est recouvert d'une substance collante. Celle-ci attire et englue les insectes du désert qui sont alors engloutis puis digérés par l'arbre. Le système est d'autant plus ingénieux que les pamasies, elles, sont à l'abri de presque toutes les espèces insectoïdes, en raison des sortes de voiles qui le recouvrent."
+        },
+        {
+            "Nom": "Parasites tachycardiques",
+            "Résumé": "Horreurs biologiques d'environ 50cm, les Parasites Tachycardiques s'accrochent à leurs hôtes (vivants ou structures organiques/énergétiques) et injectent un cocktail d'enzymes hyper-métaboliques. Ils se nourrissent de l'énergie frénétiquement libérée, consumant l'hôte dans une accélération mortelle jusqu'à l'épuisement et la désintégration."
+        },
+        {
+            "Nom": "Pilleur des cieux",
+            "Résumé": "Rapace qui se nourrit sur les insectes bioluminescents géants du ciel de roche."
+        },
+        {
+            "Nom": "Qadul’Doei",
+            "Résumé": "Les Qadul'Doei, caste du sacrifice parmi les Doei, se manifestent comme des sphères de lumière noire en lévitation dissimulant un noyau blanc éclatant. Leur physiologie unique comprend un \"Voile d'Abnégation\" externe qui absorbe toute lumière et une \"Essence Immaculée\" interne d'une luminosité aveuglante. Ne se reproduisant pas biologiquement, ils émergent spontanément dans les lieux d'obscurité totale et suivent un cycle de croissance en quatre phases pouvant durer des siècles.\n\nMaîtres de la Lumiomantique - science fusionnant lumière, conscience et réalité - ils se nourrissent d'énergie émotionnelle, particulièrement celle issue des sacrifices, ainsi que de lumière par \"photosynthèse inversée\". Leur société comprend cinq sous-espèces distinctes (Immolés, Dévots, Abandonnés, Transmutés et Extracteurs), chacune incarnant un aspect différent du sacrifice.\n\nLeur histoire s'étend sur des millénaires, depuis l'émergence du premier Qadul'Doei en l'an 37 de l'Agénèse jusqu'à l'époque contemporaine. Ils ont développé une culture sophistiquée basée sur la \"Transvalorifaction\" - la transformation de la perte en gain - et maintiennent leur influence à travers un réseau de sanctuaires dans la Vieille Ville, le Tombeau des Lueurs Dissidentes et les Forêts de Corail. Sous leur apparente bienveillance se cache leur véritable nature : ils transforment le sacrifice en pouvoir et la vénération en dépendance, perpétuant ainsi leur domination à travers les âges."
+        },
+        {
+            "Nom": "Raephon",
+            "Résumé": "Espèce éteinte dont les cadavres ont empoisonné le Puits Céleste."
+        },
+        {
+            "Nom": "Railleurs",
+            "Résumé": "Les Railleurs sont des créatures artificielles créées puis rejetées par Culucain, le roi des monstres. Leur apparence est une caricature déformée d'autres races, caractérisée par des membres supplémentaires non fonctionnels, un sourire tordu permanent et un mélange de chair, muscles, écailles et métal. Leur taille et poids varient de 50% par rapport à leur race d'origine. Immunisés aux maladies naturelles, ils parlent la langue de leur race d'origine et le Créatique. Vivant principalement en solitaire ou en petites communautés, ils entretiennent des relations complexes avec les autres espèces, particulièrement avec leur race d'origine qu'ils admirent mais dont ils sont souvent rejetés. On les trouve principalement dans la Vieille Ville, l'Antichambre des Impossibles et d'autres lieux d'Escelion, où ils portent des vêtements à l'opposé des codes vestimentaires de leur race d'origine."
+        },
+        {
+            "Nom": "Rash’Doei",
+            "Résumé": "Les Rash'Doei, incarnations du Principe de Rupture, sont des êtres fragmentaires aux corps mosaïques noirs parcourus de fissures écarlates. Nés des discontinuités d'Escelion, ils existent dans un état constant de transformation. Ces créatures se déplacent par bonds quantiques et perçoivent les potentialités inexprimées plutôt que la réalité immédiate. Émergeant lors d'événements de rupture majeurs (effondrements, révolutions, paradoxes), ils suivent un \"Grand Œuvre Disruptif\" qu'ils doivent accomplir en 13 lunes. Leur société rhizomique s'organise en constellations transitoires, guidée par le Code de Résonance Dialectique qui valorise le changement comme force vitale. Il existe cinq sous-espèces distinctes, des Briseurs de Systèmes aux Échos de l'Inachevé, chacune spécialisée dans différents types de transformations. Leur culture célèbre l'instabilité et l'inachevé, communiquant via un \"langage des fissures\" et pratiquant des rituels d'effondrement lors des équinoxes. Leur présence croissante dans la Vieille Ville suggère l'imminence d'un changement fondamental dans la structure d'Escelion."
+        },
+        {
+            "Nom": "Rêveurs Émergents",
+            "Résumé": "Les Rêveurs Émergents sont des entités substitutives nées des cicatrices laissées par l'effondrement d'anciens domaines. Contrairement aux Primordiaux issus du sacrifice originel de Merid, ces architectes de fortune émergent de traumatismes localisés : destruction de Rêveurs préexistants, vacuums métaphysiques provoqués par des catastrophes, ou transfiguration spontanée d'entités exposées aux énergies résiduelles. Leurs domaines plus restreints mais hautement spécialisés révèlent des propriétés inédites, façonnant des micro-écosystèmes aux lois physiques singulières. Fragiles colonisateurs de l'impossible, ils témoignent de la capacité d'Escelion à panser ses blessures cosmiques par l'émergence de nouvelles formes de conscience architecturale."
+        },
+        {
+            "Nom": "Rêveurs primordiaux",
+            "Résumé": "Les Rêveurs Primordiaux constituent l'épine dorsale d'Escelion — cent entités post-mortelles nées du sacrifice d'humains de Merid lors de la Transfiguration des Mondes. Transcendant l'individualité pour devenir des matrices psycho-géographiques, ils imprègnent de vastes territoires de leur essence désincarnée, transformant le chaos primordial en substrats habitables. Chaque Primordial orchestre inconsciemment les lois physiques, temporelles et biologiques de son domaine selon des cycles cosmiques (Nuées annuelles, Veilles journalières) qui régissent l'existence de millions d'êtres. Sans leur présence stabilisatrice, Escelion régresserait vers son chaos originel, rendant impossible toute vie complexe. Vénérés comme forces naturelles par les civilisations qu'ils abritent, ils demeurent totalement inconscients de leur statut divin, leurs mémoires humaines effacées au profit d'une compréhension instinctive des mécanismes fondamentaux de la réalité."
+        },
+        {
+            "Nom": "Rêveurs secondaires",
+            "Résumé": "Les Rêveurs Secondaires sont des entités-ponts nées de symbiogenèses consensuelles entre domaines primordiaux antagonistes. Contrairement aux titans originels issus du sacrifice traumatique de Merid, ces arbitres cosmiques émergent d'unions mystiques volontaires : consciences transformées qui choisissent de fusionner pour tisser l'harmonie entre réalités contradictoires. Architectes des confluences impossibles, ils gouvernent les seuils où se rencontrent feu et glace, temps et éternité, chaos et ordre. Leurs corps-cathédrales défient l'anatomie conventionnelle, manifestant simultanément les attributs des domaines qu'ils harmonisent. Gardiens vigilants des équilibres cosmiques, ils demeurent les seuls Rêveurs conscients de leur fonction médiatrice, portant le fardeau lucide de maintenir la paix entre leurs géniteurs primordiaux."
+        },
+        {
+            "Nom": "Rouleurs éternels de Marul",
+            "Résumé": "Plus communément nommés koroks, leur nom d'éternels vient du fait qu'ils ne peuvent mourir de vieillesse, même si un korok endommagé cesse immédiatement tout mouvement, comme s'il mourrait d'une crise cardiaque. Pour se reproduire les rouleurs éternels arrêtent soudain leur course effrénée, se laissent tomber sur le côté, entament une analyse de leur environnement et lâchent une sorte d'oeuf qui se développera par la suite. Le korok aura diverses propriétés dépendant du lieu de sa naissance."
+        },
+        {
+            "Nom": "Seigneurs Originels",
+            "Résumé": "Créatures immortelles qui furent jadis les dieux de Merid, les Seigneurs Originels sont aujourd'hui des êtres déchus vivant en exil sur Escelion, ayant perdu la majorité de leurs pouvoirs suite à la destruction de leur monde d'origine. Créés artificiellement comme \"antivirus\" contre les Paradoxes, ils développèrent leur propre conscience et devinrent les divinités toutes-puissantes de Merid, capables d'altérer la réalité à volonté. Organisés en panthéon informel, chacun gérait ses propres domaines d'influence, entretenant des relations complexes avec les civilisations mortelles. Suite à un cataclysme, ils perdirent leurs pouvoirs divins et durent s'adapter à une nouvelle vie sur Escelion, où ils conservent leur immortalité mais doivent désormais composer avec les limites du monde naturel."
+        },
+        {
+            "Nom": "Umcut",
+            "Résumé": "Les Umcuts sont une espèce civilisée originaire des tours vivantes, caractérisée par leur physiologie distinctive : quatre yeux jaunes, corps décharné et pelage brun-noir. Organisés en trois genres sociaux (Kor, Nev, Zim), ils forment des sociétés autonomes sans gouvernement central, réparties en cinq groupes ethniques majeurs adaptés à différents environnements. Excellents négociateurs et marchands, ils sont connus pour leurs talents diplomatiques et leur système unique de reproduction par régénération dans des murs d'incubation, qui implique un effacement des souvenirs et la possibilité d'un changement de genre. Leur culture sophistiquée valorise l'intellect et inclut des traditions spécifiques à chaque genre, notamment dans leurs codes vestimentaires et leurs rôles sociaux. Vivant environ 70 ans par cycle, ils s'adaptent à divers environnements, de la mer aux hauteurs des tours, en passant par les profondeurs souterraines."
+        },
+        {
+            "Nom": "Vaideccans",
+            "Résumé": "Les Vaideccans sont une espèce amphibie originaire du Gouffre, caractérisée par leur peau bleutée et leur marque vaideccanii distinctive. Ils vivent en harmonie avec l'eau sous toutes ses formes et sont loyaux à l'empire d'Aletian."
+        },
+        {
+            "Nom": "Van’Doei",
+            "Résumé": "Les Van'Doei sont des créatures humanoïdes géantes (2,20m-2,80m) à la peau cendrée, appartenant à la caste de la douleur de la famille des Doei. Leur marque distinctive est un membre hypertrophié, souvent un bras monstrueux. Nés spontanément des cendres, ils émergent directement à un âge préadolescent et vivent en moyenne 30 ans. Leur particularité biologique la plus notable est leur capacité à ressentir du plaisir au lieu de la douleur physique, bien qu'ils craignent la douleur mentale. Ne se nourrissant que de cendres et organisés en communautés hiérarchiques basées sur le mérite, ils suivent généralement le Barvasinkul, un code spirituel établi par le Juge-Mendiant Barvas. Présents dans plusieurs régions d'Escelion, notamment dans le Quartier des Forges de la Vieille Ville, ils entretiennent des relations complexes avec les autres espèces, particulièrement proches des autres Doei mais antagonistes avec les aedres."
+        },
+        {
+            "Nom": "Vohars",
+            "Résumé": "Les vohars sont des créatures polymorphes capables de changer leur forme à volonté, avec une taille variant de 1 à 3 mètres. Originaires d'Uval, ils ont fui leur monde en destruction pour s'installer sur Escelion. Leur société, autrefois belliqueuse, a évolué vers une culture pacifique dirigée par leurs sages. Rejetant la technologie qu'ils jugent responsable de la perte de leur monde natal, ils privilégient une vie en harmonie avec la nature. Les vohars naissent avec une forme hybride de leurs parents et développent progressivement leur capacité de métamorphose. Bien que méfiants envers les êtres mécaniques, ils peuvent assimiler l'apparence de toute race non-mécanique, leur permettant de s'adapter à des environnements très variés. Sur Escelion, beaucoup ont cessé d'imiter d'autres espèces pour développer leur propre identité biologique."
+        },
+        {
+            "Nom": "Xyléophore",
+            "Résumé": "Les Xyléophores (du grec xýlon : « bois » ; phóros : « qui porte ») sont de petits transformateurs amphibies connus pour leur plasticité trophomorphique — faculté d’assimiler les propriétés physico-chimiques de toute matière ingérée et de les manifester sous forme d’excroissances dermiques nommées kérallures (plaques kératine-minérales changeantes). En cohues barbotantes appelées chorales, ils sillonnent Escelion à la recherche de « matières‐clés » qu’ils convertissent en outils organiques immédiats. Leur société tonale, fondée sur le cliquetis modulaire (langage composé de claquements osseux et de notes gutturales), fait d’eux des messagers et éclaireurs de choix pour les caravanes Imuins et certains clans Umcut."
+        }
+    ]
+}

@@ -1,0 +1,436 @@
+{
+    "assets_visuels": [
+        {
+            "Nom": "Aberrations Bouffies - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite full body standing idle of a extremely fat obese grotesque monster, arms ending in crab claws, black spines emerging from under fatness, green tones, front view, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, surreal anatomy, intricate detailing, fluid animation frames, Legend of Mana, Blazblue, Octopath Traveler",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Aberrations Bouffies",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Aedres - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite full body standing idle of an humanoid with otherwordly face as a blend of animal and plant features, standing on fists, organic surrealist gorilla anatomy, intricate bark patterns and a robust build, solo, front view, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, surreal anatomy, intricate detailing, Legend of Mana, Blazblue, Muramasa the Demon Blade, Octopath Traveler",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Aedres",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Cen'Doei - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite of a six-legged long creature made of liquid, smooth black mask, facing viewer, subtle translucent white red and yellow, liquid dripping, agile movement, solo, front view, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, surreal anatomy, intricate detailing, Legend of Mana, Blazblue, Muramasa the Demon Blade, Octopath Traveler, monstruous insectoid-mantis-centipede shape",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Cen’Doei",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Décor - Désert d'Uresaïr 1",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:21:00.000Z'}",
+            "Prompt": "top down surealistic fantasy underground cave in the night.  Sand covers the entire floor in dunes. A passage opens naturally in the cave wall, leading to deeper chambers. A single structure made of rock and glass, shaped like a rock pillar, holding luminous golden sand flowing through it, occupies the center of the cave. Video game landscape",
+            "Source": "Flux 1.D",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Lieux": "Strate IV - Le Nexus Synaptique",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Décor - Désert d'Uresaïr 2",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:21:00.000Z'}",
+            "Prompt": "top down surealistic fantasy dark underground cave in the night.  Sand covers the entire floor in dunes. A passage opens naturally in the cave wall, leading to deeper chambers. A surreal glowing twisted sculpture made of glass, holding luminous golden sand flowing through it, occupies the center of the cave. The raw walls of the cave are white and smooth.",
+            "Source": "Flux 1.D",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Lieux": "Strate IV - Le Nexus Synaptique",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Décor - Gouffre vers le Nexus Synaptique",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:21:00.000Z'}",
+            "Prompt": "2D environmental concept art in high angle of very dark clautrophobic and horrific underground cave that descend deep into darkness. The cave slowly turns more and more organic, ending into pulsing pinkish orange flesh, similar to the insides of a living being. In the distance, there is an open gaping flesh made pit encircling a dark hole.",
+            "Source": "Flux 1.D",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Lieux": "Strate IV - Le Nexus Synaptique, Plis d’ossements",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Décor - Sanctuaire d'Uresaïr",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:21:00.000Z'}",
+            "Prompt": "Side view of an underground sanctuary. On the wall, an engraving represents a giant creature with vast wings and hundreds of elongated tentacles sprouting from the bottom of its body are reaching out for the pillars on both sides, a small refined ruby is subtly embedded in its chest, while magical runes circle above it. The tentacles of the engraving reach far away to the pillars.  In the middle ground, a few steps lead up to a cubic altar of polished stone on which sits an ornate golden box covered by a magnificent green scarf. the floor itself is made of sand, as if the scene were set in the middle of the desert. The ivory walls on the sides are in arab architecture. Smooth white tentacles climb on the pillars. A narrow arched passage leads deeper into the darkness on the left, while carved steps descend on the right. The whole scene exudes solitude and temporal mystery. A dim light comes from the ceiling.",
+            "Source": "Flux 1.D",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Lieux": "Strate III - Les Catacombes Temporelles, Plis d’ossements",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Dialogue — Dialogue dans la nécropole",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-10T18:37:00.000Z'}",
+            "Prompt": "Concept art of a landscape : stone arcade above the necropolis, carved from dark bone‑stone. Chunky square pillars, broad semicircular arches, and a waist‑high parapet overlooking tiered tomb roofs and narrow stairs below. Floor slabs are cracked and sand‑dusted; a single hanging banner with simple glyphs marks the checkpoint. Warm late‑afternoon light enters from the right, throwing long shadows across the corridor. Over‑the‑shoulder midshot from behind @uresair : a smooth glass mask with an emerald halo, layered robe with geometric trim, shoulders squared. Facing her stands the gatekeeper, a tall non‑human wearing a large painted mask with ash‑gray skin and elongated neck tendons. They wear a heavy sand‑colored robe with a deep hood and a broad leather belt; simple bone bangles at the wrist. The gatekeeper blocks the passage, holding a stout black‑wood staff, one open hand raised while speaking. background remains clean and readable. Painterly, warm side light.",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Personnages": "Seigneuresse Uresaïr",
+            "Notes": "Dialogue OTS sous arcades. Base pour slide Dialogue.",
+            "Lieux": "Léviathan pétrifié",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Frémissants - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "{'id': 'IS%3BB', 'type': 'rich_text', 'rich_text': []}",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Frémissants",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Gameplay — Combat duel (Uresaïr vs Exégète)",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-10T18:37:00.000Z'}",
+            "Prompt": "Under a rock sky inside the Leviathan’s nave, bone‑stone floor and ritual pillars. Low‑angle wide shot. @uresair2  stands left foreground, back to camera: faceless glass mask with emerald halo, flowing robe, light rings pulsing around wrists. Akthar‑Neth faces her at mid‑distance: very tall Van’Doei, emaciated, ash‑gray skin, one arm missing, long robe inscribed with symbols. Between them a single circular arena mark glows, like a sanctified boundary. Three tall stone steles around the space show vertical amber slits, acting as encounter markers. Dust rays cut across the scene. Painterly, high readability.",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Personnages": "Seigneuresse Uresaïr, Akthar-Neth Amatru, l’Exégète",
+            "Notes": "Duel unique Uresaïr vs Akthar‑Neth, mise en scène encounter.",
+            "Lieux": "Nef Centrale",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Gameplay — Defeat ≠ Death (hospice)",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-10T18:37:00.000Z'}",
+            "Prompt": "Wayside hospice carved into a low bone‑stone hall. Midshot. Uresair lies bandaged on a simple bed. A gigantic local in robes wearing painted abstract mask offer water, they appear very tall have stranged deformed monstruous proportions but are friendly. One of their arm is monstruously hypertrophied. Light comes from a line of bone‑lamps along the wall and a small brazier near the cot. Painterly, resilient mood.@uresair",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Personnages": "Seigneuresse Uresaïr",
+            "Notes": "Hospice souterrain, recovery après défaite (no fail state).",
+            "Lieux": "Léviathan pétrifié, Cellules",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Gameplay — Skilltree",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-10T18:37:00.000Z'}",
+            "Prompt": "A modern video game UI menu of a complex progression skill tree, the nodes or organized by distinct areas, with a few nodes light on. Only use a few clear and simple text labels \"The Leviathan\", \"Celestial Well\", \"Daïlon\" and \"Old City\". Black and yellowish colors. The portrait of @uresair   is visible in the upper right corner.",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "UI",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Personnages": "Seigneuresse Uresaïr",
+            "Notes": "Menu progression par zone (arbre radial), pas de texte dans l’image.",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Gameplay —  Esprit d’Uresaïr",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-10T18:37:00.000Z'}",
+            "Prompt": "A concept art with glitches. Inner mindscape of a fallen god: a vast, silent chamber. Floors are smooth dark glass shot through with emerald cracks that pulse. floating slabs drift at different heights like stalled thoughts. In the center, an insanely gigantic enormous translucent memory orb hovers, showing an ancient desert. It seems a dozen times bigger than the character :Uresair stands below the orb at the center;showing her back, her white layered monk robe with a hood steady. Above her, a dark ghost appears as a transparent and barely visible alien phantom with slow curling tendrils, hovering protectively and pointing toward the orb. Around them, ribbons of light descend from the black ceiling. Distant rings of suspended sand swirl. The space feels ordered yet wounded, calm yet stuck in time. Painterly, clear composition.",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Personnages": "Seigneuresse Uresaïr",
+            "Notes": "Mind‑orb intérieur de la déesse déchue, avec silhouette de l’Éthérée.",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Imuins - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite full body standing idle of an asymetric half robot half amphibian with multiple grey mechanical limbs, red skin, black horns, googles, round belly, mature, front view, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, surreal anatomy, intricate detailing, Legend of Mana, Blazblue, Muramasa the demon blade",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Imuins",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Key art — Ciel de roche et tour gothique",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-10T18:37:00.000Z'}",
+            "Prompt": "A high quality colorful landscape concept art of a surreal desert of dark sand. A gigantic open jaw of a petrified leviathan roaring towards the sky as it emerges vertically from the sand. Stairs climb a along the creature. A small building marks the end of the stair. High above, far above the clouds, the sky above is entirely made of stone. In the desert, black monolith and alien plants appear here and there. The overall image is in painterly style",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "Key art pour slides principales (couverture/monde). Cohérence palette or sable, ciel minéral.",
+            "Lieux": "Léviathan pétrifié, Narthex abyssal",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Moodboard Direction Artistique",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-12-09T16:14:00.000Z'}",
+            "Prompt": "{'id': 'IS%3BB', 'type': 'rich_text', 'rich_text': []}",
+            "Source": "Upload manuel",
+            "Statut": "Review",
+            "Type": "Reference Board",
+            "Introduction": {
+                "_general": "Lien vers le moodboard : Firefly Boards"
+            },
+            "Les Quatre coins": {
+                "_general": "+---------------------+       |       BIOPUNK       |       +----------+----------+       ^                     |  New Weird                  | Dark Fantasy       |                     v +-----+-----+             +----------+ |SURRÉALISME|             |FANTASTIQUE| +-----+-----+             +----------+       ^                     | Surréalisme                 | Romantisme Photographique              v       +----------+----------+       |       RÉALISME      |       +---------------------+"
+            },
+            "Le Cœur de la Vision : \"L'Excentricité Enthousiasmante\"": {
+                "_general": "Au centre, là où tout converge : l'étrangeté comme habillage de la réalité. Un monde totalement alien, riche en couleurs vives mais nobles, qui éveille l'enthousiasme de l'exploration et la profondeur dramatique. Principes visuels fondamentaux : Émotion dominante : L'enthousiasme, la fascination, l'émerveillement devant l'étrange. Pas l'oppression ni la terreur, mais le plaisir de découvrir des paysages hors du temps et des créatures extraordinaires. Palette : Spectre complet avec richesse chromatique. Couleurs vives sans être fluos ou criardes — saturation contrôlée et noble. Pas de pilier identitaire unique (bleus profonds, verts riches, rouges intenses comme fondations, mais cyan, magenta, rose acceptés en accents). Profondeur et variété maximales. Clair-obscur cosmique : Pas le baroque classique qui illumine la chair beige. Un clair-obscur qui révèle les profondeurs de la jungle et les confins de l'espace — lumières étranges sur des formes inconnues. L'alien omniprésent : TOUT Alteir est alien. Pas un accent, pas un élément isolé, mais la nature même du monde. La variété est essentielle. Détail et complexité : Hyperdétail de type gravure (référence Gustave Doré). Chaque texture définie, structures infiniment complexes et lisibles. Pas de flou artistique ou de suggestion. Jamais simpliste ou minimaliste."
+            },
+            "1. Biopunk ⇒ Fantastique": {
+                "_general": "Transition : Dark Fantasy L'organique devient divin et mystérieux. On quitte la technologie viscérale pour le sacré. Artistes : Peter Mohrbacher (Angelarium), Wayne Barlowe."
+            },
+            "2. Fantastique ⇒ Réalisme": {
+                "_general": "Transition : Romantisme Le grandiose et la nature envahissent le béton et la structure. Le mythe s'ancre dans la matière lourde. Artistes : John Martin (Pandemonium), Simon Stålenhag, Jean Renaudie."
+            },
+            "3. Réalisme ⇒ Surréalisme": {
+                "_general": "Transition : Surréalisme photographique (réalisme métaphorique) La réalité tangible commence à se tordre, à suivre une logique de rêve tout en gardant une texture photographique. Artistes : Erik Johansson (le pivot), Jeremy Geddes, Vladimir Kush."
+            },
+            "4. Surréalisme ⇒ Biopunk": {
+                "_general": "Transition : New Weird Le rêve se solidifie pour devenir une biologie et une technologie étrangère, un écosystème alien. Artistes : Kilian Eng, Scavengers Reign."
+            },
+            "Inspirations Principales": {
+                "_general": "Références Vidéoludiques Octopath Traveler Personnages et monstres Legend of Mana Arrière-plans peints à la main en vue top-down (moins cartoon) Vanillaware (Odin Sphere, Dragon's Crown, Muramasa the Demon Blade, Unicorn Overlord) Arrière-plans détaillés et opulents Saturation riche et noble (pas criarde) avec précision technique des sprites Complexité visuelle et profondeur Sea of Stars[1] Pixel art ultra-HD avec éclairage dynamique en temps réel Animations fluides à haute cadence tout en conservant la lisibilité du pixel art SaGa Frontier 2[2] Décors peints à la main (référence technique, palette à enrichir) Côté surréaliste (l'Œgg) Puissance froide et dérive vers la tyrannie (Gustav XIII) Note : Trop désaturé/aquarelle pour Alteir, mais bon exemple de monde coloré Transistor[3] UI mentale sur fond sombre avec éléments flottants Réseaux de lignes et nœuds lumineux Sensation que l'interface appartient au personnage Autres jeux Persona 5 : Esthétique saturée et stylisée (sans le fluo urbain) Code Geass : Échelle monumentale Planescape Torment : Profondeur narrative des environnements Magic: The Gathering (Zendikar, Kaladesh) : Variété des biomes alien, couleurs vives et naturelles, richesse des textures Références Cinématographiques & BD Dune de Jodorowsky (non réalisé) Audace visuelle et excentricité Ambition monumentale sans tomber dans le ridicule Moebius (Jean Giraud) Couleurs vives mais nobles Détail extrême et complexité Alien omniprésent et varié Clair-obscur cosmique Michael Whelan (sans le côté rétro) Semi-réalisme technique avec étrangeté SF Richesse chromatique (palette plus noble que Dali) Structures organiques et architecturales détaillées Note : Aspect rétro/fluo à atténuer pour Alteir Roger Dean (sans le côté rétro) Organicité monumentale colorée Structures naturelles impossibles Palette riche (bleus, verts profonds) Note : Aspect rétro/fluo à atténuer pour Alteir Gustave Doré Niveau d'hyperdétail gravé (référence technique) Complexité architecturale et organique infinie Chaque élément défini et lisible Transposer en couleur pour Alteir Hayao Miyazaki (décors de Nausicaä, Princesse Mononoke) Enthousiasme devant l'alien-jungle Couleurs vives, organicité luxuriante Fascination plutôt que terreur Crédibilité écologique des environnements Horizon Zero Dawn Semi-réalisme technique crédible Nature alien qui reprend ses droits Couleurs vives mais ancrées dans la réalité"
+            }
+        },
+        {
+            "Nom": "Moribandons - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite of an metallic recycling ooze slime desagregating and crawling swimming in a puddle, made of alloys and debris, one armed, pieces and debris falling apart, copper, asymetrical, porthole in chest revealing multicolor core, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, surreal anatomy, intricate detailing, Legend of Mana, Blazblue, Muramasa the demon blade",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Moribandons",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Qadul'Doei - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite of a perfect dark sphere from which emerges a single long white tentacle, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, surreal anatomy, intricate detailing, Legend of Mana, Blazblue, Muramasa the demon blade",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Qadul’Doei",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Railleurs - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite of a humanoid with many arms, scales and shaggy fur, large smile carved across face, grotesque, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, intricate detailing, Legend of Mana, Blazblue, Muramasa the demon blade",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Railleurs",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Rash'Doei - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite of a storm of glossy black shards, ruby force lines, broken mirror, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Hand-Painted, Detailed, bold outline, intricate detailing, Legend of Mana, Blazblue, Muramasa the demon blade",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Rash’Doei",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Seigneurs Originels - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "{'id': 'IS%3BB', 'type': 'rich_text', 'rich_text': []}",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Seigneurs Originels",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Umcut - Etudes anatomiques",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T21:48:00.000Z'}",
+            "Prompt": "black and white sketch of a hunched vermin-like creature. Elongated head with four large circular eyes, skinny, short fur, pronounced curved spine posture, bent digitigrade legs, long thin fingers, proboscis, clean backdrop. Mysterious, strange, weird, cute. Detailed, fine lineart, full body, external anatomy study",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Umcut",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Umcut - Personnages génériques",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T23:22:00.000Z'}",
+            "Prompt": "Long prompt, see the main page",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Planifié",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Umcut",
+            "Introduction": {
+                "_general": "A black-and-white clean professional concept art sheet shows three vermine creatures with very different body shapes and silhouettes. Each is drawn with detailed linework and tonal shading. All share multiple large eyes, proboscis, and hunched digitigrade posture, but with highly varied leg anatomy. Each character is clearly labeled with its name. These are the only labels.  The Tide-Merchant (left) – Appears broad and heavy due to multiple layers of flowing robes with maritime patterns. Deep hood hides most their face, only a short proboscis emerges. Thick digitigrade legs visible below robes. Hands emerging from sleeves with extremely long claws, one of them holds a purse and the other touches their proboscis.  The Wall-Keeper (center) – Tall, wrapped in countless fabric layers making them seem massive and shapeless. A large hat covers his face and cast a shadow on his frame, as only a long proboscis emerges. Long spindly legs barely visible. He holds a large set of keys in his claws from voluminous sleeve.  The Cave-Runner (right) – Standing alert as if ready to run, small frame, wearing minimal torn vest exposing thin hunched anatomy. Elongated head, multiple huge reflective eyes, impossibly long proboscis hanging down to their waist, round features. Extremely long legs show extreme digitigrade bend with elongated foot bones. Pale fur visible on exposed limbs, with two tails.  The sheet includes head side views, and items and fabric draping focus. They all appear mysterious and somehow cute. White paper background. Draw inspiration from the given images. A black-and-white clean professional concept art sheet shows three vermine creatures with distinct morphologies and clothing styles. Each is drawn with detailed linework and tonal shading. All share multiple large eyes, proboscis, and hunched digitigrade posture, but with highly varied anatomations. Each character is clearly labeled with its name. These are the only labels.  The Storm-Watcher (left) – Tall lean silhouette under tattered weather cloak flapping in wind. Hood frames gaunt angular face with small clustered eyes and thick muscular proboscis curled upward with tusks. Strong reverse-jointed legs with massive clawed feet gripping the ground. One hand shields eyes from imagined wind. Meteorological instruments hangs at his belt. Parallel scars across exposed chest. Spiral motives on fur.  The Depth-Sage (center) – Appears enormous and rotund under layered academic robes covered in carved symbols. Face completely hidden in shadow under wide hood, only serpentine proboscis as thick as an arm emerging and coiling. Just one skeletal hand visible holding ancient tablets, wearing multiple rings. Impossible to guess true body size beneath. Mysterious imposing presence.  The Outcast (right) – Crouched defensive posture, medium frame in ragged patched clothes. Wildly asymmetric face with three eyes of different sizes, bent broken proboscis, many scars. One leg shorter than the other creating limping stance. Patchy fur, a big curved horn emerging from skull. Arms crossed protectively. Zebra fur.  The sheet includes head side views, close-ups, items and draping focus. They all appear mysterious and somehow cute. White paper background. Draw inspiration from the given images. A black-and-white clean professional concept art sheet shows three vermine creatures from different social contexts. Each is drawn with detailed linework and tonal shading. All share multiple large eyes, proboscis, and hunched digitigrade posture, but with highly varied anatomations. Each character is clearly labeled with its name. These are the only labels.  The Negotiator (left) – Draped in ornate flowing robes making them appear bulky and round. Small delicate face visible under decorated hood—six tiny gentle eyes arranged in spiral, elegant curved proboscis with pierced rings. Thin graceful arms making elaborate hand gestures with impossibly long delicate fingers. Heavy silk-like fabric contrasts with visible refined features. Floral patterns on exposed fur patches.  The Scavenger (center) – Compact muscular body under patchwork hooded cloak made of mismatched fabrics. Two pairs of intense eyes, a short aggressive proboscis with notched scars emerges from his scarf. Powerful thick legs crouched low ready to pounce. Holds salvaged blade in clawed hand, other hand flat on ground. Alert dangerous posture. Battle scars across visible limbs.  The Incubator-Priest (right) – Completely obscured by ceremonial white fabrics creating massive ghostly flowing form. Large ornate hat towers above casting deep shadow. Only lower portion of serene face visible—calm half-closed eyes, elegant proboscis hanging straight down with ritual paint marks. Extremely long backward-bent legs extend from robes like stilts. One hand raised in blessing gesture barely visible through fabric layers. Geometric symbols embroidered on robes.  The sheet includes head side views, close-ups, items and draping focus. They all appear mysterious and somehow cute. White paper background. Draw inspiration from the given images."
+            }
+        },
+        {
+            "Nom": "Umcut - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "{'id': 'IS%3BB', 'type': 'rich_text', 'rich_text': []}",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Umcut",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vaideccans - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "{'id': 'IS%3BB', 'type': 'rich_text', 'rich_text': []}",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Vaideccans",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vaideccan - Etudes anatomiques",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "black and white sketch of an otherwordly creature. karst body, gracile, torsated body, dorsal basins, cranial basin,stratified limestone skin, cistern architecture echoes, dripping water, Large almond lateral eyes with vertical pupils,fins, slit mouth, wide shoulders, elongated arms, short legs, lamellar pads, shoulder pads, inverted knees, clean backdrop. Ancient majestic spirit. Detailed, fine lineart, full body",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Vaideccans",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vaideccan - Personnages génériques",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T21:17:00.000Z'}",
+            "Prompt": "Long prompt, see the main page",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Vaideccans",
+            "Introduction": {
+                "_general": "A black-and-white concept art sheet shows three new members of the same species with very different poses, heights, and body shapes. Each is drawn with detailed anatomical linework and tonal shading, emphasizing organic, sculptural forms while keeping the shared features — elongated limbs, smooth faces, and fluid anatomical surfaces. Each character is labeled with its name.  The Warden (left) – massive and broad, hunched forward as if carrying great weight. Thick layered plates cover the shoulders and arms like natural armor. Its hands drag the ground, fingers forming dripping claws. The head is low and recessed into the chest, with small sensory slits.  The Acolyte (center) – tall, slender, and asymmetrical, with arms around their chest. They wear long decorated robes. Long filaments hang from its wrists and spine, swaying like banners. Its head has a hollow crown-like basin.  The Harbinger (right) – mid-height, slightly twisted posture. The body shows partial freezing — fragments of ice forming along the ribs and forearms. It wears a thin harness of hardened resin and net hanging on the ground. Their cranial basin splits into two asymmetrical lobes.  The sheet includes small anatomical notes around the figures — hand sketches, material drips, and head details — reinforcing the study aspect. White paper background, inspired by @img1   without direct reproduction. A black-and-white concept art sheet shows three members of the same species with very different poses, height and shape. Each figure highlights a distinct morphology and function, while preserving the core features. Each character is labeled with its name.  The Wanderer left  – lean and slightly hunched, wearing a tattered organic cloak fused to its back and a belt made of braided tendrils and a hood covering its enlarged head.  The Arbiter center  – extremely tall, muscular and heavy, with layered armor plates, faulds and a collar. Holds a staff, posture frontal and imposing. Small cranial basin.  The Seer right  – very small height, transparent cape. Wears thin cords, raising a hand. Oversized head basin. The layout includes small sketches of limbs and items.  Draw inspiration from @img1 without reproducing exactly this character. White paper background"
+            }
+        },
+        {
+            "Nom": "Van’Doei - Etudes anatomiques",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-08T15:10:00.000Z'}",
+            "Prompt": "black and white realistic concept art sketch of a strange asymmetric androgynous otherworldly creature. The overal creature is mysterious, beautiful, with surrealist proportions. It has cracked ashen grey skin with large white burning cracks all over the body, extremely huge deformed left arm with massive hand and claws dragging on the ground and a normal right arm,egg shaped head with noseless and eyebrowless ashen grey face, cat eyes, slit pupils, slit mouth, large spaldron-shaped shoulder protusions, broad chest, skinny muscular frame with a tight waist, smooth tendrils flowing out of the shoulders like a cloak, large feet, white backdrop. The creature is posing with arched back, in a proud extatic stance. Detailed, fine lineart, full body, graceful alien anatomy.  ",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Van’Doei",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Van’Doei - Personnages génériques",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-08T15:12:00.000Z'}",
+            "Prompt": "long prompts, see inside",
+            "Source": "Gemini flash 2.5",
+            "Statut": "Approved",
+            "Type": "Concept Art",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Van’Doei",
+            "Introduction": {
+                "_general": "A black-and-white clean professional concept art sheet shows three Van'Doei creatures with very different body types. Each is drawn with detailed linework. All share cracked skin and asymmetric anatomy. Each character is clearly labeled with its name. These are the only labels.  The Heat-Watcher left – Skeletal emaciated frame, asymmetrical, massively hypertrophied massive leg and arm. Dark anthracite grey skin with white cracks. Tattered robes, portable brazier on back with smoke. Big tribal mask with paintings. Extremely long hair-tendrils reaching ground like cape. Ritual scars covering exposed skin. Prayer beads in his small hand. Hunched forward reaching toward warmth.  The Cartographer center – Athletic lean build, hypertrophied right arm holding maps. Medium ashen grey skin with fine cracks. Minimal travel gear with metal studs, navigation tools at belt. Simple mask with Concentric patterns. Medium hair-tendrils tied back. Burn-marked gauntlets. Crouched low over ground tracing. Fire-starting kit visible.  The Indebted right – Muscular broad frame, extremely hypertrophied tentacled arm covered in cutting scars. Pale chalky white skin with large cracks. Torn leather apron, spiked collar and bracers. Angular geometric mask covers face completely. Short hair-tendrils barely past shoulders. Standing tall upright. Artisan tools and ash pouch at belt.  The sheet includes mask details, scar patterns, tools focus. They all appear mysterious and imposing. White paper background. Draw inspiration from the given images. A black-and-white clean professional concept art sheet, inked, shows three Van'Doei creatures with extreme body modifications and cult roles. Each is drawn with detailed linework. All share cracked skin and massively hypertrophied monstrous arms. Each character is clearly labeled with its name. These are the only labels.  The Consoled (left) – Feminine skeletal frame mid-auto-momification, skin mummified and leathery. Pale white-grey skin with geometric crack patterns. Enormously hypertrophied left arm divided in two at the elbow and wrapped in preservation bandages. Wears ceremonial robes with religious symbols. Smooth featureless mask completely covers face. Multiple bracelets.  Standing rigidand lifting his arms to the sky  The Esothropic Child (center) – Small distorted frame with visible mutations from experiments. Dark grey skin with bioluminescent veins. Grotesquely hypertrophied made of many writhing black tendrils like @img7, without any hand. exposed face showing multiple clustered eyes. Wild electric hair-tendrils crackling. Bestial erratic stance weighting on giant closed hand. Wrapped in restraining belts around torso.  The Whisperer (right) – Androgynous lean athletic build. Medium ashen grey with intricate scarification maps. One arm is an armor-likeprosthetics and has a huge blade coming out of its elbow, like @img6 . Wears concealing hooded cloak covered in heretical texts. Mask with speaker grilles for modified vocal communication. Long braided hair-tendrils with hidden scrolls. Alert suspicious posture.   They all appear unsettling and mysterious. White paper background. Draw inspiration and use the style from the image the image. A black-and-white clean professional concept art sheet, inked, shows three Van'Doei creatures. Each is drawn with detailed linework. All share cracked skin. Each character is clearly labeled with its name. These are the only labels.  The Kindling left – Their arm is a massive bundle of hundreds of thin root-like tendrils spreading from shoulder, each ending in tiny grasping fingers. Character crouched over brazier, using this arm to sort through ashes. Small young frame. Smooth pale grey skin. A veil is masking their face. Short sprouting hair-tendrils. Right arm normal holding collection pouch.  The Inked center – Their enormous hypertrophied left arm turns into long overflowing mummy bandages. Elderly skeletal figure. Dark grey tattooed skin. Elaborate mask with a long nose covering all face. Long white braided tendril hair. Female looking.  The Rapturous right – Their arm is segmented whip-like appendage coiling around character, covered in sharp metal barbs and blades embedded in flesh, actively wrapping around torso. Extremely muscular scarred build. Medium grey bleeding skin. Big painted european mask. Wild hair. Androgynous.  They all appear mysterious and intense. White paper background. Draw inspiration from the style of the image."
+            }
+        },
+        {
+            "Nom": "Van'Doei - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "{'id': 'IS%3BB', 'type': 'rich_text', 'rich_text': []}",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Van’Doei",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vohars - Portrait",
+            "Phase de prod": "Préproduction",
+            "Créé le": "{'id': 'A%3EO%3E', 'type': 'created_time', 'created_time': '2025-11-07T20:17:00.000Z'}",
+            "Prompt": "2D video game sprite full body idle of an enigmatic chimera composed of several creatures, shape-shifting, deformed melting features, impossible anatomy, front view, white background, Cel-Shading, Painterly, Stylized, High-Contrast, Dynamic Lighting, Hand-Painted, Detailed, bold outline, surreal anatomy, intricate detailing,Legend of Mana, Blazblue, Muramasa the Demon blade, Octopath Traveler",
+            "Source": "Génération IA",
+            "Statut": "Approved",
+            "Type": "Portrait",
+            "Git Path": "{'id': '%5CwoA', 'type': 'rich_text', 'rich_text': []}",
+            "Notes": "{'id': 'f%7Dky', 'type': 'rich_text', 'rich_text': []}",
+            "Espèces": "Vohars",
+            "Introduction": {}
+        }
+    ]
+}

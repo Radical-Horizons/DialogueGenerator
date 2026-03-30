@@ -1,0 +1,19 @@
+{
+    "styles": [
+        {
+            "Nom": "Hub style",
+            "Pre-prompt": "realistic digital painting with many unique elements of ",
+            "Post prompt": "RPG level design map, 2D video game background, plan, toon-shading, legend of mana, ori and the blind forest, muramasa: the demon blade, dark psychedelic, paths"
+        },
+        {
+            "Nom": "Point and click",
+            "Pre-prompt": "realistic digital painting of ",
+            "Post prompt": "2D video game landscape background, focal point and leading lines, Dynamic Lighting, toon-shading, legend of mana, ori and the blind forest, muramasa: the demon blade, dark psychedelic"
+        },
+        {
+            "Nom": "Top down",
+            "Pre-prompt": "realistic digital wide format top down painting of ",
+            "Post prompt": "2D video game landscape background, Dynamic Lighting, toon-shading, legend of mana, ori and the blind forest, muramasa: the demon blade, dark psychedelic"
+        }
+    ]
+}

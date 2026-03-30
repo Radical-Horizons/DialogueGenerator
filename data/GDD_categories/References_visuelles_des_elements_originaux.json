@@ -1,0 +1,366 @@
+{
+    "references_visuelles_des_elements_originaux": [
+        {
+            "Nom": "Alcôves de stockage",
+            "Prompt Flux": "Peripheral storage niches with specialized tools",
+            "Lieux liés": "Nef Centrale, Atelier des Matrices Ossifiées"
+        },
+        {
+            "Nom": "Amibes Mémorielles",
+            "Espèces liées": "Amibes Mémorielles",
+            "Prompt Flux": "floating single-celled organisms with iridescent nuclei",
+            "Lieux liés": "Plis d’ossements, Bibliothèques Veineuses"
+        },
+        {
+            "Nom": "Anneau de Potentialité",
+            "Personnages liés": "L'Ensevelie",
+            "Prompt Flux": "Luminous rainbow ring",
+            "Lieux liés": "Strate IV - Le Nexus Synaptique, Plis d’ossements"
+        },
+        {
+            "Nom": "Archive des Empreintes",
+            "Prompt Flux": "Wall with scattered circuits, large  imprints",
+            "Lieux liés": "Nef Centrale, Atelier des Matrices Ossifiées"
+        },
+        {
+            "Nom": "Autel des cendres parlante",
+            "Prompt Flux": "Altar with a copper bowl of ash on it",
+            "Lieux liés": "Nef Centrale"
+        },
+        {
+            "Nom": "Auto-Momifiés crucifiés",
+            "Prompt Flux": "“empty alcove” (la momie sera ajoutée en inpainting)",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Bassins de moelle noire",
+            "Prompt Flux": "pools of shiny black liquid",
+            "Lieux liés": "Plis d’ossements, Strate IV - Le Nexus Synaptique, Strate III - Les Catacombes Temporelles"
+        },
+        {
+            "Nom": "Bassin de purification rituelle",
+            "Prompt Flux": "Stone bowl with glowing blue liquid",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Braseros éternels",
+            "Prompt Flux": "Standing braziers with perpetual bone-white flames",
+            "Lieux liés": "Nef Centrale"
+        },
+        {
+            "Nom": "Campement de Genka Lien",
+            "Personnages liés": "Genka Lien, le bouffon",
+            "Prompt Flux": "Nomadic camp with a strange music instrument and wall graffiti",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Canal cérébrospinal",
+            "Prompt Flux": "Narrow channel carved in floor with glowing blue glowing liquid",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Cendres Parlantes",
+            "Objets liés": "Les Cendres parlantes",
+            "Personnages liés": "Ôrmüd T’lian-Keresh, le Maître-Flagellant",
+            "Prompt Flux": "Copper bowl of grey ash with glowing embers",
+            "Lieux liés": "Léviathan pétrifié, Nef Centrale"
+        },
+        {
+            "Nom": "Chambres d'Échos Osseux",
+            "Personnages liés": "Voknir Esh'Maradel, le cartographe",
+            "Prompt Flux": "Cave with puddles of iridescent liquid",
+            "Lieux liés": "Strate II - Le Dédale Médullaire"
+        },
+        {
+            "Nom": "Champignosquelettes",
+            "Espèces liées": "Champignosquelettes",
+            "Prompt Flux": "fungal mushrooms growths with whitish bone-like stems and blueish-greenish caps",
+            "Lieux liés": "Bains parkourétiques, Plis d’ossements, Bibliothèques Veineuses, Strate II - Le Dédale Médullaire"
+        },
+        {
+            "Nom": "Champs de Chronofracture",
+            "Personnages liés": "Seigneuresse Uresaïr",
+            "Prompt Flux": "Torn appart unstable space portals",
+            "Lieux liés": "Strate III - Les Catacombes Temporelles"
+        },
+        {
+            "Nom": "Clés sonores",
+            "Prompt Flux": "Translucent jelly-like keys",
+            "Lieux liés": "Plis d’ossements, Strate II - Le Dédale Médullaire"
+        },
+        {
+            "Nom": "Codex des Dettes Karmiques",
+            "Objets liés": "Stèle des Vœux Contre-Ondoyants",
+            "Personnages liés": "Seigneuresse Uresaïr, Gardien-Calligraphe Qalamtû",
+            "Prompt Flux": "Ancient leather-bound tome with metallic clasps",
+            "Lieux liés": "Bibliothèques Veineuses"
+        },
+        {
+            "Nom": "Colonies de Lim-lim",
+            "Espèces liées": "Colonie de lim-lim",
+            "Prompt Flux": "Oval dark brown hive with many alveolus and overgrown vegetation",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Conduits Sensoriels Interactifs",
+            "Personnages liés": "Zaehria Neth'Varu, La Gardienne Vertébrale",
+            "Prompt Flux": "Pinkish filaments running along walls, pined by iron nails",
+            "Lieux liés": "Strate I - La Périphérie Caudale, Plis d’ossements"
+        },
+        {
+            "Nom": "Consolidateurs Architecturaux",
+            "Prompt Flux": "Giant bones fused with architecture",
+            "Lieux liés": "Léviathan pétrifié, Atelier des Matrices Ossifiées"
+        },
+        {
+            "Nom": "Cul-de-sacs Vivants",
+            "Prompt Flux": "Organic flesh tunnel walls with sphincter-like openings",
+            "Lieux liés": "Strate II - Le Dédale Médullaire, Plis d’ossements"
+        },
+        {
+            "Nom": "Déserts artificiels d'Uresaïr",
+            "Personnages liés": "Seigneuresse Uresaïr",
+            "Prompt Flux": "Sandy dunes and rock formations contained within large caves",
+            "Lieux liés": "Strate III - Les Catacombes Temporelles"
+        },
+        {
+            "Nom": "Ecritures / inscriptions",
+            "Objets liés": "Stèle des Vœux Contre-Ondoyants",
+            "Prompt Flux": "Trop complexe, à exclure du prompt (inpainting à faire à part)",
+            "Lieux liés": "Léviathan pétrifié"
+        },
+        {
+            "Nom": "Équations vivantes de Voknir",
+            "Personnages liés": "Voknir Esh'Maradel, le cartographe",
+            "Prompt Flux": "“Empty surface” (à ajouter en inpainting)",
+            "Lieux liés": "Strate II - Le Dédale Médullaire"
+        },
+        {
+            "Nom": "Escaliers paradoxaux",
+            "Prompt Flux": "Escheresque yellowish architecture with impossible staircases",
+            "Lieux liés": "Strate II - Le Dédale Médullaire, Plis d’ossements"
+        },
+        {
+            "Nom": "Escalier Costal",
+            "Prompt Flux": "Whitish primitive spiral staircase",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Fil de Vertèbre",
+            "Prompt Flux": "Reddish ceremonial rope",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Fioles d'ivoire",
+            "Personnages liés": "Voknir Esh'Maradel, le cartographe",
+            "Prompt Flux": "Small ivory vials with cork stoppers",
+            "Lieux liés": "Plis d’ossements"
+        },
+        {
+            "Nom": "Forge Osseuse",
+            "Personnages liés": "Kha'Vareth, L'Artisan d'Éternité",
+            "Prompt Flux": "Circular basin with translucent crystal flames",
+            "Lieux liés": "Nef Centrale, Atelier des Matrices Ossifiées"
+        },
+        {
+            "Nom": "Fosse d'Accès Charnelle",
+            "Prompt Flux": "Large passage made of pulsating pink organic flesh leading into the dark",
+            "Lieux liés": "Strate III - Les Catacombes Temporelles, Strate IV - Le Nexus Synaptique"
+        },
+        {
+            "Nom": "Gantelet du Serment Brisé",
+            "Objets liés": "Gantelet du Serment Brisé",
+            "Personnages liés": "Seigneuresse Uresaïr",
+            "Prompt Flux": "ornate golden ceremonial gauntlet with fine filigree and gemstone sockets"
+        },
+        {
+            "Nom": "Gardiens Mnémoniques",
+            "Espèces liées": "Amibes Mémorielles",
+            "Personnages liés": "L'Ensevelie",
+            "Prompt Flux": "Oversized amoeba-like creatures",
+            "Lieux liés": "Strate IV - Le Nexus Synaptique"
+        },
+        {
+            "Nom": "Larmes médullaires",
+            "Prompt Flux": "tear-shapped gems lying on cave floor",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Les Témoins Suspendus",
+            "Prompt Flux": "“Large empty alcove” (les momies seront ajoutées en inpainting)",
+            "Lieux liés": "Tunnel vertébral",
+            "Introduction": {
+                "_general": "Les Témoins Suspendus ne sont pas des corps entiers, mais des Clefs de Voûte : des têtes décapitées fixées sur leurs bras hypertrophiés, le tout stabilisé chimiquement. Ils sont disposés dans les alcôves du Tunnel Vertébral, formant des rangées de \"bustes\" organiques et asymétriques. Le terme \"suspendus\" fait référence à leur état de suspension entropique, pas à une suspension physique par des cordes (ils sont posés)."
+            }
+        },
+        {
+            "Nom": "Lichen-Sang",
+            "Espèces liées": "Lichen-Sang",
+            "Objets liés": "Nectar Stygien",
+            "Personnages liés": "Ôrmüd T’lian-Keresh, le Maître-Flagellant",
+            "Prompt Flux": "Blood-red coral formations growing on cave walls",
+            "Lieux liés": "Bains parkourétiques, Plis d’ossements, Tunnel vertébral"
+        },
+        {
+            "Nom": "Lieu souterrain",
+            "Prompt Flux": "“Dark” ou “Underground”",
+            "Lieux liés": "Léviathan pétrifié"
+        },
+        {
+            "Nom": "L’Ensevelie",
+            "Personnages liés": "L'Ensevelie",
+            "Prompt Flux": "Massive chitinous creature with segmented carapace, multiple writhing tentacles",
+            "Lieux liés": "Strate IV - Le Nexus Synaptique, Plis d’ossements"
+        },
+        {
+            "Nom": "Matrices ossifiées",
+            "Prompt Flux": "Natural cavities",
+            "Lieux liés": "Nef Centrale, Atelier des Matrices Ossifiées"
+        },
+        {
+            "Nom": "Moelle argentée",
+            "Prompt Flux": "Flowing mercury metallic liquid",
+            "Lieux liés": "Strate II - Le Dédale Médullaire, Plis d’ossements"
+        },
+        {
+            "Nom": "Noyau central iridescent",
+            "Personnages liés": "L'Ensevelie",
+            "Prompt Flux": "Gigantic core with shifting iridescent colors",
+            "Lieux liés": "Nef Centrale"
+        },
+        {
+            "Nom": "Nœud Synaptique",
+            "Prompt Flux": "Circular underground room with smooth whitish-pinkish walls",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Organoides Neuronaux",
+            "Objets liés": "Organoïdes neuronaux",
+            "Personnages liés": "Gardien-Calligraphe Qalamtû, Duq'Sha, L'Archiviste Boiteux",
+            "Prompt Flux": "Translucent cubes filled with pinkish organic tissue",
+            "Lieux liés": "Bibliothèques Veineuses"
+        },
+        {
+            "Nom": "Os de Qudratheen",
+            "Objets liés": "Cadran des Sept Fractures",
+            "Personnages liés": "Voknir Esh'Maradel, le cartographe",
+            "Prompt Flux": "Yellowish needle-shaped bone",
+            "Lieux liés": "Strate II - Le Dédale Médullaire, Plis d’ossements"
+        },
+        {
+            "Nom": "Pain d'Ossements",
+            "Prompt Flux": "Dense pumpernickel bread with calcium deposit",
+            "Lieux liés": "Léviathan pétrifié"
+        },
+        {
+            "Nom": "Perles osseuses",
+            "Prompt Flux": "Small spherical white beads with swirling colors",
+            "Lieux liés": "Strate II - Le Dédale Médullaire, Plis d’ossements"
+        },
+        {
+            "Nom": "Phantasmes osseux",
+            "Prompt Flux": "Jelly-like blobs containing sparse bones",
+            "Lieux liés": "Strate II - Le Dédale Médullaire, Plis d’ossements"
+        },
+        {
+            "Nom": "Poches temporelles",
+            "Personnages liés": "Seigneuresse Uresaïr",
+            "Prompt Flux": "Giant hourglass-shaped structures containing luminous sand",
+            "Lieux liés": "Strate III - Les Catacombes Temporelles, Plis d’ossements"
+        },
+        {
+            "Nom": "Portail Médullaire",
+            "Prompt Flux": "Immense golden door with an ivory frame, carved with intricate symbols",
+            "Lieux liés": "Tunnel vertébral, Nef Centrale"
+        },
+        {
+            "Nom": "Portail Médullaire supérieur",
+            "Prompt Flux": "Immense golden door with an ivory frame, carved with intricate symbols",
+            "Lieux liés": "Tunnel vertébral, Nef Centrale"
+        },
+        {
+            "Nom": "Rideau de fibres osseuses",
+            "Prompt Flux": "Woven bone fiber curtain covering workshop entrance",
+            "Lieux liés": "Nef Centrale, Atelier des Matrices Ossifiées"
+        },
+        {
+            "Nom": "Rivières Vertébrales",
+            "Prompt Flux": "Trop complexe, à exclure du prompt (lora à créer)",
+            "Lieux liés": "Plis d’ossements, Strate II - Le Dédale Médullaire"
+        },
+        {
+            "Nom": "Sabliers Géants Suspendus",
+            "Personnages liés": "Seigneuresse Uresaïr",
+            "Prompt Flux": "Giant hourglass-shaped crystal structures",
+            "Lieux liés": "Strate III - Les Catacombes Temporelles"
+        },
+        {
+            "Nom": "Sauf-Conduit Osseux",
+            "Personnages liés": "Zaehria Neth'Varu, La Gardienne Vertébrale",
+            "Prompt Flux": "Fragment of vertebra bone",
+            "Lieux liés": "Plis d’ossements"
+        },
+        {
+            "Nom": "Sodoirs d’Éternité",
+            "Objets liés": "Sodoirs d’Eternité",
+            "Personnages liés": "Kha'Vareth, L'Artisan d'Éternité",
+            "Prompt Flux": "Monolithic black sarcophagus with geometric sacred patterns",
+            "Lieux liés": "Nef Centrale, Atelier des Matrices Ossifiées"
+        },
+        {
+            "Nom": "Sphère colossale neuronale",
+            "Prompt Flux": "Large open area with circuit patterns on the ground",
+            "Lieux liés": "Nef Centrale"
+        },
+        {
+            "Nom": "Stalactites cardinales",
+            "Prompt Flux": "A gigantic stalagmite",
+            "Lieux liés": "Nef Centrale"
+        },
+        {
+            "Nom": "Station d'entretien du canal",
+            "Prompt Flux": "Workstation with small vials and a broom",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Stèle des voeux Contre-Ondoyants",
+            "Objets liés": "Stèle des Vœux Contre-Ondoyants",
+            "Personnages liés": "Seigneuresse Uresaïr, Akthar-Neth Amatru, l’Exégète",
+            "Prompt Flux": "Black basalt tablet covered silver lettering",
+            "Lieux liés": "Plis d’ossements, Strate III - Les Catacombes Temporelles"
+        },
+        {
+            "Nom": "Surfaces réfléchissantes du Nexus",
+            "Personnages liés": "L'Ensevelie",
+            "Prompt Flux": "Mirror-like surfaces showing kaleidoscopic visions",
+            "Lieux liés": "Strate IV - Le Nexus Synaptique"
+        },
+        {
+            "Nom": "Surface d'ivoire strié",
+            "Prompt Flux": "Weathered ivory-colored surface with dark streaks, resembling aged whale bone or driftwood",
+            "Lieux liés": "Léviathan pétrifié"
+        },
+        {
+            "Nom": "Tunnel vertébral",
+            "Prompt Flux": "tunnel with smooth pale walls, similar to giant whale or dragon bones",
+            "Lieux liés": "Tunnel vertébral"
+        },
+        {
+            "Nom": "Vaisseaux Mnémoniques  ",
+            "Prompt Flux": "Organic tunnels glowing with a faint blueish light",
+            "Lieux liés": "Nef Centrale"
+        },
+        {
+            "Nom": "Veines d'obsidienne pulsantes",
+            "Personnages liés": "L'Ensevelie",
+            "Prompt Flux": "Black organic twisted cables",
+            "Lieux liés": "Nef Centrale, Plis d’ossements, Léviathan pétrifié"
+        },
+        {
+            "Nom": "Vésicules Mémorielles Suspendues",
+            "Personnages liés": "Zaehria Neth'Varu, La Gardienne Vertébrale",
+            "Prompt Flux": "Translucent organic pouches hanging from cave ceiling",
+            "Lieux liés": "Strate I - La Périphérie Caudale"
+        }
+    ]
+}

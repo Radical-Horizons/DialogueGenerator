@@ -1,0 +1,19 @@
+{
+    "tests_de_jeu": [
+        {
+            "Nom": "SansTitre",
+            "Métrique": "70%  Justification RP du défaut activé.",
+            "Indicateurs": "{'id': 'GaEl', 'type': 'rich_text', 'rich_text': []}",
+            "Statut": "À faire",
+            "Scène à jouer": "Le groupe s’arrête pour une pause. Le joueur choisit de laisser son héroïne “se laisser aller” à un défaut (orgueil, sensualité, fuite, vengeance…) pour récupérer de l’Effort, mais cela modifie une relation ou une conséquence du monde.",
+            "Résultats observés": "{'id': 'b%7D%3Ap', 'type': 'rich_text', 'rich_text': []}",
+            "Objectif": "Tester si le joueur saisit le compromis entre régénération de ressources et exposition aux dérives du personnage.",
+            "Résultats": "{'id': 'mgsa', 'type': 'rich_text', 'rich_text': []}",
+            "Ajustements proposés": "{'id': 'oxty', 'type': 'rich_text', 'rich_text': []}",
+            "Instructions MJ": "{'id': 'qGWN', 'type': 'rich_text', 'rich_text': []}",
+            "Hypothèses": "{'id': 'v%5Bg_', 'type': 'rich_text', 'rich_text': []}",
+            "Nom du test": "Système d’indulgence",
+            "Introduction": {}
+        }
+    ]
+}

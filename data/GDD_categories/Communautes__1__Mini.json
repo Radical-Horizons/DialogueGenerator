@@ -1,0 +1,50 @@
+{
+    "communautes__1_": [
+        {
+            "Nom": "Aldravinds",
+            "Résumé": "Les Aldravinds sont un peuple humain nomade descendant de la Magocratie d'Iodan-liaqar et d'autres royaumes anciens. Après la destruction de leur terre natale Merid, ils maintiennent leur mode de vie nomade, guidés par les saisons et leurs croyances ancestrales."
+        },
+        {
+            "Nom": "Artisans transmutateurs",
+            "Résumé": "Inventent des technologies hybrides (biomeca, oniriques) : certains outils sont conscients, capricieux."
+        },
+        {
+            "Nom": "Autres communautés",
+            "Résumé": "Le contient-monde contient des centaines de communautés qui ne demandent qu’à être inventées, qu’il s’agisse de groupes politiques, d’entreprises, de collectifs, de groupes religieux ou militaires, etc."
+        },
+        {
+            "Nom": "Barvasinkul",
+            "Résumé": "Le Barvasinkul (la Voie des Dix-Sept Substrats) est une tradition spirituelle et philosophique fondée par Barvas, le Juge-Mendiant, qui s'est répandue à travers les districts concentriques d'Escelion. Centrée sur la compréhension des seize transformations fondamentales culminant avec l'entropie comme état ultime, elle enseigne que l'harmonie réside dans l'acceptation du flux perpétuel de l'existence plutôt que dans sa résistance. Enracinée dans les couches géologiques et sociales de la Vieille Ville, avec des nœuds d'interprétation dans les Couronnes Intermédiaires et jusqu'aux marges des Périphéries, cette tradition adaptative a influencé tant les Aedres que les Van'Doei, tant les Qadul'Doei que les Umcut. Malgré plusieurs schismes majeurs dont l'Anentropie n'est que le plus récent, le Barvasinkul perdure comme une force sociale transversale, offrant un cadre conceptuel pour naviguer les transformations perpétuelles d'Escelion."
+        },
+        {
+            "Nom": "Cercle des Chronographes d'Iodan-liaqar",
+            "Résumé": "Anciens rivaux d’Uresaïr sur Merid, qui avaient pour mission de la surveiller, de traquer ses décisions et de tenter d’en limiter les impacts. Leurs descendants survivants participèrent à la création du Cadran des sept fractures dans une tentative de sceller l’aspect destructeur d’Uresaïr. Il ne reste aujourd’hui qu’un tout petit nombre de leurs descendants."
+        },
+        {
+            "Nom": "Chaebol Synaptic Dynamics",
+            "Résumé": "Conglomérat industriel de la Grande Radiale, actionnaire majoritaire des mines du Tombeau des lueurs dissidentes. Sa gouvernance mêle conseil d'administration corporatif et cellule spirituelle technologique appliquant les principes du jung-do (la Voie de l’interconnexion) aux décisions industrielles. Le directeur actuel est l'imuin Tek-Syana-09."
+        },
+        {
+            "Nom": "Confrérie des Veilleurs des Abysses"
+        },
+        {
+            "Nom": "Culte de l’Anentropie",
+            "Résumé": "Le Culte de l'Anentropie constitue une théocratie pneumatique (gouvernée par le souffle vital) nichée dans les entrailles du Léviathan pétrifié. Organisée selon une Stasiarchie (gouvernement par l'immobilité), cette communauté de Van'Doei vénère la Fixation perpétuelle comme résistance ultime au Kosmokrate entropique. Sous l'autorité des six Parfaits et de la Dragovitsa (assemblée dirigeante), trois cents âmes pratiquent les rites d'Endurement, transformant leurs corps en Stabilitaires vivants. L'architecture osseuse du Léviathan devient leur Texte Absolu, chaque Conduit vertébral transmettant les Insufflations divines, tandis que les Ossiphanies (manifestations sacrées) ponctuent leurs cycles rituels."
+        },
+        {
+            "Nom": "Murmurateurs",
+            "Résumé": "Les Murmurateurs représentent une hérésie paradoxale et tenace au sein du Léviathan pétrifié – un groupe dissident qui rejette la préservation artificielle prônée par le Culte de l'Anentropie. Nichés dans les interstices oubliés du titan fossilisé, ils cultivent une interprétation fondamentaliste du Barvasinkul (enseignements du Juge-Mendiant Barvas), embrassant l'entropie comme ultime révélation plutôt que comme ennemi. Leur présence fragile mais persistante témoigne d'une vérité inconfortable : que le culte auquel ils s'opposent s'est peut-être éloigné des enseignements originels du Juge-Mendiant Barvas, transformant une philosophie cyclique de transformation en dogme de stagnation. Du fait de leur opposition à l'Anentropie, les Murmurateurs voient Uresaïr comme une ennemie."
+        },
+        {
+            "Nom": "Paradigme Ésothrope",
+            "Résumé": "Le Paradigme Ésothrope est une initiative occulte du Culte de l'Anentropie visant à créer artificiellement des Van'Doei en Fixation (état parfait de préservation anti-entropique) pour le Dernier Rituel. Lancé il y a deux siècles par le Grand-Père (chef spirituel du culte) Athkar-Neth dans les profondeurs du Léviathan Pétrifié, ce programme d'incubation expérimentale a produit 58 spécimens, dont la vaste majorité s'est soldée par des échecs catastrophiques. Les rares \"réussites\" comme Raki-Biro 58 et Ori-Bikar 57 présentent des altérations cognitives sévères, considérées comme des \"mutations antiparadoxales\" nécessaires par les architectes du projet."
+        },
+        {
+            "Nom": "Sans nom"
+        },
+        {
+            "Nom": "Symbiotisme",
+            "Résumé": "Les Khelvortim pratiquent le Symbiotisme, religion fondée sur le mythe du Grand Démembrement : six des Sept Symbiotes Primordiaux se sacrifièrent héroïquement pour créer l'univers, tandis que Khule l'Égoïste refusa par lâcheté, devenant fou et créant imparfaitement les dix-sept espèces. Cette croyance polythéiste marginalise par le Barvasinkul mêle rituels sanglants d'automutilation, économie basée sur la souffrance et quête obsessionnelle de réunification des fragments divins dispersés dans chaque être vivant. Divisés en trois branches théologiques concurrentes, les Khelvortim survivent dans la clandestinité, pratiquant scarifications rituelles, greffes inter-espèces et commerce d'organes sacrés."
+        }
+    ]
+}

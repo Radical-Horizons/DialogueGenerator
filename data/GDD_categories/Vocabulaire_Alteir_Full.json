@@ -1,0 +1,13 @@
+{
+    "vocabulaire_alteir": [
+        {
+            "Nom": "SansTitre",
+            "Origine": "{'id': '%3AVN_', 'type': 'rich_text', 'rich_text': []}",
+            "Définition": "Genre social Umcut : explorateurs et voyageurs (~20% de la population). Quittent les tours pour parcourir Escelion, accumulant savoirs et biens.",
+            "Importance": "Modéré",
+            "Catégorie": "Concept",
+            "Terme": "Kor",
+            "Introduction": {}
+        }
+    ]
+}

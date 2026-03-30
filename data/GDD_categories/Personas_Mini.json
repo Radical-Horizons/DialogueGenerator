@@ -1,0 +1,25 @@
+{
+    "personas": [
+        {
+            "Nom": "PersonaBuilder"
+        },
+        {
+            "Nom": "ProductOwner"
+        },
+        {
+            "Nom": "Roleplayer_JoueurDeJDR"
+        },
+        {
+            "Nom": "ScrumMaster"
+        },
+        {
+            "Nom": "Worldbuilder"
+        },
+        {
+            "Nom": "Worldbuilder_EspecesCivilisees"
+        },
+        {
+            "Nom": "Worldbuilder_Zoologue"
+        }
+    ]
+}

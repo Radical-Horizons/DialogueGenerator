@@ -1,0 +1,37 @@
+{
+    "user_stories": [
+        {
+            "Nom": "Dialogue de possession",
+            "État": "En cours",
+            "Type": "User Story",
+            "Lien prototype": "{'id': 'NW%5D_', 'type': 'url', 'url': None}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "Écriture des dialogues pour la mécanique de possession (système gameplay)",
+            "Introduction": {
+                "_general": "Objectif utilisateur Afficher les pensées de l’hôte de l’Ethérée (Uresaïr, Vethraak ou Eonundé) avec un style dédié, comme un \"tooltip\" mis en scène pour expliquer le vocabulaire de l’univers. Contexte et portée Composant UI overlay avec animation d’apparition/disparition Thème typographique et FX sobres Paramètres d’accessibilité: contraste et taille de texte ajustables Critères d’acceptation Le composant s’affiche sur commande sans masquer l’action ni la boîte de dialogue en cours. Le style visuel est cohérent avec le thème UI et reste sobre. Les options d’accessibilité (contraste, taille) sont disponibles et persistantes. Le déclenchement est possible via tags/commands depuis Yarn. Scénarios (Gherkin) Scénario: Affichage d’un terme expliqué Contraintes clés Intégration Yarn: déclenchement par tags/commands Lisibilité prioritaire: ne pas couvrir les choix ni les prompts d’action Accessibilité: contraste AA minimum, taille de police ajustable, navigation manette Dépendances / Blocages Disponibilité des tags/commands dans les scripts Yarn concernés Tests Vérification de non-recouvrement avec la boîte de dialogue et les prompts d’action Tests d’accessibilité: contraste, tailles, navigation manette Test d’intégration Yarn: envoi de tag et fermeture automatique"
+            }
+        },
+        {
+            "Nom": "Template User Story",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Lien prototype": "{'id': 'NW%5D_', 'type': 'url', 'url': None}",
+            "Priorité": "P2",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "👥 Utilisateur concerné": {
+                "_general": "En tant que [utilisateur], je veux [action] afin de [bénéfice]."
+            },
+            "✅ Critères d'acceptation": {
+                "_general": "Critère 1 : Critère 2 : Critère 3 :"
+            },
+            "🔧 Tâches": {
+                "_general": "Les tâches liées apparaissent dans la propriété \"Tâches (nouveau)\" ci-dessus. Cliquez dessus pour naviguer vers les tâches ou ajoutez-en de nouvelles."
+            },
+            "📌 Notes & Contraintes": {
+                "_general": "Ajoutez ici des notes techniques, contraintes, liens vers des ressources ou des décisions de design."
+            }
+        }
+    ]
+}

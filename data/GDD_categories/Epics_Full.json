@@ -1,0 +1,823 @@
+{
+    "epics": [
+        {
+            "Nom": "Campement & premiers alliés",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Très haute",
+            "Résumé": {
+                "_general": "Espace de repos mobile qui se déploie automatiquement dans certaines zones sûres. Feu de camp central, tentes pour 5-8 alliés maximum, interface simple de gestion. Focus sur les dialogues et l'approfondissement des relations."
+            },
+            "Catégorie": "Préprod",
+            "Sprint": "Sprint 2",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "Le campement sert de premier hub social avant l'obtention de la Citadelle. Il permet au joueur de se familiariser avec la gestion d'alliés et les interactions hors combat. Doit être simple, chaleureux et mobile. Piliers concernés : Des liens d'acier"
+            },
+            "Conception": {},
+            "Éléments du campement": {
+                "_general": "Feu de camp (centre) Point de rassemblement des alliés Permet repos/soins Débloque dialogues spéciaux le soir Sauvegarde automatique Tentes individuelles 1 tente par allié recruté (max 8) Permet dialogues privés Personnalisation visuelle selon le PNJ Coffre de ressources Stockage limité (50 objets) Gestion basique d'inventaire Pas de craft complexe Carte de voyage Planification de l'itinéraire Montre zones explorées Indique prochaine destination narrative"
+            },
+            "Alliés du campement": {
+                "_general": "Capacité Maximum 8 alliés dans le campement Recrutement progressif via quêtes principales Chaque allié apporte un bonus passif Dialogues et relations Dialogues d'approfondissement au feu de camp Discussions entre alliés (conversations ambient) Quêtes personnelles débloquées au campement Gestion simple Pas de besoins complexes (faim, moral, etc.) Juste présence et dialogues Peuvent partir en mission (absents temporairement)"
+            },
+            "Parcours utilisateur": {
+                "_general": "Découverte : Premier campement automatique après 2-3h de jeu Tutorial : Akthar-Neth (Exégète) explique le fonctionnement Utilisation : Se déploie automatiquement dans zones de repos Évolution : Remplacé par la Citadelle plus tard dans le jeu Transition : Les alliés du campement rejoignent la Citadelle"
+            },
+            "Valeurs": {
+                "_general": "Capacités Alliés max : 8 Objets max : 50 Zones de déploiement : ~15 emplacements à travers Escelion Bonus d'alliés Chaque allié apporte 1 bonus passif Ex: +10% soins, +5% découverte secrets, réduction coût marchand"
+            },
+            "Cas particuliers": {
+                "_general": "En zone hostile : Campement non déployable Dans le Léviathan : Campement spécial (ossements) Après obtention Citadelle : Campement devient obsolète mais reste accessible Si tous les alliés meurent : Campement reste fonctionnel (juste vide)"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : Feu de camp + 2 emplacements tente (test UI) Phase 2 : Système de dialogues au camp Phase 3 : 8 emplacements + transitions jour/nuit Phase 4 : Polish ambient + conversations entre alliés Phase 5 : Transition vers Citadelle"
+            }
+        },
+        {
+            "Nom": "Citadelle personnelle",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "Structure consciente ancienne qui s'éveille progressivement. Le joueur gagne sa confiance, débloquant de nouveaux espaces et capacités. La Citadelle a une personnalité, des désirs, des peurs. Peut refuser certaines actions ou favoriser certains alliés."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "La Citadelle est le hub principal de mi/fin de jeu. Elle n'est pas qu'une base : c'est un personnage à part entière avec lequel on développe une relation. Ce twist unique différencie le jeu et renforce le pilier \"Voyage au Cœur de l'Étrange\". Piliers concernés : Voyage au Cœur de l'Étrange, Des liens d'acier"
+            },
+            "Conception": {},
+            "La Citadelle comme personnage": {
+                "_general": "Identité Nom : À définir (découvert progressivement) Nature : Rêveur pétrifié ou construction de Seigneur Originel Personnalité : Sage, protectrice, parfois mélancolique Voix : Résonance dans les murs, texte ambient Relation avec le joueur Jauge de confiance : Augmente via dialogues et actions Débloque : Nouveaux espaces, améliorations, secrets Dialogues : Conversations avec la Citadelle (via Uresaïr) Quêtes : La Citadelle peut demander des services Capacités de la Citadelle Téléportation : Retour instantané via points d'ancrage Perception étendue : Informe sur dangers approchant Modification : Peut changer sa configuration interne Protection : Défenses automatiques vs intrus"
+            },
+            "Espaces et gestion": {
+                "_general": "Hall principal Point central d'arrivée Carte interactive d'Escelion Tableau des quêtes Accès aux autres espaces Quartiers des alliés Capacité : 30+ alliés (10 essentiels, 20 importants) Chambres personnalisées selon le PNJ Dialogues approfondis Quêtes personnelles Bibliothèque/Archives Codex du jeu Lore d'Escelion Fragments de Merid Recherche de savoirs perdus Atelier Craft avancé Amélioration d'équipement Création d'objets uniques Sanctuaire Espace de méditation pour Uresaïr Récupération de stabilité Manipulation des Aspects Salles débloquables Jardin : Culture de ressources Forge : Équipement avancé Observatoire : Prédiction d'événements Crypte : Secrets enfouis"
+            },
+            "Système de gestion": {
+                "_general": "Missions d'alliés Envoi d'alliés en mission (absents temporairement) Rapportent ressources, informations Risque d'échec ou blessure Amélioration d'installations Investissement de ressources Débloque nouvelles fonctionnalités Certaines améliorations plaisent/déplaisent à la Citadelle Défense de la Citadelle Événements de siège occasionnels Placement d'alliés aux postes défensifs La Citadelle participe activement"
+            },
+            "Parcours utilisateur": {
+                "_general": "Découverte : Trouve la Citadelle abandonnée/endormie (10-15h de jeu) Éveil : Premier dialogue avec la Citadelle (moment fort) Installation : Transfert des alliés du campement Développement : Débloque espaces progressivement Lien profond : Arc narratif de la Citadelle elle-même"
+            },
+            "Valeurs": {
+                "_general": "Capacités Alliés max : 30 (essentiels + importants) Espaces : 8 principaux + 6 débloquables Niveaux d'amélioration : 3 par installation Jauge de confiance 0-25% : Méfiante, accès limité 25-50% : Cordiale, fonctionnalités de base 50-75% : Amicale, débloque secrets 75-100% : Profonde, révèle son vrai nom et nature"
+            },
+            "Cas particuliers": {
+                "_general": "Si trahison du joueur : Citadelle peut se refermer temporairement Si alliés indésirables : Citadelle peut refuser certains PNJ Si danger imminent : Citadelle prend l'initiative de protéger En fin de jeu : Choix narratif impliquant la Citadelle"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : Hall principal + 3 chambres alliés Phase 2 : Dialogue avec Citadelle + jauge confiance Phase 3 : 6 espaces principaux + système missions Phase 4 : Événement de siège + défense Phase 5 : Arc narratif complet Citadelle + tous espaces"
+            }
+        },
+        {
+            "Nom": "Combat au tour par tour",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "Le système de combat au tour par tour d'Alteir repose sur les mécaniques de base suivantes : Ordre des tours basé sur la vitesse des personnages et la durée des actions en unités Actions de base : attaque, défense, capacités, utilisation d'objets, fuite Portraits affichant l'ordre des tours à venir Utilisation des caractéristiques des personnages pour les tests durant le combat"
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "Résumé de la fiche": "Le système de combat au tour par tour est un élément fondamental des RPG, permettant des affrontements stratégiques. Dans Alteir, ce système doit offrir une base solide pour des combats intéressants et fluides, en intégrant les caractéristiques uniques des personnages et un système de temps basé sur des unités."
+            },
+            "Conception": {},
+            "Caractéristiques des personnages": {
+                "_general": "Chaque personnage possède des Caractéristiques et compétences"
+            },
+            "Système de temps": {
+                "_general": "Le temps des actions est calculé en \"unités\", où une unité correspond à 10 secondes de temps de jeu. Actions basiques : 0.5 unité Attaque normale : 1 unité Actions complexes : Plusieurs unités (à définir selon l'action)"
+            },
+            "Déroulement d'un combat": {
+                "_general": "Le combat commence, l'ordre initial des tours est déterminé Le joueur choisit une action pour le personnage dont c'est le tour L'action est exécutée, consommant le nombre d'unités correspondant Si l'action nécessite un test, la caractéristique appropriée est utilisée L'ordre des tours est mis à jour en fonction des actions choisies et de leur durée Le combat continue jusqu'à ce qu'une équipe soit vaincue"
+            },
+            "Valeurs de base": {
+                "_general": "Valeurs des caractéristiques : 1-10 Durée des actions : 0.5 à 5"
+            },
+            "Tests": {
+                "_general": "Vérification de la fluidité du système de tour avec les unités de temps Tests d'équilibrage des vitesses et durées d'actions Évaluation de la clarté de l'interface de combat Tests d'intégration des caractéristiques dans les mécaniques de combat Simulations pour ajuster la durée moyenne des combats"
+            }
+        },
+        {
+            "Nom": "Communication au long cours - Année 2 (Production)",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Haute",
+            "Résumé": "Maintenir l'engagement des backers pendant la production, avec des mises à jour régulières, des playtests et une communication transparente. Les objectifs incluent la transformation des backers en ambassadeurs et la préparation d'une campagne de lancement. Les risques comme la fatigue de la communauté et les retards de production doivent être gérés par une communication proactive et des événements réguliers. Un budget prévisionnel de 15 000-20 000 € est prévu pour l'année 2, avec des indicateurs de succès tels que le maintien de 60-70% des backers actifs et 10 000+ wishlists sur Steam.",
+            "Catégorie": "Fonctionnement",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "_general": "Communication pendant la phase de production (Année 2) Maintien de l'engagement de la communauté et des backers pendant le développement, préparation progressive du lancement commercial."
+            },
+            "Période": {
+                "_general": "Octobre 2026 - Septembre 2027 (12 mois post-Kickstarter)"
+            },
+            "Objectifs": {
+                "_general": "Objectif principal : Maintenir l'engagement et la confiance des backers tout au long de la production Objectifs secondaires : Transformer les backers en ambassadeurs (word-of-mouth) Documenter le développement de manière transparente Continuer à faire croître la communauté pour le launch Préparer progressivement la campagne de sortie (T3-T4 2027) Gérer les attentes et communiquer sur les ajustements de scope si nécessaire"
+            },
+            "Canaux principaux": {
+                "_general": "Discord : Hub central de la communauté (événements, Q&A, playtests) E-mail backers : Updates mensuelles ou bimensuelles Blog/Site web : Devlogs détaillés (1-2x/mois) Réseaux sociaux : Partages réguliers (2-3x/semaine) - Bluesky, Instagram, Reddit YouTube : Devlogs vidéo trimestriels (optionnel selon ressources)"
+            },
+            "Actions clés": {
+                "_general": "Engagement backers (priorité max) Updates Kickstarter : Mensuelles minimum, avec transparence sur l'avancement Playtests fermés : Inviter backers early-access à tester les builds Sondages communauté : Petites décisions cosmétiques (noms de lieux secondaires, easter eggs, etc.) Behind-the-scenes : Making-of, interviews équipe, processus créatifs Croissance organique Devlogs publics : Contenu régulier accessible aux non-backers pour continuer à recruter GIFs et clips : Contenu shareable pour les réseaux sociaux Participation événements : Salons indie en ligne, showcases (Steam Next Fest si applicable) Relations presse continue : Articles \"work in progress\", interviews Préparation launch (T3-T4 2027) Constitution d'une press kit complet Préparation trailer de sortie Prise de contact avec curateurs Steam et plateformes de distribution Liste de médias/influenceurs à contacter au launch"
+            },
+            "Gestion des risques": {
+                "_general": "Fatigue communauté Risque : Baisse d'engagement après l'euphorie du Kickstarter Mitigation : Varier les formats de contenu (texte, vidéo, images, sondages) Événements communautaires réguliers (game nights, concours fanart) Transparence sur les défis (humaniser le processus) Récompenser l'engagement (shoutouts, early access builds) Retards de production Risque : Devoir annoncer un report de la date de sortie Mitigation : Communication proactive et honnête dès que le risque est identifié Expliquer les raisons (qualité, scope, etc.) Proposer compensations symboliques (contenu bonus, accès anticipé étendu) Maintenir la communication régulière même en période difficile Scope creep visible Risque : La communauté voit des features annoncées puis coupées Mitigation : Toujours qualifier les annonces (\"prévu\", \"en exploration\", \"confirmé\") Expliquer les décisions de design (trade-offs qualité vs quantité) Impliquer la communauté dans certaines décisions de priorisation"
+            },
+            "Indicateurs de succès": {
+                "_general": "Engagement Discord : Maintien de 60-70% des backers actifs 50+ messages/jour en moyenne Participation événements : 20-30% des membres Devlogs et updates : Taux d'ouverture e-mails : ≥ 40% Engagement posts blog/réseaux : 80-150 interactions/post Croissance organique : +500-1000 followers sur l'année Wishlist pré-launch (si Steam) : Croissance continue : 10 000+ wishlists fin 2027 Conversion backers vers wishlist : ≥ 80% Moral équipe & backers : Sentiment positif dans les commentaires : ≥ 80% Pas de controverses majeures ou backlash communautaire Taux de désabonnement e-mails : ≤ 5%"
+            },
+            "Budget prévisionnel": {
+                "_general": "Budget Année 2 (Production) : 15 000-20 000 € Répartition : Outils et infrastructure : 2 000-3 000 € (Discord Nitro, Mailchimp Pro, outils CM, hébergement) Contenu créatif : 3 000-4 000 € (trailer devlog, assets graphiques, commissions artwork communauté) Événements et showcases : 2 000-3 000 € (participation salons indie, sponsoring showcases) Relations presse et influenceurs : 3 000-5 000 € (PR agency si budget, sinon contacts directs et gifts) Publicités ciblées : 3 000-4 000 € (retargeting backers, croissance organique amplifiée) Préparation launch : 2 000-3 000 € (press kit, trailer sortie, assets marketing finaux)"
+            },
+            "Livrables clés fin Année 2": {
+                "_general": "✅ Communauté engagée et fidélisée (60-70% rétention backers) ✅ 10 000+ wishlists Steam (si applicable) ✅ Press kit complet et à jour ✅ Trailer de sortie finalisé ✅ Liste de 50+ médias/influenceurs contactés ✅ Campagne de sortie planifiée (T1 2028)"
+            }
+        },
+        {
+            "Nom": "Communication de sortie & Post-launch - Année 3",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Haute",
+            "Résumé": "La campagne de sortie vise à maximiser les ventes et à établir une base de joueurs fidèles, avec des phases de pré-lancement, de lancement et de post-lancement. Les objectifs incluent un seuil de rentabilité dans les 3-6 mois, une note moyenne de 80% et une stratégie de communication ciblée avec des influenceurs et des médias. Le budget prévisionnel pour la troisième année est de 30 000-35 000 €, réparti entre les différentes phases de lancement et de support post-lancement.",
+            "Catégorie": "Fonctionnement",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "_general": "Campagne de sortie et support post-lancement (Année 3) Maximiser la visibilité au lancement, convertir l'intérêt en ventes, assurer un support post-release de qualité et prolonger la durée de vie commerciale du jeu."
+            },
+            "Période": {
+                "_general": "Octobre 2027 - Décembre 2028+ (Launch prévu T1 2028 + 12 mois post-launch)"
+            },
+            "Objectifs": {
+                "_general": "Objectif principal : Maximiser les ventes au lancement et maintenir une longue traîne commerciale Objectifs secondaires : Atteindre un seuil de rentabilité dans les 3-6 mois post-launch Obtenir une note moyenne ≥ 80% (Steam/Metacritic) Construire une base de joueurs fidèle pour futurs projets Maximiser le word-of-mouth et les recommandations organiques Préparer le terrain pour DLC/contenu additionnel ou suite"
+            },
+            "Phases de lancement": {
+                "_general": "Phase Pre-Launch (Oct 2027 - Déc 2027) Objectif : Build du maximum d'anticipation Actions : Trailer de lancement publié (2-3 mois avant sortie) Démo publique disponible (Steam Next Fest ou équivalent) Reviews embargo : Envoi des clés presse 2-3 semaines avant launch Marketing push : Publicités Steam, YouTube, Reddit, Discord Influenceurs : 20-30 créateurs contactés avec clés early access Page Steam optimisée : Screenshots, vidéos, description, FAQ Phase Launch Window (Jan-Fév 2028) Objectif : Maximiser la visibilité pendant la fenêtre critique Actions : Jour J (J-0) : Sortie simultanée toutes plateformes Couverture presse : 30+ articles/reviews publiés semaine 1 Streams influenceurs : 10+ créateurs streamant le jeu Publicités intensives : Budget max alloué (50% du budget Année 3) Support communauté : Équipe disponible 24/7 pour bugs/questions Patch Day 1 : Correctifs rapides si nécessaire Phase Post-Launch immédiat (Mars-Juin 2028) Objectif : Maintenir le momentum, gérer le feedback Actions : Patches réguliers : Corrections bugs + améliorations QoL Communication transparente : Roadmap post-launch partagée Engagement reviews : Réponse aux reviews (positives et négatives) Ajustements pricing : Premières promotions ciblées si pertinent Contenu additionnel gratuit : Petites updates pour maintenir l'intérêt Phase Long-tail (Juil 2028 - Déc 2028+) Objectif : Maximiser la longue traîne commerciale Actions : Soldes Steam : Participation aux événements saisonniers (-15 à -30%) Bundles : Partenariats avec d'autres indés Localisation additionnelle : Langues supplémentaires selon ROI Awards et nominations : Soumission IGF, BAFTA Games, etc. DLC/Extension : Selon succès et ressources (année 4+)"
+            },
+            "Canaux et tactiques": {
+                "_general": "Médias traditionnels 50+ outlets contactés : Presse spécialisée (PC Gamer, IGN, Rock Paper Shotgun, Eurogamer, etc.) Reviews : Clés envoyées 2-3 semaines avant launch avec embargo Interviews : Disponibilité de l'équipe pour podcasts, articles longs Communiqués de presse : Launch, milestones (10k ventes, 50k, etc.) Influenceurs et créateurs Tier 1 (100k+ subs) : 3-5 créateurs (priorité absolue) Tier 2 (20-100k subs) : 10-15 créateurs (bon ratio reach/effort) Tier 3 (5-20k subs) : 15-20 créateurs (niche RPG, authenticité) Clés presse : Unlimited pour créateurs >5k subs Publicité payante Steam : Featured spots, recommendations algorithm boost YouTube : Pre-roll ads ciblées (RPG, indie games, narrative games) Reddit : Ads ciblées r/rpg_gamers, r/indiegaming, r/games Discord : Discovery et partenariats serveurs Meta (FB/Insta) : Ciblage démographique précis (25-40 ans, RPG fans) Communauté et grassroots Discord launch party : Événement communautaire jour J Concours fanart/fanfic : Récompenses (goodies, DLC gratuit) AMA Reddit : 1-2 semaines post-launch Streams officiels : Développeurs jouant avec la communauté"
+            },
+            "Gestion des risques": {
+                "_general": "Launch bugs critiques Risque : Bugs majeurs au lancement → reviews négatives Mitigation : QA intensif 2-3 mois pre-launch Beta fermée avec backers (1 mois avant) Équipe technique en standby 24/7 pendant launch week Hotfix pipeline prêt (déploiement < 24h) Communication transparente si problème majeur Reviews mitigées Risque : Réception critique tiède (< 75% positif) Mitigation : Identifier les critiques récurrentes rapidement Patches rapides pour les problèmes fixables (UI, balance, bugs) Communication sur les aspects intentionnels (design choices) Focus sur la niche (RPG narratif) plutôt que l'audience générale Saturation marché Risque : Trop de sorties simultanées, noyé dans la masse Mitigation : Veille concurrentielle : éviter les AAA RPG launches Différenciation claire dans messaging (mythologies uniques, IA éthique, variabilité) Investir dans le word-of-mouth (démo publique, influenceurs authentiques) Échec commercial (< 5k ventes 3 mois) Risque : Échec à atteindre l'audience, revenus insuffisants Mitigation : Stratégie d'acquisition aggressive (budget pub max) Pivot pricing si nécessaire (baisse de prix après 1-2 mois) Bundles et deals agressifs Analyse post-mortem et apprentissages pour futur projet"
+            },
+            "Indicateurs de succès": {
+                "_general": "Launch Window (Semaine 1) : 3 000-5 000 ventes (hors backers) Note Steam : ≥ 80% positive (\"Very Positive\") 20+ reviews médias publiées 5+ vidéos influenceurs >100k vues Premier mois : 8 000-12 000 ventes totales Maintien note Steam : ≥ 75% Wishlists → Ventes : 15-25% conversion 50+ reviews utilisateurs Steam Trois premiers mois : 15 000-25 000 ventes Rentabilité atteinte (selon budget) Début longue traîne stable (100-300 ventes/semaine) Année 1 post-launch : 30 000-50 000 ventes cumulées Revenue : 300k-500k € (selon prix et plateforme) Note globale stable : ≥ 75% Communauté active : 1000+ membres Discord"
+            },
+            "Budget prévisionnel": {
+                "_general": "Budget Année 3 (Sortie & Post-launch) : 30 000-35 000 € Répartition : Pre-Launch (Oct-Déc 2027) : 8 000-10 000 € Trailer final professionnel : 2 000-3 000 € Press kit et assets finaux : 1 000-1 500 € Démo publique (QA, polish) : 1 500-2 000 € Publicités teasing : 2 000-2 500 € Relations presse (outreach, gifts) : 1 500-2 000 € Launch Window (Jan-Fév 2028) : 15 000-18 000 € Publicités intensives : 8 000-10 000 € - Steam featured : 3 000-4 000 € - YouTube ads : 2 000-3 000 € - Reddit/Meta ads : 2 000-2 500 € - Discord/autres : 1 000-1 500 € Influenceurs (gifts, sponsorships) : 3 000-4 000 € PR agency (optionnel) : 2 000-3 000 € Assets promotionnels additionnels : 1 000-1 500 € Outils analytics et attribution : 500-1 000 € Contingence (hotfix, support) : 500-1 000 € Post-Launch (Mars-Déc 2028) : 7 000-9 000 € Publicités ciblées continues : 3 000-4 000 € Participation soldes et événements : 1 000-1 500 € Contenu additionnel (updates, DLC) : 1 500-2 000 € Relations presse longue traîne : 1 000-1 500 € Outils et infrastructure : 500-1 000 €"
+            },
+            "Livrables clés Année 3": {
+                "_general": "✅ Launch réussi avec 15-25k ventes 3 mois ✅ Note Steam ≥ 75% (positive/très positive) ✅ Rentabilité atteinte ✅ 30+ reviews presse publiées ✅ Communauté active et engagée (1000+ Discord) ✅ Longue traîne commerciale établie ✅ Réputation studio pour futur projet"
+            }
+        },
+        {
+            "Nom": "Doublage intégral",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Moyenne",
+            "Résumé": "Offrir un doublage intégral des dialogues clés pour améliorer l’immersion et l’accessibilité, en se concentrant sur le casting, l'enregistrement et l'intégration en jeu. Les critères de succès incluent une couverture ciblée sans dégradation des performances et une qualité audio cohérente.",
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {},
+            "Objectif": {
+                "_general": "Offrir un doublage intégral des dialogues clés pour augmenter l’immersion et l’accessibilité, sans bloquer la V1."
+            },
+            "Portée": {
+                "_general": "Casting, direction VO, enregistrement, post-prod Intégration en jeu et fallback textuel propre Guidelines de performance et continuité"
+            },
+            "Hors scope": {
+                "_general": "UI de boîte de dialogue Runtime Yarn et choix"
+            },
+            "Dépendances": {
+                "_general": "Système de dialogue (runtime) Localisation (si multilingue)"
+            },
+            "Découpage proposé": {
+                "_general": "Par personnages principaux puis zones prioritaires"
+            },
+            "Critères de succès": {
+                "_general": "Couverture ciblée livrée sans dégrader perfs et mémoire Qualité audio cohérente et mixage lisible"
+            }
+        },
+        {
+            "Nom": "Exploration des souvenirs",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "L'exploration des souvenirs est accessible via un menu dédié et représente la psyché de chaque personnage comme une série de zones navigables. Ces paysages mentaux sont structurés comme des maps traditionnelles contenant : Des nœuds de mémoire représentant des événements significatifs Des barrières psychiques (points bloquants) qui se déverrouillent avec la progression de l'histoire Des manifestations de souvenirs avec lesquelles le joueur peut interagir Des dilemmes de résolution qui influencent les traits et capacités du personnage Chaque PJ possède sa propre psyché avec une architecture unique reflétant sa personnalité : labyrinthique pour Uresaïr, fragmentée et aquatique pour Eonundé, géométrique et calculée pour Vethraak. Découvertes : Le joueur peut découvrir des souvenirs qui contredisent ses propres hypothèses sur les personnages. Nœuds mutants: Certains souvenirs changent de signification une fois reliés à d'autres découvertes ultérieures, créant une relecture surprise de scènes déjà vécues. Faux souvenirs: 20% des mémoires explorées sont des fabrications des personnages, que le joueur doit identifier pour comprendre leurs mécanismes de défense psychique."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "Résumé de la fiche": "L'exploration des souvenirs fournit un accès à la psyché des personnages possédés par l'Éthérée, permettant d'approfondir leur histoire personnelle et d'influencer leur développement. Cette fonctionnalité transforme l'évolution introspective des personnages en espaces navigables, donnant une forme concrète aux conflits intérieurs et aux expériences formatrices."
+            },
+            "Hypothèse": {
+                "_general": "Cette fonctionnalité renforce deux piliers de conception essentiels : \"Conflits de Conscience\" en permettant aux joueurs d'explorer les motivations profondes des personnages, et \"Voyage au Cœur de l'Étrange\" en transformant l'introspection en exploration physique. Elle établit également un lien tangible entre le passé des personnages et leurs capacités futures."
+            },
+            "Parcours utilisateur": {
+                "_general": "Le joueur accède au menu \"Psyché\" depuis l'interface principale Il sélectionne un des personnages possédés par l'Éthérée Une transition visuelle mène à la représentation de la psyché du personnage Le joueur navigue dans cet espace à la recherche de nœuds de mémoire En interagissant avec un nœud accessible, le joueur peut: - Observer une cutscene montrant un souvenir - Dialoguer avec une manifestation du PJ ou de figures de son passé - Prendre des décisions sur l'interprétation ou la résolution d'un souvenir Ces choix débloquent des effets mécaniques (attributs, compétences, options de dialogue) La progression de l'histoire principale déverrouille de nouvelles zones de la psyché"
+            },
+            "Flux": {
+                "_general": "[Menu principal] → [Sélection \"Psyché\"] → [Choix du personnage]                                            ↓ [Navigation dans la psyché] → [Découverte d'un nœud de mémoire]           ↑                     ↓ [Retour à la psyché] ← [Interaction avec le souvenir]                         ↓                      [Choix d'interprétation/résolution]                         ↓                      [Effet mécanique appliqué]"
+            },
+            "Intégration avec le système de progression": {
+                "_general": "L'exploration des souvenirs se connecte directement au système de progression par zone : Les arbres passifs de progression contiennent des \"cases mémorielles\" qui, une fois activées, déverrouillent des nœuds spécifiques dans la psyché Inversement, résoudre certains nœuds de mémoire débloque des options dans les arbres de progression de zone Les traits dominants révélés par l'exploration des souvenirs déterminent quelles cases spéciales sont compatibles avec le personnage dans le système de progression Certains PNJ importants d'une zone peuvent apparaître comme des figures dans les souvenirs, établissant des connexions narratives et mécaniques"
+            },
+            "Valeurs techniques": {
+                "_general": "Nombre de nœuds de mémoire: 5-8 par personnage, débloqués progressivement Temps d'exploration moyen: 5-10 minutes par session de psyché Ratio cutscenes/dialogues: 30% cutscenes, 70% dialogues interactifs Réutilisation d'assets: Les psychés utilisent principalement des assets existants réarrangés de façon symbolique"
+            },
+            "Limites et restrictions délibérées": {
+                "_general": "Pour assurer la faisabilité, le système: Utilise des maps de taille limitée (équivalentes à une zone de village) Réutilise le système de dialogue existant Limite les cutscenes à des moments essentiels Évite les mécaniques spécifiques à l'exploration psychique (pas de combat mental ou de puzzle unique) Récompense principalement par des attributs passifs et des options de dialogue"
+            },
+            "Interfaces": {
+                "_general": "Interface minimaliste comprenant: Une carte stylisée de la psyché montrant les zones accessibles Des indicateurs visuels sur les nœuds (découvert/résolu/bloqué) Des effets visuels distinctifs pour chaque type de psyché"
+            }
+        },
+        {
+            "Nom": "Marketing & Communication - Année 1 (Financement)",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Haute",
+            "Résumé": "Stratégie marketing pour le jeu \"Alteir : A Foreign Masquerade\" visant à atteindre les seuils de financement via CNC et Kickstarter, tout en construisant une communauté de joueurs. Les phases incluent la préparation interne, le lancement public, la preuve de viabilité et la campagne Kickstarter, avec des actions clés et des indicateurs de succès définis pour chaque phase. Un budget prévisionnel de 10 000 à 15 000 € est alloué pour la première année, avec une attention particulière à l'usage éthique de l'IA dans le développement.",
+            "Catégorie": "Fonctionnement",
+            "Sprint": "Sprint 2",
+            "Introduction": {
+                "_general": "Stratégie marketing et communication pour Alteir : A Foreign Masquerade Ensemble des actions marketing, communication et relation publique pour faire connaître le jeu, construire une communauté engagée et sécuriser le financement (CNC FAJV avril 2026, puis Kickstarter)."
+            },
+            "Objectifs stratégiques": {
+                "_general": "Objectif principal : Atteindre les seuils de financement (CNC + Kickstarter) tout en bâtissant une communauté de joueurs passionnés par les RPG narratifs et l'exploration d'univers riches. Objectifs secondaires : Construire une présence digitale cohérente et professionnelle Communiquer de manière transparente sur l'usage éthique de l'IA dans le développement Établir des partenariats stratégiques (distributeurs, investisseurs, médias spécialisés) Positionner Alteir comme une référence dans les RPG narratifs 2D"
+            },
+            "Documentation de référence": {
+                "_general": "Planification et stratégie Plan Marketing : Actions planifiées par phase (Communauté, Preuve, Kickstarter) avec timeline, budgets et KPIs Formation La Ruche : Business model complet incluant persona, positionnement, proposition de valeur, parcours client - Persona - explorateur d’univers - Positionnement marketing - Plan de communication Communication spécifique Communication sur l’IA : Position officielle sur l'usage éthique et responsable de l'IA (transparence, pas de style hijacking, crédits humains) Publicités  : Matériaux promotionnels (teaser, etc.) Partenariats et expansion Entreprises chinoises : Contacts potentiels pour expansion Asie (Hylink Digital, Vertex Ventures China, Cyanhill Capital)"
+            },
+            "Phases de communication": {
+                "_general": "Phase 0 : Préparation interne (Octobre 2025 - Décembre 2025) Objectif : Finaliser les assets et préparer le lancement public Statut actuel : Le jeu n'est pas encore public Actions clés : Finalisation démo jouable (Plis d'ossements) Préparation assets marketing (trailer, screenshots, GIFs) Mise en place infrastructure (site web, Discord, réseaux sociaux) Rédaction documents de présentation (CNC, pitch deck) Phase 1 : Lancement public et construction communauté (Janvier 2026 - Mars 2026) Objectif : Révéler le jeu publiquement et rassembler les premiers early adopters Canaux prioritaires : Site officiel, Discord, Bluesky, Instagram, Reddit Actions clés : Janvier 2026 : Annonce publique avec trailer et démo jouable Devlogs réguliers (2x/mois minimum) Partage de worldbuilding et making-of transparents Engagement communauté Discord active Mars/Avril 2026 : Soumission dossier CNC FAJV Phase 2 : Phase Preuve et préparation Kickstarter (Avril 2026 - Août 2026) Objectif : Démontrer la viabilité, attendre résultats CNC, préparer campagne Kickstarter Canaux prioritaires : Presse spécialisée, YouTube, Twitch, tous canaux existants Actions clés : Coverage média renforcé (articles, interviews, Let's Play) Amélioration continue démo jouable selon feedback Préparation campagne Kickstarter (page, vidéo, rewards) Building de la wishlist et de l'anticipation Juin-Juillet 2026 : Résultats CNC attendus Phase 3 : Kickstarter (Septembre 2026) Objectif : Lever les fonds complémentaires et valider l'intérêt commercial Canaux prioritaires : Kickstarter, Twitch, E-mail, tous canaux existants Actions clés : Campagne intensive (400 €/jour visé sur 21-28 jours) Streams réguliers avec les développeurs Relances influenceurs et presse BackerKit post-campagne (Octobre 2026)"
+            },
+            "Messages clés": {
+                "_general": "Piliers narratifs Conflits de conscience : Choix moraux difficiles avec conséquences permanentes Voyage au cœur de l'étrange : Exploration d'un monde surréaliste et poétique Des liens d'acier : Relations profondes avec des personnages mémorables Différenciation RPG narratif 2D avec forte variabilité narrative (pas deux parties identiques) Univers original inspiré des mythologies nordique et d'Afrique de l'Est 30h de jeu avec centaines de personnages doublés Développement transparent et éthique (usage IA documenté et responsable)"
+            },
+            "Gestion des risques": {
+                "_general": "Communication IA Risque : Backlash communautaire sur l'usage de l'IA dans la création Mitigation : Transparence totale via devlogs et making-of Mise en avant des artistes, musiciens et auteurs humains (crédits proéminents) Position éthique claire (pas de style hijacking, contrôle qualité humain systématique) Focus sur l'IA comme outil d'amplification, pas de remplacement Fatigue Kickstarter Risque : Saturation du public face aux campagnes de financement Mitigation : Construction communauté solide en amont (8 mois avant KS) Démo jouable de qualité disponible dès janvier 2026 Communication régulière et authentique (pas de survente) Stretch goals réalistes et transparents Timing CNC vs Kickstarter Risque : Résultats CNC inconnus au moment du Kickstarter (attente 3-4 mois) Mitigation : Communication transparente : \"Nous avons postulé au CNC, résultats attendus [date]\" Budget Kickstarter calibré pour fonctionner même sans CNC (scope réduit si refus) Stretch goals conditionnés aux subventions obtenues"
+            },
+            "Indicateurs de succès": {
+                "_general": "Avant lancement public (Oct-Déc 2025) : Démo jouable finalisée et testée Site web + Discord + 2-3 réseaux sociaux opérationnels 20+ assets marketing prêts (screenshots, GIFs, trailer) Dossier CNC complet Phase 1 - Construction communauté (Jan-Mars 2026) : 300+ membres Discord actifs 1000+ followers cumulés (tous réseaux) 3+ articles presse spécialisée Wishlist Steam : 1500+ (si applicable) Dossier CNC soumis en mars/avril 2026 Phase 2 - Preuve (Avr-Août 2026) : 500+ membres Discord actifs 2500+ followers cumulés 10+ articles/vidéos presse et influenceurs Wishlist Steam : 4000+ Page Kickstarter pré-lancée avec 200+ followers Phase 3 - Kickstarter (Sept 2026) : Objectif financé dans les 48h Moyenne 400 €/jour sur 21-28 jours Taux de conversion e-mail : ≥ 15% ≥ 95% des backers complètent le survey BackerKit Post-Kickstarter (Oct 2026 - 2027) : Rétention communauté Discord : ≥ 70% Engagement devlogs mensuels : 100+ interactions/post Coverage média maintenu (1+ article/trimestre)"
+            },
+            "Budget prévisionnel": {
+                "_general": "Voir détails dans Plan Marketing pour allocation par action. Budget Année 1 (Financement) : 10 000-15 000 € Phase 0 (Oct-Déc 2025) : 1 500-2 000 € (site web, branding, outils) Phase 1 (Jan-Mars 2026) : 2 000-3 000 € (trailer, publicités ciblées initiales) Phase 2 (Avr-Août 2026) : 3 000-4 500 € (PR, influenceurs, assets supplémentaires) Phase 3 (Sept 2026) : 3 500-5 500 € (campagne KS, publicités intensives, frais plateforme) Budget publicité total sur 3 ans : ~60 000 € (15% du budget total du jeu) Année 1 (Financement) : 10-15k € (~20-25%) Année 2 (Production/Communication au long cours) : 15-20k € (~25-33%) Année 3 (Sortie & Post-launch) : 30-35k € (~50-55%)"
+            }
+        },
+        {
+            "Nom": "Menu principal",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Très haute",
+            "Résumé": "Le menu principal vise à offrir un accès rapide aux informations sans perturber le jeu, intégrant le Journal et l'Inventaire. Il doit être léger, compatible avec divers contrôles, et répondre à des critères de performance stricts. Les risques incluent des limitations sur l'UI et la performance, avec des mesures de mitigation en place. Le prototype est en cours d'écriture, avec un objectif de validation lors du Sprint 3.",
+            "Catégorie": "Préprod",
+            "Sprint": "Sprint 3",
+            "User stories": "Menu pause avec écran personnage",
+            "Introduction": {
+                "_general": "Epic — Menu principal Objectif utilisateur: Offrir un point d’accès clair et rapide à toutes les informations et systèmes hors action sans casser le flow du jeu. Pourquoi maintenant: C’est le socle UI qui héberge Journal et Inventaire déjà en cours. Il dé-risque l’intégration manette et la navigation commune. Contexte Interface centrale accessible en jeu sauf cinématiques et dialogues. Doit rester légère pour la préprod, compatible clavier, souris et manette. Portée Inclus - Shell du menu, ouverture/fermeture, onglets verticaux, transitions simples - Intégration d’au moins deux onglets fonctionnels existants: Journal et Inventaire Exclus - Thèmes dynamiques par zone, quick menu en surimpression, profils multiples Hypothèses L’ouverture et le retour jeu doivent être perçus comme instantanés (< 300 ms sur machine cible). La hiérarchie en deux niveaux suffit pour la préprod. Dépendances Yarn Spinner pour interdire l’ouverture pendant les dialogues Systèmes UI Journal et Inventaire pour validation d’intégration Découpage en features (liées) Untitled — Valeur: première interaction tangible avec les objets. Fin: équiper ou consommer persiste et le retour au jeu est sans fuite d’état. Untitled — Valeur: repère narratif clair. Fin: affichage des étapes actives et terminées, lien vers objectif actif. Critères de succès Playtest: 90% des testeuses trouvent l’onglet voulu en moins de 3 actions Perf: ouverture et fermeture < 300 ms, aucun drop d’input Accessibilité: navigation manette complète et lisible sur écran 1080p Risques et mitigations Risque scope UI: limiter animations et thèmes. Garder transitions minimales. Risque perf: profiler dès le prototype, assets UI légers. Estimation et fenêtre Taille: M Sprint cible: Sprint 3 État et prochain jalon État: En cours d’écriture Prochain jalon: Prototype Shell + navigation de base intégré avec onglets vides"
+            }
+        },
+        {
+            "Nom": "PJ : Eonundé",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Très haute",
+            "Résumé": {
+                "_general": "Grande Vaideccane (1m90) à la peau bleue parcourue d'irisations argentées. Combat au corps-à-corps, mouvements oscillant entre grâce fluide et violence saccadée. Système unique de détection des mensonges et mécanique de rage."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Sprint 2",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "Eonundé représente la rébellion et la violence libératrice. Son gameplay doit refléter sa nature explosive, son combat rapproché brutal et sa capacité à détecter les mensonges. Personnage le plus orienté combat direct des trois PJ. Piliers concernés : Des liens d'acier, Conflits de conscience"
+            },
+            "Conception": {},
+            "Assets techniques": {
+                "_general": "Sprites et animations Spritesheet 8 directions : idle, marche, course (mouvements fluides + saccades) Animations de combat : combos corps-à-corps, rage, exécutions Animations narratives : tension émotionnelle, hallucinations tactiles, cicatrices qui pulsent VFX spéciaux : yeux turquoise luminescents, traces aquatiques, aura de rage rouge Particularités visuelles Irisations argentées qui changent selon l'état émotionnel Cicatrices auto-infligées visibles (recouvrant celles de Vol) Membranes natatoires dorsales (une prothésée)"
+            },
+            "Systèmes de gameplay": {
+                "_general": "Synesthésie des mensonges Passif permanent : Les mensonges apparaissent avec une \"odeur âcre\" (VFX visuel) En dialogue, icône spécial quand un PNJ ment Permet de débusquer les traîtres et manipulateurs Peut créer des embranchements de dialogue uniques Système de rage Jauge de rage : Se remplit au combat et face aux injustices Mode Rage : Dégâts et vitesse augmentés, défense réduite Exécutions : Attaques finales brutales en mode Rage Risque : Perte de contrôle si rage max trop longtemps Combat Vaideccan Spécialisation corps-à-corps Combos fluides avec finitions brutales Capacité à respirer sous l'eau (exploration aquatique) Techniques anti-autorité (bonus vs gardes, automates) Réseau de résistance Peut recruter des PNJ opprimés comme informateurs Accès à des quêtes de sabotage urbain Relation spéciale avec les créations artificielles"
+            },
+            "Parcours utilisateur": {
+                "_general": "Recrutement : Rencontre dans le Vernissage de l'Enlumineur (fusionnée au mur) Libération : Quête pour la libérer (utilise Aspects d'Uresaïr) Possession : L'Éthérée peut la posséder après recrutement Gameplay : Combat brutal, infiltration, sabotage Arc narratif : Confrontation avec son identité (Ysellor vs elle-même)"
+            },
+            "Valeurs": {
+                "_general": "Stats de base Santé : Élevée (corps Vaideccan robuste) Vitesse : Très élevée Puissance physique : Très élevée Puissance magique : Nulle Défense : Moyenne (fragile en mode Rage) Jauge de rage Se remplit : dégâts reçus, injustices témoignées, mentions de Vol/Ysellor Mode Rage : +50% dégâts, +30% vitesse, -40% défense Exécutions disponibles à 75%+ rage"
+            },
+            "Cas particuliers": {
+                "_general": "Sous l'eau : Bonus de vitesse et discrétion Face aux automates : Connaît leurs points faibles (bonus dégâts) Hallucinations tactiles : Malus temporaires sous stress intense Quand possédée par l'Éthérée : La rage reste mais contrôlable"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : Sprites de base + combat corps-à-corps Phase 2 : Système de rage + synesthésie mensonges Phase 3 : Réseau de résistance + quêtes spécifiques Phase 4 : Balance rage (risque vs récompense) Phase 5 : Polish animations combos"
+            }
+        },
+        {
+            "Nom": "PJ : Uresaïr",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Essentielle",
+            "Résumé": {
+                "_general": "Uresaïr possède un corps de verre translucide avec masque sans traits et auréole en suspension. Ses 7 Aspects forment un système de compétences actives et passives qui se renforcent mutuellement mais montrent des dysfonctionnements dus à l'absence de Deshkarta."
+            },
+            "Catégorie": "Préprod",
+            "Sprint": "Sprint 2",
+            "User stories": "Uresaïr contrôlable, Premier Aspect : Manah (Lecture des pensées), Système de stabilité d'Uresaïr, Aspects d'exploration (Asha + Khshatra), Aspects de support (Armaiti, Haurvat, Ameret, Mainyu), Polish visuel Uresaïr (VFX & animations)",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "Uresaïr est le PJ principal et le premier accessible. Son système des 7 Aspects survivants (sur 8) doit refléter sa nature de divinité brisée et offrir une palette de pouvoirs unique centrée sur la manipulation temporelle et spatiale. L'absence de son 8e Aspect (Deshkarta - Destruction) doit être perceptible dans le gameplay. Piliers concernés : Voyage au Cœur de l'Étrange, Conflits de conscience, Des liens d'acier"
+            },
+            "Conception": {},
+            "Assets techniques": {
+                "_general": "Sprites et animations Spritesheet 8 directions : idle, marche, course Animations de combat : attaque de base, esquive, 7 animations d'Aspects Animations narratives : visions traumatiques (catalepsie), transformation du verre, craquelures VFX spéciaux : aura verdâtre, anneaux de lumière pâle, brume dorée (Manah), signes géométriques (Asha) Particularités visuelles Lignes de tension émeraude qui s'intensifient avec l'émotion Effet de \"clignement du monde\" lors de l'usage des Aspects Craquelures progressives sur le corps de verre après utilisation intensive"
+            },
+            "Système des 7 Aspects": {
+                "_general": "Aspects actifs (compétences) Manah (La Pensée) - brume dorée Permet de lire les pensées superficielles d'un PNJ Révèle les intentions hostiles en combat Affiche les \"alternatives\" d'un choix sans prédire l'issue Asha (La Loi) - signes géométriques Impose une règle temporaire à l'environnement (ex: \"l'eau ne peut brûler\", \"les portes restent ouvertes\") Durée limitée, la règle s'effiloche progressivement Coût en stabilité mentale Khshatra (Le Pouvoir) - architectures momentanées Crée des structures temporaires (escaliers, ponts, murs) Les structures sont figées, ne peuvent évoluer Utile pour l'exploration et le combat défensif Armaiti (La Terre) - poussière apaisante Stabilise l'espace autour d'elle Force des pactes entre adversaires (dialogue forcé en combat) Peut créer des alliances mais risque de les rigidifier Haurvat (L'Harmonie) - lumière verdâtre Soin lent qui préserve les cicatrices Répare en intégrant la dissonance Ne peut purifier, seulement réparer Ameret (L'Immortalité) - aura blanchâtre Préserve et fige un objet ou une entité Peut empêcher la mort mais crée une stagnation Double tranchant : prolonge ce qui devrait disparaître Mainyu (Le Souffle) - vagues rythmiques Inspire créativité et révélations aux alliés Boost de compétences créatives/intellectuelles Effets répétitifs, œuvres inspirées restent inachevées Aspect absent (handicap mécanique) Deshkarta (La Destruction) - MANQUANT Impossibilité de terminer proprement certaines actions Accumulation de \"strates\" sans pouvoir détruire les anciennes Certains puzzles requièrent de la destruction pure = inaccessibles Les pactes créés par Armaiti ne peuvent être rompus Les lois d'Asha s'empilent au lieu de se remplacer"
+            },
+            "Parcours utilisateur": {
+                "_general": "Sélection : Uresaïr est possédée par l'Éthérée dès le début du jeu Tutoriel : Apprentissage progressif des 7 Aspects dans les Plis d'Ossements Gameplay : Utilisation des Aspects en exploration, dialogue et combat Tension : Les craquelures s'accumulent, nécessitant des périodes de repos Arc narratif : Possibilité de récupérer Deshkarta en fin de jeu"
+            },
+            "Valeurs": {
+                "_general": "Stats de base Santé : Moyenne (corps fragile de verre) Vitesse : Lente (mouvements mesurés) Puissance magique : Très élevée Défense : Faible (mais Aspects défensifs) Jauge de stabilité Chaque usage d'Aspect consomme de la stabilité Si stabilité = 0 : état cataleptique (visions traumatiques) Récupération : immobilité contemplative ou retour dans les Plis"
+            },
+            "Cas particuliers": {
+                "_general": "Dans les Plis d'Ossements : Aspects atténués et douloureux Près du fragment Deshkarta : Tous les Aspects fonctionnent mieux Crises de visions : Perte de contrôle temporaire, Éthérée doit gérer Distance de 7 enjambées : Maintenue automatiquement avec les PNJ en dialogue"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : Sprites de base + 1 Aspect (Manah) pour tester le système Phase 2 : Tous les Aspects + système de stabilité Phase 3 : Intégration narrative (visions, craquelures) Phase 4 : Balance et feedback joueur Phase 5 : Polish VFX et animations"
+            }
+        },
+        {
+            "Nom": "PJ : Vethraak",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Très haute",
+            "Résumé": {
+                "_general": "Umcut élégant (4 yeux jaunes à motifs géométriques) spécialisé dans les mathématiques et la manipulation sociale. Combat faible mais excellence en infiltration, persuasion et collecte d'informations. Système unique de réseau d'informateurs et charme courtisan."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Sprint 2",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "Vethraak représente la manipulation et la survie par l'intelligence. Son gameplay doit se concentrer sur le charme social, le réseau d'informations et l'évitement du danger plutôt que le combat direct. Personnage le plus orienté dialogue et infiltration. Piliers concernés : Conflits de conscience, Voyage au Cœur de l'Étrange"
+            },
+            "Conception": {},
+            "Assets techniques": {
+                "_general": "Sprites et animations Spritesheet 8 directions : idle, marche furtive, course (mouvements félins) 4 yeux : Animation indépendante, motifs géométriques changeants Animations de combat : Évasion, attaques opportunistes (faibles) Animations narratives : Gestes de courtisan, ajustements de veste, fascination du médaillon VFX spéciaux : Médaillon iridescent (équations en mouvement), aura de charme Particularités visuelles Pelage brun-noir avec motifs asymétriques changeants Iris striés de diagrammes mathématiques vivants Veste aux poches multiples (détail important) Médaillon captant et déformant la lumière"
+            },
+            "Systèmes de gameplay": {
+                "_general": "Charme courtisan Jauge de charme : Se remplit en dialogues réussis Mode Séduction : Bonus persuasion, accès à dialogues exclusifs Observation sociale : Détecte les vulnérabilités émotionnelles des PNJ Voix veloutée : Réduit l'hostilité ambiante Réseau d'informateurs Carte d'influence : Vue spéciale montrant les connexions sociales Faveurs et dettes : Système de monnaie sociale Informations exclusives : Accès à des secrets, rumeurs, opportunités Chantage : Peut manipuler certains PNJ avec informations collectées Calcul d'Interstices Vision mathématique : Détecte les \"plis\" et passages secrets Analyse de probabilités : Évalue le risque d'une action avant de la faire Énigmes mathématiques : Résout des puzzles inaccessibles aux autres PJ Combat (faible) Dégâts très faibles Spécialisé en évasion et fuite Attaques opportunistes (poison, pièges) Préfère éviter le combat entièrement"
+            },
+            "Parcours utilisateur": {
+                "_general": "Recrutement : Rencontre dans une caravane (après mort du guide) Négociation : Vethraak propose ses services contre accompagnement Possession : L'Éthérée peut le posséder après recrutement Gameplay : Infiltration sociale, collecte d'informations, évitement Arc narratif : Quête de préservation mémorielle vs acceptation"
+            },
+            "Valeurs": {
+                "_general": "Stats de base Santé : Très faible Vitesse : Élevée (évasion) Puissance physique : Très faible Puissance magique : Nulle (mais calculs mathématiques) Charme : Très élevé Perception : Très élevée Jauge de charme Se remplit : dialogues réussis, compliments, lectures sociales Mode Séduction : -30% hostilité, +50% persuasion, dialogues exclusifs Chute rapide si : détecté mentant, violence, échec social Réseau d'influence Faveurs : Monnaie sociale (gagnées/dépensées) Informateurs : PNJ recrutés (max 10 actifs) Dettes : PNJ redevables (utilisables une fois)"
+            },
+            "Cas particuliers": {
+                "_general": "En présence d'Eonundé : Malus (anxiété, ressemblance avec Ysellor) Face à Errazel ou ses agents : Terreur, malus massifs Trauma déclenché : Perd façade courtisane, devient abrupt et mathématique Quand possédé par l'Éthérée : Façade maintenue mais Éthérée peut briser le masque"
+            },
+            "Intégration narrative": {
+                "_general": "Quête personnelle : Préservation mémorielle Recherche d'artefacts anti-entropiques Étude des propriétés du Léviathan Confrontation avec le cycle de renaissance Umcut Journal codé Système de collectible : fragments du journal de Vethraak Décodage progressif (équations mathématiques) Révèle son arc narratif profond"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : Sprites de base + dialogue avancé Phase 2 : Système de charme + réseau d'informateurs Phase 3 : Calcul d'Interstices + énigmes Phase 4 : Balance charme vs autres systèmes Phase 5 : Polish interactions sociales + UI réseau"
+            }
+        },
+        {
+            "Nom": "PNJ recrutables - Essentiels",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Essentielle",
+            "Résumé": {
+                "_general": "Chaque PNJ essentiel est traité presque comme un PJ : sprites 8 directions complets, animations narratives, voix/style de dialogue unique, arc narratif à plusieurs actes, quêtes personnelles multiples, et impact sur l'ending."
+            },
+            "Catégorie": "Préprod",
+            "Sprint": "Sprint 2",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "Ces ~10 PNJ sont les compagnons principaux du joueur. Leur recrutement est lié à l'histoire principale, leurs arcs narratifs sont essentiels à la compréhension du monde et des thèmes. Qualité > quantité. Piliers concernés : Des liens d'acier, Conflits de conscience"
+            },
+            "Conception": {},
+            "Liste des PNJ essentiels (exemples)": {
+                "_general": "Confirmés Akthar-Neth (L'Exégète) - Gardien du culte, bras sacrifié Vol Reitar (fantôme/écho) - Créateur maudit d'Eonundé Valkazer Reitar - Fils/création de Vol, futur tyran Zaehria Neth'Varu - Symbiote du Léviathan, gardienne mémoire Voknir Esh'Maradel - Cartographe Déchu des Plis L'Ensevelie - Entité primordiale des Plis Esthir - Bien-aimé de Vethraak, gérant Maison de Thé Ilyena - Sœur-création abandonnée par Eonundé 9-10. À définir - Selon développement narratif"
+            },
+            "Specs techniques par PNJ": {
+                "_general": "Assets visuels Spritesheet 8 directions : idle, marche, course Portrait haute-res : Dialogues et UI Animations narratives : 5-10 animations spécifiques VFX uniques : Effets liés à leur nature/pouvoirs Système narratif Arc en 3-5 actes : Évolution majeure du personnage 3-5 quêtes personnelles : Approfondissement et résolution Dialogues contextuels : Réagissent aux événements principaux Relations inter-PNJ : Dialogues entre compagnons Impact sur ending : Choix avec eux affectent la fin Gameplay unique Compétence spéciale : Utilisable en exploration Bonus passif : Améliore certains aspects Missions déléguées : Peuvent accomplir tâches en absence joueur"
+            },
+            "Parcours de recrutement": {
+                "_general": "Phase 1 : Rencontre Intégrée à histoire principale Moment narratif fort Présentation de leur problème/besoin Phase 2 : Quête de recrutement Résolution de leur situation initiale Choix moral significatif Décision de rejoindre ou non Phase 3 : Intégration Arrivée au campement/Citadelle Dialogues d'introduction avec autres alliés Débloque leur arc personnel Phase 4 : Développement Quêtes personnelles échelonnées Évolution de la relation Moments narratifs clés Phase 5 : Résolution Climax de leur arc Choix final les concernant Impact sur ending"
+            },
+            "Valeurs": {
+                "_general": "Par PNJ essentiel Dialogues : 500-1000 lignes Quêtes : 3-5 quêtes personnelles Animations : 15-20 animations uniques Temps dev : 40-60h par PNJ Système de relation Jauge de confiance : 0-100 Paliers : 25, 50, 75, 100 (débloquent contenus) Influence : Peuvent changer selon choix du joueur Loyauté : Peuvent partir si trahis"
+            },
+            "Cas particuliers": {
+                "_general": "PNJ mutuellement exclusifs : Certains choix empêchent recrutement d'autres PNJ mortels : Peuvent mourir selon choix (permanent) PNJ évolutifs : Apparence/personnalité changent selon arc PNJ antagonistes : Certains peuvent devenir ennemis"
+            },
+            "Intégration narrative": {
+                "_general": "Liens avec l'histoire principale Chaque PNJ essentiel éclaire un aspect du monde Leurs arcs se croisent avec l'intrigue principale Leurs résolutions impactent le climax Thèmes individuels Chaque PNJ incarne un thème du jeu Ex: Akthar-Neth = dévotion, Eonundé = rébellion, Valkazer = héritage"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : 3 PNJ essentiels complets (proto) Phase 2 : Système de relation + quêtes personnelles Phase 3 : 7 PNJ restants (assets + récits) Phase 4 : Dialogues croisés entre PNJ Phase 5 : Impact sur endings + polish"
+            }
+        },
+        {
+            "Nom": "PNJ recrutables - Importants",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "PNJ avec identité forte mais assets réduits : sprites 4-8 directions, 1-2 quêtes personnelles, arc narratif en 1-2 actes. Focus sur variété et exploration de niches thématiques."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "Ces ~20 PNJ enrichissent l'univers et offrent du contenu optionnel de qualité. Moins de profondeur que les essentiels, mais toujours mémorables. Permettent d'explorer des aspects secondaires d'Escelion. Piliers concernés : Voyage au Cœur de l'Étrange, Des liens d'acier"
+            },
+            "Conception": {},
+            "Catégories de PNJ importants": {
+                "_general": "Explorateurs du monde Marchands spécialisés : Accès à objets rares Guides locaux : Connaissent zones spécifiques Archivistes : Donnent lore et contexte historique Artisans et spécialistes Forgerons : Améliorent équipement Alchimistes : Créent potions/objets Artistes : Apportent beautés et réconforts Marginaux et exilés Rebelles : Liens avec La Rébellion d'Eonundé Créations artificielles : Victimes de Vol Reitar Exilés : Bannis de leurs communautés Mystiques et érudits Disciples du Culte : Suiveurs d'Uresaïr Chercheurs : Étudient phénomènes étranges Oracles : Perceptions uniques de la réalité"
+            },
+            "Specs techniques par PNJ": {
+                "_general": "Assets visuels (réduits) Spritesheet 4-8 directions : idle, marche (pas de course) Portrait moyen-res : Dialogues 1-3 animations narratives : Moments clés uniquement VFX optionnels : Si pertinent à leur identité Système narratif Arc en 1-2 actes : Évolution modérée 1-2 quêtes personnelles : Focus sur leur spécialité Dialogues contextuels : Moins fréquents que essentiels Relations limitées : Avec 2-3 autres PNJ max Impact mineur sur ending : Peuvent influencer certaines variations Gameplay Service/fonction : Marchand, artisan, guide, etc. Bonus passif : Plus modeste que essentiels Missions occasionnelles : Moins fréquentes"
+            },
+            "Parcours de recrutement": {
+                "_general": "Phase 1 : Découverte Rencontre via exploration optionnelle Présentation rapide de leur problème Pique curiosité du joueur Phase 2 : Quête courte 1 quête de recrutement (30-60 min) Choix moral simple Décision de rejoindre Phase 3 : Utilisation Service disponible au campement/Citadelle 1-2 dialogues d'approfondissement Éventuelle quête personnelle ultérieure"
+            },
+            "Valeurs": {
+                "_general": "Par PNJ important Dialogues : 150-300 lignes Quêtes : 1-2 quêtes Animations : 5-8 animations Temps dev : 15-25h par PNJ Système de relation (simplifié) Jauge de confiance : 0-100 2 paliers : 50 et 100 Influence mineure : Changent peu Loyauté : Restent généralement fidèles"
+            },
+            "Distribution suggérée (20 PNJ)": {
+                "_general": "Par espèce 4 Umcuts 3 Vaideccans 3 Aedres 2 Frémissants 2 Van'Doei 2 Imuins 2 Créations artificielles 2 Autres (Gedroths, hybrides, etc.) Par rôle 5 Artisans/Marchands 4 Explorateurs/Guides 4 Érudits/Mystiques 4 Combattants/Gardes 3 Marginaux/Exilés"
+            },
+            "Cas particuliers": {
+                "_general": "Recrutement conditionnel : Certains nécessitent progression principale Exclusions mineures : Quelques incompatibilités entre PNJ Évolution limitée : Apparence/personnalité stables Départs possibles : Peuvent partir si très maltraités"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : 5 PNJ importants (prototype système) Phase 2 : Services/fonctions (marchand, artisan, etc.) Phase 3 : 15 PNJ restants (assets + quêtes) Phase 4 : Intégration au campement/Citadelle Phase 5 : Polish + dialogue secondaire"
+            }
+        },
+        {
+            "Nom": "PNJ recrutables - Masse",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Moyenne",
+            "Résumé": {
+                "_general": "PNJ avec identité visuelle forte mais interactions limitées : portrait statique, sprites réutilisés avec variations, pas de quêtes personnelles. Focus sur variété et création d'ambiance vivante."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Facultatif",
+            "Introduction": {},
+            "Hypothèse": {
+                "_general": "Ces ~50 PNJ sont là pour créer l'impression d'une communauté vivante et diverse dans la Citadelle. Assets minimaux, recrutement simple, mais chacun a une identité visuelle unique et quelques lignes de dialogue mémorables. Piliers concernés : Des liens d'acier"
+            },
+            "Conception": {},
+            "Rôle dans le jeu": {
+                "_general": "Fonction principale Population : Remplissent la Citadelle Ambiance : Créent sentiment de communauté Diversité : Montrent variété d'Escelion Services mineurs : Marchands basiques, informateurs Pas de profondeur narrative Pas de quêtes personnelles Pas d'arc narratif Pas d'impact sur ending Dialogues limités (5-15 lignes max)"
+            },
+            "Specs techniques (minimales)": {
+                "_general": "Assets visuels Portrait statique : Seul asset unique requis Sprites réutilisés : Banque de 10-15 bases réutilisées Variations : Palette de couleurs, accessoires Pas d'animations spéciales Système narratif Identité de base : Nom, espèce, rôle 1 trait caractéristique : Ex: \"collectionne les cailloux\", \"toujours pressé\" 3-5 lignes de dialogue : Ambient, contextuelles Réactions simples : À événements majeurs Gameplay Service basique : Si applicable (marchand commun, etc.) Pas de bonus passif Pas de missions"
+            },
+            "Recrutement (simplifié)": {
+                "_general": "Méthodes de recrutement Automatique (30 PNJ) Rejoignent automatiquement à certaines étapes Ex: \"10 réfugiés rejoignent la Citadelle\" Aucune quête requise Rencontre simple (15 PNJ) Trouvés en exploration 1 dialogue de recrutement Acceptent immédiatement Achat/invitation (5 PNJ) Payés pour rejoindre (marchands, artisans) Ou invités après condition simple"
+            },
+            "Catégories (50 PNJ)": {
+                "_general": "Par espèce 12 Umcuts 8 Vaideccans 8 Aedres 6 Van'Doei 5 Imuins 4 Frémissants 4 Créations artificielles 3 Autres/hybrides Par rôle 15 Artisans/Ouvriers (forgeron, tisserand, cuisinier, etc.) 12 Marchands (génériques, spécialisés) 10 Gardes/Soldats (défense Citadelle) 8 Érudits/Scribes (bibliothèque) 5 Serviteurs/Intendants (entretien) Par origine 20 Vieille Ville 15 Léviathan pétrifié 8 Désert des Échos 7 Autres zones"
+            },
+            "Valeurs": {
+                "_general": "Par PNJ masse Dialogues : 5-15 lignes Quêtes : 0 Assets : Portrait unique + sprite réutilisé Temps dev : 2-4h par PNJ Système (très simplifié) Pas de jauge de relation Présence/absence : Binaire (là ou parti) Pas d'évolution"
+            },
+            "Génération procédurale (optionnel)": {
+                "_general": "Si budget limité Générateur de portraits (variations procédurales) Banque de noms par espèce Traits caractéristiques aléatoires Permet de passer de 50 à 100+ PNJ facilement Paramètres Espèce Couleurs (3-5 palettes par base) Accessoires (10-15 optionnels) Rôle (détermine placement et dialogue type)"
+            },
+            "Cas particuliers": {
+                "_general": "Morts de masse : Si événement catastrophique, certains peuvent mourir (en groupe) Départs automatiques : Si Citadelle en danger, certains partent Remplacement : Peuvent être remplacés par nouveaux arrivants Pas d'exclusions : Tous compatibles entre eux"
+            },
+            "Intégration à la Citadelle": {
+                "_general": "Placement Répartis dans différentes zones Groupés par rôle (artisans ensemble, etc.) Déambulent selon cycles jour/nuit Conversations ambient Dialogues génériques entre PNJ masse Réactions aux événements majeurs Créent vie de fond Services collectifs Marchands : Inventaire commun rotatif Gardes : Défense collective lors sièges Artisans : Améliorations Citadelle"
+            },
+            "Recherche et tests": {
+                "_general": "Phase 1 : 10 PNJ masse (test système) Phase 2 : Système de variations procédurales Phase 3 : 40 PNJ restants (génération) Phase 4 : Intégration ambiance Citadelle Phase 5 : Polish répartition + cycles"
+            }
+        },
+        {
+            "Nom": "Premier lieu optionnel",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Moyenne",
+            "Résumé": "Développement d'une zone optionnelle basée sur les concepts les plus populaires, avec six candidats prioritaires allant d'une tour vivante à une jungle pensante. Les critères de sélection incluent la pertinence narrative, la faisabilité technique et les exigences de production. Le contenu minimal et étendu pour la zone est défini, ainsi qu'une estimation budgétaire pour le développement. La décision finale sera prise après évaluation du budget et consultation de l'équipe technique.",
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "_general": "Développement d'une zone secondaire complète (Top popularité) Création d'une zone jouable optionnelle parmi les 6 concepts ayant obtenu le meilleur score au sondage communauté (>45% d'approbation). Le choix final sera déterminé selon les contraintes narratives, techniques et budgétaires."
+            },
+            "Candidats prioritaires (par ordre de popularité)": {
+                "_general": "1. Xyriad Achromatique — 56,7% Concept : Une tour vivante incolore habitée par des chants Attrait : Architecture organique unique, mystère des chants, esthétique monochrome forte Scope estimé : Zone verticale avec niveau design non-standard (ascension), boss musical potentiel, mécaniques de résonance sonore 2. Marché automaton — 53,3% Concept : Un marché-archipel naviguant entre des vents contraires Attrait : Hub commercial mobile, rencontres diversifiées, gameplay économique Scope estimé : Zone-plateforme avec PNJ marchands nombreux, système de commerce avancé, navigation entre îlots 3. Jungle Vivarcade — 50% Concept : Une jungle où les arbres pensent et parlent entre eux Attrait : Écosystème vivant, dialogues non-humains, exploration organique Scope estimé : Zone exploration dense, mécaniques de communication végétale, puzzles environnementaux 4. L'Hermogène — 46,7% Concept : Un sanctuaire-laboratoire d'hybrides Attrait : Science et éthique, créatures uniques, dilemmes moraux Scope estimé : Zone laboratoire avec expérimentations, rencontres d'hybrides tragiques, choix moraux complexes 5. Fosse aux Idoles déchues — 46,7% Concept : Une nécropole remplie d'immenses statues Attrait : Atmosphère épique/mélancolique, exploration verticale (descente), lore des civilisations perdues Scope estimé : Zone dungeon avec statues animées, énigmes archéologiques, boss gardien monumental 6. Forêts de Corail — 45% Concept : Un récif végétal où les racines se nourrissent de songes Attrait : Esthétique onirique, mécaniques de rêve/cauchemar, exploration surréaliste Scope estimé : Zone psychédélique avec altérations perceptuelles, récits enchâssés dans les songes, énigmes oniriques"
+            },
+            "Critères de sélection": {
+                "_general": "Narrative Pertinence thématique : Lien avec les trois piliers (Conflits de conscience, Voyage au cœur de l'étrange, Liens d'acier) Intégration personnages : Opportunités de développement pour les héroïnes principales Impact sur l'intrigue : Contribution à l'arc narratif global Technique Assets réutilisables : Possibilité de recycler éléments graphiques/mécaniques existants Complexité implémentation : Faisabilité technique avec les systèmes en place Performance : Impact sur les performances (taille zone, nombre PNJ, effets visuels) Production Temps de développement : Estimation 3-6 mois selon complexité Budget assets : Décors 2D, musique originale, doublages Dépendances : Nécessite-t-il des systèmes non encore implémentés ?"
+            },
+            "Scope typique d'une zone optionnelle": {
+                "_general": "Contenu minimal (MVP) 3-5 lieux/sous-zones connectés 8-12 PNJ uniques avec dialogues 2-3 quêtes secondaires complètes 1 mini-boss ou rencontre mémorable 15-25 décors 2D originaux 1 thème musical principal + ambiances 1h-1h30 de gameplay pour exploration complète Contenu étendu (si budget) 6-8 lieux/sous-zones 15-20 PNJ avec arcs narratifs 4-6 quêtes dont 1 questline majeure 1 boss principal + combats optionnels 30-40 décors 2D 2-3 thèmes musicaux + variations 2h-3h de gameplay"
+            },
+            "Estimation budgétaire": {
+                "_general": "Développement (3-6 mois) : Game design & écriture : 30-45 j/h Programmation : 40-60 j/h Graphismes (décors, UI) : 35-50 j/h Musique & sound design : 15-25 j/h QA & polish : 20-30 j/h Total estimé : 140-210 jours-homme"
+            },
+            "Décision finale": {
+                "_general": "Le choix du lieu sera arrêté après : Finalisation du budget total (post-CNC + Kickstarter) Évaluation du scope restant Consultation de l'équipe technique Sondage communauté final si nécessaire"
+            }
+        },
+        {
+            "Nom": "Réputation",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "Chaque faction ou lieu majeur dispose de trois jauges de réputation distinctes: Admiration: Représente l'estime et l'émerveillement suscités Respect: Mesure la considération et la reconnaissance des accomplissements Crainte: Évalue l'intimidation et l'appréhension inspirées Ces jauges évoluent entre -999 et +999, sans plafond artificiel atteignable en pratique, évitant ainsi toute exploitation mécanique du système. Parallèlement, les personnages peuvent obtenir des Titres au sein des factions, reflétant leur statut ou position officielle, généralement acquis lors de moments narratifs significatifs plutôt que par simple accumulation de points de réputation. Les actions sont catégorisées (aide, sabotage, commerce, combat) et affectent différemment les trois jauges selon les valeurs propres à chaque faction. Par exemple, une démonstration de force pourrait augmenter l'Admiration chez les Van'Doei mais diminuer le Respect chez les Vaideccans."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "Résumé de la fiche": "Le système de réputation représente la perception des factions et communautés d'Escelion envers les personnages contrôlés par l'Éthérée. Dans un monde où les relations sociales sont façonnées par l'admiration, le respect et la crainte, ce système permet des interactions nuancées avec les différentes populations du continent-monde, créant des conséquences tangibles aux actions et choix des joueurs."
+            },
+            "Hypothèse": {
+                "_general": "Cette fonctionnalité enrichit l'expérience de jeu en rendant le monde plus réactif aux actions du joueur, renforçant le pilier \"Voyage au Cœur de l'Étrange\" par des interactions sociales complexes. Elle établit également des connexions entre les décisions éthiques et leurs conséquences pratiques, soutenant le pilier \"Conflits de Conscience\"."
+            },
+            "Parcours utilisateur": {
+                "_general": "Le joueur accomplit une action observée par des membres d'une faction Une notification discrète indique les changements de réputation En consultant le menu dédié, le joueur peut examiner: - Ses jauges actuelles auprès de chaque faction - Les titres obtenus et disponibles - L'historique récent des actions ayant affecté sa réputation Le joueur expérimente les conséquences de sa réputation: - Modification des prix chez les marchands - Accès à des zones exclusives - Nouvelles options de dialogue - Offres d'assistance de PNJ - Partage d'informations confidentielles Certaines quêtes présentent des conflits de loyauté, forçant à privilégier une faction au détriment d'une autre"
+            },
+            "Flux": {
+                "_general": "[Action du joueur] → [Vérification des témoins]                        ↓ [Si observé] → [Calcul des impacts sur les jauges] → [Notification discrète]                                                       ↓                                                    [Conséquences immédiates]                                                       ↓ [Seuils franchis] → [Déblocage de nouvelles options]          ↓ [Impact sur factions alliées/rivales]"
+            },
+            "Mécaniques spécifiques": {
+                "_general": "Système de témoins Seules les actions observées affectent la réputation, sauf exception narrative justifiée. Les actions non témoignées n'ont pas d'impact sur la réputation mais peuvent avoir d'autres conséquences. Influence et réputation Les PNJ ayant accepté une forme de possession par l'Éthérée (futurs résidents de la citadelle de Daïlon) peuvent servir d'intermédiaires pour améliorer la réputation auprès de leurs factions d'origine, moyennant une dépense d'Influence. Seuils de réputation pour la possession Certains PNJ n'accepteront la possession que si l'Éthérée atteint des seuils spécifiques de réputation auprès de leur faction (typiquement un minimum en Respect et/ou Admiration). Transfert de réputation Les actions envers une faction influencent la réputation auprès de ses alliés et rivaux selon un réseau d'affinités prédéfini. Par exemple, gagner la Crainte du Culte de l'Anentropie pourrait augmenter le Respect des Murmurateurs mais diminuer l'Admiration des Kephrasites."
+            },
+            "Valeurs techniques": {
+                "_general": "Impact moyen par action: 1-5 points pour actions mineures, 5-20 pour actions majeures Transfert entre factions: 10-30% de l'impact original, selon le degré d'alliance/rivalité"
+            },
+            "Interface": {
+                "_general": "Une section dédiée du menu principal comprenant: Écran de synthèse montrant toutes les factions avec leurs jauges résumées Vue détaillée par faction avec: - Trois jauges visuelles (Admiration, Respect, Crainte) - Titres actuels et potentiels - Historique des actions récentes et leur impact - Privilèges débloqués et à venir - Relations avec autres factions (alliés/rivaux)"
+            },
+            "Intégration avec d'autres systèmes": {
+                "_general": "Progression par zone: Certaines cases de l'arbre de progression se débloquent en atteignant des seuils de réputation spécifiques Exploration des souvenirs: Des nœuds de mémoire peuvent révéler des connections historiques avec certaines factions, fournissant un contexte narratif aux relations Traits de caractère: L'affinité naturelle entre les traits d'un personnage et les valeurs d'une faction peut être visualisée dans l'interface de réputation"
+            }
+        },
+        {
+            "Nom": "Second lieu optionnel",
+            "Taille": "M",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Faible",
+            "Résumé": "Développement d'une seconde zone optionnelle, conditionné par le succès du financement et la disponibilité de l'équipe. Cinq concepts sont proposés, classés par popularité, avec des détails sur leur attrait, leur portée estimée et leurs points forts. Des critères de développement incluent un budget confirmé et la disponibilité de l'équipe. Un scope réduit est recommandé, avec un contenu minimal et une estimation budgétaire de 75-115 jours-homme. Ce lieu est un objectif stretch, son développement ne devant pas compromettre la qualité des zones obligatoires.",
+            "Catégorie": "Prod",
+            "Sprint": "Facultatif",
+            "Introduction": {
+                "_general": "Développement d'une seconde zone secondaire (Popularité moyenne) Création d'une zone jouable optionnelle parmi les 5 concepts ayant obtenu un score intermédiaire au sondage communauté (30-44% d'approbation). Développement conditionné à la réussite du financement étendu et à la disponibilité de l'équipe."
+            },
+            "Candidats (par ordre de popularité)": {
+                "_general": "7. Plaines de l’Exuvie — 38,3% Concept : De vastes étendues désertiques couvertes d'exuvies de Deimos titanesques Attrait : Paysage titanesque unique, exploration de carapaces géantes, lore des Deimos Scope estimé : Zone ouverte avec carapaces comme dungeons, communautés nomades aldravinds, rituels spirituels Points forts : Déjà très documentée (fiche complète existante), forte identité culturelle aldravind, opportunité d'intégrer la Machine Pérégrine 8. Oeil de Mirimance — 36,7% Concept : Un œil géant émergeant du sol Attrait : Visuel iconique et perturbant, mystère de l'origine, potentiel horrifique/onirique Scope estimé : Zone compacte focalisée sur l'œil, mécaniques de regard/observation, révélations cosmiques Points forts : Forte identité visuelle, peut servir de lieu-clé pour révélations narratives majeures 9. Tombeau des lueurs dissidentes — 31,7% Concept : Une vallée couverte de dalles peintes, mines de métaux photosensibles avec phénomènes spectraux (gwi-shin) Attrait : Industriel avec fantastique, exploration de mines, folklore ouvrier unique Scope estimé : Zone industrielle verticale (descente dans les mines), rencontres avec gwi-shin, tensions sociales chaebols/ouvriers Points forts : Déjà très documentée (fiche complète existante), lien économique avec Vieille Ville, gameplay mining/exploration souterraine 10. Steppe des Éteignoirs — 30% Concept : Une plaine remplie de pylônes éteignant la lumière Attrait : Atmosphère post-apocalyptique/désolée, zones d'obscurité totale, mécaniques de lumière/ténèbres Scope estimé : Zone ouverte avec navigation entre îlots de lumière, survie dans l'obscurité, gardiens des pylônes Points forts : Gameplay unique (gestion lumière), peut tester mécaniques de peur/ténèbres 11. Cité Labiale — 28,3% Concept : Un labyrinthe de bâtiments-papiers Attrait : Architecture surréaliste, métaphore de l'écriture/mémoire, navigation labyrinthique Scope estimé : Zone urbaine compacte avec architecture impossible, énigmes textuelles, bibliothèque vivante Points forts : Opportunité de méta-narration, peut inclure archives historiques d'Escelion"
+            },
+            "Critères de développement": {
+                "_general": "Conditions de déblocage Budget confirmé : Kickstarter successful + CNC obtenu Premier lieu optionnel terminé : Validation du pipeline de production de zones secondaires Scope restant suffisant : Au moins 4-6 mois avant deadline de sortie Équipe disponible : Pas de crunch sur zones obligatoires Priorité de sélection Synergie avec premier lieu : Éviter redondance thématique/mécanique Assets réutilisables : Maximiser l'efficacité de production Demande communauté : Sondage de suivi si nécessaire"
+            },
+            "Scope réduit recommandé": {
+                "_general": "Vu le statut \"Facultatif\", un scope plus modeste est recommandé : Contenu minimal 2-4 lieux/sous-zones compacts 5-8 PNJ avec dialogues courts 1-2 quêtes secondaires focalisées 1 rencontre mémorable (pas nécessairement un boss) 10-15 décors 2D 1 thème musical ou réutilisation/variation existante 45min-1h de gameplay Estimation budgétaire réduite Développement (2-3 mois) : Game design & écriture : 15-25 j/h Programmation : 20-30 j/h Graphismes : 20-30 j/h Musique & sound design : 10-15 j/h QA & polish : 10-15 j/h Total estimé : 75-115 jours-homme"
+            },
+            "Note importante": {
+                "_general": "⚠️ Ce second lieu est un stretch goal, pas un objectif garanti. Son développement ne doit pas compromettre la qualité des zones obligatoires ni la date de sortie prévue (T1 2028). En cas de contraintes budgétaires/temporelles, il peut être : Reporté en DLC post-launch Réduit à un simple point d'intérêt (visite courte sans gameplay étendu) Abandonné si nécessaire"
+            },
+            "Décision finale": {
+                "_general": "Le développement de ce second lieu optionnel sera évalué : T3 2026 : Après résultats Kickstarter, évaluation scope total T1 2027 : Après complétion premier lieu optionnel, réévaluation feasibility T3 2027 : Go/No-go final basé sur avancement général du projet"
+            }
+        },
+        {
+            "Nom": "Système de mort et de conséquence",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Moyenne",
+            "Résumé": {
+                "_general": "Lorsqu'un personnage possédé est vaincu : Le joueur ne subit pas de game over Uresaïr ne peut mourir de manière conventionnelle (sauf dans des cas narratifs spécifiques) L'Éthérée, étant incorporelle, ne peut être détruite Vethraak et Eonundé bénéficient de cette protection par leur lien avec l'Éthérée Au lieu de la mort, le jeu propose : Une transition narrative contextuelle Des conséquences mécaniques adaptées Une continuation de l'histoire avec de nouvelles conditions"
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "Résumé de la fiche": "Dans l'univers d'Alteir, la mort n'est pas un concept absolu pour les personnages contrôlés par l'Éthérée. Ce système transforme ce qui serait traditionnellement une condition d'échec (game over) en opportunité narrative et mécanique, reflétant la nature immortelle d'Uresaïr et l'essence incorporelle de l'Éthérée."
+            },
+            "Hypothèse": {
+                "_general": "Cette fonctionnalité renforce les piliers \"Conflits de Conscience\" et \"Voyage au Cœur de l'Étrange\" en transformant l'échec en expérience significative. Elle permet d'explorer les implications narratives de l'immortalité tout en créant des conséquences tangibles aux défaites sans frustrer le joueur par des game over répétitifs."
+            },
+            "Parcours utilisateur": {
+                "_general": "Défaite en combat: Les points de vie atteignent zéro ou une condition de défaite est remplie Transition: Animation montrant la réaction spécifique à la \"mort\" du personnage Conséquences: Application des effets négatifs selon le contexte Continuation: Le jeu reprend normalement, généralement sur la map actuelle ou à un point proche"
+            },
+            "Habillage des \"morts\" selon les personnages": {
+                "_general": "Uresaïr Manifestation: Son corps se fragmente et se reforme après quelque temps Conséquence type: Perte temporaire du contrôle des sables temporels, affaiblissement de ses facultés Dialogue post-défaite: \"Je ne suis que poussière... et la poussière se rassemble à nouveau\" Eonundé Manifestation: Se dissout temporairement en forme liquide puis se reconstitue Conséquence type: Vulnérabilité accrue aux émotions négatives, risque de rage incontrôlée Dialogue post-défaite: \"L'eau prend toujours la forme du récipient... je reviendrai\" Vethraak Manifestation: Son corps commence à se décomposer avant que l'essence éthérée ne le restaure Conséquence type: Perturbation cognitive, interférences dans ses calculs complexes Dialogue post-défaite: \"Les équations étaient... incorrectes.\""
+            },
+            "Conséquences mécaniques": {
+                "_general": "Conséquences immédiates Affaiblissement temporaire: Réduction des stats pendant une durée définie Perte d'Effort: Diminution des points d'Effort disponibles Altération de la Réputation: Impact négatif auprès des témoins de la défaite Conséquences à long terme Cicatrices permanentes: Traits négatifs temporaires ou permanents Distorsion temporelle: Retour dans le temps à un moment précédent avec mémoire conservée Dettes karmiques: Ajout de conditions pour racheter la \"mort\""
+            },
+            "Cas particuliers": {
+                "_general": "Défaites narratives spéciales Certains événements scénaristiques peuvent créer des \"morts\" uniques : Sacrifice héroïque: Une \"mort\" choisie peut débloquer des pouvoirs ou des quêtes Mort rituelle: Dans le cadre de cérémonies spécifiques (ex: au Léviathan) Fragmentation existentielle: L'Éthérée peut se retrouver dispersée temporairement Situations critiques Dans de rares cas narratifs cruciaux : Une \"vraie mort\" peut être possible, mais uniquement comme choix du joueur Ces événements ont des répercussions majeures sur l'histoire"
+            },
+            "Habillage visuel et audio": {
+                "_general": "Transition graphique: Effet unique pour chaque personnage (fragmentation cristalline, dissolution aquatique, décomposition cellulaire) Bande sonore: Musique spécifique lors du processus de \"mort\"/renaissance Distorsion visuelle: L'environnement peut subir des modifications visuelles temporaires Effets de particules: L'essence de l'Éthérée visible pendant la restauration"
+            },
+            "Intégration avec d'autres systèmes": {
+                "_general": "Traits de caractère: Certains traits peuvent être influencés par une “mort” Influence: Dépenser de l'Influence peut atténuer certains effets négatifs Progression: Des \"morts\" spécifiques peuvent débloquer des options dans l'arbre de progression Réputation: Les témoins de défaites se souviennent et propagent les récits"
+            }
+        },
+        {
+            "Nom": "Zone 1b : Léviathan pétrifié",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Essentielle",
+            "Résumé": {
+                "_general": "Rédigez un résumé du fonctionnement de la fonctionnalité. Incluez des images ou des croquis si vous en avez."
+            },
+            "Catégorie": "Préprod",
+            "Sprint": "Sprint 2",
+            "User stories": "Polish graphique Zone 1 (Plis + Léviathan), Narthex abyssal accessible (entrée + PNJ), Nef Centrale + rencontre Akthar-Neth, Épreuve des Bains parkourétiques, Quête : Les Manuscrits Interdits (Akthar-Neth), Exploration Plis d'Ossements + Ensevelie, Ambiance sonore et musicale Léviathan",
+            "Introduction": {
+                "Résumé de la fiche": "Résumer la fonctionnalité."
+            },
+            "Hypothèse": {
+                "_general": "Quel impact cette fonctionnalité aura-t-elle sur le joueur ? Comment se rattache-t-elle à vos piliers de conception ?"
+            },
+            "Conception": {},
+            "Parcours utilisateur": {
+                "_general": "Esquissez les écrans de ce que le joueur verra et fera, étape par étape."
+            },
+            "Flux": {
+                "_general": "Créez un diagramme de flux du fonctionnement de la fonctionnalité, par exemple sous forme de diagramme Mermaid."
+            },
+            "Valeurs": {
+                "_general": "S'il s'agit d'une fonctionnalité avec des valeurs associées, définissez-les ici. Ajoutez un lien vers votre diagramme Machinations si vous en avez un."
+            },
+            "Cas particuliers": {
+                "_general": "Y a-t-il des situations où cette fonctionnalité doit se comporter un peu différemment ?"
+            },
+            "Recherche et tests": {
+                "_general": "Comment allez-vous tester cette fonctionnalité à différentes étapes de développement ?"
+            }
+        },
+        {
+            "Nom": "Zone 2 : Désert des Échos Perdus",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Très haute",
+            "Résumé": {
+                "_general": "Rédigez un résumé du fonctionnement de la fonctionnalité. Incluez des images ou des croquis si vous en avez."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Sprint 2",
+            "Introduction": {
+                "Résumé de la fiche": "Résumer la fonctionnalité."
+            },
+            "Hypothèse": {
+                "_general": "Quel impact cette fonctionnalité aura-t-elle sur le joueur ? Comment se rattache-t-elle à vos piliers de conception ?"
+            },
+            "Conception": {},
+            "Parcours utilisateur": {
+                "_general": "Esquissez les écrans de ce que le joueur verra et fera, étape par étape."
+            },
+            "Flux": {
+                "_general": "Créez un diagramme de flux du fonctionnement de la fonctionnalité, par exemple sous forme de diagramme Mermaid."
+            },
+            "Valeurs": {
+                "_general": "S'il s'agit d'une fonctionnalité avec des valeurs associées, définissez-les ici. Ajoutez un lien vers votre diagramme Machinations si vous en avez un."
+            },
+            "Cas particuliers": {
+                "_general": "Y a-t-il des situations où cette fonctionnalité doit se comporter un peu différemment ?"
+            },
+            "Recherche et tests": {
+                "_general": "Comment allez-vous tester cette fonctionnalité à différentes étapes de développement ?"
+            }
+        },
+        {
+            "Nom": "Zone 3 : Puits Céleste",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "Rédigez un résumé du fonctionnement de la fonctionnalité. Incluez des images ou des croquis si vous en avez."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Sprint 3",
+            "Introduction": {
+                "Résumé de la fiche": "Résumer la fonctionnalité."
+            },
+            "Hypothèse": {
+                "_general": "Quel impact cette fonctionnalité aura-t-elle sur le joueur ? Comment se rattache-t-elle à vos piliers de conception ?"
+            },
+            "Conception": {},
+            "Parcours utilisateur": {
+                "_general": "Esquissez les écrans de ce que le joueur verra et fera, étape par étape."
+            },
+            "Flux": {
+                "_general": "Créez un diagramme de flux du fonctionnement de la fonctionnalité, par exemple sous forme de diagramme Mermaid."
+            },
+            "Valeurs": {
+                "_general": "S'il s'agit d'une fonctionnalité avec des valeurs associées, définissez-les ici. Ajoutez un lien vers votre diagramme Machinations si vous en avez un."
+            },
+            "Cas particuliers": {
+                "_general": "Y a-t-il des situations où cette fonctionnalité doit se comporter un peu différemment ?"
+            },
+            "Recherche et tests": {
+                "_general": "Comment allez-vous tester cette fonctionnalité à différentes étapes de développement ?"
+            }
+        },
+        {
+            "Nom": "Zone 4 : Citadelle de Dailon",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "A écrire",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "Rédigez un résumé du fonctionnement de la fonctionnalité. Incluez des images ou des croquis si vous en avez."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "Résumé de la fiche": "Résumer la fonctionnalité."
+            },
+            "Hypothèse": {
+                "_general": "Quel impact cette fonctionnalité aura-t-elle sur le joueur ? Comment se rattache-t-elle à vos piliers de conception ?"
+            },
+            "Conception": {},
+            "Parcours utilisateur": {
+                "_general": "Esquissez les écrans de ce que le joueur verra et fera, étape par étape."
+            },
+            "Flux": {
+                "_general": "Créez un diagramme de flux du fonctionnement de la fonctionnalité, par exemple sous forme de diagramme Mermaid."
+            },
+            "Valeurs": {
+                "_general": "S'il s'agit d'une fonctionnalité avec des valeurs associées, définissez-les ici. Ajoutez un lien vers votre diagramme Machinations si vous en avez un."
+            },
+            "Cas particuliers": {
+                "_general": "Y a-t-il des situations où cette fonctionnalité doit se comporter un peu différemment ?"
+            },
+            "Recherche et tests": {
+                "_general": "Comment allez-vous tester cette fonctionnalité à différentes étapes de développement ?"
+            }
+        },
+        {
+            "Nom": "Zone 5 : Vieille Ville",
+            "Progression Features": "{'id': 'AWUP', 'type': 'formula', 'formula': {'type': 'string', 'string': None}}",
+            "Porteur": "{'id': 'E%5Dzm', 'type': 'people', 'people': []}",
+            "État": "Ecriture à finaliser",
+            "Priorité": "Haute",
+            "Résumé": {
+                "_general": "Rédigez un résumé du fonctionnement de la fonctionnalité. Incluez des images ou des croquis si vous en avez."
+            },
+            "Catégorie": "Prod",
+            "Sprint": "Plus tard",
+            "Introduction": {
+                "Résumé de la fiche": "Résumer la fonctionnalité."
+            },
+            "Hypothèse": {
+                "_general": "Quel impact cette fonctionnalité aura-t-elle sur le joueur ? Comment se rattache-t-elle à vos piliers de conception ?"
+            },
+            "Conception": {},
+            "Parcours utilisateur": {
+                "_general": "Esquissez les écrans de ce que le joueur verra et fera, étape par étape."
+            },
+            "Flux": {
+                "_general": "Créez un diagramme de flux du fonctionnement de la fonctionnalité, par exemple sous forme de diagramme Mermaid."
+            },
+            "Valeurs": {
+                "_general": "S'il s'agit d'une fonctionnalité avec des valeurs associées, définissez-les ici. Ajoutez un lien vers votre diagramme Machinations si vous en avez un."
+            },
+            "Cas particuliers": {
+                "_general": "Y a-t-il des situations où cette fonctionnalité doit se comporter un peu différemment ?"
+            },
+            "Recherche et tests": {
+                "_general": "Comment allez-vous tester cette fonctionnalité à différentes étapes de développement ?"
+            }
+        }
+    ]
+}

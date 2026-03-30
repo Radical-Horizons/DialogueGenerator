@@ -1,0 +1,13 @@
+{
+    "depenses": [
+        {
+            "Nom": "SansTitre",
+            "Date": "{'id': 'ExqL', 'type': 'date', 'date': {'start': '2025-09-16', 'end': None, 'time_zone': None}}",
+            "Status": "Terminé",
+            "Types": "Investissements",
+            "Coût": "60",
+            "Poste de dépense": "Editorial guidelines summary",
+            "Introduction": {}
+        }
+    ]
+}

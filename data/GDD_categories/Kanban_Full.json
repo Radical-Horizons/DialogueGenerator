@@ -1,0 +1,2110 @@
+{
+    "kanban": [
+        {
+            "Nom": "Aedre",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 5 : Vieille Ville",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Conception de l'espèce/communauté Aedre",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Ambiance sonore et musicale Léviathan",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Sound design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je ressens l'atmosphère oppressante du Léviathan via l'audio",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Musique d'ambiance Léviathan (selon Guide musical (Léviathan)) SFX d'ambiance : grondements, chœurs lointains, battements sourds SFX spécifiques aux zones (Narthex vs Nef vs Bains) Transition sonore entre Plis et Léviathan Mix audio équilibré"
+            },
+            "Valeur": {
+                "_general": "Identité sonore de la zone. Immersion et direction artistique."
+            },
+            "Assets nécessaires": {
+                "_general": "1 thème musical Léviathan (~3-4 min loop) 8-12 SFX d'ambiance SFX événements narratifs (apparition Akthar-Neth, etc.)"
+            },
+            "Notes": {
+                "_general": "Référence : Guide musical (Léviathan) (Guide musical Léviathan) Tone : oppressant, mystique, choral"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Nef Centrale + rencontre Akthar-Neth\""
+            }
+        },
+        {
+            "Nom": "Ambiance sonore et musicale Plis",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Sound design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je ressens l'atmosphère oppressante et étrange des Plis d'Ossements via l'audio",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Musique d'ambiance des Plis (selon Guide musical (Plis)) SFX d'ambiance : craquements, échos, respiration lointaine SFX de pas d'Uresaïr (verre sur pierre) Transition sonore entre maps Mix audio équilibré"
+            },
+            "Valeur": {
+                "_general": "Immersion et direction artistique. Pilier \"Voyage au Cœur de l'Étrange\" via l'audio."
+            },
+            "Assets nécessaires": {
+                "_general": "1 thème musical Plis d'Ossements (~2-3 min loop) 5-10 SFX d'ambiance SFX de pas"
+            },
+            "Notes": {
+                "_general": "Peut être fait en parallèle du développement de la zone. Référence : Guide musical (Plis) (Guide musical Plis)"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\""
+            }
+        },
+        {
+            "Nom": "Amélioration export GDD",
+            "État": "Archivé",
+            "Fonctionnalité": "Système de dialogue",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Améliorations du système d'export du GDD depuis Notion",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Améliorer la boite de dialogue",
+            "État": "Archivé",
+            "Fonctionnalité": "Boîte de dialogue (graphismes)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Améliorations visuelles et ergonomiques de la boîte de dialogue in-game",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Améliorer l’IA Notion",
+            "État": "Archivé",
+            "Fonctionnalité": "Pipeline & Outils IA",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Amélioration de l'agent IA Notion (ajout de fonctionnalités, optimisation)",
+            "Introduction": {
+                "_general": "Création fiche Partage fiche"
+            }
+        },
+        {
+            "Nom": "Animation de base Uresaïr",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P1",
+            "Description": "Création des animations du sprite d'Uresaïr (idle, marche, interactions)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Animation V1",
+            "État": "Archivé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Première version des animations du personnage (idle, marche, interactions)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Articles complémentaires (lore)",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Rédaction d'articles complémentaires :   Barvas le Juge-Mendiant   Barvasinkul   Symbiotisme   Rêveurs primordiaux   Rêveurs Émergents   Rêveurs secondaires  ",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Articles complémentaires :  Barvas le Juge-Mendiant   Barvasinkul   Symbiotisme   Rêveurs primordiaux   Rêveurs Émergents   Rêveurs secondaires  ",
+            "État": "Archivé",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Aspects de support (Armaiti, Haurvat, Ameret, Mainyu)",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "PJ : Uresaïr",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P3",
+            "Description": "En tant que joueur, je peux utiliser les 4 Aspects restants pour le support en combat et l'interaction sociale",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Armaiti (La Terre) : Force un dialogue/pacte en combat Haurvat (L'Harmonie) : Soin lent qui préserve cicatrices Ameret (L'Immortalité) : Fige objet/entité temporairement Mainyu (Le Souffle) : Boost créatif/intellectuel aux alliés VFX spécifiques pour chaque Aspect Consommation de stabilité Test dans contexte de combat ou dialogue"
+            },
+            "Valeur": {
+                "_general": "Complète la palette des 7 Aspects. Polyvalence d'Uresaïr en combat et interactions."
+            },
+            "Notes": {
+                "_general": "Peut être scope-réduit si nécessaire (implémenter seulement 2-3 des 4). Priorité plus basse que les Aspects d'exploration."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Aspects d'exploration\" Dépend de : Système de combat (si applicable)"
+            }
+        },
+        {
+            "Nom": "Aspects d'exploration (Asha + Khshatra)",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "PJ : Uresaïr",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P3",
+            "Description": "En tant que joueur, je peux utiliser Asha (La Loi) et Khshatra (Le Pouvoir) pour résoudre des puzzles d'exploration",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Asha : Impose une règle temporaire à l'environnement - Exemple : \"les portes restent ouvertes\", \"l'eau ne brûle pas\" - Durée limitée (30-60 sec), effet visuel d'effilochage - VFX signes géométriques Khshatra : Crée structure temporaire (escalier, pont, mur) - Au moins 2 types de structures - Structures figées, ne peuvent évoluer - VFX architectures momentanées 2 puzzles de test utilisant ces Aspects Consommation de stabilité pour chaque usage"
+            },
+            "Valeur": {
+                "_general": "Gameplay d'exploration unique basé sur la manipulation de l'environnement. Cœur du pilier \"Voyage au Cœur de l'Étrange\"."
+            },
+            "Notes techniques": {
+                "_general": "Asha : système de règles temporaires (possiblement des tags sur objets) Khshatra : prefabs de structures + placement dynamique Plus complexe, estimé 8 pts"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Système de stabilité d'Uresaïr\""
+            }
+        },
+        {
+            "Nom": "Auto-colliders",
+            "État": "Archivé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération automatique des colliders sur les décors importés",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Bastions Oubliés",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Conception de la zone Bastions Oubliés (lieu secondaire/optionnel)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Blocage de choix par traits",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Traits de caractère",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, certains choix de dialogue sont grisés si incompatibles avec les traits d'Uresaïr",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Tag sur choix Yarn Spinner indiquant trait requis (ex: <<if $trait_loyal > 5>>) Choix grisés dans l'UI avec icône/tooltip explicatif Message clair : \"Uresaïr refuse : trop [Trait]\" 3 dialogues de test avec choix bloqués Feedback visuel distinct (couleur rouge, icône cadenas)"
+            },
+            "Valeur": {
+                "_general": "Rend les PJ vivants et autonomes. Cœur du pilier \"Conflits de conscience\"."
+            },
+            "Notes techniques": {
+                "_general": "Intégration avec Yarn Spinner (variables) Système de tags pour marquer incompatibilités UI tooltip pour expliquer pourquoi le choix est refusé"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Traits de base Uresaïr\" Dépend de : Système de dialogue (choix)"
+            }
+        },
+        {
+            "Nom": "Carte d’Escelion",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Zone 5 : Vieille Ville",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Création de la carte du monde d'Escelion (navigation in-game)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Choisir le nom du studio",
+            "État": "En cours",
+            "Catégorie": "Autre",
+            "Priorité": "P1",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Choisir le nom du studio + logo + sous-titre",
+            "État": "Terminé",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Catégorie": "Autre",
+            "Priorité": "P1",
+            "Description": "Choix du nom officiel du studio, création du logo et sous-titre",
+            "Introduction": {
+                "_general": "Radical Fantasy Logo épée et ruines A Foreign Masquerade"
+            }
+        },
+        {
+            "Nom": "Chronologie",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "Établissement de la chronologie des événements d'Escelion (timeline lore)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Conscience de la possession (dialogues internes)",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Possession",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je lis les pensées/réactions internes d'Uresaïr face à mes choix",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Système de dialogues internes (texte en italique ou UI spéciale) Réactions d'Uresaïr à au moins 5 choix majeurs Ton et style cohérents avec sa personnalité Différenciation visuelle claire (pensée vs dialogue externe) Intégration avec système de dialogue Yarn Spinner"
+            },
+            "Valeur": {
+                "_general": "Rendu visible de la cohabitation Éthérée/Uresaïr. Pilier \"Conflits de conscience\"."
+            },
+            "Contenu nécessaire": {
+                "_general": "Écriture de 10-15 réactions internes Définir le \"ton\" d'Uresaïr (froide, ironique, mélancolique ?)"
+            },
+            "Notes": {
+                "_general": "Subtil : ne pas surcharger. Seulement pour les moments importants."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Système de dialogue Dépend de : US \"Traits de base Uresaïr\" (pour cohérence)"
+            }
+        },
+        {
+            "Nom": "Correctifs Unity",
+            "État": "En cours",
+            "Fonctionnalité": "Moteur de jeu",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "Corrections de bugs sur le système de déplacements et collisions",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Corriger export",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Corrections du système d'export (bugs, formatage)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Création de skills Claude",
+            "État": "Archivé",
+            "Fonctionnalité": "Pipeline & Outils IA",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Création de skills/prompts personnalisés pour Claude (workflows IA spécifiques)",
+            "Introduction": {
+                "_general": "Skill personnage Skill lieu Skill communauté"
+            }
+        },
+        {
+            "Nom": "Décors plis d’ossement",
+            "État": "En cours",
+            "Catégorie": "Graphismes",
+            "Priorité": "P1",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Décors Strate III (plis d’ossement)",
+            "État": "En cours",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Catégorie": "Graphismes",
+            "Priorité": "P1",
+            "Description": "Génération des décors 2D pour la Strate III des Plis d'ossement",
+            "Introduction": {
+                "_general": "Générer les décors Découper les décors Intégrer les décors"
+            }
+        },
+        {
+            "Nom": "Deimos",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 2 : Désert des Échos Perdus",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Conception de Deimos (la lune lumineuse d'Escelion)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Dépense d'Influence pour forcer une action",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Influence pour les personnages principaux",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux dépenser mon Influence pour forcer Uresaïr à agir contre ses traits",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Option de dialogue spéciale \"Forcer [Action]\" si Influence suffisante Coût en Influence clairement affiché (ex: -15 Influence) Animation de lutte interne (visuel de conflit Éthérée/Uresaïr) Conséquences narratives (relation dégradée, dialogue unique) 2-3 situations de test avec actions forcées"
+            },
+            "Valeur": {
+                "_general": "Mécanique unique de possession avec consentement. Tension entre pouvoir et respect."
+            },
+            "Notes": {
+                "_general": "Coût dépend de la sévérité de l'action forcée (contre traits majeurs = coût élevé)."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Jauges Influence & Respect (Uresaïr)\" Dépend de : Système de traits de caractère (pour savoir quoi \"forcer\")"
+            }
+        },
+        {
+            "Nom": "Désert des Echos Perdus",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 2 : Désert des Échos Perdus",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Conception des lieux et décors pour la zone Désert des Échos Perdus",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Dialogues",
+            "État": "Pas commencé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {
+                "_general": "Bases du dialogue Intégrer le gameplay Générer tout le dialogue Ressources : Rappel du Core System Caractéristiques et compétences  Liste de compétences"
+            }
+        },
+        {
+            "Nom": "Dialogues de la possession d’Uresaïr",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Possession, Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "Écriture des dialogues spécifiques quand on possède Uresaïr",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Dialogues de l’accord",
+            "État": "Pas commencé",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Dialogues du cartographe",
+            "État": "En cours",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {
+                "_general": "Bases du dialogue Dialogue avec Voknir Intégrer le gameplay Générer tout le dialogue Ressources : Rappel du Core System Caractéristiques et compétences  Liste de compétences  Traits de caractère"
+            }
+        },
+        {
+            "Nom": "Dialogues du cartographe V1",
+            "État": "Archivé",
+            "Fonctionnalité": "Système de dialogue",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "Écriture des dialogues de Voknir le cartographe (première version)",
+            "Introduction": {
+                "_general": "Bases du dialogue Dialogue avec Voknir Intégrer le gameplay Ressources : Rappel du Core System Caractéristiques et compétences  Liste de compétences  Traits de caractère"
+            }
+        },
+        {
+            "Nom": "Dialogues/interactions V1",
+            "État": "Archivé",
+            "Fonctionnalité": "Système de dialogue",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Premier prototype du système de dialogues et d'interactions avec les PNJ",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Dialogue avec choix",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Système de dialogue",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je peux choisir ma réponse parmi 2-4 options et voir le PNJ réagir",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Affichage de 2-4 boutons de choix à l'écran Sélection au clavier/manette fonctionnelle Branchements Yarn Spinner correctement évalués 1 dialogue de test avec au moins 2 embranchements Retour au flux principal après un choix"
+            },
+            "Valeur": {
+                "_general": "Dialogue interactif, cœur du système. Permet de tester l'impact des choix sur la narration."
+            },
+            "Notes techniques": {
+                "_general": "Gérer le focus des boutons pour la manette Désactiver les contrôles de déplacement pendant le dialogue"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Dialogue simple end-to-end\""
+            }
+        },
+        {
+            "Nom": "Dialogue avec polish UI",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Système de dialogue",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je vois une belle boîte de dialogue avec sprite animé et nom du PNJ",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Boîte de dialogue pleine largeur (selon spec Boîte de dialogue (graphismes)) Nom du PNJ affiché clairement Sprite du PNJ visible et animé (idle, parle) Transitions visuelles fluides (fade in/out) Cohérent avec la direction artistique d'Alteir"
+            },
+            "Valeur": {
+                "_general": "Immersion visuelle et identité graphique du jeu. Transforme le prototype en expérience jouable."
+            },
+            "Assets nécessaires": {
+                "_general": "Sprite Voknir (le cartographe) ou autre PNJ de test Animations idle + talking UI elements (cadre de dialogue, fond)"
+            },
+            "Notes": {
+                "_general": "Peut être fait en parallèle du développement de contenu une fois US-02 validée."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Dialogue avec choix\" (pour avoir une base fonctionnelle à habiller)"
+            }
+        },
+        {
+            "Nom": "Dialogue de possession",
+            "État": "En cours",
+            "Fonctionnalité": "Possession",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "Écriture des dialogues pour la mécanique de possession (système gameplay)",
+            "Introduction": {
+                "_general": "Bases du dialogue Intégrer le gameplay Générer tout le dialogue"
+            }
+        },
+        {
+            "Nom": "Dialogue qui se souvient",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Système de dialogue",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, si je reviens parler au PNJ, il se souvient de notre conversation passée",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Variables Yarn Spinner sauvegardées dans le système de sauvegarde Variables rechargées correctement au load game 1 PNJ de test avec dialogue évolutif (avant/après conversation) Test : quitter le jeu, recharger, vérifier que le dialogue a changé"
+            },
+            "Valeur": {
+                "_general": "Cohérence narrative et profondeur des personnages. Pilier \"Conflits de conscience\"."
+            },
+            "Notes techniques": {
+                "_general": "Intégration avec Sauvegarde automatique unique (Sauvegarde automatique unique) Serialization des variables Yarn Spinner en JSON Format de données à définir avec l'archi globale"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Sauvegarde automatique unique (Sauvegarde automatique unique) Dépend de : US \"Dialogue avec choix\""
+            }
+        },
+        {
+            "Nom": "Dialogue simple end-to-end",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Système de dialogue",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je peux parler avec un PNJ et lire ses répliques dans une UI basique",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Intégration de Yarn Spinner dans Unity fonctionnelle Un fichier .yarn de test avec 5-10 lignes de dialogue Affichage du texte à l'écran (même en texte brut sans style) Possibilité d'avancer dans le dialogue au clic 1 PNJ de test placé sur une scène"
+            },
+            "Valeur": {
+                "_general": "Un dialogue jouable de bout en bout, même sans polish. Permet de tester la narration et l'écriture immédiatement."
+            },
+            "Notes techniques": {
+                "_general": "Outil choisi : Yarn Spinner Ressources : Yarn Spinner documentation Plugin Unity : Yarn Spinner for Unity (via Package Manager)"
+            },
+            "Dépendances": {
+                "_general": "Bloque toutes les autres US du système de dialogue"
+            }
+        },
+        {
+            "Nom": "Échec critique volontaire",
+            "Story Points": "2",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Caractéristiques et compétences",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux choisir d'échouer volontairement pour récupérer 5 pts d'Effort",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Bouton \"Accepter l'échec\" dans l'UI de test Gain de +5 Effort au choix de l'échec critique Animation/VFX spéciale pour l'échec dramatique Conséquences narratives de l'échec (message contextuel) 1-2 situations de test"
+            },
+            "Valeur": {
+                "_general": "Ajoute de la profondeur tactique. Encourage les échecs narratifs mémorables."
+            },
+            "Notes": {
+                "_general": "Mécanique unique d'Alteir. Renforce le pilier \"Conflits de conscience\"."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Tests de compétences avec UI basique\""
+            }
+        },
+        {
+            "Nom": "Ecrire Guide musical",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Catégorie": "Sound design",
+            "Priorité": "P1",
+            "Description": "Ecriture de guide musical  Guide musical , guidelines",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Ecrire  Guide musical  ",
+            "État": "Terminé",
+            "Catégorie": "Sound design",
+            "Priorité": "P1",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Embranchement : Voknir guide (optionnel)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux convaincre Voknir de me guider hors des Plis (facilite la sortie)",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Dialogue complet avec Voknir implémenté (déjà écrit : Dialogue avec Voknir) Plusieurs chemins de persuasion selon traits (Patient, Empathique, Autoritaire, Cynique) Option 1 : Récupérer le 2e nœud de convergence au Nexus Synaptique (détour) Option 2 : Convaincre via angle mort spatial (test sensibilité paranormale) Option 3 : Forcer/intimider (risque d'échec) Si succès : Voknir donne indications précises pour sortir (réduit difficulté navigation) Si échec : Joueur doit naviguer seul (plus difficile)"
+            },
+            "Valeur": {
+                "_general": "Embranchement optionnel qui facilite la sortie. Pas obligatoire mais réduit la difficulté."
+            },
+            "Notes gameplay": {
+                "_general": "Ce n'est PAS un blocage : on peut sortir sans Voknir Avec Voknir : navigation facilitée, marqueurs visuels, moins de risques Sans Voknir : navigation plus difficile, plus d'exploration nécessaire Récompense de la patience/empathie vs brutalité"
+            },
+            "Contenu nécessaire": {
+                "_general": "Dialogue déjà écrit (Dialogue avec Voknir), besoin d'intégration Yarn Spinner Tests : Intimidation DD9, Orientation DD15, Sensibilité paranormale DD18 Système de guidance (markers visuels si Voknir aide)"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\" Dépend de : Système de dialogue (choix) Dépend de : US \"Traits de base Uresaïr\" (pour conditions)"
+            }
+        },
+        {
+            "Nom": "Embranchement : Voknir guide (optionnel)Embranchement : Voknir guide (optionnel)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux convaincre Voknir de me guider hors des Plis (facilite la sortie)",
+            "Introduction": {},
+            "Critères d'acceptationCritères d'acceptation": {
+                "_general": "Dialogue complet avec Voknir implémenté (déjà écrit : Dialogue avec Voknir)Dialogue complet avec Voknir implémenté (déjà écrit : Dialogue avec Voknir) Plusieurs chemins de persuasion selon traits (Patient, Empathique, Autoritaire, Cynique)Plusieurs chemins de persuasion selon traits (Patient, Empathique, Autoritaire, Cynique) Option 1 : Récupérer le 2e nœud de convergence au Nexus Synaptique (détour)Option 1 : Récupérer le 2e nœud de convergence au Nexus Synaptique (détour) Option 2 : Convaincre via angle mort spatial (test sensibilité paranormale)Option 2 : Convaincre via angle mort spatial (test sensibilité paranormale) Option 3 : Forcer/intimider (risque d'échec)Option 3 : Forcer/intimider (risque d'échec) Si succès : Voknir donne indications précises pour sortir (réduit difficulté navigation)Si succès : Voknir donne indications précises pour sortir (réduit difficulté navigation) Si échec : Joueur doit naviguer seul (plus difficile)Si échec : Joueur doit naviguer seul (plus difficile)"
+            },
+            "ValeurValeur": {
+                "_general": "Embranchement optionnel qui facilite la sortie. Pas obligatoire mais réduit la difficulté.Embranchement optionnel qui facilite la sortie. Pas obligatoire mais réduit la difficulté."
+            },
+            "Notes gameplayNotes gameplay": {
+                "_general": "Ce n'est PAS un blocage : on peut sortir sans VoknirCe n'est PAS un blocage : on peut sortir sans Voknir Avec Voknir : navigation facilitée, marqueurs visuels, moins de risquesAvec Voknir : navigation facilitée, marqueurs visuels, moins de risques Sans Voknir : navigation plus difficile, plus d'exploration nécessaireSans Voknir : navigation plus difficile, plus d'exploration nécessaire Récompense de la patience/empathie vs brutalitéRécompense de la patience/empathie vs brutalité"
+            },
+            "Contenu nécessaireContenu nécessaire": {
+                "_general": "Dialogue déjà écrit (Dialogue avec Voknir), besoin d'intégration Yarn SpinnerDialogue déjà écrit (Dialogue avec Voknir), besoin d'intégration Yarn Spinner Tests : Intimidation DD9, Orientation DD15, Sensibilité paranormale DD18Tests : Intimidation DD9, Orientation DD15, Sensibilité paranormale DD18 Système de \"guidance\" (markers visuels si Voknir aide)Système de \"guidance\" (markers visuels si Voknir aide)"
+            },
+            "DépendancesDépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\"Dépend de : US \"Zone de tutoriel jouable (Plis)\" Dépend de : Système de dialogue (choix)Dépend de : Système de dialogue (choix) Dépend de : US \"Traits de base Uresaïr\" (pour conditions)Dépend de : US \"Traits de base Uresaïr\" (pour conditions)"
+            }
+        },
+        {
+            "Nom": "Embranchement : Zaehria négociation (optionnel)",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux négocier avec Zaehria pour faciliter ma sortie des Plis",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Rencontre avec Zaehria (fusionnée aux murs des Plis) Dialogue de négociation avec 3 branches : - Partager un souvenir d'Uresaïr (elle collecte pour Akthar-Neth) - Découvrir son secret (double agent Murmurateurs) et la menacer - Faire appel à son empathie (trait Empathique) Si succès : Zaehria ouvre/stabilise un passage direct Si échec/refus : Passage standard plus long Conséquences sur relations futures avec le Culte (elle peut rapporter ou non)"
+            },
+            "Valeur": {
+                "_general": "Embranchement optionnel qui accélère/complique la sortie selon choix."
+            },
+            "Notes gameplay": {
+                "_general": "Ce n'est PAS un blocage : on peut contourner Zaehria Avec Zaehria coopérative : passage rapide, mais elle peut rapporter à Akthar-Neth Zaehria menacée : passage facile mais ennemie permanente Sans Zaehria : passage plus long mais neutre politiquement Test de mémoire morale : quel souvenir donner ?"
+            },
+            "Contenu nécessaire": {
+                "_general": "Dialogue Zaehria (3 branches + variations) Choix de souvenir à partager (liste de 3-5 souvenirs douloureux d'Uresaïr) Système de détection du secret (investigation)"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\" Dépend de : Système de dialogue (choix) Dépend de : US \"Jauges Influence & Respect\" (pour conséquences)"
+            }
+        },
+        {
+            "Nom": "Embranchement : Zaehria négociation (optionnel)Embranchement : Zaehria négociation (optionnel)",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux négocier avec Zaehria pour faciliter ma sortie ou contourner ses passages",
+            "Introduction": {
+                "_general": "Mécanique de \"stabilisation de passage\" (VFX murs qui bougent)"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\" Dépend de : Système de dialogue (choix) Dépend de : US \"Jauges Influence & Respect\" (conséquences futures)"
+            },
+            "Critères d'acceptationCritères d'acceptation": {
+                "_general": "Rencontre avec Zaehria (fusionnée aux murs des Plis)Rencontre avec Zaehria (fusionnée aux murs des Plis) Dialogue de négociation avec 3 branches :Dialogue de négociation avec 3 branches : - Partager un souvenir d'Uresaïr (elle collecte pour Akthar-Neth)Partager un souvenir d'Uresaïr (elle collecte pour Akthar-Neth) - Découvrir son secret (double agent Murmurateurs) et la menacerDécouvrir son secret (double agent Murmurateurs) et la menacer - Faire appel à son empathie (trait Empathique)Faire appel à son empathie (trait Empathique) Si succès : Zaehria ouvre/stabilise un passage directSi succès : Zaehria ouvre/stabilise un passage direct Si échec/refus : Passage standard plus longSi échec/refus : Passage standard plus long Conséquences sur relations futures avec le Culte (elle peut rapporter ou non)Conséquences sur relations futures avec le Culte (elle peut rapporter ou non)"
+            },
+            "ValeurValeur": {
+                "_general": "Embranchement optionnel qui accélère/complique la sortie selon choix.Embranchement optionnel qui accélère/complique la sortie selon choix."
+            },
+            "Notes gameplayNotes gameplay": {
+                "_general": "Ce n'est PAS un blocage : on peut contourner ZaehriaCe n'est PAS un blocage : on peut contourner Zaehria Avec Zaehria coopérative : passage rapide, mais elle peut rapporter à Akthar-NethAvec Zaehria coopérative : passage rapide, mais elle peut rapporter à Akthar-Neth Zaehria menacée : passage facile mais ennemie permanenteZaehria menacée : passage facile mais ennemie permanente Sans Zaehria : passage plus long mais neutre politiquementSans Zaehria : passage plus long mais neutre politiquement Test de mémoire morale : quel souvenir donner ?Test de mémoire morale : quel souvenir donner ?"
+            },
+            "Contenu nécessaireContenu nécessaire": {
+                "_general": "Dialogue Zaehria (3 branches + variations)Dialogue Zaehria (3 branches + variations) Choix de souvenir à partager (liste de 3-5 souChoix de souvenir à partager (liste de 3-5 souvenirs d'Uresaïr)"
+            }
+        },
+        {
+            "Nom": "Eonundé",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération du portrait d'Eonundé (personnage du Léviathan)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Épreuve des Bains parkourétiques",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux participer à l'épreuve initiatique des Bains parkourétiques",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Zone Bains modélisée (bassins d'acide, poutres suspendues) Parcours d'obstacles navigable (platforming 2D) Rencontre avec Maître-Flagellant (PNJ) Alternative : participation OU refus de l'épreuve (conséquences narratives) Récompense narrative (approbation du culte OU rejet)"
+            },
+            "Valeur": {
+                "_general": "Épreuve initiatique optionnelle. Teste engagement du joueur avec le culte."
+            },
+            "Notes gameplay": {
+                "_general": "Ce n'est PAS un puzzle, c'est un test physique/narratif : Soit le joueur réussit le parcours (skill challenge) Soit il refuse et assume les conséquences sociales Pilier \"Conflits de conscience\" : participer = accepter la doctrine du culte"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Nef Centrale + rencontre Akthar-Neth\" Dépend de : Système de déplacements (platforming)"
+            }
+        },
+        {
+            "Nom": "Escelion",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 5 : Vieille Ville",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Conception de la zone globale Escelion (le monde/continent principal)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Etudes concurrents",
+            "État": "Archivé",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Catégorie": "Marketing",
+            "Priorité": "P2",
+            "Description": "Analyse de la concurrence (RPG narratifs similaires, positionnement marché)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Etude commerciale V2",
+            "État": "Archivé",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Seconde version de l'étude commerciale du projet",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Exploration Plis d'Ossements + Ensevelie",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, j'explore les Plis d'Ossements et rencontre l'Ensevelie",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Zone Plis d'Ossements accessible (labyrinthe aux géométries mouvantes) Rencontre avec l'Ensevelie (entité en superposition temporelle) Dialogue cryptique révélant des vérités sur le Léviathan Distorsions temporelles (effet visuel/narratif) Découverte du lieu de retraite d'Uresaïr"
+            },
+            "Valeur": {
+                "_general": "Zone mystérieuse révélant l'origine du Léviathan. Lore dump narratif."
+            },
+            "Contenu nécessaire": {
+                "_general": "Zone Plis (architecture non-euclidienne, moelle résiduelle) Dialogues Ensevelie (fragmentaires, prophétiques) VFX distorsions temporelles"
+            },
+            "Notes": {
+                "_general": "Zone optionnelle mais riche en lore. Pilier \"Voyage au Cœur de l'Étrange\"."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Nef Centrale + rencontre Akthar-Neth\""
+            }
+        },
+        {
+            "Nom": "Faire une plaquette publicitaire",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Marketing",
+            "Priorité": "P2",
+            "Description": "Création d'une plaquette publicitaire à distribuer (salons, parties JDR)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Faire une V1 du pitch deck",
+            "État": "Archivé",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Création de la première version du pitch deck",
+            "Introduction": {
+                "_general": "https://docs.google.com/presentation/d/1MbRe-tWOXsFG0ybdVDUX5V2umnql4aSH/edit?slide=id.p1#slide=id.p1"
+            }
+        },
+        {
+            "Nom": "Fonctionnalités 1ere minutes (fiches)",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Ecritures des fiches de   Déplacements V1 ,  Système de caméra , etc",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Fonctionnalités diverses",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Ecriture de fonctionnalités avancées :  Système de dialogue ,  Progression  ",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Forcer un choix via Influence (implémentation)",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Traits de caractère",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux débloquer un choix grisé en dépensant de l'Influence (calcul de coût selon traits)",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Bouton \"Forcer (coût X Influence)\" apparaît sur choix grisés Calcul automatique : coût = |trait_PJ - trait_requis| / 10 (arrondi sup) Déduction de l'Influence et déblocage du choix Animation de \"lutte interne\" (réutiliser de US Influence) 2 dialogues de test avec forçage"
+            },
+            "Valeur": {
+                "_general": "Complète la boucle traits + influence. Permet de contourner les blocages moraux."
+            },
+            "Notes": {
+                "_general": "Coût moyen attendu : 1-3 points d'Influence pour un forçage classique."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Blocage de choix par traits\" Dépend de : US \"Jauges Influence & Respect (Uresaïr)\""
+            }
+        },
+        {
+            "Nom": "Forêts de corail",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Conception de la zone Forêts de corail (lieu secondaire/optionnel)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Formulaire interview",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Création d'un formulaire d'interview pour recueillir feedback playtesters",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Générateur de fiches agentique",
+            "État": "Archivé",
+            "Fonctionnalité": "Pipeline & Outils IA",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "Création d'un générateur de fiches agentique (automatisation création fiches personnages/lieux)",
+            "Introduction": {
+                "_general": "Générateur de fiches lieux, persos, etc Correctifs Mise en ligne"
+            }
+        },
+        {
+            "Nom": "Illustrations Nef centrale",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération des décors 2D pour la Nef centrale (Plis d'ossements) via Dall-e",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Illustrations Tunnel vertébral",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération des décors 2D pour le Tunnel vertébral (Plis d'ossements) via Dall-e",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Illustration Bains Parkourétiques",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération du décor 2D des Bains Parkourétiques (Plis d'ossement)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Implémentation 1eres minutes",
+            "État": "Pas commencé",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Implémenter Yarn Spinner",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Système de dialogue",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "Intégration de Yarn Spinner (outil de gestion de dialogues) dans Unity",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Impl: Focus manette et mapping",
+            "État": "Pas commencé",
+            "Type": "Tâche",
+            "Fonctionnalité": "Menu principal — Enveloppe + navigation de base",
+            "User Story parente": "Naviguer aux onglets au clavier/souris/manette",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "Input System Unity, navigation explicite entre boutons, mapping manette, tests clavier/souris/manette",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Impl: Shell UI et canevas",
+            "État": "Pas commencé",
+            "Type": "Tâche",
+            "Fonctionnalité": "Menu principal — Enveloppe + navigation de base",
+            "User Story parente": "Ouvrir/fermer le menu rapidement",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "Canvas principal, panel onglets, panel contenu, transitions légères, code d’ouverture/fermeture centralisé",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Intégration première map",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Intégration de la première map jouable dans Unity avec décors et collisions",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Inventaire — Consommer ou équiper un objet",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Inventaire",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueuse, je veux consommer ou équiper un objet depuis l’inventaire pour en voir immédiatement l’effet et continuer à jouer.\n\nCritères d’acceptation:\n- Action primaire exécute Consommer/Équiper selon type d’objet\n- Effet appliqué et persistant après fermeture de l’inventaire\n- Feedback visuel et sonore confirmant l’action\n- Impossibilité d’exécuter une action non valide (grisé + tooltip)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Inventaire — Ouvrir et naviguer à la manette",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Inventaire",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueuse, je veux ouvrir l’inventaire et naviguer aux catégories et items à la manette pour gérer mes objets sans friction.\n\nCritères d’acceptation:\n- Ouverture/fermeture via touche dédiée, indisponible en cinématique et dialogue\n- Navigation LB/RB entre catégories, focus visible en permanence\n- Sélection d’un item en ≤ 3 actions depuis l’ouverture\n- Retour au jeu sans fuite d’état",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Inventaire — Tri et recherche basiques",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Inventaire",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueuse, je veux trier et rechercher mes objets pour retrouver rapidement ce que je cherche.\n\nCritères d’acceptation:\n- Tri par nom, rareté et acquisition récente\n- Recherche textuelle filtrant la liste en temps réel\n- L’état de tri/recherche persiste jusqu’à fermeture de l’inventaire",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Jauges Influence & Respect (Uresaïr)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Influence pour les personnages principaux",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je vois mes jauges d'Influence et Respect avec Uresaïr évoluer selon mes choix",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "2 jauges visibles dans l'UI : Influence (pour forcer actions) & Respect (relation) Modifications suite aux choix de dialogue Indicateurs visuels +/- lors des changements Stockage persistent des valeurs Au moins 3 dialogues de test avec impact sur les jauges"
+            },
+            "Valeur": {
+                "_general": "Mécanique centrale de la possession éthique. Pilier \"Conflits de conscience\"."
+            },
+            "Notes techniques": {
+                "_general": "Valeurs non bornées (peuvent être négatives) Impact dialogue à définir par choix (ex: +5 Respect, -10 Influence) Intégration avec système de dialogue Yarn Spinner"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Système de dialogue (choix) Dépend de : US \"Uresaïr contrôlable\""
+            }
+        },
+        {
+            "Nom": "Journal — Afficher chapitres et objectifs actifs",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Journal de la quête principale",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueuse, je veux voir les chapitres de la quête principale et les objectifs actifs pour savoir quoi faire ensuite.\n\nCritères d’acceptation:\n- Liste des chapitres avec objectifs et statut (Actif/Terminé/Échoué)\n- Les objectifs actifs sont affichés en tête\n- Sélection d’un objectif met en avant l’étape actuelle",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Journal — Lisibilité et navigation manette",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Journal de la quête principale",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "En tant que joueuse, je veux une lecture confortable du journal et une navigation à la manette pour parcourir facilement les chapitres et objectifs.\n\nCritères d’acceptation:\n- Taille et contraste du texte validés en 1080p\n- Navigation manette fluide avec focus visible\n- Retour au menu principal en une action",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Journal — Mise à jour automatique après événements",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Journal de la quête principale",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueuse, je veux que le journal se mette à jour automatiquement après les décisions et étapes clés pour rester alignée avec l’histoire.\n\nCritères d’acceptation:\n- Mise à jour déclenchée par événements de fin d’étape, choix, ou progression\n- Pas de doublons ni d’entrées contradictoires\n- Historique minimal des 3 dernières mises à jour",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Jungle Vivarcade",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Conception de la zone Jungle Vivarcade (lieu secondaire/optionnel)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Langgraph Notion V1",
+            "État": "Archivé",
+            "Fonctionnalité": "Pipeline & Outils IA",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Webapp Python V1 avec agents IA par API et contexte Notion pour augmenter l'efficacité",
+            "Introduction": {}
+        },
+        {
+            "Nom": "La tanière (fiche)",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Zone 3 : Puits Céleste",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Création de la fiche de lieu La tanière (Puits Céleste)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Les puits céleste (fiche)",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Zone 3 : Puits Céleste",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Création de la fiche de lieu Les puits céleste (zone principale)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Level design Plis d’ossement",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Conception du level design de la zone tutoriel Plis d'ossement (layout, flow)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Le rêveur du Puits Celeste",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Zone 3 : Puits Céleste",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Création de la fiche du Rêveur du Puits Celeste (personnage/entité)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Le vernissage (fiche)",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Zone 3 : Puits Céleste",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Création de la fiche de lieu Le vernissage (Puits Céleste)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Lieux additionnels",
+            "État": "Terminé",
+            "Fonctionnalité": "Zone 2 : Désert des Échos Perdus",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Ajout de lieux limitrophes au Désert des Échos Perdus pour enrichir la zone",
+            "Introduction": {
+                "_general": "Plaines de l’Exuvie  Oeil de Mirimance"
+            }
+        },
+        {
+            "Nom": "L’Enlumineur (fiche)",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Zone 3 : Puits Céleste",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Création de la fiche de personnage L'Enlumineur (Puits Céleste)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "L’Hermogène",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Conception du lieu L'Hermogène",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Machine Pérégrine",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Conception de la Machine Pérégrine (Rêveur industriel titanesque)  Machine Pérégrine  ",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Marché automaton",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Conception du lieu Marché automaton",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Menu pause avec écran personnage",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Menu principal",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, je peux mettre le jeu en pause et consulter mes stats/inventaire",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Menu pause accessible par bouton manette (Start/Options) Onglet \"Personnage\" : caractéristiques, traits, Aspects, jauges Onglet \"Inventaire\" (placeholder si inventaire pas encore implémenté) Bouton \"Reprendre\", \"Paramètres\", \"Quitter\" Navigation manette fluide"
+            },
+            "Valeur": {
+                "_general": "Accès aux informations du PJ. UX fondamentale d'un RPG."
+            },
+            "Notes techniques": {
+                "_general": "UI responsive (portrait + paysage) Pause du Time.timeScale Prévoir l'intégration future du journal de quêtes"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Système de caractéristiques (8 stats)\" Dépend de : US \"Traits de base Uresaïr\""
+            }
+        },
+        {
+            "Nom": "Murmurateurs",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Création de la fiche et du portrait de la communauté des Murmurateurs",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Musiques Plis d’ossement",
+            "État": "En cours",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Catégorie": "Sound design",
+            "Priorité": "P1",
+            "Description": "Composition des musiques pour la zone Plis d'ossement",
+            "Introduction": {
+                "_general": "Guide musical Musique du La vision d’Uresaïr Thèmes de l’Ethérée Strate I Strate II - Le Dédale Médullaire Strate III - Les Catacombes Temporelles Strate IV Thème d’Uresaïr Thème de l’Ensevelie Thème de Voknir Esh'Maradel, le cartographe Thème de Zaehria Neth'Varu, La Gardienne Vertébrale"
+            }
+        },
+        {
+            "Nom": "Narthex abyssal accessible (entrée + PNJ)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, j'arrive au Léviathan via le Narthex et rencontre les gardiens du culte",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Zone Narthex abyssal modélisée (tour verticale, entrée cérémonielle) Escalier hélicoïdal descendant vers le Tunnel vertébral 2-3 PNJ placés (Gardiens du Seuil, Maître de Parédrie) Premier dialogue avec le Culte de l'Anentropie Transition vers les profondeurs du Léviathan"
+            },
+            "Valeur": {
+                "_general": "Porte d'entrée narrative du Léviathan. Établit le ton oppressant et mystique du culte."
+            },
+            "Assets nécessaires": {
+                "_general": "Décor Narthex (architecture osseuse + ziggourat) Sprites Gardiens du Seuil (Van'Doei masqués) Carillons d'os (SFX/VFX)"
+            },
+            "Notes": {
+                "_general": "Premier contact avec le Culte. Pilier \"Voyage au Cœur de l'Étrange\"."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\""
+            }
+        },
+        {
+            "Nom": "Naviguer aux onglets au clavier/souris/manette",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Menu principal — Enveloppe + navigation de base",
+            "Description": "- Navigation verticale entre onglets à la manette, clavier et souris\n- Focus visible en permanence\n- Bouclage haut/bas cohérent et sans piège",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Nef Centrale + rencontre Akthar-Neth",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, j'explore la Nef Centrale et rencontre l'Exégète Akthar-Neth pour la première fois",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Zone Nef Centrale modélisée (sphère aux lois gravitationnelles transcendées) Consoled momifiés disposés en constellations (décor) Première rencontre avec Akthar-Neth (dialogue majeur) Dialogue avec Uresaïr sur sa relation avec le culte Introduction des tensions théologiques (vénération vs rejet)"
+            },
+            "Valeur": {
+                "_general": "Confrontation narrative centrale. Établit Akthar-Neth comme antagoniste principal et les enjeux du culte."
+            },
+            "Contenu nécessaire": {
+                "_general": "Dialogues Akthar-Neth (scène de rencontre initiale déjà écrite) Dialogues internes Uresaïr/Éthérée sur le culte Environnement sphérique avec gravité altérée (tech à valider)"
+            },
+            "Notes": {
+                "_general": "Moment clé narratif. Piliers \"Conflits de conscience\" + \"Voyage au Cœur de l'Étrange\"."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Narthex abyssal accessible\" Dépend de : Système de dialogue (mémoire)"
+            }
+        },
+        {
+            "Nom": "Nouvelles fiches - combler les trous du Léviathan",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Combler les trous dans les fiches de lieux/personnages du Léviathan",
+            "Introduction": {
+                "_general": "Les Jardins thoraciques (alimentation) Modification de Van’Doei (besoin de chaleur pour compenser l’absence de besoin d’eau, qualité variable des cendres) et de Culte de l’Anentropie (sources de cendres et de chaleur)"
+            }
+        },
+        {
+            "Nom": "Onboarding",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Gestion de projet & Recrutement",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': [{'object': 'user', 'id': '297d872b-594c-819b-9765-0002aa973d3d', 'name': 'lancelot.renaud@gmail.com', 'avatar_url': None, 'type': 'person', 'person': {'email': 'lancelot.renaud@gmail.com'}}]}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "Onboarding spécifique pour dév, pour Renaud (setup Unity, outils)",
+            "Introduction": {},
+            "Objectif": {
+                "_general": "Intégrer progressivement le nouvel arrivant dans l'univers d'Alteir et lui fournir toutes les clés de compréhension pour contribuer efficacement au projet."
+            },
+            "🎯 Approche recommandée": {
+                "_general": "L'univers d'Alteir est riche et détaillé - c'est sa force ! Cette tâche vous guide pour découvrir progressivement cet univers de manière structurée, en commençant par les éléments essentiels avant d'approfondir selon votre rôle. L'objectif est de vous rendre rapidement opérationnel tout en vous donnant envie d'explorer davantage."
+            },
+            "Étapes d'intégration": {
+                "_general": "Phase 1 : Découverte des fondamentaux (Priorité haute) Lire la page Vision - Comprendre la prémisse, l'intrigue principale, les thèmes et la cosmologie d'Alteir Parcourir la page Onboarding  - S'orienter dans la structure générale du Notion Consulter l'État des lieux - Se familiariser avec l'avancement, les objectifs, obstacles et planning actuels Prendre connaissance de son rôle spécifique - Définir les responsabilités et attentes avec @Marc Dreyfus Phase 2 : Découverte ciblée de l'univers (Priorité moyenne) Personnages essentiels à découvrir : - L'Éthérée (entité centrale qui lie tous les protagonistes) - Seigneuresse Uresaïr  (la mystique recluse) - Akthar-Neth Amatru, l’Exégète (le gourou, premier antagoniste) - Eonundé Alinen-Egan (l'esclave émancipée) - Vethraak  (l'Umcut en quête de mémoire éternelle) - Jast, l’Inéluctable  (Rêveur primordial) Géographie : structure d'Escelion - Comprendre l'organisation générale (Escelion, Vieille Ville) Lieu central : Léviathan pétrifié - Se familiariser avec ce lieu majeur de l'action Chronologie : Chronologie d'Escelion - Événements majeurs qui ont façonné le monde Concepts clés - Espèces principales (Van’Doei, Umcut, etc.) et communautés importantes (Culte de l’Anentropie) Phase 3 : Structure et outils de travail (Priorité moyenne) Structure Macro - Comprendre l'organisation générale de l'histoire et des arcs narratifs Kanban projet - S'orienter dans les tâches en cours et le système de sprints Sprint en cours - Identifier les éléments prioritaires actuels Accès aux outils collaboratifs - Configurer les permissions et accès nécessaires avec @Marc Dreyfus Phase 4 : Ressources spécialisées (Selon profil) Pour les Narrative Designers / Scénaristes Structure Micro - Approfondir les scènes individuelles et moments clés Personnages  de leur domaine - Lire les fiches complètes des personnages assignés à leurs tâches Lieux spécifiques - Étudier en détail les lieux où se déroulent leurs scène. Prompts pour IA  - Comprendre les outils de génération de contenu assistée Pour les Game Designers Base de données Epics/Fonctionnalités - Étudier les mécaniques de jeu et systèmes Guides techniques - Se familiariser avec la documentation technique Prompts pour IA  - Comprendre les outils de génération de contenu assistée Pour les commerciaux Formation La Ruche  - Suivre le matériel de formation business Guides généraux - Parcourir la documentation d'équipe Pour les dev Télécharger Unity 6000.2.8f1 Formation unity si besoin Clone repo git : https://github.com/Saheyus/Alteir_Cursor Télécharger Cursor (si AI code) ou Visual Studio code Mettre en place git (plus large repo pour les assets) Jeter un oeil à la documentation (dossier scripts) Phase 5 : Intégration active (Priorité haute) Première contribution - Réaliser une petite tâche supervisée Feedback session - Échanger sur l'expérience d'onboarding Attribution des premières responsabilités - Définir les tâches en autonomie Intégration dans le sprint en cours - Commencer à contribuer activement"
+            },
+            "Points de validation": {
+                "_general": "Compréhension de la vision - Capacité à expliquer les fondements d'Alteir en quelques phrases Navigation autonome - Sait où chercher l'information selon le besoin (sans tout connaître par cœur) Compréhension de son périmètre - Identifie clairement ses responsabilités et les ressources associées Méthodes de travail - Maîtrise des processus et outils de l'équipe Première contribution validée - Travail de qualité réalisé en autonomie"
+            },
+            "Ressources d'aide": {
+                "_general": "Contact référent : @Marc Dreyfus  Documentation : Section Guides du Notion Support technique : @Marc Dreyfus  Questions fréquentes : [Lien vers FAQ à faire] Durée estimée : 1-2 semaines selon le profil et la disponibilité Dernière mise à jour : 06/08/2025"
+            }
+        },
+        {
+            "Nom": "Onboarding Véronique",
+            "État": "En cours",
+            "Fonctionnalité": "Gestion de projet & Recrutement",
+            "Catégorie": "Autre",
+            "Priorité": "P1",
+            "Description": "Préparation et suivi de l'onboarding de la dev Véronique (nouvelle collaboratrice)",
+            "Introduction": {},
+            "Objectif": {
+                "_general": "Intégrer progressivement le nouvel arrivant dans l'univers d'Alteir et lui fournir toutes les clés de compréhension pour contribuer efficacement au projet."
+            },
+            "🎯 Approche recommandée": {
+                "_general": "L'univers d'Alteir est riche et détaillé - c'est sa force ! Cette tâche vous guide pour découvrir progressivement cet univers de manière structurée, en commençant par les éléments essentiels avant d'approfondir selon votre rôle. L'objectif est de vous rendre rapidement opérationnel tout en vous donnant envie d'explorer davantage."
+            },
+            "Étapes d'intégration": {
+                "_general": "Phase 1 : Découverte des fondamentaux (Priorité haute) Lire la page Vision - Comprendre la prémisse, l'intrigue principale, les thèmes et la cosmologie d'Alteir Parcourir la page Onboarding  - S'orienter dans la structure générale du Notion Consulter l'État des lieux - Se familiariser avec l'avancement, les objectifs, obstacles et planning actuels Prendre connaissance de son rôle spécifique - Définir les responsabilités et attentes avec @Marc Dreyfus Phase 2 : Découverte ciblée de l'univers (Priorité moyenne) Personnages essentiels à découvrir : - L'Éthérée (entité centrale qui lie tous les protagonistes) - Seigneuresse Uresaïr  (la mystique recluse) - Akthar-Neth Amatru, l’Exégète (le gourou, premier antagoniste) - Eonundé Alinen-Egan (l'esclave émancipée) - Vethraak  (l'Umcut en quête de mémoire éternelle) - Jast, l’Inéluctable  (Rêveur primordial) Géographie : structure d'Escelion - Comprendre l'organisation générale (Escelion, Vieille Ville) Lieu central : Léviathan pétrifié - Se familiariser avec ce lieu majeur de l'action Chronologie : Chronologie d'Escelion - Événements majeurs qui ont façonné le monde Concepts clés - Espèces principales (Van’Doei, Umcut, etc.) et communautés importantes (Culte de l’Anentropie) Phase 3 : Structure et outils de travail (Priorité moyenne) Structure Macro - Comprendre l'organisation générale de l'histoire et des arcs narratifs Kanban projet - S'orienter dans les tâches en cours et le système de sprints Sprint en cours - Identifier les éléments prioritaires actuels Accès aux outils collaboratifs - Configurer les permissions et accès nécessaires avec @Marc Dreyfus Phase 4 : Ressources spécialisées (Selon profil) Pour les Narrative Designers / Scénaristes Structure Micro - Approfondir les scènes individuelles et moments clés Personnages  de leur domaine - Lire les fiches complètes des personnages assignés à leurs tâches Lieux spécifiques - Étudier en détail les lieux où se déroulent leurs scène. Prompts pour IA  - Comprendre les outils de génération de contenu assistée Pour les Game Designers Base de données Epics/Fonctionnalités - Étudier les mécaniques de jeu et systèmes Guides techniques - Se familiariser avec la documentation technique Prompts pour IA  - Comprendre les outils de génération de contenu assistée Pour les commerciaux Formation La Ruche  - Suivre le matériel de formation business Guides généraux - Parcourir la documentation d'équipe Pour les dev Télécharger Unity Formation unity Télécharger Cursor (si AI code) ou Visual Studio code Mettre en place git (plus large repo pour les assets) Jeter un oeil à la documentation (dossier scripts) Phase 5 : Intégration active (Priorité haute) Première contribution - Réaliser une petite tâche supervisée Feedback session - Échanger sur l'expérience d'onboarding Attribution des premières responsabilités - Définir les tâches en autonomie Intégration dans le sprint en cours - Commencer à contribuer activement"
+            },
+            "Points de validation": {
+                "_general": "Compréhension de la vision - Capacité à expliquer les fondements d'Alteir en quelques phrases Navigation autonome - Sait où chercher l'information selon le besoin (sans tout connaître par cœur) Compréhension de son périmètre - Identifie clairement ses responsabilités et les ressources associées Méthodes de travail - Maîtrise des processus et outils de l'équipe Première contribution validée - Travail de qualité réalisé en autonomie"
+            },
+            "Ressources d'aide": {
+                "_general": "Contact référent : @Marc Dreyfus  Documentation : Section Guides du Notion Support technique : @Marc Dreyfus  Questions fréquentes : [Lien vers FAQ à faire] Durée estimée : 1-2 semaines selon le profil et la disponibilité Dernière mise à jour : 06/08/2025"
+            }
+        },
+        {
+            "Nom": "Ouvrir/fermer le menu rapidement",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Menu principal — Enveloppe + navigation de base",
+            "Description": "- Le menu s’ouvre et se ferme depuis le jeu en < 300 ms\n- L’ouverture est bloquée pendant cinématiques et dialogues\n- Le retour au jeu ne fige ni l’input ni la caméra",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Partager projet Unity",
+            "État": "Archivé",
+            "Fonctionnalité": "Moteur de jeu",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "Mise en place du partage du projet Unity (Git/version control)",
+            "Introduction": {
+                "_general": "Mettre à jour Unity ⇒ 6.2 Mettre le git à la racine du projet + gitignore Mettre en place git lfs Lien repo : https://github.com/Saheyus/Alteir_Cursor"
+            }
+        },
+        {
+            "Nom": "Peaufinage obstacles",
+            "État": "Archivé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Améliorations et corrections du système d'obstacles (collisions, feedback visuel)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Perf: mesure et optimisation temps d’ouverture",
+            "État": "Pas commencé",
+            "Type": "Tâche",
+            "Fonctionnalité": "Menu principal — Enveloppe + navigation de base",
+            "User Story parente": "Ouvrir/fermer le menu rapidement",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "Profiler, lazy load des sous-vues, sprites/atlases UI légers, objectif <300 ms",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Pitch deck",
+            "État": "En cours",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Catégorie": "Marketing",
+            "Priorité": "P1",
+            "Description": "Création du pitch deck pour présenter le jeu aux investisseurs/partenaires",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Plan Financier",
+            "État": "Archivé",
+            "Fonctionnalité": "Finance & Administratif",
+            "Catégorie": "Comptabilité",
+            "Priorité": "P2",
+            "Description": "Création du plan financier du projet (prévisions, budgets, timeline)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Playtest à la BaC",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel), Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Session de playtest à la BaC avec des joueurs externes",
+            "Introduction": {}
+        },
+        {
+            "Nom": "PNJ secondaires",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération des portraits et fiches des PNJ secondaires du Léviathan",
+            "Introduction": {}
+        },
+        {
+            "Nom": "PNJ secondaires Léviathan",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Conception des fiches des PNJ secondaires du Léviathan (noms, rôles, dialogues)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Polish graphique Zone 1 (Plis + Léviathan)",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel), Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "En tant que joueur, je vois les Plis et le Léviathan avec un niveau de détail et polish professionnel",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Tous les décors 2D finalisés (cohérence artistique) Lighting 2D ajouté (ombres, ambiance) Parallax backgrounds sur maps principales Particules d'ambiance (poussière, brume) Assets interactifs polis (portes, coffres, énigmes)"
+            },
+            "Valeur": {
+                "_general": "Transforme le prototype en expérience visuellement cohérente. Pitch-ready."
+            },
+            "Assets nécessaires": {
+                "_general": "Révision de tous les décors 2D Assets de lighting Particules VFX"
+            },
+            "Notes": {
+                "_general": "Peut être fait en parallèle du développement de contenu une fois les zones jouables."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\" Dépend de : US \"Zone Léviathan explorable\""
+            }
+        },
+        {
+            "Nom": "Polish visuel Uresaïr (VFX & animations)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "PJ : Uresaïr",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "En tant que joueur, je vois des effets visuels immersifs quand Uresaïr utilise ses Aspects",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Craquelures progressives sur le corps de verre après usage intensif Lignes de tension émeraude qui s'intensifient avec l'émotion Effet de \"clignement du monde\" lors de l'usage des Aspects Aura verdâtre, anneaux de lumière pâle Animations narratives : visions traumatiques (catalepsie), transformation du verre"
+            },
+            "Valeur": {
+                "_general": "Immersion et identité visuelle unique d'Uresaïr. Polish qui transforme le prototype en expérience mémorable."
+            },
+            "Assets nécessaires": {
+                "_general": "VFX particules avancées Animations narratives additionnelles Shaders pour effets de verre"
+            },
+            "Notes": {
+                "_general": "Peut être fait en parallèle du développement de contenu une fois les mécaniques validées."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Tous les Aspects implémentés"
+            }
+        },
+        {
+            "Nom": "Première rencontre avec l'Éthérée",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je vis la scène d'introduction où l'Éthérée possède Uresaïr pour la première fois",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Séquence d'intro scriptée (peut être simple dialogue + fade) Explication narrative de la possession Première prise de contrôle d'Uresaïr Établit le ton et la relation Éthérée/Uresaïr Transition vers le gameplay libre"
+            },
+            "Valeur": {
+                "_general": "Première impression du jeu. Établit les piliers narratifs et le hook émotionnel."
+            },
+            "Contenu nécessaire": {
+                "_general": "Dialogue d'intro (Éthérée/Uresaïr) Possiblement une cinématique simple ou illustration"
+            },
+            "Notes": {
+                "_general": "Critique pour la première impression. Doit être mémorable mais court (~2-3 min)."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Système de dialogue Dépend de : US \"Uresaïr contrôlable\""
+            }
+        },
+        {
+            "Nom": "Premier Aspect : Manah (Lecture des pensées)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "PJ : Uresaïr",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je peux utiliser Manah pour lire les pensées superficielles d'un PNJ",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Input dédié pour activer Manah (bouton manette) VFX brume dorée visible autour d'Uresaïr Texte de pensées du PNJ affiché (peut réutiliser UI dialogue) 1 PNJ de test avec pensées écrites Feedback visuel/sonore de l'activation"
+            },
+            "Valeur": {
+                "_general": "Première interaction avec le système d'Aspects unique d'Uresaïr. Démontre la mécanique centrale."
+            },
+            "Notes techniques": {
+                "_general": "Peut réutiliser une partie du système de dialogue Besoin de tag sur les PNJ \"readable thoughts\" VFX particules dorées"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Uresaïr contrôlable\" Dépend de : Système de dialogue (pour affichage texte)"
+            }
+        },
+        {
+            "Nom": "Préparer la campagne réseaux sociaux",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Marketing",
+            "Priorité": "P2",
+            "Description": "Stratégie et préparation de la campagne réseaux sociaux (plateformes, contenu, calendrier)",
+            "Introduction": {
+                "_general": "Voir avec Valentine si elle peut aider Atelier le 20 mai"
+            }
+        },
+        {
+            "Nom": "Présentation en anglais",
+            "État": "Archivé",
+            "Fonctionnalité": "Marketing & Communication - Année 1 (Financement)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Marketing",
+            "Priorité": "P2",
+            "Description": "Traduction anglaise de la présentation du jeu",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Qadul’Doei",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 2 : Désert des Échos Perdus",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Création de la fiche et du portrait du personnage Qadul'Doei (Désert)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Quête : Les Manuscrits Interdits (Akthar-Neth)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je découvre les doutes secrets d'Akthar-Neth dans les Bibliothèques Veineuses",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Zone Bibliothèques Veineuses accessible Exploration + découverte du journal personnel d'Akthar-Neth Lecture des doutes théologiques de l'Exégète Choix moral : partager avec Uresaïr / Gardien-Calligraphe / Akthar-Neth / garder secret Conséquences sur les relations avec le culte"
+            },
+            "Valeur": {
+                "_general": "Quête annexe révélant la complexité d'Akthar-Neth. Humanise l'antagoniste."
+            },
+            "Contenu nécessaire": {
+                "_general": "Textes du journal (extraits des doutes d'Akthar-Neth) Dialogues de confrontation selon le choix Zone Bibliothèques Veineuses (labyrinthe mémoriel)"
+            },
+            "Notes": {
+                "_general": "Quête narrative pure, pas de combat/puzzle. Pilier \"Conflits de conscience\"."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Nef Centrale + rencontre Akthar-Neth\" Dépend de : US \"Blocage de choix par traits\" (pour choix moraux)"
+            }
+        },
+        {
+            "Nom": "Rash’Doei",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 2 : Désert des Échos Perdus",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Création de la fiche et du portrait du personnage Rash'Doei (Désert)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Recruter",
+            "État": "On Hold",
+            "Fonctionnalité": "Gestion de projet & Recrutement",
+            "Catégorie": "Autre",
+            "Priorité": "P1",
+            "Description": "Recrutement de nouveaux collaborateurs pour l'équipe Alteir",
+            "Introduction": {
+                "_general": "Site one-page Publication perso Marc Publication perso Mathieu ? Illustrations Screenshot Teaser / Proof of concept (6-10 secondes) Animations Corriger collisions Lumière Implémenter Yarn Spinner  Décors Strate III (plis d’ossement)  Dialogue Publications Discord Fr (Indie Park, Jardin des Slimes, Game Dev Alliance) Forums RPG maker (rpg-maker.fr) Reddit"
+            }
+        },
+        {
+            "Nom": "Réécriture des fiches de l’Anentropie (terminologie + nouveaux templates)",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Catégorie": "Game design",
+            "Priorité": "P2",
+            "Description": "Réécriture des fiches du Culte Anentropie (nouvelles terminologies et templates)",
+            "Introduction": {
+                "_general": "Qalamtû Paradigme Esothrope Akthar-Neth Khair-gul, Le Médecin-Ascétique Navarre K'ssh, la Stratège Sanguine Kha'Vareth, L'Artisan d'Éternité Genka Lien, le bouffon Raki-Biro 58, l’Enfant-Prophète Ori-Bikar 57, l’Enfant-Foudre Léviathan pétrifié Nef Centrale Bains parkourétiques Narthex abyssal Bibliothèques Veineuses Paradigme Ésothrope Murmurateurs Désert des Echos Perdus"
+            }
+        },
+        {
+            "Nom": "Règnes",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Ecritures des fiches de règnes des animaux, végétaux, etc  Règnes  ",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Relier Vethraak aux caravanes (désert des Echos)",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 2 : Désert des Échos Perdus",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Créer les liens narratifs entre Vethraak et les caravanes du Désert",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Remplir le plan financier V0.1",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Finance & Administratif",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Comptabilité",
+            "Priorité": "P3",
+            "Description": "Compléter le plan financier version 0.1 avec prévisions et budget",
+            "Introduction": {
+                "_general": "Sources :   Business Model Canvas Dépenses"
+            }
+        },
+        {
+            "Nom": "Retour au jeu sans fuite d’état",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Menu principal — Enveloppe + navigation de base",
+            "Description": "- Aucune action en cours n’est annulée en ouvrant/fermant le menu\n- L’input gameplay reprend immédiatement\n- Aucun artefact visuel persistant après fermeture",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Review TypingMind",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Pipeline & Outils IA",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Évaluation de TypingMind (interface LLM avec appels API) pour pipeline IA",
+            "Introduction": {
+                "_general": "Présentation : The Chatbot Everyone Is Talking About (TypingMind Review)  Site web : TypingMind — LLM Frontend Chat UI for AI models Résoudre le problème de stockage payant : Why, just why is there no storage? Before you buy... : r/TypingMind"
+            }
+        },
+        {
+            "Nom": "Sauvegarde/chargement de base",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Sauvegarde automatique unique",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, ma progression est sauvegardée automatiquement et rechargée au lancement",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Sauvegarde auto après événements clés (fin dialogue, changement de map) Fichier de sauvegarde unique (JSON) Données sauvegardées : position, dialogues complétés, variables Yarn, inventaire Chargement automatique au lancement du jeu Indicateur visuel discret de sauvegarde en cours"
+            },
+            "Valeur": {
+                "_general": "Fondamental pour tout RPG. Permet de tester le jeu sur plusieurs sessions."
+            },
+            "Notes techniques": {
+                "_general": "Serialization JSON des PlayerData Sauvegarde asynchrone pour ne pas freezer le jeu Gestion des erreurs (fichier corrompu)"
+            },
+            "Dépendances": {
+                "_general": "Bloque : Toutes les features qui persistent des données"
+            }
+        },
+        {
+            "Nom": "Sauvegarde de secours anti-corruption",
+            "Story Points": "2",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Sauvegarde automatique unique",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P2",
+            "Description": "En tant que joueur, si ma sauvegarde est corrompue, une sauvegarde de secours me permet de reprendre",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "1 fichier de backup créé à chaque sauvegarde (rotation) Détection de corruption au chargement (checksum) Fallback automatique sur le backup si corruption détectée Message informatif au joueur Test de corruption simulée"
+            },
+            "Valeur": {
+                "_general": "Sécurité pour éviter la perte de progression. Réduction de la frustration."
+            },
+            "Notes": {
+                "_general": "Mode \"Iron Man\" impose une sauvegarde unique, donc le backup est critique."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Sauvegarde/chargement de base\""
+            }
+        },
+        {
+            "Nom": "Scenarios 1eres minutes",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Écriture des scénarios possibles pour les premières minutes de jeu",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Sélectionne les loras",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P1",
+            "Description": "Sélection des LoRAs (modèles de diffusion spécialisés) pour génération d'images",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Squelette JDR",
+            "État": "En cours",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Écriture du template/squelette pour le jeu de rôle papier Alteir",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Steppe des Eteignoirs",
+            "État": "Archivé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P3",
+            "Description": "Conception de la zone Steppe des Éteignoirs (lieu secondaire/optionnel)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Système de caméra",
+            "État": "Archivé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Système de caméra qui suit le personnage dans les environnements 2D",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Système de caractéristiques (8 stats)",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Caractéristiques et compétences",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je vois les 8 caractéristiques de mon PJ et comprends leur utilité",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Écran de personnage montrant les 8 caractéristiques avec valeurs Jauges visuelles claires pour chaque stat Tooltip expliquant l'usage de chaque caractéristique Valeurs initiales définies pour Uresaïr Accessibilité depuis le menu principal"
+            },
+            "Valeur": {
+                "_general": "Base du système de tests. Permet au joueur de comprendre les forces/faiblesses de son PJ."
+            },
+            "Notes techniques": {
+                "_general": "8 caractéristiques selon Rappel du Core System (Core System) Stockage dans PlayerData UI responsive (portrait + paysage)"
+            },
+            "Dépendances": {
+                "_general": "D'abord cette US, puis \"Tests de compétences avec UI basique\""
+            }
+        },
+        {
+            "Nom": "Système de déplacements",
+            "État": "Archivé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Implémentation du système de déplacements 2D du personnage (WASD/joystick)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Système de musiques",
+            "État": "Pas commencé",
+            "Fonctionnalité": "Moteur de jeu",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P3",
+            "Description": "Implémentation du système de gestion et lecture des musiques dans Unity",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Système de stabilité d'Uresaïr",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "PJ : Uresaïr",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je vois ma jauge de stabilité diminuer quand j'utilise un Aspect et dois gérer cette ressource",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Jauge de stabilité visible dans l'UI Consommation de stabilité à l'usage de Manah État cataleptique si stabilité = 0 (immobilisation temporaire) Animation/VFX de craquelures sur le corps de verre Récupération de stabilité au repos (mécanique à définir)"
+            },
+            "Valeur": {
+                "_general": "Gestion de ressource qui crée de la tension. Empêche le spam des Aspects."
+            },
+            "Notes techniques": {
+                "_general": "Variable globale Stabilité (0-100) Coût Manah : ~15-20 points Durée état cataleptique : ~5-10 secondes"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Premier Aspect : Manah\""
+            }
+        },
+        {
+            "Nom": "Système de transition entre zones",
+            "État": "Archivé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Système de transitions fluides entre les différentes zones du jeu",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Système d’obstacles",
+            "État": "Archivé",
+            "Fonctionnalité": "Déplacements V1",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Système de détection et gestion des obstacles/collisions dans les décors",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Tableau des références visuelles (Début du Léviathan)",
+            "État": "Terminé",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P1",
+            "Description": "{'id': '%7CYEN', 'type': 'rich_text', 'rich_text': []}",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Tableau des références visuelles (Léviathan)",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel), Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P1",
+            "Description": "Constitution d'un tableau de références visuelles décrivant à l’IA à quoi ressemblent les éléments inventés (pour prompts)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Tests de compétences avec UI basique",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Caractéristiques et compétences",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je vois mes chances de succès et peux dépenser de l'Effort pour une action (ex: forcer une porte, convaincre un PNJ)",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "UI contextuelle affichant : Caractéristique + Compétence vs Difficulté Codage couleur (vert = succès auto, jaune = Effort nécessaire, rouge = échec probable) Jauge d'Effort (0-10 pts) visible dans l'UI Curseur ou boutons +/- pour allouer des points 2-3 situations de test (ex: dialogue persuasion, porte verrouillée, puzzle) Feedback visuel/sonore succès/échec"
+            },
+            "Valeur": {
+                "_general": "Mécanique core d'Alteir qui remplace les jets de dés. Permet décisions tactiques conscientes."
+            },
+            "Notes techniques": {
+                "_general": "Base de données des difficultés par situation Système de tags sur interactables (difficulté, compétence requise) Formule : Score = Caractéristique + Compétence + Effort alloué"
+            },
+            "Dépendances": {
+                "_general": "Bloque : Système de progression, Traits de caractère"
+            }
+        },
+        {
+            "Nom": "Todo list pour IA",
+            "État": "Archivé",
+            "Fonctionnalité": "Pipeline & Outils IA",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Création d'une todo list pour organiser les tâches IA (génération assets, prompts)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Traits de base Uresaïr (5 sphères)",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Traits de caractère",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que game designer, je définis les traits initiaux d'Uresaïr pour qu'elle soit cohérente narrativement",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Valeurs initiales des 20 traits (5 sphères × 4 traits) Document justifiant chaque valeur selon la backstory d'Uresaïr Validation narrative avec l'équipe Traits stockés dans un fichier de données (JSON/ScriptableObject) Au moins 2 combinaisons de traits remarquables identifiées (ex: Loyal + Orgueilleux)"
+            },
+            "Valeur": {
+                "_general": "Fondation du système de traits. Définit la personnalité d'Uresaïr et ses blocages narratifs."
+            },
+            "Notes": {
+                "_general": "Uresaïr est une déesse déchue, donc probablement : Orgueilleuse, Loyale (à ses anciens principes), Idéaliste, Empathique mais Froide."
+            },
+            "Dépendances": {
+                "_general": "Bloque : Toutes les US de traits gameplay"
+            }
+        },
+        {
+            "Nom": "Tunnel vertébral (scénario)",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Écriture du scénario et des dialogues pour le Tunnel vertébral",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Tutoriel intégré narratif",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, j'apprends les mécaniques de base via des dialogues et situations naturelles dans les Plis",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Voknir (ou PNJ tutoriel) explique les contrôles de base Apprentissage progressif : déplacement → dialogue → Aspects Pas d'UI invasive type \"Appuyez sur X pour...\" 1-2 puzzles simples pour tester Manah ou un Aspect Feedback clair sur les actions du joueur"
+            },
+            "Valeur": {
+                "_general": "Onboarding fluide et narratif. Pilier \"Voyage au Cœur de l'Étrange\" dès le début."
+            },
+            "Contenu nécessaire": {
+                "_general": "Dialogues de Voknir (tutoriel) Design de 1-2 puzzles d'introduction Messages contextuels (optionnel)"
+            },
+            "Notes": {
+                "_general": "Doit enseigner sans être didactique. S'inspirer de Dark Souls / Hollow Knight."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : US \"Zone de tutoriel jouable (Plis)\" Dépend de : Système de dialogue"
+            }
+        },
+        {
+            "Nom": "Uresaïr",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération du portrait de Uresaïr (Seigneuresse, personnage principal)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Uresaïr contrôlable",
+            "Story Points": "5",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "PJ : Uresaïr",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je peux incarner Uresaïr et me déplacer dans le monde",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Sprite d'Uresaïr (corps de verre translucide, masque, auréole) Animations de base : idle 8 directions, marche 8 directions Contrôles manette fonctionnels (déplacement dans 8 directions) Collisions avec l'environnement Uresaïr placée dans une scène de test des Plis d'Ossements"
+            },
+            "Valeur": {
+                "_general": "Le personnage principal est jouable. Fondation pour tous les systèmes d'Uresaïr."
+            },
+            "Assets nécessaires": {
+                "_general": "Spritesheet Uresaïr (base) Animations idle + marche"
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Déplacements V1 (Déplacements V1) Bloque : Tous les Aspects"
+            }
+        },
+        {
+            "Nom": "Vertical slice playtest externe",
+            "Story Points": "3",
+            "État": "Pas commencé",
+            "Type": "Spike",
+            "Fonctionnalité": "Gestion de projet & Recrutement",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Game design",
+            "Priorité": "P1",
+            "Description": "En tant que game designer, j'organise un playtest du vertical slice avec 5-10 joueurs externes",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "Build stable et jouable de bout en bout (Plis + début Léviathan) 5-10 testeurs recrutés (hors équipe) Questionnaire de feedback préparé Session de 1-2h par testeur Rapport de synthèse des retours"
+            },
+            "Valeur": {
+                "_general": "Validation du game feel et de la direction narrative. Détection de bugs critiques."
+            },
+            "Objectifs du playtest": {
+                "_general": "Fluidité des contrôles Compréhension des mécaniques (Aspects, Traits, Influence) Engagement narratif Bugs bloquants"
+            },
+            "Notes": {
+                "_general": "Critique avant de passer en production. À faire après Sprint 3-4."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Toutes les US Sprint 1-3 (vertical slice complet)"
+            }
+        },
+        {
+            "Nom": "Vethraak",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 1b : Léviathan pétrifié",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Génération du portrait de Vethraak (cartographe banni, personnage principal)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vieille Ville V2",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 5 : Vieille Ville",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Seconde itération de la Vieille Ville (améliorations design et contenu)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Voies de passage",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 5 : Vieille Ville, Zone 2 : Désert des Échos Perdus, Zone 3 : Puits Céleste, Zone 4 : Citadelle de Dailon",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Ecriture des voies de passages reliant les zones limitrophes en partant de la Vieille Ville",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Voir comptable",
+            "État": "En cours",
+            "Fonctionnalité": "Finance & Administratif",
+            "Catégorie": "Comptabilité",
+            "Priorité": "P2",
+            "Description": "Trouver et rencontrer un comptable (potentiellement gratuit ou ami comptable)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Vol Reitar",
+            "État": "Archivé",
+            "Fonctionnalité": "Zone 2 : Désert des Échos Perdus",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Graphismes",
+            "Priorité": "P3",
+            "Description": "Création de la fiche et du portrait de Vol Reitar (Désert)",
+            "Introduction": {}
+        },
+        {
+            "Nom": "Zone de tutoriel jouable (Plis)",
+            "Story Points": "8",
+            "État": "Pas commencé",
+            "Type": "User Story",
+            "Fonctionnalité": "Zone 1a : Plis d'ossements (tutoriel)",
+            "Personne": "{'id': 'K%5BN%5E', 'type': 'people', 'people': []}",
+            "Catégorie": "Dev",
+            "Priorité": "P1",
+            "Description": "En tant que joueur, je peux explorer une première zone des Plis d'Ossements avec collisions et transitions",
+            "Introduction": {},
+            "Critères d'acceptation": {
+                "_general": "3-5 maps interconnectées (ex: Tunnel vertébral, Cage thoracique, Cœur pétrifié) Transitions entre maps fonctionnelles Collisions avec l'environnement 1-2 PNJ placés (Voknir le cartographe minimum) Zone jouable de bout en bout (entrée → sortie)"
+            },
+            "Valeur": {
+                "_general": "Première zone explorable du jeu. Base pour tester toutes les mécaniques de déplacement et dialogue."
+            },
+            "Assets nécessaires": {
+                "_general": "3-5 décors 2D des Plis d'Ossements Tileset pour collisions Assets d'ambiance (ossements, rochers)"
+            },
+            "Notes": {
+                "_general": "C'est la zone de tutoriel, elle doit être relativement linéaire mais offrir quelques chemins secondaires."
+            },
+            "Dépendances": {
+                "_general": "Dépend de : Déplacements V1 (Déplacements V1)"
+            }
+        }
+    ]
+}

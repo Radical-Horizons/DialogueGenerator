@@ -1,0 +1,22 @@
+{
+    "localisations_culturelles": [
+        {
+            "Nom": "Marché anglophone (EN-US/UK)"
+        },
+        {
+            "Nom": "Marché brésilien/portugais (PT-BR/PT-PT)"
+        },
+        {
+            "Nom": "Marché chinois (ZH-CN/ZH-TW)"
+        },
+        {
+            "Nom": "Marché germanophone (DE/AT/CH)"
+        },
+        {
+            "Nom": "Marché hispanophone (ES/LATAM)"
+        },
+        {
+            "Nom": "Marché japonais (JP)"
+        }
+    ]
+}

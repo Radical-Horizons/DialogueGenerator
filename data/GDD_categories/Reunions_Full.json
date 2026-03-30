@@ -1,0 +1,13 @@
+{
+    "reunions": [
+        {
+            "Nom": "SansTitre",
+            "Ordre du jour": "Travail sur les fiches de lore du Notion",
+            "Récurrente": "{'id': 'M%3Ac%3F', 'type': 'checkbox', 'checkbox': True}",
+            "Date": "{'id': 'ycf%60', 'type': 'date', 'date': {'start': '2025-05-19', 'end': None, 'time_zone': None}}",
+            "Statut": "Planifiée",
+            "Titre de la réunion": "Réunion de travail (lore)",
+            "Introduction": {}
+        }
+    ]
+}

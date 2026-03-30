@@ -1,0 +1,25 @@
+{
+    "systemes_de_jeu": [
+        {
+            "Nom": "Alliés secondaires (Compagnons)"
+        },
+        {
+            "Nom": "Caractéristiques et Compétences"
+        },
+        {
+            "Nom": "Cut-scenes"
+        },
+        {
+            "Nom": "Exploration des souvenirs"
+        },
+        {
+            "Nom": "Gestion de l'Effort"
+        },
+        {
+            "Nom": "Progression (Expérience)"
+        },
+        {
+            "Nom": "Réputation"
+        }
+    ]
+}

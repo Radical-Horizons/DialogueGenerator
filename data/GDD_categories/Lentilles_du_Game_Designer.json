@@ -1,0 +1,158 @@
+{
+    "lentilles_du_game_designer": [
+        {
+            "Nom": "Besoins",
+            "Description": "Quels besoins fondamentaux (Maslow) le jeu satisfait-il ?\nChaque mécanique nourrit-elle au moins un besoin ?\nLe jeu crée-t-il de nouveaux besoins artificiels ?",
+            "Numéro": "22",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "11"
+        },
+        {
+            "Nom": "Enoncer le problème",
+            "Description": "Ai-je formulé clairement le problème que mon jeu doit résoudre ?\nCet énoncé guide-t-il réellement mes choix ?",
+            "Numéro": "14",
+            "Réponse": "\"Comment résister à un système quand celui-ci définit les termes mêmes de la résistance?\" Cette question structure l'ensemble de l'expérience ludique. Les mécaniques de possession, d'influence et de traits dramatisent ce paradoxe à l'échelle individuelle, tandis que les factions d'Escelion (Culte de l'Anentropie, Murmurateurs, Barvasinkul) l'incarnent à l'échelle sociale. Les systèmes de progression par zone et de réputation mesurent avec précision le succès ou l'échec des tentatives du joueur pour résoudre cette équation impossible, offrant des voies divergentes: subversion, assimilation ou transcendance.",
+            "Chapitre": "7"
+        },
+        {
+            "Nom": "Flow",
+            "Description": "Le défi reste-t-il toujours adapté à la compétence ?\nLes objectifs sont-ils clairs ?\nLe feedback est-il immédiat ?",
+            "Numéro": "21",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "11"
+        },
+        {
+            "Nom": "Huit filtres",
+            "Description": "Le jeu « sonne-t-il juste » ?\nPlaira-t-il assez au public visé ?\nSa conception est-elle de qualité ?\nEst-il suffisamment novateur ?\nSera-t-il rentable ?\nTechniquement faisable ?\nAligne-t-il nos objectifs sociaux/communautaires ?\nLes testeurs y prennent-ils assez de plaisir ?",
+            "Numéro": "15",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "8"
+        },
+        {
+            "Nom": "Inspiration infinie",
+            "Description": "Quelle expérience vécue ai-je envie de partager ?\nComment en capturer, même modestement, l’essence dans mon jeu ?",
+            "Numéro": "13",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "7"
+        },
+        {
+            "Nom": "Jouet",
+            "Description": "Mon jeu contient-il quelque chose d’agréable à manipuler ?\nSerait-il plaisant même sans objectif ?\nComment renforcer ce « jouet » ?",
+            "Numéro": "17",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "9"
+        },
+        {
+            "Nom": "Joueur",
+            "Description": "Qui est mon joueur ?\nQue veut-il vraiment ?\nComment puis-je me mettre à sa place ?",
+            "Numéro": "19",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "10"
+        },
+        {
+            "Nom": "La conception holographique",
+            "Description": "Chaque élément reflète-t-il le thème global ?\nSi j’enlève un élément, l’unité du jeu s’effondre-t-elle ?\nComment renforcer les échos entre les quatre composantes ?",
+            "Numéro": "10",
+            "Réponse": "Chaque élément d'Alteir reflète les trois thèmes interconnectés du jeu. Les systèmes de Traits, d'Influence et de Progression incarnent les \"Conflits de Conscience\" en créant une tension entre l'Éthérée et ses hôtes. L'esthétique surréaliste du Léviathan pétrifié et la diversité des espèces soutiennent le \"Voyage au Cœur de l'Étrange\". Le recrutement préventif de PNJ pour la Citadelle de Daïlon ancre la \"Forteresse Évolutive\" dans le gameplay dès le départ, transformant chaque rencontre en opportunité stratégique pour l'avenir.\nL'élimination du système de Possession compromettrait l'intégrité conceptuelle du jeu. Ce mécanisme justifie narrativement le contrôle partagé avec les personnages, sert de métaphore ludique sur le rapport joueur-avatar, et établit la fondation pour la Citadelle comme extension macrocosmique de cette même dynamique relationnelle. Sans lui, la cohésion entre les trois piliers thématiques s'effondrerait.\nJe renforcerais les échos entre composantes en développant la Citadelle comme entité vivante qui reflète l'état psychologique collectif de ses habitants. Techniquement, implémenter un système où les dizaines de PNJ recrutés apportent non seulement des compétences, mais aussi leurs propres traits et dilemmes moraux qui influencent l'évolution architecturale de la forteresse. Esthétiquement, les transformations visuelles de la Citadelle révéleraient les choix éthiques dominants, créant un miroir environnemental des décisions morales prises tout au long du jeu.",
+            "Chapitre": "5"
+        },
+        {
+            "Nom": "La curiosité",
+            "Description": "Quelles questions le jeu fait-il naître dans l’esprit du joueur ?\nComment puis-je lui donner envie de trouver les réponses ?\nComment l’inciter à inventer encore d’autres questions ?",
+            "Numéro": "6",
+            "Réponse": "Le jeu cultive un système d'interrogations emboîtées où chaque réponse engendre de nouvelles questions. Trois axes de mystère structurent l'expérience: l'énigme ontologique de l'Éthérée, les souvenirs refoulés des personnages possédés, et l'architecture socio-politique d'Escelion dominée par Jast, l'Inéluctable. Les systèmes d'exploration des souvenirs récompensent la curiosité par des révélations qui modifient tangiblement la progression, transformant l'enquête en principal moteur d'avancement.",
+            "Chapitre": "4"
+        },
+        {
+            "Nom": "La lentille du plaisir",
+            "Description": "Quelles parties du jeu sont amusantes ? pourquoi ?\nLesquelles doivent l’être davantage ?",
+            "Numéro": "5",
+            "Réponse": "Les éléments les plus amusants sont les systèmes de possession et d'influence qui créent une tension narrative unique entre le joueur (l'Éthérée) et les personnages possédés. Ce mécanisme transforme la convention tacite du jeu vidéo (contrôler un personnage) en élément narratif explicite, générant des conflits de conscience authentiques. L'exploration des souvenirs et le système de traits de caractère créent également une dynamique fascinante où les personnages peuvent résister aux choix du joueur, rendant chaque décision significative.\nLes zones qui mériteraient d'être plus amusantes incluent le système de combat au tour par tour, encore à l’état d’ébauche et qui ne contient pas à ce stade de systèmes innovants.",
+            "Chapitre": "4"
+        },
+        {
+            "Nom": "La résolution de problèmes",
+            "Description": "Quels problèmes le jeu demande-t-il de résoudre ?\nDes problèmes cachés émergent-ils durant la partie ?",
+            "Numéro": "8",
+            "Réponse": "Alteir présente des problèmes à multiples couches de résolution. Les défis immédiats (tests de caractéristiques, dialogues, progression dans les zones) masquent des problèmes plus profonds: comment négocier l'autonomie morale des personnages, comment naviguer les jeux de pouvoir entre factions, comment reconstituer le puzzle de l'identité fragmentée d'Uresaïr. Le système de traits crée des obstacles internes uniques où l'échec devient narrativement signifiant, transformant chaque impasse en opportunité d'exploration alternative.",
+            "Chapitre": "4"
+        },
+        {
+            "Nom": "La surprise",
+            "Description": "Qu’est-ce qui va surprendre les joueurs ?\nMon histoire, mes règles, mon art, ma techno contiennent-ils des surprises ?\nLes règles permettent-elles aux joueurs de se surprendre mutuellement ?\n…ou de se surprendre eux-mêmes ?",
+            "Numéro": "4",
+            "Réponse": "Dans Alteir, les joueurs seront surpris par un monde fantasy surréaliste où les personnages possédés conservent leur volonté propre et peuvent résister aux choix du joueur. La possession comme allégorie explicite de la relation joueur-personnage subvertit les conventions du genre, tout comme le système de mort qui transforme l'échec en nouvelle opportunité narrative plutôt qu'en simple game over.\nLe système d'indulgence offre aux joueurs la possibilité de se surprendre eux-mêmes en cédant volontairement aux défauts des personnages pour récupérer des ressources, créant une tension morale inattendue. Le système de croyances fondamentales révèle progressivement que les comportements contradictoires des personnages sont en réalité des expressions cohérentes de systèmes de pensée profonds.\nLa progression liée aux zones géographiques plutôt qu'à des niveaux traditionnels permettra aux joueurs de se surprendre par leurs propres choix d'évolution, tandis que l'architecture surfantastique et l’anatomie non conventionnelle des espèces civilisées créeront des moments d'émerveillement visuel et conceptuel.",
+            "Chapitre": "4"
+        },
+        {
+            "Nom": "La tétrade élémentaire",
+            "Description": "Mécaniques, histoire, esthétique et technologie sont-elles équilibrées ?\nSi je retire ou renforce un élément, l’expérience s’améliore-t-elle ?\nUn de ces éléments sert-il de colonne vertébrale au reste ?",
+            "Numéro": "9",
+            "Réponse": "L’histoire domine actuellement. Elle sert de colonne vertébrale. \nUne fiche sur la direction artistique a été créée et des fiches de fonctionnalités complétées pour renforcer les trois autres aspects. La dimension technologique est en attente d’animations haute qualité.",
+            "Chapitre": "5"
+        },
+        {
+            "Nom": "La valeur endogène",
+            "Description": "Qu’est-ce qui a de la valeur dans mon jeu ?\nComment puis-je lui donner encore plus de valeur à leurs yeux ?\nQuelle est la relation entre la valeur dans le jeu et les motivations du joueur ?",
+            "Numéro": "7",
+            "Réponse": "Influence, réputation, progression par zone. Ajout d’un système de quêtes principales par PJ, avec leurs propres ressources.",
+            "Chapitre": "4"
+        },
+        {
+            "Nom": "Le lieu",
+            "Description": "Quel lieu/support sert le mieux le jeu que je conçois ?\nCe lieu présente-t-il des contraintes ou opportunités particulières ?\nQuels éléments de mon jeu sont en harmonie (ou en conflit) avec ce lieu ?",
+            "Numéro": "3",
+            "Réponse": "L'univers d'Escelion, avec sa géographie impossible, ses lois physiques fluctuantes et sa structure en couches concentriques (Vieille Ville, Couronnes Intermédiaires, Périphéries), propose un terrain d'exploration où la réalité se fragmente progressivement. Le moteur 2D sous Unity exploite cette topographie stratifiée, permettant une transition fluide et visuelle entre normalité et étrangeté croissante. Les contraintes du développement solo sont transformées en atouts, concentrant les ressources sur les zones à forte densité narrative.",
+            "Chapitre": "3"
+        },
+        {
+            "Nom": "L'émotion",
+            "Description": "Quelles émotions veux-je que le joueur ressente ? pourquoi ?\nQuelles émotions les joueurs (moi compris) éprouvent-ils quand ils jouent ? pourquoi ?\nComment combler l’écart entre les émotions actuelles et celles que je vise ?",
+            "Numéro": "1",
+            "Réponse": "Alteir propose une expérience de possession multi-consciences où le joueur, incarnant l'Éthérée, habite des personnages qui conservent leur libre arbitre. Cette tension entre l'entité contrôlante et l'hôte semi-autonome crée un jeu de négociation perpétuelle entre deux volontés, faisant de chaque action un dialogue implicite entre joueur et personnage. Le système d'Influence mesure précisément cette dynamique, transformant la convention ludique tacite du \"personnage-marionnette\" en mécanique explicite aux ramifications morales.",
+            "Chapitre": "2"
+        },
+        {
+            "Nom": "L'expérience essentielle",
+            "Description": "Quelle expérience le joueur doit-il vivre ?\nQu’est-ce qui est indispensable à cette expérience ?\nComment mon jeu peut-il en capter l’essence ?",
+            "Numéro": "2",
+            "Réponse": "Dans Alteir, le joueur doit vivre une expérience de possession éthique, incarnant une entité éthérée qui habite des êtres conscients avec leur consentement initial, mais dont les volontés peuvent diverger des siennes.\nIndispensable est l'interaction entre trois systèmes complémentaires : les traits de caractère qui définissent l'identité des hôtes, l'influence qui permet de surmonter leurs résistances, et l'exploration des souvenirs qui révèle leurs motivations profondes.\nLe jeu peut capter cette essence en fusionnant narration et mécanique pour que chaque choix reflète la tension entre contrôle et cohabitation. Quand l'Éthérée force un choix contre la volonté d'Uresaïr, ce n'est pas juste une dépense de points d'influence, mais une perturbation de leur relation qui se manifestera dans les dialogues internes, l'évolution des traits et les réactions du monde extérieur aux changements de comportement.",
+            "Chapitre": "2"
+        },
+        {
+            "Nom": "L’unification",
+            "Description": "Quel est mon thème central ?\nEst-il soutenu par tous les moyens possibles ?",
+            "Numéro": "11",
+            "Réponse": "L'architecture conceptuelle d'Alteir rayonne depuis son noyau thématique: la tension entre liberté individuelle et déterminisme systémique. Chaque mécanique (Influence, Traits, Progression par zone, Réputation) incarne une facette de ce dilemme fondamental. Les systèmes de possession, d'indulgence et d'exploration mémorielle convergent vers la question identitaire \"Qui contrôle qui?\", tandis que la structure sociopolitique d'Escelion matérialise ces mêmes questions à l'échelle collective.",
+            "Chapitre": "6"
+        },
+        {
+            "Nom": "Mitigation des risques",
+            "Description": "Qu’est-ce qui pourrait empêcher ce jeu d’être excellent ?\nQuel prototype puis-je créer pour réduire ce risque, et le plus vite possible ?",
+            "Numéro": "16",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "8"
+        },
+        {
+            "Nom": "Passion",
+            "Description": "Qu’est-ce qui me fait aimer ce projet ?\nOù cette passion transparaît-elle dans le jeu ?\nComment la transmettre à l’équipe et aux joueurs ?",
+            "Numéro": "18",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "9"
+        },
+        {
+            "Nom": "Plaisir",
+            "Description": "Quels plaisirs (sensoriels, sociaux, narratifs, etc.) le jeu procure-t-il ?\nSont-ils équilibrés ?\nLequel est le plus central ?",
+            "Numéro": "20",
+            "Réponse": "{'id': 'UbHD', 'type': 'rich_text', 'rich_text': []}",
+            "Chapitre": "10"
+        },
+        {
+            "Nom": "Resonance",
+            "Description": "Qu’est-ce qui, dans mon jeu, paraît puissant et spécial ?\nQuand je le présente, quels aspects enthousiasment le plus les gens ?",
+            "Numéro": "12",
+            "Réponse": "La spécificité qui fait résonner notre univers de jeu repose sur un triptyque philosophique cohérent : l'immortalité comme fardeau plutôt que pouvoir, l'exploration sociale comme véritable progression, et le conflit comme terrain d'intelligence plutôt que de violence. \nEn plaçant le joueur face à la dette que représente son don d’immortalité (plébiscité par 50% des répondants), nous créons un cadre narratif où chaque choix porte un poids véritable. Cette tension morale s'exprime à travers notre système de progression territoriale et relationnelle (70%) qui remplace les mécaniques traditionnelles d'expérience par combat. L'autonomie authentique de nos PNJ (64%) et notre approche des conflits non-violents mais profondément conséquents (60%) complètent cette vision où l'interdépendance sociale devient le véritable terrain d'aventure.",
+            "Chapitre": "6"
+        }
+    ]
+}
