@@ -1,5 +1,5 @@
 /**
- * Tests pour SelectedContextSummary - détection de doublons et vérification du compteur.
+ * Tests pour SelectedContextSummary - détection de doublons, compteur, bouton X et toggle mode.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -232,6 +232,195 @@ describe('SelectedContextSummary', () => {
       expect(container.textContent).toContain('Personnage A')
       expect(container.textContent).toContain('Personnage B')
       expect(container.textContent).toContain('Personnage C')
+    })
+  })
+
+  // --- Task 1 : Bouton X de suppression individuelle (AC#3) ---
+
+  it('affiche un bouton X par entité dans le panneau développé et appelle onRemoveEntity', async () => {
+    const user = userEvent.setup()
+    const mockRemove = vi.fn()
+    const selections: ContextSelection = {
+      characters_full: ['Personnage A'],
+      characters_excerpt: [],
+      locations_full: ['Lieu B'],
+      locations_excerpt: [],
+      items_full: [],
+      items_excerpt: [],
+      species_full: [],
+      species_excerpt: [],
+      communities_full: [],
+      communities_excerpt: [],
+      dialogues_examples: [],
+    }
+
+    render(
+      <SelectedContextSummary
+        selections={selections}
+        onClear={vi.fn()}
+        onRemoveEntity={mockRemove}
+      />
+    )
+
+    await user.click(screen.getByTestId('selected-context-summary-toggle'))
+
+    const removeCharBtn = await screen.findByRole('button', { name: /retirer personnage a/i })
+    expect(removeCharBtn).toBeInTheDocument()
+
+    await user.click(removeCharBtn)
+    expect(mockRemove).toHaveBeenCalledOnce()
+    expect(mockRemove).toHaveBeenCalledWith('characters', 'Personnage A')
+  })
+
+  it('le bouton X appelle onRemoveEntity avec le bon type pour chaque catégorie', async () => {
+    const user = userEvent.setup()
+    const mockRemove = vi.fn()
+    const selections: ContextSelection = {
+      characters_full: [],
+      characters_excerpt: [],
+      locations_full: [],
+      locations_excerpt: [],
+      items_full: [],
+      items_excerpt: [],
+      species_full: ['Espèce X'],
+      species_excerpt: [],
+      communities_full: ['Commu Y'],
+      communities_excerpt: [],
+      dialogues_examples: [],
+    }
+
+    render(
+      <SelectedContextSummary
+        selections={selections}
+        onClear={vi.fn()}
+        onRemoveEntity={mockRemove}
+      />
+    )
+
+    await user.click(screen.getByTestId('selected-context-summary-toggle'))
+
+    await user.click(await screen.findByRole('button', { name: /retirer espèce x/i }))
+    expect(mockRemove).toHaveBeenCalledWith('species', 'Espèce X')
+
+    await user.click(screen.getByRole('button', { name: /retirer commu y/i }))
+    expect(mockRemove).toHaveBeenCalledWith('communities', 'Commu Y')
+  })
+
+  it('n\'affiche pas de bouton X quand onRemoveEntity n\'est pas fourni', async () => {
+    const user = userEvent.setup()
+    const selections: ContextSelection = {
+      characters_full: ['Perso Z'],
+      characters_excerpt: [],
+      locations_full: [],
+      locations_excerpt: [],
+      items_full: [],
+      items_excerpt: [],
+      species_full: [],
+      species_excerpt: [],
+      communities_full: [],
+      communities_excerpt: [],
+      dialogues_examples: [],
+    }
+
+    render(<SelectedContextSummary selections={selections} onClear={vi.fn()} />)
+
+    await user.click(screen.getByTestId('selected-context-summary-toggle'))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /retirer perso z/i })).not.toBeInTheDocument()
+    })
+  })
+
+  // --- Task 2 : Toggle mode Complet/Extrait par entité (AC#2, #3) ---
+
+  it('affiche le badge de mode (Complet/Extrait) pour chaque entité sélectionnée', async () => {
+    const user = userEvent.setup()
+    const selections: ContextSelection = {
+      characters_full: ['Perso Complet'],
+      characters_excerpt: ['Perso Extrait'],
+      locations_full: [],
+      locations_excerpt: [],
+      items_full: [],
+      items_excerpt: [],
+      species_full: [],
+      species_excerpt: [],
+      communities_full: [],
+      communities_excerpt: [],
+      dialogues_examples: [],
+    }
+
+    render(
+      <SelectedContextSummary
+        selections={selections}
+        onClear={vi.fn()}
+        onModeChange={vi.fn()}
+      />
+    )
+
+    await user.click(screen.getByTestId('selected-context-summary-toggle'))
+
+    expect(await screen.findByTestId('mode-toggle-characters-Perso Complet')).toHaveTextContent(/complet/i)
+    expect(screen.getByTestId('mode-toggle-characters-Perso Extrait')).toHaveTextContent(/extrait/i)
+  })
+
+  it('appelle onModeChange avec le mode inversé au clic sur le badge de mode', async () => {
+    const user = userEvent.setup()
+    const mockModeChange = vi.fn()
+    const selections: ContextSelection = {
+      characters_full: ['Perso Full'],
+      characters_excerpt: ['Perso Excerpt'],
+      locations_full: [],
+      locations_excerpt: [],
+      items_full: [],
+      items_excerpt: [],
+      species_full: [],
+      species_excerpt: [],
+      communities_full: [],
+      communities_excerpt: [],
+      dialogues_examples: [],
+    }
+
+    render(
+      <SelectedContextSummary
+        selections={selections}
+        onClear={vi.fn()}
+        onModeChange={mockModeChange}
+      />
+    )
+
+    await user.click(screen.getByTestId('selected-context-summary-toggle'))
+
+    // Perso Full (mode full) → clic → doit passer en 'excerpt'
+    await user.click(await screen.findByTestId('mode-toggle-characters-Perso Full'))
+    expect(mockModeChange).toHaveBeenCalledWith('characters', 'Perso Full', 'excerpt')
+
+    // Perso Excerpt (mode excerpt) → clic → doit passer en 'full'
+    await user.click(screen.getByTestId('mode-toggle-characters-Perso Excerpt'))
+    expect(mockModeChange).toHaveBeenCalledWith('characters', 'Perso Excerpt', 'full')
+  })
+
+  it('n\'affiche pas de badge de mode quand onModeChange n\'est pas fourni', async () => {
+    const user = userEvent.setup()
+    const selections: ContextSelection = {
+      characters_full: ['Perso Z'],
+      characters_excerpt: [],
+      locations_full: [],
+      locations_excerpt: [],
+      items_full: [],
+      items_excerpt: [],
+      species_full: [],
+      species_excerpt: [],
+      communities_full: [],
+      communities_excerpt: [],
+      dialogues_examples: [],
+    }
+
+    render(<SelectedContextSummary selections={selections} onClear={vi.fn()} />)
+
+    await user.click(screen.getByTestId('selected-context-summary-toggle'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('mode-toggle-characters-Perso Z')).not.toBeInTheDocument()
     })
   })
 })

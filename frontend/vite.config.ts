@@ -1,12 +1,27 @@
 /// <reference types="vite/client" />
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { API_TIMEOUTS } from './src/constants'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const rootPackageJsonPath = resolve(__dirname, '..', 'package.json')
+const rootPackageVersion = JSON.parse(
+  readFileSync(rootPackageJsonPath, 'utf-8')
+) as { version?: string }
+const appVersion =
+  typeof rootPackageVersion.version === 'string'
+    ? rootPackageVersion.version
+    : '0.0.0'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   define: {
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __APP_VERSION__: JSON.stringify(appVersion),
   },
   server: {
     port: 3000,
@@ -45,6 +60,9 @@ export default defineConfig({
         changeOrigin: true,
         secure: false, // Désactiver la vérification SSL en dev
         ws: false, // Désactiver le proxy WebSocket (non utilisé)
+        // Sync GDD Notion : même délai que axios (`API_TIMEOUTS.GDD_NOTION_SYNC`).
+        timeout: API_TIMEOUTS.GDD_NOTION_SYNC,
+        proxyTimeout: API_TIMEOUTS.GDD_NOTION_SYNC,
         // Désactiver le cache du proxy en développement
         configure: (proxy, _options) => {
           // Logs de debug uniquement si DEBUG_VITE_PROXY=true

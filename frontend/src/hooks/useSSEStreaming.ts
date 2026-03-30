@@ -197,8 +197,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
 
               // Appeler callback personnalisé (peut charger le graphe, etc.) - fire-and-forget après fermeture
               if (onComplete) {
-                // Fire-and-forget : ne pas await pour éviter de bloquer, EventSource déjà fermé
-                onComplete(data.result).catch((err) => {
+                void Promise.resolve(onComplete(data.result)).catch((err: unknown) => {
                   console.warn('Erreur dans onComplete callback:', err)
                 })
               }

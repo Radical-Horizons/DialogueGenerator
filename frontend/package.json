@@ -18,7 +18,11 @@
     "test:run:json": "vitest run --reporter=json --outputFile=../tmp/vitest-report.json",
     "test:run:json:full": "node ../scripts/run-vitest-full.cjs --reporter=json --outputFile=../tmp/vitest-report-full.json",
     "test:ui": "vitest --ui",
-    "test:coverage": "node ../scripts/run-vitest-full.cjs --coverage"
+    "test:coverage": "node ../scripts/run-vitest-full.cjs --coverage",
+    "test:bail": "vitest run --reporter=dot --bail=1",
+    "test:quick": "vitest run --changed --reporter=dot",
+    "test:ci": "vitest run --reporter=default --reporter=json --outputFile=../tmp/vitest-results.json",
+    "test:ci:json-only": "vitest run --reporter=json --outputFile=../tmp/vitest-results.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

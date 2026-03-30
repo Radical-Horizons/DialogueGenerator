@@ -119,7 +119,7 @@ def test_estimate_tokens(client, mock_dialogue_service, mock_skill_trait_service
                 "communities": []
             },
             "user_instructions": "Test instructions",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     assert response.status_code == 200
@@ -160,7 +160,7 @@ def test_preview_prompt(client, mock_dialogue_service, mock_skill_trait_services
                 "communities_full": []
             },
             "user_instructions": "Test instructions",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     assert response.status_code == 200
@@ -229,7 +229,7 @@ class TestGenerateUnityDialogue:
             },
             "user_instructions": "Test instructions",
             "llm_model_identifier": "gpt-5-mini",
-            "max_context_tokens": 1000,
+            "max_context_tokens": 10000,
             "max_choices": 2
         }
         

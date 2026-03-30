@@ -173,7 +173,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
       const stroke = preferred.style?.stroke
       const color =
         (typeof stroke === 'string' ? stroke : undefined) ??
-        edgeStrokeFromSourceHandle(preferred.sourceHandle) ??
+        edgeStrokeFromSourceHandle(preferred.sourceHandle ?? undefined) ??
         theme.text.secondary
       byTarget.set(targetId, color)
     }
@@ -452,7 +452,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     })
     return validEdges.map((edge) => {
       const sourceDerivedStroke = edgeStrokeFromSource({
-        sourceHandle: edge.sourceHandle,
+        sourceHandle: edge.sourceHandle ?? undefined,
         connectionType: (edge.data as { edgeType?: string } | undefined)?.edgeType,
         edgeLabel: typeof edge.label === 'string' ? edge.label : undefined,
       })

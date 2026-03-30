@@ -49,6 +49,10 @@ Les utilisateurs peuvent travailler sur une application stable avec l'infrastruc
    - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
    - Si nouveau : Documenter **POURQUOI** pas de réutilisation
 
+6. **Version produit (semver applicative, distincte de `schemaVersion` JSON) :**
+   - À la clôture d’un epic qui livre une release : bump via `npm run version:bump:patch` (ou `minor` / `major` selon [workflow.mdc](../../../.cursor/rules/workflow.mdc)), puis commit ; tag Git optionnel.
+   - Vérifier : `npm run verify:app-version` (également exécuté par `npm run test:all` et `npm run build:check`).
+
 ### Fichiers/Composants Spécifiques Epic 0
 
 **OBLIGATOIRE avant création de chaque story de cet epic :**

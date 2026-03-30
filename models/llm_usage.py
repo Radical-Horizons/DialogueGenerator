@@ -1,6 +1,6 @@
 """Modèles de données pour le suivi de l'utilisation des LLM."""
 from datetime import datetime, UTC
-from typing import Optional
+from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field, ConfigDict, field_serializer
 
 
@@ -28,7 +28,15 @@ class LLMUsageRecord(BaseModel):
     deleted: bool = Field(default=False, description="Nœud supprimé du graphe (marqué lors du rejet)")
     prompt: Optional[str] = Field(default=None, description="Prompt complet envoyé au LLM (Story 1.15)")
     response: Optional[str] = Field(default=None, description="Réponse brute du LLM (Story 1.15)")
-    
+    context_relevance: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Rapport de pertinence contexte GDD (Story 3.6, FR16)",
+    )
+    context_section_usage: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Détail d’usage par section GDD injectée (Story 3.7, FR17)",
+    )
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {

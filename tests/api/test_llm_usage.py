@@ -429,3 +429,163 @@ def test_usage_history_exposes_dialogue_fields(client, tmp_path):
     finally:
         app.dependency_overrides.pop(get_llm_usage_service, None)
 
+
+def test_get_context_relevance_missing_200(client, tmp_path):
+    """GET pertinence : 200 + record_present=false si aucun enregistrement (évite 404 bruyants)."""
+    repository = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    test_service = LLMUsageService(
+        repository=repository, pricing_service=LLMPricingService()
+    )
+    app.dependency_overrides[get_llm_usage_service] = lambda: test_service
+    try:
+        response = client.get(
+            "/api/v1/llm-usage/dialogue/missing.json/nodes/NODE_X/context-relevance"
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["record_present"] is False
+        assert body["node_id"] == "NODE_X"
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
+
+def test_get_context_relevance_and_history(client, tmp_path):
+    """GET pertinence nœud + historique dialogue (Story 3.6)."""
+    import json
+
+    repository = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    prompt = "### Personnages\nTokenHistOne lore.\n\n--- Input ---\n[]"
+    response_json = json.dumps({"line": "TokenHistOne says hi", "choices": []})
+    t0 = datetime.now(UTC)
+    t1 = t0 + timedelta(seconds=2)
+    r1 = LLMUsageRecord(
+        request_id="hr1",
+        timestamp=t0,
+        model_name="m",
+        prompt_tokens=1,
+        completion_tokens=1,
+        total_tokens=2,
+        estimated_cost=0.0,
+        duration_ms=1,
+        success=True,
+        endpoint="e",
+        k_variants=1,
+        dialogue_id="hist_dialogue.json",
+        node_id="NODE_A",
+        prompt=prompt,
+        response=response_json,
+    )
+    r2 = LLMUsageRecord(
+        request_id="hr2",
+        timestamp=t1,
+        model_name="m",
+        prompt_tokens=1,
+        completion_tokens=1,
+        total_tokens=2,
+        estimated_cost=0.0,
+        duration_ms=1,
+        success=True,
+        endpoint="e",
+        k_variants=1,
+        dialogue_id="hist_dialogue.json",
+        node_id="NODE_B",
+        prompt=prompt,
+        response=response_json,
+    )
+    repository.save(r1)
+    repository.save(r2)
+    usage = LLMUsageService(repository=repository, pricing_service=LLMPricingService())
+    usage.compute_and_persist_context_relevance("hr1")
+    usage.compute_and_persist_context_relevance("hr2")
+    app.dependency_overrides[get_llm_usage_service] = lambda: usage
+    try:
+        detail = client.get(
+            "/api/v1/llm-usage/dialogue/hist_dialogue.json/nodes/NODE_A/context-relevance"
+        )
+        assert detail.status_code == 200
+        body = detail.json()
+        assert body.get("record_present", True) is True
+        assert body["dialogue_id"] == "hist_dialogue.json"
+        assert body["node_id"] == "NODE_A"
+        assert "score_percent" in body
+        assert body["request_id"] == "hr1"
+        hist = client.get(
+            "/api/v1/llm-usage/dialogue/hist_dialogue.json/context-relevance-history"
+        )
+        assert hist.status_code == 200
+        hbody = hist.json()
+        assert hbody["total_count"] == 2
+        assert len(hbody["entries"]) == 2
+        assert hbody["entries"][0]["request_id"] == "hr1"
+        assert hbody["entries"][1]["request_id"] == "hr2"
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
+
+def test_get_context_section_usage_missing_200(client, tmp_path):
+    """GET usage sections : 200 + record_present=false si aucun enregistrement."""
+    repository = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    test_service = LLMUsageService(
+        repository=repository, pricing_service=LLMPricingService()
+    )
+    app.dependency_overrides[get_llm_usage_service] = lambda: test_service
+    try:
+        response = client.get(
+            "/api/v1/llm-usage/dialogue/missing.json/nodes/NODE_X/context-usage"
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["record_present"] is False
+        assert body["weak_section_count"] == 0
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+
+
+def test_get_context_section_usage_200(client, tmp_path):
+    """GET usage sections : schéma stable + aperçu généré (Story 3.7)."""
+    import json
+
+    repository = FileLLMUsageRepository(storage_dir=str(tmp_path))
+    prompt = "### Personnages\nTokenUsageAPI lore.\n\n--- Input ---\n[]"
+    response_json = json.dumps({"line": "TokenUsageAPI speaks", "choices": []})
+    record = LLMUsageRecord(
+        request_id="req_cu1",
+        timestamp=datetime.now(UTC),
+        model_name="m",
+        prompt_tokens=1,
+        completion_tokens=1,
+        total_tokens=2,
+        estimated_cost=0.0,
+        duration_ms=1,
+        success=True,
+        endpoint="e",
+        k_variants=1,
+        dialogue_id="dlg_cu.json",
+        node_id="NODE_CU",
+        prompt=prompt,
+        response=response_json,
+    )
+    repository.save(record)
+    usage = LLMUsageService(repository=repository, pricing_service=LLMPricingService())
+    usage.compute_and_persist_context_relevance("req_cu1")
+    updated = repository.get_by_request_id("req_cu1")
+    assert updated is not None
+    assert updated.context_section_usage is not None
+
+    app.dependency_overrides[get_llm_usage_service] = lambda: usage
+    try:
+        res = client.get(
+            "/api/v1/llm-usage/dialogue/dlg_cu.json/nodes/NODE_CU/context-usage"
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["dialogue_id"] == "dlg_cu.json"
+        assert body["node_id"] == "NODE_CU"
+        assert body["request_id"] == "req_cu1"
+        assert len(body["entity_groups"]) >= 1
+        assert "generated_plain_preview" in body
+        assert "TokenUsageAPI" in body["generated_plain_preview"]
+        assert body["weak_section_count"] >= 0
+    finally:
+        app.dependency_overrides.pop(get_llm_usage_service, None)
+

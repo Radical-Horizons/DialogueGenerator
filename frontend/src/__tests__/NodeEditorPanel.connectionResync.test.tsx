@@ -83,10 +83,10 @@ describe('NodeEditorPanel - connection resync when store updates same selected T
       highlightedNodeIds: [],
       selectedNode: makeTestNode(''),
     }
-    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       if (typeof selector === 'function') return selector(mockState)
       return mockState
-    })
+    }) as typeof useGraphStore)
     ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
       () => mockState
     )
@@ -106,10 +106,10 @@ describe('NodeEditorPanel - connection resync when store updates same selected T
       nodes: [filled, targetNode],
       selectedNode: filled,
     }
-    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       if (typeof selector === 'function') return selector(mockState)
       return mockState
-    })
+    }) as typeof useGraphStore)
     ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
       () => mockState
     )

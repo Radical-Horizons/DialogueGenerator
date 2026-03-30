@@ -261,8 +261,8 @@ export function syncTestNodeFromChoice(
  */
 export function syncChoiceFromTestNode(
   testNode: Node,
-  dialogueNodeId: string,
-  choiceIndex: number,
+  _dialogueNodeId: string,
+  _choiceIndex: number,
   existingChoice: Choice
 ): Choice {
   const testNodeData = testNode.data as {

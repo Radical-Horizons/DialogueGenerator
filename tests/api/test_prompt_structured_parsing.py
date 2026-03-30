@@ -53,7 +53,7 @@ def test_prompt_structured_parsing_with_real_data(real_client):
                 "characters": ["Nom", "Résumé", "Introduction", "Faiblesse", "Compulsion", "Désir Principal", "Caractérisation", "Contexte Background"]
             },
             "user_instructions": "Test de parsing structuré",
-            "max_context_tokens": 2000,
+            "max_context_tokens": 10000,
             "npc_speaker_id": character_name
         }
     )

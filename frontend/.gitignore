@@ -12,9 +12,7 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# Editor directories and files (recommendations VSCode : voir .gitignore à la racine du repo)
 .idea
 .DS_Store
 *.suo

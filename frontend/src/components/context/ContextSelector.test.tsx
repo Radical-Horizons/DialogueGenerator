@@ -9,6 +9,9 @@ import type { CharacterResponse, CharacterListResponse, LocationResponse, Locati
 // Mock des modules
 vi.mock('../../api/context')
 vi.mock('../../store/contextStore')
+vi.mock('./ContextSuggestionsPanel', () => ({
+  ContextSuggestionsPanel: () => null,
+}))
 
 const mockUseContextStore = vi.mocked(useContextStore)
 
@@ -22,6 +25,9 @@ describe('ContextSelector', () => {
   const mockSetElementLists = vi.fn()
   const mockGetElementMode = vi.fn(() => null)
   const mockSetElementMode = vi.fn()
+  const mockSetSuggestions = vi.fn()
+  const mockRefreshSuggestionsForTrigger = vi.fn()
+  const mockIsElementSelected = vi.fn(() => false)
 
   const mockSelections = {
     characters_full: [],
@@ -66,6 +72,11 @@ describe('ContextSelector', () => {
       setElementLists: mockSetElementLists,
       getElementMode: mockGetElementMode,
       setElementMode: mockSetElementMode,
+      setSuggestions: mockSetSuggestions,
+      refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
+      isElementSelected: mockIsElementSelected,
+      suggestions: [],
+      gddDataRevision: 0,
     } as ReturnType<typeof useContextStore>)
 
     // Mock des appels API par défaut (page, page_size, total_pages pour pagination)
@@ -105,6 +116,67 @@ describe('ContextSelector', () => {
       regions: [],
       total: 0,
     })
+  })
+
+  // --- Tests d'intégration Story 3.3 : suggestions automatiques ---
+
+  it('coche un personnage → appelle refreshSuggestionsForTrigger (character)', async () => {
+    const user = userEvent.setup()
+
+    render(<ContextSelector />)
+    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+
+    const checkbox = screen.getByRole('checkbox')
+    await user.click(checkbox)
+    await waitFor(() =>
+      expect(mockRefreshSuggestionsForTrigger).toHaveBeenCalledWith('character', 'Test Character', 'salutation')
+    )
+  })
+
+  it('coche un personnage → le store rafraîchit les suggestions (mock délègue à setSuggestions)', async () => {
+    const user = userEvent.setup()
+    mockRefreshSuggestionsForTrigger.mockImplementationOnce(() => {
+      mockSetSuggestions([{ type: 'location', name: 'Nef Centrale' }])
+    })
+
+    render(<ContextSelector />)
+    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+
+    const checkbox = screen.getByRole('checkbox')
+    await user.click(checkbox)
+    await waitFor(() =>
+      expect(mockSetSuggestions).toHaveBeenCalledWith([
+        { type: 'location', name: 'Nef Centrale' },
+      ])
+    )
+  })
+
+  it('désélectionner un personnage vide les suggestions', async () => {
+    const user = userEvent.setup()
+    // La sélection initiale contient déjà le personnage
+    mockUseContextStore.mockReturnValue({
+      selections: { ...mockSelections, characters_full: ['Test Character'] },
+      toggleCharacter: mockToggleCharacter,
+      toggleLocation: mockToggleLocation,
+      toggleItem: mockToggleItem,
+      toggleSpecies: mockToggleSpecies,
+      toggleCommunity: mockToggleCommunity,
+      clearSelections: mockClearSelections,
+      setElementLists: mockSetElementLists,
+      getElementMode: mockGetElementMode,
+      setElementMode: mockSetElementMode,
+      setSuggestions: mockSetSuggestions,
+      isElementSelected: vi.fn((type) => type === 'characters'),
+      suggestions: [],
+      gddDataRevision: 0,
+    } as ReturnType<typeof useContextStore>)
+
+    render(<ContextSelector />)
+    await waitFor(() => expect(screen.getByText('Test Character')).toBeInTheDocument())
+
+    const checkbox = screen.getByRole('checkbox')
+    await user.click(checkbox)
+    await waitFor(() => expect(mockSetSuggestions).toHaveBeenCalledWith([]))
   })
 
   it('affiche les onglets Contexte GDD : Personnages, Lieux, Régions, Objets, Espèces, Communautés', async () => {
@@ -173,7 +245,7 @@ describe('ContextSelector', () => {
 
     await waitFor(() => {
       expect(contextAPI.getCharacter).toHaveBeenCalledWith('Test Character')
-      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter)
+      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter, 'personnages')
     })
   })
 
@@ -254,6 +326,11 @@ describe('ContextSelector', () => {
       setElementLists: mockSetElementLists,
       getElementMode: mockGetElementMode,
       setElementMode: mockSetElementMode,
+      setSuggestions: mockSetSuggestions,
+      refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
+      isElementSelected: mockIsElementSelected,
+      suggestions: [],
+      gddDataRevision: 0,
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSelector />)
@@ -262,6 +339,85 @@ describe('ContextSelector', () => {
       // Le résumé doit afficher le personnage sélectionné
       expect(screen.getByText(/test character/i)).toBeInTheDocument()
     })
+  })
+
+  it('handleRemoveEntity : clic sur X dans le résumé appelle toggleCharacter avec le bon nom', async () => {
+    const user = userEvent.setup()
+    mockUseContextStore.mockReturnValue({
+      selections: {
+        characters_full: ['Test Character'],
+        characters_excerpt: [],
+        locations_full: [],
+        locations_excerpt: [],
+        items_full: [],
+        items_excerpt: [],
+        species_full: [],
+        species_excerpt: [],
+        communities_full: [],
+        communities_excerpt: [],
+        dialogues_examples: [],
+      },
+      toggleCharacter: mockToggleCharacter,
+      toggleLocation: mockToggleLocation,
+      toggleItem: mockToggleItem,
+      toggleSpecies: mockToggleSpecies,
+      toggleCommunity: mockToggleCommunity,
+      clearSelections: mockClearSelections,
+      setElementLists: mockSetElementLists,
+      getElementMode: mockGetElementMode,
+      setElementMode: mockSetElementMode,
+      setSuggestions: mockSetSuggestions,
+      isElementSelected: mockIsElementSelected,
+      suggestions: [],
+      gddDataRevision: 0,
+    } as ReturnType<typeof useContextStore>)
+
+    render(<ContextSelector />)
+
+    await user.click(await screen.findByTestId('selected-context-summary-toggle'))
+    await user.click(await screen.findByRole('button', { name: /retirer test character/i }))
+
+    expect(mockToggleCharacter).toHaveBeenCalledWith('Test Character')
+  })
+
+  it('handleSelectionPanelModeChange : clic sur le badge mode appelle setElementMode avec le bon entityType', async () => {
+    const user = userEvent.setup()
+    mockUseContextStore.mockReturnValue({
+      selections: {
+        characters_full: ['Test Character'],
+        characters_excerpt: [],
+        locations_full: [],
+        locations_excerpt: [],
+        items_full: [],
+        items_excerpt: [],
+        species_full: [],
+        species_excerpt: [],
+        communities_full: [],
+        communities_excerpt: [],
+        dialogues_examples: [],
+      },
+      toggleCharacter: mockToggleCharacter,
+      toggleLocation: mockToggleLocation,
+      toggleItem: mockToggleItem,
+      toggleSpecies: mockToggleSpecies,
+      toggleCommunity: mockToggleCommunity,
+      clearSelections: mockClearSelections,
+      setElementLists: mockSetElementLists,
+      getElementMode: mockGetElementMode,
+      setElementMode: mockSetElementMode,
+      setSuggestions: mockSetSuggestions,
+      refreshSuggestionsForTrigger: mockRefreshSuggestionsForTrigger,
+      isElementSelected: mockIsElementSelected,
+      suggestions: [],
+      gddDataRevision: 0,
+    } as ReturnType<typeof useContextStore>)
+
+    render(<ContextSelector />)
+
+    await user.click(await screen.findByTestId('selected-context-summary-toggle'))
+    await user.click(await screen.findByTestId('mode-toggle-characters-Test Character'))
+
+    expect(mockSetElementMode).toHaveBeenCalledWith('characters', 'Test Character', 'excerpt')
   })
 
   it('affiche nom, aperçu (résumé) et badge type d\'entité', async () => {
@@ -291,7 +447,7 @@ describe('ContextSelector', () => {
     await user.click(characterItem)
 
     await waitFor(() => {
-      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter)
+      expect(mockOnItemSelected).toHaveBeenCalledWith(mockCharacter, 'personnages')
     })
 
     // Changer d'onglet
@@ -300,7 +456,7 @@ describe('ContextSelector', () => {
 
     // La sélection devrait être réinitialisée
     await waitFor(() => {
-      expect(mockOnItemSelected).toHaveBeenCalledWith(null)
+      expect(mockOnItemSelected).toHaveBeenLastCalledWith(null, null)
     })
   })
 })

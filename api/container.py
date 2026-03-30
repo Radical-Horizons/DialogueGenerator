@@ -4,7 +4,12 @@ Ce container stocke toutes les instances de services dans app.state,
 permettant une meilleure gestion du cycle de vie et facilitant les tests.
 """
 import logging
-from typing import Optional
+import os
+from pathlib import Path
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from services.gdd_notion_sync_service import GddNotionSyncService
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from services.configuration_service import ConfigurationService
@@ -20,6 +25,7 @@ from services.llm_usage_service import LLMUsageService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.linked_selector import LinkedSelectorService
 from services.notion_import_service import NotionImportService
+from services.context_rule_service import ContextRuleService
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +63,8 @@ class ServiceContainer:
         self._graph_node_orchestrator: Optional["GraphNodeOrchestrator"] = None
         self._linked_selector_service: Optional[LinkedSelectorService] = None
         self._notion_import_service: Optional[NotionImportService] = None
+        self._context_rule_service: Optional[ContextRuleService] = None
+        self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
     def get_config_service(self) -> ConfigurationService:
@@ -267,6 +275,59 @@ class ServiceContainer:
             self._notion_import_service = NotionImportService()
             logger.info("NotionImportService initialisé dans le container.")
         return self._notion_import_service
+
+    def get_context_rule_service(self) -> ContextRuleService:
+        """Retourne le service de règles de sélection de contexte GDD.
+
+        Returns:
+            Instance de ContextRuleService.
+        """
+        if self._context_rule_service is None:
+            from pathlib import Path
+            from constants import FilePaths
+            storage_file = Path(__file__).resolve().parent.parent / FilePaths.CONTEXT_RULES_FILE
+            self._context_rule_service = ContextRuleService(storage_file=storage_file)
+            logger.info("ContextRuleService initialisé dans le container.")
+        return self._context_rule_service
+
+    def get_gdd_notion_sync_service(self) -> "GddNotionSyncService":
+        """Retourne le service de synchronisation GDD depuis Notion (FR18).
+
+        Returns:
+            Instance configurée avec chemins projet et data/.
+        """
+        if self._gdd_notion_sync_service is None:
+            from constants import FilePaths
+            from services.gdd_notion_sync_config_store import GddNotionSyncConfigStore
+            from services.gdd_notion_sync_service import GddNotionSyncService
+
+            root = Path(__file__).resolve().parent.parent
+            store = GddNotionSyncConfigStore(
+                settings_path=root / FilePaths.GDD_NOTION_SYNC_CONFIG_FILE,
+                token_path=root / FilePaths.GDD_NOTION_SYNC_TOKEN_FILE,
+            )
+            gdd_dir = self._resolve_gdd_categories_path()
+            manifest = root / FilePaths.GDD_NOTION_SYNC_MANIFEST_FILE
+            status_path = root / FilePaths.GDD_NOTION_SYNC_DIR / "status.json"
+            from services.gdd_context_refresh import reload_context_builder_if_loaded
+
+            self._gdd_notion_sync_service = GddNotionSyncService(
+                config_store=store,
+                manifest_path=manifest,
+                gdd_categories_path=gdd_dir,
+                status_path=status_path,
+                after_gdd_disk_mutation=lambda: reload_context_builder_if_loaded(self),
+            )
+            logger.info("GddNotionSyncService initialisé dans le container.")
+        return self._gdd_notion_sync_service
+
+    def _resolve_gdd_categories_path(self) -> Path:
+        """Répertoire des catégories GDD (aligné sur GDDLoader / variables d'env)."""
+        root = Path(__file__).resolve().parent.parent
+        env = os.getenv("GDD_CATEGORIES_PATH", "").strip()
+        if env:
+            return Path(env)
+        return root / "data" / "GDD_categories"
     
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.
@@ -314,4 +375,6 @@ class ServiceContainer:
         self._graph_node_orchestrator = None
         self._linked_selector_service = None
         self._notion_import_service = None
+        self._context_rule_service = None
+        self._gdd_notion_sync_service = None
         logger.info("ServiceContainer réinitialisé (reload détecté).")

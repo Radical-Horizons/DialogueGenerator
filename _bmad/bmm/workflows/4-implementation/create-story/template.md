@@ -22,12 +22,12 @@ so that {{benefit}}.
 - [ ] Task 1 : [Behavior description] (AC: #)
   - [ ] 🔴 Test échoue : [behavioral assertion — observable outcome, not implementation detail]
   - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
-  - [ ] 🔵 Faire le refactor du code développé pour passer le test afin d'obtenir un code KISS, DRY, SOLID. Autres chantiers possibles : [optionnel — ex. accessibilité, réutilisation modals, nommage].
+  - [ ] 🔵 Refactor : [chantier principal — visible uniquement sur code complet, pas pendant le GREEN. Ex: renommer X→Y pour aligner vocabulaire métier, éliminer duplication entre A et B, clarifier nommage des cas de test]. Si applicable : [chantiers secondaires].
 
 - [ ] Task 2 : [Behavior description] (AC: #)
   - [ ] 🔴 Test échoue : [behavioral assertion]
   - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
-  - [ ] 🔵 Faire le refactor du code développé pour passer le test afin d'obtenir un code KISS, DRY, SOLID. Autres chantiers possibles : [optionnel].
+  - [ ] 🔵 Refactor : [chantier principal — visible uniquement sur code complet, pas pendant le GREEN. Ex: renommer X→Y pour aligner vocabulaire métier, éliminer duplication entre A et B, clarifier nommage des cas de test]. Si applicable : [chantiers secondaires].
 
 ## Dev Notes
 
@@ -38,6 +38,7 @@ so that {{benefit}}.
 - Architecture guardrails : what must not be violated, ADRs applicable
 - What to reuse : existing components, actions, or endpoints (brief; key references only, not an exhaustive list)
 - Quality bar : what behaviors must be covered by tests (outcomes), not how to write them
+- Refactor bar (defaults) : dev-story REFACTOR QUALITY CRITERIA — e.g. max ~300 lines per source file touched in a task, ~60 lines per function, no non-trivial duplication, domain naming, single responsibility of exported units; override here if the story needs different numeric limits
 - Conventions : naming, where similar code lives, constraints (e.g. persist via existing save)
 
 ### Project Structure Notes

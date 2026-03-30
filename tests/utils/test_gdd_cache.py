@@ -4,7 +4,12 @@ import time
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from api.utils.gdd_cache import GDDCache, GDDCacheEntry, get_gdd_cache
+from api.utils.gdd_cache import (
+    GDDCache,
+    GDDCacheEntry,
+    gdd_shard_directory_fingerprint,
+    get_gdd_cache,
+)
 
 
 class TestGDDCacheEntry:
@@ -62,6 +67,23 @@ class TestGDDCacheEntry:
         # Vérifier que l'entrée est obsolète
         assert entry.is_stale(check_interval=0.0) is True
 
+    def test_is_stale_shard_directory_new_file(self, tmp_path):
+        """Répertoire shards : nouvelle entrée (count) invalide le cache."""
+        d = tmp_path / "shards"
+        d.mkdir()
+        (d / "a.json").write_text("{}", encoding="utf-8")
+        max_m, cnt = gdd_shard_directory_fingerprint(d)
+        entry = GDDCacheEntry(
+            data=[],
+            file_path=d,
+            mtime=max_m,
+            shard_file_count=cnt,
+        )
+        entry.cached_at = 0.0
+        assert entry.is_stale(check_interval=0.0) is False
+        (d / "b.json").write_text("{}", encoding="utf-8")
+        assert entry.is_stale(check_interval=0.0) is True
+
 
 class TestGDDCache:
     """Tests pour GDDCache."""
@@ -103,6 +125,17 @@ class TestGDDCache:
         # Récupérer devrait retourner None car obsolète
         cached_data = cache.get("test_key", file_path)
         assert cached_data is None
+
+    def test_get_cache_stale_shard_directory(self, tmp_path):
+        """Cache sur répertoire shards invalidé si un JSON est ajouté."""
+        cache = GDDCache(check_interval=0.0)
+        d = tmp_path / "lieux"
+        d.mkdir()
+        (d / "one.json").write_text('{"Nom": "L1"}', encoding="utf-8")
+        cache.set("lieux:shards", [{"Nom": "L1"}], d)
+        time.sleep(0.1)
+        (d / "two.json").write_text('{"Nom": "L2"}', encoding="utf-8")
+        assert cache.get("lieux:shards", d) is None
     
     def test_invalidate_key(self, tmp_path):
         """Test l'invalidation d'une clé spécifique."""

@@ -89,10 +89,10 @@ describe('NodeEditorPanel - flush on selection change preserves targetNode', () 
       highlightedNodeIds: [],
       selectedNode: parentNode,
     }
-    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       if (typeof selector === 'function') return selector(mockState)
       return mockState
-    })
+    }) as typeof useGraphStore)
     ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
       () => mockState
     )
@@ -115,12 +115,10 @@ describe('NodeEditorPanel - flush on selection change preserves targetNode', () 
         selectedNode: generatedNode,
         nodes: [parentNode, generatedNode],
       }
-      vi.mocked(useGraphStore).mockImplementation(
-        (selector?: (s: typeof mockState) => unknown) => {
-          if (typeof selector === 'function') return selector(mockState)
-          return mockState
-        }
-      )
+      vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
+        if (typeof selector === 'function') return selector(mockState)
+        return mockState
+      }) as typeof useGraphStore)
       ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
         () => mockState
       )
@@ -194,10 +192,10 @@ describe('NodeEditorPanel - flush on selection change preserves TestNode result 
       highlightedNodeIds: [],
       selectedNode: testNodeEmpty,
     }
-    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       if (typeof selector === 'function') return selector(mockState)
       return mockState
-    })
+    }) as typeof useGraphStore)
     ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
       () => mockState
     )
@@ -233,12 +231,10 @@ describe('NodeEditorPanel - flush on selection change preserves TestNode result 
         selectedNodeId: generatedNode.id,
         selectedNode: generatedNode,
       }
-      vi.mocked(useGraphStore).mockImplementation(
-        (selector?: (s: typeof mockState) => unknown) => {
-          if (typeof selector === 'function') return selector(mockState)
-          return mockState
-        }
-      )
+      vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
+        if (typeof selector === 'function') return selector(mockState)
+        return mockState
+      }) as typeof useGraphStore)
       ;(useGraphStore as unknown as { getState: () => typeof mockState }).getState = vi.fn(
         () => mockState
       )

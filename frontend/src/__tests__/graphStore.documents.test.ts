@@ -23,6 +23,9 @@ const sampleDocument = {
 
 const sampleLayout = { nodes: { START: { x: 100, y: 200 }, END: { x: 100, y: 350 } } }
 
+/** document dans le store est typé large ; les tests ciblent la forme Unity avec `nodes`. */
+type DocumentNodesRef = { nodes?: Array<Record<string, unknown> & { id: string }> }
+
 describe('graphStore - document SoT load/save', () => {
   beforeEach(() => {
     vi.mocked(documentsAPI.getDocument).mockReset()
@@ -206,11 +209,18 @@ describe('graphStore - document SoT load/save', () => {
       })
 
       await saveDialogue()
+      // saveDialogue reconstruit le document depuis le graphe (graphToDocument), pas state.document figé.
       expect(documentsAPI.putDocument).toHaveBeenCalledWith(
         'test-doc',
         expect.objectContaining({
-          document: stateBeforeSave.document,
           revision: 1,
+          document: expect.objectContaining({
+            schemaVersion: '1.1.0',
+            nodes: expect.arrayContaining([
+              expect.objectContaining({ id: 'START', speaker: 'NPC', line: 'Hello' }),
+              expect.objectContaining({ id: 'END', line: '' }),
+            ]),
+          }),
         })
       )
       expect(documentsAPI.putLayout).toHaveBeenCalledWith(
@@ -276,7 +286,7 @@ describe('graphStore - document SoT load/save', () => {
       updateNode('START', { data: { line: 'Hello world', speaker: 'NPC' } })
 
       const state = useGraphStore.getState()
-      const startUnity = state.document?.nodes?.find((n: { id: string }) => n.id === 'START')
+      const startUnity = (state.document as DocumentNodesRef | null)?.nodes?.find((n) => n.id === 'START')
       expect(startUnity?.line).toBe('Hello world')
       expect(startUnity?.speaker).toBe('NPC')
       const startNode = state.nodes.find((n) => n.id === 'START')
@@ -310,7 +320,9 @@ describe('graphStore - document SoT load/save', () => {
       updateNode('START', { data: { line: 'Updated line', speaker: 'X', choices: [{ choiceId: 'opt', text: 'Go', targetNode: 'END' }] } })
 
       const state = useGraphStore.getState()
-      expect(state.document?.nodes?.find((n: { id: string }) => n.id === 'START')?.line).toBe('Updated line')
+      expect((state.document as DocumentNodesRef | null)?.nodes?.find((n) => n.id === 'START')?.line).toBe(
+        'Updated line'
+      )
       const edgeAfter = state.edges.find(
         (e) => e.source === 'START' && e.target === 'END' && e.data?.choiceId === 'opt'
       )
@@ -356,7 +368,7 @@ describe('graphStore - document SoT load/save', () => {
       updateNode(testNodeId!, { data: { test: { formula: '2d20' } } })
 
       const state = useGraphStore.getState()
-      const startNode = state.document?.nodes?.find((n: { id: string }) => n.id === 'START')
+      const startNode = (state.document as DocumentNodesRef | null)?.nodes?.find((n) => n.id === 'START')
       const choice = (startNode?.choices as { test?: { formula?: string } }[])?.[0]
       expect(choice?.test).toEqual({ formula: '2d20' })
       const testNode = state.nodes.find((n) => n.id === 'test-node-START-choice-0')

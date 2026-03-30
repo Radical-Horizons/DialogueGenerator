@@ -9,9 +9,10 @@ import { buildLayoutFromNodes } from '../../utils/documentToGraph'
 
 const MAX_UNDO_SNAPSHOTS = 50
 
+/** Actions uniquement — `undoStack` / `redoStack` viennent de `initialState`. */
 export type UndoSlice = Pick<
   GraphState,
-  'undoStack' | 'redoStack' | 'undo' | 'redo' | 'canUndo' | 'canRedo' | '_pushUndoSnapshot' | 'clearUndoHistory'
+  'undo' | 'redo' | 'canUndo' | 'canRedo' | '_pushUndoSnapshot' | 'clearUndoHistory'
 >
 
 function cloneSnapshot(nodes: Node[], edges: Edge[]): GraphSnapshot {

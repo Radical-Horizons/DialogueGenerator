@@ -438,7 +438,8 @@ describe('usePresetStore', () => {
         try {
           await result.current.validatePreset('non-existent');
         } catch (error: unknown) {
-          expect(error.message).toContain('Failed to validate preset');
+          expect(error).toBeInstanceOf(Error)
+          expect((error as Error).message).toContain('Failed to validate preset')
         }
       });
     });

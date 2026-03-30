@@ -361,7 +361,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     let changed = false
     const normalizedEdges = state.edges.map((edge) => {
       const derivedStroke = edgeStrokeFromSource({
-        sourceHandle: edge.sourceHandle,
+        sourceHandle: edge.sourceHandle ?? undefined,
         connectionType: (edge.data as { edgeType?: string } | undefined)?.edgeType,
         edgeLabel: typeof edge.label === 'string' ? edge.label : undefined,
       })

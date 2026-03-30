@@ -165,7 +165,7 @@ def test_prompt_xml_format(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test XML format",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     
@@ -208,7 +208,7 @@ def test_debug_raw_json_endpoint(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test debug endpoint",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     
@@ -249,7 +249,7 @@ def test_structured_prompt_remains_json(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test structured prompt",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     
@@ -613,7 +613,7 @@ def test_end_to_end_no_duplicate_fields_real_data(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test end-to-end déduplication",
-            "max_context_tokens": 5000,
+            "max_context_tokens": 10000,
             "include_narrative_guides": True
         }
     )

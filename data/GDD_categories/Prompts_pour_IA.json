@@ -1,0 +1,9 @@
+[
+  {
+    "Nom": "Prompts pour IA",
+    "sections": {
+      "_general": "# Ops Center \n\n## Méthode de nettoyage de call-out Notion\n\nDans Notepad ++ (expression régulière), chercher : \n\n</?aside[^>]*>|<img[^>]*>|(\\r?\\n){3,}\n\nRemplacer : \n\n\\r\\n\\r\\n"
+    },
+    "notion_page_id": "1b26e4d2-1b45-8040-9064-c235ef268a3d"
+  }
+]

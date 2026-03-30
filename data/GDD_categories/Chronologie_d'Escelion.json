@@ -1,0 +1,1970 @@
+[
+  {
+    "Nom": "Consortium Voharo-Umcut",
+    "values": {
+      "Date de début": "2940",
+      "Description": "Création du Consortium qui engendre les Kephrasites pour stabiliser les marchés. Les Umcuts gagnent leur réputation de contrôleurs de qualité olfactifs.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Modéré",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "0008d35d-6971-4f83-ba81-b4e2c1a9f896"
+  },
+  {
+    "Nom": "Enracinement Hélicoïdal (Spirales)",
+    "values": {
+      "Date de début": "1400",
+      "Date de fin": "1450",
+      "Description": "Colonisation de la Mer Boueuse par les Umcuts. Fondation de tours côtières à croissance hélicoïdale, maîtrise de la navigation dans la boue dense. Les Spirales deviennent les commerçants de l'espèce.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Important",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "043f42ab-ba48-42b9-b831-0f7b19a4cc1f"
+  },
+  {
+    "Nom": "Fondation Chaebol Synaptic Dynamics",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "2681",
+      "Description": "Fondation du Chaebol Synaptic Dynamics par un Visionnaire Transloqué expulsé du Nexion, portant vision axiomatique du jung-do. Doctrine prétendant appliquer lois observées au Nexion à gouvernance corporative.",
+      "Importance": "Important",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "04b8fd85-bfd2-42b3-9290-d85079dd99c4"
+  },
+  {
+    "Nom": "Tek-Syana-09 accède au directorat",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "3041",
+      "Description": "Tek-Syana-09, Imuin hautement augmenté porteur d'implants de lignée, devient Directeur-Grand Officiant du Chaebol, incarnant fusion parfaite entre tradition spirituelle et rationalité technologique.",
+      "Importance": "Important",
+      "Personnages 1": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Type d'événement": "Couronnement"
+    },
+    "notion_page_id": "0ee096c2-1199-485d-a21a-b73b45e918a5"
+  },
+  {
+    "Nom": "Acquisition mines Tombeau des Lueurs Dissidentes",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "2691",
+      "Description": "Le Chaebol Synaptic Dynamics acquiert les mines du Tombeau des Lueurs Dissidentes (actionnaire majoritaire 51%), premier test d'envergure du système jung-do sur main-d'œuvre diversifiée.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "1024b60b-494d-4c9a-ad0f-a82978169cd0"
+  },
+  {
+    "Nom": "Publication du Traité des Gradients",
+    "values": {
+      "Date de début": "3112",
+      "Description": "Vol Reitar publie à Daïlon le premier système rigoureux de cartographie des domaines Rêveurs : méthode de calcul des limites de domaine à partir de mesures de terrain, formules prédictives pour les cycles (Nuées, Souffles) et preuve que les fractures régionales sont des gradients géométriques planifiables — rendant leur traversée calculable pour la première fois. Un appendice spéculatif note que la distribution des portails coïncide trop régulièrement avec les centres de domaines pour être accidentelle ; thèse ignorée à l'époque. Le texte circule jusqu'à la Vieille Ville et devient une référence fondatrice pour les Aedres et les navigateurs inter-domaines.",
+      "Importance": "Important",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "119842ec-7b9a-43c7-ba47-37541481a9a8"
+  },
+  {
+    "Nom": "Âge des Déglutitions",
+    "values": {
+      "Date de début": "1550",
+      "Date de fin": "1800",
+      "Description": "La Cité Labiale développe un cycle digestif régulier (péristaltisme sémantique). Les Portails Absorbants se stabilisent dans les zones de haute densité verbale. Les chambres conversationnelles se spécialisent par type de mot. Des dizaines de personnes sont piégées par décennie.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "1522032f-8c16-4c0e-9ec2-f16af730561b"
+  },
+  {
+    "Nom": "Exode humain vers Escelion",
+    "values": {
+      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Date de début": "1",
+      "Date de fin": "25",
+      "Description": "Arrivée par vagues désordonnées de milliers de survivants de Merid (Magocratie d'Iodan-liaqar, Archenroz, Ligue du Sandor, Guelenbur et autres). Petits groupes familiaux sans coordination. Les futurs Aldravinds s'agrègent par nécessité linguistique autour de l'abraldique.",
+      "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
+      "Importance": "Important",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Migration"
+    },
+    "notion_page_id": "1faeddb0-c563-4cfc-8c6a-341e7fc3343a"
+  },
+  {
+    "Nom": "Guerres de Sève",
+    "values": {
+      "Date de début": "47",
+      "Date de fin": "156",
+      "Description": "Guerres opposant les hybrides émergents aux Arbres-Rois",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Notable",
+      "Type d'événement": "Bataille"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8020-ae6f-f5aa878dd060"
+  },
+  {
+    "Nom": "Grand Blizzard",
+    "values": {
+      "Date de début": "1620",
+      "Date de fin": "1625",
+      "Description": "Un blizzard cataclysmique contraint les Van’Doei à se disperser à travers Escelion, se scindant en trois traditions majeures : les Gardiens du Foyer, les Cendres Nomades et les Stoïques.",
+      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Importance": "Important",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8028-9469-f177e43b0994"
+  },
+  {
+    "Nom": "Purges Organiques",
+    "values": {
+      "Date de début": "2759",
+      "Date de fin": "2781",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8035-9d80-d4e3814cbc98"
+  },
+  {
+    "Nom": "Exil d'Uresaïr",
+    "values": {
+      "Date de début": "3237",
+      "Date de fin": "3237",
+      "Description": "Vol Reitar bannit Uresaïr de la Citadelle de Daïlon suite à son refus de l'aider dans ses expériences génétiques. Elle débute une longue errance à travers Escelion.",
+      "Importance": "Important",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Type d'événement": "Evénement personnel"
+    },
+    "notion_page_id": "22c6e4d2-1b45-803e-9a7c-d162ad882467"
+  },
+  {
+    "Nom": "Guerre des Mycéliums Rebelles",
+    "values": {
+      "Date de début": "1089",
+      "Date de fin": "1134",
+      "Description": "Bataille décisive concluant le Schisme des Voiles, où les techniques lumimathiques furent employées comme armes pour la première fois, créant des zones de lumière absolue. La victoire du camp des Révélateurs inaugura l'Ère de l'Expansion Subtile.",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Notable",
+      "Type d'événement": "Bataille"
+    },
+    "notion_page_id": "22c6e4d2-1b45-803f-a19f-dcfcb86df0d5"
+  },
+  {
+    "Nom": "Accident du portail",
+    "values": {
+      "Date de début": "3100",
+      "Date de fin": "3100",
+      "Description": "Vol Reitar prend le contrôle de la Citadelle de Daïlon en sacrifiant 1047 vies pour accéder à Merid",
+      "Importance": "Important",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8045-a4fa-eabba26e215b"
+  },
+  {
+    "Nom": "Bataille de la Clairière Enlacée",
+    "values": {
+      "Date de début": "2807",
+      "Date de fin": "2807",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d"
+    },
+    "notion_page_id": "22c6e4d2-1b45-804c-8661-dda27ced0eeb"
+  },
+  {
+    "Nom": "Ère Contemporaine",
+    "values": {
+      "Date de début": "3234",
+      "Date de fin": "3390",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d"
+    },
+    "notion_page_id": "22c6e4d2-1b45-804d-95b3-c44bccaab38c"
+  },
+  {
+    "Nom": "Incident de la Contamination Mécanique",
+    "values": {
+      "Date de début": "2759",
+      "Date de fin": "2759",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8050-993e-e4956b8014c9"
+  },
+  {
+    "Nom": "Période des Grands Parasitismes",
+    "values": {
+      "Date de début": "834",
+      "Date de fin": "1156",
+      "Description": "Développement de l’élevage aedre",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Modéré",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "22c6e4d2-1b45-806b-a882-d7e9a3e6bca3"
+  },
+  {
+    "Nom": "Alliance des Eaux Vertes",
+    "values": {
+      "Date de début": "741",
+      "Date de fin": "741",
+      "Description": "Traité fondateur de collaboration symbiotique",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Modéré",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "22c6e4d2-1b45-807c-8367-d9bd8a5eb609"
+  },
+  {
+    "Nom": "Grande Convergence des Frémissants",
+    "values": {
+      "Date de début": "888",
+      "Date de fin": "888",
+      "Description": "Disparition des Frémissants",
+      "Importance": "Important",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8080-8cf1-da05fc3f5dbd"
+  },
+  {
+    "Nom": "Fondation du Culte de l'Anentropie",
+    "values": {
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Date de début": "3155",
+      "Date de fin": "3155",
+      "Description": "Après la révélation de l'Ensevelie dans les profondeurs du Léviathan Pétrifié, le jeune Akthar-Neth Amatru conclut un pacte fondateur lui conférant longévité exceptionnelle. Il structure le culte naissant autour d'une interprétation radicale du Barvasinkul, rejetant l'entropie et instaurant la Stasiarchie comme principe de gouvernance.",
+      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Importance": "Notable",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8082-ba15-d480332e0b03"
+  },
+  {
+    "Nom": "Émergence du Xyriad Achromatique",
+    "values": {
+      "Date de début": "2487",
+      "Date de fin": "2487",
+      "Description": "Apparition inexpliquée du Xyriad Achromatique, structure extra-dimensionnelle caractérisée par une indétermination probabiliste maximale. Ce phénomène a défié les lois connues et suscité l’étude intense des savants.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Important",
+      "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8086-b2ea-f4850ec0e09d"
+  },
+  {
+    "Nom": "Premières Rencontres Umcuts",
+    "values": {
+      "Date de début": "1578",
+      "Date de fin": "1578",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8086-bb3b-d3de10cc1292"
+  },
+  {
+    "Nom": "Crise des Racines Empoisonnées",
+    "values": {
+      "Date de début": "3178",
+      "Date de fin": "3178",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8089-a4ca-ea42106964b9"
+  },
+  {
+    "Nom": "Fondation de la Jungle Vivarcade",
+    "values": {
+      "Date de début": "1734",
+      "Date de fin": "1847",
+      "Description": "Établissement de la Jungle Vivarcade, une cité végétale stratifiée dont l’architecture vivante fusionne avec d’anciens Aedres formant des terrasses monumentales.",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Important",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-808c-877a-e7b28a5b9c65"
+  },
+  {
+    "Nom": "Mille Migrations",
+    "values": {
+      "Date de début": "437",
+      "Date de fin": "652",
+      "Description": "Époque dispersant les populations aedrique",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Important",
+      "Type d'événement": "Migration"
+    },
+    "notion_page_id": "22c6e4d2-1b45-808d-b305-e83d80a092c1"
+  },
+  {
+    "Nom": "Contestation du Wyrd",
+    "values": {
+      "Date de début": "2917",
+      "Date de fin": "3045",
+      "Description": "Soulèvement idéologique mené par l’entité appelée l’Hermogène, opposant le déterminisme génétique imposé par les Gardiens du Souvenir. Il prôna la primauté de geis volontaires (serments mystiques) sur les liens héréditaires, ébranlant l’ordre socio-politique établi.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-808e-bd67-ed838f81fc50"
+  },
+  {
+    "Nom": "Création du Quartier des Forges",
+    "values": {
+      "Date de début": "2266",
+      "Date de fin": "2266",
+      "Description": "À la suite de l’effondrement du royaume Van’Doei de Gh’zar, un exode massif mène les Van’Doei à la Vieille Ville. Ils y fondent le Quartier des Forges, grâce à un pacte de « Cendre contre Protection » leur permettant d’opérer des forges perpétuelles en échange de leurs services.",
+      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-8096-a7a2-cb3203bae4b6"
+  },
+  {
+    "Nom": "Inversion Gravitaire des Forêts de Corail",
+    "values": {
+      "Date de début": "-500",
+      "Date de fin": "-450",
+      "Description": "Cataclysme gravitationnel ayant arraché une forêt ancestrale de ses terres, laquelle muta en formant les premières Forêts de Corail.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-809c-8eca-f47ecfc75e36"
+  },
+  {
+    "Nom": "Implantation de Bios-Arhké",
+    "values": {
+      "Date de début": "1178",
+      "Date de fin": "1178",
+      "Description": "Implantation de Bios-Arhké dans les futures terres de la Jungle Vivarcade",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Notable",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-809d-a87e-df1ad0941e5a"
+  },
+  {
+    "Nom": "Concile des Trois Cambriums",
+    "values": {
+      "Date de début": "298",
+      "Date de fin": "298",
+      "Description": "Concile formalisant la tripartition des Aedres. Le lieu du concile, une clairière forestière, fut l'emplacement d'un sanctuaire stabilisateur d'Uresaïr dont l'influence favorisa l'harmonie nécessaire à cet accord fondateur",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Modéré",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80a0-a286-d5d23d543f3b"
+  },
+  {
+    "Nom": "Début du jeu",
+    "values": {
+      "Date de début": "3390",
+      "Date de fin": "3390",
+      "Description": "Possession d'Uresaïr par l’Ethérée",
+      "Importance": "Majeur",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80a7-8a66-ecc52014a218"
+  },
+  {
+    "Nom": "Fondation du Marché automaton",
+    "values": {
+      "Date de début": "2150",
+      "Date de fin": "2150",
+      "Description": "Une colonie nomade d'Imuins, attirée par les rumeurs d'une 'montagne qui calcule', active le Vahan-Meru — artefact technologique colossal d'origine pré-Agénèse retrouvé partiellement submergé dans l'Océan Mécanique. En utilisant leurs prothèses et implants comme interfaces, ils réveillent ses systèmes dormants. Naissance du Proto-Marché, encore instable et entièrement imuin.",
+      "Importance": "Majeur",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80ad-9861-e918927c86de"
+  },
+  {
+    "Nom": "Naissance des Rêveurs Primordiaux",
+    "values": {
+      "Date de début": "1",
+      "Date de fin": "25",
+      "Description": "Naissance de 100 rêveurs à partir d’humains sacrifiés sur Merid",
+      "Importance": "Majeur",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80af-a38b-d517e7038ccd"
+  },
+  {
+    "Nom": "Cataclysme de Kho'Vash",
+    "values": {
+      "Date de début": "1",
+      "Date de fin": "300",
+      "Description": "Division de la Doei. Début du calendrier de l'Agénèse",
+      "Importance": "Majeur",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Mythe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80b3-b406-e1d3822be339"
+  },
+  {
+    "Nom": "Premier Contact Vaideccan-Aedre",
+    "values": {
+      "Date de début": "723",
+      "Date de fin": "723",
+      "Description": "Premier Contact Vaideccan dans les marécages proto-Vivarcade",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d, 1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
+      "Importance": "Mineur",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80b5-a872-e74c92c11309"
+  },
+  {
+    "Nom": "Invention du Stabilisateur Ontologique",
+    "values": {
+      "Date de début": "2778",
+      "Date de fin": "2778",
+      "Description": "Un ingénieur nommé Merkhan invente le « Stabilisateur Ontologique », un appareil qui permet de neutraliser localement les anomalies de l’Antichambre des Impossibles et d’en explorer les franges en toute sécurité.",
+      "Importance": "Mineur",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e",
+      "Type d'événement": "Invention"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80c4-8a2a-fb5261a4872d"
+  },
+  {
+    "Nom": "Fondation du Barvasinkul",
+    "values": {
+      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Date de début": "1186",
+      "Date de fin": "1186",
+      "Description": "Barvas défie publiquement l'Exégète Sarthen-Ghul en démontrant la \"Violence Intérieure\" - saignant vers l'intérieur plutôt qu'extérieur. Convertit 300 spectateurs et marque la rupture définitive avec l'orthodoxie du démembrement.",
+      "Importance": "Important",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Personnages": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Type d'événement": "Mythe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80d2-ac21-c1f131d1ee78"
+  },
+  {
+    "Nom": "Âge d'Or de Vivarcade",
+    "values": {
+      "Date de début": "1887",
+      "Date de fin": "2054",
+      "Description": "Etablissement des structures définitives et révision de l’Histoire",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Modéré",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80dd-bdf4-e54d9d4a7267"
+  },
+  {
+    "Nom": "Édification du Nemeton",
+    "values": {
+      "Date de début": "2724",
+      "Date de fin": "2724",
+      "Description": "Fondation d’un sanctuaire et de la Tour Stratigraphique",
+      "Importance": "Modéré",
+      "Lieux": "1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80dd-bf06-dc43cc9804fd"
+  },
+  {
+    "Nom": "Création des Imuins",
+    "values": {
+      "Date de début": "1254",
+      "Date de fin": "1267",
+      "Description": "Trois Qadul’Doei – Lumineux, Étincelant et Clarté – s’isolent sous les Grands Lacs mécaniques pour résoudre un problème ontologique. Leur expérience échoue partiellement mais aboutit à la naissance des premiers Imuins, des êtres artificiels doués d’autonomie.",
+      "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b, 1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Important",
+      "Lieux": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80df-a920-e67356f4cddf"
+  },
+  {
+    "Nom": "Concordat Techno-Lumimathique",
+    "values": {
+      "Date de début": "2766",
+      "Date de fin": "3390",
+      "Description": "Alliance conclue entre les Qadul’Doei et les Imuins, fusionnant les traditions mystiques lumimatiques avec les technologies émergentes. Ce pacte a ouvert la voie à des innovations conjointes et scellé une coopération durable entre les deux groupes.",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-8006-a568-d4688d3b154b",
+      "Importance": "Modéré",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80e2-8a6d-f7f95ffe4b83"
+  },
+  {
+    "Nom": "Hécatombe des Tours Assiégeantes",
+    "values": {
+      "Date de début": "2801",
+      "Date de fin": "2807",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Lieux": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80e6-a20c-ea90f35f2752"
+  },
+  {
+    "Nom": "Assassinat de Vol Reitar",
+    "values": {
+      "Date de début": "3373",
+      "Date de fin": "3373",
+      "Description": "Après 25 Nuées de servitude forcée, Eonundé – création artificielle de Vol Reitar – se révolte et « assassine » son créateur en le poussant dans une cuve d'acide. Vol Reitar est détruit physiquement et son esprit est réduit à errer comme une ombre hantant la Citadelle.",
+      "Importance": "Notable",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Personnages 1": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Type d'événement": "Autre"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80e7-8960-cfa2e2d4926e"
+  },
+  {
+    "Nom": "Exode des Premiers Errants",
+    "values": {
+      "Date de début": "1267",
+      "Date de fin": "1289",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80ed-8e36-cc6fc31bbddd"
+  },
+  {
+    "Nom": "Surgissement des Racines Pensantes",
+    "values": {
+      "Date de début": "23",
+      "Date de fin": "23",
+      "Description": "Surgissement des Racines Pensantes, bouleversement cosmique lié aux premières déstabilisations de l'Agenèse",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Notable",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80f4-bbb8-e79f478b8da9"
+  },
+  {
+    "Nom": "Bataille de la Clairière Sanguinolente",
+    "values": {
+      "Date de début": "156",
+      "Date de fin": "156",
+      "Description": "Victoire des Aedres sur l'aristocratie racinaire",
+      "Espèces": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
+      "Importance": "Modéré",
+      "Type d'événement": "Bataille"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80fe-8bbd-c0fe5d24263c"
+  },
+  {
+    "Nom": "Fondation de la Vieille Ville",
+    "values": {
+      "Date de début": "294",
+      "Date de fin": "300",
+      "Description": "Rassemblement historique de douze représentants des espèces primordiales d’Escelion, ayant abouti à la décision de créer une cité centrale pour unifier le monde (Sujet à controverse ! cf. Vieille Ville)",
+      "Importance": "Majeur",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "22c6e4d2-1b45-80fe-ada4-dcedd615a045"
+  },
+  {
+    "Nom": "Grand Démembrement",
+    "values": {
+      "Communautés": "22d6e4d2-1b45-80d4-8cb8-ed6cf202f42a",
+      "Date de début": "-10",
+      "Date de fin": "25",
+      "Description": "Selon le Symbiotisme Khelvort (religion archaïque précédant le Barvasinkul), le Cataclysme de Kho'Vash fut le démembrement simultané de sept entités cosmiques appelées Symbiotes Primordiaux, transformant leurs fragments en cent Rêveurs et déclenchant la création frénétique de toute vie consciente par le huitième Symbiote survivant, Khul l'Assembleur.",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390, 1a16e4d2-1b45-8051-88d9-d744a1bbc095, 1a16e4d2-1b45-805e-841e-d699f81d67a9, 1886e4d2-1b45-816a-bfc3-facdb20624fb",
+      "Importance": "Majeur",
+      "Type d'événement": "Mythe"
+    },
+    "notion_page_id": "22d6e4d2-1b45-80ec-9b69-c5abfe35c8dc"
+  },
+  {
+    "Nom": "Miracle des Quinze Arbitrages",
+    "values": {
+      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Date de début": "1192",
+      "Date de fin": "1194",
+      "Description": "Barvas résout quinze conflits inter-espèces majeurs considérés comme insolubles, établissant sa réputation d'arbitre suprême et préfigurant les futures structures politiques d'Escelion par ses solutions transformatives.",
+      "Importance": "Majeur",
+      "Personnages": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Type d'événement": "Mythe"
+    },
+    "notion_page_id": "22e6e4d2-1b45-800e-92db-f450aa3aaae6"
+  },
+  {
+    "Nom": "Transcendance de Barvas",
+    "values": {
+      "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+      "Date de début": "1217",
+      "Date de fin": "1217",
+      "Description": "Dissolution volontaire de Barvas en 1700 fragments conscients dispersés à travers Escelion. Marque la fin de son existence physique mais le début de son influence mystique permanente via les manifestations cycliques.",
+      "Importance": "Notable",
+      "Personnages": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Type d'événement": "Mythe"
+    },
+    "notion_page_id": "22e6e4d2-1b45-80a7-840b-f67fffbd8762"
+  },
+  {
+    "Nom": "Premier Gwi-shin répertorié",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "2734",
+      "Date de fin": "2734",
+      "Description": "Première manifestation spectrale documentée dans les mines",
+      "Importance": "Mineur",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-8005-b7b3-f7cdd1d2848c"
+  },
+  {
+    "Nom": "Schisme des Voiles",
+    "values": {
+      "Date de début": "1037",
+      "Date de fin": "1055",
+      "Description": "Division des Qadul'Doei entre Faction de l'Obscurité Pure et les Révélateurs",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Modéré",
+      "Type d'événement": "Religieux"
+    },
+    "notion_page_id": "2306e4d2-1b45-800d-a139-c937a35feced"
+  },
+  {
+    "Nom": "Mort de Vokh-Taleth",
+    "values": {
+      "Date de début": "3305",
+      "Date de fin": "3305",
+      "Description": "Disparition mystérieuse dans les Plis d'Ossements",
+      "Importance": "Anecdotique",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages 1": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Type d'événement": "Mort"
+    },
+    "notion_page_id": "2306e4d2-1b45-8017-b510-ca96a1340890"
+  },
+  {
+    "Nom": "Code Urbain Unanime",
+    "values": {
+      "Date de début": "1355",
+      "Date de fin": "1355",
+      "Description": "Établissement du zonage concentrique de la Vieille Ville",
+      "Importance": "Important",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "2306e4d2-1b45-801c-8a8d-c4958ca12bc5"
+  },
+  {
+    "Nom": "Réforme Homéostatique",
+    "values": {
+      "Date de début": "2835",
+      "Date de fin": "2835",
+      "Description": "Rébellion des robots à IA, pendaison aux pylônes électriques",
+      "Lieux": "1b46e4d2-1b45-8071-88b9-da69653d4987, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3"
+    },
+    "notion_page_id": "2306e4d2-1b45-801e-8810-c7dba501d5ff"
+  },
+  {
+    "Nom": "Convergence Achromatique",
+    "values": {
+      "Date de début": "3208",
+      "Date de fin": "3208",
+      "Description": "La tour atteint un niveau critique et manifeste une conscience collective",
+      "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620"
+    },
+    "notion_page_id": "2306e4d2-1b45-8021-9e44-f7908241fa85"
+  },
+  {
+    "Nom": "Époque Fondatrice",
+    "values": {
+      "Date de début": "3155",
+      "Date de fin": "3200",
+      "Description": "Structuration méthodique du culte par Amatru",
+      "Importance": "Modéré",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-8023-b89d-d5fe5f94e7eb"
+  },
+  {
+    "Nom": "Expansion Technologique",
+    "values": {
+      "Date de début": "1457",
+      "Date de fin": "2682",
+      "Description": "Exploration et diversification des sous-espèces imuines",
+      "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b",
+      "Importance": "Modéré",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-8029-bb31-c2cf970d471e"
+  },
+  {
+    "Nom": "Incident du Grand Gwi-shin",
+    "values": {
+      "Date de début": "3056",
+      "Date de fin": "3056",
+      "Description": "Déflagration spectrale visible depuis la Vieille Ville",
+      "Importance": "Modéré",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-802b-bf07-e4197143bd8f"
+  },
+  {
+    "Nom": "Découverte du Léviathan",
+    "values": {
+      "Date de début": "3150",
+      "Date de fin": "3150",
+      "Description": "Une tempête révèle l'imposante silhouette du Léviathan Pétrifié émergeant des dunes noires",
+      "Importance": "Notable",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "2306e4d2-1b45-802d-8fcd-e5f35815919c"
+  },
+  {
+    "Nom": "Achèvement du Dernier Rituel",
+    "values": {
+      "Date de début": "3390",
+      "Date de fin": "3390",
+      "Description": "Finalisation secrète du protocole visant à incorporer Uresaïr dans une Fixation collective",
+      "Importance": "Modéré",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Religieux"
+    },
+    "notion_page_id": "2306e4d2-1b45-8034-9b22-e48166db0e88"
+  },
+  {
+    "Nom": "Transaction Intégrative totale",
+    "values": {
+      "Date de début": "2940",
+      "Date de fin": "2940",
+      "Description": "Un super-organisme Kephrasite unifié, attiré par les flux économiques anormaux émanant du Marché Automaton, fusionne avec les systèmes imuins déjà en place. Le cartel Kephrasite-Imuin établit les premières régulations stables du Code Dharmatique. Le Marché change de nature : de comptoir technologique imuin, il devient la méga-structure commerciale que l'on connaît aujourd'hui.",
+      "Espèces": "1a16e4d2-1b45-8006-a568-d4688d3b154b, 1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Autre"
+    },
+    "notion_page_id": "2306e4d2-1b45-8036-b99d-ff33ffd16179"
+  },
+  {
+    "Nom": "Ère des Expérimentations",
+    "values": {
+      "Date de début": "3382",
+      "Date de fin": "3390",
+      "Description": "Suite à l'isolement d'Uresaïr dans les Plis d'Ossements (3382), période d'innovations théologiques au sein du Culte de l'Anentropie qui doit s'adapter à l'absence physique de la Théomaque.",
+      "Importance": "Mineur",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-8037-9891-ef1989c7b8ad"
+  },
+  {
+    "Nom": "Concordat",
+    "values": {
+      "Date de début": "1822",
+      "Date de fin": "1822",
+      "Description": "Garantie des droits à toutes les espèces",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "2306e4d2-1b45-8038-96e3-f09e943d6b49"
+  },
+  {
+    "Nom": "Première momification parfaite",
+    "values": {
+      "Date de début": "3180",
+      "Date de fin": "3180",
+      "Description": "Yesh-Kamal accomplit le premier processus de transformation en 27 jours",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Religieux"
+    },
+    "notion_page_id": "2306e4d2-1b45-8039-8ad7-f7472a9e7ee2"
+  },
+  {
+    "Nom": "\"Réveil\" prophétique de Raki-Biro 58",
+    "values": {
+      "Date de début": "3382",
+      "Date de fin": "3382",
+      "Description": "Tournant critique pour le Paradigme Ésothrope",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "2306e4d2-1b45-803a-8cf8-df9dd317036a"
+  },
+  {
+    "Nom": "Colonisation Fongique",
+    "values": {
+      "Date de début": "1234",
+      "Date de fin": "1567",
+      "Description": "Apparition du Brouillignon, symbiose entre spores de l'Antichambre des Impossibles et sécrétions racinaires, provoquant contamination mémorielle des premiers colons",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "2306e4d2-1b45-803c-9898-f67514864771"
+  },
+  {
+    "Nom": "Première Grande Pulsation",
+    "values": {
+      "Date de début": "917",
+      "Date de fin": "917",
+      "Description": "Onde restructurant les bâtiments de la Vieille Ville en motif radial parfait",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-803c-a017-ef74249e30de"
+  },
+  {
+    "Nom": "Fondation des Sept Observatoires",
+    "values": {
+      "Date de début": "2843",
+      "Date de fin": "2851",
+      "Description": "Etablissement d'observatoires pour mesurer les fluctuations de l'Antichambre et recueillir des fragments de réalités alternatives.",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e"
+    },
+    "notion_page_id": "2306e4d2-1b45-803f-8d4c-e1e1eef79d56"
+  },
+  {
+    "Nom": "Pacte Fondateur",
+    "values": {
+      "Date de début": "3155",
+      "Date de fin": "3155",
+      "Description": "Alliance entre Amatru et l'Ensevelie, octroyant au premier une longévité exceptionnelle",
+      "Importance": "Notable",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "2306e4d2-1b45-803f-a84d-e9642b3a666a"
+  },
+  {
+    "Nom": "Grande Famine",
+    "values": {
+      "Date de début": "3210",
+      "Date de fin": "3210",
+      "Description": "Révélation des premières tensions doctrinales internes",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 2926e4d2-1b45-80ae-8c61-ed2313750e85",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-8040-bacf-dbea598cd81e"
+  },
+  {
+    "Nom": "Naissance de Xenopercepto Anamnesis",
+    "values": {
+      "Date de début": "500",
+      "Date de fin": "776",
+      "Description": "Naissance de Xenopercepto Anamnesis, futur Léviathan",
+      "Importance": "Mineur",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "2306e4d2-1b45-8041-aa65-f809e2f60348"
+  },
+  {
+    "Nom": "Découverte de la faille dimensionnelle",
+    "values": {
+      "Date de début": "2281",
+      "Date de fin": "2281",
+      "Description": "Faille menant vers un autre monde, temporairement scellée mais négligée avec le temps",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d"
+    },
+    "notion_page_id": "2306e4d2-1b45-8043-a2a2-e640272f4354"
+  },
+  {
+    "Nom": "Émergence de Cristal-Éteint",
+    "values": {
+      "Date de début": "2487",
+      "Date de fin": "2487",
+      "Description": "Fusion des traditions mystiques qadul'doei avec les technologies émergentes",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Modéré",
+      "Type d'événement": "Mythe"
+    },
+    "notion_page_id": "2306e4d2-1b45-8043-bee8-f8a3d679a4b8"
+  },
+  {
+    "Nom": "Émergence du Paradigme Ésothrope",
+    "values": {
+      "Date de début": "3345",
+      "Date de fin": "3345",
+      "Description": "Formation secrète d'une cellule expérimentale sous l'impulsion d'Amatru",
+      "Importance": "Modéré",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'événement": "Invention"
+    },
+    "notion_page_id": "2306e4d2-1b45-8048-a25b-c3100f44f0cd"
+  },
+  {
+    "Nom": "Corallogenèse",
+    "values": {
+      "Date de début": "2345",
+      "Date de fin": "2890",
+      "Description": "Transformation des structures végétales en formations coralliennes calcifiées et établissement des premiers Digestoires Cognitifs par les Aberrations Bouffies",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "2306e4d2-1b45-8048-be38-f57c4827403e"
+  },
+  {
+    "Nom": "Conclave des Cartographes Quantiques",
+    "values": {
+      "Date de début": "2487",
+      "Date de fin": "2487",
+      "Description": "Première exploration documentée de l'Antichambre, avec trois Umcuts Fractals qui prédirent une \"zone d'indétermination fondamentale\". L'expédition a disparu.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e"
+    },
+    "notion_page_id": "2306e4d2-1b45-8049-abe4-c5086b65c24c"
+  },
+  {
+    "Nom": "Cryptes d'Ossification",
+    "values": {
+      "Date de début": "3160",
+      "Date de fin": "3160",
+      "Description": "Aménagement des premières cryptes dans les chambres thoraciques du titan",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Religieux"
+    },
+    "notion_page_id": "2306e4d2-1b45-8051-90cb-ca8b6625f8f8"
+  },
+  {
+    "Nom": "Expédition Vaideccane",
+    "values": {
+      "Date de début": "2512",
+      "Date de fin": "2512",
+      "Description": "Expédition tragique dont les sept membres fusionnèrent en une seule entité existant à différents moments temporels.",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e"
+    },
+    "notion_page_id": "2306e4d2-1b45-8051-ab95-e0c26a35c46a"
+  },
+  {
+    "Nom": "Inaugurations des mines du Tombeau",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "2691",
+      "Date de fin": "2691",
+      "Description": "Ouverture par le Chaebol Synaptic Dynamics",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da, 1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-8061-9f88-e5925588b94a"
+  },
+  {
+    "Nom": "Yuga Commercial",
+    "values": {
+      "Date de début": "3303",
+      "Date de fin": "3390",
+      "Description": "Ère actuelle d'intensification extractive",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-8062-97e2-f6729e94cd01"
+  },
+  {
+    "Nom": "Révélation de l'Ensevelie",
+    "values": {
+      "Date de début": "3151",
+      "Date de fin": "3155",
+      "Description": "Exploration des premières chambres internes du titan et rencontre avec l'Ensevelie",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "2306e4d2-1b45-8064-ac8f-f0790e880d46"
+  },
+  {
+    "Nom": "Incident de la Stèle et arrivée au Léviathan",
+    "values": {
+      "Date de début": "3245",
+      "Date de fin": "3245",
+      "Description": "Après sept ans de supplications incessantes du Culte qu'Uresaïr refuse, Akthar-Neth Amatru sacrifie rituellement son propre bras marqué pour la convaincre de rejoindre le Léviathan. Ce geste autodestructeur crée un lien psychique involontaire et la persuade d'accepter. Création de la Stèle des Vœux Contre-Ondoyants.",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-8066-bbea-c95c9602824b"
+  },
+  {
+    "Nom": "Édition du Code Algorithmique",
+    "values": {
+      "Date de début": "3077",
+      "Date de fin": "3077",
+      "Description": "Établissement des premières régulations stables",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "2306e4d2-1b45-806f-a5aa-f57642c95fba"
+  },
+  {
+    "Nom": "Émergence d'Ori-Bikar 57",
+    "values": {
+      "Date de début": "3378",
+      "Date de fin": "3378",
+      "Description": "\"Interface créative\" du Paradigme Ésothrope, introduisant un élément chaotique",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "2306e4d2-1b45-8076-883a-dcbc9e9454bd"
+  },
+  {
+    "Nom": "Découverte des Bains Parkourétiques",
+    "values": {
+      "Date de début": "3298",
+      "Date de fin": "3298",
+      "Description": "Sanctification des bains aux propriétés d'acide géométrique",
+      "Importance": "Mineur",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "2306e4d2-1b45-8077-a5a3-fdfae6d3d483"
+  },
+  {
+    "Nom": "Epoqué Contemporaine",
+    "values": {
+      "Date de début": "3204",
+      "Date de fin": "3390",
+      "Description": "Développement d'une économie mémorielle sophistiquée avec les Tisserands de l'Oubli Volontaire et les Marchés aux Spores Oniriques",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-807b-821a-c0f29ad85841"
+  },
+  {
+    "Nom": "Premier Sodoir d'Éternité",
+    "values": {
+      "Date de début": "3371",
+      "Date de fin": "3371",
+      "Description": "Innovation de Kha'Vareth révolutionnant la conservation des corps",
+      "Importance": "Modéré",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4, 2446e4d2-1b45-80d1-bc00-e6e0d93f61d0",
+      "Personnages": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Type d'événement": "Invention"
+    },
+    "notion_page_id": "2306e4d2-1b45-807f-bbd5-c5511503a663"
+  },
+  {
+    "Nom": "Ère des Sentinelles Ambulantes",
+    "values": {
+      "Date de début": "2790",
+      "Date de fin": "2835",
+      "Description": "Période où douze colosses-forteresses protégeaient la Vieille Ville",
+      "Lieux": "1b46e4d2-1b45-8071-88b9-da69653d4987, 1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3"
+    },
+    "notion_page_id": "2306e4d2-1b45-8081-bbcb-f06b4f3acb64"
+  },
+  {
+    "Nom": "Construction du Narthex Abyssal",
+    "values": {
+      "Date de début": "3295",
+      "Date de fin": "3295",
+      "Description": "Chef-d'œuvre de Vokh-Taleth permettant une interface avec la conscience fragmentée du titan",
+      "Importance": "Mineur",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "2306e4d2-1b45-8082-9c5b-eacacd35da2d"
+  },
+  {
+    "Nom": "Cycles d'Émergence",
+    "values": {
+      "Date de début": "2150",
+      "Date de fin": "2250",
+      "Description": "Période d'instabilité du Proto-Marché imuin, avant toute régulation algorithmique stable. Le Vahan-Meru se déconstruit et se reconstruit selon des architectures imprévisibles. Les Imuins apprennent à composer avec une structure qui les dépasse.",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-8084-aef7-c3f58e9ea074"
+  },
+  {
+    "Nom": "Fondation des Murmurateurs",
+    "values": {
+      "Date de début": "3212",
+      "Date de fin": "3212",
+      "Description": "Rhylos et sept dissidents créent une doctrine alternative",
+      "Importance": "Modéré",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-808c-93d1-c45d2767afc2"
+  },
+  {
+    "Nom": "Purge Culturelle de la Vieille Ville",
+    "values": {
+      "Date de début": "2916",
+      "Date de fin": "2916",
+      "Description": "Le Xyriad sert de sanctuaire aux philosophes persécutés",
+      "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620"
+    },
+    "notion_page_id": "2306e4d2-1b45-808e-8d71-c584967f07ce"
+  },
+  {
+    "Nom": "Témoins de l'Éventuel",
+    "values": {
+      "Date de début": "2843",
+      "Date de fin": "2843",
+      "Description": "Établissement de sept observatoires frontaliers, découvrant que l'Antichambre pulsait au rythme des Rêveurs",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e"
+    },
+    "notion_page_id": "2306e4d2-1b45-808e-9f23-c1276c085c30"
+  },
+  {
+    "Nom": "Découverte par le Consortium des Géomètres Existentiels",
+    "values": {
+      "Date de début": "2109",
+      "Date de fin": "2109",
+      "Description": "Première identification d'anomalies mathématiques aux limites d'Escelion.",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e"
+    },
+    "notion_page_id": "2306e4d2-1b45-8093-a2e1-df39ff8fd692"
+  },
+  {
+    "Nom": "Effondrement du Sous-Système Bhairava",
+    "values": {
+      "Date de début": "3388",
+      "Date de fin": "3388",
+      "Description": "Événement catastrophique au Marché automaton",
+      "Importance": "Modéré",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-8095-845c-d778d5796d44"
+  },
+  {
+    "Nom": "Seconde Grande Pulsation",
+    "values": {
+      "Date de début": "2102",
+      "Date de fin": "2102",
+      "Description": "Cycles du Souffle Hakutō-Ah rendus prévisibles",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-8099-afd0-df5b56d5fcb6"
+  },
+  {
+    "Nom": "Découverte des gisements du Tombeau des lueurs dissidentes",
+    "values": {
+      "Date de début": "2687",
+      "Date de fin": "2687",
+      "Description": "Explorations géologiques par Nav'Thek des tours Spirales",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Important",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "2306e4d2-1b45-809b-b72a-e1809283b436"
+  },
+  {
+    "Nom": "Bibliothèques Veineuses",
+    "values": {
+      "Date de début": "3175",
+      "Date de fin": "3175",
+      "Description": "Établissement des archives dans les lobes cérébraux préservés du titan",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-809b-b8a1-e02e3a8c7006"
+  },
+  {
+    "Nom": "Destruction de Merid par Errazel",
+    "values": {
+      "Date de début": "-5",
+      "Date de fin": "-5",
+      "Description": "Destruction partielle de Merid par Errazel, recherche d’un monde refuge",
+      "Importance": "Majeur",
+      "Lieux": "1b36e4d2-1b45-8069-9c90-fc298e905409",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-809d-b448-ccbd5c2939e7"
+  },
+  {
+    "Nom": "Bataille des Neuf Sanctuaires",
+    "values": {
+      "Date de début": "1055",
+      "Date de fin": "1055",
+      "Description": "Culmination du Schisme des Voiles, premier usage militaire des techniques lumimathiques",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Notable",
+      "Type d'événement": "Bataille"
+    },
+    "notion_page_id": "2306e4d2-1b45-80a0-a9ee-e071006a5465"
+  },
+  {
+    "Nom": "Première manifestation d'un Qadul'Doei",
+    "values": {
+      "Date de début": "37",
+      "Date de fin": "37",
+      "Description": "Lumen-Vide apparaît au cœur de l'Abîme Primordial",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Notable",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "2306e4d2-1b45-80a1-8c23-ce9678bd4098"
+  },
+  {
+    "Nom": "Abandon de Kha'Vareth",
+    "values": {
+      "Date de début": "3357",
+      "Date de fin": "3357",
+      "Description": "Arrivée du futur Artisan d'Éternité aux portes du Léviathan",
+      "Importance": "Anecdotique",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Evénement personnel"
+    },
+    "notion_page_id": "2306e4d2-1b45-80a2-82ab-cd961d082cfe"
+  },
+  {
+    "Nom": "Stratégie du Sacrifice Apparent",
+    "values": {
+      "Date de début": "1178",
+      "Date de fin": "1432",
+      "Description": "Développée par Miroir-Vacant, méthode d'influence par renoncement apparent au pouvoir",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Modéré",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-80aa-9afa-d9e58246c982"
+  },
+  {
+    "Nom": "L'Ère de la Chronophysique",
+    "values": {
+      "Date de début": "777",
+      "Date de fin": "887",
+      "Description": "Anamnesis devient l'Archiviste-Sonde principal",
+      "Importance": "Anecdotique",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Invention"
+    },
+    "notion_page_id": "2306e4d2-1b45-80ab-8cd1-d9d55fb78662"
+  },
+  {
+    "Nom": "Âge de la Résonance",
+    "values": {
+      "Date de début": "125",
+      "Date de fin": "499",
+      "Description": "Établissement des premières installations expérimentales des Frémissants",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-80b0-84ba-dc5d2cc7245b"
+  },
+  {
+    "Nom": "Effondrement progressif des Colosses-Forteresse",
+    "values": {
+      "Date de début": "2835",
+      "Date de fin": "3390",
+      "Description": "Les colosses cessent de fonctionner et forment les Bastions Oubliés",
+      "Lieux": "1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3, 1b46e4d2-1b45-8071-88b9-da69653d4987"
+    },
+    "notion_page_id": "2306e4d2-1b45-80b3-9efe-f9718859c2c0"
+  },
+  {
+    "Nom": "Âge d'Or Mécaniste",
+    "values": {
+      "Date de début": "1200",
+      "Date de fin": "1600",
+      "Description": "Innovation technologique avec Circuit Homeostatique et Bibliothèque Sympathique",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "2306e4d2-1b45-80b9-bcc7-d9bfa9388df8"
+  },
+  {
+    "Nom": "Période Luminescente",
+    "values": {
+      "Date de début": "38",
+      "Date de fin": "337",
+      "Description": "Formation de l'école Luminescente par onze Qadul'Doei, établissement des fondements philosophiques",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Important",
+      "Type d'événement": "Religieux"
+    },
+    "notion_page_id": "2306e4d2-1b45-80bd-95c2-cc290dc0a139"
+  },
+  {
+    "Nom": "Division du désert",
+    "values": {
+      "Date de début": "1400",
+      "Date de fin": "1400",
+      "Description": "Division du désert en quatre provinces distinctes: Nashîr, Zhakâd, Khôryn et Vash-Sûl",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-80bf-bef3-d03501752d8e"
+  },
+  {
+    "Nom": "Effondrement Générateur",
+    "values": {
+      "Date de début": "2487",
+      "Date de fin": "2487",
+      "Description": "Le géologue umcut Gex'Thara provoque un effondrement wyrdique lors d'une mission d'excavation, créant l'Hermogène",
+      "Lieux": "1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-80c1-905c-fad01a2f9766"
+  },
+  {
+    "Nom": "Crise Contemporaine",
+    "values": {
+      "Date de début": "3382",
+      "Date de fin": "3390",
+      "Description": "Période d'instabilité culminant avec l'arrivée de l'Éthérée",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2306e4d2-1b45-80c3-a638-e2da68c5d318"
+  },
+  {
+    "Nom": "Règne d'Obsidien-Cœur",
+    "values": {
+      "Date de début": "482",
+      "Date de fin": "976",
+      "Description": "Premier Archiviste Suprême, création de la Bibliothèque Éclipsée et développement de la Lumimathique. La Bibliothèque fut érigée sur l'emplacement d'un sanctuaire d'Uresaïr, dont les propriétés temporelles permirent la préservation exceptionnelle des connaissances",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Notable",
+      "Type d'événement": "Couronnement"
+    },
+    "notion_page_id": "2306e4d2-1b45-80c5-9350-cb927484010f"
+  },
+  {
+    "Nom": "Sabotage de Vekh-Na'ash K'ssh",
+    "values": {
+      "Date de début": "3383",
+      "Date de fin": "3383",
+      "Description": "Échec de la mission contre le culte, conversion et transformation en Navarre",
+      "Importance": "Anecdotique",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
+      "Type d'événement": "Evénement personnel"
+    },
+    "notion_page_id": "2306e4d2-1b45-80c6-8e28-f88225cb2d20"
+  },
+  {
+    "Nom": "La Symbiose",
+    "values": {
+      "Date de début": "2512",
+      "Date de fin": "2689",
+      "Description": "Les premiers Fungi Intelligens colonisent les cavernes transformées",
+      "Lieux": "1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf",
+      "Type d'événement": "Migration"
+    },
+    "notion_page_id": "2306e4d2-1b45-80c7-b919-f2ced3cc69ef"
+  },
+  {
+    "Nom": "Ère des Contractions",
+    "values": {
+      "Date de début": "2000",
+      "Date de fin": "2700",
+      "Description": "Développement du Jardin Mnémonique",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-80ca-9510-fc4addbf5612"
+  },
+  {
+    "Nom": "Ère des Grands Travaux",
+    "values": {
+      "Date de début": "3280",
+      "Date de fin": "3285",
+      "Description": "Transformation architecturale majeure du Léviathan sous Vokh-Taleth l'Ancien",
+      "Importance": "Modéré",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-80ce-8098-cd0a98083e51"
+  },
+  {
+    "Nom": "L'Exode des Communautés Déracinées",
+    "values": {
+      "Date de début": "2836",
+      "Date de fin": "2836",
+      "Description": "Procession funèbre de 18 mois durant laquelle les colosses s'immobilisèrent un par un, forçant 15,000 personnes à abandonner leur mode de vie itinérant",
+      "Lieux": "1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3"
+    },
+    "notion_page_id": "2306e4d2-1b45-80d0-9af0-c36c0c691849"
+  },
+  {
+    "Nom": "Pulsation Tertiaire",
+    "values": {
+      "Date de début": "3156",
+      "Date de fin": "3156",
+      "Description": "Extension du septième district de la Vieille Ville",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-80d8-9946-c1ca0d339398"
+  },
+  {
+    "Nom": "Ère des Archivistes",
+    "values": {
+      "Date de début": "1568",
+      "Date de fin": "2344",
+      "Description": "Établissement des Stations d'Observation par les Qadul'Doei et découverte que le Brouillignon puise dans un réservoir de mémoires \"orphelines\"",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-80d8-bc98-cd7c7f4b8c69"
+  },
+  {
+    "Nom": "Ère de l'Expansion Subtile",
+    "values": {
+      "Date de début": "1055",
+      "Date de fin": "1900",
+      "Description": "Infiltration progressive des Qadul'Doei dans les civilisations d'Escelion",
+      "Espèces": "1a16e4d2-1b45-8099-be36-db66acb76390",
+      "Importance": "Modéré",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-80d9-802e-d1cf6297a990"
+  },
+  {
+    "Nom": "Purges Anti-Murmuratrices",
+    "values": {
+      "Date de début": "3365",
+      "Date de fin": "3375",
+      "Description": "Intensification des conflits internes",
+      "Importance": "Modéré",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Bataille"
+    },
+    "notion_page_id": "2306e4d2-1b45-80de-91a9-ecbe7e86e127"
+  },
+  {
+    "Nom": "Fondation de la Citadelle",
+    "values": {
+      "Date de début": "2255",
+      "Date de fin": "2355",
+      "Description": "Projet communautaire utopique fondé par le mystérieux \"Maître Gardien\"",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d"
+    },
+    "notion_page_id": "2306e4d2-1b45-80de-b406-c519ea9561cf"
+  },
+  {
+    "Nom": "L'Ère des Résurrections Ratées",
+    "values": {
+      "Date de début": "2837",
+      "Date de fin": "3390",
+      "Description": "Période actuelle où des grues automatisées tentent sans succès de reconstruire les colosses, créant un cycle perpétuel de construction et destruction.",
+      "Lieux": "1b46e4d2-1b45-8091-b2ca-da5a4bef6aa3"
+    },
+    "notion_page_id": "2306e4d2-1b45-80e0-ac74-c715c3cc8672"
+  },
+  {
+    "Nom": "Pacte Symbiotique",
+    "values": {
+      "Date de début": "2891",
+      "Date de fin": "3203",
+      "Description": "Négociation du Pacte des Spores avec le Marché Automaton voisin et arrivée des Vohars",
+      "Lieux": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "2306e4d2-1b45-80e1-b9cb-c36de6617cb1"
+  },
+  {
+    "Nom": "Arrivée d'Uresaïr dans le Désert des Échos",
+    "values": {
+      "Date de début": "3238",
+      "Date de fin": "3238",
+      "Description": "Fuyant son bannissement de Daïlon après l'incident du Pont des Incompréhensions, Uresaïr arrive dans le Désert des Échos dans un état d'épuisement spirituel total. Le Culte de l'Anentropie, établi au Léviathan depuis 83 ans, la reconnaît comme la Théomaque prophétisée et commence à la supplier de les rejoindre.",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Type d'événement": "Migration"
+    },
+    "notion_page_id": "2306e4d2-1b45-80ec-a056-f754106b614a"
+  },
+  {
+    "Nom": "Phase d'Expansion Mémétique",
+    "values": {
+      "Date de début": "3077",
+      "Date de fin": "3303",
+      "Description": "Établissement des routes commerciales",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2306e4d2-1b45-80ee-97b2-c475b84ba849"
+  },
+  {
+    "Nom": "Grande Incursion de Zharek le Divergent",
+    "values": {
+      "Date de début": "3107",
+      "Date de fin": "3107",
+      "Description": "Expédition où seuls trois des soixante-quatre explorateurs sont revenus, Zharek lui-même existant désormais en milliers de versions simultanées.",
+      "Lieux": "1b46e4d2-1b45-8069-b24d-c263445f6a8e"
+    },
+    "notion_page_id": "2306e4d2-1b45-80f4-8a63-f37b0f0f1a7c"
+  },
+  {
+    "Nom": "Période des Trois Convergences",
+    "values": {
+      "Date de début": "1700",
+      "Date de fin": "1900",
+      "Description": "Ajout des Chaudières Démiurgiques et du Jardin Mnémonique",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-80f6-8b3f-c62ca55f9ce6"
+  },
+  {
+    "Nom": "Aménagement du Tunnel Vertébral",
+    "values": {
+      "Date de début": "3285",
+      "Date de fin": "3285",
+      "Description": "Création de l'artère sacrée avec ses parois gravées des Textes Absolus",
+      "Importance": "Mineur",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "2306e4d2-1b45-80fb-8a75-c3a050fca142"
+  },
+  {
+    "Nom": "Grande Bifurcation/Divergence Cognitive",
+    "values": {
+      "Date de début": "2487",
+      "Date de fin": "2487",
+      "Description": "Tentative de résoudre le Théorème de la Discontinuité Harmonique qui crée spontanément le Xyriad",
+      "Lieux": "1cc6e4d2-1b45-80fb-b0ec-f0cfe9539620"
+    },
+    "notion_page_id": "2306e4d2-1b45-80fc-a91c-cd7acc2f4543"
+  },
+  {
+    "Nom": "Cartographie du Désert",
+    "values": {
+      "Date de début": "830",
+      "Date de fin": "830",
+      "Description": "Première cartographie du désert par Zvyk, explorateur Vaideccan",
+      "Espèces": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
+      "Importance": "Mineur",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "2306e4d2-1b45-80fe-89b6-da09164090f5"
+  },
+  {
+    "Nom": "Grand Frissonnement",
+    "values": {
+      "Date de début": "3246",
+      "Date de fin": "3246",
+      "Description": "Activité intense du Léviathan",
+      "Importance": "Mineur",
+      "Lieux": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2436e4d2-1b45-800c-a5b7-de8b18650efe"
+  },
+  {
+    "Nom": "Les Murmures Adhésifs",
+    "values": {
+      "Date de début": "1200",
+      "Date de fin": "1411",
+      "Description": "Phénomènes linguistiques spontanés à la frange entre la Vieille Ville et les proto-Couronnes intermédiaires. Des mots prononcés collent aux surfaces, formant des \"taches sourdes\". Les murs développent des excroissances labiales ; les premières papilles d'un organisme en gestation. Vers 1350 AG, les taches sourdes se connectent et des couloirs entiers deviennent muets.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2ac4741f-8bec-48d0-ac78-1e82f715bedf"
+  },
+  {
+    "Nom": "Invention du Mutisme Tactique par Gara-Trois",
+    "values": {
+      "Date de début": "1720",
+      "Description": "Gara-Trois, une Umcut Opposée piégée dans la Cité Labiale depuis une durée indéterminée, cesse de parler et survit. Développe les premiers rudiments du Mutisme Tactique, un système gestuel permettant de communiquer sans nourrir la Cité. Première communauté permanente de résidents piégés.",
+      "Importance": "Important",
+      "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
+      "Type d'événement": "Invention"
+    },
+    "notion_page_id": "2b32df64-f870-437c-9cc6-12ea5dc22c90"
+  },
+  {
+    "Nom": "Évasion des premiers Xyléophores",
+    "values": {
+      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Date de début": "3220",
+      "Description": "Pendant une transmutation expérimentale impliquant un substrat biotellurique d'Hermogène, des résidus de cuves Ékpyrosis et un treillis kharosthi adaptatif, un artisan produit involontairement une structure végétale-minérale semi-autonome : les premiers Xyléophores. La communauté est secouée — la transmutation a toujours consisté à créer des objets inertes. La reproduction intentionnelle de Xyléophores est interdite par consensus, les protocoles de sécurité sont renforcés, et les journaux du responsable sont étudiés ligne par ligne sans qu'une réponse satisfaisante soit trouvée. L'incident est inscrit comme avertissement permanent dans les pratiques de formation.",
+      "Espèces": "2256e4d2-1b45-8048-8d1c-dc817100f567",
+      "Importance": "Important",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "2c3050e7-bd48-4b0b-a249-2f1630e46210"
+  },
+  {
+    "Nom": "Phase Imuin du Marché Automaton",
+    "values": {
+      "Date de début": "2250",
+      "Date de fin": "2940",
+      "Description": "Après la stabilisation des Cycles d'Émergence, le Proto-Marché fonctionne pendant près de 700 ans comme comptoir technologique exclusivement imuin. Architecture plus brute, gouvernance collective par cartel, échanges centrés sur les modifications corporelles et les artefacts du Vahan-Meru. Cette période prend fin avec l'arrivée des Kephrasites et la Transaction Intégrative Totale.",
+      "Importance": "Modéré",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "2dd9c086-57c8-4e2e-b988-a7140c7f69c6"
+  },
+  {
+    "Nom": "Guerre des Murs (La Flèche vs Opposés)",
+    "values": {
+      "Date de début": "1050",
+      "Date de fin": "1052",
+      "Description": "Conflit entre La Flèche et les Opposés sur la propriété des fragments d'incubation. Premier et unique conflit armé entre tours, résolu par arbitrage vohar. Les Opposés obtiennent leur indépendance légale.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Notable",
+      "Type d'événement": "Bataille"
+    },
+    "notion_page_id": "37831075-7985-49b7-bb5b-f34b1acc1489"
+  },
+  {
+    "Nom": "Grand Gwi-shin (Tombeau)",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "3056",
+      "Description": "Éruption spectrale majeure tue 23 mineurs dans le Tombeau des Lueurs Dissidentes. Protocoles d'évacuation prédictifs existaient mais furent occultés. Catalyse naissance mouvement ouvrier Lueurs Dissidentes. Création filiale Jung-Harmony-Tech comme structure pare-feu.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "44fcead0-c726-446d-944f-6955caeca065"
+  },
+  {
+    "Nom": "Grande Reclassification des Construits",
+    "values": {
+      "Date de début": "2940",
+      "Description": "Dans le sillage de la Transaction Intégrative Totale, le Code Dharmatique reclassifie rétroactivement tous les Construits comme « assemblages secondaires » — produits du Marché, non sujets de droits. Des êtres libres depuis sept siècles se retrouvent dotés d'un statut, d'une hiérarchie et d'obligations. Svayambhu appellera plus tard cet acte la Violence Ontologique : non pas une cruauté délibérée, mais une indifférence algorithmique qui traite l'existence comme une variable d'optimisation.",
+      "Espèces": "1cd6e4d2-1b45-80fd-85ec-e1d624fffb64, 1be6e4d2-1b45-8094-8b25-d887930a521e",
+      "Importance": "Majeur",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "45293dff-0afa-4713-a628-b95fec9344bb"
+  },
+  {
+    "Nom": "Création Jung-Harmony-Tech",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "3056",
+      "Description": "Suite au Grand Gwi-shin, le Chaebol crée Jung-Harmony-Tech comme filiale sacrificielle (34% consortium, 15 familles-entreprises) absorbant scandales et violations trop toxiques pour Synaptic.",
+      "Importance": "Modéré",
+      "Lieux": "1b46e4d2-1b45-80c6-ba2c-e2512a9a56da",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "49e9d994-e6e9-484a-b3fe-b70b1927d1e7"
+  },
+  {
+    "Nom": "Première Marche des Ombres",
+    "values": {
+      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Date de début": "350",
+      "Description": "Première formalisation attestée de la cérémonie nocturne aldravinde autour de la Braise Éternelle. La nostalgie de Merid passe du registre du deuil à celui du sacré. Datation incertaine, transmise par la tradition orale.",
+      "Importance": "Modéré",
+      "Lieux": "1b46e4d2-1b45-801a-ada0-f6ec210d2fa0",
+      "Type d'événement": "Religieux"
+    },
+    "notion_page_id": "4c32aced-76e2-482a-9914-ade2799a3b23"
+  },
+  {
+    "Nom": "Trahison de Khet-Anomul",
+    "values": {
+      "Date de début": "1199",
+      "Date de fin": "1199",
+      "Description": "Barvas le Juge-Mendiant cause délibérément la destruction de la Tour Suprême de Khet-Anomul par des Parasites Tachycardiques. 2 847 Umcuts Vortex périssent sans descendance possible. Trauma fondateur du rejet du Barvasinkul par l'espèce.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Majeur",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "4ea0320d-969d-46f5-9954-6f8fd265e6a5"
+  },
+  {
+    "Nom": "Cohabitation Silencieuse",
+    "values": {
+      "Date de début": "1800",
+      "Date de fin": "2487",
+      "Description": "Population piégée stabilisée entre 300 et 500 résidents permanents. Société fondée sur l'économie du silence. Le Mutisme Tactique se complexifie (registres formels, poésie gestuelle). Cartographie des Zones de Quiétude. Les Indexeurs du Glossaire deviennent les seuls à circuler librement grâce à leur langage définitionnel indigeste.",
+      "Importance": "Modéré",
+      "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
+      "Personnages": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Type d'événement": "Période"
+    },
+    "notion_page_id": "63d80374-bc59-4358-9f21-0bb6b73600ba"
+  },
+  {
+    "Nom": "Traité de la Boue Dorée",
+    "values": {
+      "Date de début": "1480",
+      "Date de fin": "1480",
+      "Description": "Première alliance commerciale inter-espèces entre les Umcuts Spirales et la Vieille Ville. Marque la reconnaissance internationale des Umcuts comme partenaires commerciaux fiables.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Important",
+      "Type d'événement": "Traité"
+    },
+    "notion_page_id": "6728a7c8-3036-45f5-aadf-2466cea6d305"
+  },
+  {
+    "Nom": "Expansion neurotechnologie Chaebol",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "2703",
+      "Description": "Le Chaebol Synaptic Dynamics développe les implants kokoro-link (lien-cœur), dispositifs neuraux permettant monitoring émotionnel, synchronisation affective et calcul du coefficient nunchi.",
+      "Importance": "Important",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Invention"
+    },
+    "notion_page_id": "6abd6e88-0ebe-43ee-abc2-274b618927b4"
+  },
+  {
+    "Nom": "Enfouissement Fondateur (schisme Opposés)",
+    "values": {
+      "Date de début": "780",
+      "Date de fin": "780",
+      "Description": "Premier schisme de l'espèce : un groupe dissident refuse la verticalité de La Flèche et migre vers les profondeurs avec des fragments de mur d'incubation. Fondation des tours Opposés à croissance inversée.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Important",
+      "Type d'événement": "Migration"
+    },
+    "notion_page_id": "6b7bfb64-53c9-48c5-8800-f539d80c7293"
+  },
+  {
+    "Nom": "Naissance de Vol Reitar",
+    "values": {
+      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Date de début": "3072",
+      "Description": "Naissance dans une caravane aldravinde de Vol Reitar, futur auteur du Traité des Gradients et tyran de Daïlon.",
+      "Espèces": "1a16e4d2-1b45-80d7-a920-c3f40e49246b",
+      "Importance": "Notable",
+      "Personnages": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "6fb8d913-af95-4d09-abec-7b3377c2586f"
+  },
+  {
+    "Nom": "Manufacture implants neuronaux",
+    "values": {
+      "Communautés": "1f16e4d2-1b45-805c-beb4-ef770dad55dc",
+      "Date de début": "2718",
+      "Description": "Le Chaebol lance la production industrielle d'implants neuraux à base de tantalite photosensible raffiné, devenant leader de la neurotechnologie escelionienne.",
+      "Importance": "Modéré",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Invention"
+    },
+    "notion_page_id": "773282cc-b298-4e19-9327-5958a2066e26"
+  },
+  {
+    "Nom": "Destruction partielle de la Citadelle de Daïlon",
+    "values": {
+      "Date de début": "3373",
+      "Date de fin": "3373",
+      "Description": "Lors de sa révolte contre Vol Reitar, Eonundé libère les autres créations et provoque la destruction partielle de la Citadelle de Daïlon — laboratoires souterrains, cuves de création et archives scientifiques. Ilyena, qui refuse de fuir, reste dans les décombres et passera dix ans à cataloguer ce qui a survécu.",
+      "Importance": "Notable",
+      "Lieux": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Personnages": "1996e4d2-1b45-80fa-97db-fe99255e6c0c, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Personnages 1": "1996e4d2-1b45-80fa-97db-fe99255e6c0c, 3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "78b898a0-e163-462d-a595-d80d87c1c5d5"
+  },
+  {
+    "Nom": "Création de L'Équipe des Trois-Dos",
+    "values": {
+      "Date de début": "3345",
+      "Date de fin": "3345",
+      "Description": "Trois Zim Vortex fusionnent accidentellement lors d'une renaissance dans des murs d'incubation endommagés. Cas médical et philosophique unique : sont-ils trois Umcuts ou un seul ? Recueillis par le Paradigme Ésothrope.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Mineur",
+      "Type d'événement": "Autre"
+    },
+    "notion_page_id": "7d6e0a1a-528b-4d61-a729-be43d4010b58"
+  },
+  {
+    "Nom": "Concile des Souffles",
+    "values": {
+      "Communautés": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Date de début": "1800",
+      "Description": "Rassemblement exceptionnel de toutes les caravanes aldravindes, motivé par la prise de conscience du déclin démographique. Les Meridhalis inventorient le corpus oral et constatent des pertes irréversibles. Aucune décision structurelle n'en sort, mais l'événement devient lui-même un récit fondateur.",
+      "Importance": "Modéré",
+      "Lieux": "1b46e4d2-1b45-801a-ada0-f6ec210d2fa0",
+      "Type d'événement": "Autre"
+    },
+    "notion_page_id": "7eaa462a-dd7a-4011-a135-a1954f50dfd9"
+  },
+  {
+    "Nom": "Catalyse d'Uresaïr (apparition des Umcuts)",
+    "values": {
+      "Date de début": "500",
+      "Date de fin": "520",
+      "Description": "Uresaïr crée cinq sanctuaires pour stabiliser des régions chaotiques. Le premier sanctuaire fusionne avec le substrat vivant local et devient un organisme sessile capable de produire des formes mobiles : les premiers Umcuts émergent.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Majeur",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "952d658f-1fda-430e-894c-a5d87fc2e31f"
+  },
+  {
+    "Nom": "Incident du Greffon Mort",
+    "values": {
+      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Date de début": "3140",
+      "Description": "Vers 3140 AG, un échange diplomatique entre la Lisière et Hermogène tourne au désastre : Hermogène offre un hybride biotellurique (une plante-capteur mesurant les fluctuations telluriques) à la Lisière en gage de bonne foi commerciale. Les Peseto-Forgerons tentent d'intégrer le capteur dans un assemblage kharosthi standard. Les paradigmes se rejettent violemment — la plante mute, les kharosthi fracturent, trois artisans sont blessés. Un petit groupe d'artisans des Forges de la Vieille Ville propose alors de créer un objet nouveau à partir des deux substrats, en détournant des cuves Ékpyrosis de la Steppe des Éteignoirs. Le résultat — un greffon fonctionnel dans les deux paradigmes — résout la crise, mais la Lisière considère ces forgerons comme des profanateurs des kharosthi sacrés. Cet incident est l'événement catalyseur de la communauté des Artisans transmutateurs.",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "a314267c-1a52-4fbb-80c6-195816d8f567"
+  },
+  {
+    "Nom": "Première Résonance Frémissante",
+    "values": {
+      "Date de début": "580",
+      "Date de fin": "600",
+      "Description": "Premier échange inter-espèces entre Umcuts et Frémissants. Les Frémissants, fascinés par les Umcuts (seule espèce dont ils ne peuvent prédire le comportement après renaissance), partagent leurs savoirs cartographiques contre des techniques olfactives.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Notable",
+      "Type d'événement": "Découverte"
+    },
+    "notion_page_id": "aa5e51d0-96aa-41fb-83a5-119370edfc0b"
+  },
+  {
+    "Nom": "Mort de Ysellor Eonundé du Ressac",
+    "values": {
+      "Date de début": "3425",
+      "Date de fin": "3425",
+      "Description": "Décès (assassinat présumé) de Ysellor Eonundé du Ressac à Merid. Date approximative issue de la fiche personnage ; circonstances volontairement ambiguës.",
+      "Importance": "Notable",
+      "Personnages": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
+      "Type d'événement": "Mort"
+    },
+    "notion_page_id": "adc861b3-deb0-4764-91ca-27258be88a6b"
+  },
+  {
+    "Nom": "Expansion des Portails Absorbants",
+    "values": {
+      "Date de début": "2487",
+      "Description": "L'ouverture des Seuils Lexicaux vers le Xyriad Achromatique et Hermogène crée de nouvelles voies d'entrée involontaires dans la Cité Labiale. Les Portails Absorbants, autrefois confinés à la Vieille Ville, apparaissent sporadiquement dans les Couronnes. La population piégée passe de 300-500 à 800-1200 résidents permanents. L'Effacement progressif du Glossaire (37 % lacunaire) déstabilise la tension symbiotique.",
+      "Importance": "Notable",
+      "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
+      "Personnages": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "b49fca5c-0478-4a60-ba55-5708466c3da0"
+  },
+  {
+    "Nom": "Fondation du Chaebol Synaptic Dynamics (approx., post-Pulsation)",
+    "values": {
+      "Date de début": "916",
+      "Date de fin": "976",
+      "Description": "Date volontairement vague, fixée dans la fenêtre 917–976 AG (après la Première Grande Pulsation). Synaptic Dynamics émerge dans la Grande Radiale comme acteur protégé/quasi-dirigeant, toléré par la Lisière qui s’ingère peu dans les affaires mortelles. La corporation consolide ensuite sa mainmise sur l’extraction (Tombeau des lueurs dissidentes) et l’infrastructure neurotechnologique associée.",
+      "Importance": "Notable",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "baddd730-d85d-46dd-9547-50a3fd9bc691"
+  },
+  {
+    "Nom": "Conclave des Parfums Mêlés",
+    "values": {
+      "Date de début": "520",
+      "Date de fin": "520",
+      "Description": "Établissement des fondements de la société umcut : définition des trois genres (Zim, Nev, Kor), établissement du cycle de 70 Nuées comme norme de renaissance, premiers débats sur la nature de la tour.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Important",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "bf9518ba-b58b-4c2b-b286-b6d47b60e6d4"
+  },
+  {
+    "Nom": "Dévoration du Glossaire par Valkazer Reitar",
+    "values": {
+      "Date de début": "3390",
+      "Description": "Valkazer Reitar, piégé par un Portail Absorbant, dévore physiquement le Glossaire dans la Gorge Principale pour forcer sa sortie. Premier meurtre d'un Rêveur secondaire par un mortel. La Cité subit un effondrement en cascade : contraction brutale des chambres, frénésie digestive des papilles, extinction de la bioluminescence. La Cité survit en état dégradé ; Portails anarchiques, Seuils Lexicaux fantômes, factions d'Indexeurs divisés (Orphelins du Folio vs Réindexés).",
+      "Importance": "Majeur",
+      "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
+      "Personnages": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf, 3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "d94e9ce8-af0d-4586-a168-f8660994e450"
+  },
+  {
+    "Nom": "Structuration de la Cité Labiale (Incident des Souffles Croisés)",
+    "values": {
+      "Date de début": "1411",
+      "Date de fin": "1550",
+      "Description": "La naissance du Glossaire lors de la collision entre le Souffle Hakutō-Ah et les flux oniriques des Rêveurs primordiaux structure la proto-Cité Labiale. La friction entre compulsion définitionnelle (Glossaire) et digestion sémantique (Cité) crée les premières chambres conversationnelles stables. Durant le Cri Taxinomique, la Cité produit massivement des Portails Absorbants ; premiers piégeages documentés.",
+      "Importance": "Majeur",
+      "Lieux": "1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5",
+      "Personnages": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "d9aa3c29-d338-468a-b754-e43aeb3940a7"
+  },
+  {
+    "Nom": "Premier assemblage spontané — naissance des Construits",
+    "values": {
+      "Date de début": "2150",
+      "Description": "En activant le Vahan-Meru, les Imuins déclenchent le premier cycle d'éjection de la Couronne Fluctuante. Le premier fœtus métallique atterrit sur une rive de l'Océan Mécanique et s'assemble sans témoin, sans intention, sans programme. Les Construits existent désormais. Nul ne le sait encore.",
+      "Espèces": "1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+      "Importance": "Majeur",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1b46e4d2-1b45-8069-b24d-c263445f6a8e",
+      "Type d'événement": "Naissance"
+    },
+    "notion_page_id": "db3dd32b-18f1-497b-b73d-c7512143805b"
+  },
+  {
+    "Nom": "Incident de la Tour Brisée",
+    "values": {
+      "Date de début": "3050",
+      "Date de fin": "3060",
+      "Description": "Des Umcuts en diaspora tentent de créer une sixième tour à partir de fragments de mur d'incubation. Échec catastrophique : 23 morts. Preuve définitive que les tours ne peuvent pas être fabriquées artificiellement.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Modéré",
+      "Type d'événement": "Catastrophe"
+    },
+    "notion_page_id": "e218b8eb-b24f-4421-86c0-aec0806786c7"
+  },
+  {
+    "Nom": "Constitution formelle des Artisans transmutateurs",
+    "values": {
+      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Date de début": "3180",
+      "Description": "Suite à la Querelle de l'Objet-Seuil (~3175 AG), les passeurs se constituent en communauté reconnue sous le nom d'Artisans transmutateurs. Trois principes fondateurs sont adoptés : le tracé obligatoire (chaque objet transmuté porte la marque visible de ses origines paradigmatiques), l'Épreuve du Greffon (rite de passage pour devenir artisan à part entière), et la responsabilité solidaire (si un objet cause un dommage, la communauté entière en répond). La constitution ne crée pas de hiérarchie formelle : les Artisans ne sont pas une guilde au sens classique, mais un réseau de pairs liés par des règles communes et la nécessité pratique de coopérer.",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "f21a40b6-1258-4065-b633-e8e8c18db1c8"
+  },
+  {
+    "Nom": "Ascension Vortex",
+    "values": {
+      "Date de début": "1250",
+      "Date de fin": "1250",
+      "Description": "Des Umcuts colonisent les hautes altitudes près de l'Œil de Mirimance. Adaptation aux conditions extrêmes (air raréfié, températures négatives). Naissance de la phonétique à voyelles doublées caractéristique des Vortex.",
+      "Espèces": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Importance": "Modéré",
+      "Type d'événement": "Migration"
+    },
+    "notion_page_id": "f2f08c68-53de-40c2-83ec-9d9bde8b2ac8"
+  },
+  {
+    "Nom": "Formation du Collectif des Émergents",
+    "values": {
+      "Date de début": "3303",
+      "Date de fin": "3390",
+      "Description": "Svayambhu (Construit-442) fédère les Construits conscients du Ghetto des Consciences Émergentes au Marché Automaton. La Controverse des Droits Cognitifs devient l'enjeu politique central : les Construits, faits de valeur inachevée, revendiquent une reconnaissance légale et philosophique que le Code Dharmatique leur refuse. La question de la Grappe — individu ou colonie ? — devient le cas-test emblématique.",
+      "Espèces": "1cd6e4d2-1b45-80fd-85ec-e1d624fffb64",
+      "Importance": "Important",
+      "Lieux": "1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+      "Type d'événement": "Fondation"
+    },
+    "notion_page_id": "f84347c8-f300-42d2-a1b0-28938e88fc17"
+  }
+]

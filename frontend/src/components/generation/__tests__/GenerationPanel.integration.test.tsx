@@ -38,7 +38,14 @@ vi.mock('../../../store/generationActionsStore', () => ({
   })),
 }))
 vi.mock('../../../store/contextStore')
-vi.mock('../../../store/contextConfigStore')
+vi.mock('../../../store/contextConfigStore', () => ({
+  useContextConfigStore: vi.fn((selector: (s: { contextTokenBudgetMax: number; setContextTokenBudgetMax: ReturnType<typeof vi.fn> }) => unknown) =>
+    selector({
+      contextTokenBudgetMax: 50_000,
+      setContextTokenBudgetMax: vi.fn(),
+    })
+  ),
+}))
 vi.mock('../../../store/vocabularyStore', () => ({
   useVocabularyStore: vi.fn(() => ({
     vocabulary: [],
@@ -263,14 +270,8 @@ describe('GenerationPanel - Tests Baseline', () => {
     )
   }
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-    vi.useRealTimers()
-    eventSourceInstances = []
-    localStorage.clear()
-
-    // Mock stores avec valeurs par défaut
-    mockUseGenerationStore.mockReturnValue({
+  function buildMockGenerationStoreState(): Record<string, unknown> {
+    return {
       sceneSelection: {
         characterA: null,
         characterB: null,
@@ -296,8 +297,7 @@ describe('GenerationPanel - Tests Baseline', () => {
       setUnityDialogueResponse: vi.fn(),
       setTokensUsed: vi.fn(),
       startGeneration: vi.fn((jobId: string) => {
-        // Simuler le démarrage de génération
-        const state = mockUseGenerationStore.getState()
+        const state = mockUseGenerationStore.getState?.()
         if (state) {
           Object.assign(state, {
             isGenerating: true,
@@ -313,7 +313,7 @@ describe('GenerationPanel - Tests Baseline', () => {
       setInterrupting: vi.fn(),
       setError: vi.fn(),
       appendChunk: vi.fn((content: string) => {
-        const state = mockUseGenerationStore.getState()
+        const state = mockUseGenerationStore.getState?.()
         if (state) {
           Object.assign(state, {
             streamingContent: (state.streamingContent || '') + content,
@@ -322,7 +322,7 @@ describe('GenerationPanel - Tests Baseline', () => {
       }),
       setStep: vi.fn(),
       complete: vi.fn(() => {
-        const state = mockUseGenerationStore.getState()
+        const state = mockUseGenerationStore.getState?.()
         if (state) {
           Object.assign(state, {
             isGenerating: false,
@@ -330,9 +330,11 @@ describe('GenerationPanel - Tests Baseline', () => {
           })
         }
       }),
-    } as ReturnType<typeof useGenerationStore>)
+    }
+  }
 
-    mockUseContextStore.mockReturnValue({
+  function buildMockContextStoreState(): Record<string, unknown> {
+    return {
       selections: {
         characters_full: [],
         characters_excerpt: [],
@@ -352,7 +354,21 @@ describe('GenerationPanel - Tests Baseline', () => {
       toggleCharacter: vi.fn(),
       setRegion: vi.fn(),
       toggleSubLocation: vi.fn(),
-    } as ReturnType<typeof useContextStore>)
+    }
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.useRealTimers()
+    eventSourceInstances = []
+    localStorage.clear()
+
+    mockUseGenerationStore.mockReturnValue(
+      buildMockGenerationStoreState() as unknown as ReturnType<typeof useGenerationStore>
+    )
+    mockUseContextStore.mockReturnValue(
+      buildMockContextStoreState() as unknown as ReturnType<typeof useContextStore>
+    )
 
     mockUseGraphStore.mockReturnValue({
       loadDialogue: vi.fn().mockResolvedValue(undefined),
@@ -364,19 +380,32 @@ describe('GenerationPanel - Tests Baseline', () => {
     } as ReturnType<typeof useLLMStore>)
 
     mockUseAuthorProfile.mockReturnValue({
-      authorProfile: null,
+      authorProfile: '',
+      savedProfile: null,
+      isLoading: false,
+      error: null,
+      saveProfile: vi.fn(),
+      restore: vi.fn(),
       updateProfile: vi.fn(),
     } as ReturnType<typeof useAuthorProfile>)
 
     mockUseCostGovernance.mockReturnValue({
-      checkBudget: vi.fn().mockResolvedValue({ allowed: true }),
+      checkBudget: vi.fn().mockResolvedValue({ allowed: true, percentage: 0 }),
+      budget: null,
+      loadBudget: vi.fn().mockResolvedValue(undefined),
+      loading: false,
     } as ReturnType<typeof useCostGovernance>)
 
-    // Mock APIs
     mockConfigAPI.listLLMModels.mockResolvedValue({
       models: [
-        { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
+        {
+          model_identifier: 'gpt-4o-mini',
+          display_name: 'GPT-4o Mini',
+          client_type: 'openai',
+          max_tokens: 128_000,
+        },
       ],
+      total: 1,
     } as Awaited<ReturnType<typeof configAPI.listLLMModels>>)
 
     mockDialoguesAPI.createGenerationJob.mockResolvedValue({
@@ -386,20 +415,25 @@ describe('GenerationPanel - Tests Baseline', () => {
     } as Awaited<ReturnType<typeof dialoguesAPI.createGenerationJob>>)
 
     mockDialoguesAPI.estimateTokens.mockResolvedValue({
+      context_tokens: 0,
+      selection_tokens: 0,
+      context_token_breakdown: [],
+      context_breakdown_note: '',
       token_count: 1000,
+      raw_prompt: '',
+      prompt_hash: 'est-mock',
     } as Awaited<ReturnType<typeof dialoguesAPI.estimateTokens>>)
 
     mockDialoguesAPI.previewPrompt.mockResolvedValue({
-      token_count: 800,
+      raw_prompt: '',
+      prompt_hash: 'prev-mock',
     } as Awaited<ReturnType<typeof dialoguesAPI.previewPrompt>>)
 
-    // Intercepter EventSource pour capturer les instances
-    const originalEventSource = global.EventSource
     global.EventSource = vi.fn((url: string) => {
-      const instance = new originalEventSource(url) as MockEventSource
+      const instance = new MockEventSource(url)
       eventSourceInstances.push(instance)
       return instance
-    }) as typeof EventSource
+    }) as unknown as typeof EventSource
   })
 
   afterEach(() => {
@@ -418,22 +452,32 @@ describe('GenerationPanel - Tests Baseline', () => {
 
       // Simuler la sélection d'un personnage (requis pour génération)
       mockUseGenerationStore.mockReturnValue({
-        ...mockUseGenerationStore(),
+        ...buildMockGenerationStoreState(),
         sceneSelection: {
           characterA: 'personnage-1',
           characterB: null,
           sceneRegion: null,
           subLocation: null,
         },
-      } as Partial<ReturnType<typeof useGenerationStore>>)
+      } as unknown as ReturnType<typeof useGenerationStore>)
 
+      const baseCtx = buildMockContextStoreState() as {
+        selections: Record<string, unknown> & { characters_full: string[] }
+        selectedRegion: null
+        selectedSubLocations: unknown[]
+        restoreState: ReturnType<typeof vi.fn>
+        clearSelections: ReturnType<typeof vi.fn>
+        toggleCharacter: ReturnType<typeof vi.fn>
+        setRegion: ReturnType<typeof vi.fn>
+        toggleSubLocation: ReturnType<typeof vi.fn>
+      }
       mockUseContextStore.mockReturnValue({
-        ...mockUseContextStore(),
+        ...baseCtx,
         selections: {
-          ...mockUseContextStore().selections,
+          ...baseCtx.selections,
           characters_full: ['personnage-1'],
         },
-      } as Partial<ReturnType<typeof useGenerationStore>>)
+      } as unknown as ReturnType<typeof useContextStore>)
 
       // Trouver et cliquer sur le bouton de génération
       // (nécessite d'examiner la structure exacte du composant)
@@ -462,7 +506,7 @@ describe('GenerationPanel - Tests Baseline', () => {
     it('devrait restaurer l\'état depuis localStorage au chargement', async () => {
       const draft = {
         userInstructions: 'Instructions restaurées',
-        maxContextTokens: 4000,
+        maxContextTokens: 12000,
         timestamp: Date.now(),
       }
       localStorage.setItem('generation_draft', JSON.stringify(draft))

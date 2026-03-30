@@ -144,7 +144,7 @@ def test_api_endpoint_uses_correct_llm_client(client_with_real_config):
                     "communities": []
                 },
                 "user_instructions": "Test",
-                "max_context_tokens": 1000
+                "max_context_tokens": 10000
             }
         )
         

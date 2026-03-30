@@ -3,8 +3,20 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDialogueLoader } from '../hooks/useDialogueLoader'
 import { useGraphStore } from '../store/graphStore'
 import { useGraphViewStore } from '../store/graphViewStore'
+import type { UnityDialogueMetadata } from '../types/api'
 
 const toastMock = vi.fn()
+
+function unityDialogueFixture(
+  partial: Pick<UnityDialogueMetadata, 'filename'> & Partial<UnityDialogueMetadata>
+): UnityDialogueMetadata {
+  return {
+    file_path: `/mock/${partial.filename}`,
+    size_bytes: 0,
+    modified_time: '2020-01-01T00:00:00Z',
+    ...partial,
+  }
+}
 const getUnityDialogueMock = vi.fn()
 
 vi.mock('../api/unityDialogues', () => ({
@@ -39,12 +51,14 @@ describe('useDialogueLoader', () => {
     const { result } = renderHook(() => useDialogueLoader(toastMock, null))
 
     act(() => {
-      result.current.setSelectedDialogue({
-        filename: 'test.json',
-        title: 'Test Dialogue',
-        node_count: 0,
-        edge_count: 0,
-      })
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'test.json',
+          title: 'Test Dialogue',
+          node_count: 0,
+          edge_count: 0,
+        })
+      )
     })
 
     await waitFor(() => {
@@ -67,12 +81,14 @@ describe('useDialogueLoader', () => {
     const { result } = renderHook(() => useDialogueLoader(toastMock, null))
 
     act(() => {
-      result.current.setSelectedDialogue({
-        filename: 'fail.json',
-        title: 'Fail',
-        node_count: 0,
-        edge_count: 0,
-      })
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'fail.json',
+          title: 'Fail',
+          node_count: 0,
+          edge_count: 0,
+        })
+      )
     })
 
     await waitFor(() => {
@@ -147,12 +163,14 @@ describe('useDialogueLoader', () => {
     const { result } = renderHook(() => useDialogueLoader(toastMock, null))
 
     await act(async () => {
-      result.current.setSelectedDialogue({
-        filename: 'd.json',
-        title: 'D',
-        node_count: 1,
-        edge_count: 0,
-      })
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'd.json',
+          title: 'D',
+          node_count: 1,
+          edge_count: 0,
+        })
+      )
     })
 
     await act(async () => {
@@ -188,12 +206,14 @@ describe('useDialogueLoader', () => {
     const { result } = renderHook(() => useDialogueLoader(toastMock, null))
 
     act(() => {
-      result.current.setSelectedDialogue({
-        filename: 'will-delete.json',
-        title: 'Will Delete',
-        node_count: 0,
-        edge_count: 0,
-      })
+      result.current.setSelectedDialogue(
+        unityDialogueFixture({
+          filename: 'will-delete.json',
+          title: 'Will Delete',
+          node_count: 0,
+          edge_count: 0,
+        })
+      )
     })
 
     act(() => {

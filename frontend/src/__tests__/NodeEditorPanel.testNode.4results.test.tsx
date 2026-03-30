@@ -59,10 +59,10 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       connectNodes: vi.fn(),
       disconnectNodes: vi.fn(),
     } as ReturnType<typeof useGraphStore>
-    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof mockState) => unknown) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       if (typeof selector === 'function') return selector(mockState)
       return mockState
-    })
+    }) as typeof useGraphStore)
     ;(useGraphStore as { getState: () => typeof mockState }).getState = vi.fn(() => mockState)
 
     vi.mocked(useContextStore).mockReturnValue({
@@ -132,10 +132,10 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       connectNodes: vi.fn(),
       disconnectNodes: vi.fn(),
     } as ReturnType<typeof useGraphStore>
-    vi.mocked(useGraphStore).mockImplementation((selector?: (s: typeof state2) => unknown) => {
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
       if (typeof selector === 'function') return selector(state2)
       return state2
-    })
+    }) as typeof useGraphStore)
     ;(useGraphStore as { getState: () => typeof state2 }).getState = vi.fn(() => state2)
 
     // WHEN: Rendu du NodeEditorPanel

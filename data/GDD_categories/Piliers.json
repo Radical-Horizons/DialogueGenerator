@@ -1,11 +1,23 @@
-{
-    "piliers": [
-        {
-            "Nom": "SansTitre",
-            "Description visuelle": "Intimité en clair‑obscur. Reflets, vitres et eaux. Palette ocres, ivoire, bleus sombres. Marques rituelles, textiles usés, grands vides négatifs qui pèsent sur la scène.",
-            "Description thématique": "Des dilemmes moraux déchirants dans lesquels les personnages affrontent leurs contradictions et celles de leur propre monde.",
-            "Description sonore": "cello, minor key, melancholic, rubato, dissonant, intimate, piano, introspective, chamber, sorrowful",
-            "Pilier": "Conflits de conscience"
-        }
-    ]
-}
+[
+  {
+    "Nom": "Des liens d’acier",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "5cdde713-1cd7-4491-8306-2d25e551aecc"
+  },
+  {
+    "Nom": "Voyage au Cœur de l'Étrange",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "8431c59e-1bd7-458c-bac8-e57d74168133"
+  },
+  {
+    "Nom": "Conflits de conscience",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "8a9feb30-fdc4-44d7-a68a-6be05bcdbdff"
+  }
+]

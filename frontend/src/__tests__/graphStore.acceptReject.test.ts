@@ -242,10 +242,11 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       vi.mocked(graphAPI.generateNode).mockResolvedValue({
         node: {
           id: 'generated-1',
+          type: 'dialogueNode',
           speaker: 'Generated',
           line: 'Generated line',
         },
-        nodes: null,
+        nodes: undefined,
         suggested_connections: [],
         parent_node_id: 'parent-1',
       })
@@ -273,10 +274,10 @@ describe('graphStore - Accept/Reject Nodes (Story 1.4)', () => {
       }
       useGraphStore.getState().addNode(parentNode)
       vi.mocked(graphAPI.generateNode).mockResolvedValue({
-        node: null,
+        node: undefined,
         nodes: [
-          { id: 'generated-1', speaker: 'PNJ', line: 'Réponse 1' },
-          { id: 'generated-2', speaker: 'PNJ', line: 'Réponse 2' },
+          { id: 'generated-1', type: 'dialogueNode', speaker: 'PNJ', line: 'Réponse 1' },
+          { id: 'generated-2', type: 'dialogueNode', speaker: 'PNJ', line: 'Réponse 2' },
         ],
         suggested_connections: [
           { from: 'parent-1', to: 'generated-1', via_choice_index: 0, connection_type: 'choice' },

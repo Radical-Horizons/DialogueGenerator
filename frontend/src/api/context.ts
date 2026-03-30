@@ -3,6 +3,12 @@
  */
 import apiClient from './client'
 import type {
+  EstimateTokensRequest,
+  EstimateTokensResponse,
+  OptimizeContextRequest,
+  OptimizeContextResponse,
+} from '../types/api'
+import type {
   CharacterResponse,
   CharacterListResponse,
   LocationResponse,
@@ -17,6 +23,13 @@ import type {
   SubLocationListResponse,
   LinkedElementsRequest,
   LinkedElementsResponse,
+  SuggestionsRequest,
+  SuggestionsResponse,
+  ContextRule,
+  CreateRuleRequest,
+  UpdateRuleRequest,
+  RulesListResponse,
+  DialogueTypeRulesResponse,
 } from '../types/api'
 
 export interface ListContextParams {
@@ -149,6 +162,91 @@ export async function getSubLocations(regionName: string): Promise<SubLocationLi
  */
 export async function getLinkedElements(request: LinkedElementsRequest): Promise<LinkedElementsResponse> {
   const response = await apiClient.post<LinkedElementsResponse>('/api/v1/context/linked-elements', request)
+  return response.data
+}
+
+/**
+ * Retourne des suggestions d'entités GDD liées à l'entité trigger (sélection automatique basée sur règles).
+ */
+export async function getSuggestions(request: SuggestionsRequest): Promise<SuggestionsResponse> {
+  const response = await apiClient.post<SuggestionsResponse>('/api/v1/context/suggestions', request)
+  return response.data
+}
+
+// ---------------------------------------------------------------------------
+// Règles de sélection de contexte — CRUD (Story 3.4)
+// ---------------------------------------------------------------------------
+
+/**
+ * Liste toutes les règles de sélection de contexte.
+ */
+export async function listRules(): Promise<RulesListResponse> {
+  const response = await apiClient.get<RulesListResponse>('/api/v1/context/rules')
+  return response.data
+}
+
+/**
+ * Crée une nouvelle règle de sélection de contexte.
+ */
+export async function createRule(request: CreateRuleRequest): Promise<ContextRule> {
+  const response = await apiClient.post<ContextRule>('/api/v1/context/rules', request)
+  return response.data
+}
+
+/**
+ * Met à jour une règle de sélection de contexte.
+ */
+export async function updateRule(ruleId: string, request: UpdateRuleRequest): Promise<ContextRule> {
+  const response = await apiClient.put<ContextRule>(`/api/v1/context/rules/${encodeURIComponent(ruleId)}`, request)
+  return response.data
+}
+
+/**
+ * Supprime une règle de sélection de contexte.
+ */
+export async function deleteRule(ruleId: string): Promise<void> {
+  await apiClient.delete(`/api/v1/context/rules/${encodeURIComponent(ruleId)}`)
+}
+
+/**
+ * Lit les règles d'un type de dialogue, avec fallback global.
+ */
+export async function getRulesByDialogueType(dialogueType: string): Promise<DialogueTypeRulesResponse> {
+  const response = await apiClient.get<DialogueTypeRulesResponse>(
+    `/api/v1/context/rules/by-dialogue-type/${encodeURIComponent(dialogueType)}`
+  )
+  return response.data
+}
+
+/**
+ * Remplace l'ensemble des règles d'un type de dialogue.
+ */
+export async function putRulesByDialogueType(
+  dialogueType: string,
+  rules: CreateRuleRequest[]
+): Promise<DialogueTypeRulesResponse> {
+  const response = await apiClient.put<DialogueTypeRulesResponse>(
+    `/api/v1/context/rules/by-dialogue-type/${encodeURIComponent(dialogueType)}`,
+    rules
+  )
+  return response.data
+}
+
+/**
+ * Estime les tokens du contexte + prompt (identique au flux génération, endpoint contexte).
+ */
+export async function estimateContextTokens(body: EstimateTokensRequest): Promise<EstimateTokensResponse> {
+  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/context/estimate-tokens', body)
+  return response.data
+}
+
+/**
+ * Propose une sélection GDD réduite sous le budget tokens (FR21).
+ */
+export async function optimizeContextSelection(
+  body: OptimizeContextRequest
+): Promise<OptimizeContextResponse> {
+  const response = await apiClient.post<OptimizeContextResponse>('/api/v1/context/optimize', body)
   return response.data
 }
 

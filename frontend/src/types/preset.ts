@@ -26,7 +26,7 @@ export interface PresetConfiguration {
   /** Top_p (nucleus sampling) - optionnel */
   topP?: number | null;
   /** Reasoning effort - optionnel */
-  reasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+  reasoningEffort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
   /** Max completion tokens - optionnel */
   maxCompletionTokens?: number | null;
   /** Max choices - optionnel */

@@ -118,7 +118,12 @@ class BasePromptRequest(BaseModel):
     user_instructions: str = Field(..., min_length=1, description="Instructions spécifiques pour la scène")
     context_selections: ContextSelection = Field(..., description="Sélections de contexte GDD")
     npc_speaker_id: Optional[str] = Field(None, description="ID du PNJ interlocuteur (si None, utiliser le premier personnage sélectionné)")
-    max_context_tokens: int = Field(default=1500, ge=100, le=Defaults.MAX_CONTEXT_TOKENS, description="Nombre maximum de tokens pour le contexte")
+    max_context_tokens: int = Field(
+        default=Defaults.CONTEXT_TOKENS,
+        ge=Defaults.MIN_CONTEXT_TOKENS,
+        le=Defaults.MAX_CONTEXT_TOKENS,
+        description="Nombre maximum de tokens pour le contexte",
+    )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     author_profile: Optional[str] = Field(None, description="Profil d'auteur global (style réutilisable entre scènes)")
     max_choices: Optional[int] = Field(None, ge=0, le=8, description="Nombre maximum de choix à générer (0-8, ou None pour laisser l'IA décider librement)")
@@ -133,8 +138,10 @@ class BasePromptRequest(BaseModel):
     @classmethod
     def validate_max_context_tokens(cls, v: int) -> int:
         """Valide que max_context_tokens est dans les limites autorisées (règle métier)."""
-        if v < 100:
-            raise ValueError(f"max_context_tokens doit être au minimum 100 (reçu: {v})")
+        if v < Defaults.MIN_CONTEXT_TOKENS:
+            raise ValueError(
+                f"max_context_tokens doit être au minimum {Defaults.MIN_CONTEXT_TOKENS} (reçu: {v})"
+            )
         if v > Defaults.MAX_CONTEXT_TOKENS:
             raise ValueError(f"max_context_tokens ne peut pas dépasser {Defaults.MAX_CONTEXT_TOKENS} (reçu: {v})")
         return v
@@ -147,18 +154,50 @@ class EstimateTokensRequest(BasePromptRequest):
     field_configs: Optional[Dict[str, List[str]]] = Field(None, description="Configuration des champs de contexte par type d'élément")
     organization_mode: Optional[str] = Field(None, description="Mode d'organisation du contexte (default, narrative, minimal)")
 
+class ContextTokenBreakdownRow(BaseModel):
+    """Tokens estimés pour un compartiment de la sélection (type + mode), build isolé."""
+
+    entity_type: str = Field(..., description="characters | locations | items | species | communities")
+    mode: str = Field(..., description="full | excerpt")
+    token_count: int = Field(..., ge=0, description="Nombre de tokens pour ce compartiment seul")
+
+
 class EstimateTokensResponse(BaseModel):
     """Réponse pour l'estimation de tokens.
     
     Attributes:
-        context_tokens: Nombre de tokens du contexte.
+        context_tokens: Tokens du bloc contexte GDD **après** troncature avec ``max_context_tokens``
+            de la requête (budget utilisateur). Peut être inférieur à ``selection_tokens``.
+        selection_tokens: Taille « pleine sélection » mesurée avec un plafond technique élevé
+            (``Defaults.MAX_CONTEXT_TOKENS``), sans utiliser le budget comme limite de mesure.
+        context_token_breakdown: Détail par type/mode (mesures isolées ; somme potentiellement > selection_tokens).
+        context_breakdown_note: Explication sur la cohérence somme vs total.
         token_count: Nombre total de tokens (contexte + prompt).
         total_estimated_tokens: Alias rétrocompatible de token_count (contexte + prompt).
         raw_prompt: Le prompt brut réel qui sera envoyé au LLM.
         prompt_hash: Hash SHA-256 du prompt pour validation.
         structured_prompt: Structure JSON du prompt (optionnel).
     """
-    context_tokens: int = Field(..., description="Nombre de tokens du contexte")
+    context_tokens: int = Field(
+        ...,
+        description=(
+            "Tokens du contexte GDD tel que construit avec le plafond "
+            "`max_context_tokens` de la requête (troncature appliquée). "
+            "Ne pas confondre avec `selection_tokens` (mesure sans ce plafond)."
+        ),
+    )
+    selection_tokens: int = Field(
+        default=0,
+        description="Tokens de la sélection complète mesurés avec plafond technique (ex. MAX_CONTEXT_TOKENS)",
+    )
+    context_token_breakdown: List[ContextTokenBreakdownRow] = Field(
+        default_factory=list,
+        description="Répartition par type d'entité et mode (full/excerpt)",
+    )
+    context_breakdown_note: str = Field(
+        default="",
+        description="Note sur la cohérence entre total et somme des lignes",
+    )
     token_count: int = Field(..., description="Nombre total de tokens")
     total_estimated_tokens: Optional[int] = Field(
         default=None,
@@ -178,6 +217,84 @@ class EstimateTokensResponse(BaseModel):
         if self.total_estimated_tokens is None:
             self.total_estimated_tokens = self.token_count
         return self
+
+
+class ContextOptimizationRules(BaseModel):
+    """Règles MVP pour POST /context/optimize (FR21) — persistées côté client."""
+
+    pinned_entity_keys: List[str] = Field(
+        default_factory=list,
+        description="Clés « type:nom » (ex. characters:Alice) à ne pas réduire en premier",
+    )
+    strategy: Literal["conservative", "aggressive"] = Field(
+        default="conservative",
+        description="conservative = réduit d'abord types périphériques ; aggressive l'inverse",
+    )
+    pre_generation_proxy_warning_threshold_percent: int = Field(
+        default=50,
+        ge=1,
+        le=100,
+        description="Seuil d'avertissement sur le proxy pré-génération (distinct du scoring post-génération Story 3.6)",
+    )
+
+    @field_validator("pinned_entity_keys")
+    @classmethod
+    def _limit_pins(cls, v: List[str]) -> List[str]:
+        if len(v) > 200:
+            raise ValueError("Au plus 200 entités épinglées pour l'optimisation")
+        return v
+
+
+class OptimizeContextRequest(EstimateTokensRequest):
+    """Même entrée qu'estimate-tokens + règles d'optimisation. Le plafond cible = max_context_tokens."""
+
+    optimization_rules: ContextOptimizationRules = Field(default_factory=ContextOptimizationRules)
+
+
+class OptimizeContextChange(BaseModel):
+    """Changement de mode full/excerpt pour une entité."""
+
+    entity_type: str = Field(..., description="characters | locations | items | species | communities")
+    entity_name: str = Field(..., description="Nom GDD de l'entité")
+    from_mode: Literal["full", "excerpt"] = Field(..., description="Mode avant optimisation")
+    to_mode: Literal["full", "excerpt"] = Field(..., description="Mode après optimisation")
+
+
+class OptimizeContextResponse(BaseModel):
+    """Proposition d'optimisation de sélection GDD sous budget (FR21)."""
+
+    proposed_context_selections: ContextSelection = Field(
+        ...,
+        description="Sélection proposée (appliquer côté UI si l'utilisateur accepte)",
+    )
+    selection_tokens_before: int = Field(..., ge=0, description="Tokens sélection (pipeline estimate-tokens) avant")
+    selection_tokens_after: int = Field(..., ge=0, description="Tokens sélection après optimisation")
+    tokens_saved: int = Field(..., ge=0, description="Économie = avant − après")
+    changes: List[OptimizeContextChange] = Field(
+        default_factory=list,
+        description="Liste des passages full→excerpt effectués",
+    )
+    pre_generation_context_fidelity_proxy_percent: int = Field(
+        ...,
+        ge=0,
+        le=100,
+        description=(
+            "Proxy pré-génération 0–100 : ratio tokens sélection après/avant (arrondi). "
+            "Ne mesure pas la sémantique ; distinct de context_relevance post-génération (Story 3.6)."
+        ),
+    )
+    warnings: List[str] = Field(
+        default_factory=list,
+        description="Avertissements non bloquants (ex. proxy bas, budget non atteignable)",
+    )
+    no_op: bool = Field(
+        default=False,
+        description="True si la sélection respectait déjà le budget (aucun changement)",
+    )
+    budget_respected: bool = Field(
+        ...,
+        description="True si selection_tokens_after ≤ plafond demandé (max_context_tokens)",
+    )
 
 
 class PreviewPromptRequest(BasePromptRequest):

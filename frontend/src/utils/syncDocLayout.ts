@@ -3,7 +3,7 @@
  * Extrait le pattern répété 8× dans graphStore.ts pour éviter toute divergence silencieuse.
  */
 import type { Node, Edge } from 'reactflow'
-import { graphToDocument, buildLayoutFromNodes } from './documentToGraph'
+import { graphToDocument, buildLayoutFromNodes, type LayoutPositions } from './documentToGraph'
 
 /**
  * Fusionne un layout existant avec les positions courantes des nœuds.
@@ -11,7 +11,7 @@ import { graphToDocument, buildLayoutFromNodes } from './documentToGraph'
  * qu'un layout stale écrase la géométrie réellement affichée.
  */
 export function mergeLayoutWithNodePositions(
-  currentLayout: Record<string, unknown> | null | undefined,
+  currentLayout: Record<string, unknown> | LayoutPositions | null | undefined,
   nodes: Node[]
 ): Record<string, unknown> {
   const newPositions = buildLayoutFromNodes(nodes)

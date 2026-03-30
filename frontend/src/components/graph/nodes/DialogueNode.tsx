@@ -11,6 +11,7 @@ import type { NodePromptResponse } from '../../../types/graph'
 import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
+import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
 
 interface ValidationError {
   type: string
@@ -45,6 +46,8 @@ interface DialogueNodeData {
   lastGenerationInstructions?: string
   regenerationHistory?: RegenerationEntry[]
   contextGddHash?: string
+  contextGddContentFingerprint?: string
+  gddContextSelectionsSnapshot?: Record<string, unknown>
   incomingEdgeColor?: string
   [key: string]: unknown
 }
@@ -90,6 +93,12 @@ export const DialogueNode = memo(function DialogueNode({
   const dialogueId = useGraphStore(
     (s) => s.documentId ?? s.dialogueMetadata.filename ?? 'current'
   )
+
+  const { stale: gddContextStale, checking: gddStaleChecking } = useGddStaleIndicator({
+    id: data.id,
+    contextGddContentFingerprint: data.contextGddContentFingerprint,
+    gddContextSelectionsSnapshot: data.gddContextSelectionsSnapshot,
+  })
 
   // Tronquer le texte pour l'aperçu
   const truncatedLine = line.length > 100 ? `${line.substring(0, 100)}...` : line
@@ -303,6 +312,32 @@ export const DialogueNode = memo(function DialogueNode({
       )}
       
       {/* Badge d'avertissement */}
+      {gddContextStale && !gddStaleChecking && (
+        <div
+          data-testid="gdd-stale-badge"
+          role="status"
+          aria-live="polite"
+          style={{
+            position: 'absolute',
+            top: tag ? 26 : 4,
+            right: hasErrors || hasWarnings ? 30 : 4,
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            backgroundColor: theme.state.warning.background ?? 'rgba(255, 193, 7, 0.25)',
+            color: theme.state.warning.color,
+            border: `1px solid ${theme.state.warning.color}`,
+            zIndex: 9,
+            maxWidth: 120,
+            textAlign: 'center',
+            lineHeight: 1.2,
+          }}
+          title="GDD mis à jour depuis la génération — régénérer le nœud pour utiliser le lore à jour."
+        >
+          GDD↑
+        </div>
+      )}
       {!hasErrors && hasWarnings && (
         <div
           style={{

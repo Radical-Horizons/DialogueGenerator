@@ -30,6 +30,7 @@ from factories.llm_factory import LLMClientFactory
 from services.vocabulary_service import VocabularyService
 from services.narrative_guides_service import NarrativeGuidesService
 from services.notion_import_service import NotionImportService
+from services.context_rule_service import ContextRuleService
 from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
@@ -394,6 +395,19 @@ def get_notion_import_service(request: Request) -> NotionImportService:
     return container.get_notion_import_service()
 
 
+def get_context_rule_service(request: Request) -> ContextRuleService:
+    """Retourne le service de règles de sélection de contexte GDD.
+
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+
+    Returns:
+        Instance de ContextRuleService.
+    """
+    container = get_service_container(request)
+    return container.get_context_rule_service()
+
+
 def get_skill_catalog_service(request: Request) -> SkillCatalogService:
     """Retourne le service de catalogue des compétences.
     
@@ -446,4 +460,20 @@ def get_preset_service(request: Request) -> PresetService:
     """
     container = get_service_container(request)
     return container.get_preset_service()
+
+
+def get_gdd_notion_sync_service(request: Request):
+    """Retourne le service de synchronisation GDD Notion (FR18).
+
+    Args:
+        request: Requête HTTP courante.
+
+    Returns:
+        Instance de GddNotionSyncService depuis le ServiceContainer.
+    """
+    from services.gdd_notion_sync_service import GddNotionSyncService
+
+    container = get_service_container(request)
+    svc: GddNotionSyncService = container.get_gdd_notion_sync_service()
+    return svc
 

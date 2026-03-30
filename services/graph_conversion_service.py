@@ -346,9 +346,13 @@ class GraphConversionService:
                 unity_node.pop("failureNode", None)
                 
                 # Retirer le champ status avant export Unity (métadonnée éditeur uniquement) (Task 6 - Story 1.4)
-                # lastGenerationInstructions, regenerationHistory, contextGddHash (Story 1.10) restent dans le JSON
-                # éditeur pour persistance save/load ; retirés uniquement si export final pour Unity.
+                # Métadonnées éditeur / FR19 : retirées pour export Unity strict.
                 unity_node.pop("status", None)
+                unity_node.pop("contextGddHash", None)
+                unity_node.pop("contextGddContentFingerprint", None)
+                unity_node.pop("gddContextSelectionsSnapshot", None)
+                unity_node.pop("lastGenerationInstructions", None)
+                unity_node.pop("regenerationHistory", None)
                 
                 # Nettoyer les targetNode et test*Node des choix (seront recréés depuis les edges)
                 if "choices" in unity_node:

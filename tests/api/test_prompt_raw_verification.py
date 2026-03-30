@@ -62,7 +62,7 @@ def test_estimate_tokens_raw_prompt_with_character(real_client):
                 "characters": ["Nom", "Résumé", "Introduction", "Faiblesse", "Compulsion", "Désir Principal", "Caractérisation", "Contexte Background"]
             },
             "user_instructions": "Test de vérification du prompt brut",
-            "max_context_tokens": 2000,
+            "max_context_tokens": 10000,
             "npc_speaker_id": character_name
         }
     )

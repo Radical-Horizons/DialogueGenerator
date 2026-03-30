@@ -158,11 +158,12 @@ export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: E
               
               // 4 edges TestNode → nœuds de résultat (config centralisée)
               TEST_RESULT_EDGE_CONFIG.forEach((result) => {
-                const targetNodeId = choice[result.field]
+                const rawTarget = choice[result.field as keyof typeof choice]
+                const targetNodeId = typeof rawTarget === 'string' ? rawTarget : undefined
                 if (targetNodeId && unityNodes.some((n) => n.id === targetNodeId)) {
                   reactflowEdges.push(
                     buildTestResultEdge(
-                      testNodeId,
+                      testNodeId!,
                       targetNodeId,
                       result.handleId,
                       result.label,

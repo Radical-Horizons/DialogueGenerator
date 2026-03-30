@@ -25,7 +25,7 @@ export interface UseGenerationRequestReturn {
     maxContextTokens: number
     maxCompletionTokens: number | null
     llmModel: string
-    reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+    reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
     topP: number | null
     maxChoices: number | null
     choicesMode: 'free' | 'capped'
@@ -119,7 +119,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
       maxContextTokens: number
       maxCompletionTokens: number | null
       llmModel: string
-      reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+      reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
       topP: number | null
       maxChoices: number | null
       choicesMode: 'free' | 'capped'

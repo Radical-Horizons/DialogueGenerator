@@ -9,7 +9,7 @@ import { useContextStore } from '../store/contextStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
 import { filterObsoleteReferences } from '../utils/presetUtils'
 import { getErrorMessage } from '../types/errors'
-import type { Preset, PresetValidationResult } from '../types/preset'
+import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
 
 export interface UsePresetManagementReturn {
   /** Charger un preset avec validation */
@@ -17,7 +17,7 @@ export interface UsePresetManagementReturn {
   /** Appliquer un preset directement */
   applyPreset: (preset: Preset) => void
   /** Obtenir la configuration actuelle pour sauvegarde */
-  getCurrentConfiguration: () => Record<string, unknown>
+  getCurrentConfiguration: () => PresetConfiguration
   /** État du modal de validation */
   isValidationModalOpen: boolean
   /** Résultat de validation */
@@ -48,9 +48,11 @@ export interface UsePresetManagementOptions {
   /** Setter pour topP - optionnel */
   setTopP?: (value: number | null) => void
   /** Reasoning effort - optionnel */
-  reasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   /** Setter pour reasoningEffort - optionnel */
-  setReasoningEffort?: (value: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null) => void
+  setReasoningEffort?: (
+    value: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  ) => void
   /** Max completion tokens - optionnel */
   maxCompletionTokens?: number | null
   /** Setter pour maxCompletionTokens - optionnel */
@@ -250,7 +252,7 @@ export function usePresetManagement(
       ...(options.llmModel !== undefined ? { llmModel: options.llmModel } : {}),
     }
     
-    return config
+    return config as PresetConfiguration
   }, [sceneSelection, options.userInstructions, options.topP, options.reasoningEffort, options.maxCompletionTokens, options.maxChoices, options.llmModel])
 
   return {

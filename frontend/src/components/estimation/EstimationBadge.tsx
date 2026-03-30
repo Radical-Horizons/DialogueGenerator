@@ -81,7 +81,7 @@ export function EstimationBadge({
           </span>
         )}
         {state === 'error' && (
-          <span style={{ fontSize: '0.85rem', color: theme.text.error ?? '#e57373' }}>{error}</span>
+          <span style={{ fontSize: '0.85rem', color: theme.state.error.color }}>{error}</span>
         )}
       </div>
 
@@ -127,12 +127,12 @@ export function EstimationBadge({
       )}
 
       {budgetWarning90 && !budgetExceeded && (
-        <div style={{ fontSize: '0.8rem', color: theme.text.warning ?? '#ffb74d' }}>
+        <div style={{ fontSize: '0.8rem', color: theme.state.warning.color }}>
           Budget atteint à 90% — vérifiez avant de générer.
         </div>
       )}
       {budgetExceeded && (
-        <div style={{ fontSize: '0.8rem', color: theme.text.error ?? '#e57373', fontWeight: 600 }}>
+        <div style={{ fontSize: '0.8rem', color: theme.state.error.color, fontWeight: 600 }}>
           Budget dépassé — génération bloquée.
         </div>
       )}

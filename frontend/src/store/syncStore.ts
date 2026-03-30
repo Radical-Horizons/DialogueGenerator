@@ -11,7 +11,11 @@ interface SyncState {
   error: string | null
   
   // Actions
-  syncFromNotion: () => Promise<{ success: boolean; last_sync?: string; error?: string }>
+  syncFromNotion: () => Promise<{
+    success: boolean
+    last_sync?: string | null
+    error?: string
+  }>
   clearError: () => void
 }
 
