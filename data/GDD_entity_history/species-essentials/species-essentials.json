@@ -1,0 +1,50 @@
+[
+  {
+    "at": "2026-03-27T21:27:40.426012+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "species-essentials",
+      "sections": {
+        "_general": "# Species Essentials\n\nRéférence condensée des espèces civilisées d’Alteir. Consulter uniquement quand l’espèce d’un personnage est déterminée.\n\n## Tableau de référence rapide\n\n## Principes de cohérence espèce-personnage\n\n### Durée de vie et âge du personnage\n\n- Court (< 100 ans) : Urgence existentielle, transmission rapide\n\n- Moyen (100-200 ans) : Perspective multi-générationnelle\n\n- Long (> 200 ans) : Risque de stagnation, ennui existentiel\n\nATTENTION : Éviter le cliché du “très vieux sage” - privilégier jeunes ambitieux ou vieux marginaux.\n\n### Langages et communication\n\n- Chaque espèce a ses langages natifs + possibles acquisitions\n\n- Un personnage érudit/voyageur peut parler 3-5 langages\n\n- Certains langages sont incompatibles physiologiquement\n\n### Traits biologiques contraignants\n\n- Imuins : Dépendance aux augmentations, maintenance corporelle\n\n- Frémissants : Instabilité identitaire post-transformation\n\n- Railleurs : Besoin constant de parasitage émotionnel\n\n- Qadul’Doei : Contraintes nutritionnelles par sacrifice\n\n## Anti-clichés par espèce\n\n### Van’Doei\n\n❌ Éviter : Forgerons barbus stoïques, obsédés par l’honneur, tous affiliés à l’Anentropie\n✅ Privilégier : Van’Doei artistes, intellectuels, pacifistes, renégats de l’Anentropie\n\n### Humains\n\n❌ Éviter : Héros prophétiques venus sauver le monde, derniers survivants nobles\n✅ Privilégier : Humains pragmatiques, assimilés, qui ont oublié Merid\n\n### Imuins\n\n❌ Éviter : Robots froids sans émotions, transhumanistes fanatiques\n✅ Privilégier : Imuins hédonistes, artistes, dysfonctionnels, technophobes paradoxaux\n\n### Qadul’Doei\n\n❌ Éviter : Cultistes fanatiques exclusivement, tous affamés et terrifiants\n✅ Privilégier : Qadul’Doei bureaucrates, hédonistes, qui gèrent le sacrifice comme un métier\n\n## Extraction des propriétés Notion\n\nQuand tu crées un personnage, toujours consulter :\n1. La base Espèces pour l’espèce choisie (durée de vie, lieux, représentants)\n2. Les Lieux de vie (pour cohérence géographique)\n3. Les Communautés liées à l’espèce\n\nMéthode : Utiliser notion_context_fetcher.py pour extraction ciblée des résumés uniquement."
+      },
+      "notion_page_id": "3056e4d2-1b45-814f-8531-e681e9c8c566"
+    }
+  },
+  {
+    "at": "2026-03-28T01:58:29.402630+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "species-essentials",
+      "sections": {
+        "_general": "# Species Essentials\n\nRéférence condensée des espèces civilisées d’Alteir. Consulter uniquement quand l’espèce d’un personnage est déterminée.\n\n## Tableau de référence rapide\n\n## Principes de cohérence espèce-personnage\n\n### Durée de vie et âge du personnage\n\n- Court (< 100 ans) : Urgence existentielle, transmission rapide\n\n- Moyen (100-200 ans) : Perspective multi-générationnelle\n\n- Long (> 200 ans) : Risque de stagnation, ennui existentiel\n\nATTENTION : Éviter le cliché du “très vieux sage” - privilégier jeunes ambitieux ou vieux marginaux.\n\n### Langages et communication\n\n- Chaque espèce a ses langages natifs + possibles acquisitions\n\n- Un personnage érudit/voyageur peut parler 3-5 langages\n\n- Certains langages sont incompatibles physiologiquement\n\n### Traits biologiques contraignants\n\n- Imuins : Dépendance aux augmentations, maintenance corporelle\n\n- Frémissants : Instabilité identitaire post-transformation\n\n- Railleurs : Besoin constant de parasitage émotionnel\n\n- Qadul’Doei : Contraintes nutritionnelles par sacrifice\n\n## Anti-clichés par espèce\n\n### Van’Doei\n\n❌ Éviter : Forgerons barbus stoïques, obsédés par l’honneur, tous affiliés à l’Anentropie\n✅ Privilégier : Van’Doei artistes, intellectuels, pacifistes, renégats de l’Anentropie\n\n### Humains\n\n❌ Éviter : Héros prophétiques venus sauver le monde, derniers survivants nobles\n✅ Privilégier : Humains pragmatiques, assimilés, qui ont oublié Merid\n\n### Imuins\n\n❌ Éviter : Robots froids sans émotions, transhumanistes fanatiques\n✅ Privilégier : Imuins hédonistes, artistes, dysfonctionnels, technophobes paradoxaux\n\n### Qadul’Doei\n\n❌ Éviter : Cultistes fanatiques exclusivement, tous affamés et terrifiants\n✅ Privilégier : Qadul’Doei bureaucrates, hédonistes, qui gèrent le sacrifice comme un métier\n\n## Extraction des propriétés Notion\n\nQuand tu crées un personnage, toujours consulter :\n1. La base Espèces pour l’espèce choisie (durée de vie, lieux, représentants)\n2. Les Lieux de vie (pour cohérence géographique)\n3. Les Communautés liées à l’espèce\n\nMéthode : Utiliser notion_context_fetcher.py pour extraction ciblée des résumés uniquement."
+      },
+      "notion_page_id": "3056e4d2-1b45-814f-8531-e681e9c8c566"
+    }
+  },
+  {
+    "at": "2026-03-29T20:39:41.754633+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "species-essentials",
+      "sections": {
+        "_general": "# Species Essentials\n\nRéférence condensée des espèces civilisées d’Alteir. Consulter uniquement quand l’espèce d’un personnage est déterminée.\n\n## Tableau de référence rapide\n\n## Principes de cohérence espèce-personnage\n\n### Durée de vie et âge du personnage\n\n- Court (< 100 ans) : Urgence existentielle, transmission rapide\n\n- Moyen (100-200 ans) : Perspective multi-générationnelle\n\n- Long (> 200 ans) : Risque de stagnation, ennui existentiel\n\nATTENTION : Éviter le cliché du “très vieux sage” - privilégier jeunes ambitieux ou vieux marginaux.\n\n### Langages et communication\n\n- Chaque espèce a ses langages natifs + possibles acquisitions\n\n- Un personnage érudit/voyageur peut parler 3-5 langages\n\n- Certains langages sont incompatibles physiologiquement\n\n### Traits biologiques contraignants\n\n- Imuins : Dépendance aux augmentations, maintenance corporelle\n\n- Frémissants : Instabilité identitaire post-transformation\n\n- Railleurs : Besoin constant de parasitage émotionnel\n\n- Qadul’Doei : Contraintes nutritionnelles par sacrifice\n\n## Anti-clichés par espèce\n\n### Van’Doei\n\n❌ Éviter : Forgerons barbus stoïques, obsédés par l’honneur, tous affiliés à l’Anentropie\n✅ Privilégier : Van’Doei artistes, intellectuels, pacifistes, renégats de l’Anentropie\n\n### Humains\n\n❌ Éviter : Héros prophétiques venus sauver le monde, derniers survivants nobles\n✅ Privilégier : Humains pragmatiques, assimilés, qui ont oublié Merid\n\n### Imuins\n\n❌ Éviter : Robots froids sans émotions, transhumanistes fanatiques\n✅ Privilégier : Imuins hédonistes, artistes, dysfonctionnels, technophobes paradoxaux\n\n### Qadul’Doei\n\n❌ Éviter : Cultistes fanatiques exclusivement, tous affamés et terrifiants\n✅ Privilégier : Qadul’Doei bureaucrates, hédonistes, qui gèrent le sacrifice comme un métier\n\n## Extraction des propriétés Notion\n\nQuand tu crées un personnage, toujours consulter :\n1. La base Espèces pour l’espèce choisie (durée de vie, lieux, représentants)\n2. Les Lieux de vie (pour cohérence géographique)\n3. Les Communautés liées à l’espèce\n\nMéthode : Utiliser notion_context_fetcher.py pour extraction ciblée des résumés uniquement."
+      },
+      "notion_page_id": "3056e4d2-1b45-814f-8531-e681e9c8c566"
+    }
+  },
+  {
+    "at": "2026-03-30T00:45:34.593527+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "species-essentials",
+      "sections": {
+        "_general": "# Species Essentials\n\nRéférence condensée des espèces civilisées d’Alteir. Consulter uniquement quand l’espèce d’un personnage est déterminée.\n\n## Tableau de référence rapide\n\n## Principes de cohérence espèce-personnage\n\n### Durée de vie et âge du personnage\n\n- Court (< 100 ans) : Urgence existentielle, transmission rapide\n\n- Moyen (100-200 ans) : Perspective multi-générationnelle\n\n- Long (> 200 ans) : Risque de stagnation, ennui existentiel\n\nATTENTION : Éviter le cliché du “très vieux sage” - privilégier jeunes ambitieux ou vieux marginaux.\n\n### Langages et communication\n\n- Chaque espèce a ses langages natifs + possibles acquisitions\n\n- Un personnage érudit/voyageur peut parler 3-5 langages\n\n- Certains langages sont incompatibles physiologiquement\n\n### Traits biologiques contraignants\n\n- Imuins : Dépendance aux augmentations, maintenance corporelle\n\n- Frémissants : Instabilité identitaire post-transformation\n\n- Railleurs : Besoin constant de parasitage émotionnel\n\n- Qadul’Doei : Contraintes nutritionnelles par sacrifice\n\n## Anti-clichés par espèce\n\n### Van’Doei\n\n❌ Éviter : Forgerons barbus stoïques, obsédés par l’honneur, tous affiliés à l’Anentropie\n✅ Privilégier : Van’Doei artistes, intellectuels, pacifistes, renégats de l’Anentropie\n\n### Humains\n\n❌ Éviter : Héros prophétiques venus sauver le monde, derniers survivants nobles\n✅ Privilégier : Humains pragmatiques, assimilés, qui ont oublié Merid\n\n### Imuins\n\n❌ Éviter : Robots froids sans émotions, transhumanistes fanatiques\n✅ Privilégier : Imuins hédonistes, artistes, dysfonctionnels, technophobes paradoxaux\n\n### Qadul’Doei\n\n❌ Éviter : Cultistes fanatiques exclusivement, tous affamés et terrifiants\n✅ Privilégier : Qadul’Doei bureaucrates, hédonistes, qui gèrent le sacrifice comme un métier\n\n## Extraction des propriétés Notion\n\nQuand tu crées un personnage, toujours consulter :\n1. La base Espèces pour l’espèce choisie (durée de vie, lieux, représentants)\n2. Les Lieux de vie (pour cohérence géographique)\n3. Les Communautés liées à l’espèce\n\nMéthode : Utiliser notion_context_fetcher.py pour extraction ciblée des résumés uniquement."
+      },
+      "notion_page_id": "3056e4d2-1b45-814f-8531-e681e9c8c566"
+    }
+  }
+]

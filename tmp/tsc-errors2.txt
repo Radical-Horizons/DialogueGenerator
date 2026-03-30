@@ -1,0 +1,140 @@
+src/__tests__/ChoiceEditor.4results.test.tsx(35,15): error TS2352: Conversion of type '(state: GraphState) => unknown' to type '(s: { nodes: { id: string; type: string; data: {}; }[]; edges: never[]; isGenerating: boolean; connectNodes: Mock<Procedure>; disconnectNodes: Mock<Procedure>; }) => unknown' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of parameters 'state' and 's' are incompatible.
+    Type '{ nodes: { id: string; type: string; data: {}; }[]; edges: never[]; isGenerating: boolean; connectNodes: Mock<Procedure>; disconnectNodes: Mock<Procedure>; }' is missing the following properties from type 'GraphState': selectedNodeId, selectedNodeIds, dialogueMetadata, isLoading, and 72 more.
+src/__tests__/ChoiceEditor.4results.test.tsx(50,9): error TS2322: Type '{ id: string; title?: string | undefined; speaker?: string | undefined; line?: string | undefined; choices?: { text: string; choiceId?: string | undefined; targetNode?: string | undefined; ... 10 more ...; respectDelta?: number | undefined; }[] | undefined; ... 5 more ...; gddContextSelectionsSnapshot?: Record<...> ...' is not assignable to type '{ id?: string | undefined; title?: string | undefined; speaker?: string | undefined; line?: string | undefined; choices?: ({ text?: string | undefined; choiceId?: string | undefined; ... 11 more ...; respectDelta?: number | undefined; } | undefined)[] | undefined; ... 5 more ...; gddContextSelectionsSnapshot?: { ......'.
+  Object literal may only specify known properties, and 'type' does not exist in type '{ id?: string | undefined; title?: string | undefined; speaker?: string | undefined; line?: string | undefined; choices?: ({ text?: string | undefined; choiceId?: string | undefined; ... 11 more ...; respectDelta?: number | undefined; } | undefined)[] | undefined; ... 5 more ...; gddContextSelectionsSnapshot?: { ......'.
+src/__tests__/ChoiceEditor.4results.test.tsx(65,7): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type '{ id: string; title?: string | undefined; speaker?: string | undefined; line?: string | undefined; choices?: { text: string; choiceId?: string | undefined; targetNode?: string | undefined; ... 10 more ...; respectDelta?: number | undefined; }[] | undefined; ... 5 more ...; gddContextSelectionsSnapshot?: Record<...> ...'.
+src/__tests__/ChoiceEditor.4results.test.tsx(91,7): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type '{ id: string; title?: string | undefined; speaker?: string | undefined; line?: string | undefined; choices?: { text: string; choiceId?: string | undefined; targetNode?: string | undefined; ... 10 more ...; respectDelta?: number | undefined; }[] | undefined; ... 5 more ...; gddContextSelectionsSnapshot?: Record<...> ...'.
+src/__tests__/ChoiceEditor.4results.test.tsx(116,7): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type '{ id: string; title?: string | undefined; speaker?: string | undefined; line?: string | undefined; choices?: { text: string; choiceId?: string | undefined; targetNode?: string | undefined; ... 10 more ...; respectDelta?: number | undefined; }[] | undefined; ... 5 more ...; gddContextSelectionsSnapshot?: Record<...> ...'.
+src/__tests__/DialogueLoader.race.test.ts(62,9): error TS2561: Object literal may only specify known properties, but 'edge_count' does not exist in type 'UnityDialogueMetadata'. Did you mean to write 'node_count'?
+src/__tests__/DialogueLoader.race.test.ts(84,9): error TS2561: Object literal may only specify known properties, but 'edge_count' does not exist in type 'UnityDialogueMetadata'. Did you mean to write 'node_count'?
+src/__tests__/duplicateNode.test.ts(61,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/duplicateNode.test.ts(62,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/duplicateNode.test.ts(63,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/duplicateNode.test.ts(64,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/duplicateNode.test.ts(65,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/duplicateNode.test.ts(66,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/duplicateNode.test.ts(67,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/duplicateNode.test.ts(68,12): error TS18046: 'dupData.choices' is of type 'unknown'.
+src/__tests__/GraphCanvas.virtualization.test.tsx(252,43): error TS2352: Conversion of type '{ id: string; type: string; position: { x: number; y: number; }; data: { id: string; }; selected: boolean; xPos: number; yPos: number; width: number; height: number; measured: { width: number; height: number; }; dragging: boolean; }' to type 'Pick<WrapNodeProps<DialogueNodeData>, "id" | "data" | "type" | "selected" | "zIndex" | "dragHandle" | "isConnectable" | "xPos" | "yPos"> & { ...; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; type: string; position: { x: number; y: number; }; data: { id: string; }; selected: boolean; xPos: number; yPos: number; width: number; height: number; measured: { width: number; height: number; }; dragging: boolean; }' is missing the following properties from type 'Pick<WrapNodeProps<DialogueNodeData>, "id" | "data" | "type" | "selected" | "zIndex" | "dragHandle" | "isConnectable" | "xPos" | "yPos">': zIndex, isConnectable
+src/__tests__/GraphCanvas.virtualization.test.tsx(265,39): error TS2352: Conversion of type '{ id: string; type: string; position: { x: number; y: number; }; data: { id: string; }; selected: boolean; xPos: number; yPos: number; width: number; height: number; measured: { width: number; height: number; }; dragging: boolean; }' to type 'Pick<WrapNodeProps<TestNodeData>, "id" | "data" | "type" | "selected" | "zIndex" | "dragHandle" | "isConnectable" | "xPos" | "yPos"> & { ...; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; type: string; position: { x: number; y: number; }; data: { id: string; }; selected: boolean; xPos: number; yPos: number; width: number; height: number; measured: { width: number; height: number; }; dragging: boolean; }' is missing the following properties from type 'Pick<WrapNodeProps<TestNodeData>, "id" | "data" | "type" | "selected" | "zIndex" | "dragHandle" | "isConnectable" | "xPos" | "yPos">': zIndex, isConnectable
+src/__tests__/GraphCanvas.virtualization.test.tsx(277,38): error TS2352: Conversion of type '{ id: string; type: string; position: { x: number; y: number; }; data: { id: string; }; selected: boolean; xPos: number; yPos: number; width: number; height: number; measured: { width: number; height: number; }; dragging: boolean; }' to type 'Pick<WrapNodeProps<EndNodeData>, "id" | "data" | "type" | "selected" | "zIndex" | "dragHandle" | "isConnectable" | "xPos" | "yPos"> & { ...; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; type: string; position: { x: number; y: number; }; data: { id: string; }; selected: boolean; xPos: number; yPos: number; width: number; height: number; measured: { width: number; height: number; }; dragging: boolean; }' is missing the following properties from type 'Pick<WrapNodeProps<EndNodeData>, "id" | "data" | "type" | "selected" | "zIndex" | "dragHandle" | "isConnectable" | "xPos" | "yPos">': zIndex, isConnectable
+src/__tests__/GraphEditorHeader.undoRedo.test.tsx(11,3): error TS2322: Type '{ showAutoLayoutDropdown: boolean; setShowAutoLayoutDropdown: (v: boolean | ((prev: boolean) => boolean)) => void; showActionsDropdown: boolean; setShowActionsDropdown: (v: boolean | ((prev: boolean) => boolean)) => void; ... 31 more ...; canRedoNow?: boolean | undefined; }' is not assignable to type 'UseGraphToolbarReturn'.
+  Types of property 'canUndoNow' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/__tests__/graphFilterUtils.test.ts(84,53): error TS2554: Expected 2 arguments, but got 3.
+src/__tests__/graphFilterUtils.test.ts(90,47): error TS2554: Expected 2 arguments, but got 3.
+src/__tests__/graphStore.acceptReject.test.ts(243,9): error TS2741: Property 'type' is missing in type '{ id: string; speaker: string; line: string; }' but required in type 'GraphNodePayload'.
+src/__tests__/graphStore.acceptReject.test.ts(248,9): error TS2322: Type 'null' is not assignable to type 'GraphNodePayload[] | undefined'.
+src/__tests__/graphStore.acceptReject.test.ts(276,9): error TS2322: Type 'null' is not assignable to type 'GraphNodePayload | undefined'.
+src/__tests__/graphStore.acceptReject.test.ts(278,11): error TS2741: Property 'type' is missing in type '{ id: string; speaker: string; line: string; }' but required in type 'GraphNodePayload'.
+src/__tests__/graphStore.acceptReject.test.ts(279,11): error TS2741: Property 'type' is missing in type '{ id: string; speaker: string; line: string; }' but required in type 'GraphNodePayload'.
+src/__tests__/graphStore.autoLayout.test.ts(138,9): error TS2353: Object literal may only specify known properties, and 'measured' does not exist in type 'Node'.
+src/__tests__/graphStore.autoLayout.test.ts(147,9): error TS2353: Object literal may only specify known properties, and 'measured' does not exist in type 'Node'.
+src/__tests__/graphStore.documents.test.ts(279,49): error TS2339: Property 'find' does not exist on type '{}'.
+src/__tests__/graphStore.documents.test.ts(313,37): error TS2339: Property 'find' does not exist on type '{}'.
+src/__tests__/graphStore.documents.test.ts(359,48): error TS2339: Property 'find' does not exist on type '{}'.
+src/__tests__/graphStore.regenerate.test.ts(87,9): error TS2741: Property 'type' is missing in type '{ id: string; speaker: string; line: string; }' but required in type 'GraphNodePayload'.
+src/__tests__/graphStore.test.ts(61,30): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+src/__tests__/graphStore.test.ts(120,30): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+src/__tests__/NodeEditorPanel.connectionResync.test.tsx(86,49): error TS2345: Argument of type '(selector?: (s: Record<string, unknown>) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: Record<string, unknown>) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'Record<string, unknown>' is missing the following properties from type 'GraphState': nodes, edges, selectedNodeId, selectedNodeIds, and 77 more.
+src/__tests__/NodeEditorPanel.connectionResync.test.tsx(109,49): error TS2345: Argument of type '(selector?: (s: Record<string, unknown>) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: Record<string, unknown>) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'Record<string, unknown>' is missing the following properties from type 'GraphState': nodes, edges, selectedNodeId, selectedNodeIds, and 77 more.
+src/__tests__/NodeEditorPanel.debouncePush.test.tsx(61,49): error TS2345: Argument of type '(selector?: (s: unknown) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: unknown) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'unknown' is not assignable to type 'GraphState'.
+src/__tests__/NodeEditorPanel.selectionFlush.test.tsx(92,49): error TS2345: Argument of type '(selector?: (s: Record<string, unknown>) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: Record<string, unknown>) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'Record<string, unknown>' is missing the following properties from type 'GraphState': nodes, edges, selectedNodeId, selectedNodeIds, and 77 more.
+src/__tests__/NodeEditorPanel.selectionFlush.test.tsx(119,9): error TS2345: Argument of type '(selector?: (s: Record<string, unknown>) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: Record<string, unknown>) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'Record<string, unknown>' is missing the following properties from type 'GraphState': nodes, edges, selectedNodeId, selectedNodeIds, and 77 more.
+src/__tests__/NodeEditorPanel.selectionFlush.test.tsx(197,49): error TS2345: Argument of type '(selector?: (s: Record<string, unknown>) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: Record<string, unknown>) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'Record<string, unknown>' is missing the following properties from type 'GraphState': nodes, edges, selectedNodeId, selectedNodeIds, and 77 more.
+src/__tests__/NodeEditorPanel.selectionFlush.test.tsx(237,9): error TS2345: Argument of type '(selector?: (s: Record<string, unknown>) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: Record<string, unknown>) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'Record<string, unknown>' is missing the following properties from type 'GraphState': nodes, edges, selectedNodeId, selectedNodeIds, and 77 more.
+src/__tests__/NodeEditorPanel.testNode.4results.test.tsx(62,49): error TS2345: Argument of type '(selector?: (s: unknown) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: unknown) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'unknown' is not assignable to type 'GraphState'.
+src/__tests__/NodeEditorPanel.testNode.4results.test.tsx(135,49): error TS2345: Argument of type '(selector?: (s: unknown) => unknown) => unknown' is not assignable to parameter of type '(selector: (state: GraphState) => unknown, equalityFn: (a: unknown, b: unknown) => boolean) => unknown'.
+  Types of parameters 'selector' and 'selector' are incompatible.
+    Type '(state: GraphState) => unknown' is not assignable to type '(s: unknown) => unknown'.
+      Types of parameters 'state' and 's' are incompatible.
+        Type 'unknown' is not assignable to type 'GraphState'.
+src/__tests__/presetStore.test.ts(441,18): error TS18046: 'error' is of type 'unknown'.
+src/__tests__/TestNode.test.tsx(11,15): error TS2741: Property 'id' is missing in type 'Record<string, unknown>' but required in type 'TestNodeData'.
+src/__tests__/useDialogueLoader.test.ts(46,9): error TS2561: Object literal may only specify known properties, but 'edge_count' does not exist in type 'UnityDialogueMetadata'. Did you mean to write 'node_count'?
+src/__tests__/useDialogueLoader.test.ts(74,9): error TS2561: Object literal may only specify known properties, but 'edge_count' does not exist in type 'UnityDialogueMetadata'. Did you mean to write 'node_count'?
+src/__tests__/useDialogueLoader.test.ts(154,9): error TS2561: Object literal may only specify known properties, but 'edge_count' does not exist in type 'UnityDialogueMetadata'. Did you mean to write 'node_count'?
+src/__tests__/useDialogueLoader.test.ts(195,9): error TS2561: Object literal may only specify known properties, but 'edge_count' does not exist in type 'UnityDialogueMetadata'. Did you mean to write 'node_count'?
+src/__tests__/useLLMStore.test.ts(89,41): error TS2345: Argument of type '{ api_identifier: string; display_name: string; client_type: string; parameters: { default_temperature: number; max_tokens: number; }; }[]' is not assignable to parameter of type 'LLMModel[]'.
+  Type '{ api_identifier: string; display_name: string; client_type: string; parameters: { default_temperature: number; max_tokens: number; }; }' is not assignable to type 'LLMModel'.
+    Types of property 'client_type' are incompatible.
+      Type 'string' is not assignable to type '"openai" | "mistral"'.
+src/components/context/ContextDetail.test.tsx(119,30): error TS6133: 'content' is declared but its value is never read.
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(373,42): error TS2352: Conversion of type '{ authorProfile: null; updateProfile: Mock<Procedure>; }' to type '{ authorProfile: string; savedProfile: string | null; isLoading: boolean; error: string | null; saveProfile: (profile: string) => void; restore: () => void; updateProfile: (profile: string) => void; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ authorProfile: null; updateProfile: Mock<Procedure>; }' is missing the following properties from type '{ authorProfile: string; savedProfile: string | null; isLoading: boolean; error: string | null; saveProfile: (profile: string) => void; restore: () => void; updateProfile: (profile: string) => void; }': savedProfile, isLoading, error, saveProfile, restore
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(378,43): error TS2352: Conversion of type '{ checkBudget: Mock<Procedure>; }' to type 'UseCostGovernanceReturn' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ checkBudget: Mock<Procedure>; }' is missing the following properties from type 'UseCostGovernanceReturn': budget, loadBudget, loading
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(383,51): error TS2352: Conversion of type '{ models: { id: string; name: string; provider: string; }[]; }' to type 'LLMModelsListResponse' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'total' is missing in type '{ models: { id: string; name: string; provider: string; }[]; }' but required in type 'LLMModelsListResponse'.
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(399,54): error TS2352: Conversion of type '{ token_count: number; }' to type 'PreviewPromptResponse' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ token_count: number; }' is missing the following properties from type 'PreviewPromptResponse': raw_prompt, prompt_hash
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(405,26): error TS2352: Conversion of type 'Mock<(url: string) => MockEventSource>' to type '{ new (url: string | URL, eventSourceInitDict?: EventSourceInit | undefined): EventSource; prototype: EventSource; readonly CONNECTING: 0; readonly OPEN: 1; readonly CLOSED: 2; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'MockInstance<(url: string) => MockEventSource> & { (url: string): MockEventSource; new (url: string): MockEventSource; } & {}' is missing the following properties from type '{ new (url: string | URL, eventSourceInitDict?: EventSourceInit | undefined): EventSource; prototype: EventSource; readonly CONNECTING: 0; readonly OPEN: 1; readonly CLOSED: 2; }': CONNECTING, OPEN, CLOSED
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(406,24): error TS2352: Conversion of type 'EventSource' to type 'MockEventSource' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'EventSource' is missing the following properties from type 'MockEventSource': simulateMessage, simulateError
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(428,9): error TS2698: Spread types may only be created from object types.
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(428,12): error TS2554: Expected 2 arguments, but got 0.
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(438,9): error TS2698: Spread types may only be created from object types.
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(438,12): error TS2554: Expected 2 arguments, but got 0.
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(440,14): error TS2554: Expected 2 arguments, but got 0.
+src/components/generation/__tests__/GenerationPanel.integration.test.tsx(440,14): error TS2571: Object is of type 'unknown'.
+src/components/generation/GenerationPanel.tsx(137,5): error TS2322: Type '"none" | "minimal" | "low" | "medium" | "high" | "xhigh" | null' is not assignable to type '"none" | "low" | "medium" | "high" | "xhigh" | null | undefined'.
+  Type '"minimal"' is not assignable to type '"none" | "low" | "medium" | "high" | "xhigh" | null | undefined'.
+src/components/generation/GraphView.tsx(166,23): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/generation/UnityDialogueViewer.test.tsx(27,9): error TS2739: Type '{ json_content: string; title: string; estimated_tokens: number; }' is missing the following properties from type 'GenerateUnityDialogueResponse': raw_prompt, prompt_hash
+src/components/generation/UnityDialogueViewer.test.tsx(82,11): error TS2739: Type '{ json_content: string; title: string; estimated_tokens: number; }' is missing the following properties from type 'GenerateUnityDialogueResponse': raw_prompt, prompt_hash
+src/components/generation/UnityDialogueViewer.test.tsx(94,11): error TS2739: Type '{ json_content: string; title: string; estimated_tokens: number; }' is missing the following properties from type 'GenerateUnityDialogueResponse': raw_prompt, prompt_hash
+src/components/generation/UnityDialogueViewer.test.tsx(165,11): error TS2739: Type '{ json_content: string; title: string; estimated_tokens: number; }' is missing the following properties from type 'GenerateUnityDialogueResponse': raw_prompt, prompt_hash
+src/components/generation/UnityDialogueViewer.test.tsx(198,11): error TS2739: Type '{ json_content: string; title: string; estimated_tokens: number; }' is missing the following properties from type 'GenerateUnityDialogueResponse': raw_prompt, prompt_hash
+src/components/generation/UnityDialogueViewer.test.tsx(216,11): error TS2739: Type '{ json_content: string; title: string; estimated_tokens: number; }' is missing the following properties from type 'GenerateUnityDialogueResponse': raw_prompt, prompt_hash
+src/hooks/useGenerationOrchestrator.ts(166,3): error TS2741: Property 'validateCharacters' is missing in type '{ buildContextSelections: () => ContextSelection; buildGenerationRequest: (params: { userInstructions: string; maxContextTokens: number; maxCompletionTokens: number | null; llmModel: string; reasoningEffort: "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | null; topP: number | null; maxChoices: number | nu...' but required in type 'UseGenerationOrchestratorReturn'.
+src/hooks/useGenerationRequest.test.tsx(75,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/hooks/usePresetManagement.ts(148,26): error TS2345: Argument of type '"none" | "minimal" | "low" | "medium" | "high" | "xhigh" | null' is not assignable to parameter of type '"none" | "low" | "medium" | "high" | "xhigh" | null'.
+  Type '"minimal"' is not assignable to type '"none" | "low" | "medium" | "high" | "xhigh" | null'.
+src/hooks/useTokenEstimation.ts(167,57): error TS2345: Argument of type 'PromptStateParams' is not assignable to parameter of type 'PreviewPromptRequest'.
+  Types of property 'in_game_flags' are incompatible.
+    Type 'unknown[] | undefined' is not assignable to type 'InGameFlag[] | undefined'.
+      Type 'unknown[]' is not assignable to type 'InGameFlag[]'.
+        Type 'unknown' is not assignable to type 'InGameFlag'.
+src/store/contextRulesStore.test.ts(8,28): error TS6196: 'CreateRuleRequest' is declared but never used.
+src/store/contextRulesStore.test.ts(8,47): error TS6196: 'RuleCondition' is declared but never used.
+src/utils/testNodeSync.ts(264,3): error TS6133: 'dialogueNodeId' is declared but its value is never read.
+src/utils/testNodeSync.ts(265,3): error TS6133: 'choiceIndex' is declared but its value is never read.
