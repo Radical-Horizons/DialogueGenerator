@@ -1,6 +1,6 @@
 /**
  * Composant principal de sélection de contexte (panneau Contexte GDD) avec onglets par type d'entité.
- * AC FR11 : Personnages, Lieux (inclusion contexte), Lieux (catalogue), Objets, Espèces, Communautés.
+ * AC FR11 : Personnages, Lieux (contexte), Objets, Espèces, Communautés.
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import * as contextAPI from '../../api/context'
@@ -41,13 +41,12 @@ import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 
-type TabType = 'characters' | 'locations' | 'regions' | 'items' | 'species' | 'communities'
+type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
 /** Stem fichier catégorie GDD pour l’API historique (Story 3.9). */
 const HISTORY_CATEGORY_BY_TAB: Record<TabType, string> = {
   characters: 'personnages',
   locations: 'lieux',
-  regions: 'lieux',
   items: 'objets',
   species: 'especes',
   communities: 'communautes',
@@ -59,8 +58,7 @@ const PAGE_SIZE = 50
 
 const TAB_DEFS: { key: TabType; label: string }[] = [
   { key: 'characters', label: 'Personnages' },
-  { key: 'locations',  label: 'Lieux (contexte)' },
-  { key: 'regions',    label: 'Lieux' },
+  { key: 'locations',  label: 'Lieux' },
   { key: 'items',      label: 'Objets' },
   { key: 'species',    label: 'Espèces' },
   { key: 'communities', label: 'Communautés' },
@@ -69,7 +67,6 @@ const TAB_DEFS: { key: TabType; label: string }[] = [
 const ENTITY_TYPE_LABELS: Record<TabType, string> = {
   characters: 'Personnage',
   locations: 'Lieu',
-  regions: 'Lieu',
   items: 'Objet',
   species: 'Espèce',
   communities: 'Communauté',
@@ -151,7 +148,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   const [showRulesEditor, setShowRulesEditor] = useState(false)
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
   const [locations, setLocations] = useState<LocationResponse[]>([])
-  const [regions, setRegions] = useState<ContextListItem[]>([])
   const [items, setItems] = useState<ItemResponse[]>([])
   const [species, setSpecies] = useState<SpeciesResponse[]>([])
   const [communities, setCommunities] = useState<CommunityResponse[]>([])
@@ -206,10 +202,9 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     setIsLoading(true)
     setError(null)
     try {
-      const [charsRes, locsRes, regionsRes, itemsRes, speciesRes, communitiesRes] = await Promise.all([
+      const [charsRes, locsRes, itemsRes, speciesRes, communitiesRes] = await Promise.all([
         contextAPI.listCharacters({ page: 1, page_size: PAGE_SIZE }),
         contextAPI.listLocations({ page: 1, page_size: PAGE_SIZE }),
-        contextAPI.listRegions(),
         contextAPI.listItems({ page: 1, page_size: PAGE_SIZE }),
         contextAPI.listSpecies(),
         contextAPI.listCommunities({ page: 1, page_size: PAGE_SIZE }),
@@ -220,7 +215,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
       setLocations(locsRes.locations)
       setLocationsPage(1)
       setLocationsTotalPages(locsRes.total_pages ?? 1)
-      setRegions(regionsRes.regions.map((name) => ({ name })))
       setItems(itemsRes.items)
       setItemsPage(1)
       setItemsTotalPages(itemsRes.total_pages ?? 1)
@@ -249,7 +243,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     if (activeTab === 'locations' && locationsPage >= locationsTotalPages) return
     if (activeTab === 'items' && itemsPage >= itemsTotalPages) return
     if (activeTab === 'communities' && communitiesPage >= communitiesTotalPages) return
-    if (activeTab === 'regions' || activeTab === 'species') return
+    if (activeTab === 'species') return
 
     setLoadingMore(true)
     try {
@@ -299,9 +293,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         item = await contextAPI.getCharacter(name)
       } else if (activeTab === 'locations') {
         item = await contextAPI.getLocation(name)
-      } else if (activeTab === 'regions') {
-        const loc = await contextAPI.getLocation(name)
-        item = loc
       } else if (activeTab === 'items') {
         item = await contextAPI.getItem(name)
       } else if (activeTab === 'species') {
@@ -324,8 +315,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const handleItemToggle = (name: string) => {
-    if (activeTab === 'regions') return
-
     const storeKey = STORE_TYPE_MAP[activeTab]
     const wasSelected = storeKey ? isElementSelected(storeKey, name) : false
 
@@ -368,7 +357,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         ...(selections.locations_excerpt ?? []),
       ])
     }
-    if (activeTab === 'regions') return regions
     if (activeTab === 'items') {
       return mergeListWithSelectedNames(items, [
         ...(selections.items_full ?? []),
@@ -391,7 +379,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const getSelectedItems = (): string[] => {
-    if (activeTab === 'regions') return []
     if (activeTab === 'characters') {
       return [
         ...(Array.isArray(selections.characters_full) ? selections.characters_full : []),
@@ -452,7 +439,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }, [setElementMode])
 
   const getElementModeForList = (name: string): 'full' | 'excerpt' | null => {
-    if (activeTab === 'regions') return null
     if (activeTab === 'characters') return getElementMode('characters', name)
     if (activeTab === 'locations') return getElementMode('locations', name)
     if (activeTab === 'items') return getElementMode('items', name)
@@ -460,8 +446,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     if (activeTab === 'communities') return getElementMode('communities', name)
     return null
   }
-
-  const showCheckboxes = activeTab !== 'regions'
 
   return (
     <div
@@ -627,7 +611,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           getElementMode={getElementModeForList}
           onModeChange={handleModeChange}
           tabId={activeTab}
-          showCheckboxes={showCheckboxes}
+          showCheckboxes
           entityTypeLabel={ENTITY_TYPE_LABELS[activeTab]}
           onScrollToBottom={loadMore}
           loadingMore={loadingMore}

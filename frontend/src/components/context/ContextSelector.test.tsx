@@ -112,10 +112,6 @@ describe('ContextSelector', () => {
       page_size: 50,
       total_pages: 1,
     })
-    vi.mocked(contextAPI.listRegions).mockResolvedValue({
-      regions: [],
-      total: 0,
-    })
   })
 
   // --- Tests d'intégration Story 3.3 : suggestions automatiques ---
@@ -179,13 +175,12 @@ describe('ContextSelector', () => {
     await waitFor(() => expect(mockSetSuggestions).toHaveBeenCalledWith([]))
   })
 
-  it('affiche les onglets Contexte GDD : Personnages, Lieux (contexte), Lieux, Objets, Espèces, Communautés', async () => {
+  it('affiche les onglets Contexte GDD : Personnages, Lieux (contexte), Objets, Espèces, Communautés', async () => {
     render(<ContextSelector />)
 
     await waitFor(() => {
       expect(screen.getByText(/personnages/i)).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Lieux (contexte)' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Lieux' })).toBeInTheDocument()
       expect(screen.getByText(/objets/i)).toBeInTheDocument()
       expect(screen.getByText(/espèces/i)).toBeInTheDocument()
       expect(screen.getByText(/communautés/i)).toBeInTheDocument()
@@ -198,7 +193,6 @@ describe('ContextSelector', () => {
     await waitFor(() => {
       expect(contextAPI.listCharacters).toHaveBeenCalledWith({ page: 1, page_size: 50 })
       expect(contextAPI.listLocations).toHaveBeenCalledWith({ page: 1, page_size: 50 })
-      expect(contextAPI.listRegions).toHaveBeenCalled()
       expect(contextAPI.listItems).toHaveBeenCalledWith({ page: 1, page_size: 50 })
       expect(contextAPI.listSpecies).toHaveBeenCalled()
       expect(contextAPI.listCommunities).toHaveBeenCalledWith({ page: 1, page_size: 50 })
@@ -224,7 +218,7 @@ describe('ContextSelector', () => {
     const locationsTab = screen.getByRole('button', { name: 'Lieux (contexte)' })
     await user.click(locationsTab)
 
-    // L'onglet Lieux devrait être actif
+    // L'onglet Lieux (contexte) est sélectionné
     expect(locationsTab).toBeInTheDocument()
   })
 
@@ -273,7 +267,6 @@ describe('ContextSelector', () => {
       new Promise<unknown>((resolve) => { resolvers.push(resolve) })
     vi.mocked(contextAPI.listCharacters).mockReturnValue(createDeferred() as Promise<CharacterListResponse>)
     vi.mocked(contextAPI.listLocations).mockReturnValue(createDeferred() as Promise<LocationListResponse>)
-    vi.mocked(contextAPI.listRegions).mockResolvedValue({ regions: [], total: 0 })
     vi.mocked(contextAPI.listItems).mockReturnValue(createDeferred() as Promise<ItemListResponse>)
     vi.mocked(contextAPI.listSpecies).mockResolvedValue({ species: [], total: 0 })
     vi.mocked(contextAPI.listCommunities).mockReturnValue(createDeferred() as Promise<CommunityListResponse>)

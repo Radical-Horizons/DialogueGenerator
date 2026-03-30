@@ -50,7 +50,6 @@ export function ContextTokenBudgetSection() {
         id={`${budgetId}-title`}
         style={{ margin: '0 0 0.35rem', fontSize: '0.85rem', fontWeight: 600, color: theme.text.primary }}
       >
-        Budget tokens contexte
       </h3>
 
       <div
@@ -67,7 +66,7 @@ export function ContextTokenBudgetSection() {
         )}
         {!loading && !error && (
           <>
-            Sélection (estimée) : <strong>{selectionTokens.toLocaleString()}</strong> /{' '}
+            Sélection (tokens contexte) : <strong>{selectionTokens.toLocaleString()}</strong> /{' '}
             <strong>{contextTokenBudgetMax.toLocaleString()}</strong>
             {overBudget && (
               <span
