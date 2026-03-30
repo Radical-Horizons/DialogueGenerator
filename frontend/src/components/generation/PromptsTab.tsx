@@ -52,8 +52,8 @@ export function PromptsTab() {
       {error && (
         <div style={{ 
           padding: '0.75rem', 
-          backgroundColor: theme.error.background, 
-          color: theme.error.color, 
+          backgroundColor: theme.state.error.background,
+          color: theme.state.error.color, 
           borderRadius: '4px',
           marginBottom: '1rem'
         }}>

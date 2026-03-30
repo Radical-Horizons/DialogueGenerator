@@ -25,6 +25,8 @@ describe('UnityDialogueViewer', () => {
   const mockOnExport = vi.fn()
 
   const mockUnityResponse: GenerateUnityDialogueResponse = {
+    raw_prompt: '',
+    prompt_hash: 'test-hash',
     json_content: JSON.stringify([
       {
         id: 'START',
@@ -80,6 +82,8 @@ describe('UnityDialogueViewer', () => {
 
   it('affiche un message si le JSON est invalide', () => {
     const invalidResponse: GenerateUnityDialogueResponse = {
+      raw_prompt: '',
+      prompt_hash: 'h1',
       json_content: 'invalid json',
       title: 'Invalid',
       estimated_tokens: 0,
@@ -92,6 +96,8 @@ describe('UnityDialogueViewer', () => {
 
   it('affiche un message si le JSON n\'est pas un tableau', () => {
     const invalidResponse: GenerateUnityDialogueResponse = {
+      raw_prompt: '',
+      prompt_hash: 'h2',
       json_content: JSON.stringify({ not: 'an array' }),
       title: 'Invalid',
       estimated_tokens: 0,
@@ -163,6 +169,8 @@ describe('UnityDialogueViewer', () => {
 
   it('affiche les options avancées quand elles sont présentes', async () => {
     const responseWithAdvanced: GenerateUnityDialogueResponse = {
+      raw_prompt: '',
+      prompt_hash: 'h-adv',
       json_content: JSON.stringify([
         {
           id: 'START',
@@ -196,6 +204,8 @@ describe('UnityDialogueViewer', () => {
 
   it('affiche "Fin du dialogue" pour un nœud sans choix ni nextNode', () => {
     const responseEndNode: GenerateUnityDialogueResponse = {
+      raw_prompt: '',
+      prompt_hash: 'h4',
       json_content: JSON.stringify([
         {
           id: 'END',
@@ -214,6 +224,8 @@ describe('UnityDialogueViewer', () => {
 
   it('affiche le nextNode pour un dialogue linéaire', () => {
     const responseLinear: GenerateUnityDialogueResponse = {
+      raw_prompt: '',
+      prompt_hash: 'h5',
       json_content: JSON.stringify([
         {
           id: 'START',

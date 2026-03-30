@@ -58,14 +58,21 @@ describe('graphStore - Duplicate Nodes', () => {
     expect(dupData.testSuccessNode).toBeUndefined()
     expect(dupData.testFailureNode).toBeUndefined()
 
-    expect(dupData.choices.length).toBe(2)
-    expect(dupData.choices[0].text).toBe('Réponse 1')
-    expect(dupData.choices[0].targetNode).toBeUndefined()
-    expect(dupData.choices[0].test).toBe('Dex:12') // AC#3 : condition conservée
-    expect(dupData.choices[0].testSuccessNode).toBeUndefined() // AC#2 : connexions supprimées
-    expect(dupData.choices[0].testFailureNode).toBeUndefined()
-    expect(dupData.choices[1].text).toBe('Réponse 2')
-    expect(dupData.choices[1].targetNode).toBeUndefined()
+    const dupChoices = dupData.choices as Array<{
+      text: string
+      targetNode?: string
+      test?: string
+      testSuccessNode?: string
+      testFailureNode?: string
+    }>
+    expect(dupChoices.length).toBe(2)
+    expect(dupChoices[0].text).toBe('Réponse 1')
+    expect(dupChoices[0].targetNode).toBeUndefined()
+    expect(dupChoices[0].test).toBe('Dex:12') // AC#3 : condition conservée
+    expect(dupChoices[0].testSuccessNode).toBeUndefined() // AC#2 : connexions supprimées
+    expect(dupChoices[0].testFailureNode).toBeUndefined()
+    expect(dupChoices[1].text).toBe('Réponse 2')
+    expect(dupChoices[1].targetNode).toBeUndefined()
 
     expect(state.selectedNodeId).toBe(duplicate!.id)
   })

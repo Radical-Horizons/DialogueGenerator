@@ -86,6 +86,7 @@ describe('graphStore - Regeneration & history (Story 1.10)', () => {
       vi.mocked(graphAPI.generateNode).mockResolvedValue({
         node: {
           id: 'generated-1',
+          type: 'dialogueNode',
           speaker: 'Generated',
           line: 'Generated line',
         },

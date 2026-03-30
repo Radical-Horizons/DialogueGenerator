@@ -513,7 +513,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             parent_node_id: selectedNodeId,
             parent_node_content: (selectedNode.data ?? {}) as Record<string, unknown>,
             user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
-            context_selections: selections as Record<string, unknown>,
+            context_selections: selections as unknown as Record<string, unknown>,
             llm_model_identifier: llmModel,
           }
         : null,
@@ -1077,7 +1077,11 @@ interface ChoicesEditorProps {
 
 function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: ChoicesEditorProps) {
   const { control, getValues } = useFormContext<DialogueNodeData>()
-  const { selectedNodeId, updateNode, selectedNode } = useGraphStore()
+  const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
+  const updateNode = useGraphStore((s) => s.updateNode)
+  const selectedNode = useGraphStore(
+    useShallow((s) => s.nodes.find((n) => n.id === s.selectedNodeId) ?? null)
+  )
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'choices',
@@ -1103,8 +1107,12 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
       choices: updatedChoices.map((sc, i) => {
         // Fusionner avec les données du formulaire pour les choix restants
         const formChoice = formData.choices?.[i < index ? i : i + 1] // Décaler l'index si après l'index supprimé
+        const storeText =
+          typeof (sc as { text?: string }).text === 'string' ? (sc as { text?: string }).text : ''
+        const formText = formChoice?.text?.trim() ? formChoice.text : ''
         return {
           ...(formChoice || {}),
+          text: formText || storeText || 'Choix',
           // Préserver les champs de connexion du store
           targetNode: sc.targetNode,
           testCriticalFailureNode: sc.testCriticalFailureNode,

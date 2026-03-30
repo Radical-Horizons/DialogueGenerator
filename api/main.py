@@ -20,6 +20,7 @@ from api.exceptions import APIException, ValidationException
 from api.dependencies import get_request_id
 from api.config.security_config import get_security_config
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
+from api.app_version import APP_VERSION
 
 # Charger le fichier .env en dev (éviter sous pytest pour des tests déterministes)
 if "pytest" not in sys.modules:
@@ -221,6 +222,37 @@ async def lifespan(app: FastAPI):
             logger.info("Cleanup task des jobs de génération démarrée")
         except Exception as e:
             logger.warning(f"Erreur lors du démarrage de la cleanup task: {e}")
+
+        async def gdd_notion_scheduler() -> None:
+            """Sync GDD Notion périodique si activée (FR18, pas de cron OS)."""
+            await asyncio.sleep(20)
+            while True:
+                delay_sec = 3600
+                try:
+                    container = getattr(app.state, "container", None)
+                    if container is not None:
+                        svc = container.get_gdd_notion_sync_service()
+                        delay_sec = svc.poll_interval_seconds()
+                        if svc.is_auto_sync_enabled():
+                            await svc.run_sync(
+                                force_full=False,
+                                mirror_rebuild=False,
+                                request_id="gdd-notion-scheduler",
+                            )
+                except asyncio.CancelledError:
+                    raise
+                except Exception as sched_exc:
+                    logger.warning(
+                        "Planificateur sync GDD Notion: %s",
+                        sched_exc,
+                        exc_info=True,
+                    )
+                await asyncio.sleep(delay_sec)
+
+        app.state._gdd_notion_scheduler_task = asyncio.create_task(
+            gdd_notion_scheduler()
+        )
+
         _startup_timer.mark("lifespan_startup_complete")
         _startup_timer.log_report()
 
@@ -246,12 +278,20 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"Erreur lors de l'arrêt de la cleanup task: {e}")
 
+        sched_task = getattr(app.state, "_gdd_notion_scheduler_task", None)
+        if sched_task is not None:
+            sched_task.cancel()
+            try:
+                await sched_task
+            except asyncio.CancelledError:
+                pass
+
 
 # Création de l'application FastAPI
 app = FastAPI(
     title="DialogueGenerator API",
     description="API REST pour la génération de dialogues IA pour jeux de rôle",
-    version="1.0.0",
+    version=APP_VERSION,
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
@@ -533,6 +573,10 @@ app.include_router(graph.router)
 
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
+
+from api.routers import gdd_notion_sync
+
+app.include_router(gdd_notion_sync.router)
 
 # Debug endpoint (dev only): inspect PromptEngine code loaded by server
 @app.get("/debug/prompt-engine", tags=["Debug"])

@@ -141,11 +141,9 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     
     // Calculer le hash AVANT l'appel API pour vérifier le cache
     const computedHash = await computeStateHash(promptParams)
-    const { promptHash: currentHash, tokenCount: currentTokenCount } = useGenerationStore.getState()
+    const { previewInputHash, tokenCount: currentTokenCount } = useGenerationStore.getState()
 
-    // Si le hash est identique et qu'on a déjà un tokenCount, skip l'appel API
-    if (computedHash === currentHash && currentTokenCount !== null) {
-      // Cache hit: pas besoin d'appeler l'API
+    if (computedHash === previewInputHash && currentTokenCount !== null) {
       return
     }
     
@@ -159,7 +157,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       stateBeforeCall.tokenCount,
       stateBeforeCall.promptHash,
       true,
-      stateBeforeCall.structuredPrompt
+      stateBeforeCall.structuredPrompt,
+      'preserve'
     )
 
     try {
@@ -172,20 +171,26 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       // Estimation approximative basée sur la longueur pour l'affichage (le backend sera la source de vérité lors de la génération)
       const estimatedTokenCount = Math.ceil(response.raw_prompt.length / 4)
       
-      // Mettre à jour le prompt seulement si le hash a changé ou si on n'avait pas de prompt
-      // Cela évite de reconstruire l'affichage si le prompt est identique
-      // Note: response.prompt_hash devrait correspondre à computedHash, mais on utilise celui du backend comme source de vérité
-      if (computedHash !== response.prompt_hash) {
-        // Log warning si les hashs ne correspondent pas (devrait être rare)
-        console.warn('Hash mismatch: computed', computedHash, 'vs backend', response.prompt_hash)
-      }
-      
-      if (currentHash !== response.prompt_hash || currentHash === null) {
-        setRawPrompt(response.raw_prompt, estimatedTokenCount, response.prompt_hash, false, response.structured_prompt || null)
+      const priorBackendHash = useGenerationStore.getState().promptHash
+      if (priorBackendHash !== response.prompt_hash || priorBackendHash === null) {
+        setRawPrompt(
+          response.raw_prompt,
+          estimatedTokenCount,
+          response.prompt_hash,
+          false,
+          response.structured_prompt || null,
+          computedHash
+        )
       } else {
-        // Même hash : ne pas remplacer le contenu mais remettre isEstimating à false dans le store
         const stateAfter = useGenerationStore.getState()
-        setRawPrompt(stateAfter.rawPrompt, stateAfter.tokenCount, stateAfter.promptHash, false, stateAfter.structuredPrompt)
+        setRawPrompt(
+          stateAfter.rawPrompt,
+          stateAfter.tokenCount,
+          stateAfter.promptHash,
+          false,
+          stateAfter.structuredPrompt,
+          'preserve'
+        )
       }
     } catch (err: unknown) {
       // Ne logger que les erreurs non liées à la connexion (backend non accessible)
@@ -202,7 +207,14 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       // Ne pas effacer le prompt existant si l'estimation échoue
       // Le prompt précédent reste visible pour l'utilisateur
       const currentState = useGenerationStore.getState()
-      setRawPrompt(currentState.rawPrompt, currentState.tokenCount, currentState.promptHash, false, null)
+      setRawPrompt(
+        currentState.rawPrompt,
+        currentState.tokenCount,
+        currentState.promptHash,
+        false,
+        null,
+        'invalidate'
+      )
     } finally {
       setIsEstimating(false)
     }

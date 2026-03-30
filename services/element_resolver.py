@@ -17,30 +17,60 @@ class ElementResolver:
     # Mapping des catégories vers les types d'éléments (pour context_config.json)
     ELEMENT_TYPE_MAP: Dict[str, str] = {
         "characters": "character",
+        "characters_full": "character",
+        "characters_excerpt": "character",
         "locations": "location",
+        "locations_full": "location",
+        "locations_excerpt": "location",
         "items": "item",
+        "items_full": "item",
+        "items_excerpt": "item",
         "species": "species",
+        "species_full": "species",
+        "species_excerpt": "species",
         "communities": "community",
+        "communities_full": "community",
+        "communities_excerpt": "community",
         "quests": "quest",
     }
     
     # Mapping des catégories vers les labels pour les marqueurs explicites
     ELEMENT_LABEL_MAP: Dict[str, str] = {
         "characters": "PNJ",
+        "characters_full": "PNJ",
+        "characters_excerpt": "PNJ",
         "locations": "LIEU",
+        "locations_full": "LIEU",
+        "locations_excerpt": "LIEU",
         "items": "OBJET",
+        "items_full": "OBJET",
+        "items_excerpt": "OBJET",
         "species": "ESPÈCE",
+        "species_full": "ESPÈCE",
+        "species_excerpt": "ESPÈCE",
         "communities": "COMMUNAUTÉ",
+        "communities_full": "COMMUNAUTÉ",
+        "communities_excerpt": "COMMUNAUTÉ",
         "quests": "QUÊTE",
     }
     
     # Mapping des catégories vers les ElementCategory
     CATEGORY_TO_ELEMENT_CATEGORY: Dict[str, ElementCategory] = {
         "characters": ElementCategory.CHARACTERS,
+        "characters_full": ElementCategory.CHARACTERS,
+        "characters_excerpt": ElementCategory.CHARACTERS,
         "locations": ElementCategory.LOCATIONS,
+        "locations_full": ElementCategory.LOCATIONS,
+        "locations_excerpt": ElementCategory.LOCATIONS,
         "items": ElementCategory.ITEMS,
+        "items_full": ElementCategory.ITEMS,
+        "items_excerpt": ElementCategory.ITEMS,
         "species": ElementCategory.SPECIES,
+        "species_full": ElementCategory.SPECIES,
+        "species_excerpt": ElementCategory.SPECIES,
         "communities": ElementCategory.COMMUNITIES,
+        "communities_full": ElementCategory.COMMUNITIES,
+        "communities_excerpt": ElementCategory.COMMUNITIES,
         "quests": ElementCategory.QUESTS,
         "dialogues_examples": ElementCategory.DIALOGUES,
     }

@@ -220,6 +220,7 @@ function PanelExpandButton({
 
 export function Dashboard() {
   const [selectedContextItem, setSelectedContextItem] = useState<ContextItem | null>(null)
+  const [selectedContextHistoryStem, setSelectedContextHistoryStem] = useState<string | null>(null)
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [rightPanelTab, setRightPanelTab] = useState<'prompt' | 'dialogue' | 'node' | 'details'>('prompt')
   const [centerPanelTab, setCenterPanelTab] = useState<'generation' | 'edition' | 'graph'>('generation')
@@ -420,7 +421,10 @@ export function Dashboard() {
       content: (
         <div style={{ flex: 1, minHeight: 0, maxHeight: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
           {selectedContextItem ? (
-            <ContextDetail item={selectedContextItem} />
+            <ContextDetail
+              item={selectedContextItem}
+              historyCategoryStem={selectedContextHistoryStem}
+            />
           ) : (
             <div style={{ 
               padding: '2rem', 
@@ -580,8 +584,9 @@ export function Dashboard() {
               />
             </div>
             <ContextSelector 
-              onItemSelected={(item) => {
+              onItemSelected={(item, historyStem) => {
                 setSelectedContextItem(item)
+                setSelectedContextHistoryStem(item ? (historyStem ?? null) : null)
                 if (item) {
                   setRightPanelTab('details')
                 }

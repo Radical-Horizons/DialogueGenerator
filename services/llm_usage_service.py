@@ -2,7 +2,7 @@
 import logging
 import time
 from datetime import date, datetime, UTC
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from models.llm_usage import LLMUsageRecord
 from services.llm_pricing_service import LLMPricingService
@@ -401,4 +401,154 @@ class LLMUsageService:
             end_date=end_date,
             model_name=model_name
         )
+
+    def get_record_for_dialogue_node(
+        self,
+        dialogue_id: str,
+        node_id: str,
+    ) -> Optional[LLMUsageRecord]:
+        """Retourne l’enregistrement d’usage LLM pour un couple dialogue / nœud."""
+        return self.repository.get_by_dialogue_and_node(dialogue_id, node_id)
+
+    def compute_and_persist_context_relevance(self, request_id: str) -> None:
+        """Calcule pertinence + usage par section et met à jour l’enregistrement (3.6 / 3.7).
+
+        Ne lève pas d’exception vers l’appelant : les erreurs sont loguées uniquement.
+
+        Args:
+            request_id: Identifiant de la requête LLM déjà persistée.
+        """
+        from services.context_relevance_scoring import compute_context_relevance_result
+        from services.context_section_usage_scoring import (
+            compute_context_section_usage_result,
+        )
+
+        try:
+            record = self.repository.get_by_request_id(request_id)
+            if record is None or not record.success:
+                return
+            if not record.prompt or not record.response:
+                return
+            relevance = compute_context_relevance_result(
+                record.prompt, record.response, request_id=request_id
+            )
+            section_usage = compute_context_section_usage_result(
+                record.prompt, record.response, request_id=request_id
+            )
+            record.context_relevance = relevance
+            record.context_section_usage = section_usage
+            self.repository.update(record)
+        except Exception as e:
+            logger.error(
+                "compute_and_persist_context_relevance: échec pour request_id=%s: %s",
+                request_id,
+                e,
+                exc_info=True,
+            )
+
+    def get_context_relevance_for_node(
+        self,
+        dialogue_id: str,
+        node_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Retourne le rapport de pertinence pour un nœud (lazy-compute si absent).
+
+        Args:
+            dialogue_id: Identifiant dialogue (fichier).
+            node_id: Identifiant nœud Unity.
+
+        Returns:
+            Dict rapport ou None si aucun enregistrement exploitable.
+        """
+        from services.context_relevance_scoring import compute_context_relevance_result
+
+        record = self.get_record_for_dialogue_node(dialogue_id, node_id)
+        if record is None:
+            return None
+        if record.context_relevance is not None:
+            return dict(record.context_relevance)
+        if record.prompt and record.response and record.success:
+            relevance = compute_context_relevance_result(
+                record.prompt, record.response, request_id=record.request_id
+            )
+            record.context_relevance = relevance
+            if record.context_section_usage is None:
+                from services.context_section_usage_scoring import (
+                    compute_context_section_usage_result,
+                )
+
+                record.context_section_usage = compute_context_section_usage_result(
+                    record.prompt, record.response, request_id=record.request_id
+                )
+            self.repository.update(record)
+            return relevance
+        return None
+
+    def get_context_section_usage_for_node(
+        self,
+        dialogue_id: str,
+        node_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Retourne le rapport d’usage par section GDD pour un nœud (lazy-compute si absent).
+
+        Args:
+            dialogue_id: Identifiant dialogue (fichier).
+            node_id: Identifiant nœud Unity.
+
+        Returns:
+            Dict rapport ou None si aucun enregistrement exploitable.
+        """
+        from services.context_section_usage_scoring import (
+            compute_context_section_usage_result,
+        )
+
+        record = self.get_record_for_dialogue_node(dialogue_id, node_id)
+        if record is None:
+            return None
+        if record.context_section_usage is not None:
+            return dict(record.context_section_usage)
+        if record.prompt and record.response and record.success:
+            usage = compute_context_section_usage_result(
+                record.prompt, record.response, request_id=record.request_id
+            )
+            record.context_section_usage = usage
+            if record.context_relevance is None:
+                from services.context_relevance_scoring import (
+                    compute_context_relevance_result,
+                )
+
+                record.context_relevance = compute_context_relevance_result(
+                    record.prompt, record.response, request_id=record.request_id
+                )
+            self.repository.update(record)
+            return usage
+        return None
+
+    def list_context_relevance_history(self, dialogue_id: str) -> List[Dict[str, Any]]:
+        """Liste les mesures de pertinence persistées pour un dialogue, ordre chronologique.
+
+        Args:
+            dialogue_id: Identifiant dialogue.
+
+        Returns:
+            Liste d’entrées simplifiées (request_id, node_id, timestamp, score, …).
+        """
+        records = self.repository.get_by_dialogue_id(dialogue_id)
+        out: List[Dict[str, Any]] = []
+        for r in records:
+            if not r.success or not r.node_id or r.context_relevance is None:
+                continue
+            rel = r.context_relevance
+            out.append(
+                {
+                    "request_id": r.request_id,
+                    "node_id": r.node_id,
+                    "timestamp": r.timestamp,
+                    "score_percent": float(rel.get("score_percent", 0.0)),
+                    "low_context_warning": bool(rel.get("low_context_warning", False)),
+                    "breakdown_by_type": dict(rel.get("breakdown_by_type", {})),
+                }
+            )
+        out.sort(key=lambda x: x["timestamp"])
+        return out
 

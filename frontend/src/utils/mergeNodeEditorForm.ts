@@ -26,9 +26,11 @@ export function mergeDialogueNodeFormIntoStoreData(
       .map((choice) => [choice.choiceId, choice] as const)
   )
   const mergedChoices: Choice[] = formChoices.map((fc, i) => {
+    // Avec choiceId explicite : uniquement la map (pas storeChoices[i], faux si l’ordre form ≠ store).
     const storeChoice =
-      (typeof fc.choiceId === 'string' ? storeChoicesById.get(fc.choiceId) : undefined) ??
-      storeChoices[i]
+      typeof fc.choiceId === 'string' && fc.choiceId.trim() !== ''
+        ? storeChoicesById.get(fc.choiceId)
+        : storeChoices[i]
     return {
       ...fc,
       choiceId: storeChoice?.choiceId ?? fc.choiceId,
@@ -135,8 +137,9 @@ export function applyStoreConnectionFieldsToDialogueFormChoices(
   )
   return formChoices.map((fc, i) => {
     const sc =
-      (typeof fc.choiceId === 'string' ? storeChoicesById.get(fc.choiceId) : undefined) ??
-      storeChoices[i]
+      typeof fc.choiceId === 'string' && fc.choiceId.trim() !== ''
+        ? storeChoicesById.get(fc.choiceId)
+        : storeChoices[i]
     if (!sc) return fc
     return {
       ...fc,

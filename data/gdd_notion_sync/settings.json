@@ -1,0 +1,663 @@
+{
+  "schema_version": 1,
+  "sync_interval_minutes": 60,
+  "auto_sync_enabled": false,
+  "sources": [
+    {
+      "kind": "database",
+      "notion_id": "3e13e12e-934c-4a78-8850-7439b7d1dc60",
+      "category_file": "Actes.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "0b194ed5-41f8-44e9-8a56-6320350e7e0b",
+      "category_file": "Assets_visuels.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-8151-a8a5-c1ca1d7c0861",
+      "category_file": "Bible_narrative.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "7b5970f6-1bb2-4694-b443-9d848546dda2",
+      "category_file": "Bibliothèque_de_Prompts.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "dbf0e2f0-55b0-456a-a8e4-1185d04a5e76",
+      "category_file": "Caractéristiques_—_Uresaïr_(FP).json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-8179-b57b-e95813caac2e",
+      "category_file": "Chapitres.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "22c6e4d2-1b45-8066-b17c-c2af998de0b8",
+      "category_file": "Chronologie_d'Escelion.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-81de-a4f4-d01beb5e1be2",
+      "category_file": "Communautés.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "10f87005-d58e-46cc-94dc-580b4be9a5cd",
+      "category_file": "Compétences.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "0e4cee6a-0546-456a-b49d-5592f553cc9a",
+      "category_file": "Compétences_de_perso.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-81df-8b05-fcdd43604be5",
+      "category_file": "Dialogues.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-81e9-a768-df06185c1aea",
+      "category_file": "Espèces.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "76fcffae-cabb-43e1-88d6-4e27fa00f876",
+      "category_file": "Feuilles_de_perso.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "2956e4d2-1b45-80f4-97f4-f75efb1e3565",
+      "category_file": "Guides_musicaux_par_lieux.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-8111-8ce7-c3cc47199f55",
+      "category_file": "Inspirations.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "742623bf-54dc-4186-87aa-b63876eea2ed",
+      "category_file": "Langues.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1eb6e4d2-1b45-8086-87be-f8589888b62c",
+      "category_file": "Lentilles_du_Game_Designer.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "2996e4d2-1b45-8033-893c-e3acf5fc0260",
+      "category_file": "Lexique_Musical.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-81ed-a022-ea4e0f1aba5f",
+      "category_file": "Lieux.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "049aca84-1f77-48c5-889d-7f29f2107fca",
+      "category_file": "Maps.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "28e6e4d2-1b45-80ea-a9b2-d4385c346d57",
+      "category_file": "Musiques.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "28edd8b0-0f25-417e-b78e-f940de0e65c7",
+      "category_file": "Mémoires_des_Personas.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "935bdaad-d395-4cdb-be6b-7f7f9a6789d2",
+      "category_file": "Noms.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "29c6e4d2-1b45-80c8-8041-efbccc9c1767",
+      "category_file": "Notebook.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-8109-8024-c61acd801f52",
+      "category_file": "Objets.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "2ec6e4d2-1b45-8015-9bd0-ccb3a73c3bd2",
+      "category_file": "Personas.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-81a2-9340-f77f5f2e5885",
+      "category_file": "Personnages.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "7ad25e00-dec2-4105-acfd-c9fbd043f45b",
+      "category_file": "Piliers.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "98765e2f-80ac-433d-885a-1582fadf12a8",
+      "category_file": "Règnes_et_classes.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "2426e4d2-1b45-8056-8d13-eba8efd92996",
+      "category_file": "Références_visuelles_des_éléments_originaux.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-8178-99ed-e2eaee1298f3",
+      "category_file": "Scènes.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1886e4d2-1b45-81bc-9dd9-eca74ed8b499",
+      "category_file": "Structure_Narrative.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "50c2527a-1429-47a1-ba2e-8a79190510db",
+      "category_file": "Table_des_patterns.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "1f96e4d2-1b45-8007-a09f-dcbb0ef15f5a",
+      "category_file": "Tests_de_jeu.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "2d16e4d2-1b45-8016-ba74-ccb4fbd92b72",
+      "category_file": "Vocabulaire_Alteir.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "e1066f02-734d-4d32-802f-1f17ae8882e8",
+      "category_file": "Évaluation_des_aspects_culturels___études.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "45a0dee0-f8f8-4973-b4dc-5dbf8c18d241",
+      "category_file": "Action-RPG.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1b36e4d2-1b45-80a1-b403-c15a97581e64",
+      "category_file": "Annexes.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "87f63e7e-da25-45d8-a1e6-e5409ac75043",
+      "category_file": "antagonists.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-819a-830d-e8cca671fbc5",
+      "category_file": "anti-cliches-strategy.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-8115-8537-fe5b6b3c6c50",
+      "category_file": "archetypes-psychology.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "fb503b69-a0d2-4ae5-afa4-986bd9fa7186",
+      "category_file": "Autres.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-816e-972a-eb9b498324ca",
+      "category_file": "biopunk-aesthetics.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2866e4d2-1b45-809e-842f-db11228ed77f",
+      "category_file": "Business_Plan.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1cd6e4d2-1b45-80eb-9373-fb9b774a47c2",
+      "category_file": "Carte_d’Escelion.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2dc6e4d2-1b45-8061-9b72-df2d9b7e4aa4",
+      "category_file": "Cartographie_du_Quotidien_Économique_d’Alteir.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "e0c6bcbf-4c3c-4eab-8960-42249cd54efc",
+      "category_file": "cas-usage-lieux.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-81c5-9d14-fd2b8c782646",
+      "category_file": "cas-usage.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "cbf51ab5-be95-4c6e-a97b-f91978602f21",
+      "category_file": "CRPG.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "99ee87ab-c7f2-478d-b013-e86135a9b9c7",
+      "category_file": "Dashboard_Narratif.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-81a2-80e2-c3e3e5c84a55",
+      "category_file": "dialogue-crafting.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1eb6e4d2-1b45-807a-a0a4-c2850f2d9609",
+      "category_file": "Direction_artistique.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2336e4d2-1b45-800a-a5ab-f77df48bef95",
+      "category_file": "Draft_-_Dialogue_Uresaïr_et_Ethérée.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11f6e4d2-1b45-8073-b508-eefe91ce663d",
+      "category_file": "Défis_de_la_prémisse.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "bca57f97-fcaf-42d8-adc1-54a31278a739",
+      "category_file": "Game_Design.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "07c336d2-286a-47cf-9a6c-2cc6665d4b0f",
+      "category_file": "Gestion_d'Espèces_civilisées.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "13d5e5c1-f2b7-424d-9874-3b4b5d7ede36",
+      "category_file": "Gestion_d'Objets.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "38262832-cbfe-4eb0-ae5c-90dea19a0de0",
+      "category_file": "Gestion_de_Communautés.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "addaacf7-79fe-4290-a8fc-c38f84dbfc94",
+      "category_file": "Gestion_de_Faune,_Flore_et_Classes.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "03cf0bb6-2112-4a86-844c-59d6cb3fe265",
+      "category_file": "Gestion_de_Lieux.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "571e0db5-b2d1-4b7e-aaa0-c5a6c6c47ac2",
+      "category_file": "Gestion_de_Patterns.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "c9cbc6e7-20bf-4e68-b46e-bcea0fd5528e",
+      "category_file": "Gestion_de_Personas.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-819b-8e39-ee744916d38c",
+      "category_file": "Gestion_de_personnages.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "72a1bcd4-078e-4d0f-a123-61316f0f9794",
+      "category_file": "Gestion_de_Skills.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "fbe30c8d-2e52-4bbf-bbb6-f08f9e360943",
+      "category_file": "Guide_de_création_de_personnage.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "39bcafcb-7724-4445-9ea6-1aa6f60456a5",
+      "category_file": "Guide_de_direction_UI.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "76743f6f-5fdd-450b-954d-ffe9adc85031",
+      "category_file": "Guide_de_détermination_du_règne.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2146e4d2-1b45-80b4-9ec5-eb667da2864d",
+      "category_file": "Guide_de_génération_de_prompts_pour_les_décors.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2146e4d2-1b45-80f5-8595-d56947831556",
+      "category_file": "Guide_de_génération_de_prompts_pour_les_décors_du_Léviathan.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1886e4d2-1b45-8133-9cf2-ef6486fa001d",
+      "category_file": "Guide_de_narration.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1886e4d2-1b45-8120-94c4-fb4e9666e0cb",
+      "category_file": "Guide_des_dialogues.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "97db684d-93f9-4b2f-af23-77e4509a2140",
+      "category_file": "Guide_des_Quêtes_annexes.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2766e4d2-1b45-802b-8edc-e89598fd401a",
+      "category_file": "Guide_des_récompenses_possibles.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2846e4d2-1b45-801b-901c-e54cad28554e",
+      "category_file": "Guide_musical.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2b16e4d2-1b45-8045-acf7-e29ba9e52458",
+      "category_file": "Guide_Nano_Banana.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1886e4d2-1b45-80b1-a012-ed5ee06d6fe4",
+      "category_file": "Guides.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-81d7-b98d-f819463e1fbf",
+      "category_file": "historical-npcs.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1b098542-8458-42d6-a80c-0072d8b26f84",
+      "category_file": "Index_Escelion_(référence_condensée_pour_IA).json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "d218b5e7-91b5-43ec-a53b-942a8922bf33",
+      "category_file": "Initialisation_Créative.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-818f-87e1-e5282c4807b1",
+      "category_file": "innovation-guidelines.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "a74f304a-10be-4fe5-82f0-06e07e6e81d5",
+      "category_file": "JRPG.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11f6e4d2-1b45-809b-84e6-e06c0e19307d",
+      "category_file": "Les_meilleurs_personnages_de_la_prémisse.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2996e4d2-1b45-8094-8df4-c206e8e52c16",
+      "category_file": "Lexique_de_termes_musicaux.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11e6e4d2-1b45-8009-af21-d82c86c99ae2",
+      "category_file": "Liste_de_souhaits.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1eb6e4d2-1b45-8011-a6fa-c39c0ac80690",
+      "category_file": "L’art_du_game_Design_-_lenses.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11e6e4d2-1b45-80ea-a589-e00c0851a03d",
+      "category_file": "L’Immortalité_dans_Alteir.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1886e4d2-1b45-80fc-838a-ca60047f3481",
+      "category_file": "Manifeste_du_Surréalisme_Fantastique.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "4e54c9b6-a1ef-4fc8-9825-e9f7d300be52",
+      "category_file": "Meneur_de_Jeu.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "fdb506be-9f9f-4704-9780-f75069a18a97",
+      "category_file": "modules-lieux.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "16dacd10-33dd-4822-b36b-8a76f5e5f394",
+      "category_file": "Méthodologie_des_Boucles_Expérientielles_(McWills).json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b5",
+      "category_file": "Narrative_Design.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "d9b1a891-6136-47b1-949e-e289cad6fc9c",
+      "category_file": "Personnages_(stats).json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3146e4d2-1b45-8024-932e-fb7aafe6c527",
+      "category_file": "Pitch.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1e40e68c-fef4-42d5-b27b-314f96da7dae",
+      "category_file": "pj-characters.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11f6e4d2-1b45-80ef-a797-f8c7780f5149",
+      "category_file": "Possibilités_de_transformation.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11f6e4d2-1b45-800b-8036-c249ce43e907",
+      "category_file": "Principe_directeur_et_conflit_central.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2a684d1c-8752-4ffb-8c4b-04883310945f",
+      "category_file": "Prompt_Engineering.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1b26e4d2-1b45-8040-9064-c235ef268a3d",
+      "category_file": "Prompts_pour_IA.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11e6e4d2-1b45-80f1-a10b-ebfa2c2ac93c",
+      "category_file": "Que_se_passerait-il_si__….json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1ed6e4d2-1b45-8040-8bcd-d9c1cc64a6a0",
+      "category_file": "Rappel_du_Core_System.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "16745a74-7227-4edf-940e-a4b2304f0888",
+      "category_file": "Recherche_Deep_Dive.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-8163-b6fd-ed41c47f857f",
+      "category_file": "recruitable-npcs.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2ae6e4d2-1b45-801f-a6ca-c0e7a8b2a61f",
+      "category_file": "Relations_inter-espèces_et_hybridation_dans_Escelion_et_la_fantasy.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-81ac-8441-dcf4ea030ce3",
+      "category_file": "relationship-weaving.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2be6e4d2-1b45-80f4-8942-cd456cd0050d",
+      "category_file": "Règnes_et_espèces.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "d7fd7860-085b-4415-9bde-7ac4e2d3f6fa",
+      "category_file": "Référence___Anti-clichés_et_esthétique_des_lieux.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "297e51ac-007e-4506-b1e8-8ff493a418ef",
+      "category_file": "Référence___Gabarit_et_principes_de_rédaction.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "b68baa7f-2702-4c6f-a6e5-5d1d255c9191",
+      "category_file": "Référence___Mapping_domaines_→_SoT.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "ddd3bf9b-8668-43ef-819d-21942012f114",
+      "category_file": "Référence___Points_d'entrée_et_extraction_contextuelle.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "350a5da1-1b25-45cc-9f33-78e4b3870198",
+      "category_file": "Référence___Structure_des_fiches_Lieux.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "e0f2f297-3b68-41d9-a9d4-b5bcff407350",
+      "category_file": "Référence___Structure_des_fiches_Personas.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "1a16e4d2-1b45-80c9-8779-f1f5de187ba4",
+      "category_file": "Scénario.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "643553d8-4679-45f7-b938-269a93704ee7",
+      "category_file": "secondary-npcs.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "72cd2442-6489-4cc7-88ad-04375cb53971",
+      "category_file": "Skill___Initialisation.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "f0985ce9-2af6-41cb-8f29-fbd074417bab",
+      "category_file": "Skills.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "b22bd27f-d273-4614-abce-b800edc76d8c",
+      "category_file": "Sound_Design.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-814f-8531-e681e9c8c566",
+      "category_file": "species-essentials.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "89ea7602-f2d1-495d-a816-44d3c3eab106",
+      "category_file": "Spécification_Agile.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "51bef7e5-74da-4dc5-9a1c-a0a0e13f9091",
+      "category_file": "Structure_Narrative_51bef7e5.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11e6e4d2-1b45-807a-b475-c02430101469",
+      "category_file": "Structure_narrative_en_Spirale.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-818b-aad3-ef52ad09371b",
+      "category_file": "superior-entities.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "661a936c-69bc-4f6f-8f59-fd7cf1784702",
+      "category_file": "tertiary-npcs.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3bbdddde-af2e-40e6-9eab-f194f87ff957",
+      "category_file": "troubleshooting-lieux.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-81f3-8db7-c3df02d4d860",
+      "category_file": "troubleshooting.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "887b29a3-1e48-4be0-9cf3-013802211d35",
+      "category_file": "TRPG.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2816e4d2-1b45-80ae-8d68-ff077b9807eb",
+      "category_file": "Tutos.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2b16e4d2-1b45-80b4-ae1d-d0f6db42c4b6",
+      "category_file": "Visual_guides.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "11f6e4d2-1b45-8086-b514-e51b1e04c051",
+      "category_file": "Voie_unique_de_cause_à_effet.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "3056e4d2-1b45-8151-9cb9-fdec4c3a1399",
+      "category_file": "worldbuilding-core.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "2dc6e4d2-1b45-80c3-b1e2-d9173fa33ff2",
+      "category_file": "Études.json"
+    },
+    {
+      "kind": "page",
+      "notion_id": "21993c24-8a06-4303-b8a3-4e413d0d4fcb",
+      "category_file": "Évaluation_des_aspects_culturels_d'Alteir.json"
+    }
+  ],
+  "included_categories": []
+}

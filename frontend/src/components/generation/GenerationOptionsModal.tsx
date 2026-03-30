@@ -1,12 +1,13 @@
 /**
- * Modal pour configurer les options de génération (champs de contexte, Unity, organisation, guidance).
+ * Modal pour configurer les options de génération (contexte, vocabulaire, prompts, budget, sync GDD, suivi).
  */
 import { useState, useCallback, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextStore } from '../../store/contextStore'
 import { ContextFieldSelector } from './ContextFieldSelector'
 import { VocabularyGuidesTab } from './VocabularyGuidesTab'
+import { GddNotionSyncSection } from './GddNotionSyncSection'
 import { PromptsTab } from './PromptsTab'
 import { ErrorBoundary } from '../shared/ErrorBoundary'
 import { BudgetSettings } from '../settings/BudgetSettings'
@@ -16,16 +17,39 @@ import { theme } from '../../theme'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import * as configAPI from '../../api/config'
+import { type BudgetResponse } from '../../api/costs'
+import {
+  GDD_FULL_SYNC_CHECKPOINT_QUERY_KEY,
+  getGddFullSyncCheckpoint,
+} from '../../api/gddNotionSync'
 import { InfoIcon } from '../shared/Tooltip'
 
 export interface GenerationOptionsModalProps {
   isOpen: boolean
   onClose: () => void
   onApply?: () => void
-  initialTab?: 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage' | 'logs'
+  initialTab?:
+    | 'context'
+    | 'metadata'
+    | 'general'
+    | 'vocabulary'
+    | 'gdd_notion'
+    | 'prompts'
+    | 'shortcuts'
+    | 'usage'
+    | 'logs'
 }
 
-type TabId = 'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage' | 'logs'
+type TabId =
+  | 'context'
+  | 'metadata'
+  | 'general'
+  | 'vocabulary'
+  | 'gdd_notion'
+  | 'prompts'
+  | 'shortcuts'
+  | 'usage'
+  | 'logs'
 
 interface Tab {
   id: TabId
@@ -36,7 +60,7 @@ export function GenerationOptionsModal({
   isOpen,
   onClose,
   onApply,
-  initialTab = 'context',
+  initialTab = 'general',
 }: GenerationOptionsModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab as TabId)
   
@@ -59,6 +83,8 @@ export function GenerationOptionsModal({
     loadSuggestions,
     loadDefaultConfig,
   } = useContextConfigStore()
+
+  const queryClient = useQueryClient()
 
   // Charger la config par défaut au montage
   useEffect(() => {
@@ -132,15 +158,24 @@ export function GenerationOptionsModal({
   }, [detectFields, loadSuggestions])
 
   const tabs: Tab[] = [
+    { id: 'general', label: 'Général' },
+    { id: 'gdd_notion', label: 'Notion' },
     { id: 'context', label: 'Contexte' },
     { id: 'metadata', label: 'Métadonnées' },
-    { id: 'general', label: 'Général' },
     { id: 'vocabulary', label: 'Vocabulaire & Guides' },
     { id: 'prompts', label: 'Prompts' },
-    { id: 'shortcuts', label: 'Raccourcis' },
     { id: 'usage', label: 'Usage IA' },
     { id: 'logs', label: 'Logs' },
+    { id: 'shortcuts', label: 'Raccourcis' },
   ]
+
+  const { data: notionResumeCheckpoint } = useQuery({
+    queryKey: GDD_FULL_SYNC_CHECKPOINT_QUERY_KEY,
+    queryFn: getGddFullSyncCheckpoint,
+    enabled: isOpen,
+    staleTime: 10_000,
+  })
+  const notionResumeAvailable = notionResumeCheckpoint?.resumable === true
 
   if (!isOpen) return null
 
@@ -210,24 +245,72 @@ export function GenerationOptionsModal({
             flexShrink: 0,
           }}
         >
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+          {tabs.map((tab) => {
+            const tabLabel =
+              tab.id === 'gdd_notion' && notionResumeAvailable ? 'Notion · reprise' : tab.label
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: '1rem 1.5rem',
+                  border: 'none',
+                  borderBottom: activeTab === tab.id ? `3px solid ${theme.border.focus}` : '3px solid transparent',
+                  backgroundColor: 'transparent',
+                  color: activeTab === tab.id ? theme.text.primary : theme.text.secondary,
+                  cursor: 'pointer',
+                  fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                }}
+              >
+                {tabLabel}
+              </button>
+            )
+          })}
+        </div>
+
+        {notionResumeAvailable && activeTab !== 'gdd_notion' ? (
+          <div
+            style={{
+              padding: '0.65rem 1.25rem',
+              backgroundColor: theme.background.secondary,
+              borderBottom: `1px solid ${theme.border.focus}`,
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: '0.75rem',
+              flexShrink: 0,
+            }}
+          >
+            <span
               style={{
-                padding: '1rem 1.5rem',
-                border: 'none',
-                borderBottom: activeTab === tab.id ? `3px solid ${theme.border.focus}` : '3px solid transparent',
-                backgroundColor: 'transparent',
-                color: activeTab === tab.id ? theme.text.primary : theme.text.secondary,
-                cursor: 'pointer',
-                fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                color: theme.text.primary,
+                fontSize: '0.88rem',
+                lineHeight: 1.45,
+                flex: '1 1 220px',
               }}
             >
-              {tab.label}
+              Synchronisation Notion complète en pause sur le serveur. Vous pouvez la reprendre après
+              avoir fermé le navigateur ou l&apos;application : onglet <strong>Notion</strong>, puis{' '}
+              <strong>Reprendre la sync</strong>.
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab('gdd_notion')}
+              style={{
+                padding: '0.45rem 0.9rem',
+                borderRadius: '6px',
+                border: `1px solid ${theme.border.focus}`,
+                backgroundColor: theme.border.focus,
+                color: theme.background.panel,
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+              }}
+            >
+              Aller à Notion
             </button>
-          ))}
-        </div>
+          </div>
+        ) : null}
 
         {/* Content - Seul ce conteneur scroll */}
         <div
@@ -249,20 +332,6 @@ export function GenerationOptionsModal({
             <ContextTab
               onDetectAll={handleDetectAll}
               showOnlyEssential={true}
-            />
-          )}
-
-          {activeTab === 'general' && (
-            <GeneralTab
-              organization={organization}
-              setOrganization={setOrganization}
-              previewText={previewText}
-              previewTokens={previewTokens}
-              isLoadingPreview={isLoadingPreview}
-              onPreview={handlePreview}
-              onBudgetUpdated={() => {
-                // Optionnel: recharger les données si nécessaire
-              }}
             />
           )}
 
@@ -294,8 +363,48 @@ export function GenerationOptionsModal({
             <PromptsTab />
           )}
 
-          {activeTab === 'shortcuts' && (
-            <ShortcutsTab />
+          {activeTab === 'general' && (
+            <GeneralTab
+              organization={organization}
+              setOrganization={setOrganization}
+              previewText={previewText}
+              previewTokens={previewTokens}
+              isLoadingPreview={isLoadingPreview}
+              onPreview={handlePreview}
+              onBudgetUpdated={() => {
+                // Optionnel: recharger les données si nécessaire
+              }}
+            />
+          )}
+
+          {activeTab === 'gdd_notion' && (
+            <ErrorBoundary
+              fallback={
+                <div
+                  style={{
+                    padding: '2rem',
+                    color: theme.text.primary,
+                    backgroundColor: theme.background.secondary,
+                    borderRadius: '8px',
+                    border: `1px solid ${theme.border.primary}`,
+                  }}
+                >
+                  <h3 style={{ marginTop: 0 }}>Erreur lors du chargement</h3>
+                  <p>
+                    Une erreur s&apos;est produite lors du chargement de la synchronisation GDD
+                    Notion. Veuillez réessayer.
+                  </p>
+                </div>
+              }
+            >
+              <GddNotionSyncSection
+                onCheckpointDiskChanged={() => {
+                  void queryClient.invalidateQueries({
+                    queryKey: GDD_FULL_SYNC_CHECKPOINT_QUERY_KEY,
+                  })
+                }}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'usage' && (
@@ -304,6 +413,10 @@ export function GenerationOptionsModal({
 
           {activeTab === 'logs' && (
             <LogsTab />
+          )}
+
+          {activeTab === 'shortcuts' && (
+            <ShortcutsTab />
           )}
         </div>
 
@@ -529,7 +642,7 @@ function GeneralTab({
   previewTokens: number
   isLoadingPreview: boolean
   onPreview: () => void
-  onBudgetUpdated?: (budget: { allowed: boolean; message?: string; [key: string]: unknown }) => void
+  onBudgetUpdated?: (budget: BudgetResponse) => void
 }) {
   return (
     <div>

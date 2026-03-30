@@ -184,3 +184,107 @@ export async function getGenerationLogs(
   return response.data
 }
 
+/** Rapport de pertinence contexte GDD pour un nœud (Story 3.6). */
+export interface ContextRelevanceReport {
+  /** False si aucune analyse persistée pour ce nœud (réponse 200, pas de 404). */
+  record_present?: boolean
+  dialogue_id: string
+  node_id: string
+  request_id?: string | null
+  score_percent: number
+  breakdown_by_type: Record<string, number>
+  reflected_types: string[]
+  weak_types: string[]
+  low_context_warning: boolean
+  low_threshold_percent: number
+  method: string
+  computation_ms: number
+  computed_at: string
+  suggestions_hints: string[]
+}
+
+export interface ContextRelevanceHistoryEntry {
+  request_id: string
+  node_id?: string | null
+  timestamp: string
+  score_percent: number
+  low_context_warning: boolean
+  breakdown_by_type: Record<string, number>
+}
+
+export interface ContextRelevanceHistoryResponse {
+  dialogue_id: string
+  entries: ContextRelevanceHistoryEntry[]
+  total_count: number
+}
+
+export async function getNodeContextRelevance(
+  dialogueId: string,
+  nodeId: string
+): Promise<ContextRelevanceReport> {
+  const url = `/api/v1/llm-usage/dialogue/${encodeURIComponent(dialogueId)}/nodes/${encodeURIComponent(nodeId)}/context-relevance`
+  const response = await apiClient.get(url)
+  return response.data
+}
+
+/** Section GDD analysée pour un nœud (Story 3.7). */
+export interface ContextSectionUsageItem {
+  section_key: string
+  section_title: string
+  excerpt: string
+  overlap_percent: number
+  status: string
+}
+
+export interface ContextSectionUsageEntityGroup {
+  entity_type: string
+  entity_label: string
+  sections: ContextSectionUsageItem[]
+}
+
+export interface ContextSectionUsageFlatItem {
+  entity_type: string
+  entity_label: string
+  section_key: string
+  section_title: string
+  excerpt: string
+  overlap_percent: number
+  status: string
+}
+
+export interface ContextSectionUsageReport {
+  /** False si aucune analyse persistée pour ce nœud (réponse 200). */
+  record_present?: boolean
+  dialogue_id: string
+  node_id: string
+  request_id?: string | null
+  method: string
+  computation_ms: number
+  computed_at: string
+  reflected_threshold_percent: number
+  entity_groups: ContextSectionUsageEntityGroup[]
+  weak_sections: ContextSectionUsageFlatItem[]
+  reflected_sections: ContextSectionUsageFlatItem[]
+  weak_section_count: number
+  reflected_section_count: number
+  generated_plain_preview: string
+  parser_note?: string | null
+}
+
+export async function getNodeContextSectionUsage(
+  dialogueId: string,
+  nodeId: string
+): Promise<ContextSectionUsageReport> {
+  const url = `/api/v1/llm-usage/dialogue/${encodeURIComponent(dialogueId)}/nodes/${encodeURIComponent(nodeId)}/context-usage`
+  const response = await apiClient.get(url)
+  return response.data
+}
+
+export async function getContextRelevanceHistory(
+  dialogueId: string
+): Promise<ContextRelevanceHistoryResponse> {
+  const url = `/api/v1/llm-usage/dialogue/${encodeURIComponent(dialogueId)}/context-relevance-history`
+  const response = await apiClient.get(url)
+  return response.data
+}
+

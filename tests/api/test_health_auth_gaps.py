@@ -27,6 +27,7 @@ class TestHealthGaps:
         data = response.json()
         assert "status" in data
         assert "timestamp" in data
+        assert "app_version" in data
 
 
 class TestAuthGaps:

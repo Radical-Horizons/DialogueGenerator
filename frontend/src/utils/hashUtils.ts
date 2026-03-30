@@ -4,6 +4,8 @@
  * Utilisé pour le cache des prompts afin d'éviter les appels API redondants.
  */
 
+import type { ContextSelection, InGameFlag } from '../types/api'
+
 /**
  * Interface pour les paramètres d'entrée du prompt.
  * 
@@ -11,7 +13,7 @@
  */
 export interface PromptStateParams {
   user_instructions: string
-  context_selections: unknown
+  context_selections: ContextSelection
   npc_speaker_id?: string
   max_context_tokens: number
   system_prompt_override?: string
@@ -24,7 +26,7 @@ export interface PromptStateParams {
   previous_dialogue_preview?: string
   field_configs?: Record<string, string[]>
   organization_mode?: string
-  in_game_flags?: unknown[]
+  in_game_flags?: InGameFlag[]
 }
 
 /**

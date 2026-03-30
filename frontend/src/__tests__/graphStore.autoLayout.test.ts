@@ -139,7 +139,7 @@ describe('graphStore - Auto-layout (Story 2.13 FR34)', () => {
         width: 280,
         height: 420,
         data: { id: 'tall-root', speaker: '', line: 'Parent', choices: [] },
-      })
+      } as import('reactflow').Node)
       useGraphStore.getState().addNode({
         id: 'child',
         type: 'dialogueNode',
@@ -148,7 +148,7 @@ describe('graphStore - Auto-layout (Story 2.13 FR34)', () => {
         width: 280,
         height: 180,
         data: { id: 'child', speaker: '', line: 'Child', choices: [] },
-      })
+      } as import('reactflow').Node)
       useGraphStore.getState().connectNodes('tall-root', 'child', 0, 'choice')
 
       await useGraphStore.getState().applyAutoLayout('dagre', 'TB')

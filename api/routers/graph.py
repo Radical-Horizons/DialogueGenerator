@@ -38,6 +38,7 @@ from api.exceptions import (
 )
 from api.dependencies import (
     get_config_service,
+    get_context_builder,
     get_request_id,
     get_graph_node_orchestrator,
     get_token_estimation_service,
@@ -55,8 +56,25 @@ from services.graph_node_orchestrator import GraphNodeOrchestrator
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
+from core.context.context_builder import ContextBuilder
 
 logger = logging.getLogger(__name__)
+
+
+def _fingerprint_for_selections_safe(
+    context_builder: ContextBuilder,
+    selections: dict,
+) -> Optional[str]:
+    """Empreinte du contexte GDD pour les sélections ; None si vide ou erreur."""
+    if not selections:
+        return None
+    try:
+        from services.gdd_context_fingerprint import compute_gdd_content_fingerprint
+
+        return compute_gdd_content_fingerprint(context_builder, selections)
+    except Exception as exc:
+        logger.warning("Empreinte contexte GDD omise: %s", exc)
+        return None
 
 # Taux de conversion USD → EUR (à mettre à jour périodiquement, voir llm_pricing.json note).
 _USD_TO_EUR_RATE: float = 0.92
@@ -127,6 +145,21 @@ def _estimate_cost_cache_key(representative_prompt: str, model_id: str, batch_co
     """Clé de cache pour estimate-cost."""
     blob = f"{representative_prompt}|{model_id}|{batch_count}"
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _try_compute_context_relevance(
+    usage_service: LLMUsageService,
+    request_id: str,
+) -> None:
+    """Calcule la pertinence contexte sans impacter la réponse HTTP (Story 3.6)."""
+    try:
+        usage_service.compute_and_persist_context_relevance(request_id)
+    except Exception as exc:
+        logger.warning(
+            "Pertinence contexte non enregistrée (request_id=%s): %s",
+            request_id,
+            exc,
+        )
 
 
 router = APIRouter(prefix="/api/v1/unity-dialogues/graph", tags=["Graph Editor"])
@@ -373,6 +406,7 @@ async def generate_node(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> GenerateNodeResponse:
     """Génère un nœud en contexte (extension de /generate/unity-dialogue).
@@ -456,6 +490,14 @@ async def generate_node(
                 usage_service.annotate_usage(
                     request_id, request_data.dialogue_id, str(first_node_id)
                 )
+                _try_compute_context_relevance(usage_service, request_id)
+
+        gdd_fp = _fingerprint_for_selections_safe(
+            context_builder,
+            request_data.context_selections
+            if isinstance(request_data.context_selections, dict)
+            else {},
+        )
 
         return GenerateNodeResponse(
             node=result.nodes[0] if result.nodes else None,
@@ -467,6 +509,7 @@ async def generate_node(
             connected_choices_count=result.connected_choices_count,
             failed_choices_count=result.failed_choices_count,
             total_choices_count=result.total_choices_count,
+            context_gdd_content_fingerprint=gdd_fp,
         )
 
     except ValueError as e:
@@ -983,6 +1026,7 @@ async def regenerate_node(
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     orchestrator: Annotated[GraphNodeOrchestrator, Depends(get_graph_node_orchestrator)],
     usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> RegenerateNodeResponse:
     """Régénère un nœud avec de nouvelles instructions (Story 1.10).
@@ -1056,7 +1100,19 @@ async def regenerate_node(
             request_data.parent_node_id,
             request_id,
         )
-        return RegenerateNodeResponse(node=new_node, suggested_connections=suggested_connections)
+        usage_service.annotate_usage(request_id, request_data.dialogue_id, str(node_id))
+        _try_compute_context_relevance(usage_service, request_id)
+        gdd_fp = _fingerprint_for_selections_safe(
+            context_builder,
+            request_data.context_selections
+            if isinstance(request_data.context_selections, dict)
+            else {},
+        )
+        return RegenerateNodeResponse(
+            node=new_node,
+            suggested_connections=suggested_connections,
+            context_gdd_content_fingerprint=gdd_fp,
+        )
     except (NotFoundException, ValidationException):
         raise
     except AllLLMProvidersUnavailableError:

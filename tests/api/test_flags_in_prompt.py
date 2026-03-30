@@ -80,7 +80,7 @@ def test_preview_prompt_with_flags(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True, "category": "Event"},
             {"id": "CURRENT_EFFORT", "value": 2, "category": "Stat"}
@@ -112,7 +112,7 @@ def test_preview_prompt_without_flags(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000
+        "max_context_tokens": 10000
     }
     
     response = client.post("/api/v1/dialogues/preview-prompt", json=request_data)
@@ -137,7 +137,7 @@ def test_estimate_tokens_with_flags(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True}
         ]
@@ -167,7 +167,7 @@ def test_flags_instruction_in_technical_section(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True}
         ]
@@ -195,7 +195,7 @@ def test_multiple_flags_serialization(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True},
             {"id": "ALLIED_WITH_CULTE", "value": False},

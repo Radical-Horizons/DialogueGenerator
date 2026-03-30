@@ -24,7 +24,7 @@ export interface UseGenerationHandlersOptions {
   /** Modèle LLM sélectionné */
   llmModel: string
   /** Reasoning effort */
-  reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   /** Top_p (nucleus sampling) */
   topP: number | null
   /** Nombre max de choix */

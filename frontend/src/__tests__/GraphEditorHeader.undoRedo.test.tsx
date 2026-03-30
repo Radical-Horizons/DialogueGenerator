@@ -43,6 +43,8 @@ function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGra
     handleExportSVG: async () => {},
     undo: () => useGraphStore.getState().undo(),
     redo: () => useGraphStore.getState().redo(),
+    canUndoNow: false,
+    canRedoNow: false,
     ...overrides,
   }
 }

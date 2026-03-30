@@ -80,12 +80,12 @@ function determineNodeType(unityNode: UnityNode): string {
  * choice.test ; la réapparition après suppression est gérée côté sauvegarde (graphToDocument).
  */
 export function documentToGraph(
-  document: Record<string, unknown> | UnityNode[],
+  document: UnityDocument | Record<string, unknown> | UnityNode[],
   layout: LayoutPositions | null | undefined
 ): { nodes: Node[]; edges: Edge[] } {
   const nodesArray: UnityNode[] = Array.isArray(document)
     ? document
-    : (document?.nodes as UnityNode[]) ?? []
+    : ((document as UnityDocument | Record<string, unknown>)?.nodes as UnityNode[]) ?? []
   const layoutPositions = layout ?? null
 
   const nodes: Node[] = []
@@ -313,7 +313,11 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
           choices[edge.data.choiceIndex].targetNode = edge.target
         }
       }
-    } else if (!sourceNode.choices?.length && edge.label === 'Suivant') {
+    } else if (
+      Array.isArray(sourceNode.choices) &&
+      sourceNode.choices.length === 0 &&
+      edge.label === 'Suivant'
+    ) {
       sourceNode.nextNode = edge.target
     }
   }

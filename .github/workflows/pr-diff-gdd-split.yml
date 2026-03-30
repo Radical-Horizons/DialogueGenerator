@@ -1,0 +1,123 @@
+# Résumé de diff PR : stats séparées GDD (data/GDD_categories, Vision.json) vs reste.
+# Contourne la limite GitHub (~300 fichiers) sur le diff web : la review "code" se lit dans le commentaire.
+name: PR diff — GDD vs code
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-diff-gdd-split-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  comment-split-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Résumé git diff (hors GDD / GDD seul)
+        id: build
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          MARKER='<!-- pr-diff-split: DialogueGenerator -->'
+          OUT="comment.md"
+          NON_GDD_N=$(
+            git diff "$BASE_SHA...$HEAD_SHA" --name-only -- . ':!data/GDD_categories' ':!data/Vision.json' 2>/dev/null | wc -l | tr -d ' '
+          )
+          GDD_N=$(
+            git diff "$BASE_SHA...$HEAD_SHA" --name-only -- data/GDD_categories data/Vision.json 2>/dev/null | wc -l | tr -d ' '
+          )
+          {
+            printf '%s\n\n' "$MARKER"
+            echo '## Diff séparé : GDD vs reste'
+            echo ''
+            echo "Comparaison \`$BASE_SHA...$HEAD_SHA\` (base de la PR ↔ HEAD)."
+            echo ''
+            echo '| Zone | Fichiers modifiés |'
+            echo '|------|------------------:|'
+            echo "| Hors GDD | $NON_GDD_N |"
+            echo '| GDD (`data/GDD_categories/`, `data/Vision.json`) | '"$GDD_N"' |'
+            echo ''
+            echo '### `git diff --stat` hors GDD'
+            echo ''
+            echo '```'
+            git diff "$BASE_SHA...$HEAD_SHA" --stat -- . ':!data/GDD_categories' ':!data/Vision.json' || true
+            echo '```'
+            echo ''
+            echo '### `git diff --stat` GDD uniquement'
+            echo ''
+            echo '```'
+            GDD_STAT=$(git diff "$BASE_SHA...$HEAD_SHA" --stat -- data/GDD_categories data/Vision.json 2>/dev/null || true)
+            if [ -z "$GDD_STAT" ]; then
+              echo '(aucun changement sous ces chemins)'
+            else
+              printf '%s\n' "$GDD_STAT"
+            fi
+            echo '```'
+            echo ''
+            echo '---'
+            echo ''
+            echo '*Commentaire mis à jour automatiquement par `.github/workflows/pr-diff-gdd-split.yml`.*'
+          } > "$OUT"
+          python3 << 'PY'
+          import os
+          import pathlib
+
+          p = pathlib.Path("comment.md")
+          text = p.read_text(encoding="utf-8", errors="replace")
+          max_len = 60_000
+          if len(text) > max_len:
+              b, h = os.environ["BASE_SHA"], os.environ["HEAD_SHA"]
+              note = (
+                  f"\n\n_… Tronqué (limite ~65k du commentaire GitHub). "
+                  f"En local : `git diff {b}...{h} --stat -- . ':(exclude)data/GDD_categories' ':(exclude)data/Vision.json'` "
+                  f"et `git diff {b}...{h} --stat -- data/GDD_categories data/Vision.json`._\n"
+              )
+              p.write_text(text[: max_len - len(note)] + note, encoding="utf-8")
+          PY
+
+      - name: Publier ou mettre à jour le commentaire
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- pr-diff-split: DialogueGenerator -->';
+            const body = fs.readFileSync('comment.md', 'utf8');
+            if (!body.includes(marker)) {
+              core.setFailed('comment.md missing marker');
+              return;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find((c) => (c.body || '').includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
