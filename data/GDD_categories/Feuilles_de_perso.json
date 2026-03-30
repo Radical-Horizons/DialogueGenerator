@@ -1,25 +1,23 @@
-{
-    "feuilles_de_perso": [
-        {
-            "Nom": "SansTitre",
-            "Raison": "18",
-            "Rôle / Archétype": "DPS",
-            "Volonté": "18",
-            "Écart vs cible": "{'id': 'GFjP', 'type': 'formula', 'formula': {'type': 'number', 'number': 0}}",
-            "Sociabilité": "5",
-            "Agilité": "12",
-            "Créativité": "15",
-            "Technique": "16",
-            "Total Caracs": "{'id': 'Wz%3Bg', 'type': 'formula', 'formula': {'type': 'number', 'number': 114}}",
-            "Personnage": "Valkazer Reitar",
-            "Cible Total Caracs FP": "114",
-            "Build": "FP",
-            "Feuille à copier": "{'id': 'jx%3AP', 'type': 'formula', 'formula': {'type': 'string', 'string': 'DPS • FP — PUI 14 | AGI 12 | PER 16 | RAI 18 | CRE 15 | SOC 5 | TEC 16 | VOL 18 • Total 114 (cible 114, écart 0)'}}",
-            "Perception": "16",
-            "Notes d’équilibrage": "Boss antagoniste principal niveau Divin. Pour atteindre Divin (28+) dans ses points forts : Raison 18 + Stratégie 10 = 28. Pour Extrême (11-14) dans ses points faibles : Sociabilité 5 + compétences/modificateurs. Stats amplifiées pour refléter : 27 ans d'expérience intensive, maîtrise du Cercle d'Octon (8 disciplines), absorption du Glossaire, prothèses vivantes (Bras du Pacte/Foi), immortalité défectueuse avec décennies d'adaptation, synthèse théorique avec Velkan Tehr. Ratio Cloud/Sephiroth : doit dominer une équipe complète.",
-            "🧩 Compétences de perso": "Valkazer — FP — Greffes, Valkazer — FP — Invocation, Valkazer — FP — Adaptabilité, Valkazer — FP — Histoire de l'art, Valkazer — FP — Escalade, Valkazer — FP — Biologie, Valkazer — FP — Négociation, Valkazer — FP — Chimie, Valkazer — FP — Folklore, Valkazer — FP — Neurosciences, Valkazer — FP — Perception auditive, Valkazer — FP — Fouille, Valkazer — FP — Législation, Valkazer — FP — Perception visuelle, Valkazer — FP — Intimidation, Valkazer — FP — Duperie, Valkazer — FP — Natation, Valkazer — FP — Alchimie, Valkazer — FP — Déplacement silencieux, Valkazer — FP — Orientation, Valkazer — FP — Explosifs à Détonateur, Valkazer — FP — Langues, Valkazer — FP — Médecine, Valkazer — FP — Endurance, Valkazer — FP — Crochetage",
-            "Puissance": "14",
-            "Feuille": "Valkazer Reitar — FP"
-        }
-    ]
-}
+[
+  {
+    "Nom": "Uresaïr — FP",
+    "sections": {
+      "_general": "> Filtre appliqué: Feuille contient Cette page. Tri par Compétence ascendant."
+    },
+    "notion_page_id": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b"
+  },
+  {
+    "Nom": "Valkazer Reitar — FP",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c197a14e-0c3c-41b1-85de-77aabc62d114"
+  },
+  {
+    "Nom": "Voknir Esh'Maradel — FP",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91"
+  }
+]

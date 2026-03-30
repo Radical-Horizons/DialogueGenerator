@@ -8,11 +8,11 @@ alwaysApply: false
 
 # Chemins GDD
 
-- **Catégories GDD** : `DialogueGenerator/data/GDD_categories/` (dossier réel, hors dépôt Git — `.gitignore` ; alimenter via sync Notion / copie depuis Notion_Scrapper, voir `docs/deployment/DATA_MAINTENANCE.md`)
-- **Shards (listes)** : pour une clé `personnages`, `lieux`, etc., le loader accepte soit `personnages.json` (monolithe), soit un répertoire `personnages/*.json` (une fiche = un fichier, prioritaire s’il contient au moins un JSON). Découpe monolithe → shards : `python scripts/split_gdd_category_to_shards.py --category personnages`
+- **Catégories GDD** : `DialogueGenerator/data/GDD_categories/` (alimenter via sync Notion / copie ; voir `docs/deployment/DATA_MAINTENANCE.md`). Les dossiers `.archive/` et `.staging/` sont gitignored (backups sync), pas nécessairement tout le répertoire.
+- **Shards (listes)** : forme cible — répertoire `personnages/*.json`, etc. (une fiche = un fichier ; prioritaire s’il y a au moins un JSON). **Monolithe `personnages.json` à la racine : toléré temporairement** (compat anciens exports / transition) ; découpe → shards : `python scripts/split_gdd_category_to_shards.py --category personnages`
 - **Sync Notion (complète)** : réserve `.archive/` (snapshots, listables via API) et `.staging/` (temporaire) ; ne pas versionner ; restauration et détails dans `.cursor/rules/gdd_notion_sync_builder.mdc`.
 - **Vision.json** : `DialogueGenerator/data/Vision.json` (dans le même dossier que GDD_categories)
 - **Variable d'environnement** : `GDD_IMPORT_PATH` peut pointer vers le dossier contenant Vision.json ou directement vers le fichier
 - **Cache disque** : `data/.gdd_snapshot/` (gitignored) — pickle du `GDDData` si les JSON sources sont inchangés entre deux processus ; `GDD_DISK_CACHE=false` pour désactiver
 
-⚠️ **Note** : Le dossier `data/GDD_categories/` est ignoré par Git ; il doit exister en local pour l’app et les tests d’intégration qui chargent les vraies données.
+⚠️ **Note** : `data/GDD_categories/` peut être versionné (fiches) ; `.archive/` et `.staging/` restent ignorés. Les tests « vraies données » exigent des fiches présentes (shards ou monolithe temporaire).

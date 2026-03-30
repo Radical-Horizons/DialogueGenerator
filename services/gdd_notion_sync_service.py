@@ -7,7 +7,19 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Type
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 import httpx
 
@@ -42,6 +54,7 @@ from services.gdd_notion_sync_mirror import (
     create_staging_run_dir,
     list_gdd_archives,
     partial_errors_block_mirror_promote,
+    partial_errors_should_preserve_mirror_staging,
     promote_staging_to_live,
     prune_archives,
     resolve_archive_dir,
@@ -54,7 +67,11 @@ from services.gdd_notion_sync_mapper import (
     notion_page_to_compact_row_record,
     notion_page_to_gdd_record,
 )
-from services.gdd_notion_sync_retry import SyncBackoffPolicy, run_with_retries
+from services.gdd_notion_sync_retry import (
+    SyncBackoffPolicy,
+    is_transient_notion_http_error,
+    run_with_retries,
+)
 from services.gdd_notion_sync_utils import (
     category_file_matches_included,
     category_stem_to_list_category_key,
@@ -65,6 +82,8 @@ from services.notion_api_client import NotionAPIClient
 from services.gdd_context_refresh import clear_gdd_runtime_caches
 
 logger = logging.getLogger(__name__)
+
+_TNotionRead = TypeVar("_TNotionRead")
 
 
 class GddNotionSyncUserCancelled(Exception):
@@ -106,14 +125,12 @@ _SYNC_RECOVERABLE: Tuple[Type[BaseException], ...] = (
 )
 
 
-def _is_transient_http_error(exc: BaseException) -> bool:
-    if isinstance(exc, httpx.TimeoutException):
-        return True
-    if isinstance(exc, httpx.ConnectError):
-        return True
+def _format_partial_error_detail(exc: BaseException) -> str:
+    """Détail d'erreur pour ``partial_errors`` (code HTTP explicite si applicable)."""
+    base = redact_notion_token_from_text(str(exc))
     if isinstance(exc, httpx.HTTPStatusError):
-        return exc.response.status_code in (429, 502, 503, 504)
-    return False
+        return f"HTTP {exc.response.status_code} — {base}"
+    return base
 
 
 @dataclass
@@ -431,17 +448,25 @@ class GddNotionSyncService:
         s = str(page_id or "").strip()
         return (s[:12] + "…") if len(s) > 12 else (s or "?")
 
-    def list_gdd_archive_entries(self, *, limit: int = 20) -> List[Dict[str, str]]:
+    def list_gdd_archive_entries(self, *, limit: int = 20) -> List[Dict[str, Any]]:
         """Liste les derniers snapshots locaux (``.archive/``), du plus récent au plus ancien.
 
         Args:
             limit: Nombre maximum d'entrées.
 
         Returns:
-            Liste de dicts ``id``, ``created_at`` (ISO UTC).
+            Liste de dicts ``id``, ``created_at`` (ISO UTC), ``size_bytes``, ``fiche_count``.
         """
         infos = list_gdd_archives(self._gdd_categories_path, limit=limit)
-        return [{"id": i.id, "created_at": i.created_at_iso} for i in infos]
+        return [
+            {
+                "id": i.id,
+                "created_at": i.created_at_iso,
+                "size_bytes": i.size_bytes,
+                "fiche_count": i.fiche_count,
+            }
+            for i in infos
+        ]
 
     def restore_gdd_archive(
         self,
@@ -580,6 +605,7 @@ class GddNotionSyncService:
                 force_full=force_full,
                 mirror_rebuild=mirror_rebuild,
                 request_id=request_id,
+                retry_policy=policy,
                 resume=resume,
                 fresh=fresh,
             )
@@ -590,7 +616,7 @@ class GddNotionSyncService:
                 _do,
                 policy=policy,
                 max_attempts=5,
-                is_transient=_is_transient_http_error,
+                is_transient=is_transient_notion_http_error,
             )
         except GddNotionSyncUserCancelled:
             if self._active_mirror_staging is not None:
@@ -636,6 +662,21 @@ class GddNotionSyncService:
             }
         )
 
+    async def _notion_read_with_retries(
+        self,
+        op: Callable[[], Awaitable[_TNotionRead]],
+        *,
+        retry_policy: SyncBackoffPolicy,
+        max_attempts: int = 5,
+    ) -> _TNotionRead:
+        """Lecture Notion (page / liste pages / corps) avec backoff sur erreurs transitoires."""
+        return await run_with_retries(
+            op,
+            policy=retry_policy,
+            max_attempts=max_attempts,
+            is_transient=is_transient_notion_http_error,
+        )
+
     async def _sync_body(
         self,
         token: str,
@@ -643,6 +684,7 @@ class GddNotionSyncService:
         force_full: bool,
         mirror_rebuild: bool,
         request_id: Optional[str],
+        retry_policy: SyncBackoffPolicy,
         resume: bool = False,
         fresh: bool = False,
     ) -> GddNotionSyncResult:
@@ -845,11 +887,15 @@ class GddNotionSyncService:
                 self._sync_progress_update(sources_completed=i)
                 continue
             try:
-                pages = await self._fetch_pages(client, kind, nid)
-            except _SYNC_RECOVERABLE as exc:
-                partial.append(
-                    f"{cat_file}: fetch — {redact_notion_token_from_text(str(exc))}"
+
+                async def _load_pages() -> List[Mapping[str, Any]]:
+                    return await self._fetch_pages(client, kind, nid)
+
+                pages = await self._notion_read_with_retries(
+                    _load_pages, retry_policy=retry_policy
                 )
+            except _SYNC_RECOVERABLE as exc:
+                partial.append(f"{cat_file}: fetch — {_format_partial_error_detail(exc)}")
                 self._sync_progress_update(sources_completed=i)
                 continue
 
@@ -906,11 +952,23 @@ class GddNotionSyncService:
                     current_page_id_short=self._notion_id_short(pid),
                 )
                 try:
-                    full_page = await client.get_page(pid)
+
+                    async def _read_meta() -> Dict[str, Any]:
+                        return await client.get_page(pid)
+
+                    full_page = await self._notion_read_with_retries(
+                        _read_meta, retry_policy=retry_policy
+                    )
                     if compact_table:
                         rec = notion_page_to_compact_row_record(full_page)
                     else:
-                        body = await client.get_page_content(pid)
+
+                        async def _read_body() -> str:
+                            return await client.get_page_content(pid)
+
+                        body = await self._notion_read_with_retries(
+                            _read_body, retry_policy=retry_policy
+                        )
                         rec = notion_page_to_gdd_record(full_page, body)
                     edited = p.get("last_edited_time") or ""
                     if is_record_empty_for_sync(rec):
@@ -936,7 +994,7 @@ class GddNotionSyncService:
                         updated += 1
                 except _SYNC_RECOVERABLE as exc:
                     partial.append(
-                        f"{cat_file} page {pid}: {redact_notion_token_from_text(str(exc))}"
+                        f"{cat_file} page {pid}: {_format_partial_error_detail(exc)}"
                     )
                 finally:
                     pages_processed_count += 1
@@ -975,7 +1033,7 @@ class GddNotionSyncService:
                     cat_file, shard_list_key, use_shards, written_page_records
                 )
             except _SYNC_RECOVERABLE as exc:
-                partial.append(f"{cat_file}: écriture — {exc}")
+                partial.append(f"{cat_file}: écriture — {_format_partial_error_detail(exc)}")
                 self._sync_progress_update(sources_completed=i)
                 continue
 
@@ -996,6 +1054,31 @@ class GddNotionSyncService:
 
         if mirror_ok and staging_run is not None:
             if partial_errors_block_mirror_promote(partial):
+                preserve = partial_errors_should_preserve_mirror_staging(partial)
+                if preserve and cp_state is not None:
+                    save_checkpoint(
+                        self._sync_checkpoint_dir, cp_state, manifest
+                    )
+                    log_sync_event(
+                        "Miroir non promu (erreurs transitoires) — "
+                        "staging et checkpoint conservés pour reprise.",
+                        request_id=request_id,
+                    )
+                    msg = (
+                        f"Miroir non appliqué : erreurs bloquantes ({len(partial)}). "
+                        f"État GDD inchangé. Snapshot : {archive_rel or '?'}. "
+                        "Reprise possible — relancez une sync complète avec Reprendre."
+                    )
+                    self._clear_gdd_file_cache_and_notify_context()
+                    self._active_mirror_staging = None
+                    return GddNotionSyncResult(
+                        success=False,
+                        message=msg,
+                        updated_entities=updated,
+                        partial_errors=partial,
+                        last_archive_relative=archive_rel,
+                        mirror_rebuild_used=True,
+                    )
                 cleanup_staging_only(staging_run)
                 clear_checkpoint_files(self._sync_checkpoint_dir)
                 msg = (

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import filecmp
+import json
 import logging
 import re
 import shutil
@@ -26,6 +27,8 @@ class GddArchiveInfo:
 
     id: str
     created_at: datetime
+    size_bytes: int = 0
+    fiche_count: int = 0
 
     @property
     def created_at_iso(self) -> str:
@@ -92,7 +95,7 @@ def archive_gdd_snapshot_if_delta(gdd_root: Path) -> GddArchiveDecision:
     sans créer de dossier ni copier.
     """
     gdd_root = gdd_root.resolve()
-    latest = list_gdd_archives(gdd_root, limit=1)
+    latest = list_gdd_archives(gdd_root, limit=1, include_empty=True)
     if latest:
         prev = gdd_root / ".archive" / latest[0].id
         if prev.is_dir() and gdd_live_matches_snapshot_dir(gdd_root, prev):
@@ -162,12 +165,101 @@ def prune_archives(gdd_root: Path, keep: int) -> None:
             logger.warning("Suppression archive %s impossible: %s", oldest, exc)
 
 
-def list_gdd_archives(gdd_root: Path, *, limit: int) -> List[GddArchiveInfo]:
+def _snapshot_total_size_bytes(snapshot_dir: Path) -> int:
+    """Somme des tailles de tous les fichiers sous le snapshot (récursif)."""
+    snapshot_dir = snapshot_dir.resolve()
+    if not snapshot_dir.is_dir():
+        return 0
+    total = 0
+    for p in snapshot_dir.rglob("*"):
+        if not p.is_file():
+            continue
+        try:
+            total += p.stat().st_size
+        except OSError:
+            continue
+    return total
+
+
+def _count_fiches_in_snapshot(snapshot_dir: Path) -> int:
+    """Estime le nombre de fiches GDD dans un snapshot (shards + monolithes racine).
+
+    - Chaque ``*.json`` sous un sous-dossier (ex. ``personnages/uuid.json``) compte pour une fiche.
+    - Chaque ``*.json`` à la racine du snapshot : listes d'entités dans les clés connues du
+      chargeur GDD, ou un seul enregistrement pour les catégories de type dict.
+
+    Returns:
+        Nombre estimé (0 si répertoire absent ou illisible).
+    """
+    from services.gdd_loader import GDDLoader
+
+    snapshot_dir = snapshot_dir.resolve()
+    if not snapshot_dir.is_dir():
+        return 0
+    list_keys = {
+        cfg["key"]
+        for cfg in GDDLoader.CATEGORIES_CONFIG.values()
+        if cfg["type"] == list
+    }
+    dict_keys = {
+        cfg["key"]
+        for cfg in GDDLoader.CATEGORIES_CONFIG.values()
+        if cfg["type"] == dict
+    }
+    total = 0
+    for path in sorted(snapshot_dir.rglob("*.json")):
+        rel = path.relative_to(snapshot_dir)
+        parts = rel.parts
+        if len(parts) >= 2:
+            total += 1
+            continue
+        if len(parts) != 1:
+            continue
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            continue
+        if isinstance(raw, list):
+            total += sum(1 for x in raw if isinstance(x, dict))
+            continue
+        if not isinstance(raw, dict):
+            continue
+        list_added = 0
+        for k in list_keys:
+            block = raw.get(k)
+            if isinstance(block, list):
+                list_added += sum(1 for x in block if isinstance(x, dict))
+        if list_added:
+            total += list_added
+            continue
+        for k in dict_keys:
+            if k in raw:
+                total += 1
+                break
+        else:
+            if raw:
+                total += 1
+    return total
+
+
+def list_gdd_archives(
+    gdd_root: Path,
+    *,
+    limit: int,
+    include_empty: bool = False,
+) -> List[GddArchiveInfo]:
     """Liste les snapshots valides sous ``.archive/``, du plus récent au plus ancien.
+
+    Si ``include_empty`` est faux (défaut, usage API / UI), les entrées avec
+    ``fiche_count == 0`` sont ignorées : archives sans fiche GDD détectée.
+
+    Si ``include_empty`` est vrai (sync, dédup de snapshot), tous les dossiers valides
+    sont listés jusqu'à la limite.
 
     Args:
         gdd_root: Racine ``GDD_categories``.
         limit: Nombre maximum d'entrées (minimum 1).
+        include_empty: Inclure les snapshots sans fiche (comparaison miroir / rétention).
 
     Returns:
         Liste triée par nom de dossier décroissant (préfixe date UTC triable).
@@ -191,7 +283,34 @@ def list_gdd_archives(gdd_root: Path, *, limit: int) -> List[GddArchiveInfo]:
             continue
         candidates.append((child.name, parsed))
     candidates.sort(key=lambda x: x[0], reverse=True)
-    return [GddArchiveInfo(id=name, created_at=dt) for name, dt in candidates[:n]]
+    out: List[GddArchiveInfo] = []
+    for name, dt in candidates:
+        if include_empty and len(out) >= n:
+            break
+        snap = base / name
+        size_b = 0
+        fiches = 0
+        if snap.is_dir():
+            try:
+                size_b = _snapshot_total_size_bytes(snap)
+                fiches = _count_fiches_in_snapshot(snap)
+            except OSError as exc:
+                logger.warning("Stats snapshot GDD impossible (%s): %s", name, exc)
+        if not include_empty and fiches == 0:
+            continue
+        out.append(
+            GddArchiveInfo(
+                id=name,
+                created_at=dt,
+                size_bytes=size_b,
+                fiche_count=fiches,
+            )
+        )
+        if include_empty:
+            continue
+        if len(out) >= n:
+            break
+    return out
 
 
 def resolve_archive_dir(gdd_root: Path, archive_id: str) -> Path:
@@ -340,6 +459,55 @@ def partial_errors_block_mirror_promote(partial: List[str]) -> bool:
         if " page " in line and "ignorée" not in line:
             return True
     return False
+
+
+def iter_blocking_partial_errors(partial: List[str]) -> List[str]:
+    """Lignes de ``partial_errors`` qui bloquent la promotion miroir."""
+    blocking: List[str] = []
+    for line in partial:
+        if ": fetch —" in line or ": fetch -" in line:
+            blocking.append(line)
+        elif ": écriture —" in line:
+            blocking.append(line)
+        elif " page " in line and "ignorée" not in line:
+            blocking.append(line)
+    return blocking
+
+
+def is_transient_partial_error_line(line: str) -> bool:
+    """Heuristique : erreur réseau / HTTP typiquement retentable côté Notion."""
+    low = line.lower()
+    markers = (
+        "429",
+        "500",
+        "502",
+        "503",
+        "504",
+        "bad gateway",
+        "gateway timeout",
+        "service unavailable",
+        "too many requests",
+        "timeout",
+        "timed out",
+        "connecterror",
+        "connection reset",
+        "connection aborted",
+        "temporarily unavailable",
+    )
+    return any(m in low for m in markers)
+
+
+def partial_errors_should_preserve_mirror_staging(partial: List[str]) -> bool:
+    """True si le miroir est bloqué uniquement par des erreurs jugées transitoires.
+
+    Dans ce cas on conserve ``.staging/`` et le checkpoint pour ``resume=true``.
+    """
+    if not partial_errors_block_mirror_promote(partial):
+        return False
+    blocking = iter_blocking_partial_errors(partial)
+    if not blocking:
+        return False
+    return all(is_transient_partial_error_line(b) for b in blocking)
 
 
 def create_staging_run_dir(gdd_root: Path) -> Path:

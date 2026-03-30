@@ -1,0 +1,9 @@
+[
+  {
+    "Nom": "modules-lieux",
+    "sections": {
+      "_general": "# Modules (Lieux)\n\nSous-workflows à charger selon le type de lieu.\n\n## Module : Région majeure\n\nQuand : nouvelle grande région ou région structurante.\n\n- Définir rôle macro (frontière, réservoir, verrou, sanctuaire, usine, etc.).\n\n- Définir 3-7 sous-lieux obligatoires (économie, social, danger, accès).\n\n- Définir 2 axes de circulation + 2 limitrophes.\n\n- Produire une carte mentale : \"ce que la région produit / ce qu’elle consomme / ce qu’elle interdit\".\n\n## Module : Point d’intérêt (POI)\n\nQuand : lieu très petit mais jouable.\n\n- 1 fonction narrative claire.\n\n- 1 contrainte forte.\n\n- 1 interaction typique (ce que le joueur fait ici).\n\n- 1 détail biopunk baroque distinctif.\n\n## Module : Lieu de culte\n\n- Rituel concret (sons, matières, coûts).\n\n- Violence implicite ou paradoxe (éviter sacré lisse).\n\n- Règle locale (interdit, serment, taxe, sacrifice).\n\n## Module : Lieu commercial\n\n- Qu’est-ce qui s’échange ?\n\n- Qu’est-ce qui manque toujours ?\n\n- Mécanisme d’aliénation ou de contrainte (contrat, dette, rationnement).\n\n## Module : Zone naturelle\n\n- Chaîne trophique minimale.\n\n- Adaptations des espèces.\n\n- 1 cycle naturel observable.\n\n## Module : Lieu militaire\n\n- Objectif de contrôle.\n\n- Logistique (ravitaillement, accès).\n\n- 1 faille exploitable (physique, sociale, rituelle)."
+    },
+    "notion_page_id": "fdb506be-9f9f-4704-9780-f75069a18a97"
+  }
+]

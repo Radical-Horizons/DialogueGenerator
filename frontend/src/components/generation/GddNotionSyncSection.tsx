@@ -36,7 +36,12 @@ function refreshContextAfterGddDiskChange(): void {
   st.bumpGddDataRevision()
 }
 
-export function GddNotionSyncSection() {
+export interface GddNotionSyncSectionProps {
+  /** Après mise à jour locale du checkpoint (sync / abandon), rafraîchir l’UI parent (ex. onglet Options). */
+  onCheckpointDiskChanged?: () => void
+}
+
+export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncSectionProps) {
   const { phase, userMessage, run, resetMessage } = useGddNotionSyncUi()
   const [serverStatus, setServerStatus] = useState<GddNotionSyncStatusResponse | null>(null)
   const [statusLoadError, setStatusLoadError] = useState<string | null>(null)
@@ -176,6 +181,7 @@ export function GddNotionSyncSection() {
             await refreshArchives()
           }
           await refreshCheckpoint()
+          onCheckpointDiskChanged?.()
           if (r.success) {
             refreshContextAfterGddDiskChange()
           }
@@ -188,7 +194,7 @@ export function GddNotionSyncSection() {
         }
       })
     },
-    [run, refreshStatus, refreshArchives, refreshCheckpoint],
+    [run, refreshStatus, refreshArchives, refreshCheckpoint, onCheckpointDiskChanged],
   )
 
   const handleSaveSettings = async () => {
@@ -255,6 +261,20 @@ export function GddNotionSyncSection() {
           Met à jour les fichiers JSON sous <code style={{ fontSize: '0.85em' }}>data/GDD_categories/</code>{' '}
           selon <code style={{ fontSize: '0.85em' }}>settings.json</code>. Le token n&apos;est jamais
           renvoyé par l&apos;API.
+        </p>
+        <p
+          style={{
+            margin: '0 0 1rem 0',
+            color: theme.text.secondary,
+            fontSize: '0.88rem',
+            lineHeight: 1.45,
+          }}
+        >
+          <strong style={{ color: theme.text.primary }}>Sync complète</strong> interrompue (onglet fermé,
+          navigateur quitté, erreur réseau) : rouvrez <strong style={{ color: theme.text.primary }}>Options</strong>{' '}
+          → onglet <strong style={{ color: theme.text.primary }}>Notion</strong>, puis{' '}
+          <strong style={{ color: theme.text.primary }}>Reprendre la sync</strong> — le serveur conserve le
+          checkpoint et le staging tant que vous n&apos;annulez pas.
         </p>
 
         {configLoadError && (
@@ -514,10 +534,10 @@ export function GddNotionSyncSection() {
             lineHeight: 1.4,
           }}
         >
-          <strong style={{ color: theme.text.primary }}>Reprendre</strong> continue une sync complète
-          interrompue (veille, timeout). <strong style={{ color: theme.text.primary }}>Sync complète</strong>{' '}
-          sans reprise = nouveau run (l’ancien checkpoint est effacé). L’annulation pendant la sync supprime
-          le checkpoint : il n’y a plus de reprise possible, seulement une nouvelle sync complète.
+          <strong style={{ color: theme.text.primary }}>Reprendre la sync</strong> reprend une sync complète
+          en cours sur le serveur (même après fermeture du site ou de l’application).{' '}
+          <strong style={{ color: theme.text.primary }}>Sync complète</strong> sans reprise démarre un nouveau
+          run et abandonne l’ancien checkpoint. L’annulation <em>pendant</em> la sync supprime le checkpoint.
         </p>
 
         <div
@@ -584,6 +604,7 @@ export function GddNotionSyncSection() {
                     try {
                       await deleteGddFullSyncCheckpoint()
                       await refreshCheckpoint()
+                      onCheckpointDiskChanged?.()
                     } catch (e) {
                       setCheckpointBannerError(
                         e instanceof Error ? e.message : 'Abandon du checkpoint impossible',
@@ -619,6 +640,7 @@ export function GddNotionSyncSection() {
                     try {
                       await deleteGddFullSyncCheckpoint()
                       await refreshCheckpoint()
+                      onCheckpointDiskChanged?.()
                     } catch (e) {
                       setCheckpointBannerError(
                         e instanceof Error ? e.message : 'Nettoyage impossible',
@@ -647,6 +669,7 @@ export function GddNotionSyncSection() {
                     try {
                       await deleteGddFullSyncCheckpoint()
                       await refreshCheckpoint()
+                      onCheckpointDiskChanged?.()
                     } catch (e) {
                       setCheckpointBannerError(
                         e instanceof Error ? e.message : 'Nettoyage impossible',
@@ -696,7 +719,9 @@ export function GddNotionSyncSection() {
           <p style={{ margin: '0 0 0.5rem 0', color: theme.text.secondary, fontSize: '0.85rem' }}>
             Snapshots locaux sous <code style={{ fontSize: '0.82em' }}>.archive/</code>. La sync
             complète en crée un avant mise à jour seulement si l’état sur disque diffère du dernier
-            snapshot.
+            snapshot. « Taille » = somme des fichiers du dossier ; « Fiches » = estimation (un JSON
+            par fiche dans les sous-dossiers + entrées des listes dans les monolithes à la racine).
+            Les sauvegardes sans aucune fiche détectée ne sont pas affichées.
           </p>
           {archivesLoadError && (
             <p style={{ color: theme.state.error.color, fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>
@@ -714,6 +739,8 @@ export function GddNotionSyncSection() {
                   <tr style={{ textAlign: 'left', color: theme.text.secondary }}>
                     <th style={{ padding: '0.35rem 0.5rem' }}>Date (UTC)</th>
                     <th style={{ padding: '0.35rem 0.5rem' }}>Id</th>
+                    <th style={{ padding: '0.35rem 0.5rem', textAlign: 'right' }}>Taille</th>
+                    <th style={{ padding: '0.35rem 0.5rem', textAlign: 'right' }}>Fiches</th>
                     <th style={{ padding: '0.35rem 0.5rem' }} />
                   </tr>
                 </thead>
@@ -735,6 +762,18 @@ export function GddNotionSyncSection() {
                         }}
                       >
                         {a.id}
+                      </td>
+                      <td
+                        style={{
+                          padding: '0.35rem 0.5rem',
+                          textAlign: 'right',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {formatArchiveSizeBytes(a.size_bytes)}
+                      </td>
+                      <td style={{ padding: '0.35rem 0.5rem', textAlign: 'right' }}>
+                        {typeof a.fiche_count === 'number' ? a.fiche_count : '—'}
                       </td>
                       <td style={{ padding: '0.35rem 0.5rem', textAlign: 'right' }}>
                         <button
@@ -937,6 +976,24 @@ function formatArchiveLabel(iso: string): string {
   } catch {
     return iso
   }
+}
+
+function formatArchiveSizeBytes(n: number): string {
+  if (!Number.isFinite(n) || n < 0) {
+    return '—'
+  }
+  if (n === 0) {
+    return '0 o'
+  }
+  const units = ['o', 'Ko', 'Mo', 'Go'] as const
+  let i = 0
+  let x = n
+  while (x >= 1024 && i < units.length - 1) {
+    x /= 1024
+    i += 1
+  }
+  const rounded = i === 0 || x >= 10 ? Math.round(x) : Math.round(x * 10) / 10
+  return `${rounded} ${units[i]}`
 }
 
 function apiErrorDetail(e: unknown): string {

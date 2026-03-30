@@ -238,6 +238,7 @@ def test_get_archives_lists_snapshots(client: TestClient, tmp_path: Path) -> Non
     arch = gdd / ".archive" / "20260102T030405Z_a1b2c3d4"
     arch.mkdir(parents=True)
     (arch / "note.txt").write_text("x", encoding="utf-8")
+    (arch / "fiche.json").write_text('{"Nom":"Test"}', encoding="utf-8")
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
     svc = GddNotionSyncService(
         config_store=store,
@@ -253,6 +254,8 @@ def test_get_archives_lists_snapshots(client: TestClient, tmp_path: Path) -> Non
         assert len(data) == 1
         assert data[0]["id"] == "20260102T030405Z_a1b2c3d4"
         assert "2026" in data[0]["created_at"]
+        assert data[0]["size_bytes"] > len("x".encode("utf-8"))
+        assert data[0]["fiche_count"] == 1
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
 

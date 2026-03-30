@@ -151,6 +151,16 @@ class GddArchiveEntrySchema(BaseModel):
 
     id: str = Field(..., description="Nom du dossier snapshot")
     created_at: str = Field(..., description="Horodatage UTC ISO (préfixe du run)")
+    size_bytes: int = Field(
+        0,
+        ge=0,
+        description="Taille totale des fichiers du snapshot (octets)",
+    )
+    fiche_count: int = Field(
+        0,
+        ge=0,
+        description="Nombre estimé de fiches GDD (shards + entrées des monolithes racine)",
+    )
 
 
 class GddArchivesListResponse(BaseModel):

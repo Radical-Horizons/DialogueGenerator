@@ -4,6 +4,9 @@
 import { API_TIMEOUTS } from '../constants'
 import apiClient from './client'
 
+/** Clé React Query pour l’état checkpoint / reprise sync complète. */
+export const GDD_FULL_SYNC_CHECKPOINT_QUERY_KEY = ['gdd-full-sync-checkpoint'] as const
+
 export interface GddNotionSyncConfigPublic {
   schema_version: number
   sync_interval_minutes: number
@@ -183,6 +186,10 @@ export async function postGddFullSyncCancel(): Promise<GddFullSyncSimpleOkRespon
 export interface GddArchiveEntry {
   id: string
   created_at: string
+  /** Taille totale des fichiers du snapshot (octets). */
+  size_bytes: number
+  /** Nombre estimé de fiches GDD (shards + monolithes). */
+  fiche_count: number
 }
 
 export interface GddArchivesListResponse {

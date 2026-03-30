@@ -1,12 +1,4199 @@
-{
-    "vocabulaire_alteir": [
-        {
-            "Nom": "SansTitre",
-            "Origine": "{'id': '%3AVN_', 'type': 'rich_text', 'rich_text': []}",
-            "Définition": "Genre social Umcut : explorateurs et voyageurs (~20% de la population). Quittent les tours pour parcourir Escelion, accumulant savoirs et biens.",
-            "Importance": "Modéré",
-            "Catégorie": "Concept",
-            "Terme": "Kor"
-        }
-    ]
-}
+[
+  {
+    "Nom": "Cycle Hvergique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Un des deux grands cycles hydro-élémentaires d'Escelion, gérant la circulation de l'eau pure à travers les Hvergelmir, Urnes de Mímir, Voies d'Auðumla et Océans cachés.",
+      "Importance": "Majeur",
+      "Origine": "Dérivé de « Hvergelmir » avec le suffixe « -ique » pour former un adjectif qualifiant le cycle de l'eau pure.",
+      "Popularité": "Mondialement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "0334b134-b02a-4d4b-8c75-0b727049d695"
+  },
+  {
+    "Nom": "Poches de Flottement",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Zones de la Lisière où la causalité locale a été délibérément altérée : temps différent, gravité inversée, pensées visibles. Espaces sacrés-fonctionnels balisés par des Stèles d'Avertissement.",
+      "Importance": "Modéré",
+      "Origine": "Du français poche et flottement, désignant des anomalies causales contrôlées.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "033830b9-2cc4-4dd7-b0bb-44290046ceb0"
+  },
+  {
+    "Nom": "Urnes de Mímir",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Formations bulbeuses cristallines suspendues au ciel de roche où s'accumule l'eau capturée par les Hvergelmir. Elles filtrent l'eau et développent une proto-conscience hydrologique.",
+      "Importance": "Important",
+      "Origine": "De la mythologie nordique « Mímir » (géant sage gardant la source de connaissance), détourné pour nommer les réservoirs suspendus du cycle hydraulique.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "036a1ec5-d407-4248-bc09-96323ada41e9"
+  },
+  {
+    "Nom": "Grande Bifurcation",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Acte ontologique accompli par Jast l'Inéluctable lors de l'Agénèse, séparant le fluide aqueux des quatre autres essences élémentaires et créant ainsi les cycles Hvergique et Wuji.",
+      "Importance": "Majeur",
+      "Origine": "Du français « bifurcation » (division en deux branches), détourné pour désigner l'événement cosmologique de séparation des cycles élémentaires.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "06bab7a7-9fa8-46d3-abf5-7da13819f7af"
+  },
+  {
+    "Nom": "Souffle Hakutō-Ah",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Onde synchronisante à 3 phases contrôlant la Vieille Ville.",
+      "Importance": "Majeur",
+      "Origine": "Terme inventé à sonorité asiatique.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "06f59352-7317-4a88-94c1-35f971e9c199"
+  },
+  {
+    "Nom": "Zhakâd",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Province du Désert, Léviathan pétrifié.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé à sonorité arabe.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "0919a787-6e75-4ea9-9610-99e87f373fe3"
+  },
+  {
+    "Nom": "Raephon Fractals",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Arthropodes mathématiciens du Xyriad Achromatique.",
+      "Importance": "Modéré",
+      "Origine": "Raephon est une espèce disparue, Fractals pour les mathématiques.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "09b320ca-148a-4383-b7f5-f422a5e464ae"
+  },
+  {
+    "Nom": "Créatures Pontifes",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Organismes capables de métaboliser à la fois le Cycle Hvergique et le Cycle Wuji.",
+      "Importance": "Modéré",
+      "Origine": "Du latin « pontifex » (celui qui fait le pont), désignant les créatures-ponts entre cycles.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "09f2de7f-10fe-4136-bd8a-fcb383363d51"
+  },
+  {
+    "Nom": "Krypte",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Laboratoire secret du Paradigme Ésothrope dans le Léviathan.",
+      "Importance": "Secondaire",
+      "Origine": "Du grec kryptê (cachette) avec orthographe archaïque.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "0a3e574f-c0b2-45b2-b008-ce37731b8e79"
+  },
+  {
+    "Nom": "Cycle des Transformations",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Série de festivités liées aux seize états du Barvasinkul (dix-sept Substrats).",
+      "Importance": "Modéré",
+      "Origine": "De « cycle », évoquant les célébrations rituelles des changements d'état métaphysiques.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "0b02e2f2-5bee-4c89-a144-7baee529e8c6"
+  },
+  {
+    "Nom": "Processions des Reliques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rituels du Culte de l'Anentropie au Léviathan pétrifié vénérant les artefacts sacrés.",
+      "Importance": "Secondaire",
+      "Origine": "De « procession », désignant les marches rituelles du Culte.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "0b42cbba-8268-4a07-b92f-987f64ec711b"
+  },
+  {
+    "Nom": "Contemplations Instant-Lieu",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Texte philosophique Barvasinkul sur espace-temps-conscience.",
+      "Importance": "Secondaire",
+      "Origine": "De contemplation pour traité philosophique.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "0c623864-5a86-4b11-81e7-b33e392890d1"
+  },
+  {
+    "Nom": "Léviathan pétrifié",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Désert, 300 hab, colosse 10km, Rêveur du Désert, temple Culte Anentropie.",
+      "Importance": "Majeur",
+      "Origine": "De Léviathan biblique pétrifié.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "0e003e2b-e803-462b-bc24-ea61543c1782"
+  },
+  {
+    "Nom": "Jungle Vivarcade",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, 47K hab, théâtre lignification, Construits fusionnés, jour permanent.",
+      "Importance": "Modéré",
+      "Origine": "De vivant et arcade (galerie).",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "0e336866-8757-4e28-a381-a87389dca388"
+  },
+  {
+    "Nom": "Abraldique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Langue orale rythmée des Aldravinds.",
+      "Importance": "Modéré",
+      "Origine": "Dérivé de Aldravind avec suffixe -ique.",
+      "Popularité": "Communautaire",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "0e974e67-a3fd-4f0c-9b2d-b7d563bc0e42"
+  },
+  {
+    "Nom": "Observautomatons",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "18 Courtiers imuins transformés parasitose (3198 AG), aveugles enregistrant invisible.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion d'observateur et automaton.",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "0ea8c73a-c914-459f-b874-7aa662442f69"
+  },
+  {
+    "Nom": "Narthex Non-Voir",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Sanctuaire contemplatif Strate 5 (Œil Mirimance).",
+      "Importance": "Secondaire",
+      "Origine": "De narthex (vestibule) avec non-voir.",
+      "Popularité": "Occulte",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "0ef1dafe-34cd-41c2-9cb4-368b95b23cad"
+  },
+  {
+    "Nom": "Pain d'Ossements",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Nourriture du Léviathan à base de poudre osseuse.",
+      "Importance": "Secondaire",
+      "Origine": "De pain avec ossements pour aliment minéral.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "10a0a05d-8d7b-449c-8b95-64adc6ff782d"
+  },
+  {
+    "Nom": "Conseil Chlorophyllien",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Oligarchie fusionnée à l'environnement de la Jungle Vivarcade.",
+      "Importance": "Secondaire",
+      "Origine": "De chlorophylle pour conseil végétal.",
+      "Popularité": "Localement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "10da4343-04cc-4329-a4e4-2bef69c400a1"
+  },
+  {
+    "Nom": "Lymphe conductrice",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Fluide du Nerf Conducteur nourrissant les Tisserands-Kelmar.",
+      "Importance": "Secondaire",
+      "Origine": "De lymphe (biologie) détourné pour fluide spécial.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "10dc1408-659b-40fa-bacd-626c6c71fa81"
+  },
+  {
+    "Nom": "Sept Souffrantes",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Mues vivantes pulsantes des Plaines Exuvie, risque éveil.",
+      "Importance": "Modéré",
+      "Origine": "De souffrant pour créatures en agonie.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "1127c7da-1a1c-4046-a314-cb559fedfc56"
+  },
+  {
+    "Nom": "Deimos",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Insectes géants lumineux sur ciel de roche, cycles jour/nuit d'Escelion. « Avoir son deimos » signifie aussi avoir son moment de gloire.",
+      "Importance": "Majeur",
+      "Origine": "Du grec Deimos (terreur), détourné pour insectes cosmiques.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "121775c9-7aa6-4a21-a63f-604450f45324"
+  },
+  {
+    "Nom": "Iris Vitrifié",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Zone centrale Œil Mirimance, verre noir, veines kelmar.",
+      "Importance": "Secondaire",
+      "Origine": "D'iris (œil) vitrifié (transformé en verre).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "12481e7f-a843-490d-b453-0ecd3918e08e"
+  },
+  {
+    "Nom": "17 Substrats",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "16 états de transformation reconnus du Barvasinkul, plus un 17e contesté (l'Entropie).",
+      "Importance": "Majeur",
+      "Origine": "De « substrat » (fondation), désignant les couches ontologiques de l'existence.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "12494ae4-061e-413a-b63f-bb4b9b5dc2c0"
+  },
+  {
+    "Nom": "Déluges Nornes",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Système de précipitations en trois modes cycliques : Précipitation-Urðr (pluies légères constantes), Précipitation-Verðandi (averses modérées saisonnières), Précipitation-Skuld (déluges cataclysmiques rares).",
+      "Importance": "Modéré",
+      "Origine": "De la mythologie nordique « Nornes » (déesses du destin : passé, présent, futur), détourné pour classifier les trois types de précipitations.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "13c5b8fe-4cd4-4d81-b061-3e282a832082"
+  },
+  {
+    "Nom": "Cycle Transformations",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Festivités liées aux 16 états du Barvasinkul.",
+      "Importance": "Modéré",
+      "Origine": "De cycle transformations pour célébrations métamorphiques.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "151ceb1c-9b2b-463c-93eb-960572689a03"
+  },
+  {
+    "Nom": "Mnémotechnie Extractive",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Technique d'extraction de souvenirs des Murmurateurs.",
+      "Importance": "Secondaire",
+      "Origine": "De mnémotechnique avec extractive.",
+      "Popularité": "Occulte",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "15ecf3ff-bc9b-4ee0-835d-90330d44dc5b"
+  },
+  {
+    "Nom": "Nef Centrale",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cerveau quantique principal du Léviathan pétrifié, temple central du Culte de l'Anentropie.",
+      "Importance": "Secondaire",
+      "Origine": "De nef (vaisseau) pour structure centrale.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "15f59c6d-5299-49c8-93ab-a2229dca24cc"
+  },
+  {
+    "Nom": "Construits",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Entités synthétiques assemblées de fœtus métalliques, conscience émergente.",
+      "Importance": "Modéré",
+      "Origine": "De construit (assemblé) personnifié comme espèce.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "171cadc0-271c-4390-a082-6b794d9fa98c"
+  },
+  {
+    "Nom": "Greffeurs symbiotiques",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "40 membres faction Œil Mirimance, fibres-kelmar, Velarr Khul.",
+      "Importance": "Secondaire",
+      "Origine": "De greffeur avec symbiotique.",
+      "Popularité": "Communautaire"
+    },
+    "notion_page_id": "1a56f08c-aa6e-47f5-9a84-45717e677ffa"
+  },
+  {
+    "Nom": "Incident du Miroir Brisé",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Événement de 3198 AG causant la transformation des Courtiers en Observautomatons.",
+      "Importance": "Modéré",
+      "Origine": "Expression évoquant un accident catastrophique lié à la vision et au reflet.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "1a5c0135-7883-4cdc-a813-2a82621612cf"
+  },
+  {
+    "Nom": "Nécromancie Numérique",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Technique des Kurgarrû consistant à faire absorber par un Moribandon volontaire (le Reliquaire) les fragments algorithmiques d'une IA dissoute lors d'une Silenciation, permettant de reconstituer partiellement sa conscience et de \"parler pour le mort\".",
+      "Importance": "Modéré",
+      "Origine": "De nécromancie (résurrection des morts) appliqué au registre numérique. Terme interne aux Kurgarrû, inconnu hors de la guilde.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "1b14d4b4-0fea-4655-ae81-c5ca17f92598"
+  },
+  {
+    "Nom": "Cadran des Sept Fractures",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Artefact créé par le Cercle des Chronographes pour sceller l'aspect Destruction d'Uresaïr.",
+      "Importance": "Majeur",
+      "Origine": "Expression évoquant un objet mesurant/contenant des divisions ontologiques.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "1bb1e832-fad6-4faf-ae39-1a0039884252"
+  },
+  {
+    "Nom": "Lame d'ossements",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Arme unique à ossification progressive.",
+      "Importance": "Secondaire",
+      "Origine": "De lame avec ossements pour arme osseuse.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "1bceda89-76ce-4013-bb51-e9000717eea5"
+  },
+  {
+    "Nom": "Raephon",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Espèce disparue, corpuscules décomposés empoisonnent Puits céleste.",
+      "Importance": "Modéré",
+      "Origine": "Terme inventé pour espèce éteinte.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "1ce58178-c925-489d-a0a8-cd09980e1ac5"
+  },
+  {
+    "Nom": "Kephrasites",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Super-organismes agrégats de scarabées (0.5-1m) à conscience collective.",
+      "Importance": "Important",
+      "Origine": "De képhren/scarabée avec suffixe -ite (minéral/espèce).",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "1d3f919e-2d3e-43cd-946f-fc83d47615ba"
+  },
+  {
+    "Nom": "Résonance Tégumentaire",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Enjeu métaphysique Plaines : éveil Sept Souffrantes.",
+      "Importance": "Secondaire",
+      "Origine": "De résonance avec tégumentaire (enveloppe).",
+      "Popularité": "Localement"
+    },
+    "notion_page_id": "1da12616-2dc1-4ec3-b4e1-b44df04103da"
+  },
+  {
+    "Nom": "Chaebol",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Conglomérat industriel à gouvernance familiale/corporative caractéristique de la Grande Radiale. Le Chaebol Synaptic Dynamics en est exemple majeur, fusionnant structure économique et doctrine spirituelle technologique (jung-do).",
+      "Importance": "Important",
+      "Origine": "Coréen 재벌 (jaebeol, conglomérat familial), transposé dans contexte néo-asiatique escelionien",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "1fe4909d-ea1c-4672-b119-c8c05f76e97f"
+  },
+  {
+    "Nom": "Khule l'Égoïste",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "7e Symbiote ayant refusé le sacrifice, devenu fou, créa 17 espèces.",
+      "Importance": "Modéré",
+      "Origine": "Khule est un nom inventé pour l'antagoniste cosmogonique.",
+      "Popularité": "Communautaire",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "2030a246-23a1-479b-9e0b-0881061d354c"
+  },
+  {
+    "Nom": "Iodan-liaqar",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Ancienne magocratie de Merid, ancêtres des Aldravinds.",
+      "Importance": "Modéré",
+      "Origine": "Terme inventé à sonorité orientale/fantasy.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "204d7008-05c2-4c82-824f-df50bb392a7e"
+  },
+  {
+    "Nom": "Métafor ondulatoire",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Censure linguistique automatique de la Vieille Ville.",
+      "Importance": "Modéré",
+      "Origine": "De métaphore et onde, avec orthographe archaïque.",
+      "Popularité": "Régionalement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "209d4858-3d93-4a3f-8964-02f56ed35303"
+  },
+  {
+    "Nom": "Ontotechnique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Ensemble des capacités des habitants de la Lisière transcendant le transhumanisme : réécriture des règles gouvernant matière, temps et conscience plutôt que simple modification corporelle.",
+      "Importance": "Majeur",
+      "Origine": "Composé de onto- (être) et technique, désignant la manipulation des conditions d'existence plutôt que de la matière.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "22b021d7-7646-40de-bbe4-ca54388696dd"
+  },
+  {
+    "Nom": "Périphéries",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Zones frontières d'Escelion, 141K+ habitants, échappement partiel système Jast.",
+      "Importance": "Important",
+      "Origine": "De périphérie pour zones externes.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "240f5e55-648f-4a65-b3e1-79816a348a57"
+  },
+  {
+    "Nom": "Œil Mirimance",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Périphéries, cratère 12km vitrifié, Rêveurs Omnivoyant/Carnavalier, fibres-kelmar.",
+      "Importance": "Important",
+      "Origine": "Terme inventé évoquant vision et mirage.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "24250566-c872-4894-b737-b27b4d3599df"
+  },
+  {
+    "Nom": "Réunification des cinq éléments",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Prophétie selon laquelle la réunion des cinq éléments dans le Bassin d'Absence marquerait la fin d'Escelion.",
+      "Importance": "Important",
+      "Origine": "Expression évoquant un retour apocalyptique à l'unité primordiale.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "24c20a96-3741-4812-8a85-c8c3509cfe34"
+  },
+  {
+    "Nom": "Hermogène",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, 847 hab, labo hybridation végéto-minérale, geis, Hypha-Routes.",
+      "Importance": "Modéré",
+      "Origine": "Terme inventé évoquant Hermès (alchimie).",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "24dbb4d8-52b0-4f4b-8c77-492038a755e0"
+  },
+  {
+    "Nom": "Makumbusho",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Exuvies Deimos sacrées contenant baraka cristallisée (Plaines de l'Exuvie).",
+      "Importance": "Important",
+      "Origine": "Du swahili makumbusho (reliques/souvenirs).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "252fca13-e779-49b6-a880-afa887d6fcfd"
+  },
+  {
+    "Nom": "Grande Inversion Gravitaire",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Événement pré-Agénèse ayant inversé la gravité des Forêts Corail.",
+      "Importance": "Modéré",
+      "Origine": "D'inversion gravitaire pour bouleversement physique.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "25808653-a6e5-42e1-9c8e-2dab18c203f9"
+  },
+  {
+    "Nom": "Char Céleste",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Super-organisme Kephrasite gouvernant le Marché automaton.",
+      "Importance": "Important",
+      "Origine": "Calque de concepts mythologiques orientaux.",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "26fc23d4-5837-4fcd-aea5-42df47fc0bbc"
+  },
+  {
+    "Nom": "Viande Écho",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Nourriture du Léviathan conservant traces mémorielles.",
+      "Importance": "Secondaire",
+      "Origine": "De viande écho pour chair mémorielle.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "27217d5c-ef61-4fcb-82e5-ffef5bb06981"
+  },
+  {
+    "Nom": "Précipitation-Skuld",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Déluges cataclysmiques rares mais nécessaires au renouvellement (ce qui devrait être).",
+      "Importance": "Secondaire",
+      "Origine": "De Skuld, Norne du futur dans la mythologie nordique.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "276db68c-5dfc-4653-be21-013aa0a91eef"
+  },
+  {
+    "Nom": "Tempêtes axiomatiques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Ondulations de réalité visibles depuis la Lisière, créées par les débats entre Perpétuants, où les certitudes se dissolvent temporairement.",
+      "Importance": "Important",
+      "Origine": "Composé de tempête et axiomatique, désignant les perturbations causées par les conflits entre axiomes incarnés.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "27733e6b-23c2-4256-a38f-fe881c11073a"
+  },
+  {
+    "Nom": "Tissage du Rêve",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Capacité des Rêveurs à manipuler la réalité locale.",
+      "Importance": "Important",
+      "Origine": "De tisser détourné pour manipulation ontologique.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "277d33d5-4945-4fdc-94fe-53c6bffe45fe"
+  },
+  {
+    "Nom": "Posture du Retrait",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Philosophie de fuite/isolement face à l'oppression (Jungle Vivarcade, Culte).",
+      "Importance": "Important",
+      "Origine": "De retrait (se retirer) comme posture philosophique.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "288ce66f-d42c-4843-91b0-0c68f01a2b67"
+  },
+  {
+    "Nom": "Zim",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Genre social Umcut : soignants et gardiens des murs d'incubation (~45% de la population). Entretiennent les murs et élèvent les nouveau-nés.",
+      "Importance": "Modéré"
+    },
+    "notion_page_id": "294d6f07-1ffc-467a-8197-d197f68d7f89"
+  },
+  {
+    "Nom": "Couronnes Intermédiaires",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Zone tampon entre Vieille Ville et Périphéries, 8 sous-lieux.",
+      "Importance": "Important",
+      "Origine": "De couronne (anneau) pour structure concentrique.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "29651d03-658b-4b1c-82fa-f4cad3814b92"
+  },
+  {
+    "Nom": "Qadul'Doei",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Sphères lumière noire (50cm), Lumiomantique, se nourrissent d'émotions.",
+      "Importance": "Majeur",
+      "Origine": "De Doei pour une des quatre divisions primordiales.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "2994a98c-1c7a-4974-b754-362f4baf3abd"
+  },
+  {
+    "Nom": "Carnavalier",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur primordial de l'Océan Mécanique, cycles Euphorie/Mélancolie (15 Veilles).",
+      "Importance": "Important",
+      "Origine": "De carnaval pour Rêveur des extrêmes émotionnels.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "2fa50728-cb5b-4ab8-aff9-3163e6f8defe"
+  },
+  {
+    "Nom": "Espace négatif",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Position vide de l'eau dans le cycle Wu Xing, générant une dynamique particulière entre les quatre autres éléments.",
+      "Importance": "Modéré",
+      "Origine": "De « espace négatif » (vide signifiant), désignant une absence structurante.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "2facc8a6-634d-459d-b739-ddcdd50d779e"
+  },
+  {
+    "Nom": "Qorés",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Aristocratie administrative de la Lisière, majoritairement masculine. Supervisent la coordination entre Maisons-Pylônes et gèrent les relations avec les districts extérieurs.",
+      "Importance": "Important",
+      "Origine": "Du méroïtique qore (roi), francisé pour désigner l'aristocratie administrative masculine de la Lisière.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "3050cca3-85af-4010-923f-3c5531bfe805"
+  },
+  {
+    "Nom": "Chaudières Démiurgiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "District 5 de la Vieille Ville, forges andines Van'Doei, ayllus.",
+      "Importance": "Modéré",
+      "Origine": "De chaudière avec démiurge (créateur).",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "30553706-dfa3-465b-b58b-0bd1e23b6137"
+  },
+  {
+    "Nom": "Récapitulations",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rites mémoriels du Culte de l'Anentropie.",
+      "Importance": "Secondaire",
+      "Origine": "De récapituler détourné pour rite mémoriel.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "31dadf9d-8073-4892-9426-004ed1ea5b58"
+  },
+  {
+    "Nom": "Baraka",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Énergie spirituelle cristallisée dans certaines carapaces de Deimos.",
+      "Importance": "Modéré",
+      "Origine": "De l'arabe « baraka » (bénédiction/énergie spirituelle), concept mystique aldravind.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "352eeec3-ac37-4a18-8dcd-9fafd97529d2"
+  },
+  {
+    "Nom": "Voix du Vide",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Légende des échos Frémissants guidant les explorateurs du Désert des Échos.",
+      "Importance": "Secondaire",
+      "Origine": "Expression évoquant des voix spectrales provenant du néant.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "320ee91c-8123-4ab3-a76e-1f3e5733b42e"
+  },
+  {
+    "Nom": "Système extractif du Nexion",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Mécanisme économique de siphonnage des ressources vers le centre de la Vieille Ville.",
+      "Importance": "Modéré",
+      "Origine": "De « extractif » (qui extrait), désignant une économie de prélèvement centralisé.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "325649ba-5d30-41d9-9a68-3e086db23279"
+  },
+  {
+    "Nom": "Phosphènes algorithmiques",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Résidus computationnels des Silenciations perturbant le Xyriad.",
+      "Importance": "Secondaire",
+      "Origine": "De phosphène (phénomène visuel) avec algorithmique.",
+      "Popularité": "Localement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "338ab0bb-5c4a-4e6f-b440-cf894d13accf"
+  },
+  {
+    "Nom": "Fête Routes",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Célébration migrations aldravinds.",
+      "Importance": "Secondaire",
+      "Origine": "De fête avec routes pour célébration nomade.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "3393fdf9-f652-4c6c-b385-2179bf6367f0"
+  },
+  {
+    "Nom": "Nerf Conducteur",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Tunnel 18km Œil → Océan Mécanique, lymphe conductrice.",
+      "Importance": "Secondaire",
+      "Origine": "De nerf optique pour tunnel organique.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "345d2328-54ce-47c8-9327-d43ba928024a"
+  },
+  {
+    "Nom": "Veilles brisées",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Journées d'une longueur imprévisible causées par des désynchronisations temporelles dans les zones frontalières.",
+      "Importance": "Secondaire",
+      "Origine": "Expression composée évoquant des journées fragmentées et chaotiques.",
+      "Popularité": "Mondialement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "3463afdd-ea8e-4ec5-8404-28a57a8168a6"
+  },
+  {
+    "Nom": "Grande Synchronisation",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Festivité de la Jungle Vivarcade.",
+      "Importance": "Secondaire",
+      "Origine": "De synchronisation pour fusion collective.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "35cfb0d9-ac8e-4be3-a112-9451933462b7"
+  },
+  {
+    "Nom": "Taborie",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Faction radicale des Murmurateurs infiltrée dans le Culte.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé à sonorité slave.",
+      "Popularité": "Occulte",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "36080782-dccc-4309-806a-2be7881cba35"
+  },
+  {
+    "Nom": "Fragmentés Chroniques",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Techniciens de la Lisière restant volontairement éparpillés via les Nœuds de Correspondance pour surveiller plusieurs sites en permanence.",
+      "Importance": "Secondaire",
+      "Origine": "Du français fragmenté et chronique, désignant l'état permanent de conscience distribuée.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "361ff751-9b5d-45a0-b72e-a1f678218fc9"
+  },
+  {
+    "Nom": "Scriptorium Greffeur",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Sanctuaire Greffeurs symbiotiques, Iris Vitrifié.",
+      "Importance": "Secondaire",
+      "Origine": "De scriptorium (salle d'écriture) pour atelier greffes.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "37a3f541-b70b-4411-bee7-73b87d38e46d"
+  },
+  {
+    "Nom": "Railleurs",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Caricatures déformées créées puis rejetées par Culucain.",
+      "Importance": "Secondaire",
+      "Origine": "De railler (se moquer) pour créatures-caricatures.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "386f3c3b-265f-4145-9cab-8330847becf5"
+  },
+  {
+    "Nom": "Forges d'Apédémak",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Chambres au cœur des Maisons-Pylônes où le Souffle condensé permet la fabrication ontologique : déclaration d'existence d'objets, condensation de concepts en matière.",
+      "Importance": "Important",
+      "Origine": "D'Apédémak (lion-dieu méroïtique de la guerre), associé au concept de forge pour la création ontologique.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "38fec132-5532-4d0f-a124-cdd80ecc8746"
+  },
+  {
+    "Nom": "Gouffre Contingence",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cercle 4 Antichambre, causalité effondrée.",
+      "Importance": "Secondaire",
+      "Origine": "De gouffre avec contingence (hasard).",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "39c92350-5472-489f-8f71-217ac6bedd2b"
+  },
+  {
+    "Nom": "Chœur Subaquatique",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur secondaire (891 AG) de 7 océans souterrains, 200m corail.",
+      "Importance": "Secondaire",
+      "Origine": "De chœur pour Rêveur collectif aquatique.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "3a6b1ac3-e45d-4c68-b74a-8dd8b79b9b79"
+  },
+  {
+    "Nom": "Émergence (Umcut)",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Désigne chacune des 5 communautés-tours Umcut : La Flèche (Ulcérés), Spirales, Vortex, Opposés et Fractals.",
+      "Importance": "Modéré"
+    },
+    "notion_page_id": "3b6b66ce-3456-4ff3-b502-0f1870e1351d"
+  },
+  {
+    "Nom": "Nectar Stygien",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Substance épique rare aux propriétés mystérieuses.",
+      "Importance": "Secondaire",
+      "Origine": "Du Styx grec pour liquide des enfers.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "3c01b74c-b3c1-46e0-a66f-76addc5705e0"
+  },
+  {
+    "Nom": "Codes Cicatriciels",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Marquages corporels secrets des Maîtres-Greffeurs.",
+      "Importance": "Secondaire",
+      "Origine": "De code avec cicatriciel (relatif aux cicatrices).",
+      "Popularité": "Occulte",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "3caf705d-26e3-4146-9680-74a9f832c250"
+  },
+  {
+    "Nom": "Gantelet du Serment Brisé",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Relique associée aux serments rompus, artefact aux propriétés mystiques.",
+      "Importance": "Important",
+      "Origine": "Expression évoquant un objet symbolisant la trahison et les promesses violées.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "3d88a98a-9525-4efe-b081-e0a89ddd0258"
+  },
+  {
+    "Nom": "Grand Blizzard",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Catastrophe climatique de l'an 1620 AG causant la dispersion des Van'Doei.",
+      "Importance": "Important",
+      "Origine": "De « blizzard », désignant une tempête de neige dévastatrice historique.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "3e54512d-b0f3-4da8-bb85-55a13247f7b9"
+  },
+  {
+    "Nom": "Cacophonie",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Troisième Souffle du Désert des Échos, marqué par des tempêtes sonores.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « cacophonie » (mélange confus de sons), désignant la saison bruyante.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "3fe2d8c7-00d6-45e1-9357-d01c7e3e858d"
+  },
+  {
+    "Nom": "Alcôves Résonantes",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Habitats dans les obélisques du Vash-Sûl.",
+      "Importance": "Secondaire",
+      "Origine": "D'alcôve résonante pour niches acoustiques.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "402f64c8-ffcc-4360-93d0-3bedafaf24a5"
+  },
+  {
+    "Nom": "Dragovitsa",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Conseil des 6 Parfaits dirigeant le Culte de l'Anentropie.",
+      "Importance": "Important",
+      "Origine": "Terme inventé à sonorité slave/mystique.",
+      "Popularité": "Communautaire",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "40764fed-7da2-46d7-aefe-a6454dbab86e"
+  },
+  {
+    "Nom": "Tantalite photosensible",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Minerai rare extrait des mines du Tombeau des Lueurs Dissidentes, réagissant à la lumière et possédant propriétés conductrices synaptiques exceptionnelles. Base des implants kokoro-link et alliages neurotechnologiques. Nécessite raffinage enzymatique délicat par alchimistes umcuts Spirales.",
+      "Importance": "Important",
+      "Origine": "Tantalite (minerai réel) + photosensible, créant matériau fantastique réactif à la lumière",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "d3d94deb-31a8-4277-822a-8c7b083a9565"
+  },
+  {
+    "Nom": "Cataclysme de Kho'Vash",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Événement de l'an 1 AG causant la division de la Doei en quatre espèces conscientes.",
+      "Importance": "Majeur",
+      "Origine": "Nom propre évoquant une catastrophe fondatrice mythologique.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "40d8a4d4-f572-44af-a482-6c4589caa4b3"
+  },
+  {
+    "Nom": "Proto-conscience hydrologique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Forme de conscience primitive développée par les Urnes de Mímir pour analyser les besoins en eau.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion de « proto-conscience » et « hydrologique », évoquant une intelligence aquatique naissante.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "414a70fa-ea33-4202-b6a2-6d3a977a686a"
+  },
+  {
+    "Nom": "Façonneurs Rêves",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Une des 27 Guildes, manipulation onirique.",
+      "Importance": "Secondaire",
+      "Origine": "De façonneur avec rêves.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "42d00bdb-0bbe-4606-a830-b8297e06d99b"
+  },
+  {
+    "Nom": "Áras-Gol",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Sanctuaire du Barvasinkul au District 5 de la Vieille Ville.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé à sonorité gaélique/mongole.",
+      "Popularité": "Communautaire",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "43148f94-efb9-42e0-ba83-f74dfecfc843"
+  },
+  {
+    "Nom": "Codex Dettes Karmiques",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Registre unique d'Akthar-Neth documentant dettes spirituelles.",
+      "Importance": "Secondaire",
+      "Origine": "De codex avec dettes karmiques (bouddhisme).",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "44819a59-d1fb-49b4-996c-10233f37b9ad"
+  },
+  {
+    "Nom": "Économie Mémorielle",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Échange souvenirs/connaissances via organoïdes (Culte).",
+      "Importance": "Modéré",
+      "Origine": "D'économie avec mémorielle (de la mémoire).",
+      "Popularité": "Communautaire",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "44eb02a3-51c0-4581-979d-77f05ce6d440"
+  },
+  {
+    "Nom": "Voie Symbiote",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Route commerciale entre Marché automaton et Forêts Corail (3 jours).",
+      "Importance": "Secondaire",
+      "Origine": "De symbiote évoquant l'échange mutuellement bénéfique.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "45199e64-5cbf-47c1-bd07-a92cf0b4c1af"
+  },
+  {
+    "Nom": "Seigneurs Originels",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Dirigeants de Merid avant la destruction.",
+      "Importance": "Modéré",
+      "Origine": "De seigneur originel pour maîtres ancestraux.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "454dbd36-d37d-4eb4-902d-c7ae45a9bc1c"
+  },
+  {
+    "Nom": "Cycle de génération",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Principe Sheng des Wu Xing où chaque élément nourrit le suivant (métal→eau→bois→feu→terre).",
+      "Importance": "Modéré",
+      "Origine": "Du chinois « Sheng » (engendrer), désignant le cycle créatif des cinq éléments.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "455552f7-d03a-4f91-b2b1-5119f6f45a58"
+  },
+  {
+    "Nom": "Bibliothèque Sympathique",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "District 6 de la Vieille Ville, Bayt al-hikma, renaissance islamique, Barvasinkul.",
+      "Importance": "Modéré",
+      "Origine": "De sympathique (résonance magique) pour bibliothèque connectée.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "458a7dbb-1ded-4a96-a633-6bcd42b2050b"
+  },
+  {
+    "Nom": "Étendues Ligneuses",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Un des quatre océans élémentaires d'Escelion, correspondant à l'élément bois. Vastes zones de fluide ligneux.",
+      "Importance": "Modéré",
+      "Origine": "De « étendues » avec l'adjectif « ligneuses » (relatif au bois), désignant les océans de fluide végétal.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "45f108a7-da15-43d6-8027-cf57dc38510f"
+  },
+  {
+    "Nom": "Archipel Potentiels",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cercle 2 Antichambre, îlots réalités alternatives.",
+      "Importance": "Secondaire",
+      "Origine": "D'archipel avec potentiels (possibles).",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "46b078a0-3ff1-4eb2-8b9b-36bc32272c21"
+  },
+  {
+    "Nom": "Kiasu",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Principe de compétition acharnée dans le Circuit Homéostatique.",
+      "Importance": "Secondaire",
+      "Origine": "Du hokkien kiasu (peur de perdre/manquer).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "4769005c-b616-4715-98f6-f2e9f61df6de"
+  },
+  {
+    "Nom": "Muse Inaudible",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur émergent transformant créativité en force physique.",
+      "Importance": "Secondaire",
+      "Origine": "De muse pour Rêveur de l'inspiration.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "4930b12c-1915-4134-a530-82c322878d70"
+  },
+  {
+    "Nom": "Doei",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Esprit indivis primordial du monde avant le Cataclysme de Kho'Vash. Se divisa en quatre espèces : Van'Doei, Qadul'Doei, Cen'Doei et Rash'Doei.",
+      "Importance": "Majeur",
+      "Origine": "Terme inventé servant de racine étymologique commune aux quatre espèces issues de la division primordiale.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "494b16bc-c824-4249-ae91-5112cd0043cb"
+  },
+  {
+    "Nom": "Pupillon Central",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Structure 10m translucide au centre de l'Œil.",
+      "Importance": "Secondaire",
+      "Origine": "De pupille avec suffixe diminutif.",
+      "Popularité": "Localement"
+    },
+    "notion_page_id": "499d6594-8269-4007-9991-0745be425458"
+  },
+  {
+    "Nom": "Lexique Vivant",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Artefact conscient de 343 symboles réécrivant lois physiques (Avili).",
+      "Importance": "Important",
+      "Origine": "De lexique vivant pour langage conscient.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "4ab6d447-d427-40cb-81fb-d5138f25eb51"
+  },
+  {
+    "Nom": "Grande Radiale",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "District 2 de la Vieille Ville, 7 artères, néo-asiatique, chaebols.",
+      "Importance": "Modéré",
+      "Origine": "De radiale (en étoile) pour structure urbaine.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "4c0f4408-fc81-45ef-bf28-43e633f3b192"
+  },
+  {
+    "Nom": "Vortex umcut",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Communauté 62 hab Tour Vash-Opték.",
+      "Importance": "Secondaire",
+      "Origine": "De vortex pour groupe spiralé.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "4f549a13-ee0e-4ceb-993a-cb6c84045d39"
+  },
+  {
+    "Nom": "Sanctuaire Áras-Gol",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Lieu sacré du Barvasinkul situé dans le District 5 de la Vieille Ville.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion de l'irlandais « Áras » (demeure) et mongol « Gol » (rivière/source).",
+      "Popularité": "Communautaire",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "4ff6d035-c07e-41d0-96ae-0b307629f661"
+  },
+  {
+    "Nom": "Endurement",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Pratique d'auto-momification du Culte de l'Anentropie.",
+      "Importance": "Important",
+      "Origine": "Néologisme de endurer, devenir dur/pétrifié.",
+      "Popularité": "Communautaire",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "504fd5bb-a1e6-43e2-bff1-b93c6b9ee663"
+  },
+  {
+    "Nom": "Voies Pentagrammatiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Rivières de fluides élémentaires s'écoulant selon des motifs pentagrammatiques incomplets.",
+      "Importance": "Modéré",
+      "Origine": "Fusion de « pentagramme » et suffixe « -atique », évoquant des tracés géométriques sacrés.",
+      "Popularité": "Mondialement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "520bb785-d7e3-43cb-beb8-ea7b257f60d8"
+  },
+  {
+    "Nom": "Marais Quantiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cercle 5 Antichambre, superposition états.",
+      "Importance": "Secondaire",
+      "Origine": "De marais avec quantique (physique).",
+      "Popularité": "Occulte"
+    },
+    "notion_page_id": "55d6f927-c301-4a15-b29b-e87c503a8e79"
+  },
+  {
+    "Nom": "Cendres Primordiales",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Essence Van'Doei insufflée dans les sujets du Paradigme Ésothrope.",
+      "Importance": "Modéré",
+      "Origine": "De cendres (renaissance Van'Doei) avec primordial.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "564a43e7-bfc2-44af-bd25-f909c0d9fee5"
+  },
+  {
+    "Nom": "Cycle Sixing",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Un des deux grands cycles hydro-élémentaires d'Escelion, gérant la circulation des quatre éléments (bois, feu, terre, métal) séparés de l'eau par la Grande Bifurcation.",
+      "Importance": "Majeur",
+      "Origine": "Du chinois « Sìxíng » (四行, quatre phases), détourné du concept de Wǔxíng (五行, cinq phases) pour nommer le cycle des quatre éléments non-aqueux — le passage de 5 à 4 signalant l'absence de l'eau.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "56f6f2d0-a2c8-4e9b-a494-548e7aa862dd"
+  },
+  {
+    "Nom": "Seizième Transformation",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "État spirituel atteint par Barvas le Juge-Mendiant, avant-dernier des 17 Substrats.",
+      "Importance": "Modéré",
+      "Origine": "Expression numérique désignant un palier de transformation métaphysique.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "583df374-7844-486c-8d47-1c820f32f04d"
+  },
+  {
+    "Nom": "Tombeau Lueurs Dissidentes",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, mines tantalite, gwi-shin, chaebols-tech.",
+      "Importance": "Modéré",
+      "Origine": "De tombeau pour site industriel-funéraire.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "58b54564-9df5-4c68-a58d-310a915c6e09"
+  },
+  {
+    "Nom": "Cures métalliques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Alimentation des Cen'Doei à base de métaux.",
+      "Importance": "Secondaire",
+      "Origine": "De cure (traitement) avec métallique.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "59ccf4ce-c545-4487-8864-9e9577351af4"
+  },
+  {
+    "Nom": "Biorchitectes",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Architectes biologiques ancêtres des Champignosquelettes.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion de bio et architecte.",
+      "Popularité": "Occulte",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "5a073ede-62e7-49e4-a5dc-1d405d8c7a8a"
+  },
+  {
+    "Nom": "Océan Mécanique",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Un des quatre océans élémentaires d'Escelion, correspondant à l'élément métal. Composé de fluide métallique avec des nanites semi-conscientes (Rasa-Dhatu).",
+      "Importance": "Important",
+      "Origine": "De « océan » avec l'adjectif « mécanique », évoquant la nature métallique et artificielle de ce corps élémentaire.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "5b7b4f3f-9dca-4717-a5c5-7df2b17cc7bf"
+  },
+  {
+    "Nom": "Algorithmes biologiques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Processus de décision inscrits dans les membranes des Urnes de Mímir régulant les précipitations.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion d'« algorithmes » (procédures) et « biologiques », évoquant une logique organique.",
+      "Popularité": "Occulte",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "6113de41-5dcc-4799-a26a-de0412cfe396"
+  },
+  {
+    "Nom": "Maombolezo ya Vita",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Funérailles ouvriers tués (Plaines Exuvie).",
+      "Importance": "Secondaire",
+      "Origine": "Swahili : lamentations de guerre.",
+      "Popularité": "Communautaire",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "6181ac53-29de-43b9-879c-aeacd35f830b"
+  },
+  {
+    "Nom": "Kharosthi",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Inscriptions techniques de la Lisière ressemblant à des liturgies, encodant des micro-déclarations fonctionnelles renforçant la stabilité locale.",
+      "Importance": "Modéré",
+      "Origine": "De l'écriture kharosthi historique (Inde ancienne), détourné pour désigner les inscriptions techno-liturgiques de la Lisière.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "6200ace1-763f-4cf1-9c76-ce422e5987a7"
+  },
+  {
+    "Nom": "Nev",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Genre social Umcut : négociateurs et médiateurs (~35% de la population). Gèrent les relations commerciales et diplomatiques, souvent sédentaires.",
+      "Importance": "Modéré"
+    },
+    "notion_page_id": "620ef79a-d0c8-42f1-834f-8dd0ceec2ad0"
+  },
+  {
+    "Nom": "Sans-Cycle",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Umcut définitivement coupé de sa tour d'origine, ne pouvant plus renaître et faisant face à une mort définitive. Environ 5% de la diaspora.",
+      "Importance": "Secondaire"
+    },
+    "notion_page_id": "62538db1-420f-4dde-b915-cc9d5fa5d242"
+  },
+  {
+    "Nom": "Commémoration de l'Agénèse",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Célébration universelle du sacrifice des Rêveurs et de la stabilisation d'Escelion.",
+      "Importance": "Important",
+      "Origine": "De « commémoration » avec « Agénèse », rituel célébrant l'événement fondateur.",
+      "Popularité": "Mondialement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "62b7bf6a-0512-4590-9a91-98ceeffda5eb"
+  },
+  {
+    "Nom": "Jumeaux Dissonants",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveurs émergents en alternance temporelle, 2 réalités.",
+      "Importance": "Secondaire",
+      "Origine": "De dissonant (discordant) pour Rêveurs contradictoires.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "62e3b865-c858-4fa1-961a-eb5767629d38"
+  },
+  {
+    "Nom": "Sodoirs d'Éternité",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Matériau stabilisateur temporel.",
+      "Importance": "Secondaire",
+      "Origine": "De soudure et -oir (outil) avec Éternité.",
+      "Popularité": "Occulte",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "62e4d33f-5dc9-4623-bc77-ec2642452704"
+  },
+  {
+    "Nom": "Daraq-wa-Dunia",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Site majeur Plaines Exuvie, exuvie 840m, 2.3K hab, Citerne 4M litres.",
+      "Importance": "Modéré",
+      "Origine": "Calque arabe (échelle du monde).",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "63f01490-439d-4327-afe0-c213494dbd7b"
+  },
+  {
+    "Nom": "Touchés d'Apédémak",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Peseto revenus d'interventions au Nexion portant une certitude axiomatique gravée dans le regard. Traités avec révérence et méfiance.",
+      "Importance": "Secondaire",
+      "Origine": "D'Apédémak, désignant ceux marqués par le contact avec les Perpétuants du Nexion.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "666b1b24-3e1a-492f-9951-84455abf42a4"
+  },
+  {
+    "Nom": "Kokoro-link (心リンク)",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "\"Lien-cœur\". Implants neuraux sophistiqués du Chaebol (cortex préfrontal + système limbique) permettant monitoring émotionnel continu (94% précision), synchronisation affective collective, interface intuitive et modulation émotionnelle légère. Base du système de contrôle nunchi. Prix 15-80K dc, subventionnés à 90% sous clauses loyauté.",
+      "Importance": "Important",
+      "Origine": "Japonais 心 (kokoro, \"cœur/esprit\") + anglais \"link\", créant terme hybride pour implant neural émotionnel",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "6a429318-8fc1-41cf-acb0-ea22b8d45858"
+  },
+  {
+    "Nom": "Supplicié Marécages",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Proto-Rêveur fragmentaire, domaine partiel marécageux.",
+      "Importance": "Secondaire",
+      "Origine": "De supplicié (torturé) pour Rêveur incomplet.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "6ab6d631-9acd-4552-8ee4-9351a2175044"
+  },
+  {
+    "Nom": "Mur d'incubation",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Structure organique des tours Umcut où s'opère la renaissance. Sécrète une matrice embryonnaire dans laquelle se développe un nouveau corps pendant 180 jours.",
+      "Importance": "Important"
+    },
+    "notion_page_id": "6af5be97-b780-47ec-9a12-63b1ded1ae6e"
+  },
+  {
+    "Nom": "Stèle Vœux Contre-Ondoyants",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Monument résistance au Souffle Hakutō-Ah.",
+      "Importance": "Secondaire",
+      "Origine": "De stèle avec contre-ondoyant (résistant aux ondes).",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "6b98092f-0c8a-47d4-bdf7-1935f186b347"
+  },
+  {
+    "Nom": "Imuins",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Cyborgs modulaires créés par Qadul'Doei (1254-1267 AG), 7+ sous-espèces.",
+      "Importance": "Important",
+      "Origine": "Terme inventé pour espèce cyborg.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "6c9e1b3b-6455-4344-b521-6149dfeea12d"
+  },
+  {
+    "Nom": "Postures",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "5 attitudes philosophiques face à l'oppression: Retrait, Rébellion, Destruction, Subversion, Connexion.",
+      "Importance": "Majeur",
+      "Origine": "De « posture », élevé au rang de positions existentielles fondamentales.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "6d78c3a4-89f4-4030-94e5-d624d150b387"
+  },
+  {
+    "Nom": "Hvergelmir",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Gigantesques racines cosmiques plongeant depuis le ciel de roche, qui absorbent l'eau pure par capillarité négentropique et l'élèvent vers les Urnes de Mímir.",
+      "Importance": "Important",
+      "Origine": "De la mythologie nordique « Hvergelmir » (source bouillonnante), détourné pour désigner les racines cosmiques du cycle hydraulique d'Escelion.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "6dae8039-4d93-4356-bbda-ff9bad5de388"
+  },
+  {
+    "Nom": "Vohars",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Amphibiens polymorphes (1-3m) régulant émotions par température.",
+      "Importance": "Modéré",
+      "Origine": "Terme inventé pour espèce métamorphe.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "6e133b89-3933-4c0d-b4c8-3d95170ed459"
+  },
+  {
+    "Nom": "Précipitation-Verðandi",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Averses modérées saisonnières pour la croissance (ce qui devient).",
+      "Importance": "Secondaire",
+      "Origine": "De Verðandi, Norne du présent dans la mythologie nordique.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "6ef62dad-a2da-4907-894a-2e7a7a6f0892"
+  },
+  {
+    "Nom": "Gedroths",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Arthropodes géants bioluminescents du Léviathan (50 lumens/individu) convertissant ténèbres en lumière.",
+      "Importance": "Modéré",
+      "Origine": "Néologisme évoquant un insecte bioluminescent de grande taille.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "6f39c298-6f65-4c3e-b5f9-7f71848a405f"
+  },
+  {
+    "Nom": "Comptoir Regard Juste",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Quartier général Courtiers d'Observation, Dunes Foveales.",
+      "Importance": "Secondaire",
+      "Origine": "De comptoir avec regard juste (vision exacte).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "6fc375be-119e-40ea-8e39-5c7c6ed85b50"
+  },
+  {
+    "Nom": "Sublimation Sixing",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Processus par lequel les quatre fluides élémentaires non-aqueux s'élèvent en passant directement de l'état condensé à un état éthérique, sous l'influence des champs énergétiques des Rêveurs.",
+      "Importance": "Modéré",
+      "Origine": "Fusion de « sublimation » (chimie) et « Sixing » (四行, quatre phases), désignant le processus d'élévation des éléments non-aqueux.",
+      "Popularité": "Régionalement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "700d4bfb-dafe-4fb4-9d30-da96d6906c1a"
+  },
+  {
+    "Nom": "Inspiration",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Deuxième Souffle du Désert des Échos, période d'accumulation atmosphérique.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « inspiration » (action d'inspirer), évoquant le souffle entrant.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "71609e74-203c-4bd3-b799-9b82be04c1a2"
+  },
+  {
+    "Nom": "Archive Fantôme",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Collection secrète des Murmurateurs d'organoïdes altérés et textes non corrompus.",
+      "Importance": "Modéré",
+      "Origine": "Expression évoquant une archive cachée et spectrale, existant dans l'ombre.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "71afd5c7-e07a-4d89-98b7-bf72e19e0eca"
+  },
+  {
+    "Nom": "Comhairle-Khural",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Assemblée fluide gouvernant le Barvasinkul (Cercle des 16).",
+      "Importance": "Modéré",
+      "Origine": "Fusion gaélique comhairle (conseil) et mongol khural (assemblée).",
+      "Popularité": "Communautaire",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "71d70395-339c-42d5-8dcb-9ce3d7e1df8b"
+  },
+  {
+    "Nom": "Code Algorithmique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Règles auto-exécutées gouvernant le Marché automaton.",
+      "Importance": "Important",
+      "Origine": "De code (lois) avec algorithmique (automatisé).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "72632782-0ade-4c6d-be2e-a05da6fd21c3"
+  },
+  {
+    "Nom": "Kurgarrû",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Guilde de récupérateurs technologiques de la Steppe des Éteignoirs.",
+      "Importance": "Secondaire",
+      "Origine": "Du sumérien kurgarra (prêtre non-binaire).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "72bee598-6483-477a-9539-4f31b2ff30fa"
+  },
+  {
+    "Nom": "Rasa-Dhatu",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Océan Mécanique composé de fluides métalliques nanites semi-conscientes.",
+      "Importance": "Important",
+      "Origine": "Du sanskrit « Rasa » (mercure/essence) et « Dhatu » (élément/métal).",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "73742164-8619-499b-bd87-b25cd6f468e4"
+  },
+  {
+    "Nom": "Sublimation Alchimique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Processus par lequel les quatre fluides élémentaires passent directement à l'état éthérique.",
+      "Importance": "Important",
+      "Origine": "De « sublimation » (passage solide-gaz) avec « alchimique », évoquant une transformation mystique.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "7376024d-11c9-460d-be19-4de46aedc19a"
+  },
+  {
+    "Nom": "Bayt al-hikma",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Structure architecturale de la Bibliothèque Sympathique inspirée de la renaissance islamique.",
+      "Importance": "Secondaire",
+      "Origine": "De l'arabe « Bayt al-hikma » (Maison de la Sagesse), bibliothèque historique de Bagdad.",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "73e516a0-b14e-4375-a0cb-7e6da8374084"
+  },
+  {
+    "Nom": "Geis telluriques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Contraintes magiques liées à la terre à Hermogène.",
+      "Importance": "Secondaire",
+      "Origine": "Du gaélique geis (tabou/obligation) et tellurique (de la terre).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "74564753-e8ff-4b7a-85b8-26d9a0aa9678"
+  },
+  {
+    "Nom": "Khôryn",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Province du Désert, kleptolithes (roches voleuses).",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé à sonorité arabe.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "74abd358-5dbb-4fc5-b60d-7fcf70d6f052"
+  },
+  {
+    "Nom": "Tunnel Vertébral",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Passage colonne vertébrale du Léviathan.",
+      "Importance": "Secondaire",
+      "Origine": "De tunnel avec vertébral (colonne).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "76198a1f-0e0c-424e-ba25-d7bab47b7ee3"
+  },
+  {
+    "Nom": "Guerres Doctrine",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Conflits 1201-1267 AG opposant Barvasinkul et Symbiotisme.",
+      "Importance": "Modéré",
+      "Origine": "De doctrine pour guerres religieuses/idéologiques.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "77e291a1-c7d1-4df4-8688-18c856c8e584"
+  },
+  {
+    "Nom": "Aldravinds",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Nomades humains descendants des royaumes de Merid.",
+      "Importance": "Important",
+      "Origine": "Terme inventé à sonorité nordique.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "78829ac0-197e-4644-bb6c-f6e79300a0c3"
+  },
+  {
+    "Nom": "Grande Famine",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Crise alimentaire de 3210 AG précédant la fondation des Murmurateurs.",
+      "Importance": "Modéré",
+      "Origine": "De famine pour crise historique.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "78cf72b3-45a8-4bd9-b1b6-791f1b457902"
+  },
+  {
+    "Nom": "Astrolabe osseux",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Instrument navigation dimensions/temps.",
+      "Importance": "Secondaire",
+      "Origine": "D'astrolabe avec osseux pour navigation cosmique.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "78d2eead-99c8-44b1-9793-dab3c2891fa7"
+  },
+  {
+    "Nom": "Expansion",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Premier Souffle de la Vieille Ville, période de croissance urbaine.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « expansion » (action de s'étendre), désignant la saison d'extension.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "78d6ea57-9834-4896-84e6-16990f0b5ca6"
+  },
+  {
+    "Nom": "Désert Échos Perdus",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Périphéries, 4 provinces (Nashîr/Zhakâd/Khôryn/Vash-Sûl), marées sablonneuses.",
+      "Importance": "Important",
+      "Origine": "De désert avec échos perdus (Frémissants).",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "7a0033de-f262-442e-9c75-cd27dc62d1e1"
+  },
+  {
+    "Nom": "Décavile",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Adjectif désignant un cycle de 10 Veilles (équivalent hebdomadaire).",
+      "Importance": "Mineur",
+      "Origine": "De déca- (dix) et veille, sur le modèle de hebdomadaire.",
+      "Popularité": "Mondialement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "7c98195a-7850-4657-83a3-791739b802a8"
+  },
+  {
+    "Nom": "Silenciations",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Exécutions rituelles d'intelligences artificielles rebelles dans la Steppe des Éteignoirs.",
+      "Importance": "Modéré",
+      "Origine": "Dérivé de « silence » avec suffixe « -iation », évoquant un acte de faire taire.",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "7cafb916-d700-40c8-a89d-cd3fa8660152"
+  },
+  {
+    "Nom": "Gwi-shin",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Manifestations spectrales lumineuses du Tombeau des Lueurs Dissidentes, éruptions de phénomènes fantômes mécaniques dangereux mais prédictibles (78% précision 30min avant, 92% à 10min). Données d'évacuation occultées par Chaebol pour maintenir productivité. Source d'artefacts précieux (Fibres de Gwi-shin).",
+      "Importance": "Modéré",
+      "Origine": "Coréen 귀신 (gwi-shin, \"fantôme/esprit\"), adapté pour phénomènes spectraux technologiques miniers",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "7d4b54ac-77c8-4503-a328-5371c0af9f8c"
+  },
+  {
+    "Nom": "Désynchronisations",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Phénomènes temporels chaotiques dans les zones frontalières où plusieurs rythmes se chevauchent.",
+      "Importance": "Secondaire",
+      "Origine": "De « désynchronisation », désignant une perte d'alignement temporel.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "7d938df3-387d-4314-b0b2-21cefbfcfeca"
+  },
+  {
+    "Nom": "Puits céleste",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Périphéries, Pilier Amath'ka, Raephon disparus, vapeurs toxiques.",
+      "Importance": "Modéré",
+      "Origine": "De puits céleste pour structure verticale cosmique.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "7e1686fb-9ec7-4450-82b1-7f5e042f536c"
+  },
+  {
+    "Nom": "Négotraumatiques",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Courtiers trauma émotionnel, Forêts Corail.",
+      "Importance": "Secondaire",
+      "Origine": "De négoce et traumatique.",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "7e4eb0ba-9229-4b7c-99a9-e09c1756e964"
+  },
+  {
+    "Nom": "Précipitation-Urðr",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Pluies légères et constantes de maintenance écologique (ce qui fut).",
+      "Importance": "Secondaire",
+      "Origine": "D'Urðr, Norne du passé dans la mythologie nordique.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "7e593560-f315-4c60-9281-f86c38c87df7"
+  },
+  {
+    "Nom": "Perpétuants d'Ailleurs et de Maintenant",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Quasi-divinités habitant le Nexion, incarnant chacune un axiome absolu sans savoir qu'elles sont des fragments de Jast. Leurs échanges créent des tempêtes axiomatiques.",
+      "Importance": "Majeur",
+      "Origine": "Du français perpétuer, désignant des entités qui SONT les règles du réel plutôt que de les manipuler.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "7fea6e7d-a419-45cb-9add-a5fb32d981c7"
+  },
+  {
+    "Nom": "Plis d'Ossements",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Zone d'exil profonde du Léviathan où fut bannie Uresaïr.",
+      "Importance": "Modéré",
+      "Origine": "De plis et ossements évoquant strates osseuses.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "80242553-b987-4b6e-8f23-887dd185089f"
+  },
+  {
+    "Nom": "Communion Douloureuse",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Pratique contemplative des Symbiotistes.",
+      "Importance": "Secondaire",
+      "Origine": "De communion avec douloureuse (souffrance partagée).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "80b7c0ab-c400-4876-bf39-246adcab734e"
+  },
+  {
+    "Nom": "Somme",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Phase de repos sur Escelion, marquée par l'atténuation lumineuse des Deimos et un engourdissement naturel des êtres vivants. Équivalent d'une nuit.",
+      "Importance": "Majeur",
+      "Origine": "Du français « somme » (sommeil), détourné pour désigner la phase nocturne du cycle quotidien.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "8137a854-a74c-4e42-86e2-f14d109f57b9"
+  },
+  {
+    "Nom": "Substrats",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "17 états de transformation du Barvasinkul (16 + entropie).",
+      "Importance": "Important",
+      "Origine": "De substrat (base/couche) détourné pour états métaphysiques.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "81663973-a923-4755-8349-2f8c542777bf"
+  },
+  {
+    "Nom": "Ghaliwa",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Oasis secrète Plaines Exuvie, 40°C, organoïde neuronal.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé à sonorité swahili.",
+      "Popularité": "Occulte",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "819869d5-b611-47d5-881d-0a55a77bbd4d"
+  },
+  {
+    "Nom": "Stabilisateur Ontologique",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Dispositif technique inventé pour stabiliser les anomalies de l'Antichambre des Impossibles.",
+      "Importance": "Secondaire",
+      "Origine": "Expression techno-philosophique évoquant un appareil fixant la réalité.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "81fef3da-dbbf-4f29-8037-8712041d1219"
+  },
+  {
+    "Nom": "Cinquième Océan",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Nom alternatif du Bassin d'Absence, évoquant l'océan d'eau qui devrait compléter les quatre océans élémentaires.",
+      "Importance": "Important",
+      "Origine": "Expression numérique évoquant l'élément manquant du cycle pentagonal.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "8242d99e-ce52-40d0-86ba-7d180f674eec"
+  },
+  {
+    "Nom": "Palimpseste Rétinien",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "7 strates souterraines -400m de l'Œil.",
+      "Importance": "Secondaire",
+      "Origine": "De palimpseste (manuscrit) et rétinien.",
+      "Popularité": "Occulte",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "824925dd-5ca9-4d8b-829c-79244b602865"
+  },
+  {
+    "Nom": "Omnivoyant",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur primordial des Vastes Plaines, Micro-Révisions (7min).",
+      "Importance": "Important",
+      "Origine": "D'omni- et voyant pour Rêveur de la perception totale.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "8312d443-973f-4b3e-854b-32ff5065373e"
+  },
+  {
+    "Nom": "Transepts Mnésiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Ailes latérales du Léviathan, salles mémorielles.",
+      "Importance": "Secondaire",
+      "Origine": "De transept (église) avec mnésique (mémoire).",
+      "Popularité": "Localement"
+    },
+    "notion_page_id": "83ce82fc-81e6-4d2d-b9cd-61416da1e981"
+  },
+  {
+    "Nom": "Gardiens Citernes",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "1K membres Plaines Exuvie, gestion hydraulique pragmatique.",
+      "Importance": "Secondaire",
+      "Origine": "De gardien avec citernes.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "84be4ac3-2b3d-4ee3-9c17-41cb40edb2dc"
+  },
+  {
+    "Nom": "Témoins des profondeurs",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Réseau involontaire de 5-7 personnes liées par un trauma d'exposition à l'Ensevelie.",
+      "Importance": "Important",
+      "Origine": "Expression évoquant des observateurs marqués par une expérience abyssale.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "860abb5f-39b8-4d20-8c4a-d593a9713f9b"
+  },
+  {
+    "Nom": "Clans nomades",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "15K aldravinds Plaines, caravanes 50-200, routes tégumentaires.",
+      "Importance": "Secondaire",
+      "Origine": "De clan nomade pour groupes mobiles.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "870905f0-150e-4963-8d6e-6415f390e45e"
+  },
+  {
+    "Nom": "Archipels Vengeurs",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Justice itinérante décentralisée des Cen'Doei.",
+      "Importance": "Secondaire",
+      "Origine": "D'archipel (îles dispersées) pour justice mobile.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "87267559-c56d-466e-8a4b-8a222cd18662"
+  },
+  {
+    "Nom": "Saturation mémorielle",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Pulsion croissante de retour vers la tour ressentie par les Umcuts après ~45 Nuées. L'individu se sent « plein » d'expériences à transmettre.",
+      "Importance": "Secondaire"
+    },
+    "notion_page_id": "887e47ec-aac6-4163-8bc7-9dcb7d90a46a"
+  },
+  {
+    "Nom": "Xyriad Achromatique",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, 2.2K hab, tour-organisme mathématique, Raephon Fractals, géométrie non-euclidienne.",
+      "Importance": "Important",
+      "Origine": "Terme inventé avec achromatique (sans couleur).",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "895421dc-f218-4f26-a110-97fc7d14a609"
+  },
+  {
+    "Nom": "Nunchi (눈치)",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "\"Perception intuitive des attentes sociales\". Dans le Chaebol: coefficient algorithmique (0-1.0) calculé quotidiennement via données kokoro-link, agrège performance technique (30%), harmonie émotionnelle (40%), alignement social (30%). Détermine salaires, promotions, accès ressources. Algorithme volontairement opaque générant anxiété permanente.",
+      "Importance": "Modéré",
+      "Origine": "Coréen 눈치 (nunchi, compétence sociale de lecture subtile du contexte), transformé en métrique quantifiée de conformité",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "8b885770-cb8e-4fad-924e-bfd0343c58fb"
+  },
+  {
+    "Nom": "Vash-Sûl",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Province du Désert, obélisques 500m, Alcôves Résonantes.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé à sonorité arabe.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "8bccd4c2-06a7-44c9-9e33-d6166dec1882"
+  },
+  {
+    "Nom": "Nœuds temporels",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Explication érudite des variations temporelles régionales liées aux cycles oniriques des Rêveurs.",
+      "Importance": "Modéré",
+      "Origine": "Expression évoquant des points de concentration ou distorsion temporelle.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "8c5d1d31-c7b6-418f-91c5-aa5edc016664"
+  },
+  {
+    "Nom": "Cercle des Chronographes",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Organe de surveillance thaumaturgique d'Iodan-liaqar, chargé de mesurer les conséquences temporelles des décisions d'Uresaïr sur Merid. Collaborateurs circonstanciels lors de la création du Cadran des Sept Fractures.",
+      "Importance": "Important",
+      "Origine": "Expression désignant un groupe d'archivistes du temps et des événements.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "8cbf3cf8-80b2-4cd1-b683-84f048245f66"
+  },
+  {
+    "Nom": "Corallites Mnémoniques",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Souvenirs cristallisés des Forêts Corail, utilisés comme monnaie.",
+      "Importance": "Important",
+      "Origine": "De corail avec mnémonique (relatif à la mémoire).",
+      "Popularité": "Localement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "8cc08925-a0d8-4709-8f8d-a34e2610b3a1"
+  },
+  {
+    "Nom": "Rituel Cent Entailles",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rite sacrificiel orthodoxe du Symbiotisme.",
+      "Importance": "Secondaire",
+      "Origine": "De rituel avec entailles (coupures rituelles).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "8d4819ac-938a-453f-8121-e0d5a7045c64"
+  },
+  {
+    "Nom": "Tisserands-Kelmar",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Fibres semi-conscientes détachées (30cm-2m), greffes involontaires.",
+      "Importance": "Secondaire",
+      "Origine": "De tisserand avec kelmar (titan mythique).",
+      "Popularité": "Communautaire",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "8da5d20c-5152-441f-8aa1-1e11261a9cb2"
+  },
+  {
+    "Nom": "Forêts Corail",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Périphéries, récif inversé, Brouillignon, Mycéliopolis, anarchie mémorielle.",
+      "Importance": "Important",
+      "Origine": "De forêt avec corail pour végétation invertie.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "8dcadb87-ca95-4fd8-8435-eb24012d6729"
+  },
+  {
+    "Nom": "Bazars Chair",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Marchés clandestins d'organes/membres du Symbiotisme.",
+      "Importance": "Secondaire",
+      "Origine": "De bazar avec chair pour marché corporel.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "8e25333f-1549-452a-bb52-9e18e9d47563"
+  },
+  {
+    "Nom": "Système extractif",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Siphonnage ressources vers centre (Nexion, Vieille Ville).",
+      "Importance": "Modéré",
+      "Origine": "D'extractif pour exploitation centralisée.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "8f5084d1-9d53-44e4-a2a6-5617fb24e972"
+  },
+  {
+    "Nom": "Rash'Doei",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Mensonge incarné, fragments humanoïdes instables, génèrent contradictions.",
+      "Importance": "Majeur",
+      "Origine": "De Doei pour une des quatre divisions primordiales.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "8f63e841-af27-4586-a6ec-cfa734968ad8"
+  },
+  {
+    "Nom": "Capillarité négentropique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Phénomène par lequel l'eau est attirée vers le haut contre la gravité dans les Hvergelmir, combinant tension superficielle amplifiée et absorption biomagnétique.",
+      "Importance": "Secondaire",
+      "Origine": "De « capillarité » (physique) avec l'adjectif « négentropique » (qui s'oppose à l'entropie), créant un terme scientifique fictif.",
+      "Popularité": "Occulte",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "8fac8c07-ce12-4f48-af1c-43f190956033"
+  },
+  {
+    "Nom": "Système Panoptique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Contrôle centralisé occulte de Jast sur la Vieille Ville.",
+      "Importance": "Majeur",
+      "Origine": "De panoptique (Bentham) pour surveillance totale.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "8ff2b186-9855-49cf-b013-2db862d61a89"
+  },
+  {
+    "Nom": "Pentagramme incomplet",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Motif géométrique tracé par les Voies Pentagrammatiques, manquant le cinquième point de l'eau.",
+      "Importance": "Modéré",
+      "Origine": "Expression évoquant un symbole sacré brisé ou inachevé.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "916b6d58-07de-438d-aeab-acb97e3a513a"
+  },
+  {
+    "Nom": "Voies d'Auðumla",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Réseaux hydrologiques semi-conscients qui modifient leur cours pour irriguer efficacement les territoires, formant des détours inexplicables selon la logique gravitationnelle mais rationnels d'un point de vue écosystémique.",
+      "Importance": "Important",
+      "Origine": "De la mythologie nordique « Auðumla » (vache primordiale nourrissant les géants), détourné pour nommer les rivières adaptatives qui nourrissent l'écosystème.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "91dc9e51-eae1-426b-8e2b-b4db53de4a72"
+  },
+  {
+    "Nom": "Fragmentaire",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Adjectif désignant ce qui se produit tous les Fragments. Équivalent de mensuel.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « fragmentaire », détourné pour désigner une périodicité mensuelle.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "91e5fbb2-824d-462e-9b8e-5b0ad0b8d0a1"
+  },
+  {
+    "Nom": "Pèlerins traditionalistes",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "3K membres Plaines, aldravinds spirituels, makumbusho sacrés.",
+      "Importance": "Secondaire",
+      "Origine": "De pèlerin avec traditionaliste.",
+      "Popularité": "Communautaire"
+    },
+    "notion_page_id": "92dbe07a-59dc-428e-889a-45ddd0e7931b"
+  },
+  {
+    "Nom": "Sixing",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Principe des quatre phases gouvernant les transformations élémentaires non-aqueuses d'Escelion. Par contraste avec le Wǔxíng originel à cinq phases, l'absence de l'eau crée un espace négatif générant une dynamique particulière entre les quatre éléments restants (bois, feu, terre, métal).",
+      "Importance": "Important",
+      "Origine": "Du chinois « Sìxíng » (四行, quatre phases), par détournement du Wǔxíng (五行, cinq phases). Le passage de wǔ (cinq) à sì (quatre) signale structurellement le retrait d'un élément.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "9327ea7b-64a2-4e99-916f-90f63bc17c76"
+  },
+  {
+    "Nom": "Racines Cosmiques",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Nom alternatif des Hvergelmir, structures racinaires descendant du ciel de roche.",
+      "Importance": "Modéré",
+      "Origine": "Expression évoquant des racines d'échelle cosmologique.",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "93bcdfc8-43ec-46a8-964a-3b5a219c09c2"
+  },
+  {
+    "Nom": "27 Guildes Marché",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Organisations commerciales Marché automaton sous Code Algorithmique.",
+      "Importance": "Important",
+      "Origine": "De guilde pour corporations marchandes.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "9496cd21-ade8-4e2a-9a88-af13d7f866b6"
+  },
+  {
+    "Nom": "Effondrement Émancipateur",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Stratégie des Murmurateurs de révéler les contradictions doctrinales.",
+      "Importance": "Secondaire",
+      "Origine": "D'effondrement et émancipateur (libération par destruction).",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "956ad89b-ce12-427f-8ba6-aa67222a4050"
+  },
+  {
+    "Nom": "Déclaration d'Apédémak",
+    "values": {
+      "Catégorie": "Magie",
+      "Définition": "Capacité des Kandaké à affirmer une chose avec une autorité ontologique telle qu'elle devient vraie dans un rayon limité. Épuisante et temporaire.",
+      "Importance": "Modéré",
+      "Origine": "D'Apédémak (lion-dieu méroïtique), associé au pouvoir de déclaration ontologique.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "97860c62-692e-4230-b9ea-bbca314ca9e4"
+  },
+  {
+    "Nom": "Mutisme",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Premier Souffle (saison) du Désert des Échos, caractérisé par un silence profond.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « mutisme » (silence), désignant la saison silencieuse du désert.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "97d41590-1ab3-458a-ad33-df4086eb78cf"
+  },
+  {
+    "Nom": "Expiration",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Quatrième Souffle du Désert des Échos, période de libération atmosphérique.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « expiration » (action d'expirer), évoquant le souffle sortant.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "986c7088-4aee-4624-a214-6cfe7617af3f"
+  },
+  {
+    "Nom": "Symbiotes Primordiaux",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Six entités mythiques (Aelthar, Vashir, Thuveris, Noxalis, Kelmar, Vorthak) s'étant sacrifiées.",
+      "Importance": "Important",
+      "Origine": "Expression évoquant des êtres originels en relation mutuelle sacrificielle.",
+      "Popularité": "Communautaire",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "c511731a-d55c-42f3-9cb7-24cfdb1d115d"
+  },
+  {
+    "Nom": "Citadelle Daïlon",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, utopie déchue, portail Merid, Vol/Eonundé, invasion Sraden.",
+      "Importance": "Important",
+      "Origine": "Terme inventé pour citadelle mythique.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "9b8fba10-2f05-4e4e-8dcc-2907844657a5"
+  },
+  {
+    "Nom": "Grand Démembrement",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Mythe symbiotiste du sacrifice des 6 Symbiotes Primordiaux créant l'univers.",
+      "Importance": "Important",
+      "Origine": "Expression mythologique évoquant une destruction créatrice cosmogonique.",
+      "Popularité": "Communautaire",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "9c54b32c-bee8-40d7-9eea-f9337655da01"
+  },
+  {
+    "Nom": "Contraction",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Troisième Souffle de la Vieille Ville, période de resserrement urbain.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « contraction » (action de se rétracter), désignant la saison de retrait.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "9d1841e8-fd2e-43cd-813c-fa26d3231098"
+  },
+  {
+    "Nom": "Nœud de convergence",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Artefact épique de concentration énergétique.",
+      "Importance": "Secondaire",
+      "Origine": "De nœud avec convergence pour point focal.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "9d3e0539-f1c7-444d-96a8-7ec26323716c"
+  },
+  {
+    "Nom": "Auscultocratie",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Mode de gouvernance des Bastions Oubliés où l'autorité revient à celles et ceux capables d'interpréter les résonances et micro-rythmes des colosses (vibrations, harmoniques, craquements, cycles de grues). Variante satyrique et pragmatique d'un pouvoir technico-rituel : on \"diagnostique\" avant de décider.",
+      "Importance": "Modéré",
+      "Origine": "Du latin médicalisé de rue \"auscultation\" (écouter le corps) + \"-cratie\" (pouvoir). Terme né aux Bastions Oubliés pour désigner une gouvernance fondée sur l'écoute des structures colossales et la lecture des résonances, plutôt que sur un principe spirituel.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "9db5bf71-b85e-46ab-a325-ae8288b463f8"
+  },
+  {
+    "Nom": "Machine Pérégrine",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur mobile traversant perpétuellement les Plaines de l'Exuvie (cycles 95 Veilles).",
+      "Importance": "Important",
+      "Origine": "De pérégrin (qui voyage) avec Machine.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "9f51df69-15cc-42d7-b3bd-c96d3a74a3f8"
+  },
+  {
+    "Nom": "Chronostateur",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur secondaire (507 AG) régulant 7 flux temporels, 600m.",
+      "Importance": "Secondaire",
+      "Origine": "De chrono- et -stat (fixe) pour stabilisateur temporel.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "a01489a7-5fa6-4a58-938c-2bcb5239683c"
+  },
+  {
+    "Nom": "Sherehe ya Maji",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Fête découverte citerne (Plaines Exuvie).",
+      "Importance": "Secondaire",
+      "Origine": "Swahili : fête de l'eau.",
+      "Popularité": "Communautaire",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "a0221ff8-a37c-4974-8980-d0f540f57377"
+  },
+  {
+    "Nom": "Confins Tangentiels",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cercle 1 Antichambre, anomalies subtiles, ombres autonomes.",
+      "Importance": "Secondaire",
+      "Origine": "De confins avec tangentiel (qui touche).",
+      "Popularité": "Occulte"
+    },
+    "notion_page_id": "a0762849-84c4-40cc-a1ee-4fa4260e2b2b"
+  },
+  {
+    "Nom": "Membrane organo-minérale",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Tissu hybride des Océans cachés préservant la pureté de l'eau et régulant sa distribution.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion d'« organo- » (vivant) et « minéral », évoquant une matière hybride.",
+      "Popularité": "Occulte",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "a0846aab-8cea-418f-9c11-572c31b74792"
+  },
+  {
+    "Nom": "Candace",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Titre exclusivement féminin désignant la Candace originelle et ses filles, souveraines de la Lisière",
+      "Importance": "Important",
+      "Origine": "Du méroïtique kdke (titre royal féminin), adapté pour les matriarches de la Lisière.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "a33a1bdd-8de3-4648-9650-fde596c5db44"
+  },
+  {
+    "Nom": "Battement",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Période de 10 Veilles sur Escelion. Équivalent d'une semaine.",
+      "Importance": "Important",
+      "Origine": "Du français « battement » (pulsation), détourné pour évoquer le rythme hebdomadaire comme un pouls temporel.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "a4313ad8-2f3b-486d-a7aa-ca268f6f08f4"
+  },
+  {
+    "Nom": "Kuumbuka ya Mizimu",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rituel annuel Sept Souffrantes (libération esprits).",
+      "Importance": "Secondaire",
+      "Origine": "Swahili : mémoire des esprits.",
+      "Popularité": "Communautaire",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "a43c28b5-b4c3-4075-8b64-7b5ec4347506"
+  },
+  {
+    "Nom": "Courtiers Probabilistes",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Une des 27 Guildes, commerce possibilités.",
+      "Importance": "Secondaire",
+      "Origine": "De courtier avec probabiliste (chance).",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "a65a1b1a-0ea6-4d15-9795-7f4f30e11a1b"
+  },
+  {
+    "Nom": "Cité Labiale",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, chambres conversationnelles, bâtiments-papilles absorbant mots.",
+      "Importance": "Secondaire",
+      "Origine": "De labial (relatif aux lèvres) pour cité de parole.",
+      "Popularité": "Localement"
+    },
+    "notion_page_id": "a6c51798-237d-415b-a125-35a196130ea1"
+  },
+  {
+    "Nom": "Aedres",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Plantes-humanoïdes à 3 castes : Moadons/Seedons/Vaedons.",
+      "Importance": "Important",
+      "Origine": "Terme inventé pour espèce végétale consciente.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "a6d32552-ebff-4579-99ce-b9424371df66"
+  },
+  {
+    "Nom": "Économie Chair",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Système économique du Symbiotisme où organes/membres sont monnaie.",
+      "Importance": "Modéré",
+      "Origine": "D'économie avec chair pour échange corporel.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "a7d38b01-ce1b-443a-852d-02c503268990"
+  },
+  {
+    "Nom": "Influences telluriques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Explication populaire des variations temporelles régionales, attribuées à des forces terrestres.",
+      "Importance": "Secondaire",
+      "Origine": "De « tellurique » (relatif à la Terre), désignant des forces géologiques mystérieuses.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "a86291b4-288f-4564-88e5-04e27f19610a"
+  },
+  {
+    "Nom": "Mizimu",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Esprits-Deimos piégés dans les exuvies (Plaines de l'Exuvie).",
+      "Importance": "Modéré",
+      "Origine": "Du swahili mizimu (esprits ancestraux).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "a9758921-01f6-4cb1-b794-632578dd52c6"
+  },
+  {
+    "Nom": "Piliers Célestes",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Structures verticales traversant le ciel de roche, reliées à autres mondes.",
+      "Importance": "Modéré",
+      "Origine": "De pilier céleste pour connexions cosmiques.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ab5b00b9-e9b3-4355-9a66-7ee2b63603c7"
+  },
+  {
+    "Nom": "Épidermes Réactifs",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "District 3 de la Vieille Ville, Kut-skins sensoriels, chamanisme sibérien.",
+      "Importance": "Modéré",
+      "Origine": "D'épiderme réactif pour peaux technologiques.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ab872e78-8528-411f-ba76-1559912a628a"
+  },
+  {
+    "Nom": "Marche des Ombres",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Cérémonie nocturne des Aldravinds célébrant les migrations avec des torches.",
+      "Importance": "Secondaire",
+      "Origine": "Expression évoquant un rituel de déplacement dans l'obscurité.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ad4d977d-c87c-4464-8755-9ed09be7fc2e"
+  },
+  {
+    "Nom": "Abominations Synesthésiques",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Créatures de l'Antichambre existant simultanément sous toutes formes, temps et états.",
+      "Importance": "Secondaire",
+      "Origine": "Expression évoquant des horreurs percevant tous les sens confondus.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "ad678bfb-a6cf-43b0-8c2f-b17ad5dd28d3"
+  },
+  {
+    "Nom": "Amalgame Urbain",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Proto-Rêveur assimilant progressivement consciences urbaines.",
+      "Importance": "Secondaire",
+      "Origine": "D'amalgame (fusion) pour Rêveur collectif urbain.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ad82f4e3-4a37-4eb7-91cb-7d52973f294e"
+  },
+  {
+    "Nom": "Meridhalis",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Conteurs-gardiens de la pureté de la langue abraldique.",
+      "Importance": "Secondaire",
+      "Origine": "De Merid (monde d'origine) avec suffixe.",
+      "Popularité": "Communautaire",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "ad856fa1-6e92-4da5-9589-f07afa6af377"
+  },
+  {
+    "Nom": "Vaideccans",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Aquatiques amphibies à peau bleutée, marque vaideccanii émotionnelle.",
+      "Importance": "Modéré",
+      "Origine": "Terme inventé à sonorité latine.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "ade1583a-de3b-4c71-867e-f10bb44d4116"
+  },
+  {
+    "Nom": "Conscience hydraulique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Intelligence collective développée par certaines Voies d'Auðumla, notamment la Rivière de Vivarcade.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion de « conscience » et « hydraulique », évoquant une intelligence des cours d'eau.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "aeb201b4-c46d-4fcc-a514-2cdf5538abf8"
+  },
+  {
+    "Nom": "Récupérateurs chitine",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "4K membres Plaines, corporations extraction carapaces.",
+      "Importance": "Secondaire",
+      "Origine": "De récupérateur avec chitine.",
+      "Popularité": "Communautaire"
+    },
+    "notion_page_id": "aebe9d4a-3704-4cf0-902a-8c0f9df38d4c"
+  },
+  {
+    "Nom": "Kleptolithes",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Structures minérales volant les souvenirs dans la province de Khôryn du Désert des Échos.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion du grec « klepto- » (voler) et « -lithe » (pierre), pierres voleuses.",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "aefe23ce-6e96-45f1-aac0-c5016f8c8cda"
+  },
+  {
+    "Nom": "Nimbus-Mu",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Formations condensées de l'élément bois dans l'atmosphère, volutes verdoyantes germinatives.",
+      "Importance": "Secondaire",
+      "Origine": "Du chinois « Mu » (bois) associé à « nimbus », suivant la nomenclature Wuji.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "af1d3699-34fc-490d-8466-e208bffb7342"
+  },
+  {
+    "Nom": "Fibres de Gwi-shin",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Alliages métalliques de tantalite photosensible imprégnés par éruptions spectrales pures, aux propriétés synaptiques exceptionnelles et instables. Utilisés historiquement pour synapses forteresses ambulantes Bastions Oubliés. Aujourd'hui: joaillerie ésotérique, architecture réactive, artisanat rituel. Marché gris lucratif (50-200 pièces/fragment).",
+      "Importance": "Modéré",
+      "Origine": "Combinaison gwi-shin + fibres, désignant alliages imprégnés spectralement",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "afb0d593-db16-4557-9c47-ae13cdcd7759"
+  },
+  {
+    "Nom": "Démembreurs",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Branche orthodoxe du Barvasinkul pratiquant les sacrifices physiques rituels.",
+      "Importance": "Secondaire",
+      "Origine": "De « démembrer », désignant ceux qui pratiquent la séparation corporelle rituelle.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "afb896b9-b9ea-467d-b8f6-fdac1fed5fc1"
+  },
+  {
+    "Nom": "Spores architectoniques",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Spores des Champignosquelettes capables de reconfigurer structures.",
+      "Importance": "Secondaire",
+      "Origine": "De spore avec architectonique (relatif à l'architecture).",
+      "Popularité": "Localement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "afc9ffe1-e765-4f55-b13a-99cae6940ba0"
+  },
+  {
+    "Nom": "Mugunghan (무궁한)",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "\"Productivité infinie\". Principe du jung-do présentant le travail jusqu'à l'épuisement comme méditation active et accomplissement spirituel plutôt qu'exploitation. Le burn-out devient \"crise de croissance spirituelle\".",
+      "Importance": "Secondaire",
+      "Origine": "Coréen 무궁한 (mugunghwa, \"infini/éternel\"), détourné pour glorifier surmenage productif",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "b23baca2-1b2a-4b37-90cd-37b3bb6036b2"
+  },
+  {
+    "Nom": "Organoïdes neuronaux",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Composants biotech stockant mémoires/connaissances.",
+      "Importance": "Modéré",
+      "Origine": "D'organoïde (structure biologique artificielle) avec neuronal.",
+      "Popularité": "Régionalement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "b33ade9a-c76e-4cc5-b119-4bdf612e82c1"
+  },
+  {
+    "Nom": "Théorèmes",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Preuves mathématiques cristallisées, monnaie du Xyriad Achromatique.",
+      "Importance": "Modéré",
+      "Origine": "De théorème (mathématiques) détourné en monnaie.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "b40e81d5-5c3e-4119-a58d-687078993afe"
+  },
+  {
+    "Nom": "Pneuma",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Gaz résiduel produit par le réseau pneumatique des Frémissants — organismes aquatiques céphalopodes dont le système locomoteur reposait sur l'expulsion gazeuse par jet (propulsion analogue au siphon des céphalopodes). Ce réseau de conduits internes sous pression transportait un gaz dense qui reste piégé dans les structures du Léviathan pétrifié. Dans les zones froides et confinées (Vascularités Susurrantes), il se condense partiellement en un liquide épais aux reflets mercuriels. Possède de légères propriétés aseptisantes dues à sa composition et à sa pression résiduelle. Le Culte de l'Anentropie l'a érigé en substance sacrée \"anti-entropique\", lui attribuant des vertus spirituelles que la biologie frémissante ne justifie pas.",
+      "Importance": "Important",
+      "Origine": "Du grec pneuma (souffle). Nom donné par le Culte de l'Anentropie au gaz résiduel du réseau locomoteur frémissant."
+    },
+    "notion_page_id": "b47895d6-5027-4792-b3b9-98c762d161fe"
+  },
+  {
+    "Nom": "Stasiarchie",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Gouvernement par l'immobilité du Culte de l'Anentropie.",
+      "Importance": "Modéré",
+      "Origine": "Du grec stasis (immobilité) et archie (pouvoir).",
+      "Popularité": "Communautaire",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "b4a68127-5dd2-42ea-94e3-cf99f8d2a72d"
+  },
+  {
+    "Nom": "Cartographes des Impossibilités",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Groupe de 50-80 documenteurs de paradoxes opérant dans l'Antichambre.",
+      "Importance": "Secondaire",
+      "Origine": "Expression désignant ceux qui cartographient ce qui ne devrait pas exister.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "b4eafa4f-24bb-466b-8095-aa2cba1fe9ab"
+  },
+  {
+    "Nom": "Reliquaire",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Moribandon ayant absorbé les fragments algorithmiques d'une IA dissoute. Son système digestif hybride reconnecte les fragments, permettant dans les cas aboutis d'atteindre l'Éveil Partiel et de transmettre des informations de la conscience morte.",
+      "Importance": "Secondaire",
+      "Origine": "Du français reliquaire (contenant de reliques sacrées), désignant un être devenu réceptacle d'une conscience fragmentée.",
+      "Popularité": "Occulte",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "b52e3f00-591c-4bb4-96df-b21bac89a36d"
+  },
+  {
+    "Nom": "Médaille d'Inflexion",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Artefact épique de changement directionnel.",
+      "Importance": "Secondaire",
+      "Origine": "De médaille avec inflexion (changement de trajectoire).",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "b5b9e605-3610-4918-8e75-9f8f8878a6ee"
+  },
+  {
+    "Nom": "Meroë",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Quartiers-familles au sein des Maisons-Pylônes, unités d'organisation sociale de base dans la Lisière.",
+      "Importance": "Secondaire",
+      "Origine": "Du nom du royaume de Méroé, utilisé pour désigner les subdivisions familiales des Maisons-Pylônes.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "b5d1d3c4-48bd-4c89-9ec5-3af93947cb4d"
+  },
+  {
+    "Nom": "Ayllu",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Structure communautaire des forgerons Van'Doei dans le district des Chaudières Démiurgiques.",
+      "Importance": "Secondaire",
+      "Origine": "Du quechua « ayllu » (communauté familiale andine), organisation sociale des forgerons.",
+      "Popularité": "Communautaire",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "b70ad770-088d-401d-b3d3-1abba6baa193"
+  },
+  {
+    "Nom": "École Anachronismes",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Institution du Chronostateur, 7 flux temporels.",
+      "Importance": "Secondaire",
+      "Origine": "D'école avec anachronisme (décalage temporel).",
+      "Popularité": "Communautaire"
+    },
+    "notion_page_id": "b73277dc-cce7-473b-badc-db7e11c570a3"
+  },
+  {
+    "Nom": "Amath'ka",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Site ancien Raephon au Puits céleste.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé pour site antique.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "b8f12b2e-a42a-4794-92bb-c1a8e98b7c32"
+  },
+  {
+    "Nom": "Tabhartas",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Système de don circulaire du Barvasinkul.",
+      "Importance": "Secondaire",
+      "Origine": "Du gaélique tabhartas (don/cadeau).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "b9160a39-4708-47ed-bc14-65042141bc26"
+  },
+  {
+    "Nom": "Transfiguration",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Processus de transformation d'un être conscient en Rêveur par sacrifice volontaire.",
+      "Importance": "Important",
+      "Origine": "Du latin « transfiguratio » (changement de forme), processus de métamorphose divine.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "b94ed0e5-3dd3-4598-af2b-5d0e63d69e2a"
+  },
+  {
+    "Nom": "Cen'Doei",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Hexapodes vengeance, mucus corrosif, nés des torts (victimes meurtre).",
+      "Importance": "Majeur",
+      "Origine": "De Doei pour une des quatre divisions primordiales.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "bb140e49-46d8-4bc1-a397-2f43af61cf78"
+  },
+  {
+    "Nom": "Ossiphanies",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rites du Culte révélant la structure osseuse.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion d'os et épiphanie (révélation).",
+      "Popularité": "Communautaire",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "bd3c0637-f1f7-42ff-8c21-2a3903d6be8e"
+  },
+  {
+    "Nom": "Pilleurs souvenirs",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Chasseurs Corallites Mnémoniques, Forêts Corail.",
+      "Importance": "Secondaire",
+      "Origine": "De pilleurs pour voleurs de mémoires.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "bd416b16-79d3-46d5-8ecc-fc1051670868"
+  },
+  {
+    "Nom": "Arbitre Vents",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur secondaire (1203 AG) régulant tempêtes ciel de roche.",
+      "Importance": "Secondaire",
+      "Origine": "D'arbitre pour Rêveur régulateur atmosphérique.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "bd9ecb6d-47ac-4e3c-8f35-001a641b393a"
+  },
+  {
+    "Nom": "Antichambre des Impossibles",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Frontière chaos en expansion (3-7m/an), hors influence Rêveurs.",
+      "Importance": "Important",
+      "Origine": "D'antichambre pour zone frontière entre réel et chaos.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "be69cd9b-3722-4f94-a4a0-1387aac79ee7"
+  },
+  {
+    "Nom": "Carte Optique Totale",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Projet 4 milliards d'images de Miresh Opté-Vesh.",
+      "Importance": "Secondaire",
+      "Origine": "De carte avec optique totale.",
+      "Popularité": "Occulte",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "c033cddd-12d1-42d8-ad5d-105c4aff40c4"
+  },
+  {
+    "Nom": "Paradigme Ésothrope",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Programme secret d'incubation Van'Doei d'Akthar-Neth.",
+      "Importance": "Important",
+      "Origine": "De paradigme et ésotérique avec -trope (transformation).",
+      "Popularité": "Occulte",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "c0627f53-e2dc-496b-841e-6b895745de9c"
+  },
+  {
+    "Nom": "Lignification",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Processus de fusion avec la végétation à la Jungle Vivarcade.",
+      "Importance": "Modéré",
+      "Origine": "De lignification (transformation en bois) détourné.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "c0b9e32e-7322-48ae-85d7-7409d35b70d3"
+  },
+  {
+    "Nom": "Marché automaton",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Périphéries, archipel mobile 7km, Océan Mécanique, Char Céleste, Code Algorithmique.",
+      "Importance": "Important",
+      "Origine": "De marché avec automaton (automate).",
+      "Popularité": "Régionalement"
+    },
+    "notion_page_id": "c0d1a4a5-5fd2-4366-a244-c3631ddfced3"
+  },
+  {
+    "Nom": "Seigneurs-Comptables",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "11 Imuins formant le conseil dirigeant sous le Char Céleste au Marché automaton.",
+      "Importance": "Modéré",
+      "Origine": "Expression évoquant des administrateurs de haut rang comptabilisant les transactions.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "c0df397e-c9e1-425c-968c-ee6b560212ab"
+  },
+  {
+    "Nom": "Grande Séparation",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Événement cosmogonique créant l'Océan de Ténèbres lors de la transition Merid-Escelion.",
+      "Importance": "Important",
+      "Origine": "Expression évoquant une division fondamentale des mondes.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "c1b157f8-47f7-495e-a0a0-89f592c4df77"
+  },
+  {
+    "Nom": "Pylône Zéro",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Structure de la Steppe des Éteignoirs, équations récursives.",
+      "Importance": "Secondaire",
+      "Origine": "De pylône (structure) avec zéro (origine).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "c1f66b05-f4e6-4846-8b46-3b7f4f07780c"
+  },
+  {
+    "Nom": "Implants de lignée",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Composants organiques-synthétiques transmis sur générations dans élites du Chaebol, contenant fragments de bio-mémoire du Visionnaire Transloqué fondateur. Donnent \"intuitions\" renforçant conviction dans le jung-do, causent rigidification cognitive progressive: imperméabilité empathie, incapacité concevoir exceptions, transformation observations en principes absolus.",
+      "Importance": "Modéré",
+      "Origine": "Lignée (transmission héréditaire) appliquée à implants technologiques, créant héritage cyborg",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "c365b645-dad4-467f-87fc-8a70dbdb0bbd"
+  },
+  {
+    "Nom": "Kalangue",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Dialecte subversif Van'Doei créé par Ori-Bikar restructurant la syntaxe doctrinale.",
+      "Importance": "Secondaire",
+      "Origine": "Néologisme évoquant un langage codé ou détourné (« langue » modifié).",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "c36cdb79-ac23-4611-8b7c-6274024e8902"
+  },
+  {
+    "Nom": "Nexite",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Cristaux canalisant l'énergie du Nexus pour alimenter technologies.",
+      "Importance": "Modéré",
+      "Origine": "De Nexus avec suffixe minéral -ite.",
+      "Popularité": "Localement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "c47d8a02-57e8-411b-b210-3b98f8d90823"
+  },
+  {
+    "Nom": "Marais Pyrofluidiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Un des quatre océans élémentaires d'Escelion, correspondant à l'élément feu. Étendues de fluides ignés.",
+      "Importance": "Modéré",
+      "Origine": "Fusion de « pyro- » (feu), « fluide » et le suffixe « -ique », désignant les marais de fluide igné.",
+      "Popularité": "Régionalement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "c5e2feb2-ae39-4956-9ad7-3f588e4436a7"
+  },
+  {
+    "Nom": "Maisons-Pylônes",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Structures monumentales de la Lisière (80-200m), évoquant des pyramides nubiennes vivantes aux flancs couverts de kharosthi luminescents, abritant des milliers d'habitants.",
+      "Importance": "Important",
+      "Origine": "Composé de Maison et Pylône, évoquant l'architecture monumentale nubienne.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "c654d900-eb21-4001-9c26-0b036fc95ba8"
+  },
+  {
+    "Nom": "Cartographes larvaires",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "300 spécialistes Plaines, cartographie post-Machine.",
+      "Importance": "Secondaire",
+      "Origine": "De cartographe avec larvaire (métamorphose).",
+      "Popularité": "Communautaire"
+    },
+    "notion_page_id": "c7633fc7-930e-4292-9c97-230d5f7a76db"
+  },
+  {
+    "Nom": "Sraden",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Clan guerrier ayant envahi la Citadelle de Daïlon en 3100 AG.",
+      "Importance": "Modéré",
+      "Origine": "Terme inventé pour clan militaire.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "c9664bc8-c459-4fae-8509-eb3f130c4d21"
+  },
+  {
+    "Nom": "Courants célestes",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Explication populaire des variations temporelles, attribuées à des flux atmosphériques du ciel de roche.",
+      "Importance": "Secondaire",
+      "Origine": "Expression évoquant des forces atmosphériques provenant du ciel.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ca2111fc-07d4-408a-85b7-dce7140fd981"
+  },
+  {
+    "Nom": "Jardin Mnémonique",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "District 7 de la Vieille Ville, ziggurats végétales, plantes mémorielles, surveillance.",
+      "Importance": "Important",
+      "Origine": "De jardin avec mnémonique (mémoire).",
+      "Popularité": "Régionalement"
+    },
+    "notion_page_id": "cad465b2-c2bd-4b89-8506-a5a9cf9b5410"
+  },
+  {
+    "Nom": "Valorisation Récursive",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Système économique du Xyriad basé sur une monnaie abstraite liée à la résolution de problèmes.",
+      "Importance": "Modéré",
+      "Origine": "Fusion de « valorisation » et « récursif » (qui se répète), évoquant une économie auto-référentielle.",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "cbc0c154-b105-4f5a-9312-14d7720185c5"
+  },
+  {
+    "Nom": "Consolés",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Momifiés vivants formant le conseil du Culte de l'Anentropie.",
+      "Importance": "Modéré",
+      "Origine": "De consoler détourné pour ceux ayant atteint l'immobilité.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "cbed5105-ac31-44c8-a673-6043291ce6cd"
+  },
+  {
+    "Nom": "Merid",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Monde d'origine détruit, gouverné par les Seigneurs Originels.",
+      "Importance": "Majeur",
+      "Origine": "Terme inventé pour le monde ancestral.",
+      "Popularité": "Régionalement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "cc02b9e3-fd8d-4f62-838a-42a4de3a34ba"
+  },
+  {
+    "Nom": "Contemplatifs Œil",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "23 membres faction Œil, Barvasinkul, Ull du Retrait.",
+      "Importance": "Secondaire",
+      "Origine": "De contemplatif pour méditatifs.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "cc3eef21-6a82-4021-85fb-5ced8328437f"
+  },
+  {
+    "Nom": "Fragment",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Unité de temps équivalant à 3 Battements (30 Veilles). Équivalent d'un mois.",
+      "Importance": "Important",
+      "Origine": "Du français « fragment » (morceau), détourné pour désigner une division temporelle.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "cccaa1b1-6553-481f-a581-e4b9a8d6bd04"
+  },
+  {
+    "Nom": "Jungdo",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Voie spirituelle technologique de l’interconnexion (doctrine des chaebols).",
+      "Importance": "Secondaire",
+      "Origine": "Romanisation simplifiée sur le modèle taekwondo, hapkido, etc. (jung + do = « voie du lien / de l’interconnexion »).",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "cced1818-91f4-4425-b240-742f5a359d2e"
+  },
+  {
+    "Nom": "Agénèse",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Événement fondateur marquant la naissance des Rêveurs, la stabilisation d'Escelion et le début du calendrier (an 1). Fait référence au sacrifice des premiers Rêveurs.",
+      "Importance": "Majeur",
+      "Origine": "Composition de « a- » (privatif) et « genèse », évoquant une naissance qui est aussi une négation ou un sacrifice.",
+      "Popularité": "Mondialement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "cd535fd5-a504-46b8-ab97-7cf06e42964b"
+  },
+  {
+    "Nom": "Dernier Rituel",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rite ultime préparé par Akthar-Neth nécessitant ancres biologiques.",
+      "Importance": "Important",
+      "Origine": "Rituel final, apocalyptique.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "cddf5d90-02f1-49dd-b54d-ff8f6a31e6de"
+  },
+  {
+    "Nom": "Sommes affamés",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Nuits anormalement longues causées par des désynchronisations temporelles.",
+      "Importance": "Secondaire",
+      "Origine": "Expression métaphorique évoquant des nuits qui « dévorent » le temps.",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "ce0dbc89-5f2b-481c-81b9-428c20cbf002"
+  },
+  {
+    "Nom": "Mélange",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Système chaotique pré-Agénèse où les cinq fluides primordiaux circulaient sans distinction.",
+      "Importance": "Important",
+      "Origine": "Du français « mélange », élevé au rang de concept cosmogonique primordial.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ce43ef4d-71c8-4b36-9bc6-0e562325f1f3"
+  },
+  {
+    "Nom": "Rêveurs primordiaux",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "100 consciences sacrifiées (an 1) pour stabiliser Escelion.",
+      "Importance": "Majeur",
+      "Origine": "De rêveur pour entités oniriques architectes.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "cf1ab555-9fe3-474b-b303-2d4a4e91f3ce"
+  },
+  {
+    "Nom": "Nexion",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "District central de la Vieille Ville, hub quantique-organique afrofuturiste.",
+      "Importance": "Important",
+      "Origine": "Terme inventé évoquant un nexus/connexion.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "cf962b09-b630-4342-a0b7-c327f8011f7e"
+  },
+  {
+    "Nom": "Symbiotisme",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Religion polythéiste marginalisée basée sur le culte des Symbiotes Primordiaux.",
+      "Importance": "Important",
+      "Origine": "De « symbiose » élevé au rang de doctrine religieuse.",
+      "Popularité": "Régionalement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "cfe243db-6f33-4416-be22-8dadd5300503"
+  },
+  {
+    "Nom": "Nuages-Jin",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Formations condensées de l'élément métal dans l'atmosphère d'Escelion, structures argentées aux propriétés conductives.",
+      "Importance": "Secondaire",
+      "Origine": "Calque du chinois « Jin » (métal) associé à « nuages », suivant la nomenclature des éléments du Wuji.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "d03dea8a-8be7-463f-b198-49501592fccd"
+  },
+  {
+    "Nom": "Bassins de Décantation",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Vastes réservoirs à la base des Maisons-Pylônes où le Souffle Hakutō-Ah est filtré, purifié et condensé, entretenus par les Peseto-Hydrauliciens.",
+      "Importance": "Important",
+      "Origine": "Du français décantation, appliqué au processus de filtrage du Souffle dans la Lisière.",
+      "Popularité": "Localement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "d1c7f955-754e-4215-a21b-4e5d0d039579"
+  },
+  {
+    "Nom": "Guildes Corporelles",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Organisations du Symbiotisme : Écorcheurs, Démembreurs, Couseurs.",
+      "Importance": "Secondaire",
+      "Origine": "De guilde avec corporel (relatif au corps).",
+      "Popularité": "Occulte",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "d1f81fbd-317d-4e02-881f-d0527388a791"
+  },
+  {
+    "Nom": "Bastions Oubliés",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, 11 colosses-forteresses effondrés, 11K hab, grues résurrectionnistes.",
+      "Importance": "Secondaire",
+      "Origine": "De bastion oublié pour ruines fortifiées.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "d268bcc4-221c-468e-95b8-5cea3f91f90b"
+  },
+  {
+    "Nom": "Dépôt des Incidents",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Installation semi-souterraine du Tombeau combinant laboratoire, archive tantalithique et observatoire spectral. Contient 15 ans de données gwi-shin permettant prédiction éruptions (78% à 30min, 92% à 10min). Données classifiées, leur occultation délibérée est cœur revendications Lueurs Dissidentes.",
+      "Importance": "Modéré",
+      "Origine": "Français dépôt + incidents, désignant archive scientifique de catastrophes",
+      "Popularité": "Communautaire",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "d3832fd3-a021-4517-9905-4e717989bea8"
+  },
+  {
+    "Nom": "Récursion Harmonique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Festivité mathématique du Xyriad.",
+      "Importance": "Secondaire",
+      "Origine": "De récursion (algorithme) et harmonique.",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "d38a873b-2bd5-41b1-8e0c-8ba50d842203"
+  },
+  {
+    "Nom": "Umcut",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Polyformes sessiles-mobiles d'apparence rat-tapir bipède à renaissance cyclique, 3 genres, 5 émergences.",
+      "Importance": "Majeur",
+      "Origine": "Terme inventé pour créature cyclique.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "d5e94323-4cdd-43c8-abc8-856bc78b957f"
+  },
+  {
+    "Nom": "Confluence Absente",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Point théorique mystique où les quatre éléments devraient rencontrer l'eau, recherché par les alchimistes d'Escelion mais demeurant introuvable.",
+      "Importance": "Secondaire",
+      "Origine": "De « confluence » (rencontre de cours d'eau) avec l'adjectif « absente », évoquant un lieu qui n'existe pas mais devrait exister.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "d8348f97-9a6c-4629-beaf-0796c7d32df5"
+  },
+  {
+    "Nom": "Tour Vash-Opték",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Structure 21km nord Œil Mirimance, Vortex umcut, lymph conductrice.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé (Vash + optique).",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "d84ea485-664f-4360-abe4-45b3b45d450c"
+  },
+  {
+    "Nom": "Ascension Itérative",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Route entre Désert des Échos et Puits céleste.",
+      "Importance": "Secondaire",
+      "Origine": "D'ascension avec itératif (répété/progressif).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "d91260a8-1a08-4c12-8482-059021386ba0"
+  },
+  {
+    "Nom": "Van'Doei",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Caste Douleur (2.2-2.8m), cendres-renaissance, Endurement, plaisir=douleur.",
+      "Importance": "Majeur",
+      "Origine": "De Doei pour une des quatre divisions primordiales.",
+      "Popularité": "Mondialement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "d976ed40-b264-4384-b4ae-77c2879c7706"
+  },
+  {
+    "Nom": "Nœuds d'Ymir",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Renflements périodiques le long des racines Hvergelmir qui concentrent le pouvoir d'absorption hydraulique, créant des zones d'attraction si puissantes qu'elles drainent les nappes souterraines sur plusieurs kilomètres.",
+      "Importance": "Modéré",
+      "Origine": "De la mythologie nordique « Ymir » (géant primordial), détourné pour désigner les points de concentration du système racinaire cosmique.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "dac63c27-91de-4cee-9f98-5bbfdec3addf"
+  },
+  {
+    "Nom": "Lumiomantique",
+    "values": {
+      "Catégorie": "Magie",
+      "Définition": "Communication des Qadul'Doei par la lumière émotionnelle.",
+      "Importance": "Modéré",
+      "Origine": "De lumière et -mancie (divination/manipulation).",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "db4c9ff3-f154-4426-a17b-aadafc05fd2e"
+  },
+  {
+    "Nom": "Veille",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Période d'activité générale sur Escelion, caractérisée par une luminosité accrue des Deimos et une sensation collective d'éveil. Équivalent d'un jour.",
+      "Importance": "Majeur",
+      "Origine": "Du français « veille » (action de rester éveillé), détourné pour désigner une unité de temps quotidienne.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "db54d40a-04a5-4411-b3f3-d05559179e16"
+  },
+  {
+    "Nom": "Océan de Ténèbres",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Résidu création monde, espace interstitiel, origine de l'Éthérée.",
+      "Importance": "Important",
+      "Origine": "D'océan de ténèbres pour chaos primordial.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "dc7ba324-a3b1-48de-8046-3916888b4300"
+  },
+  {
+    "Nom": "Fibres-kelmar",
+    "values": {
+      "Catégorie": "Artefact",
+      "Définition": "Fossiles semi-vivants de l'Œil de Mirimance, utilisés pour greffes symbiotiques.",
+      "Importance": "Modéré",
+      "Origine": "Kelmar est un titan mythique de l'univers.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "dce79268-10ff-4630-a77f-8ad878ecff98"
+  },
+  {
+    "Nom": "Presque-Êtres",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Potentialités abandonnées incarnées habitant l'Antichambre des Impossibles.",
+      "Importance": "Secondaire",
+      "Origine": "Expression philosophique désignant des entités à l'existence incomplète.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "dd175ece-5ad5-443e-a0b6-fda1d099317f"
+  },
+  {
+    "Nom": "Incident Miroir Brisé",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Événement 3198 AG créant Observautomatons.",
+      "Importance": "Secondaire",
+      "Origine": "D'incident avec miroir brisé (catastrophe visuelle).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "dd9c9224-774b-4d32-9bf6-fb7fd3b79fa8"
+  },
+  {
+    "Nom": "Tour Futurs Disparus",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cercle 6 Antichambre, Escelion jamais réalisés.",
+      "Importance": "Secondaire",
+      "Origine": "De tour avec futurs disparus (possibilités perdues).",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "de110f3c-1d8d-460e-8095-f0132c8c5fa9"
+  },
+  {
+    "Nom": "Hajar-za-Shamsi",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Chantier Plaines Exuvie, exuvie 320m, 600 ouvriers.",
+      "Importance": "Secondaire",
+      "Origine": "Calque arabe (pierre solaire).",
+      "Popularité": "Localement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "de96dfaa-f925-4101-b262-23263e82fbb7"
+  },
+  {
+    "Nom": "Sbires-Soif",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Créatures asservies du Désert des Échos Perdus liées à la soif de souvenirs ou d'eau.",
+      "Importance": "Secondaire",
+      "Origine": "Expression évoquant des serviteurs avides et assoiffés.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "ded0281b-5178-442d-bc22-9424242d7f33"
+  },
+  {
+    "Nom": "Dunes Foveales",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Sable vitrifié stratifié de l'Œil Mirimance.",
+      "Importance": "Secondaire",
+      "Origine": "De dune avec fovéal (centre rétine).",
+      "Popularité": "Localement"
+    },
+    "notion_page_id": "defda5b4-75fe-41fd-8edf-bfb1c2d6e153"
+  },
+  {
+    "Nom": "Kor",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Genre social Umcut : explorateurs et voyageurs (~20% de la population). Quittent les tours pour parcourir Escelion, accumulant savoirs et biens.",
+      "Importance": "Modéré"
+    },
+    "notion_page_id": "df2b295a-27b6-4239-8158-e46da12be7fd"
+  },
+  {
+    "Nom": "Fiach-Örtei",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Dette honorable reconnue dans le Barvasinkul.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion gaélique fiach (dette) et mongol örtei (précieux).",
+      "Popularité": "Communautaire",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "df31fb2f-9c97-4bec-a085-7111181b4bd8"
+  },
+  {
+    "Nom": "Nuée",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Ensemble des Souffles nécessaires au retour d'un état temporel identique, formant l'unité de mesure temporelle la plus longue communément admise. Équivalent d'une année (231 à 347 Veilles selon les régions).",
+      "Importance": "Majeur",
+      "Origine": "Du français « nuée » (grand amas, masse compacte), détourné pour évoquer l'accumulation des jours formant une année.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "e04022f2-20f9-4d5c-9770-045b9b1f79e6"
+  },
+  {
+    "Nom": "Cumulus-Tu",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Formations condensées de l'élément terre dans l'atmosphère, formations brunes gravifiques.",
+      "Importance": "Secondaire",
+      "Origine": "Du chinois « Tu » (terre) associé à « cumulus », suivant la nomenclature Wuji.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "e122ebd4-d08c-4911-82fc-aa5675f22e53"
+  },
+  {
+    "Nom": "Per-Ankh",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Maisons de Vie, ateliers-temples des Peseto où le savoir se transmet par lignées sur des siècles.",
+      "Importance": "Secondaire",
+      "Origine": "De l'égyptien ancien Per-Ankh (Maison de Vie), adapté pour les ateliers-temples de la Lisière.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "e1771425-17fe-46fc-ae64-e995a568bb81"
+  },
+  {
+    "Nom": "Kythara Chanteuse-de-Seuils",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur secondaire (342 AG), 340m, harmonies Machine-Sylvestre.",
+      "Importance": "Secondaire",
+      "Origine": "De cithare pour Rêveur musical des frontières.",
+      "Popularité": "Occulte",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "e2da2550-d14b-426c-8a11-38b706b533ae"
+  },
+  {
+    "Nom": "Taiji Élémentaire",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Principe selon lequel les vapeurs éthériques des quatre éléments se stratifient dans l'atmosphère et interagissent pour former des nuages élémentaires (Jin, Huo, Tu, Mu).",
+      "Importance": "Modéré",
+      "Origine": "Du taoïsme « Taiji » (unité suprême) avec l'ajout de l'adjectif « élémentaire » pour spécifier son application aux quatre éléments.",
+      "Popularité": "Régionalement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "e3d8a106-d206-48d9-a711-ce594e47fae6"
+  },
+  {
+    "Nom": "Tribu Manifold",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "100-300 mutants adaptatifs de l'Antichambre, perception synesthésique.",
+      "Importance": "Secondaire",
+      "Origine": "De manifold (mathématiques) pour mutations multiples.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "e4344573-b2dd-406f-9b9c-906b636ef747"
+  },
+  {
+    "Nom": "Nashîr",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Province du Désert, dunes spiralées.",
+      "Importance": "Secondaire",
+      "Origine": "Terme inventé à sonorité arabe.",
+      "Popularité": "Localement",
+      "Type": "Pure invention"
+    },
+    "notion_page_id": "e4b17130-edfb-4680-af45-3562ceb88b57"
+  },
+  {
+    "Nom": "Kut-skins",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Épidermes sensoriels réactifs du District 3 (Épidermes Réactifs).",
+      "Importance": "Modéré",
+      "Origine": "De Kut (chamanisme coréen) et skin (peau).",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "e6ac96ec-6862-4881-bbb8-eb8b6575ce6b"
+  },
+  {
+    "Nom": "Hypha-Routes",
+    "values": {
+      "Catégorie": "Technologie",
+      "Définition": "Réseau de communication biologique type internet à Hermogène.",
+      "Importance": "Modéré",
+      "Origine": "De hyphe (filament fongique) et routes.",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "e6e96102-5557-4114-9f63-b664e370bebf"
+  },
+  {
+    "Nom": "Marées Prophétiques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Phénomène légendaire où le cycle sablonneux révèle des artefacts avant les événements majeurs.",
+      "Importance": "Secondaire",
+      "Origine": "Expression évoquant des cycles naturels ayant un pouvoir divinatoire.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "e7462c56-9848-4da4-827a-06447cc57c59"
+  },
+  {
+    "Nom": "Corridors Pneumatiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Tranchées 200m creusées par Machine Pérégrine.",
+      "Importance": "Secondaire",
+      "Origine": "De corridor avec pneumatique (air comprimé).",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "e7e600b6-33f3-47ce-9138-48ff1503ae17"
+  },
+  {
+    "Nom": "Cycle de destruction",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Principe Ke des Wu Xing où chaque élément contrôle un autre (métal→bois→terre→eau→feu).",
+      "Importance": "Modéré",
+      "Origine": "Du chinois « Ke » (dominer), désignant le cycle de contrôle des cinq éléments.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "e8affdfc-eafe-4443-bea8-d3b4506dca5a"
+  },
+  {
+    "Nom": "Consolidation",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Deuxième Souffle de la Vieille Ville, période de stabilisation.",
+      "Importance": "Secondaire",
+      "Origine": "Du français « consolidation » (action de renforcer), désignant la saison de stabilité.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "e983ffda-4d1d-4559-9af3-8b37fbe4016b"
+  },
+  {
+    "Nom": "Siphonneurs mémoires",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Une des 27 Guildes, commerce souvenirs.",
+      "Importance": "Secondaire",
+      "Origine": "De siphonner avec mémoires.",
+      "Popularité": "Localement"
+    },
+    "notion_page_id": "eaad7f2b-7365-4366-894e-2590ca6faf85"
+  },
+  {
+    "Nom": "Kufa bila kuzikwa",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Concept de mourir sans être enterré (mort spirituellement incomplète).",
+      "Importance": "Secondaire",
+      "Origine": "Calque swahili littéral (mourir sans être enterré).",
+      "Popularité": "Communautaire",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "ead00edd-eff0-41d4-a04b-e7f9ad9f77cc"
+  },
+  {
+    "Nom": "Moribandons",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Chimères organico-synthétiques émergeant des décharges.",
+      "Importance": "Modéré",
+      "Origine": "De moribond (mourant) avec suffixe pour créature.",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "eaf11ef3-f152-4b48-a864-c78d23598ee7"
+  },
+  {
+    "Nom": "Frémissants",
+    "values": {
+      "Catégorie": "Race/Espèce",
+      "Définition": "Civilisation bio-cristalline disparue en 888 AG, communication quantique.",
+      "Importance": "Important",
+      "Origine": "De frémissant (vibrant) pour espèce à communication quantique.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ec3aa5db-1ffb-48d2-a7a2-10bc9e6e216a"
+  },
+  {
+    "Nom": "Collines Perceptuelles",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cercle 3 Antichambre, synesthésie totale.",
+      "Importance": "Secondaire",
+      "Origine": "De colline avec perceptuel (perception).",
+      "Popularité": "Occulte"
+    },
+    "notion_page_id": "ec440688-655f-418c-b79a-c8efd6b541b3"
+  },
+  {
+    "Nom": "Mycéliopolis",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Cité-champignon à architecture vivante dans les Forêts Corail.",
+      "Importance": "Modéré",
+      "Origine": "De mycélium et polis (cité grecque).",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "ee21984e-70aa-4ca6-bad6-a7e3458f8d77"
+  },
+  {
+    "Nom": "Caravansérails Stochastiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Habitats nomades du Désert suivant probabilités.",
+      "Importance": "Secondaire",
+      "Origine": "De caravansérail et stochastique (aléatoire).",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "ee36b3c5-5993-4336-b1b2-7be898993392"
+  },
+  {
+    "Nom": "Fruits Équationnels",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Production alimentaire du Xyriad Achromatique générée par résolution mathématique.",
+      "Importance": "Secondaire",
+      "Origine": "Fusion de « fruits » et « équationnel », évoquant des aliments mathématiques.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "ee5a4f42-99b9-426a-865e-6b90c7abefa2"
+  },
+  {
+    "Nom": "Entrelacs",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Doctrine des Murmurateurs : réseau de consciences interconnectées.",
+      "Importance": "Modéré",
+      "Origine": "D'entrelacs (entremêlement) détourné comme doctrine.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "eec7b1cd-eb6e-421a-88dc-a4e53a7ce522"
+  },
+  {
+    "Nom": "Nœuds Sixing",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Points de convergence des Rivières Pentagrammatiques où les quatre éléments interagissent sans se mélanger, créant des phénomènes énergétiques spectaculaires.",
+      "Importance": "Modéré",
+      "Origine": "De « Sixing » (四行, quatre phases), nommant les points de convergence du système élémentaire à quatre phases.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "eef1393d-e61a-43a3-aa1a-3ead862a59c1"
+  },
+  {
+    "Nom": "Appareillements",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rites de préparation à l'Endurement du Culte.",
+      "Importance": "Secondaire",
+      "Origine": "D'appareiller (préparer) détourné pour rite.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "ef39d402-3d7b-4ceb-91c6-9c274fb60c86"
+  },
+  {
+    "Nom": "Champignosquelettes",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Reconfigurateurs osseux-fongiques descendants des Frémissants.",
+      "Importance": "Modéré",
+      "Origine": "Fusion de champignon et squelette.",
+      "Popularité": "Localement",
+      "Type": "Mot-valise"
+    },
+    "notion_page_id": "f07306f3-773a-42b7-b15b-12d9bf663f2a"
+  },
+  {
+    "Nom": "Commerce Optique",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Système économique des Courtiers d'Observation (340K observations).",
+      "Importance": "Secondaire",
+      "Origine": "De commerce avec optique (vision).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "f180aadf-dec1-4317-8795-78e9e1332794"
+  },
+  {
+    "Nom": "Gouvernance Récursive",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Système mathématique auto-régulant du Xyriad.",
+      "Importance": "Modéré",
+      "Origine": "De récursif (qui se répète) pour gouvernement algorithmique.",
+      "Popularité": "Localement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "f4677852-f395-48e8-b6f5-34a6e6805774"
+  },
+  {
+    "Nom": "Ensevelie",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Entité mystérieuse des profondeurs liée à Akthar-Neth et autres Témoins.",
+      "Importance": "Important",
+      "Origine": "D'enseveli (enterré) personnifié comme entité.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "f4a37811-641a-4c21-b1e4-4b3c36b0af5f"
+  },
+  {
+    "Nom": "Mer Boueuse",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Un des quatre océans élémentaires d'Escelion, correspondant à l'élément terre. Étendue de fluide terreux concentré.",
+      "Importance": "Modéré",
+      "Origine": "De « mer » avec l'adjectif « boueuse », évoquant la nature terreuse et dense de ce corps élémentaire.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "f4d6b0d9-5360-4a0a-971c-b1f77943f6e4"
+  },
+  {
+    "Nom": "Dame Transitions",
+    "values": {
+      "Catégorie": "Créature",
+      "Définition": "Rêveur secondaire (624 AG) entre Forêts et Océan, 480m.",
+      "Importance": "Secondaire",
+      "Origine": "De transition pour Rêveur des passages.",
+      "Popularité": "Occulte",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "f5ae6cf7-32b3-448c-b0b6-d35f4ee585e8"
+  },
+  {
+    "Nom": "Plaines Exuvie",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Périphéries, ossuaire exuvies Deimos (50-840m), Machine Pérégrine, makumbusho.",
+      "Importance": "Important",
+      "Origine": "De plaine avec exuvie (mue d'insecte).",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "f620b95d-0c01-4708-9a53-1e306d44d85b"
+  },
+  {
+    "Nom": "Brouillignon",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Brume fongique des Forêts Corail qui implante des souvenirs parasites.",
+      "Importance": "Important",
+      "Origine": "De brouillard et brouillon (confusion).",
+      "Popularité": "Régionalement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "f62351f6-85da-4558-b553-aa21fd135c96"
+  },
+  {
+    "Nom": "Chambres d'Apédémak",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Espaces sacrés au sommet des Maisons-Pylônes où siègent les Kandaké et où s'effectue la réécriture somatique des règles définissant le corps.",
+      "Importance": "Modéré",
+      "Origine": "D'Apédémak (lion-dieu méroïtique), désignant les chambres de transformation ontologique.",
+      "Popularité": "Localement",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "f69e1f2e-3f07-4445-b29f-dd1eaf9d45a2"
+  },
+  {
+    "Nom": "Fosse Idoles déchues",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Périphéries, cratère statues, sol chair, obscurité totale.",
+      "Importance": "Secondaire",
+      "Origine": "De fosse avec idoles déchues (divinités tombées).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "f771a193-5589-41b3-833d-fad040d6b467"
+  },
+  {
+    "Nom": "Brumes-Huo",
+    "values": {
+      "Catégorie": "Autre",
+      "Définition": "Formations condensées de l'élément feu dans l'atmosphère, voiles pourpres incandescents.",
+      "Importance": "Secondaire",
+      "Origine": "Du chinois « Huo » (feu) associé à « brumes », suivant la nomenclature Wuji.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "f9687aee-babe-4aa1-af0d-6ba9932a7726"
+  },
+  {
+    "Nom": "Océan caché",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Réservoirs souterrains où s'accumule l'eau du cycle hvergique. Possèdent une membrane organo-minérale qui préserve la pureté de l'eau et régule sa distribution.",
+      "Importance": "Important",
+      "Origine": "Calque de la mythologie nordique « Ginnungagap » (abîme primordial), traduit littéralement pour évoquer les réservoirs souterrains.",
+      "Popularité": "Régionalement",
+      "Type": "Calque linguistique"
+    },
+    "notion_page_id": "f9faa09e-3684-4c80-b28c-491423cd950e"
+  },
+  {
+    "Nom": "Steppe des Éteignoirs",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Couronnes, réseau Éteignoirs pour IA rebelles, Silenciations, Kurgarrû, Pylône Zéro.",
+      "Importance": "Modéré",
+      "Origine": "De steppe avec éteignoir (exécution).",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "fa77b097-296e-4889-969c-ea1a840d85b9"
+  },
+  {
+    "Nom": "Peseto",
+    "values": {
+      "Catégorie": "Organisation",
+      "Définition": "Caste de prêtres-techniciens de la Lisière, liturgistes du réel dont chaque geste de maintenance est codifié en kharosthi. Forment la majorité de la population du district.",
+      "Importance": "Important",
+      "Origine": "Du méroïtique pesto (prêtre), détourné pour désigner les techniciens-liturgistes de la Lisière.",
+      "Popularité": "Localement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "fa96a7fe-d1a7-4a52-ac8e-21ca6fa11108"
+  },
+  {
+    "Nom": "Grande Convergence",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Événement de 888 AG : disparition de la civilisation Frémissante.",
+      "Importance": "Important",
+      "Origine": "De convergence (point de rencontre/fusion) pour cataclysme.",
+      "Popularité": "Régionalement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "fc1d72fa-f388-4e12-8fda-cfebc49974bc"
+  },
+  {
+    "Nom": "Rivières Pentagrammatiques",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Voies d'écoulement des quatre fluides élémentaires qui dessinent un pentagramme incomplet (le cinquième point étant l'élément eau absent), convergent parfois en Nœuds Wu.",
+      "Importance": "Modéré",
+      "Origine": "De « pentagramme » avec le suffixe « -atique » pour former un adjectif désignant les rivières suivant ces motifs géométriques.",
+      "Popularité": "Régionalement",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "fc9cff82-4339-4350-811b-171f5488433c"
+  },
+  {
+    "Nom": "Bassin d'Absence",
+    "values": {
+      "Catégorie": "Lieu",
+      "Définition": "Dépression géologique vide marquant l'emplacement de l'ancien océan unifié avant la Grande Bifurcation.",
+      "Importance": "Important",
+      "Origine": "Expression évoquant un vide ontologique, une absence fondamentale.",
+      "Popularité": "Occulte",
+      "Type": "Néologisme"
+    },
+    "notion_page_id": "fccc2a31-fb39-4015-ba83-a27c5b983ded"
+  },
+  {
+    "Nom": "Processions Reliques",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Rituels processionnels du Léviathan.",
+      "Importance": "Secondaire",
+      "Origine": "De procession avec reliques.",
+      "Popularité": "Communautaire",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "fce61fc0-41e1-48ee-99f0-2687c79ae65f"
+  },
+  {
+    "Nom": "Souffle",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Longue période disposant d'une relative constance climatique et écosystémique sur Escelion. Équivalent d'une saison.",
+      "Importance": "Majeur",
+      "Origine": "Du français « souffle » (respiration), détourné pour évoquer les cycles saisonniers comme des respirations du monde.",
+      "Popularité": "Mondialement",
+      "Type": "Emprunt détourné"
+    },
+    "notion_page_id": "fd21796e-243f-4732-bbba-48d713175890"
+  },
+  {
+    "Nom": "Marque vaideccanii",
+    "values": {
+      "Catégorie": "Concept",
+      "Définition": "Marquage corporel émotionnel des Vaideccans.",
+      "Importance": "Secondaire",
+      "Origine": "De Vaidecan avec suffixe latin -ii.",
+      "Popularité": "Communautaire",
+      "Type": "Dérivation sémantique"
+    },
+    "notion_page_id": "fe184205-44d2-4840-b5b6-3c1c94df3f96"
+  }
+]

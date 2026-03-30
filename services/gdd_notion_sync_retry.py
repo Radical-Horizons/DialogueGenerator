@@ -7,9 +7,22 @@ import time
 from dataclasses import dataclass
 from typing import Awaitable, Callable, Optional, TypeVar
 
+import httpx
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+
+def is_transient_notion_http_error(exc: BaseException) -> bool:
+    """True si l'exception vaut un retry (timeouts, réseau, HTTP transitoires Notion)."""
+    if isinstance(exc, httpx.TimeoutException):
+        return True
+    if isinstance(exc, httpx.ConnectError):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code in (429, 500, 502, 503, 504)
+    return False
 
 
 @dataclass

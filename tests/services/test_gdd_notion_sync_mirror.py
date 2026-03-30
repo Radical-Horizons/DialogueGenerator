@@ -8,8 +8,11 @@ from services.gdd_notion_sync_mirror import (
     archive_gdd_snapshot_if_delta,
     collect_sync_targets,
     gdd_live_matches_snapshot_dir,
+    is_transient_partial_error_line,
+    iter_blocking_partial_errors,
     list_gdd_archives,
     partial_errors_block_mirror_promote,
+    partial_errors_should_preserve_mirror_staging,
     prune_archives,
     resolve_archive_dir,
     restore_gdd_from_archive,
@@ -41,6 +44,44 @@ def test_partial_errors_block_mirror_promote_empty_ok() -> None:
     assert partial_errors_block_mirror_promote([]) is False
 
 
+def test_iter_blocking_partial_errors_matches_promote_rules() -> None:
+    p = [
+        "a.json: fetch — timeout",
+        "hint: no block",
+        "b.json page x: 502",
+    ]
+    b = iter_blocking_partial_errors(p)
+    assert len(b) == 2
+    assert "fetch" in b[0]
+    assert "502" in b[1]
+
+
+def test_is_transient_partial_error_line_detects_502_message() -> None:
+    assert is_transient_partial_error_line(
+        "Table.json page cbcd: Server error '502 Bad Gateway' for url"
+    )
+
+
+def test_partial_errors_should_preserve_mirror_staging_transient_only() -> None:
+    partial = [
+        "x.json page abc: Server error '502 Bad Gateway' for url 'https://api.notion.com'",
+    ]
+    assert partial_errors_should_preserve_mirror_staging(partial) is True
+
+
+def test_partial_errors_should_preserve_false_on_non_transient_page_error() -> None:
+    partial = ["x.json page abc: simulated fetch failure"]
+    assert partial_errors_should_preserve_mirror_staging(partial) is False
+
+
+def test_partial_errors_should_preserve_false_on_mixed_errors() -> None:
+    partial = [
+        "x.json page a: 502",
+        "y.json page b: permission denied",
+    ]
+    assert partial_errors_should_preserve_mirror_staging(partial) is False
+
+
 def test_collect_sync_targets_shard_and_file(tmp_path: Path) -> None:
     root = tmp_path / "gdd"
     root.mkdir()
@@ -64,14 +105,51 @@ def test_prune_archives_keeps_newest(tmp_path: Path) -> None:
     assert "20250101" in next(iter(sub))
 
 
-def test_list_gdd_archives_skips_junk_and_sorts(tmp_path: Path) -> None:
+def test_list_gdd_archives_skips_junk_and_empty_snapshots(tmp_path: Path) -> None:
     gdd = tmp_path / "gdd"
     arch = gdd / ".archive"
     (arch / "not-a-valid-name").mkdir(parents=True)
     (arch / "20260201T000000Z_aaaaaaaa").mkdir()
     (arch / "20260202T000000Z_bbbbbbbb").mkdir()
     rows = list_gdd_archives(gdd, limit=10)
+    assert rows == []
+
+
+def test_list_gdd_archives_sorts_nonempty_and_skips_empty(tmp_path: Path) -> None:
+    gdd = tmp_path / "gdd"
+    arch = gdd / ".archive"
+    empty_new = arch / "20260203T000000Z_cccccccc"
+    empty_new.mkdir(parents=True)
+    old = arch / "20260201T000000Z_aaaaaaaa"
+    old.mkdir()
+    (old / "one.json").write_text('{"Nom":"A"}', encoding="utf-8")
+    newer = arch / "20260202T000000Z_bbbbbbbb"
+    newer.mkdir()
+    (newer / "two.json").write_text('{"Nom":"B"}', encoding="utf-8")
+    rows = list_gdd_archives(gdd, limit=10)
     assert [r.id for r in rows] == ["20260202T000000Z_bbbbbbbb", "20260201T000000Z_aaaaaaaa"]
+    assert rows[0].fiche_count == 1
+
+
+def test_list_gdd_archives_reports_size_and_fiche_counts(tmp_path: Path) -> None:
+    gdd = tmp_path / "gdd"
+    snap = gdd / ".archive" / "20260203T120000Z_cccccccc"
+    snap.mkdir(parents=True)
+    (snap / "note.txt").write_text("hello", encoding="utf-8")
+    pd = snap / "personnages"
+    pd.mkdir()
+    (pd / "a.json").write_text('{"Nom":"A"}', encoding="utf-8")
+    (pd / "b.json").write_text('{"Nom":"B"}', encoding="utf-8")
+    (snap / "lieux.json").write_text(
+        '{"lieux": [{"Nom": "L1"}, {"Nom": "L2"}]}',
+        encoding="utf-8",
+    )
+    rows = list_gdd_archives(gdd, limit=5)
+    assert len(rows) == 1
+    r = rows[0]
+    assert r.id == "20260203T120000Z_cccccccc"
+    assert r.size_bytes > 0
+    assert r.fiche_count == 4
 
 
 def test_resolve_archive_dir_rejects_invalid(tmp_path: Path) -> None:

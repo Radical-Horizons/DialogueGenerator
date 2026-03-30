@@ -2,10 +2,22 @@
 import json
 from pathlib import Path
 
+import httpx
 import pytest
 
+from services.gdd_notion_full_sync_checkpoint import checkpoint_json_path
 from services.gdd_notion_sync_config_store import GddNotionSyncConfigStore
 from services.gdd_notion_sync_service import GddNotionSyncService
+
+
+def _http_status_error(status: int) -> httpx.HTTPStatusError:
+    req = httpx.Request("GET", "https://api.notion.com/v1/x")
+    resp = httpx.Response(status, request=req)
+    return httpx.HTTPStatusError("err", request=req, response=resp)
+
+
+async def _instant_backoff_sleep(_self: object, _attempt_index: int) -> None:
+    return None
 
 
 @pytest.mark.asyncio
@@ -526,6 +538,152 @@ async def test_run_sync_mirror_rebuild_rollback_on_fetch_error(tmp_path: Path) -
     assert res.success is False
     assert res.mirror_rebuild_used
     assert orphan_path.is_file()
+    staging_root = gdd_dir / ".staging"
+    assert not staging_root.is_dir() or next(staging_root.iterdir(), None) is None
+
+
+@pytest.mark.asyncio
+async def test_run_sync_mirror_retries_transient_502_on_page_content(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """502 transitoires sur get_page_content : retries puis succès et promotion miroir."""
+    monkeypatch.setattr(
+        "services.gdd_notion_sync_retry.SyncBackoffPolicy.sleep_before_retry",
+        _instant_backoff_sleep,
+    )
+    pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+
+    class FlakyContentClient:
+        _n = 0
+
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-04-01T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "Héros"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            FlakyContentClient._n += 1
+            if FlakyContentClient._n < 3:
+                raise _http_status_error(502)
+            return "Corps."
+
+        async def query_database(self, database_id: str) -> list:
+            return []
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "mirror_rebuild_on_full_sync": True,
+            "archive_retention_count": 10,
+            "sources": [
+                {
+                    "kind": "page",
+                    "notion_id": pid,
+                    "category_file": "Personnages.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FlakyContentClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="mirror-retry-ok")
+    assert res.success
+    assert FlakyContentClient._n == 3
+    assert (gdd_dir / "personnages" / f"{pid}.json").is_file()
+
+
+@pytest.mark.asyncio
+async def test_run_sync_mirror_preserves_staging_on_persistent_502(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """502 après épuisement des retries : staging + checkpoint conservés (reprise)."""
+    monkeypatch.setattr(
+        "services.gdd_notion_sync_retry.SyncBackoffPolicy.sleep_before_retry",
+        _instant_backoff_sleep,
+    )
+    pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+
+    class Always502ContentClient:
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-04-01T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "Héros"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            raise _http_status_error(502)
+
+        async def query_database(self, database_id: str) -> list:
+            return []
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "mirror_rebuild_on_full_sync": True,
+            "archive_retention_count": 10,
+            "sources": [
+                {
+                    "kind": "page",
+                    "notion_id": pid,
+                    "category_file": "Personnages.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    status_path = tmp_path / "status.json"
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=status_path,
+        client_factory=lambda _k: Always502ContentClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="mirror-preserve-502")
+    assert res.success is False
+    assert "Reprise possible" in res.message
+    assert res.partial_errors
+    staging_root = gdd_dir / ".staging"
+    assert staging_root.is_dir()
+    assert any(staging_root.iterdir())
+    assert checkpoint_json_path(status_path.parent).is_file()
 
 
 @pytest.mark.asyncio

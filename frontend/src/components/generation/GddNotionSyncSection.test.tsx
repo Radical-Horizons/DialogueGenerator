@@ -163,7 +163,7 @@ describe('GddNotionSyncSection', () => {
       partial_errors: [],
     })
     render(<GddNotionSyncSection />)
-    expect(await screen.findByText(/Sync complète interrompue/i)).toBeInTheDocument()
+    expect(await screen.findByText(/onglet fermé/i)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Reprendre la sync/i }))
     await waitFor(() => {
       expect(mockPostSync).toHaveBeenCalledWith(true, { resume: true })
@@ -177,6 +177,8 @@ describe('GddNotionSyncSection', () => {
         {
           id: '20260101T120000Z_a1b2c3d4',
           created_at: '2026-01-01T12:00:00Z',
+          size_bytes: 12_345,
+          fiche_count: 42,
         },
       ],
     })

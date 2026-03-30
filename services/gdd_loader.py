@@ -282,10 +282,14 @@ class GDDLoader:
     
     def load_category(self, category_name: str) -> Optional[Any]:
         """Charge une catégorie spécifique de fichiers GDD.
-        
+
+        Pour les catégories en liste, la forme attendue à terme est un répertoire de shards
+        (``<catégorie>/*.json``). Le chargement depuis un monolithe ``<catégorie>.json`` est
+        conservé temporairement pour compatibilité (anciens exports, transition).
+
         Args:
             category_name: Nom de la catégorie (ex: "personnages", "lieux").
-            
+
         Returns:
             Données chargées (liste ou dict selon la catégorie), ou liste vide/dict vide si erreur.
         """
@@ -337,6 +341,7 @@ class GDDLoader:
                         gdd_cache.set(composite_cache_key, aggregated, shard_dir)
                     return aggregated
 
+        # Compat temporaire : monolithe à la racine (ex. personnages.json) — retirer quand plus aucun flux ne l’utilise.
         file_path = self._resolve_category_json_path(category_name)
         if file_path is None:
             logger.debug(
