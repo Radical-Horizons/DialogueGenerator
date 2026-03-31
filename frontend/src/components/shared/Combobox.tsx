@@ -216,16 +216,16 @@ export function Combobox({
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         style={{
-          padding: '0.5rem',
+          padding: '0.55rem 0.65rem',
           border: `1px solid ${theme.input.border}`,
-          borderRadius: '4px',
+          borderRadius: '6px',
           backgroundColor: disabled ? theme.background.secondary : theme.input.background,
           color: theme.input.color,
           cursor: disabled ? 'not-allowed' : 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          minHeight: '36px',
+          minHeight: '38px',
         }}
       >
         {isOpen ? (

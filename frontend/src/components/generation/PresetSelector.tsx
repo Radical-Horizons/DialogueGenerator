@@ -235,16 +235,17 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           disabled={!currentConfiguration && !getCurrentConfiguration}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: theme.button.primary.background,
-            border: 'none',
-            borderRadius: '4px',
-            color: 'white',
+            backgroundColor: theme.button.default.background,
+            border: `1px solid ${theme.border.secondary}`,
+            borderRadius: '6px',
+            color: theme.button.default.color,
+            fontWeight: 600,
             cursor: currentConfiguration || getCurrentConfiguration ? 'pointer' : 'not-allowed',
             opacity: currentConfiguration || getCurrentConfiguration ? 1 : 0.5,
             whiteSpace: 'nowrap',
           }}
         >
-          💾 Sauvegarder
+          Sauvegarder preset
         </button>
 
         {/* Indicateur de statut de sauvegarde */}

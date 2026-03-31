@@ -1,7 +1,7 @@
 """Service pour gérer les relations et liens entre éléments GDD."""
 import logging
 import re
-from typing import Dict, List, Optional, Set, TYPE_CHECKING
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from services.element_repository import ElementRepository
@@ -165,6 +165,40 @@ class ElementLinker:
                 linked_found.add(pname)
         return linked_found
     
+    @staticmethod
+    def _sections_narrative_text(entity: Optional[Dict]) -> str:
+        """Concatène les champs texte sous ``sections`` (fiches shard / export Notion)."""
+        if not isinstance(entity, dict):
+            return ""
+        sections = entity.get("sections")
+        if not isinstance(sections, dict):
+            return ""
+        chunks: List[str] = []
+        for _key, val in sorted(sections.items(), key=lambda kv: str(kv[0])):
+            if isinstance(val, str) and val.strip():
+                chunks.append(val)
+        return "\n\n".join(chunks)
+
+    def _merge_mentions_from_narrative(
+        self,
+        narrative: str,
+        linked_elements: Dict[str, Set[str]],
+        name_bundles: Tuple[Tuple[str, List[str]], ...],
+    ) -> None:
+        """Détecte des noms GDD connus dans un bloc narratif (même heuristique que Relations)."""
+        if not narrative or not isinstance(narrative, str):
+            return
+        pairs: List[Tuple[str, str]] = []
+        for category, names in name_bundles:
+            for raw in names:
+                name = str(raw).strip()
+                if name:
+                    pairs.append((name, category))
+        pairs.sort(key=lambda x: len(x[0]), reverse=True)
+        for name, category in pairs:
+            if re.search(r"\b" + re.escape(name) + r"\b", narrative):
+                linked_elements[category].add(name)
+
     def find_related_names_in_text(self, text: str, known_character_names: List[str]) -> Set[str]:
         """Trouve les noms de personnages mentionnés dans un texte.
         
@@ -216,7 +250,16 @@ class ElementLinker:
         all_species_names = self._element_resolver.get_names("species")
         all_comm_names = self._element_resolver.get_names("communities")
         all_quest_names = self._element_resolver.get_names("quests")
-        
+
+        name_bundles: Tuple[Tuple[str, List[str]], ...] = (
+            ("characters", all_char_names),
+            ("locations", all_loc_names),
+            ("items", all_item_names),
+            ("species", all_species_names),
+            ("communities", all_comm_names),
+            ("quests", all_quest_names),
+        )
+
         # Traiter le personnage
         if character_name:
             char_details = self._element_resolver.get_by_name("characters", character_name)
@@ -246,7 +289,11 @@ class ElementLinker:
                     for word_or_phrase in self.find_related_names_in_text(relations_text, all_char_names):
                         if word_or_phrase != character_name:
                             linked_elements["characters"].add(word_or_phrase)
-        
+
+                narrative = self._sections_narrative_text(char_details)
+                if narrative:
+                    self._merge_mentions_from_narrative(narrative, linked_elements, name_bundles)
+
         # Traiter les lieux
         if location_names:
             for loc_name in location_names:
@@ -267,7 +314,11 @@ class ElementLinker:
                     linked_elements["locations"].update(
                         self.extract_linked_names(loc_details.get("Contenu par"), all_loc_names)
                     )
-        
+
+                    loc_narrative = self._sections_narrative_text(loc_details)
+                    if loc_narrative:
+                        self._merge_mentions_from_narrative(loc_narrative, linked_elements, name_bundles)
+
         # Exclure les éléments sources
         if character_name:
             linked_elements["characters"].discard(character_name)

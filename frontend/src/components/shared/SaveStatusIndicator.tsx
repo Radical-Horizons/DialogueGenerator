@@ -13,6 +13,11 @@ export interface SaveStatusIndicatorProps {
   status: SaveStatus
   lastSavedAt?: number | null // Timestamp ms (Task 3 - Story 0.5)
   variant?: 'draft' | 'disk' // Optionnel, pour wording si besoin (Task 3 - Story 0.5)
+  /**
+   * dot = pastille colorée seule (compact) ;
+   * discreet = texte discret type « Sauvegardé ✓ » (barres d’outils modernes).
+   */
+  appearance?: 'dot' | 'discreet'
   errorMessage?: string | null // Message d'erreur optionnel (Task 3 - Story 0.5)
   style?: React.CSSProperties
   /** ADR-006: dernier seq reconnu par le serveur → "Synced (seq …)" */
@@ -28,6 +33,14 @@ const STATUS_CONFIG: Record<SaveStatus, { label: string; color: string }> = {
   saving: { label: 'Sauvegarde…', color: theme.state.info.color },
   unsaved: { label: 'En attente', color: theme.state.warning.color },
   error: { label: 'Erreur', color: theme.state.error.color },
+}
+
+/** Libellés brouillon local (discreet) — évite la confusion avec la sauvegarde fichier dialogue. */
+const DISCREET_DRAFT_LABELS: Record<SaveStatus, string> = {
+  saved: 'Brouillon sauvegardé',
+  saving: 'Sauvegarde du brouillon…',
+  unsaved: 'Modifications non enregistrées',
+  error: 'Erreur brouillon',
 }
 
 // Helper pour formater le temps relatif (Task 3 - Story 0.5)
@@ -49,6 +62,7 @@ export function SaveStatusIndicator({
   status,
   lastSavedAt,
   errorMessage,
+  appearance = 'dot',
   style,
   ackSeq,
   pendingCount = 0,
@@ -82,7 +96,46 @@ export function SaveStatusIndicator({
     label = `${config.label} ${relativeTime}`
   }
 
+  let discreetLine = label
+  if (appearance === 'discreet' && !syncStatusDisplay) {
+    const base = DISCREET_DRAFT_LABELS[status]
+    discreetLine =
+      status === 'saved' && relativeTime ? `${base} · ${relativeTime}` : base
+    if (status === 'saved') {
+      discreetLine = `${discreetLine} ✓`
+    }
+  }
+
   const tooltipText = status === 'error' && errorMessage ? errorMessage : label
+
+  if (appearance === 'discreet') {
+    const textColor =
+      status === 'error'
+        ? theme.state.error.color
+        : status === 'unsaved'
+          ? theme.text.secondary
+          : status === 'saving'
+            ? theme.state.info.color
+            : theme.text.tertiary
+    return (
+      <span
+        style={{
+          fontSize: '0.78rem',
+          fontWeight: 500,
+          color: textColor,
+          letterSpacing: '0.01em',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          maxWidth: 'min(220px, 42vw)',
+          ...style,
+        }}
+        title={tooltipText}
+      >
+        {syncStatusDisplay ? label : discreetLine}
+      </span>
+    )
+  }
 
   return (
     <div

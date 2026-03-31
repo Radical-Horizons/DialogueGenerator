@@ -465,18 +465,30 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
       {/* Barre d'onglets avec overflow dynamique */}
       <div
         ref={tabBarRef}
-        style={{ flexShrink: 0, display: 'flex', borderBottom: `1px solid ${theme.border.primary}`, position: 'relative' }}
+        style={{
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'stretch',
+          gap: '0.2rem',
+          padding: '4px 6px 2px',
+          borderBottom: `1px solid ${theme.border.primary}`,
+          position: 'relative',
+          boxSizing: 'border-box',
+        }}
       >
         {/* Onglets visibles */}
         {TAB_DEFS.slice(0, visibleTabCount).map(({ key, label }) => (
           <button
             key={key}
+            type="button"
+            className="context-gdd-tab"
             onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null, null) }}
             style={{
               flex: 1,
-              padding: '0.75rem 0.4rem',
+              padding: '0.42rem 0.35rem',
               border: 'none',
-              borderBottom: activeTab === key ? `2px solid ${theme.button.primary.background}` : 'none',
+              borderRadius: '6px',
+              borderBottom: activeTab === key ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
               backgroundColor: activeTab === key ? theme.background.tertiary : 'transparent',
               color: theme.text.primary,
               cursor: 'pointer',
@@ -486,6 +498,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               minWidth: 0,
+              boxSizing: 'border-box',
             }}
           >
             {label}
@@ -499,20 +512,24 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           return (
             <div ref={overflowMenuRef} style={{ position: 'relative', flexShrink: 0 }}>
               <button
+                type="button"
+                className="context-gdd-tab"
                 data-testid="btn-overflow-tabs"
                 aria-label="Plus d'onglets"
                 aria-expanded={showOverflowMenu}
                 onClick={() => setShowOverflowMenu(v => !v)}
                 style={{
-                  padding: '0.75rem 0.5rem',
+                  padding: '0.42rem 0.45rem',
                   border: 'none',
-                  borderBottom: overflowHasActive ? `2px solid ${theme.button.primary.background}` : 'none',
+                  borderRadius: '6px',
+                  borderBottom: overflowHasActive ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
                   backgroundColor: overflowHasActive ? theme.background.tertiary : 'transparent',
                   color: theme.text.primary,
                   cursor: 'pointer',
                   fontWeight: overflowHasActive ? 'bold' : 'normal',
                   fontSize: '0.85rem',
                   whiteSpace: 'nowrap',
+                  boxSizing: 'border-box',
                 }}
               >
                 ▾ {overflowTabs.length}
@@ -562,6 +579,8 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
 
         {/* Bouton Règles (Story 3.4) — toujours visible */}
         <button
+          type="button"
+          className="context-gdd-tab"
           data-testid="btn-toggle-rules"
           aria-label="Règles de sélection"
           aria-pressed={showRulesEditor}
@@ -569,13 +588,15 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           title="Règles de sélection de contexte"
           style={{
             flexShrink: 0,
-            padding: '0.75rem 0.5rem',
+            padding: '0.42rem 0.45rem',
             border: 'none',
-            borderBottom: showRulesEditor ? `2px solid ${theme.button.primary.background}` : 'none',
+            borderRadius: '6px',
+            borderBottom: showRulesEditor ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
             backgroundColor: showRulesEditor ? theme.background.tertiary : 'transparent',
             color: theme.text.primary,
             cursor: 'pointer',
             fontSize: '1rem',
+            boxSizing: 'border-box',
           }}
         >
           ⚙

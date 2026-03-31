@@ -91,12 +91,14 @@ describe('Dashboard', () => {
 
     mockUseGenerationActionsStore.mockReturnValue({
       actions: {
-        handleGenerate: undefined,
-        handlePreview: undefined,
-        handleExportUnity: undefined,
-        handleReset: undefined,
+        handleGenerate: null,
+        handlePreview: null,
+        handleExportUnity: null,
+        handleReset: null,
         isLoading: false,
         isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
       },
     } as ReturnType<typeof useGenerationActionsStore>)
   })
@@ -194,6 +196,8 @@ describe('Dashboard', () => {
         handleReset: vi.fn(),
         isLoading: false,
         isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
       },
     } as ReturnType<typeof useGenerationActionsStore>)
 
@@ -209,7 +213,7 @@ describe('Dashboard', () => {
     })
   })
 
-  it('affiche l\'indicateur de brouillon non sauvegardé', async () => {
+  it('affiche le statut brouillon discret quand le brouillon n’est pas synchronisé', async () => {
     mockUseGenerationActionsStore.mockReturnValue({
       actions: {
         handleGenerate: vi.fn(),
@@ -218,6 +222,8 @@ describe('Dashboard', () => {
         handleReset: vi.fn(),
         isLoading: false,
         isDirty: true,
+        saveStatus: 'unsaved',
+        draftLastSavedAt: null,
       },
     } as ReturnType<typeof useGenerationActionsStore>)
 
@@ -228,7 +234,7 @@ describe('Dashboard', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/brouillon non sauvegardé/i)).toBeInTheDocument()
+      expect(screen.getByText(/modifications non enregistrées/i)).toBeInTheDocument()
     })
   })
 

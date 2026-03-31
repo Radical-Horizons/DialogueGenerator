@@ -10,6 +10,7 @@ import { UnityDialogueEditor, type UnityDialogueEditorHandle } from '../generati
 import { ReasoningTraceViewer } from '../generation/ReasoningTraceViewer'
 import { ContextDetail } from '../context/ContextDetail'
 import { ResizablePanels, type ResizablePanelsRef } from '../shared/ResizablePanels'
+import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { Tabs, type Tab } from '../shared/Tabs'
 import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
 import { UnityDialogueDetails } from '../unityDialogues/UnityDialogueDetails'
@@ -553,7 +554,7 @@ export function Dashboard() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.secondary,
           height: '100%',
           minHeight: 0,
           position: 'relative',
@@ -624,11 +625,12 @@ export function Dashboard() {
             ariaLabel="Déplier le panneau droit"
           />
         )}
-        <Tabs
-          tabs={[
-            {
-              id: 'generation',
-              label: 'Génération de Dialogues',
+          <Tabs
+            variant="segmented"
+            tabs={[
+              {
+                id: 'generation',
+              label: '💬 Génération de Dialogues',
               content: (
                 <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                   <GenerationPanel />
@@ -637,7 +639,7 @@ export function Dashboard() {
             },
             {
               id: 'edition',
-              label: 'Édition de Dialogues',
+              label: '✏️ Édition de Dialogues',
               content: (
                 <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
                   <div
@@ -701,7 +703,7 @@ export function Dashboard() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.secondary,
           height: '100%',
           minHeight: 0,
           maxHeight: '100%',
@@ -724,6 +726,8 @@ export function Dashboard() {
             justifyContent: 'space-between',
             gap: '0.5rem',
             flexShrink: 0,
+            minHeight: 40,
+            boxSizing: 'border-box',
           }}
         >
           <PanelCollapseButton
@@ -733,34 +737,29 @@ export function Dashboard() {
             onClick={toggleRightPanel}
             ariaLabel="Replier le panneau droit"
           />
-          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: theme.text.primary }}>
-            Détails
-          </div>
-        </div>
-        {/* Indicateur de brouillon non sauvegardé */}
-        {actions.handleGenerate && actions.isDirty && (
           <div
             style={{
-              padding: '0.5rem',
-              borderBottom: `1px solid ${theme.border.primary}`,
-              backgroundColor: theme.background.panelHeader,
-              display: 'flex',
-              alignItems: 'center',
-              flexShrink: 0,
-              boxSizing: 'border-box',
+              flex: 1,
+              minWidth: 0,
+              textAlign: 'center',
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              color: theme.text.primary,
             }}
           >
-            <div
-              style={{
-                fontSize: '0.85rem',
-                color: theme.state.info.color,
-                fontStyle: 'italic',
-              }}
-            >
-              ● Brouillon non sauvegardé
-            </div>
+            Détails
           </div>
-        )}
+          {actions.handleGenerate ? (
+            <SaveStatusIndicator
+              appearance="discreet"
+              status={actions.saveStatus}
+              lastSavedAt={actions.draftLastSavedAt}
+              style={{ flexShrink: 0, maxWidth: 'min(200px, 38vw)' }}
+            />
+          ) : (
+            <span style={{ width: 'min(200px, 38vw)', flexShrink: 0 }} aria-hidden />
+          )}
+        </div>
         {/* Zone de contenu avec scroll (prend l'espace restant, mais laisse toujours de la place pour le bouton) */}
         <div
           style={{
@@ -773,6 +772,7 @@ export function Dashboard() {
           }}
         >
           <Tabs
+            variant="segmented"
             tabs={visibleRightPanelTabs}
             activeTabId={effectiveRightPanelTab}
             onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
@@ -860,9 +860,9 @@ export function Dashboard() {
                   disabled={!unityDialogueEditorRef.current?.isValid || unityDialogueEditorRef.current?.isSaving || actions.isLoading || isGraphGenerating}
                   style={{
                     flex: 1,
-                    padding: '0.875rem 1rem',
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
+                    padding: '0.65rem 1rem',
+                    fontSize: '1rem',
+                    fontWeight: 700,
                     backgroundColor: theme.button.primary.background,
                     color: theme.button.primary.color,
                     border: 'none',
@@ -883,8 +883,8 @@ export function Dashboard() {
                   onClick={actions.handleGenerate}
                   disabled={actions.isLoading || isGraphGenerating}
                   style={{
-                    padding: '0.875rem',
-                    fontSize: '1.1rem',
+                    padding: '0.65rem',
+                    fontSize: '1rem',
                     backgroundColor: theme.button.default.background,
                     color: theme.button.default.color,
                     border: `1px solid ${theme.border.primary}`,
@@ -894,8 +894,8 @@ export function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '48px',
-                    height: '48px',
+                    width: '44px',
+                    height: '44px',
                     transition: 'all 0.2s',
                     boxSizing: 'border-box',
                   }}

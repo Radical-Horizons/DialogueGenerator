@@ -8,6 +8,10 @@ import { SaveStatusIndicator } from '../components/shared/SaveStatusIndicator'
 // Mock le theme
 vi.mock('../theme', () => ({
   theme: {
+    text: {
+      secondary: 'rgba(255,255,255,0.75)',
+      tertiary: 'rgba(255,255,255,0.55)',
+    },
     state: {
       success: { color: '#28a745' },
       info: { color: '#17a2b8' },
@@ -45,6 +49,18 @@ describe('SaveStatusIndicator', () => {
     it('should display "Erreur" when status is error', () => {
       render(<SaveStatusIndicator status="error" />)
       expect(screen.getByTitle('Erreur')).toBeInTheDocument()
+    })
+
+    it('discreet affiche le libellé brouillon pour saved', () => {
+      const now = Date.now()
+      render(<SaveStatusIndicator appearance="discreet" status="saved" lastSavedAt={now} />)
+      expect(screen.getByText(/brouillon sauvegardé/i)).toBeInTheDocument()
+      expect(screen.getByText(/✓/)).toBeInTheDocument()
+    })
+
+    it('discreet affiche les modifications en attente pour unsaved', () => {
+      render(<SaveStatusIndicator appearance="discreet" status="unsaved" />)
+      expect(screen.getByText(/modifications non enregistrées/i)).toBeInTheDocument()
     })
   })
 

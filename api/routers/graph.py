@@ -125,7 +125,10 @@ def _resolve_model_and_provider(
 
 
 def _batch_count_from_request(request_data: EstimateCostRequest) -> int:
-    """Nombre de nœuds à estimer (1 si single, N si generate_all_choices)."""
+    """Nombre de nœuds à estimer (1 si single, N si generate_all_choices).
+
+    Chaque choix avec test non vide génère 4 nœuds (issues de test) ; les autres 1.
+    """
     if not request_data.generate_all_choices:
         return 1
     choices = request_data.parent_node_content.get("choices", [])
@@ -133,7 +136,9 @@ def _batch_count_from_request(request_data: EstimateCostRequest) -> int:
     for c in choices:
         target = c.get("targetNode")
         if not target or target == "END":
-            count += 1
+            tv = c.get("test")
+            has_test = tv is not None and (not isinstance(tv, str) or str(tv).strip())
+            count += 4 if has_test else 1
     return max(1, count)
 
 

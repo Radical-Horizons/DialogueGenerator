@@ -103,10 +103,12 @@ function AccordionSection({
     <div
       style={{
         border: `1px solid ${theme.border.primary}`,
-        borderRadius: '4px',
-        marginBottom: level > 0 ? '0.75rem' : '0.5rem',
+        borderRadius: '10px',
+        marginBottom: level > 0 ? '0.75rem' : '0.65rem',
         marginLeft: level > 0 ? `${level * 0.75}rem` : '0',
         overflow: 'hidden',
+        boxShadow: theme.shadow.card,
+        backgroundColor: theme.background.tertiary,
       }}
     >
       <button
@@ -115,7 +117,7 @@ function AccordionSection({
         style={{
           width: '100%',
           padding: '0.75rem 1rem',
-          backgroundColor: isExpanded ? theme.background.secondary : theme.background.panel,
+          backgroundColor: isExpanded ? theme.background.secondary : theme.background.tertiary,
           border: 'none',
           borderBottom: isExpanded ? `1px solid ${theme.border.primary}` : 'none',
           color: theme.text.primary,
@@ -135,7 +137,7 @@ function AccordionSection({
         }}
         onMouseLeave={(e) => {
           if (!isExpanded) {
-            e.currentTarget.style.backgroundColor = theme.background.panel
+            e.currentTarget.style.backgroundColor = theme.background.tertiary
           }
         }}
       >

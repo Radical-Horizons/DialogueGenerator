@@ -313,8 +313,10 @@ export function GenerationPanel() {
       handleReset: handlersRef.current.handleReset,
       isLoading,
       isDirty: draft.isDirty,
+      saveStatus: draft.saveStatus,
+      draftLastSavedAt: draft.draftLastSavedAt,
     })
-  }, [isLoading, draft.isDirty, setActions])
+  }, [isLoading, draft.isDirty, draft.saveStatus, draft.draftLastSavedAt, setActions])
   
   // Initialiser le store au montage
   useEffect(() => {
@@ -325,6 +327,8 @@ export function GenerationPanel() {
       handleReset: handlersRef.current.handleReset,
       isLoading,
       isDirty: draft.isDirty,
+      saveStatus: draft.saveStatus,
+      draftLastSavedAt: draft.draftLastSavedAt,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Exécuter une seule fois au montage

@@ -277,6 +277,12 @@ export const createGenerationSlice: StateCreator<
             nodesToAdd.push({ node, choiceIndex: nodesToAdd.length })
           }
         }
+      } else if (isBatch && generatedNodes.length > 0) {
+        // Batch API : inclure tous les nœuds (choix avec test = 4 nœuds + connexions test-*).
+        nodesToAdd = generatedNodes.map((node, index) => ({
+          node,
+          choiceIndex: index,
+        }))
       } else {
         const sortedConnections = Array.from(connectionMap.entries())
           .filter(([key]) => typeof key === 'number')
@@ -414,7 +420,11 @@ export const createGenerationSlice: StateCreator<
             choiceIndex: targetChoiceIndex,
             connectionType: 'choice',
           })
-        } else if (generateAllChoices && parentChoicesCount > 0) {
+        } else if (
+          generateAllChoices &&
+          parentChoicesCount > 0 &&
+          suggestedConnections.length === 0
+        ) {
           nodesToAdd.forEach(({ node, choiceIndex }) => {
             if (choiceIndex >= parentChoicesCount) return
             appendConnectionIntent(plannedConnections, seenConnectionKeys, {

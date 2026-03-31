@@ -21,6 +21,8 @@ import {
 const MANUAL_NODE_OFFSET_X = 150
 const MANUAL_NODE_OFFSET_Y = 100
 const MANUAL_NODE_STEP = 40
+/** Pas vertical entre nœuds manuels successifs (plus serré que l’axe X). */
+const MANUAL_NODE_STEP_Y = MANUAL_NODE_STEP / 2
 
 /** Au-dessus des modales graphe (10001) : le tooltip est rendu en portail pour éviter le clip du panneau redimensionnable. */
 const GRAPH_SHORTCUTS_TOOLTIP_Z = 10050
@@ -617,7 +619,7 @@ export function GraphEditorHeader({
                   const count = nodes.filter((n) => n.type === 'dialogueNode').length
                   const position = {
                     x: MANUAL_NODE_OFFSET_X + count * MANUAL_NODE_STEP,
-                    y: MANUAL_NODE_OFFSET_Y + count * MANUAL_NODE_STEP,
+                    y: MANUAL_NODE_OFFSET_Y + count * MANUAL_NODE_STEP_Y,
                   }
                   const node = createEmptyNode(position)
                   addNode(node)

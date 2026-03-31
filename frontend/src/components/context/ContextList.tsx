@@ -153,7 +153,14 @@ export function ContextList({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      <div style={{ flexShrink: 0, padding: '0.5rem', borderBottom: `1px solid ${theme.border.primary}` }}>
+      <div
+        style={{
+          flexShrink: 0,
+          padding: '0.65rem 0.75rem',
+          borderBottom: `1px solid ${theme.border.primary}`,
+          backgroundColor: theme.background.tertiary,
+        }}
+      >
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
           <input
             ref={searchInputRef}
@@ -193,7 +200,7 @@ export function ContextList({
         ref={scrollContainerRef}
         data-testid="context-list-scroll"
         onScroll={handleScroll}
-        style={{ flex: 1, overflowY: 'auto', padding: '0.5rem', minHeight: 0 }}
+        style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0.65rem', minHeight: 0 }}
       >
         {filteredItems.length === 0 ? (
           <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
@@ -218,32 +225,36 @@ export function ContextList({
               <div
                 key={item.name}
                 style={{
-                  padding: '0.75rem',
+                  padding: '0.65rem 0.75rem',
                   marginBottom: '0.5rem',
-                  border: isSelected 
-                    ? `2px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}` 
-                    : `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  backgroundColor: isSelected 
-                    ? theme.state.selected.background 
-                    : isDetailSelected 
-                      ? theme.background.tertiary 
-                      : theme.background.panel,
+                  border: isSelected
+                    ? `2px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
+                    : `1px solid rgba(255, 255, 255, 0.06)`,
+                  borderRadius: '10px',
+                  backgroundColor: isSelected
+                    ? theme.state.selected.background
+                    : isDetailSelected
+                      ? theme.background.panel
+                      : theme.background.tertiary,
+                  boxShadow: isSelected ? theme.shadow.card : '0 1px 4px rgba(0, 0, 0, 0.25)',
                   color: theme.text.primary,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
+                  transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
                 }}
                 onClick={() => onItemClick(item.name)}
                 onMouseEnter={(e) => {
                   if (!isSelected && !isDetailSelected) {
-                    e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    e.currentTarget.style.backgroundColor = theme.background.panel
+                    e.currentTarget.style.boxShadow = theme.shadow.card
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isSelected && !isDetailSelected) {
-                    e.currentTarget.style.backgroundColor = theme.background.panel
+                    e.currentTarget.style.backgroundColor = theme.background.tertiary
+                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.25)'
                   }
                 }}
               >

@@ -18,6 +18,9 @@
 - **Epic 3**: [Gestion du contexte narratif (GDD)](epic-03.md)  
   Les utilisateurs peuvent explorer, sélectionner et utiliser le Game Design Document (500+ pages) pour enrichir la génération de dialogues. Le système permet le browse des entités (personnages, lieux, régions), sélection manuelle/automatique, règles de contexte, budget tokens, et sync Notion (V2.0+).
 
+- **Epic 17**: [Expérience mobile et responsive (web)](epic-17.md) — **Séquençage : après Epic 3, avant investissement lourd Epics 4–6**  
+  Les utilisateurs peuvent utiliser DialogueGenerator sur mobile/tablette (web responsive) : shell adaptatif, tactiles sur le graphe, panneaux en drawers/plein écran, PWA optionnelle (V1.5+).
+
 - **Epic 4**: [Validation et assurance qualité](epic-04.md)  
   Les utilisateurs peuvent valider la qualité, cohérence et conformité structurelle des dialogues avant export. Le système détecte orphans, cycles, nœuds vides, contradictions lore, "AI slop", context dropping, et fournit LLM judge scoring + simulation flow.
 

@@ -118,7 +118,11 @@
 **FR114:** Users can navigate the graph editor with keyboard (Tab, Arrow keys, Enter, Escape, and shortcuts)  
 **FR115:** System can provide visible focus indicators for keyboard navigation  
 **FR116:** Users can customize color contrast (WCAG AA minimum)  
-**FR117:** System can support screen readers with ARIA labels (V2.0+)
+**FR117:** System can support screen readers with ARIA labels (V2.0+)  
+**FR118:** Users can use the application on narrow viewports (from 320px width) with an adaptive shell and without whole-app horizontal scroll *(NEW - Mobile / responsive)*  
+**FR119:** Users can complete primary graph and chrome interactions via touch, including equivalent paths for mouse-only actions (e.g. context menu) *(NEW - Touch)*  
+**FR120:** Users can access context selection and node detail panels on narrow viewports via mobile-appropriate patterns (drawers, full-screen panels, or explicit tabs) *(NEW - Narrow panels)*  
+**FR121:** Users can install the web app as a PWA (home screen icon / install prompt) where the browser supports it (V1.5+) *(NEW - PWA)*
 
 ### NonFunctional Requirements
 

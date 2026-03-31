@@ -355,3 +355,93 @@ async def test_generate_nodes_for_all_choices_partial_failure(
     assert "error" in result["failed_choices"][0]
     assert "choice_index" in result["failed_choices"][0]
     assert "LLM error" in result["failed_choices"][0]["error"]
+
+
+@pytest.mark.asyncio
+async def test_generate_nodes_for_all_choices_expands_test_choices_to_four_nodes(
+    mock_llm_client, mock_generation_service
+):
+    """Batch : 2 choix avec test → 4 nœuds chacun ; 1 choix sans test → 1 nœud (9 au total)."""
+    parent_node: Dict[str, Any] = {
+        "id": "START",
+        "speaker": "PNJ",
+        "line": "Alors ?",
+        "choices": [
+            {"text": "Tenter A", "test": "Force:10", "targetNode": None},
+            {"text": "Tenter B", "test": "Agilité:12", "targetNode": None},
+            {"text": "Partir", "targetNode": None},
+        ],
+    }
+
+    def four_nodes_for_choice(prefix: str) -> Dict[str, Any]:
+        b, c, d, e = (
+            f"{prefix}_cf",
+            f"{prefix}_f",
+            f"{prefix}_s",
+            f"{prefix}_cs",
+        )
+        return {
+            "nodes": [
+                {"id": b, "speaker": "PNJ", "line": f"{prefix} cf", "choices": []},
+                {"id": c, "speaker": "PNJ", "line": f"{prefix} f", "choices": []},
+                {"id": d, "speaker": "PNJ", "line": f"{prefix} s", "choices": []},
+                {"id": e, "speaker": "PNJ", "line": f"{prefix} cs", "choices": []},
+            ],
+            "connections": [
+                {
+                    "from": "NODE_START",
+                    "choice_index": 0,
+                    "testCriticalFailureNode": b,
+                    "testFailureNode": c,
+                    "testSuccessNode": d,
+                    "testCriticalSuccessNode": e,
+                }
+            ],
+        }
+
+    async def choice_with_test_side_effect(*args: Any, **kwargs: Any) -> Dict[str, Any]:
+        idx = choice_with_test_side_effect.idx
+        choice_with_test_side_effect.idx += 1
+        return four_nodes_for_choice(f"N{idx}")
+
+    choice_with_test_side_effect.idx = 0
+
+    mock_generation_service.generate_nodes_for_choice_with_test = AsyncMock(
+        side_effect=choice_with_test_side_effect
+    )
+
+    from models.dialogue_structure.unity_dialogue_node import (
+        UnityDialogueGenerationResponse,
+        UnityDialogueNodeContent,
+    )
+
+    plain_response = UnityDialogueGenerationResponse(
+        title="Fin",
+        node=UnityDialogueNodeContent(speaker="PNJ", line="Au revoir", choices=None),
+    )
+    mock_generation_service.generate_dialogue_node = AsyncMock(return_value=plain_response)
+    mock_generation_service.enrich_with_ids.return_value = [
+        {"id": "NODE_START_CHOICE_2", "speaker": "PNJ", "line": "Au revoir", "choices": []}
+    ]
+
+    service = GraphGenerationService(mock_generation_service)
+    result = await service.generate_nodes_for_all_choices(
+        parent_node=parent_node,
+        instructions="Continue",
+        context={},
+        llm_client=mock_llm_client,
+        system_prompt_override=None,
+        max_choices=None,
+    )
+
+    assert len(result["nodes"]) == 9
+    assert result["generated_choices_count"] == 9
+    assert result["failed_choices_count"] == 0
+    assert mock_generation_service.generate_nodes_for_choice_with_test.call_count == 2
+    assert mock_generation_service.generate_dialogue_node.call_count == 1
+
+    test_conns = [c for c in result["connections"] if c.get("connection_type", "").startswith("test-")]
+    assert len(test_conns) == 8
+    choice_conns = [c for c in result["connections"] if c.get("connection_type") == "choice"]
+    assert len(choice_conns) == 1
+    assert choice_conns[0]["via_choice_index"] == 2

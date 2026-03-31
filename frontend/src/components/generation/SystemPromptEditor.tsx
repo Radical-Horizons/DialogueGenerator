@@ -341,12 +341,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 onClick={handleSaveSceneInstructions}
                 style={{
                   padding: '0.5rem 1rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
                   cursor: 'pointer',
                   fontSize: '0.85rem',
+                  fontWeight: 600,
                 }}
                 title="Sauvegarde le brief de scène actuel"
               >
@@ -357,11 +358,12 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 style={{
                   padding: '0.5rem 1rem',
                   border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
+                  borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
                   fontSize: '0.85rem',
+                  fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée"
               >
@@ -379,15 +381,16 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 placeholder="Ex: Bob doit annoncer à Alice qu'il part à l'aventure. Ton désiré: Héroïque. Inclure une condition sur la compétence 'Charisme' de Bob."
                 style={{
                   width: '100%',
-                  padding: '0.5rem',
+                  padding: '0.65rem 0.75rem',
                   boxSizing: 'border-box',
                   backgroundColor: theme.input.background,
                   border: `1px solid ${theme.input.border}`,
                   color: theme.input.color,
-                  borderRadius: '4px',
+                  borderRadius: '6px',
                   fontFamily: 'inherit',
                   fontSize: '0.9rem',
                   resize: 'vertical',
+                  lineHeight: 1.55,
                 }}
               />
               <div
@@ -532,12 +535,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 onClick={handleSaveAuthorProfile}
                 style={{
                   padding: '0.5rem 1rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
                   cursor: 'pointer',
                   fontSize: '0.85rem',
+                  fontWeight: 600,
                 }}
                 title="Sauvegarde le profil d'auteur actuel"
               >
@@ -548,11 +552,12 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 style={{
                   padding: '0.5rem 1rem',
                   border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
+                  borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
                   fontSize: '0.85rem',
+                  fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée"
               >
@@ -569,16 +574,16 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               placeholder="Style d'auteur global (réutilisable entre toutes les scènes). Ex: Style littéraire, vocabulaire riche, etc."
               style={{
                 width: '100%',
-                padding: '0.5rem',
+                padding: '0.65rem 0.75rem',
                 boxSizing: 'border-box',
                 backgroundColor: theme.input.background,
                 border: `1px solid ${theme.input.border}`,
                 color: theme.input.color,
-                borderRadius: '4px',
+                borderRadius: '6px',
                 fontFamily: 'inherit',
                 fontSize: '0.9rem',
                 resize: 'vertical',
-                lineHeight: '1.5',
+                lineHeight: 1.55,
               }}
             />
           </FormField>
@@ -630,13 +635,14 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 disabled={isLoadingSystemPrompt}
                 style={{
                   padding: '0.5rem 1rem',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
                   cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
                   opacity: isLoadingSystemPrompt ? 0.6 : 1,
                   fontSize: '0.85rem',
+                  fontWeight: 600,
                 }}
                 title="Sauvegarde le prompt système actuel"
               >
@@ -648,12 +654,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 style={{
                   padding: '0.5rem 1rem',
                   border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
+                  borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
                   opacity: isLoadingSystemPrompt ? 0.6 : 1,
                   fontSize: '0.85rem',
+                  fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée (ou le défaut si rien n'est sauvegardé)"
               >
@@ -670,16 +677,16 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               placeholder="Modifiez le prompt système principal envoyé au LLM. Ce prompt guide le comportement général de l'IA et le format de sortie."
               style={{
                 width: '100%',
-                padding: '0.5rem',
+                padding: '0.65rem 0.75rem',
                 boxSizing: 'border-box',
                 backgroundColor: theme.input.background,
                 border: `1px solid ${theme.input.border}`,
                 color: theme.input.color,
-                borderRadius: '4px',
+                borderRadius: '6px',
                 fontFamily: 'monospace',
                 fontSize: '0.85rem',
                 resize: 'vertical',
-                lineHeight: '1.5',
+                lineHeight: 1.55,
               }}
             />
           </FormField>
@@ -695,11 +702,12 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       style={{
         marginBottom: '1rem',
         border: `1px solid ${theme.border.primary}`,
-        borderRadius: '4px',
-        backgroundColor: theme.background.panel,
+        borderRadius: '8px',
+        backgroundColor: theme.background.tertiary,
       }}
     >
       <Tabs
+        variant="segmented"
         tabs={tabs}
         activeTabId={activeTabId}
         onTabChange={setActiveTabId}

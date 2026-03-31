@@ -29,6 +29,7 @@ import {
   type Choice,
 } from '../../schemas/nodeEditorSchema'
 import { stableChoiceEdgeId } from '../../utils/graphEdgeBuilders'
+import { countExpandedBatchNodesForChoices } from '../../utils/graphChoiceLabels'
 import {
   childNodeTopLeftX,
   GRAPH_DIALOGUE_NODE_WIDTH,
@@ -472,7 +473,17 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       
       // Si les instructions sont vides, on utilisera un texte par défaut côté backend
       const finalInstructions = userInstructions.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
-      
+
+      const st = useGraphStore.getState()
+      const dialogueParent = st.nodes.find((n) => n.id === selectedNodeId)
+      const unc = (
+        (dialogueParent?.data?.choices as Array<{ targetNode?: string; test?: unknown }> | undefined) ?? []
+      ).filter((c) => !c.targetNode || c.targetNode === 'END')
+      const batchTotal = countExpandedBatchNodesForChoices(unc)
+      if (batchTotal > 0) {
+        setBatchProgress({ current: 0, total: batchTotal })
+      }
+
       const generationResult = await generateFromNode(
         selectedNodeId,
         finalInstructions,
@@ -970,6 +981,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                     const unconnectedChoices = (choices || []).filter(
                       (choice: Choice) => !choice.targetNode || choice.targetNode === 'END'
                     )
+                    const batchNodeTotal = countExpandedBatchNodesForChoices(unconnectedChoices)
                     return unconnectedChoices.length > 1 ? (
                       <button
                         type="button"
@@ -991,7 +1003,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                           ? batchProgress?.total
                             ? `Génération ${batchProgress.current}/${batchProgress.total}...`
                             : 'Génération batch...'
-                          : `✨ Générer pour tous les choix (${unconnectedChoices.length})`}
+                          : `✨ Générer pour tous les choix (${unconnectedChoices.length} choix → ${batchNodeTotal} nœud${batchNodeTotal > 1 ? 's' : ''})`}
                       </button>
                     ) : null
                   })()}

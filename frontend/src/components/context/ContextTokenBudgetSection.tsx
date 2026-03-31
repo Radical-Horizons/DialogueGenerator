@@ -40,7 +40,7 @@ export function ContextTokenBudgetSection() {
       style={{
         flexShrink: 0,
         borderTop: `1px solid ${theme.border.primary}`,
-        backgroundColor: theme.background.secondary,
+        backgroundColor: theme.background.tertiary,
         padding: '0.5rem 0.65rem',
         fontSize: '0.82rem',
       }}
@@ -50,6 +50,7 @@ export function ContextTokenBudgetSection() {
         id={`${budgetId}-title`}
         style={{ margin: '0 0 0.35rem', fontSize: '0.85rem', fontWeight: 600, color: theme.text.primary }}
       >
+        Contexte pour le modèle
       </h3>
 
       <div

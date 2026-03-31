@@ -27,6 +27,10 @@ vi.mock('../theme', () => ({
       secondary: '#333',
     },
     button: {
+      default: {
+        background: '#333',
+        color: '#fff',
+      },
       primary: {
         background: '#007bff',
         color: '#fff',

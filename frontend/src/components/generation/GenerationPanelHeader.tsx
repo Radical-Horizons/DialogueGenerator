@@ -17,7 +17,7 @@ export function GenerationPanelHeader({ saveStatus }: GenerationPanelHeaderProps
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
       <h2 style={{ marginTop: 0, marginBottom: 0, color: theme.text.primary }}>Génération de Dialogues</h2>
-      <SaveStatusIndicator status={saveStatus} />
+      <SaveStatusIndicator appearance="discreet" status={saveStatus} />
     </div>
   )
 }

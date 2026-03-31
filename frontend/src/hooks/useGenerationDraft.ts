@@ -46,6 +46,8 @@ export interface UseGenerationDraftReturn {
   isDirty: boolean
   /** Statut de sauvegarde */
   saveStatus: SaveStatus
+  /** Horodatage ms de la dernière écriture réussie du brouillon (localStorage). */
+  draftLastSavedAt: number | null
   /** Marquer comme modifié */
   markDirty: () => void
   /** Marquer comme sauvegardé */
@@ -127,6 +129,7 @@ export function useGenerationDraft(
 
   const [isDirty, setIsDirty] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved')
+  const [draftLastSavedAt, setDraftLastSavedAt] = useState<number | null>(null)
 
   const {
     sceneSelection,
@@ -169,6 +172,7 @@ export function useGenerationDraft(
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
       setIsDirty(false)
       setSaveStatus('saved')
+      setDraftLastSavedAt(draft.timestamp)
     } catch (err) {
       console.error('Erreur lors de la sauvegarde automatique:', err)
       setSaveStatus('error')
@@ -258,6 +262,9 @@ export function useGenerationDraft(
         }
         setIsDirty(false)
         setSaveStatus('saved')
+        if (typeof draft.timestamp === 'number') {
+          setDraftLastSavedAt(draft.timestamp)
+        }
       }
     } catch (err) {
       console.error('Erreur lors du chargement du brouillon:', err)
@@ -334,6 +341,7 @@ export function useGenerationDraft(
     loadDraft,
     isDirty,
     saveStatus,
+    draftLastSavedAt,
     markDirty,
     markSaved,
   }

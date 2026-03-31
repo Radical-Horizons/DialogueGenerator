@@ -180,7 +180,7 @@ describe('ContextSelector', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/personnages/i)).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Lieux (contexte)' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^lieux$/i })).toBeInTheDocument()
       expect(screen.getByText(/objets/i)).toBeInTheDocument()
       expect(screen.getByText(/espèces/i)).toBeInTheDocument()
       expect(screen.getByText(/communautés/i)).toBeInTheDocument()
@@ -215,10 +215,10 @@ describe('ContextSelector', () => {
       expect(screen.getByText(/personnages/i)).toBeInTheDocument()
     })
 
-    const locationsTab = screen.getByRole('button', { name: 'Lieux (contexte)' })
+    const locationsTab = screen.getByRole('button', { name: /^lieux$/i })
     await user.click(locationsTab)
 
-    // L'onglet Lieux (contexte) est sélectionné
+    // L'onglet Lieux est sélectionné
     expect(locationsTab).toBeInTheDocument()
   })
 
@@ -444,7 +444,7 @@ describe('ContextSelector', () => {
     })
 
     // Changer d'onglet
-    const locationsTab = screen.getByRole('button', { name: 'Lieux (contexte)' })
+    const locationsTab = screen.getByRole('button', { name: /^lieux$/i })
     await user.click(locationsTab)
 
     // La sélection devrait être réinitialisée

@@ -138,6 +138,7 @@ export function buildChoiceEdge(params: BuildChoiceEdgeParams): Edge {
       edgeType: 'choice',
       choiceIndex,
       ...(choiceId && { choiceId }),
+      ...(choiceText !== undefined && choiceText !== '' && { choiceText }),
     },
   }
 }

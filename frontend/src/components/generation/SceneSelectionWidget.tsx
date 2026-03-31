@@ -79,12 +79,16 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     label: name,
   }))
 
+  const iconActionSize = 36
+
   const randomButtonStyle: React.CSSProperties = {
-    width: '28px',
-    height: '28px',
+    width: `${iconActionSize}px`,
+    height: `${iconActionSize}px`,
+    minWidth: `${iconActionSize}px`,
+    minHeight: `${iconActionSize}px`,
     padding: 0,
     border: `1px solid ${theme.border.primary}`,
-    borderRadius: '4px',
+    borderRadius: '6px',
     backgroundColor: theme.button.default.background,
     color: theme.button.default.color,
     cursor: 'pointer',
@@ -104,7 +108,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
         style={{
           padding: '2rem',
           border: `1px dashed ${theme.border.primary}`,
-          borderRadius: '4px',
+          borderRadius: '8px',
           backgroundColor: theme.background.tertiary,
           marginBottom: '1rem',
           textAlign: 'center',
@@ -123,10 +127,10 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   return (
     <div
       style={{
-        padding: '0.75rem',
+        padding: '1rem',
         border: `1px solid ${theme.border.primary}`,
-        borderRadius: '4px',
-        backgroundColor: theme.background.panel,
+        borderRadius: '8px',
+        backgroundColor: theme.background.tertiary,
         marginBottom: '1rem',
       }}
     >
@@ -183,11 +187,13 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           disabled={isLoading || (!selection.characterA && !selection.characterB)}
           title="Échanger PJ et PNJ (Alt+S)"
           style={{
-            width: '28px',
-            height: '28px',
+            width: `${iconActionSize}px`,
+            height: `${iconActionSize}px`,
+            minWidth: `${iconActionSize}px`,
+            minHeight: `${iconActionSize}px`,
             padding: 0,
             border: `1px solid ${theme.border.primary}`,
-            borderRadius: '4px',
+            borderRadius: '6px',
             backgroundColor: theme.button.default.background,
             color: theme.button.default.color,
             cursor:
@@ -198,7 +204,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               isLoading || (!selection.characterA && !selection.characterB)
                 ? 0.5
                 : 1,
-            fontSize: '1.1rem',
+            fontSize: '1.15rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -274,7 +280,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
         {/* Espaceur pour aligner avec le bouton swap de la ligne supérieure */}
         <div
           style={{
-            width: '28px',
+            width: `${iconActionSize}px`,
             flexShrink: 0,
           }}
         />

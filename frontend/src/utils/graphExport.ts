@@ -25,7 +25,7 @@ export async function exportGraphToPNG(
     const options = {
       quality,
       pixelRatio: 2, // Pour une meilleure qualité
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#1a1a1a',
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#121214',
       filter: (node: HTMLElement) => {
         // Exclure les contrôles et la minimap
         return !node.classList.contains('react-flow__controls') &&
@@ -66,7 +66,7 @@ export async function exportGraphToSVG(
     
     // Options pour l'export SVG
     const options = {
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#1a1a1a',
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#121214',
       filter: (node: HTMLElement) => {
         // Exclure les contrôles et la minimap
         return !node.classList.contains('react-flow__controls') &&

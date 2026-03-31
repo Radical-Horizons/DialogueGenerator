@@ -8,16 +8,15 @@
 - **Panneaux redimensionnables** : `ResizablePanels` pour ajustement fin
 - **Mode plein écran** : Masquer panneaux latéraux (raccourci F11) pour maximiser canvas
 
-**Mobile Strategy (Phase 2 - V1.5+, non prioritaire) :**
-- Pas de support mobile prévu pour l'instant
-- Si besoin futur : Bottom navigation, layouts empilés, hamburger menu
-- **Note** : Responsive mobile secondaire et minimal (pas de priorité)
+**Mobile Strategy (priorité produit — Epic 17) :**
+- **Epic de référence :** `_bmad-output/planning-artifacts/epics/epic-17.md` (FR118–FR121)
+- **Séquençage :** après boucle cœur (Epics 1–3), idéalement avant d’empiler validation / export / templates (Epics 4–6)
+- Patterns attendus : layouts empilés, drawers / plein écran pour panneaux, navigation claire entre graphe et contexte
+- **Touch targets :** minimum 44×44px sur le chrome (voir Story 17.2)
 
-**Tablet Strategy (Phase 3 - V2.0+, non prioritaire) :**
-- Layout simplifié : 2 colonnes (Canvas | Panneau contextuel)
-- Panneaux collapsibles : Masquer panneaux non essentiels
-- Touch targets : Minimum 44x44px si support tactile ajouté
-- **Note** : Responsive tablette secondaire et minimal (pas de priorité)
+**Tablet Strategy (aligné Epic 17) :**
+- Layout simplifié : 2 colonnes ou shell hybride (Canvas | Panneau contextuel) selon breakpoint
+- Panneaux collapsibles / drawers : masquer le non essentiel sur largeur intermédiaire
 
 ## Breakpoint Strategy
 
@@ -26,13 +25,9 @@
 - **Medium Desktop** : 1280px - 1919px (layout optimal, panneaux taille normale)
 - **Large Desktop** : 1920px+ (layout 3 colonnes, espace généreux)
 
-**Breakpoints (Phase 2 - Mobile, non prioritaire) :**
-- **Mobile** : 320px - 767px (non prioritaire, à définir si besoin)
-- **Note** : Responsive mobile secondaire et minimal
-
-**Breakpoints (Phase 3 - Tablet, non prioritaire) :**
-- **Tablet** : 768px - 1023px (layout 2 colonnes, panneaux collapsibles)
-- **Note** : Responsive tablette secondaire et minimal
+**Breakpoints (Mobile / tablette — Epic 17) :**
+- **Mobile** : 320px - 767px (cible FR118)
+- **Tablet** : 768px - 1023px (layout 2 colonnes ou drawers, selon story 17.1)
 
 ## Accessibility Strategy
 
@@ -76,7 +71,7 @@
 - **Résolutions** : 1024px, 1280px, 1920px, 2560px
 - **Panneaux redimensionnables** : Tester différentes largeurs panneaux
 - **Mode plein écran** : Vérifier comportement avec panneaux masqués
-- **Mobile/Tablet** : Tests minimaux en Phase 2/3 si besoin identifié
+- **Mobile/Tablet** : tests ciblés Epic 17 (largeurs 320 / 375 / 768 px + smoke tactile si Playwright le permet)
 
 **Accessibility Testing :**
 - **Automated** : axe DevTools, Lighthouse Accessibility (tests minimaux)
@@ -92,7 +87,7 @@
 
 **Responsive Development :**
 - **Units** : Utiliser `rem`, `%`, `vw`, `vh` plutôt que `px` fixes
-- **Media queries** : Desktop-first (min-width), mobile/tablet en Phase 2/3 si besoin
+- **Media queries** : Desktop-first (min-width) avec overrides progressifs pour Epic 17
 - **Flexbox/Grid** : Layout flexibles avec `ResizablePanels`
 - **Images** : Optimisation pour différentes résolutions (Phase 2 si besoin)
 
@@ -110,4 +105,4 @@
 - **NodeEditorPanel** : Labels associés aux inputs, messages d'erreur avec `aria-describedby`
 - **GraphCanvas** : ARIA labels pour contrôles ReactFlow, navigation clavier
 
-**Note importante :** Responsive et accessibilité sont secondaires et minimales pour l'instant. Approche progressive : améliorer au besoin, pas de refactoring massif.
+**Note importante :** Le **responsive mobile/tablette** est porté par **Epic 17** (priorité produit). L’**accessibilité** (Epic 14) reste en approche progressive ; éviter les refactorings massifs hors stories.

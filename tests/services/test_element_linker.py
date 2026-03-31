@@ -213,3 +213,32 @@ class TestElementLinker:
             "communities": set(),
             "quests": set()
         }
+
+    def test_get_linked_elements_shard_sections_narrative(self):
+        """Fiche type Notion : relations plats absentes, texte sous sections._general."""
+        gdd = GDDData(
+            characters=[
+                {
+                    "Nom": "Hero",
+                    "sections": {
+                        "_general": (
+                            "Rencontre souvent Alice à la Capitale. "
+                            "Possède une Dague Empoisonnée."
+                        )
+                    },
+                },
+                {"Nom": "Alice"},
+            ],
+            locations=[{"Nom": "Capitale"}],
+            items=[{"Nom": "Dague Empoisonnée"}],
+            species=[],
+            communities=[],
+            quests=[],
+        )
+        repository = ElementRepository(gdd)
+        resolver = ElementResolver(repository)
+        linker = ElementLinker(element_resolver=resolver)
+        linked = linker.get_linked_elements(character_name="Hero")
+        assert "Alice" in linked["characters"]
+        assert "Capitale" in linked["locations"]
+        assert "Dague Empoisonnée" in linked["items"]

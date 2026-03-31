@@ -21,9 +21,9 @@ export const GRAPH_SIBLING_GAP_X = 64
 export const GRAPH_SIBLING_COLUMN_STEP = GRAPH_DIALOGUE_NODE_WIDTH + GRAPH_SIBLING_GAP_X
 
 /** Décalage vertical standard parent → enfant (dialogue ou barre de test). */
-export const GRAPH_OFFSET_PARENT_TO_CHILD_Y = 280
+export const GRAPH_OFFSET_PARENT_TO_CHILD_Y = 140
 /** Marge verticale minimale sous la boîte parent pour éviter les recouvrements. */
-export const GRAPH_PARENT_TO_CHILD_CLEARANCE_Y = 120
+export const GRAPH_PARENT_TO_CHILD_CLEARANCE_Y = 60
 
 export type GraphLayoutSpacingMode = 'compact' | 'normal' | 'large'
 export type GraphLayoutDirection = 'TB' | 'LR' | 'BT' | 'RL'

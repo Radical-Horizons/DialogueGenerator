@@ -33,6 +33,8 @@ vi.mock('../../../store/generationActionsStore', () => ({
       handleResetSelections: vi.fn(),
       isLoading: false,
       isDirty: false,
+      saveStatus: 'saved',
+      draftLastSavedAt: null,
     },
     setActions: vi.fn(),
   })),
