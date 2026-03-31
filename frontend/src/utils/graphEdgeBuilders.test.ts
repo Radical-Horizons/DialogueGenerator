@@ -71,7 +71,11 @@ describe('buildChoiceEdge', () => {
     expect(edge.type).toBe('smoothstep')
     expect(edge.label).toBe('Mon choix')
     expect(edge.style).toEqual({ stroke: CHOICE_EDGE_COLOR })
-    expect(edge.data).toEqual({ edgeType: 'choice', choiceIndex: 0 })
+    expect(edge.data).toEqual({
+      edgeType: 'choice',
+      choiceIndex: 0,
+      choiceText: 'Mon choix',
+    })
   })
 
   it('should use choice:choiceId and stable edge id when choiceId provided', () => {

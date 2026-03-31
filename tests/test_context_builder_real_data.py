@@ -76,9 +76,21 @@ class TestContextBuilderRealData:
         print(f"  Occupation: {details1.get('Occupation/Rôle', 'N/A')}")
     
     def test_build_context_with_akthar(self, real_context_builder: ContextBuilder):
-        """Test pour construire le contexte avec Akthar."""
-        akthar_name = "Akthar-Neth Amatru, l'Exégète"
-        
+        """Test pour construire le contexte avec Akthar.
+
+        Le ``Nom`` canonique dans le GDD est ``Akthar-Neth Amatru`` ; les variantes
+        d'affichage (ex. titre « l'Exégète ») ne matchent pas la clé ``Nom``.
+        """
+        all_characters = real_context_builder.get_characters_names()
+        akthar_name = next(
+            (n for n in all_characters if "Akthar-Neth" in n),
+            None,
+        )
+        assert akthar_name is not None, (
+            "Aucun personnage dont le nom GDD contient « Akthar-Neth » ; "
+            "impossible de valider build_context avec les données chargées."
+        )
+
         # Construire le contexte avec ce personnage
         context = real_context_builder.build_context(
             selected_elements={
@@ -96,8 +108,10 @@ class TestContextBuilderRealData:
         assert len(context) > 0, "Le contexte construit est vide"
         
         # Vérifier que le contexte contient des informations sur le personnage
-        assert akthar_name in context or "Akthar" in context or "Exégète" in context, \
-            f"Le contexte ne contient pas d'informations sur le personnage. Contexte: {context[:500]}"
+        assert akthar_name in context or "Akthar" in context or "Amatru" in context, (
+            f"Le contexte ne contient pas d'informations sur le personnage. "
+            f"Contexte: {context[:500]}"
+        )
         
         print(f"\n✓ Contexte construit avec succès")
         print(f"  Longueur: {len(context)} caractères")
