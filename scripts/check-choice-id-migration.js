@@ -6,14 +6,19 @@
  *
  * Usage: node scripts/check-choice-id-migration.js
  * Env: API_URL (défaut http://localhost:4243)
+ *      API_TOKEN — optionnel ; si défini, envoie Authorization: Bearer (requis si l’API est en production).
  */
 const apiBase = process.env.API_URL || process.env.API_BASE_URL || 'http://localhost:4243';
 const url = `${apiBase.replace(/\/$/, '')}/api/v1/documents/check-migration`;
+const authHeaders =
+  process.env.API_TOKEN && String(process.env.API_TOKEN).trim()
+    ? { Authorization: `Bearer ${String(process.env.API_TOKEN).trim()}` }
+    : {};
 
 async function main() {
   let res;
   try {
-    res = await fetch(url);
+    res = await fetch(url, { headers: { ...authHeaders } });
   } catch (err) {
     console.error('Impossible de contacter l’API:', err.message);
     process.exit(2);

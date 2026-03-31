@@ -371,6 +371,24 @@ class TestPutDocument:
         assert (tmp_path / "new-doc.meta").exists()
         assert json.loads((tmp_path / "new-doc.json").read_text(encoding="utf-8")) == doc
 
+    def test_put_document_new_wrong_revision_returns_409(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Création (fichier absent) : revision doit être 1, aligné sur PUT layout (409 sinon)."""
+        tmp_path.mkdir(parents=True, exist_ok=True)
+        mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+        doc = _doc_v1_1_0()
+
+        response = client.put(
+            "/api/v1/documents/brand-new-id",
+            json={"document": doc, "revision": 2},
+        )
+
+        assert response.status_code == 409
+        body = response.json()
+        assert body["revision"] == 1
+        assert not (tmp_path / "brand-new-id.json").exists()
+
     def test_put_document_nodes_edges_payload_rejected_400(
         self, client, mock_config_service, tmp_path
     ):
