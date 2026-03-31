@@ -85,7 +85,7 @@ export interface UseGenerationOrchestratorReturn {
   handleExportUnity: () => void
   
   // SSE
-  connectSSE: (jobId: string) => void
+  connectSSE: (streamUrl: string) => void
   disconnectSSE: () => void
   isSSEConnected: boolean
   sseError: string | null

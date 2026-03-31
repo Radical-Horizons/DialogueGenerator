@@ -305,19 +305,26 @@ async def get_current_user_info(
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
-    current_user: Annotated[dict, Depends(get_current_user)],
-    response: Response
+    response: Response,
+    credentials: Annotated[
+        Optional[HTTPAuthorizationCredentials],
+        Depends(HTTPBearer(auto_error=False)),
+    ] = None,
 ) -> None:
     """Endpoint de déconnexion.
     
+    Efface toujours le cookie ``refresh_token`` même si l'access token est expiré
+    (``EventSource`` / onglet fermé : l'utilisateur doit pouvoir terminer la session).
+    
     Args:
-        current_user: Utilisateur courant (injecté via dépendance).
         response: La réponse HTTP.
-        
-    Note:
-        En production, on pourrait invalider le token côté serveur (blacklist).
-        Pour l'instant, on supprime juste le cookie refresh_token.
+        credentials: Bearer optionnel pour journaliser le ``sub`` si encore valide.
     """
     _delete_refresh_cookie(response)
-    logger.info(f"Utilisateur '{current_user['username']}' déconnecté")
+    if credentials is not None:
+        payload = auth_service.verify_token(credentials.credentials, token_type="access")
+        if payload and payload.get("sub"):
+            logger.info("Déconnexion (cookie refresh effacé), sub=%s", payload.get("sub"))
+            return
+    logger.info("Déconnexion : cookie refresh effacé (access token absent ou expiré)")
 

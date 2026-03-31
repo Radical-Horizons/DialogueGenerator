@@ -19,6 +19,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       const state = get()
 
       if (algorithm === 'dagre') {
+        get()._pushUndoSnapshot()
         const { calculateDagreLayout } = await import('../../utils/dagreLayout')
         const layoutedNodes = calculateDagreLayout(state.nodes, state.edges, {
           direction: direction as 'TB' | 'LR' | 'BT' | 'RL',
@@ -30,6 +31,7 @@ export const createLayoutSlice: StateCreator<GraphState, [], [], LayoutSlice> = 
       }
 
       // Fallback backend pour les autres algorithmes
+      get()._pushUndoSnapshot()
       const response = await graphAPI.calculateLayout({
         nodes: state.nodes.map((n) => ({
           id: n.id,

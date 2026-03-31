@@ -13,10 +13,9 @@ from services.llm_pricing_service import LLMPricingService
 from api.dependencies import get_cost_governance_service, get_cost_budget_repository
 from constants import ModelNames, Defaults
 
-logger = logging.getLogger(__name__)
+from api.middleware.billable_user_context import get_billable_user_id
 
-# User ID par défaut (V1.0: pas d'authentification, utilisateur unique)
-DEFAULT_USER_ID = "default_user"
+logger = logging.getLogger(__name__)
 
 # Endpoints à intercepter pour vérification budget
 GENERATION_ENDPOINTS = [
@@ -77,7 +76,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             
             # Vérifier le budget
             budget_check = cost_service.check_budget(
-                user_id=DEFAULT_USER_ID,
+                user_id=get_billable_user_id(),
                 estimated_cost=estimated_cost
             )
             

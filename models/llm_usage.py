@@ -36,6 +36,10 @@ class LLMUsageRecord(BaseModel):
         default=None,
         description="Détail d’usage par section GDD injectée (Story 3.7, FR17)",
     )
+    billable_user_id: Optional[str] = Field(
+        default=None,
+        description="Identifiant scope coûts (JWT sub / username) pour agrégation multi-utilisateur",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={

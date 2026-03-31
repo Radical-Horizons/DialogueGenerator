@@ -77,6 +77,9 @@ class OpenAIClient(ILLMClient):
         # Callback pour streaming du reasoning trace (optionnel)
         self.reasoning_callback = reasoning_callback
         self.reasoning_trace: Optional[Dict[str, Any]] = None
+        self.last_call_cost: float = 0.0
+        self.last_usage_prompt_tokens: int = 0
+        self.last_usage_completion_tokens: int = 0
         
         # Initialiser retry et circuit breaker (optionnel)
         self._retry_with_backoff = None
@@ -243,6 +246,18 @@ class OpenAIClient(ILLMClient):
                             prompt=full_prompt_str,
                             response=raw_response_str,
                         )
+                        if success:
+                            self.last_usage_prompt_tokens = prompt_tokens
+                            self.last_usage_completion_tokens = completion_tokens
+                            self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
+                                model_name=self.model_name,
+                                prompt_tokens=prompt_tokens,
+                                completion_tokens=completion_tokens,
+                            )
+                        else:
+                            self.last_call_cost = 0.0
+                            self.last_usage_prompt_tokens = 0
+                            self.last_usage_completion_tokens = 0
                     except Exception as tracking_error:
                         logger.error(
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",
@@ -449,6 +464,18 @@ class OpenAIClient(ILLMClient):
                                 prompt=full_prompt_str,
                                 response=raw_response_str,
                             )
+                            if success:
+                                self.last_usage_prompt_tokens = prompt_tokens
+                                self.last_usage_completion_tokens = completion_tokens
+                                self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
+                                    model_name=self.model_name,
+                                    prompt_tokens=prompt_tokens,
+                                    completion_tokens=completion_tokens,
+                                )
+                            else:
+                                self.last_call_cost = 0.0
+                                self.last_usage_prompt_tokens = 0
+                                self.last_usage_completion_tokens = 0
                     except Exception as tracking_error:
                         logger.error(
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",

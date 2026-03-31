@@ -102,7 +102,7 @@ def test_get_usage_with_graph(client, temp_budget_file, temp_usage_dir):
     )
     
     # Configurer un budget
-    cost_service.update_quota("default_user", 100.0)
+    cost_service.update_quota("admin", 100.0)
     
     # Créer des enregistrements d'usage pour plusieurs jours du mois courant
     # (l'endpoint /costs/usage ne retourne que le mois en cours, de start=1 à end=today)
@@ -121,7 +121,8 @@ def test_get_usage_with_graph(client, temp_budget_file, temp_usage_dir):
             duration_ms=2500,
             success=True,
             endpoint="generate/variants",
-            k_variants=3
+            k_variants=3,
+            billable_user_id="admin",
         )
         usage_repository.save(record)
     

@@ -44,7 +44,7 @@ async def test_create_job_and_stream_real_generation(client: TestClient, monkeyp
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
-    assert response.status_code == 200
+    assert response.status_code == 201
     
     job_data = response.json()
     assert "job_id" in job_data
@@ -81,7 +81,7 @@ async def test_create_job_and_stream_real_generation(client: TestClient, monkeyp
         mock_orchestrator.generate_with_events = mock_events
         
         # Streamer le job
-        stream_response = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}/stream")
+        stream_response = client.get(job_data["stream_url"])
         assert stream_response.status_code == 200
         assert stream_response.headers['content-type'] == 'text/event-stream; charset=utf-8'
         
@@ -139,6 +139,7 @@ def test_cancel_job(client: TestClient):
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
     job_id = response.json()["job_id"]
     
     # Annuler le job
@@ -172,6 +173,7 @@ def test_stream_job_uses_job_id_as_orchestrator_request_id(client: TestClient, m
         "llm_model_identifier": "gpt-5-mini"
     }
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
     job_id = response.json()["job_id"]
 
     received_request_ids = {}
@@ -203,7 +205,8 @@ def test_stream_job_uses_job_id_as_orchestrator_request_id(client: TestClient, m
 
     monkeypatch.setattr("api.routers.streaming.get_unity_dialogue_orchestrator", fake_get_unity_orchestrator)
 
-    stream_response = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}/stream")
+    stream_url = response.json()["stream_url"]
+    stream_response = client.get(stream_url)
     assert stream_response.status_code == 200
     assert '"type": "complete"' in stream_response.text
     assert received_request_ids.get("value") == job_id
@@ -235,6 +238,7 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
     job_id = response.json()["job_id"]
     
     job_manager = get_job_manager()
@@ -265,8 +269,8 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
         
         mock_orchestrator.generate_with_events = mock_events
         
-        # Streamer le job jusqu'à completion
-        stream_response = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}/stream")
+        stream_url = response.json()["stream_url"]
+        stream_response = client.get(stream_url)
         assert stream_response.status_code == 200
         
         # Lire tous les événements pour déclencher le cleanup
@@ -293,3 +297,52 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
         assert f"job_id: {job_id}" in log_message
         assert "durée:" in log_message
         assert "timestamp:" in log_message
+
+
+def test_stream_job_when_claim_fails_emits_sse_error(client: TestClient, monkeypatch):
+    """Si try_claim_stream_job échoue, le flux SSE doit émettre un événement error."""
+    context_selection = ContextSelection(
+        characters_full=["character_1"],
+        characters_excerpt=[],
+        locations_full=[],
+        locations_excerpt=[],
+        items_full=[],
+        items_excerpt=[],
+        species_full=[],
+        species_excerpt=[],
+        communities_full=[],
+        communities_excerpt=[],
+        dialogues_examples=[],
+        scene_location=None,
+    )
+    job_request = {
+        "user_instructions": "Test dialogue",
+        "context_selections": context_selection.model_dump(mode="json"),
+        "llm_model_identifier": "gpt-5-mini",
+    }
+    response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
+    stream_url = response.json()["stream_url"]
+    job_id = response.json()["job_id"]
+
+    from api.services.generation_job_manager import get_job_manager
+
+    jm = get_job_manager()
+
+    async def deny_claim(_jid: str) -> bool:
+        return False
+
+    monkeypatch.setattr(jm, "try_claim_stream_job", deny_claim)
+
+    stream_response = client.get(stream_url)
+    assert stream_response.status_code == 200
+    events = []
+    for line in stream_response.text.split("\n"):
+        if line.startswith("data:"):
+            s = line[5:].strip()
+            if s:
+                events.append(json.loads(s))
+    assert any(e.get("type") == "error" for e in events)
+    err = next(e for e in events if e.get("type") == "error")
+    assert job_id
+    assert "message" in err

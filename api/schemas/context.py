@@ -211,6 +211,8 @@ class BuildContextRequest(BaseModel):
         user_instructions: Instructions utilisateur.
         max_tokens: Nombre maximum de tokens.
         include_dialogue_type: Inclure le type de dialogue dans le contexte.
+        field_configs: Champs par type (aligné estimate-tokens / génération).
+        organization_mode: Mode d'organisation du contexte.
     """
     context_selections: ContextSelection = Field(..., description="Sélections de contexte GDD")
     user_instructions: str = Field(default="", description="Instructions utilisateur")
@@ -221,6 +223,14 @@ class BuildContextRequest(BaseModel):
         description="Nombre maximum de tokens",
     )
     include_dialogue_type: bool = Field(default=False, description="Inclure le type de dialogue")
+    field_configs: Optional[Dict[str, List[str]]] = Field(
+        default=None,
+        description="Configuration des champs par type d'élément (même sémantique que /estimate-tokens).",
+    )
+    organization_mode: Optional[str] = Field(
+        default="narrative",
+        description='Mode d\'organisation: "default", "narrative", "minimal", etc.',
+    )
 
 
 class BuildContextResponse(BaseModel):

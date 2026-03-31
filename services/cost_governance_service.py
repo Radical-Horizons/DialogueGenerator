@@ -1,7 +1,7 @@
 """Service de gouvernance des coûts LLM."""
 import logging
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from services.repositories.cost_budget_repository import ICostBudgetRepository
 
@@ -28,7 +28,7 @@ class CostGovernanceService:
         self,
         user_id: str,
         estimated_cost: float
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """Vérifie si le budget permet une génération.
         
         Args:
@@ -95,7 +95,7 @@ class CostGovernanceService:
             return {
                 "allowed": True,
                 "percentage": percentage,
-                "warning": f"Budget atteint à {percentage:.1f}% - {remaining:.2f}€ restants"
+                "warning": f"Budget atteint à {percentage:.1f}% — {remaining:.2f} USD restants"
             }
         
         # Pas de warning
@@ -105,7 +105,7 @@ class CostGovernanceService:
             "warning": None
         }
     
-    def get_budget_status(self, user_id: str) -> Dict[str, any]:
+    def get_budget_status(self, user_id: str) -> Dict[str, Any]:
         """Récupère le statut du budget actuel.
         
         Args:
@@ -169,7 +169,7 @@ class CostGovernanceService:
             try:
                 # quota: si existant, sera préservé par le repository
                 new_amount = self.repository.add_cost(user_id, current_month, cost, quota=0.0)  # type: ignore[attr-defined]
-                logger.debug(f"Budget mis à jour (atomique) pour {user_id}: {new_amount:.2f}€")
+                logger.debug(f"Budget mis à jour (atomique) pour {user_id}: {new_amount:.2f} USD")
                 return
             except Exception:
                 # Fallback sur l'ancienne logique si le repository ne supporte pas correctement add_cost
@@ -192,7 +192,7 @@ class CostGovernanceService:
                 amount = budget.get("amount", 0.0) + cost
 
         self.repository.update_budget(user_id, current_month, amount, quota)
-        logger.debug(f"Budget mis à jour pour {user_id}: {amount:.2f}€ / {quota:.2f}€")
+        logger.debug(f"Budget mis à jour pour {user_id}: {amount:.2f} / {quota:.2f} USD")
     
     def update_quota(self, user_id: str, new_quota: float) -> None:
         """Met à jour le quota mensuel.
@@ -216,4 +216,4 @@ class CostGovernanceService:
                 amount = budget.get("amount", 0.0)
         
         self.repository.update_budget(user_id, current_month, amount, new_quota)
-        logger.debug(f"Quota mis à jour pour {user_id}: {new_quota:.2f}€")
+        logger.debug(f"Quota mis à jour pour {user_id}: {new_quota:.2f} USD")

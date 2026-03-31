@@ -289,7 +289,9 @@ class ContextRuleService:
                 self._storage_file,
                 exc,
             )
-            return []
+            raise RuntimeError(
+                f"Fichier de règles contexte invalide ou illisible: {self._storage_file}"
+            ) from exc
 
     def _save_rules_unlocked(self, rules: list[ContextRule]) -> None:
         """Sauvegarde les règles dans le fichier JSON (sans verrou).

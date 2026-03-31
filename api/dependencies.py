@@ -230,23 +230,9 @@ def create_llm_usage_service() -> LLMUsageService:
     )
 
 
-def get_llm_usage_service(
-    repository: Annotated[FileLLMUsageRepository, Depends(get_llm_usage_repository)],
-    cost_service: Annotated[CostGovernanceService, Depends(get_cost_governance_service)]
-) -> LLMUsageService:
-    """Retourne le service de tracking d'utilisation LLM.
-    
-    Args:
-        repository: Repository injecté via dépendance.
-        cost_service: Service de cost governance injecté.
-        
-    Returns:
-        Instance de LLMUsageService avec cost governance intégré.
-    """
-    return LLMUsageService(
-        repository=repository,
-        cost_governance_service=cost_service
-    )
+def get_llm_usage_service(request: Request) -> LLMUsageService:
+    """Retourne le service de tracking d'utilisation LLM (singleton du ``ServiceContainer``)."""
+    return get_service_container(request).get_llm_usage_service()
 
 
 def get_request_id(request: Request) -> str:

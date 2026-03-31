@@ -22,7 +22,7 @@ class LLMUsageService:
         self,
         repository: ILLMUsageRepository,
         pricing_service: Optional[LLMPricingService] = None,
-        cost_governance_service: Optional[any] = None  # Type: CostGovernanceService (éviter import circulaire)
+        cost_governance_service: Optional[Any] = None  # CostGovernanceService (éviter import circulaire)
     ):
         """Initialise le service de tracking.
         
@@ -77,6 +77,9 @@ class LLMUsageService:
             fallback_reason: Raison de l'échec du provider initial (optionnel, Story 1.16).
         """
         try:
+            from api.middleware.billable_user_context import get_billable_user_id
+
+            billable_uid = get_billable_user_id()
             # Calculer le coût estimé (0€ pour génération échouée, Story 1.15 AC#5)
             if success:
                 estimated_cost = self.pricing_service.calculate_cost(
@@ -107,6 +110,7 @@ class LLMUsageService:
                 response=response,
                 fallback_from=fallback_from,
                 fallback_reason=fallback_reason,
+                billable_user_id=billable_uid,
             )
             
             # Sauvegarder
@@ -115,10 +119,8 @@ class LLMUsageService:
             # Mettre à jour le budget si le service de cost governance est disponible
             if self.cost_governance_service and success:
                 try:
-                    # User ID par défaut (V1.0: pas d'authentification)
-                    DEFAULT_USER_ID = "default_user"
                     self.cost_governance_service.update_budget(
-                        user_id=DEFAULT_USER_ID,
+                        user_id=billable_uid,
                         cost=estimated_cost
                     )
                     logger.debug(f"Budget mis à jour: +${estimated_cost:.6f}")
@@ -140,7 +142,8 @@ class LLMUsageService:
         start_date: Optional[date] = None,
         end_date: Optional[date] = None,
         model_name: Optional[str] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
+        billable_user_id: Optional[str] = None,
     ) -> List[LLMUsageRecord]:
         """Récupère l'historique d'utilisation avec filtres.
         
@@ -149,6 +152,7 @@ class LLMUsageService:
             end_date: Date de fin (optionnel).
             model_name: Filtrer par modèle (optionnel).
             limit: Limiter le nombre de résultats (optionnel).
+            billable_user_id: Si défini, ne retient que les enregistrements de cet utilisateur.
             
         Returns:
             Liste des enregistrements correspondants, triés par timestamp décroissant.
@@ -161,6 +165,12 @@ class LLMUsageService:
             )
         else:
             records = self.repository.get_all(model_name=model_name)
+
+        if billable_user_id is not None:
+            records = [
+                r for r in records
+                if getattr(r, "billable_user_id", None) == billable_user_id
+            ]
         
         # Appliquer la limite si demandée
         if limit:

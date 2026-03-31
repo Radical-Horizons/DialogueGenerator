@@ -108,11 +108,43 @@ class DialogueGenerationService:
             elif not hasattr(self.prompt_engine, 'system_prompt_template'):
                  logger.warning("PromptEngine does not have system_prompt_template attribute during error recovery.")
 
+    @staticmethod
+    def _extract_balanced_json_object(fragment: str) -> Optional[str]:
+        """Extrait le premier objet JSON équilibré ``{...}`` depuis un fragment."""
+        start = fragment.find("{")
+        if start < 0:
+            return None
+        depth = 0
+        in_string = False
+        escape = False
+        quote_char = ""
+        for i in range(start, len(fragment)):
+            ch = fragment[i]
+            if in_string:
+                if escape:
+                    escape = False
+                elif ch == "\\":
+                    escape = True
+                elif ch == quote_char:
+                    in_string = False
+                continue
+            if ch in ('"', "'"):
+                in_string = True
+                quote_char = ch
+                continue
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    return fragment[start : i + 1]
+        return None
+
     def _extract_json_from_text(self, text: str) -> Optional[str]:
         """Extrait une chaîne JSON d'un texte pouvant contenir des blocs markdown.
         
         Recherche d'abord un JSON dans un bloc markdown (```json ... ``` ou ``` ... ```),
-        puis tente de trouver un objet JSON directement dans le texte.
+        puis le premier objet ``{...}`` équilibré dans le texte.
         
         Args:
             text: Le texte d'entrée à analyser.
@@ -120,16 +152,10 @@ class DialogueGenerationService:
         Returns:
             La chaîne JSON extraite, ou None si aucune n'est trouvée.
         """
-        # Regex pour trouver JSON dans des blocs markdown
-        # Capture le contenu entre les accolades les plus internes (objet JSON)
-        match = re.search(r'```(?:json)?\s*({.*?})\s*```', text, re.DOTALL)
-        if match:
-            return match.group(1)
-        
-        # Si aucun bloc markdown n'est trouvé, chercher un objet JSON directement
-        # Regex simplifiée, peut nécessiter d'être plus robuste selon la sortie LLM attendue
-        match = re.search(r'({.*?})', text, re.DOTALL)
-        if match:
-            return match.group(1)
-            
-        return None
+        fence = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
+        if fence:
+            inner = fence.group(1).strip()
+            balanced = self._extract_balanced_json_object(inner)
+            if balanced:
+                return balanced
+        return self._extract_balanced_json_object(text)

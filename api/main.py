@@ -9,12 +9,13 @@ import sys
 import asyncio
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from api.middleware import RequestIDMiddleware, LoggingMiddleware
+from api.middleware.billable_user_context import BillableUserContextMiddleware
 from api.middleware.cost_governance import CostGovernanceMiddleware
 from api.exceptions import APIException, ValidationException
 from api.dependencies import get_request_id
@@ -287,14 +288,16 @@ async def lifespan(app: FastAPI):
                 pass
 
 
+_IS_PRODUCTION_ENV = os.getenv("ENVIRONMENT", "development").lower() == "production"
+
 # Création de l'application FastAPI
 app = FastAPI(
     title="DialogueGenerator API",
     description="API REST pour la génération de dialogues IA pour jeux de rôle",
     version=APP_VERSION,
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json",
+    docs_url=None if _IS_PRODUCTION_ENV else "/api/docs",
+    redoc_url=None if _IS_PRODUCTION_ENV else "/api/redoc",
+    openapi_url=None if _IS_PRODUCTION_ENV else "/api/openapi.json",
     lifespan=lifespan
 )
 
@@ -304,7 +307,7 @@ if limiter is not None:
 
 # Configuration CORS
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
-is_production_env = os.getenv("ENVIRONMENT", "development") == "production"
+is_production_env = _IS_PRODUCTION_ENV
 
 # En production, lire depuis CORS_ORIGINS (format CSV) — obligatoire (validé aussi dans SecurityConfig.validate_config)
 # IMPORTANT: Quand allow_credentials=True, on ne peut pas utiliser "*" - il faut spécifier les origines
@@ -346,6 +349,7 @@ app.add_middleware(
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(CostGovernanceMiddleware)  # Cost governance (Story 0.7)
+app.add_middleware(BillableUserContextMiddleware)
 
 # Middleware anti-cache en développement (doit être avant le cache HTTP)
 if not is_production_env:
@@ -444,6 +448,40 @@ if limiter is not None:
             Réponse JSON avec erreur 429.
         """
         return await rate_limit_exception_handler(request, exc)
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    """Uniformise les ``HTTPException`` génériques avec l'enveloppe ``error``."""
+    request_id = getattr(request.state, "request_id", "unknown")
+    detail = exc.detail
+    if isinstance(detail, list):
+        message = "Erreur de validation"
+        details_body: dict = {"detail": detail}
+    else:
+        message = str(detail) if detail is not None else "Erreur HTTP"
+        details_body = {}
+    code_map = {
+        401: "AUTHENTICATION_ERROR",
+        403: "AUTHORIZATION_ERROR",
+        404: "NOT_FOUND",
+        405: "METHOD_NOT_ALLOWED",
+        409: "CONFLICT",
+        422: "VALIDATION_ERROR",
+        429: "QUOTA_EXCEEDED",
+    }
+    code = code_map.get(exc.status_code, f"HTTP_{exc.status_code}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": code,
+                "message": message,
+                "details": details_body,
+                "request_id": request_id,
+            }
+        },
+    )
 
 
 # Handler global d'exceptions

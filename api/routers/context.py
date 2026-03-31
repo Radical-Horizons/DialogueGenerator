@@ -496,8 +496,8 @@ async def build_context(
         structured_context = context_builder.build_context_json(
             selected_elements=context_selections_dict,
             scene_instruction=request_data.user_instructions,
-            field_configs=None,
-            organization_mode="narrative",
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
             max_tokens=request_data.max_tokens,
             include_dialogue_type=request_data.include_dialogue_type,
             element_modes=context_selections_dict.get("_element_modes")

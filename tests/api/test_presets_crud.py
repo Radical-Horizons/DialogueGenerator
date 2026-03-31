@@ -126,7 +126,7 @@ class TestPresetsList:
         
         # THEN
         assert response.status_code == 500
-        assert "error" in response.json()["detail"].lower()
+        assert "error" in response.json()["error"]["message"].lower()
 
 
 class TestPresetsCreate:
@@ -188,7 +188,7 @@ class TestPresetsCreate:
         
         # THEN
         assert response.status_code == 500
-        assert "permission" in response.json()["detail"].lower()
+        assert "permission" in response.json()["error"]["message"].lower()
     
     def test_create_preset_disk_error(
         self, client: TestClient, mock_preset_service: MagicMock
@@ -214,7 +214,8 @@ class TestPresetsCreate:
         
         # THEN
         assert response.status_code == 500
-        assert "disk" in response.json()["detail"].lower() or "error" in response.json()["detail"].lower()
+        msg = response.json()["error"]["message"].lower()
+        assert "disk" in msg or "error" in msg
 
 
 class TestPresetsGetById:
@@ -254,7 +255,7 @@ class TestPresetsGetById:
         
         # THEN
         assert response.status_code == 404
-        assert "not found" in response.json()["detail"].lower()
+        assert "not found" in response.json()["error"]["message"].lower()
     
     def test_get_preset_invalid_data(
         self, client: TestClient, mock_preset_service: MagicMock

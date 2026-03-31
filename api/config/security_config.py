@@ -68,7 +68,9 @@ class SecurityConfig(BaseSettings):
     # Environment
     environment: str = "development"
 
-    # Dev only: skip JWT and use mock user (ignored when ENVIRONMENT=production)
+    # Dev only: skip JWT and use mock user (ignored when ENVIRONMENT=production).
+    # Défaut True : le dev local fonctionne sans .env ni login (voir .env.example).
+    # En production, validate_config() impose DISABLE_AUTH=false explicitement.
     disable_auth: bool = True
     
     @property
@@ -116,8 +118,14 @@ class SecurityConfig(BaseSettings):
                 )
             logger.info("Configuration de sécurité validée (production)")
         else:
-            # En développement, ne pas logger de warning pour la clé par défaut (c'est acceptable en dev)
-            # Les warnings sont loggés uniquement en production via les exceptions
+            if (
+                not _is_running_under_pytest()
+                and self.jwt_secret_key == DEFAULT_JWT_SECRET_KEY
+            ):
+                logger.warning(
+                    "JWT_SECRET_KEY utilise encore la valeur par défaut. "
+                    "Définissez une clé dédiée dans .env (obligatoire hors machine de dev isolée)."
+                )
             if self.jwt_secret_key != DEFAULT_JWT_SECRET_KEY:
                 logger.debug("Configuration de sécurité chargée (développement)")
 

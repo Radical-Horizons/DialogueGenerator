@@ -131,6 +131,8 @@ export interface EstimateTokensResponse {
   context_token_breakdown: ContextTokenBreakdownRow[]
   context_breakdown_note: string
   token_count: number
+  /** Alias rétrocompatible OpenAPI (souvent égal à token_count). */
+  total_estimated_tokens?: number | null
   raw_prompt: RawPrompt
   prompt_hash: string
   structured_prompt?: import('./prompt').PromptStructure
@@ -327,14 +329,7 @@ export interface UnityDialoguesPathResponse {
 export interface GenerateUnityDialogueRequest extends BasePromptRequest {
   llm_model_identifier: string
   max_completion_tokens?: number | null
-  reasoning_effort?:
-    | 'none'
-    | 'minimal'
-    | 'low'
-    | 'medium'
-    | 'high'
-    | 'xhigh'
-    | null
+  reasoning_effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   top_p?: number | null
   field_configs?: Record<string, string[]>
   organization_mode?: string
@@ -356,8 +351,6 @@ export interface GenerateUnityDialogueResponse {
   estimated_tokens: number
   warning?: string
   structured_prompt?: import('./prompt').PromptStructure
-  /** Alias legacy / affichage ; préférer raw_prompt. */
-  prompt_used?: string
 }
 
 

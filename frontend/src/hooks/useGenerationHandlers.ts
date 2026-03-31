@@ -60,7 +60,7 @@ export interface UseGenerationHandlersOptions {
   /** Token count estimé */
   tokenCount: number | null
   /** Fonction pour connecter SSE (passée depuis orchestrator pour éviter duplication) */
-  connectSSE: (jobId: string) => void
+  connectSSE: (streamUrl: string) => void
 }
 
 export interface UseGenerationHandlersReturn {
@@ -194,8 +194,8 @@ export function useGenerationHandlers(
       // Démarrer la génération avec le job_id
       startGeneration(job.job_id)
       
-      // Connecter le SSE pour recevoir les événements
-      connectSSE(job.job_id)
+      // Connecter le SSE (URL inclut sse_token pour auth sans header Authorization)
+      connectSSE(job.stream_url)
     } catch (err) {
       const errorMsg = getErrorMessage(err)
       const errorDetails = err instanceof Error ? `\n\n${err.message}${err.stack ? `\n\nStack trace:\n${err.stack}` : ''}` : ''

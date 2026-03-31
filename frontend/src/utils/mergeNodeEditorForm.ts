@@ -45,6 +45,12 @@ export function mergeDialogueNodeFormIntoStoreData(
       testCriticalSuccessNode: storeChoice?.testCriticalSuccessNode ?? fc.testCriticalSuccessNode,
     }
   })
+  // Le formulaire peut avoir moins de lignes que le store (RHF désaligné) : ne pas tronquer les choix en queue.
+  if (storeChoices.length > mergedChoices.length) {
+    for (let j = mergedChoices.length; j < storeChoices.length; j++) {
+      mergedChoices.push(storeChoices[j])
+    }
+  }
   const storeNext = (nodeData as { nextNode?: string }).nextNode
   const resolvedNext =
     storeNext !== undefined ? (storeNext ?? '') : (formValues.nextNode ?? '')

@@ -116,33 +116,10 @@ class TestRegressionStableIDCorruption:
 
 
 class TestRegressionEventSourceRaceConditions:
-    """Tests de non-régression : Bug EventSource race conditions (Story 0.8).
+    """Non-régression Story 0.8 (EventSource) : couverte par Vitest ``useSSEStreaming.test.ts``.
     
-    Bug : Race conditions lors de fermetures multiples EventSource.
-    Fix : Vérification readyState avant fermeture, ref closeEventSource().
+    Fermeture idempotente, debounce 600 ms sur ``onerror``, et ``tokens === 0`` en metadata.
     """
-    
-    def test_event_source_closed_state_handling(self):
-        """REGRESSION TEST : Fermeture EventSource déjà fermé ne doit pas causer d'erreur.
-        
-        Bug Story 0.8 : Race condition → exception lors de fermetures multiples.
-        Fix : Vérification readyState avant fermeture (voir GenerationPanel.tsx:closeEventSource).
-        """
-        # Test documentaire - la logique est dans le frontend GenerationPanel.tsx
-        # Le code vérifie : if (readyState !== EventSource.CLOSED) avant close()
-        # Ce test documente que ce comportement défensif doit être maintenu
-        pass
-    
-    def test_sse_error_debouncing(self):
-        """REGRESSION TEST : Debouncing des erreurs SSE pour éviter faux positifs.
-        
-        Bug Story 0.8 : EventSource.onerror déclenché lors de fermeture normale.
-        Fix : Debouncing 600ms pour ignorer erreurs transitoires (GenerationPanel.tsx).
-        """
-        # Test documentaire - la logique est dans le frontend GenerationPanel.tsx
-        # Le code implémente : setTimeout 600ms + annulation si génération complète
-        # Ce test documente que ce comportement robuste doit être maintenu
-        pass
 
 
 class TestRegressionDatetimeParsing:

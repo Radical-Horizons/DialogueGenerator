@@ -18,19 +18,74 @@ Types d'événements :
 import logging
 import json
 import asyncio
-from typing import Annotated, AsyncGenerator, Dict, Any
-from fastapi import APIRouter, Depends, Request, HTTPException
+from typing import Annotated, AsyncGenerator, Dict, Any, Optional
+from urllib.parse import quote_plus
 
-from api.routers.auth import get_current_user
+from fastapi import APIRouter, Depends, Request, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from api.routers.auth import auth_service, get_current_user
 from api.schemas.generation_jobs import GenerationJobCreate, GenerationJobResponse, GenerationJobStatus
 from api.services.generation_job_manager import get_job_manager
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from api.dependencies import get_unity_dialogue_orchestrator
+from api.exceptions import AuthenticationException
+from api.config.security_config import get_security_config
+from api.utils.sse_job_token import create_sse_job_token, verify_sse_job_token
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(dependencies=[Depends(get_current_user)])
+router = APIRouter()
+
+_bearer_optional = HTTPBearer(auto_error=False)
+
+
+async def authenticate_sse_stream(
+    job_id: str,
+    request: Request,
+    sse_token: Optional[str] = Query(
+        None,
+        description="Jeton JWT court (émis à la création du job) pour EventSource sans header Authorization.",
+    ),
+    credentials: Annotated[
+        Optional[HTTPAuthorizationCredentials],
+        Depends(_bearer_optional),
+    ] = None,
+) -> dict:
+    """Authentifie le GET SSE : query ``sse_token`` ou Bearer access token."""
+    security_config = get_security_config()
+    if security_config.is_development and security_config.disable_auth:
+        return {
+            "id": "1",
+            "username": "admin",
+            "email": "admin@example.com",
+        }
+
+    request_id = getattr(request.state, "request_id", "unknown")
+
+    if sse_token:
+        payload = verify_sse_job_token(sse_token, job_id)
+        if payload:
+            username = payload.get("sub")
+            if username:
+                user = auth_service.get_user_by_username(username)
+                if user:
+                    return user
+
+    if credentials is not None:
+        pl = auth_service.verify_token(credentials.credentials, token_type="access")
+        if pl is not None:
+            username = pl.get("sub")
+            if username:
+                user = auth_service.get_user_by_username(username)
+                if user:
+                    return user
+
+    raise AuthenticationException(
+        message="Authentification requise pour le flux SSE (sse_token ou Bearer)",
+        request_id=request_id,
+    )
 
 # Constante pour timeout d'annulation (10 secondes) - Story 0.8
 CANCEL_TIMEOUT_SECONDS = 10
@@ -149,7 +204,7 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
                 current_step = event.data.get("step", "unknown")
                 yield f'data: {json.dumps({"type": "step", "step": current_step})}\n\n'
             elif event.type == 'metadata':
-                meta = {"type": "metadata", "tokens": event.data["tokens"], "cost": event.data["cost"]}
+                meta: Dict[str, Any] = {"type": "metadata", **event.data}
                 if event.data.get("used_fallback"):
                     meta["used_fallback"] = True
                     meta["fallback_from"] = event.data.get("fallback_from", "")
@@ -218,16 +273,22 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
             job_manager.unregister_task(job_id)
 
 
-@router.post("/generate/jobs", response_model=GenerationJobResponse)
+@router.post(
+    "/generate/jobs",
+    response_model=GenerationJobResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_generation_job(
     job_data: GenerationJobCreate,
     request: Request,
+    current_user: Annotated[dict, Depends(get_current_user)],
 ) -> GenerationJobResponse:
     """Crée un nouveau job de génération Unity Dialogue.
     
     Args:
         job_data: Paramètres de génération (identiques à l'endpoint REST).
         request: Requête HTTP (pour construire l'URL de streaming).
+        current_user: Utilisateur authentifié (émission du jeton SSE).
         
     Returns:
         Job créé avec job_id et stream_url.
@@ -237,9 +298,11 @@ async def create_generation_job(
     # Créer le job avec les paramètres
     job_id = job_manager.create_job(job_data.model_dump(mode='json'))
     
-    # Construire l'URL de streaming
-    base_url = str(request.base_url).rstrip('/')
-    stream_url = f"{base_url}/api/v1/dialogues/generate/jobs/{job_id}/stream"
+    username = str(current_user.get("username") or current_user.get("id") or "user")
+    sse_token = create_sse_job_token(job_id=job_id, username=username)
+    stream_url = (
+        f"/api/v1/dialogues/generate/jobs/{job_id}/stream?sse_token={quote_plus(sse_token)}"
+    )
     
     logger.info(f"Created generation job {job_id}", extra={'job_id': job_id})
     
@@ -262,6 +325,7 @@ def _get_stream_orchestrator(
 @router.get("/generate/jobs/{job_id}/stream", response_class=StreamingResponse)
 async def stream_job(
     job_id: str,
+    _auth: Annotated[dict, Depends(authenticate_sse_stream)],
     orchestrator: Annotated[UnityDialogueOrchestrator, Depends(_get_stream_orchestrator)],
 ) -> StreamingResponse:
     """Endpoint SSE pour streamer la génération d'un job.
@@ -290,7 +354,10 @@ async def stream_job(
 
 
 @router.post("/generate/jobs/{job_id}/cancel")
-async def cancel_job(job_id: str) -> Dict[str, Any]:
+async def cancel_job(
+    job_id: str,
+    _user: Annotated[dict, Depends(get_current_user)],
+) -> Dict[str, Any]:
     """Annule un job de génération en cours.
     
     Args:
@@ -326,7 +393,10 @@ async def cancel_job(job_id: str) -> Dict[str, Any]:
 
 
 @router.get("/generate/jobs/{job_id}", response_model=GenerationJobStatus)
-async def get_job_status(job_id: str) -> GenerationJobStatus:
+async def get_job_status(
+    job_id: str,
+    _user: Annotated[dict, Depends(get_current_user)],
+) -> GenerationJobStatus:
     """Récupère le statut d'un job.
     
     Args:

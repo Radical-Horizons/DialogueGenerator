@@ -52,8 +52,10 @@ export async function createGenerationJob(
 /**
  * Annule un job de génération en cours (Story 0.2).
  */
-export async function cancelGenerationJob(job_id: string): Promise<{ success: boolean; message: string }> {
-  const response = await apiClient.post<{ success: boolean; message: string }>(
+export async function cancelGenerationJob(
+  job_id: string
+): Promise<{ success: boolean; message: string; job_id: string }> {
+  const response = await apiClient.post<{ success: boolean; message: string; job_id: string }>(
     `/api/v1/dialogues/generate/jobs/${job_id}/cancel`
   )
   return response.data

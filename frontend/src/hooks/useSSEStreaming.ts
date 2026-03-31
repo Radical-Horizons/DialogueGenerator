@@ -28,8 +28,8 @@ export interface UseSSEStreamingOptions {
 }
 
 export interface UseSSEStreamingReturn {
-  /** Connecter au stream SSE avec un jobId */
-  connect: (jobId: string) => void
+  /** Connecter au stream SSE (URL relative absolue, ex. retour ``stream_url`` du POST job, avec ``sse_token``). */
+  connect: (streamUrl: string) => void
   /** Déconnecter du stream SSE */
   disconnect: () => void
   /** EventSource instance (pour tests) */
@@ -61,13 +61,13 @@ export interface UseSSEStreamingReturn {
  *   setIsLoading: (loading) => setIsLoading(loading)
  * })
  * 
- * // Connecter quand jobId est disponible
+ * // Connecter quand l'URL du stream est disponible (inclut sse_token)
  * useEffect(() => {
- *   if (jobId) {
- *     connect(jobId)
+ *   if (streamUrl) {
+ *     connect(streamUrl)
  *   }
  *   return () => disconnect()
- * }, [jobId, connect, disconnect])
+ * }, [streamUrl, connect, disconnect])
  * ```
  */
 export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStreamingReturn {
@@ -101,12 +101,11 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
     setRawPrompt,
   } = useGenerationStore()
 
-  const connect = useCallback((jobId: string) => {
+  const connect = useCallback((streamUrl: string) => {
     // Ne pas créer plusieurs EventSource
     if (eventSourceRef.current) {
       return
     }
-    const streamUrl = `/api/v1/dialogues/generate/jobs/${jobId}/stream`
     const es = new EventSource(streamUrl)
     // Désactiver la reconnexion automatique d'EventSource (fonctionnalité de génération multiple désactivée)
     // EventSource se reconnecte automatiquement par défaut, ce qui peut causer des générations multiples
@@ -143,7 +142,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
             
           case 'metadata':
             console.debug('SSE metadata:', data)
-            if (data.tokens) {
+            if (typeof data.tokens === 'number') {
               setTokensUsed(data.tokens)
             }
             // Appeler callback personnalisé si fourni

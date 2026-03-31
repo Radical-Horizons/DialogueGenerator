@@ -149,6 +149,7 @@ function updateDialogueNodeInDocumentSoT(
 
   const data = updates.data as Record<string, unknown> | undefined
   if (data) {
+    if (data.title !== undefined) docNode.title = data.title
     if (data.line !== undefined) docNode.line = data.line
     if (data.speaker !== undefined) docNode.speaker = data.speaker
     if (data.nextNode !== undefined) docNode.nextNode = data.nextNode

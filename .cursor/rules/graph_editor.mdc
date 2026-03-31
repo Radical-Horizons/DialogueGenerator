@@ -16,7 +16,7 @@ globs:
 alwaysApply: false
 ---
 
-- **Invariant éditeur de nœud** : au changement de sélection dans `NodeEditorPanel`, flush le formulaire avec **`mergeFormDataIntoNodeData()`** (`frontend/src/utils/mergeNodeEditorForm.ts`), pas un spread `{ ...nodeData, ...formValues }` — sinon `choices[i].targetNode` (rempli par `connectNodes` / `edgeSlice`) peut être écrasé. Détails du flux dans `AGENTS.md` (Learned Workspace Facts).
+- **Invariant éditeur de nœud** : au changement de sélection dans `NodeEditorPanel`, flush le formulaire avec **`mergeNodeFormIntoStoreData()`** / **`mergeDialogueNodeFormIntoStoreData()`** (`frontend/src/utils/mergeNodeEditorForm.ts`), pas un spread `{ ...nodeData, ...formValues }` — sinon `choices[i].targetNode` (rempli par `connectNodes` / `edgeSlice`) peut être écrasé. Détails du flux dans `AGENTS.md` (Learned Workspace Facts).
 
 - **Architecture contrôlée React Flow (ADR-007)** :
   - `GraphCanvas` reste en **mode controlled** : `nodes` / `edges` proviennent exclusivement de `useGraphStore`, jamais de `useState` local.

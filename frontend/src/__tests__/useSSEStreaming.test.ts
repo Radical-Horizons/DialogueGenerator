@@ -12,12 +12,18 @@ const mockClose = vi.fn()
 interface MockEventSourceInstance {
   readyState: number
   close: () => void
+  onmessage: ((event: MessageEvent) => void) | null
+  onopen: (() => void) | null
+  onerror: (() => void) | null
 }
 const MockEventSource = vi.fn().mockImplementation(function (
   this: MockEventSourceInstance
 ) {
   this.readyState = 1
   this.close = mockClose
+  this.onmessage = null
+  this.onopen = null
+  this.onerror = null
   return this
 })
 global.EventSource = MockEventSource as unknown as typeof EventSource
@@ -42,17 +48,74 @@ describe('useSSEStreaming', () => {
     expect(result.current.eventSource).toBeNull()
   })
 
-  it('should create EventSource when connect is called', async () => {
+  it('should create EventSource when connect is called with full stream URL', async () => {
     const { result } = renderHook(() => useSSEStreaming({}))
+    const streamUrl =
+      '/api/v1/dialogues/generate/jobs/job-123/stream?sse_token=signed'
 
     await act(async () => {
-      result.current.connect('job-123')
+      result.current.connect(streamUrl)
     })
 
     await waitFor(() => {
-      expect(MockEventSource).toHaveBeenCalled()
+      expect(MockEventSource).toHaveBeenCalledWith(streamUrl)
       expect(result.current.eventSource).not.toBeNull()
     })
+  })
+
+  it('should not create a second EventSource if already connected', async () => {
+    const { result } = renderHook(() => useSSEStreaming({}))
+    await act(async () => {
+      result.current.connect('/stream/1')
+      result.current.connect('/stream/2')
+    })
+    expect(MockEventSource).toHaveBeenCalledTimes(1)
+  })
+
+  it('should call setTokensUsed when metadata.tokens is 0', async () => {
+    const spy = vi.spyOn(useGenerationStore.getState(), 'setTokensUsed')
+    const { result } = renderHook(() => useSSEStreaming({}))
+
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    expect(inst?.onmessage).toBeTruthy()
+
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'metadata', tokens: 0 }),
+      } as MessageEvent)
+    })
+
+    expect(spy).toHaveBeenCalledWith(0)
+    spy.mockRestore()
+  })
+
+  it('should debounce onerror before calling onError callback', async () => {
+    vi.useFakeTimers()
+    const onError = vi.fn()
+    const { result } = renderHook(() => useSSEStreaming({ onError }))
+
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    inst.readyState = 1
+
+    act(() => {
+      inst.onerror!()
+      inst.onerror!()
+    })
+
+    await act(async () => {
+      vi.advanceTimersByTime(600)
+    })
+
+    expect(onError).toHaveBeenCalledTimes(1)
+    vi.useRealTimers()
   })
 
   it('should call disconnect and close EventSource', async () => {

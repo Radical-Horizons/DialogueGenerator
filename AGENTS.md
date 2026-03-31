@@ -42,7 +42,6 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 
 | Subagent | Model | Purpose |
 |----------|-------|---------|
-| `code-review-orchestrator` | inherit | Full-repo review, launches all reviewers in parallel |
 | `api-contracts-reviewer` | fast | Schema/router/client drift |
 | `graph-editor-reviewer` | inherit | Zustand slices, React Flow, stale closures |
 | `llm-pipeline-reviewer` | fast | Streaming SSE, cost governance, LLM clients |
@@ -51,6 +50,8 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 | `backend-services-reviewer` | fast | services/ layer, Notion sync, Unity export |
 | `test-coverage-reviewer` | fast | pytest + Vitest coverage gaps |
 | `transcript-history-researcher` | fast | Optional helper to grep/mining past Cursor session JSONL on disk (e.g. rules/process retros) |
+
+**Full-repo review (no separate orchestrator agent)** : run **Composer** with seven specialist reviewers in parallel, or the parent sends **seven `Task` calls in one turn** (`api-contracts-reviewer`, `graph-editor-reviewer`, `llm-pipeline-reviewer`, `context-gdd-reviewer`, `security-reviewer`, `backend-services-reviewer`, `test-coverage-reviewer`). Then synthesize. A single `Task` that “does all seven” in one child run is **not** equivalent to seven isolates.
 
 **Cursor session files on disk** : only relevant when you are explicitly mining *past chats* for patterns. Use whatever works (`Task` + subagent, `scripts/peek_cursor_transcript.py`, or targeted grep). Goal is to improve **this agent’s behavior in the repo**, not to maintain a history *of* subagents.
 
@@ -75,9 +76,9 @@ See `.cursor/rules/workflow.mdc` for the full command reference (including **Vit
 
 ## Learned Workspace Facts
 
-- Graph invariants (flush, `graphViewStore`, API) → **`.cursor/rules/graph_editor.mdc`**. `mergeFormDataIntoNodeData()` / `targetNode` below stay the short reminder.
-- Use `mergeFormDataIntoNodeData()` instead of spread (`{ ...nodeData, ...formValues }`) when flushing `NodeEditorPanel` form state on selection change; the spread overwrites `choices[N].targetNode` written by `connectNodes`, breaking the edge connection.
-- Node generation connection flow: API response → `connectNodes(parentId, newId, targetChoiceIndex, 'choice')` in `generationSlice` → `choices[N].targetNode` set in `edgeSlice` → `NodeEditorPanel` selection-change flush must preserve this field via `mergeFormDataIntoNodeData`.
+- Graph invariants (flush, `graphViewStore`, API) → **`.cursor/rules/graph_editor.mdc`**. `mergeNodeFormIntoStoreData()` / `mergeDialogueNodeFormIntoStoreData()` / `targetNode` below stay the short reminder.
+- Use `mergeNodeFormIntoStoreData()` (dialogue: `mergeDialogueNodeFormIntoStoreData()`) instead of spread (`{ ...nodeData, ...formValues }`) when flushing `NodeEditorPanel` form state on selection change; the spread overwrites `choices[N].targetNode` written by `connectNodes`, breaking the edge connection.
+- Node generation connection flow: API response → `connectNodes(parentId, newId, targetChoiceIndex, 'choice')` in `generationSlice` → `choices[N].targetNode` set in `edgeSlice` → `NodeEditorPanel` selection-change flush must preserve this field via `mergeDialogueNodeFormIntoStoreData` / `mergeNodeFormIntoStoreData`.
 - Frontend lint baseline is zero error: `npm --prefix frontend run lint` must stay green, and stale `eslint-disable` directives should be removed instead of normalized.
 - GraphEditor JSX is split into dedicated components in `frontend/src/components/graph/`: `GraphEditorHeader` (toolbar), `GraphValidationPanel` (overlay), `DialogueCostModal`, `GraphExportFormatDialog`. `GraphEditorHeader` calls `useGraphStore()` internally to avoid prop drilling.
 - The `exportToUnity` store action (in `persistenceSlice`) serializes graph nodes to Unity JSON format; its trigger button lives in `GraphEditorHeader` and downloads a `.json` file named after `dialogueMetadata.filename`.

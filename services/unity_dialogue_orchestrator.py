@@ -5,6 +5,7 @@ permettant de l'utiliser à la fois pour l'endpoint REST et le streaming SSE.
 """
 import logging
 import asyncio
+import numbers
 from typing import AsyncGenerator, Callable, Dict, Any, Optional
 from dataclasses import dataclass
 
@@ -14,6 +15,7 @@ from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
+from services.context_truncator import ContextTruncator
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
 from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
@@ -22,6 +24,31 @@ from factories.llm_factory import LLMClientFactory
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueGenerationResponse
 
 logger = logging.getLogger(__name__)
+
+
+def _coerce_context_text(summary: object) -> str:
+    """Convertit le résumé de contexte en ``str`` (mocks de tests inclus)."""
+    if isinstance(summary, str):
+        return summary
+    if summary is None:
+        return ""
+    return str(summary)
+
+
+def _safe_int_usage(value: object, default: int = 0) -> int:
+    """Retourne un entier d'usage LLM ; ignore les mocks et types non numériques."""
+    if isinstance(value, numbers.Integral) and not isinstance(value, bool):
+        return int(value)
+    if isinstance(value, numbers.Real) and not isinstance(value, bool):
+        return int(value)
+    return default
+
+
+def _safe_float_cost(value: object, default: float = 0.0) -> float:
+    """Retourne un coût numérique ; ignore les mocks et types non numériques."""
+    if isinstance(value, numbers.Real) and not isinstance(value, bool):
+        return float(value)
+    return default
 
 
 @dataclass
@@ -152,8 +179,15 @@ class UnityDialogueOrchestrator:
                 include_dialogue_type=True,
                 element_modes=context_selections_dict.get("_element_modes")
             )
-            # Sérialiser en texte pour le LLM
-            context_summary = context_builder.serialize_context_to_text(structured_context)
+            # Sérialiser en texte pour le LLM, puis appliquer le plafond utilisateur (budget contexte)
+            context_summary = _coerce_context_text(
+                context_builder.serialize_context_to_text(structured_context)
+            )
+            _trunc = ContextTruncator()
+            if _trunc.count_tokens(context_summary) > request_data.max_context_tokens:
+                context_summary = _trunc.truncate_context(
+                    context_summary, request_data.max_context_tokens
+                )
             
             # 5. Construire le prompt Unity via le builder unique
             prompt_input = PromptInput(
@@ -365,15 +399,19 @@ class UnityDialogueOrchestrator:
             # Extraire le reasoning trace du client LLM si disponible
             reasoning_trace = getattr(llm_client, 'reasoning_trace', None)
             
-            # Calculer le coût (si disponible)
-            cost = 0.0
-            if hasattr(llm_client, 'last_call_cost'):
-                cost = llm_client.last_call_cost or 0.0
-            elif hasattr(self.usage_service, 'get_last_call_cost'):
-                cost = self.usage_service.get_last_call_cost() or 0.0
+            cost = _safe_float_cost(getattr(llm_client, "last_call_cost", 0.0), 0.0)
+            usage_pt = _safe_int_usage(getattr(llm_client, "last_usage_prompt_tokens", 0), 0)
+            usage_ct = _safe_int_usage(getattr(llm_client, "last_usage_completion_tokens", 0), 0)
             
             # Metadata (Story 1.16: fallback si utilisé)
-            metadata_data: Dict[str, Any] = {'tokens': estimated_tokens, 'cost': cost}
+            metadata_data: Dict[str, Any] = {
+                "tokens": estimated_tokens,
+                "prompt_tokens_estimated": estimated_tokens,
+                "usage_prompt_tokens": usage_pt,
+                "usage_completion_tokens": usage_ct,
+                "cost_usd": cost,
+                "cost": cost,
+            }
             fallback_info = getattr(llm_client, '_last_used_fallback', None)
             if fallback_info and isinstance(fallback_info, (list, tuple)) and len(fallback_info) >= 2:
                 metadata_data['used_fallback'] = True

@@ -23,15 +23,12 @@ const apiClient: AxiosInstance = axios.create({
 
 /**
  * Intercepteur pour ajouter le token d'authentification.
- * En développement, on n'envoie pas de token (l'auth est désactivée côté serveur).
+ * Si un access_token est présent (login), il est toujours envoyé — y compris en dev,
+ * pour le cas où DISABLE_AUTH=false en local. Sans token, le backend avec DISABLE_AUTH=true
+ * accepte quand même les routes protégées (utilisateur mock).
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // En développement, ne pas envoyer de token (auth désactivée)
-    if (import.meta.env.DEV) {
-      return config
-    }
-    
     const token = localStorage.getItem('access_token')
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`

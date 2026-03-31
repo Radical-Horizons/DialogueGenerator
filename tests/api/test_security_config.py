@@ -21,6 +21,7 @@ def test_security_config_default_values():
         assert config.environment == "development"
         assert config.is_development is True
         assert config.is_production is False
+        assert config.disable_auth is True
 
 
 def test_security_config_from_env():
