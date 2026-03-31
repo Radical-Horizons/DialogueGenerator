@@ -5,6 +5,8 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, status
 
+from api.routers.auth import get_current_user
+
 from api.dependencies import get_llm_usage_service, get_request_id
 from api.exceptions import InternalServerException
 from api.schemas.llm_usage import (
@@ -31,7 +33,7 @@ from services.llm_usage_service import LLMUsageService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _context_section_usage_to_response(

@@ -82,6 +82,30 @@ describe('mergeDialogueNodeFormIntoStoreData', () => {
     expect(out.choices?.[0]?.choiceId).toBe('0')
     expect(out.line).toBe('edited')
   })
+
+  it('falls back to store choice by index when form choiceId is absent from map', () => {
+    const nodeData: Record<string, unknown> = {
+      id: 'D1',
+      line: 'x',
+      choices: [
+        { text: 'c0', choiceId: 'stable', targetNode: 'FROM_STORE' },
+      ] as Choice[],
+    }
+    const formValues: DialogueNodeData = {
+      id: 'D1',
+      line: 'x',
+      choices: [
+        {
+          text: 'c0',
+          choiceId: 'unknown-id',
+          targetNode: '',
+        },
+      ],
+    }
+    const out = mergeDialogueNodeFormIntoStoreData(nodeData, formValues) as DialogueNodeData
+    expect(out.choices?.[0]?.targetNode).toBe('FROM_STORE')
+    expect(out.choices?.[0]?.choiceId).toBe('stable')
+  })
   it('takes nextNode from store when defined on nodeData', () => {
     const nodeData: Record<string, unknown> = {
       id: 'D1',

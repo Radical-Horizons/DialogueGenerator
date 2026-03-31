@@ -160,3 +160,20 @@ def test_update_budget(cost_governance_service, mock_budget_repository):
     assert call_args[0][1] == current_month  # month
     assert call_args[0][2] == 65.0  # amount (50 + 15 = 65)
     assert call_args[0][3] == 100.0  # quota (préservé)
+
+
+def test_check_budget_quota_zero_means_unlimited(cost_governance_service, mock_budget_repository):
+    """Quota 0 (ou absent) = pas de plafond : générations autorisées."""
+    current_month = datetime.now().strftime("%Y-%m")
+    mock_budget_repository.get_budget.return_value = {
+        "month": current_month,
+        "amount": 0.0,
+        "quota": 0.0,
+        "updated_at": datetime.now().isoformat(),
+    }
+
+    result = cost_governance_service.check_budget(user_id="user_1", estimated_cost=50.0)
+
+    assert result["allowed"] is True
+    assert result["percentage"] == 0.0
+    assert result["warning"] is None

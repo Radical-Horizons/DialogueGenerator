@@ -74,9 +74,9 @@ export interface UseGenerationHandlersReturn {
   handleResetInstructions: () => void
   /** Réinitialiser les sélections */
   handleResetSelections: () => void
-  /** Prévisualiser (TODO) */
+  /** Raccourci : prévisualisation via le flux principal / graphe */
   handlePreview: () => void
-  /** Exporter Unity (TODO) */
+  /** Raccourci : export via l’éditeur graphe ou liste Unity */
   handleExportUnity: () => void
 }
 
@@ -283,13 +283,11 @@ export function useGenerationHandlers(
   }, [clearSelections, toast])
 
   const handlePreview = useCallback(() => {
-    // TODO: Implémenter prévisualisation
-    toast('Prévisualisation à implémenter', 'info')
+    toast('Utilisez l’aperçu prompt ou l’éditeur de graphe pour prévisualiser le dialogue.', 'info')
   }, [toast])
 
   const handleExportUnity = useCallback(() => {
-    // TODO: Implémenter export Unity
-    toast('Export Unity à implémenter', 'info')
+    toast('Exportez depuis l’éditeur de graphe (Unity JSON) ou la liste des dialogues.', 'info')
   }, [toast])
 
   return {

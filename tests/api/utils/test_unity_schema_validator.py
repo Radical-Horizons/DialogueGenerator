@@ -2,6 +2,7 @@
 
 Story 16.1 : schéma v1.1.0 (racine objet, schemaVersion, choiceId requis).
 """
+import builtins
 import json
 import pytest
 from pathlib import Path
@@ -137,16 +138,24 @@ class TestUnitySchemaValidator:
                 assert isinstance(errors, list)
     
     def test_validate_unity_json_import_error(self, tmp_path):
-        """Test de validation avec jsonschema non installé."""
+        """Test de validation avec jsonschema non installé (repli UnityJsonRenderer)."""
         mock_schema = {"type": "array"}
-        
+
         with patch("api.utils.unity_schema_validator.load_unity_schema", return_value=mock_schema):
-            with patch("builtins.__import__", side_effect=ImportError("No module named 'jsonschema'")):
+            real_import = builtins.__import__
+
+            with patch("builtins.__import__") as mock_import:
+
+                def import_side_effect(name: str, *args, **kwargs):
+                    if name == "jsonschema":
+                        raise ImportError("No module named 'jsonschema'")
+                    return real_import(name, *args, **kwargs)
+
+                mock_import.side_effect = import_side_effect
                 json_data = [{"id": "node-start"}]
-                
+
                 is_valid, errors = validate_unity_json(json_data)
-                
-                # Graceful degradation
+
                 assert is_valid is True
                 assert errors == []
 

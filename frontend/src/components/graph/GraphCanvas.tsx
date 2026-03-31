@@ -37,30 +37,7 @@ import {
 import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
-
-/** Déduit l'index du choix à partir du sourceHandle (choice:N ou choice:__idx_N ou choice:choiceId). */
-function getChoiceIndexFromHandle(
-  sourceNodeId: string,
-  sourceHandleId: string,
-  nodes: Array<{ id: string; data?: { choices?: Array<{ choiceId?: string }> } }>
-): number | undefined {
-  if (sourceHandleId.startsWith('choice-')) {
-    const n = parseInt(sourceHandleId.replace('choice-', ''), 10)
-    return Number.isNaN(n) ? undefined : n
-  }
-  if (sourceHandleId.startsWith('choice:')) {
-    const id = sourceHandleId.slice(7)
-    if (id.startsWith('__idx_')) {
-      const n = parseInt(id.replace('__idx_', ''), 10)
-      return Number.isNaN(n) ? undefined : n
-    }
-    const source = nodes.find((n) => n.id === sourceNodeId)
-    const choices = (source?.data?.choices ?? []) as Array<{ choiceId?: string }>
-    const idx = choices.findIndex((c, i) => (c?.choiceId ?? `__idx_${i}`) === id)
-    return idx >= 0 ? idx : undefined
-  }
-  return undefined
-}
+import { getChoiceIndexFromSourceHandle } from '../../utils/choiceHandleIndex'
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
 const GraphCanvasInner = memo(function GraphCanvasInner() {
@@ -257,7 +234,11 @@ export const GraphCanvas = memo(function GraphCanvas() {
   })
 
   const choiceIndexFromDrop = dropChoiceMenu
-    ? getChoiceIndexFromHandle(dropChoiceMenu.sourceNodeId, dropChoiceMenu.sourceHandleId, storeNodesForChoice)
+    ? getChoiceIndexFromSourceHandle(
+        dropChoiceMenu.sourceNodeId,
+        dropChoiceMenu.sourceHandleId,
+        storeNodesForChoice
+      )
     : undefined
 
   const handleDropChoiceCreateEmpty = useCallback(() => {

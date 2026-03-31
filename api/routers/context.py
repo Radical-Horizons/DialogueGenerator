@@ -2,6 +2,8 @@
 import logging
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status
+
+from api.routers.auth import get_current_user
 from api.schemas.context import (
     CharacterListResponse,
     CharacterResponse,
@@ -66,7 +68,7 @@ from services.trait_catalog_service import TraitCatalogService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get(
@@ -1019,6 +1021,7 @@ async def get_context_suggestions(
 @router.get(
     "/rules",
     response_model=RulesListResponse,
+    response_model_by_alias=True,
     status_code=status.HTTP_200_OK,
 )
 async def list_context_rules(
@@ -1043,6 +1046,7 @@ async def list_context_rules(
 @router.post(
     "/rules",
     response_model=ContextRule,
+    response_model_by_alias=True,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_context_rule(
@@ -1076,6 +1080,7 @@ async def create_context_rule(
 @router.put(
     "/rules/{rule_id}",
     response_model=ContextRule,
+    response_model_by_alias=True,
     status_code=status.HTTP_200_OK,
 )
 async def update_context_rule(
@@ -1143,6 +1148,7 @@ async def delete_context_rule(
 @router.get(
     "/rules/by-dialogue-type/{dialogue_type}",
     response_model=DialogueTypeRulesResponse,
+    response_model_by_alias=True,
     status_code=status.HTTP_200_OK,
 )
 async def get_context_rules_by_dialogue_type(
@@ -1163,6 +1169,7 @@ async def get_context_rules_by_dialogue_type(
 @router.put(
     "/rules/by-dialogue-type/{dialogue_type}",
     response_model=DialogueTypeRulesResponse,
+    response_model_by_alias=True,
     status_code=status.HTTP_200_OK,
 )
 async def put_context_rules_by_dialogue_type(

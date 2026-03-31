@@ -20,6 +20,8 @@ import json
 import asyncio
 from typing import Annotated, AsyncGenerator, Dict, Any
 from fastapi import APIRouter, Depends, Request, HTTPException
+
+from api.routers.auth import get_current_user
 from fastapi.responses import StreamingResponse
 from api.schemas.generation_jobs import GenerationJobCreate, GenerationJobResponse, GenerationJobStatus
 from api.services.generation_job_manager import get_job_manager
@@ -28,7 +30,7 @@ from api.dependencies import get_unity_dialogue_orchestrator
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 # Constante pour timeout d'annulation (10 secondes) - Story 0.8
 CANCEL_TIMEOUT_SECONDS = 10
@@ -84,17 +86,40 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
     
     from datetime import datetime, timezone
     
-    # FIX: Vérifier le statut AVANT de mettre à "running" pour éviter les générations multiples
-    if job.get("status") == "completed":
+    st_initial = job.get("status")
+    if st_initial == "completed":
         logger.warning(f"Job {job_id} déjà complété, arrêt du stream")
         yield f'data: {json.dumps({"type": "error", "message": "Job déjà complété"})}\n\n'
         return
-    
+    if st_initial in ("error", "cancelled"):
+        yield (
+            f'data: {json.dumps({"type": "error", "message": f"Job en état terminal: {st_initial}"})}\n\n'
+        )
+        return
+
+    claimed = await job_manager.try_claim_stream_job(job_id)
+    if not claimed:
+        job_refresh = job_manager.get_job(job_id)
+        st_now = job_refresh.get("status") if job_refresh else None
+        if st_now == "running":
+            msg = "Un flux SSE est déjà actif pour ce job"
+        elif st_now == "completed":
+            msg = "Job déjà complété"
+        else:
+            msg = "Impossible de démarrer le flux pour ce job"
+        logger.warning(
+            "Stream non réservé pour job %s (statut=%s)",
+            job_id,
+            st_now,
+            extra={"job_id": job_id, "status": st_now},
+        )
+        yield f'data: {json.dumps({"type": "error", "message": msg})}\n\n'
+        return
+
     try:
         current_task = asyncio.current_task()
         if current_task is not None:
             job_manager.register_task(job_id, current_task)
-        job_manager.update_status(job_id, "running")
         
         # Construire request_data depuis job params
         from api.schemas.dialogue import GenerateUnityDialogueRequest

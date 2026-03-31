@@ -315,7 +315,8 @@ class OpenAIClient(ILLMClient):
             error_message = None
             parsed_output: Optional[Union[BaseModel, str]] = None
             raw_response_str: Optional[str] = None
-            
+            completed_response: Optional[Any] = None
+
             try:
                 logger.info(f"Début de la génération streaming de la variante {i+1}/{k} pour le prompt.")
                 
@@ -326,7 +327,6 @@ class OpenAIClient(ILLMClient):
                 stream_parser = OpenAIStreamParser(reasoning_callback=self.reasoning_callback)
                 function_call_arguments: Optional[str] = None
                 item_id: Optional[str] = None
-                completed_response: Optional[Any] = None
                 
                 async for chunk in stream_parser.parse_stream(stream):
                     # Yielder le chunk pour feedback temps réel (priorité sur callback)
@@ -416,35 +416,39 @@ class OpenAIClient(ILLMClient):
             finally:
                 # Calculer la durée
                 duration_ms = int((time.time() - start_time) * 1000)
-                
-                # Enregistrer l'utilisation si le service est disponible
+
+                # Enregistrer l'utilisation si le service est disponible (pas de ligne vide si stream interrompu)
                 if self.usage_service:
                     try:
-                        # Récupérer les métriques depuis completed_response si disponible
                         prompt_tokens = 0
                         completion_tokens = 0
                         total_tokens = 0
-                        
+
                         if completed_response:
                             usage_metrics = OpenAIUsageTracker.extract_usage_metrics(completed_response)
                             prompt_tokens = usage_metrics["prompt_tokens"]
                             completion_tokens = usage_metrics["completion_tokens"]
                             total_tokens = usage_metrics["total_tokens"]
-                        
-                        self.usage_service.track_usage(
-                            request_id=self.request_id,
-                            model_name=self.model_name,
-                            prompt_tokens=prompt_tokens,
-                            completion_tokens=completion_tokens,
-                            total_tokens=total_tokens,
-                            duration_ms=duration_ms,
-                            success=success,
-                            endpoint=self.endpoint,
-                            k_variants=k,
-                            error_message=error_message,
-                            prompt=full_prompt_str,
-                            response=raw_response_str,
-                        )
+
+                        if completed_response is None and not success:
+                            logger.debug(
+                                "Skip track_usage: variante streaming sans réponse complète (tokens=0)"
+                            )
+                        else:
+                            self.usage_service.track_usage(
+                                request_id=self.request_id,
+                                model_name=self.model_name,
+                                prompt_tokens=prompt_tokens,
+                                completion_tokens=completion_tokens,
+                                total_tokens=total_tokens,
+                                duration_ms=duration_ms,
+                                success=success,
+                                endpoint=self.endpoint,
+                                k_variants=k,
+                                error_message=error_message,
+                                prompt=full_prompt_str,
+                                response=raw_response_str,
+                            )
                     except Exception as tracking_error:
                         logger.error(
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",

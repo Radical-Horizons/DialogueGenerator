@@ -36,6 +36,40 @@ export function getErrorMessage(error: unknown): string {
       return 'Impossible de se connecter au serveur. Vérifiez que le backend est démarré et accessible.'
     }
     
+    const rawData = axiosError.response?.data as Record<string, unknown> | undefined
+    const detail = rawData?.detail
+    if (detail !== undefined && detail !== null && !errorData) {
+      if (typeof detail === 'string') {
+        return detail
+      }
+      if (Array.isArray(detail)) {
+        const parts = detail
+          .map((item: unknown) =>
+            typeof item === 'object' && item !== null && 'msg' in item
+              ? String((item as { msg: unknown }).msg)
+              : String(item)
+          )
+          .filter(Boolean)
+        if (parts.length > 0) {
+          return parts.join('\n')
+        }
+      }
+    }
+    const flatMessage = typeof rawData?.message === 'string' ? rawData.message : null
+    const validationReport = rawData?.validationReport
+    if (flatMessage && Array.isArray(validationReport)) {
+      const lines = (validationReport as { message?: string }[])
+        .map((row) => row.message)
+        .filter((m): m is string => typeof m === 'string' && m.length > 0)
+      if (lines.length > 0) {
+        return `${flatMessage}\n\n${lines.slice(0, 5).join('\n')}`
+      }
+      return flatMessage
+    }
+    if (flatMessage && !errorData) {
+      return flatMessage
+    }
+
     if (errorData) {
       let message = errorData.message || axiosError.message || 'Une erreur est survenue'
       

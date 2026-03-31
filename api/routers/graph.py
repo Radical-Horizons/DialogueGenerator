@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Request, status
+
+from api.routers.auth import get_current_user
 from cachetools import TTLCache
 from api.schemas.graph import (
     LoadGraphRequest,
@@ -167,7 +169,11 @@ def _try_compute_context_relevance(
         )
 
 
-router = APIRouter(prefix="/api/v1/unity-dialogues/graph", tags=["Graph Editor"])
+router = APIRouter(
+    prefix="/api/v1/unity-dialogues/graph",
+    tags=["Graph Editor"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.post(

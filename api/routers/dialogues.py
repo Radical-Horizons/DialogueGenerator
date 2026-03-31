@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Annotated, Dict, Any
 from fastapi import APIRouter, Depends, Request, status
+
+from api.routers.auth import get_current_user
 from starlette.requests import Request
 from api.schemas.dialogue import (
     EstimateTokensRequest,
@@ -40,7 +42,7 @@ from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _transform_openai_error(error: Exception, request_id: str) -> OpenAIException:

@@ -57,6 +57,8 @@ def test_security_config_validate_production_default_key():
     """Test que la validation en production rejette la clé par défaut."""
     with patch.dict(os.environ, {
         "ENVIRONMENT": "production",
+        "DISABLE_AUTH": "false",
+        "CORS_ORIGINS": "https://app.example.com",
         "JWT_SECRET_KEY": DEFAULT_JWT_SECRET_KEY
     }, clear=True):
         config = SecurityConfig()
@@ -69,11 +71,38 @@ def test_security_config_validate_production_custom_key():
     """Test que la validation en production accepte une clé personnalisée."""
     with patch.dict(os.environ, {
         "ENVIRONMENT": "production",
+        "DISABLE_AUTH": "false",
+        "CORS_ORIGINS": "https://app.example.com",
         "JWT_SECRET_KEY": "custom-secret-key-123"
     }, clear=True):
         config = SecurityConfig()
         # Ne doit pas lever d'exception avec une clé personnalisée
         config.validate_config()
+
+
+def test_security_config_validate_production_rejects_disable_auth():
+    """Test que DISABLE_AUTH=true est interdit en production."""
+    with patch.dict(os.environ, {
+        "ENVIRONMENT": "production",
+        "DISABLE_AUTH": "true",
+        "CORS_ORIGINS": "https://app.example.com",
+        "JWT_SECRET_KEY": "custom-secret-key-123",
+    }, clear=True):
+        config = SecurityConfig()
+        with pytest.raises(ValueError, match="DISABLE_AUTH"):
+            config.validate_config()
+
+
+def test_security_config_validate_production_requires_cors():
+    """Test que CORS_ORIGINS est obligatoire en production."""
+    with patch.dict(os.environ, {
+        "ENVIRONMENT": "production",
+        "DISABLE_AUTH": "false",
+        "JWT_SECRET_KEY": "custom-secret-key-123",
+    }, clear=True):
+        config = SecurityConfig()
+        with pytest.raises(ValueError, match="CORS_ORIGINS"):
+            config.validate_config()
 
 
 def test_get_security_config_singleton():

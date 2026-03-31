@@ -67,6 +67,9 @@ class SecurityConfig(BaseSettings):
     
     # Environment
     environment: str = "development"
+
+    # Dev only: skip JWT and use mock user (ignored when ENVIRONMENT=production)
+    disable_auth: bool = True
     
     @property
     def is_production(self) -> bool:
@@ -96,6 +99,16 @@ class SecurityConfig(BaseSettings):
             ValueError: Si la configuration est invalide en production.
         """
         if self.is_production:
+            if self.disable_auth:
+                raise ValueError(
+                    "DISABLE_AUTH ne peut pas être activé en production. "
+                    "Définissez DISABLE_AUTH=false (ou supprimez la variable)."
+                )
+            cors_origins = os.getenv("CORS_ORIGINS", "").strip()
+            if not cors_origins:
+                raise ValueError(
+                    "CORS_ORIGINS doit être défini (liste CSV d'origines) lorsque ENVIRONMENT=production."
+                )
             if self.jwt_secret_key == DEFAULT_JWT_SECRET_KEY:
                 raise ValueError(
                     "JWT_SECRET_KEY ne peut pas être la valeur par défaut en production. "

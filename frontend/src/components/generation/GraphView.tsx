@@ -9,8 +9,6 @@ import ReactFlow, {
   MiniMap,
   useNodesState,
   useEdgesState,
-  addEdge,
-  type Connection,
   type Node,
   type Edge,
   type NodeTypes,
@@ -224,13 +222,6 @@ export const GraphView = memo(function GraphView({
     []
   )
   
-  const onConnect = useCallback(
-    (params: Connection) => {
-      setEdges((eds) => addEdge(params, eds))
-    },
-    [setEdges]
-  )
-  
   const onNodeClick = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- signature requise par ReactFlow, usage prévu plus tard
     (_event: React.MouseEvent, _node: Node) => {
@@ -240,13 +231,35 @@ export const GraphView = memo(function GraphView({
   )
   
   return (
-    <div style={{ width: '100%', height: '100%', backgroundColor: theme.background.panel }}>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: theme.background.panel,
+      }}
+    >
+      <div
+        style={{
+          flexShrink: 0,
+          padding: '6px 10px',
+          fontSize: '0.78rem',
+          color: theme.text.secondary,
+          borderBottom: `1px solid ${theme.border.primary}`,
+          backgroundColor: theme.background.tertiary,
+        }}
+      >
+        Aperçu non persistant — les connexions ne sont pas enregistrées (éditer dans l’éditeur de graphe).
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChangeLocal}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        nodesConnectable={false}
+        edgesUpdatable={false}
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         fitView
@@ -263,6 +276,7 @@ export const GraphView = memo(function GraphView({
           style={{ backgroundColor: theme.background.secondary }}
         />
       </ReactFlow>
+      </div>
     </div>
   )
 })

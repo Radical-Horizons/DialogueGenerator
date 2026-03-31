@@ -23,8 +23,10 @@ logger = logging.getLogger(__name__)
 security_config = get_security_config()
 
 router = APIRouter()
-# En développement, rendre le security optionnel pour permettre l'accès sans token
-security = HTTPBearer(auto_error=False) if security_config.is_development else HTTPBearer()
+# Bearer optionnel uniquement en dev avec DISABLE_AUTH=true ; sinon erreur 403 si header absent
+security = HTTPBearer(auto_error=False) if (
+    security_config.is_development and security_config.disable_auth
+) else HTTPBearer()
 auth_service = AuthService()
 _is_production = security_config.is_production
 _cookie_domain = None  # Peut être étendu via config si nécessaire
@@ -119,9 +121,11 @@ async def get_current_user(
     Raises:
         AuthenticationException: Si le token est invalide ou expiré (production uniquement).
     """
-    # En développement, retourner un utilisateur mock sans vérifier le token
-    if security_config.is_development:
-        logger.debug("Mode développement: authentification désactivée, retour utilisateur mock")
+    # Développement + DISABLE_AUTH=true : utilisateur mock sans JWT
+    if security_config.is_development and security_config.disable_auth:
+        logger.debug(
+            "DISABLE_AUTH=true: JWT ignoré, utilisateur mock (développement uniquement)"
+        )
         return {
             "id": "1",
             "username": "admin",

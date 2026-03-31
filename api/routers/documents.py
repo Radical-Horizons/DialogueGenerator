@@ -34,7 +34,7 @@ from services.configuration_service import ConfigurationService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 META_FILENAME_SUFFIX = ".meta"
 LAYOUT_META_SUFFIX = ".layout.meta"
@@ -176,7 +176,6 @@ def _first_missing_choice_id_path(document: dict) -> str | None:
     status_code=status.HTTP_200_OK,
 )
 async def check_migration(
-    _user: Annotated[dict, Depends(get_current_user)],
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> CheckMigrationResponse:
@@ -278,7 +277,6 @@ def _resolve_layout_base(
 )
 async def get_document(
     document_id: str,
-    _user: Annotated[dict, Depends(get_current_user)],
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> DocumentGetResponse:
@@ -332,7 +330,6 @@ async def get_document(
 )
 async def get_layout(
     document_id: str,
-    _user: Annotated[dict, Depends(get_current_user)],
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> LayoutGetResponse:
@@ -384,7 +381,6 @@ async def get_layout(
 async def put_layout(
     document_id: str,
     body: PutLayoutRequest,
-    _user: Annotated[dict, Depends(get_current_user)],
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> PutLayoutResponse | JSONResponse:
@@ -467,7 +463,6 @@ async def put_layout(
 async def put_document(
     document_id: str,
     body: PutDocumentRequest,
-    _user: Annotated[dict, Depends(get_current_user)],
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
     x_validation_mode: Annotated[str | None, Header(alias="X-Validation-Mode")] = None,
@@ -578,7 +573,6 @@ async def put_document(
 )
 async def delete_document(
     document_id: str,
-    _user: Annotated[dict, Depends(get_current_user)],
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ):

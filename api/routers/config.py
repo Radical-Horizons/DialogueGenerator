@@ -2,6 +2,8 @@
 import logging
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status, Query
+
+from api.routers.auth import get_current_user
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from api.dependencies import (
@@ -33,7 +35,7 @@ from core.context.context_builder import ContextBuilder
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 class LLMConfigResponse(BaseModel):

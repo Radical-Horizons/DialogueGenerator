@@ -306,10 +306,13 @@ if limiter is not None:
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
 is_production_env = os.getenv("ENVIRONMENT", "development") == "production"
 
-# En production, lire depuis CORS_ORIGINS (format CSV)
+# En production, lire depuis CORS_ORIGINS (format CSV) — obligatoire (validé aussi dans SecurityConfig.validate_config)
 # IMPORTANT: Quand allow_credentials=True, on ne peut pas utiliser "*" - il faut spécifier les origines
-if is_production_env and cors_origins_env:
-    cors_origins = [origin.strip() for origin in cors_origins_env.split(",")]
+if is_production_env:
+    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+    cors_origin_regex = None
+elif cors_origins_env:
+    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
     cors_origin_regex = None
 else:
     # En développement, accepter localhost et toutes les origines ngrok via regex
@@ -531,6 +534,9 @@ async def health_check_detailed() -> JSONResponse:
     Returns:
         Statut de santé détaillé avec vérification de toutes les dépendances (200 si healthy, 503 si unhealthy).
     """
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+
     from api.utils.health_check import perform_health_checks
     
     health_result = perform_health_checks(detailed=True)
@@ -582,6 +588,9 @@ app.include_router(gdd_notion_sync.router)
 @app.get("/debug/prompt-engine", tags=["Debug"])
 async def debug_prompt_engine() -> JSONResponse:
     """Expose basic PromptEngine debug info (development only)."""
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+
     import inspect
     import core.prompt.prompt_engine as pe_module
     from core.prompt.prompt_engine import PromptEngine

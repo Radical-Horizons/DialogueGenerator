@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Annotated, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, Request, status
+
+from api.routers.auth import get_current_user
 from api.schemas.dialogue import (
     UnityDialogueListResponse,
     UnityDialogueMetadata,
@@ -21,7 +23,7 @@ from services.configuration_service import ConfigurationService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _extract_title_from_json(json_data: list) -> Optional[str]:

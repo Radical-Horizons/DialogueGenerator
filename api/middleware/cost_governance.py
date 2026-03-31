@@ -1,6 +1,7 @@
 """Middleware pour la gouvernance des coûts LLM."""
 import json
 import logging
+import os
 from typing import Callable
 
 from fastapi import Request, Response, status
@@ -118,26 +119,28 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             # Erreurs de données (JSON invalide, clés manquantes, etc.)
             # Fail-safe: bloquer la génération pour protéger le budget
             logger.error(f"Erreur de données dans CostGovernanceMiddleware: {e}", exc_info=True)
+            _prod = os.getenv("ENVIRONMENT", "development") == "production"
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
                     "error": {
                         "code": "BUDGET_CHECK_ERROR",
                         "message": "Erreur lors de la vérification du budget. La génération a été bloquée pour protéger votre budget.",
-                        "details": {"error": str(e)}
+                        "details": {} if _prod else {"error": str(e)},
                     }
                 }
             )
         except Exception as e:
             # Erreur inattendue: fail-safe en bloquant la génération
             logger.error(f"Erreur inattendue dans CostGovernanceMiddleware: {e}", exc_info=True)
+            _prod = os.getenv("ENVIRONMENT", "development") == "production"
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
                     "error": {
                         "code": "BUDGET_CHECK_ERROR",
                         "message": "Erreur lors de la vérification du budget. La génération a été bloquée pour protéger votre budget.",
-                        "details": {"error": str(e)}
+                        "details": {} if _prod else {"error": str(e)},
                     }
                 }
             )

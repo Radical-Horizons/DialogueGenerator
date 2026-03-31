@@ -4,6 +4,8 @@ from datetime import date
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request
+
+from api.routers.auth import get_current_user
 from pydantic import BaseModel
 
 from api.dependencies import get_request_id
@@ -12,7 +14,11 @@ from constants import FilePaths
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/logs", tags=["Logs"])
+router = APIRouter(
+    prefix="/api/v1/logs",
+    tags=["Logs"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 # Schémas de requête/réponse

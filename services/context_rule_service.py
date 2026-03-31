@@ -314,7 +314,11 @@ class ContextRuleService:
             try:
                 with os.fdopen(tmp_fd, "w", encoding="utf-8") as f:
                     json.dump(
-                        {"rules": [r.model_dump() for r in rules]},
+                        {
+                            "rules": [
+                                r.model_dump(mode="json", by_alias=False) for r in rules
+                            ]
+                        },
                         f,
                         indent=2,
                         ensure_ascii=False,

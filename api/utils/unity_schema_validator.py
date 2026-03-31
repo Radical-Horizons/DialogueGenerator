@@ -6,8 +6,8 @@ disponible qu'en développement (pas en production).
 
 v1.1.0 (Story 16.1) : document racine = objet { schemaVersion, nodes } ;
 accepte aussi une liste (legacy) en la normalisant en document pour validation.
-Si le schéma est absent, les fonctions retournent des valeurs par défaut
-sans erreur (graceful degradation).
+Si le schéma JSON Schema est absent ou jsonschema indisponible, la validation
+structurée (utilisée par PUT documents) retombe sur ``UnityJsonRenderer.validate_nodes``.
 """
 import json
 import logging
@@ -15,6 +15,36 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
+
+
+def _validate_with_renderer_structured(
+    json_data: Union[List[Dict[str, Any]], Dict[str, Any]]
+) -> Tuple[bool, List[Dict[str, Any]]]:
+    """Valide via UnityJsonRenderer lorsque le schéma JSON Schema n'est pas utilisable.
+
+    Args:
+        json_data: Document ou liste de nœuds Unity.
+
+    Returns:
+        Tuple (is_valid, erreurs structurées code/message/path).
+    """
+    from services.json_renderer.unity_json_renderer import UnityJsonRenderer
+
+    try:
+        payload = _normalize_to_document(json_data)
+    except ValueError as exc:
+        return False, [{"code": "validation_error", "message": str(exc), "path": ""}]
+
+    nodes = payload.get("nodes")
+    if not isinstance(nodes, list):
+        return False, [{"code": "validation_error", "message": "nodes must be a list", "path": "nodes"}]
+
+    ok, messages = UnityJsonRenderer().validate_nodes(nodes)
+    if ok:
+        return True, []
+    return False, [
+        {"code": "validation_error", "message": msg, "path": ""} for msg in messages
+    ]
 
 # Chemin relatif depuis la racine du projet
 _SCHEMA_PATH = Path(__file__).parent.parent.parent / "docs" / "resources" / "dialogue-format.schema.json"
@@ -78,24 +108,26 @@ def validate_unity_json(json_data: Union[List[Dict[str, Any]], Dict[str, Any]]) 
         
     Returns:
         Tuple (is_valid, errors) où errors est la liste des messages d'erreur.
-        Si le schéma est absent, retourne (True, []) (graceful degradation).
+        Si le schéma fichier est absent, validation via ``UnityJsonRenderer``.
     """
     schema = load_unity_schema()
-    
+
     if schema is None:
-        # Schéma absent : pas d'erreur, juste pas de validation
-        return (True, [])
-    
+        ok, structured = _validate_with_renderer_structured(json_data)
+        if ok:
+            return True, []
+        return False, [str(e.get("message", "")) for e in structured]
+
     # Normalisation : document v1.1.0 uniquement (pas de rétrocompat v1.0)
     payload = _normalize_to_document(json_data)
-    
+
     try:
         import jsonschema
         from jsonschema import ValidationError
-        
+
         validator = jsonschema.Draft7Validator(schema)
         errors = []
-        
+
         for error in validator.iter_errors(payload):
             # Formater l'erreur de manière lisible
             path = " -> ".join(str(p) for p in error.path)
@@ -103,19 +135,22 @@ def validate_unity_json(json_data: Union[List[Dict[str, Any]], Dict[str, Any]]) 
             if path:
                 error_msg = f"[{path}] {error_msg}"
             errors.append(error_msg)
-        
+
         is_valid = len(errors) == 0
-        
+
         if not is_valid:
             logger.warning(f"Validation Unity échouée: {len(errors)} erreur(s)")
             for err in errors[:5]:  # Logger les 5 premières erreurs
                 logger.warning(f"  - {err}")
-        
+
         return (is_valid, errors)
-        
+
     except ImportError:
-        logger.warning("jsonschema non installé, validation Unity désactivée")
-        return (True, [])
+        logger.warning("jsonschema non installé, repli sur UnityJsonRenderer.validate_nodes")
+        ok, structured = _validate_with_renderer_structured(json_data)
+        if ok:
+            return True, []
+        return False, [str(e.get("message", "")) for e in structured]
     except Exception as e:
         logger.error(f"Erreur lors de la validation Unity: {e}")
         return (False, [f"Erreur de validation: {str(e)}"])
@@ -143,15 +178,16 @@ def validate_unity_json_structured(
         
     Returns:
         Tuple (is_valid, errors_structured) où errors_structured est une liste de
-        dicts avec clés "code", "message", "path". Si schéma absent, (True, []).
+        dicts avec clés "code", "message", "path". Si schéma fichier absent,
+        repli sur ``UnityJsonRenderer.validate_nodes``.
     """
     schema = load_unity_schema()
     if schema is None:
-        return (True, [])
-    
+        return _validate_with_renderer_structured(json_data)
+
     # Normalisation : document v1.1.0 uniquement (pas de rétrocompat v1.0)
     payload = _normalize_to_document(json_data)
-    
+
     try:
         import jsonschema
         validator = jsonschema.Draft7Validator(schema)
@@ -161,8 +197,8 @@ def validate_unity_json_structured(
         is_valid = len(errors_structured) == 0
         return (is_valid, errors_structured)
     except ImportError:
-        logger.warning("jsonschema non installé, validation Unity désactivée")
-        return (True, [])
+        logger.warning("jsonschema non installé, repli sur UnityJsonRenderer.validate_nodes")
+        return _validate_with_renderer_structured(json_data)
     except Exception as e:
         logger.error(f"Erreur lors de la validation Unity: {e}")
         return (False, [{"code": "validation_error", "message": str(e), "path": ""}])

@@ -5,6 +5,8 @@ from typing import Annotated, Dict
 
 from fastapi import APIRouter, Depends, Request, status
 
+from api.routers.auth import get_current_user
+
 from api.dependencies import get_cost_governance_service, get_llm_usage_service, get_request_id
 from api.exceptions import InternalServerException
 from api.schemas.costs import BudgetResponse, UpdateBudgetRequest, UsageResponse, DailyCost
@@ -13,7 +15,7 @@ from services.llm_usage_service import LLMUsageService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 # User ID par défaut (V1.0: pas d'authentification, utilisateur unique)
 DEFAULT_USER_ID = "default_user"

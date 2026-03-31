@@ -28,12 +28,15 @@ from services.gdd_notion_sync_service import GddNotionSyncService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/gdd-notion-sync", tags=["GDD Notion Sync"])
+router = APIRouter(
+    prefix="/api/v1/gdd-notion-sync",
+    tags=["GDD Notion Sync"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/config", response_model=GddNotionSyncConfigResponse)
 async def get_gdd_notion_config(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddNotionSyncConfigResponse:
     """Retourne la configuration sans secret."""
@@ -46,7 +49,6 @@ async def get_gdd_notion_config(
 @router.put("/config", response_model=GddNotionSyncConfigResponse)
 async def put_gdd_notion_config(
     body: GddNotionSyncConfigUpdate,
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddNotionSyncConfigResponse:
     """Met à jour la configuration (token optionnel, non renvoyé)."""
@@ -67,7 +69,6 @@ async def put_gdd_notion_config(
 
 @router.post("/test-connection", response_model=GddNotionConnectionTestResponse)
 async def test_gdd_notion_connection(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> GddNotionConnectionTestResponse:
@@ -78,7 +79,6 @@ async def test_gdd_notion_connection(
 
 @router.post("/sync", response_model=GddNotionSyncRunResponse)
 async def run_gdd_notion_sync(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
     request_id: Annotated[str, Depends(get_request_id)],
     full: Annotated[bool, Query(description="Sync complète : ignore le manifeste, archive puis miroir Notion→disque")] = False,
@@ -137,7 +137,6 @@ async def run_gdd_notion_sync(
     response_model=GddFullSyncCheckpointResponse,
 )
 async def get_gdd_full_sync_checkpoint(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddFullSyncCheckpointResponse:
     """Décrit si une reprise de sync complète est possible."""
@@ -150,7 +149,6 @@ async def get_gdd_full_sync_checkpoint(
     response_model=GddFullSyncCheckpointAbandonResponse,
 )
 async def delete_gdd_full_sync_checkpoint(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddFullSyncCheckpointAbandonResponse:
     """Supprime le checkpoint et le staging associé (sans lancer de sync)."""
@@ -163,7 +161,6 @@ async def delete_gdd_full_sync_checkpoint(
     response_model=GddFullSyncPauseResponse,
 )
 async def pause_gdd_full_sync(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddFullSyncPauseResponse:
     """Met en pause une synchronisation en cours (coopératif)."""
@@ -177,7 +174,6 @@ async def pause_gdd_full_sync(
     response_model=GddFullSyncPauseResponse,
 )
 async def unpause_gdd_full_sync(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddFullSyncPauseResponse:
     """Reprend après une pause."""
@@ -191,7 +187,6 @@ async def unpause_gdd_full_sync(
     response_model=GddFullSyncPauseResponse,
 )
 async def cancel_gdd_full_sync(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddFullSyncPauseResponse:
     """Annule la synchronisation en cours (débloque aussi une pause)."""
@@ -202,7 +197,6 @@ async def cancel_gdd_full_sync(
 
 @router.get("/status", response_model=GddNotionSyncStatusResponse)
 async def get_gdd_notion_status(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddNotionSyncStatusResponse:
     """Lit le dernier statut de sync (persisté)."""
@@ -212,7 +206,6 @@ async def get_gdd_notion_status(
 
 @router.get("/sync-progress", response_model=GddNotionSyncProgressResponse)
 async def get_gdd_notion_sync_progress(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
 ) -> GddNotionSyncProgressResponse:
     """Lit la progression d'une synchronisation en cours (polling)."""
@@ -222,7 +215,6 @@ async def get_gdd_notion_sync_progress(
 
 @router.get("/archives", response_model=GddArchivesListResponse)
 async def list_gdd_notion_archives(
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
     limit: Annotated[int, Query(ge=1, le=100, description="Nombre max de snapshots")] = 20,
 ) -> GddArchivesListResponse:
@@ -239,7 +231,6 @@ async def list_gdd_notion_archives(
 )
 async def restore_gdd_notion_archive(
     archive_id: str,
-    _user: Annotated[dict, Depends(get_current_user)],
     svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
     request_id: Annotated[str, Depends(get_request_id)],
     body: GddArchiveRestoreRequest | None = None,

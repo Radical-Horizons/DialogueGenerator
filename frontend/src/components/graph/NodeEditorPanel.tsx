@@ -37,6 +37,7 @@ import {
 } from '../../utils/graphNodeLayout'
 import {
   mergeNodeFormIntoStoreData,
+  mergeDialogueNodeFormIntoStoreData,
   connectionFingerprintFromNodeData,
   applyStoreConnectionFieldsToDialogueFormChoices,
 } from '../../utils/mergeNodeEditorForm'
@@ -343,24 +344,11 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     // tout en conservant les champs de connexion du store pour chaque choix (targetNode, test*Node)
     // pour ne pas déconnecter les autres choix (ex. choix #1) ni perdre la persistance.
     if (nodeType === 'dialogueNode' && formChoices.length >= storeChoices.length) {
-      const mergedChoices: Choice[] = formChoices.map((fc, i) => {
-        const storeChoice = storeChoices[i]
-        return {
-          ...fc,
-          targetNode: storeChoice?.targetNode,
-          testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
-          testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
-          testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,
-          testCriticalSuccessNode: storeChoice?.testCriticalSuccessNode ?? fc.testCriticalSuccessNode,
-        }
-      })
-      updateNode(selectedNodeId, {
-        data: {
-          ...selectedNode.data,
-          ...formData,
-          choices: mergedChoices,
-        },
-      })
+      const mergedData = mergeDialogueNodeFormIntoStoreData(
+        selectedNode.data as Record<string, unknown>,
+        formData
+      )
+      updateNode(selectedNodeId, { data: mergedData })
     }
     const state = useGraphStore.getState()
     const parentAfterSync = state.nodes.find((n) => n.id === selectedNodeId)

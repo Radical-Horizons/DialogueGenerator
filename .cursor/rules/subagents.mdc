@@ -1,0 +1,58 @@
+---
+description: Subagents Cursor — liste, usage et bonnes pratiques pour ce repo
+globs: []
+alwaysApply: false
+---
+
+## Subagents disponibles (`.cursor/agents/`)
+
+| Nom | Modèle | Scope principal | Quand l'utiliser |
+|-----|--------|-----------------|------------------|
+| `code-review-orchestrator` | inherit | Tout le repo | Review complète multi-zones en parallèle |
+| `api-contracts-reviewer` | fast | `api/routers/`, `api/schemas/`, `frontend/src/api/` | Drift schema/router/client, status codes |
+| `graph-editor-reviewer` | inherit | `frontend/src/store/*Slice*`, `components/graph/` | Zustand, React Flow, flush NodeEditorPanel |
+| `llm-pipeline-reviewer` | fast | `core/llm/`, `services/llm_*`, `api/routers/streaming.py` | Streaming SSE, coûts, token counting |
+| `context-gdd-reviewer` | fast | `core/context/`, `services/context_*`, `services/gdd_*` | Cache GDD, budget token, pipeline contexte |
+| `security-reviewer` | fast | `api/middleware/`, auth, secrets | JWT, CORS, secrets, injection |
+| `backend-services-reviewer` | fast | `services/`, `api/container.py` | Logique métier, Notion sync, Unity export |
+| `test-coverage-reviewer` | fast | `tests/`, `frontend/src/__tests__/` | Couverture manquante, qualité tests |
+| `transcript-history-researcher` | fast | `~/.cursor/.../agent-transcripts/` (hors git) | Optionnel : grep/mining sur JSONL de sessions pour rétro **comportement agent / rules** (pas un journal des subagents) |
+
+## Invocation
+
+```
+# Explicite — un seul subagent
+/graph-editor-reviewer vérifie les slices Zustand
+
+# Orchestré — revue complète
+/code-review-orchestrator revue complète du repo
+
+# Naturel
+Use the security-reviewer subagent on the auth module
+```
+
+## Règles de délégation
+
+- **Isoler** les tâches longues (exploration multi-dossiers, revue profonde) dans un subagent → contexte séparé
+- **Paralléliser** : envoyer plusieurs Task() dans le même message quand les zones sont indépendantes
+- **`model: fast`** pour les reviewers qui font surtout de la lecture/grep
+- **`model: inherit`** pour les reviewers qui ont besoin du même raisonnement que le parent (graph-editor, orchestrator)
+- **`readonly: true`** sur tous les reviewers — ils lisent, ils ne modifient pas
+
+## Création d'un nouveau subagent
+
+Fichier `.cursor/agents/<nom>.md` avec frontmatter YAML :
+```yaml
+---
+name: nom-du-subagent
+description: Rôle précis. Use when [condition spécifique].
+model: fast   # ou inherit
+readonly: true
+---
+```
+Le champ `description` est critique — c'est ce que lit l'agent parent pour décider de déléguer.
+
+## Anti-patterns à éviter
+- Ne pas créer de subagents génériques ("helper", "assistant")
+- Ne pas dupliquer la logique des slash commands pour des tâches simples one-shot
+- Ne pas lancer la suite de tests complète depuis un subagent (`vitest run` sans filtre = interdit) — voir `.cursor/rules/workflow.mdc`

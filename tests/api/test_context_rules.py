@@ -147,10 +147,11 @@ class TestContextRulesCRUD:
             }],
         )
         assert put_resp.status_code == 200
-        assert put_resp.json()["source"] == "specific"
-        assert put_resp.json()["dialogue_type"] == "salutation"
-        assert len(put_resp.json()["rules"]) == 1
-        assert put_resp.json()["rules"][0]["dialogue_type"] == "salutation"
+        put_data = put_resp.json()
+        assert put_data["source"] == "specific"
+        assert put_data["dialogueType"] == "salutation"
+        assert len(put_data["rules"]) == 1
+        assert put_data["rules"][0]["dialogueType"] == "salutation"
 
         # Un autre type reste en fallback global
         other = rules_client.get("/api/v1/context/rules/by-dialogue-type/confrontation")

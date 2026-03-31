@@ -4,6 +4,8 @@ from typing import Annotated
 from datetime import datetime
 from fastapi import APIRouter, Depends, status
 
+from api.routers.auth import get_current_user
+
 from api.dependencies import (
     get_narrative_guides_service,
     get_notion_import_service,
@@ -20,7 +22,11 @@ from api.utils.notion_cache import get_notion_cache
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/narrative-guides", tags=["narrative-guides"])
+router = APIRouter(
+    prefix="/api/narrative-guides",
+    tags=["narrative-guides"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get(

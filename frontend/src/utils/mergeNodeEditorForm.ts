@@ -26,15 +26,19 @@ export function mergeDialogueNodeFormIntoStoreData(
       .map((choice) => [choice.choiceId, choice] as const)
   )
   const mergedChoices: Choice[] = formChoices.map((fc, i) => {
-    // Avec choiceId explicite : uniquement la map (pas storeChoices[i], faux si l’ordre form ≠ store).
+    // choiceId en map ; si absent (form/store désalignés), repli index pour ne pas perdre targetNode.
     const storeChoice =
       typeof fc.choiceId === 'string' && fc.choiceId.trim() !== ''
-        ? storeChoicesById.get(fc.choiceId)
+        ? (storeChoicesById.get(fc.choiceId) ?? storeChoices[i])
         : storeChoices[i]
+    const targetNode =
+      storeChoice?.targetNode !== undefined && storeChoice.targetNode !== ''
+        ? storeChoice.targetNode
+        : fc.targetNode
     return {
       ...fc,
       choiceId: storeChoice?.choiceId ?? fc.choiceId,
-      targetNode: storeChoice?.targetNode,
+      targetNode,
       testCriticalFailureNode: storeChoice?.testCriticalFailureNode ?? fc.testCriticalFailureNode,
       testFailureNode: storeChoice?.testFailureNode ?? fc.testFailureNode,
       testSuccessNode: storeChoice?.testSuccessNode ?? fc.testSuccessNode,

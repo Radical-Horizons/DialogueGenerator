@@ -30,9 +30,16 @@ export function ContextTokenBudgetSection() {
     void refresh()
   }, [refresh])
 
+  /** Tokens réellement injectés dans le prompt (après troncature au budget). */
+  const contextTokens = data?.context_tokens ?? 0
+  /** Mesure « pleine sélection » (plafond technique), peut dépasser le budget utilisateur. */
   const selectionTokens = data?.selection_tokens ?? 0
-  const overBudget = selectionTokens > contextTokenBudgetMax
-  const pct = contextTokenBudgetMax > 0 ? Math.min(100, (selectionTokens / contextTokenBudgetMax) * 100) : 0
+  const overBudget =
+    contextTokenBudgetMax > 0 && contextTokens > contextTokenBudgetMax
+  const pct =
+    contextTokenBudgetMax > 0
+      ? Math.min(100, (contextTokens / contextTokenBudgetMax) * 100)
+      : 0
 
   return (
     <section
@@ -67,14 +74,25 @@ export function ContextTokenBudgetSection() {
         )}
         {!loading && !error && (
           <>
-            Sélection (tokens contexte) : <strong>{selectionTokens.toLocaleString()}</strong> /{' '}
+            Contexte pour le modèle (après budget) :{' '}
+            <strong>{contextTokens.toLocaleString()}</strong> /{' '}
             <strong>{contextTokenBudgetMax.toLocaleString()}</strong>
+            <span
+              style={{
+                display: 'block',
+                marginTop: 2,
+                fontSize: '0.74rem',
+                color: theme.text.secondary,
+              }}
+            >
+              Sélection complète (mesure) : {selectionTokens.toLocaleString()} tokens
+            </span>
             {overBudget && (
               <span
                 data-testid="context-token-budget-warning"
                 style={{ display: 'block', marginTop: 4, color: theme.state.warning.color }}
               >
-                Budget dépassé — réduire la sélection. La génération reste possible (avertissement seul).
+                Budget dépassé — le contexte est tronqué ; réduire la sélection pour plus de marge.
               </span>
             )}
           </>

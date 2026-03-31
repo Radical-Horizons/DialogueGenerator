@@ -15,6 +15,11 @@ DialogueGenerator is a React + FastAPI app for generating RPG dialogues via LLMs
 
 Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 
+### Scaffolding (default behavior)
+
+- Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run the smallest command that proves the change (pytest/Vitest ciblé, lint).
+- **Real environment**: you can execute shell commands and network fetches; use them instead of dumping long “you should run…” lists when the task is to verify or fix.
+
 ### Non-obvious caveats
 
 - **`python` symlink required on Linux**: The dev scripts (`scripts/dev.js`) check for `python` in PATH. On Linux, create a symlink: `sudo ln -sf /usr/bin/python3 /usr/local/bin/python`.
@@ -22,28 +27,34 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 - **`.env` file**: Copy from `.env.example`. Required for JWT auth and config. Default dev credentials: `admin` / `admin123`.
 - **No real LLM key needed for basic dev**: Without `OPENAI_API_KEY`, the backend uses `DummyLLMClient` (mock responses). Set a real key for actual dialogue generation.
 - **Frontend ESLint**: `npm --prefix frontend run lint` is green. Treat any new lint error as a regression to fix, not as accepted baseline debt.
-- **Frontend Vitest — règle absolue pour les agents** :
-  - **NE JAMAIS lancer la suite entière depuis l'agent.** Elle ne termine pas proprement (workers qui restent ouverts). La CI s'en charge.
-  - **Protocole agent** :
-    1. **Cibler les fichiers modifiés** : `cd frontend && npx vitest run src/__tests__/Fichier.test.ts --reporter=dot` — termine en < 60s.
-    2. **Après edits locaux** : `cd frontend && npm run test:quick` (`vitest --changed`) ou `npm run test:bail` (arrêt au 1er échec).
-    3. **Sanity check global** (optionnel) : `cd frontend && npx vitest run --bail=1 --reporter=dot` — stoppe au premier échec, < 2 min.
-    4. **Interdits depuis l'agent** : `vitest run` sans filtre, `npm test` (suite complète du package frontend), `npm run test:full` sans demande explicite.
-  - **Validation humaine / CI** : `cd frontend && npm run test:ci` puis `node scripts/vitest-summary.js` (ou équivalent `test:frontend:vitest:full` à la racine). **Ne pas** piper Vitest dans PowerShell (`| Select-Object`) : sortie bufferisée jusqu’à la fin.
-  - Si un test échoue, vérifier qu'une feature n'a pas été silencieusement retirée avant de le considérer obsolète.
+- **Frontend Vitest (agents)** : protocole détaillé, PowerShell et sortie fichier → **`.cursor/rules/workflow.mdc`** (section Vitest + Frontend tests Windows). Si un test échoue, vérifier qu'une feature n'a pas été silencieusement retirée avant de le considérer obsolète.
 - **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
+
+### Subagents (`.cursor/agents/`)
+
+Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/subagents.mdc` for the full reference.
+
+| Subagent | Model | Purpose |
+|----------|-------|---------|
+| `code-review-orchestrator` | inherit | Full-repo review, launches all reviewers in parallel |
+| `api-contracts-reviewer` | fast | Schema/router/client drift |
+| `graph-editor-reviewer` | inherit | Zustand slices, React Flow, stale closures |
+| `llm-pipeline-reviewer` | fast | Streaming SSE, cost governance, LLM clients |
+| `context-gdd-reviewer` | fast | GDD cache, context pipeline, token budget |
+| `security-reviewer` | fast | Auth, JWT, secrets, CORS |
+| `backend-services-reviewer` | fast | services/ layer, Notion sync, Unity export |
+| `test-coverage-reviewer` | fast | pytest + Vitest coverage gaps |
+| `transcript-history-researcher` | fast | Optional helper to grep/mining past Cursor session JSONL on disk (e.g. rules/process retros) |
+
+**Cursor session files on disk** : only relevant when you are explicitly mining *past chats* for patterns. Use whatever works (`Task` + subagent, `scripts/peek_cursor_transcript.py`, or targeted grep). Goal is to improve **this agent’s behavior in the repo**, not to maintain a history *of* subagents.
 
 ### Commands reference
 
-See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
+See `.cursor/rules/workflow.mdc` for the full command reference (including **Vitest agent protocol**). Quick reminders:
 
 - **Backend tests**: `.venv/bin/python -m pytest tests/ -x --tb=short`
 - **Frontend lint**: `cd frontend && npx eslint . --ext ts,tsx`
-- **Frontend tests (agent — ciblés)** : `cd frontend && npx vitest run src/__tests__/MonFichier.test.ts --reporter=dot`
-- **Frontend tests (dossier / sortie fichier)** : `cd frontend && npx vitest run src/mon/dossier/ > ..\tmp\vitest-out.txt 2>&1` puis lire `tmp\vitest-out.txt` (évite le pipe buffering PowerShell)
-- **Frontend tests (rapide / après edits)** : `cd frontend && npm run test:quick` ou `npm run test:bail`
-- **Frontend tests (sanity check)** : `cd frontend && npx vitest run --bail=1 --reporter=dot`
-- **Frontend tests (CI/full, humain ou CI)** : `cd frontend && npm run test:ci` puis `node scripts/vitest-summary.js`, ou `npm run test:full`
+- **Frontend tests**: follow `workflow.mdc` (ciblage, `test:quick`, fichier de sortie sous PowerShell, CI summary)
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
 
 ## Learned User Preferences
@@ -58,6 +69,7 @@ See `.cursor/rules/workflow.mdc` for the full command reference. Key commands:
 
 ## Learned Workspace Facts
 
+- Graph invariants (flush, `graphViewStore`, API) → **`.cursor/rules/graph_editor.mdc`**. `mergeFormDataIntoNodeData()` / `targetNode` below stay the short reminder.
 - Use `mergeFormDataIntoNodeData()` instead of spread (`{ ...nodeData, ...formValues }`) when flushing `NodeEditorPanel` form state on selection change; the spread overwrites `choices[N].targetNode` written by `connectNodes`, breaking the edge connection.
 - Node generation connection flow: API response → `connectNodes(parentId, newId, targetChoiceIndex, 'choice')` in `generationSlice` → `choices[N].targetNode` set in `edgeSlice` → `NodeEditorPanel` selection-change flush must preserve this field via `mergeFormDataIntoNodeData`.
 - Frontend lint baseline is zero error: `npm --prefix frontend run lint` must stay green, and stale `eslint-disable` directives should be removed instead of normalized.

@@ -129,6 +129,30 @@ export function normalizeTestBars(nodes: Node[], edges: Edge[]): { nodes: Node[]
   return { nodes: finalNodes, edges: currentEdges }
 }
 
+/** Compare deux versions semver simples ``major.minor.patch`` (suffixe ignoré). */
+function semverTuple(version: string): [number, number, number] | null {
+  const trimmed = version.trim()
+  const core = trimmed.split(/[-+]/, 1)[0] ?? trimmed
+  const parts = core.split('.').map((p) => parseInt(p.replace(/\D/g, ''), 10))
+  if (parts.some((n) => Number.isNaN(n))) return null
+  const major = parts[0] ?? 0
+  const minor = parts[1] ?? 0
+  const patch = parts[2] ?? 0
+  return [major, minor, patch]
+}
+
+function isSchemaVersionAtLeast(documentVersion: string, target: [number, number, number]): boolean {
+  const v = documentVersion.trim()
+  if (v === '1.1') return target[0] === 1 && target[1] === 1
+  const t = semverTuple(v)
+  if (!t) return false
+  for (let i = 0; i < 3; i++) {
+    if (t[i] > target[i]) return true
+    if (t[i] < target[i]) return false
+  }
+  return true
+}
+
 /**
  * Détecte les documents v1.1.x non migrés (choices sans choiceId).
  * Ces documents sont explicitement refusés par l'API documents en mode draft.
@@ -137,7 +161,7 @@ export function documentRequiresChoiceIdMigration(document: Record<string, unkno
   const schemaVersionValue = document.schemaVersion
   const schemaVersion =
     typeof schemaVersionValue === 'string' ? schemaVersionValue.trim() : ''
-  if (!(schemaVersion === '1.1' || schemaVersion >= '1.1.0')) {
+  if (!isSchemaVersionAtLeast(schemaVersion, [1, 1, 0])) {
     return false
   }
   const nodesValue = document.nodes

@@ -5,6 +5,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Connection, Node, NodeChange, EdgeChange } from 'reactflow'
 import { useGraphStore } from '../store/graphStore'
+import { getChoiceIndexFromSourceHandle } from '../utils/choiceHandleIndex'
 import { useGraphViewStore } from '../store/graphViewStore'
 import { collectOutgoingDescendantIds } from '../utils/collectOutgoingDescendantIds'
 
@@ -268,17 +269,13 @@ export function useReactFlowHandlers(
       const sourceHandle = connection.sourceHandle || ''
       let connectionType = 'default'
       let choiceIndex: number | undefined
-      if (sourceHandle.startsWith('choice:')) {
+      if (sourceHandle.startsWith('choice:') || sourceHandle.startsWith('choice-')) {
         connectionType = 'choice'
-        const choiceId = sourceHandle.slice(7)
-        const nodes = useGraphStore.getState().nodes
-        const sourceNode = nodes.find((n) => n.id === connection.source)
-        const choices = (sourceNode?.data?.choices as Array<{ choiceId?: string }>) ?? []
-        const idx = choices.findIndex((c, i) => (c?.choiceId ?? `__idx_${i}`) === choiceId)
-        choiceIndex = idx >= 0 ? idx : undefined
-      } else if (sourceHandle.startsWith('choice-')) {
-        connectionType = 'choice'
-        choiceIndex = parseInt(sourceHandle.replace('choice-', ''), 10)
+        choiceIndex = getChoiceIndexFromSourceHandle(
+          connection.source,
+          sourceHandle,
+          useGraphStore.getState().nodes
+        )
       } else if (sourceHandle === 'success') {
         connectionType = 'success'
       } else if (sourceHandle === 'failure') {

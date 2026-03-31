@@ -46,7 +46,7 @@ class CostGovernanceService:
         # Récupérer le budget actuel
         budget = self.repository.get_budget(user_id, current_month)
         
-        # Si pas de budget, créer un budget par défaut (quota = 0 = bloqué)
+        # Si pas de budget, créer un budget par défaut (quota = 0 → illimité jusqu'à définition d'un quota > 0)
         if budget is None:
             budget = {
                 "month": current_month,
@@ -71,15 +71,15 @@ class CostGovernanceService:
         
         quota = budget.get("quota", 0.0)
         amount = budget.get("amount", 0.0)
-        
+
+        # Quota <= 0 : pas de plafond mensuel (illimité pour l'usage courant)
+        if quota <= 0.0:
+            return {"allowed": True, "percentage": 0.0, "warning": None}
+
         # Calculer le nouveau montant après génération
         new_amount = amount + estimated_cost
-        
-        # Calculer le pourcentage
-        if quota == 0.0:
-            percentage = 0.0 if new_amount == 0.0 else 100.0
-        else:
-            percentage = (new_amount / quota) * 100.0
+
+        percentage = (new_amount / quota) * 100.0
         
         # Hard block à 100%
         if new_amount >= quota and quota > 0:

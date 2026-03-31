@@ -172,7 +172,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             category: 'dialogue',
             action: () => {
               navigate('/unity-dialogues')
-              // TODO: Ouvrir le dialogue spécifique (nécessite un state global ou query param)
               onClose()
             },
             keywords: [dialogue.filename, dialogue.title || ''],

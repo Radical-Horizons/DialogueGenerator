@@ -16,3 +16,5 @@ alwaysApply: false
 - **Cache disque** : `data/.gdd_snapshot/` (gitignored) — pickle du `GDDData` si les JSON sources sont inchangés entre deux processus ; `GDD_DISK_CACHE=false` pour désactiver
 
 ⚠️ **Note** : `data/GDD_categories/` peut être versionné (fiches) ; `.archive/` et `.staging/` restent ignorés. Les tests « vraies données » exigent des fiches présentes (shards ou monolithe temporaire).
+
+- **Même changement que le code** : toute évolution de stratégie de chemins, shards ou chargeur GDD dans le code doit mettre à jour **ce fichier** dans le même lot (évite dérive doc ↔ runtime).

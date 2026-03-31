@@ -1,5 +1,7 @@
 """Router FastAPI pour les endpoints /api/v1/presets."""
 from fastapi import APIRouter, Depends, HTTPException, status, Response
+
+from api.routers.auth import get_current_user
 from typing import List
 import logging
 import base64
@@ -8,7 +10,7 @@ from api.schemas.preset import Preset, PresetCreate, PresetUpdate, PresetValidat
 from api.dependencies import get_preset_service
 from services.preset_service import PresetService
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 logger = logging.getLogger(__name__)
 
 

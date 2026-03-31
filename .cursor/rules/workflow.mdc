@@ -41,6 +41,14 @@ alwaysApply: false
   - Configuration : `pytest.ini` définit les options (asyncio_mode, testpaths, etc.)
   - **E2E (Playwright)** : `npm run test:e2e`. L'environnement nécessaire pour les E2E est disponible (`.env` avec `OPENAI_API_KEY`, budget, modèle gpt-5-mini). Tous les tests E2E sont censés passer avec cet environnement. Voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
 
+- **Vitest — protocole agents Cursor (source de vérité)** : détail unique ici ; `AGENTS.md` ne fait que résumer. `frontend_testing.mdc` couvre RTL, Playwright et anti-patterns — pas une deuxième copie du protocole d’exécution.
+  - **Ne pas** lancer la suite Vitest complète depuis l’agent (workers ouverts). La CI ou une demande explicite utilisateur.
+  - **Ciblage** : `cd frontend && npx vitest run src/__tests__/Fichier.test.ts --reporter=dot` (typiquement moins d’une minute).
+  - **Après edits** : `cd frontend && npm run test:quick` (`vitest --changed`) ou `npm run test:bail`.
+  - **Sanity optionnel** : `cd frontend && npx vitest run --bail=1 --reporter=dot`.
+  - **Interdits agent** : `vitest run` sans filtre, `npm test` côté frontend comme suite complète, `npm run test:full` sans demande explicite.
+  - **CI / humain** : `cd frontend && npm run test:ci` puis `node scripts/vitest-summary.js` (ou `npm run test:frontend:vitest:full` à la racine selon scripts du repo).
+
 - **Frontend tests — Windows (éviter le pipe buffering PowerShell)** :
   - **❌ NE PAS** faire : `npx vitest run 2>&1 | Select-Object -Last 15` — PowerShell bufférise tout stdout, le résumé n'apparaît jamais dans le terminal.
   - **✅ Méthode courte (scope)** : `cd frontend && npx vitest run src/mon/dossier/ > ..\tmp\vitest-out.txt 2>&1` puis lire `tmp\vitest-out.txt`
