@@ -15,6 +15,12 @@ DialogueGenerator is a React + FastAPI app for generating RPG dialogues via LLMs
 
 Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 
+### Meta-Agent Protocol (Inspiration: Meta-Harness)
+
+- **Diagnostic over Speculation**: Always run `.\scripts\meta-diagnostic.ps1` or read raw logs in `data/logs/*.json` before proposing a fix.
+- **Rules Evolution**: If a task fails or a pattern is discovered, update or create a `.cursor/rules/*.mdc` file immediately.
+- **Transcript Mining**: Use `python scripts/peek_cursor_transcript.py search "pattern"` to retrieve solutions from past sessions (10M+ tokens of diagnostic history).
+
 ### Scaffolding (default behavior)
 
 - Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run the smallest command that proves the change (pytest/Vitest ciblé, lint).
