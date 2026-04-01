@@ -24,6 +24,7 @@ declare global {
 }
 import { triggerGraphSave } from './trigger-graph-save'
 import { uniqueE2EDocumentId, seedDocumentWithRetry, openDashboardGraphTabAndSelectDocument } from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
 const FIXTURE_PREFIX = 'e2e-connection-dropdown'
@@ -54,13 +55,13 @@ async function loginIfNeeded(page: Page): Promise<void> {
   await page.goto('/')
   const onLogin = await page
     .getByRole('heading', { name: /connexion/i })
-    .isVisible({ timeout: 3000 })
+    .isVisible({ timeout: E2E_MS.control })
     .catch(() => false)
   if (onLogin) {
     await page.getByLabel(/nom d'utilisateur/i).fill('admin')
     await page.getByLabel(/mot de passe/i).fill('admin123')
     await page.getByRole('button', { name: /se connecter/i }).click()
-    await expect(page).toHaveURL(/\//, { timeout: 10000 })
+    await expect(page).toHaveURL(/\//, { timeout: E2E_MS.ui })
   }
 }
 
@@ -79,7 +80,7 @@ async function triggerSave(page: Page): Promise<void> {
   }
   const maxAttempts = 4
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const waitSave = page.waitForResponse(matchesSaveResponse, { timeout: 90_000 })
+    const waitSave = page.waitForResponse(matchesSaveResponse, { timeout: E2E_MS.savePut })
     await triggerGraphSave(page)
     const resp = await waitSave
     if (resp.status() === 409 && attempt < maxAttempts - 1) {
@@ -116,7 +117,7 @@ async function deleteFixture(
 }
 
 test.describe('Graph — cible de connexion (dropdown)', () => {
-  test.setTimeout(180_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.saveHeavy)
 
   test.afterEach(async ({ request }, testInfo) => {
     await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
@@ -131,7 +132,7 @@ test.describe('Graph — cible de connexion (dropdown)', () => {
     await openDashboardGraphAndSelectFixture(page, fixtureId)
 
     const canvasNodes = page.locator('[data-testid="graph-editor"] .react-flow__viewport .react-flow__node')
-    await expect(canvasNodes.first()).toBeVisible({ timeout: 20000 })
+    await expect(canvasNodes.first()).toBeVisible({ timeout: E2E_MS.graphCanvas })
     await expect(
       page.locator('[data-testid="graph-editor"] .react-flow__viewport .react-flow__edge')
     ).not.toHaveCount(0)
@@ -140,13 +141,13 @@ test.describe('Graph — cible de connexion (dropdown)', () => {
 
     // NodeEditorPanel doit être monté pour le flush avant sauvegarde (handleSave → requestFlush).
     const nodeTab = page.getByRole('button', { name: /^Édition de nœud$/ })
-    await expect(nodeTab).toBeVisible({ timeout: 15000 })
+    await expect(nodeTab).toBeVisible({ timeout: E2E_MS.graphField })
     await nodeTab.click()
 
-    await expect(page.locator('textarea[name="line"]')).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('textarea[name="line"]')).toBeVisible({ timeout: E2E_MS.graphField })
 
     const combobox = page.getByTestId('connection-target-next-node')
-    await expect(combobox).toBeVisible({ timeout: 15000 })
+    await expect(combobox).toBeVisible({ timeout: E2E_MS.graphField })
     await expect(combobox).toContainText(/Middle|MID/)
 
     await combobox.click()

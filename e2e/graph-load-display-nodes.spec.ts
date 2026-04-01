@@ -9,6 +9,7 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 import { uniqueE2EDocumentId, seedDocumentWithRetry, gotoGraphEditorAndWaitForDocument } from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = 'http://127.0.0.1:4243'
 const FIXTURE_PREFIX = 'e2e-graph-load'
@@ -33,16 +34,16 @@ const FIXTURE_DOC = {
 }
 
 test.describe('Graph load – affichage des nœuds', () => {
-  test.setTimeout(60_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.apiMedium)
 
   const login = async (page: Page) => {
     await page.goto('/')
-    const onLogin = await page.getByRole('heading', { name: /connexion/i }).isVisible({ timeout: 3000 }).catch(() => false)
+    const onLogin = await page.getByRole('heading', { name: /connexion/i }).isVisible({ timeout: E2E_MS.control }).catch(() => false)
     if (onLogin) {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
-      await expect(page).toHaveURL(/\//, { timeout: 10000 })
+      await expect(page).toHaveURL(/\//, { timeout: E2E_MS.ui })
     }
   }
 
@@ -71,7 +72,7 @@ test.describe('Graph load – affichage des nœuds', () => {
     // Vérifier qu'au moins un nœud est affiché à l'écran (régression : bug "aucun nœud au chargement")
     // On exige toBeVisible : si les nœuds ne s'affichent pas, le test doit échouer.
     const nodes = page.locator('[data-testid="graph-node-content"]')
-    await expect(nodes.first()).toBeVisible({ timeout: 15000 })
+    await expect(nodes.first()).toBeVisible({ timeout: E2E_MS.graphField })
     const count = await nodes.count()
     expect(count).toBeGreaterThan(0)
   })
@@ -86,7 +87,7 @@ test.describe('Graph load – affichage des nœuds', () => {
     await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
     await gotoGraphEditorAndWaitForDocument(page, fixtureId)
     const nodeElements = page.locator('[data-testid="graph-node-content"]:visible')
-    await expect(nodeElements.first()).toBeVisible({ timeout: 15000 })
+    await expect(nodeElements.first()).toBeVisible({ timeout: E2E_MS.graphField })
 
     const consoleErrors: string[] = []
     page.on('console', (msg) => {
@@ -108,7 +109,7 @@ test.describe('Graph load – affichage des nœuds', () => {
     await page.mouse.down()
     await page.mouse.move(centerX + 80, centerY + 40, { steps: 5 })
     await page.mouse.up()
-    await firstNode.waitFor({ state: 'visible', timeout: 3000 })
+    await firstNode.waitFor({ state: 'visible', timeout: E2E_MS.control })
 
     const errorCount = consoleErrors.length
     const repeated = consoleErrors.filter(

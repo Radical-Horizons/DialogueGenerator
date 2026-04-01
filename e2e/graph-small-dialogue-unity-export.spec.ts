@@ -8,6 +8,7 @@ import { test, expect, type Page } from '@playwright/test'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import { uniqueE2EDocumentId, seedDocumentWithRetry, openDashboardGraphTabAndSelectDocument } from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
 const FIXTURE_PREFIX = 'e2e-small-dialogue-unity-export'
@@ -39,13 +40,13 @@ async function loginIfNeeded(page: Page): Promise<void> {
   await page.goto('/')
   const onLogin = await page
     .getByRole('heading', { name: /connexion/i })
-    .isVisible({ timeout: 3000 })
+    .isVisible({ timeout: E2E_MS.control })
     .catch(() => false)
   if (onLogin) {
     await page.getByLabel(/nom d'utilisateur/i).fill('admin')
     await page.getByLabel(/mot de passe/i).fill('admin123')
     await page.getByRole('button', { name: /se connecter/i }).click()
-    await expect(page).toHaveURL(/\//, { timeout: 10000 })
+    await expect(page).toHaveURL(/\//, { timeout: E2E_MS.ui })
   }
 }
 
@@ -66,7 +67,7 @@ async function deleteFixture(
 }
 
 test.describe('Graph — petit dialogue + export Unity', () => {
-  test.setTimeout(90_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.cost)
 
   test.afterEach(async ({ request }, testInfo) => {
     await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
@@ -80,12 +81,12 @@ test.describe('Graph — petit dialogue + export Unity', () => {
     await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
     await openDashboardGraphAndSelectFixture(page, fixtureId)
 
-    await expect(page.locator('.react-flow__node')).toHaveCount(2, { timeout: 20000 })
+    await expect(page.locator('.react-flow__node')).toHaveCount(2, { timeout: E2E_MS.graphCanvas })
     await expect(page.locator('.react-flow__edge')).not.toHaveCount(0)
 
     const graphEditor = page.getByTestId('graph-editor')
     await graphEditor.getByTestId('btn-actions-dropdown').click()
-    const downloadPromise = page.waitForEvent('download', { timeout: 15000 })
+    const downloadPromise = page.waitForEvent('download', { timeout: E2E_MS.graphField })
     await page.getByTestId('btn-export-unity').click()
     const download = await downloadPromise
 

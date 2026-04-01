@@ -4,6 +4,8 @@
 import { expect } from '@playwright/test'
 import type { APIRequestContext, Page, Response, TestInfo } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 /**
  * Génère un identifiant de document canonique unique par test et worker,
  * pour éviter les courses entre workers (`fullyParallel`) sur le même fichier disque.
@@ -63,10 +65,10 @@ export function matchDocumentJsonGetResponse(documentId: string, response: Respo
 export async function gotoGraphEditorAndWaitForDocument(page: Page, documentId: string): Promise<void> {
   const stem = documentId.replace(/\.json$/i, '')
   await Promise.all([
-    page.waitForResponse((r) => matchDocumentJsonGetResponse(stem, r), { timeout: 30_000 }),
+    page.waitForResponse((r) => matchDocumentJsonGetResponse(stem, r), { timeout: E2E_MS.documentLoad }),
     page.goto(`/graph-editor/${encodeURIComponent(stem)}`, { waitUntil: 'domcontentloaded' }),
   ])
-  await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 30_000 })
+  await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: E2E_MS.documentLoad })
 }
 
 export async function seedDocumentWithRetry(
@@ -107,21 +109,21 @@ export async function openDashboardGraphTabAndSelectDocument(
 ): Promise<void> {
   await page
     .getByRole('button', { name: /Génération de Dialogues/i })
-    .waitFor({ state: 'visible', timeout: 15000 })
+    .waitFor({ state: 'visible', timeout: E2E_MS.graphField })
     .catch(() => {})
-  await page.getByRole('button', { name: /Éditeur de Graphe/i }).click({ timeout: 15000 })
+  await page.getByRole('button', { name: /Éditeur de Graphe/i }).click({ timeout: E2E_MS.graphField })
   // Lazy keep-alive : le premier clic sur l’onglet graphe monte GraphEditor + liste.
-  await expect(page.getByTestId('graph-editor')).toBeVisible({ timeout: 30_000 })
+  await expect(page.getByTestId('graph-editor')).toBeVisible({ timeout: E2E_MS.graphPanel })
   // Scoper sur l’éditeur graphe (évite l’input homonyme de l’onglet Édition de Dialogues).
   await expect(
     page.locator('[data-testid="graph-editor"] input[placeholder*="Rechercher un dialogue"]')
-  ).toBeVisible({ timeout: 45_000 })
+  ).toBeVisible({ timeout: E2E_MS.dashboardList })
   const needle = documentStem.replace(/\.json$/i, '')
   const item = page.getByTestId('unity-dialogue-item').filter({ hasText: needle })
-  await expect(item.first()).toBeVisible({ timeout: 45_000 })
+  await expect(item.first()).toBeVisible({ timeout: E2E_MS.dashboardList })
   await item.first().click()
   // Fin de chargement : mieux vaut un nœud React Flow que « Chargement du graphe » (texte dupliqué / onglets keep-alive).
   await expect(page.locator('[data-testid="graph-editor"] .react-flow__node').first()).toBeVisible({
-    timeout: 90_000,
+    timeout: E2E_MS.graphFirstNode,
   })
 }

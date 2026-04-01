@@ -3,11 +3,13 @@
  */
 import { test, expect } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 test.describe('Multi-Provider LLM Selection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
-    await page.locator('#model-select').waitFor({ state: 'visible', timeout: 10000 })
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
+    await page.locator('#model-select').waitFor({ state: 'visible', timeout: E2E_MS.ui })
   })
 
   test('should display model selector', async ({ page }) => {
@@ -18,7 +20,7 @@ test.describe('Multi-Provider LLM Selection', () => {
   test('should show OpenAI and Mistral providers', async ({ page }) => {
     await page.waitForFunction(
       () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length ?? 0 > 0,
-      { timeout: 15000 }
+      { timeout: E2E_MS.graphField }
     )
     const optionCount = await page.locator('#model-select option').count()
     if (optionCount === 0) {
@@ -30,7 +32,7 @@ test.describe('Multi-Provider LLM Selection', () => {
   test('should change model selection', async ({ page }) => {
     await page.waitForFunction(
       () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length ?? 0 > 0,
-      { timeout: 15000 }
+      { timeout: E2E_MS.graphField }
     )
     const mistral = page.locator('#model-select option[value="labs-mistral-small-creative"]')
     if ((await mistral.count()) === 0) {
@@ -54,10 +56,10 @@ test.describe('Multi-Provider LLM Selection', () => {
     const valueToSelect = opts[1]
     await page.selectOption('#model-select', valueToSelect)
     await page.reload()
-    await page.locator('#model-select').waitFor({ state: 'visible', timeout: 10000 })
+    await page.locator('#model-select').waitFor({ state: 'visible', timeout: E2E_MS.ui })
     await page.waitForFunction(
       () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length > 0,
-      { timeout: 8000 }
+      { timeout: E2E_MS.medium }
     )
     const selectedValue = await page.inputValue('#model-select')
     if (!selectedValue) {
@@ -70,7 +72,7 @@ test.describe('Multi-Provider LLM Selection', () => {
   test('should display provider in UI', async ({ page }) => {
     await page.waitForFunction(
       () => (document.querySelector('#model-select') as HTMLSelectElement)?.options?.length ?? 0 > 0,
-      { timeout: 15000 }
+      { timeout: E2E_MS.graphField }
     )
     const mistral = page.locator('#model-select option[value="labs-mistral-small-creative"]')
     if ((await mistral.count()) === 0) {
@@ -88,16 +90,16 @@ test.describe('Multi-Provider LLM Selection', () => {
     await page.selectOption('#model-select', 'labs-mistral-small-creative')
     await page.fill('#user-instructions', 'Test generation with Mistral')
     await page.click('button:has-text("Générer")')
-    await page.waitForSelector('[data-testid="generation-progress"]', { timeout: 5000 })
+    await page.waitForSelector('[data-testid="generation-progress"]', { timeout: E2E_MS.short })
     const errorMessage = page.locator('.error-message')
-    await expect(errorMessage).not.toBeVisible({ timeout: 2000 })
+    await expect(errorMessage).not.toBeVisible({ timeout: E2E_MS.probe })
   })
 
   test.skip('should handle Mistral API error gracefully (requires invalid key)', async ({ page }) => {
     await page.selectOption('#model-select', 'labs-mistral-small-creative')
     await page.click('button:has-text("Générer")')
     const errorMessage = page.locator('.error-message')
-    await expect(errorMessage).toBeVisible({ timeout: 10000 })
+    await expect(errorMessage).toBeVisible({ timeout: E2E_MS.ui })
     await expect(errorMessage).toContainText('Mistral API unavailable')
   })
 })

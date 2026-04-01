@@ -5,7 +5,6 @@
  *   APIRequestContext (même fichier que e2e/.auth/user.json) pour les PUT/GET documents/costs.
  * - Frontend : VITE_API_BASE_URL vide → URLs relatives `/api` + proxy Vite → :4243 (évite .env local 4242/ngrok).
  */
-import { cpus } from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
 const AUTH_FILE = 'e2e/.auth/user.json'

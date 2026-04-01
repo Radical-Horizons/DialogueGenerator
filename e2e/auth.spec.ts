@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 test.describe('Authentification', () => {
   test('doit afficher le formulaire de connexion', async ({ page }) => {
     await page.goto('/login')
@@ -17,7 +19,7 @@ test.describe('Authentification', () => {
     await page.getByLabel(/nom d'utilisateur/i).fill('admin')
     await page.getByLabel(/mot de passe/i).fill('admin123')
     await page.getByRole('button', { name: /se connecter/i }).click()
-    await expect(page).toHaveURL('/', { timeout: 20000 })
+    await expect(page).toHaveURL('/', { timeout: E2E_MS.authRedirect })
 
     const userMenuButton = page.getByRole('button', { name: /menu utilisateur admin/i })
     await expect(userMenuButton).toBeVisible()
@@ -34,6 +36,6 @@ test.describe('Authentification', () => {
 
     await expect(
       page.getByText(/nom d'utilisateur ou mot de passe incorrect|401|incorrect/i)
-    ).toBeVisible({ timeout: 10000 })
+    ).toBeVisible({ timeout: E2E_MS.ui })
   })
 })

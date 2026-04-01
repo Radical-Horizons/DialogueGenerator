@@ -16,6 +16,7 @@ import {
   seedDocumentWithRetry,
   openDashboardGraphTabAndSelectDocument,
 } from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
 const FIXTURE_PREFIX = 'e2e-testnode-gen'
@@ -60,17 +61,17 @@ async function loginAndOpenFixtureOnDashboardGraph(page: Page, fixtureId: string
   await page.goto('/')
   const onLogin = await page
     .getByRole('heading', { name: /connexion/i })
-    .isVisible({ timeout: 3000 })
+    .isVisible({ timeout: E2E_MS.control })
     .catch(() => false)
   if (onLogin) {
     await page.getByLabel(/nom d'utilisateur/i).fill('admin')
     await page.getByLabel(/mot de passe/i).fill('admin123')
     await page.getByRole('button', { name: /se connecter/i }).click()
-    await expect(page).toHaveURL(/\//, { timeout: 10000 })
+    await expect(page).toHaveURL(/\//, { timeout: E2E_MS.ui })
   }
   await page
     .getByRole('button', { name: /Génération de Dialogues/i })
-    .waitFor({ state: 'visible', timeout: 15000 })
+    .waitFor({ state: 'visible', timeout: E2E_MS.graphField })
     .catch(() => {})
   await openDashboardGraphTabAndSelectDocument(page, fixtureId)
 }
@@ -111,7 +112,7 @@ async function triggerSaveAndReadPersistedNodes(
       if (m === 'PUT' && u.includes('/api/v1/documents/') && !u.includes('/layout')) return true
       return false
     },
-    { timeout: 30000 }
+    { timeout: E2E_MS.documentLoad }
   )
   await triggerGraphSave(page)
   const persistResp = await persistRespPromise
@@ -128,7 +129,7 @@ async function triggerSaveAndReadPersistedNodes(
         r.request().method() === 'PUT' &&
         r.url().includes('/api/v1/documents/') &&
         r.url().includes('/layout'),
-      { timeout: 15000 }
+      { timeout: E2E_MS.graphField }
     )
     .catch(() => {})
 
@@ -151,7 +152,7 @@ async function triggerSaveAndReadPersistedNodes(
             choice0?.testCriticalSuccessNode === 'NODE_CS',
         }
       },
-      { timeout: 30_000 }
+      { timeout: E2E_MS.graphFlow }
     )
     .toEqual({ ok: true })
 
@@ -180,7 +181,7 @@ async function deleteFixture(
 }
 
 test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () => {
-  test.setTimeout(120_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.graphHeavy)
 
   test.afterEach(async ({ request }, testInfo) => {
     await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
@@ -206,11 +207,11 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
     const flowNodes = page.locator('[data-testid="graph-editor"] .react-flow__viewport .react-flow__node')
     const flowEdges = page.locator('[data-testid="graph-editor"] .react-flow__viewport .react-flow__edge')
 
-    await expect(flowNodes.first()).toBeVisible({ timeout: 15000 })
+    await expect(flowNodes.first()).toBeVisible({ timeout: E2E_MS.graphField })
     const nodeCountBeforeGen = await flowNodes.count()
 
     const testNode = page.locator('[data-id="test-node-START-choice-0"]')
-    await expect(testNode).toBeVisible({ timeout: 5000 })
+    await expect(testNode).toBeVisible({ timeout: E2E_MS.short })
     const edgesBeforeGen = await flowEdges.count()
     // Minimap (coin bas-droit) peut recouvrir le TestNode après layout — force évite l’interception.
     await testNode.click({ button: 'left', force: true })
@@ -221,14 +222,14 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
         resp.url().includes('/api/v1/unity-dialogues/graph/generate-node') &&
         resp.request().method() === 'POST' &&
         resp.status() === 200,
-      { timeout: 20000 }
+      { timeout: E2E_MS.graphCanvas }
     )
 
     await page.getByRole('menuitem', { name: /Générer/i }).click()
     await generateResponsePromise
 
     await expect(page.getByRole('status', { name: /Génération en cours/i })).toHaveCount(0, {
-      timeout: 60_000,
+      timeout: E2E_MS.generationMenu,
     })
 
     // Après génération, le canvas peut zoomer sur un seul nœud + onlyRenderVisibleElements → peu de
@@ -240,11 +241,11 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
 
     // Les ids DOM peuvent différer des ids logiques mockés — on valide sur le nombre de nœuds ajoutés.
     await expect
-      .poll(async () => flowNodes.count(), { timeout: 45_000 })
+      .poll(async () => flowNodes.count(), { timeout: E2E_MS.pollNodes })
       .toBeGreaterThanOrEqual(nodeCountBeforeGen + 4)
 
     await expect
-      .poll(async () => flowEdges.count(), { timeout: 15000 })
+      .poll(async () => flowEdges.count(), { timeout: E2E_MS.pollEdges })
       .toBeGreaterThanOrEqual(edgesBeforeGen + 4)
 
     // Flush avec TestNode sélectionné → syncChoiceFromTestNode peut effacer les test*Node du choix.

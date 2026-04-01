@@ -9,6 +9,8 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
+
 const API_BASE = 'http://127.0.0.1:4243'
 
 /** Tests API purs : pas de beforeEach UI (évite de saturer le timeout et de disposer le request context). */
@@ -37,20 +39,20 @@ test.describe('Cost Governance — API', () => {
 })
 
 test.describe('Cost Governance — UI (Story 0.7)', () => {
-  test.setTimeout(90_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.cost)
   test.describe.configure({ mode: 'serial' })
 
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: 'Connexion' })
-    const isLoginPage = await loginHeading.isVisible({ timeout: 2000 }).catch(() => false)
+    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)
 
     if (isLoginPage) {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
       await Promise.race([
-        page.waitForURL('**/', { timeout: 5000 }).catch(() => {}),
-        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
+        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
+        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {}),
       ])
     }
   }
@@ -58,15 +60,15 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
   })
 
   test('AC#3: Dashboard affiche budget et graphique', async ({ page }) => {
     const usageButton = page.locator('button:has-text("Usage")').or(page.locator('[data-testid="usage-button"]'))
-    if (await usageButton.isVisible({ timeout: 2000 })) {
+    if (await usageButton.isVisible({ timeout: E2E_MS.probe })) {
       await usageButton.click()
 
-      await page.waitForSelector('text=/Budget LLM|Suivi d\'utilisation/i', { timeout: 5000 })
+      await page.waitForSelector('text=/Budget LLM|Suivi d\'utilisation/i', { timeout: E2E_MS.short })
 
       const budgetSection = page.locator('text=/Budget LLM/i')
       await expect(budgetSection).toBeVisible()
@@ -77,7 +79,7 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
       await expect(page.locator('text=/Pourcentage utilisé/i')).toBeVisible()
 
       const chartSection = page.locator('text=/Évolution des coûts/i')
-      await expect(chartSection).toBeVisible({ timeout: 5000 })
+      await expect(chartSection).toBeVisible({ timeout: E2E_MS.short })
     } else {
       test.skip('Bouton Usage non trouvé - test ignoré')
     }
@@ -110,16 +112,16 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
 
       await page.goto('/')
       await login(page)
-      await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 15000 })
+      await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.graphField })
 
       const contextPanel = page.locator('div').filter({ has: page.getByRole('button', { name: /personnages/i }) })
       const firstCheckbox = contextPanel.locator('input[type="checkbox"]').first()
-      if (await firstCheckbox.isVisible({ timeout: 8000 }).catch(() => false)) {
+      if (await firstCheckbox.isVisible({ timeout: E2E_MS.medium }).catch(() => false)) {
         await firstCheckbox.click()
       }
       await page.keyboard.press('Control+Enter')
 
-      await expect(page.getByText(/Budget atteint à \d/i).first()).toBeVisible({ timeout: 15000 })
+      await expect(page.getByText(/Budget atteint à \d/i).first()).toBeVisible({ timeout: E2E_MS.graphField })
     } finally {
       await page.request.put(`${API_BASE}/api/v1/costs/budget`, { data: { quota: restoreQuota } }).catch(() => {})
     }
@@ -150,7 +152,7 @@ test.describe('Cost Governance — UI (Story 0.7)', () => {
     } else {
       await page.goto('http://localhost:3000')
       await login(page)
-      await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
+      await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
 
       test.skip('Budget n\'est pas à 100% - nécessite setup manuel du budget à 100%')
     }

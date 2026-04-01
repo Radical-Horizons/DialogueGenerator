@@ -9,6 +9,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { triggerGraphSave } from './trigger-graph-save'
 import { uniqueE2EDocumentId, openDashboardGraphTabAndSelectDocument } from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = 'http://127.0.0.1:4243'
 const FIXTURE_PREFIX = 'e2e-adr008'
@@ -53,13 +54,13 @@ async function loginAndGotoGraph(page: Page, documentId: string): Promise<void> 
   await page.goto('/')
   const onLogin = await page
     .getByRole('heading', { name: /connexion/i })
-    .isVisible({ timeout: 3000 })
+    .isVisible({ timeout: E2E_MS.control })
     .catch(() => false)
   if (onLogin) {
     await page.getByLabel(/nom d'utilisateur/i).fill('admin')
     await page.getByLabel(/mot de passe/i).fill('admin123')
     await page.getByRole('button', { name: /se connecter/i }).click()
-    await expect(page).toHaveURL(/\//, { timeout: 10000 })
+    await expect(page).toHaveURL(/\//, { timeout: E2E_MS.ui })
   }
   // NodeEditorPanel n’est monté que dans le Dashboard (pas sur /graph-editor standalone).
   await openDashboardGraphTabAndSelectDocument(page, documentId)
@@ -70,7 +71,7 @@ async function loginAndGotoGraph(page: Page, documentId: string): Promise<void> 
  * et retourne le nom du fichier réellement sélectionné.
  */
 async function selectFirst(page: Page, fixtureFilename: string): Promise<string> {
-  await expect(page.locator('[data-testid="graph-node-content"]').first()).toBeVisible({ timeout: 25000 })
+  await expect(page.locator('[data-testid="graph-node-content"]').first()).toBeVisible({ timeout: E2E_MS.graphLoad })
   return fixtureFilename
 }
 
@@ -84,7 +85,7 @@ async function triggerSave(page: Page): Promise<void> {
       resp.url().includes('/api/v1/unity-dialogues/graph/save') ||
       resp.url().includes('/api/v1/documents/') ||
       resp.url().includes('.layout'),
-    { timeout: 20000 }
+    { timeout: E2E_MS.graphCanvas }
   )
   await triggerGraphSave(page)
   const resp = await waitSave
@@ -120,7 +121,7 @@ async function deleteFixture(
 
 test.describe('ADR-008 E2E (Story 16.6)', () => {
   test.describe.configure({ mode: 'serial' })
-  test.setTimeout(120_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.graphHeavy)
 
   test.afterEach(async ({ request }, testInfo) => {
     await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
@@ -166,20 +167,20 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
 
     // Cliquer sur le premier nœud pour l'éditer
     await page.locator('.react-flow__node').first().click()
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: 8000 })
+    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.medium })
 
     // Remplir les champs — l'UI doit refléter immédiatement les nouvelles valeurs
     await page.locator('input[name="speaker"]').fill(speakerVal)
-    await expect(page.locator('input[name="speaker"]')).toHaveValue(speakerVal, { timeout: 3000 })
+    await expect(page.locator('input[name="speaker"]')).toHaveValue(speakerVal, { timeout: E2E_MS.control })
     await page.locator('textarea[name="line"]').fill(lineVal)
-    await expect(page.locator('textarea[name="line"]')).toHaveValue(lineVal, { timeout: 3000 })
+    await expect(page.locator('textarea[name="line"]')).toHaveValue(lineVal, { timeout: E2E_MS.control })
 
     const choice0 = page.locator('textarea[name="choices.0.text"]')
-    const hasChoice = await choice0.isVisible({ timeout: 1500 }).catch(() => false)
+    const hasChoice = await choice0.isVisible({ timeout: E2E_MS.tiny }).catch(() => false)
     const choiceVal = `CHO_${stamp}`
     if (hasChoice) {
       await choice0.fill(choiceVal)
-      await expect(choice0).toHaveValue(choiceVal, { timeout: 3000 })
+      await expect(choice0).toHaveValue(choiceVal, { timeout: E2E_MS.control })
     }
 
     // Sauvegarder : vérifier que la requête réseau réussit
@@ -206,7 +207,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
 
     // Cliquer sur le premier nœud pour l'éditer
     await page.locator('.react-flow__node').first().click()
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: 8000 })
+    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.medium })
 
     // Vérifier qu'il y a des arêtes en partant du nœud
     const edgeBefore = page.locator('.react-flow__edge')
@@ -215,7 +216,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
     // Tenter de cliquer sur une arête ou de déconnecter un choix
     // Le test vérifie que le graphe peut être sauvegardé sans erreur réseau
     await triggerSave(page)
-    await page.getByText(/chargement|loading/i).waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
+    await page.getByText(/chargement|loading/i).waitFor({ state: 'hidden', timeout: E2E_MS.short }).catch(() => {})
 
     // L'API doit toujours répondre correctement après sauvegarde
     const nodes = await readDialogueViaApi(request, selectedFile2)
@@ -242,21 +243,21 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
 
     const countBefore = await page.locator('.react-flow__node').count()
     await page.locator('.react-flow__node').first().click()
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: 8000 })
+    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.medium })
 
     // Chercher un bouton Dupliquer (bouton direct ou menu contextuel)
     let duplicated = false
     const dupBtn = page.getByRole('button', { name: /dupliquer/i })
-    if (await dupBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await dupBtn.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
       await dupBtn.click()
       duplicated = true
     } else {
       await page.locator('.react-flow__node').first().click({ button: 'right' })
       const menuItem = page.getByRole('menuitem', { name: /dupliquer/i })
-      if (await menuItem.isVisible({ timeout: 1500 }).catch(() => false)) {
+      if (await menuItem.isVisible({ timeout: E2E_MS.tiny }).catch(() => false)) {
         try {
           // Le context menu peut dépasser le viewport — on essaie en force
-          await menuItem.click({ force: true, timeout: 3000 })
+          await menuItem.click({ force: true, timeout: E2E_MS.control })
           duplicated = true
         } catch {
           // Hors viewport non cliquable : feature Story 1.7 non accessible depuis E2E
@@ -268,7 +269,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
       test.skip('Story 1.7 (Dupliquer nœud) non implémentée — bouton/menu introuvable')
     }
 
-    await expect(page.locator('.react-flow__node')).toHaveCount(countBefore + 1, { timeout: 10000 })
+    await expect(page.locator('.react-flow__node')).toHaveCount(countBefore + 1, { timeout: E2E_MS.ui })
     await triggerSave(page)
 
     const nodes = await readDialogueViaApi(request, fixtureFilename)
@@ -307,7 +308,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
             Math.abs(b.x - before!.x) + Math.abs(b.y - before!.y) > 20
           )
         },
-        { timeout: 3000 }
+        { timeout: E2E_MS.control }
       )
       .toBe(true)
 

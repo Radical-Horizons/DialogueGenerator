@@ -1,12 +1,14 @@
 import { test, expect } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 test.describe('Sélecteur de contexte', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
   })
 
   test('le résumé des sélections doit être entièrement visible en bas du panneau', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible({ timeout: E2E_MS.graphField })
     const contextPanel = page.getByTestId('context-selector')
     const checkboxes = contextPanel.locator('input[type="checkbox"]')
     const count = await checkboxes.count()
@@ -14,7 +16,7 @@ test.describe('Sélecteur de contexte', () => {
       test.skip(true, 'Aucun personnage dans le GDD - test ignoré')
     }
     const firstCharacter = checkboxes.first()
-    await expect(firstCharacter).toBeVisible({ timeout: 5000 })
+    await expect(firstCharacter).toBeVisible({ timeout: E2E_MS.short })
     const firstCharacterRow = firstCharacter.locator('xpath=..')
     const selectedCharacterName = ((await firstCharacterRow.textContent()) ?? '')
       .replace(/📄\s*Complet/gi, '')
@@ -23,7 +25,7 @@ test.describe('Sélecteur de contexte', () => {
     
     // Attendre que le résumé apparaisse après sélection
     const summaryToggle = page.getByTestId('selected-context-summary-toggle')
-    await expect(summaryToggle).toBeVisible({ timeout: 10000 })
+    await expect(summaryToggle).toBeVisible({ timeout: E2E_MS.ui })
     
     // Vérifier que le résumé est visible (pas tronqué)
     const summarySection = summaryToggle.locator('xpath=../..')

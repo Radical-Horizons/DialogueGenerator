@@ -9,19 +9,21 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 test.describe('Graph 4 Test Results (Story 0.10)', () => {
   // Helper pour s'authentifier
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: /connexion/i })
-    const isLoginPage = await loginHeading.isVisible({ timeout: 2000 }).catch(() => false)
+    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)
     
     if (isLoginPage) {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
       await Promise.race([
-        page.waitForURL('**/', { timeout: 5000 }).catch(() => {}),
-        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
+        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
+        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {})
       ])
     }
   }
@@ -29,12 +31,12 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
     
     const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-    if (await graphTab.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await graphTab.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
       await graphTab.click()
-      await page.locator('.react-flow__node').first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {})
+      await page.locator('.react-flow__node').first().waitFor({ state: 'attached', timeout: E2E_MS.graphField }).catch(() => {})
     }
   })
 
@@ -44,17 +46,17 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
     
     // WHEN: Sélectionner un nœud et ajouter un choix avec test
     const startNode = page.locator('[data-id="START"]').or(page.locator('[data-id^="NODE_"]').first())
-    if (await startNode.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await startNode.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
       await startNode.click()
       
       // Attendre que le panneau d'édition s'affiche
-      await page.waitForSelector('text=/Édition de nœud|Éditer/i', { timeout: 2000 })
+      await page.waitForSelector('text=/Édition de nœud|Éditer/i', { timeout: E2E_MS.probe })
       
       // Ajouter un choix avec test
       const addChoiceButton = page.locator('button:has-text("Ajouter un choix")').or(
         page.locator('button').filter({ hasText: /choix|choice/i })
       )
-      if (await addChoiceButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await addChoiceButton.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
         await addChoiceButton.click()
         
         // Remplir le texte du choix
@@ -77,7 +79,7 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
         
         // THEN: Un TestNode doit apparaître automatiquement avec 4 handles
         const testNode = page.locator('[data-id*="test-node-"]')
-        await expect(testNode).toBeVisible({ timeout: 5000 })
+        await expect(testNode).toBeVisible({ timeout: E2E_MS.short })
         
         // Vérifier que le TestNode a 4 handles (visualisation)
         // Les handles sont des éléments avec des classes spécifiques ou des data-attributes
@@ -108,23 +110,23 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
     const exportButton = page.locator('button:has-text("Exporter")').or(
       page.locator('button:has-text("Export")')
     )
-    if (await exportButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await exportButton.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
       await exportButton.click()
       
       // Attendre que le JSON soit exporté (toast ou modal)
-      await page.waitForSelector('text=/exporté|succès/i', { timeout: 5000 })
+      await page.waitForSelector('text=/exporté|succès/i', { timeout: E2E_MS.short })
       
       // WHEN: Importer le JSON exporté
       const importButton = page.locator('button:has-text("Importer")').or(
         page.locator('button:has-text("Import")')
       )
-      if (await importButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await importButton.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
         // (Ceci nécessite l'implémentation de l'import)
         // Pour l'instant, on vérifie juste que l'export fonctionne
         
         // THEN: Le graphe doit afficher correctement les 4 connexions
         const testNode = page.locator('[data-id*="test-node-"]')
-        await expect(testNode).toBeVisible({ timeout: 5000 })
+        await expect(testNode).toBeVisible({ timeout: E2E_MS.short })
       } else {
         test.skip('Fonctionnalité d\'import non disponible - test ignoré')
       }
@@ -136,11 +138,11 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
   test('AC#3: Éditer manuellement les 4 connexions dans l\'éditeur', async ({ page }) => {
     // GIVEN: Un dialogue avec un TestNode existant
     const testNode = page.locator('[data-id*="test-node-"]')
-    if (await testNode.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await testNode.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
       await testNode.click()
       
       // WHEN: Éditer les 4 connexions dans le panneau d'édition
-      await page.waitForSelector('text=/Connexions de test/i', { timeout: 2000 })
+      await page.waitForSelector('text=/Connexions de test/i', { timeout: E2E_MS.probe })
       
       // Vérifier que les 4 champs sont visibles
       const criticalFailureInput = page.locator('input[name*="criticalFailure"]').or(
@@ -156,10 +158,10 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
         page.locator('label:has-text("Réussite critique")').locator('..').locator('input')
       )
       
-      await expect(criticalFailureInput).toBeVisible({ timeout: 2000 })
-      await expect(failureInput).toBeVisible({ timeout: 2000 })
-      await expect(successInput).toBeVisible({ timeout: 2000 })
-      await expect(criticalSuccessInput).toBeVisible({ timeout: 2000 })
+      await expect(criticalFailureInput).toBeVisible({ timeout: E2E_MS.probe })
+      await expect(failureInput).toBeVisible({ timeout: E2E_MS.probe })
+      await expect(successInput).toBeVisible({ timeout: E2E_MS.probe })
+      await expect(criticalSuccessInput).toBeVisible({ timeout: E2E_MS.probe })
       
       // Modifier une connexion
       await criticalFailureInput.fill('NODE_CRITICAL_FAILURE')
@@ -175,7 +177,7 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
         (r) =>
           r.url().includes('/api/v1/documents/') ||
           r.url().includes('/api/v1/unity-dialogues/graph/save'),
-        { timeout: 8000 }
+        { timeout: E2E_MS.medium }
       )
       await saveButton.click()
       await saveResponsePromise.catch(() => {})
@@ -195,11 +197,11 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
     
     // THEN: Le TestNode doit être visible avec 4 handles
     const testNode = page.locator('[data-id*="test-node-"]')
-    if (await testNode.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await testNode.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
       await testNode.click()
       
       // Vérifier que les 4 champs sont visibles (même si seulement 2 sont définis)
-      await page.waitForSelector('text=/Connexions de test/i', { timeout: 2000 })
+      await page.waitForSelector('text=/Connexions de test/i', { timeout: E2E_MS.probe })
       
       const criticalFailureInput = page.locator('input[name*="criticalFailure"]')
       const failureInput = page.locator('input[name*="failureNode"]')
@@ -207,10 +209,10 @@ test.describe('Graph 4 Test Results (Story 0.10)', () => {
       const criticalSuccessInput = page.locator('input[name*="criticalSuccess"]')
       
       // Les 4 champs doivent être visibles
-      await expect(criticalFailureInput).toBeVisible({ timeout: 2000 })
-      await expect(failureInput).toBeVisible({ timeout: 2000 })
-      await expect(successInput).toBeVisible({ timeout: 2000 })
-      await expect(criticalSuccessInput).toBeVisible({ timeout: 2000 })
+      await expect(criticalFailureInput).toBeVisible({ timeout: E2E_MS.probe })
+      await expect(failureInput).toBeVisible({ timeout: E2E_MS.probe })
+      await expect(successInput).toBeVisible({ timeout: E2E_MS.probe })
+      await expect(criticalSuccessInput).toBeVisible({ timeout: E2E_MS.probe })
       
       // Vérifier que seulement failureNode et successNode ont des valeurs
       const failureValue = await failureInput.inputValue()

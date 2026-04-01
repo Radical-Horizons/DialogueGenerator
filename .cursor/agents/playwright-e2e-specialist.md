@@ -38,6 +38,7 @@ Ne **jamais** affirmer vert sans **sortie de commande** réelle.
 ## Fichiers clés
 
 - `playwright.config.ts` — `webServer`, `VITE_API_BASE_URL`, `DISABLE_AUTH`, workers.
+- `e2e/timeouts.ts` — `E2E_MS` / `E2E_TEST_TIMEOUT_MS` : durées d’attente centralisées (éviter les littéraux éparpillés).
 - `e2e/helpers.ts` — `uniqueE2EDocumentId`, `matchDocumentJsonGetResponse`, `openDashboardGraphTabAndSelectDocument`, `gotoGraphEditorAndWaitForDocument`.
 - `e2e/trigger-graph-save.ts` — `window.__graphViewStoreE2E` (dev uniquement).
 - `docs/troubleshooting/e2e-llm.md` — `@e2e-llm`, clé, budget.

@@ -12,6 +12,7 @@ import {
   seedDocumentWithRetry,
   openDashboardGraphTabAndSelectDocument,
 } from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = 'http://127.0.0.1:4243'
 const FIXTURE_PREFIX = 'e2e-manual-node'
@@ -24,17 +25,17 @@ const FIXTURE_DOC = {
 }
 
 test.describe('Graph Manual Node (Story 1.6)', () => {
-  test.setTimeout(120_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.graphHeavy)
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: /connexion/i })
-    const isLoginPage = await loginHeading.isVisible({ timeout: 2000 }).catch(() => false)
+    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)
     if (isLoginPage) {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
       await Promise.race([
-        page.waitForURL('**/', { timeout: 5000 }).catch(() => {}),
-        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
+        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
+        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {}),
       ])
     }
   }
@@ -42,7 +43,7 @@ test.describe('Graph Manual Node (Story 1.6)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await login(page)
-    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
   })
 
   test.afterEach(async ({ request }, testInfo) => {
@@ -59,16 +60,16 @@ test.describe('Graph Manual Node (Story 1.6)', () => {
     await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
     // NodeEditorPanel (champs speaker/line) n’est rendu que dans le Dashboard, pas en page /graph-editor standalone.
     await openDashboardGraphTabAndSelectDocument(page, fixtureId)
-    await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 20000 })
+    await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: E2E_MS.graphCanvas })
 
     // Le bouton est dans le menu Actions (pas sur la barre directement) ; désactivé tant que le graphe n’est pas éditable.
-    await expect(page.getByTestId('btn-actions-dropdown')).toBeEnabled({ timeout: 20_000 })
+    await expect(page.getByTestId('btn-actions-dropdown')).toBeEnabled({ timeout: E2E_MS.graphCanvas })
     await page.getByTestId('btn-actions-dropdown').click()
     const newNodeBtn = page.getByTestId('btn-new-manual-node')
-    await expect(newNodeBtn).toBeVisible({ timeout: 8000 })
+    await expect(newNodeBtn).toBeVisible({ timeout: E2E_MS.medium })
     await newNodeBtn.click()
 
     // Le panneau d'édition doit s'afficher (champ speaker, line ou titre "Édition")
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: 15_000 })
+    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: E2E_MS.graphField })
   })
 })

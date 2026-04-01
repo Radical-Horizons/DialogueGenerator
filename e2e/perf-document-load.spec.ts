@@ -4,6 +4,7 @@
  */
 import { test, expect } from '@playwright/test'
 import { uniqueE2EDocumentId, seedDocumentWithRetry, matchDocumentJsonGetResponse } from './helpers'
+import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const COMFORT_LOAD_MS = 3000 // p95 load < 3s pour cible confort (N < 500)
 const API_BASE = 'http://127.0.0.1:4243'
@@ -18,7 +19,7 @@ const FIXTURE_DOC = {
 }
 
 test.describe('ADR-008 Perf (Story 16.6)', () => {
-  test.setTimeout(90_000)
+  test.setTimeout(E2E_TEST_TIMEOUT_MS.cost)
 
   test.afterEach(async ({ request }, testInfo) => {
     const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
@@ -38,29 +39,29 @@ test.describe('ADR-008 Perf (Story 16.6)', () => {
     await page.goto('/')
     const onLogin = await page
       .getByRole('heading', { name: /connexion/i })
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_MS.control })
       .catch(() => false)
     if (onLogin) {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
-      await expect(page).toHaveURL(/\//, { timeout: 10000 })
+      await expect(page).toHaveURL(/\//, { timeout: E2E_MS.ui })
     }
 
     await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
 
     const start = Date.now()
     await Promise.all([
-      page.waitForResponse((r) => matchDocumentJsonGetResponse(fixtureId, r), { timeout: 30000 }),
+      page.waitForResponse((r) => matchDocumentJsonGetResponse(fixtureId, r), { timeout: E2E_MS.documentLoad }),
       page.goto(`/graph-editor/${encodeURIComponent(fixtureId)}`, { waitUntil: 'domcontentloaded' }),
     ])
-    await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 25000 })
-    await expect(page.locator('[data-testid="graph-node-content"]').first()).toBeVisible({ timeout: 25000 })
+    await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: E2E_MS.graphLoad })
+    await expect(page.locator('[data-testid="graph-node-content"]').first()).toBeVisible({ timeout: E2E_MS.graphLoad })
     const loadMs = Date.now() - start
 
     if (process.env.PERF_STRICT === '1') {
       expect(loadMs).toBeLessThan(COMFORT_LOAD_MS)
     }
-    expect(loadMs).toBeLessThan(90_000)
+    expect(loadMs).toBeLessThan(E2E_MS.perfMaxLoad)
   })
 })
