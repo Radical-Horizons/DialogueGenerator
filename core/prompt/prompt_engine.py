@@ -14,14 +14,6 @@ from utils.xml_utils import (
     extract_text_from_element
 )
 
-# Essayer d'importer tiktoken, mais continuer si non disponible
-try:
-    import tiktoken
-    tiktoken_available = True
-except ImportError:
-    tiktoken_available = False
-    tiktoken = None # Pour que les références ultérieures ne lèvent pas de NameError
-
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -63,6 +55,8 @@ class PromptInput:
     vocabulary_config: Optional[Dict[str, str]] = None
     include_narrative_guides: bool = True
     in_game_flags: Optional[List[Dict[str, Any]]] = None
+    max_context_tokens: Optional[int] = None
+    llm_model_identifier: Optional[str] = None
 
 @dataclass
 class BuiltPrompt:
@@ -92,17 +86,7 @@ class PromptEngine:
     """
     _last_info_log_time = {}
     _info_log_interval = 5.0
-    _tiktoken_warned_models = set()  # Cache des modèles pour lesquels on a déjà warné
-    
-    # Mapping des modèles personnalisés vers les encodages tiktoken connus
-    # Les modèles GPT récents (GPT-4, GPT-4-turbo, etc.) utilisent cl100k_base
-    _MODEL_ENCODING_MAP = {
-        "gpt-5.2": "cl100k_base",
-        "gpt-5.2-pro": "cl100k_base",
-        "gpt-5.2-thinking": "cl100k_base",  # Alias pour compatibilité
-        "gpt-5-mini": "cl100k_base",
-        "gpt-5-nano": "cl100k_base",
-    }
+
     def _throttled_info_log(self, log_key: str, message: str) -> None:
         """Enregistre un message de log avec limitation de fréquence.
         
@@ -194,43 +178,10 @@ class PromptEngine:
         return "Tu es un dialoguiste expert en jeux de rôle narratifs."
 
     def _count_tokens(self, text: str, model_name: str = "gpt-5.2") -> int:
-        """
-        Compte le nombre de tokens dans un texte en utilisant tiktoken si disponible.
+        """Compte les tokens du prompt final (aligné sur ``TokenEstimationService`` / ``ContextTruncator``)."""
+        from services.token_estimation_service import count_prompt_tokens_for_model
 
-        Si tiktoken n'est pas disponible ou si une erreur se produit,
-        un décompte approximatif basé sur les mots (séparés par des espaces) est utilisé.
-
-        Args:
-            text (str): Le texte pour lequel compter les tokens.
-            model_name (str): Le nom du modèle à utiliser pour l'encodage (par défaut "gpt-5.2").
-                              Cela influence la manière dont tiktoken compte les tokens.
-                              Les modèles personnalisés (gpt-5.2, etc.) sont mappés vers cl100k_base.
-
-        Returns:
-            int: Le nombre estimé de tokens.
-        """
-        if tiktoken_available and tiktoken is not None:
-            try:
-                # Essayer d'abord avec le mapping personnalisé
-                encoding_name = self._MODEL_ENCODING_MAP.get(model_name)
-                if encoding_name:
-                    encoding = tiktoken.get_encoding(encoding_name)
-                else:
-                    # Essayer avec encoding_for_model pour les modèles standards
-                    encoding = tiktoken.encoding_for_model(model_name)
-                return len(encoding.encode(text))
-            except Exception as e:
-                # Warn seulement une fois par modèle pour éviter le spam
-                if model_name not in PromptEngine._tiktoken_warned_models:
-                    logger.warning(
-                        f"Erreur lors du comptage des tokens avec tiktoken pour le modèle {model_name}: {e}. "
-                        f"Repli sur le comptage de mots. (Ce warning ne s'affichera qu'une fois par modèle)"
-                    )
-                    PromptEngine._tiktoken_warned_models.add(model_name)
-                pass # Tomber vers le comptage de mots
-        
-        # Fallback si tiktoken n'est pas disponible ou a échoué
-        return len(text.split())
+        return count_prompt_tokens_for_model(text, model_name)
 
 
     def _format_tone_section(self, generation_params: Dict[str, Any]) -> Optional[str]:
@@ -383,7 +334,8 @@ class PromptEngine:
         # Créer le document XML complet avec déclaration
         full_prompt = create_xml_document(root)
         
-        num_tokens = self._count_tokens(full_prompt)
+        count_model = input.llm_model_identifier or "gpt-5.2"
+        num_tokens = self._count_tokens(full_prompt, count_model)
         prompt_hash = hashlib.sha256(full_prompt.encode('utf-8')).hexdigest()
         
         # Parser le XML pour générer structured_prompt (JSON)

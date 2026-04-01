@@ -103,6 +103,15 @@ class FallbackLLMClient(ILLMClient):
         self._clients: List[Optional[ILLMClient]] = [None] * len(model_ids)
         self._max_tokens = 0
         self._last_used_fallback: Optional[tuple[str, str]] = None  # (fallback_from, fallback_to)
+        self.last_call_cost: float = 0.0
+        self.last_usage_prompt_tokens: int = 0
+        self.last_usage_completion_tokens: int = 0
+
+    def _sync_last_usage_from(self, client: object) -> None:
+        """Copie last_* du client effectif (OpenAI, Mistral, etc.) pour l'orchestrateur SSE."""
+        self.last_call_cost = float(getattr(client, "last_call_cost", 0.0) or 0.0)
+        self.last_usage_prompt_tokens = int(getattr(client, "last_usage_prompt_tokens", 0) or 0)
+        self.last_usage_completion_tokens = int(getattr(client, "last_usage_completion_tokens", 0) or 0)
 
     def _get_client(self, index: int, fallback_from: Optional[str] = None, fallback_reason: Optional[str] = None) -> ILLMClient:
         """Retourne le client à l'index, en le créant si nécessaire."""
@@ -160,6 +169,7 @@ class FallbackLLMClient(ILLMClient):
                         self._model_ids[i],
                         last_reason,
                     )
+                self._sync_last_usage_from(client)
                 return result
             except Exception as e:  # noqa: BLE001
                 last_error = e
@@ -227,6 +237,7 @@ class FallbackLLMClient(ILLMClient):
                         chunk_callback=chunk_callback,
                     ):
                         yield item
+                    self._sync_last_usage_from(client)
                     return
                 # Pas de streaming sur ce client: dégrader en generate_variants
                 result = await retry_with_backoff(
@@ -247,6 +258,7 @@ class FallbackLLMClient(ILLMClient):
                         self._model_ids[i],
                         last_reason,
                     )
+                self._sync_last_usage_from(client)
                 for r in result:
                     yield r
                 return

@@ -276,17 +276,17 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
         # Lire tous les événements pour déclencher le cleanup
         content = stream_response.text
         assert '"type": "complete"' in content
-        
-        # Attendre un peu pour que le cleanup se termine
+
+        # Attendre conditionnellement la fin du cleanup (évite sleep fixe flaky)
         import asyncio
-        await asyncio.sleep(0.2)
-        
-        # Vérifier que la tâche a été désenregistrée (cleanup automatique dans finally)
-        # Note: La tâche est désenregistrée dans le finally block de stream_generation
-        # On vérifie que le job est dans l'état completed
-        job = job_manager.get_job(job_id)
+        job = None
+        for _ in range(200):
+            job = job_manager.get_job(job_id)
+            if job is not None and job.get("status") == "completed":
+                break
+            await asyncio.sleep(0.01)
         assert job is not None
-        assert job['status'] == 'completed'
+        assert job["status"] == "completed"
         
         # Vérifier que les logs de cleanup automatique sont présents
         log_records = [r for r in caplog.records if 'Génération terminée, cleanup automatique' in r.message]

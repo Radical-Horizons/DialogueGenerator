@@ -322,12 +322,11 @@ class ServiceContainer:
         return self._gdd_notion_sync_service
 
     def _resolve_gdd_categories_path(self) -> Path:
-        """Répertoire des catégories GDD (aligné sur GDDLoader / variables d'env)."""
+        """Répertoire des catégories GDD (helper partagé ``services.gdd_paths``)."""
+        from services.gdd_paths import resolve_gdd_categories_path
+
         root = Path(__file__).resolve().parent.parent
-        env = os.getenv("GDD_CATEGORIES_PATH", "").strip()
-        if env:
-            return Path(env)
-        return root / "data" / "GDD_categories"
+        return resolve_gdd_categories_path(root)
     
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.

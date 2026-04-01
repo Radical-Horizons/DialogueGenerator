@@ -49,7 +49,11 @@ def _repo_root_for_fingerprint_cache(context_builder: Any) -> Path:
 
 
 def _gdd_invalidation_token(repo_root: Path) -> str:
-    """Jeton lié aux écritures GDD (manifeste sync + mtime du dossier catégories)."""
+    """Jeton lié aux écritures GDD (manifeste sync + shards JSON sous GDD_categories).
+
+    Le mtime du répertoire seul est peu fiable sous Windows quand seuls des fichiers
+    enfants changent ; on réutilise la même logique que le cache GDD (max mtime des ``*.json``).
+    """
     parts: List[str] = []
     manifest = repo_root / "data" / ".gdd_snapshot" / "manifest.json"
     try:
@@ -60,7 +64,10 @@ def _gdd_invalidation_token(repo_root: Path) -> str:
     gdd_dir = repo_root / "data" / "GDD_categories"
     try:
         if gdd_dir.is_dir():
-            parts.append(str(gdd_dir.stat().st_mtime_ns))
+            from api.utils.gdd_cache import gdd_shard_directory_fingerprint
+
+            mmax, njson = gdd_shard_directory_fingerprint(gdd_dir)
+            parts.append(f"{mmax:.9f}|{njson}")
     except OSError:
         pass
     return "|".join(parts) if parts else "0"

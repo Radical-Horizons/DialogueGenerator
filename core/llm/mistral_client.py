@@ -66,6 +66,10 @@ class MistralClient(ILLMClient):
         self.reasoning_callback = reasoning_callback
         self.reasoning_trace: Optional[Dict[str, Any]] = None
 
+        self.last_call_cost: float = 0.0
+        self.last_usage_prompt_tokens: int = 0
+        self.last_usage_completion_tokens: int = 0
+
         logger.info(f"MistralClient initialisé avec le modèle: {self.model_name}, API Key présente: {'Oui' if api_key else 'Non'}.")
         logger.info(f"System prompt template utilisé: '{self.system_prompt_template}'")
 
@@ -180,6 +184,23 @@ class MistralClient(ILLMClient):
                         prompt_tokens = getattr(response.usage, "prompt_tokens", 0) or 0
                         completion_tokens = getattr(response.usage, "completion_tokens", 0) or 0
                         total_tokens = getattr(response.usage, "total_tokens", 0) or 0
+
+                    pricing = getattr(self.usage_service, "pricing_service", None)
+                    if pricing is not None:
+                        try:
+                            self.last_call_cost = float(
+                                pricing.calculate_cost(
+                                    model_name=self.model_name,
+                                    prompt_tokens=prompt_tokens,
+                                    completion_tokens=completion_tokens,
+                                )
+                            )
+                        except (TypeError, ValueError):
+                            self.last_call_cost = 0.0
+                    else:
+                        self.last_call_cost = 0.0
+                    self.last_usage_prompt_tokens = int(prompt_tokens)
+                    self.last_usage_completion_tokens = int(completion_tokens)
 
                     logger.debug(f"Réponse brute de l'API Mistral pour la variante {i+1}:\n{response}")
 

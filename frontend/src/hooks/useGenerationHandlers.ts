@@ -111,6 +111,7 @@ export function useGenerationHandlers(
     setMaxChoices,
     setNarrativeTags,
     toast,
+    tokenCount,
     connectSSE,  // Passé depuis orchestrator pour éviter duplication
   } = options
 
@@ -188,8 +189,11 @@ export function useGenerationHandlers(
         availableModels: modelsToCheck,
       })
 
-      // Créer le job de génération avec streaming SSE
-      const job = await dialoguesAPI.createGenerationJob(request)
+      // Créer le job de génération avec streaming SSE (en-têtes d'estimation pour le middleware budget)
+      const job = await dialoguesAPI.createGenerationJob(request, {
+        promptTokens: tokenCount ?? undefined,
+        completionTokens: maxCompletionTokens ?? undefined,
+      })
       
       // Démarrer la génération avec le job_id
       startGeneration(job.job_id)
@@ -223,6 +227,7 @@ export function useGenerationHandlers(
     choicesMode,
     narrativeTags,
     previousDialoguePreview,
+    tokenCount,
     startGeneration,
     resetStreamingState,
     connectSSE,  // Passé depuis orchestrator

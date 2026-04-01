@@ -4,6 +4,7 @@
  * Les handlers événementiels sont délégués à useReactFlowHandlers.
  */
 import { memo, useMemo, useEffect, useRef, useState, useCallback } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import ReactFlow, {
   Background,
   Controls,
@@ -123,7 +124,34 @@ export const GraphCanvas = memo(function GraphCanvas() {
     highlightedNodeIds,
     highlightedCycleNodes,
     documentId,
-  } = useGraphStore()
+    createEmptyNode,
+    addNode,
+    applyAutoLayout,
+    connectNodes,
+    disconnectNodes,
+    setSelectedNode,
+    generateFromNode,
+    isGenerating,
+  } = useGraphStore(
+    useShallow((s) => ({
+      nodes: s.nodes,
+      edges: s.edges,
+      graphFilters: s.graphFilters,
+      selectedNodeIds: s.selectedNodeIds,
+      validationErrors: s.validationErrors,
+      highlightedNodeIds: s.highlightedNodeIds,
+      highlightedCycleNodes: s.highlightedCycleNodes,
+      documentId: s.documentId,
+      createEmptyNode: s.createEmptyNode,
+      addNode: s.addNode,
+      applyAutoLayout: s.applyAutoLayout,
+      connectNodes: s.connectNodes,
+      disconnectNodes: s.disconnectNodes,
+      setSelectedNode: s.setSelectedNode,
+      generateFromNode: s.generateFromNode,
+      isGenerating: s.isGenerating,
+    }))
+  )
 
   const visibleStoreNodes = useMemo(
     () => applyNodeFilters(storeNodes, graphFilters),
@@ -170,17 +198,6 @@ export const GraphCanvas = memo(function GraphCanvas() {
     position: { x: number; y: number } | undefined
   } | null>(null)
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null)
-  const {
-    createEmptyNode,
-    addNode,
-    applyAutoLayout,
-    connectNodes,
-    disconnectNodes,
-    setSelectedNode,
-    generateFromNode,
-    nodes: storeNodesForChoice,
-    isGenerating,
-  } = useGraphStore()
   const { selections } = useContextStore()
   const toast = useToast()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
@@ -237,7 +254,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     ? getChoiceIndexFromSourceHandle(
         dropChoiceMenu.sourceNodeId,
         dropChoiceMenu.sourceHandleId,
-        storeNodesForChoice
+        storeNodes
       )
     : undefined
 

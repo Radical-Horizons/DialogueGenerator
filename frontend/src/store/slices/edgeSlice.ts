@@ -30,7 +30,8 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
     targetId: string,
     choiceIndex?: number,
     connectionType: string = 'default',
-    sourceHandle?: string
+    sourceHandle?: string,
+    txOptions?: { skipUndo?: boolean; skipMarkDirty?: boolean }
   ) => {
     let actualSourceHandle = sourceHandle
     if (!actualSourceHandle && connectionType.startsWith('test-')) {
@@ -73,7 +74,10 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
       return
     }
 
-    runGraphTransaction(get, set, (state) => {
+    runGraphTransaction(
+      get,
+      set,
+      (state) => {
       const strokeColor = edgeStrokeFromSource({
         sourceHandle: actualSourceHandle,
         connectionType,
@@ -192,7 +196,12 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
           edge_count: newEdges.length,
         },
       }
-    })
+    },
+      {
+        skipUndo: txOptions?.skipUndo,
+        skipMarkDirty: txOptions?.skipMarkDirty,
+      },
+    )
   },
 
   disconnectNodes: (edgeId: string, skipMarkDirty?: boolean) => {

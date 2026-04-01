@@ -64,6 +64,13 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     duplicateNode,
   } = useGraphStore()
   const { selections } = useContextStore()
+  /** Valeurs lues au moment de l'appel API (évite closures périmées pendant await generateFromNode). */
+  const selectionsRef = useRef(selections)
+  selectionsRef.current = selections
+  const llmModelRef = useRef(llmModel)
+  llmModelRef.current = llmModel
+  const userInstructionsRef = useRef(userInstructions)
+  userInstructionsRef.current = userInstructions
   const toast = useToast()
   
   const [showGenerationOptions, setShowGenerationOptions] = useState(false)
@@ -226,6 +233,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       selectedNode.data as Record<string, unknown>
     )
     if (fp === prevConnectionFingerprintRef.current) return
+    if (debouncePushRef.current) {
+      clearTimeout(debouncePushRef.current)
+      debouncePushRef.current = null
+    }
     prevConnectionFingerprintRef.current = fp
     if (nodeType === 'testNode') {
       const d = selectedNode.data as Record<string, unknown>
@@ -301,22 +312,20 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     }
     
     try {
-      const allCharacters = [
-        ...(selections.characters_full || []),
-        ...(selections.characters_excerpt || []),
-      ]
-      const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
-      
       // Si les instructions sont vides, on utilisera un texte par défaut côté backend
-      const finalInstructions = userInstructions.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
-      
+      const finalInstructions =
+        userInstructionsRef.current.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
+      const sel = selectionsRef.current
+      const allCharsForNpc = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
+      const npcFromSel = allCharsForNpc.length > 0 ? allCharsForNpc[0] : undefined
+
       const generationResult = await generateFromNode(
         selectedNodeId,
         finalInstructions,
         {
-          context_selections: selections,
-          npc_speaker_id: npcSpeakerId,
-          llm_model_identifier: llmModel,
+          context_selections: sel,
+          npc_speaker_id: npcFromSel,
+          llm_model_identifier: llmModelRef.current,
         }
       )
       
@@ -332,18 +341,13 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     } catch (err) {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
-  }, [selectedNodeId, selectedNode?.data?.choices, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
+  }, [selectedNodeId, selectedNode?.data?.choices, generateFromNode, setSelectedNode, toast])
 
   /** Créer un nœud vide et le lier comme cible du choix (panneau Détails, par choix). */
   const handleCreateEmptyNodeForChoice = useCallback((choiceIndex: number) => {
     if (!selectedNodeId || !selectedNode) return
-    const storeChoices = (selectedNode.data?.choices || []) as Choice[]
     const formData = form.getValues() as DialogueNodeData
-    const formChoices = formData.choices || []
-    // Synchroniser la structure des choix (longueur / champs éditables) depuis le formulaire,
-    // tout en conservant les champs de connexion du store pour chaque choix (targetNode, test*Node)
-    // pour ne pas déconnecter les autres choix (ex. choix #1) ni perdre la persistance.
-    if (nodeType === 'dialogueNode' && formChoices.length >= storeChoices.length) {
+    if (nodeType === 'dialogueNode') {
       const mergedData = mergeDialogueNodeFormIntoStoreData(
         selectedNode.data as Record<string, unknown>,
         formData
@@ -384,22 +388,21 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     if (!selectedNodeId) return
     
     // Si pas d'instructions, utiliser un prompt par défaut
-    const instructions = userInstructions.trim() || 'Continue la conversation de manière naturelle'
+    const instructions =
+      userInstructionsRef.current.trim() || 'Continue la conversation de manière naturelle'
     
     try {
-      const allCharacters = [
-        ...(selections.characters_full || []),
-        ...(selections.characters_excerpt || []),
-      ]
-      const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+      const sel = selectionsRef.current
+      const allChars = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
+      const npcSpeakerId = allChars.length > 0 ? allChars[0] : undefined
       
       const generationResult = await generateFromNode(
         selectedNodeId,
         instructions,
         {
-          context_selections: selections,
+          context_selections: sel,
           npc_speaker_id: npcSpeakerId,
-          llm_model_identifier: llmModel,
+          llm_model_identifier: llmModelRef.current,
           target_choice_index: choiceIndex,
         }
       )
@@ -416,22 +419,21 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     } catch (err) {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
-  }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
+  }, [selectedNodeId, generateFromNode, setSelectedNode, toast])
 
   /** Génération depuis le TestNode sélectionné : on envoie son id, le backend renvoie les connexions avec ce même id. */
   const handleGenerateFromTestNode = useCallback(async () => {
     if (!selectedNodeId) return
-    const instructions = userInstructions.trim() || 'Continue la conversation de manière naturelle'
+    const instructions =
+      userInstructionsRef.current.trim() || 'Continue la conversation de manière naturelle'
     try {
-      const allCharacters = [
-        ...(selections.characters_full || []),
-        ...(selections.characters_excerpt || []),
-      ]
-      const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+      const sel = selectionsRef.current
+      const allChars = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
+      const npcSpeakerId = allChars.length > 0 ? allChars[0] : undefined
       const generationResult = await generateFromNode(selectedNodeId, instructions, {
-        context_selections: selections,
+        context_selections: sel,
         npc_speaker_id: npcSpeakerId,
-        llm_model_identifier: llmModel,
+        llm_model_identifier: llmModelRef.current,
       })
       toast('Nœud généré avec succès', 'success', 2000)
       if (generationResult.nodeId) {
@@ -443,7 +445,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     } catch (err) {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
-  }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
+  }, [selectedNodeId, generateFromNode, setSelectedNode, toast])
 
   // Handler pour générer pour tous les choix
   const handleGenerateAllChoices = useCallback(async () => {
@@ -453,14 +455,13 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     }
     
     try {
-      const allCharacters = [
-        ...(selections.characters_full || []),
-        ...(selections.characters_excerpt || []),
-      ]
-      const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+      const sel = selectionsRef.current
+      const allChars = [...(sel.characters_full || []), ...(sel.characters_excerpt || [])]
+      const npcSpeakerId = allChars.length > 0 ? allChars[0] : undefined
       
       // Si les instructions sont vides, on utilisera un texte par défaut côté backend
-      const finalInstructions = userInstructions.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
+      const finalInstructions =
+        userInstructionsRef.current.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
 
       const st = useGraphStore.getState()
       const dialogueParent = st.nodes.find((n) => n.id === selectedNodeId)
@@ -476,9 +477,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         selectedNodeId,
         finalInstructions,
         {
-          context_selections: selections,
+          context_selections: sel,
           npc_speaker_id: npcSpeakerId,
-          llm_model_identifier: llmModel,
+          llm_model_identifier: llmModelRef.current,
           generate_all_choices: true,
           onBatchProgress: (current: number, total: number) => {
             setBatchProgress({ current, total })
@@ -500,7 +501,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     } finally {
       setBatchProgress(null)
     }
-  }, [selectedNodeId, userInstructions, selections, llmModel, generateFromNode, setSelectedNode, toast])
+  }, [selectedNodeId, generateFromNode, setSelectedNode, toast])
 
   // Hooks appelés unconditionnellement pour respecter les Rules of Hooks (ordre stable entre rendus).
   const choices = watch('choices') as Choice[] | undefined

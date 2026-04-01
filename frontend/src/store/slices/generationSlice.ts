@@ -443,13 +443,18 @@ export const createGenerationSlice: StateCreator<
         }
       }
 
+      const batchConnect = plannedConnections.length > 1
+      if (batchConnect) {
+        get()._pushUndoSnapshot()
+      }
       for (const connection of plannedConnections) {
         get().connectNodes(
           connection.sourceId,
           connection.targetId,
           connection.choiceIndex,
           connection.connectionType,
-          connection.sourceHandle
+          connection.sourceHandle,
+          batchConnect ? { skipUndo: true, skipMarkDirty: true } : undefined
         )
       }
 

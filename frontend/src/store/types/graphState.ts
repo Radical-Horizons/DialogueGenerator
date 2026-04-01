@@ -119,7 +119,9 @@ export interface GraphState {
     targetId: string,
     choiceIndex?: number,
     connectionType?: string,
-    sourceHandle?: string
+    sourceHandle?: string,
+    /** Batch génération : un snapshot undo + markDirty une fois pour tout le lot. */
+    txOptions?: { skipUndo?: boolean; skipMarkDirty?: boolean }
   ) => void
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (utilisé pour batch : appeler markDirty une fois après). */
   disconnectNodes: (edgeId: string, skipMarkDirty?: boolean) => void

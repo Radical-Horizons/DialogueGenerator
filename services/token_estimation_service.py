@@ -12,6 +12,34 @@ logger = logging.getLogger(__name__)
 DEFAULT_COMPLETION_TOKENS_PER_NODE = 350
 
 
+def count_prompt_tokens_for_model(
+    text: str,
+    model_id: str,
+    truncator: Optional[ContextTruncator] = None,
+) -> int:
+    """Compte les tokens d'un prompt brut pour un identifiant de modèle (chemin partagé UI / PromptEngine).
+
+    Mistral : approximation caractères/4 (tokenizer SP hors tiktoken). Autres modèles : ``ContextTruncator``
+    (cl100k_base si tiktoken disponible).
+
+    Args:
+        text: Texte complet du prompt.
+        model_id: Identifiant API du modèle.
+        truncator: Tronqueur réutilisable (optionnel).
+
+    Returns:
+        Nombre de tokens estimé (0 si texte vide).
+    """
+    if not text or not str(text).strip():
+        return 0
+    stripped = str(text).strip()
+    mid = (model_id or "").lower()
+    if "mistral" in mid:
+        return max(1, len(stripped) // 4)
+    t = truncator or ContextTruncator()
+    return max(1, t.count_tokens(stripped))
+
+
 class TokenEstimationService:
     """Estime les tokens (prompt + completion) sans appeler le LLM.
 
@@ -51,10 +79,5 @@ class TokenEstimationService:
             return (0, self._default_completion_tokens)
 
         text = prompt_text.strip()
-        if "mistral" in model_id.lower():
-            # Mistral utilise un tokenizer SentencePiece non disponible via tiktoken.
-            # Approximation : ~4 caractères par token (marge d'erreur ±15%).
-            prompt_tokens = max(1, len(text) // 4)
-        else:
-            prompt_tokens = max(1, self._truncator.count_tokens(text))
+        prompt_tokens = count_prompt_tokens_for_model(text, model_id, self._truncator)
         return (prompt_tokens, self._default_completion_tokens)

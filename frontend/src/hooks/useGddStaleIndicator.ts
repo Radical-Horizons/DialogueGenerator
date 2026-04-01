@@ -1,7 +1,7 @@
 /**
  * Compare l'empreinte GDD stockée sur le nœud à l'empreinte courante (Story 3.9 FR19).
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { postGddContentFingerprint } from '../api/gddContextStale'
 import { useContextConfigStore } from '../store/contextConfigStore'
 
@@ -19,6 +19,19 @@ export function useGddStaleIndicator(nodeData: GddStaleNodeDataRef): {
 } {
   const [stale, setStale] = useState(false)
   const [checking, setChecking] = useState(false)
+
+  const fieldConfigs = useContextConfigStore((s) => s.fieldConfigs)
+  const essentialFields = useContextConfigStore((s) => s.essentialFields)
+  const organization = useContextConfigStore((s) => s.organization)
+  const configRevision = useMemo(
+    () =>
+      JSON.stringify({
+        organization,
+        fieldConfigs,
+        essentialFields,
+      }),
+    [organization, fieldConfigs, essentialFields]
+  )
 
   useEffect(() => {
     const fp = nodeData.contextGddContentFingerprint
@@ -78,6 +91,7 @@ export function useGddStaleIndicator(nodeData: GddStaleNodeDataRef): {
     nodeData.id,
     nodeData.contextGddContentFingerprint,
     nodeData.gddContextSelectionsSnapshot,
+    configRevision,
   ])
 
   return { stale, checking }

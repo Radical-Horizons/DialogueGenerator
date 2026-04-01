@@ -203,7 +203,9 @@ class UnityDialogueOrchestrator:
                 author_profile=request_data.author_profile,
                 vocabulary_config=request_data.vocabulary_config,
                 include_narrative_guides=request_data.include_narrative_guides,
-                in_game_flags=request_data.in_game_flags
+                in_game_flags=request_data.in_game_flags,
+                max_context_tokens=request_data.max_context_tokens,
+                llm_model_identifier=request_data.llm_model_identifier,
             )
             
             built = self.prompt_engine.build_prompt(prompt_input)

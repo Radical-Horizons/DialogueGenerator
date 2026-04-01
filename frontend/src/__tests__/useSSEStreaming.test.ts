@@ -159,4 +159,91 @@ describe('useSSEStreaming', () => {
       expect(mockClose).toHaveBeenCalled()
     })
   })
+
+  it('should append chunk with empty string content', async () => {
+    const spy = vi.spyOn(useGenerationStore.getState(), 'appendChunk')
+    const { result } = renderHook(() => useSSEStreaming({}))
+
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'chunk', content: '', sequence: 1 }),
+      } as MessageEvent)
+    })
+
+    expect(spy).toHaveBeenCalledWith('', 1)
+    spy.mockRestore()
+  })
+
+  it('should ignore step events after complete (out-of-order)', async () => {
+    const setStep = vi.spyOn(useGenerationStore.getState(), 'setStep')
+    const { result } = renderHook(() => useSSEStreaming({}))
+
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'complete', result: { json_content: '{}' } }),
+      } as MessageEvent)
+    })
+    setStep.mockClear()
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'step', step: 'Late' }),
+      } as MessageEvent)
+    })
+
+    expect(setStep).not.toHaveBeenCalled()
+    setStep.mockRestore()
+  })
+
+  it('should close EventSource 500ms after complete', async () => {
+    vi.useFakeTimers()
+    mockClose.mockClear()
+    const { result } = renderHook(() => useSSEStreaming({}))
+
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'complete', result: { json_content: '{}' } }),
+      } as MessageEvent)
+    })
+
+    expect(mockClose).not.toHaveBeenCalled()
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+    })
+    expect(mockClose).toHaveBeenCalled()
+    vi.useRealTimers()
+  })
+
+  it('should surface error payload on error event', async () => {
+    const setErr = vi.spyOn(useGenerationStore.getState(), 'setError')
+    const { result } = renderHook(() => useSSEStreaming({}))
+
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({ type: 'error', message: 'fail-msg' }),
+      } as MessageEvent)
+    })
+
+    expect(setErr).toHaveBeenCalledWith('fail-msg')
+    setErr.mockRestore()
+  })
 })

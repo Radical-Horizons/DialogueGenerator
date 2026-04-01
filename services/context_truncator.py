@@ -1,5 +1,6 @@
 """Service de gestion des tokens et troncature de contexte."""
 import logging
+import re
 from typing import Optional
 
 # Import tiktoken avec gestion d'erreur
@@ -162,3 +163,26 @@ def cap_context_text_to_budget(text: str, max_tokens: int) -> str:
     if truncator.count_tokens(text) <= max_tokens:
         return text
     return truncator.truncate_context(text, max_tokens)
+
+
+def count_tokens_in_prompt_context_element(raw_xml: str) -> int:
+    """Compte les tokens du contenu interne de la première balise ``<context>`` du prompt.
+
+    Utilisé pour aligner ``context_tokens`` (API estimate) sur ce que le LLM reçoit réellement
+    dans la section contexte du XML assemblé par ``PromptEngine``.
+
+    Args:
+        raw_xml: Document XML du prompt (ex. ``BuiltPrompt.raw_prompt``).
+
+    Returns:
+        Nombre de tokens (``ContextTruncator``) du fragment interne à ``<context>``, ou 0 si absent.
+    """
+    if not raw_xml:
+        return 0
+    match = re.search(r"<context(?:\s[^>]*)?>([\s\S]*?)</context>", raw_xml)
+    if not match:
+        return 0
+    inner = match.group(1).strip()
+    if not inner:
+        return 0
+    return ContextTruncator().count_tokens(inner)

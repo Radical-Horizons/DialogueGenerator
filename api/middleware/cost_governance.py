@@ -1,8 +1,7 @@
 """Middleware pour la gouvernance des coûts LLM."""
-import json
 import logging
 import os
-from typing import Callable
+from typing import Callable, Optional
 
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
@@ -10,8 +9,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from services.cost_governance_service import CostGovernanceService
 from services.llm_pricing_service import LLMPricingService
-from api.dependencies import get_cost_governance_service, get_cost_budget_repository
-from constants import ModelNames, Defaults
+from api.dependencies import get_cost_budget_repository
+from constants import Defaults
 
 from api.middleware.billable_user_context import get_billable_user_id
 
@@ -21,13 +20,35 @@ logger = logging.getLogger(__name__)
 GENERATION_ENDPOINTS = [
     "/api/v1/dialogues/generate/unity-dialogue",
     "/api/v1/dialogues/generate/variants",
-    "/api/v1/graph/generate-node",
+    "/api/v1/unity-dialogues/graph/generate-node",
     "/api/v1/dialogues/generate/jobs",  # Streaming generation
 ]
 
 # Estimation par défaut des tokens (si non disponibles dans la requête)
 DEFAULT_PROMPT_TOKENS = 5000  # Estimation conservatrice
 DEFAULT_COMPLETION_TOKENS = 1000  # Estimation conservatrice
+
+# Plafond anti-abus pour les en-têtes d'estimation client (POST body illisible en middleware)
+_MAX_HEADER_TOKEN_ESTIMATE = 2_000_000
+
+_HEADER_PROMPT = "x-estimated-prompt-tokens"
+_HEADER_COMPLETION = "x-estimated-completion-tokens"
+
+
+def _parse_positive_int_header(request: Request, header_name: str) -> Optional[int]:
+    """Lit un entier positif borné depuis les en-têtes (clés ASGI en minuscules)."""
+    raw = request.headers.get(header_name)
+    if raw is None:
+        return None
+    try:
+        value = int(str(raw).strip())
+    except (TypeError, ValueError):
+        logger.debug("En-tête %s ignoré (valeur non entière): %r", header_name, raw)
+        return None
+    if value < 0 or value > _MAX_HEADER_TOKEN_ESTIMATE:
+        logger.debug("En-tête %s ignoré (hors plage): %s", header_name, value)
+        return None
+    return value
 
 
 class CostGovernanceMiddleware(BaseHTTPMiddleware):
@@ -173,12 +194,19 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
         elif "/generate/jobs" in path:
             # Streaming generation: tokens similaires mais traitement spécial
             prompt_tokens = DEFAULT_PROMPT_TOKENS
-            completion_tokens = DEFAULT_COMPLETION_TOKENS * 1.5
+            completion_tokens = int(DEFAULT_COMPLETION_TOKENS * 1.5)
         else:
             # Génération standard (unity-dialogue, generate-node)
             prompt_tokens = DEFAULT_PROMPT_TOKENS
             completion_tokens = DEFAULT_COMPLETION_TOKENS
-        
+
+        hdr_pt = _parse_positive_int_header(request, _HEADER_PROMPT)
+        hdr_ct = _parse_positive_int_header(request, _HEADER_COMPLETION)
+        if hdr_pt is not None:
+            prompt_tokens = hdr_pt
+        if hdr_ct is not None:
+            completion_tokens = hdr_ct
+
         return self.pricing_service.calculate_cost(
             model_name=model_name,
             prompt_tokens=prompt_tokens,

@@ -133,7 +133,11 @@ class BasePromptRequest(BaseModel):
     include_narrative_guides: bool = Field(default=True, description="Inclure les guides narratifs dans le prompt")
     previous_dialogue_preview: Optional[str] = Field(None, description="Texte formaté du dialogue précédent")
     in_game_flags: Optional[List[Dict[str, Any]]] = Field(None, description="Flags in-game sélectionnés pour la génération réactive")
-    
+    llm_model_identifier: str = Field(
+        default=ModelNames.GPT_5_MINI,
+        description="Identifiant du modèle LLM (estimation tokens / coût / comptage prompt)",
+    )
+
     @field_validator('max_context_tokens')
     @classmethod
     def validate_max_context_tokens(cls, v: int) -> int:
@@ -322,7 +326,7 @@ class PreviewPromptResponse(BaseModel):
 
 class GenerateUnityDialogueRequest(BasePromptRequest):
     """Requête pour générer un nœud de dialogue au format Unity JSON."""
-    llm_model_identifier: str = Field(default=ModelNames.GPT_5_MINI, description="Identifiant du modèle LLM")
+
     max_completion_tokens: Optional[int] = Field(
         None,
         ge=100,

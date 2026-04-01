@@ -10,6 +10,10 @@ import xml.etree.ElementTree as ET
 
 from utils.xml_utils import escape_xml_text
 from services.prompt_xml_parsers import build_narrative_guides_xml, build_vocabulary_xml
+from services.context_truncator import ContextTruncator, cap_context_text_to_budget
+
+# Réserve tokens pour l’enveloppe XML plate (<context><gdd_context>) quand le XML hiérarchique dépasse le budget.
+_XML_CONTEXT_ENVELOPE_TOKEN_RESERVE = 96
 
 if TYPE_CHECKING:
     from core.prompt.prompt_engine import PromptInput
@@ -240,25 +244,52 @@ class PromptBuilder:
                         "ContextBuilder non injecté dans PromptBuilder. "
                         "Utilisez le ServiceContainer pour créer PromptBuilder avec ses dépendances."
                     )
-                
-                # serialize_to_xml retourne maintenant directement un ET.Element
-                context_root = self._context_builder._context_serializer.serialize_to_xml(input.structured_context)
-                
+
+                cb = self._context_builder
+                context_root = cb._context_serializer.serialize_to_xml(input.structured_context)
+
                 if context_root is None:
                     raise ValueError("serialize_context_to_xml a retourné None")
-                
-                # Valider que c'est bien un élément <context>
+
                 if context_root.tag != "context":
                     logger.warning(f"Élément XML inattendu: {context_root.tag}, attendu 'context'")
                     raise ValueError(f"Tag XML inattendu: {context_root.tag}")
-                
-                # INJECTION DES FLAGS IN-GAME (si présents)
-                # Insérer en première position dans <context> pour visibilité maximale
+
+                max_tok = input.max_context_tokens
+                if max_tok is not None and max_tok > 0:
+                    text_ser = cb.serialize_context_to_text(input.structured_context)
+                    capped_text = cap_context_text_to_budget(text_ser, max_tok)
+                    trunc = ContextTruncator()
+                    xml_tok = trunc.count_tokens(
+                        ET.tostring(context_root, encoding="unicode", method="xml")
+                    )
+                    text_was_truncated = capped_text != text_ser
+                    if text_was_truncated or xml_tok > max_tok:
+                        if text_was_truncated:
+                            body_text = capped_text
+                        else:
+                            inner_budget = max(1, max_tok - _XML_CONTEXT_ENVELOPE_TOKEN_RESERVE)
+                            body_text = cap_context_text_to_budget(text_ser, inner_budget)
+                        flat_ctx = ET.Element("context")
+                        gdd_el = ET.SubElement(flat_ctx, "gdd_context")
+                        gdd_el.text = escape_xml_text(body_text)
+                        if input.in_game_flags and len(input.in_game_flags) > 0:
+                            flags_elem = self._build_in_game_flags_element(input.in_game_flags)
+                            if flags_elem is not None:
+                                flat_ctx.insert(0, flags_elem)
+                        logger.debug(
+                            "Contexte prompt: forme plate sous budget (text_trunc=%s xml_tok=%s max=%s)",
+                            text_was_truncated,
+                            xml_tok,
+                            max_tok,
+                        )
+                        return flat_ctx
+
                 if input.in_game_flags and len(input.in_game_flags) > 0:
                     flags_elem = self._build_in_game_flags_element(input.in_game_flags)
                     if flags_elem is not None:
                         context_root.insert(0, flags_elem)
-                
+
                 return context_root
             except Exception as e:
                 logger.error(

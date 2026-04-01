@@ -353,6 +353,15 @@ export interface GenerateUnityDialogueResponse {
   structured_prompt?: import('./prompt').PromptStructure
 }
 
+/** GET /api/v1/dialogues/generate/jobs/{job_id} — aligné sur ``GenerationJobStatus`` OpenAPI. */
+export interface GenerationJobStatus {
+  job_id: string
+  status: 'queued' | 'running' | 'completed' | 'error' | 'cancelled'
+  result: Record<string, unknown> | null
+  error: string | null
+  created_at: string
+  updated_at: string
+}
 
 export interface ExportUnityDialogueRequest {
   json_content: string

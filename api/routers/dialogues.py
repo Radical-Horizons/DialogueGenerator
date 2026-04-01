@@ -179,9 +179,11 @@ def _build_prompt_from_request(
         author_profile=request_data.author_profile,
         vocabulary_config=request_data.vocabulary_config,
         include_narrative_guides=request_data.include_narrative_guides,
-        in_game_flags=request_data.in_game_flags  # Ajouter les flags
+        in_game_flags=request_data.in_game_flags,
+        max_context_tokens=request_data.max_context_tokens,
+        llm_model_identifier=request_data.llm_model_identifier,
     )
-    
+
     return prompt_engine.build_prompt(prompt_input)
 
 
@@ -561,14 +563,17 @@ async def get_raw_json_context(
         all_characters = context_selections_dict.get('characters', [])
         npc_speaker_id = request_data.npc_speaker_id or (all_characters[0] if all_characters else "UNKNOWN")
         
-        # Construire le prompt pour obtenir le hash
+        context_text_for_prompt = cap_context_text_to_budget(
+            context_builder.serialize_context_to_text(structured_context),
+            request_data.max_context_tokens,
+        )
         prompt_input = PromptInput(
             user_instructions=request_data.user_instructions,
             npc_speaker_id=npc_speaker_id,
             player_character_id="URESAIR",
             skills_list=skills_list,
             traits_list=traits_list,
-            context_summary=None,  # On utilise structured_context
+            context_summary=context_text_for_prompt,
             structured_context=structured_context,
             scene_location=request_data.context_selections.scene_location,
             max_choices=request_data.max_choices,
@@ -576,7 +581,9 @@ async def get_raw_json_context(
             narrative_tags=request_data.narrative_tags,
             author_profile=request_data.author_profile,
             vocabulary_config=request_data.vocabulary_config,
-            include_narrative_guides=request_data.include_narrative_guides
+            include_narrative_guides=request_data.include_narrative_guides,
+            max_context_tokens=request_data.max_context_tokens,
+            llm_model_identifier=request_data.llm_model_identifier,
         )
         
         built = prompt_engine.build_prompt(prompt_input)
