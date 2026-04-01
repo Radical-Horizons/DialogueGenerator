@@ -193,6 +193,7 @@ export function useGenerationHandlers(
       const job = await dialoguesAPI.createGenerationJob(request, {
         promptTokens: tokenCount ?? undefined,
         completionTokens: maxCompletionTokens ?? undefined,
+        llmModelIdentifier: request.llm_model_identifier ?? undefined,
       })
       
       // Démarrer la génération avec le job_id

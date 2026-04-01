@@ -3,7 +3,9 @@ import pytest
 import json
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, patch, MagicMock
+
 from api.main import app
+from api.routers.auth import get_current_user
 from api.schemas.dialogue import ContextSelection
 
 @pytest.fixture
@@ -378,3 +380,84 @@ async def test_stream_generation_with_billable_user_sets_context_during_stream(m
         assert chunks
     finally:
         reset_billable_user_id(outer)
+
+
+def _minimal_job_request() -> dict:
+    """Payload minimal pour POST /generate/jobs (réutilisé par les tests ownership)."""
+    context_selection = ContextSelection(
+        characters_full=["character_1"],
+        characters_excerpt=[],
+        locations_full=[],
+        locations_excerpt=[],
+        items_full=[],
+        items_excerpt=[],
+        species_full=[],
+        species_excerpt=[],
+        communities_full=[],
+        communities_excerpt=[],
+        dialogues_examples=[],
+        scene_location=None,
+    )
+    return {
+        "user_instructions": "Test dialogue",
+        "context_selections": context_selection.model_dump(mode="json"),
+        "llm_model_identifier": "gpt-5-mini",
+    }
+
+
+def test_cancel_job_forbidden_for_non_owner(client: TestClient, monkeypatch) -> None:
+    """Un utilisateur ne peut pas annuler le job d'un autre (auth réelle simulée)."""
+    monkeypatch.setattr(
+        "api.routers.streaming._security_skips_job_ownership",
+        lambda: False,
+    )
+
+    async def user_alice() -> dict:
+        return {"id": "1", "username": "alice", "email": "alice@example.com"}
+
+    app.dependency_overrides[get_current_user] = user_alice
+    try:
+        create_resp = client.post(
+            "/api/v1/dialogues/generate/jobs",
+            json=_minimal_job_request(),
+        )
+        assert create_resp.status_code == 201
+        job_id = create_resp.json()["job_id"]
+
+        async def user_bob() -> dict:
+            return {"id": "2", "username": "bob", "email": "bob@example.com"}
+
+        app.dependency_overrides[get_current_user] = user_bob
+        cancel_resp = client.post(f"/api/v1/dialogues/generate/jobs/{job_id}/cancel")
+        assert cancel_resp.status_code == 403
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_get_job_status_forbidden_for_non_owner(client: TestClient, monkeypatch) -> None:
+    """Un utilisateur ne peut pas lire le statut du job d'un autre."""
+    monkeypatch.setattr(
+        "api.routers.streaming._security_skips_job_ownership",
+        lambda: False,
+    )
+
+    async def user_alice() -> dict:
+        return {"id": "1", "username": "alice", "email": "alice@example.com"}
+
+    app.dependency_overrides[get_current_user] = user_alice
+    try:
+        create_resp = client.post(
+            "/api/v1/dialogues/generate/jobs",
+            json=_minimal_job_request(),
+        )
+        assert create_resp.status_code == 201
+        job_id = create_resp.json()["job_id"]
+
+        async def user_bob() -> dict:
+            return {"id": "2", "username": "bob", "email": "bob@example.com"}
+
+        app.dependency_overrides[get_current_user] = user_bob
+        status_resp = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}")
+        assert status_resp.status_code == 403
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)

@@ -64,6 +64,12 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     duplicateNode,
   } = useGraphStore()
   const { selections } = useContextStore()
+  const toast = useToast()
+  const [showGenerationOptions, setShowGenerationOptions] = useState(false)
+  const [userInstructions, setUserInstructions] = useState('')
+  const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
+  const [availableModels, setAvailableModels] = useState<LLMModelResponse[]>([])
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null)
   /** Valeurs lues au moment de l'appel API (évite closures périmées pendant await generateFromNode). */
   const selectionsRef = useRef(selections)
   selectionsRef.current = selections
@@ -71,13 +77,6 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   llmModelRef.current = llmModel
   const userInstructionsRef = useRef(userInstructions)
   userInstructionsRef.current = userInstructions
-  const toast = useToast()
-  
-  const [showGenerationOptions, setShowGenerationOptions] = useState(false)
-  const [userInstructions, setUserInstructions] = useState('')
-  const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
-  const [availableModels, setAvailableModels] = useState<LLMModelResponse[]>([])
-  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null)
   
   // Charger les modèles disponibles
   useEffect(() => {

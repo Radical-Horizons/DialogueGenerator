@@ -448,50 +448,17 @@ export const createPersistenceSlice: StateCreator<
   exportToUnity: (opts?: { keepStatusForDraft?: boolean }) => {
     const state = get()
     const keepStatus = opts?.keepStatusForDraft === true
-
-    const unityNodes = state.nodes
-      .map((node) => {
-        if (node.type === 'testNode') return null
-        const unityNode = { ...node.data }
-        if (!keepStatus) delete unityNode.status
-        delete unityNode.nextNode
-        delete unityNode.successNode
-        delete unityNode.failureNode
-        if (unityNode.choices) {
-          unityNode.choices = (
-            unityNode.choices as Array<{ targetNode?: string; [key: string]: unknown }>
-          ).map((choice) => {
-            const cleanChoice = { ...choice }
-            delete cleanChoice.targetNode
-            return cleanChoice
-          })
-        }
-        return unityNode
-      })
-      .filter((node) => node !== null)
-
-    // Reconstituer les connexions depuis les edges
-    for (const edge of state.edges) {
-      const sourceNode = unityNodes.find((n) => n && n.id === edge.source)
-      if (!sourceNode) continue
-      const edgeType = edge.data?.edgeType
-      const choiceIndex = edge.data?.choiceIndex
-      if (edgeType === 'success') {
-        sourceNode.successNode = edge.target
-      } else if (edgeType === 'failure') {
-        sourceNode.failureNode = edge.target
-      } else if (edgeType === 'choice' && choiceIndex !== undefined) {
-        if (sourceNode.choices && sourceNode.choices[choiceIndex]) {
-          sourceNode.choices[choiceIndex].targetNode = edge.target
-        }
-      } else {
-        if (!sourceNode.choices && !sourceNode.test) {
-          sourceNode.nextNode = edge.target
+    const doc = graphToDocument(state.nodes, state.edges) as {
+      schemaVersion: string
+      nodes: Array<Record<string, unknown>>
+    }
+    if (!keepStatus) {
+      for (const n of doc.nodes) {
+        if (n && typeof n === 'object' && 'status' in n) {
+          delete n.status
         }
       }
     }
-
-    const document = { schemaVersion: '1.1.0', nodes: unityNodes }
-    return JSON.stringify(document, null, 2)
+    return JSON.stringify(doc, null, 2)
   },
 })

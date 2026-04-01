@@ -199,6 +199,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
   } | null>(null)
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null)
   const { selections } = useContextStore()
+  const selectionsRef = useRef(selections)
+  selectionsRef.current = selections
   const toast = useToast()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
@@ -279,14 +281,15 @@ export const GraphCanvas = memo(function GraphCanvas() {
   const handleDropChoiceGenerate = useCallback(async () => {
     if (!dropChoiceMenu || choiceIndexFromDrop === undefined) return
     try {
+      const sel = selectionsRef.current
       const allCharacters = [
-        ...(selections.characters_full || []),
-        ...(selections.characters_excerpt || []),
+        ...(sel.characters_full || []),
+        ...(sel.characters_excerpt || []),
       ]
       const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
       const instructions = 'Continue la conversation de manière naturelle'
       const result = await generateFromNode(dropChoiceMenu.sourceNodeId, instructions, {
-        context_selections: selections,
+        context_selections: sel,
         npc_speaker_id: npcSpeakerId,
         llm_model_identifier: DEFAULT_MODEL,
         target_choice_index: choiceIndexFromDrop,
@@ -300,20 +303,21 @@ export const GraphCanvas = memo(function GraphCanvas() {
     } catch (err) {
       toast(`Erreur lors de la génération: ${getErrorMessage(err)}`, 'error')
     }
-  }, [dropChoiceMenu, choiceIndexFromDrop, selections, generateFromNode, setSelectedNode, toast])
+  }, [dropChoiceMenu, choiceIndexFromDrop, generateFromNode, setSelectedNode, toast])
 
   const handleGenerateFromTestNode = useCallback(
     async (testNodeId: string) => {
       setShowContextMenuGenerationLoader(true)
       try {
+        const sel = selectionsRef.current
         const allCharacters = [
-          ...(selections.characters_full || []),
-          ...(selections.characters_excerpt || []),
+          ...(sel.characters_full || []),
+          ...(sel.characters_excerpt || []),
         ]
         const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
         const instructions = 'Continue la conversation de manière naturelle'
         const result = await generateFromNode(testNodeId, instructions, {
-          context_selections: selections,
+          context_selections: sel,
           npc_speaker_id: npcSpeakerId,
           llm_model_identifier: DEFAULT_MODEL,
         })
@@ -328,7 +332,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         setShowContextMenuGenerationLoader(false)
       }
     },
-    [selections, generateFromNode, setSelectedNode, toast]
+    [generateFromNode, setSelectedNode, toast]
   )
 
   const openContextMenu = (nodeId: string, clientX: number, clientY: number) => {

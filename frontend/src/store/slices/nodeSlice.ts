@@ -17,6 +17,7 @@ import { truncateChoiceLabel } from '../../utils/graphEdgeBuilders'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { runGraphTransaction } from '../utils/runGraphTransaction'
 import { documentToGraph } from '../../utils/documentToGraph'
+import { syncDocAndLayout } from '../../utils/syncDocLayout'
 
 /** Nombre max d'entrées dans l'historique de régénération (Story 1.10 - AC#3). */
 const MAX_REGENERATION_HISTORY = 10
@@ -421,6 +422,8 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
     return node
   },
 
+  // Hors runGraphTransaction : éditions texte très fréquentes saturerait la pile undo ;
+  // les opérations discrètes (add/delete/connect) passent par des transactions.
   updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty = false) => {
     set((state) => {
       const node = state.nodes.find((n) => n.id === nodeId)
@@ -493,8 +496,8 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
             if (node.type !== 'dialogueNode' || !node.data.choices) return node
             const choices = node.data.choices as Choice[]
             let modified = false
-            const updatedChoices = choices.map(c => {
-              const possibleId = `test-node-${node.id}-choice-${choices.indexOf(c)}`
+            const updatedChoices = choices.map((c, idx) => {
+              const possibleId = `test-node-${node.id}-choice-${idx}`
               
               if (possibleId === nodeId || c.testSuccessNode === nodeId || c.testFailureNode === nodeId) {
                 modified = true
@@ -728,12 +731,22 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
       (node.data as { regenerationHistory?: RegenerationEntry[] }).regenerationHistory ?? []
     const newHistory = [...currentHistory, entry].slice(-MAX_REGENERATION_HISTORY)
 
-    set((s) => ({
-      nodes: s.nodes.map((n) =>
+    set((s) => {
+      const nodes = s.nodes.map((n) =>
         n.id === nodeId
           ? { ...n, data: { ...n.data, regenerationHistory: newHistory } }
           : n
-      ),
-    }))
+      )
+      const next = { ...s, nodes }
+      if (next.document != null && next.layout != null) {
+        const { document, layout } = syncDocAndLayout(
+          nodes,
+          s.edges,
+          next.layout as Record<string, unknown>
+        )
+        return { ...next, document, layout }
+      }
+      return next
+    })
   },
 })

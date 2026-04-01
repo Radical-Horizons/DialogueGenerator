@@ -5,6 +5,8 @@
 export interface CostEstimateHeadersInput {
   promptTokens?: number | null
   completionTokens?: number | null
+  /** Aligne CostGovernanceMiddleware sur le modèle réel (allowlist côté serveur via llm_pricing.json). */
+  llmModelIdentifier?: string | null
 }
 
 /**
@@ -27,6 +29,13 @@ export function buildCostEstimateHeaders(
   const ct = input.completionTokens
   if (typeof ct === 'number' && Number.isFinite(ct) && ct >= 0) {
     headers['X-Estimated-Completion-Tokens'] = String(Math.floor(ct))
+  }
+  const mid = input.llmModelIdentifier
+  if (typeof mid === 'string') {
+    const trimmed = mid.trim()
+    if (trimmed.length > 0 && trimmed.length <= 256) {
+      headers['X-LLM-Model'] = trimmed
+    }
   }
   return Object.keys(headers).length > 0 ? headers : undefined
 }

@@ -192,20 +192,23 @@ export const createGenerationSlice: StateCreator<
       const dialogueIdForCosts = state.dialogueMetadata.filename || undefined
       // Ne pas envoyer de test vide pour un choix (évite 422 après suppression du TestNode)
       const normalizedContent = normalizeParentContentForGeneration(parentNodeContent)
-      const response = await graphAPI.generateNode({
-        parent_node_id: parentNodeId,
-        parent_node_content: normalizedContent,
-        user_instructions: instructions,
-        context_selections: contextSelections,
-        max_choices: maxChoices,
-        npc_speaker_id: npcSpeakerId,
-        system_prompt_override: systemPromptOverride,
-        narrative_tags: narrativeTags,
-        llm_model_identifier: llmModelIdentifier,
-        target_choice_index: targetChoiceIndex,
-        generate_all_choices: generateAllChoices,
-        dialogue_id: dialogueIdForCosts,
-      })
+      const response = await graphAPI.generateNode(
+        {
+          parent_node_id: parentNodeId,
+          parent_node_content: normalizedContent,
+          user_instructions: instructions,
+          context_selections: contextSelections,
+          max_choices: maxChoices,
+          npc_speaker_id: npcSpeakerId,
+          system_prompt_override: systemPromptOverride,
+          narrative_tags: narrativeTags,
+          llm_model_identifier: llmModelIdentifier,
+          target_choice_index: targetChoiceIndex,
+          generate_all_choices: generateAllChoices,
+          dialogue_id: dialogueIdForCosts,
+        },
+        { llmModelIdentifier: llmModelIdentifier ?? undefined }
+      )
 
       const isTestNode =
         parentNode.type === 'testNode' ||
@@ -733,7 +736,16 @@ export const createGenerationSlice: StateCreator<
         updatedEdges = updatedEdges.filter(
           (e) => e.source !== nodeId && e.target !== nodeId
         )
-        return { ...currentState, nodes: updatedNodes, edges: updatedEdges }
+        const nextState = { ...currentState, nodes: updatedNodes, edges: updatedEdges }
+        if (nextState.document != null && nextState.layout != null) {
+          const { document, layout } = syncDocAndLayout(
+            updatedNodes,
+            updatedEdges,
+            nextState.layout as Record<string, unknown>
+          )
+          return { ...nextState, document, layout }
+        }
+        return nextState
       })
 
       get().deleteNode(nodeId)

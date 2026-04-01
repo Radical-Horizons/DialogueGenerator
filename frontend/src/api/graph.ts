@@ -2,6 +2,7 @@
  * API client pour les endpoints de gestion de graphes.
  */
 import apiClient from './client'
+import { buildCostEstimateHeaders, type CostEstimateHeadersInput } from './costEstimateHeaders'
 import type {
   LoadGraphRequest,
   LoadGraphResponse,
@@ -75,7 +76,8 @@ function isTestNodeGeneration(parentNodeId: string): boolean {
  * Génère un nœud en contexte avec l'IA.
  */
 export async function generateNode(
-  request: GenerateNodeRequest
+  request: GenerateNodeRequest,
+  costEstimate?: CostEstimateHeadersInput
 ): Promise<GenerateNodeResponse> {
   // Timeout adaptatif : 5 min pour batch ou TestNode (plusieurs appels LLM), 2 min pour single
   const longTimeout = 300000
@@ -84,10 +86,11 @@ export async function generateNode(
     request.generate_all_choices || isTestNodeGeneration(request.parent_node_id)
       ? longTimeout
       : shortTimeout
+  const hdr = buildCostEstimateHeaders(costEstimate)
   const response = await apiClient.post<GenerateNodeResponse>(
     `/api/v1/unity-dialogues/graph/generate-node`,
     request,
-    { timeout }
+    { timeout, ...(hdr ? { headers: hdr } : {}) }
   )
   return response.data
 }

@@ -208,26 +208,10 @@ def get_cost_governance_service(
 
 
 def create_llm_usage_service() -> LLMUsageService:
-    """Crée un service de tracking d'utilisation LLM (sans dépendances FastAPI).
-    
-    Cette fonction peut être appelée directement sans passer par le système
-    de dépendances FastAPI. Pour l'injection de dépendances dans les routes,
-    utiliser get_llm_usage_service() avec Depends().
-    
-    Le service est configuré avec CostGovernanceService pour mettre à jour
-    automatiquement le budget après chaque génération.
-    
-    Returns:
-        Instance de LLMUsageService.
-    """
-    repository = get_llm_usage_repository()
-    # Injecter CostGovernanceService pour mise à jour automatique du budget
-    cost_repository = get_cost_budget_repository()
-    cost_service = CostGovernanceService(repository=cost_repository)
-    return LLMUsageService(
-        repository=repository,
-        cost_governance_service=cost_service
-    )
+    """Délègue à ``api.llm_usage_factory`` (évite cycle container ↔ dependencies)."""
+    from api.llm_usage_factory import create_llm_usage_service as _factory_create
+
+    return _factory_create()
 
 
 def get_llm_usage_service(request: Request) -> LLMUsageService:

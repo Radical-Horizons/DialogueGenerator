@@ -33,6 +33,7 @@ _MAX_HEADER_TOKEN_ESTIMATE = 2_000_000
 
 _HEADER_PROMPT = "x-estimated-prompt-tokens"
 _HEADER_COMPLETION = "x-estimated-completion-tokens"
+_HEADER_LLM_MODEL = "x-llm-model"
 
 
 def _parse_positive_int_header(request: Request, header_name: str) -> Optional[int]:
@@ -165,6 +166,33 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
                 }
             )
     
+    def _resolve_model_for_cost_estimate(self, request: Request) -> str:
+        """Détermine l'identifiant modèle pour le tarif (body illisible ici).
+
+        Priorité : en-tête ``X-LLM-Model`` si présent **et** présent dans
+        ``llm_pricing.json``, sinon query ``model`` / ``llm_model``, sinon défaut.
+
+        Args:
+            request: Requête entrante.
+
+        Returns:
+            Identifiant modèle passé à ``calculate_cost``.
+        """
+        raw = request.headers.get(_HEADER_LLM_MODEL)
+        if raw is not None:
+            mid = str(raw).strip()
+            if mid and self.pricing_service.get_model_pricing(mid) is not None:
+                return mid
+            logger.debug(
+                "En-tête %s ignoré (vide ou modèle absent de la grille tarifaire): %r",
+                _HEADER_LLM_MODEL,
+                raw,
+            )
+        q = request.query_params.get("model") or request.query_params.get("llm_model")
+        if q:
+            return str(q).strip()
+        return Defaults.MODEL_ID
+
     async def _estimate_cost(self, request: Request) -> float:
         """Estime le coût d'une génération basé sur la requête.
         
@@ -180,10 +208,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
         Returns:
             Coût estimé en USD (estimation conservatrice).
         """
-        # Essayer d'extraire le modèle depuis les query params
-        model_name = request.query_params.get("model") or request.query_params.get("llm_model")
-        if not model_name:
-            model_name = Defaults.MODEL_ID
+        model_name = self._resolve_model_for_cost_estimate(request)
         
         # Estimation selon le type d'endpoint
         path = request.url.path

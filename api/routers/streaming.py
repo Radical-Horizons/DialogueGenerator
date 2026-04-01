@@ -18,7 +18,7 @@ Types d'événements :
 import logging
 import json
 import asyncio
-from typing import Annotated, AsyncGenerator, Dict, Any, Optional
+from typing import Annotated, AsyncGenerator, Dict, Any, NamedTuple, Optional
 from urllib.parse import quote_plus
 
 from fastapi import APIRouter, Depends, Request, HTTPException, Query, status
@@ -42,6 +42,54 @@ router = APIRouter()
 _bearer_optional = HTTPBearer(auto_error=False)
 
 
+class SSEStreamAuth(NamedTuple):
+    """Utilisateur authentifié pour le SSE et indicateur jeton job (évite IDOR Bearer)."""
+
+    user: dict
+    authenticated_via_sse_token: bool
+
+
+def _security_skips_job_ownership() -> bool:
+    """Dev local avec auth désactivée : pas de contrôle propriétaire (voir AGENTS.md)."""
+    cfg = get_security_config()
+    return bool(cfg.is_development and cfg.disable_auth)
+
+
+def _job_owner_label(user: dict) -> str:
+    """Clé alignée sur ``owner_username`` stocké à la création du job."""
+    return str(user.get("username") or user.get("id") or "")
+
+
+def _ensure_job_owned_by(job: Dict[str, Any], user: dict) -> None:
+    """Vérifie que l'utilisateur est le propriétaire du job (routes REST)."""
+    if _security_skips_job_ownership():
+        return
+    owner = job.get("owner_username")
+    if owner is None:
+        return
+    if _job_owner_label(user) != owner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé au propriétaire du job",
+        )
+
+
+def _ensure_stream_allowed_for_job(job: Dict[str, Any], stream_auth: SSEStreamAuth) -> None:
+    """SSE : jeton ``sse_token`` OK ; Bearer exige même utilisateur que ``owner_username``."""
+    if _security_skips_job_ownership():
+        return
+    if stream_auth.authenticated_via_sse_token:
+        return
+    owner = job.get("owner_username")
+    if owner is None:
+        return
+    if _job_owner_label(stream_auth.user) != owner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé au propriétaire du job",
+        )
+
+
 async def authenticate_sse_stream(
     job_id: str,
     request: Request,
@@ -53,15 +101,18 @@ async def authenticate_sse_stream(
         Optional[HTTPAuthorizationCredentials],
         Depends(_bearer_optional),
     ] = None,
-) -> dict:
+) -> SSEStreamAuth:
     """Authentifie le GET SSE : query ``sse_token`` ou Bearer access token."""
     security_config = get_security_config()
     if security_config.is_development and security_config.disable_auth:
-        return {
-            "id": "1",
-            "username": "admin",
-            "email": "admin@example.com",
-        }
+        return SSEStreamAuth(
+            user={
+                "id": "1",
+                "username": "admin",
+                "email": "admin@example.com",
+            },
+            authenticated_via_sse_token=False,
+        )
 
     request_id = getattr(request.state, "request_id", "unknown")
 
@@ -72,7 +123,7 @@ async def authenticate_sse_stream(
             if username:
                 user = auth_service.get_user_by_username(username)
                 if user:
-                    return user
+                    return SSEStreamAuth(user=user, authenticated_via_sse_token=True)
 
     if credentials is not None:
         pl = auth_service.verify_token(credentials.credentials, token_type="access")
@@ -81,7 +132,7 @@ async def authenticate_sse_stream(
             if username:
                 user = auth_service.get_user_by_username(username)
                 if user:
-                    return user
+                    return SSEStreamAuth(user=user, authenticated_via_sse_token=False)
 
     raise AuthenticationException(
         message="Authentification requise pour le flux SSE (sse_token ou Bearer)",
@@ -321,12 +372,14 @@ async def create_generation_job(
         Job créé avec job_id et stream_url.
     """
     job_manager = get_job_manager()
-    
-    # Créer le job avec les paramètres
-    job_id = job_manager.create_job(job_data.model_dump(mode='json'))
-    
-    username = str(current_user.get("username") or current_user.get("id") or "user")
-    sse_token = create_sse_job_token(job_id=job_id, username=username)
+
+    owner_username = _job_owner_label(current_user)
+    job_id = job_manager.create_job(
+        job_data.model_dump(mode='json'),
+        owner_username=owner_username,
+    )
+
+    sse_token = create_sse_job_token(job_id=job_id, username=owner_username)
     stream_url = (
         f"/api/v1/dialogues/generate/jobs/{job_id}/stream?sse_token={quote_plus(sse_token)}"
     )
@@ -352,7 +405,7 @@ def _get_stream_orchestrator(
 @router.get("/generate/jobs/{job_id}/stream", response_class=StreamingResponse)
 async def stream_job(
     job_id: str,
-    _auth: Annotated[dict, Depends(authenticate_sse_stream)],
+    stream_auth: Annotated[SSEStreamAuth, Depends(authenticate_sse_stream)],
     orchestrator: Annotated[UnityDialogueOrchestrator, Depends(_get_stream_orchestrator)],
 ) -> StreamingResponse:
     """Endpoint SSE pour streamer la génération d'un job.
@@ -369,7 +422,9 @@ async def stream_job(
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
-    billable_uid = str(_auth.get("username") or _auth.get("id") or "user")
+    _ensure_stream_allowed_for_job(job, stream_auth)
+
+    billable_uid = _job_owner_label(stream_auth.user) or "user"
 
     return StreamingResponse(
         stream_generation_with_billable_user(job_id, orchestrator, billable_uid),
@@ -397,9 +452,12 @@ async def cancel_job(
     """
     job_manager = get_job_manager()
     
-    if not job_manager.get_job(job_id):
+    job = job_manager.get_job(job_id)
+    if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
+
+    _ensure_job_owned_by(job, _user)
+
     success = job_manager.cancel_job(job_id)
     
     if not success:
@@ -436,10 +494,12 @@ async def get_job_status(
     """
     job_manager = get_job_manager()
     job = job_manager.get_job(job_id)
-    
+
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
+
+    _ensure_job_owned_by(job, _user)
+
     return GenerationJobStatus(
         job_id=job['job_id'],
         status=job['status'],

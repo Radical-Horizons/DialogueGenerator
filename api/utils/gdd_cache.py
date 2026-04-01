@@ -68,12 +68,13 @@ class GDDCacheEntry:
         
         Args:
             check_interval: Intervalle minimum entre vérifications mtime (en secondes).
+                ``0`` désactive le throttle (vérifie le disque à chaque ``get``).
             
         Returns:
             True si le fichier a été modifié depuis le chargement.
         """
-        # Throttle : ne pas vérifier trop souvent
-        if time.time() - self.cached_at < check_interval:
+        # Throttle : ne pas vérifier trop souvent (``check_interval=0`` → toujours vérifier)
+        if check_interval > 0 and time.time() - self.cached_at < check_interval:
             return False
 
         if self.shard_file_count is not None:

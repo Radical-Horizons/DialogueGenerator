@@ -77,6 +77,8 @@ export interface BasePromptRequest {
   include_narrative_guides?: boolean
   previous_dialogue_preview?: string
   in_game_flags?: InGameFlag[]
+  /** Aligné backend ``BasePromptRequest.llm_model_identifier`` (estimate / preview). */
+  llm_model_identifier?: string
 }
 
 export interface EstimateTokensRequest extends BasePromptRequest {
@@ -198,6 +200,9 @@ export interface SpeciesResponse {
 export interface SpeciesListResponse {
   species: SpeciesResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface CommunityResponse {
@@ -333,6 +338,8 @@ export interface GenerateUnityDialogueRequest extends BasePromptRequest {
   top_p?: number | null
   field_configs?: Record<string, string[]>
   organization_mode?: string
+  /** Aligné Pydantic ``reasoning_summary`` (ex. ``"auto"``). */
+  reasoning_summary?: 'auto' | null
 }
 
 export interface ReasoningTrace {

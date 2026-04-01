@@ -164,16 +164,38 @@ class MistralClient(ILLMClient):
                 if stream:
                     accumulated_content = ""
                     response_stream = await self.client.chat.stream_async(**chat_params)
-                    
+
                     async for chunk in response_stream:
                         if chunk.choices and chunk.choices[0].delta:
                             delta_content = getattr(chunk.choices[0].delta, "content", None)
                             if delta_content:
                                 accumulated_content += delta_content
-                    
+
                     generated_results.append(accumulated_content)
                     logger.info(f"Variante {i+1} générée avec succès (streaming).")
                     success = True
+                    # Usage non fourni de façon fiable sur tous les chunks Mistral : estimation grossière
+                    # pour le tracking (évite des zéros systématiques).
+                    prompt_tokens = max(1, len(full_prompt_str) // 4)
+                    completion_tokens = max(1, len(accumulated_content) // 4)
+                    total_tokens = prompt_tokens + completion_tokens
+                    raw_response_str = accumulated_content[:12000] if accumulated_content else None
+                    pricing = getattr(self.usage_service, "pricing_service", None)
+                    if pricing is not None:
+                        try:
+                            self.last_call_cost = float(
+                                pricing.calculate_cost(
+                                    model_name=self.model_name,
+                                    prompt_tokens=prompt_tokens,
+                                    completion_tokens=completion_tokens,
+                                )
+                            )
+                        except (TypeError, ValueError):
+                            self.last_call_cost = 0.0
+                    else:
+                        self.last_call_cost = 0.0
+                    self.last_usage_prompt_tokens = int(prompt_tokens)
+                    self.last_usage_completion_tokens = int(completion_tokens)
                 else:
                     # Appel API sans streaming
                     response: ChatCompletionResponse = await self.client.chat.complete_async(**chat_params)

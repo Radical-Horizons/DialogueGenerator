@@ -306,7 +306,15 @@ class OpenAIStreamParser:
                         data={"error": error_data},
                         sequence=sequence_number
                     )
-                
+
+                elif event_type == StreamEventType.RESPONSE_INCOMPLETE.value:
+                    response_obj = event_data.get("response")
+                    yield StreamChunk(
+                        event_type=event_type,
+                        data={"response": response_obj, "event_data": event_data},
+                        sequence=sequence_number,
+                    )
+
                 else:
                     # Autres événements (on les log mais on ne les yield pas forcément)
                     logger.debug(f"Événement streaming non géré: {event_type}")

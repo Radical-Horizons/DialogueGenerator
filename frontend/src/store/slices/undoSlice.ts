@@ -5,7 +5,6 @@
 import type { StateCreator } from 'zustand'
 import type { Node, Edge } from 'reactflow'
 import type { GraphState, GraphSnapshot } from '../types/graphState'
-import { buildLayoutFromNodes } from '../../utils/documentToGraph'
 
 const MAX_UNDO_SNAPSHOTS = 50
 
@@ -15,10 +14,21 @@ export type UndoSlice = Pick<
   'undo' | 'redo' | 'canUndo' | 'canRedo' | '_pushUndoSnapshot' | 'clearUndoHistory'
 >
 
-function cloneSnapshot(nodes: Node[], edges: Edge[]): GraphSnapshot {
+function cloneSnapshot(state: {
+  nodes: Node[]
+  edges: Edge[]
+  document: Record<string, unknown> | null
+  layout: Record<string, unknown> | null
+}): GraphSnapshot {
   return {
-    nodes: nodes.map((n) => ({ ...n, data: JSON.parse(JSON.stringify(n.data)) })),
-    edges: edges.map((e) => ({ ...e })),
+    nodes: state.nodes.map((n) => ({ ...n, data: JSON.parse(JSON.stringify(n.data)) })),
+    edges: state.edges.map((e) => ({ ...e })),
+    document: state.document
+      ? (JSON.parse(JSON.stringify(state.document)) as Record<string, unknown>)
+      : null,
+    layout: state.layout
+      ? (JSON.parse(JSON.stringify(state.layout)) as Record<string, unknown>)
+      : null,
   }
 }
 
@@ -27,7 +37,7 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
     const state = get()
     if (state.undoStack.length === 0) return
     const snapshot = state.undoStack[state.undoStack.length - 1]
-    const redoSnapshot = cloneSnapshot(state.nodes, state.edges)
+    const redoSnapshot = cloneSnapshot(state)
     const restoredNodes = snapshot.nodes.map((n) => ({
       ...n,
       data: JSON.parse(JSON.stringify(n.data)),
@@ -38,10 +48,12 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
       edges: restoredEdges,
       undoStack: state.undoStack.slice(0, -1),
       redoStack: [...state.redoStack, redoSnapshot],
-    }
-    if (state.document != null && state.layout != null) {
-      const restoredLayout = buildLayoutFromNodes(snapshot.nodes)
-      updates.layout = { ...state.layout, nodes: restoredLayout.nodes }
+      document: snapshot.document
+        ? (JSON.parse(JSON.stringify(snapshot.document)) as Record<string, unknown>)
+        : null,
+      layout: snapshot.layout
+        ? (JSON.parse(JSON.stringify(snapshot.layout)) as Record<string, unknown>)
+        : null,
     }
     set(updates)
     get().markDirty()
@@ -51,7 +63,7 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
     const state = get()
     if (state.redoStack.length === 0) return
     const snapshot = state.redoStack[state.redoStack.length - 1]
-    const undoSnapshot = cloneSnapshot(state.nodes, state.edges)
+    const undoSnapshot = cloneSnapshot(state)
     const restoredNodes = snapshot.nodes.map((n) => ({
       ...n,
       data: JSON.parse(JSON.stringify(n.data)),
@@ -61,10 +73,12 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
       edges: [...snapshot.edges],
       undoStack: [...state.undoStack, undoSnapshot],
       redoStack: state.redoStack.slice(0, -1),
-    }
-    if (state.document != null && state.layout != null) {
-      const restoredLayout = buildLayoutFromNodes(snapshot.nodes)
-      redoUpdates.layout = { ...state.layout, nodes: restoredLayout.nodes }
+      document: snapshot.document
+        ? (JSON.parse(JSON.stringify(snapshot.document)) as Record<string, unknown>)
+        : null,
+      layout: snapshot.layout
+        ? (JSON.parse(JSON.stringify(snapshot.layout)) as Record<string, unknown>)
+        : null,
     }
     set(redoUpdates)
     get().markDirty()
@@ -75,7 +89,7 @@ export const createUndoSlice: StateCreator<GraphState, [], [], UndoSlice> = (set
 
   _pushUndoSnapshot: () => {
     const state = get()
-    const snapshot = cloneSnapshot(state.nodes, state.edges)
+    const snapshot = cloneSnapshot(state)
     let nextUndo = [...state.undoStack, snapshot]
     if (nextUndo.length > MAX_UNDO_SNAPSHOTS) nextUndo = nextUndo.slice(-MAX_UNDO_SNAPSHOTS)
     set({ undoStack: nextUndo, redoStack: [] })

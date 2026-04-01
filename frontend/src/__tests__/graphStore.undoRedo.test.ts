@@ -19,6 +19,40 @@ describe('graphStore - undo/redo', () => {
   })
 
   describe('undo', () => {
+    it('undo restores document and layout snapshot (SoT)', () => {
+      const document = {
+        schemaVersion: '1.1.0',
+        nodes: [] as unknown[],
+        docMarker: 'before',
+      } as Record<string, unknown>
+      const layout = { nodes: { n1: { x: 0, y: 0 } }, layoutMarker: 'v1' } as Record<string, unknown>
+      useGraphStore.setState({
+        document,
+        layout,
+        nodes: [
+          {
+            id: 'n1',
+            type: 'dialogueNode',
+            position: { x: 0, y: 0 },
+            data: { id: 'n1', speaker: 'A', line: '', choices: [] },
+          },
+        ],
+        edges: [],
+      })
+      const { addNode, undo } = useGraphStore.getState()
+      addNode({
+        id: 'n2',
+        type: 'dialogueNode',
+        position: { x: 50, y: 0 },
+        data: { id: 'n2', speaker: 'B', line: '', choices: [] },
+      })
+      expect(useGraphStore.getState().nodes).toHaveLength(2)
+      undo()
+      expect(useGraphStore.getState().nodes).toHaveLength(1)
+      expect(useGraphStore.getState().document).toEqual(document)
+      expect(useGraphStore.getState().layout).toEqual(layout)
+    })
+
     it('after addNode, undo() restores previous state (no node)', () => {
       const { addNode, undo, canUndo } = useGraphStore.getState()
       expect(canUndo()).toBe(false)

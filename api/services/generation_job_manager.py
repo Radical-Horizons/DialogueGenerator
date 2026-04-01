@@ -22,23 +22,25 @@ class GenerationJobManager:
         self._tasks: Dict[str, asyncio.Task] = {}
         self._stream_claim_locks: Dict[str, asyncio.Lock] = {}
     
-    def create_job(self, params: dict) -> str:
+    def create_job(self, params: dict, owner_username: str) -> str:
         """
         Crée un nouveau job de génération.
-        
+
         Args:
-            params: Paramètres de génération (sera passé au service)
-        
+            params: Paramètres de génération (sera passé au service).
+            owner_username: Identifiant stable du créateur (username JWT ``sub`` ou équivalent).
+
         Returns:
             job_id: UUID du job créé
         """
         job_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc)
-        
+
         self._jobs[job_id] = {
             'job_id': job_id,
             'status': 'queued',
             'params': params,
+            'owner_username': owner_username,
             'result': None,
             'error': None,
             'cancelled': False,

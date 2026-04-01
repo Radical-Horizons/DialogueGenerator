@@ -5,10 +5,14 @@
 import type { Node, Edge } from 'reactflow'
 import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
 
-/** Story 2.14 FR35: snapshot du graphe pour undo/redo. */
+/** Story 2.14 FR35: snapshot du graphe pour undo/redo (incl. SoT document + layout). */
 export interface GraphSnapshot {
   nodes: Node[]
   edges: Edge[]
+  /** Copie profonde au moment du snapshot ; null si pas de document SoT. */
+  document: Record<string, unknown> | null
+  /** Copie profonde au moment du snapshot ; null si pas de layout SoT. */
+  layout: Record<string, unknown> | null
 }
 
 /** Story 2.9 FR30: types de nœuds pour filtrage (dialogue / test / end). */

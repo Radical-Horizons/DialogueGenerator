@@ -16,7 +16,7 @@ def job_manager():
 def job_id(job_manager):
     """Fixture pour créer un job de test."""
     params = {"user_instructions": "Test dialogue"}
-    return job_manager.create_job(params)
+    return job_manager.create_job(params, owner_username="test_owner")
 
 
 def test_cancel_job_annules_asyncio_task(job_manager, job_id):

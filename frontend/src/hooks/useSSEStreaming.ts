@@ -202,10 +202,15 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
             if (data.result) {
               setUnityDialogueResponse(data.result)
               
-              if (data.result.raw_prompt && data.result.estimated_tokens && data.result.prompt_hash) {
+              const est = data.result.estimated_tokens
+              if (
+                data.result.raw_prompt != null &&
+                data.result.prompt_hash != null &&
+                typeof est === 'number'
+              ) {
                 setRawPrompt(
                   data.result.raw_prompt,
-                  data.result.estimated_tokens,
+                  est,
                   data.result.prompt_hash,
                   false,
                   data.result.structured_prompt || null

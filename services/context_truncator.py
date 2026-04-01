@@ -1,7 +1,8 @@
 """Service de gestion des tokens et troncature de contexte."""
+import json
 import logging
 import re
-from typing import Optional
+from typing import Any, Optional, Union
 
 # Import tiktoken avec gestion d'erreur
 try:
@@ -55,7 +56,7 @@ class ContextTruncator:
             return 0
         return max(1, len(text) // 4)
 
-    def count_tokens(self, text: str) -> int:
+    def count_tokens(self, text: Union[str, Any]) -> int:
         """Compte le nombre de tokens dans un texte.
         
         Args:
@@ -64,6 +65,11 @@ class ContextTruncator:
         Returns:
             Nombre de tokens (ou nombre de mots si tiktoken non disponible).
         """
+        if not isinstance(text, str):
+            if isinstance(text, (dict, list)):
+                text = json.dumps(text, ensure_ascii=False)
+            else:
+                text = str(text)
         if self.tokenizer:
             return len(self.tokenizer.encode(text))
         else:
@@ -144,7 +150,7 @@ class ContextTruncator:
         return '\n'.join(truncated_lines)
 
 
-def cap_context_text_to_budget(text: str, max_tokens: int) -> str:
+def cap_context_text_to_budget(text: Union[str, Any, None], max_tokens: int) -> str:
     """Tronque un texte de contexte sérialisé s'il dépasse ``max_tokens``.
 
     Politique alignée sur la génération Unity (orchestrateur + endpoints dialogue) :
@@ -157,8 +163,14 @@ def cap_context_text_to_budget(text: str, max_tokens: int) -> str:
     Returns:
         Texte inchangé si sous le plafond, sinon tronqué avec marqueur de troncature.
     """
-    if not text or max_tokens <= 0:
-        return text
+    if text is None:
+        return ""
+    if max_tokens <= 0:
+        return "" if not text else (text if isinstance(text, str) else json.dumps(text, ensure_ascii=False))
+    if not text:
+        return text if isinstance(text, str) else ""
+    if not isinstance(text, str):
+        text = json.dumps(text, ensure_ascii=False) if isinstance(text, (dict, list)) else str(text)
     truncator = ContextTruncator()
     if truncator.count_tokens(text) <= max_tokens:
         return text

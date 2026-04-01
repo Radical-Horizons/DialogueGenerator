@@ -219,7 +219,8 @@ class ServiceContainer:
             Instance de LLMUsageService.
         """
         if self._llm_usage_service is None:
-            from api.dependencies import create_llm_usage_service
+            from api.llm_usage_factory import create_llm_usage_service
+
             self._llm_usage_service = create_llm_usage_service()
             logger.info("LLMUsageService initialisé dans le container.")
         return self._llm_usage_service

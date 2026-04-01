@@ -13,7 +13,7 @@ from core.llm.openai.parameter_builder import OpenAIParameterBuilder
 from core.llm.openai.response_parser import OpenAIResponseParser
 from core.llm.openai.reasoning_extractor import OpenAIReasoningExtractor
 from core.llm.openai.usage_tracker import OpenAIUsageTracker
-from core.llm.openai.stream_parser import OpenAIStreamParser, StreamChunk
+from core.llm.openai.stream_parser import OpenAIStreamParser, StreamChunk, StreamEventType
 
 logger = logging.getLogger(__name__)
 
@@ -408,7 +408,18 @@ class OpenAIClient(ILLMClient):
                         error_data = chunk.data.get("error", {})
                         error_message = str(error_data)
                         logger.error(f"Erreur API OpenAI (streaming) pour la variante {i+1}: {error_message}")
-                
+
+                    elif chunk.event_type == StreamEventType.RESPONSE_INCOMPLETE.value:
+                        inc = chunk.data.get("response")
+                        error_message = (
+                            f"Réponse OpenAI incomplète ou tronquée (max output / annulation): {inc!r}"
+                        )
+                        logger.warning(
+                            "Streaming variante %s: %s",
+                            i + 1,
+                            error_message,
+                        )
+
                 # Yielder le résultat final
                 if success and parsed_output is not None:
                     yield parsed_output
