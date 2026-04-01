@@ -5,6 +5,7 @@
  */
 import { useState, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
+import { usePresetStore } from '../store/presetStore'
 import { useContextStore } from '../store/contextStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
 import { filterObsoleteReferences } from '../utils/presetUtils'
@@ -165,9 +166,9 @@ export function usePresetManagement(
 
   const handlePresetLoaded = useCallback(async (preset: Preset) => {
     try {
-      // Validation du preset
-      const validation = await fetch(`/api/v1/presets/${preset.id}/validate`)
-      const validationResult = await validation.json()
+      const validationResult = await usePresetStore
+        .getState()
+        .validatePreset(preset.id)
 
       if (!validationResult.valid) {
         // Afficher modal de validation si références obsolètes

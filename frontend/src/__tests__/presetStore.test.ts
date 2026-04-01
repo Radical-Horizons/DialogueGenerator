@@ -2,18 +2,24 @@
  * Tests pour usePresetStore - Store Zustand pour gestion des presets
  */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { AxiosError } from 'axios';
+import type { AxiosResponse } from 'axios';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePresetStore } from '../store/presetStore';
+import * as presetsApi from '../api/presets';
 
-// Mock fetch global
-global.fetch = vi.fn();
+vi.mock('../api/presets');
+
+function axiosHttpError(status: number): AxiosError {
+  const e = new AxiosError(`Request failed with status code ${status}`);
+  e.response = { status } as AxiosResponse;
+  return e;
+}
 
 describe('usePresetStore', () => {
   beforeEach(() => {
-    // Réinitialiser le mock fetch avant chaque test
     vi.clearAllMocks();
-    
-    // Réinitialiser le store à l'état initial
+
     const { result } = renderHook(() => usePresetStore());
     act(() => {
       result.current.reset();
@@ -54,10 +60,7 @@ describe('usePresetStore', () => {
         },
       ];
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockPresets,
-      });
+      vi.mocked(presetsApi.listPresetsApi).mockResolvedValueOnce(mockPresets);
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -71,14 +74,14 @@ describe('usePresetStore', () => {
     });
 
     it('should set loading state while loading presets', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(
-        () => new Promise((resolve) => setTimeout(() => resolve({ ok: true, json: async () => [] }), 100))
+      vi.mocked(presetsApi.listPresetsApi).mockImplementationOnce(
+        () => new Promise((resolve) => setTimeout(() => resolve([]), 100))
       );
 
       const { result } = renderHook(() => usePresetStore());
 
       act(() => {
-        result.current.loadPresets();
+        void result.current.loadPresets();
       });
 
       expect(result.current.isLoading).toBe(true);
@@ -89,10 +92,7 @@ describe('usePresetStore', () => {
     });
 
     it('should handle error when loading presets fails', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      vi.mocked(presetsApi.listPresetsApi).mockRejectedValueOnce(axiosHttpError(500));
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -105,7 +105,7 @@ describe('usePresetStore', () => {
     });
 
     it('should handle network error when loading presets', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'));
+      vi.mocked(presetsApi.listPresetsApi).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -138,9 +138,9 @@ describe('usePresetStore', () => {
         metadata: { created: '2026-01-17T10:00:00Z', modified: '2026-01-17T10:00:00Z' },
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-        json: async () => createdPreset,
+      vi.mocked(presetsApi.createPresetApi).mockResolvedValueOnce({
+        preset: createdPreset,
+        cleanupMessage: null,
       });
 
       const { result } = renderHook(() => usePresetStore());
@@ -166,17 +166,14 @@ describe('usePresetStore', () => {
         },
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      vi.mocked(presetsApi.createPresetApi).mockRejectedValueOnce(axiosHttpError(500));
 
       const { result } = renderHook(() => usePresetStore());
 
       await act(async () => {
         try {
           await result.current.createPreset(newPresetData);
-        } catch (error) {
+        } catch {
           // L'erreur est lancée, ce qui est le comportement attendu
         }
       });
@@ -207,14 +204,10 @@ describe('usePresetStore', () => {
         metadata: { ...existingPreset.metadata, modified: '2026-01-17T11:00:00Z' },
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-        json: async () => updatedPreset,
-      });
+      vi.mocked(presetsApi.updatePresetApi).mockResolvedValueOnce(updatedPreset);
 
       const { result } = renderHook(() => usePresetStore());
 
-      // Setup initial state
       act(() => {
         result.current.presets = [existingPreset];
       });
@@ -228,17 +221,14 @@ describe('usePresetStore', () => {
     });
 
     it('should handle error when updating preset fails', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-      });
+      vi.mocked(presetsApi.updatePresetApi).mockRejectedValueOnce(axiosHttpError(404));
 
       const { result } = renderHook(() => usePresetStore());
 
       await act(async () => {
         try {
           await result.current.updatePreset('non-existent', { name: 'Test' });
-        } catch (error) {
+        } catch {
           // L'erreur est lancée, ce qui est le comportement attendu
         }
       });
@@ -263,13 +253,10 @@ describe('usePresetStore', () => {
         },
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-      });
+      vi.mocked(presetsApi.deletePresetApi).mockResolvedValueOnce(undefined);
 
       const { result } = renderHook(() => usePresetStore());
 
-      // Setup initial state
       act(() => {
         result.current.presets = [preset];
       });
@@ -297,13 +284,10 @@ describe('usePresetStore', () => {
         },
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-      });
+      vi.mocked(presetsApi.deletePresetApi).mockResolvedValueOnce(undefined);
 
       const { result } = renderHook(() => usePresetStore());
 
-      // Setup initial state
       act(() => {
         result.current.presets = [preset];
         result.current.selectedPreset = preset;
@@ -317,10 +301,7 @@ describe('usePresetStore', () => {
     });
 
     it('should handle error when deleting preset fails', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-      });
+      vi.mocked(presetsApi.deletePresetApi).mockRejectedValueOnce(axiosHttpError(404));
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -348,10 +329,7 @@ describe('usePresetStore', () => {
         },
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-        json: async () => preset,
-      });
+      vi.mocked(presetsApi.getPresetApi).mockResolvedValueOnce(preset);
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -364,10 +342,7 @@ describe('usePresetStore', () => {
     });
 
     it('should handle error when loading preset fails', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-      });
+      vi.mocked(presetsApi.getPresetApi).mockRejectedValueOnce(axiosHttpError(404));
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -388,10 +363,7 @@ describe('usePresetStore', () => {
         obsoleteRefs: [],
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-        json: async () => validationResult,
-      });
+      vi.mocked(presetsApi.validatePresetApi).mockResolvedValueOnce(validationResult);
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -411,10 +383,7 @@ describe('usePresetStore', () => {
         obsoleteRefs: ['char-999'],
       };
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: true,
-        json: async () => validationResult,
-      });
+      vi.mocked(presetsApi.validatePresetApi).mockResolvedValueOnce(validationResult);
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -427,10 +396,7 @@ describe('usePresetStore', () => {
     });
 
     it('should handle error when validating preset fails', async () => {
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-      });
+      vi.mocked(presetsApi.validatePresetApi).mockRejectedValueOnce(axiosHttpError(404));
 
       const { result } = renderHook(() => usePresetStore());
 
@@ -438,8 +404,8 @@ describe('usePresetStore', () => {
         try {
           await result.current.validatePreset('non-existent');
         } catch (error: unknown) {
-          expect(error).toBeInstanceOf(Error)
-          expect((error as Error).message).toContain('Failed to validate preset')
+          expect(error).toBeInstanceOf(Error);
+          expect((error as Error).message).toContain('Failed to validate preset');
         }
       });
     });

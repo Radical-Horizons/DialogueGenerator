@@ -29,6 +29,10 @@ export interface NodeCostEntry {
   cost_eur: number
   success: boolean
   deleted: boolean
+  /** Provider initial en échec si fallback (Story 1.16). */
+  fallback_from?: string | null
+  /** Raison de l’échec du provider initial (Story 1.16). */
+  fallback_reason?: string | null
 }
 
 export interface DialogueCostResponse {
@@ -90,6 +94,8 @@ export interface GenerationLogEntry {
   error_message?: string | null
   prompt?: string | null
   response?: string | null
+  fallback_from?: string | null
+  fallback_reason?: string | null
 }
 
 /** Réponse GET /dialogue/{id}/generation-logs (Story 1.15). */

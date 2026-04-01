@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import logging
-import os
 from contextvars import ContextVar, Token
-from typing import Callable, Optional
+from typing import Callable
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from api.config.security_config import get_security_config
 from api.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
@@ -72,8 +72,9 @@ class BillableUserContextMiddleware(BaseHTTPMiddleware):
     """Définit ``get_billable_user_id()`` pour toute la durée de la requête."""
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        # Aligner avec ``get_current_user`` mock (username admin) quand auth désactivée en dev/test.
-        if os.getenv("DISABLE_AUTH", "").lower() in ("1", "true", "yes"):
+        # Même source de vérité que ``get_current_user`` (SecurityConfig.disable_auth), pas seulement
+        # ``os.getenv`` : sans .env, le défaut Pydantic reste auth désactivée en local.
+        if get_security_config().disable_auth:
             uid = "admin"
         else:
             uid = _user_id_from_authorization(request)

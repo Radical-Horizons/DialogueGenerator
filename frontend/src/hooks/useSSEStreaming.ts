@@ -20,6 +20,7 @@ export interface UseSSEStreamingOptions {
     used_fallback?: boolean
     fallback_from?: string
     fallback_to?: string
+    fallback_reason?: string
   }) => void
   /** Callback appelé lors d'une erreur (après debounce) */
   onError?: (error: string) => void
@@ -126,8 +127,9 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
         // Dispatcher selon le type d'événement SSE
         switch (data.type) {
           case 'chunk':
-            if (data.content) {
-              appendChunk(data.content, data.sequence)
+            // Ne pas utiliser `if (data.content)` : les deltas vides sont valides.
+            if (data.content !== undefined && data.content !== null) {
+              appendChunk(String(data.content), data.sequence)
             }
             break
             
@@ -166,6 +168,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
                 used_fallback: data.used_fallback,
                 fallback_from: data.fallback_from,
                 fallback_to: data.fallback_to,
+                fallback_reason: data.fallback_reason,
               })
             }
             // Story 1.16: toast informatif quand fallback utilisé

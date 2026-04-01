@@ -65,14 +65,12 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     if (!newPresetName.trim() || !configToSave) return;
 
     try {
-      const response = await createPreset({
+      const { cleanupMessage } = await createPreset({
         name: newPresetName.trim(),
         icon: newPresetIcon,
         configuration: configToSave,
       });
 
-      // Vérifier message auto-cleanup dans header
-      const cleanupMessage = response.headers.get('X-Preset-Cleanup-Message');
       if (cleanupMessage) {
         toast(cleanupMessage, 'warning');
       } else {

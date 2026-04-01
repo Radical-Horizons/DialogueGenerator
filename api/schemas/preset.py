@@ -13,6 +13,7 @@ class PresetMetadata(BaseModel):
 
 class PresetConfiguration(BaseModel):
     """Configuration de génération du preset."""
+
     characters: List[str] = Field(default_factory=list, description="IDs des personnages")
     locations: List[str] = Field(default_factory=list, description="IDs des lieux")
     region: str = Field(..., description="Région principale")
@@ -24,6 +25,12 @@ class PresetConfiguration(BaseModel):
     contextSelections: Optional[Dict] = Field(None, description="Snapshot complet des sélections de contexte (optionnel)")
     selectedRegion: Optional[str] = Field(None, description="Région sélectionnée dans le ContextSelector (optionnel)")
     selectedSubLocations: Optional[List[str]] = Field(None, description="Sous-lieux sélectionnés dans le ContextSelector (optionnel)")
+    # Aligné avec frontend/src/types/preset.ts (paramètres LLM optionnels)
+    topP: Optional[float] = Field(None, description="Top-p (nucleus sampling)")
+    reasoningEffort: Optional[str] = Field(None, description="Effort de raisonnement (valeurs UI / OpenAI)")
+    maxCompletionTokens: Optional[int] = Field(None, ge=0, description="Plafond tokens complétion")
+    maxChoices: Optional[int] = Field(None, ge=0, description="Nombre max de choix générés")
+    llmModel: Optional[str] = Field(None, description="Identifiant modèle LLM")
 
 
 class Preset(BaseModel):
