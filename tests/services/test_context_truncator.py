@@ -1,6 +1,6 @@
 """Tests pour le service ContextTruncator."""
 import pytest
-from services.context_truncator import ContextTruncator
+from services.context_truncator import ContextTruncator, cap_context_text_to_budget
 
 
 class TestContextTruncatorEstimateTokens:
@@ -23,3 +23,20 @@ class TestContextTruncatorEstimateTokens:
         assert truncator.estimate_tokens("a" * 4) == 1
         assert truncator.estimate_tokens("a" * 8) == 2
         assert truncator.estimate_tokens("hello world") == 2  # 11 // 4
+
+
+class TestCapContextTextToBudget:
+    """Tests pour cap_context_text_to_budget (plafond post-sérialisation)."""
+
+    def test_under_budget_unchanged(self):
+        """Texte déjà sous le plafond : inchangé."""
+        t = ContextTruncator(tokenizer=None)
+        short = "one two three"
+        assert cap_context_text_to_budget(short, t.count_tokens(short) + 10) == short
+
+    def test_over_budget_truncates(self):
+        """Texte au-delà du plafond : troncature avec marqueur."""
+        words = " ".join([f"w{i}" for i in range(200)])
+        out = cap_context_text_to_budget(words, 5)
+        assert len(out) < len(words)
+        assert "tronqué" in out

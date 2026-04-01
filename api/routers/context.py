@@ -46,6 +46,7 @@ from api.schemas.gdd_context_stale import (
 )
 from constants import Defaults
 from services.context_token_budget import compute_context_selection_token_metrics
+from services.context_truncator import cap_context_text_to_budget
 from services.context_selection_optimizer import optimize_context_selection
 from api.dependencies import (
     get_context_builder,
@@ -578,7 +579,10 @@ async def estimate_context_tokens(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        context_text = context_builder.serialize_context_to_text(structured_context)
+        context_text = cap_context_text_to_budget(
+            context_builder.serialize_context_to_text(structured_context),
+            request_data.max_context_tokens,
+        )
         context_tokens = context_builder._count_tokens(context_text)
 
         metrics = compute_context_selection_token_metrics(

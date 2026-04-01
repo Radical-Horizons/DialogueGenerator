@@ -262,7 +262,7 @@ class TestPresetsGetById:
     ):
         """GIVEN un preset avec données invalides
         WHEN je charge le preset
-        THEN je reçois une erreur 500"""
+        THEN je reçois une erreur 422 (validation)"""
         # GIVEN
         preset_id = str(uuid4())
         mock_preset_service.load_preset.side_effect = ValueError("Invalid JSON")
@@ -271,7 +271,8 @@ class TestPresetsGetById:
         response = client.get(f"/api/v1/presets/{preset_id}")
         
         # THEN
-        assert response.status_code == 500
+        assert response.status_code == 422
+        assert "invalid" in response.json()["error"]["message"].lower()
 
 
 class TestPresetsUpdate:

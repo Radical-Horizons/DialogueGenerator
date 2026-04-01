@@ -93,6 +93,30 @@ describe('useSSEStreaming', () => {
     spy.mockRestore()
   })
 
+  it('should prefer usage_prompt_tokens + usage_completion_tokens over estimate tokens', async () => {
+    const spy = vi.spyOn(useGenerationStore.getState(), 'setTokensUsed')
+    const { result } = renderHook(() => useSSEStreaming({}))
+
+    await act(async () => {
+      result.current.connect('http://localhost/sse')
+    })
+
+    const inst = MockEventSource.mock.results[0]?.value as MockEventSourceInstance
+    await act(async () => {
+      inst.onmessage!({
+        data: JSON.stringify({
+          type: 'metadata',
+          tokens: 9999,
+          usage_prompt_tokens: 10,
+          usage_completion_tokens: 5,
+        }),
+      } as MessageEvent)
+    })
+
+    expect(spy).toHaveBeenCalledWith(15)
+    spy.mockRestore()
+  })
+
   it('should debounce onerror before calling onError callback', async () => {
     vi.useFakeTimers()
     const onError = vi.fn()

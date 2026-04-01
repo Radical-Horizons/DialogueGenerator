@@ -15,7 +15,7 @@ from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
-from services.context_truncator import ContextTruncator
+from services.context_truncator import cap_context_text_to_budget
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
 from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
@@ -180,14 +180,12 @@ class UnityDialogueOrchestrator:
                 element_modes=context_selections_dict.get("_element_modes")
             )
             # Sérialiser en texte pour le LLM, puis appliquer le plafond utilisateur (budget contexte)
-            context_summary = _coerce_context_text(
-                context_builder.serialize_context_to_text(structured_context)
+            context_summary = cap_context_text_to_budget(
+                _coerce_context_text(
+                    context_builder.serialize_context_to_text(structured_context)
+                ),
+                request_data.max_context_tokens,
             )
-            _trunc = ContextTruncator()
-            if _trunc.count_tokens(context_summary) > request_data.max_context_tokens:
-                context_summary = _trunc.truncate_context(
-                    context_summary, request_data.max_context_tokens
-                )
             
             # 5. Construire le prompt Unity via le builder unique
             prompt_input = PromptInput(

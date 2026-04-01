@@ -15,6 +15,8 @@ export interface UseSSEStreamingOptions {
   /** Callback appelé lors de l'événement 'metadata' avec les tokens et éventuellement fallback (Story 1.16) */
   onMetadata?: (metadata: {
     tokens?: number
+    usage_prompt_tokens?: number
+    usage_completion_tokens?: number
     used_fallback?: boolean
     fallback_from?: string
     fallback_to?: string
@@ -140,15 +142,27 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
             }
             break
             
-          case 'metadata':
+          case 'metadata': {
             console.debug('SSE metadata:', data)
-            if (typeof data.tokens === 'number') {
-              setTokensUsed(data.tokens)
+            const usagePt =
+              typeof data.usage_prompt_tokens === 'number' ? data.usage_prompt_tokens : null
+            const usageCt =
+              typeof data.usage_completion_tokens === 'number' ? data.usage_completion_tokens : null
+            const billedTotal =
+              usagePt !== null && usageCt !== null && (usagePt > 0 || usageCt > 0)
+                ? usagePt + usageCt
+                : typeof data.tokens === 'number'
+                  ? data.tokens
+                  : undefined
+            if (billedTotal !== undefined) {
+              setTokensUsed(billedTotal)
             }
             // Appeler callback personnalisé si fourni
             if (onMetadata) {
               onMetadata({
                 tokens: data.tokens,
+                usage_prompt_tokens: data.usage_prompt_tokens,
+                usage_completion_tokens: data.usage_completion_tokens,
                 used_fallback: data.used_fallback,
                 fallback_from: data.fallback_from,
                 fallback_to: data.fallback_to,
@@ -159,6 +173,7 @@ export function useSSEStreaming(options: UseSSEStreamingOptions = {}): UseSSEStr
               toast(`${data.fallback_from} indisponible - bascule vers ${data.fallback_to}`, 'info')
             }
             break
+          }
             
           case 'complete':
             // FIX: Marquer IMMÉDIATEMENT qu'on a reçu complete pour ignorer les step suivants

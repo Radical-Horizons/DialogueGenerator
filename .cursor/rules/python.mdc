@@ -22,4 +22,6 @@ alwaysApply: true
 
 - Outils: avant d’inférer, localiser la source réelle (recherche sémantique + grep). Si une API “récente” est incertaine (Cursor rules, OpenAI SDK, Qt), valider via navigateur/web.
 
+- **Tests (agents)** : après changement Python, **exécuter** pytest ciblé ou `npm test` ; ne pas affirmer le succès sans preuve d’exécution. Détail et frontend : `.cursor/rules/workflow.mdc` (obligation agents).
+
 

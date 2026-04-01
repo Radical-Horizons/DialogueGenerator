@@ -141,3 +141,24 @@ class ContextTruncator:
             return ""
         
         return '\n'.join(truncated_lines)
+
+
+def cap_context_text_to_budget(text: str, max_tokens: int) -> str:
+    """Tronque un texte de contexte sérialisé s'il dépasse ``max_tokens``.
+
+    Politique alignée sur la génération Unity (orchestrateur + endpoints dialogue) :
+    comptage via ``ContextTruncator.count_tokens`` puis ``truncate_context`` si besoin.
+
+    Args:
+        text: Contexte après ``serialize_context_to_text`` (ou équivalent).
+        max_tokens: Plafond demandé par la requête (ex. ``max_context_tokens``).
+
+    Returns:
+        Texte inchangé si sous le plafond, sinon tronqué avec marqueur de troncature.
+    """
+    if not text or max_tokens <= 0:
+        return text
+    truncator = ContextTruncator()
+    if truncator.count_tokens(text) <= max_tokens:
+        return text
+    return truncator.truncate_context(text, max_tokens)

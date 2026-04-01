@@ -10,6 +10,12 @@ alwaysApply: false
   - Vérification : `npm run verify:venv` (vérifier que le venv est correctement configuré)
   - Activation manuelle (si besoin) : `.\scripts\activate-venv.ps1` ou `.\.venv\Scripts\Activate.ps1`
 
+- **Obligation agents (mode Agent — exécution réelle des tests)** :
+  - Après toute modification de code, correctif ou fin de tâche d’implémentation, l’agent **exécute** les tests pertinents dans le terminal intégré (pytest ciblé, Vitest ciblé, lint si TS/TSX), et **ne conclut pas** « terminé », « vert », « OK » ou « prêt à merger » **sans** sortie de commande montrant le passage (résumé pass/fail ou extrait d’échec à corriger).
+  - **Interdit** : se limiter à « vous pouvez lancer `pytest`… » à la place de l’exécution, sauf blocage technique avéré (sandbox, pas d’accès shell) — dans ce cas le signaler explicitement.
+  - Backend : racine repo → `node scripts/getPythonPath.js -m pytest <fichiers ou -k marqueur>` ou `npm test`.
+  - Frontend : **`cd frontend`** puis `npx vitest run src/chemin/Fichier.test.ts --reporter=dot` (alias `@/`). La suite Vitest complète sans filtre reste interdite pour l’agent sauf demande explicite (voir section Vitest ci-dessous).
+
 - **Commandes essentielles (donner en une ligne)** :
   - Installation initiale : `npm run setup` (créer venv + installer toutes les dépendances)
   - Développement : `npm run dev` (lance backend sur 4243 + frontend sur 3000 automatiquement, utilise venv)

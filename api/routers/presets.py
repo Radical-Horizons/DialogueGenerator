@@ -8,6 +8,7 @@ import base64
 
 from api.schemas.preset import Preset, PresetCreate, PresetUpdate, PresetValidationResult
 from api.dependencies import get_preset_service
+from api.exceptions import ValidationException
 from services.preset_service import PresetService
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
@@ -111,10 +112,10 @@ def get_preset(
             detail=f"Preset {preset_id} not found"
         )
     except ValueError as e:
-        logger.error(f"Invalid preset data: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Invalid preset data: {str(e)}"
+        logger.warning("Invalid preset data: %s", e)
+        raise ValidationException(
+            message=f"Données de preset invalides: {e}",
+            details={"reason": str(e)},
         )
     except Exception as e:
         logger.error(f"Erreur chargement preset {preset_id}: {e}")

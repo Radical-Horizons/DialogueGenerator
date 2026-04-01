@@ -24,6 +24,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 ### Scaffolding (default behavior)
 
 - Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run the smallest command that proves the change (pytest/Vitest ciblé, lint).
+- **Run tests, do not only suggest them**: in Agent mode, **execute** the relevant pytest/Vitest/lint commands and report outcomes; do not claim “done” or “green” without command output. Full policy: `.cursor/rules/workflow.mdc` (obligation agents — exécution réelle des tests).
 - **Real environment**: you can execute shell commands and network fetches; use them instead of dumping long “you should run…” lists when the task is to verify or fix.
 
 ### Non-obvious caveats

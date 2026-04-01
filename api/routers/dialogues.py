@@ -37,6 +37,7 @@ from services.trait_catalog_service import TraitCatalogService
 from services.unity_dialogue_export_service import write_unity_dialogue_to_file
 from constants import Defaults
 from services.context_token_budget import compute_context_selection_token_metrics
+from services.context_truncator import cap_context_text_to_budget
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from core.llm.llm_client import ILLMClient
 
@@ -156,8 +157,11 @@ def _build_prompt_from_request(
         include_dialogue_type=True,
         element_modes=context_selections_dict.get("_element_modes")
     )
-    # Sérialiser en texte pour le LLM
-    context_text = context_builder.serialize_context_to_text(structured_context)
+    # Sérialiser en texte pour le LLM puis appliquer le plafond (aligné orchestrateur SSE)
+    context_text = cap_context_text_to_budget(
+        context_builder.serialize_context_to_text(structured_context),
+        request_data.max_context_tokens,
+    )
 
     # 5. Construire le prompt unifié via le builder unique (PromptInput)
     prompt_input = PromptInput(
@@ -346,7 +350,10 @@ async def estimate_tokens(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        context_text = context_builder.serialize_context_to_text(structured_context)
+        context_text = cap_context_text_to_budget(
+            context_builder.serialize_context_to_text(structured_context),
+            request_data.max_context_tokens,
+        )
         context_tokens = context_builder._count_tokens(context_text)
 
         metrics = compute_context_selection_token_metrics(

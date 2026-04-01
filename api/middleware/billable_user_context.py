@@ -34,8 +34,25 @@ def set_billable_user_id_for_tests(user_id: str) -> Token[str]:
     return _billable_user_id.set(user_id)
 
 
+def push_billable_user_id(user_id: str) -> Token[str]:
+    """Empile un identifiant facturable (ex. propriétaire du job SSE).
+
+    ``EventSource`` n'envoie pas ``Authorization: Bearer`` : le middleware ne peut
+    pas déduire l'utilisateur sur le GET ``/stream``. Après authentification par
+    ``sse_token``, appeler cette fonction pour que ``get_billable_user_id()`` reflète
+    le même utilisateur que la création du job, sur toute la durée du flux.
+
+    Args:
+        user_id: Identifiant aligné sur ``username`` / ``sub`` (ex. depuis JWT job).
+
+    Returns:
+        Jeton à passer à ``reset_billable_user_id`` dans un ``finally``.
+    """
+    return _billable_user_id.set(user_id)
+
+
 def reset_billable_user_id(token: Token[str]) -> None:
-    """Réinitialise le contexte après un ``set`` de test."""
+    """Réinitialise le contexte après un ``push_billable_user_id`` ou ``set`` de test."""
     _billable_user_id.reset(token)
 
 

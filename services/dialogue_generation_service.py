@@ -9,6 +9,7 @@ import asyncio
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from core.llm.llm_client import ILLMClient
+from services.context_truncator import cap_context_text_to_budget
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,10 @@ class DialogueGenerationService:
             element_modes=element_modes
         )
         # Sérialiser en texte pour compatibilité avec l'ancienne signature
-        return self.context_builder.serialize_context_to_text(structured_context)
+        text = self.context_builder.serialize_context_to_text(structured_context)
+        if no_limit:
+            return text
+        return cap_context_text_to_budget(text, max_tokens)
 
     def _restore_prompt_on_error(self, original_system_prompt: Optional[str]) -> None:
         """Restaure le prompt système original après une erreur.

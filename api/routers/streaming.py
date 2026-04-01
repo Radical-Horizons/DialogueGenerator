@@ -33,6 +33,7 @@ from api.dependencies import get_unity_dialogue_orchestrator
 from api.exceptions import AuthenticationException
 from api.config.security_config import get_security_config
 from api.utils.sse_job_token import create_sse_job_token, verify_sse_job_token
+from api.middleware.billable_user_context import push_billable_user_id, reset_billable_user_id
 
 logger = logging.getLogger(__name__)
 
@@ -273,6 +274,32 @@ async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator
             job_manager.unregister_task(job_id)
 
 
+async def stream_generation_with_billable_user(
+    job_id: str,
+    orchestrator: UnityDialogueOrchestrator,
+    billable_user_id: str,
+) -> AsyncGenerator[str, None]:
+    """Enveloppe ``stream_generation`` avec le bon ``get_billable_user_id()`` pour le flux SSE.
+
+    Le middleware ne voit pas de Bearer sur les requêtes ``EventSource`` ; sans cette
+    enveloppe, l'usage LLM serait attribué à ``default_user`` au lieu du propriétaire du job.
+
+    Args:
+        job_id: Identifiant du job.
+        orchestrator: Orchestrateur Unity.
+        billable_user_id: Même identifiant que pour la création du job (username ou id).
+
+    Yields:
+        Chunks SSE identiques à ``stream_generation``.
+    """
+    var_token = push_billable_user_id(billable_user_id)
+    try:
+        async for chunk in stream_generation(job_id, orchestrator):
+            yield chunk
+    finally:
+        reset_billable_user_id(var_token)
+
+
 @router.post(
     "/generate/jobs",
     response_model=GenerationJobResponse,
@@ -341,9 +368,11 @@ async def stream_job(
     
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
+
+    billable_uid = str(_auth.get("username") or _auth.get("id") or "user")
+
     return StreamingResponse(
-        stream_generation(job_id, orchestrator),
+        stream_generation_with_billable_user(job_id, orchestrator, billable_uid),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

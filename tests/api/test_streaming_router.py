@@ -346,3 +346,35 @@ def test_stream_job_when_claim_fails_emits_sse_error(client: TestClient, monkeyp
     err = next(e for e in events if e.get("type") == "error")
     assert job_id
     assert "message" in err
+
+
+@pytest.mark.asyncio
+async def test_stream_generation_with_billable_user_sets_context_during_stream(monkeypatch):
+    """Le flux SSE doit pousser l'utilisateur facturable aligné sur le job (sse_token), pas seulement le middleware."""
+    from api.routers import streaming as streaming_mod
+    from api.middleware.billable_user_context import (
+        get_billable_user_id,
+        push_billable_user_id,
+        reset_billable_user_id,
+    )
+
+    seen_during_inner: list[str] = []
+
+    async def fake_stream_generation(_job_id: str, _orchestrator):
+        seen_during_inner.append(get_billable_user_id())
+        yield 'data: {"type":"complete","result":{}}\n\n'
+
+    monkeypatch.setattr(streaming_mod, "stream_generation", fake_stream_generation)
+
+    outer = push_billable_user_id("default_user")
+    try:
+        chunks: list[str] = []
+        async for line in streaming_mod.stream_generation_with_billable_user(
+            "job-1", MagicMock(), "alice"
+        ):
+            chunks.append(line)
+        assert seen_during_inner == ["alice"]
+        assert get_billable_user_id() == "default_user"
+        assert chunks
+    finally:
+        reset_billable_user_id(outer)
