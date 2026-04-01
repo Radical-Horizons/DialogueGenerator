@@ -7,6 +7,7 @@
  * les flakiness liées au re-sélect après navigation).
  */
 import { test, expect, type Page } from '@playwright/test'
+import { triggerGraphSave } from './trigger-graph-save'
 
 const API_BASE = 'http://127.0.0.1:4243'
 const FIXTURE_ID = 'e2e-adr008-fixture'
@@ -73,10 +74,8 @@ async function selectFirst(page: Page): Promise<string> {
 }
 
 /**
- * Déclenche la sauvegarde via l'événement DOM `request-save-dialogue`
- * (même mécanisme que le bouton Sauvegarder de l'UI).
- * On évite Ctrl+S car le focus peut être capturé par un <input> et bloquer
- * la propagation vers le handler global.
+ * Déclenche la sauvegarde via `graphViewStore.requestSave()` (même chemin que flush → useDialogueLoader).
+ * On évite Ctrl+S car le focus peut être capturé par un <input>.
  */
 async function triggerSave(page: Page): Promise<void> {
   const waitSave = page.waitForResponse(
@@ -86,8 +85,7 @@ async function triggerSave(page: Page): Promise<void> {
       resp.url().includes('.layout'),
     { timeout: 20000 }
   )
-  // Déclencher via l'événement DOM — identique au clic sur le bouton Sauvegarder
-  await page.evaluate(() => window.dispatchEvent(new CustomEvent('request-save-dialogue')))
+  await triggerGraphSave(page)
   const resp = await waitSave
   if (!resp.ok()) {
     const body = await resp.text().catch(() => '')

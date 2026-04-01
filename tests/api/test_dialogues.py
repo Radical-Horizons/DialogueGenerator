@@ -22,7 +22,7 @@ Pour exécuter les tests d'intégration (avec vraies données) :
 """
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock
 from api.main import app
 from services.dialogue_generation_service import DialogueGenerationService
 # InteractionService et Interaction supprimés - système obsolète
@@ -39,6 +39,13 @@ def mock_dialogue_service():
     
     mock_service = MagicMock(spec=DialogueGenerationService)
     mock_service.context_builder = MagicMock()
+    # Aligné sur le pipeline réel (_build_prompt_from_request / estimate-tokens) : JSON → texte → tiktoken.
+    mock_service.context_builder.build_context_json = MagicMock(
+        return_value={"_test": "structured_context"}
+    )
+    mock_service.context_builder.serialize_context_to_text = MagicMock(
+        return_value="context text"
+    )
     mock_service.context_builder._count_tokens = MagicMock(return_value=100)
     mock_service.prompt_engine = MagicMock()
     mock_built = BuiltPrompt(
@@ -56,25 +63,14 @@ def mock_dialogue_service():
 
 
 @pytest.fixture
-def mock_skill_trait_services(monkeypatch):
-    """Fixture partagée : mock SkillCatalogService et TraitCatalogService (évite duplication)."""
-    mock_skill_service = MagicMock()
-    mock_skill_service.load_skills = MagicMock(return_value=["Skill1", "Skill2"])
-    mock_trait_service = MagicMock()
-    mock_trait_service.load_traits = MagicMock(return_value=[])
-    mock_trait_service.get_trait_labels = MagicMock(return_value=["Trait1", "Trait2"])
-    monkeypatch.setattr("api.routers.dialogues.SkillCatalogService", lambda: mock_skill_service)
-    monkeypatch.setattr("api.routers.dialogues.TraitCatalogService", lambda: mock_trait_service)
-    yield mock_skill_service, mock_trait_service
-
-
-@pytest.fixture
 def client(mock_dialogue_service):
     """Fixture pour créer un client de test avec mocks."""
     from api.dependencies import (
         get_dialogue_generation_service,
-        # get_interaction_service supprimé - système obsolète
-        get_config_service
+        get_config_service,
+        get_prompt_engine,
+        get_skill_catalog_service,
+        get_trait_catalog_service,
     )
     
     # Mock du config service pour éviter les erreurs
@@ -85,15 +81,24 @@ def client(mock_dialogue_service):
     mock_config_service.get_available_llm_models = MagicMock(return_value=[
         {
             "api_identifier": "gpt-5.2-mini",
-            "display_name": "GPT-4o Mini",
+            "display_name": "GPT-5.2 Mini",
             "client_type": "openai"
         }
     ])
-    
+
+    mock_skill_service = MagicMock()
+    mock_skill_service.load_skills = MagicMock(return_value=["Skill1", "Skill2"])
+    mock_trait_service = MagicMock()
+    mock_trait_service.load_traits = MagicMock(return_value=[])
+    mock_trait_service.get_trait_labels = MagicMock(return_value=["Trait1", "Trait2"])
+
     # Override les dépendances FastAPI
     app.dependency_overrides[get_dialogue_generation_service] = lambda: mock_dialogue_service
-    # get_interaction_service supprimé - système obsolète
     app.dependency_overrides[get_config_service] = lambda: mock_config_service
+    # Évite PromptEngine réel + chargement GDD (XML sur structured_context mocké).
+    app.dependency_overrides[get_prompt_engine] = lambda: mock_dialogue_service.prompt_engine
+    app.dependency_overrides[get_skill_catalog_service] = lambda: mock_skill_service
+    app.dependency_overrides[get_trait_catalog_service] = lambda: mock_trait_service
     
     yield TestClient(app)
     
@@ -104,19 +109,17 @@ def client(mock_dialogue_service):
 @pytest.mark.unit
 @pytest.mark.api
 @pytest.mark.p0
-def test_estimate_tokens(client, mock_dialogue_service, mock_skill_trait_services):
+def test_estimate_tokens(client, mock_dialogue_service):
     """Test d'estimation de tokens."""
-    mock_dialogue_service.context_builder.build_context = MagicMock(return_value="context text")
-
     response = client.post(
         "/api/v1/dialogues/estimate-tokens",
         json={
             "context_selections": {
-                "characters": ["Character1"],
-                "locations": [],
-                "items": [],
-                "species": [],
-                "communities": []
+                "characters_full": ["Character1"],
+                "locations_full": [],
+                "items_full": [],
+                "species_full": [],
+                "communities_full": []
             },
             "user_instructions": "Test instructions",
             "max_context_tokens": 10000
@@ -145,10 +148,8 @@ def test_estimate_tokens_invalid_request(client):
 @pytest.mark.unit
 @pytest.mark.api
 @pytest.mark.p0
-def test_preview_prompt(client, mock_dialogue_service, mock_skill_trait_services):
+def test_preview_prompt(client, mock_dialogue_service):
     """Test de prévisualisation du prompt."""
-    mock_dialogue_service.context_builder.build_context = MagicMock(return_value="context text")
-
     response = client.post(
         "/api/v1/dialogues/preview-prompt",
         json={

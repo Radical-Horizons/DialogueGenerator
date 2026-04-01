@@ -15,6 +15,13 @@ DialogueGenerator is a React + FastAPI app for generating RPG dialogues via LLMs
 
 Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 
+### Mandat d'agentivité
+
+- **Priorité** : meilleur résultat produit et respect des processus du repo — pas l'auto-limitation sur tokens, nombre de subagents ou « scope minimal » au détriment d'une revue ou d'un diagnostic complets.
+- **Budget** : l'utilisateur arbitre coût et durée ; l'agent ne raccourcit pas un flux documenté (ex. revue holistique) pour « économiser » sans instruction explicite.
+- **Règle Cursor** : `.cursor/rules/agentivity.mdc` (`alwaysApply`) — à lire en cas de tension entre consignes.
+- **Revues globales** : synonymes (*full review*, *entire codebase*, *holistic*) → **7 reviewers** en parallèle + synthèse ; voir section Subagents et la commande `.cursor/commands/full-review.md`.
+
 ### Meta-Agent Protocol (Inspiration: Meta-Harness)
 
 - **Diagnostic over Speculation**: Always run `.\scripts\meta-diagnostic.ps1` or read raw logs in `data/logs/*.json` before proposing a fix.
@@ -23,7 +30,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 
 ### Scaffolding (default behavior)
 
-- Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run the smallest command that proves the change (pytest/Vitest ciblé, lint).
+- Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run commands that **prove** the change (pytest/Vitest ciblé, lint). « Plus petit test utile » = preuve, pas excuse pour éviter une étape de processus requise.
 - **Run tests, do not only suggest them**: in Agent mode, **execute** the relevant pytest/Vitest/lint commands and report outcomes; do not claim “done” or “green” without command output. Full policy: `.cursor/rules/workflow.mdc` (obligation agents — exécution réelle des tests).
 - **Real environment**: you can execute shell commands and network fetches; use them instead of dumping long “you should run…” lists when the task is to verify or fix.
 

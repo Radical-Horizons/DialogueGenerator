@@ -19,6 +19,10 @@ alwaysApply: false
 
 **Revue complète du repo** : pas d’agent orchestrateur dédié — **Composer** avec les 7 reviewers en parallèle, ou **7× `Task`** dans le même message (les 7 lignes du tableau sauf `transcript-history-researcher` si optionnel). Le parent synthétise ensuite. Un seul `Task` multi-rôles ≠ 7 contextes isolés.
 
+**Déclencheurs implicites** : toute demande de revue **globale** / **complète** / **holistique** du codebase (y compris en anglais) = ce protocole 7×, **sans** demander confirmation pour « économiser » — sauf si l’utilisateur précise un périmètre réduit ou un seul domaine.
+
+**Coût** : ne pas substituer une passe unique « généraliste » aux sept reviewers ; voir `.cursor/rules/agentivity.mdc`.
+
 ## Invocation
 
 ```

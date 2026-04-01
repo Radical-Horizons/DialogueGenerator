@@ -131,3 +131,14 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   notifyDialogueDeleted: (filename) => set({ dialogueDeleted: filename }),
   clearDialogueDeleted: () => set({ dialogueDeleted: null }),
 }))
+
+/** Exposé uniquement en dev pour E2E Playwright (`requestSave` aligné sur la toolbar / Ctrl+S). */
+declare global {
+  interface Window {
+    __graphViewStoreE2E?: typeof useGraphViewStore
+  }
+}
+
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  window.__graphViewStoreE2E = useGraphViewStore
+}

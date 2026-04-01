@@ -6,6 +6,7 @@
  * speaker / line depuis Playwright.
  */
 import { test, expect, type Page } from '@playwright/test'
+import { triggerGraphSave } from './trigger-graph-save'
 
 const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
 const FIXTURE_ID = 'e2e-connection-dropdown-fixture'
@@ -90,7 +91,7 @@ async function triggerSave(page: Page): Promise<void> {
       resp.url().includes('.layout'),
     { timeout: 20000 }
   )
-  await page.evaluate(() => window.dispatchEvent(new CustomEvent('request-save-dialogue')))
+  await triggerGraphSave(page)
   const resp = await waitSave
   if (!resp.ok()) {
     const body = await resp.text().catch(() => '')

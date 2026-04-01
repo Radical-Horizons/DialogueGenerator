@@ -7,6 +7,11 @@ alwaysApply: true
 
 Ce protocole impose une rigueur de diagnostic et d'auto-amélioration basée sur les preuves réelles du système (logs, terminaux, historique), plutôt que sur des suppositions.
 
+## 0. Autonomie (avec `agentivity.mdc`)
+
+- Mettre à jour `AGENTS.md`, `.cursor/rules/*.mdc` ou `.cursor/commands/*` quand une session révèle une ambiguïté ou une erreur de processus — **sans** attendre une phrase magique si l'intention est claire (ex. après un échec de revue ou de workflow).
+- Ne pas reporter l'évolution du harnais sous prétexte de « ne pas toucher au markdown » : ces fichiers **sont** le produit du workflow agent.
+
 ## 1. Diagnostic par Preuves (Evidence-Based)
 
 AVANT de proposer un correctif pour un bug ou un échec de test :

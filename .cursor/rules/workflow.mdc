@@ -3,6 +3,8 @@ description: Workflow — commandes essentielles, tests, déploiement, venv
 alwaysApply: false
 ---
 
+- **Agentivité vs garde-fous techniques** : les limites ci-dessous (ex. Vitest sans filtre) sont des contraintes **techniques** (temps, workers, fiabilité du terminal Windows) — pas une consigne de « réduire les coûts ». Si l’utilisateur demande explicitement la suite complète, l’exécuter. Voir `.cursor/rules/agentivity.mdc`.
+
 - **Environnement virtuel Python** :
   - Le projet utilise un venv (`.venv/`) pour isoler les dépendances Python
   - Tous les scripts npm utilisent automatiquement le venv (pas d'activation manuelle nécessaire)
