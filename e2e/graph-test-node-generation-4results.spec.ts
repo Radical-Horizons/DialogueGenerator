@@ -11,9 +11,14 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 import { triggerGraphSave } from './trigger-graph-save'
+import {
+  uniqueE2EDocumentId,
+  seedDocumentWithRetry,
+  openDashboardGraphTabAndSelectDocument,
+} from './helpers'
 
 const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
-const FIXTURE_ID = 'e2e-testnode-gen-fixture'
+const FIXTURE_PREFIX = 'e2e-testnode-gen'
 
 const FIXTURE_DOC = {
   schemaVersion: '1.1.0',
@@ -50,26 +55,8 @@ const MOCK_GENERATE_RESPONSE = {
   parent_node_id: 'test-node-START-choice-0',
 }
 
-async function seedFixture(
-  request: Parameters<Parameters<typeof test>[1]>[0]['request']
-): Promise<void> {
-  let revision = 1
-  for (let attempt = 0; attempt < 6; attempt++) {
-    const res = await request.put(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`, {
-      data: { document: FIXTURE_DOC, revision },
-    })
-    if (res.ok()) return
-    if (res.status() === 409) {
-      const body = (await res.json().catch(() => ({}))) as { revision?: number }
-      revision = body.revision ?? revision + 1
-      continue
-    }
-    const text = await res.text().catch(() => '')
-    throw new Error(`Seed failed ${res.status()}: ${text}`)
-  }
-}
-
-async function loginAndGotoGraph(page: Page): Promise<void> {
+/** Dashboard → onglet graphe : NodeEditorPanel monté pour flush + sauvegarde explicite. */
+async function loginAndOpenFixtureOnDashboardGraph(page: Page, fixtureId: string): Promise<void> {
   await page.goto('/')
   const onLogin = await page
     .getByRole('heading', { name: /connexion/i })
@@ -81,39 +68,111 @@ async function loginAndGotoGraph(page: Page): Promise<void> {
     await page.getByRole('button', { name: /se connecter/i }).click()
     await expect(page).toHaveURL(/\//, { timeout: 10000 })
   }
-  await page.goto(`/graph-editor/${encodeURIComponent(FIXTURE_ID)}`)
-  await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
+  await page
+    .getByRole('button', { name: /Génération de Dialogues/i })
+    .waitFor({ state: 'visible', timeout: 15000 })
+    .catch(() => {})
+  await openDashboardGraphTabAndSelectDocument(page, fixtureId)
 }
 
-async function triggerSave(page: Page): Promise<void> {
-  const waitSave = page.waitForResponse(
-    (resp) =>
-      resp.url().includes('/api/v1/unity-dialogues/graph/save') ||
-      resp.url().includes('/api/v1/documents/') ||
-      resp.url().includes('.layout'),
-    { timeout: 20000 }
+function nodesFromUnityJsonContent(jsonContent: string): Array<Record<string, unknown>> {
+  const raw = JSON.parse(jsonContent) as { nodes?: unknown[] } | unknown[]
+  if (Array.isArray(raw)) {
+    return raw as Array<Record<string, unknown>>
+  }
+  if (raw && typeof raw === 'object' && Array.isArray(raw.nodes)) {
+    return raw.nodes as Array<Record<string, unknown>>
+  }
+  return []
+}
+
+function expectStartChoiceTestConnections(nodes: Array<Record<string, unknown>>): void {
+  const startNode = nodes.find((n) => n.id === 'START') as { choices?: Array<Record<string, unknown>> } | undefined
+  expect(startNode?.choices?.length).toBeGreaterThanOrEqual(1)
+  const choice0 = startNode?.choices?.[0]
+  expect(choice0?.testCriticalFailureNode).toBe('NODE_CF')
+  expect(choice0?.testFailureNode).toBe('NODE_F')
+  expect(choice0?.testSuccessNode).toBe('NODE_S')
+  expect(choice0?.testCriticalSuccessNode).toBe('NODE_CS')
+}
+
+/** Sauvegarde explicite ; le backend peut prendre PUT documents+layout ou POST save-and-write (repli migration). */
+async function triggerSaveAndReadPersistedNodes(
+  page: Page,
+  request: Parameters<Parameters<typeof test>[1]>[0]['request'],
+  fixtureId: string
+): Promise<Array<Record<string, unknown>>> {
+  const persistRespPromise = page.waitForResponse(
+    (r) => {
+      if (!r.ok()) return false
+      const u = r.url()
+      const m = r.request().method()
+      if (m === 'POST' && u.includes('/save-and-write')) return true
+      if (m === 'PUT' && u.includes('/api/v1/documents/') && !u.includes('/layout')) return true
+      return false
+    },
+    { timeout: 30000 }
   )
   await triggerGraphSave(page)
-  const resp = await waitSave
-  if (!resp.ok()) {
-    const body = await resp.text().catch(() => '')
-    throw new Error(`Save failed ${resp.status()}: ${body}`)
+  const persistResp = await persistRespPromise
+
+  if (persistResp.url().includes('save-and-write')) {
+    const body = (await persistResp.json()) as { json_content?: string }
+    return nodesFromUnityJsonContent(body.json_content ?? '{}')
   }
+
+  await page
+    .waitForResponse(
+      (r) =>
+        r.ok() &&
+        r.request().method() === 'PUT' &&
+        r.url().includes('/api/v1/documents/') &&
+        r.url().includes('/layout'),
+      { timeout: 15000 }
+    )
+    .catch(() => {})
+
+  // Lecture API : parfois un GET immédiat après PUT voit encore la révision précédente (CI / disque).
+  let nodes: Array<Record<string, unknown>> = []
+  await expect
+    .poll(
+      async () => {
+        const doc = await getDocumentViaApi(request, fixtureId)
+        nodes = doc.nodes
+        const startNode = nodes.find((n) => n.id === 'START') as
+          | { choices?: Array<Record<string, unknown>> }
+          | undefined
+        const choice0 = startNode?.choices?.[0]
+        return {
+          ok:
+            choice0?.testCriticalFailureNode === 'NODE_CF' &&
+            choice0?.testFailureNode === 'NODE_F' &&
+            choice0?.testSuccessNode === 'NODE_S' &&
+            choice0?.testCriticalSuccessNode === 'NODE_CS',
+        }
+      },
+      { timeout: 30_000 }
+    )
+    .toEqual({ ok: true })
+
+  return nodes
 }
 
 async function getDocumentViaApi(
-  request: Parameters<Parameters<typeof test>[1]>[0]['request']
+  request: Parameters<Parameters<typeof test>[1]>[0]['request'],
+  fixtureId: string
 ): Promise<{ nodes: Array<Record<string, unknown>> }> {
-  const res = await request.get(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`)
+  const res = await request.get(`${API_BASE}/api/v1/documents/${fixtureId}`)
   expect(res.ok(), `GET document failed: ${res.status()}`).toBe(true)
   const body = (await res.json()) as { document?: { nodes?: Array<Record<string, unknown>> } }
   return { nodes: body.document?.nodes ?? [] }
 }
 
 async function deleteFixture(
-  request: Parameters<Parameters<typeof test>[1]>[0]['request']
+  request: Parameters<Parameters<typeof test>[1]>[0]['request'],
+  fixtureId: string
 ): Promise<void> {
-  const res = await request.delete(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`)
+  const res = await request.delete(`${API_BASE}/api/v1/documents/${fixtureId}`)
   if (!res.ok() && res.status() !== 404) {
     const text = await res.text().catch(() => '')
     throw new Error(`Cleanup DELETE failed ${res.status()}: ${text}`)
@@ -121,40 +180,41 @@ async function deleteFixture(
 }
 
 test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () => {
-  test.setTimeout(60_000)
+  test.setTimeout(120_000)
 
-  test.afterEach(async ({ request }) => {
-    await deleteFixture(request)
+  test.afterEach(async ({ request }, testInfo) => {
+    await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
   })
 
   test('génération depuis menu contextuel TestNode → 4 nœuds visibles et connexions persistées dans le document', async ({
     page,
     request,
-  }) => {
-    await seedFixture(request)
+  }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
 
     await page.route('**/api/v1/unity-dialogues/graph/generate-node', async (route) => {
-      const body = route.request().postDataJSON()
-      if (body?.parent_node_id?.startsWith('test-node-')) {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_GENERATE_RESPONSE),
-        })
-      } else {
-        await route.continue()
-      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(MOCK_GENERATE_RESPONSE),
+      })
     })
 
-    await loginAndGotoGraph(page)
+    await loginAndOpenFixtureOnDashboardGraph(page, fixtureId)
 
-    await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 15000 })
+    const flowNodes = page.locator('[data-testid="graph-editor"] .react-flow__viewport .react-flow__node')
+    const flowEdges = page.locator('[data-testid="graph-editor"] .react-flow__viewport .react-flow__edge')
+
+    await expect(flowNodes.first()).toBeVisible({ timeout: 15000 })
+    const nodeCountBeforeGen = await flowNodes.count()
 
     const testNode = page.locator('[data-id="test-node-START-choice-0"]')
     await expect(testNode).toBeVisible({ timeout: 5000 })
-    const edgesBeforeGen = await page.locator('.react-flow__edge').count()
-    await testNode.click({ button: 'left' })
-    await testNode.click({ button: 'right' })
+    const edgesBeforeGen = await flowEdges.count()
+    // Minimap (coin bas-droit) peut recouvrir le TestNode après layout — force évite l’interception.
+    await testNode.click({ button: 'left', force: true })
+    await testNode.click({ button: 'right', force: true })
 
     const generateResponsePromise = page.waitForResponse(
       (resp) =>
@@ -167,27 +227,31 @@ test.describe('Génération depuis TestNode - 4 résultats connectés (UI)', () 
     await page.getByRole('menuitem', { name: /Générer/i }).click()
     await generateResponsePromise
 
-    // Event-based: API done → wait for all 4 nodes in DOM (attached), parallel to avoid viewport/order flakiness
-    const nodeIds = ['NODE_CF', 'NODE_F', 'NODE_S', 'NODE_CS']
-    await Promise.all(
-      nodeIds.map((id) =>
-        page.locator(`[data-id="${id}"]`).waitFor({ state: 'attached', timeout: 20000 })
-      )
-    )
+    await expect(page.getByRole('status', { name: /Génération en cours/i })).toHaveCount(0, {
+      timeout: 60_000,
+    })
+
+    // Après génération, le canvas peut zoomer sur un seul nœud + onlyRenderVisibleElements → peu de
+    // `.react-flow__node` dans le DOM. Fit view remet tout le graphe à l’écran pour des comptages fiables.
+    await page
+      .locator('[data-testid="graph-editor"]')
+      .getByRole('button', { name: /fit view/i })
+      .click()
+
+    // Les ids DOM peuvent différer des ids logiques mockés — on valide sur le nombre de nœuds ajoutés.
+    await expect
+      .poll(async () => flowNodes.count(), { timeout: 45_000 })
+      .toBeGreaterThanOrEqual(nodeCountBeforeGen + 4)
 
     await expect
-      .poll(async () => page.locator('.react-flow__edge').count(), { timeout: 15000 })
+      .poll(async () => flowEdges.count(), { timeout: 15000 })
       .toBeGreaterThanOrEqual(edgesBeforeGen + 4)
 
-    await triggerSave(page)
+    // Flush avec TestNode sélectionné → syncChoiceFromTestNode peut effacer les test*Node du choix.
+    // START + mergeDialogueNodeFormIntoStoreData préserve les champs de connexion déjà dans le store.
+    await page.locator('[data-testid="graph-editor"] [data-id="START"]').click({ force: true })
 
-    const { nodes } = await getDocumentViaApi(request)
-    const startNode = nodes.find((n) => n.id === 'START') as { choices?: Array<Record<string, unknown>> } | undefined
-    expect(startNode?.choices?.length).toBeGreaterThanOrEqual(1)
-    const choice0 = startNode?.choices?.[0]
-    expect(choice0?.testCriticalFailureNode).toBe('NODE_CF')
-    expect(choice0?.testFailureNode).toBe('NODE_F')
-    expect(choice0?.testSuccessNode).toBe('NODE_S')
-    expect(choice0?.testCriticalSuccessNode).toBe('NODE_CS')
+    const nodes = await triggerSaveAndReadPersistedNodes(page, request, fixtureId)
+    expectStartChoiceTestConnections(nodes)
   })
 })

@@ -40,6 +40,7 @@ import {
   mergeDialogueNodeFormIntoStoreData,
   connectionFingerprintFromNodeData,
   applyStoreConnectionFieldsToDialogueFormChoices,
+  applyLinearNextNodeFromGraphEdges,
 } from '../../utils/mergeNodeEditorForm'
 import { ChoiceEditor } from './ChoiceEditor'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
@@ -147,7 +148,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const node = state.nodes.find((n) => n.id === selectedNodeId)
       if (!node?.data) return
       const formValues = form.getValues()
-      const merged = mergeNodeFormIntoStoreData(nodeType, node.data as Record<string, unknown>, formValues)
+      let merged = mergeNodeFormIntoStoreData(nodeType, node.data as Record<string, unknown>, formValues)
+      if (nodeType === 'dialogueNode') {
+        merged = applyLinearNextNodeFromGraphEdges(selectedNodeId, merged, state.edges)
+      }
       // Evite une boucle idle: ne pousse pas au store si le formulaire n'a rien changé.
       const mergedStr = JSON.stringify(merged)
       const currentStr = JSON.stringify(node.data)
@@ -262,18 +266,23 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         toast('Nœud vide - ajouter du texte', 'warning')
       }
     }
-    const merged = mergeNodeFormIntoStoreData(
+    const st = useGraphStore.getState()
+    const liveNode = st.nodes.find((n) => n.id === selectedNodeId)
+    let merged = mergeNodeFormIntoStoreData(
       nodeType,
-      (selectedNode?.data as Record<string, unknown> | undefined) ?? {},
+      (liveNode?.data as Record<string, unknown> | undefined) ?? {},
       data
     )
+    if (nodeType === 'dialogueNode' && selectedNodeId) {
+      merged = applyLinearNextNodeFromGraphEdges(selectedNodeId, merged, st.edges)
+    }
     updateNode(selectedNodeId, {
       data: merged,
     })
     if (!isFlushingRef.current) {
       useGraphViewStore.getState().requestSave()
     }
-  }, [selectedNodeId, nodeType, selectedNode?.data, updateNode, toast])
+  }, [selectedNodeId, nodeType, updateNode, toast])
 
   const flushRequested = useGraphViewStore((s) => s.flushRequested)
   useEffect(() => {

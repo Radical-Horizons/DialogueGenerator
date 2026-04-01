@@ -349,6 +349,42 @@ describe('testNodeSync', () => {
       expect(result.condition).toBe('FLAG_SET')
       expect(result.traitRequirements).toEqual([{ trait: 'Courage', minValue: 5 }])
     })
+
+    it('should keep existing choice test*Node when test node carries empty strings (flush formulaire)', () => {
+      const testNode: Node = {
+        id: 'test-node-dialogue-1-choice-0',
+        type: 'testNode',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'test-node-dialogue-1-choice-0',
+          test: 'Dex:10',
+          criticalFailureNode: '',
+          failureNode: '',
+          successNode: '',
+          criticalSuccessNode: '',
+        },
+      }
+      const existingChoice: Choice & {
+        testCriticalFailureNode?: string
+        testFailureNode?: string
+        testSuccessNode?: string
+        testCriticalSuccessNode?: string
+      } = {
+        text: 'Roll',
+        test: 'Dex:10',
+        testCriticalFailureNode: 'NODE_CF',
+        testFailureNode: 'NODE_F',
+        testSuccessNode: 'NODE_S',
+        testCriticalSuccessNode: 'NODE_CS',
+      }
+
+      const result = syncChoiceFromTestNode(testNode, 'dialogue-1', 0, existingChoice)
+
+      expect(result.testCriticalFailureNode).toBe('NODE_CF')
+      expect(result.testFailureNode).toBe('NODE_F')
+      expect(result.testSuccessNode).toBe('NODE_S')
+      expect(result.testCriticalSuccessNode).toBe('NODE_CS')
+    })
   })
 
   describe('syncTestNodeResultEdges', () => {

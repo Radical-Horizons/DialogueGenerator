@@ -96,6 +96,7 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
             target: targetId,
             ...(actualSourceHandle && { sourceHandle: actualSourceHandle }),
             type: 'smoothstep',
+            ...(connectionType === 'nextNode' ? { label: 'Suivant' } : {}),
             ...(strokeColor && { style: { stroke: strokeColor } }),
             data: { edgeType: connectionType, choiceIndex },
           }
@@ -304,7 +305,10 @@ export const createEdgeSlice: StateCreator<GraphState, [], [], EdgeSlice> = (set
         }
       }
 
-      if (edge?.label === 'Suivant' && edge.source) {
+      const isNextEdge =
+        edge?.label === 'Suivant' ||
+        (edge?.data as { edgeType?: string } | undefined)?.edgeType === 'nextNode'
+      if (isNextEdge && edge.source) {
         updatedNodes = updatedNodes.map((n) =>
           n.id === edge.source
             ? { ...n, data: { ...n.data, nextNode: '' } }

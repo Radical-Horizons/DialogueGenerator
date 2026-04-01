@@ -42,6 +42,9 @@ export function useDialogueLoader(
 ): UseDialogueLoaderReturn {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const [isLoadingDialogue, setIsLoadingDialogue] = useState(false)
+  /** Valeur courante pour handleSave (évite no-op si le state React n’est pas encore rafraîchi). */
+  const isLoadingDialogueRef = useRef(isLoadingDialogue)
+  isLoadingDialogueRef.current = isLoadingDialogue
 
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const prevSelectedDialogueRef = useRef<UnityDialogueMetadata | null>(null)
@@ -66,7 +69,12 @@ export function useDialogueLoader(
     incrementLoadSeq,
   } = useGraphStore()
 
-  const activeDialogueFilename = selectedDialogue?.filename ?? dialogueMetadata.filename ?? null
+  // Ne pas utiliser ?? seul : une chaîne vide sur selectedDialogue bloquait le repli documentId (E2E / liste).
+  const activeDialogueFilename =
+    selectedDialogue?.filename?.trim() ||
+    dialogueMetadata.filename?.trim() ||
+    documentId?.trim() ||
+    null
   const activeDialogueTitle = selectedDialogue?.title ?? dialogueMetadata.title
   const hasActiveDialogue = !!activeDialogueFilename || nodes.length > 0
 
@@ -190,7 +198,11 @@ export function useDialogueLoader(
           nextState.setSelectedNode(nextState.nodes[0].id)
         }
       } catch (err) {
-        if (useGraphStore.getState().activeLoadSeq !== loadSeq) return
+        if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+          loadInFlightRef.current = false
+          setIsLoadingDialogue(false)
+          return
+        }
         console.error('Erreur lors du chargement du dialogue:', err)
         const errorMessage = getErrorMessage(err)
         const isNetworkError =
@@ -256,57 +268,62 @@ export function useDialogueLoader(
       loadInFlightRef.current = true
       setIsLoadingDialogue(true)
 
-      const docIdsToTry = /\.json$/i.test(routeTarget.decodedDialogueId)
-        ? [routeTarget.normalizedDialogueId, routeTarget.decodedDialogueId]
-        : [routeTarget.normalizedDialogueId, `${routeTarget.normalizedDialogueId}.json`]
-      let loaded = false
-      for (const documentId of docIdsToTry) {
-        try {
-          await loadDialogueByDocumentId(documentId)
-          loaded = true
-          break
-        } catch {
-          continue
+      try {
+        const docIdsToTry = /\.json$/i.test(routeTarget.decodedDialogueId)
+          ? [routeTarget.normalizedDialogueId, routeTarget.decodedDialogueId]
+          : [routeTarget.normalizedDialogueId, `${routeTarget.normalizedDialogueId}.json`]
+        let loaded = false
+        for (const documentId of docIdsToTry) {
+          try {
+            await loadDialogueByDocumentId(documentId)
+            loaded = true
+            break
+          } catch {
+            continue
+          }
         }
-      }
 
-      if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
-        loadInFlightRef.current = false
-        setIsLoadingDialogue(false)
-        return
-      }
-
-      if (!loaded) {
-        const filename = /\.json$/i.test(routeTarget.decodedDialogueId)
-          ? routeTarget.decodedDialogueId
-          : `${routeTarget.normalizedDialogueId}.json`
-        const response = await unityDialoguesAPI.getUnityDialogue(filename)
-        
         if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
           loadInFlightRef.current = false
           setIsLoadingDialogue(false)
           return
         }
 
-        const stem = filename.replace(/\.json$/i, '') || filename
-        await loadDialogueFromRawJson(response.json_content, stem)
-      }
+        if (!loaded) {
+          const filename = /\.json$/i.test(routeTarget.decodedDialogueId)
+            ? routeTarget.decodedDialogueId
+            : `${routeTarget.normalizedDialogueId}.json`
+          const response = await unityDialoguesAPI.getUnityDialogue(filename)
 
-      if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
-        loadInFlightRef.current = false
-        setIsLoadingDialogue(false)
-        return
-      }
-      await finalizeLoad(loadSeq)
-    }
+          if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+            loadInFlightRef.current = false
+            setIsLoadingDialogue(false)
+            return
+          }
 
-    loadFromRoute()
-      .catch((err) => {
-        if (useGraphStore.getState().activeLoadSeq !== incrementLoadSeq()) return
+          const stem = filename.replace(/\.json$/i, '') || filename
+          await loadDialogueFromRawJson(response.json_content, stem)
+        }
+
+        if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+          loadInFlightRef.current = false
+          setIsLoadingDialogue(false)
+          return
+        }
+        await finalizeLoad(loadSeq)
+      } catch (err) {
+        if (useGraphStore.getState().activeLoadSeq !== loadSeq) {
+          loadInFlightRef.current = false
+          setIsLoadingDialogue(false)
+          return
+        }
         loadInFlightRef.current = false
         setIsLoadingDialogue(false)
         toast(getErrorMessage(err), 'error')
-      })
+      }
+    }
+
+    void loadFromRoute()
   }, [
     routeTarget,
     loadDialogueByDocumentId,
@@ -392,29 +409,61 @@ export function useDialogueLoader(
       toast('Aucun dialogue sélectionné', 'warning')
       return
     }
-    if (isLoadingDialogue) return
+    // Attendre la fin du chargement (ex. E2E : Ctrl+S / requestSave juste après ouverture dialogue).
+    const loadDeadline = Date.now() + 8000
+    while (isLoadingDialogueRef.current && Date.now() < loadDeadline) {
+      await new Promise<void>((r) => {
+        window.setTimeout(r, 100)
+      })
+    }
+    if (isLoadingDialogueRef.current) {
+      toast('Chargement du dialogue en cours — réessayez dans un instant', 'warning')
+      return
+    }
+
+    // Laisser finir une sauvegarde API en cours (autosave ~50 ms ou requête longue) avant Ctrl+S / E2E requestSave.
+    const savingDeadline = Date.now() + 45_000
+    while (useGraphStore.getState().isSaving && Date.now() < savingDeadline) {
+      await new Promise<void>((r) => {
+        window.setTimeout(r, 100)
+      })
+    }
+    if (useGraphStore.getState().isSaving) {
+      toast('Sauvegarde déjà en cours — réessayez dans un instant', 'warning')
+      return
+    }
 
     try {
       setIsLoadingDialogue(true)
       useGraphViewStore.getState().requestFlush()
-      await new Promise<void>((resolve, reject) => {
-        const FLUSH_WAIT_MS = 1500
-        let settled = false
-        const timeout = window.setTimeout(() => {
-          if (settled) return
-          settled = true
-          unsub()
-          reject(new Error('Flush timeout: éditeur non synchronisé'))
-        }, FLUSH_WAIT_MS)
-        const unsub = useGraphViewStore.subscribe((state) => {
-          if (state.flushCompleted && !settled) {
-            settled = true
-            window.clearTimeout(timeout)
-            unsub()
-            resolve()
-          }
-        })
+      // Laisser un tick au navigateur pour que NodeEditorPanel (useEffect flush) s’exécute avant l’abonnement Zustand.
+      await new Promise<void>((r) => {
+        window.setTimeout(r, 0)
       })
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const FLUSH_WAIT_MS = 5000
+          let settled = false
+          const timeout = window.setTimeout(() => {
+            if (settled) return
+            settled = true
+            unsub()
+            reject(new Error('Flush timeout: éditeur non synchronisé'))
+          }, FLUSH_WAIT_MS)
+          const unsub = useGraphViewStore.subscribe((state) => {
+            if (state.flushCompleted && !settled) {
+              settled = true
+              window.clearTimeout(timeout)
+              unsub()
+              resolve()
+            }
+          })
+        })
+      } catch (flushErr) {
+        // ConnectionTargetSelect / edgeSlice mettent déjà à jour le store ; sans ce repli,
+        // Ctrl+S peut ne rien persister si le panneau nœud ne confirme pas le flush (E2E Dashboard).
+        console.warn('Flush éditeur incomplet, sauvegarde du graphe courant:', flushErr)
+      }
       useGraphViewStore.getState().resetFlush()
       const saveResponse = await saveDialogue()
       try {
@@ -443,11 +492,12 @@ export function useDialogueLoader(
       }
       dialogueListRef.current?.refresh()
     } catch (err) {
+      useGraphViewStore.getState().resetFlush()
       toast(`Erreur lors de la sauvegarde: ${getErrorMessage(err)}`, 'error')
     } finally {
       setIsLoadingDialogue(false)
     }
-  }, [activeDialogueFilename, isLoadingDialogue, saveDialogue, validateGraph, toast])
+  }, [activeDialogueFilename, saveDialogue, validateGraph, toast])
 
   const saveRequested = useGraphViewStore((s) => s.saveRequested)
   useEffect(() => {

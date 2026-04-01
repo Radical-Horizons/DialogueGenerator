@@ -373,6 +373,120 @@ describe('graphToDocument', () => {
     expect((doc.nodes[0] as { title?: string }).title).toBe('Ouverture')
   })
 
+  it('prefers edgeType nextNode over legacy Suivant when both edges exist', () => {
+    const nodes = [
+      {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'START', speaker: 'A', line: 'L', choices: [], nextNode: 'MID' },
+      },
+      {
+        id: 'MID',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'MID', speaker: 'M', line: 'M', choices: [] },
+      },
+      {
+        id: 'END',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'END', speaker: 'B', line: 'E', choices: [] },
+      },
+    ]
+    const edges = [
+      {
+        id: 'START->MID',
+        source: 'START',
+        target: 'MID',
+        type: 'smoothstep',
+        label: 'Suivant',
+      },
+      {
+        id: 'START->END',
+        source: 'START',
+        target: 'END',
+        type: 'smoothstep',
+        data: { edgeType: 'nextNode' },
+      },
+    ]
+    const doc = graphToDocument(nodes as never, edges as never)
+    const start = doc.nodes.find((n) => n.id === 'START')
+    expect((start as { nextNode?: string } | undefined)?.nextNode).toBe('END')
+  })
+
+  it('tie-breaks plusieurs arêtes Suivant (sans edgeType) via node.data.nextNode', () => {
+    const nodes = [
+      {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'START', speaker: 'A', line: 'L', choices: [], nextNode: 'END' },
+      },
+      {
+        id: 'MID',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'MID', speaker: 'M', line: 'M', choices: [] },
+      },
+      {
+        id: 'END',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'END', speaker: 'B', line: 'E', choices: [] },
+      },
+    ]
+    // Ordre volontairement « MID en dernier » : sans tie-break, nextFromSuivant = MID.
+    const edges = [
+      {
+        id: 'START->END',
+        source: 'START',
+        target: 'END',
+        type: 'smoothstep',
+        label: 'Suivant',
+      },
+      {
+        id: 'START->MID',
+        source: 'START',
+        target: 'MID',
+        type: 'smoothstep',
+        label: 'Suivant',
+      },
+    ]
+    const doc = graphToDocument(nodes as never, edges as never)
+    const start = doc.nodes.find((n) => n.id === 'START')
+    expect((start as { nextNode?: string } | undefined)?.nextNode).toBe('END')
+  })
+
+  it('maps nextNode from edge.data.edgeType nextNode (connectNodes sans label Suivant)', () => {
+    const nodes = [
+      {
+        id: 'START',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'START', speaker: 'A', line: 'L', choices: [], nextNode: 'MID' },
+      },
+      {
+        id: 'END',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { id: 'END', speaker: 'B', line: 'E', choices: [] },
+      },
+    ]
+    const edges = [
+      {
+        id: 'START->END',
+        source: 'START',
+        target: 'END',
+        type: 'smoothstep',
+        data: { edgeType: 'nextNode' },
+      },
+    ]
+    const doc = graphToDocument(nodes as never, edges as never)
+    const start = doc.nodes.find((n) => n.id === 'START')
+    expect((start as { nextNode?: string } | undefined)?.nextNode).toBe('END')
+  })
+
   it('reconstructs document with choiceId from stable sourceHandle', () => {
     const doc: UnityDocument = {
       schemaVersion: '1.1.0',

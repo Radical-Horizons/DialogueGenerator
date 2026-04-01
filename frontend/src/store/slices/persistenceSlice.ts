@@ -300,10 +300,11 @@ export const createPersistenceSlice: StateCreator<
       // Flux principal : PUT document + PUT layout (Story 16.4)
       // Construire le document depuis le graphe courant pour éviter décalage avec state.document (ex. après suppression TestNode).
       if (state.document != null && documentId) {
-        const doc = graphToDocument(state.nodes, state.edges) as unknown as Record<string, unknown>
+        const snap = get()
+        const doc = graphToDocument(snap.nodes, snap.edges) as unknown as Record<string, unknown>
         const layoutPayload = mergeLayoutWithNodePositions(
-          state.layout ?? buildLayoutFromNodes(state.nodes),
-          state.nodes
+          snap.layout ?? buildLayoutFromNodes(snap.nodes),
+          snap.nodes
         ) as Record<string, unknown>
         const docRev = state.documentRevision ?? 1
         const layoutRev = state.layoutRevision ?? 1

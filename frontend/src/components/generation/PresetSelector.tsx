@@ -48,6 +48,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [newPresetName, setNewPresetName] = useState('');
   const [newPresetIcon, setNewPresetIcon] = useState('📋');
   const [snapshotConfiguration, setSnapshotConfiguration] = useState<PresetConfiguration | null>(null);
+  /** Soumission création preset — ne pas réutiliser ``isLoading`` du store (chargement liste) pour le bouton Créer. */
+  const [isCreatingPreset, setIsCreatingPreset] = useState(false);
 
   // Charger presets au montage
   useEffect(() => {
@@ -64,6 +66,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     const configToSave = snapshotConfiguration || currentConfiguration || getCurrentConfiguration?.() || null;
     if (!newPresetName.trim() || !configToSave) return;
 
+    setIsCreatingPreset(true);
     try {
       const { cleanupMessage } = await createPreset({
         name: newPresetName.trim(),
@@ -83,6 +86,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       setSnapshotConfiguration(null);
     } catch (error) {
       // Error already handled by store
+    } finally {
+      setIsCreatingPreset(false);
     }
   };
 
@@ -373,33 +378,35 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
-                disabled={isLoading}
+                disabled={isCreatingPreset}
                 style={{
                   padding: '0.5rem 1rem',
                   backgroundColor: theme.background.secondary,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '4px',
                   color: theme.text.primary,
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
-                  opacity: isLoading ? 0.6 : 1,
+                  cursor: isCreatingPreset ? 'not-allowed' : 'pointer',
+                  opacity: isCreatingPreset ? 0.6 : 1,
                 }}
               >
                 Annuler
               </button>
               <button
+                type="button"
+                data-testid="preset-modal-create-btn"
                 onClick={handleCreatePreset}
-                disabled={!newPresetName.trim() || isLoading}
+                disabled={!newPresetName.trim() || isCreatingPreset}
                 style={{
                   padding: '0.5rem 1rem',
                   backgroundColor: theme.button.primary.background,
                   border: 'none',
                   borderRadius: '4px',
                   color: 'white',
-                  cursor: !newPresetName.trim() || isLoading ? 'not-allowed' : 'pointer',
-                  opacity: !newPresetName.trim() || isLoading ? 0.6 : 1,
+                  cursor: !newPresetName.trim() || isCreatingPreset ? 'not-allowed' : 'pointer',
+                  opacity: !newPresetName.trim() || isCreatingPreset ? 0.6 : 1,
                 }}
               >
-                {isLoading ? 'Sauvegarde…' : 'Créer'}
+                {isCreatingPreset ? 'Sauvegarde…' : 'Créer'}
               </button>
             </div>
           </div>

@@ -18,6 +18,7 @@ import { normalizeTestBars } from '../../utils/graphNormalizers'
 import { runGraphTransaction } from '../utils/runGraphTransaction'
 import { documentToGraph } from '../../utils/documentToGraph'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
+import { applyLinearNextNodeFromGraphEdges } from '../../utils/mergeNodeEditorForm'
 
 /** Nombre max d'entrées dans l'historique de régénération (Story 1.10 - AC#3). */
 const MAX_REGENERATION_HISTORY = 10
@@ -155,6 +156,19 @@ function updateDialogueNodeInDocumentSoT(
     if (data.speaker !== undefined) docNode.speaker = data.speaker
     if (data.nextNode !== undefined) docNode.nextNode = data.nextNode
     if (data.choices !== undefined) docNode.choices = data.choices
+  }
+
+  const docChoices = docNode.choices as unknown[] | undefined
+  if (Array.isArray(docChoices) && docChoices.length === 0) {
+    const aligned = applyLinearNextNodeFromGraphEdges(
+      nodeId,
+      docNode as Record<string, unknown>,
+      state.edges
+    )
+    const next = aligned.nextNode
+    if (typeof next === 'string' && next.trim() !== '') {
+      docNode.nextNode = next
+    }
   }
 
   const layoutPositions = state.layout as { nodes?: Record<string, { x: number; y: number }> }

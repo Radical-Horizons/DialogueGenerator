@@ -135,7 +135,7 @@ describe('useDialogueLoader', () => {
     ).toBe(true)
   })
 
-  it('handleSave does not call saveDialogue when flush times out (no NodeEditorPanel)', async () => {
+  it('handleSave still calls saveDialogue when flush times out (best-effort persist)', async () => {
     vi.useFakeTimers()
     const saveDialogueMock = vi.fn().mockResolvedValue({
       filename: 'd.json',
@@ -175,17 +175,19 @@ describe('useDialogueLoader', () => {
 
     await act(async () => {
       const savePromise = result.current.handleSave()
-      await vi.advanceTimersByTimeAsync(2000)
+      // FLUSH_WAIT_MS dans useDialogueLoader (5s) + marge
+      await vi.advanceTimersByTimeAsync(6000)
       await savePromise
     })
 
-    expect(saveDialogueMock).not.toHaveBeenCalled()
+    expect(saveDialogueMock).toHaveBeenCalled()
+    expect(validateGraphMock).toHaveBeenCalled()
     expect(
       toastMock.mock.calls.some(
         (c) =>
-          c[1] === 'error' &&
+          c[1] === 'success' &&
           typeof c[0] === 'string' &&
-          (c[0].includes('sauvegarde') || c[0].includes('Flush') || c[0].includes('synchronis'))
+          c[0].includes('sauvegardé')
       )
     ).toBe(true)
 

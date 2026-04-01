@@ -24,6 +24,7 @@ import {
   GRAPH_SIBLING_COLUMN_STEP,
   GRAPH_TEST_NODE_WIDTH,
 } from './graphNodeLayout'
+import { pickTestConnectionField } from './mergeNodeEditorForm'
 
 /**
  * Mapping handle TestNode → champ choice.
@@ -276,15 +277,29 @@ export function syncChoiceFromTestNode(
   }
 
   const testExplicit = Object.prototype.hasOwnProperty.call(testNodeData, 'test')
+  const ex = existingChoice as Choice & {
+    testCriticalFailureNode?: string
+    testFailureNode?: string
+    testSuccessNode?: string
+    testCriticalSuccessNode?: string
+  }
 
   return {
     ...existingChoice,
     test: testExplicit ? testNodeData.test : existingChoice.test,
     // Note: line du TestNode n'est pas synchronisé vers choice.text (choix.text reste inchangé)
-    testCriticalFailureNode: testNodeData.criticalFailureNode ?? (existingChoice as Choice & { testCriticalFailureNode?: string }).testCriticalFailureNode,
-    testFailureNode: testNodeData.failureNode ?? (existingChoice as Choice & { testFailureNode?: string }).testFailureNode,
-    testSuccessNode: testNodeData.successNode ?? (existingChoice as Choice & { testSuccessNode?: string }).testSuccessNode,
-    testCriticalSuccessNode: testNodeData.criticalSuccessNode ?? (existingChoice as Choice & { testCriticalSuccessNode?: string }).testCriticalSuccessNode,
+    // pickTestConnectionField : le choix graphe (post-connectNodes / génération) prime sur chaînes vides
+    // du formulaire au flush sélection (évite d'effacer test*Node avant autosave / document SoT).
+    testCriticalFailureNode: pickTestConnectionField(
+      ex.testCriticalFailureNode,
+      testNodeData.criticalFailureNode
+    ),
+    testFailureNode: pickTestConnectionField(ex.testFailureNode, testNodeData.failureNode),
+    testSuccessNode: pickTestConnectionField(ex.testSuccessNode, testNodeData.successNode),
+    testCriticalSuccessNode: pickTestConnectionField(
+      ex.testCriticalSuccessNode,
+      testNodeData.criticalSuccessNode
+    ),
   }
 }
 

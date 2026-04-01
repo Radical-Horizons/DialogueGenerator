@@ -2,6 +2,7 @@
  * Fusion pure formulaire d'édition → données nœud pour le store (ADR-006).
  * Les champs de connexion (edges) ne doivent pas être écrasés par un form stale.
  */
+import type { Edge } from 'reactflow'
 import type { Choice, DialogueNodeData, EndNodeData, TestNodeData } from '../schemas/nodeEditorSchema'
 
 /** Priorité au store non vide, sinon valeur form (évite écrasement post-génération). */
@@ -56,6 +57,33 @@ export function mergeDialogueNodeFormIntoStoreData(
     storeNext !== undefined ? (storeNext ?? '') : (formValues.nextNode ?? '')
 
   return { ...nodeData, ...formValues, choices: mergedChoices, nextNode: resolvedNext }
+}
+
+/**
+ * Pour un dialogue sans choix, aligne `nextNode` sur les arêtes courantes (SoT graphe).
+ * Évite que le debounce RHF réécrive le document depuis un merge sans arêtes (perte du changement ConnectionTargetSelect).
+ */
+export function applyLinearNextNodeFromGraphEdges(
+  dialogueNodeId: string,
+  merged: Record<string, unknown>,
+  edges: Edge[]
+): Record<string, unknown> {
+  const choices = (merged.choices as Choice[] | undefined) ?? []
+  if (choices.length > 0) return merged
+  let nextFromNextNodeType: string | undefined
+  let nextFromSuivant: string | undefined
+  for (const e of edges) {
+    if (e.source !== dialogueNodeId) continue
+    if (e.label === 'Suivant') {
+      nextFromSuivant = e.target
+    }
+    if ((e.data as { edgeType?: string } | undefined)?.edgeType === 'nextNode') {
+      nextFromNextNodeType = e.target
+    }
+  }
+  const resolved = nextFromNextNodeType ?? nextFromSuivant
+  if (!resolved) return merged
+  return { ...merged, nextNode: resolved }
 }
 
 /**

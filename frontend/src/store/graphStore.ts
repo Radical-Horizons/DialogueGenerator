@@ -31,3 +31,14 @@ export const useGraphStore = create<GraphState>()((...args) => ({
   ...createLayoutSlice(...args),
   ...createUISlice(...args),
 }))
+
+/** Exposé en dev pour E2E Playwright (diagnostic persistance / documentId). */
+declare global {
+  interface Window {
+    __graphStoreE2E?: typeof useGraphStore
+  }
+}
+
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  window.__graphStoreE2E = useGraphStore
+}

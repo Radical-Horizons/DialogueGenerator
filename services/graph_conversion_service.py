@@ -1,6 +1,7 @@
 """Service de conversion entre format Unity JSON et format ReactFlow."""
 import json
 import logging
+import re
 from typing import List, Dict, Any, Tuple, Optional
 
 logger = logging.getLogger(__name__)
@@ -382,7 +383,10 @@ class GraphConversionService:
     @staticmethod
     def _rebuild_connections(unity_nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]) -> None:
         """Reconstruit les connexions Unity (nextNode, successNode, etc.) depuis les edges.
-        
+
+        Si ``data.choiceIndex`` manque sur l'arête Dialogue→TestNode, déduit l'index depuis
+        l'id ``test-node-…-choice-N`` ou le ``sourceHandle`` ``choice:choiceId``.
+
         Args:
             unity_nodes: Liste de nœuds Unity (modifiée in-place).
             edges: Liste d'edges ReactFlow.
@@ -408,12 +412,53 @@ class GraphConversionService:
                 continue
             
             # Si l'edge va d'un DialogueNode vers un TestNode (via choice handle)
-            if edge_type == "choice" and (
+            source_handle = edge.get("sourceHandle")
+            is_choice_to_test = (
                 target_id.startswith("test-node-") or target_id.startswith("test:")
-            ):
+            ) and (
+                edge_type == "choice"
+                or (
+                    isinstance(source_handle, str)
+                    and source_handle.startswith("choice:")
+                )
+            )
+            if is_choice_to_test:
                 choice_index = edge_data.get("choiceIndex")
+                # E2E / clients : data.choiceIndex parfois absent après sérialisation ;
+                # id legacy test-node-{dialogueId}-choice-{index} suffit à retrouver l'index.
+                if choice_index is None and target_id.startswith("test-node-"):
+                    match = re.match(
+                        r"^test-node-(.+)-choice-(\d+)$",
+                        target_id,
+                    )
+                    if match:
+                        dialogue_id, idx_str = match.group(1), match.group(2)
+                        if dialogue_id == source_id:
+                            choice_index = int(idx_str)
+                if choice_index is None and isinstance(source_handle, str) and source_handle.startswith(
+                    "choice:"
+                ):
+                    stable = source_handle[7:]
+                    dialogue_node = nodes_by_id.get(source_id)
+                    choices = (
+                        dialogue_node.get("choices")
+                        if isinstance(dialogue_node, dict)
+                        else None
+                    )
+                    if isinstance(choices, list):
+                        for idx, ch in enumerate(choices):
+                            if not isinstance(ch, dict):
+                                continue
+                            cid = ch.get("choiceId")
+                            if cid == stable:
+                                choice_index = idx
+                                break
+                            idx_m = re.match(r"^__idx_(\d+)$", stable)
+                            if idx_m and int(idx_m.group(1)) == idx:
+                                choice_index = idx
+                                break
                 if choice_index is not None:
-                    test_node_to_choice_map[target_id] = (source_id, choice_index)
+                    test_node_to_choice_map[target_id] = (source_id, int(choice_index))
         
         # Deuxième passe : reconstruire les connexions
         for edge in edges:

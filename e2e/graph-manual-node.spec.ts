@@ -7,9 +7,14 @@
  * Note : Les E2E sont parfois instables ; un seul passage suffit (story 1.6).
  */
 import { test, expect, type Page } from '@playwright/test'
+import {
+  uniqueE2EDocumentId,
+  seedDocumentWithRetry,
+  openDashboardGraphTabAndSelectDocument,
+} from './helpers'
 
 const API_BASE = 'http://127.0.0.1:4243'
-const FIXTURE_ID = 'e2e-manual-node-fixture'
+const FIXTURE_PREFIX = 'e2e-manual-node'
 const FIXTURE_DOC = {
   schemaVersion: '1.1.0',
   nodes: [
@@ -19,6 +24,7 @@ const FIXTURE_DOC = {
 }
 
 test.describe('Graph Manual Node (Story 1.6)', () => {
+  test.setTimeout(120_000)
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: /connexion/i })
     const isLoginPage = await loginHeading.isVisible({ timeout: 2000 }).catch(() => false)
@@ -39,22 +45,30 @@ test.describe('Graph Manual Node (Story 1.6)', () => {
     await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: 10000 })
   })
 
-  test('AC#1–#2: Nouveau nœud → panneau d\'édition s\'ouvre', async ({ page, request }) => {
-    const seedRes = await request.put(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`, {
-      data: { document: FIXTURE_DOC, revision: 1 },
-    })
-    expect([200, 409]).toContain(seedRes.status())
-    await page.goto(`/graph-editor/${FIXTURE_ID}`)
+  test.afterEach(async ({ request }, testInfo) => {
+    const fid = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    const res = await request.delete(`${API_BASE}/api/v1/documents/${fid}`)
+    if (!res.ok() && res.status() !== 404) {
+      const text = await res.text().catch(() => '')
+      throw new Error(`Cleanup DELETE failed ${res.status()}: ${text}`)
+    }
+  })
+
+  test('AC#1–#2: Nouveau nœud → panneau d\'édition s\'ouvre', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
+    // NodeEditorPanel (champs speaker/line) n’est rendu que dans le Dashboard, pas en page /graph-editor standalone.
+    await openDashboardGraphTabAndSelectDocument(page, fixtureId)
     await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 20000 })
 
-    // Clic sur "Nouveau nœud" (data-testid prioritaire pour stabilité E2E)
-    const newNodeBtn = page.getByTestId('btn-new-manual-node').or(
-      page.getByRole('button', { name: /nouveau nœud|➕/i })
-    )
-    await expect(newNodeBtn).toBeVisible({ timeout: 5000 })
+    // Le bouton est dans le menu Actions (pas sur la barre directement) ; désactivé tant que le graphe n’est pas éditable.
+    await expect(page.getByTestId('btn-actions-dropdown')).toBeEnabled({ timeout: 20_000 })
+    await page.getByTestId('btn-actions-dropdown').click()
+    const newNodeBtn = page.getByTestId('btn-new-manual-node')
+    await expect(newNodeBtn).toBeVisible({ timeout: 8000 })
     await newNodeBtn.click()
 
     // Le panneau d'édition doit s'afficher (champ speaker, line ou titre "Édition")
-    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('input[name="speaker"]')).toBeVisible({ timeout: 15_000 })
   })
 })

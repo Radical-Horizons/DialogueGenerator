@@ -8,10 +8,10 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 import { triggerGraphSave } from './trigger-graph-save'
+import { uniqueE2EDocumentId, openDashboardGraphTabAndSelectDocument } from './helpers'
 
 const API_BASE = 'http://127.0.0.1:4243'
-const FIXTURE_ID = 'e2e-adr008-fixture'
-const FIXTURE_FILENAME = `${FIXTURE_ID}.json`
+const FIXTURE_PREFIX = 'e2e-adr008'
 
 const FIXTURE_DOC = {
   schemaVersion: '1.1.0',
@@ -30,11 +30,12 @@ const FIXTURE_DOC = {
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 async function seedFixture(
-  request: Parameters<Parameters<typeof test>[1]>[0]['request']
+  request: Parameters<Parameters<typeof test>[1]>[0]['request'],
+  fixtureId: string
 ): Promise<void> {
   let revision = 1
   for (let attempt = 0; attempt < 6; attempt++) {
-    const res = await request.put(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`, {
+    const res = await request.put(`${API_BASE}/api/v1/documents/${fixtureId}`, {
       data: { document: FIXTURE_DOC, revision },
     })
     if (res.ok()) return
@@ -60,17 +61,17 @@ async function loginAndGotoGraph(page: Page, documentId: string): Promise<void> 
     await page.getByRole('button', { name: /se connecter/i }).click()
     await expect(page).toHaveURL(/\//, { timeout: 10000 })
   }
-  await page.goto(`/graph-editor/${encodeURIComponent(documentId)}`)
-  await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
+  // NodeEditorPanel n’est monté que dans le Dashboard (pas sur /graph-editor standalone).
+  await openDashboardGraphTabAndSelectDocument(page, documentId)
 }
 
 /**
  * Clique sur le premier item .json de la liste, attend le graphe chargé,
  * et retourne le nom du fichier réellement sélectionné.
  */
-async function selectFirst(page: Page): Promise<string> {
-  await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout: 20000 })
-  return FIXTURE_FILENAME
+async function selectFirst(page: Page, fixtureFilename: string): Promise<string> {
+  await expect(page.locator('[data-testid="graph-node-content"]').first()).toBeVisible({ timeout: 25000 })
+  return fixtureFilename
 }
 
 /**
@@ -105,9 +106,10 @@ async function readDialogueViaApi(
 }
 
 async function deleteFixture(
-  request: Parameters<Parameters<typeof test>[1]>[0]['request']
+  request: Parameters<Parameters<typeof test>[1]>[0]['request'],
+  fixtureId: string
 ): Promise<void> {
-  const res = await request.delete(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`)
+  const res = await request.delete(`${API_BASE}/api/v1/documents/${fixtureId}`)
   if (!res.ok() && res.status() !== 404) {
     const text = await res.text().catch(() => '')
     throw new Error(`Cleanup DELETE failed ${res.status()}: ${text}`)
@@ -118,22 +120,24 @@ async function deleteFixture(
 
 test.describe('ADR-008 E2E (Story 16.6)', () => {
   test.describe.configure({ mode: 'serial' })
-  test.setTimeout(90_000)
+  test.setTimeout(120_000)
 
-  test.afterEach(async ({ request }) => {
-    await deleteFixture(request)
+  test.afterEach(async ({ request }, testInfo) => {
+    await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
   })
 
   // ── Test 0 : validation API uniquement (pas de browser) ─────────────────
-  test('API: fixture seedée et loadGraph retourne des nœuds', async ({ request }) => {
-    await seedFixture(request)
+  test('API: fixture seedée et loadGraph retourne des nœuds', async ({ request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    const fixtureFilename = `${fixtureId}.json`
+    await seedFixture(request, fixtureId)
 
     const listRes = await request.get(`${API_BASE}/api/v1/unity-dialogues`)
     expect(listRes.ok()).toBe(true)
     const list = (await listRes.json()) as { dialogues?: Array<{ filename: string }> }
-    expect(list.dialogues?.some((d) => d.filename === FIXTURE_FILENAME)).toBe(true)
+    expect(list.dialogues?.some((d) => d.filename === fixtureFilename)).toBe(true)
 
-    const readRes = await request.get(`${API_BASE}/api/v1/unity-dialogues/${FIXTURE_FILENAME}`)
+    const readRes = await request.get(`${API_BASE}/api/v1/unity-dialogues/${fixtureFilename}`)
     expect(readRes.ok()).toBe(true)
     const { json_content } = (await readRes.json()) as { json_content: string }
 
@@ -149,10 +153,12 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   test('édition line/speaker/choice visible dans l\'UI + save réussit (Task 2.1)', async ({
     page,
     request,
-  }) => {
-    await seedFixture(request)
-    await loginAndGotoGraph(page, FIXTURE_ID)
-    const selectedFile = await selectFirst(page)
+  }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    const fixtureFilename = `${fixtureId}.json`
+    await seedFixture(request, fixtureId)
+    await loginAndGotoGraph(page, fixtureId)
+    const selectedFile = await selectFirst(page, fixtureFilename)
 
     const stamp = Date.now()
     const speakerVal = `SPK_${stamp}`
@@ -191,10 +197,12 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   // ── Task 2.2 : connect/disconnect choix ─────────────────────────────────
   // Note: ce test vérifie save + cohérence arêtes après interaction ; une action explicite
   // de déconnexion (clic arête / bouton) pourrait être ajoutée pour couvrir pleinement "déconnecter".
-  test('connect/disconnect choix → save → cohérent (Task 2.2)', async ({ page, request }) => {
-    await seedFixture(request)
-    await loginAndGotoGraph(page, FIXTURE_ID)
-    const selectedFile2 = await selectFirst(page)
+  test('connect/disconnect choix → save → cohérent (Task 2.2)', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    const fixtureFilename = `${fixtureId}.json`
+    await seedFixture(request, fixtureId)
+    await loginAndGotoGraph(page, fixtureId)
+    const selectedFile2 = await selectFirst(page, fixtureFilename)
 
     // Cliquer sur le premier nœud pour l'éditer
     await page.locator('.react-flow__node').first().click()
@@ -225,10 +233,12 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   })
 
   // ── Task 2.3 : dupliquer nœud ───────────────────────────────────────────
-  test('dupliquer nœud → nouveaux IDs → save (Task 2.3)', async ({ page, request }) => {
-    await seedFixture(request)
-    await loginAndGotoGraph(page, FIXTURE_ID)
-    await selectFirst(page)
+  test('dupliquer nœud → nouveaux IDs → save (Task 2.3)', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    const fixtureFilename = `${fixtureId}.json`
+    await seedFixture(request, fixtureId)
+    await loginAndGotoGraph(page, fixtureId)
+    await selectFirst(page, fixtureFilename)
 
     const countBefore = await page.locator('.react-flow__node').count()
     await page.locator('.react-flow__node').first().click()
@@ -261,7 +271,7 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
     await expect(page.locator('.react-flow__node')).toHaveCount(countBefore + 1, { timeout: 10000 })
     await triggerSave(page)
 
-    const nodes = await readDialogueViaApi(request, FIXTURE_FILENAME)
+    const nodes = await readDialogueViaApi(request, fixtureFilename)
     expect(nodes.length).toBeGreaterThan(countBefore)
 
     // Vérifier que les IDs sont uniques
@@ -271,10 +281,12 @@ test.describe('ADR-008 E2E (Story 16.6)', () => {
   })
 
   // ── Task 2.4 : drag node → layout persisté ──────────────────────────────
-  test('drag node → save → layout persisté (Task 2.4)', async ({ page, request }) => {
-    await seedFixture(request)
-    await loginAndGotoGraph(page, FIXTURE_ID)
-    const selectedFile4 = await selectFirst(page)
+  test('drag node → save → layout persisté (Task 2.4)', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
+    const fixtureFilename = `${fixtureId}.json`
+    await seedFixture(request, fixtureId)
+    await loginAndGotoGraph(page, fixtureId)
+    const selectedFile4 = await selectFirst(page, fixtureFilename)
 
     const node = page.locator('.react-flow__node').first()
     const before = await node.boundingBox()

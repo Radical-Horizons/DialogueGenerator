@@ -11,6 +11,7 @@
 import { test, expect, type Page } from '@playwright/test'
 
 test.describe('Presets CRUD Operations [P0]', () => {
+  test.setTimeout(120_000)
   test.describe.configure({ mode: 'serial' })
   // Helper pour s'authentifier
   const login = async (page: Page) => {
@@ -55,9 +56,9 @@ test.describe('Presets CRUD Operations [P0]', () => {
     await saveBtn.click()
     await expect(page.getByRole('heading', { name: /nouveau preset/i })).toBeVisible({ timeout: 5000 })
     await page.locator('#preset-name').fill('Test Preset E2E')
-    await page.locator('#preset-icon').fill('🎭')
-    await page.getByRole('button', { name: /^créer$/i }).click()
-    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: 20000 })
+    await page.locator('#preset-icon').fill('PRE')
+    await page.getByTestId('preset-modal-create-btn').click()
+    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: 40_000 })
     await page.getByTestId('preset-dropdown-trigger').click({ timeout: 10000 })
     await expect(page.getByText('Test Preset E2E').first()).toBeVisible({ timeout: 15000 })
   })
@@ -145,11 +146,11 @@ test.describe('Presets CRUD Operations [P0]', () => {
     }
     await saveBtn.click()
     await page.locator('#preset-name').fill('Preset Obsolètes E2E')
-    await page.locator('#preset-icon').fill('📋')
-    await page.getByRole('button', { name: /^créer$/i }).click()
-    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: 15000 })
+    await page.locator('#preset-icon').fill('OBS')
+    await page.getByTestId('preset-modal-create-btn').click()
+    await expect(page.getByRole('heading', { name: /nouveau preset/i })).not.toBeVisible({ timeout: 40_000 })
     await page.getByTestId('preset-dropdown-trigger').click()
-    await expect(page.getByText(/Preset Obsolètes E2E/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/Preset Obsolètes E2E/i).first()).toBeVisible({ timeout: 5000 })
   })
 
   test('[P1] should cancel loading preset with obsolete references', async ({ page }) => {

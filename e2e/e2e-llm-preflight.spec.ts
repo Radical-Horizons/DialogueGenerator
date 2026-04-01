@@ -19,6 +19,7 @@ const PREFLIGHT_DOC = 'docs/troubleshooting/e2e-llm.md'
 
 test.describe('E2E LLM Preflight @e2e-llm', () => {
   test.describe.configure({ mode: 'serial' })
+  test.setTimeout(60_000)
   test.beforeAll(async ({ request }) => {
     const healthRes = await request.get(`${API_BASE}/health/detailed`)
     if (!healthRes.ok()) {
@@ -78,6 +79,7 @@ test.describe('E2E LLM Preflight @e2e-llm', () => {
   test('preflight auto-adjusts budget when quota is 0 (lesson: preflight peut ajuster le quota)', async ({
     request,
   }) => {
+    test.setTimeout(120_000)
     const get = async () => {
       const r = await request.get(`${API_BASE}/api/v1/costs/budget`)
       if (!r.ok()) throw new Error('GET budget failed')

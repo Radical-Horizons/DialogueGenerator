@@ -108,24 +108,29 @@ export const ConnectionTargetSelect = memo(function ConnectionTargetSelect(
       if (props.variant !== 'nextNode') return
       const { dialogueNodeId } = props
       const v = (newVal ?? '').trim()
-      const st = useGraphStore.getState()
-      const suivant = st.edges.find(
-        (e) => e.source === dialogueNodeId && e.label === 'Suivant'
-      )
+      const nextEdgeIds = () =>
+        useGraphStore.getState().edges.filter((e) => {
+          return (
+            e.source === dialogueNodeId &&
+            (e.label === 'Suivant' ||
+              (e.data as { edgeType?: string } | undefined)?.edgeType === 'nextNode')
+          )
+        })
 
       if (!v) {
-        if (suivant) {
-          disconnectNodes(suivant.id)
+        for (const e of nextEdgeIds()) {
+          disconnectNodes(e.id)
         }
         return
       }
 
-      if (suivant?.target === v) {
+      const nexts = nextEdgeIds()
+      if (nexts.length === 1 && nexts[0].target === v) {
         return
       }
 
-      if (suivant) {
-        disconnectNodes(suivant.id)
+      for (const e of nexts) {
+        disconnectNodes(e.id)
       }
       connectNodes(dialogueNodeId, v, undefined, 'nextNode')
     },

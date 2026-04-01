@@ -1,7 +1,8 @@
 /**
  * Combobox amélioré avec recherche, raccourcis clavier, et récents.
  */
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { theme } from '../../theme'
 
 export interface ComboboxOption {
@@ -43,8 +44,10 @@ export function Combobox({
   const [searchTerm, setSearchTerm] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const containerRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const [dropdownBox, setDropdownBox] = useState({ top: 0, left: 0, width: 0 })
 
   // Gestion des récents (localStorage ou prop externe)
   const storageKey = useMemo(() => {
@@ -115,16 +118,32 @@ export function Combobox({
   )
 
   // Fermer au clic extérieur
+  useLayoutEffect(() => {
+    if (!isOpen || !containerRef.current) return
+    const sync = () => {
+      const el = containerRef.current
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      setDropdownBox({ top: r.bottom + 4, left: r.left, width: r.width })
+    }
+    sync()
+    window.addEventListener('scroll', sync, true)
+    window.addEventListener('resize', sync)
+    return () => {
+      window.removeEventListener('scroll', sync, true)
+      window.removeEventListener('resize', sync)
+    }
+  }, [isOpen])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false)
-        setSearchTerm('')
-        setHighlightedIndex(-1)
+      const t = event.target as Node
+      if (containerRef.current?.contains(t) || dropdownRef.current?.contains(t)) {
+        return
       }
+      setIsOpen(false)
+      setSearchTerm('')
+      setHighlightedIndex(-1)
     }
 
     if (isOpen) {
@@ -289,75 +308,82 @@ export function Combobox({
         </div>
       </div>
 
-      {isOpen && !disabled && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            marginTop: '0.25rem',
-            backgroundColor: theme.background.panel,
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: '4px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            zIndex: 1000,
-            maxHeight: '300px',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+      {isOpen &&
+        !disabled &&
+        typeof document !== 'undefined' &&
+        createPortal(
           <div
-            ref={listRef}
+            ref={dropdownRef}
             style={{
-              maxHeight: '280px',
-              overflowY: 'auto',
+              position: 'fixed',
+              top: dropdownBox.top,
+              left: dropdownBox.left,
+              width: dropdownBox.width,
+              backgroundColor: theme.background.panel,
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '4px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              zIndex: 12000,
+              maxHeight: '300px',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            {displayedOptions.length === 0 ? (
-              <div
-                style={{
-                  padding: '0.75rem',
-                  textAlign: 'center',
-                  color: theme.text.secondary,
-                  fontSize: '0.9rem',
-                }}
-              >
-                Aucun résultat
-              </div>
-            ) : (
-              displayedOptions.map((option, index) => {
-                const isHighlighted = index === highlightedIndex
-                const isSelected = option.value === value
+            <div
+              ref={listRef}
+              style={{
+                maxHeight: '280px',
+                overflowY: 'auto',
+              }}
+            >
+              {displayedOptions.length === 0 ? (
+                <div
+                  style={{
+                    padding: '0.75rem',
+                    textAlign: 'center',
+                    color: theme.text.secondary,
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  Aucun résultat
+                </div>
+              ) : (
+                displayedOptions.map((option, index) => {
+                  const isHighlighted = index === highlightedIndex
+                  const isSelected = option.value === value
 
-                return (
-                  <div
-                    key={option.value}
-                    onClick={() => !option.disabled && handleSelect(option.value)}
-                    style={{
-                      padding: '0.75rem',
-                      cursor: option.disabled ? 'not-allowed' : 'pointer',
-                      backgroundColor: isSelected
-                        ? theme.state.selected.background
-                        : isHighlighted
-                          ? theme.state.hover.background
-                          : 'transparent',
-                      color: option.disabled
-                        ? theme.text.secondary
-                        : theme.text.primary,
-                      opacity: option.disabled ? 0.5 : 1,
-                      borderBottom: `1px solid ${theme.border.primary}`,
-                    }}
-                  >
-                    {option.label}
-                  </div>
-                )
-              })
-            )}
-          </div>
-        </div>
-      )}
+                  return (
+                    <div
+                      key={option.value}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                      }}
+                      onClick={() => !option.disabled && handleSelect(option.value)}
+                      style={{
+                        padding: '0.75rem',
+                        cursor: option.disabled ? 'not-allowed' : 'pointer',
+                        backgroundColor: isSelected
+                          ? theme.state.selected.background
+                          : isHighlighted
+                            ? theme.state.hover.background
+                            : 'transparent',
+                        color: option.disabled
+                          ? theme.text.secondary
+                          : theme.text.primary,
+                        opacity: option.disabled ? 0.5 : 1,
+                        borderBottom: `1px solid ${theme.border.primary}`,
+                      }}
+                    >
+                      {option.label}
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   )
 }

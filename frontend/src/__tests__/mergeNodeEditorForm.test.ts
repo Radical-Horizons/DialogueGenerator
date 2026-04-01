@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import type { Edge } from 'reactflow'
 import {
   pickTestConnectionField,
   mergeDialogueNodeFormIntoStoreData,
@@ -7,6 +8,7 @@ import {
   mergeNodeFormIntoStoreData,
   connectionFingerprintFromNodeData,
   applyStoreConnectionFieldsToDialogueFormChoices,
+  applyLinearNextNodeFromGraphEdges,
 } from '../utils/mergeNodeEditorForm'
 import type { Choice, DialogueNodeData, TestNodeData } from '../schemas/nodeEditorSchema'
 
@@ -280,5 +282,24 @@ describe('applyStoreConnectionFieldsToDialogueFormChoices', () => {
 
     expect(merged[0].targetNode).toBe('NODE_B')
     expect(merged[1].targetNode).toBe('NODE_A')
+  })
+})
+
+describe('applyLinearNextNodeFromGraphEdges', () => {
+  it('prefers edge with data.edgeType nextNode over legacy Suivant', () => {
+    const merged = { id: 'START', choices: [], nextNode: 'MID' }
+    const edges = [
+      { id: 'a', source: 'START', target: 'MID', label: 'Suivant' },
+      { id: 'b', source: 'START', target: 'END', data: { edgeType: 'nextNode' } },
+    ] as Edge[]
+    const out = applyLinearNextNodeFromGraphEdges('START', merged, edges)
+    expect(out.nextNode).toBe('END')
+  })
+
+  it('does not override nextNode when node has choices', () => {
+    const merged = { choices: [{ text: 'c', choiceId: '0' }], nextNode: 'KEEP' }
+    const edges = [{ id: 'x', source: 'START', target: 'END', label: 'Suivant' }] as Edge[]
+    const out = applyLinearNextNodeFromGraphEdges('START', merged, edges)
+    expect(out.nextNode).toBe('KEEP')
   })
 })

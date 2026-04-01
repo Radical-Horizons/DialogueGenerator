@@ -313,12 +313,53 @@ export function graphToDocument(nodes: Node[], edges: Edge[]): UnityDocument {
           choices[edge.data.choiceIndex].targetNode = edge.target
         }
       }
-    } else if (
-      Array.isArray(sourceNode.choices) &&
-      sourceNode.choices.length === 0 &&
-      edge.label === 'Suivant'
+    }
+  }
+
+  // Nœud dialogue sans choix : nextNode depuis arêtes « Suivant » legacy et/ou edgeType nextNode.
+  // Si les deux coexistent (ex. disconnect incomplet + reconnect), la cible explicite nextNode prime.
+  // Plusieurs « Suivant » seuls : l’ordre du tableau edges n’est pas canonique — tie-break via
+  // node.data.nextNode (mis à jour par connectNodes / ConnectionTargetSelect).
+  for (const u of unityNodes) {
+    const choices = u.choices as Record<string, unknown>[] | undefined
+    if (!Array.isArray(choices) || choices.length !== 0) continue
+    const sourceId = u.id as string
+    const sourceRf = nodes.find((n) => n.id === sourceId && n.type !== 'testNode')
+    const dataNextRaw = (sourceRf?.data as { nextNode?: string } | undefined)?.nextNode
+    const dataNext =
+      typeof dataNextRaw === 'string' && dataNextRaw.trim() !== '' ? dataNextRaw.trim() : ''
+
+    let nextFromNextNodeType: string | undefined
+    let nextFromSuivant: string | undefined
+    for (const e of edges) {
+      if (e.source !== sourceId) continue
+      if (e.label === 'Suivant') {
+        nextFromSuivant = e.target
+      }
+      if ((e.data as { edgeType?: string } | undefined)?.edgeType === 'nextNode') {
+        nextFromNextNodeType = e.target
+      }
+    }
+    let resolved = nextFromNextNodeType ?? nextFromSuivant
+    const linearOut = edges.filter(
+      (e) =>
+        e.source === sourceId &&
+        (e.label === 'Suivant' ||
+          (e.data as { edgeType?: string } | undefined)?.edgeType === 'nextNode')
+    )
+    const suivantOnly = linearOut.filter((e) => e.label === 'Suivant')
+    const distinctSuivantTargets = new Set(suivantOnly.map((e) => e.target))
+    if (
+      !nextFromNextNodeType &&
+      suivantOnly.length > 1 &&
+      distinctSuivantTargets.size > 1 &&
+      dataNext &&
+      linearOut.some((e) => e.target === dataNext)
     ) {
-      sourceNode.nextNode = edge.target
+      resolved = dataNext
+    }
+    if (resolved) {
+      u.nextNode = resolved
     }
   }
 

@@ -8,9 +8,10 @@
  * - Au moins un dialogue Unity existant avec des nœuds (ex. Dialogue_Unity.json).
  */
 import { test, expect, type Page } from '@playwright/test'
+import { uniqueE2EDocumentId, seedDocumentWithRetry, gotoGraphEditorAndWaitForDocument } from './helpers'
 
 const API_BASE = 'http://127.0.0.1:4243'
-const FIXTURE_ID = 'e2e-graph-load-fixture'
+const FIXTURE_PREFIX = 'e2e-graph-load'
 const FIXTURE_DOC = {
   schemaVersion: '1.1.0',
   nodes: [
@@ -45,39 +46,27 @@ test.describe('Graph load – affichage des nœuds', () => {
     }
   }
 
-  const seedFixture = async (
-    request: Parameters<Parameters<typeof test>[1]>[0]['request']
-  ): Promise<void> => {
-    const res = await request.put(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`, {
-      data: { document: FIXTURE_DOC, revision: 1 },
-    })
-    if (!(res.ok() || res.status() === 409)) {
-      throw new Error(`Impossible de seed la fixture graphe (${res.status()})`)
-    }
-  }
-
   const deleteFixture = async (
-    request: Parameters<Parameters<typeof test>[1]>[0]['request']
+    request: Parameters<Parameters<typeof test>[1]>[0]['request'],
+    fixtureId: string
   ): Promise<void> => {
-    const res = await request.delete(`${API_BASE}/api/v1/documents/${FIXTURE_ID}`)
+    const res = await request.delete(`${API_BASE}/api/v1/documents/${fixtureId}`)
     if (!res.ok() && res.status() !== 404) {
       const text = await res.text().catch(() => '')
       throw new Error(`Cleanup DELETE failed ${res.status()}: ${text}`)
     }
   }
 
-  test.afterEach(async ({ request }) => {
-    await deleteFixture(request)
+  test.afterEach(async ({ request }, testInfo) => {
+    await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
   })
 
-  test('ouvrir un dialogue et vérifier que les nœuds du graphe s\'affichent', async ({ page, request }) => {
+  test('ouvrir un dialogue et vérifier que les nœuds du graphe s\'affichent', async ({ page, request }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
     await page.goto('/')
     await login(page)
-    await seedFixture(request)
-    await page.goto(`/graph-editor/${FIXTURE_ID}`)
-
-    // Attendre la fin du chargement (disparition de "Chargement du graphe...")
-    await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
+    await gotoGraphEditorAndWaitForDocument(page, fixtureId)
 
     // Vérifier qu'au moins un nœud est affiché à l'écran (régression : bug "aucun nœud au chargement")
     // On exige toBeVisible : si les nœuds ne s'affichent pas, le test doit échouer.
@@ -90,13 +79,12 @@ test.describe('Graph load – affichage des nœuds', () => {
   test('drag dialogue node then release – positions stables, pas d’erreurs console en boucle', async ({
     page,
     request,
-  }) => {
+  }, testInfo) => {
+    const fixtureId = uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo)
     await page.goto('/')
     await login(page)
-    await seedFixture(request)
-    await page.goto(`/graph-editor/${FIXTURE_ID}`)
-
-    await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 20000 })
+    await seedDocumentWithRetry(request, API_BASE, fixtureId, FIXTURE_DOC)
+    await gotoGraphEditorAndWaitForDocument(page, fixtureId)
     const nodeElements = page.locator('[data-testid="graph-node-content"]:visible')
     await expect(nodeElements.first()).toBeVisible({ timeout: 15000 })
 

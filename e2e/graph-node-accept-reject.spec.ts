@@ -42,27 +42,35 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
         err && typeof err === 'object' && 'message' in err
           ? String((err as { message: string }).message)
           : String(err)
-      throw new Error(
-        `E2E LLM : l'API ne répond pas (${msg}). Lance le serveur avant les tests : \`npm run dev\` (ou dans un autre terminal : \`npm run start:api\` avec API_PORT=4243, puis \`cd frontend && npm run dev\`). Voir docs/troubleshooting/e2e-llm.md.`
+      test.skip(
+        true,
+        `E2E LLM : l'API ne répond pas (${msg}). Lance \`npm run dev\` ou \`npm run start:api\` (API_PORT=4243). Voir docs/troubleshooting/e2e-llm.md.`
       )
+      return
     }
     if (!healthRes.ok()) {
-      throw new Error(
-        'E2E LLM : API injoignable (health check). Vérifier que l\'API tourne sur 4243. Voir docs/troubleshooting/e2e-llm.md.'
+      test.skip(
+        true,
+        "E2E LLM : API injoignable (health). Voir docs/troubleshooting/e2e-llm.md."
       )
+      return
     }
     const health = (await healthRes.json()) as { checks?: Array<{ name: string; status: string }> }
     const llm = health.checks?.find((c) => c.name === 'llm_connectivity')
     if (!llm || llm.status !== 'healthy') {
-      throw new Error(
-        "E2E LLM : OPENAI_API_KEY manquante. Définir .env à la racine ou la variable d'environnement. Voir docs/troubleshooting/e2e-llm.md."
+      test.skip(
+        true,
+        "E2E LLM : OPENAI_API_KEY absente ou LLM non joignable — suite @e2e-llm ignorée. Voir docs/troubleshooting/e2e-llm.md."
       )
+      return
     }
     const budgetRes = await request.get(`${API_BASE}/api/v1/costs/budget`)
     if (!budgetRes.ok()) {
-      throw new Error(
-        'E2E LLM : impossible de vérifier le budget. Voir docs/troubleshooting/e2e-llm.md.'
+      test.skip(
+        true,
+        'E2E LLM : impossible de lire le budget (API). Voir docs/troubleshooting/e2e-llm.md.'
       )
+      return
     }
     const budget = (await budgetRes.json()) as { quota: number; percentage: number }
     if (budget.quota <= 0 || budget.percentage >= 100) {
@@ -70,12 +78,13 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
         data: { quota: 50 },
       })
       if (!putRes.ok()) {
-        throw new Error(
-          'E2E LLM : impossible de mettre à jour le budget. Voir docs/troubleshooting/e2e-llm.md.'
+        test.skip(
+          true,
+          'E2E LLM : budget épuisé et remise à 50 impossible — suite ignorée. Voir docs/troubleshooting/e2e-llm.md.'
         )
       }
     }
-  })
+  }, { timeout: 120_000 })
 
   const login = async (page: Page) => {
     await page.goto('/login')
@@ -99,22 +108,11 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
     await page.goto('/')
     const onLogin = await page.getByRole('heading', { name: 'Connexion' }).isVisible({ timeout: 2000 }).catch(() => false)
     if (onLogin) await login(page)
-    const graphTab = page.getByRole('button', { name: /Éditeur de Graphe|📊/ }).first()
-    await expect(graphTab).toBeVisible({ timeout: 15000 })
-    await graphTab.click()
-    const list = page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')
-    await expect(list).toBeVisible({ timeout: 25000 })
-    const item = list
-      .locator('[data-testid="unity-dialogue-item"]')
-      .filter({ hasText: new RegExp(fixtureFilename.replace('.', '\\.'), 'i') })
-      .first()
-    const hasItem = await item.isVisible({ timeout: 15000 }).catch(() => false)
-    if (!hasItem) {
-      test.skip(true, `${fixtureFilename} introuvable dans la liste Unity`)
-    }
-    await item.click()
+    const stem = fixtureFilename.replace(/\.json$/i, '')
+    await page.goto(`/graph-editor/${encodeURIComponent(stem)}`, { waitUntil: 'domcontentloaded' })
+    await expect(page.getByText(/Chargement du graphe/i)).toBeHidden({ timeout: 90_000 })
     const nodes = page.locator('.react-flow__node')
-    await expect(nodes.first()).toBeVisible({ timeout: 15000 })
+    await expect(nodes.first()).toBeVisible({ timeout: 30_000 })
     return nodes
   }
 
@@ -143,20 +141,20 @@ test.describe('Graph Node Accept/Reject (Story 1.4) @e2e-llm', () => {
         await firstChoice.click()
       }
     }
-    const submitSingle = page.getByRole('button', { name: /^✨ Générer$|^✨ Générer pour choix \d+$/ })
-    const submitBatch = page.getByRole('button', { name: /Générer pour tous les choix/ })
-    const submit = (await submitSingle.count() > 0) ? submitSingle.first() : submitBatch.first()
-    await expect(submit).toBeVisible({ timeout: 3000 })
+    const submitSingle = page.getByRole('button', { name: /^✨ Générer$|✨ Générer :/ })
+    const submitBatch = page.getByRole('button', { name: /tous les choix/i })
+    const submit = (await submitSingle.count()) > 0 ? submitSingle.first() : submitBatch.first()
+    await expect(submit).toBeVisible({ timeout: 15_000 })
     await expect(submit).toBeEnabled({ timeout: 2000 })
     await submit.click({ force: true })
     const successToast = page.getByText(/Nœud généré avec succès|Nœud généré pour le choix \d+|[1-9]\d* nouveau\(x\) nœud\(s\) généré\(s\)/)
     await expect(
       successToast,
       'Génération LLM : aucun toast de succès. Vérifier logs frontend/API, budget, modèle gpt-5-mini. Voir docs/troubleshooting/e2e-llm.md.'
-    ).toBeVisible({ timeout: 360_000 })
+    ).toBeVisible({ timeout: 180_000 })
     await expect(
       page.locator('.react-flow__node:has([data-status="pending"])').first()
-    ).toBeVisible({ timeout: 15000 })
+    ).toBeVisible({ timeout: 60_000 })
     const countAfter = await page.locator('.react-flow__node').count()
     const pendingCount = await page.locator('.react-flow__node:has([data-status="pending"])').count()
     expect(
