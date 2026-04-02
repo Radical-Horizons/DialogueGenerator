@@ -19,6 +19,12 @@
 ssh ubuntu@137.74.115.203
 ```
 
+### Déploiement : Git sur le VPS
+
+- Par défaut, `npm run deploy` exécute sur le serveur : **`git fetch origin && git reset --hard origin/main`** puis **`pip install -r requirements.txt`**. Les modifications **locales non poussées** sur le dépôt (ex. `data/GDD_categories` suivies par git) sont **écrasées** par GitHub — comportement voulu pour une prod pilotée par le dépôt.
+- Ancien mode merge : lancer le script PowerShell avec **`-GitUseAutostash`** si tu dois absolument tenter un `git pull --autostash`.
+- Branche suivie : **`main`** (paramètre **`-GitRemoteBranch`** si besoin).
+
 ## 🌐 URLs d'Accès
 
 ### Domaine public (DNS)

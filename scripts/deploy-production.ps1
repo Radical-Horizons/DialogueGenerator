@@ -1,16 +1,19 @@
 # Script de déploiement en production
 # Build le frontend et upload sur le serveur
-# Usage: .\scripts\deploy-production.ps1 [-SkipBuild] [-SkipRestart] [-ServerHost "137.74.115.203"] [-ServerUser "ubuntu"] [-HealthCheckHost "demo.auto-diffusion.net"]
+# Usage: .\scripts\deploy-production.ps1 [-SkipBuild] ... [-GitUseAutostash]  (defaut: fetch + reset --hard origin/main sur le VPS)
 
 param(
     [switch]$SkipBuild = $false,
     [switch]$SkipRestart = $false,
     [switch]$SkipNginx = $false,
     [switch]$SkipGitPull = $false,
+    [switch]$SkipPipInstall = $false,
+    [switch]$GitUseAutostash = $false,
     [string]$ServerHost = "137.74.115.203",
     [string]$ServerUser = "ubuntu",
     [string]$ServerPath = "/opt/DialogueGeneratorV2",
-    [string]$HealthCheckHost = "demo.auto-diffusion.net"
+    [string]$HealthCheckHost = "demo.auto-diffusion.net",
+    [string]$GitRemoteBranch = "main"
 )
 
 $ErrorActionPreference = "Stop"
@@ -152,21 +155,51 @@ Write-Success "Upload terminé avec succès"
 # Nettoyer le dossier temporaire
 Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 
-# Étape 3: Git pull sur le serveur (optionnel)
+# Étape 3: Synchronisation git sur le serveur (optionnel)
 if (-not $SkipGitPull) {
-    Write-Host "`n=== Étape 3: Mise à jour du code (git pull) ===" -ForegroundColor Cyan
-    
-    Write-Info "Git pull sur le serveur..."
-    $gitPullCommand = "ssh ${ServerUser}@${ServerHost} 'cd ${ServerPath} && git pull'"
-    Invoke-Expression $gitPullCommand
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warning "Échec du git pull (peut nécessiter une intervention manuelle)"
+    Write-Host "`n=== Étape 3: Synchronisation git (serveur) ===" -ForegroundColor Cyan
+
+    $gitExit = 1
+    $gitText = ""
+
+    if ($GitUseAutostash) {
+        Write-Info "Mode autostash: git pull --autostash (peut echouer si conflits avec data/ modifie sur le VPS)"
+        $remotePull = "cd ${ServerPath} && git pull --autostash"
+        $pullOutput = & ssh.exe -o BatchMode=yes "${ServerUser}@${ServerHost}" $remotePull 2>&1
+        $gitText = if ($pullOutput -is [System.Array]) { $pullOutput -join "`n" } else { "$pullOutput" }
+        Write-Host $gitText
+        $gitExit = $LASTEXITCODE
+        if ($gitText -match "Applying autostash resulted in conflicts") {
+            Write-Warning "Conflit autostash. Relancez sans -GitUseAutostash (reset hard) ou reparez en SSH."
+        }
     } else {
-        Write-Success "Code mis à jour avec succès"
+        Write-Info "Mode defaut: git fetch + reset --hard origin/${GitRemoteBranch} (le code sur le VPS = GitHub, fini les blocages data/GDD)"
+        $remoteSync = "cd ${ServerPath} && git fetch origin && git reset --hard origin/${GitRemoteBranch}"
+        $syncOutput = & ssh.exe -o BatchMode=yes "${ServerUser}@${ServerHost}" $remoteSync 2>&1
+        $gitText = if ($syncOutput -is [System.Array]) { $syncOutput -join "`n" } else { "$syncOutput" }
+        Write-Host $gitText
+        $gitExit = $LASTEXITCODE
+    }
+
+    if ($gitExit -ne 0) {
+        Write-Warning "Echec git sur le serveur (code $gitExit). Verifiez SSH et le depot ${ServerPath}."
+    } else {
+        Write-Success "Depot serveur aligne sur origin/${GitRemoteBranch}"
+    }
+
+    if ($gitExit -eq 0 -and -not $SkipPipInstall) {
+        Write-Host "`n=== Étape 3b: Dependances Python (venv serveur) ===" -ForegroundColor Cyan
+        Write-Info "pip install -r requirements.txt ..."
+        $pipRemote = "cd ${ServerPath} && .venv/bin/pip install -r requirements.txt -q"
+        & ssh.exe -o BatchMode=yes "${ServerUser}@${ServerHost}" $pipRemote
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "pip install a echoue — en SSH: cd ${ServerPath} && .venv/bin/pip install -r requirements.txt"
+        } else {
+            Write-Success "Dependances Python a jour"
+        }
     }
 } else {
-    Write-Warning "Git pull ignoré (--SkipGitPull)"
+    Write-Warning "Synchronisation git serveur ignoree (--SkipGitPull)"
 }
 
 # Étape 4: Mise à jour de la config Nginx (optionnel)
