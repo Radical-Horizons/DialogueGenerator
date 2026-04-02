@@ -11,7 +11,7 @@ alwaysApply: false
 - **Authentification**: JWT (python-jose), access token (15 min) + refresh token (7 jours), middleware d'auth.
 - **Validation**: Pydantic pour schemas API, double validation (API + métier), messages d'erreur clairs.
 - **Gestion d'erreurs**: Exceptions hiérarchisées (`api/exceptions.py`), handler global, logging structuré avec request_id. Voir `.cursor/rules/logging.mdc` pour le système de logs complet (archivage, API de consultation).
-- **Sécurité**: HTTPS en production, CORS configuré, validation inputs, pas de secrets dans logs/réponses.
+- **Sécurité**: HTTPS en production, CORS configuré, validation inputs, pas de secrets dans logs/réponses. Les endpoints de debug/diagnostic doivent être gardés via une dépendance partagée et rester désactivés par défaut hors développement, sauf override explicite de configuration.
 - **Cache HTTP**: Désactivé automatiquement en développement (middleware `DevNoCacheMiddleware`), activé en production avec TTL configurable. Voir `api/middleware/http_cache.py`.
 - **Documentation**: OpenAPI/Swagger automatique via FastAPI (`/api/docs`), maintenir les docstrings.
 - **Tests**: `tests/api/` avec pytest, tests unitaires routers + intégration API, mocks pour services externes.

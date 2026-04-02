@@ -4,7 +4,7 @@
  * Affiche le texte généré en temps réel, la progression par étapes,
  * et permet l'interruption ou la réduction de la modal.
  */
-import { useEffect, useMemo } from 'react'
+import { Fragment, type ReactNode, useEffect, useMemo } from 'react'
 import { theme } from '../../theme'
 
 /**
@@ -159,13 +159,20 @@ function formatStreamingContent(rawContent: string): {
         // Chercher toutes les occurrences de "text" dans le contexte des choix
         // (chaque choix a un champ "text")
         let searchIndex = 0
-        while (true) {
+        let hasMoreChoices = true
+        while (hasMoreChoices) {
           const textValue = extractPartialStringValue(choicesContext.substring(searchIndex), 'text')
-          if (!textValue) break
+          if (!textValue) {
+            hasMoreChoices = false
+            continue
+          }
           
           // Trouver la position de ce "text" pour chercher "test" après
           const textFieldPos = choicesContext.indexOf(`"text"`, searchIndex)
-          if (textFieldPos === -1) break
+          if (textFieldPos === -1) {
+            hasMoreChoices = false
+            continue
+          }
           
           // Chercher "test" après ce "text" (dans le même objet choix)
           const afterText = choicesContext.substring(textFieldPos)
@@ -178,7 +185,9 @@ function formatStreamingContent(rawContent: string): {
           
           // Continuer la recherche après ce choix
           searchIndex = textFieldPos + `"text"`.length + textValue.length + 10 // Approximatif
-          if (searchIndex >= choicesContext.length) break
+          if (searchIndex >= choicesContext.length) {
+            hasMoreChoices = false
+          }
         }
       }
     }
@@ -200,22 +209,73 @@ function formatStreamingContent(rawContent: string): {
 }
 
 /**
- * Interprète le markdown basique et les séquences d'échappement.
+ * Normalise le texte streamé avant rendu.
  */
-function interpretMarkdown(text: string): string {
+function normalizeStreamingText(text: string): string {
   if (!text) return ''
-  
-  // Remplacer \n par de vrais sauts de ligne
-  let result = text.replace(/\\n/g, '\n')
-  
-  // Interpréter le markdown basique
-  // *text* → italique (on utilise _ pour éviter les conflits avec les astérisques)
-  result = result.replace(/\*([^*]+)\*/g, '_$1_')
-  
-  // **text** → gras
-  result = result.replace(/\*\*([^*]+)\*\*/g, '**$1**')
-  
-  return result
+  return text.replace(/\\n/g, '\n')
+}
+
+/**
+ * Rend un sous-ensemble volontairement limité du markdown sans injecter de HTML.
+ */
+function renderInlineMarkdown(text: string): ReactNode[] {
+  const nodes: ReactNode[] = []
+  const pattern = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g
+  let lastIndex = 0
+  let match: RegExpExecArray | null = pattern.exec(text)
+
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index))
+    }
+
+    const token = match[0]
+    if (token.startsWith('**') && token.endsWith('**')) {
+      nodes.push(
+        <strong key={`strong-${match.index}`}>
+          {token.slice(2, -2)}
+        </strong>
+      )
+    } else {
+      nodes.push(
+        <em key={`em-${match.index}`}>
+          {token.slice(1, -1)}
+        </em>
+      )
+    }
+
+    lastIndex = match.index + token.length
+    match = pattern.exec(text)
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex))
+  }
+
+  return nodes
+}
+
+/**
+ * Rend le markdown compatible streaming sous forme de noeuds React sûrs.
+ */
+function renderMarkdownText(text: string): ReactNode[] {
+  const normalizedText = normalizeStreamingText(text)
+  const lines = normalizedText.split('\n')
+
+  return lines.flatMap((line, lineIndex) => {
+    const lineNodes = (
+      <Fragment key={`line-${lineIndex}`}>
+        {renderInlineMarkdown(line)}
+      </Fragment>
+    )
+
+    if (lineIndex === lines.length - 1) {
+      return [lineNodes]
+    }
+
+    return [lineNodes, <br key={`line-break-${lineIndex}`} />]
+  })
 }
 
 export interface GenerationProgressModalProps {
@@ -558,13 +618,9 @@ export function GenerationProgressModal({
                             wordBreak: 'break-word',
                             color: theme.text.primary,
                           }}
-                          dangerouslySetInnerHTML={{
-                            __html: interpretMarkdown(formattedContent.line)
-                              .replace(/\n/g, '<br/>')
-                              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                              .replace(/_([^_]+)_/g, '<em>$1</em>'),
-                          }}
-                        />
+                        >
+                          {renderMarkdownText(formattedContent.line)}
+                        </div>
                       )}
                     </div>
                   )}

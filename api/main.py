@@ -4,7 +4,7 @@ import logging
 import sys
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+from fastapi import Depends, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
 from fastapi.responses import JSONResponse
@@ -12,7 +12,7 @@ from slowapi.errors import RateLimitExceeded
 from api.middleware import RequestIDMiddleware, LoggingMiddleware
 from api.middleware.cost_governance import CostGovernanceMiddleware
 from api.exceptions import APIException, ValidationException
-from api.dependencies import get_request_id
+from api.dependencies import get_request_id, require_debug_access
 from api.config.security_config import get_security_config
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
 
@@ -494,7 +494,9 @@ app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
 
 # Debug endpoint (dev only): inspect PromptEngine code loaded by server
 @app.get("/debug/prompt-engine", tags=["Debug"])
-async def debug_prompt_engine() -> JSONResponse:
+async def debug_prompt_engine(
+    _: None = Depends(require_debug_access)
+) -> JSONResponse:
     """Expose basic PromptEngine debug info (development only)."""
     import inspect
     import core.prompt.prompt_engine as pe_module

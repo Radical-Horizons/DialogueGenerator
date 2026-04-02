@@ -164,4 +164,32 @@ describe('GenerationProgressModal', () => {
 
     expect(screen.getByText('Test error message')).toBeInTheDocument()
   })
+
+  it('should render streamed markdown safely without injecting HTML', () => {
+    const maliciousLine = 'Bonjour <img src=x onerror="alert(1)"> **important** *note*'
+    const content = JSON.stringify({
+      title: 'Titre',
+      node: {
+        speaker: 'PNJ',
+        line: maliciousLine,
+      },
+    })
+
+    const { container } = render(
+      <GenerationProgressModal
+        isOpen={true}
+        content={content}
+        currentStep="Generating"
+        onInterrupt={mockOnInterrupt}
+        onMinimize={mockOnMinimize}
+        onClose={mockOnClose}
+      />
+    )
+
+    expect(container.querySelector('img')).not.toBeInTheDocument()
+    expect(container.querySelector('script')).not.toBeInTheDocument()
+    expect(screen.getByText('important', { selector: 'strong' })).toBeInTheDocument()
+    expect(screen.getByText('note', { selector: 'em' })).toBeInTheDocument()
+    expect(screen.getByText(/<img src=x onerror="alert\(1\)">/)).toBeInTheDocument()
+  })
 })

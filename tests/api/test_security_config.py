@@ -21,6 +21,7 @@ def test_security_config_default_values():
         assert config.environment == "development"
         assert config.is_development is True
         assert config.is_production is False
+        assert config.are_debug_endpoints_enabled is True
 
 
 def test_security_config_from_env():
@@ -43,6 +44,17 @@ def test_security_config_from_env():
         assert config.environment == "production"
         assert config.is_production is True
         assert config.is_development is False
+        assert config.are_debug_endpoints_enabled is False
+
+
+def test_security_config_debug_endpoints_override():
+    """Test qu'un override explicite contrôle l'accès aux endpoints de debug."""
+    with patch.dict(os.environ, {
+        "ENVIRONMENT": "production",
+        "DEBUG_ENDPOINTS_ENABLED": "true"
+    }, clear=True):
+        config = SecurityConfig()
+        assert config.are_debug_endpoints_enabled is True
 
 
 def test_security_config_validate_development():

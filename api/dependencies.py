@@ -33,6 +33,8 @@ from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from constants import FilePaths, Defaults
+from api.config.security_config import get_security_config
+from api.exceptions import NotFoundException
 
 logger = logging.getLogger(__name__)
 
@@ -265,6 +267,26 @@ def get_request_id(request: Request) -> str:
         Le request_id ou "unknown" si absent.
     """
     return getattr(request.state, "request_id", "unknown")
+
+
+def require_debug_access(request: Request) -> None:
+    """Bloque les endpoints de debug quand ils ne sont pas explicitement autorisés.
+
+    Args:
+        request: La requête HTTP courante.
+
+    Raises:
+        NotFoundException: Si les endpoints de debug sont désactivés.
+    """
+    security_config = get_security_config()
+    if security_config.are_debug_endpoints_enabled:
+        return
+
+    raise NotFoundException(
+        resource_type="Endpoint",
+        resource_id=request.url.path,
+        request_id=get_request_id(request)
+    )
 
 
 # Variables globales _vocab_service et _guides_service supprimées - utilisez ServiceContainer
