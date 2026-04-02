@@ -1,7 +1,9 @@
 """Tests de protection des endpoints de debug."""
+import os
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 DEBUG_RAW_JSON_PAYLOAD = {
@@ -31,13 +33,14 @@ def test_debug_endpoints_return_404_when_disabled(
     path: str,
     payload: dict[str, object] | None,
 ) -> None:
-    """Test que les endpoints de debug sont masqués quand ils sont désactivés."""
-    disabled_security_config = MagicMock()
-    disabled_security_config.are_debug_endpoints_enabled = False
-
-    with patch("api.dependencies.get_security_config", return_value=disabled_security_config):
+    """En production, les endpoints de debug sont masqués (404 + enveloppe API)."""
+    with patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=False):
         request_method = getattr(client, method)
-        response = request_method(path, json=payload) if payload is not None else request_method(path)
+        response = (
+            request_method(path, json=payload)
+            if payload is not None
+            else request_method(path)
+        )
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "NOT_FOUND"

@@ -627,7 +627,7 @@ app.include_router(gdd_notion_sync.router)
 async def debug_prompt_engine() -> JSONResponse:
     """Expose basic PromptEngine debug info (development only)."""
     if os.getenv("ENVIRONMENT", "development") == "production":
-        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
     import inspect
     import core.prompt.prompt_engine as pe_module

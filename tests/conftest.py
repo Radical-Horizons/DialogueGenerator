@@ -1,7 +1,12 @@
 """Configuration globale des tests pytest."""
+import json
 import os
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
+
+from services.repositories.cost_budget_repository import FileCostBudgetRepository
 
 # IMPORTANT: certains singletons (SecurityConfig / rate limiter) sont initialisés à l'import de `api.main`.
 # On fixe donc l'env AVANT l'import pour éviter des 429 en tests.
@@ -27,6 +32,40 @@ def disable_rate_limiting():
     # Nettoyer après les tests (optionnel, car les tests ne modifient pas l'environnement global)
     if "AUTH_RATE_LIMIT_ENABLED" in os.environ:
         del os.environ["AUTH_RATE_LIMIT_ENABLED"]
+
+
+@pytest.fixture(scope="function", autouse=True)
+def unlimited_llm_cost_budget(tmp_path):
+    """Isole les tests du fichier ``data/cost_budgets.json`` machine (quotas bas → 429)."""
+    # Sous-dossier dédié : beaucoup de tests réutilisent ``tmp_path`` comme racine Unity
+    # (listing JSON) — ne pas y placer ``*.json`` de budget.
+    budget_dir = tmp_path / ".pytest-cost-governance"
+    budget_dir.mkdir(parents=True, exist_ok=True)
+    budget_file = budget_dir / "cost_budgets.json"
+    month = "2099-12"
+    payload = {
+        "budgets": {
+            "admin": {
+                "month": month,
+                "amount": 0.0,
+                "quota": 1_000_000.0,
+                "updated_at": "1970-01-01T00:00:00",
+            },
+            "default_user": {
+                "month": month,
+                "amount": 0.0,
+                "quota": 1_000_000.0,
+                "updated_at": "1970-01-01T00:00:00",
+            },
+        }
+    }
+    budget_file.write_text(json.dumps(payload), encoding="utf-8")
+    repository = FileCostBudgetRepository(storage_file=str(budget_file))
+    with patch(
+        "api.middleware.cost_governance.get_cost_budget_repository",
+        return_value=repository,
+    ):
+        yield
 
 
 @pytest.fixture(scope="function", autouse=True)

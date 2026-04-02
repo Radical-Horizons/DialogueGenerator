@@ -2,7 +2,7 @@
 import logging
 import os
 from typing import Annotated, Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, Request, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
 
 from api.routers.auth import get_current_user
 from fastapi.responses import JSONResponse
@@ -1020,7 +1020,7 @@ async def get_author_profile_templates(
 async def debug_prompt_engine_loaded_code() -> JSONResponse:
     """Expose des infos de debug sur le PromptEngine chargé côté serveur (dev)."""
     if os.getenv("ENVIRONMENT", "development") == "production":
-        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
     import inspect
     import core.prompt.prompt_engine as pe_module

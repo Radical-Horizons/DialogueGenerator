@@ -1,10 +1,11 @@
 """Router pour la génération de dialogues."""
 import logging
+import os
 import re
 import json
 from pathlib import Path
 from typing import Annotated, Dict, Any
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.routers.auth import get_current_user
 from starlette.requests import Request
@@ -495,6 +496,12 @@ class RawJsonContextResponse(BaseModel):
     prompt_hash: str = Field(..., description="Hash SHA-256 du prompt pour référence")
 
 
+def _block_debug_raw_json_in_production() -> None:
+    """Refuse l'endpoint en production avant parsing du corps (évite fuite de schéma 422)."""
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+
 @router.post(
     "/debug/raw-json",
     response_model=RawJsonContextResponse,
@@ -502,6 +509,7 @@ class RawJsonContextResponse(BaseModel):
     tags=["Debug"]
 )
 async def get_raw_json_context(
+    _prod_guard: Annotated[None, Depends(_block_debug_raw_json_in_production)],
     request_data: EstimateTokensRequest,
     request: Request,
     dialogue_service: Annotated[DialogueGenerationService, Depends(get_dialogue_generation_service)],
