@@ -16,7 +16,7 @@ class ValidationIssue:
     element_type: str
     field_path: str
     issue_type: str  # "missing", "obsolete", "similar_found"
-    severity: str  # "error", "warning"
+    severity: str  # "error" (réservé) | "warning" (chemins absents du GDD)
     message: str
     suggested_path: Optional[str] = None  # Chemin suggéré si similar_found
 
@@ -31,7 +31,7 @@ class ValidationResult:
     total_fields_detected: int
     
     def has_errors(self) -> bool:
-        """Vérifie s'il y a des erreurs critiques."""
+        """True si au moins une issue est en severity ``error`` (rare ; chemins GDD manquants = warning)."""
         return any(issue.severity == "error" for issue in self.invalid_fields)
     
     def has_warnings(self) -> bool:
@@ -151,11 +151,14 @@ class ContextFieldValidator:
                 # Champ invalide : chercher un équivalent
                 suggested_path = self._find_similar_field(path, detected_fields)
                 
+                # Toujours en "warning" : à l'exécution, l'organizer filtre déjà ces chemins ;
+                # bloquer le démarrage en prod sur l'absence de fuzzy-match créait des faux positifs
+                # (GDD chargé correctement dans l'UI, panneau gauche OK) tout en empêchant le déploiement.
                 issue = ValidationIssue(
                     element_type=element_type,
                     field_path=path,
                     issue_type="missing" if not suggested_path else "similar_found",
-                    severity="error" if not suggested_path else "warning",
+                    severity="warning",
                     message=f"Champ '{path}' non trouvé dans les données GDD",
                     suggested_path=suggested_path
                 )
@@ -170,20 +173,15 @@ class ContextFieldValidator:
                     + (f" -> Suggestion: '{suggested_path}'" if suggested_path else "")
                 )
         
-        # Log résumé seulement si des problèmes détectés (visible en WARNING/INFO)
+        # Log résumé : chemins non résolus = filtrés à l'exécution (pas un arrêt prod)
         if invalid_fields:
-            errors = sum(1 for i in invalid_fields if i.severity == "error")
-            warnings = sum(1 for i in invalid_fields if i.severity == "warning")
-            if errors > 0:
-                logger.warning(
-                    f"[{element_type}] {errors} champ(s) invalide(s) (erreurs) détecté(s) sur {len(config_paths)} total. "
-                    f"Utilisez --debug pour voir les détails."
-                )
-            elif warnings > 0:
-                logger.info(
-                    f"[{element_type}] {warnings} champ(s) avec suggestions détecté(s) sur {len(config_paths)} total. "
-                    f"Utilisez --debug pour voir les détails."
-                )
+            n = len(invalid_fields)
+            with_suggestion = sum(1 for i in invalid_fields if i.suggested_path)
+            logger.warning(
+                f"[{element_type}] {n} champ(s) de context_config absents du schéma GDD détecté(s) "
+                f"({with_suggestion} avec suggestion). Filtrés à l'exécution — "
+                f"voir STARTUP_REPORT=full ou npm run diagnose:prod-context."
+            )
         
         return ValidationResult(
             element_type=element_type,

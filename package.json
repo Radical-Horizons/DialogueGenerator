@@ -49,6 +49,7 @@
     "deploy:wsl": "wsl bash scripts/deploy-from-wsl.sh",
     "deploy:skip-build": "powershell -ExecutionPolicy Bypass -File scripts/deploy-production.ps1 -SkipBuild",
     "deploy:skip-restart": "powershell -ExecutionPolicy Bypass -File scripts/deploy-production.ps1 -SkipRestart",
+    "diagnose:prod-context": "node scripts/getPythonPath.js scripts/diagnose_prod_context_validation.py",
     "start:prod": "powershell -ExecutionPolicy Bypass -File scripts/start-production.ps1",
     "start:debug": "powershell -ExecutionPolicy Bypass -File scripts/start-debug.ps1",
     "start:api": "node scripts/getPythonPath.js -m api.main"

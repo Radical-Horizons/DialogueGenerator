@@ -26,6 +26,11 @@ ssh ubuntu@137.74.115.203
 - **`demo.auto-diffusion.net`** pointe vers la même machine (**`137.74.115.203`**). C’est l’URL à utiliser pour **`PUBLIC_ORIGIN`** / CORS en HTTPS en prod.
 - Les URLs ci‑dessous en **`http://IP`** restent valides pour des tests directs ou l’accès par IP.
 
+### Validation `context_config` / GDD (dev vs prod)
+
+- Les chemins de `context_config.json` absents du schéma GDD détecté sont des **avertissements** : à l’exécution, l’organizer les **filtre** (comme en dev — panneau contexte / UI inchangés).
+- En **`ENVIRONMENT=production`**, le démarrage **ne bloque plus** sur ces écarts (aligné sur le comportement runtime). Les logs restent en **WARNING** ; rapport détaillé : **`STARTUP_REPORT=full`** ou **`npm run diagnose:prod-context`**.
+
 ### Frontend (Interface Web)
 - **URL principale** : http://137.74.115.203
 - **Interface utilisateur** : Application React complète

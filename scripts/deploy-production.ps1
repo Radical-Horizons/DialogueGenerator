@@ -1,6 +1,6 @@
 # Script de déploiement en production
 # Build le frontend et upload sur le serveur
-# Usage: .\scripts\deploy-production.ps1 [-SkipBuild] [-SkipRestart] [-ServerHost "137.74.115.203"] [-ServerUser "ubuntu"]
+# Usage: .\scripts\deploy-production.ps1 [-SkipBuild] [-SkipRestart] [-ServerHost "137.74.115.203"] [-ServerUser "ubuntu"] [-HealthCheckHost "demo.auto-diffusion.net"]
 
 param(
     [switch]$SkipBuild = $false,
@@ -9,7 +9,8 @@ param(
     [switch]$SkipGitPull = $false,
     [string]$ServerHost = "137.74.115.203",
     [string]$ServerUser = "ubuntu",
-    [string]$ServerPath = "/opt/DialogueGeneratorV2"
+    [string]$ServerPath = "/opt/DialogueGeneratorV2",
+    [string]$HealthCheckHost = "demo.auto-diffusion.net"
 )
 
 $ErrorActionPreference = "Stop"
@@ -174,11 +175,11 @@ if (-not $SkipNginx) {
     
     Write-Info "Vérification de la config Nginx actuelle..."
     
-    # Vérifier si la config Nginx a déjà les paramètres SSE
-    # Utiliser des guillemets simples pour éviter l'interprétation PowerShell
+    # Motif complet entre quotes côté shell distant (évite grep: off: No such file)
     $sshTarget = "${ServerUser}@${ServerHost}"
-    $checkNginxCommand = 'ssh ' + $sshTarget + ' ''grep -q "proxy_buffering off" /etc/nginx/sites-available/dialogue-generator && echo OK || echo MISSING'''
-    $nginxStatus = (Invoke-Expression $checkNginxCommand) | Select-Object -Last 1
+    $remoteNginxCheck = "grep -Fq 'proxy_buffering off' /etc/nginx/sites-available/dialogue-generator && echo OK || echo MISSING"
+    $nginxOutput = & ssh.exe -o BatchMode=yes $sshTarget $remoteNginxCheck 2>&1
+    $nginxStatus = ($nginxOutput | Select-Object -Last 1).ToString().Trim()
     
     if ($nginxStatus -eq "OK") {
         Write-Success "Config Nginx déjà à jour (SSE support présent)"
@@ -304,20 +305,51 @@ if (-not $SkipRestart) {
 # Étape 6: Vérification
 Write-Host "`n=== Étape 6: Vérification ===" -ForegroundColor Cyan
 
-Write-Info "Vérification du health check..."
-$healthUrl = "http://${ServerHost}/health"
-try {
-    $response = Invoke-WebRequest -Uri $healthUrl -Method Get -TimeoutSec 10 -UseBasicParsing -ErrorAction Stop
-    if ($response.StatusCode -eq 200) {
-        $health = $response.Content | ConvertFrom-Json
-        if ($health.status -eq "healthy") {
-            Write-Success "Health check: OK (status: $($health.status))"
-        } else {
-            Write-Warning "Health check: Degraded (status: $($health.status))"
+Write-Info "Vérification du health check (IP + en-tête Host si configuré)..."
+$healthPaths = @("/health", "/api/v1/healthcheck")
+$healthVerified = $false
+foreach ($path in $healthPaths) {
+    $uri = "http://${ServerHost}${path}"
+    $headerVariants = [System.Collections.ArrayList]@()
+    if ($HealthCheckHost) {
+        [void]$headerVariants.Add(@{ Name = "Host: $HealthCheckHost"; Headers = @{ Host = $HealthCheckHost } })
+    }
+    [void]$headerVariants.Add(@{ Name = "sans Host"; Headers = $null })
+    foreach ($hv in $headerVariants) {
+        try {
+            $req = @{
+                Uri             = $uri
+                Method          = "Get"
+                TimeoutSec      = 10
+                UseBasicParsing = $true
+                ErrorAction     = "Stop"
+            }
+            if ($null -ne $hv.Headers) {
+                $req["Headers"] = $hv.Headers
+            }
+            $response = Invoke-WebRequest @req
+            if ($response.StatusCode -eq 200) {
+                try {
+                    $health = $response.Content | ConvertFrom-Json
+                    if ($health.status -eq "healthy") {
+                        Write-Success "Health check: OK ($($hv.Name) | $path | status: $($health.status))"
+                    } else {
+                        Write-Warning "Health check: Degraded ($($hv.Name) | $path | status: $($health.status))"
+                    }
+                } catch {
+                    Write-Success "Health check: HTTP 200 ($($hv.Name) | $path | body not JSON)"
+                }
+                $healthVerified = $true
+                break
+            }
+        } catch {
+            continue
         }
     }
-} catch {
-    Write-Warning "Impossible de vérifier le health check: $($_.Exception.Message)"
+    if ($healthVerified) { break }
+}
+if (-not $healthVerified) {
+    Write-Warning "Aucun health check HTTP 200 sur $healthPaths (essayez -HealthCheckHost ou vérifiez Nginx)."
 }
 
 # Résumé

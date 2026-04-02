@@ -149,7 +149,7 @@ class TestContextFieldValidator:
         assert isinstance(results["character"], ValidationResult)
     
     def test_validation_result_has_errors(self, mock_context_builder):
-        """Test que ValidationResult détecte correctement les erreurs."""
+        """Chemins absents du GDD : warnings uniquement (pas d'erreur bloquante)."""
         validator = ContextFieldValidator(mock_context_builder)
         
         fields = [
@@ -158,9 +158,9 @@ class TestContextFieldValidator:
         ]
         result = validator.validate_config_for_element_type("character", fields)
         
-        # Devrait avoir des erreurs (champs invalides sans suggestion)
-        # ou des warnings (champs invalides avec suggestion)
-        assert result.has_warnings() or result.has_errors()
+        assert result.has_warnings()
+        assert not result.has_errors()
+        assert all(i.severity == "warning" for i in result.invalid_fields)
     
     def test_get_validation_report(self, mock_context_builder, sample_config):
         """Test de génération du rapport de validation."""
