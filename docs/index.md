@@ -128,6 +128,7 @@ Located in [`features/`](./features/)
 
 Located in [`deployment/`](./deployment/)
 
+- **[Production (OVH VPS) — référence](./deployment/PRODUCTION.md)** : hébergement réel du DialogueGenerator (IP, SSH, Nginx, `demo.auto-diffusion.net`). À lire avant les guides génériques.
 - [Gunicorn Configuration](./deployment/gunicorn.conf.example) - Gunicorn configuration example
 - [Nginx Configuration](./deployment/nginx.conf.example) - Nginx configuration example
 - [Web Config](./deployment/web.config.example) - Web configuration example
@@ -185,7 +186,7 @@ When creating a brownfield PRD:
 
 - **For Planning**: Use this documentation when creating PRD
 - **For Development**: Reference architecture and API documentation
-- **For Deployment**: Follow deployment guide
+- **For Deployment**: [OVH production reference](./deployment/PRODUCTION.md), then [deployment guide](./guides/deployment-guide.md)
 - **For Troubleshooting**: Check troubleshooting documentation
 
 ---

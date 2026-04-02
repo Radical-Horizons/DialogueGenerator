@@ -68,7 +68,7 @@ alwaysApply: false
 
 - **Avant commit** : `npm test` (backend, utilise venv) + `npm run test:frontend` (frontend). Si vert : commit + push.
 
-- **Déploiement** : `npm run deploy:build` puis uploader + configurer `ENVIRONMENT=production` et `CORS_ORIGINS`.
+- **Déploiement** : prod de référence = **VPS OVH** (`docs/deployment/PRODUCTION.md`, URL publique `demo.auto-diffusion.net`). `npm run deploy:build` / `npm run deploy:check` ; déploiement typique `npm run deploy`. Sur le serveur : `ENVIRONMENT=production`, `PUBLIC_ORIGIN` (ou `CORS_ORIGINS`), secrets JWT/OpenAI, etc.
 
 - **Diagnostic développement** :
   - Si ports bloqués ou processus zombies : `npm run dev:check` (vérifie ports 3000/4243, processus liés au projet, lockfile)

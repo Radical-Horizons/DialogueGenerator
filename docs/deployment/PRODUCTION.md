@@ -21,6 +21,11 @@ ssh ubuntu@137.74.115.203
 
 ## 🌐 URLs d'Accès
 
+### Domaine public (DNS)
+
+- **`demo.auto-diffusion.net`** pointe vers la même machine (**`137.74.115.203`**). C’est l’URL à utiliser pour **`PUBLIC_ORIGIN`** / CORS en HTTPS en prod.
+- Les URLs ci‑dessous en **`http://IP`** restent valides pour des tests directs ou l’accès par IP.
+
 ### Frontend (Interface Web)
 - **URL principale** : http://137.74.115.203
 - **Interface utilisateur** : Application React complète

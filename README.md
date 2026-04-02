@@ -13,6 +13,10 @@ npm run dev          # Lance backend + frontend automatiquement
 
 L'application utilise **l'interface web** (React + FastAPI) comme interface principale.
 
+### Production (OVH)
+
+L’instance de référence est sur un **VPS OVH** (Ubuntu) ; déploiement typique : `npm run deploy`. Détails (IP, SSH, Nginx, URL publique **`demo.auto-diffusion.net`**) : **[`docs/deployment/PRODUCTION.md`](docs/deployment/PRODUCTION.md)**. Guide générique : [`docs/guides/deployment-guide.md`](docs/guides/deployment-guide.md).
+
 ## Objectif Principal (Rappel des Spécifications)
 
 1.  Charger le GDD (via des fichiers JSON extraits de Notion).

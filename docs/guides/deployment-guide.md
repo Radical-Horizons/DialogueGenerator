@@ -3,9 +3,25 @@
 ## Overview
 This guide covers deployment of DialogueGenerator to production environments.
 
+## Where this project runs in production (source of truth)
+
+**This repo’s production deployment is an OVH VPS (Ubuntu), not shared Windows hosting.**
+
+| Item | Value |
+|------|--------|
+| Provider | **OVH** — VPS Linux |
+| Public demo (DNS) | **`https://demo.auto-diffusion.net`** → `137.74.115.203` |
+| SSH | `ssh ubuntu@137.74.115.203` |
+| App path on server | `/opt/DialogueGeneratorV2` |
+| Deploy from dev machine | `npm run deploy` → `scripts/deploy-production.ps1` (SCP/SSH; defaults match this host) |
+
+**Canonical technical doc (French):** [`docs/deployment/PRODUCTION.md`](../deployment/PRODUCTION.md) — Nginx, systemd, env vars, troubleshooting.
+
+Mentions of **SmarterASP** or generic **FTP** in older sections below are **optional patterns** for other hosts; if you deploy elsewhere, adapt paths and web server config accordingly.
+
 ## Prerequisites
 
-1. Hosting platform with Python support (SmarterASP.net, VPS, etc.)
+1. **For this project’s OVH setup:** Ubuntu VPS with Python 3.10+, Nginx (see `PRODUCTION.md`). **For other hosts:** a platform with Python support (e.g. SmarterASP.net, another VPS) and adapted configuration.
 2. FTP/SFTP access or control panel access
 3. Python 3.10+ installed on server
 4. Node.js and npm installed (for frontend build)
