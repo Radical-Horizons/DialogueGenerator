@@ -94,16 +94,28 @@ def test_security_config_validate_production_rejects_disable_auth():
             config.validate_config()
 
 
-def test_security_config_validate_production_requires_cors():
-    """Test que CORS_ORIGINS est obligatoire en production."""
+def test_security_config_validate_production_requires_cors_or_public_origin():
+    """Test qu'en production il faut CORS_ORIGINS ou PUBLIC_ORIGIN."""
     with patch.dict(os.environ, {
         "ENVIRONMENT": "production",
         "DISABLE_AUTH": "false",
         "JWT_SECRET_KEY": "custom-secret-key-123",
     }, clear=True):
         config = SecurityConfig()
-        with pytest.raises(ValueError, match="CORS_ORIGINS"):
+        with pytest.raises(ValueError, match="CORS_ORIGINS|PUBLIC_ORIGIN"):
             config.validate_config()
+
+
+def test_security_config_validate_production_accepts_public_origin_only():
+    """Test que PUBLIC_ORIGIN seul suffit en production (sans CORS_ORIGINS)."""
+    with patch.dict(os.environ, {
+        "ENVIRONMENT": "production",
+        "DISABLE_AUTH": "false",
+        "JWT_SECRET_KEY": "custom-secret-key-123",
+        "PUBLIC_ORIGIN": "https://demo.auto-diffusion.net",
+    }, clear=True):
+        config = SecurityConfig()
+        config.validate_config()
 
 
 def test_get_security_config_singleton():

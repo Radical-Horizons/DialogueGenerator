@@ -107,9 +107,12 @@ class SecurityConfig(BaseSettings):
                     "Définissez DISABLE_AUTH=false (ou supprimez la variable)."
                 )
             cors_origins = os.getenv("CORS_ORIGINS", "").strip()
-            if not cors_origins:
+            public_origin = os.getenv("PUBLIC_ORIGIN", "").strip()
+            if not cors_origins and not public_origin:
                 raise ValueError(
-                    "CORS_ORIGINS doit être défini (liste CSV d'origines) lorsque ENVIRONMENT=production."
+                    "En production, définissez CORS_ORIGINS (liste CSV d'origines) ou PUBLIC_ORIGIN "
+                    "(URL du frontend, ex. https://demo.auto-diffusion.net). "
+                    "Si les deux sont définis, CORS_ORIGINS est utilisé en priorité."
                 )
             if self.jwt_secret_key == DEFAULT_JWT_SECRET_KEY:
                 raise ValueError(

@@ -20,6 +20,7 @@ from api.middleware.cost_governance import CostGovernanceMiddleware
 from api.exceptions import APIException, ValidationException
 from api.dependencies import get_request_id
 from api.config.security_config import get_security_config
+from api.config.cors_resolution import resolve_production_cors_origins
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
 from api.app_version import APP_VERSION
 
@@ -306,13 +307,13 @@ if limiter is not None:
     app.state.limiter = limiter
 
 # Configuration CORS
-cors_origins_env = os.getenv("CORS_ORIGINS", "")
+cors_origins_env = os.getenv("CORS_ORIGINS", "").strip()
 is_production_env = _IS_PRODUCTION_ENV
 
-# En production, lire depuis CORS_ORIGINS (format CSV) — obligatoire (validé aussi dans SecurityConfig.validate_config)
-# IMPORTANT: Quand allow_credentials=True, on ne peut pas utiliser "*" - il faut spécifier les origines
+# En production : CORS_ORIGINS (CSV) prioritaire, sinon PUBLIC_ORIGIN (voir api.config.cors_resolution).
+# Validé dans SecurityConfig.validate_config. allow_credentials=True interdit "*".
 if is_production_env:
-    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+    cors_origins = resolve_production_cors_origins()
     cors_origin_regex = None
 elif cors_origins_env:
     cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
