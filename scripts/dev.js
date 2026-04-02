@@ -18,6 +18,13 @@ const frontendOnly = args.includes('--frontend') || args.includes('--front');
 const stopOnly = args.includes('--stop');
 const fastStartup =
   args.includes('--fast') || process.env.DEV_FAST_STARTUP === '1';
+
+const printRedactedConfig =
+  args.includes('--print-config') ||
+  ['1', 'true', 'yes'].includes(
+    String(process.env.DEV_PRINT_REDACTED_CONFIG || '').toLowerCase()
+  );
+
 if (fastStartup) {
   process.env.SKIP_STARTUP_CONTEXT_VALIDATION = 'true';
   process.env.SKIP_STARTUP_LOG_CLEANUP = 'true';
@@ -385,6 +392,11 @@ async function main() {
 }
 
 function runCommand() {
+  if (!stopOnly && printRedactedConfig) {
+    const { printSnapshot } = require('./redacted-env-snapshot');
+    printSnapshot(path.join(__dirname, '..'));
+    console.log('');
+  }
   if (stopOnly) {
     handleStop();
   } else if (backendOnly) {

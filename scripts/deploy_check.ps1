@@ -11,6 +11,63 @@ Set-Location $projectRoot
 # Importer la fonction Get-VenvPython
 . (Join-Path $projectRoot "scripts\Get-VenvPython.ps1")
 
+<#
+.SYNOPSIS
+    Parse un fichier .env minimal (lignes KEY=VAL, commentaires #, guillemets optionnels).
+#>
+function Read-DotEnvFile {
+    param([Parameter(Mandatory)][string]$Path)
+    $map = @{}
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $map
+    }
+    foreach ($raw in Get-Content -LiteralPath $Path -Encoding UTF8) {
+        $line = $raw.Trim()
+        if (-not $line -or $line.StartsWith('#')) {
+            continue
+        }
+        $eq = $line.IndexOf('=')
+        if ($eq -lt 1) {
+            continue
+        }
+        $key = $line.Substring(0, $eq).Trim()
+        if (-not $key) {
+            continue
+        }
+        $val = $line.Substring($eq + 1).Trim()
+        if ($val.Length -ge 2) {
+            $dq = $val.StartsWith('"') -and $val.EndsWith('"')
+            $sq = $val.StartsWith("'") -and $val.EndsWith("'")
+            if ($dq -or $sq) {
+                $val = $val.Substring(1, $val.Length - 2)
+            }
+        }
+        $map[$key] = $val
+    }
+    return $map
+}
+
+<#
+.SYNOPSIS
+    Valeur effective pour le déploiement : shell (Process/User/Machine) puis repli .env, comme load_dotenv côté API.
+#>
+function Get-DeployCheckEnvValue {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][hashtable]$DotEnv
+    )
+    foreach ($scope in @("Process", "User", "Machine")) {
+        $v = [Environment]::GetEnvironmentVariable($Name, $scope)
+        if (-not [string]::IsNullOrWhiteSpace($v)) {
+            return @{ Value = $v; Source = "shell" }
+        }
+    }
+    if ($DotEnv.ContainsKey($Name) -and -not [string]::IsNullOrWhiteSpace($DotEnv[$Name])) {
+        return @{ Value = $DotEnv[$Name]; Source = "dotenv" }
+    }
+    return @{ Value = $null; Source = $null }
+}
+
 $errors = @()
 $warnings = @()
 
@@ -32,20 +89,19 @@ if (-not (Test-Path $frontendDist)) {
 Write-Host "`n2. Vérification des variables d'environnement..." -ForegroundColor Cyan
 $requiredEnvVars = @("OPENAI_API_KEY", "JWT_SECRET_KEY")
 $missingVars = @()
+$dotEnvPath = Join-Path $projectRoot ".env"
+$dotEnvMap = Read-DotEnvFile -Path $dotEnvPath
+if ((Test-Path -LiteralPath $dotEnvPath)) {
+    Write-Host "  ℹ Fichier .env trouvé (complète la détection des variables)" -ForegroundColor DarkGray
+}
 
 foreach ($var in $requiredEnvVars) {
-    $value = [Environment]::GetEnvironmentVariable($var, "Process")
-    if (-not $value) {
-        $value = [Environment]::GetEnvironmentVariable($var, "User")
-    }
-    if (-not $value) {
-        $value = [Environment]::GetEnvironmentVariable($var, "Machine")
-    }
-    
-    if (-not $value) {
-        $missingVars += $var
+    $resolved = Get-DeployCheckEnvValue -Name $var -DotEnv $dotEnvMap
+    if ($resolved.Value) {
+        $via = if ($resolved.Source -eq "dotenv") { " (via fichier .env)" } else { "" }
+        Write-Host "  ✓ $var est défini$via" -ForegroundColor Green
     } else {
-        Write-Host "  ✓ $var est défini" -ForegroundColor Green
+        $missingVars += $var
     }
 }
 

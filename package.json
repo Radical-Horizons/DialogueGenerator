@@ -17,6 +17,7 @@
     "dev:debug": "node scripts/dev.js --debug",
     "dev:verbose": "node scripts/dev.js --verbose",
     "dev:quiet": "node scripts/dev.js --quiet",
+    "config:snapshot": "node scripts/config-snapshot.js",
     "build": "cd frontend && npm install && npm run build",
     "version:sync": "node scripts/sync-app-version.js",
     "version:bump:patch": "npm version patch --no-git-tag-version && npm run version:sync",
