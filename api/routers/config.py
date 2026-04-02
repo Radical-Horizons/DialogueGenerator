@@ -1,5 +1,6 @@
 """Router pour la configuration."""
 import logging
+import os
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status, Query
 
@@ -10,7 +11,6 @@ from api.dependencies import (
     get_config_service,
     get_context_builder,
     get_request_id,
-    require_debug_access,
 )
 from api.exceptions import InternalServerException, ValidationException
 from api.schemas.config import (
@@ -1017,10 +1017,11 @@ async def get_author_profile_templates(
     "/debug/prompt-engine",
     status_code=status.HTTP_200_OK
 )
-async def debug_prompt_engine_loaded_code(
-    _: None = Depends(require_debug_access)
-) -> JSONResponse:
+async def debug_prompt_engine_loaded_code() -> JSONResponse:
     """Expose des infos de debug sur le PromptEngine chargé côté serveur (dev)."""
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+
     import inspect
     import core.prompt.prompt_engine as pe_module
     from core.prompt.prompt_engine import PromptEngine
