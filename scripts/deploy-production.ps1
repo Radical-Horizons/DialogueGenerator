@@ -28,6 +28,46 @@ function Write-Success { Write-Host "[SUCCESS] $args" -ForegroundColor Green }
 function Write-Warning { Write-Host "[WARNING] $args" -ForegroundColor Yellow }
 function Write-Error { Write-Host "[ERROR] $args" -ForegroundColor Red }
 
+# Git/progress sur stderr declenche NativeCommandError avec $ErrorActionPreference Stop — on neutralise pendant la capture.
+function Invoke-SshRemoteCapture {
+    param(
+        [Parameter(Mandatory)][string]$SshTarget,
+        [Parameter(Mandatory)][string]$RemoteShellCommand
+    )
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $raw = & ssh.exe -o BatchMode=yes $SshTarget $RemoteShellCommand 2>&1
+        $lines = @(
+            foreach ($o in @($raw)) {
+                if ($null -eq $o) { continue }
+                if ($o -is [System.Management.Automation.ErrorRecord]) { $o.ToString() } else { "$o" }
+            }
+        )
+        [pscustomobject]@{
+            Text     = $lines -join "`n"
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $prevEap
+    }
+}
+
+function Invoke-SshRemote {
+    param(
+        [Parameter(Mandatory)][string]$SshTarget,
+        [Parameter(Mandatory)][string]$RemoteShellCommand
+    )
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & ssh.exe -o BatchMode=yes $SshTarget $RemoteShellCommand
+        return $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $prevEap
+    }
+}
+
 Write-Host "`n=== Déploiement en Production ===" -ForegroundColor Cyan
 Write-Info "Serveur: ${ServerUser}@${ServerHost}"
 Write-Info "Chemin serveur: $ServerPath"
@@ -111,7 +151,7 @@ if (-not $SkipBuild) {
     Write-Success "Build terminé avec succès"
     Write-Info "Fichiers dans: $distPath"
 } else {
-    Write-Warning "Build ignoré (--SkipBuild)"
+    Write-Warning 'Build ignoré (--SkipBuild)'
     $frontendPath = Join-Path $projectRoot "frontend"
     $distPath = Join-Path $frontendPath "dist"
     
@@ -163,22 +203,22 @@ if (-not $SkipGitPull) {
     $gitText = ""
 
     if ($GitUseAutostash) {
-        Write-Info "Mode autostash: git pull --autostash (peut echouer si conflits avec data/ modifie sur le VPS)"
+        Write-Info 'Mode autostash: git pull --autostash (peut echouer si conflits avec data/ modifie sur le VPS)'
         $remotePull = "cd ${ServerPath} && git pull --autostash"
-        $pullOutput = & ssh.exe -o BatchMode=yes "${ServerUser}@${ServerHost}" $remotePull 2>&1
-        $gitText = if ($pullOutput -is [System.Array]) { $pullOutput -join "`n" } else { "$pullOutput" }
+        $pullR = Invoke-SshRemoteCapture -SshTarget "${ServerUser}@${ServerHost}" -RemoteShellCommand $remotePull
+        $gitText = $pullR.Text
         Write-Host $gitText
-        $gitExit = $LASTEXITCODE
+        $gitExit = $pullR.ExitCode
         if ($gitText -match "Applying autostash resulted in conflicts") {
             Write-Warning "Conflit autostash. Relancez sans -GitUseAutostash (reset hard) ou reparez en SSH."
         }
     } else {
-        Write-Info "Mode defaut: git fetch + reset --hard origin/${GitRemoteBranch} (le code sur le VPS = GitHub, fini les blocages data/GDD)"
+        Write-Info "Mode defaut: git fetch + reset --hard origin/$GitRemoteBranch (le code sur le VPS = GitHub, fini les blocages data/GDD)"
         $remoteSync = "cd ${ServerPath} && git fetch origin && git reset --hard origin/${GitRemoteBranch}"
-        $syncOutput = & ssh.exe -o BatchMode=yes "${ServerUser}@${ServerHost}" $remoteSync 2>&1
-        $gitText = if ($syncOutput -is [System.Array]) { $syncOutput -join "`n" } else { "$syncOutput" }
+        $syncR = Invoke-SshRemoteCapture -SshTarget "${ServerUser}@${ServerHost}" -RemoteShellCommand $remoteSync
+        $gitText = $syncR.Text
         Write-Host $gitText
-        $gitExit = $LASTEXITCODE
+        $gitExit = $syncR.ExitCode
     }
 
     if ($gitExit -ne 0) {
@@ -191,15 +231,15 @@ if (-not $SkipGitPull) {
         Write-Host "`n=== Étape 3b: Dependances Python (venv serveur) ===" -ForegroundColor Cyan
         Write-Info "pip install -r requirements.txt ..."
         $pipRemote = "cd ${ServerPath} && .venv/bin/pip install -r requirements.txt -q"
-        & ssh.exe -o BatchMode=yes "${ServerUser}@${ServerHost}" $pipRemote
-        if ($LASTEXITCODE -ne 0) {
-            Write-Warning "pip install a echoue — en SSH: cd ${ServerPath} && .venv/bin/pip install -r requirements.txt"
+        $pipExit = Invoke-SshRemote -SshTarget "${ServerUser}@${ServerHost}" -RemoteShellCommand $pipRemote
+        if ($pipExit -ne 0) {
+            Write-Warning ('pip install a echoue en SSH: cd ' + $ServerPath + ' ; .venv/bin/pip install -r requirements.txt')
         } else {
             Write-Success "Dependances Python a jour"
         }
     }
 } else {
-    Write-Warning "Synchronisation git serveur ignoree (--SkipGitPull)"
+    Write-Warning 'Synchronisation git serveur ignoree (--SkipGitPull)'
 }
 
 # Étape 4: Mise à jour de la config Nginx (optionnel)
@@ -210,9 +250,10 @@ if (-not $SkipNginx) {
     
     # Motif complet entre quotes côté shell distant (évite grep: off: No such file)
     $sshTarget = "${ServerUser}@${ServerHost}"
-    $remoteNginxCheck = "grep -Fq 'proxy_buffering off' /etc/nginx/sites-available/dialogue-generator && echo OK || echo MISSING"
-    $nginxOutput = & ssh.exe -o BatchMode=yes $sshTarget $remoteNginxCheck 2>&1
-    $nginxStatus = ($nginxOutput | Select-Object -Last 1).ToString().Trim()
+    $remoteNginxCheck = 'grep -Fq ''proxy_buffering off'' /etc/nginx/sites-available/dialogue-generator && echo OK || echo MISSING'
+    $nginxR = Invoke-SshRemoteCapture -SshTarget $sshTarget -RemoteShellCommand $remoteNginxCheck
+    $nginxLines = $nginxR.Text -split "`n"
+    $nginxStatus = ($nginxLines | Select-Object -Last 1).ToString().Trim()
     
     if ($nginxStatus -eq "OK") {
         Write-Success "Config Nginx déjà à jour (SSE support présent)"
@@ -304,7 +345,7 @@ fi
         Remove-Item -Path $tempScript -Force -ErrorAction SilentlyContinue
     }
 } else {
-    Write-Warning "Mise à jour Nginx ignorée (--SkipNginx)"
+    Write-Warning 'Mise à jour Nginx ignorée (--SkipNginx)'
 }
 
 # Étape 5: Redémarrer le service (optionnel)
@@ -329,7 +370,7 @@ if (-not $SkipRestart) {
         Invoke-Expression $statusCommand
     }
 } else {
-    Write-Warning "Redémarrage ignoré (--SkipRestart)"
+    Write-Warning 'Redémarrage ignoré (--SkipRestart)'
     Write-Info "N'oubliez pas de redémarrer le service manuellement:"
     Write-Info "  ssh ${ServerUser}@${ServerHost}"
     Write-Info "  sudo systemctl restart dialogue-generator"
