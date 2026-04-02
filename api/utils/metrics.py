@@ -16,7 +16,9 @@ def setup_prometheus_metrics(app) -> Optional[Instrumentator]:
     Returns:
         Instance d'Instrumentator si activé, None sinon.
     """
-    enabled = os.getenv("PROMETHEUS_ENABLED", "true").lower() in ("true", "1", "yes")
+    _prod = os.getenv("ENVIRONMENT", "development").lower() == "production"
+    _default_metrics = "false" if _prod else "true"
+    enabled = os.getenv("PROMETHEUS_ENABLED", _default_metrics).lower() in ("true", "1", "yes")
     
     if not enabled:
         logger.info("Métriques Prometheus désactivées")

@@ -2,7 +2,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-from context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 
 
 @pytest.fixture
@@ -60,8 +60,7 @@ def mock_context_builder():
     from unittest.mock import MagicMock as Mock
     mock_prompt_structure = Mock()
     mock_builder.build_context_json = MagicMock(return_value=mock_prompt_structure)
-    mock_builder._context_serializer = MagicMock()
-    mock_builder._context_serializer.serialize_to_text = MagicMock(return_value="Test context text")
+    mock_builder.serialize_context_to_text = MagicMock(return_value="Test context text")
     
     return mock_builder
 
@@ -291,7 +290,7 @@ class TestBuildContext:
                 "locations_full": ["Forest"]
             },
             "user_instructions": "Test scene",
-            "max_tokens": 1000
+            "max_tokens": 10000
         }
         
         response = client.post("/api/v1/context/build", json=request_data)
@@ -307,7 +306,7 @@ class TestBuildContext:
         """Test de construction avec sélection vide."""
         request_data = {
             "context_selections": {},
-            "max_tokens": 1000
+            "max_tokens": 10000
         }
         
         response = client.post("/api/v1/context/build", json=request_data)
@@ -329,7 +328,7 @@ class TestEstimateTokens:
                 "locations_full": ["Forest"]
             },
             "user_instructions": "Test scene",
-            "max_tokens": 1000
+            "max_context_tokens": 10000,
         }
         
         response = client.post("/api/v1/context/estimate-tokens", json=request_data)
@@ -341,13 +340,16 @@ class TestEstimateTokens:
             assert "context_tokens" in data
             assert "total_estimated_tokens" in data
             assert isinstance(data["context_tokens"], int)
+            assert "selection_tokens" in data
+            assert "context_token_breakdown" in data
+            assert isinstance(data["context_token_breakdown"], list)
     
     def test_estimate_tokens_empty(self, client, mock_context_builder):
         """Test d'estimation avec sélection vide."""
         request_data = {
             "context_selections": {},
             "user_instructions": "Test instructions",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
         
         response = client.post("/api/v1/context/estimate-tokens", json=request_data)
@@ -356,6 +358,128 @@ class TestEstimateTokens:
         data = response.json()
         assert "context_tokens" in data
         assert isinstance(data["context_tokens"], int)
+
+
+class TestContextSuggestions:
+    """Tests pour l'endpoint POST /api/v1/context/suggestions."""
+
+    def test_suggestions_character_trigger_returns_linked_entities(self, client, mock_context_builder):
+        """Trigger personnage → retourne les entités liées, hors trigger lui-même."""
+        mock_context_builder.get_linked_elements = MagicMock(return_value={
+            "characters": {"Bob"},
+            "locations": {"Forest"},
+            "items": set(),
+            "species": {"Elf"},
+            "communities": {"Guild of Mages"},
+            "quests": set(),
+        })
+
+        response = client.post("/api/v1/context/suggestions", json={
+            "trigger_type": "character",
+            "trigger_name": "Alice",
+            "already_selected": {
+                "characters_full": ["Alice"],
+                "characters_excerpt": [],
+                "locations_full": [],
+                "locations_excerpt": [],
+                "items_full": [],
+                "items_excerpt": [],
+                "species_full": [],
+                "species_excerpt": [],
+                "communities_full": [],
+                "communities_excerpt": [],
+                "dialogues_examples": [],
+            },
+        })
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "suggestions" in data
+        names = {s["name"] for s in data["suggestions"]}
+        types = {s["type"] for s in data["suggestions"]}
+        assert "Bob" in names
+        assert "Forest" in names
+        assert "Elf" in names
+        assert "Guild of Mages" in names
+        assert "Alice" not in names  # trigger exclu
+        assert "character" in types
+        assert "location" in types
+        mock_context_builder.get_linked_elements.assert_called_once_with(character_name="Alice")
+
+    def test_suggestions_excludes_already_selected_entities(self, client, mock_context_builder):
+        """Les entités déjà sélectionnées sont exclues des suggestions."""
+        mock_context_builder.get_linked_elements = MagicMock(return_value={
+            "characters": {"Bob"},
+            "locations": {"Forest"},
+            "items": set(),
+            "species": set(),
+            "communities": set(),
+            "quests": set(),
+        })
+
+        response = client.post("/api/v1/context/suggestions", json={
+            "trigger_type": "character",
+            "trigger_name": "Alice",
+            "already_selected": {
+                "characters_full": ["Alice", "Bob"],
+                "characters_excerpt": [],
+                "locations_full": ["Forest"],
+                "locations_excerpt": [],
+                "items_full": [],
+                "items_excerpt": [],
+                "species_full": [],
+                "species_excerpt": [],
+                "communities_full": [],
+                "communities_excerpt": [],
+                "dialogues_examples": [],
+            },
+        })
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["suggestions"] == []
+
+    def test_suggestions_location_trigger_calls_get_linked_elements_with_location_names(
+        self, client, mock_context_builder
+    ):
+        """Trigger lieu → appelle get_linked_elements avec location_names."""
+        mock_context_builder.get_linked_elements = MagicMock(return_value={
+            "characters": {"Alice"},
+            "locations": {"Castle"},
+            "items": set(),
+            "species": set(),
+            "communities": {"Guild of Mages"},
+            "quests": set(),
+        })
+
+        response = client.post("/api/v1/context/suggestions", json={
+            "trigger_type": "location",
+            "trigger_name": "Forest",
+            "already_selected": None,
+        })
+
+        assert response.status_code == 200
+        data = response.json()
+        names = {s["name"] for s in data["suggestions"]}
+        assert "Alice" in names
+        assert "Forest" not in names  # trigger exclu
+        mock_context_builder.get_linked_elements.assert_called_once_with(location_names=["Forest"])
+
+    def test_suggestions_unsupported_trigger_type_returns_empty(self, client, mock_context_builder):
+        """Trigger non supporté (item, species, community) → liste vide, pas d'erreur."""
+        mock_context_builder.get_linked_elements = MagicMock(return_value={
+            "characters": set(), "locations": set(), "items": set(),
+            "species": set(), "communities": set(), "quests": set(),
+        })
+
+        response = client.post("/api/v1/context/suggestions", json={
+            "trigger_type": "item",
+            "trigger_name": "Sword",
+            "already_selected": None,
+        })
+
+        assert response.status_code == 200
+        assert response.json()["suggestions"] == []
 
 
 class TestPagination:

@@ -4,10 +4,7 @@
  * Extrait la logique de validation depuis GenerationPanel.
  */
 import { useState, useEffect, useMemo } from 'react'
-import { useGenerationStore } from '../store/generationStore'
-import { useContextStore } from '../store/contextStore'
-import { CONTEXT_TOKENS_LIMITS } from '../constants'
-import { useGenerationRequest } from './useGenerationRequest'
+import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS } from '../constants'
 
 export interface ValidationError {
   field: string
@@ -63,11 +60,11 @@ export function useGenerationValidation(
     }
     
     if (maxCompletionTokens !== null) {
-      if (maxCompletionTokens < 100) {
-        errors.maxCompletionTokens = 'Minimum 100 tokens'
+      if (maxCompletionTokens < COMPLETION_TOKENS_LIMITS.MIN) {
+        errors.maxCompletionTokens = `Minimum ${(COMPLETION_TOKENS_LIMITS.MIN / 1000).toFixed(0)} 000 tokens`
       }
-      if (maxCompletionTokens > 16000) {
-        errors.maxCompletionTokens = 'Maximum 16 000 tokens (limite backend)'
+      if (maxCompletionTokens > COMPLETION_TOKENS_LIMITS.MAX) {
+        errors.maxCompletionTokens = `Maximum ${(COMPLETION_TOKENS_LIMITS.MAX / 1000).toFixed(0)} 000 tokens`
       }
     }
     

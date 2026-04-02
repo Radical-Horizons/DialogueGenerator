@@ -324,7 +324,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
                             backgroundColor: theme.background.panel,
                             border: `1px solid ${theme.border.primary}`,
                             borderRadius: '6px',
-                            borderLeft: `4px solid ${theme.accent?.primary || theme.button.primary.background}`,
+                            borderLeft: `4px solid ${theme.border.focus}`,
                           }}
                         >
                           <div
@@ -513,7 +513,7 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
           }}
         >
           {response.warning && (
-            <div style={{ color: theme.error?.color || '#ff6b6b', marginBottom: '0.25rem' }}>
+            <div style={{ color: theme.state.error.color, marginBottom: '0.25rem' }}>
               ⚠️ {response.warning}
             </div>
           )}

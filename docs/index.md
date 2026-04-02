@@ -15,19 +15,15 @@
   - Backend: `api/main.py`
 - **Architecture Pattern:** Component-based (Frontend), Layered (Backend)
 
-## ⚠️ Documentation la plus récente
+## Source de vérité (suivi & décisions)
 
-**La documentation la plus récente et à jour se trouve dans les dossiers artifacts de BMad :**
+**Pour la planification, les épics/stories, les ADRs canoniques et le suivi d’implémentation récent :** consulter en priorité **`_bmad-output/`** :
 
-- **Planning Artifacts** : [`_bmad-output/planning-artifacts/`](../_bmad-output/planning-artifacts/)
-  - Architecture détaillée, PRD, épics, rapports de préparation à l'implémentation
-  - Contient la documentation de planification la plus récente
-  
-- **Implementation Artifacts** : [`_bmad-output/implementation-artifacts/`](../_bmad-output/implementation-artifacts/)
-  - ADRs (Architecture Decision Records), plans de sprint, statut d'implémentation
-  - Contient la documentation d'implémentation la plus récente
+- **Planning** : [`_bmad-output/planning-artifacts/`](../_bmad-output/planning-artifacts/) — PRD, architecture, épics, readiness, recherche.
+- **Implémentation** : [`_bmad-output/implementation-artifacts/`](../_bmad-output/implementation-artifacts/) — stories livrées, rétros, notes de suivi alignées sur le travail courant.
+- **Registre ADR** : [`_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`](../_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md)
 
-**Note** : La documentation dans `docs/` est organisée et structurée, mais peut être moins à jour que celle dans `_bmad-output/`. Consultez d'abord les artifacts BMad pour la documentation la plus récente.
+**Rôle de `docs/`** : référence technique durable (architecture détaillée, contrats API, guides, specs, troubleshooting). Certains fichiers sont des **miroirs** ou approfondissements ; en cas d’écart avec `_bmad-output/`, privilégier les artifacts BMad pour l’historique de décision et le statut produit.
 
 ## Documentation Structure
 
@@ -51,6 +47,7 @@ Located in [`architecture/`](./architecture/)
 - [Prompt Estimation Architecture](./architecture/ARCHITECTURE_PROMPT_ESTIMATION.md) - Prompt estimation architecture
 - [Graph Editor](./architecture/GRAPH_EDITOR.md) - Graph editor documentation
 - [Graph Editor Implementation](./architecture/GRAPH_EDITOR_IMPLEMENTATION.md) - Graph editor implementation
+- [ADR — Cibles de connexion UI & coque éditeur](./architecture/adr-graph-connection-targets-ui-shell.md) - Miroir technique ; registre BMad **ADR-009** dans `v10-architectural-decisions-adrs.md`
 - [Field Validation](./architecture/FIELD_VALIDATION.md) - Field validation documentation
 - [Missing API Features](./architecture/FONCTIONNALITES_MANQUANTES_API.md) - Missing API features
 - [Migration & Refactoring 2026](./architecture/MIGRATION_REFACTORING_2026.md) - Migration and refactoring documentation
@@ -84,6 +81,8 @@ Located in [`troubleshooting/`](./troubleshooting/)
 - [Scrollbar Fix](./troubleshooting/SCROLLBAR_FIX.md) - Scrollbar issue resolution
 - [Diagnostic Extraction Fiches](./troubleshooting/DIAGNOSTIC_EXTRACTION_FICHES.md) - Diagnostic extraction
 - [Prompt Parsing Issue](./troubleshooting/PROMPT_PARSING_ISSUE.md) - Prompt parsing troubleshooting
+- [E2E avec LLM](./troubleshooting/e2e-llm.md) - Prérequis, preflight, dépannage des tests E2E qui appellent le LLM
+- [Post-mortem E2E LLM](./troubleshooting/post-mortem-e2e-llm.md) - Causes, correctifs et leçons des tests graph-node-accept-reject
 
 ### Prompts Documentation
 
@@ -119,6 +118,7 @@ Located in [`mechanics/`](./mechanics/)
 
 Located in [`features/`](./features/)
 
+- [Graph — livraison cibles de connexion (suivi)](./features/graph-connection-targets-delivery.md) - Synthèse livraison 2026-03 (dropdowns, merge, E2E) ; lien ADR
 - [Current UI Structure](./features/current-ui-structure.md) - Current UI structure documentation (3-column layout, existing components)
 - [V1.0 UX Specs](./features/v1.0-ux-specs.md) - UX specifications for V1.0 features (Progress Feedback, Presets)
 - [V1.5 Unified Context Search](./features/v1.5-unified-context-search.md) - Unified context search specifications for V1.5
@@ -177,7 +177,7 @@ When creating a brownfield PRD:
 
 ## Documentation Status
 
-**Last Updated**: 2026-01-16
+**Last Updated**: 2026-03-17
 **Structure**: Reorganized into logical categories
 **Parts Documented**: 2 (frontend, api)
 
@@ -190,4 +190,4 @@ When creating a brownfield PRD:
 
 ---
 
-**Note**: This is the primary entry point for AI-assisted development. All generated documentation is located in the `docs/` directory with a logical folder structure.
+**Note** : Point d’entrée indexé pour la doc technique sous `docs/`. Pour l’IA et l’équipe, le **fil décisionnel et le suivi à jour** sont dans **`_bmad-output/`** ; ce fichier les référence explicitement ci-dessus.

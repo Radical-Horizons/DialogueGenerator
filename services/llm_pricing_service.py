@@ -1,6 +1,7 @@
 """Service de calcul des prix pour les appels LLM."""
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -46,6 +47,31 @@ class LLMPricingService:
             logger.error(f"Erreur de décodage JSON dans {self.config_path}: {e}")
             self._pricing_config = {}
     
+    def max_reference_cost(self, prompt_tokens: int, completion_tokens: int) -> float:
+        """Coût maximal parmi tous les modèles connus (pré-check conservateur).
+
+        Args:
+            prompt_tokens: Tokens prompt.
+            completion_tokens: Tokens complétion.
+
+        Returns:
+            Coût USD maximal théorique sur la grille chargée, ou 0.0 si grille vide.
+        """
+        if not self._pricing_config:
+            return 0.0
+        models = self._pricing_config.get("models", {})
+        if not isinstance(models, dict) or not models:
+            return 0.0
+        best = 0.0
+        for _name, pricing in models.items():
+            if not isinstance(pricing, dict):
+                continue
+            inp = float(pricing.get("input_price_per_1M", 0.0) or 0.0)
+            out = float(pricing.get("output_price_per_1M", 0.0) or 0.0)
+            c = (prompt_tokens / 1_000_000) * inp + (completion_tokens / 1_000_000) * out
+            best = max(best, c)
+        return best
+
     def get_model_pricing(self, model_name: str) -> Optional[Dict[str, float]]:
         """Récupère les tarifs pour un modèle donné.
         
@@ -79,9 +105,19 @@ class LLMPricingService:
             Coût estimé en USD. Retourne 0.0 si le modèle n'est pas trouvé.
         """
         pricing = self.get_model_pricing(model_name)
-        
+
         if not pricing:
-            logger.warning(f"Modèle '{model_name}' non trouvé dans la configuration des prix. Coût = 0.0")
+            logger.warning(
+                "Modèle %r non trouvé dans la configuration des prix.",
+                model_name,
+            )
+            if os.getenv("ENVIRONMENT", "development").lower() == "production":
+                conservative = self.max_reference_cost(prompt_tokens, completion_tokens)
+                logger.warning(
+                    "Production: utilisation du coût de référence maximal (conservateur): %.6f USD",
+                    conservative,
+                )
+                return conservative
             return 0.0
         
         input_price_per_1M = pricing.get("input_price_per_1M", 0.0)

@@ -4,15 +4,21 @@
  */
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { useCostGovernance } from '../../hooks/useCostGovernance'
 import { ConfirmDialog } from '../shared'
+import { CostEstimationBadge } from './CostEstimationBadge'
 import { theme } from '../../theme'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
 import * as configAPI from '../../api/config'
 import type { LLMModelResponse } from '../../types/api'
+import {
+  countExpandedBatchNodesForChoices,
+  getChoiceDisplayLabel,
+} from '../../utils/graphChoiceLabels'
 
 interface AIGenerationPanelProps {
   parentNodeId: string | null
@@ -25,7 +31,7 @@ export function AIGenerationPanel({
   onClose,
   onGenerated,
 }: AIGenerationPanelProps) {
-  const { generateFromNode, isGenerating, nodes } = useGraphStore()
+  const { generateFromNode, isGenerating, nodes, edges } = useGraphStore()
   const { selections } = useContextStore()
   const toast = useToast()
   const { checkBudget } = useCostGovernance()
@@ -41,9 +47,10 @@ export function AIGenerationPanel({
   const [targetChoiceIndex, setTargetChoiceIndex] = useState<number | null>(null)
   const [generateAllChoices, setGenerateAllChoices] = useState(false)
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null)
+  const [budgetExceededByEstimate, setBudgetExceededByEstimate] = useState(false)
   
   const availableNarrativeTags = ['tension', 'humour', 'dramatique', 'intime', 'révélation']
-  
+
   // Charger les modèles disponibles
   useEffect(() => {
     configAPI.listLLMModels()
@@ -54,10 +61,19 @@ export function AIGenerationPanel({
         console.error('Erreur lors du chargement des modèles:', err)
       })
   }, [])
-  
+
   // Trouver le nœud parent
   const parentNode = parentNodeId ? nodes.find((n) => n.id === parentNodeId) : null
-  
+
+  const batchAllNodesCount = useMemo(() => {
+    const ch = parentNode?.data?.choices as
+      | Array<{ targetNode?: string | null; test?: unknown }>
+      | undefined
+    if (!ch?.length) return 0
+    const unc = ch.filter((c) => !c.targetNode || c.targetNode === 'END')
+    return countExpandedBatchNodesForChoices(unc)
+  }, [parentNode])
+
   // Les sélections sont déjà au bon format (ContextSelection)
   // Pas besoin de conversion, utiliser directement selections
   
@@ -105,10 +121,14 @@ export function AIGenerationPanel({
     // Initialiser la progression si génération batch OU TestNode (génère toujours 4 nœuds)
     const isTestNode = parentNodeId?.startsWith('test-node-') ?? false
     if (generateAllChoices || isTestNode) {
-      const totalChoices = isTestNode 
-        ? 4  // TestNodes génèrent toujours 4 nœuds (critical-failure, failure, success, critical-success)
-        : (parentNode?.data?.choices || []).filter((c: any) => !c.targetNode || c.targetNode === 'END').length
-      setBatchProgress({ current: 0, total: totalChoices })
+      const totalNodes = isTestNode
+        ? 4
+        : countExpandedBatchNodesForChoices(
+            (parentNode?.data?.choices as Array<{ targetNode?: string | null; test?: unknown }> | undefined)?.filter(
+              (c) => !c.targetNode || c.targetNode === 'END'
+            )
+          )
+      setBatchProgress({ current: 0, total: Math.max(1, totalNodes) })
     }
     
     try {
@@ -143,18 +163,24 @@ export function AIGenerationPanel({
           'success',
           4000
         )
-      } else if (targetChoiceIndex !== null) {
-        toast(`Nœud généré pour le choix ${targetChoiceIndex + 1}`, 'success', 2000)
+      } else if (targetChoiceIndex !== null && parentNode) {
+        const lbl = getChoiceDisplayLabel(
+          parentNodeId!,
+          (parentNode.data.choices as Array<{ text?: string; test?: unknown; choiceId?: string }>)[
+            targetChoiceIndex
+          ] ?? {},
+          targetChoiceIndex,
+          nodes,
+          edges
+        )
+        toast(`Nœud généré pour : ${lbl}`, 'success', 2000)
       } else {
         toast('Nœud généré avec succès', 'success', 2000)
       }
       
       // Déclencher un événement pour sélectionner et zoomer vers le nouveau nœud
       if (generationResult.nodeId) {
-        const event = new CustomEvent('focus-generated-node', {
-          detail: { nodeId: generationResult.nodeId }
-        })
-        window.dispatchEvent(event)
+        useGraphViewStore.getState().focusNode(generationResult.nodeId)
       }
       
       onGenerated?.()
@@ -180,7 +206,39 @@ export function AIGenerationPanel({
     generateAllChoices,
     parentNode,
     checkBudget,
+    nodes,
+    edges,
   ])
+
+  // Fermer la modale quand la génération se termine (doit être avant tout return conditionnel)
+  useEffect(() => {
+    if (!isGenerating && batchProgress) {
+      const timer = setTimeout(() => {
+        setBatchProgress(null)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [isGenerating, batchProgress])
+
+  // Payload pour l'estimation de coût (aligné sur GenerateNodeRequest).
+  // useMemo évite de recréer l'objet à chaque render (référence stable pour useEffect dans le badge).
+  // Doit être avant tout return conditionnel (règles des hooks React).
+  const estimateRequest = useMemo(
+    () =>
+      parentNodeId && parentNode
+        ? {
+            parent_node_id: parentNodeId,
+            parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
+            user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+            context_selections: selections as unknown as Record<string, unknown>,
+            max_choices: maxChoices ?? undefined,
+            llm_model_identifier: llmModel,
+            target_choice_index: targetChoiceIndex ?? undefined,
+            generate_all_choices: generateAllChoices,
+          }
+        : null,
+    [parentNodeId, parentNode, userInstructions, selections, maxChoices, llmModel, targetChoiceIndex, generateAllChoices]
+  )
   
   if (!parentNodeId || !parentNode) {
     return (
@@ -193,6 +251,7 @@ export function AIGenerationPanel({
   // Fonction helper pour vérifier si le bouton doit être désactivé
   const isGenerateDisabled = () => {
     if (isGenerating) return true
+    if (budgetExceededByEstimate) return true
     // En mode "suite (nextNode)", si le parent a des choix, il faut en sélectionner au moins un
     const parentChoices = parentNode?.data?.choices || []
     const hasChoices = parentChoices.length > 0
@@ -208,17 +267,6 @@ export function AIGenerationPanel({
   // Détecter si c'est un TestNode (pour afficher la modal même si generateAllChoices est false)
   const isTestNode = parentNodeId?.startsWith('test-node-') ?? false
   const shouldShowProgressModal = isGenerating && (generateAllChoices || isTestNode) && batchProgress
-  
-  // Fermer la modale quand la génération se termine
-  useEffect(() => {
-    if (!isGenerating && batchProgress) {
-      // Délai court pour laisser le temps de voir "4/4" avant fermeture
-      const timer = setTimeout(() => {
-        setBatchProgress(null)
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [isGenerating, batchProgress])
   
   return (
     <>
@@ -464,6 +512,7 @@ export function AIGenerationPanel({
                 return (
                   <div
                     key={index}
+                    data-testid={!isConnected ? `ai-gen-choice-${index}` : undefined}
                     style={{
                       padding: '0.5rem',
                       backgroundColor: theme.background.panel,
@@ -485,7 +534,7 @@ export function AIGenerationPanel({
                       color: theme.text.primary,
                       fontWeight: targetChoiceIndex === index ? 600 : 400,
                     }}>
-                      {choice.text || `Choix ${index + 1}`}
+                      {getChoiceDisplayLabel(parentNodeId!, choice, index, nodes, edges)}
                       {isConnected && (
                         <span style={{ 
                           fontSize: '0.75rem',
@@ -507,6 +556,7 @@ export function AIGenerationPanel({
             const unconnectedChoices = (parentNode.data.choices as Array<{ targetNode?: string; [key: string]: unknown }>).filter(
               (choice) => !choice.targetNode || choice.targetNode === 'END'
             )
+            const batchNodeTotal = countExpandedBatchNodesForChoices(unconnectedChoices)
             return unconnectedChoices.length > 1 ? (
               <button
                 onClick={() => {
@@ -526,7 +576,9 @@ export function AIGenerationPanel({
                   marginBottom: '0.5rem',
                 }}
               >
-                {generateAllChoices ? '✓ ' : ''}Générer la suite pour tous les choix ({unconnectedChoices.length})
+                {generateAllChoices ? '✓ ' : ''}Générer la suite pour tous les choix (
+                {unconnectedChoices.length} choix → {batchNodeTotal} nœud
+                {batchNodeTotal > 1 ? 's' : ''})
               </button>
             ) : null
           })()}
@@ -545,6 +597,7 @@ export function AIGenerationPanel({
           Modèle LLM
         </label>
         <select
+          data-testid="llm-model-select"
           value={llmModel}
           onChange={(e) => setLlmModel(e.target.value)}
           style={{
@@ -664,6 +717,12 @@ export function AIGenerationPanel({
         </div>
       </div>
       
+      {/* Estimation coût (Story 1.11) */}
+      <CostEstimationBadge
+        estimateRequest={estimateRequest}
+        onBudgetExceeded={setBudgetExceededByEstimate}
+      />
+
       {/* Actions */}
       <div style={{ 
         display: 'flex', 
@@ -711,7 +770,11 @@ export function AIGenerationPanel({
                 ? `Génération ${batchProgress.current}/${batchProgress.total}...`
                 : 'Génération batch...'
               : 'Génération...')
-            : (generateAllChoices ? '✨ Générer pour tous les choix' : targetChoiceIndex !== null ? `✨ Générer pour choix ${targetChoiceIndex + 1}` : '✨ Générer')
+            : generateAllChoices
+              ? `✨ Générer pour tous les choix (${batchAllNodesCount} nœud${batchAllNodesCount > 1 ? 's' : ''})`
+              : targetChoiceIndex !== null
+                ? `✨ Générer : ${getChoiceDisplayLabel(parentNodeId!, (parentNode!.data.choices as Array<{ text?: string; test?: unknown; choiceId?: string }>)[targetChoiceIndex] ?? {}, targetChoiceIndex, nodes, edges)}`
+                : '✨ Générer'
           }
         </button>
       </div>

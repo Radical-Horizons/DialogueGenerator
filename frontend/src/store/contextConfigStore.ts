@@ -4,6 +4,24 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import * as configAPI from '../api/config'
+import { CONTEXT_TOKENS_LIMITS } from '../constants'
+
+function clampContextTokenBudget(value: number): number {
+  const n = Number.isFinite(value) ? Math.round(value) : CONTEXT_TOKENS_LIMITS.DEFAULT
+  return Math.min(CONTEXT_TOKENS_LIMITS.MAX, Math.max(CONTEXT_TOKENS_LIMITS.MIN, n))
+}
+
+const MAX_OPTIMIZATION_PINS = 200
+
+function clampOptimizationPins(keys: string[]): string[] {
+  const uniq = [...new Set(keys.map((k) => k.trim()).filter(Boolean))]
+  return uniq.slice(0, MAX_OPTIMIZATION_PINS)
+}
+
+function clampProxyThreshold(n: number): number {
+  const x = Number.isFinite(n) ? Math.round(n) : 50
+  return Math.min(100, Math.max(1, x))
+}
 
 export interface FieldInfo {
   path: string
@@ -14,8 +32,9 @@ export interface FieldInfo {
   suggested: boolean
   category?: string | null
   importance?: string | null
-  is_metadata?: boolean  // Si le champ est une métadonnée (avant "Introduction" dans le JSON)
-  is_essential?: boolean  // Si le champ est essentiel (contexte OU métadonnées) selon ESSENTIAL_*_FIELDS
+  /** API / JSON peuvent renvoyer des booléens ou des chaînes `"true"`. */
+  is_metadata?: boolean | string
+  is_essential?: boolean | string
   is_unique?: boolean  // Si le champ est unique (n'apparaît que dans une seule fiche)
   is_in_config?: boolean  // Si le champ est référencé dans context_config.json
   is_valid?: boolean  // Si le champ existe réellement dans les données GDD
@@ -80,6 +99,19 @@ interface ContextConfigState {
     maxTokens?: number
   ) => Promise<ContextPreviewResponse>
   clearError: () => void
+
+  /** Budget tokens sélection GDD (FR20) — source de vérité pour max_context_tokens côté génération */
+  contextTokenBudgetMax: number
+  setContextTokenBudgetMax: (value: number) => void
+
+  /** FR21 — clés « type:nom » à ne pas réduire en premier (max 200 côté API) */
+  contextOptimizationPinnedKeys: string[]
+  setContextOptimizationPinnedKeys: (keys: string[]) => void
+  contextOptimizationStrategy: 'conservative' | 'aggressive'
+  setContextOptimizationStrategy: (s: 'conservative' | 'aggressive') => void
+  /** Seuil d’avertissement proxy pré-génération (1–100) */
+  contextOptimizationProxyThreshold: number
+  setContextOptimizationProxyThreshold: (n: number) => void
 }
 
 const defaultFieldConfigs: Record<string, string[]> = {
@@ -103,6 +135,24 @@ export const useContextConfigStore = create<ContextConfigState>()(
       suggestions: {},
       isLoading: false,
       error: null,
+      contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
+      contextOptimizationPinnedKeys: [],
+      contextOptimizationStrategy: 'conservative',
+      contextOptimizationProxyThreshold: 50,
+
+      setContextTokenBudgetMax: (value) => {
+        set({ contextTokenBudgetMax: clampContextTokenBudget(value) })
+      },
+
+      setContextOptimizationPinnedKeys: (keys) => {
+        set({ contextOptimizationPinnedKeys: clampOptimizationPins(keys) })
+      },
+      setContextOptimizationStrategy: (s) => {
+        set({ contextOptimizationStrategy: s })
+      },
+      setContextOptimizationProxyThreshold: (n) => {
+        set({ contextOptimizationProxyThreshold: clampProxyThreshold(n) })
+      },
 
   setFieldConfig: (elementType, fields) => {
     set((state) => {
@@ -218,7 +268,7 @@ export const useContextConfigStore = create<ContextConfigState>()(
       }
       
       const response = await configAPI.getContextFields(elementType)
-      
+
       set((state) => {
         const newAvailableFields = {
           ...state.availableFields,
@@ -274,37 +324,32 @@ export const useContextConfigStore = create<ContextConfigState>()(
       const hasExistingConfigs = Object.values(state.fieldConfigs).some(fields => fields.length > 0)
       if (!hasExistingConfigs) {
         // Si aucun champ n'est sélectionné, initialiser avec "tous les champs" par défaut
-        // Pour cela, on doit d'abord détecter les champs disponibles
-        const elementTypes = ['character', 'location', 'item', 'species', 'community']
+        const elementTypes = ['character', 'location', 'item', 'species', 'community'] as const
         const allFieldsDetected: Record<string, string[]> = {}
         const newAvailableFields: Record<string, Record<string, FieldInfo>> = {}
-        
-        // Détecter les champs pour chaque type d'élément en appelant directement l'API
-        for (const elementType of elementTypes) {
-          try {
-            // Invalider le cache pour forcer une nouvelle détection
-            try {
-              await configAPI.invalidateContextFieldsCache(elementType)
-            } catch (err) {
-              console.warn(`Impossible d'invalider le cache pour ${elementType}:`, err)
-            }
-            
-            // Appeler directement l'API pour détecter les champs
-            const fieldsResponse = await configAPI.getContextFields(elementType)
+
+        // Détecter les champs pour tous les types en parallèle (une requête par type)
+        const results = await Promise.allSettled(
+          elementTypes.map((elementType) =>
+            configAPI.getContextFields(elementType).then((fieldsResponse) => ({ elementType, fieldsResponse }))
+          )
+        )
+
+        for (let i = 0; i < results.length; i++) {
+          const elementType = elementTypes[i]
+          const result = results[i]
+          if (result.status === 'fulfilled') {
+            const { fieldsResponse } = result.value
             newAvailableFields[elementType] = fieldsResponse.fields
-            
             const allFieldPaths = Object.keys(fieldsResponse.fields)
             const essentialFieldsForType = response.essential_fields[elementType] || []
-            
-            // Sélectionner tous les champs (essentiels + tous les autres)
             allFieldsDetected[elementType] = [...new Set([...essentialFieldsForType, ...allFieldPaths])]
-          } catch (err) {
-            console.warn(`Impossible de détecter les champs pour ${elementType}:`, err)
-            // En cas d'erreur, utiliser les champs par défaut de l'API
+          } else {
+            console.warn(`Impossible de détecter les champs pour ${elementType}:`, result.reason)
             allFieldsDetected[elementType] = response.default_fields[elementType] || []
           }
         }
-        
+
         // Mettre à jour le store avec les champs détectés et disponibles
         set((state) => ({
           fieldConfigs: allFieldsDetected,
@@ -350,6 +395,10 @@ export const useContextConfigStore = create<ContextConfigState>()(
     set({
       fieldConfigs: resetFieldConfigs,
       organization: 'default',
+      contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
+      contextOptimizationPinnedKeys: [],
+      contextOptimizationStrategy: 'conservative',
+      contextOptimizationProxyThreshold: 50,
     })
   },
 
@@ -390,15 +439,40 @@ export const useContextConfigStore = create<ContextConfigState>()(
       partialize: (state) => ({
         fieldConfigs: state.fieldConfigs,
         organization: state.organization,
+        contextTokenBudgetMax: state.contextTokenBudgetMax,
+        contextOptimizationPinnedKeys: state.contextOptimizationPinnedKeys,
+        contextOptimizationStrategy: state.contextOptimizationStrategy,
+        contextOptimizationProxyThreshold: state.contextOptimizationProxyThreshold,
       }),
       // Toujours reconstituer les clés attendues (même si le localStorage ne les contient pas)
       merge: (persistedState, currentState) => {
         const persisted = persistedState as Partial<ContextConfigState> | undefined
         const persistedFieldConfigs = persisted?.fieldConfigs ?? {}
+        const budget =
+          persisted?.contextTokenBudgetMax !== undefined
+            ? clampContextTokenBudget(persisted.contextTokenBudgetMax)
+            : currentState.contextTokenBudgetMax
+        const pins =
+          persisted?.contextOptimizationPinnedKeys !== undefined
+            ? clampOptimizationPins(persisted.contextOptimizationPinnedKeys)
+            : currentState.contextOptimizationPinnedKeys
+        const strat =
+          persisted?.contextOptimizationStrategy === 'aggressive' ||
+          persisted?.contextOptimizationStrategy === 'conservative'
+            ? persisted.contextOptimizationStrategy
+            : currentState.contextOptimizationStrategy
+        const pthr =
+          persisted?.contextOptimizationProxyThreshold !== undefined
+            ? clampProxyThreshold(persisted.contextOptimizationProxyThreshold)
+            : currentState.contextOptimizationProxyThreshold
         return {
           ...currentState,
           ...persisted,
           fieldConfigs: { ...defaultFieldConfigs, ...persistedFieldConfigs },
+          contextTokenBudgetMax: budget,
+          contextOptimizationPinnedKeys: pins,
+          contextOptimizationStrategy: strat,
+          contextOptimizationProxyThreshold: pthr,
         }
       },
     }

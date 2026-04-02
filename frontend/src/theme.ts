@@ -3,18 +3,18 @@
  */
 
 export const theme = {
-  // Couleurs de base
+  // Couleurs de base (primary = chrome, secondary = colonnes latérales, panel = zone centrale)
   background: {
-    primary: '#1a1a1a',
-    secondary: '#242424',
-    tertiary: '#2d2d2d',
-    panel: '#2a2a2a',
-    panelHeader: '#333333',
+    primary: '#121214',
+    secondary: '#1a1a1f',
+    tertiary: '#25252c',
+    panel: '#212126',
+    panelHeader: '#2a2a32',
   },
   // Couleurs de bordure
   border: {
-    primary: '#505050',
-    secondary: '#5a5a5a',
+    primary: '#3d3d46',
+    secondary: '#4a4a54',
     focus: '#646cff',
   },
   // Couleurs de texte
@@ -27,9 +27,9 @@ export const theme = {
   // Couleurs de bouton
   button: {
     default: {
-      background: '#333333',
+      background: '#2e2e34',
       color: 'rgba(255, 255, 255, 0.87)',
-      border: '#404040',
+      border: '#3d3d46',
       hover: {
         background: '#3a3a3a',
         border: '#646cff',
@@ -43,9 +43,9 @@ export const theme = {
       },
     },
     secondary: {
-      background: '#404040',
+      background: '#36363e',
       color: 'rgba(255, 255, 255, 0.87)',
-      border: '#505050',
+      border: '#4a4a54',
     },
     selected: {
       background: '#1a3a5a',
@@ -55,8 +55,8 @@ export const theme = {
   },
   // Couleurs d'input
   input: {
-    background: '#2a2a2a',
-    border: '#404040',
+    background: '#26262c',
+    border: '#3d3d46',
     color: 'rgba(255, 255, 255, 0.87)',
     focus: {
       border: '#646cff',
@@ -81,13 +81,27 @@ export const theme = {
     warning: {
       background: '#3a3a1a',
       color: '#ffd43b',
+      border: '#ffc107',
     },
     selected: {
       background: '#1a3a5a',
       color: '#74c0fc',
     },
     hover: {
-      background: '#333333',
+      background: '#323238',
     },
+    /** Bordure nœuds pending (générés, non validés) — Story 1.4 */
+    pending: {
+      border: '#F5A623',
+    },
+    /** Bordure nœuds accepted (validés) — Story 1.4 */
+    accepted: {
+      border: '#27AE60',
+    },
+  },
+  /** Élévation légère (cartes, accordéons) — mode sombre */
+  shadow: {
+    card: '0 2px 10px rgba(0, 0, 0, 0.4)',
+    cardInset: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
   },
 } as const

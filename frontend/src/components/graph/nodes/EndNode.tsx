@@ -4,6 +4,7 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
+import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 
 interface ValidationError {
   type: string
@@ -18,6 +19,7 @@ interface EndNodeData {
   validationErrors?: ValidationError[]
   validationWarnings?: ValidationError[]
   isHighlighted?: boolean
+  incomingEdgeColor?: string
   [key: string]: unknown
 }
 
@@ -41,6 +43,9 @@ export const EndNode = memo(function EndNode({
   
   return (
     <div
+      data-testid="graph-node-content"
+      data-node-type="end"
+      title={NODE_DRAG_TOOLTIP}
       style={{
         width: 200,
         height: 80,
@@ -124,7 +129,7 @@ export const EndNode = memo(function EndNode({
         type="target"
         position={Position.Top}
         style={{
-          background: '#B8B8B8',
+          background: data.incomingEdgeColor ?? '#B8B8B8',
           width: 12,
           height: 12,
           border: '2px solid white',

@@ -1,4 +1,4 @@
-# Script de vérification avant déploiement
+﻿# Script de vérification avant déploiement
 # Vérifie que tout est prêt pour le déploiement
 # Usage: .\scripts\deploy_check.ps1
 # Ou via npm: npm run deploy:check
@@ -16,7 +16,7 @@ $warnings = @()
 
 # 1. Vérifier que le build frontend existe
 Write-Host "`n1. Vérification du build frontend..." -ForegroundColor Cyan
-$frontendDist = Join-Path $projectRoot "frontend" "dist"
+$frontendDist = Join-Path (Join-Path $projectRoot "frontend") "dist"
 if (-not (Test-Path $frontendDist)) {
     $errors += "Le dossier frontend/dist n'existe pas. Exécutez d'abord scripts/build_production.ps1"
 } else {
@@ -89,7 +89,7 @@ try {
 
 # 6. Vérifier la structure des fichiers API
 Write-Host "`n6. Vérification de la structure API..." -ForegroundColor Cyan
-$apiMain = Join-Path $projectRoot "api" "main.py"
+$apiMain = Join-Path (Join-Path $projectRoot "api") "main.py"
 if (-not (Test-Path $apiMain)) {
     $errors += "Le fichier api/main.py n'existe pas"
 } else {
@@ -99,7 +99,7 @@ if (-not (Test-Path $apiMain)) {
 $requiredFiles = @(
     "api/routers/auth.py",
     "api/routers/dialogues.py",
-    "api/routers/interactions.py",
+    "api/routers/graph.py",
     "api/routers/context.py",
     "api/routers/config.py"
 )
@@ -148,8 +148,8 @@ if ($warnings.Count -gt 0) {
 
 if ($errors.Count -gt 0) {
     Write-Host "`n✗ Erreurs:" -ForegroundColor Red
-    foreach ($error in $errors) {
-        Write-Host "  - $error" -ForegroundColor Red
+    foreach ($errItem in $errors) {
+        Write-Host "  - $errItem" -ForegroundColor Red
     }
     Write-Host "`n✗ Le déploiement ne peut pas être effectué. Corrigez les erreurs ci-dessus." -ForegroundColor Red
     exit 1

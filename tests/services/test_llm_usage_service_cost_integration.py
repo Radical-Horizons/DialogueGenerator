@@ -97,3 +97,28 @@ def test_track_usage_does_not_update_budget_on_failure(temp_budget_file, temp_us
     # Vérifier que le budget n'a PAS été mis à jour (success=False)
     updated_status = cost_service.get_budget_status("default_user")
     assert updated_status["amount"] == initial_amount  # Le montant ne devrait pas changer
+
+
+def test_track_usage_with_prompt_response_then_get_by_dialogue_node(temp_usage_dir):
+    """Story 1.15: après track_usage avec prompt/response/dialogue_id/node_id, get_by_dialogue_and_node retourne le record avec prompt et response."""
+    usage_repository = FileLLMUsageRepository(storage_dir=str(temp_usage_dir))
+    usage_service = LLMUsageService(repository=usage_repository)
+    usage_service.track_usage(
+        request_id="req_int_1",
+        model_name="gpt-5-mini",
+        prompt_tokens=100,
+        completion_tokens=50,
+        total_tokens=150,
+        duration_ms=200,
+        success=True,
+        endpoint="generate-node",
+        k_variants=1,
+        dialogue_id="Dialogue_Test",
+        node_id="NODE_CHOICE_0",
+        prompt="System: You are a writer.\n\nUser: Continue the dialogue.",
+        response='{"node": {"id": "NODE_CHOICE_0", "line": "Hello."}}',
+    )
+    found = usage_repository.get_by_dialogue_and_node("Dialogue_Test", "NODE_CHOICE_0")
+    assert found is not None
+    assert found.prompt == "System: You are a writer.\n\nUser: Continue the dialogue."
+    assert found.response == '{"node": {"id": "NODE_CHOICE_0", "line": "Hello."}}'

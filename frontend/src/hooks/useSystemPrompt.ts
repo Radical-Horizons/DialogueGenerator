@@ -13,6 +13,22 @@ export function useSystemPrompt() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const readSavedPrompt = useCallback((): string | null => {
+    try {
+      return localStorage.getItem(SAVED_PROMPT_KEY)
+    } catch (err) {
+      console.warn('Impossible de lire le prompt sauvegardé:', err)
+      return null
+    }
+  }, [])
+
+  const fetchDefaultPrompt = useCallback(async (): Promise<string> => {
+    const response = await configAPI.getDefaultSystemPrompt()
+    setDefaultPrompt(response.prompt)
+    setError(null)
+    return response.prompt
+  }, [])
+
   // Charger le prompt par défaut et la sauvegarde au montage
   useEffect(() => {
     loadDefaultPrompt()
@@ -23,23 +39,15 @@ export function useSystemPrompt() {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await configAPI.getDefaultSystemPrompt()
-      setDefaultPrompt(response.prompt)
-      
-      // Lire le prompt sauvegardé depuis localStorage
-      let saved: string | null = null
-      try {
-        saved = localStorage.getItem(SAVED_PROMPT_KEY)
-      } catch (err) {
-        console.warn('Impossible de lire le prompt sauvegardé:', err)
-      }
-      
+      const prompt = await fetchDefaultPrompt()
+      const saved = readSavedPrompt()
+
       // Si un prompt est sauvegardé, l'utiliser, sinon utiliser le défaut
       if (saved) {
         setSavedPrompt(saved)
         setSystemPrompt(saved)
       } else {
-        setSystemPrompt(response.prompt)
+        setSystemPrompt(prompt)
       }
     } catch (err) {
       setError('Erreur lors du chargement du prompt par défaut')
@@ -47,7 +55,7 @@ export function useSystemPrompt() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [fetchDefaultPrompt, readSavedPrompt])
 
   const savePrompt = useCallback((prompt: string) => {
     try {
@@ -60,41 +68,34 @@ export function useSystemPrompt() {
   }, [])
 
   const restore = useCallback(async (): Promise<string> => {
-    // Lire le prompt sauvegardé depuis localStorage
-    let saved: string | null = null
-    try {
-      saved = localStorage.getItem(SAVED_PROMPT_KEY)
-    } catch (err) {
-      console.warn('Impossible de lire le prompt sauvegardé:', err)
-    }
-    
+    const saved = readSavedPrompt()
+
     // Restaurer la dernière version sauvegardée, ou le défaut si rien n'est sauvegardé
     if (saved) {
       setSavedPrompt(saved)
       setSystemPrompt(saved)
       return saved
-    } else {
-      // Si defaultPrompt n'est pas encore chargé, le charger depuis l'API
-      if (defaultPrompt === null) {
-        setIsLoading(true)
-        try {
-          const response = await configAPI.getDefaultSystemPrompt()
-          setDefaultPrompt(response.prompt)
-          setSystemPrompt(response.prompt)
-          return response.prompt
-        } catch (err) {
-          setError('Erreur lors du chargement du prompt par défaut')
-          console.error('Erreur lors du chargement du prompt par défaut:', err)
-          return ''
-        } finally {
-          setIsLoading(false)
-        }
-      } else {
-        setSystemPrompt(defaultPrompt)
-        return defaultPrompt
-      }
     }
-  }, [defaultPrompt])
+
+    if (defaultPrompt !== null) {
+      setSystemPrompt(defaultPrompt)
+      return defaultPrompt
+    }
+
+    setIsLoading(true)
+    setError(null)
+    try {
+      const prompt = await fetchDefaultPrompt()
+      setSystemPrompt(prompt)
+      return prompt
+    } catch (err) {
+      setError('Erreur lors du chargement du prompt par défaut')
+      console.error('Erreur lors du chargement du prompt par défaut:', err)
+      return ''
+    } finally {
+      setIsLoading(false)
+    }
+  }, [defaultPrompt, fetchDefaultPrompt, readSavedPrompt])
 
   const resetToDefault = useCallback(() => {
     if (defaultPrompt !== null) {

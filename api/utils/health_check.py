@@ -6,13 +6,14 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 from constants import FilePaths
 from api.config.security_config import get_security_config
+from api.app_version import APP_VERSION
 
-# Import ContextBuilder uniquement si nécessaire (évite les dépendances circulaires)
+# Import canonique (évite les imports racine dépréciés). Optionnel pour éviter dépendances circulaires.
 try:
-    from context_builder import ContextBuilder, PROJECT_ROOT_DIR
+    from core.context.context_builder import ContextBuilder, PROJECT_ROOT_DIR
 except ImportError:
-    ContextBuilder = None
-    PROJECT_ROOT_DIR = None
+    ContextBuilder = None  # type: ignore[misc, assignment]
+    PROJECT_ROOT_DIR = None  # type: ignore[misc, assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -356,9 +357,12 @@ def perform_health_checks(detailed: bool = False) -> Dict[str, Any]:
     # Convertir les résultats en dictionnaires
     checks_dict = [check.to_dict() for check in checks]
     
-    return {
+    result: Dict[str, Any] = {
         "status": overall_status,
         "checks": checks_dict,
         "timestamp": None  # Sera ajouté par l'endpoint
     }
+    if detailed:
+        result["app_version"] = APP_VERSION
+    return result
 

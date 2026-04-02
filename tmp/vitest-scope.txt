@@ -1,0 +1,755 @@
+
+ RUN  v4.0.16 F:/Projets/Notion_Scrapper/DialogueGenerator/frontend
+
+stderr | src/__tests__/JumpToNodeModal.test.tsx > JumpToNodeModal > shows suggestions when typing and Enter on first result calls jumpToNode and onClose
+Warning: An update to JumpToNodeModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at JumpToNodeModal (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/graph/JumpToNodeModal.tsx:11:28)
+Warning: An update to JumpToNodeModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at JumpToNodeModal (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/graph/JumpToNodeModal.tsx:11:28)
+Warning: An update to JumpToNodeModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at JumpToNodeModal (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/graph/JumpToNodeModal.tsx:11:28)
+
+stderr | src/__tests__/JumpToNodeModal.test.tsx > JumpToNodeModal > selection in list calls jumpToNode and closes modal
+Warning: An update to JumpToNodeModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at JumpToNodeModal (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/graph/JumpToNodeModal.tsx:11:28)
+Warning: An update to JumpToNodeModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at JumpToNodeModal (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/graph/JumpToNodeModal.tsx:11:28)
+Warning: An update to JumpToNodeModal inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at JumpToNodeModal (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/graph/JumpToNodeModal.tsx:11:28)
+
+stderr | src/components/generation/UnityDialogueViewer.test.tsx > UnityDialogueViewer > affiche un message si le JSON est invalide
+Erreur lors du parsing du JSON Unity: SyntaxError: Unexpected token 'i', "invalid json" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/generation/UnityDialogueViewer.tsx:52:27
+    at mountMemo (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:16406:19)
+    at Object.useMemo (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:16851:16)
+    at useMemo (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react\cjs\react.development.js:1650:21)
+    at UnityDialogueViewer2 (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/generation/UnityDialogueViewer.tsx:50:17)
+    at renderWithHooks (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateFunctionComponent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:19617:20)
+    at updateSimpleMemoComponent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:19454:10)
+    at updateMemoComponent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:19303:14)
+
+stderr | src/components/generation/UnityDialogueViewer.test.tsx > UnityDialogueViewer > affiche un message si le JSON n'est pas un tableau
+Erreur lors du parsing du JSON Unity: Error: Le JSON Unity doit ├¬tre un tableau de n┼ôuds
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/generation/UnityDialogueViewer.tsx:54:15
+    at mountMemo (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:16406:19)
+    at Object.useMemo (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:16851:16)
+    at useMemo (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react\cjs\react.development.js:1650:21)
+    at UnityDialogueViewer2 (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/generation/UnityDialogueViewer.tsx:50:17)
+    at renderWithHooks (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at updateFunctionComponent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:19617:20)
+    at updateSimpleMemoComponent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:19454:10)
+    at updateMemoComponent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:19303:14)
+    at beginWork (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\react-dom\cjs\react-dom.development.js:21712:16)
+
+stderr | src/__tests__/useDialogueLoader.test.ts > useDialogueLoader > shows error toast when load fails
+Erreur lors du chargement du dialogue: Error: API error
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/useDialogueLoader.test.ts:74:44
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1653:37
+    at Traces.$ (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+    at trace (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)
+    at runTest (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1653:12)
+
+stderr | src/__tests__/useDialogueLoader.test.ts > useDialogueLoader > dispatches unity-dialogue-deleted and clears dialogue when matching
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\@testing-library\react\dist\pure.js:328:5)
+
+stderr | src/__tests__/DialogueLoader.race.test.ts > useDialogueLoader Race Conditions > ignores previous load result when a new load starts (cancellation via sequence)
+Erreur lors de la validation: AxiosError: Network Error
+    at XMLHttpRequest.handleError (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/adapters/xhr.js:112:20)
+    at XMLHttpRequest.invokeTheCallbackFunction (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\generated\EventHandlerNonNull.js:14:28)
+    at XMLHttpRequest.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\create-event-accessor.js:36:32)
+    at innerInvokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at XMLHttpRequestImpl._dispatch (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at fireAnEvent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+    at requestErrorSteps (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:123:3)
+    at Object.dispatchError (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:59:3)
+    at Request.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\XMLHttpRequest-impl.js:655:18)
+    at Axios.request (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/core/Axios.js:45:41)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at Module.validateGraph (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/api/graph.ts:101:20)
+    at validateGraph (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:44:24)
+    at run (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/hooks/useDialogueLoader.ts:182:11) {
+  code: 'ERR_NETWORK',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 30000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json'
+    },
+    baseURL: '',
+    withCredentials: true,
+    method: 'post',
+    url: '/api/v1/unity-dialogues/graph/validate',
+    data: '{"nodes":[{"id":"node-second","type":"dialogueNode","position":{"x":0,"y":0},"data":{"id":"node-second","line":"Second"}}],"edges":[]}',
+    allowAbsoluteUrls: true
+  },
+  request: XMLHttpRequest {},
+  event: ProgressEvent { isTrusted: [Getter] }
+}
+
+stderr | src/__tests__/DialogueLoader.race.test.ts > useDialogueLoader Race Conditions > ignores previous load result when a new load starts (cancellation via sequence)
+Erreur lors de la validation automatique au chargement: AxiosError: Network Error
+    at XMLHttpRequest.handleError (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/adapters/xhr.js:112:20)
+    at XMLHttpRequest.invokeTheCallbackFunction (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\generated\EventHandlerNonNull.js:14:28)
+    at XMLHttpRequest.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\create-event-accessor.js:36:32)
+    at innerInvokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at XMLHttpRequestImpl._dispatch (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at fireAnEvent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+    at requestErrorSteps (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:123:3)
+    at Object.dispatchError (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:59:3)
+    at Request.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\XMLHttpRequest-impl.js:655:18)
+    at Axios.request (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/core/Axios.js:45:41)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at Module.validateGraph (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/api/graph.ts:101:20)
+    at validateGraph (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:44:24)
+    at run (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/hooks/useDialogueLoader.ts:182:11) {
+  code: 'ERR_NETWORK',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 30000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json'
+    },
+    baseURL: '',
+    withCredentials: true,
+    method: 'post',
+    url: '/api/v1/unity-dialogues/graph/validate',
+    data: '{"nodes":[{"id":"node-second","type":"dialogueNode","position":{"x":0,"y":0},"data":{"id":"node-second","line":"Second"}}],"edges":[]}',
+    allowAbsoluteUrls: true
+  },
+  request: XMLHttpRequest {},
+  event: ProgressEvent { isTrusted: [Getter] }
+}
+
+stderr | src/__tests__/DialogueLoader.race.test.ts > useDialogueLoader Race Conditions > ignores previous load result when a new load starts (cancellation via sequence)
+[Persistence] Ignored stale load result (seq 1, current 2)
+
+stderr | src/__tests__/GraphEditor.autosave.test.tsx > GraphEditor autosave (ADR-006) > d├®clenche saveDialogue automatiquement quand hasUnsavedChanges=true et dialogue s├®lectionn├®
+Erreur chargement document: Error: no document
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/GraphEditor.autosave.test.tsx:74:42
+    at ManualMockedModule.factory (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/vi.2VT5v0um.js:3807:78)
+    at ManualMockedModule.resolve (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/node_modules/@vitest/mocker/dist/chunk-registry.js:161:27)
+    at VitestMocker.callFunctionMock (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:376:32)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:497:23
+    at Traces.$ (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+    at VitestMocker.requestWithMockedModule (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:462:21)
+    at VitestMocker.mockedRequest (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:512:15)
+    at VitestModuleRunner.cachedRequest (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:664:35)
+    at request (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/node_modules/vite/dist/node/module-runner.js:1104:76)
+
+stderr | src/__tests__/GraphEditor.autosave.test.tsx > GraphEditor autosave (ADR-006) > d├®clenche saveDialogue automatiquement quand hasUnsavedChanges=true et dialogue s├®lectionn├®
+Erreur chargement document: Error: no document
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/GraphEditor.autosave.test.tsx:74:42
+    at ManualMockedModule.factory (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/vi.2VT5v0um.js:3807:78)
+    at ManualMockedModule.resolve (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/node_modules/@vitest/mocker/dist/chunk-registry.js:161:27)
+    at VitestMocker.callFunctionMock (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:376:32)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:497:23
+    at Traces.$ (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+    at VitestMocker.requestWithMockedModule (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:462:21)
+    at VitestMocker.mockedRequest (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:512:15)
+    at VitestModuleRunner.cachedRequest (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/startModuleRunner.DpqpB8k3.js:664:35)
+    at request (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/node_modules/vite/dist/node/module-runner.js:1104:76)
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > acceptNode > should mark node as accepted and call API
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.updateMetadata (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:252:11)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:44:32
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > acceptNode > should mark node as accepted and call API
+Journal IndexedDB (snapshot/clear): Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at writeSnapshot (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:57:20)
+    at Object.saveDialogue (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/persistenceSlice.ts:401:17)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at Object.acceptNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:550:7)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:52:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > acceptNode > should mark node as accepted and call API
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.acceptNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:551:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:52:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > acceptNode > should rollback status to pending and show toast when saveDialogue fails
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.updateMetadata (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:252:11)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:79:32
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+Erreur lors de la sauvegarde: Error: Save failed
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:81:63
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1653:37
+    at Traces.$ (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+    at trace (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)
+    at runTest (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1653:12)
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should remove node, call API and saveDialogue (persist removal)
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.updateMetadata (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:252:11)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:117:32
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should remove node, call API and saveDialogue (persist removal)
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at runGraphTransaction (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/utils/runGraphTransaction.ts:60:11)
+    at Object.deleteNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:450:5)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:724:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:125:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should remove node, call API and saveDialogue (persist removal)
+Journal IndexedDB (snapshot/clear): Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at writeSnapshot (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:57:20)
+    at Object.saveDialogue (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/persistenceSlice.ts:401:17)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:725:7)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:125:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should remove node, call API and saveDialogue (persist removal)
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:729:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:125:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should not modify state and throw when reject API fails
+Erreur lors du rejet du n┼ôud: Error: Network error
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:152:56
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1653:37
+    at Traces.$ (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+    at trace (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)
+    at runTest (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1653:12)
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.updateMetadata (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:252:11)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:151:32
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent targetNode when rejecting node referenced by choice
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.updateMetadata (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:252:11)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:180:32
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent targetNode when rejecting node referenced by choice
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at runGraphTransaction (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/utils/runGraphTransaction.ts:60:11)
+    at Object.deleteNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:450:5)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:724:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:188:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent targetNode when rejecting node referenced by choice
+Journal IndexedDB (snapshot/clear): Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at writeSnapshot (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:57:20)
+    at Object.saveDialogue (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/persistenceSlice.ts:401:17)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:725:7)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:188:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent targetNode when rejecting node referenced by choice
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:729:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:188:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent nextNode when rejecting node referenced by nextNode
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.updateMetadata (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:252:11)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:217:32
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:145:11
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:26
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:1209:10)
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent nextNode when rejecting node referenced by nextNode
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at runGraphTransaction (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/utils/runGraphTransaction.ts:60:11)
+    at Object.deleteNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:450:5)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:724:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:225:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent nextNode when rejecting node referenced by nextNode
+Journal IndexedDB (snapshot/clear): Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at writeSnapshot (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:57:20)
+    at Object.saveDialogue (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/persistenceSlice.ts:401:17)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:725:7)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:225:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.acceptReject.test.ts > graphStore - Accept/Reject Nodes (Story 1.4) > rejectNode > should clean parent nextNode when rejecting node referenced by nextNode
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at Object.rejectNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/generationSlice.ts:729:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.acceptReject.test.ts:225:7
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src\store\slices\generationSlice.ts:681:17
+mark-node-deleted non-critique: AxiosError: Network Error
+    at XMLHttpRequest.handleError (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/adapters/xhr.js:112:20)
+    at XMLHttpRequest.invokeTheCallbackFunction (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\generated\EventHandlerNonNull.js:14:28)
+    at XMLHttpRequest.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\create-event-accessor.js:36:32)
+    at innerInvokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at XMLHttpRequestImpl._dispatch (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at fireAnEvent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+    at requestErrorSteps (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:123:3)
+    at Object.dispatchError (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:59:3)
+    at Request.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\XMLHttpRequest-impl.js:655:18)
+    at Axios.request (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/core/Axios.js:45:41)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at markNodeDeleted (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/api/llmUsage.ts:149:3) {
+  code: 'ERR_NETWORK',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 30000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json'
+    },
+    baseURL: '',
+    withCredentials: true,
+    method: 'post',
+    url: '/api/v1/llm-usage/nodes/node-1/mark-deleted',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: XMLHttpRequest {},
+  event: ProgressEvent { isTrusted: [Getter] }
+}
+
+stderr | src\store\slices\generationSlice.ts:681:17
+mark-node-deleted non-critique: AxiosError: Network Error
+    at XMLHttpRequest.handleError (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/adapters/xhr.js:112:20)
+    at XMLHttpRequest.invokeTheCallbackFunction (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\generated\EventHandlerNonNull.js:14:28)
+    at XMLHttpRequest.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\create-event-accessor.js:36:32)
+    at innerInvokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at XMLHttpRequestImpl._dispatch (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at fireAnEvent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+    at requestErrorSteps (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:123:3)
+    at Object.dispatchError (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:59:3)
+    at Request.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\XMLHttpRequest-impl.js:655:18)
+    at Axios.request (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/core/Axios.js:45:41)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at markNodeDeleted (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/api/llmUsage.ts:149:3) {
+  code: 'ERR_NETWORK',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 30000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json'
+    },
+    baseURL: '',
+    withCredentials: true,
+    method: 'post',
+    url: '/api/v1/llm-usage/nodes/child-1/mark-deleted',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: XMLHttpRequest {},
+  event: ProgressEvent { isTrusted: [Getter] }
+}
+
+stderr | src\store\slices\generationSlice.ts:681:17
+mark-node-deleted non-critique: AxiosError: Network Error
+    at XMLHttpRequest.handleError (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/adapters/xhr.js:112:20)
+    at XMLHttpRequest.invokeTheCallbackFunction (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\generated\EventHandlerNonNull.js:14:28)
+    at XMLHttpRequest.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\create-event-accessor.js:36:32)
+    at innerInvokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at XMLHttpRequestImpl._dispatch (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at fireAnEvent (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+    at requestErrorSteps (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:123:3)
+    at Object.dispatchError (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:59:3)
+    at Request.<anonymous> (F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\node_modules\jsdom\lib\jsdom\living\xhr\XMLHttpRequest-impl.js:655:18)
+    at Axios.request (file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/axios/lib/core/Axios.js:45:41)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at markNodeDeleted (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/api/llmUsage.ts:149:3) {
+  code: 'ERR_NETWORK',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 30000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json'
+    },
+    baseURL: '',
+    withCredentials: true,
+    method: 'post',
+    url: '/api/v1/llm-usage/nodes/child-2/mark-deleted',
+    allowAbsoluteUrls: true,
+    data: undefined
+  },
+  request: XMLHttpRequest {},
+  event: ProgressEvent { isTrusted: [Getter] }
+}
+
+stderr | src/__tests__/graphStore.documents.test.ts > graphStore - document SoT load/save > saveDialogue with document SoT > updates revisions and clears hasUnsavedChanges on success
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at updateNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:446:31)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.documents.test.ts:246:7
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.documents.test.ts > graphStore - document SoT load/save > Task 2.2 - edit via document then re-project > updateNode in document SoT updates document then re-projects (line/speaker)
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at updateNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:446:31)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.documents.test.ts:279:7
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.documents.test.ts > graphStore - document SoT load/save > Task 2.2 - edit via document then re-project > updateNode in document SoT preserves stable ids (no panel reset)
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at updateNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:446:31)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.documents.test.ts:313:7
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.documents.test.ts > graphStore - document SoT load/save > Task 2.2 - edit via document then re-project > updateNode on TestNode in document SoT patches document choice then re-projects
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at updateNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:446:31)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.documents.test.ts:361:7
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+stderr | src/__tests__/graphStore.documents.test.ts > graphStore - document SoT load/save > Task 3.2 - no panel reset after edit (AC 4) > editing line/speaker in document SoT keeps selectedNodeId and node ids stable
+Journal setPending: Error: IndexedDB not available
+    at openDb (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:33:27)
+    at setPending (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/utils/graphJournal.ts:82:20)
+    at Object.markDirty (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/uiSlice.ts:236:7)
+    at updateNode (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/store/slices/nodeSlice.ts:446:31)
+    at F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/__tests__/graphStore.documents.test.ts:388:7
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at file:///F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/node_modules/@vitest/runner/dist/index.js:915:20
+
+Not implemented: Window's alert() method
+Not implemented: Window's alert() method
+
+<--- Last few GCs --->
+
+[83920:0000018C6EBC2000] 13232475 ms: Scavenge (interleaved) 3626.4 (3707.6) -> 3626.3 (3736.9) MB, pooled: 0 MB, 26.30 / 0.00 ms  (average mu = 0.397, current mu = 0.398) allocation failure; 
+[83920:0000018C6EBC2000] 13233725 ms: Mark-Compact (reduce) 3639.3 (3736.9) -> 3306.8 (3560.6) MB, pooled: 0 MB, 147.80 / 0.00 ms  (+ 1042.8 ms in 208 steps since start of marking, biggest step 5.2 ms, walltime since start of marking 1249 ms) (average mu 
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF77901AE1F node::OnFatalError+1343
+ 2: 00007FF779C637B7 v8::Function::NewInstance+423
+ 3: 00007FF779A63E77 v8::base::AddressSpaceReservation::AddressSpaceReservation+322071
+ 4: 00007FF779A67B84 v8::base::AddressSpaceReservation::AddressSpaceReservation+337700
+ 5: 00007FF779A76B1C v8::internal::StrongRootAllocatorBase::deallocate_impl+16604
+ 6: 00007FF779A7635B v8::internal::StrongRootAllocatorBase::deallocate_impl+14619
+ 7: 00007FF77AEDEBED v8::base::UnsignedDivisionByConstant<unsigned __int64>+2791309
+ 8: 00007FF779A61940 v8::base::AddressSpaceReservation::AddressSpaceReservation+312544
+ 9: 00007FF779AE5619 v8::Unlocker::~Unlocker+9273
+10: 00007FF77965B1C2 v8::String::Utf8Value::~Utf8Value+142210
+11: 0000018C27E7733A 
+┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬Àx┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 1 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/__tests__/graphStore.documents.test.ts > graphStore - document SoT load/save > saveDialogue with document SoT > reconstruit le layout sauvegard├® depuis les positions courantes, m├¬me si state.layout est stale
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'test-doc', ObjectContaining{ÔÇª} ]
+
+Received: 
+
+  1st vi.fn() call:
+
+@@ -1,19 +1,20 @@
+  [
+    "test-doc",
+-   ObjectContaining {
++   {
+      "document": {
+        "nodes": [
+          {
+            "id": "START",
+            "line": "Hello",
+-           "nextNode": "END",
++           "nextNode": undefined,
+            "speaker": "NPC",
+          },
+          {
+            "id": "END",
+            "line": "",
++           "nextNode": undefined,
+          },
+        ],
+        "schemaVersion": "1.1.0",
+      },
+      "revision": 1,
+
+
+Number of calls: 1
+
+ ÔØ» src/__tests__/graphStore.documents.test.ts:212:40
+    210| 
+    211|       await saveDialogue()
+    212|       // saveDialogue reconstruit le document depuis le graphe (graphTÔÇª
+       |                                        ^
+    213|       expect(documentsAPI.putDocument).toHaveBeenCalledWith(
+    214|         'test-doc',
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/1]ÔÄ»
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Unhandled Errors ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Unhandled Error ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+Error: [vitest-pool]: Worker forks emitted error.
+ ÔØ» EventEmitter.<anonymous> node_modules/vitest/dist/chunks/cli-api.BKg19Fvw.js:8015:22
+ ÔØ» EventEmitter.emit node:events:508:28
+ ÔØ» ChildProcess.emitUnexpectedExit node_modules/vitest/dist/chunks/cli-api.BKg19Fvw.js:7588:22
+ ÔØ» ChildProcess.emit node:events:508:28
+ ÔØ» Process.ChildProcess._handle.onexit node:internal/child_process:294:12
+
+Caused by: Error: Worker exited unexpectedly
+ ÔØ» ChildProcess.emitUnexpectedExit node_modules/vitest/dist/chunks/cli-api.BKg19Fvw.js:7587:33
+ ÔØ» ChildProcess.emit node:events:508:28
+ ÔØ» Process.ChildProcess._handle.onexit node:internal/child_process:294:12
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+
+ Test Files  1 failed | 70 passed (72)
+      Tests  1 failed | 532 passed (536)
+     Errors  1 error
+   Start at  18:06:48
+   Duration  13296.65s (transform 6.58s, setup 34.03s, import 35.20s, tests 21.97s, environment 145.34s)
+

@@ -1,6 +1,7 @@
 """Service de conversion entre format Unity JSON et format ReactFlow."""
 import json
 import logging
+import re
 from typing import List, Dict, Any, Tuple, Optional
 
 logger = logging.getLogger(__name__)
@@ -23,11 +24,16 @@ class GraphConversionService:
             ValueError: Si le JSON est invalide ou mal formaté.
         """
         try:
-            unity_nodes = json.loads(json_content)
-            
-            if not isinstance(unity_nodes, list):
-                raise ValueError("Le JSON Unity doit être un tableau de nœuds")
-            
+            data = json.loads(json_content)
+            if isinstance(data, list):
+                unity_nodes = data
+            elif isinstance(data, dict) and "nodes" in data:
+                unity_nodes = data["nodes"]
+                if not isinstance(unity_nodes, list):
+                    raise ValueError("Le document doit contenir un tableau 'nodes'")
+            else:
+                raise ValueError("Le JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)")
+
             # Convertir les nœuds Unity en nœuds ReactFlow
             reactflow_nodes: List[Dict[str, Any]] = []
             reactflow_edges: List[Dict[str, Any]] = []
@@ -49,11 +55,12 @@ class GraphConversionService:
                 node_type = GraphConversionService._determine_node_type(unity_node)
                 
                 # Créer le nœud ReactFlow
+                # Préserver le champ status (métadonnée éditeur) si présent (Task 6 - Story 1.4)
                 reactflow_node = {
                     "id": node_id,
                     "type": node_type,
                     "position": {"x": x_offset, "y": y_offset},
-                    "data": unity_node  # Toutes les données Unity stockées dans data
+                    "data": unity_node  # Toutes les données Unity stockées dans data (inclut status si présent)
                 }
                 
                 # Position suivante (layout basique en cascade)
@@ -74,10 +81,11 @@ class GraphConversionService:
                             test_node_id = f"test-node-{node_id}-choice-{choice_index}"
                             test_node_map[test_node_key] = test_node_id
                             
-                            # Position du TestNode (à droite du DialogueNode)
+                            # Position du TestNode (en dessous du DialogueNode, répartis horizontalement)
+                            # y_offset a déjà été incrémenté pour le prochain nœud → parent à y_offset - 150
                             test_node_position = {
-                                "x": x_offset + 300,
-                                "y": y_offset - 150 + (choice_index * 200)
+                                "x": x_offset + (choice_index * 200),
+                                "y": (y_offset - 150) + 280,
                             }
                             
                             # Créer le TestNode avec les données du test
@@ -98,19 +106,23 @@ class GraphConversionService:
                             reactflow_nodes.append(test_node)
                             
                             # Créer l'edge DialogueNode → TestNode (via le handle du choix)
+                            # ADR-008 : sourceHandle = choice:choiceId ou choice:__idx_N (aligné DialogueNode frontend)
+                            choice_id = choice.get("choiceId") or f"__idx_{choice_index}"
+                            edge_id = f"e:{node_id}:choice:{choice_id}:test"
                             choice_text = choice.get("text", f"Choix {choice_index + 1}")
                             # Tronquer le label pour l'affichage (comme pour les autres edges)
                             truncated_label = choice_text[:30] + "..." if len(choice_text) > 30 else choice_text
                             reactflow_edges.append({
-                                "id": f"{node_id}-choice-{choice_index}-to-test",
+                                "id": edge_id,
                                 "source": node_id,
                                 "target": test_node_id,
-                                "sourceHandle": f"choice-{choice_index}",
+                                "sourceHandle": f"choice:{choice_id}",
                                 "type": "smoothstep",
                                 "label": truncated_label,
                                 "data": {
                                     "edgeType": "choice",
                                     "choiceIndex": choice_index,
+                                    "choiceId": choice_id,
                                     "choiceText": choice_text
                                 }
                             })
@@ -179,26 +191,29 @@ class GraphConversionService:
     @staticmethod
     def _determine_node_type(unity_node: Dict[str, Any]) -> str:
         """Détermine le type de nœud ReactFlow basé sur les propriétés Unity.
-        
+
         Args:
             unity_node: Nœud Unity JSON.
-            
+
         Returns:
             Type de nœud: 'dialogueNode', 'testNode', 'endNode'.
         """
+        node_id = unity_node.get("id", "")
+        choices = unity_node.get("choices")
+        next_node = unity_node.get("nextNode")
+        has_choices = bool(choices and len(choices) > 0)
+        has_next = bool(next_node)
+
         # Nœud avec test d'attribut (success/failure branching)
         if unity_node.get("test"):
             return "testNode"
-        
-        # Nœud "END" spécial
-        if unity_node.get("id") == "END":
+
+        # Nœud "END" spécial uniquement (ne pas classer en endNode les nœuds sans choix/nextNode :
+        # un nœud manuel ou une cible de choix a choices=[] et pas de nextNode mais reste un dialogueNode)
+        if node_id == "END":
             return "endNode"
-        
-        # Nœud de fin (ni choix ni nextNode)
-        if not unity_node.get("choices") and not unity_node.get("nextNode"):
-            return "endNode"
-        
-        # Nœud de dialogue par défaut
+
+        # Nœud de dialogue (y compris nœuds manuels et cibles sans choix/nextNode)
         return "dialogueNode"
     
     @staticmethod
@@ -255,6 +270,7 @@ class GraphConversionService:
         # Edges depuis choix du joueur
         # NOTE: Les choix avec test sont gérés dans unity_json_to_graph() et créent un TestNode
         # Ici, on ne crée que les edges pour les choix SANS test (targetNode direct)
+        # ADR-008 : sourceHandle = choice:choiceId ou choice:__idx_N (aligné DialogueNode frontend)
         choices = unity_node.get("choices", [])
         for choice_index, choice in enumerate(choices):
             # Ignorer les choix avec test (ils passent par un TestNode, pas de targetNode direct)
@@ -263,20 +279,23 @@ class GraphConversionService:
                 
             target_node = choice.get("targetNode")
             if target_node:
+                choice_id = choice.get("choiceId") or f"__idx_{choice_index}"
+                edge_id = f"e:{source_id}:choice:{choice_id}"
                 choice_text = choice.get("text", f"Choix {choice_index + 1}")
                 # Tronquer le texte pour le label
                 label = choice_text[:30] + "..." if len(choice_text) > 30 else choice_text
                 
                 edges.append({
-                    "id": f"{source_id}-choice{choice_index}->{target_node}",
+                    "id": edge_id,
                     "source": source_id,
                     "target": target_node,
-                    "sourceHandle": f"choice-{choice_index}",  # Correspond à l'ID du handle dans DialogueNode
+                    "sourceHandle": f"choice:{choice_id}",
                     "type": "default",
                     "label": label,
                     "data": {
                         "edgeType": "choice",
                         "choiceIndex": choice_index,
+                        "choiceId": choice_id,
                         "choiceText": choice_text
                     }
                 })
@@ -295,7 +314,7 @@ class GraphConversionService:
             edges: Liste d'edges ReactFlow.
             
         Returns:
-            JSON Unity (tableau de nœuds).
+            JSON Unity (document canonique : schemaVersion + nodes).
             
         Raises:
             ValueError: Si la conversion échoue.
@@ -327,6 +346,15 @@ class GraphConversionService:
                 unity_node.pop("successNode", None)
                 unity_node.pop("failureNode", None)
                 
+                # Retirer le champ status avant export Unity (métadonnée éditeur uniquement) (Task 6 - Story 1.4)
+                # Métadonnées éditeur / FR19 : retirées pour export Unity strict.
+                unity_node.pop("status", None)
+                unity_node.pop("contextGddHash", None)
+                unity_node.pop("contextGddContentFingerprint", None)
+                unity_node.pop("gddContextSelectionsSnapshot", None)
+                unity_node.pop("lastGenerationInstructions", None)
+                unity_node.pop("regenerationHistory", None)
+                
                 # Nettoyer les targetNode et test*Node des choix (seront recréés depuis les edges)
                 if "choices" in unity_node:
                     for choice in unity_node["choices"]:
@@ -340,10 +368,11 @@ class GraphConversionService:
             
             # Reconstruire les connexions depuis les edges
             GraphConversionService._rebuild_connections(unity_nodes, edges)
-            
-            # Convertir en JSON
-            json_content = json.dumps(unity_nodes, indent=2, ensure_ascii=False)
-            
+
+            # Format canonique : même format que document DialogueGenerator / Unity (schemaVersion + nodes)
+            document = {"schemaVersion": "1.1.0", "nodes": unity_nodes}
+            json_content = json.dumps(document, indent=2, ensure_ascii=False)
+
             logger.info(f"Conversion réussie: {len(unity_nodes)} nœuds Unity")
             return json_content
             
@@ -354,19 +383,25 @@ class GraphConversionService:
     @staticmethod
     def _rebuild_connections(unity_nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]) -> None:
         """Reconstruit les connexions Unity (nextNode, successNode, etc.) depuis les edges.
-        
+
+        Si ``data.choiceIndex`` manque sur l'arête Dialogue→TestNode, déduit l'index depuis
+        l'id ``test-node-…-choice-N`` ou le ``sourceHandle`` ``choice:choiceId``.
+
         Args:
             unity_nodes: Liste de nœuds Unity (modifiée in-place).
             edges: Liste d'edges ReactFlow.
         """
         # Créer un index des nœuds par ID
         nodes_by_id = {node["id"]: node for node in unity_nodes}
-        
+
         # Map pour trouver le choix correspondant à un TestNode
         # key: testNodeId, value: (dialogueNodeId, choiceIndex)
         test_node_to_choice_map: Dict[str, Tuple[str, int]] = {}
         
         # Première passe : identifier les TestNodes et leurs choix parents
+        # Supporte les deux formats d'ID:
+        # - legacy: test-node-{dialogueId}-choice-{index}
+        # - stable ADR-008: test:{choiceId} (ou test:__idx_N)
         for edge in edges:
             source_id = edge.get("source")
             target_id = edge.get("target")
@@ -377,10 +412,53 @@ class GraphConversionService:
                 continue
             
             # Si l'edge va d'un DialogueNode vers un TestNode (via choice handle)
-            if edge_type == "choice" and target_id.startswith("test-node-"):
+            source_handle = edge.get("sourceHandle")
+            is_choice_to_test = (
+                target_id.startswith("test-node-") or target_id.startswith("test:")
+            ) and (
+                edge_type == "choice"
+                or (
+                    isinstance(source_handle, str)
+                    and source_handle.startswith("choice:")
+                )
+            )
+            if is_choice_to_test:
                 choice_index = edge_data.get("choiceIndex")
+                # E2E / clients : data.choiceIndex parfois absent après sérialisation ;
+                # id legacy test-node-{dialogueId}-choice-{index} suffit à retrouver l'index.
+                if choice_index is None and target_id.startswith("test-node-"):
+                    match = re.match(
+                        r"^test-node-(.+)-choice-(\d+)$",
+                        target_id,
+                    )
+                    if match:
+                        dialogue_id, idx_str = match.group(1), match.group(2)
+                        if dialogue_id == source_id:
+                            choice_index = int(idx_str)
+                if choice_index is None and isinstance(source_handle, str) and source_handle.startswith(
+                    "choice:"
+                ):
+                    stable = source_handle[7:]
+                    dialogue_node = nodes_by_id.get(source_id)
+                    choices = (
+                        dialogue_node.get("choices")
+                        if isinstance(dialogue_node, dict)
+                        else None
+                    )
+                    if isinstance(choices, list):
+                        for idx, ch in enumerate(choices):
+                            if not isinstance(ch, dict):
+                                continue
+                            cid = ch.get("choiceId")
+                            if cid == stable:
+                                choice_index = idx
+                                break
+                            idx_m = re.match(r"^__idx_(\d+)$", stable)
+                            if idx_m and int(idx_m.group(1)) == idx:
+                                choice_index = idx
+                                break
                 if choice_index is not None:
-                    test_node_to_choice_map[target_id] = (source_id, choice_index)
+                    test_node_to_choice_map[target_id] = (source_id, int(choice_index))
         
         # Deuxième passe : reconstruire les connexions
         for edge in edges:
@@ -394,7 +472,10 @@ class GraphConversionService:
                 continue
             
             # Si l'edge part d'un TestNode vers un nœud de résultat
-            if source_id.startswith("test-node-") and source_handle:
+            if (
+                source_handle
+                and (source_id.startswith("test-node-") or source_id.startswith("test:"))
+            ):
                 # Trouver le choix parent
                 parent_info = test_node_to_choice_map.get(source_id)
                 if parent_info:
@@ -427,7 +508,7 @@ class GraphConversionService:
             elif edge_type == "choice":
                 # Ignorer les edges "choice" qui pointent vers un TestNode
                 # (les choix avec test n'ont pas de targetNode direct, seulement les 4 champs test*Node)
-                if target_id.startswith("test-node-"):
+                if target_id.startswith("test-node-") or target_id.startswith("test:"):
                     continue
                 choice_index = edge_data.get("choiceIndex")
                 if choice_index is not None and "choices" in source_node:

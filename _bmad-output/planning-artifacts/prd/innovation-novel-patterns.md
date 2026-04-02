@@ -133,7 +133,7 @@ context_rules:
 - **Quality** : LLM judge score >8/10, voice consistency, anti context-dropping templates
 - **Feedback loop** : Amélioration templates basée sur patterns qualité
 
-**Référence benchmark :** [EQ-Bench Creative Writing v3](https://eqbench.com/creative_writing.html) - Mesure "Slop Score" (fréquence mots/phrases LLM overused).
+**Référence benchmark :** [EQ-Bench Creative Writing v3](https://eqbench.com/creative_writing.html) - Slop Score **aligné** (60% slop words, 25% not-x-but-y, 15% slop trigrams, listes slop-forensics / [slop-score](https://github.com/sam-paech/slop-score)).
 
 **Adaptation DialogueGenerator :** Benchmark **par run** (pas par modèle), critères mesurables adaptés CRPG dialogues.
 
@@ -364,4 +364,4 @@ Inspiré de [EQ-Bench Creative Writing](https://eqbench.com/creative_writing.htm
 - **Open-source friendly** : Marc = pas contraintes IP, vision open-source
 
 ---
-
+

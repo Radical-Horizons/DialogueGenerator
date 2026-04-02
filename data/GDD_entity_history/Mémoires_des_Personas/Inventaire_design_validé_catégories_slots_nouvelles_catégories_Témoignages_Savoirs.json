@@ -1,0 +1,26 @@
+[
+  {
+    "at": "2026-03-29T19:44:18.984907+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Inventaire — design validé, catégories, slots, nouvelles catégories Témoignages+Savoirs",
+      "sections": {
+        "_general": "Système Inventaire créé (Inventaire). Inventaire partagé unique, 6 catégories-onglets mappées 1:1 sur les systèmes : Équipement (Caract.&Comp.), Consommables (Effort), Matériaux (Économie), Objets de quête (Quêtes), Témoignages=NOUVEAU (Dialogues+Influence&Respect — montrer réversible/offrir irréversible), Savoirs=NOUVEAU (Connaissances — non consommé après étude, un livre ne disparaît pas). ObjetsDePouvoir SUPPRIMÉ (trop flou → redistribuer vers Équipement ou Témoignages). Slots : 3 universels (Relique/Sceau/Catalyseur) + 1 unique par hôte (Uresaïr=Aspect, Vethraak=Gadget, Eonundé=Greffon). Pas d'encombrement V1. Trois concepts orthogonaux : slots uniques/hôte, restrictions usage/hôte, espace partagé. Principe clé validé par Marc : \"une catégorie = un système\" — dérivé directement des systèmes existants."
+      },
+      "notion_page_id": "0004ca85-b66a-46c2-be47-767a067b3d79"
+    }
+  },
+  {
+    "at": "2026-03-29T23:48:48.068496+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Inventaire — design validé, catégories, slots, nouvelles catégories Témoignages+Savoirs",
+      "sections": {
+        "_general": "Système Inventaire créé (Inventaire). Inventaire partagé unique, 6 catégories-onglets mappées 1:1 sur les systèmes : Équipement (Caract.&Comp.), Consommables (Effort), Matériaux (Économie), Objets de quête (Quêtes), Témoignages=NOUVEAU (Dialogues+Influence&Respect — montrer réversible/offrir irréversible), Savoirs=NOUVEAU (Connaissances — non consommé après étude, un livre ne disparaît pas). ObjetsDePouvoir SUPPRIMÉ (trop flou → redistribuer vers Équipement ou Témoignages). Slots : 3 universels (Relique/Sceau/Catalyseur) + 1 unique par hôte (Uresaïr=Aspect, Vethraak=Gadget, Eonundé=Greffon). Pas d'encombrement V1. Trois concepts orthogonaux : slots uniques/hôte, restrictions usage/hôte, espace partagé. Principe clé validé par Marc : \"une catégorie = un système\" — dérivé directement des systèmes existants."
+      },
+      "notion_page_id": "0004ca85-b66a-46c2-be47-767a067b3d79"
+    }
+  }
+]

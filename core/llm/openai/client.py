@@ -1,5 +1,6 @@
 """Client OpenAI refactorisé utilisant Responses API uniquement."""
 
+import json
 import logging
 import os
 import time
@@ -12,7 +13,7 @@ from core.llm.openai.parameter_builder import OpenAIParameterBuilder
 from core.llm.openai.response_parser import OpenAIResponseParser
 from core.llm.openai.reasoning_extractor import OpenAIReasoningExtractor
 from core.llm.openai.usage_tracker import OpenAIUsageTracker
-from core.llm.openai.stream_parser import OpenAIStreamParser, StreamChunk
+from core.llm.openai.stream_parser import OpenAIStreamParser, StreamChunk, StreamEventType
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,9 @@ class OpenAIClient(ILLMClient):
         # Callback pour streaming du reasoning trace (optionnel)
         self.reasoning_callback = reasoning_callback
         self.reasoning_trace: Optional[Dict[str, Any]] = None
+        self.last_call_cost: float = 0.0
+        self.last_usage_prompt_tokens: int = 0
+        self.last_usage_completion_tokens: int = 0
         
         # Initialiser retry et circuit breaker (optionnel)
         self._retry_with_backoff = None
@@ -152,17 +156,25 @@ class OpenAIClient(ILLMClient):
             top_p=self.top_p,
         )
         
+        # Prompt complet pour le tracking (Story 1.15)
+        full_prompt_str = f"{system_message_content}\n\n--- Input ---\n{json.dumps(messages, ensure_ascii=False)}"
+        
         # Générer k variantes
         for i in range(k):
             start_time = time.time()
             success = False
             error_message = None
-            
+            raw_response_str = None
+            prompt_tokens = 0
+            completion_tokens = 0
+            total_tokens = 0
+
             try:
                 logger.info(f"Début de la génération de la variante {i+1}/{k} pour le prompt.")
                 
                 # Appel API avec retry et circuit breaker
                 response = await self._make_api_call_with_protection(responses_params)
+                raw_response_str = response.model_dump_json() if hasattr(response, "model_dump_json") else str(response)
                 
                 # Logger la réponse brute
                 try:
@@ -217,21 +229,35 @@ class OpenAIClient(ILLMClient):
                 # Calculer la durée
                 duration_ms = int((time.time() - start_time) * 1000)
                 
-                # Enregistrer l'utilisation si le service est disponible
+                # Enregistrer l'utilisation si le service est disponible (Story 1.15: prompt/response)
                 if self.usage_service:
                     try:
                         self.usage_service.track_usage(
                             request_id=self.request_id,
                             model_name=self.model_name,
-                            prompt_tokens=prompt_tokens if 'prompt_tokens' in locals() else 0,
-                            completion_tokens=completion_tokens if 'completion_tokens' in locals() else 0,
-                            total_tokens=total_tokens if 'total_tokens' in locals() else 0,
+                            prompt_tokens=prompt_tokens,
+                            completion_tokens=completion_tokens,
+                            total_tokens=total_tokens,
                             duration_ms=duration_ms,
                             success=success,
                             endpoint=self.endpoint,
                             k_variants=k,
                             error_message=error_message,
+                            prompt=full_prompt_str,
+                            response=raw_response_str,
                         )
+                        if success:
+                            self.last_usage_prompt_tokens = prompt_tokens
+                            self.last_usage_completion_tokens = completion_tokens
+                            self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
+                                model_name=self.model_name,
+                                prompt_tokens=prompt_tokens,
+                                completion_tokens=completion_tokens,
+                            )
+                        else:
+                            self.last_call_cost = 0.0
+                            self.last_usage_prompt_tokens = 0
+                            self.last_usage_completion_tokens = 0
                     except Exception as tracking_error:
                         logger.error(
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",
@@ -294,13 +320,18 @@ class OpenAIClient(ILLMClient):
             stream=True,
         )
         
+        # Prompt complet pour le tracking (Story 1.15)
+        full_prompt_str = f"{system_message_content}\n\n--- Input ---\n{json.dumps(messages, ensure_ascii=False)}"
+        
         # Générer k variantes avec streaming
         for i in range(k):
             start_time = time.time()
             success = False
             error_message = None
             parsed_output: Optional[Union[BaseModel, str]] = None
-            
+            raw_response_str: Optional[str] = None
+            completed_response: Optional[Any] = None
+
             try:
                 logger.info(f"Début de la génération streaming de la variante {i+1}/{k} pour le prompt.")
                 
@@ -311,7 +342,6 @@ class OpenAIClient(ILLMClient):
                 stream_parser = OpenAIStreamParser(reasoning_callback=self.reasoning_callback)
                 function_call_arguments: Optional[str] = None
                 item_id: Optional[str] = None
-                completed_response: Optional[Any] = None
                 
                 async for chunk in stream_parser.parse_stream(stream):
                     # Yielder le chunk pour feedback temps réel (priorité sur callback)
@@ -342,6 +372,11 @@ class OpenAIClient(ILLMClient):
                         # Réponse complète reçue
                         completed_response = chunk.data.get("response")
                         if completed_response:
+                            raw_response_str = (
+                                completed_response.model_dump_json()
+                                if hasattr(completed_response, "model_dump_json")
+                                else str(completed_response)
+                            )
                             # Extraire les métriques d'utilisation
                             usage_metrics = OpenAIUsageTracker.extract_usage_metrics(completed_response)
                             prompt_tokens = usage_metrics["prompt_tokens"]
@@ -373,7 +408,18 @@ class OpenAIClient(ILLMClient):
                         error_data = chunk.data.get("error", {})
                         error_message = str(error_data)
                         logger.error(f"Erreur API OpenAI (streaming) pour la variante {i+1}: {error_message}")
-                
+
+                    elif chunk.event_type == StreamEventType.RESPONSE_INCOMPLETE.value:
+                        inc = chunk.data.get("response")
+                        error_message = (
+                            f"Réponse OpenAI incomplète ou tronquée (max output / annulation): {inc!r}"
+                        )
+                        logger.warning(
+                            "Streaming variante %s: %s",
+                            i + 1,
+                            error_message,
+                        )
+
                 # Yielder le résultat final
                 if success and parsed_output is not None:
                     yield parsed_output
@@ -396,33 +442,51 @@ class OpenAIClient(ILLMClient):
             finally:
                 # Calculer la durée
                 duration_ms = int((time.time() - start_time) * 1000)
-                
-                # Enregistrer l'utilisation si le service est disponible
+
+                # Enregistrer l'utilisation si le service est disponible (pas de ligne vide si stream interrompu)
                 if self.usage_service:
                     try:
-                        # Récupérer les métriques depuis completed_response si disponible
                         prompt_tokens = 0
                         completion_tokens = 0
                         total_tokens = 0
-                        
+
                         if completed_response:
                             usage_metrics = OpenAIUsageTracker.extract_usage_metrics(completed_response)
                             prompt_tokens = usage_metrics["prompt_tokens"]
                             completion_tokens = usage_metrics["completion_tokens"]
                             total_tokens = usage_metrics["total_tokens"]
-                        
-                        self.usage_service.track_usage(
-                            request_id=self.request_id,
-                            model_name=self.model_name,
-                            prompt_tokens=prompt_tokens,
-                            completion_tokens=completion_tokens,
-                            total_tokens=total_tokens,
-                            duration_ms=duration_ms,
-                            success=success,
-                            endpoint=self.endpoint,
-                            k_variants=k,
-                            error_message=error_message,
-                        )
+
+                        if completed_response is None and not success:
+                            logger.debug(
+                                "Skip track_usage: variante streaming sans réponse complète (tokens=0)"
+                            )
+                        else:
+                            self.usage_service.track_usage(
+                                request_id=self.request_id,
+                                model_name=self.model_name,
+                                prompt_tokens=prompt_tokens,
+                                completion_tokens=completion_tokens,
+                                total_tokens=total_tokens,
+                                duration_ms=duration_ms,
+                                success=success,
+                                endpoint=self.endpoint,
+                                k_variants=k,
+                                error_message=error_message,
+                                prompt=full_prompt_str,
+                                response=raw_response_str,
+                            )
+                            if success:
+                                self.last_usage_prompt_tokens = prompt_tokens
+                                self.last_usage_completion_tokens = completion_tokens
+                                self.last_call_cost = self.usage_service.pricing_service.calculate_cost(
+                                    model_name=self.model_name,
+                                    prompt_tokens=prompt_tokens,
+                                    completion_tokens=completion_tokens,
+                                )
+                            else:
+                                self.last_call_cost = 0.0
+                                self.last_usage_prompt_tokens = 0
+                                self.last_usage_completion_tokens = 0
                     except Exception as tracking_error:
                         logger.error(
                             f"Erreur lors du tracking de l'usage LLM: {tracking_error}",

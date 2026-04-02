@@ -1,9 +1,17 @@
 /**
  * Nœud personnalisé pour afficher un nœud de dialogue dans le graphe.
  */
-import { memo, useState } from 'react'
+import { memo, useState, useCallback, useEffect } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
+import { useGraphStore } from '../../../store/graphStore'
+import { useGraphViewStore } from '../../../store/graphViewStore'
+import { getNodePrompt } from '../../../api/graph'
+import type { NodePromptResponse } from '../../../types/graph'
+import { RegenerateNodeModal } from '../RegenerateNodeModal'
+import { PromptViewerModal } from '../PromptViewerModal'
+import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
+import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
 
 interface ValidationError {
   type: string
@@ -11,6 +19,15 @@ interface ValidationError {
   message: string
   severity: string
   target?: string
+}
+
+/** Entrée d'historique de régénération (Story 1.10). */
+interface RegenerationEntry {
+  timestamp: string
+  instructions: string
+  generationId: string
+  cost?: number
+  provider?: string
 }
 
 interface DialogueNodeData {
@@ -25,17 +42,31 @@ interface DialogueNodeData {
   validationErrors?: ValidationError[]
   validationWarnings?: ValidationError[]
   isHighlighted?: boolean
+  status?: "pending" | "accepted"  // Métadonnée éditeur, non Unity
+  lastGenerationInstructions?: string
+  regenerationHistory?: RegenerationEntry[]
+  contextGddHash?: string
+  contextGddContentFingerprint?: string
+  gddContextSelectionsSnapshot?: Record<string, unknown>
+  incomingEdgeColor?: string
   [key: string]: unknown
 }
+
+// Zones de layout fixes pour éviter toute superposition (handles, lien prompt, tooltip)
+const NODE_WIDTH = 280
+const BOTTOM_ZONE_LINK_PX = 28 // au-dessus : "Voir le prompt" (28px depuis le bas)
+const BOTTOM_RESERVED_WITH_CHOICES = 52 // hasChoices : handles + lien
+const BOTTOM_RESERVED_SINGLE = 28 // pas de choix : handle + lien
+const CHOICE_TOOLTIP_BOTTOM_PX = 56 // tooltip au survol d’un choix au-dessus du lien
+const CONTENT_PADDING_TOP_WHEN_PENDING = 32 // pour ne pas passer sous Accepter/Régénérer/Rejeter
 
 export const DialogueNode = memo(function DialogueNode({
   data,
   selected,
 }: NodeProps<DialogueNodeData>) {
-  const NODE_WIDTH = 280
-
   const speaker = data.speaker || 'PNJ'
   const line = data.line || ''
+  const title = (data.title as string) || ''
   const choices = data.choices || []
   const hasChoices = choices.length > 0
   const errors = data.validationErrors || []
@@ -43,30 +74,145 @@ export const DialogueNode = memo(function DialogueNode({
   const hasErrors = errors.length > 0
   const hasWarnings = warnings.length > 0
   const isHighlighted = data.isHighlighted || false
+  const nodeStatus = data.status  // "pending" | "accepted" | undefined
+  const isPending = nodeStatus === "pending"
+  const isAccepted = nodeStatus === "accepted"
+  const tag = (data.tag as string) || undefined
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
   
+  // Store pour accept/reject et régénération (Story 1.10)
+  const acceptNode = useGraphStore((state) => state.acceptNode)
+  const rejectNode = useGraphStore((state) => state.rejectNode)
+  const regenerateNode = useGraphStore((state) => state.regenerateNode)
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false)
+  const [showPromptModal, setShowPromptModal] = useState(false)
+  const [promptData, setPromptData] = useState<NodePromptResponse | null>(null)
+  const [promptError, setPromptError] = useState<string | null>(null)
+  const [promptLoading, setPromptLoading] = useState(false)
+  const dialogueId = useGraphStore(
+    (s) => s.documentId ?? s.dialogueMetadata.filename ?? 'current'
+  )
+
+  const { stale: gddContextStale, checking: gddStaleChecking } = useGddStaleIndicator({
+    id: data.id,
+    contextGddContentFingerprint: data.contextGddContentFingerprint,
+    gddContextSelectionsSnapshot: data.gddContextSelectionsSnapshot,
+  })
+
   // Tronquer le texte pour l'aperçu
   const truncatedLine = line.length > 100 ? `${line.substring(0, 100)}...` : line
   
-  const handleGenerateClick = (e: React.MouseEvent) => {
+  // Handlers pour accept/reject avec prévention du double-clic
+  const [isProcessing, setIsProcessing] = useState(false)
+  
+  const handleAccept = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    // Déclencher un événement custom pour ouvrir le panel de génération
-    const event = new CustomEvent('open-ai-generation-panel', { 
-      detail: { nodeId: data.id } 
-    })
-    window.dispatchEvent(event)
+    e.preventDefault()
+    
+    // Prévenir le double-clic
+    if (isProcessing) {
+      return
+    }
+    
+    setIsProcessing(true)
+    try {
+      await acceptNode(data.id)
+    } catch (error) {
+      console.error('Erreur lors de l\'acceptation:', error)
+    } finally {
+      setIsProcessing(false)
+    }
   }
   
-  // Couleur du speaker (hash du nom pour consistance)
-  const speakerColor = getSpeakerColor(speaker)
+  const handleReject = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    // Prévenir le double-clic
+    if (isProcessing) {
+      return
+    }
+    
+    setIsProcessing(true)
+    try {
+      await rejectNode(data.id)
+    } catch (error) {
+      console.error('Erreur lors du rejet:', error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
   
-  // Déterminer la couleur de la bordure selon les erreurs
+  const handleOpenRegenerateModal = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setShowRegenerateModal(true)
+  }
+
+  const openAndLoadPromptModal = useCallback(async () => {
+    setShowPromptModal(true)
+    setPromptData(null)
+    setPromptError(null)
+    setPromptLoading(true)
+    try {
+      const res = await getNodePrompt(dialogueId, data.id)
+      setPromptData(res)
+    } catch (err) {
+      setPromptError(
+        err instanceof Error ? err.message : 'Impossible de charger le prompt'
+      )
+    } finally {
+      setPromptLoading(false)
+    }
+  }, [dialogueId, data.id])
+
+  const handleOpenPromptModal = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      e.preventDefault()
+      openAndLoadPromptModal()
+    },
+    [openAndLoadPromptModal]
+  )
+
+  const promptViewerNodeId = useGraphViewStore((s) => s.promptViewerNodeId)
+  useEffect(() => {
+    if (promptViewerNodeId === data.id) {
+      useGraphViewStore.getState().closePromptViewer()
+      openAndLoadPromptModal()
+    }
+  }, [promptViewerNodeId, data.id, openAndLoadPromptModal])
+
+  const handleClosePromptModal = useCallback(() => {
+    setShowPromptModal(false)
+    setPromptData(null)
+    setPromptError(null)
+  }, [])
+
+  const handleRegenerate = async (nodeId: string, newInstructions: string) => {
+    await regenerateNode(nodeId, newInstructions)
+    setShowRegenerateModal(false)
+  }
+  
+  // Couleur du speaker (hash de l'ID du nœud pour consistance - évite changement de couleur)
+  // Utiliser l'ID du nœud plutôt que le speaker pour avoir une couleur stable
+  const speakerColor = getSpeakerColor(data.id)
+  
+  // Déterminer la couleur et le style de la bordure selon le statut et les erreurs
   let borderColor = selected ? '#27AE60' : '#4A90E2'
+  let borderStyle: 'solid' | 'dashed' = 'solid'
+  
   if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
     borderColor = theme.state.warning.color
+  } else if (isPending) {
+    borderColor = theme.state.pending.border
+    borderStyle = 'dashed'
+  } else if (isAccepted) {
+    borderColor = theme.state.accepted.border
+    borderStyle = 'solid'
   }
 
   const getChoiceHandleLeftPercent = (index: number): number => {
@@ -74,13 +220,26 @@ export const DialogueNode = memo(function DialogueNode({
     return ((index + 1) / (choices.length + 1)) * 100
   }
   
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      useGraphViewStore.getState().openContextMenu(data.id, e.clientX, e.clientY)
+    },
+    [data.id]
+  )
+
   return (
     <div
+      data-testid="graph-node-content"
+      data-node-type="dialogue"
+      data-status={nodeStatus ?? undefined}
+      title={NODE_DRAG_TOOLTIP}
       style={{
         width: NODE_WIDTH,
-        minHeight: 100,
+        minHeight: 120,
         maxHeight: 500,
-        border: `2px solid ${borderColor}`,
+        border: `2px ${borderStyle} ${borderColor}`,
         borderRadius: 8,
         backgroundColor: isHighlighted ? theme.state.selected.background : theme.background.tertiary,
         boxShadow: selected
@@ -96,7 +255,33 @@ export const DialogueNode = memo(function DialogueNode({
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onContextMenu={handleContextMenu}
     >
+      {/* Badge tag (Story 2.11 FR32) */}
+      {tag && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 4,
+            left: 4,
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontSize: '0.7rem',
+            fontWeight: 600,
+            backgroundColor: theme.background.primary,
+            color: theme.text.secondary,
+            border: `1px solid ${theme.border.primary}`,
+            zIndex: 10,
+            maxWidth: NODE_WIDTH - 32,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={tag}
+        >
+          {tag}
+        </div>
+      )}
       {/* Badge d'erreur */}
       {hasErrors && (
         <div
@@ -127,6 +312,32 @@ export const DialogueNode = memo(function DialogueNode({
       )}
       
       {/* Badge d'avertissement */}
+      {gddContextStale && !gddStaleChecking && (
+        <div
+          data-testid="gdd-stale-badge"
+          role="status"
+          aria-live="polite"
+          style={{
+            position: 'absolute',
+            top: tag ? 26 : 4,
+            right: hasErrors || hasWarnings ? 30 : 4,
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            backgroundColor: theme.state.warning.background ?? 'rgba(255, 193, 7, 0.25)',
+            color: theme.state.warning.color,
+            border: `1px solid ${theme.state.warning.color}`,
+            zIndex: 9,
+            maxWidth: 120,
+            textAlign: 'center',
+            lineHeight: 1.2,
+          }}
+          title="GDD mis à jour depuis la génération — régénérer le nœud pour utiliser le lore à jour."
+        >
+          GDD↑
+        </div>
+      )}
       {!hasErrors && hasWarnings && (
         <div
           style={{
@@ -159,14 +370,14 @@ export const DialogueNode = memo(function DialogueNode({
         type="target"
         position={Position.Top}
         style={{
-          background: '#4A90E2',
+          background: data.incomingEdgeColor ?? '#4A90E2',
           width: 12,
           height: 12,
           border: '2px solid white',
         }}
       />
       
-      {/* Header avec speaker */}
+      {/* En-tête : titre en avant-plan, speaker en second plan */}
       <div
         style={{
           padding: '8px 12px',
@@ -185,42 +396,75 @@ export const DialogueNode = memo(function DialogueNode({
             backgroundColor: 'white',
           }}
         />
-        <span
-          style={{
-            fontSize: '0.85rem',
-            fontWeight: 'bold',
-            color: 'white',
-            textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-          }}
-        >
-          {speaker}
-        </span>
-      </div>
-      
-      {/* Contenu (dialogue) */}
-      {line && (
         <div
           style={{
-            padding: '12px',
-            paddingBottom: hasChoices ? '28px' : '12px', // Espace pour les ronds oranges si des choix existent
-            fontSize: '0.9rem',
-            lineHeight: 1.4,
-            color: theme.text.primary,
-            whiteSpace: 'pre-wrap',
-            wordWrap: 'break-word',
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0,
+            flex: 1,
+            gap: 2,
           }}
         >
-          {truncatedLine}
+          <span
+            style={{
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+              color: 'white',
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={title ? `${title} (${speaker})` : speaker}
+          >
+            {title ? title : speaker}
+          </span>
+          {title ? (
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 'normal',
+                color: 'rgba(255,255,255,0.9)',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ({speaker})
+            </span>
+          ) : null}
         </div>
-      )}
+      </div>
       
-      {/* Tooltip au survol d'un rond orange (réponse associée) */}
+      {/* Contenu (dialogue) — padding bas réservé pour handles + "Voir le prompt" */}
+      <div
+        style={{
+          padding: '12px',
+          paddingTop:
+            isPending && (isHovered || selected)
+              ? CONTENT_PADDING_TOP_WHEN_PENDING
+              : 12,
+          paddingBottom: hasChoices ? BOTTOM_RESERVED_WITH_CHOICES : BOTTOM_RESERVED_SINGLE,
+          fontSize: '0.9rem',
+          lineHeight: 1.4,
+          color: theme.text.primary,
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+          flex: '1 1 auto',
+          minHeight: 0,
+        }}
+      >
+        {line ? truncatedLine : null}
+      </div>
+      
+      {/* Tooltip au survol d'un rond orange (réponse associée) — au-dessus du lien "Voir le prompt" */}
       {hasChoices && hoveredChoiceIndex !== null && choices[hoveredChoiceIndex] && (
         <div
           style={{
             position: 'absolute',
             left: `${getChoiceHandleLeftPercent(hoveredChoiceIndex)}%`,
-            bottom: 34,
+            bottom: CHOICE_TOOLTIP_BOTTOM_PX,
             transform: 'translateX(-50%)',
             backgroundColor: theme.background.secondary,
             border: '1px solid #F5A623',
@@ -245,12 +489,14 @@ export const DialogueNode = memo(function DialogueNode({
         choices.map((choice, index) => {
           const leftPercent = getChoiceHandleLeftPercent(index)
           const label = choice.text || `Choix ${index + 1}`
+          const stableId = (choice as { choiceId?: string }).choiceId ?? `__idx_${index}`
+          const handleId = `choice:${stableId}`
           return (
             <Handle
-              key={index}
+              key={stableId}
               type="source"
               position={Position.Bottom}
-              id={`choice-${index}`}
+              id={handleId}
               title={label}
               onMouseEnter={() => setHoveredChoiceIndex(index)}
               onMouseLeave={() => setHoveredChoiceIndex((prev) => (prev === index ? null : prev))}
@@ -282,51 +528,168 @@ export const DialogueNode = memo(function DialogueNode({
         />
       )}
       
-      {/* Bouton "Générer" visible au hover */}
+      {/* Boutons Accept / Régénérer / Reject visibles au hover pour nœuds pending (Story 1.4, 1.10) */}
+      {isPending && (isHovered || selected) && !isProcessing && (
+        <>
+          <button
+            onClick={handleAccept}
+            disabled={isProcessing}
+            style={{
+              position: 'absolute',
+              top: 34,
+              right: 8,
+              padding: '0.4rem 0.6rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#27AE60',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+              zIndex: 15,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+            }}
+            title="Accepter le nœud"
+          >
+            <span>✓</span>
+            <span>Accepter</span>
+          </button>
+          <button
+            onClick={handleReject}
+            disabled={isProcessing}
+            style={{
+              position: 'absolute',
+              top: 34,
+              left: 8,
+              padding: '0.4rem 0.6rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#E74C3C',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+              zIndex: 15,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+            }}
+            title="Rejeter le nœud"
+          >
+            <span>✗</span>
+            <span>Rejeter</span>
+          </button>
+          <button
+            onClick={handleOpenRegenerateModal}
+            disabled={isProcessing}
+            style={{
+              position: 'absolute',
+              top: 34,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              padding: '0.4rem 0.6rem',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#F5A623',
+              color: theme.text.inverse,
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+              zIndex: 15,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateX(-50%) scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateX(-50%) scale(1)'
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
+            }}
+            title="Régénérer avec d'autres instructions"
+          >
+            <span>🔄</span>
+            <span>Régénérer</span>
+          </button>
+        </>
+      )}
+
+      {/* Voir le prompt (Story 1.14) — zone dédiée au-dessus des handles, jamais superposé */}
       {(isHovered || selected) && (
         <button
-          onClick={handleGenerateClick}
+          type="button"
+          onClick={handleOpenPromptModal}
           style={{
             position: 'absolute',
-            top: 34,
-            right: 8,
-            padding: '0.4rem 0.6rem',
+            bottom: BOTTOM_ZONE_LINK_PX,
+            left: 8,
+            padding: '0.25rem 0.5rem',
+            backgroundColor: 'transparent',
             border: 'none',
-            borderRadius: '6px',
-            backgroundColor: theme.button.primary.background,
-            color: theme.button.primary.color,
+            borderRadius: '4px',
+            color: theme.text.secondary,
             cursor: 'pointer',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.3rem',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-            zIndex: 15,
-            transition: 'all 0.2s ease',
+            fontSize: '0.8rem',
+            textDecoration: 'underline',
+            zIndex: 10,
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)'
-            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)'
-            e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)'
-          }}
-          title="Générer la suite avec l'IA"
+          title="Voir le prompt envoyé au LLM pour ce nœud"
         >
-          <span>✨</span>
-          <span>Générer</span>
+          Voir le prompt
         </button>
       )}
+
+      <RegenerateNodeModal
+        isOpen={showRegenerateModal}
+        nodeId={data.id}
+        initialInstructions={data.lastGenerationInstructions ?? ''}
+        history={data.regenerationHistory ?? []}
+        contextGddChanged={false}
+        onRegenerate={handleRegenerate}
+        onClose={() => setShowRegenerateModal(false)}
+      />
+      <PromptViewerModal
+        isOpen={showPromptModal}
+        data={promptData}
+        error={promptError}
+        isLoading={promptLoading}
+        onClose={handleClosePromptModal}
+      />
     </div>
   )
 })
 
 /**
- * Génère une couleur consistante pour un speaker.
+ * Génère une couleur consistante basée sur un identifiant (ID du nœud ou nom du speaker).
+ * Utilise l'ID du nœud pour garantir une couleur stable même si le speaker change.
  */
-function getSpeakerColor(speaker: string): string {
+function getSpeakerColor(identifier: string): string {
   const colors = [
     '#4A90E2', // Bleu
     '#9013FE', // Violet
@@ -338,10 +701,10 @@ function getSpeakerColor(speaker: string): string {
     '#D35400', // Orange foncé
   ]
   
-  // Hash simple du nom pour sélectionner une couleur
+  // Hash simple de l'identifiant pour sélectionner une couleur stable
   let hash = 0
-  for (let i = 0; i < speaker.length; i++) {
-    hash = speaker.charCodeAt(i) + ((hash << 5) - hash)
+  for (let i = 0; i < identifier.length; i++) {
+    hash = identifier.charCodeAt(i) + ((hash << 5) - hash)
   }
   
   return colors[Math.abs(hash) % colors.length]

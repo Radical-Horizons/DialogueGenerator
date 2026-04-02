@@ -1,26 +1,28 @@
 /**
  * Tests E2E pour la modal de progression de génération avec SSE streaming.
- * 
- * Scénarios testés :
- * - AC#1 : Modal s'affiche au lancement génération avec streaming visible
- * - AC#2 : Interruption fonctionne (bouton "Interrompre" → modal ferme)
- * - AC#3 : Réduction fonctionne (icône minimize → badge compact)
- * - AC#4 : Auto-fermeture après succès + nœuds ajoutés au graphe
+ *
+ * Ces tests exigent une génération LLM complète (API key, budget, preflight OK).
+ * Désactivés par défaut pour éviter timeouts/flakiness ; activer manuellement
+ * ou en CI avec env dédié (ex. E2E_FULL_GENERATION=1).
  */
 import { test, expect, type Page } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 test.describe('Generation Progress Modal with SSE Streaming', () => {
+  test.skip(
+    () => process.env.E2E_FULL_GENERATION !== '1',
+    'Exige E2E_FULL_GENERATION=1 (génération LLM complète)'
+  )
+
   const selectFirstCharacter = async (page: Page) => {
     await page.getByText('(Aucun) - Rechercher...').first().click()
     await page.keyboard.press('ArrowDown')
     await page.keyboard.press('Enter')
   }
   test.beforeEach(async ({ page }) => {
-    // Naviguer vers l'application
-    await page.goto('http://localhost:3000')
-    
-    // Attendre que l'application soit chargée
-    await page.waitForSelector('h2:has-text("Génération de Dialogues")')
+    await page.goto('/')
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.graphField })
   })
 
   test('AC#1: Modal s\'affiche au lancement génération avec streaming visible', async ({ page }) => {
@@ -44,7 +46,7 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     
     // Attendre que du contenu streaming apparaisse
     // Note : Ceci dépend du backend SSE fonctionnel
-    await page.waitForSelector('pre', { timeout: 5000 })
+    await page.waitForSelector('pre', { timeout: E2E_MS.short })
     const streamingContent = await page.locator('pre').textContent()
     expect(streamingContent).toBeTruthy()
     expect(streamingContent!.length).toBeGreaterThan(0)
@@ -63,7 +65,7 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     await page.click('button:has-text("Interrompre")')
     
     // Vérifier que la modal se ferme
-    await expect(page.locator('h2:has-text("Génération en cours...")')).not.toBeVisible({ timeout: 2000 })
+    await expect(page.locator('h2:has-text("Génération en cours...")')).not.toBeVisible({ timeout: E2E_MS.probe })
   })
 
   test('AC#3: Réduction fonctionne (icône minimize → badge compact)', async ({ page }) => {
@@ -79,7 +81,7 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     await page.click('button[aria-label="Réduire"]')
     
     // Vérifier que la modal pleine n'est plus visible
-    await expect(page.locator('h2:has-text("Génération en cours...")')).not.toBeVisible({ timeout: 2000 })
+    await expect(page.locator('h2:has-text("Génération en cours...")')).not.toBeVisible({ timeout: E2E_MS.probe })
     
     // Vérifier que le badge compact est visible (coin écran)
     // Le badge affiche toujours la progression
@@ -103,21 +105,18 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     
     // Attendre que la génération se termine (état "Complete")
     // Note : Timeout long car génération LLM peut prendre du temps
-    await expect(page.locator('h2:has-text("Génération terminée")')).toBeVisible({ timeout: 30000 })
+    await expect(page.locator('h2:has-text("Génération terminée")')).toBeVisible({ timeout: E2E_MS.graphFlow })
     
     // Vérifier que le bouton "Fermer" est visible
     await expect(page.locator('button:has-text("Fermer")')).toBeVisible()
-    
-    // Attendre l'auto-fermeture (3 secondes)
-    await page.waitForTimeout(3500)
-    
-    // Vérifier que la modal s'est fermée automatiquement
-    await expect(page.locator('h2:has-text("Génération terminée")')).not.toBeVisible()
+
+    // Attendre l'auto-fermeture (event-based)
+    await expect(page.locator('h2:has-text("Génération terminée")')).not.toBeVisible({ timeout: E2E_MS.medium })
     
     // Vérifier que les nœuds ont été ajoutés au graphe
     // Note : Ceci dépend de l'implémentation du graphe
     // Pour l'instant, vérifier que le panneau de résultats affiche quelque chose
-    await expect(page.locator('text=Unity JSON').or(page.locator('text=Dialogue généré'))).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('text=Unity JSON').or(page.locator('text=Dialogue généré'))).toBeVisible({ timeout: E2E_MS.short })
   })
 
   test('AC#4 (variante): Fermeture manuelle avant auto-fermeture', async ({ page }) => {
@@ -127,13 +126,13 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     await page.click('button:has-text("Générer")')
     
     // Attendre que la génération se termine
-    await expect(page.locator('h2:has-text("Génération terminée")')).toBeVisible({ timeout: 30000 })
+    await expect(page.locator('h2:has-text("Génération terminée")')).toBeVisible({ timeout: E2E_MS.graphFlow })
     
     // Cliquer sur "Fermer" avant l'auto-fermeture
     await page.click('button:has-text("Fermer")')
     
     // Vérifier que la modal se ferme immédiatement
-    await expect(page.locator('h2:has-text("Génération terminée")')).not.toBeVisible({ timeout: 1000 })
+    await expect(page.locator('h2:has-text("Génération terminée")')).not.toBeVisible({ timeout: E2E_MS.micro })
   })
 
   test('Gestion d\'erreur : Modal affiche l\'erreur si génération échoue', async ({ page }) => {
@@ -145,7 +144,7 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     await page.click('button:has-text("Générer")')
     
     // Vérifier qu'un message d'erreur s'affiche (toast ou modal)
-    await expect(page.locator('text=Au moins un personnage').or(page.locator('text=erreur'))).toBeVisible({ timeout: 3000 })
+    await expect(page.locator('text=Au moins un personnage').or(page.locator('text=erreur'))).toBeVisible({ timeout: E2E_MS.control })
   })
 
   test('Génération streaming produit un Unity JSON valide', async ({ page }) => {
@@ -162,12 +161,12 @@ test.describe('Generation Progress Modal with SSE Streaming', () => {
     await expect(page.locator('h2:has-text("Génération en cours...")')).toBeVisible()
     
     // Attendre que la génération se termine
-    await expect(page.locator('h2:has-text("Génération terminée")').or(page.locator('text=Complete'))).toBeVisible({ timeout: 60000 })
+    await expect(page.locator('h2:has-text("Génération terminée")').or(page.locator('text=Complete'))).toBeVisible({ timeout: E2E_MS.generationMenu })
     
     // Vérifier que le résultat Unity JSON est disponible
     // Le résultat devrait être dans le store et affiché dans le panneau de résultats
     // Vérifier que le panneau "Dialogue généré" ou "Unity JSON" contient du contenu
-    await expect(page.locator('text=Unity JSON').or(page.locator('text=Dialogue généré')).or(page.locator('pre'))).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('text=Unity JSON').or(page.locator('text=Dialogue généré')).or(page.locator('pre'))).toBeVisible({ timeout: E2E_MS.short })
     
     // Vérifier que le contenu JSON est valide (si accessible)
     // Note : Ceci dépend de l'implémentation de l'affichage du résultat

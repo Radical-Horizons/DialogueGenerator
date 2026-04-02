@@ -1,0 +1,13 @@
+{
+  "dimension": "performance",
+  "score": 100,
+  "max_score": 100,
+  "grade": "A",
+  "violations": [],
+  "passed_checks": 6,
+  "failed_checks": 0,
+  "total_checks": 6,
+  "violation_summary": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 },
+  "recommendations": [],
+  "summary": "Aucun time.sleep ni attente arbitraire ; services mockés (pas d'appels LLM/API réels). Tests légers et rapides, conformes à la cible <1.5 min."
+}

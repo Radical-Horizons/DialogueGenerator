@@ -6,14 +6,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
-import { CONTEXT_TOKENS_LIMITS } from '../constants'
+import type { ContextSelection } from '../types/api'
+import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS } from '../constants'
 import type { SaveStatus } from '../components/shared/SaveStatusIndicator'
 
 const DRAFT_STORAGE_KEY = 'generation_draft'
 
 interface DraftData {
   userInstructions: string
-  authorProfile: any
+  authorProfile: string | null
   systemPromptOverride: string | null
   dialogueStructure: string[]
   sceneSelection: {
@@ -25,12 +26,12 @@ interface DraftData {
   maxContextTokens: number
   maxCompletionTokens: number | null
   llmModel: string
-  reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   topP: number | null
   maxChoices: number | null
   choicesMode: 'free' | 'capped'
   narrativeTags: string[]
-  contextSelections: any
+  contextSelections: unknown
   selectedRegion: string | null
   selectedSubLocations: string[]
   timestamp: number
@@ -45,6 +46,8 @@ export interface UseGenerationDraftReturn {
   isDirty: boolean
   /** Statut de sauvegarde */
   saveStatus: SaveStatus
+  /** Horodatage ms de la dernière écriture réussie du brouillon (localStorage). */
+  draftLastSavedAt: number | null
   /** Marquer comme modifié */
   markDirty: () => void
   /** Marquer comme sauvegardé */
@@ -61,7 +64,7 @@ export interface UseGenerationDraftOptions {
   /** Modèle LLM */
   llmModel: string
   /** Reasoning effort */
-  reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   /** Top_p (nucleus sampling) */
   topP: number | null
   /** Nombre max de choix */
@@ -79,7 +82,9 @@ export interface UseGenerationDraftOptions {
   /** Callback pour mettre à jour llmModel */
   setLlmModel: (value: string) => void
   /** Callback pour mettre à jour reasoningEffort */
-  setReasoningEffort: (value: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null) => void
+  setReasoningEffort: (
+    value: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  ) => void
   /** Callback pour mettre à jour topP */
   setTopP: (value: number | null) => void
   /** Callback pour mettre à jour maxChoices */
@@ -87,7 +92,7 @@ export interface UseGenerationDraftOptions {
   /** Callback pour mettre à jour narrativeTags */
   setNarrativeTags: (tags: string[]) => void
   /** Callback pour mettre à jour authorProfile */
-  updateAuthorProfile: (profile: any) => void
+  updateAuthorProfile: (profile: string) => void
 }
 
 /**
@@ -124,6 +129,7 @@ export function useGenerationDraft(
 
   const [isDirty, setIsDirty] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved')
+  const [draftLastSavedAt, setDraftLastSavedAt] = useState<number | null>(null)
 
   const {
     sceneSelection,
@@ -166,6 +172,7 @@ export function useGenerationDraft(
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
       setIsDirty(false)
       setSaveStatus('saved')
+      setDraftLastSavedAt(draft.timestamp)
     } catch (err) {
       console.error('Erreur lors de la sauvegarde automatique:', err)
       setSaveStatus('error')
@@ -196,8 +203,12 @@ export function useGenerationDraft(
         if (draft.userInstructions !== undefined) {
           setUserInstructions(draft.userInstructions)
         }
-        if (draft.authorProfile !== undefined) {
-          updateAuthorProfile(draft.authorProfile)
+        if (draft.authorProfile !== undefined && draft.authorProfile !== null) {
+          updateAuthorProfile(
+            typeof draft.authorProfile === 'string'
+              ? draft.authorProfile
+              : String(draft.authorProfile)
+          )
         }
         if (draft.systemPromptOverride !== undefined) {
           setSystemPromptOverride(draft.systemPromptOverride)
@@ -213,10 +224,10 @@ export function useGenerationDraft(
           const value = Math.max(CONTEXT_TOKENS_LIMITS.MIN, draft.maxContextTokens)
           setMaxContextTokens(value)
         }
-        if (draft.maxCompletionTokens !== undefined) {
+        if (draft.maxCompletionTokens !== undefined && draft.maxCompletionTokens !== null) {
           const clampedMaxCompletionTokens = Math.min(
-            Math.max(draft.maxCompletionTokens, 100),
-            16000
+            Math.max(draft.maxCompletionTokens, COMPLETION_TOKENS_LIMITS.MIN),
+            COMPLETION_TOKENS_LIMITS.MAX
           )
           setMaxCompletionTokens(clampedMaxCompletionTokens)
         }
@@ -243,10 +254,17 @@ export function useGenerationDraft(
             draft.selectedSubLocations !== undefined && Array.isArray(draft.selectedSubLocations)
               ? draft.selectedSubLocations
               : []
-          restoreContextState(draft.contextSelections, savedRegion, savedSubLocations)
+          restoreContextState(
+            draft.contextSelections as ContextSelection,
+            savedRegion,
+            savedSubLocations
+          )
         }
         setIsDirty(false)
         setSaveStatus('saved')
+        if (typeof draft.timestamp === 'number') {
+          setDraftLastSavedAt(draft.timestamp)
+        }
       }
     } catch (err) {
       console.error('Erreur lors du chargement du brouillon:', err)
@@ -262,6 +280,7 @@ export function useGenerationDraft(
     setMaxCompletionTokens,
     setLlmModel,
     setReasoningEffort,
+    setTopP,
     setMaxChoices,
     setNarrativeTags,
     restoreContextState,
@@ -322,6 +341,7 @@ export function useGenerationDraft(
     loadDraft,
     isDirty,
     saveStatus,
+    draftLastSavedAt,
     markDirty,
     markSaved,
   }

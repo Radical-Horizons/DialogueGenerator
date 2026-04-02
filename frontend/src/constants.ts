@@ -35,28 +35,31 @@ export const DEFAULT_MODEL = MODEL_NAMES.GPT_5_MINI
  * Ces valeurs doivent correspondre à celles définies dans constants.py (Defaults.MAX_CONTEXT_TOKENS, Defaults.MIN_CONTEXT_TOKENS)
  */
 export const CONTEXT_TOKENS_LIMITS = {
-  /** Minimum autorisé pour le slider (10K) */
+  /** Minimum autorisé (aligné API max_context_tokens et budget contexte FR20 — plancher sérieux LLM) */
   MIN: 10000,
   /** Maximum autorisé pour le slider et l'API (100K) */
   MAX: 100000,
-  /** Pas du slider (5K) */
-  STEP: 5000,
+  /** Pas du slider */
+  STEP: 1000,
   /** Valeur par défaut (50K) */
   DEFAULT: 50000,
 } as const
+
+/** Optimisation auto du contexte (FR21) — POST /api/v1/context/optimize. */
+export const CONTEXT_OPTIMIZE_API_ENABLED = true
 
 /**
  * Limites pour les tokens de completion (génération).
  */
 export const COMPLETION_TOKENS_LIMITS = {
-  /** Minimum autorisé (100) */
-  MIN: 100,
-  /** Maximum autorisé (16K) */
-  MAX: 16000,
-  /** Pas du slider (500) */
-  STEP: 500,
-  /** Valeur par défaut (5K) */
-  DEFAULT: 5000,
+  /** Minimum autorisé (5K) */
+  MIN: 5000,
+  /** Maximum autorisé (64K) */
+  MAX: 64000,
+  /** Pas du slider (5K) */
+  STEP: 5000,
+  /** Valeur par défaut (20K) */
+  DEFAULT: 20000,
 } as const
 
 /**
@@ -65,6 +68,11 @@ export const COMPLETION_TOKENS_LIMITS = {
 export const API_TIMEOUTS = {
   /** Timeout par défaut pour les requêtes API rapides (30 secondes) */
   DEFAULT: 30000,
+  /**
+   * Sync GDD depuis Notion : export massif (workspace entier) ; le client HTTP ne doit pas
+   * couper avant le serveur. 6 h — aligner le proxy dev (`vite.config.ts`) sur cette valeur.
+   */
+  GDD_NOTION_SYNC: 6 * 60 * 60 * 1000,
   /** Timeout pour les requêtes LLM longues (5 minutes) - génération de dialogues */
   LLM_GENERATION: 300000,
   /** Timeout pour l'annulation d'un job de génération (10 secondes) - Story 0.8 */

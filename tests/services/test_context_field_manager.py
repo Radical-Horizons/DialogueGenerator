@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from services.context_field_manager import ContextFieldManager
-from context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 
 
 @pytest.fixture

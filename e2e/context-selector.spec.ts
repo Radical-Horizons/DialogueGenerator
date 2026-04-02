@@ -1,41 +1,48 @@
 import { test, expect } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 test.describe('Sélecteur de contexte', () => {
   test.beforeEach(async ({ page }) => {
-    // Se connecter
-    await page.goto('/login')
-    await page.getByLabel(/nom d'utilisateur/i).fill('admin')
-    await page.getByLabel(/mot de passe/i).fill('admin123')
-    await page.getByRole('button', { name: /se connecter/i }).click()
-    await expect(page).toHaveURL('/')
+    await page.goto('/')
   })
 
   test('le résumé des sélections doit être entièrement visible en bas du panneau', async ({ page }) => {
-    // Attendre que les données soient chargées
-    await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible()
-    
-    // Sélectionner un personnage
-    const firstCharacter = page.locator('input[type="checkbox"]').first()
+    await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible({ timeout: E2E_MS.graphField })
+    const contextPanel = page.getByTestId('context-selector')
+    const checkboxes = contextPanel.locator('input[type="checkbox"]')
+    const count = await checkboxes.count()
+    if (count === 0) {
+      test.skip(true, 'Aucun personnage dans le GDD - test ignoré')
+    }
+    const firstCharacter = checkboxes.first()
+    await expect(firstCharacter).toBeVisible({ timeout: E2E_MS.short })
+    const firstCharacterRow = firstCharacter.locator('xpath=..')
+    const selectedCharacterName = ((await firstCharacterRow.textContent()) ?? '')
+      .replace(/📄\s*Complet/gi, '')
+      .trim()
     await firstCharacter.click()
     
-    // Attendre que le résumé apparaisse
-    await expect(page.getByText(/sélections actives/i)).toBeVisible()
+    // Attendre que le résumé apparaisse après sélection
+    const summaryToggle = page.getByTestId('selected-context-summary-toggle')
+    await expect(summaryToggle).toBeVisible({ timeout: E2E_MS.ui })
     
     // Vérifier que le résumé est visible (pas tronqué)
-    const summarySection = page.getByText(/sélections actives/i).locator('..').locator('..')
-    const summaryBox = summarySection.boundingBox()
+    const summarySection = summaryToggle.locator('xpath=../..')
     
     // Vérifier que le bouton "Tout effacer" est visible
     await expect(page.getByRole('button', { name: /tout effacer/i })).toBeVisible()
+
+    // Développer explicitement le résumé pour vérifier son contenu détaillé
+    await summaryToggle.click()
+    await expect(summaryToggle).toHaveAttribute('aria-expanded', 'true')
     
     // Vérifier que le texte "Personnages: 1" est visible
     await expect(page.getByText(/personnages:\s*1/i)).toBeVisible()
     
     // Vérifier que le nom du personnage sélectionné est visible (pas tronqué)
-    // Le nom devrait apparaître sous "Personnages: 1"
-    const characterName = await firstCharacter.locator('..').locator('span').textContent()
-    if (characterName) {
-      await expect(page.getByText(characterName, { exact: false })).toBeVisible()
+    if (selectedCharacterName) {
+      await expect(summarySection.getByText(selectedCharacterName, { exact: false })).toBeVisible()
     }
     
     // Vérifier visuellement que le résumé n'est pas coupé

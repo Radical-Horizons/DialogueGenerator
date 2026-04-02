@@ -59,7 +59,6 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   const {
     userInstructions,
     maxContextTokens,
-    maxCompletionTokens,
     maxChoices,
     choicesMode,
     narrativeTags,
@@ -71,7 +70,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   const [estimationError, setEstimationError] = useState<string | null>(null)
 
   const { selections } = useContextStore()
-  const { sceneSelection, dialogueStructure, systemPromptOverride, promptHash, tokenCount, setRawPrompt } = useGenerationStore()
+  const { sceneSelection, dialogueStructure, systemPromptOverride, tokenCount, setRawPrompt } = useGenerationStore()
   const { vocabularyConfig } = useVocabularyStore()
   const { includeNarrativeGuides } = useNarrativeGuidesStore()
   const { authorProfile } = useAuthorProfile()
@@ -142,18 +141,26 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     
     // Calculer le hash AVANT l'appel API pour vérifier le cache
     const computedHash = await computeStateHash(promptParams)
-    const currentHash = promptHash
-    
-    // Si le hash est identique et qu'on a déjà un tokenCount, skip l'appel API
-    if (computedHash === currentHash && tokenCount !== null) {
-      // Cache hit: pas besoin d'appeler l'API
+    const { previewInputHash, tokenCount: currentTokenCount } = useGenerationStore.getState()
+
+    if (computedHash === previewInputHash && currentTokenCount !== null) {
       return
     }
     
     // Ne pas effacer le prompt existant pendant l'estimation
     setIsEstimating(true)
     setEstimationError(null)
-    
+    // Mettre à jour le store pour afficher "Construction du prompt..." dans le panneau Détails
+    const stateBeforeCall = useGenerationStore.getState()
+    setRawPrompt(
+      stateBeforeCall.rawPrompt,
+      stateBeforeCall.tokenCount,
+      stateBeforeCall.promptHash,
+      true,
+      stateBeforeCall.structuredPrompt,
+      'preserve'
+    )
+
     try {
       // Appel API seulement si le hash a changé
       const response = await dialoguesAPI.previewPrompt(promptParams)
@@ -164,16 +171,26 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       // Estimation approximative basée sur la longueur pour l'affichage (le backend sera la source de vérité lors de la génération)
       const estimatedTokenCount = Math.ceil(response.raw_prompt.length / 4)
       
-      // Mettre à jour le prompt seulement si le hash a changé ou si on n'avait pas de prompt
-      // Cela évite de reconstruire l'affichage si le prompt est identique
-      // Note: response.prompt_hash devrait correspondre à computedHash, mais on utilise celui du backend comme source de vérité
-      if (computedHash !== response.prompt_hash) {
-        // Log warning si les hashs ne correspondent pas (devrait être rare)
-        console.warn('Hash mismatch: computed', computedHash, 'vs backend', response.prompt_hash)
-      }
-      
-      if (currentHash !== response.prompt_hash || currentHash === null) {
-        setRawPrompt(response.raw_prompt, estimatedTokenCount, response.prompt_hash, false, response.structured_prompt || null)
+      const priorBackendHash = useGenerationStore.getState().promptHash
+      if (priorBackendHash !== response.prompt_hash || priorBackendHash === null) {
+        setRawPrompt(
+          response.raw_prompt,
+          estimatedTokenCount,
+          response.prompt_hash,
+          false,
+          response.structured_prompt || null,
+          computedHash
+        )
+      } else {
+        const stateAfter = useGenerationStore.getState()
+        setRawPrompt(
+          stateAfter.rawPrompt,
+          stateAfter.tokenCount,
+          stateAfter.promptHash,
+          false,
+          stateAfter.structuredPrompt,
+          'preserve'
+        )
       }
     } catch (err: unknown) {
       // Ne logger que les erreurs non liées à la connexion (backend non accessible)
@@ -190,7 +207,14 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       // Ne pas effacer le prompt existant si l'estimation échoue
       // Le prompt précédent reste visible pour l'utilisateur
       const currentState = useGenerationStore.getState()
-      setRawPrompt(currentState.rawPrompt, currentState.tokenCount, currentState.promptHash, false, null)
+      setRawPrompt(
+        currentState.rawPrompt,
+        currentState.tokenCount,
+        currentState.promptHash,
+        false,
+        null,
+        'invalidate'
+      )
     } finally {
       setIsEstimating(false)
     }
@@ -210,13 +234,11 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     sceneSelection.characterB,
     toast,
     choicesMode,
-    promptHash,
-    tokenCount,
   ])
 
-  // Debounce automatique de l'estimation (500ms)
+  // Debounce automatique de l'estimation (500ms, ou 100ms si on a des critères mais pas encore de prompt)
   useEffect(() => {
-    const hasAnySelections = 
+    const hasAnySelections =
       selections.characters_full.length > 0 ||
       selections.characters_excerpt.length > 0 ||
       selections.locations_full.length > 0 ||
@@ -228,16 +250,19 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.communities_full.length > 0 ||
       selections.communities_excerpt.length > 0 ||
       selections.dialogues_examples.length > 0
-    
+
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
-    
+    const hasCriteria = Boolean(userInstructions.trim() || hasAnySelections || hasSystemPrompt)
+    const hasNoPromptYet = useGenerationStore.getState().rawPrompt == null
+    const debounceMs = hasCriteria && hasNoPromptYet ? 100 : 500
+
     const timeoutId = setTimeout(() => {
-      if (userInstructions.trim() || hasAnySelections || hasSystemPrompt) {
+      if (hasCriteria) {
         void estimateTokens()
       } else {
         setRawPrompt(null, null, null, false, null)
       }
-    }, 500)
+    }, debounceMs)
 
     return () => clearTimeout(timeoutId)
   }, [

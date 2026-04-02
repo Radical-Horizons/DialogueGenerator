@@ -53,7 +53,7 @@ describe('graphStore - Intentional Cycles', () => {
       const originalSetItem = Storage.prototype.setItem
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       
-      Storage.prototype.setItem = vi.fn(function(key: string, value: string) {
+      Storage.prototype.setItem = vi.fn(function (this: Storage, key: string, value: string) {
         if (key === 'graph_intentional_cycles') {
           const error = new DOMException('Quota exceeded', 'QuotaExceededError')
           throw error
@@ -112,7 +112,7 @@ describe('graphStore - Intentional Cycles', () => {
       const originalSetItem = Storage.prototype.setItem
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       
-      Storage.prototype.setItem = vi.fn(function(key: string, value: string) {
+      Storage.prototype.setItem = vi.fn(function (this: Storage, key: string, value: string) {
         if (key === 'graph_intentional_cycles') {
           const error = new DOMException('Quota exceeded', 'QuotaExceededError')
           throw error
@@ -165,7 +165,7 @@ describe('graphStore - Intentional Cycles', () => {
 
   describe('filtering intentional cycles in validation errors', () => {
     it('should filter out intentional cycles from warnings display', () => {
-      const { markCycleAsIntentional, validateGraph } = useGraphStore.getState()
+      const { markCycleAsIntentional } = useGraphStore.getState()
       
       // Marquer un cycle comme intentionnel
       markCycleAsIntentional('cycle_abc123')

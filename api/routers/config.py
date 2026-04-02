@@ -2,6 +2,8 @@
 import logging
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status, Query
+
+from api.routers.auth import get_current_user
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from api.dependencies import (
@@ -34,7 +36,7 @@ from core.context.context_builder import ContextBuilder
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 class LLMConfigResponse(BaseModel):
@@ -154,10 +156,18 @@ async def update_llm_config(
         Configuration LLM mise à jour.
     """
     try:
-        # TODO: Implémenter la mise à jour dans ConfigurationService
-        # Pour l'instant, on retourne juste la config actuelle
+        current_config = config_service.get_llm_config()
+        current_config.update(config_data)
+        if not config_service.save_llm_config(current_config):
+            raise InternalServerException(
+                message="Échec de la sauvegarde de la configuration LLM",
+                details={"error": "save_llm_config returned False"},
+                request_id=request_id
+            )
         llm_config = config_service.get_llm_config()
         return LLMConfigResponse(config=llm_config)
+    except InternalServerException:
+        raise
     except Exception as e:
         logger.exception(f"Erreur lors de la mise à jour de la config LLM (request_id: {request_id})")
         raise InternalServerException(
@@ -566,7 +576,7 @@ async def get_context_fields(
             try:
                 detector = ContextFieldDetector(context_builder)
                 default_config = config_service.get_context_config()
-                essential_fields = detector._identify_essential_fields(element_type, default_config)
+                essential_fields = detector.identify_essential_fields(element_type, default_config)
                 logger.info(f"Re-marquage des champs essentiels pour '{element_type}': {len(essential_fields)} champs détectés")
                 for path, field_info in cached_fields.items():
                     if isinstance(field_info, DetectorFieldInfo):
@@ -617,7 +627,7 @@ async def get_context_fields(
             # Détecter les champs uniques regroupés par fiche
             unique_fields_by_item = {}
             try:
-                sample_data = detector._get_sample_data(element_type)
+                sample_data = detector.get_sample_data(element_type)
                 if sample_data:
                     unique_fields_by_item = detector.detect_unique_fields_by_item(element_type, sample_data)
             except Exception as e:
@@ -637,7 +647,7 @@ async def get_context_fields(
         # Marquer les champs essentiels depuis la config par défaut et par analyse
         try:
             default_config = config_service.get_context_config()
-            essential_fields = detector._identify_essential_fields(element_type, default_config)
+            essential_fields = detector.identify_essential_fields(element_type, default_config)
             logger.info(f"Champs essentiels détectés pour '{element_type}': {len(essential_fields)} champs")
             
             essential_count = 0
@@ -655,7 +665,7 @@ async def get_context_fields(
         # Détecter les champs uniques regroupés par fiche
         unique_fields_by_item = {}
         try:
-            sample_data = detector._get_sample_data(element_type)
+            sample_data = detector.get_sample_data(element_type)
             if sample_data:
                 unique_fields_by_item = detector.detect_unique_fields_by_item(element_type, sample_data)
         except Exception as e:
@@ -811,10 +821,10 @@ async def preview_context(
             element_modes=element_modes
         )
         # Sérialiser en texte pour compatibilité
-        preview_text = context_builder._context_serializer.serialize_to_text(structured_context)
+        preview_text = context_builder.serialize_context_to_text(structured_context)
         
         # Compter les tokens
-        tokens = context_builder._count_tokens(preview_text)
+        tokens = context_builder.count_tokens(preview_text)
         
         # Convertir structured_context en dict pour la réponse
         structured_prompt_dict = None
@@ -861,10 +871,11 @@ async def get_default_system_prompt(
         prompt = config_service.get_default_system_prompt()
         return JSONResponse(content={"prompt": prompt})
     except Exception as e:
-        logger.error(f"Erreur lors de la récupération du system prompt par défaut: {e}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"error": "Erreur lors de la récupération du system prompt par défaut"}
+        logger.exception(f"Erreur lors de la récupération du system prompt par défaut (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors de la récupération du system prompt par défaut",
+            details={"error": str(e)},
+            request_id=request_id
         )
 
 

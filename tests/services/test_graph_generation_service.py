@@ -4,7 +4,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 from typing import Dict, Any, List
 
 from services.graph_generation_service import GraphGenerationService
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.unity_dialogue_generation_service import UnityDialogueGenerationService, _stable_node_id
 from core.llm.llm_client import ILLMClient
 
 
@@ -216,15 +216,15 @@ async def test_generate_nodes_for_all_choices_id_format(mock_llm_client, mock_ge
         UnityDialogueGenerationResponse(title="Dialogue 3", node=mock_nodes_content[2])
     ]
     
+    stable_ids = [_stable_node_id() for _ in range(3)]
     mock_enriched_nodes = [
-        [{"id": "NODE_PARENT_1_CHOICE_0", "speaker": "PNJ", "line": "Réponse 1", "choices": []}],
-        [{"id": "NODE_PARENT_1_CHOICE_1", "speaker": "PNJ", "line": "Réponse 2", "choices": []}],
-        [{"id": "NODE_PARENT_1_CHOICE_2", "speaker": "PNJ", "line": "Réponse 3", "choices": []}]
+        [{"id": stable_ids[0], "speaker": "PNJ", "line": "Réponse 1", "choices": []}],
+        [{"id": stable_ids[1], "speaker": "PNJ", "line": "Réponse 2", "choices": []}],
+        [{"id": stable_ids[2], "speaker": "PNJ", "line": "Réponse 3", "choices": []}]
     ]
-    
     mock_generation_service.enrich_with_ids.side_effect = mock_enriched_nodes
     mock_generation_service.generate_dialogue_node = AsyncMock(side_effect=mock_responses)
-    
+
     result = await service.generate_nodes_for_all_choices(
         parent_node=sample_parent_node_with_choices,
         instructions="Test",
@@ -233,20 +233,16 @@ async def test_generate_nodes_for_all_choices_id_format(mock_llm_client, mock_ge
         system_prompt_override=None,
         max_choices=None
     )
-    
-    # Vérifier format IDs (3 choix: 2 avec None, 1 avec "END" - tous générés)
+
     assert len(result["nodes"]) == 3
-    assert result["nodes"][0]["id"] == "NODE_PARENT_1_CHOICE_0"
-    assert result["nodes"][1]["id"] == "NODE_PARENT_1_CHOICE_1"
-    assert result["nodes"][2]["id"] == "NODE_PARENT_1_CHOICE_2"
-    
-    # Vérifier que enrich_with_ids a été appelé avec le bon format (arguments nommés)
+    node_ids = [n["id"] for n in result["nodes"]]
+    assert len(set(node_ids)) == 3
+    for nid in node_ids:
+        assert nid.startswith("node-") and len(nid) == 37
     calls = mock_generation_service.enrich_with_ids.call_args_list
     assert len(calls) == 3
-    # enrich_with_ids est appelé avec content=response, start_id=start_id (arguments nommés)
-    assert calls[0].kwargs["start_id"] == "NODE_PARENT_1_CHOICE_0"  # start_id pour premier choix
-    assert calls[1].kwargs["start_id"] == "NODE_PARENT_1_CHOICE_1"  # start_id pour deuxième choix
-    assert calls[2].kwargs["start_id"] == "NODE_PARENT_1_CHOICE_2"  # start_id pour troisième choix
+    for call in calls:
+        assert call.kwargs["start_id"].startswith("node-") and len(call.kwargs["start_id"]) == 37
     
     # Vérifier compteurs batch
     assert "connected_choices_count" in result
@@ -299,3 +295,153 @@ async def test_generate_nodes_for_all_choices_empty_choices(mock_llm_client, moc
     
     # Vérifier que generate_dialogue_node n'a pas été appelé
     mock_generation_service.generate_dialogue_node.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_generate_nodes_for_all_choices_partial_failure(
+    mock_llm_client, mock_generation_service, sample_parent_node_with_choices
+):
+    """Test génération batch avec N choix : K succès, N-K échecs.
+
+    AC: #3 (batch) — Lorsqu'un choix échoue (LLM ou enrichissement), les autres sont
+    tout de même retournés et les échecs sont exposés (failed_choices, failed_choices_count).
+    Story 1.2 — Traçabilité Epic 1.
+    """
+    from models.dialogue_structure.unity_dialogue_node import (
+        UnityDialogueGenerationResponse,
+        UnityDialogueNodeContent,
+    )
+
+    service = GraphGenerationService(mock_generation_service)
+
+    mock_ok = [
+        UnityDialogueGenerationResponse(
+            title="Dialogue 1",
+            node=UnityDialogueNodeContent(speaker="PNJ", line="Réponse 1", choices=None),
+        ),
+        UnityDialogueGenerationResponse(
+            title="Dialogue 3",
+            node=UnityDialogueNodeContent(speaker="PNJ", line="Réponse 3", choices=None),
+        ),
+    ]
+    # 1er appel OK, 2e échec, 3e OK
+    def generate_side_effect(*args, **kwargs):
+        generate_side_effect.call_count += 1
+        if generate_side_effect.call_count == 2:
+            raise Exception("LLM error")
+        return mock_ok[0] if generate_side_effect.call_count == 1 else mock_ok[1]
+
+    generate_side_effect.call_count = 0
+    mock_generation_service.generate_dialogue_node = AsyncMock(side_effect=generate_side_effect)
+
+    enriched_0 = [{"id": "NODE_PARENT_1_CHOICE_0", "speaker": "PNJ", "line": "Réponse 1", "choices": []}]
+    enriched_2 = [{"id": "NODE_PARENT_1_CHOICE_2", "speaker": "PNJ", "line": "Réponse 3", "choices": []}]
+    mock_generation_service.enrich_with_ids.side_effect = [enriched_0, enriched_2]
+
+    result = await service.generate_nodes_for_all_choices(
+        parent_node=sample_parent_node_with_choices,
+        instructions="Test",
+        context={},
+        llm_client=mock_llm_client,
+        system_prompt_override=None,
+        max_choices=None,
+    )
+
+    assert result["generated_choices_count"] == 2
+    assert result["failed_choices_count"] == 1
+    assert result["total_choices_count"] == 3
+    assert len(result["nodes"]) == 2
+    assert len(result["failed_choices"]) == 1
+    assert "error" in result["failed_choices"][0]
+    assert "choice_index" in result["failed_choices"][0]
+    assert "LLM error" in result["failed_choices"][0]["error"]
+
+
+@pytest.mark.asyncio
+async def test_generate_nodes_for_all_choices_expands_test_choices_to_four_nodes(
+    mock_llm_client, mock_generation_service
+):
+    """Batch : 2 choix avec test → 4 nœuds chacun ; 1 choix sans test → 1 nœud (9 au total)."""
+    parent_node: Dict[str, Any] = {
+        "id": "START",
+        "speaker": "PNJ",
+        "line": "Alors ?",
+        "choices": [
+            {"text": "Tenter A", "test": "Force:10", "targetNode": None},
+            {"text": "Tenter B", "test": "Agilité:12", "targetNode": None},
+            {"text": "Partir", "targetNode": None},
+        ],
+    }
+
+    def four_nodes_for_choice(prefix: str) -> Dict[str, Any]:
+        b, c, d, e = (
+            f"{prefix}_cf",
+            f"{prefix}_f",
+            f"{prefix}_s",
+            f"{prefix}_cs",
+        )
+        return {
+            "nodes": [
+                {"id": b, "speaker": "PNJ", "line": f"{prefix} cf", "choices": []},
+                {"id": c, "speaker": "PNJ", "line": f"{prefix} f", "choices": []},
+                {"id": d, "speaker": "PNJ", "line": f"{prefix} s", "choices": []},
+                {"id": e, "speaker": "PNJ", "line": f"{prefix} cs", "choices": []},
+            ],
+            "connections": [
+                {
+                    "from": "NODE_START",
+                    "choice_index": 0,
+                    "testCriticalFailureNode": b,
+                    "testFailureNode": c,
+                    "testSuccessNode": d,
+                    "testCriticalSuccessNode": e,
+                }
+            ],
+        }
+
+    async def choice_with_test_side_effect(*args: Any, **kwargs: Any) -> Dict[str, Any]:
+        idx = choice_with_test_side_effect.idx
+        choice_with_test_side_effect.idx += 1
+        return four_nodes_for_choice(f"N{idx}")
+
+    choice_with_test_side_effect.idx = 0
+
+    mock_generation_service.generate_nodes_for_choice_with_test = AsyncMock(
+        side_effect=choice_with_test_side_effect
+    )
+
+    from models.dialogue_structure.unity_dialogue_node import (
+        UnityDialogueGenerationResponse,
+        UnityDialogueNodeContent,
+    )
+
+    plain_response = UnityDialogueGenerationResponse(
+        title="Fin",
+        node=UnityDialogueNodeContent(speaker="PNJ", line="Au revoir", choices=None),
+    )
+    mock_generation_service.generate_dialogue_node = AsyncMock(return_value=plain_response)
+    mock_generation_service.enrich_with_ids.return_value = [
+        {"id": "NODE_START_CHOICE_2", "speaker": "PNJ", "line": "Au revoir", "choices": []}
+    ]
+
+    service = GraphGenerationService(mock_generation_service)
+    result = await service.generate_nodes_for_all_choices(
+        parent_node=parent_node,
+        instructions="Continue",
+        context={},
+        llm_client=mock_llm_client,
+        system_prompt_override=None,
+        max_choices=None,
+    )
+
+    assert len(result["nodes"]) == 9
+    assert result["generated_choices_count"] == 9
+    assert result["failed_choices_count"] == 0
+    assert mock_generation_service.generate_nodes_for_choice_with_test.call_count == 2
+    assert mock_generation_service.generate_dialogue_node.call_count == 1
+
+    test_conns = [c for c in result["connections"] if c.get("connection_type", "").startswith("test-")]
+    assert len(test_conns) == 8
+    choice_conns = [c for c in result["connections"] if c.get("connection_type") == "choice"]
+    assert len(choice_conns) == 1
+    assert choice_conns[0]["via_choice_index"] == 2

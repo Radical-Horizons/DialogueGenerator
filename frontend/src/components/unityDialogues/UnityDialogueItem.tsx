@@ -47,15 +47,23 @@ export const UnityDialogueItem = memo(function UnityDialogueItem({
   const titleText = formatFilename(dialogue.filename)
 
   return (
-    <div
+    <button
+      type="button"
+      data-testid="unity-dialogue-item"
+      aria-pressed={isSelected}
       onClick={onClick}
       style={{
+        width: '100%',
         padding: '0.75rem',
         borderBottom: `1px solid ${theme.border.primary}`,
+        borderTop: 'none',
+        borderLeft: 'none',
+        borderRight: 'none',
         backgroundColor: isSelected ? theme.state.selected.background : 'transparent',
         color: theme.text.primary,
         cursor: 'pointer',
         transition: 'background-color 0.2s',
+        textAlign: 'left',
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
@@ -92,7 +100,7 @@ export const UnityDialogueItem = memo(function UnityDialogueItem({
         <span>•</span>
         <span>{formatDate(dialogue.modified_time)}</span>
       </div>
-    </div>
+    </button>
   )
 })
 

@@ -1,5 +1,7 @@
 """Service pour générer des dialogues au format Unity JSON."""
+import asyncio
 import logging
+import uuid
 from typing import List, Dict, Any, Optional
 
 from models.dialogue_structure.unity_dialogue_node import (
@@ -10,6 +12,11 @@ from models.dialogue_structure.unity_dialogue_node import (
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
+
+
+def _stable_node_id() -> str:
+    """Retourne un identifiant stable unique pour un nœud (schema v1.2.0)."""
+    return f"node-{uuid.uuid4().hex}"
 
 
 class UnityDialogueGenerationService:
@@ -230,12 +237,10 @@ class UnityDialogueGenerationService:
             }
         ]
         
-        # Générer les 4 nœuds
-        generated_nodes = []
-        node_ids = {}
-        
-        for result_context in result_contexts:
-            # Construire le prompt enrichi pour ce résultat
+        # Générer les 4 nœuds en parallèle (réduit le temps total vs 4 appels séquentiels)
+        async def generate_one(
+            result_context: Dict[str, str],
+        ) -> tuple[str, List[Dict[str, Any]]]:
             enriched_prompt = f"""Contexte précédent:
 {parent_speaker}: {parent_line}
 
@@ -250,31 +255,31 @@ Résultat du test: {result_context["label"]}
 Instructions pour la suite:
 {instructions}
 """
-            
-            # Générer le nœud pour ce résultat
             response = await self.generate_dialogue_node(
                 llm_client=llm_client,
                 prompt=enriched_prompt,
                 system_prompt_override=system_prompt_override,
-                max_choices=None
+                max_choices=None,
             )
-            
-            # Générer l'ID du nœud
-            if parent_node_id.startswith("NODE_"):
-                node_id = f"{parent_node_id}_CHOICE_{choice_index}_{result_context['node_id_suffix']}"
-            else:
-                node_id = f"NODE_{parent_node_id}_CHOICE_{choice_index}_{result_context['node_id_suffix']}"
-            
-            # Enrichir avec ID
+            node_id = _stable_node_id()
             enriched = self.enrich_with_ids(
                 content=response,
-                start_id=node_id
+                start_id=node_id,
             )
-            
             if enriched:
-                generated_nodes.extend(enriched)
-                node_ids[result_context["name"]] = node_id
-        
+                enriched[0]["title"] = result_context["label"]
+            return node_id, enriched or []
+
+        results = await asyncio.gather(
+            *[generate_one(rc) for rc in result_contexts],
+            return_exceptions=False,
+        )
+        generated_nodes = []
+        node_ids = {}
+        for result_context, (node_id, enriched) in zip(result_contexts, results):
+            node_ids[result_context["name"]] = node_id
+            generated_nodes.extend(enriched)
+
         # Créer la connexion avec les 4 champs
         connection = {
             "from": parent_node_id,
@@ -375,7 +380,9 @@ Instructions pour la suite:
                         choice_dict["testSuccessNode"] = test_result_node_ids.get("success")
                         choice_dict["testCriticalSuccessNode"] = test_result_node_ids.get("critical-success")
                 if choice_content.traitRequirements:
-                    choice_dict["traitRequirements"] = choice_content.traitRequirements
+                    choice_dict["traitRequirements"] = [
+                        tr.model_dump(mode="json") for tr in choice_content.traitRequirements
+                    ]
                 if choice_content.allowInfluenceForcing is not None:
                     choice_dict["allowInfluenceForcing"] = choice_content.allowInfluenceForcing
                 if choice_content.influenceThreshold is not None:

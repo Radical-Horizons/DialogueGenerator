@@ -64,7 +64,7 @@ class TestContextRetrievalIntegration:
         build_request = {
             "context_selections": context_selections,
             "user_instructions": "Scène de test pour vérifier la récupération de fiches",
-            "max_tokens": 2000,
+            "max_tokens": 10000,
             "include_dialogue_type": False
         }
         
@@ -144,7 +144,7 @@ class TestContextRetrievalIntegration:
                 "locations_full": [location_name]
             },
             "user_instructions": "Test avec un seul lieu",
-            "max_tokens": 1000
+            "max_tokens": 10000
         }
         
         build_response = client.post("/api/v1/context/build", json=build_request)
@@ -196,7 +196,7 @@ class TestContextRetrievalIntegration:
         build_request = {
             "context_selections": context_selections,
             "user_instructions": "Test avec plusieurs éléments",
-            "max_tokens": 3000
+            "max_tokens": 10000
         }
         
         build_response = client.post("/api/v1/context/build", json=build_request)

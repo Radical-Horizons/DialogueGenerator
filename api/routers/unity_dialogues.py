@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Annotated, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, Request, status
+
+from api.routers.auth import get_current_user
 from api.schemas.dialogue import (
     UnityDialogueListResponse,
     UnityDialogueMetadata,
@@ -21,7 +23,7 @@ from services.configuration_service import ConfigurationService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _extract_title_from_json(json_data: list) -> Optional[str]:
@@ -91,8 +93,12 @@ async def list_unity_dialogues(
         # Créer le dossier s'il n'existe pas
         unity_dir.mkdir(parents=True, exist_ok=True)
         
-        # Lister tous les fichiers .json
-        json_files = list(unity_dir.glob("*.json"))
+        # Lister uniquement les vrais dialogues Unity et ignorer les sidecars techniques.
+        json_files = [
+            path for path in unity_dir.glob("*.json")
+            if not path.name.endswith(".layout.json")
+            and not path.name.endswith(".json.json")
+        ]
         metadata_list = []
         
         for json_file in json_files:
@@ -206,12 +212,16 @@ async def read_unity_dialogue(
         try:
             json_content = file_path.read_text(encoding='utf-8')
             
-            # Valider que c'est du JSON valide
+            # Valider que c'est du JSON valide ; accepter liste ou document canonique (schemaVersion + nodes)
             try:
                 json_data = json.loads(json_content)
+                if isinstance(json_data, dict) and "nodes" in json_data:
+                    # Format document (Story 16.2) : renvoyer la liste des nœuds pour compatibilité loadGraph
+                    json_data = json_data["nodes"]
+                    json_content = json.dumps(json_data, ensure_ascii=False, indent=2)
                 if not isinstance(json_data, list):
                     raise ValidationException(
-                        message="Le fichier JSON Unity doit être un tableau de nœuds",
+                        message="Le fichier JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)",
                         details={"filename": filename},
                         request_id=request_id
                     )
@@ -310,7 +320,9 @@ async def delete_unity_dialogue(
                 request_id=request_id
             )
         
-        # Supprimer le fichier
+        document_key = filename[:-5] if filename.endswith(".json") else filename
+        
+        # Supprimer le fichier dialogue
         try:
             file_path.unlink()
             logger.info(f"Dialogue Unity supprimé: {filename} (request_id: {request_id})")
@@ -320,6 +332,28 @@ async def delete_unity_dialogue(
                 details={"filename": filename, "error": str(e)},
                 request_id=request_id
             )
+        
+        # Supprimer le layout associé (Assets/Layouts)
+        layouts_path = config_service.get_unity_layouts_path()
+        if layouts_path:
+            layout_dir = Path(layouts_path)
+            for sidecar in (f"{document_key}.layout.json", f"{document_key}.layout.meta"):
+                sidecar_path = layout_dir / sidecar
+                if sidecar_path.is_file():
+                    try:
+                        sidecar_path.unlink()
+                        logger.info(f"Layout supprimé: {sidecar} (request_id: {request_id})")
+                    except (OSError, IOError) as e:
+                        logger.warning("Impossible de supprimer le layout %s: %s", sidecar, e)
+        
+        # Supprimer le sidecar last_seq (ADR-006) s'il existe
+        seq_path = unity_dir / f"{document_key}.seq"
+        if seq_path.is_file():
+            try:
+                seq_path.unlink()
+                logger.info(f"Sidecar .seq supprimé pour {document_key} (request_id: {request_id})")
+            except (OSError, IOError) as e:
+                logger.warning("Impossible de supprimer le fichier .seq %s: %s", document_key, e)
         
     except (ValidationException, NotFoundException):
         raise

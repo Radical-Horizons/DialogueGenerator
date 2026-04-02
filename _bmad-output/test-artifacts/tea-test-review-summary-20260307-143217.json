@@ -1,0 +1,74 @@
+{
+  "overall_score": 93,
+  "overall_grade": "A",
+  "quality_assessment": "Good",
+  "dimension_scores": {
+    "determinism": 100,
+    "isolation": 95,
+    "maintainability": 78,
+    "performance": 100
+  },
+  "dimension_grades": {
+    "determinism": "A",
+    "isolation": "A",
+    "maintainability": "B",
+    "performance": "A"
+  },
+  "violations_summary": {
+    "total": 4,
+    "HIGH": 0,
+    "MEDIUM": 1,
+    "LOW": 3
+  },
+  "all_violations": [
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 81,
+      "severity": "LOW",
+      "category": "shared-overrides",
+      "description": "app.dependency_overrides est modifié globalement ; le cleanup dans yield évite la fuite vers d'autres tests mais la pratique est sensible en parallèle.",
+      "suggestion": "Documenter que les tests de ce module ne doivent pas être exécutés en parallèle avec d'autres modules modifiant app.dependency_overrides, ou utiliser un scope session avec restauration explicite.",
+      "code_snippet": "app.dependency_overrides[get_dialogue_generation_service] = lambda: mock_dialogue_service",
+      "dimension": "isolation"
+    },
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 0,
+      "severity": "MEDIUM",
+      "category": "missing-test-ids",
+      "description": "Aucun identifiant de test (ex. 1.3-API-001) ni marqueurs P0/P1/P2/P3 pour la priorisation ou la traçabilité.",
+      "suggestion": "Ajouter des test IDs dans les noms ou via @pytest.mark avec un id ; utiliser @pytest.mark.p0 / p1 pour les tests critiques.",
+      "code_snippet": "",
+      "dimension": "maintainability"
+    },
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 95,
+      "severity": "LOW",
+      "category": "duplicate-monkeypatch",
+      "description": "Le même bloc monkeypatch (SkillCatalogService, TraitCatalogService) est répété dans test_estimate_tokens et test_preview_prompt.",
+      "suggestion": "Extraire dans une fixture partagée (ex. mock_skill_trait_services) pour réduire la duplication.",
+      "code_snippet": "monkeypatch.setattr(\"api.routers.dialogues.SkillCatalogService\", lambda: mock_skill_service)",
+      "dimension": "maintainability"
+    },
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 238,
+      "severity": "LOW",
+      "category": "assert-in-branch",
+      "description": "test_generate_unity_dialogue_success utilise assert response.status_code in [200, 500] puis des assertions dans if response.status_code == 200 ; comportement accepté mais peu explicite.",
+      "suggestion": "Pour plus de clarté : soit mock plus strict pour viser 200, soit deux tests (success vs error) avec assertions explicites.",
+      "code_snippet": "assert response.status_code in [200, 500]",
+      "dimension": "maintainability"
+    }
+  ],
+  "high_severity_violations": [],
+  "top_10_recommendations": [
+    { "dimension": "maintainability", "recommendation": "Introduire des test IDs et marqueurs P0/P1 pour alignement avec test-levels-framework et trace.", "impact": "MEDIUM" },
+    { "dimension": "maintainability", "recommendation": "Factoriser les mocks Skill/Trait dans une fixture.", "impact": "MEDIUM" },
+    { "dimension": "maintainability", "recommendation": "Renforcer les assertions dans test_generate_unity_dialogue_success (un seul code attendu ou deux cas distincts).", "impact": "MEDIUM" },
+    { "dimension": "isolation", "recommendation": "Conserver le cleanup dans yield ; ajouter une note en en-tête du module sur l'usage de dependency_overrides.", "impact": "MEDIUM" }
+  ],
+  "subagent_execution": "sequential",
+  "performance_gain": "N/A (sequential mode)"
+}

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MainLayout } from './components/layout/MainLayout'
 import { LoginForm } from './components/auth/LoginForm'
 import { Dashboard } from './components/layout/Dashboard'
@@ -10,6 +11,7 @@ import { useAuthStore } from './store/authStore'
 import { ToastContainer } from './components/shared'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { initLogging } from './utils/logging'
+import { theme } from './theme'
 import './App.css'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -57,7 +59,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh',
-        backgroundColor: '#1a1a1a',
+        backgroundColor: theme.background.primary,
         color: 'rgba(255, 255, 255, 0.87)',
       }}>
         <div>Chargement...</div>
@@ -185,6 +187,8 @@ function AppRoutes() {
   )
 }
 
+const queryClient = new QueryClient()
+
 function App() {
   useEffect(() => {
     // Initialiser le système de logging au démarrage
@@ -192,7 +196,7 @@ function App() {
   }, [])
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <ToastContainer />
       <BrowserRouter
         future={{
@@ -202,7 +206,7 @@ function App() {
       >
         <AppRoutes />
       </BrowserRouter>
-    </>
+    </QueryClientProvider>
   )
 }
 

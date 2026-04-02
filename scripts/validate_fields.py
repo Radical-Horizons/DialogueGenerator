@@ -10,7 +10,7 @@ _root_dir = Path(__file__).parent.parent
 if str(_root_dir) not in sys.path:
     sys.path.insert(0, str(_root_dir))
 
-from context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 from services.context_field_validator import ContextFieldValidator
 from services.configuration_service import ConfigurationService
 

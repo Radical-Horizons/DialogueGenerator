@@ -1,0 +1,17 @@
+{
+  "file": "tests/services/test_dialogue_generation_service.py",
+  "overall_score": 95,
+  "overall_grade": "A",
+  "dimension_scores": { "determinism": 100, "isolation": 100, "maintainability": 80, "performance": 100 },
+  "violations_summary": { "total": 1, "HIGH": 0, "MEDIUM": 0, "LOW": 1 },
+  "all_violations": [
+    {
+      "severity": "LOW",
+      "category": "missing-test-ids",
+      "description": "Aucun identifiant de test ni marqueurs P0/P1 pour priorisation (tests unitaires service critiques).",
+      "line": 0,
+      "file": "tests/services/test_dialogue_generation_service.py"
+    }
+  ],
+  "strengths": ["Fixtures mock_context_builder / mock_prompt_engine avec spec=", "Fichier 207 lignes (<300)", "Assertions explicites sur les appels mock", "Pas de dépendances externes"]
+}

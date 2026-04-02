@@ -1,0 +1,23 @@
+{
+  "dimension": "isolation",
+  "score": 95,
+  "max_score": 100,
+  "grade": "A",
+  "violations": [
+    {
+      "file": "tests/api/test_dialogues.py",
+      "line": 81,
+      "severity": "LOW",
+      "category": "shared-overrides",
+      "description": "app.dependency_overrides est modifié globalement ; le cleanup dans yield évite la fuite vers d'autres tests mais la pratique est sensible en parallèle.",
+      "suggestion": "Documenter que les tests de ce module ne doivent pas être exécutés en parallèle avec d'autres modules modifiant app.dependency_overrides, ou utiliser un scope session avec restauration explicite.",
+      "code_snippet": "app.dependency_overrides[get_dialogue_generation_service] = lambda: mock_dialogue_service"
+    }
+  ],
+  "passed_checks": 7,
+  "failed_checks": 1,
+  "total_checks": 8,
+  "violation_summary": { "HIGH": 0, "MEDIUM": 0, "LOW": 1 },
+  "recommendations": ["Conserver le cleanup dans yield ; ajouter une note en en-tête du module sur l'usage de dependency_overrides."],
+  "summary": "Bonne isolation : fixtures avec yield et app.dependency_overrides.clear(). Un point d'attention (LOW) sur la portée globale des overrides."
+}

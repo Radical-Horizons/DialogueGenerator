@@ -1,5 +1,5 @@
 """Schémas Pydantic pour le contexte GDD."""
-from typing import List, Optional, Dict, Any
+from typing import List, Literal, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from api.schemas.dialogue import ContextSelection
 import sys
@@ -142,20 +142,26 @@ class CommunityListResponse(BaseModel):
     Attributes:
         communities: Liste des communautés.
         total: Nombre total de communautés.
+        page: Numéro de page (1-indexed) si pagination activée.
+        page_size: Taille de page si pagination activée.
+        total_pages: Nombre de pages si pagination activée.
     """
     communities: List[CommunityResponse] = Field(..., description="Liste des communautés")
     total: int = Field(..., description="Nombre total de communautés")
+    page: Optional[int] = Field(None, description="Numéro de page actuelle (1-indexed)")
+    page_size: Optional[int] = Field(None, description="Taille de la page")
+    total_pages: Optional[int] = Field(None, description="Nombre total de pages")
 
 
 class RegionListResponse(BaseModel):
-    """Réponse contenant une liste de régions.
+    """Réponse contenant la liste des noms du catalogue lieux (clé API ``regions`` inchangée).
     
     Attributes:
-        regions: Liste des noms de régions.
-        total: Nombre total de régions.
+        regions: Noms (régions typées si présentes, sinon toutes les fiches lieux).
+        total: Nombre d'entrées.
     """
-    regions: List[str] = Field(..., description="Liste des noms de régions")
-    total: int = Field(..., description="Nombre total de régions")
+    regions: List[str] = Field(..., description="Noms de lieux pour le catalogue")
+    total: int = Field(..., description="Nombre de noms")
 
 
 class SubLocationListResponse(BaseModel):
@@ -205,11 +211,26 @@ class BuildContextRequest(BaseModel):
         user_instructions: Instructions utilisateur.
         max_tokens: Nombre maximum de tokens.
         include_dialogue_type: Inclure le type de dialogue dans le contexte.
+        field_configs: Champs par type (aligné estimate-tokens / génération).
+        organization_mode: Mode d'organisation du contexte.
     """
     context_selections: ContextSelection = Field(..., description="Sélections de contexte GDD")
     user_instructions: str = Field(default="", description="Instructions utilisateur")
-    max_tokens: int = Field(default=1500, ge=100, le=Defaults.MAX_CONTEXT_TOKENS, description="Nombre maximum de tokens")
+    max_tokens: int = Field(
+        default=Defaults.CONTEXT_TOKENS,
+        ge=Defaults.MIN_CONTEXT_TOKENS,
+        le=Defaults.MAX_CONTEXT_TOKENS,
+        description="Nombre maximum de tokens",
+    )
     include_dialogue_type: bool = Field(default=False, description="Inclure le type de dialogue")
+    field_configs: Optional[Dict[str, List[str]]] = Field(
+        default=None,
+        description="Configuration des champs par type d'élément (même sémantique que /estimate-tokens).",
+    )
+    organization_mode: Optional[str] = Field(
+        default="narrative",
+        description='Mode d\'organisation: "default", "narrative", "minimal", etc.',
+    )
 
 
 class BuildContextResponse(BaseModel):
@@ -221,4 +242,49 @@ class BuildContextResponse(BaseModel):
     """
     context: str = Field(..., description="Contexte construit")
     token_count: int = Field(..., description="Nombre de tokens")
+
+
+class SuggestionItem(BaseModel):
+    """Un élément suggéré automatiquement basé sur les relations GDD.
+
+    Attributes:
+        type: Type de l'entité suggérée (singular form: character, location, etc.).
+        name: Nom de l'entité.
+    """
+
+    type: Literal["character", "location", "item", "species", "community"] = Field(
+        ..., description="Type de l'entité : character, location, item, species, community"
+    )
+    name: str = Field(..., description="Nom de l'entité suggérée")
+
+
+class SuggestionsRequest(BaseModel):
+    """Requête pour obtenir des suggestions de contexte basées sur l'entité déclencheur.
+
+    Attributes:
+        trigger_type: Type de l'entité qui vient d'être sélectionnée.
+        trigger_name: Nom de l'entité trigger.
+        already_selected: Sélections actuelles (pour filtrer les doublons).
+    """
+
+    trigger_type: Literal["character", "location", "item", "species", "community"] = Field(
+        ..., description="Type du trigger : character, location, item, species, community"
+    )
+    trigger_name: str = Field(..., min_length=1, description="Nom de l'entité trigger")
+    already_selected: Optional[ContextSelection] = Field(
+        None, description="Sélections actuelles à exclure des suggestions"
+    )
+    dialogue_type: Optional[str] = Field(
+        None, description="Type de dialogue courant (ex: salutation, confrontation)"
+    )
+
+
+class SuggestionsResponse(BaseModel):
+    """Réponse contenant les suggestions de contexte GDD.
+
+    Attributes:
+        suggestions: Liste des entités suggérées (non encore sélectionnées, non ignorées).
+    """
+
+    suggestions: List[SuggestionItem] = Field(..., description="Liste des suggestions")
 

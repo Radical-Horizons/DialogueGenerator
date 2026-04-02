@@ -6,26 +6,30 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 
 ## Accès
 
-- **URL** : `/graph-editor`
+- **URL** : `/graph-editor` (vue **standalone** : canvas + liste des dialogues, **sans** panneau d’édition de nœud intégré au même layout que ci-dessous)
+- **Dashboard** : onglet central **« 📊 Éditeur de Graphe »** — graphe au centre, **panneau droit « Édition de nœud »** pour speaker, ligne, choix, **comboboxes de cibles**, etc.
 - **Raccourci clavier** : `Ctrl+4` depuis n'importe quelle page
+
+> **Suivi (2026-03)** : décisions détaillées (sélecteurs de cibles branchés sur le store, merge formulaire, resync, implications tests E2E) → [`adr-graph-connection-targets-ui-shell.md`](./adr-graph-connection-targets-ui-shell.md).
 
 ## Interface
 
 ### Layout Principal
 
+**Dashboard (onglet graphe)** — schéma représentatif :
+
 ```
 +--------------------------------------------------+
 | Header (titre, actions)                          |
 +--------------------------------------------------+
-| Canvas (Graphe)           | Panel Édition         |
-|                          |                       |
-| [Graphe interactif]      | [Propriétés nœud]     |
-|                          |                       |
-| Minimap (coin)           |                       |
-+--------------------------------------------------+
-| Footer (stats, validation)                       |
+| Liste Unity | Canvas (Graphe)  | Panel Édition   |
+|             |                  | (nœud sélec.)   |
+|             | [Graphe]         |                 |
+|             | Minimap          |                 |
 +--------------------------------------------------+
 ```
+
+**Page `/graph-editor` (standalone)** : pas de colonne « Panel Édition » dans cette vue ; édition texte/connexions via le **Dashboard** (voir ADR ci-dessus).
 
 ### Header
 
@@ -45,12 +49,16 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 
 ### Panel Édition
 
+*(Visible dans le Dashboard, onglet « Édition de nœud », pas sur la page standalone `/graph-editor`.)*
+
 - **ID du nœud** : Identifiant unique (readonly)
 - **Type** : dialogueNode, testNode, endNode
+- **Titre** : Libellé optionnel (affichage carte / listes / jump-to ; distinct de l’id stable)
 - **Speaker** : Personnage qui parle
 - **Dialogue** : Texte de la réplique
 - **Test** : Test d'attribut (format: `Attribut+Compétence:DD`)
-- **Choix** : Liste des choix du joueur (readonly pour l'instant)
+- **Choix** : Texte, conditions, etc. ; **cibles** (nœud suivant au choix, branches test) via **combobox** branché sur le graphe (pas saisie libre d’id seule)
+- **Nœud suivant** : Combobox lorsqu’il n’y a **pas** de choix (flux `nextNode`)
 - **Actions** : Enregistrer, Supprimer
 
 ### Footer

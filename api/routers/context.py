@@ -1,7 +1,9 @@
 """Router pour le contexte GDD."""
 import logging
-from typing import Annotated, Optional
+from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status
+
+from api.routers.auth import get_current_user
 from api.schemas.context import (
     CharacterListResponse,
     CharacterResponse,
@@ -18,9 +20,37 @@ from api.schemas.context import (
     LinkedElementsRequest,
     LinkedElementsResponse,
     BuildContextRequest,
-    BuildContextResponse
+    BuildContextResponse,
+    SuggestionsRequest,
+    SuggestionsResponse,
+    SuggestionItem,
 )
-from api.schemas.dialogue import EstimateTokensRequest, EstimateTokensResponse
+from api.schemas.context_rules import (
+    ContextRule,
+    CreateRuleRequest,
+    UpdateRuleRequest,
+    RulesListResponse,
+    DialogueTypeRulesResponse,
+)
+from api.schemas.dialogue import (
+    EstimateTokensRequest,
+    EstimateTokensResponse,
+    OptimizeContextRequest,
+    OptimizeContextResponse,
+)
+from api.schemas.gdd_context_stale import (
+    GddContentFingerprintRequest,
+    GddContentFingerprintResponse,
+    GddEntityHistoryResponse,
+    GddEntityHistoryEventPublic,
+)
+from constants import Defaults
+from services.context_token_budget import compute_context_selection_token_metrics
+from services.context_truncator import (
+    cap_context_text_to_budget,
+    count_tokens_in_prompt_context_element,
+)
+from services.context_selection_optimizer import optimize_context_selection
 from api.dependencies import (
     get_context_builder,
     get_linked_selector_service,
@@ -28,19 +58,21 @@ from api.dependencies import (
     get_dialogue_generation_service,
     get_prompt_engine,
     get_skill_catalog_service,
-    get_trait_catalog_service
+    get_trait_catalog_service,
+    get_context_rule_service,
 )
 from api.exceptions import NotFoundException, InternalServerException, ValidationException
 from core.context.context_builder import ContextBuilder
 from services.linked_selector import LinkedSelectorService
 from services.dialogue_generation_service import DialogueGenerationService
+from services.context_rule_service import ContextRuleService
 from core.prompt.prompt_engine import PromptEngine
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get(
@@ -205,7 +237,7 @@ async def list_regions(
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> RegionListResponse:
-    """Liste toutes les régions disponibles.
+    """Liste les noms du catalogue lieux (régions typées ou toutes les fiches).
     
     Args:
         request: La requête HTTP.
@@ -213,13 +245,57 @@ async def list_regions(
         request_id: ID de la requête.
         
     Returns:
-        Liste des régions.
+        Liste des noms (champ ``regions`` pour compatibilité client).
     """
     regions = context_builder.get_regions()
     
     return RegionListResponse(
         regions=regions,
         total=len(regions)
+    )
+
+
+@router.get(
+    "/locations/scene/regions",
+    response_model=RegionListResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def list_scene_regions(
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> RegionListResponse:
+    """Liste les noms pour le sélecteur « région » (Scène principale).
+
+    Diffère du catalogue « Lieux » : priorité aux régions typées ou aux parents avec ``Contient``.
+    """
+    regions = context_builder.get_scene_region_names()
+    return RegionListResponse(regions=regions, total=len(regions))
+
+
+@router.get(
+    "/locations/scene/sub-locations/{name}",
+    response_model=SubLocationListResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_scene_sub_locations(
+    name: str,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> SubLocationListResponse:
+    """Sous-lieux pour la scène : ``Contient`` du parent ou tous les autres lieux."""
+    if context_builder.get_location_details_by_name(name) is None:
+        raise NotFoundException(
+            resource_type="Lieu",
+            resource_id=name,
+            request_id=request_id,
+        )
+    sub_locations = context_builder.get_scene_sub_location_names(name)
+    return SubLocationListResponse(
+        sub_locations=sub_locations,
+        total=len(sub_locations),
+        region_name=name,
     )
 
 
@@ -234,10 +310,10 @@ async def get_sub_locations(
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> SubLocationListResponse:
-    """Récupère les sous-lieux d'une région.
+    """Récupère les noms du champ ``Contient`` pour une fiche lieu.
     
     Args:
-        name: Nom de la région.
+        name: Nom de la fiche lieu.
         request: La requête HTTP.
         context_builder: ContextBuilder injecté.
         request_id: ID de la requête.
@@ -248,15 +324,14 @@ async def get_sub_locations(
     Raises:
         NotFoundException: Si la région n'existe pas.
     """
-    # Vérifier que la région existe
     region_details = context_builder.get_location_details_by_name(name)
-    if region_details is None or region_details.get("Catégorie") != "Région":
+    if region_details is None:
         raise NotFoundException(
-            resource_type="Région",
+            resource_type="Lieu",
             resource_id=name,
             request_id=request_id
         )
-    
+
     sub_locations = context_builder.get_sub_locations(name)
     
     return SubLocationListResponse(
@@ -360,6 +435,41 @@ async def list_items(
         )
 
 
+@router.get(
+    "/items/{name}",
+    response_model=ItemResponse,
+    status_code=status.HTTP_200_OK
+)
+async def get_item(
+    name: str,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)]
+) -> ItemResponse:
+    """Récupère un objet par son nom.
+
+    Args:
+        name: Nom de l'objet.
+        request: La requête HTTP.
+        context_builder: ContextBuilder injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        L'objet demandé.
+
+    Raises:
+        NotFoundException: Si l'objet n'existe pas.
+    """
+    item_data = context_builder.get_item_details_by_name(name)
+    if item_data is None:
+        raise NotFoundException(
+            resource_type="Objet",
+            resource_id=name,
+            request_id=request_id
+        )
+    return ItemResponse(name=name, data=item_data)
+
+
 @router.post(
     "/build",
     response_model=BuildContextResponse,
@@ -390,19 +500,19 @@ async def build_context(
         structured_context = context_builder.build_context_json(
             selected_elements=context_selections_dict,
             scene_instruction=request_data.user_instructions,
-            field_configs=None,
-            organization_mode="narrative",
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
             max_tokens=request_data.max_tokens,
             include_dialogue_type=request_data.include_dialogue_type,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        # Sérialiser en texte
-        context_text = context_builder._context_serializer.serialize_to_text(structured_context)
-        token_count = context_builder._count_tokens(context_text)
-        
+        context_text = context_builder.serialize_context_to_text(structured_context)
+        capped = cap_context_text_to_budget(context_text, request_data.max_tokens)
+        token_count = context_builder._count_tokens(capped)
+
         return BuildContextResponse(
-            context=context_text,
-            token_count=token_count
+            context=capped,
+            token_count=token_count,
         )
         
     except Exception as e:
@@ -430,7 +540,12 @@ async def estimate_context_tokens(
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> EstimateTokensResponse:
     """Estime le nombre de tokens pour un contexte donné.
-    
+
+    Coût: pour le breakdown FR20, ``compute_context_selection_token_metrics`` peut invoquer
+    jusqu'à une construction + sérialisation + comptage par compartiment de sélection non vide
+    (un passage pour la sélection complète, puis un par bucket type/mode), en plus du build
+    prompt complet. Prévoir une charge CPU proportionnelle à la richesse de la sélection.
+
     Args:
         request_data: Données de la requête (sélections, instructions).
         request: La requête HTTP.
@@ -440,9 +555,10 @@ async def estimate_context_tokens(
         skill_service: SkillCatalogService injecté.
         trait_service: TraitCatalogService injecté.
         request_id: ID de la requête.
-        
+
     Returns:
-        Estimation du nombre de tokens.
+        Estimation du nombre de tokens. Voir ``EstimateTokensResponse`` pour la distinction
+        ``context_tokens`` (tronqué au budget requête) vs ``selection_tokens`` (mesure pleine).
     """
     try:
         # Utiliser la même fonction que dialogues.py pour construire le prompt complet
@@ -466,8 +582,25 @@ async def estimate_context_tokens(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        context_text = context_builder._context_serializer.serialize_to_text(structured_context)
-        context_tokens = context_builder._count_tokens(context_text)
+        context_text = cap_context_text_to_budget(
+            context_builder.serialize_context_to_text(structured_context),
+            request_data.max_context_tokens,
+        )
+        ctx_in_prompt = count_tokens_in_prompt_context_element(built.raw_prompt)
+        context_tokens = (
+            ctx_in_prompt
+            if ctx_in_prompt > 0
+            else context_builder._count_tokens(context_text)
+        )
+
+        metrics = compute_context_selection_token_metrics(
+            context_builder,
+            full_selection=request_data.context_selections,
+            user_instructions=request_data.user_instructions,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+            measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+        )
         
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
@@ -479,7 +612,11 @@ async def estimate_context_tokens(
         
         return EstimateTokensResponse(
             context_tokens=context_tokens,
+            selection_tokens=metrics.selection_tokens,
+            context_token_breakdown=metrics.breakdown,
+            context_breakdown_note=metrics.breakdown_note,
             token_count=built.token_count,
+            total_estimated_tokens=built.token_count,
             raw_prompt=built.raw_prompt,
             prompt_hash=built.prompt_hash,
             structured_prompt=structured_prompt_dict
@@ -495,6 +632,51 @@ async def estimate_context_tokens(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+@router.post(
+    "/optimize",
+    response_model=OptimizeContextResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def optimize_context(
+    request_data: OptimizeContextRequest,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> OptimizeContextResponse:
+    """Propose une sélection GDD réduite pour respecter le budget tokens (FR21).
+
+    Mesure via le même pipeline que ``/estimate-tokens`` (``selection_tokens``).
+
+    Args:
+        request_data: Sélection + paramètres alignés estimate-tokens + règles d'optimisation.
+        request: Requête HTTP.
+        context_builder: ContextBuilder injecté.
+        request_id: ID de corrélation.
+
+    Returns:
+        Sélection proposée, métriques et avertissements éventuels.
+    """
+    try:
+        return optimize_context_selection(
+            context_builder,
+            initial_selection=request_data.context_selections,
+            user_instructions=request_data.user_instructions,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+            budget_tokens=request_data.max_context_tokens,
+            rules=request_data.optimization_rules,
+        )
+    except Exception as e:
+        logger.exception(
+            "Erreur lors de l'optimisation de contexte (request_id: %s)", request_id
+        )
+        raise InternalServerException(
+            message="Erreur lors de l'optimisation de contexte",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
 
 
 @router.get(
@@ -704,4 +886,450 @@ async def get_linked_elements(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+def _resolve_already_selected(already_selected: "ContextSelection | None") -> dict[str, set[str]]:
+    """Construit un mapping type → noms sélectionnés à partir de la sélection courante.
+
+    Args:
+        already_selected: Sélection actuelle (peut être None).
+
+    Returns:
+        Dictionnaire {type_singulier: {noms}} pour filtrage des doublons.
+    """
+    if already_selected is None:
+        return {}
+    return {
+        "character": set((already_selected.characters_full or []) + (already_selected.characters_excerpt or [])),
+        "location": set((already_selected.locations_full or []) + (already_selected.locations_excerpt or [])),
+        "item": set((already_selected.items_full or []) + (already_selected.items_excerpt or [])),
+        "species": set((already_selected.species_full or []) + (already_selected.species_excerpt or [])),
+        "community": set((already_selected.communities_full or []) + (already_selected.communities_excerpt or [])),
+    }
+
+
+_LINKED_CATEGORY_TO_SUGGESTION_TYPE: dict[str, str] = {
+    "characters": "character",
+    "locations": "location",
+    "items": "item",
+    "species": "species",
+    "communities": "community",
+}
+
+
+def _filter_suggestions_by_types(
+    linked: dict[str, set[str]],
+    already_selected: dict[str, set[str]],
+    trigger_name: str,
+    allowed_types: "set[str] | None",
+) -> list[SuggestionItem]:
+    """Filtre les entités GDD liées pour construire la liste de suggestions.
+
+    Args:
+        linked: Entités liées groupées par catégorie GDD (ex. "characters": {"Bob"}).
+        already_selected: Mapping type singulier → noms déjà sélectionnés.
+        trigger_name: Nom de l'entité trigger (exclue des suggestions).
+        allowed_types: Types autorisés par les règles, ou None si aucune règle active
+            (→ tous les types sont autorisés).
+
+    Returns:
+        Liste des SuggestionItem filtrés.
+    """
+    suggestions: list[SuggestionItem] = []
+    for category, names in linked.items():
+        suggestion_type = _LINKED_CATEGORY_TO_SUGGESTION_TYPE.get(category)
+        if not suggestion_type:
+            continue
+        if allowed_types is not None and suggestion_type not in allowed_types:
+            continue
+        selected_in_category = already_selected.get(suggestion_type, set())
+        for name in names:
+            if name == trigger_name:
+                continue
+            if name in selected_in_category:
+                continue
+            suggestions.append(SuggestionItem(type=suggestion_type, name=name))
+    return suggestions
+
+
+@router.post(
+    "/suggestions",
+    response_model=SuggestionsResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_context_suggestions(
+    request_data: SuggestionsRequest,
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> SuggestionsResponse:
+    """Retourne des suggestions d'entités GDD liées à l'entité trigger.
+
+    Déclenché lors de la sélection d'une entité — retourne les entités GDD
+    liées (via les relations du GDD) non encore sélectionnées.
+
+    Si des règles de contexte actives existent et matchent le trigger, seules
+    les entités dont le type est dans les ``suggested_types`` des règles matchées
+    sont retournées. En l'absence de règles actives, toutes les entités liées
+    sont proposées (comportement Story 3.3).
+
+    Args:
+        request_data: Type + nom de l'entité trigger + sélections existantes.
+        request: La requête HTTP.
+        context_builder: ContextBuilder injecté.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        Liste de suggestions groupables par type, sans doublons.
+    """
+    try:
+        # Obtenir les éléments liés selon le type de trigger
+        linked: dict[str, set[str]] = {}
+        if request_data.trigger_type == "character":
+            linked = context_builder.get_linked_elements(character_name=request_data.trigger_name)
+        elif request_data.trigger_type == "location":
+            linked = context_builder.get_linked_elements(location_names=[request_data.trigger_name])
+        # item / species / community non supportés comme triggers → liste vide
+
+        already_selected = _resolve_already_selected(request_data.already_selected)
+
+        # Évaluation des règles : détermine les types autorisés
+        already_selected_sets: dict[str, set[str]] = already_selected
+        allowed_types = rule_service.evaluate_rules(
+            trigger_type=request_data.trigger_type,
+            trigger_name=request_data.trigger_name,
+            already_selected=already_selected_sets,
+            dialogue_type=request_data.dialogue_type,
+        )
+        # None → pas de règles actives → comportement par défaut (tous les types)
+
+        suggestions: list[SuggestionItem] = _filter_suggestions_by_types(
+            linked=linked,
+            already_selected=already_selected,
+            trigger_name=request_data.trigger_name,
+            allowed_types=allowed_types,
+        )
+
+        return SuggestionsResponse(suggestions=suggestions)
+
+    except Exception as e:
+        logger.exception(
+            f"Erreur lors de la récupération des suggestions (request_id: {request_id})"
+        )
+        raise InternalServerException(
+            message="Erreur lors de la récupération des suggestions",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Règles de sélection de contexte — CRUD (Story 3.4)
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/rules",
+    response_model=RulesListResponse,
+    response_model_by_alias=True,
+    status_code=status.HTTP_200_OK,
+)
+async def list_context_rules(
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> RulesListResponse:
+    """Liste toutes les règles de sélection de contexte.
+
+    Args:
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        Liste des règles triées par priorité.
+    """
+    rules = rule_service.list_rules()
+    return RulesListResponse(rules=rules, total=len(rules))
+
+
+@router.post(
+    "/rules",
+    response_model=ContextRule,
+    response_model_by_alias=True,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_context_rule(
+    request_data: CreateRuleRequest,
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ContextRule:
+    """Crée une nouvelle règle de sélection de contexte.
+
+    Args:
+        request_data: Corps de la requête (nom, conditions, types suggérés).
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        La règle créée avec son identifiant généré.
+    """
+    try:
+        return rule_service.create_rule(request_data)
+    except Exception as e:
+        logger.exception(f"Erreur lors de la création d'une règle (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors de la création de la règle",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.put(
+    "/rules/{rule_id}",
+    response_model=ContextRule,
+    response_model_by_alias=True,
+    status_code=status.HTTP_200_OK,
+)
+async def update_context_rule(
+    rule_id: str,
+    request_data: UpdateRuleRequest,
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ContextRule:
+    """Met à jour une règle de sélection de contexte.
+
+    Args:
+        rule_id: Identifiant de la règle à modifier.
+        request_data: Champs à modifier (tous optionnels).
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Returns:
+        La règle mise à jour.
+
+    Raises:
+        NotFoundException: Si la règle n'existe pas.
+    """
+    updated = rule_service.update_rule(rule_id, request_data)
+    if updated is None:
+        raise NotFoundException(
+            resource_type="Règle de contexte",
+            resource_id=rule_id,
+            request_id=request_id,
+        )
+    return updated
+
+
+@router.delete(
+    "/rules/{rule_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_context_rule(
+    rule_id: str,
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> None:
+    """Supprime une règle de sélection de contexte.
+
+    Args:
+        rule_id: Identifiant de la règle à supprimer.
+        request: La requête HTTP.
+        rule_service: ContextRuleService injecté.
+        request_id: ID de la requête.
+
+    Raises:
+        NotFoundException: Si la règle n'existe pas.
+    """
+    deleted = rule_service.delete_rule(rule_id)
+    if not deleted:
+        raise NotFoundException(
+            resource_type="Règle de contexte",
+            resource_id=rule_id,
+            request_id=request_id,
+        )
+
+
+@router.get(
+    "/rules/by-dialogue-type/{dialogue_type}",
+    response_model=DialogueTypeRulesResponse,
+    response_model_by_alias=True,
+    status_code=status.HTTP_200_OK,
+)
+async def get_context_rules_by_dialogue_type(
+    dialogue_type: str,
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> DialogueTypeRulesResponse:
+    """Retourne les règles spécifiques d'un type de dialogue avec fallback global."""
+    source, rules = rule_service.get_rules_for_dialogue_type(dialogue_type)
+    return DialogueTypeRulesResponse(
+        dialogue_type=dialogue_type,
+        source=source,
+        rules=rules,
+    )
+
+
+@router.put(
+    "/rules/by-dialogue-type/{dialogue_type}",
+    response_model=DialogueTypeRulesResponse,
+    response_model_by_alias=True,
+    status_code=status.HTTP_200_OK,
+)
+async def put_context_rules_by_dialogue_type(
+    dialogue_type: str,
+    request_data: list[CreateRuleRequest],
+    request: Request,
+    rule_service: Annotated[ContextRuleService, Depends(get_context_rule_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> DialogueTypeRulesResponse:
+    """Remplace l'ensemble des règles d'un type de dialogue donné."""
+    normalized_type = dialogue_type.strip().lower()
+
+    # Supprimer les anciennes règles spécifiques au type.
+    current_rules = rule_service.list_rules()
+    for rule in [r for r in current_rules if r.dialogue_type == normalized_type]:
+        rule_service.delete_rule(rule.id)
+
+    # Créer le nouvel ensemble de règles spécifiques.
+    for rule in request_data:
+        rule_service.create_rule(
+            CreateRuleRequest(
+                name=rule.name,
+                enabled=rule.enabled,
+                priority=rule.priority,
+                condition_operator=rule.condition_operator,
+                conditions=rule.conditions,
+                suggested_types=rule.suggested_types,
+                dialogue_type=normalized_type,
+            )
+        )
+
+    source, rules = rule_service.get_rules_for_dialogue_type(normalized_type)
+    return DialogueTypeRulesResponse(
+        dialogue_type=normalized_type,
+        source=source,
+        rules=rules,
+    )
+
+
+@router.post(
+    "/gdd-content-fingerprint",
+    response_model=GddContentFingerprintResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def post_gdd_content_fingerprint(
+    request_data: GddContentFingerprintRequest,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> GddContentFingerprintResponse:
+    """Calcule l'empreinte du contenu GDD pour une sélection (Story 3.9, détection stale)."""
+    from services.gdd_context_fingerprint import compute_gdd_content_fingerprint
+
+    try:
+        fp = compute_gdd_content_fingerprint(
+            context_builder,
+            request_data.context_selections,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+        )
+    except Exception as exc:
+        logger.warning(
+            "post_gdd_content_fingerprint échoué (request_id=%s): %s",
+            request_id,
+            exc,
+        )
+        raise ValidationException(
+            message="Impossible de calculer l'empreinte GDD pour cette sélection.",
+            request_id=request_id,
+        ) from exc
+    return GddContentFingerprintResponse(fingerprint=fp)
+
+
+@router.get(
+    "/gdd-entity-history",
+    response_model=GddEntityHistoryResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_gdd_entity_history(
+    category: str,
+    name: str,
+    request_id: Annotated[str, Depends(get_request_id)],
+    include_snapshots: bool = False,
+) -> GddEntityHistoryResponse:
+    """Timeline locale des modifications d'une entité GDD (alimentée par sync Notion)."""
+    from core.context.context_builder import PROJECT_ROOT_DIR
+    from services.gdd_category_entity_lookup import live_gdd_entity_exists
+    from services.gdd_entity_history import diff_snapshots_json, load_entity_history
+
+    cat = (category or "").strip()
+    nom = (name or "").strip()
+    if not cat or not nom:
+        raise ValidationException(
+            message="Paramètres category et name requis.",
+            request_id=request_id,
+        )
+
+    raw = load_entity_history(PROJECT_ROOT_DIR, cat, nom)
+    if not raw and not live_gdd_entity_exists(PROJECT_ROOT_DIR, cat, nom):
+        raise NotFoundException(
+            resource_type="Entité GDD",
+            resource_id=f"{cat}/{nom}",
+            request_id=request_id,
+        )
+
+    events_pub: List[GddEntityHistoryEventPublic] = []
+    for i, e in enumerate(raw):
+        if not isinstance(e, dict):
+            continue
+        snap: Optional[Dict[str, Any]] = None
+        diff_prev: Optional[str] = None
+        if include_snapshots:
+            s = e.get("snapshot")
+            if isinstance(s, dict):
+                snap = s
+            if i > 0 and isinstance(raw[i - 1], dict):
+                ps = raw[i - 1].get("snapshot")
+                if isinstance(ps, dict) and isinstance(snap, dict):
+                    diff_prev = diff_snapshots_json(ps, snap)
+        events_pub.append(
+            GddEntityHistoryEventPublic(
+                at=str(e.get("at", "")),
+                source=str(e.get("source", "")),
+                summary=str(e.get("summary", "")),
+                snapshot=snap,
+                diff_from_previous=diff_prev,
+            )
+        )
+
+    diff_hint: Optional[str] = None
+    prev_snap: Optional[Dict[str, Any]] = None
+    cur_snap: Optional[Dict[str, Any]] = None
+    if len(raw) >= 2:
+        a = raw[-2]
+        b = raw[-1]
+        if isinstance(a, dict) and isinstance(b, dict):
+            sa = a.get("snapshot")
+            sb = b.get("snapshot")
+            if isinstance(sa, dict) and isinstance(sb, dict):
+                prev_snap = sa
+                cur_snap = sb
+                diff_hint = diff_snapshots_json(sa, sb)
+
+    return GddEntityHistoryResponse(
+        category=cat,
+        name=nom,
+        events=events_pub,
+        diff_hint=diff_hint,
+        previous_snapshot=prev_snap,
+        current_snapshot=cur_snap,
+    )
 

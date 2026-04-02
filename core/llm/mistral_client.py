@@ -66,6 +66,10 @@ class MistralClient(ILLMClient):
         self.reasoning_callback = reasoning_callback
         self.reasoning_trace: Optional[Dict[str, Any]] = None
 
+        self.last_call_cost: float = 0.0
+        self.last_usage_prompt_tokens: int = 0
+        self.last_usage_completion_tokens: int = 0
+
         logger.info(f"MistralClient initialisé avec le modèle: {self.model_name}, API Key présente: {'Oui' if api_key else 'Non'}.")
         logger.info(f"System prompt template utilisé: '{self.system_prompt_template}'")
 
@@ -105,6 +109,9 @@ class MistralClient(ILLMClient):
 
         logger.debug(f"Messages envoyés au LLM (avant tool): {messages}")
 
+        # Prompt complet pour le tracking (Story 1.15)
+        full_prompt_str = json.dumps(messages, ensure_ascii=False)
+
         tool_definition = None
         if response_model:
             model_schema_for_tool = response_model.model_json_schema()
@@ -135,6 +142,7 @@ class MistralClient(ILLMClient):
             prompt_tokens = 0
             completion_tokens = 0
             total_tokens = 0
+            raw_response_str = None
 
             try:
                 logger.info(f"Début de la génération de la variante {i+1}/{k} pour le prompt.")
@@ -156,25 +164,65 @@ class MistralClient(ILLMClient):
                 if stream:
                     accumulated_content = ""
                     response_stream = await self.client.chat.stream_async(**chat_params)
-                    
+
                     async for chunk in response_stream:
                         if chunk.choices and chunk.choices[0].delta:
                             delta_content = getattr(chunk.choices[0].delta, "content", None)
                             if delta_content:
                                 accumulated_content += delta_content
-                    
+
                     generated_results.append(accumulated_content)
                     logger.info(f"Variante {i+1} générée avec succès (streaming).")
                     success = True
+                    # Usage non fourni de façon fiable sur tous les chunks Mistral : estimation grossière
+                    # pour le tracking (évite des zéros systématiques).
+                    prompt_tokens = max(1, len(full_prompt_str) // 4)
+                    completion_tokens = max(1, len(accumulated_content) // 4)
+                    total_tokens = prompt_tokens + completion_tokens
+                    raw_response_str = accumulated_content[:12000] if accumulated_content else None
+                    pricing = getattr(self.usage_service, "pricing_service", None)
+                    if pricing is not None:
+                        try:
+                            self.last_call_cost = float(
+                                pricing.calculate_cost(
+                                    model_name=self.model_name,
+                                    prompt_tokens=prompt_tokens,
+                                    completion_tokens=completion_tokens,
+                                )
+                            )
+                        except (TypeError, ValueError):
+                            self.last_call_cost = 0.0
+                    else:
+                        self.last_call_cost = 0.0
+                    self.last_usage_prompt_tokens = int(prompt_tokens)
+                    self.last_usage_completion_tokens = int(completion_tokens)
                 else:
                     # Appel API sans streaming
                     response: ChatCompletionResponse = await self.client.chat.complete_async(**chat_params)
+                    raw_response_str = response.model_dump_json() if hasattr(response, "model_dump_json") else str(response)
 
                     # Extraire les métriques d'utilisation
                     if hasattr(response, 'usage') and response.usage:
                         prompt_tokens = getattr(response.usage, "prompt_tokens", 0) or 0
                         completion_tokens = getattr(response.usage, "completion_tokens", 0) or 0
                         total_tokens = getattr(response.usage, "total_tokens", 0) or 0
+
+                    pricing = getattr(self.usage_service, "pricing_service", None)
+                    if pricing is not None:
+                        try:
+                            self.last_call_cost = float(
+                                pricing.calculate_cost(
+                                    model_name=self.model_name,
+                                    prompt_tokens=prompt_tokens,
+                                    completion_tokens=completion_tokens,
+                                )
+                            )
+                        except (TypeError, ValueError):
+                            self.last_call_cost = 0.0
+                    else:
+                        self.last_call_cost = 0.0
+                    self.last_usage_prompt_tokens = int(prompt_tokens)
+                    self.last_usage_completion_tokens = int(completion_tokens)
 
                     logger.debug(f"Réponse brute de l'API Mistral pour la variante {i+1}:\n{response}")
 
@@ -207,7 +255,7 @@ class MistralClient(ILLMClient):
                                                     parsed_output = response_model.model_validate(raw_obj)
                                                     generated_results.append(parsed_output)
                                                     logger.info(
-                                                        f"Variante {i+1} validée après normalisation (node.consequences list→object)."
+                                                        f"Variante {i+1} validée après normalisation (node.consequences list->object)."
                                                     )
                                                     success = True
                                                     normalized_ok = True
@@ -279,7 +327,9 @@ class MistralClient(ILLMClient):
                             success=success,
                             endpoint=self.endpoint,
                             k_variants=k,
-                            error_message=error_message
+                            error_message=error_message,
+                            prompt=full_prompt_str,
+                            response=raw_response_str,
                         )
                     except Exception as tracking_error:
                         # Ne pas faire échouer l'appel LLM si le tracking échoue

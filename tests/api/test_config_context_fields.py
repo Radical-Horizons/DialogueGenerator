@@ -118,9 +118,9 @@ class TestContextFieldsEndpoints:
                 }
             ]
         })
-        mock_context_builder._context_serializer = MagicMock()
-        mock_context_builder._context_serializer.serialize_to_text = MagicMock(return_value="Test Character\nTest content for preview")
+        mock_context_builder.serialize_context_to_text = MagicMock(return_value="Test Character\nTest content for preview")
         mock_context_builder._count_tokens = MagicMock(return_value=10)
+        mock_context_builder.count_tokens = MagicMock(return_value=10)
         
         def mock_get_context_builder():
             return mock_context_builder
@@ -141,7 +141,7 @@ class TestContextFieldsEndpoints:
                     },
                     "organization_mode": "default",
                     "scene_instruction": "Test scene",
-                    "max_tokens": 1000
+                    "max_tokens": 10000
                 }
             )
             

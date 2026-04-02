@@ -1,6 +1,7 @@
 """Tests pour les endpoints de cost governance."""
 import pytest
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, date, UTC
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from models.llm_usage import LLMUsageRecord
 from services.cost_governance_service import CostGovernanceService
@@ -101,10 +102,13 @@ def test_get_usage_with_graph(client, temp_budget_file, temp_usage_dir):
     )
     
     # Configurer un budget
-    cost_service.update_quota("default_user", 100.0)
+    cost_service.update_quota("admin", 100.0)
     
-    # Créer des enregistrements d'usage pour plusieurs jours
-    base_time = datetime.now(UTC)
+    # Créer des enregistrements d'usage pour plusieurs jours du mois courant
+    # (l'endpoint /costs/usage ne retourne que le mois en cours, de start=1 à end=today)
+    now = datetime.now(UTC)
+    first_of_month = now.replace(day=1, hour=12, minute=0, second=0, microsecond=0)
+    base_time = first_of_month + timedelta(days=4)  # 5 du mois → 5 jours dans le mois
     for i in range(5):
         record = LLMUsageRecord(
             request_id=f"req_{i}",
@@ -117,7 +121,8 @@ def test_get_usage_with_graph(client, temp_budget_file, temp_usage_dir):
             duration_ms=2500,
             success=True,
             endpoint="generate/variants",
-            k_variants=3
+            k_variants=3,
+            billable_user_id="admin",
         )
         usage_repository.save(record)
     
@@ -126,8 +131,25 @@ def test_get_usage_with_graph(client, temp_budget_file, temp_usage_dir):
     app.dependency_overrides[get_llm_usage_service] = lambda: usage_service
     
     try:
-        # Faire la requête
-        response = client.get("/api/v1/costs/usage")
+        # Figer "today" au 5 du mois pour que l'endpoint inclue les 5 jours (1 à 5)
+        fake_today = date(now.year, now.month, 5)
+        real_date = date
+        real_datetime = datetime
+
+        def _date_constructor(*args: object, **kwargs: object) -> date:
+            return real_date(*args, **kwargs)
+
+        with patch("api.routers.costs.date") as mock_date_module, patch(
+            "api.routers.costs.datetime"
+        ) as mock_datetime_module:
+            mock_date_module.today.return_value = fake_today
+            mock_date_module.side_effect = _date_constructor
+            mock_datetime_module.now.return_value = datetime(
+                fake_today.year, fake_today.month, fake_today.day, 12, 0, 0, tzinfo=UTC
+            )
+            mock_datetime_module.side_effect = lambda *a, **k: real_datetime(*a, **k)
+            # Faire la requête (date.today / datetime.now sont mockés au 5 du mois)
+            response = client.get("/api/v1/costs/usage")
         
         assert response.status_code == 200
         data = response.json()

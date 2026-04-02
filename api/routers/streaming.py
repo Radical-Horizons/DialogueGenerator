@@ -18,16 +18,126 @@ Types d'événements :
 import logging
 import json
 import asyncio
-from typing import AsyncGenerator, Optional, Dict, Any
-from fastapi import APIRouter, Depends, Request, HTTPException
+from typing import Annotated, AsyncGenerator, Dict, Any, NamedTuple, Optional
+from urllib.parse import quote_plus
+
+from fastapi import APIRouter, Depends, Request, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from api.routers.auth import auth_service, get_current_user
 from api.schemas.generation_jobs import GenerationJobCreate, GenerationJobResponse, GenerationJobStatus
 from api.services.generation_job_manager import get_job_manager
-from api.container import ServiceContainer
+from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
+from api.dependencies import get_unity_dialogue_orchestrator
+from api.exceptions import AuthenticationException
+from api.config.security_config import get_security_config
+from api.utils.sse_job_token import create_sse_job_token, verify_sse_job_token
+from api.middleware.billable_user_context import push_billable_user_id, reset_billable_user_id
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+_bearer_optional = HTTPBearer(auto_error=False)
+
+
+class SSEStreamAuth(NamedTuple):
+    """Utilisateur authentifié pour le SSE et indicateur jeton job (évite IDOR Bearer)."""
+
+    user: dict
+    authenticated_via_sse_token: bool
+
+
+def _security_skips_job_ownership() -> bool:
+    """Dev local avec auth désactivée : pas de contrôle propriétaire (voir AGENTS.md)."""
+    cfg = get_security_config()
+    return bool(cfg.is_development and cfg.disable_auth)
+
+
+def _job_owner_label(user: dict) -> str:
+    """Clé alignée sur ``owner_username`` stocké à la création du job."""
+    return str(user.get("username") or user.get("id") or "")
+
+
+def _ensure_job_owned_by(job: Dict[str, Any], user: dict) -> None:
+    """Vérifie que l'utilisateur est le propriétaire du job (routes REST)."""
+    if _security_skips_job_ownership():
+        return
+    owner = job.get("owner_username")
+    if owner is None:
+        return
+    if _job_owner_label(user) != owner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé au propriétaire du job",
+        )
+
+
+def _ensure_stream_allowed_for_job(job: Dict[str, Any], stream_auth: SSEStreamAuth) -> None:
+    """SSE : jeton ``sse_token`` OK ; Bearer exige même utilisateur que ``owner_username``."""
+    if _security_skips_job_ownership():
+        return
+    if stream_auth.authenticated_via_sse_token:
+        return
+    owner = job.get("owner_username")
+    if owner is None:
+        return
+    if _job_owner_label(stream_auth.user) != owner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé au propriétaire du job",
+        )
+
+
+async def authenticate_sse_stream(
+    job_id: str,
+    request: Request,
+    sse_token: Optional[str] = Query(
+        None,
+        description="Jeton JWT court (émis à la création du job) pour EventSource sans header Authorization.",
+    ),
+    credentials: Annotated[
+        Optional[HTTPAuthorizationCredentials],
+        Depends(_bearer_optional),
+    ] = None,
+) -> SSEStreamAuth:
+    """Authentifie le GET SSE : query ``sse_token`` ou Bearer access token."""
+    security_config = get_security_config()
+    if security_config.is_development and security_config.disable_auth:
+        return SSEStreamAuth(
+            user={
+                "id": "1",
+                "username": "admin",
+                "email": "admin@example.com",
+            },
+            authenticated_via_sse_token=False,
+        )
+
+    request_id = getattr(request.state, "request_id", "unknown")
+
+    if sse_token:
+        payload = verify_sse_job_token(sse_token, job_id)
+        if payload:
+            username = payload.get("sub")
+            if username:
+                user = auth_service.get_user_by_username(username)
+                if user:
+                    return SSEStreamAuth(user=user, authenticated_via_sse_token=True)
+
+    if credentials is not None:
+        pl = auth_service.verify_token(credentials.credentials, token_type="access")
+        if pl is not None:
+            username = pl.get("sub")
+            if username:
+                user = auth_service.get_user_by_username(username)
+                if user:
+                    return SSEStreamAuth(user=user, authenticated_via_sse_token=False)
+
+    raise AuthenticationException(
+        message="Authentification requise pour le flux SSE (sse_token ou Bearer)",
+        request_id=request_id,
+    )
 
 # Constante pour timeout d'annulation (10 secondes) - Story 0.8
 CANCEL_TIMEOUT_SECONDS = 10
@@ -59,7 +169,7 @@ def _calculate_duration(job: Dict[str, Any]) -> float:
         return 0.0
 
 
-async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGenerator[str, None]:
+async def stream_generation(job_id: str, orchestrator: UnityDialogueOrchestrator) -> AsyncGenerator[str, None]:
     """Générateur async pour streamer la génération Unity Dialogue.
     
     Pattern :
@@ -69,7 +179,7 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
     
     Args:
         job_id: ID du job à streamer.
-        container: Container de dépendances.
+        orchestrator: Orchestrateur Unity injecté via dépendance.
         
     Yields:
         Chunks SSE au format `data: {...}\n\n`.
@@ -83,20 +193,40 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
     
     from datetime import datetime, timezone
     
-    # FIX: Vérifier le statut AVANT de mettre à "running" pour éviter les générations multiples
-    if job.get("status") == "completed":
+    st_initial = job.get("status")
+    if st_initial == "completed":
         logger.warning(f"Job {job_id} déjà complété, arrêt du stream")
         yield f'data: {json.dumps({"type": "error", "message": "Job déjà complété"})}\n\n'
         return
-    
+    if st_initial in ("error", "cancelled"):
+        yield (
+            f'data: {json.dumps({"type": "error", "message": f"Job en état terminal: {st_initial}"})}\n\n'
+        )
+        return
+
+    claimed = await job_manager.try_claim_stream_job(job_id)
+    if not claimed:
+        job_refresh = job_manager.get_job(job_id)
+        st_now = job_refresh.get("status") if job_refresh else None
+        if st_now == "running":
+            msg = "Un flux SSE est déjà actif pour ce job"
+        elif st_now == "completed":
+            msg = "Job déjà complété"
+        else:
+            msg = "Impossible de démarrer le flux pour ce job"
+        logger.warning(
+            "Stream non réservé pour job %s (statut=%s)",
+            job_id,
+            st_now,
+            extra={"job_id": job_id, "status": st_now},
+        )
+        yield f'data: {json.dumps({"type": "error", "message": msg})}\n\n'
+        return
+
     try:
         current_task = asyncio.current_task()
         if current_task is not None:
             job_manager.register_task(job_id, current_task)
-        job_manager.update_status(job_id, "running")
-        
-        # Créer orchestrateur via le container (plus propre)
-        orchestrator = container.get_unity_dialogue_orchestrator(job_id)
         
         # Construire request_data depuis job params
         from api.schemas.dialogue import GenerateUnityDialogueRequest
@@ -108,15 +238,10 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
         current_step = "queued"
         
         # Streamer les événements
-        event_count = 0
-        complete_count = 0
         async for event in orchestrator.generate_with_events(
             request_data,
             check_cancelled=lambda: job_manager.is_cancelled(job_id)
         ):
-            event_count += 1
-            if event.type == 'complete':
-                complete_count += 1
             # Convertir GenerationEvent en SSE
             if event.type == 'chunk':
                 chunk_content = event.data.get("content", "")
@@ -131,7 +256,12 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
                 current_step = event.data.get("step", "unknown")
                 yield f'data: {json.dumps({"type": "step", "step": current_step})}\n\n'
             elif event.type == 'metadata':
-                yield f'data: {json.dumps({"type": "metadata", "tokens": event.data["tokens"], "cost": event.data["cost"]})}\n\n'
+                meta: Dict[str, Any] = {"type": "metadata", **event.data}
+                if event.data.get("used_fallback"):
+                    meta["used_fallback"] = True
+                    meta["fallback_from"] = event.data.get("fallback_from", "")
+                    meta["fallback_to"] = event.data.get("fallback_to", "")
+                yield f'data: {json.dumps(meta)}\n\n'
             elif event.type == 'complete':
                 # Stocker résultat dans job
                 job_manager.update_status(job_id, "completed", result=event.data['result'])
@@ -195,28 +325,64 @@ async def stream_generation(job_id: str, container: ServiceContainer) -> AsyncGe
             job_manager.unregister_task(job_id)
 
 
-@router.post("/generate/jobs", response_model=GenerationJobResponse)
+async def stream_generation_with_billable_user(
+    job_id: str,
+    orchestrator: UnityDialogueOrchestrator,
+    billable_user_id: str,
+) -> AsyncGenerator[str, None]:
+    """Enveloppe ``stream_generation`` avec le bon ``get_billable_user_id()`` pour le flux SSE.
+
+    Le middleware ne voit pas de Bearer sur les requêtes ``EventSource`` ; sans cette
+    enveloppe, l'usage LLM serait attribué à ``default_user`` au lieu du propriétaire du job.
+
+    Args:
+        job_id: Identifiant du job.
+        orchestrator: Orchestrateur Unity.
+        billable_user_id: Même identifiant que pour la création du job (username ou id).
+
+    Yields:
+        Chunks SSE identiques à ``stream_generation``.
+    """
+    var_token = push_billable_user_id(billable_user_id)
+    try:
+        async for chunk in stream_generation(job_id, orchestrator):
+            yield chunk
+    finally:
+        reset_billable_user_id(var_token)
+
+
+@router.post(
+    "/generate/jobs",
+    response_model=GenerationJobResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_generation_job(
     job_data: GenerationJobCreate,
     request: Request,
+    current_user: Annotated[dict, Depends(get_current_user)],
 ) -> GenerationJobResponse:
     """Crée un nouveau job de génération Unity Dialogue.
     
     Args:
         job_data: Paramètres de génération (identiques à l'endpoint REST).
         request: Requête HTTP (pour construire l'URL de streaming).
+        current_user: Utilisateur authentifié (émission du jeton SSE).
         
     Returns:
         Job créé avec job_id et stream_url.
     """
     job_manager = get_job_manager()
-    
-    # Créer le job avec les paramètres
-    job_id = job_manager.create_job(job_data.model_dump(mode='json'))
-    
-    # Construire l'URL de streaming
-    base_url = str(request.base_url).rstrip('/')
-    stream_url = f"{base_url}/api/v1/dialogues/generate/jobs/{job_id}/stream"
+
+    owner_username = _job_owner_label(current_user)
+    job_id = job_manager.create_job(
+        job_data.model_dump(mode='json'),
+        owner_username=owner_username,
+    )
+
+    sse_token = create_sse_job_token(job_id=job_id, username=owner_username)
+    stream_url = (
+        f"/api/v1/dialogues/generate/jobs/{job_id}/stream?sse_token={quote_plus(sse_token)}"
+    )
     
     logger.info(f"Created generation job {job_id}", extra={'job_id': job_id})
     
@@ -227,16 +393,25 @@ async def create_generation_job(
     )
 
 
+def _get_stream_orchestrator(
+    request: Request,
+    job_id: str,
+) -> UnityDialogueOrchestrator:
+    """Fournit un orchestrateur Unity configuré pour le job SSE."""
+    # Conserver le job_id comme request_id pour la traçabilité.
+    return get_unity_dialogue_orchestrator(request=request, request_id=job_id)
+
+
 @router.get("/generate/jobs/{job_id}/stream", response_class=StreamingResponse)
 async def stream_job(
     job_id: str,
-    request: Request,
+    stream_auth: Annotated[SSEStreamAuth, Depends(authenticate_sse_stream)],
+    orchestrator: Annotated[UnityDialogueOrchestrator, Depends(_get_stream_orchestrator)],
 ) -> StreamingResponse:
     """Endpoint SSE pour streamer la génération d'un job.
     
     Args:
         job_id: ID du job à streamer.
-        request: Requête HTTP (pour accéder au container).
         
     Returns:
         StreamingResponse avec chunks SSE.
@@ -246,12 +421,13 @@ async def stream_job(
     
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
-    # Récupérer le container depuis l'app state
-    container: ServiceContainer = request.app.state.container
-    
+
+    _ensure_stream_allowed_for_job(job, stream_auth)
+
+    billable_uid = _job_owner_label(stream_auth.user) or "user"
+
     return StreamingResponse(
-        stream_generation(job_id, container),
+        stream_generation_with_billable_user(job_id, orchestrator, billable_uid),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -262,7 +438,10 @@ async def stream_job(
 
 
 @router.post("/generate/jobs/{job_id}/cancel")
-async def cancel_job(job_id: str) -> Dict[str, Any]:
+async def cancel_job(
+    job_id: str,
+    _user: Annotated[dict, Depends(get_current_user)],
+) -> Dict[str, Any]:
     """Annule un job de génération en cours.
     
     Args:
@@ -273,9 +452,12 @@ async def cancel_job(job_id: str) -> Dict[str, Any]:
     """
     job_manager = get_job_manager()
     
-    if not job_manager.get_job(job_id):
+    job = job_manager.get_job(job_id)
+    if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
+
+    _ensure_job_owned_by(job, _user)
+
     success = job_manager.cancel_job(job_id)
     
     if not success:
@@ -298,7 +480,10 @@ async def cancel_job(job_id: str) -> Dict[str, Any]:
 
 
 @router.get("/generate/jobs/{job_id}", response_model=GenerationJobStatus)
-async def get_job_status(job_id: str) -> GenerationJobStatus:
+async def get_job_status(
+    job_id: str,
+    _user: Annotated[dict, Depends(get_current_user)],
+) -> GenerationJobStatus:
     """Récupère le statut d'un job.
     
     Args:
@@ -309,10 +494,12 @@ async def get_job_status(job_id: str) -> GenerationJobStatus:
     """
     job_manager = get_job_manager()
     job = job_manager.get_job(job_id)
-    
+
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
+
+    _ensure_job_owned_by(job, _user)
+
     return GenerationJobStatus(
         job_id=job['job_id'],
         status=job['status'],

@@ -2,28 +2,14 @@
  * Client API pour les endpoints de cost governance.
  */
 import apiClient from './client'
+import type { BudgetResponse, UsageResponse } from '../types/costs'
 
-export interface BudgetResponse {
-  quota: number
-  amount: number
-  percentage: number
-  remaining: number
-}
-
-export interface UpdateBudgetRequest {
-  quota: number
-}
-
-export interface DailyCost {
-  date: string
-  cost: number
-}
-
-export interface UsageResponse {
-  daily_costs: DailyCost[]
-  total: number
-  percentage: number
-}
+export type {
+  BudgetResponse,
+  UpdateBudgetRequest,
+  DailyCost,
+  UsageResponse,
+} from '../types/costs'
 
 /**
  * Récupère le budget actuel.

@@ -1,4 +1,4 @@
-# generated: 2026-01-15
+# generated: 2026-01-25
 # project: DialogueGenerator
 # project_key: dialogue-generator
 # tracking_system: file-system
@@ -12,8 +12,8 @@
 #   - done: All stories in epic completed
 #
 # Epic Status Transitions:
-#   - backlog → in-progress: Automatically when first story is created (via create-story)
-#   - in-progress → done: Manually when all stories reach 'done' status
+#   - backlog -> in-progress: Automatically when first story is created (via create-story)
+#   - in-progress -> done: Manually when all stories reach 'done' status
 #
 # Story Status:
 #   - backlog: Story only exists in epic file
@@ -33,13 +33,13 @@
 # - SM typically creates next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
-generated: '2026-01-15'
+generated: '2026-01-25'
 project: DialogueGenerator
 project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
 development_status:
-  epic-0: in-progress
+  epic-0: done
   0-1-fix-graph-editor-stableid-adr-003: done
   0-2-progress-feedback-modal-avec-sse-streaming-adr-001: done
   0-3-multi-provider-llm-avec-abstraction-mistral-adr-004: done
@@ -49,60 +49,73 @@ development_status:
   0-6-validation-cycles-graphe-id-002: done
   0-7-cost-governance-id-003: done
   0-8-streaming-cleanup-id-004: done
-  0-9-preset-validation-id-005: in-progress
-  0-10-tests-4-resultats-critiques: done
-  0-11-header-refactoring-ui-consolidation: done
-  0-12-ui-refactoring-generation-panel-sliders-tooltips: done
-  epic-0-retrospective: optional
-  epic-1: backlog
-  1-1-générer-un-nœud-de-dialogue-single-avec-llm-fr1: backlog
-  1-2-générer-batch-de-nœuds-3-8-depuis-choix-existants-fr2: backlog
-  1-3-spécifier-instructions-de-génération-tone-style-theme-fr3: backlog
-  1-4-accepter-ou-rejeter-nœuds-générés-inline-fr4: backlog
-  1-5-éditer-manuellement-le-contenu-des-nœuds-générés-fr5: backlog
-  1-6-créer-manuellement-des-nœuds-sans-llm-fr6: backlog
-  1-7-dupliquer-des-nœuds-existants-pour-créer-des-variantes-fr7: backlog
-  1-8-supprimer-des-nœuds-du-dialogue-fr8: backlog
-  1-9-auto-link-des-nœuds-générés-au-graphe-existant-fr9: backlog
-  1-10-régénérer-des-nœuds-rejetés-avec-instructions-ajustées-fr10: backlog
-  1-11-estimer-le-coût-llm-avant-génération-fr72: backlog
-  1-12-afficher-breakdown-des-coûts-par-dialogue-fr73: backlog
-  1-13-afficher-coûts-llm-cumulatifs-daily-monthly-fr74: backlog
-  1-14-afficher-prompt-transparency-prompt-exact-envoyé-au-llm-fr77: backlog
-  1-15-afficher-logs-de-génération-prompts-réponses-coûts-fr78: backlog
-  1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79: backlog
-  epic-1-retrospective: optional
-  epic-2: backlog
-  2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: backlog
-  2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: backlog
-  2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: backlog
-  2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: backlog
-  2-5-créer-connexions-entre-nœuds-manuellement-fr26: backlog
-  2-6-supprimer-connexions-entre-nœuds-fr27: backlog
-  2-7-rechercher-nœuds-par-contenu-texte-ou-nom-speaker-fr28: backlog
-  2-8-jump-to-nœud-spécifique-par-id-ou-nom-fr29: backlog
-  2-9-filtrer-vue-graphe-showhide-types-nœuds-speakers-fr30: backlog
-  2-10-sélection-multiple-nœuds-shift-click-lasso-selection-fr31: backlog
-  2-11-appliquer-opérations-à-nœuds-sélectionnés-delete-tag-validate-fr32: backlog
-  2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: backlog
-  2-13-auto-layout-graphe-pour-lisibilité-fr34: backlog
-  2-14-undoredo-opérations-graphe-fr35: backlog
-  epic-2-retrospective: optional
-  epic-3: backlog
-  3-1-parcourir-entités-gdd-disponibles-personnages-lieux-régions-thèmes-fr11: backlog
-  3-2-sélectionner-manuellement-contexte-gdd-pertinent-fr12: backlog
-  3-3-suggestions-automatiques-contexte-gdd-basées-sur-règles-fr13: backlog
-  3-4-définir-règles-explicites-de-sélection-contexte-lieu-région-personnages-thème-fr14: backlog
-  3-5-configurer-règles-contexte-par-type-de-dialogue-fr15: backlog
-  3-6-mesurer-pertinence-contexte-gdd-utilisé-dans-dialogue-généré-fr16: backlog
-  3-7-voir-sections-gdd-utilisées-dans-génération-nœud-fr17: backlog
-  3-8-synchroniser-données-gdd-depuis-notion-v20-fr18: backlog
-  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: backlog
-  3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: backlog
-  3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: backlog
-  epic-3-retrospective: optional
-  epic-4: backlog
-  4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: backlog
+  0-9-preset-validation-id-005: done
+  epic-0-retrospective: done
+  epic-16: done
+  16-1-schéma-json-v1-1-0-et-choiceid-fondations: done
+  16-2-backend-document-get-put-revision-409: done
+  16-3-backend-layout-sidecar-concurrence: done
+  16-4-frontend-sot-document-layout-projection-ids-stables: done
+  16-5-migration-choiceid-lecture-tolérante-refus-sans-choiceid: done
+  16-6-tests-golden-e2e-perf-non-régression: done
+  epic-16-retrospective: done
+  epic-1: done
+  1-1-générer-un-nœud-de-dialogue-single-depuis-un-nœud-parent-dans-le-graphe-fr1: done
+  1-2-générer-batch-de-nœuds-depuis-tous-les-choix-existants-fr2: done
+  1-3-spécifier-instructions-de-génération-tone-style-theme-fr3: done
+  1-4-accepter-ou-rejeter-nœuds-générés-inline-fr4: done
+  1-5-éditer-manuellement-le-contenu-des-nœsquds-générés-fr5: done
+  1-6-créer-manuellement-des-nœuds-sans-llm-fr6: done
+  1-7-dupliquer-des-nœuds-existants-pour-créer-des-variantes-fr7: done
+  1-8-supprimer-des-nœuds-du-dialogue-fr8: done
+  1-9-auto-link-des-nœuds-générés-au-graphe-existant-fr9: done
+  1-10-régénérer-des-nœuds-rejetés-avec-instructions-ajustées-fr10: done
+  1-11-estimer-le-coût-llm-avant-génération-fr72: done
+  1-12-afficher-breakdown-des-coûts-par-dialogue-fr73: done
+  1-13-afficher-coûts-llm-cumulatifs-daily-monthly-fr74: done
+  1-14-afficher-prompt-transparency-prompt-exact-envoyé-au-llm-fr77: done
+  1-15-afficher-logs-de-génération-prompts-réponses-coûts-fr78: done
+  1-16-fallback-vers-provider-llm-alternatif-en-cas-déchec-fr79: done
+  1-17-adr-007-react-flow-controlled: done
+  epic-1-retrospective: done
+  epic-2: done
+  2-1-visualiser-la-structure-de-dialogue-comme-graphe-fr22: done
+  2-2-naviguer-dans-de-grands-graphes-500-nœuds-fr23: done
+  2-3-zoom-pan-et-focus-sur-zones-spécifiques-fr24: done
+  2-4-drag-and-drop-nœuds-pour-réorganiser-layout-fr25: done
+  2-5-créer-connexions-entre-nœuds-manuellement-fr26: done
+  2-6-supprimer-connexions-entre-nœuds-fr27: done
+  2-7-rechercher-nœuds-par-contenu-texte-ou-nom-speaker-fr28: done
+  2-8-jump-to-nœud-spécifique-par-id-ou-nom-fr29: done
+  2-9-filtrer-vue-graphe-show-hide-types-nœuds-speakers-fr30: done
+  2-10-sélection-multiple-nœuds-shift-click-lasso-selection-fr31: done
+  2-11-appliquer-opérations-à-nœuds-sélectionnés-delete-tag-validate-fr32: done
+  2-12-actions-contextuelles-sur-nœuds-menu-clic-droit-fr33: done
+  2-13-auto-layout-graphe-pour-lisibilité-fr34: done
+  2-14-undo-redo-opérations-graphe-fr35: done
+  epic-2-retrospective: done
+  epic-3: done
+  3-1-parcourir-entités-gdd-disponibles-personnages-lieux-régions-thèmes-fr11: done
+  3-2-sélectionner-manuellement-contexte-gdd-pertinent-fr12: done
+  3-3-suggestions-automatiques-contexte-gdd-basées-sur-règles-fr13: done
+  3-4-définir-règles-explicites-de-sélection-contexte-lieu-région-personnages-thème-fr14: done
+  3-5-configurer-règles-contexte-par-type-de-dialogue-fr15: done
+  3-6-mesurer-pertinence-contexte-gdd-utilisé-dans-dialogue-généré-fr16: done
+  3-7-voir-sections-gdd-utilisées-dans-génération-nœud-fr17: done
+  3-8-synchroniser-données-gdd-depuis-notion-v20-fr18: done
+  3-9-mettre-à-jour-données-gdd-sans-régénérer-dialogues-existants-fr19: done
+  3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
+  3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
+  epic-3-retrospective: done
+  epic-17: backlog
+  17-1-shell-responsive-breakpoints-layout-320px-fr118: backlog
+  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: backlog
+  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: backlog
+  17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: backlog
+  17-5-pwa-install-manifest-option-fr121: backlog
+  epic-17-retrospective: optional
+  epic-4: in-progress
+  4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: ready-for-dev
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: backlog
   4-3-détecter-contradictions-lore-explicites-faits-gdd-conflictuels-fr38: backlog
   4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39: backlog
@@ -116,6 +129,14 @@ development_status:
   4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: backlog
   4-13-valider-conformité-schéma-json-unity-100-fr48: backlog
   epic-4-retrospective: optional
+  epic-9: backlog
+  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog
+  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: backlog
+  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: backlog
+  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: backlog
+  9-5-valider-références-variables-détecter-variables-non-définies-fr93: backlog
+  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: backlog
+  epic-9-retrospective: optional
   epic-5: backlog
   5-1-exporter-dialogue-single-vers-format-unity-json-fr49: backlog
   5-2-exporter-batch-plusieurs-dialogues-vers-unity-json-fr50: backlog
@@ -131,12 +152,12 @@ development_status:
   6-4-fournir-templates-pré-built-salutations-confrontation-révélation-fr58: backlog
   6-5-configurer-templates-anti-context-dropping-subtilité-lore-vs-explicite-fr59: backlog
   6-6-parcourir-marketplace-de-templates-v15-fr60: backlog
-  6-7-ab-tester-templates-et-scorer-qualité-v25-fr61: backlog
+  6-7-a-b-tester-templates-et-scorer-qualité-v25-fr61: backlog
   6-8-partager-templates-avec-membres-équipe-fr62: backlog
   6-9-suggérer-templates-basés-sur-scénario-dialogue-fr63: backlog
   epic-6-retrospective: optional
   epic-7: backlog
-  7-1-créer-comptes-utilisateurs-avec-authentification-usernamepassword-fr64: backlog
+  7-1-créer-comptes-utilisateurs-avec-authentification-username-password-fr64: backlog
   7-2-se-connecter-et-se-déconnecter-du-système-fr65: backlog
   7-3-administrateurs-assignent-rôles-aux-utilisateurs-admin-writer-viewer-fr66: backlog
   7-4-writers-peuvent-créer-éditer-et-supprimer-dialogues-fr67: backlog
@@ -150,20 +171,12 @@ development_status:
   8-2-rechercher-des-dialogues-nom-personnage-lieu-thème-fr81: backlog
   8-3-filtrer-les-dialogues-par-métadonnées-date-auteur-statut-fr82: backlog
   8-4-trier-les-dialogues-alpha-date-taille-fr83: backlog
-  8-5-créer-des-collectionsdossiers-de-dialogues-fr84: backlog
+  8-5-créer-des-collections-dossiers-de-dialogues-fr84: backlog
   8-6-indexer-les-dialogues-pour-recherche-rapide-1000-fr85: backlog
   8-7-afficher-les-métadonnées-dun-dialogue-nodes-coût-last-edited-fr86: backlog
   8-8-valider-en-batch-plusieurs-dialogues-fr87: backlog
   8-9-générer-en-batch-depuis-plusieurs-nœuds-de-départ-fr88: backlog
   epic-8-retrospective: optional
-  epic-9: backlog
-  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog
-  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: backlog
-  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: backlog
-  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: backlog
-  9-5-valider-références-variables-détecter-variables-non-définies-fr93: backlog
-  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: backlog
-  epic-9-retrospective: optional
   epic-10: backlog
   10-1-restaurer-session-après-crash-navigateur-fr96: backlog
   10-2-sauvegarder-manuellement-le-progrès-dialogue-fr97: backlog
@@ -180,6 +193,10 @@ development_status:
   11-5-détecter-niveau-compétence-utilisateur-et-adapter-ui-power-vs-guided-mode-v15-fr106: backlog
   11-6-activer-mode-avancé-pour-contrôle-complet-power-users-fr107: backlog
   11-7-activer-mode-guidé-avec-wizard-étape-par-étape-nouveaux-utilisateurs-fr108: backlog
+  11-8-détecter-automatiquement-persona-mathieu-et-activer-mode-guidé-optimisé-v10: backlog
+  11-9-wizard-optimisé-pour-création-premier-dialogue-persona-mathieu-v10: backlog
+  11-10-assistance-contextuelle-renforcée-pour-persona-mathieu-v10: backlog
+  11-11-valider-expérience-premier-run-complète-objectif-30min-v10: backlog
   epic-11-retrospective: optional
   epic-12: backlog
   12-1-prévisualiser-structure-estimée-nœuds-avant-génération-llm-dry-run-mode-fr109: backlog
@@ -197,8 +214,10 @@ development_status:
   14-4-supporter-lecteurs-décran-avec-aria-labels-v20-fr117: backlog
   epic-14-retrospective: optional
   epic-15: backlog
-  15-1-détecter-automatiquement-persona-mathieu-et-activer-mode-guidé-v10: backlog
-  15-2-wizard-optimisé-pour-création-premier-dialogue-persona-mathieu-v10: backlog
-  15-3-assistance-contextuelle-renforcée-pour-persona-mathieu-v10: backlog
-  15-4-valider-expérience-premier-run-complète-objectif-30min-v10: backlog
+  15-1-service-rlm-contextselector-outils-gdd-gddtoolsprovider-fondation: backlog
+  15-2-extension-contextfieldmanager-avec-section-filters: backlog
+  15-3-endpoint-api-select-context: backlog
+  15-4-toggle-auto-selection-ui-affichage-justifications: backlog
+  15-5-mode-override-lock: backlog
+  15-6-fallback-gracieux-tests-e2e: backlog
   epic-15-retrospective: optional

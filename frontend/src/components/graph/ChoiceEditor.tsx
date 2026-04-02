@@ -1,29 +1,39 @@
 /**
  * Composant pour éditer un choix de dialogue avec conditions et mécaniques RPG.
  */
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import { theme } from '../../theme'
 import { useGraphStore } from '../../store/graphStore'
 import type { DialogueNodeData } from '../../schemas/nodeEditorSchema'
+import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 
 export interface ChoiceEditorProps {
+  dialogueNodeId: string
   choiceIndex: number
   onRemove?: () => void
   onGenerateForChoice?: (choiceIndex: number) => void
+  onCreateEmptyNodeForChoice?: (choiceIndex: number) => void
 }
 
 export const ChoiceEditor = memo(function ChoiceEditor({
+  dialogueNodeId,
   choiceIndex,
   onRemove,
   onGenerateForChoice,
+  onCreateEmptyNodeForChoice,
 }: ChoiceEditorProps) {
   const { register, formState: { errors }, control, watch } = useFormContext<DialogueNodeData>()
-  const { isGenerating } = useGraphStore()
+  const isGenerating = useGraphStore((state) => state.isGenerating)
   const choicesErrors = errors.choices?.[choiceIndex]
   const choices = watch('choices') || []
   const currentChoice = choices[choiceIndex]
   const isConnected = currentChoice?.targetNode && currentChoice.targetNode !== 'END'
+
+  const testSourceNodeId = useMemo(
+    () => `test-node-${dialogueNodeId}-choice-${choiceIndex}`,
+    [dialogueNodeId, choiceIndex]
+  )
   
   return (
     <div
@@ -63,6 +73,24 @@ export const ChoiceEditor = memo(function ChoiceEditor({
               title="Générer la suite pour ce choix"
             >
               {isGenerating ? 'Génération...' : '✨ Générer'}
+            </button>
+          )}
+          {onCreateEmptyNodeForChoice && !isConnected && (
+            <button
+              type="button"
+              onClick={() => onCreateEmptyNodeForChoice(choiceIndex)}
+              style={{
+                padding: '0.25rem 0.5rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: 4,
+                backgroundColor: theme.button.default.background,
+                color: theme.button.default.color,
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+              }}
+              title="Créer un nœud vide et le lier à ce choix"
+            >
+              ➕ Nouveau nœud
             </button>
           )}
           {onRemove && (
@@ -123,34 +151,14 @@ export const ChoiceEditor = memo(function ChoiceEditor({
       
       {/* Nœud cible (affiché seulement si pas de test) */}
       {!currentChoice?.test && (
-        <div style={{ marginBottom: '0.75rem' }}>
-          <label
-            style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              color: theme.text.secondary,
-            }}
-          >
-            Nœud cible
-          </label>
-          <input
-            type="text"
-            {...register(`choices.${choiceIndex}.targetNode` as const)}
-            placeholder="ID du nœud cible (ex: END, START, NODE_123)"
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: 4,
-              backgroundColor: theme.background.tertiary,
-              color: theme.text.primary,
-              fontSize: '0.9rem',
-              fontFamily: 'monospace',
-            }}
-          />
-        </div>
+        <ConnectionTargetSelect
+          variant="choice"
+          dialogueNodeId={dialogueNodeId}
+          choiceIndex={choiceIndex}
+          label="Nœud cible"
+          value={currentChoice?.targetNode}
+          data-testid={`choice-target-select-${choiceIndex}`}
+        />
       )}
       
       {/* Condition */}
@@ -226,133 +234,41 @@ export const ChoiceEditor = memo(function ChoiceEditor({
             Destinations du test
           </h5>
           
-          {/* Échec critique */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label
-              htmlFor={`choice-${choiceIndex}-testCriticalFailureNode`}
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.85rem',
-                fontWeight: 'bold',
-                color: theme.text.secondary,
-              }}
-            >
-              Échec critique →
-            </label>
-            <input
-              id={`choice-${choiceIndex}-testCriticalFailureNode`}
-              type="text"
-              {...register(`choices.${choiceIndex}.testCriticalFailureNode` as const)}
-              placeholder="ID du nœud (ex: NODE_CRITICAL_FAILURE)"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: '0.85rem',
-                fontFamily: 'monospace',
-              }}
-            />
-          </div>
-          
-          {/* Échec */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label
-              htmlFor={`choice-${choiceIndex}-testFailureNode`}
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.85rem',
-                fontWeight: 'bold',
-                color: theme.text.secondary,
-              }}
-            >
-              Échec →
-            </label>
-            <input
-              id={`choice-${choiceIndex}-testFailureNode`}
-              type="text"
-              {...register(`choices.${choiceIndex}.testFailureNode` as const)}
-              placeholder="ID du nœud (ex: NODE_FAILURE)"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: '0.85rem',
-                fontFamily: 'monospace',
-              }}
-            />
-          </div>
-          
-          {/* Réussite */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label
-              htmlFor={`choice-${choiceIndex}-testSuccessNode`}
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.85rem',
-                fontWeight: 'bold',
-                color: theme.text.secondary,
-              }}
-            >
-              Réussite →
-            </label>
-            <input
-              id={`choice-${choiceIndex}-testSuccessNode`}
-              type="text"
-              {...register(`choices.${choiceIndex}.testSuccessNode` as const)}
-              placeholder="ID du nœud (ex: NODE_SUCCESS)"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: '0.85rem',
-                fontFamily: 'monospace',
-              }}
-            />
-          </div>
-          
-          {/* Réussite critique */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label
-              htmlFor={`choice-${choiceIndex}-testCriticalSuccessNode`}
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.85rem',
-                fontWeight: 'bold',
-                color: theme.text.secondary,
-              }}
-            >
-              Réussite critique →
-            </label>
-            <input
-              id={`choice-${choiceIndex}-testCriticalSuccessNode`}
-              type="text"
-              {...register(`choices.${choiceIndex}.testCriticalSuccessNode` as const)}
-              placeholder="ID du nœud (ex: NODE_CRITICAL_SUCCESS)"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: '0.85rem',
-                fontFamily: 'monospace',
-              }}
-            />
-          </div>
+          <ConnectionTargetSelect
+            variant="testHandle"
+            testSourceNodeId={testSourceNodeId}
+            handle="critical-failure"
+            label="Échec critique →"
+            value={currentChoice?.testCriticalFailureNode}
+            data-testid={`choice-test-cf-${choiceIndex}`}
+          />
+
+          <ConnectionTargetSelect
+            variant="testHandle"
+            testSourceNodeId={testSourceNodeId}
+            handle="failure"
+            label="Échec →"
+            value={currentChoice?.testFailureNode}
+            data-testid={`choice-test-f-${choiceIndex}`}
+          />
+
+          <ConnectionTargetSelect
+            variant="testHandle"
+            testSourceNodeId={testSourceNodeId}
+            handle="success"
+            label="Réussite →"
+            value={currentChoice?.testSuccessNode}
+            data-testid={`choice-test-s-${choiceIndex}`}
+          />
+
+          <ConnectionTargetSelect
+            variant="testHandle"
+            testSourceNodeId={testSourceNodeId}
+            handle="critical-success"
+            label="Réussite critique →"
+            value={currentChoice?.testCriticalSuccessNode}
+            data-testid={`choice-test-cs-${choiceIndex}`}
+          />
         </div>
       )}
       

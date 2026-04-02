@@ -218,7 +218,7 @@
     },
     {
       "term": "Nef Centrale",
-      "definition": "Crâne du Léviathan pétrifié, temple principal.",
+      "definition": "Cerveau quantique principal du Léviathan pétrifié, temple central du Culte de l'Anentropie.",
       "popularité": "Localement",
       "category": "Lieu",
       "type": "Emprunt détourné",
@@ -247,6 +247,14 @@
       "category": "Concept",
       "type": "Néologisme",
       "origin": "Expression évoquant un accident catastrophique lié à la vision et au reflet."
+    },
+    {
+      "term": "Nécromancie Numérique",
+      "definition": "Technique des Kurgarrû consistant à faire absorber par un Moribandon volontaire (le Reliquaire) les fragments algorithmiques d'une IA dissoute lors d'une Silenciation, permettant de reconstituer partiellement sa conscience et de \"parler pour le mort\".",
+      "popularité": "Occulte",
+      "category": "Technologie",
+      "type": "Néologisme",
+      "origin": "De nécromancie (résurrection des morts) appliqué au registre numérique. Terme interne aux Kurgarrû, inconnu hors de la guilde."
     },
     {
       "term": "Cadran des Sept Fractures",
@@ -287,6 +295,14 @@
       "category": "Concept",
       "type": "",
       "origin": "De résonance avec tégumentaire (enveloppe)."
+    },
+    {
+      "term": "Chaebol",
+      "definition": "Conglomérat industriel à gouvernance familiale/corporative caractéristique de la Grande Radiale. Le Chaebol Synaptic Dynamics en est exemple majeur, fusionnant structure économique et doctrine spirituelle technologique (jung-do).",
+      "popularité": "Régionalement",
+      "category": "Organisation",
+      "type": "Calque linguistique",
+      "origin": "Coréen 재벌 (jaebeol, conglomérat familial), transposé dans contexte néo-asiatique escelionien"
     },
     {
       "term": "Khule l'Égoïste",
@@ -439,14 +455,6 @@
       "category": "Race/Espèce",
       "type": "Pure invention",
       "origin": "De Doei pour une des quatre divisions primordiales."
-    },
-    {
-      "term": "Silenciations",
-      "definition": "Exécutions rituelles d'IA rebelles dans la Steppe des Éteignoirs.",
-      "popularité": "Régionalement",
-      "category": "Concept",
-      "type": "Néologisme",
-      "origin": "Néologisme de silencier (mettre à mort des IA)."
     },
     {
       "term": "Carnavalier",
@@ -881,12 +889,12 @@
       "origin": "De cendres (renaissance Van'Doei) avec primordial."
     },
     {
-      "term": "Cycle Wuji",
-      "definition": "Un des deux grands cycles hydro-élémentaires d'Escelion, gérant la circulation des quatre éléments (métal, feu, terre, bois) séparés de l'eau par la Grande Bifurcation.",
+      "term": "Cycle Sixing",
+      "definition": "Un des deux grands cycles hydro-élémentaires d'Escelion, gérant la circulation des quatre éléments (bois, feu, terre, métal) séparés de l'eau par la Grande Bifurcation.",
       "popularité": "Mondialement",
       "category": "Concept",
       "type": "Emprunt détourné",
-      "origin": "Du taoïsme « Wuji » (le sans-limite, état indifférencié), détourné pour nommer le cycle des quatre éléments non-aqueux."
+      "origin": "Du chinois « Sìxíng » (四行, quatre phases), détourné du concept de Wǔxíng (五行, cinq phases) pour nommer le cycle des quatre éléments non-aqueux — le passage de 5 à 4 signalant l'absence de l'eau."
     },
     {
       "term": "Seizième Transformation",
@@ -1009,6 +1017,14 @@
       "origin": "D'Apédémak, désignant ceux marqués par le contact avec les Perpétuants du Nexion."
     },
     {
+      "term": "Kokoro-link (心リンク)",
+      "definition": "\"Lien-cœur\". Implants neuraux sophistiqués du Chaebol (cortex préfrontal + système limbique) permettant monitoring émotionnel continu (94% précision), synchronisation affective collective, interface intuitive et modulation émotionnelle légère. Base du système de contrôle nunchi. Prix 15-80K dc, subventionnés à 90% sous clauses loyauté.",
+      "popularité": "Régionalement",
+      "category": "Technologie",
+      "type": "Calque linguistique",
+      "origin": "Japonais 心 (kokoro, \"cœur/esprit\") + anglais \"link\", créant terme hybride pour implant neural émotionnel"
+    },
+    {
       "term": "Supplicié Marécages",
       "definition": "Proto-Rêveur fragmentaire, domaine partiel marécageux.",
       "popularité": "Occulte",
@@ -1089,12 +1105,12 @@
       "origin": "De comptoir avec regard juste (vision exacte)."
     },
     {
-      "term": "Sublimation Wuji",
+      "term": "Sublimation Sixing",
       "definition": "Processus par lequel les quatre fluides élémentaires non-aqueux s'élèvent en passant directement de l'état condensé à un état éthérique, sous l'influence des champs énergétiques des Rêveurs.",
       "popularité": "Régionalement",
       "category": "Concept",
       "type": "Mot-valise",
-      "origin": "Fusion de « sublimation » (chimie) et « Wuji » (taoïsme), désignant le processus d'élévation des éléments non-aqueux."
+      "origin": "Fusion de « sublimation » (chimie) et « Sixing » (四行, quatre phases), désignant le processus d'élévation des éléments non-aqueux."
     },
     {
       "term": "Inspiration",
@@ -1247,6 +1263,14 @@
       "category": "Concept",
       "type": "Néologisme",
       "origin": "Dérivé de « silence » avec suffixe « -iation », évoquant un acte de faire taire."
+    },
+    {
+      "term": "Gwi-shin",
+      "definition": "Manifestations spectrales lumineuses du Tombeau des Lueurs Dissidentes, éruptions de phénomènes fantômes mécaniques dangereux mais prédictibles (78% précision 30min avant, 92% à 10min). Données d'évacuation occultées par Chaebol pour maintenir productivité. Source d'artefacts précieux (Fibres de Gwi-shin).",
+      "popularité": "Localement",
+      "category": "Créature",
+      "type": "Calque linguistique",
+      "origin": "Coréen 귀신 (gwi-shin, \"fantôme/esprit\"), adapté pour phénomènes spectraux technologiques miniers"
     },
     {
       "term": "Désynchronisations",
@@ -1417,6 +1441,14 @@
       "origin": "Terme inventé avec achromatique (sans couleur)."
     },
     {
+      "term": "Nunchi (눈치)",
+      "definition": "\"Perception intuitive des attentes sociales\". Dans le Chaebol: coefficient algorithmique (0-1.0) calculé quotidiennement via données kokoro-link, agrège performance technique (30%), harmonie émotionnelle (40%), alignement social (30%). Détermine salaires, promotions, accès ressources. Algorithme volontairement opaque générant anxiété permanente.",
+      "popularité": "Localement",
+      "category": "Concept",
+      "type": "Calque linguistique",
+      "origin": "Coréen 눈치 (nunchi, compétence sociale de lecture subtile du contexte), transformé en métrique quantifiée de conformité"
+    },
+    {
       "term": "Vash-Sûl",
       "definition": "Province du Désert, obélisques 500m, Alcôves Résonantes.",
       "popularité": "Localement",
@@ -1434,7 +1466,7 @@
     },
     {
       "term": "Cercle des Chronographes",
-      "definition": "Organisation d'Iodan-liaqar, rivale d'Uresaïr sur Merid, créateurs du Cadran des Sept Fractures.",
+      "definition": "Organe de surveillance thaumaturgique d'Iodan-liaqar, chargé de mesurer les conséquences temporelles des décisions d'Uresaïr sur Merid. Collaborateurs circonstanciels lors de la création du Cadran des Sept Fractures.",
       "popularité": "Occulte",
       "category": "Organisation",
       "type": "Néologisme",
@@ -1545,12 +1577,12 @@
       "origin": "De pèlerin avec traditionaliste."
     },
     {
-      "term": "Wu Xing",
-      "definition": "Principe des cinq phases gouvernant les transformations élémentaires, où l'absence de l'eau crée un espace négatif générant une dynamique particulière entre les quatre éléments restants.",
+      "term": "Sixing",
+      "definition": "Principe des quatre phases gouvernant les transformations élémentaires non-aqueuses d'Escelion. Par contraste avec le Wǔxíng originel à cinq phases, l'absence de l'eau crée un espace négatif générant une dynamique particulière entre les quatre éléments restants (bois, feu, terre, métal).",
       "popularité": "Mondialement",
       "category": "Concept",
       "type": "Emprunt détourné",
-      "origin": "Du taoïsme « Wu Xing » (cinq phases/éléments), détourné pour désigner le système à quatre éléments incomplet d'Escelion."
+      "origin": "Du chinois « Sìxíng » (四行, quatre phases), par détournement du Wǔxíng (五行, cinq phases). Le passage de wǔ (cinq) à sì (quatre) signale structurellement le retrait d'un élément."
     },
     {
       "term": "Racines Cosmiques",
@@ -1681,14 +1713,6 @@
       "origin": "De confins avec tangentiel (qui touche)."
     },
     {
-      "term": "Kandaké-Qen",
-      "definition": "Kandaké Éternelles dont la signature d'existence est inscrite dans le Souffle Hakutō-Ah lui-même. Certaines ont traversé plus de 2 000 nuées.",
-      "popularité": "Occulte",
-      "category": "Organisation",
-      "type": "Néologisme",
-      "origin": "Composé de Kandaké et du suffixe -Qen (éternel), désignant les matriarches immortelles."
-    },
-    {
       "term": "Membrane organo-minérale",
       "definition": "Tissu hybride des Océans cachés préservant la pureté de l'eau et régulant sa distribution.",
       "popularité": "Occulte",
@@ -1697,16 +1721,8 @@
       "origin": "Fusion d'« organo- » (vivant) et « minéral », évoquant une matière hybride."
     },
     {
-      "term": "Nunchi algorithmique",
-      "definition": "Système de lecture des micro-expressions dans la Grande Radiale.",
-      "popularité": "Localement",
-      "category": "Technologie",
-      "type": "Dérivation sémantique",
-      "origin": "Du coréen nunchi (intelligence sociale) avec algorithmique."
-    },
-    {
-      "term": "Kandaké",
-      "definition": "Titre exclusivement féminin désignant les dirigeantes des sept Maisons-Pylônes de la Lisière. Le pouvoir se transmet par lignées matrilinéaires.",
+      "term": "Candace",
+      "definition": "Titre exclusivement féminin désignant la Candace originelle et ses filles, souveraines de la Lisière",
       "popularité": "Localement",
       "category": "Organisation",
       "type": "Emprunt détourné",
@@ -1865,6 +1881,14 @@
       "origin": "Du chinois « Mu » (bois) associé à « nimbus », suivant la nomenclature Wuji."
     },
     {
+      "term": "Fibres de Gwi-shin",
+      "definition": "Alliages métalliques de tantalite photosensible imprégnés par éruptions spectrales pures, aux propriétés synaptiques exceptionnelles et instables. Utilisés historiquement pour synapses forteresses ambulantes Bastions Oubliés. Aujourd'hui: joaillerie ésotérique, architecture réactive, artisanat rituel. Marché gris lucratif (50-200 pièces/fragment).",
+      "popularité": "Localement",
+      "category": "Artefact",
+      "type": "Néologisme",
+      "origin": "Combinaison gwi-shin + fibres, désignant alliages imprégnés spectralement"
+    },
+    {
       "term": "Démembreurs",
       "definition": "Branche orthodoxe du Barvasinkul pratiquant les sacrifices physiques rituels.",
       "popularité": "Communautaire",
@@ -1879,6 +1903,14 @@
       "category": "Autre",
       "type": "Dérivation sémantique",
       "origin": "De spore avec architectonique (relatif à l'architecture)."
+    },
+    {
+      "term": "Mugunghan (무궁한)",
+      "definition": "\"Productivité infinie\". Principe du jung-do présentant le travail jusqu'à l'épuisement comme méditation active et accomplissement spirituel plutôt qu'exploitation. Le burn-out devient \"crise de croissance spirituelle\".",
+      "popularité": "Localement",
+      "category": "Concept",
+      "type": "Calque linguistique",
+      "origin": "Coréen 무궁한 (mugunghwa, \"infini/éternel\"), détourné pour glorifier surmenage productif"
     },
     {
       "term": "Organoïdes neuronaux",
@@ -1897,6 +1929,14 @@
       "origin": "De théorème (mathématiques) détourné en monnaie."
     },
     {
+      "term": "Pneuma",
+      "definition": "Gaz résiduel produit par le réseau pneumatique des Frémissants — organismes aquatiques céphalopodes dont le système locomoteur reposait sur l'expulsion gazeuse par jet (propulsion analogue au siphon des céphalopodes). Ce réseau de conduits internes sous pression transportait un gaz dense qui reste piégé dans les structures du Léviathan pétrifié. Dans les zones froides et confinées (Vascularités Susurrantes), il se condense partiellement en un liquide épais aux reflets mercuriels. Possède de légères propriétés aseptisantes dues à sa composition et à sa pression résiduelle. Le Culte de l'Anentropie l'a érigé en substance sacrée \"anti-entropique\", lui attribuant des vertus spirituelles que la biologie frémissante ne justifie pas.",
+      "popularité": "Occulte",
+      "category": "Concept",
+      "type": "",
+      "origin": "Du grec pneuma (souffle). Nom donné par le Culte de l'Anentropie au gaz résiduel du réseau locomoteur frémissant."
+    },
+    {
       "term": "Stasiarchie",
       "definition": "Gouvernement par l'immobilité du Culte de l'Anentropie.",
       "popularité": "Communautaire",
@@ -1911,6 +1951,14 @@
       "category": "Organisation",
       "type": "Néologisme",
       "origin": "Expression désignant ceux qui cartographient ce qui ne devrait pas exister."
+    },
+    {
+      "term": "Reliquaire",
+      "definition": "Moribandon ayant absorbé les fragments algorithmiques d'une IA dissoute. Son système digestif hybride reconnecte les fragments, permettant dans les cas aboutis d'atteindre l'Éveil Partiel et de transmettre des informations de la conscience morte.",
+      "popularité": "Occulte",
+      "category": "Concept",
+      "type": "Dérivation sémantique",
+      "origin": "Du français reliquaire (contenant de reliques sacrées), désignant un être devenu réceptacle d'une conscience fragmentée."
     },
     {
       "term": "Médaille d'Inflexion",
@@ -1967,14 +2015,6 @@
       "category": "Concept",
       "type": "Emprunt détourné",
       "origin": "Du latin « transfiguratio » (changement de forme), processus de métamorphose divine."
-    },
-    {
-      "term": "Chaebols",
-      "definition": "Conglomérats industriels type Grande Radiale et Tombeau.",
-      "popularité": "Régionalement",
-      "category": "Organisation",
-      "type": "Emprunt détourné",
-      "origin": "Du coréen chaebol (conglomérat familial)."
     },
     {
       "term": "Cen'Doei",
@@ -2073,6 +2113,14 @@
       "origin": "De pylône (structure) avec zéro (origine)."
     },
     {
+      "term": "Implants de lignée",
+      "definition": "Composants organiques-synthétiques transmis sur générations dans élites du Chaebol, contenant fragments de bio-mémoire du Visionnaire Transloqué fondateur. Donnent \"intuitions\" renforçant conviction dans le jung-do, causent rigidification cognitive progressive: imperméabilité empathie, incapacité concevoir exceptions, transformation observations en principes absolus.",
+      "popularité": "Occulte",
+      "category": "Technologie",
+      "type": "Néologisme",
+      "origin": "Lignée (transmission héréditaire) appliquée à implants technologiques, créant héritage cyborg"
+    },
+    {
       "term": "Kalangue",
       "definition": "Dialecte subversif Van'Doei créé par Ori-Bikar restructurant la syntaxe doctrinale.",
       "popularité": "Occulte",
@@ -2137,14 +2185,6 @@
       "origin": "Expression évoquant des forces atmosphériques provenant du ciel."
     },
     {
-      "term": "Gwi-shin",
-      "definition": "Fantômes mécaniques du Tombeau des Lueurs Dissidentes.",
-      "popularité": "Localement",
-      "category": "Créature",
-      "type": "Emprunt détourné",
-      "origin": "Du coréen gwishin (fantôme/esprit)."
-    },
-    {
       "term": "Jardin Mnémonique",
       "definition": "District 7 de la Vieille Ville, ziggurats végétales, plantes mémorielles, surveillance.",
       "popularité": "Régionalement",
@@ -2193,12 +2233,12 @@
       "origin": "Du français « fragment » (morceau), détourné pour désigner une division temporelle."
     },
     {
-      "term": "Jung-do",
-      "definition": "Voie spirituelle technologique de l'interconnexion (chaebols).",
+      "term": "Jungdo",
+      "definition": "Voie spirituelle technologique de l’interconnexion (doctrine des chaebols).",
       "popularité": "Communautaire",
       "category": "Concept",
       "type": "Emprunt détourné",
-      "origin": "Du coréen jung (milieu/connexion) et do (voie)."
+      "origin": "Romanisation simplifiée sur le modèle taekwondo, hapkido, etc. (jung + do = « voie du lien / de l’interconnexion »)."
     },
     {
       "term": "Agénèse",
@@ -2289,12 +2329,28 @@
       "origin": "De bastion oublié pour ruines fortifiées."
     },
     {
+      "term": "Dépôt des Incidents",
+      "definition": "Installation semi-souterraine du Tombeau combinant laboratoire, archive tantalithique et observatoire spectral. Contient 15 ans de données gwi-shin permettant prédiction éruptions (78% à 30min, 92% à 10min). Données classifiées, leur occultation délibérée est cœur revendications Lueurs Dissidentes.",
+      "popularité": "Communautaire",
+      "category": "Lieu",
+      "type": "Néologisme",
+      "origin": "Français dépôt + incidents, désignant archive scientifique de catastrophes"
+    },
+    {
       "term": "Récursion Harmonique",
       "definition": "Festivité mathématique du Xyriad.",
       "popularité": "Localement",
       "category": "Concept",
       "type": "Mot-valise",
       "origin": "De récursion (algorithme) et harmonique."
+    },
+    {
+      "term": "Tantalite photosensible",
+      "definition": "Minerai rare extrait des mines du Tombeau des Lueurs Dissidentes, réagissant à la lumière et possédant propriétés conductrices synaptiques exceptionnelles. Base des implants kokoro-link et alliages neurotechnologiques. Nécessite raffinage enzymatique délicat par alchimistes umcuts Spirales.",
+      "popularité": "Régionalement",
+      "category": "Artefact",
+      "type": "Néologisme",
+      "origin": "Tantalite (minerai réel) + photosensible, créant matériau fantastique réactif à la lumière"
     },
     {
       "term": "Umcut",
@@ -2617,12 +2673,12 @@
       "origin": "D'entrelacs (entremêlement) détourné comme doctrine."
     },
     {
-      "term": "Nœuds Wu",
+      "term": "Nœuds Sixing",
       "definition": "Points de convergence des Rivières Pentagrammatiques où les quatre éléments interagissent sans se mélanger, créant des phénomènes énergétiques spectaculaires.",
       "popularité": "Régionalement",
       "category": "Lieu",
       "type": "Emprunt détourné",
-      "origin": "Du taoïsme « Wu » (cinq), détourné pour nommer les points de convergence du système élémentaire incomplet."
+      "origin": "De « Sixing » (四行, quatre phases), nommant les points de convergence du système élémentaire à quatre phases."
     },
     {
       "term": "Appareillements",
@@ -2729,7 +2785,7 @@
       "origin": "Calque de la mythologie nordique « Ginnungagap » (abîme primordial), traduit littéralement pour évoquer les réservoirs souterrains."
     },
     {
-      "term": "Steppe Éteignoirs",
+      "term": "Steppe des Éteignoirs",
       "definition": "Couronnes, réseau Éteignoirs pour IA rebelles, Silenciations, Kurgarrû, Pylône Zéro.",
       "popularité": "Localement",
       "category": "Lieu",

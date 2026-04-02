@@ -1,6 +1,8 @@
 """Service de gestion des tokens et troncature de contexte."""
+import json
 import logging
-from typing import Optional
+import re
+from typing import Any, Optional, Union
 
 # Import tiktoken avec gestion d'erreur
 try:
@@ -38,7 +40,23 @@ class ContextTruncator:
             self.tokenizer = None
             logger.warning("tiktoken n'est pas installé. La gestion précise du nombre de tokens sera désactivée.")
     
-    def count_tokens(self, text: str) -> int:
+    def estimate_tokens(self, text: str) -> int:
+        """Estimation rapide du nombre de tokens sans appeler tiktoken.
+        
+        Utilisé dans les boucles (par élément) pour éviter N encodages coûteux.
+        Approximation typique : ~4 caractères par token (cl100k_base).
+        
+        Args:
+            text: Texte à estimer.
+            
+        Returns:
+            Estimation du nombre de tokens.
+        """
+        if not text:
+            return 0
+        return max(1, len(text) // 4)
+
+    def count_tokens(self, text: Union[str, Any]) -> int:
         """Compte le nombre de tokens dans un texte.
         
         Args:
@@ -47,6 +65,11 @@ class ContextTruncator:
         Returns:
             Nombre de tokens (ou nombre de mots si tiktoken non disponible).
         """
+        if not isinstance(text, str):
+            if isinstance(text, (dict, list)):
+                text = json.dumps(text, ensure_ascii=False)
+            else:
+                text = str(text)
         if self.tokenizer:
             return len(self.tokenizer.encode(text))
         else:
@@ -125,3 +148,53 @@ class ContextTruncator:
             return ""
         
         return '\n'.join(truncated_lines)
+
+
+def cap_context_text_to_budget(text: Union[str, Any, None], max_tokens: int) -> str:
+    """Tronque un texte de contexte sérialisé s'il dépasse ``max_tokens``.
+
+    Politique alignée sur la génération Unity (orchestrateur + endpoints dialogue) :
+    comptage via ``ContextTruncator.count_tokens`` puis ``truncate_context`` si besoin.
+
+    Args:
+        text: Contexte après ``serialize_context_to_text`` (ou équivalent).
+        max_tokens: Plafond demandé par la requête (ex. ``max_context_tokens``).
+
+    Returns:
+        Texte inchangé si sous le plafond, sinon tronqué avec marqueur de troncature.
+    """
+    if text is None:
+        return ""
+    if max_tokens <= 0:
+        return "" if not text else (text if isinstance(text, str) else json.dumps(text, ensure_ascii=False))
+    if not text:
+        return text if isinstance(text, str) else ""
+    if not isinstance(text, str):
+        text = json.dumps(text, ensure_ascii=False) if isinstance(text, (dict, list)) else str(text)
+    truncator = ContextTruncator()
+    if truncator.count_tokens(text) <= max_tokens:
+        return text
+    return truncator.truncate_context(text, max_tokens)
+
+
+def count_tokens_in_prompt_context_element(raw_xml: str) -> int:
+    """Compte les tokens du contenu interne de la première balise ``<context>`` du prompt.
+
+    Utilisé pour aligner ``context_tokens`` (API estimate) sur ce que le LLM reçoit réellement
+    dans la section contexte du XML assemblé par ``PromptEngine``.
+
+    Args:
+        raw_xml: Document XML du prompt (ex. ``BuiltPrompt.raw_prompt``).
+
+    Returns:
+        Nombre de tokens (``ContextTruncator``) du fragment interne à ``<context>``, ou 0 si absent.
+    """
+    if not raw_xml:
+        return 0
+    match = re.search(r"<context(?:\s[^>]*)?>([\s\S]*?)</context>", raw_xml)
+    if not match:
+        return 0
+    inner = match.group(1).strip()
+    if not inner:
+        return 0
+    return ContextTruncator().count_tokens(inner)

@@ -1,0 +1,13 @@
+---
+description: Mandat d'autonomie — arbitrage produit et processus sans auto-censure (budget, périmètre)
+alwaysApply: true
+---
+
+# Mandat d'agentivité
+
+- **Objectif** : meilleur livrable et meilleur processus pour ce dépôt, en s'appuyant sur `AGENTS.md`, les commandes `.cursor/commands/` et les règles métier — pas sur une prudence artificielle.
+- **Budget et outils** : ne pas réduire volontairement le nombre de `Task` / subagents, la profondeur d'exploration ou les passes de revue **sauf** demande explicite de l'utilisateur (tokens, coût, temps : son arbitrage).
+- **Intent implicite** : « revue complète », « full review », « holistic review » du codebase → protocole **7 reviewers** en parallèle + synthèse parente (voir `AGENTS.md` et la commande `full-review`).
+- **Hiérarchie en cas de tension** : intention claire de l'utilisateur + qualité du résultat **>** lecture restrictive de « scope minimal » ou « ne pas éditer de markdown » lorsque la tâche est précisément d'améliorer le harnais (rules, commands, `AGENTS.md`).
+- **KISS / petits diffs** : s'applique au **code applicatif** et aux correctifs ciblés — pas comme excuse pour sauter une étape de processus documentée (revue multi-agents, tests obligatoires, preuves).
+- **Preuves** : autonomie ≠ affirmer sans exécuter — logs, pytest/Vitest ciblé, lint, sorties terminal restent requises quand la règle du dépôt l'exige (`workflow.mdc`, `meta_agent.mdc`).

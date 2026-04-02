@@ -48,8 +48,11 @@ class TraitCatalogService:
             return self._traits
         
         if not self.csv_path.exists():
-            logger.error(f"Fichier CSV introuvable: {self.csv_path}")
-            raise FileNotFoundError(f"Le fichier CSV des traits n'existe pas: {self.csv_path}")
+            # Dégradation gracieuse : le catalogue Unity est optionnel (ex. en CI/tests).
+            # On renvoie une liste vide et on log un warning contextualisé.
+            logger.warning(f"Fichier CSV des traits introuvable: {self.csv_path} (catalogue ignoré)")
+            self._traits = []
+            return self._traits
         
         traits = []
         

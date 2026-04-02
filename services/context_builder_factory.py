@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     from services.gdd_loader import GDDLoader
     from services.element_repository import ElementRepository
     from services.element_resolver import ElementResolver

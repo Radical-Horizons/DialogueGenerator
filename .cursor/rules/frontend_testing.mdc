@@ -4,11 +4,15 @@ alwaysApply: false
 ---
 - Tu es autonome pour les tests frontend via l'outil browser. Tu peux te connecter avec le login admin et le mot de passe admin123.
 - **Tests unitaires**: Vitest + React Testing Library dans `frontend/src/test/` et `frontend/src/**/*.test.ts`. Tests rapides, isolation complète, mocks pour API. Tests de parsing dans `frontend/src/hooks/usePromptPreview.test.ts`.
-- **Tests E2E**: Playwright dans `e2e/`. Tests critiques (auth, navigation, génération), nécessite serveurs lancés.
+- **`npm test` dans `frontend/`** = **`vitest run` rapide** (exclut 3 fichiers d’intégration lourds ; liste dans `frontend/vitest.config.ts`). **`npm run test:full`** = suite complète (comme la CI). Le watch = **`npm run test:watch`** (ne se termine pas).
+- **Exécution depuis un agent Cursor** : politique Vitest (filtres, interdits, PowerShell) → **`.cursor/rules/workflow.mdc`**. Ici : patterns de tests, pas la procédure d’orchestration.
+- **Tests E2E**: Playwright dans `e2e/`. Tests critiques (auth, navigation, génération), nécessite serveurs lancés. L'environnement E2E est complet (clé API, budget, GDD, etc.) ; tous les tests E2E sont censés passer. Pour l'éditeur de graphe : scoper la liste dans le contexte actif : `page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')` quand le test travaille sur l'onglet Éditeur de Graphe. Specs avec LLM : voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
+- **Formulaires (react-hook-form) + Playwright** : `page.fill()` met à jour le DOM mais RHF peut ne pas mettre à jour son store interne (il écoute le `change` natif). Pour vérifier la persistance après save : soit blur explicite (Tab ou clic canvas) avant de déclencher la sauvegarde, soit asserter via API (GET du fichier sauvegardé) plutôt que via reload de la page.
+- **Seed E2E (PUT document)** : en cas de 409 (optimistic locking), réessayer le PUT avec la `revision` renvoyée dans le corps de la réponse jusqu'à succès. Convention utilisée dans `e2e/documents-layout-adr008.spec.ts`.
 - **Vérifications automatiques après modification frontend**:
   1. Build check : `cd frontend && npm run build` (détecte erreurs TypeScript)
   2. Lint check : `cd frontend && npm run lint` (détecte erreurs de code)
-  3. Tests unitaires : `cd frontend && npm test -- --run` (tests rapides)
+  3. Tests unitaires : commandes et contraintes agent → **`workflow.mdc`**. En local humain : `cd frontend && npm test` ou rapports JSON selon scripts du `package.json`.
   4. Tests E2E : `npm run test:e2e` (si serveurs lancés, tests critiques)
 - **Script automatisé**: `.\scripts\test-frontend.ps1` (build + lint + tests unitaires), `.\scripts\test-frontend.ps1 -E2E` (inclut E2E).
 - **MCP Browser** (si disponible): Pour inspection visuelle, vérifier console logs, network requests, après avoir lancé `npm run dev`.
@@ -17,6 +21,54 @@ alwaysApply: false
   - Avant commit : `.\scripts\test-frontend.ps1` ou `npm run test:frontend`
   - Pour tests E2E : s'assurer que `npm run dev` est lancé, puis `npm run test:e2e`
 - **Commandes**:
+  - `npm run test:frontend:vitest` : Vitest **rapide**, reporter JSON → `tmp/vitest-report.json`
+  - `npm run test:frontend:vitest:full` : Vitest **complet** (CI) → `tmp/vitest-report-full.json`
+  - `npm run test:frontend:vitest:summary` : lit `tmp/vitest-report.json` (rapide)
   - `npm run test:frontend` : Build + lint + tests unitaires frontend (script PowerShell automatisé)
   - `npm run test:e2e` : Tests E2E Playwright
   - `npm run test:all` : Backend + frontend (unitaires uniquement)
+
+## Anti-patterns à éviter absolument
+
+### Tests vacueux via garde optionnelle
+```typescript
+// ❌ INTERDIT — si querySelector retourne null, le bloc entier est skipé
+//    le test "passe" sans rien vérifier
+const el = container.querySelector('input[type="checkbox"]')
+if (el) {
+  await user.click(el)
+  expect(mock).toHaveBeenCalled()  // jamais atteint si el est null
+}
+
+// ✅ CORRECT — assertion explicite avant l'usage
+const el = screen.getByRole('checkbox')  // lève une erreur si absent
+await user.click(el)
+expect(mock).toHaveBeenCalled()
+```
+
+### Sélecteur DOM fragile via `closest('div')?.querySelector()`
+`getByText('X').closest('div')` retourne le premier div **ancêtre**, pas le conteneur item. Si la checkbox est **sibling** de ce div (pas enfant), `querySelector` ne la trouve pas.
+```typescript
+// ❌ FRAGILE — closest('div') peut ne pas être le bon conteneur
+screen.getByText('Nom').closest('div')?.querySelector('input[type="checkbox"]')
+
+// ✅ ROBUSTE — utiliser getByRole ou remonter d'un niveau
+screen.getByRole('checkbox')                              // si unique dans le scope
+screen.getByLabelText('Sélectionner Nom')                 // si aria-label présent
+getByText('Nom').closest('div')?.parentElement?.querySelector('input[type="checkbox"]')  // si nécessaire
+```
+
+### useCallback avec closure périmée (store Zustand)
+```typescript
+// ❌ STALE — selections est capturé au dernier render, jamais mis à jour
+const fn = useCallback(() => {
+  doSomethingWith(selections)  // périmé si selections a changé sans re-render
+}, [setSuggestions])           // selections absent des dépendances
+
+// ✅ useRef toujours à jour
+const selectionsRef = useRef(selections)
+selectionsRef.current = selections  // mis à jour à chaque render
+const fn = useCallback(() => {
+  doSomethingWith(selectionsRef.current)  // toujours frais
+}, [])
+```

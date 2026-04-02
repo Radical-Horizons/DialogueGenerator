@@ -78,7 +78,7 @@ Ces règles sont toujours pertinentes et n'ont pas besoin de changements majeurs
 ### Ce que BMAD gère (ne pas dupliquer dans les règles)
 
 - ✅ **Planning** : PRD, Architecture, Epics, Stories (dans `_bmad-output/planning-artifacts/`)
-- ✅ **Documentation détaillée** : Spécifications, architecture détaillée (dans `docs/` et `_bmad-output/`)
+- ✅ **Documentation détaillée** : Décisions / suivi récent surtout dans `_bmad-output/` ; specs, guides et référence technique longue durée dans `docs/`
 - ✅ **Workflow de développement** : Commands BMAD (`/bmad:...`) pour planification
 
 ### Ce que les règles .mdc doivent couvrir (guidance quotidienne)
@@ -136,7 +136,7 @@ Ces règles sont toujours pertinentes et n'ont pas besoin de changements majeurs
 
 **Après réduction, les règles doivent** :
 - ✅ Guider le développement quotidien (code, tests, commandes)
-- ✅ Référencer `README*.md` et `docs/` pour détails
+- ✅ Référencer `README*.md`, `_bmad-output/` (planning / ADR) et `docs/` (référence technique)
 - ✅ Ne pas dupliquer la planification BMAD (PRD, Architecture, Stories)
 - ✅ Rester concises (< 100 lignes par fichier, idéalement < 50)
 

@@ -7,12 +7,12 @@
 import { useCallback } from 'react'
 import { useContextStore } from '../store/contextStore'
 import { useGenerationStore } from '../store/generationStore'
-import { useLLMStore } from '../store/llmStore'
 import { useAuthorProfile } from '../hooks/useAuthorProfile'
 import { useVocabularyStore } from '../store/vocabularyStore'
 import { useNarrativeGuidesStore } from '../store/narrativeGuidesStore'
 import { useFlagsStore } from '../store/flagsStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
+import { COMPLETION_TOKENS_LIMITS } from '../constants'
 import type { ContextSelection, GenerateUnityDialogueRequest } from '../types/api'
 import type { LLMModelResponse } from '../types/api'
 
@@ -25,7 +25,7 @@ export interface UseGenerationRequestReturn {
     maxContextTokens: number
     maxCompletionTokens: number | null
     llmModel: string
-    reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+    reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
     topP: number | null
     maxChoices: number | null
     choicesMode: 'free' | 'capped'
@@ -119,7 +119,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
       maxContextTokens: number
       maxCompletionTokens: number | null
       llmModel: string
-      reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+      reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
       topP: number | null
       maxChoices: number | null
       choicesMode: 'free' | 'capped'
@@ -135,7 +135,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
     
     // Clamp maxCompletionTokens si nécessaire
     const safeMaxCompletionTokens = params.maxCompletionTokens !== null
-      ? Math.min(Math.max(params.maxCompletionTokens, 100), 16000)
+      ? Math.min(Math.max(params.maxCompletionTokens, COMPLETION_TOKENS_LIMITS.MIN), COMPLETION_TOKENS_LIMITS.MAX)
       : null
 
     // Utiliser une valeur par défaut si userInstructions est vide (backend exige min_length=1)

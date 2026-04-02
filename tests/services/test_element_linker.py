@@ -69,6 +69,37 @@ class TestElementLinker:
         regions = linker.get_regions([])
         
         assert regions == []
+
+    def test_get_regions_shard_mode_all_lieux(self, linker):
+        """Sans Catégorie Région, tous les lieux nommés sont listés (fiches individuelles)."""
+        locs = [
+            {"Nom": "Zeta", "sections": {}},
+            {"Nom": "Alpha", "sections": {}},
+            {"Nom": "Alpha"},
+        ]
+        regions = linker.get_regions(locs)
+        assert regions == ["Alpha", "Zeta"]
+
+    def test_get_sub_locations_from_contient_without_categorie(self, linker):
+        """Contient est lu même sans champ Catégorie (fiche lieu moderne)."""
+        locs = [
+            {"Nom": "Zone Mère", "Contient": "Site A, Site B"},
+        ]
+        assert linker.get_sub_locations("Zone Mère", locs) == ["Site A", "Site B"]
+
+    def test_get_scene_region_names_typed_first(self, linker, sample_gdd_data):
+        """Scène : priorité aux Catégorie Région."""
+        names = linker.get_scene_region_names(sample_gdd_data.locations)
+        assert names == ["Forêt Sombre"]
+
+    def test_get_scene_sub_location_names_fallback_others(self, linker):
+        """Sans Contient, sous-lieux scène = autres fiches."""
+        locs = [
+            {"Nom": "A"},
+            {"Nom": "B"},
+            {"Nom": "C"},
+        ]
+        assert linker.get_scene_sub_location_names("B", locs) == ["A", "C"]
     
     def test_get_sub_locations(self, linker, sample_gdd_data):
         """Test de récupération des sous-lieux."""
@@ -182,3 +213,32 @@ class TestElementLinker:
             "communities": set(),
             "quests": set()
         }
+
+    def test_get_linked_elements_shard_sections_narrative(self):
+        """Fiche type Notion : relations plats absentes, texte sous sections._general."""
+        gdd = GDDData(
+            characters=[
+                {
+                    "Nom": "Hero",
+                    "sections": {
+                        "_general": (
+                            "Rencontre souvent Alice à la Capitale. "
+                            "Possède une Dague Empoisonnée."
+                        )
+                    },
+                },
+                {"Nom": "Alice"},
+            ],
+            locations=[{"Nom": "Capitale"}],
+            items=[{"Nom": "Dague Empoisonnée"}],
+            species=[],
+            communities=[],
+            quests=[],
+        )
+        repository = ElementRepository(gdd)
+        resolver = ElementResolver(repository)
+        linker = ElementLinker(element_resolver=resolver)
+        linked = linker.get_linked_elements(character_name="Hero")
+        assert "Alice" in linked["characters"]
+        assert "Capitale" in linked["locations"]
+        assert "Dague Empoisonnée" in linked["items"]

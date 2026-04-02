@@ -4,6 +4,8 @@ import logging
 from datetime import datetime, timezone
 from typing import Annotated, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, status
+
+from api.routers.auth import get_current_user
 from api.schemas.flags import (
     FlagsCatalogResponse,
     FlagDefinition,
@@ -25,7 +27,11 @@ from services.flag_catalog_service import FlagCatalogService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/mechanics/flags", tags=["Mechanics - Flags"])
+router = APIRouter(
+    prefix="/api/v1/mechanics/flags",
+    tags=["Mechanics - Flags"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def get_flag_catalog_service() -> FlagCatalogService:

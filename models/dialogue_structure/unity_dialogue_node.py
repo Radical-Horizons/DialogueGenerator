@@ -3,14 +3,27 @@
 Ces modèles représentent le contenu créatif généré par l'IA, sans les IDs techniques
 qui seront ajoutés automatiquement par le système.
 """
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from typing import List, Optional, Any
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class UnityDialogueConsequencesContent(BaseModel):
     """Contenu des conséquences (flags narratifs) généré par l'IA."""
     flag: str = Field(..., description="Nom du flag narratif")
     description: Optional[str] = Field(None, description="Description de la conséquence")
+
+
+class UnityDialogueTraitRequirementContent(BaseModel):
+    """Exigence de trait pour débloquer un choix."""
+
+    trait: str = Field(..., description="Nom du trait requis (ex: 'Courageux')")
+    minValue: int = Field(
+        ...,
+        ge=-100,
+        le=100,
+        description="Valeur minimale requise pour ce trait (ex: 5).",
+    )
 
 
 class UnityDialogueChoiceContent(BaseModel):
@@ -21,7 +34,7 @@ class UnityDialogueChoiceContent(BaseModel):
     testFailureNode: Optional[str] = Field(None, description="ID du nœud cible en cas d'échec (score >= DD - 5 et < DD)")
     testSuccessNode: Optional[str] = Field(None, description="ID du nœud cible en cas de réussite (score >= DD et < DD + 5)")
     testCriticalSuccessNode: Optional[str] = Field(None, description="ID du nœud cible en cas de réussite critique (score >= DD + 5)")
-    traitRequirements: Optional[List[Dict[str, Any]]] = Field(
+    traitRequirements: Optional[List[UnityDialogueTraitRequirementContent]] = Field(
         None, 
         description="Exigences de traits (ex: [{'trait': 'Courageux', 'minValue': 5}])"
     )
@@ -50,6 +63,26 @@ class UnityDialogueNodeContent(BaseModel):
     isLongRest: Optional[bool] = Field(None, description="Si true, déclenche un repos long")
     startState: Optional[int] = Field(None, description="État de démarrage pour dialogues multi-entrées")
     choices: Optional[List[UnityDialogueChoiceContent]] = Field(None, description="Choix disponibles pour le joueur")
+
+    @field_validator("consequences", mode="before")
+    @classmethod
+    def normalize_consequences(cls, value: Any) -> Any:
+        """Normalise `consequences` en objet unique.
+
+        Certains providers / modes (structured output, streaming) renvoient parfois
+        `node.consequences` comme une liste d'objets (souvent de taille 1) au lieu
+        d'un objet unique conforme au schéma. On convertit donc :
+        - `[{...}]` -> `{...}`
+        - `[]` -> `None`
+        - `[x, ...]` -> `x` (premier élément)
+        """
+        if value is None:
+            return None
+        if isinstance(value, list):
+            if len(value) == 0:
+                return None
+            return value[0]
+        return value
 
 
 class UnityDialogueGenerationResponse(BaseModel):

@@ -17,7 +17,17 @@ export function Header() {
   const { isGenerating: isGraphGenerating } = useGraphStore()
   
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false)
-  const [optionsModalInitialTab, setOptionsModalInitialTab] = useState<'context' | 'metadata' | 'general' | 'vocabulary' | 'prompts' | 'shortcuts' | 'usage'>('context')
+  const [optionsModalInitialTab, setOptionsModalInitialTab] = useState<
+    | 'context'
+    | 'metadata'
+    | 'general'
+    | 'vocabulary'
+    | 'gdd_notion'
+    | 'prompts'
+    | 'shortcuts'
+    | 'usage'
+    | 'logs'
+  >('general')
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
@@ -55,7 +65,7 @@ export function Header() {
         key: 'ctrl+,',
         handler: () => {
           if (isAuthenticated && user && actions.handleGenerate) {
-            setOptionsModalInitialTab('context')
+            setOptionsModalInitialTab('general')
             setIsOptionsModalOpen(true)
           }
         },
@@ -158,7 +168,7 @@ export function Header() {
             {/* Bouton Options */}
             <button
               onClick={() => {
-                setOptionsModalInitialTab('context')
+                setOptionsModalInitialTab('general')
                 setIsOptionsModalOpen(true)
               }}
               style={{
@@ -302,6 +312,9 @@ export function Header() {
                 e.stopPropagation()
                 setIsUserMenuOpen(!isUserMenuOpen)
               }}
+              aria-label={`Menu utilisateur ${user.username}`}
+              aria-expanded={isUserMenuOpen}
+              aria-haspopup="menu"
               style={{
                 width: '36px',
                 height: '36px',

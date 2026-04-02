@@ -24,7 +24,7 @@ export interface UseGenerationHandlersOptions {
   /** Modèle LLM sélectionné */
   llmModel: string
   /** Reasoning effort */
-  reasoningEffort: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   /** Top_p (nucleus sampling) */
   topP: number | null
   /** Nombre max de choix */
@@ -60,7 +60,7 @@ export interface UseGenerationHandlersOptions {
   /** Token count estimé */
   tokenCount: number | null
   /** Fonction pour connecter SSE (passée depuis orchestrator pour éviter duplication) */
-  connectSSE: (jobId: string) => void
+  connectSSE: (streamUrl: string) => void
 }
 
 export interface UseGenerationHandlersReturn {
@@ -74,9 +74,9 @@ export interface UseGenerationHandlersReturn {
   handleResetInstructions: () => void
   /** Réinitialiser les sélections */
   handleResetSelections: () => void
-  /** Prévisualiser (TODO) */
+  /** Raccourci : prévisualisation via le flux principal / graphe */
   handlePreview: () => void
-  /** Exporter Unity (TODO) */
+  /** Raccourci : export via l’éditeur graphe ou liste Unity */
   handleExportUnity: () => void
 }
 
@@ -155,8 +155,8 @@ export function useGenerationHandlers(
     setError(null)
 
     try {
-      const contextSelections = buildContextSelections()
-      
+      buildContextSelections() // appel pour cohérence; la requête utilise buildGenerationRequest qui lit les stores
+
       // NOTE: La validation métier (personnages requis, etc.) est maintenant effectuée par le backend
       // via les validators Pydantic. Le backend rejettera avec un message clair si la requête est invalide.
       
@@ -189,14 +189,18 @@ export function useGenerationHandlers(
         availableModels: modelsToCheck,
       })
 
-      // Créer le job de génération avec streaming SSE
-      const job = await dialoguesAPI.createGenerationJob(request)
+      // Créer le job de génération avec streaming SSE (en-têtes d'estimation pour le middleware budget)
+      const job = await dialoguesAPI.createGenerationJob(request, {
+        promptTokens: tokenCount ?? undefined,
+        completionTokens: maxCompletionTokens ?? undefined,
+        llmModelIdentifier: request.llm_model_identifier ?? undefined,
+      })
       
       // Démarrer la génération avec le job_id
       startGeneration(job.job_id)
       
-      // Connecter le SSE pour recevoir les événements
-      connectSSE(job.job_id)
+      // Connecter le SSE (URL inclut sse_token pour auth sans header Authorization)
+      connectSSE(job.stream_url)
     } catch (err) {
       const errorMsg = getErrorMessage(err)
       const errorDetails = err instanceof Error ? `\n\n${err.message}${err.stack ? `\n\nStack trace:\n${err.stack}` : ''}` : ''
@@ -219,10 +223,12 @@ export function useGenerationHandlers(
     maxCompletionTokens,
     llmModel,
     reasoningEffort,
+    topP,
     maxChoices,
     choicesMode,
     narrativeTags,
     previousDialoguePreview,
+    tokenCount,
     startGeneration,
     resetStreamingState,
     connectSSE,  // Passé depuis orchestrator
@@ -283,13 +289,11 @@ export function useGenerationHandlers(
   }, [clearSelections, toast])
 
   const handlePreview = useCallback(() => {
-    // TODO: Implémenter prévisualisation
-    toast('Prévisualisation à implémenter', 'info')
+    toast('Utilisez l’aperçu prompt ou l’éditeur de graphe pour prévisualiser le dialogue.', 'info')
   }, [toast])
 
   const handleExportUnity = useCallback(() => {
-    // TODO: Implémenter export Unity
-    toast('Export Unity à implémenter', 'info')
+    toast('Exportez depuis l’éditeur de graphe (Unity JSON) ou la liste des dialogues.', 'info')
   }, [toast])
 
   return {

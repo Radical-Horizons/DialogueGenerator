@@ -40,7 +40,7 @@ def test_estimate_tokens_raw_prompt_with_character(real_client):
     3. Le format du prompt est correct pour le parsing structuré
     """
     # Récupérer un personnage depuis le GDD (générique, pas hardcodé)
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     cb = ContextBuilder()
     cb.load_gdd_files()
     all_characters = cb.get_characters_names()
@@ -62,7 +62,7 @@ def test_estimate_tokens_raw_prompt_with_character(real_client):
                 "characters": ["Nom", "Résumé", "Introduction", "Faiblesse", "Compulsion", "Désir Principal", "Caractérisation", "Contexte Background"]
             },
             "user_instructions": "Test de vérification du prompt brut",
-            "max_context_tokens": 2000,
+            "max_context_tokens": 10000,
             "npc_speaker_id": character_name
         }
     )

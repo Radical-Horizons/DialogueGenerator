@@ -77,6 +77,8 @@ export interface BasePromptRequest {
   include_narrative_guides?: boolean
   previous_dialogue_preview?: string
   in_game_flags?: InGameFlag[]
+  /** Aligné backend ``BasePromptRequest.llm_model_identifier`` (estimate / preview). */
+  llm_model_identifier?: string
 }
 
 export interface EstimateTokensRequest extends BasePromptRequest {
@@ -84,9 +86,55 @@ export interface EstimateTokensRequest extends BasePromptRequest {
   organization_mode?: string
 }
 
-export interface EstimateTokensResponse {
-  context_tokens: number
+/** Règles MVP optimisation contexte (FR21) — alignées Pydantic `ContextOptimizationRules`. */
+export interface ContextOptimizationRules {
+  pinned_entity_keys?: string[]
+  strategy?: 'conservative' | 'aggressive'
+  pre_generation_proxy_warning_threshold_percent?: number
+}
+
+export interface OptimizeContextRequest extends EstimateTokensRequest {
+  optimization_rules?: ContextOptimizationRules
+}
+
+export interface OptimizeContextChange {
+  entity_type: string
+  entity_name: string
+  from_mode: 'full' | 'excerpt'
+  to_mode: 'full' | 'excerpt'
+}
+
+/** Réponse POST /context/optimize — proxy pré-génération distinct du scoring post-génération (3.6). */
+export interface OptimizeContextResponse {
+  proposed_context_selections: ContextSelection
+  selection_tokens_before: number
+  selection_tokens_after: number
+  tokens_saved: number
+  changes: OptimizeContextChange[]
+  pre_generation_context_fidelity_proxy_percent: number
+  warnings: string[]
+  no_op: boolean
+  /** Aligné AC#2 : false si le backend n’a pas pu ramener la sélection sous le plafond. */
+  budget_respected: boolean
+}
+
+export interface ContextTokenBreakdownRow {
+  entity_type: string
+  mode: string
   token_count: number
+}
+
+/** Réponse POST /context/estimate-tokens — voir schéma Pydantic pour la sémantique exacte. */
+export interface EstimateTokensResponse {
+  /** Contexte GDD tel qu’avec troncature `max_context_tokens` de la requête (budget). */
+  context_tokens: number
+  /** Sélection complète mesurée avec plafond technique élevé (sans ce budget comme limite). */
+  selection_tokens: number
+  context_token_breakdown: ContextTokenBreakdownRow[]
+  context_breakdown_note: string
+  token_count: number
+  /** Alias rétrocompatible OpenAPI (souvent égal à token_count). */
+  total_estimated_tokens?: number | null
   raw_prompt: RawPrompt
   prompt_hash: string
   structured_prompt?: import('./prompt').PromptStructure
@@ -113,6 +161,9 @@ export interface CharacterResponse {
 export interface CharacterListResponse {
   characters: CharacterResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface LocationResponse {
@@ -123,6 +174,9 @@ export interface LocationResponse {
 export interface LocationListResponse {
   locations: LocationResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface ItemResponse {
@@ -133,6 +187,9 @@ export interface ItemResponse {
 export interface ItemListResponse {
   items: ItemResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface SpeciesResponse {
@@ -143,6 +200,9 @@ export interface SpeciesResponse {
 export interface SpeciesListResponse {
   species: SpeciesResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface CommunityResponse {
@@ -153,6 +213,9 @@ export interface CommunityResponse {
 export interface CommunityListResponse {
   communities: CommunityResponse[]
   total: number
+  page?: number
+  page_size?: number
+  total_pages?: number
 }
 
 export interface RegionListResponse {
@@ -178,6 +241,76 @@ export interface LinkedElementsResponse {
   total: number
 }
 
+export type SuggestionEntityType = 'character' | 'location' | 'item' | 'species' | 'community'
+
+export interface SuggestionItem {
+  type: SuggestionEntityType
+  name: string
+}
+
+export interface SuggestionsRequest {
+  trigger_type: string
+  trigger_name: string
+  already_selected?: ContextSelection | null
+  dialogue_type?: string | null
+}
+
+export interface SuggestionsResponse {
+  suggestions: SuggestionItem[]
+}
+
+// Context Rules (Story 3.4)
+export type EntityTypeStr = 'character' | 'location' | 'item' | 'species' | 'community'
+
+export interface RuleCondition {
+  entityType: EntityTypeStr
+  entityName?: string | null
+}
+
+export interface ContextRule {
+  id: string
+  name: string
+  enabled: boolean
+  priority: number
+  conditionOperator: 'AND' | 'OR'
+  conditions: RuleCondition[]
+  suggestedTypes: EntityTypeStr[]
+  dialogueType?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateRuleRequest {
+  name: string
+  enabled?: boolean
+  priority?: number | null
+  conditionOperator?: 'AND' | 'OR'
+  conditions: RuleCondition[]
+  suggestedTypes: EntityTypeStr[]
+  dialogueType?: string | null
+}
+
+export interface UpdateRuleRequest {
+  name?: string | null
+  enabled?: boolean | null
+  priority?: number | null
+  conditionOperator?: 'AND' | 'OR' | null
+  conditions?: RuleCondition[] | null
+  suggestedTypes?: EntityTypeStr[] | null
+  dialogueType?: string | null
+}
+
+export interface RulesListResponse {
+  rules: ContextRule[]
+  total: number
+}
+
+export interface DialogueTypeRulesResponse {
+  dialogueType: string
+  source: 'specific' | 'fallback_global'
+  rules: ContextRule[]
+}
+
 // Config
 export interface LLMModelResponse {
   model_identifier: string
@@ -201,8 +334,12 @@ export interface UnityDialoguesPathResponse {
 export interface GenerateUnityDialogueRequest extends BasePromptRequest {
   llm_model_identifier: string
   max_completion_tokens?: number | null
-  reasoning_effort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoning_effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   top_p?: number | null
+  field_configs?: Record<string, string[]>
+  organization_mode?: string
+  /** Aligné Pydantic ``reasoning_summary`` (ex. ``"auto"``). */
+  reasoning_summary?: 'auto' | null
 }
 
 export interface ReasoningTrace {
@@ -223,6 +360,15 @@ export interface GenerateUnityDialogueResponse {
   structured_prompt?: import('./prompt').PromptStructure
 }
 
+/** GET /api/v1/dialogues/generate/jobs/{job_id} — aligné sur ``GenerationJobStatus`` OpenAPI. */
+export interface GenerationJobStatus {
+  job_id: string
+  status: 'queued' | 'running' | 'completed' | 'error' | 'cancelled'
+  result: Record<string, unknown> | null
+  error: string | null
+  created_at: string
+  updated_at: string
+}
 
 export interface ExportUnityDialogueRequest {
   json_content: string
@@ -243,6 +389,9 @@ export interface UnityDialogueMetadata {
   size_bytes: number
   modified_time: string
   title?: string
+  /** Présent côté UI / listes enrichies ; optionnel selon l’endpoint. */
+  node_count?: number
+  edge_count?: number
 }
 
 export interface UnityDialogueListResponse {

@@ -5,7 +5,7 @@
 
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #1a1a1a;
+  background-color: #121214;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -31,8 +31,9 @@ body {
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #1a1a1a;
+  background-color: #121214;
   color: rgba(255, 255, 255, 0.87);
+  line-height: 1.55;
 }
 
 h1 {
@@ -57,13 +58,14 @@ input[type="number"],
 input[type="email"],
 textarea,
 select {
-  background-color: #2a2a2a;
-  border: 1px solid #404040;
+  background-color: #26262c;
+  border: 1px solid #3d3d46;
   color: rgba(255, 255, 255, 0.87);
-  border-radius: 4px;
-  padding: 0.5rem;
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
   font-family: inherit;
   font-size: 1em;
+  line-height: 1.5;
 }
 
 input[type="text"]:focus,
@@ -79,7 +81,7 @@ select:focus {
 
 button {
   border-radius: 8px;
-  border: 1px solid #404040;
+  border: 1px solid #3d3d46;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
@@ -104,5 +106,24 @@ button:focus,
 button:focus-visible {
   outline: 2px solid #646cff;
   outline-offset: 2px;
+}
+
+/**
+ * Onglets Contexte GDD : anneau intérieur pour éviter la découpe (outline-offset + parent overflow / bordure basse).
+ */
+button.context-gdd-tab:focus,
+button.context-gdd-tab:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #646cff;
+}
+
+/* React Flow: sélection multiple type Photoshop (pointillés blancs, sans fond) */
+.react-flow {
+  --xy-selection-background-color-default: transparent;
+  --xy-selection-border-default: 2px dashed rgba(255, 255, 255, 0.9);
+}
+.react-flow .react-flow__selection {
+  background: transparent !important;
+  border: 2px dashed rgba(255, 255, 255, 0.9) !important;
 }
 

@@ -1,7 +1,7 @@
 /**
  * Composant pour afficher le prompt structuré avec sections dépliables.
  */
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { parsePromptSections, parsePromptFromJson, type PromptSection } from '../../hooks/usePromptPreview'
 import { renderMarkdown } from '../../utils/markdownRenderer'
 import { prettifyJsonInText } from '../../utils/jsonPrettifier'
@@ -22,6 +22,8 @@ export interface StructuredPromptViewProps {
   prompt: string
   /** Structure JSON du prompt (prioritaire si disponible) */
   structuredPrompt?: PromptStructure | null
+  /** Sections déjà parsées par le parent (évite le double parsing) */
+  sections?: PromptSection[]
   /** Callback pour exposer l'état allExpanded et la fonction toggleAll (pour le bouton externe) */
   onToggleStateChange?: (allExpanded: boolean, toggleAll: () => void) => void
 }
@@ -101,10 +103,12 @@ function AccordionSection({
     <div
       style={{
         border: `1px solid ${theme.border.primary}`,
-        borderRadius: '4px',
-        marginBottom: level > 0 ? '0.75rem' : '0.5rem',
+        borderRadius: '10px',
+        marginBottom: level > 0 ? '0.75rem' : '0.65rem',
         marginLeft: level > 0 ? `${level * 0.75}rem` : '0',
         overflow: 'hidden',
+        boxShadow: theme.shadow.card,
+        backgroundColor: theme.background.tertiary,
       }}
     >
       <button
@@ -113,7 +117,7 @@ function AccordionSection({
         style={{
           width: '100%',
           padding: '0.75rem 1rem',
-          backgroundColor: isExpanded ? theme.background.secondary : theme.background.panel,
+          backgroundColor: isExpanded ? theme.background.secondary : theme.background.tertiary,
           border: 'none',
           borderBottom: isExpanded ? `1px solid ${theme.border.primary}` : 'none',
           color: theme.text.primary,
@@ -133,7 +137,7 @@ function AccordionSection({
         }}
         onMouseLeave={(e) => {
           if (!isExpanded) {
-            e.currentTarget.style.backgroundColor = theme.background.panel
+            e.currentTarget.style.backgroundColor = theme.background.tertiary
           }
         }}
       >
@@ -254,15 +258,19 @@ function collectAllKeys(sections: PromptSection[], prefix: string = ''): string[
   return keys
 }
 
-export function StructuredPromptView({ prompt, structuredPrompt, onToggleStateChange }: StructuredPromptViewProps) {
+export function StructuredPromptView({ prompt, structuredPrompt, sections: sectionsProp, onToggleStateChange }: StructuredPromptViewProps) {
   const sections = useMemo(() => {
+    // Réutiliser les sections fournies par le parent (évite le double parsing)
+    if (sectionsProp && sectionsProp.length > 0) {
+      return sectionsProp
+    }
     // Priorité au JSON structuré si disponible
     if (structuredPrompt) {
       return parsePromptFromJson(structuredPrompt)
     }
     // Fallback sur parsing texte
     return parsePromptSections(prompt)
-  }, [prompt, structuredPrompt])
+  }, [sectionsProp, prompt, structuredPrompt])
   
   const [allExpanded, setAllExpanded] = useState(false)
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set())

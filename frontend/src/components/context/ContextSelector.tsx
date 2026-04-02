@@ -1,7 +1,8 @@
 /**
- * Composant principal de sélection de contexte avec onglets pour personnages, lieux et objets.
+ * Composant principal de sélection de contexte (panneau Contexte GDD) avec onglets par type d'entité.
+ * AC FR11 : Personnages, Lieux (contexte), Objets, Espèces, Communautés.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import * as contextAPI from '../../api/context'
 import type { 
   CharacterResponse, 
@@ -11,21 +12,140 @@ import type {
   CommunityResponse,
 } from '../../types/api'
 import { ContextList } from './ContextList'
+import type { ContextListItem } from './ContextList'
+
+/** Affiche aussi les noms sélectionnés absents du catalogue API (GDD vide / preset). */
+function mergeListWithSelectedNames(
+  items: ContextListItem[],
+  selectedNames: string[],
+): ContextListItem[] {
+  const seen = new Set(items.map((i) => i.name))
+  const prepend: ContextListItem[] = []
+  for (const name of selectedNames) {
+    if (name && !seen.has(name)) {
+      prepend.push({ name, data: {} })
+      seen.add(name)
+    }
+  }
+  return [...prepend, ...items]
+}
 import { SelectedContextSummary } from './SelectedContextSummary'
+import type { EntityType } from './SelectedContextSummary'
+import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
+import { ContextRulesEditor } from './ContextRulesEditor'
+import { ContextRelevancePanel } from './ContextRelevancePanel'
+import { ContextUsagePanel } from './ContextUsagePanel'
+import { ContextTokenBudgetSection } from './ContextTokenBudgetSection'
 import { useContextStore } from '../../store/contextStore'
+import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 
 type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
+/** Stem fichier catégorie GDD pour l’API historique (Story 3.9). */
+const HISTORY_CATEGORY_BY_TAB: Record<TabType, string> = {
+  characters: 'personnages',
+  locations: 'lieux',
+  items: 'objets',
+  species: 'especes',
+  communities: 'communautes',
+}
+
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 
+const PAGE_SIZE = 50
+
+const TAB_DEFS: { key: TabType; label: string }[] = [
+  { key: 'characters', label: 'Personnages' },
+  { key: 'locations',  label: 'Lieux' },
+  { key: 'items',      label: 'Objets' },
+  { key: 'species',    label: 'Espèces' },
+  { key: 'communities', label: 'Communautés' },
+]
+
+const ENTITY_TYPE_LABELS: Record<TabType, string> = {
+  characters: 'Personnage',
+  locations: 'Lieu',
+  items: 'Objet',
+  species: 'Espèce',
+  communities: 'Communauté',
+}
+
+/** Mapping onglet → clé du store (pour isElementSelected). */
+const STORE_TYPE_MAP: Partial<Record<TabType, 'characters' | 'locations' | 'items' | 'species' | 'communities'>> = {
+  characters: 'characters',
+  locations: 'locations',
+  items: 'items',
+  species: 'species',
+  communities: 'communities',
+}
+
+/** Mapping onglet → trigger_type envoyé à l'API suggestions. */
+const TRIGGER_TYPE_MAP: Partial<Record<TabType, string>> = {
+  characters: 'character',
+  locations: 'location',
+  items: 'item',
+  species: 'species',
+  communities: 'community',
+}
+
+// ---------------------------------------------------------------------------
+// Hook overflow : détermine combien d'onglets tiennent dans la barre
+// ---------------------------------------------------------------------------
+
+const GEAR_BTN_W = 38    // px réservés pour le bouton ⚙
+const OVERFLOW_BTN_W = 44 // px réservés pour le bouton "▾ N"
+const TAB_CHAR_PX = 7.5  // px approximatif par caractère (font ~0.85rem)
+const TAB_PAD_PX = 22    // padding fixe par onglet
+
+function estimateTabWidth(label: string): number {
+  return Math.ceil(label.length * TAB_CHAR_PX) + TAB_PAD_PX
+}
+
+function useTabOverflow(containerRef: React.RefObject<HTMLDivElement | null>) {
+  const [visibleCount, setVisibleCount] = useState(TAB_DEFS.length)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const compute = (availableWidth: number) => {
+      // Largeur inconnue (ex : JSDOM) → afficher tous les onglets par défaut
+      if (availableWidth <= 0) {
+        setVisibleCount(TAB_DEFS.length)
+        return
+      }
+      let used = GEAR_BTN_W
+      let count = 0
+      for (let i = 0; i < TAB_DEFS.length; i++) {
+        const tabW = estimateTabWidth(TAB_DEFS[i].label)
+        // Réserver la place du bouton overflow sauf si tous les tabs tiennent
+        const allFit = used + tabW + estimateTabWidth(TAB_DEFS[i + 1]?.label ?? '') <= availableWidth
+        const overflowReserved = i < TAB_DEFS.length - 1 && !allFit ? OVERFLOW_BTN_W : 0
+        if (used + tabW + overflowReserved > availableWidth && count > 0) break
+        used += tabW
+        count++
+      }
+      setVisibleCount(Math.max(1, count))
+    }
+
+    const ro = new ResizeObserver(([entry]) => compute(entry.contentRect.width))
+    ro.observe(el)
+    compute(el.getBoundingClientRect().width)
+    return () => ro.disconnect()
+  }, [containerRef])
+
+  return visibleCount
+}
+
 interface ContextSelectorProps {
-  onItemSelected?: (item: ContextItem | null) => void
+  onItemSelected?: (item: ContextItem | null, historyCategoryStem?: string | null) => void
 }
 
 export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('characters')
+  const [showRulesEditor, setShowRulesEditor] = useState(false)
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
   const [locations, setLocations] = useState<LocationResponse[]>([])
   const [items, setItems] = useState<ItemResponse[]>([])
@@ -34,6 +154,19 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showOverflowMenu, setShowOverflowMenu] = useState(false)
+  const tabBarRef = useRef<HTMLDivElement>(null)
+  const overflowMenuRef = useRef<HTMLDivElement>(null)
+  const visibleTabCount = useTabOverflow(tabBarRef)
+  const [charactersPage, setCharactersPage] = useState(1)
+  const [charactersTotalPages, setCharactersTotalPages] = useState(1)
+  const [locationsPage, setLocationsPage] = useState(1)
+  const [locationsTotalPages, setLocationsTotalPages] = useState(1)
+  const [itemsPage, setItemsPage] = useState(1)
+  const [itemsTotalPages, setItemsTotalPages] = useState(1)
+  const [communitiesPage, setCommunitiesPage] = useState(1)
+  const [communitiesTotalPages, setCommunitiesTotalPages] = useState(1)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   const { 
     selections, 
@@ -46,26 +179,50 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     setElementLists,
     getElementMode,
     setElementMode,
+    isElementSelected,
+    setSuggestions,
+    refreshSuggestionsForTrigger,
+    gddDataRevision,
   } = useContextStore()
+  const selectedDialogueType = useContextRulesStore((s) => s.selectedDialogueType)
+
+  // Ferme le menu overflow si l'utilisateur clique en dehors
+  useEffect(() => {
+    if (!showOverflowMenu) return
+    const handler = (e: MouseEvent) => {
+      if (overflowMenuRef.current && !overflowMenuRef.current.contains(e.target as Node)) {
+        setShowOverflowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showOverflowMenu])
 
   const loadData = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
       const [charsRes, locsRes, itemsRes, speciesRes, communitiesRes] = await Promise.all([
-        contextAPI.listCharacters(),
-        contextAPI.listLocations(),
-        contextAPI.listItems(),
+        contextAPI.listCharacters({ page: 1, page_size: PAGE_SIZE }),
+        contextAPI.listLocations({ page: 1, page_size: PAGE_SIZE }),
+        contextAPI.listItems({ page: 1, page_size: PAGE_SIZE }),
         contextAPI.listSpecies(),
-        contextAPI.listCommunities(),
+        contextAPI.listCommunities({ page: 1, page_size: PAGE_SIZE }),
       ])
       setCharacters(charsRes.characters)
+      setCharactersPage(1)
+      setCharactersTotalPages(charsRes.total_pages ?? 1)
       setLocations(locsRes.locations)
+      setLocationsPage(1)
+      setLocationsTotalPages(locsRes.total_pages ?? 1)
       setItems(itemsRes.items)
+      setItemsPage(1)
+      setItemsTotalPages(itemsRes.total_pages ?? 1)
       setSpecies(speciesRes.species)
       setCommunities(communitiesRes.communities)
-      
-      // Mettre à jour le store avec les listes pour qu'elles soient accessibles partout
+      setCommunitiesPage(1)
+      setCommunitiesTotalPages(communitiesRes.total_pages ?? 1)
+
       setElementLists({
         characters: charsRes.characters,
         locations: locsRes.locations,
@@ -80,13 +237,58 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     }
   }, [setElementLists])
 
+  const loadMore = useCallback(async () => {
+    if (loadingMore) return
+    if (activeTab === 'characters' && charactersPage >= charactersTotalPages) return
+    if (activeTab === 'locations' && locationsPage >= locationsTotalPages) return
+    if (activeTab === 'items' && itemsPage >= itemsTotalPages) return
+    if (activeTab === 'communities' && communitiesPage >= communitiesTotalPages) return
+    if (activeTab === 'species') return
+
+    setLoadingMore(true)
+    try {
+      if (activeTab === 'characters') {
+        const res = await contextAPI.listCharacters({ page: charactersPage + 1, page_size: PAGE_SIZE })
+        setCharacters((prev) => [...prev, ...res.characters])
+        setCharactersPage((p) => p + 1)
+      } else if (activeTab === 'locations') {
+        const res = await contextAPI.listLocations({ page: locationsPage + 1, page_size: PAGE_SIZE })
+        setLocations((prev) => [...prev, ...res.locations])
+        setLocationsPage((p) => p + 1)
+      } else if (activeTab === 'items') {
+        const res = await contextAPI.listItems({ page: itemsPage + 1, page_size: PAGE_SIZE })
+        setItems((prev) => [...prev, ...res.items])
+        setItemsPage((p) => p + 1)
+      } else if (activeTab === 'communities') {
+        const res = await contextAPI.listCommunities({ page: communitiesPage + 1, page_size: PAGE_SIZE })
+        setCommunities((prev) => [...prev, ...res.communities])
+        setCommunitiesPage((p) => p + 1)
+      }
+    } catch (err) {
+      setError(getErrorMessage(err))
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [
+    loadingMore,
+    activeTab,
+    charactersPage,
+    charactersTotalPages,
+    locationsPage,
+    locationsTotalPages,
+    itemsPage,
+    itemsTotalPages,
+    communitiesPage,
+    communitiesTotalPages,
+  ])
+
   useEffect(() => {
     void loadData()
-  }, [loadData])
+  }, [loadData, gddDataRevision])
 
   const handleItemClick = async (name: string) => {
     try {
-      let item: CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse | null = null
+      let item: ContextItem | { name: string; data: Record<string, unknown> } | null = null
       if (activeTab === 'characters') {
         item = await contextAPI.getCharacter(name)
       } else if (activeTab === 'locations') {
@@ -99,12 +301,13 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         item = await contextAPI.getCommunity(name)
       }
 
+      const stem = HISTORY_CATEGORY_BY_TAB[activeTab]
       if (item && selectedDetail === name) {
         setSelectedDetail(null)
-        onItemSelected?.(null)
+        onItemSelected?.(item as ContextItem, stem)
       } else if (item) {
         setSelectedDetail(name)
-        onItemSelected?.(item)
+        onItemSelected?.(item as ContextItem, stem)
       }
     } catch (err) {
       setError(getErrorMessage(err))
@@ -112,6 +315,9 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   }
 
   const handleItemToggle = (name: string) => {
+    const storeKey = STORE_TYPE_MAP[activeTab]
+    const wasSelected = storeKey ? isElementSelected(storeKey, name) : false
+
     if (activeTab === 'characters') {
       toggleCharacter(name)
     } else if (activeTab === 'locations') {
@@ -125,46 +331,54 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     }
     if (selectedDetail === name) {
       setSelectedDetail(null)
-      onItemSelected?.(null)
+      onItemSelected?.(null, null)
+    }
+
+    if (!wasSelected) {
+      const triggerType = TRIGGER_TYPE_MAP[activeTab]
+      if (triggerType) {
+        refreshSuggestionsForTrigger(triggerType, name, selectedDialogueType)
+      }
+    } else {
+      setSuggestions([])
     }
   }
 
-  const getCurrentItems = (): (CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse)[] => {
-    if (activeTab === 'characters') return characters
-    if (activeTab === 'locations') return locations
-    if (activeTab === 'items') return items
-    if (activeTab === 'species') return species
-    if (activeTab === 'communities') return communities
+  const getCurrentItems = (): ContextListItem[] => {
+    if (activeTab === 'characters') {
+      return mergeListWithSelectedNames(characters, [
+        ...(selections.characters_full ?? []),
+        ...(selections.characters_excerpt ?? []),
+      ])
+    }
+    if (activeTab === 'locations') {
+      return mergeListWithSelectedNames(locations, [
+        ...(selections.locations_full ?? []),
+        ...(selections.locations_excerpt ?? []),
+      ])
+    }
+    if (activeTab === 'items') {
+      return mergeListWithSelectedNames(items, [
+        ...(selections.items_full ?? []),
+        ...(selections.items_excerpt ?? []),
+      ])
+    }
+    if (activeTab === 'species') {
+      return mergeListWithSelectedNames(species, [
+        ...(selections.species_full ?? []),
+        ...(selections.species_excerpt ?? []),
+      ])
+    }
+    if (activeTab === 'communities') {
+      return mergeListWithSelectedNames(communities, [
+        ...(selections.communities_full ?? []),
+        ...(selections.communities_excerpt ?? []),
+      ])
+    }
     return []
   }
 
-  const getSelectedCount = (): number => {
-    if (activeTab === 'characters') {
-      return (Array.isArray(selections.characters_full) ? selections.characters_full.length : 0) +
-        (Array.isArray(selections.characters_excerpt) ? selections.characters_excerpt.length : 0)
-    }
-    if (activeTab === 'locations') {
-      return (Array.isArray(selections.locations_full) ? selections.locations_full.length : 0) +
-        (Array.isArray(selections.locations_excerpt) ? selections.locations_excerpt.length : 0)
-    }
-    if (activeTab === 'items') {
-      return (Array.isArray(selections.items_full) ? selections.items_full.length : 0) +
-        (Array.isArray(selections.items_excerpt) ? selections.items_excerpt.length : 0)
-    }
-    if (activeTab === 'species') {
-      return (Array.isArray(selections.species_full) ? selections.species_full.length : 0) +
-        (Array.isArray(selections.species_excerpt) ? selections.species_excerpt.length : 0)
-    }
-    if (activeTab === 'communities') {
-      return (Array.isArray(selections.communities_full) ? selections.communities_full.length : 0) +
-        (Array.isArray(selections.communities_excerpt) ? selections.communities_excerpt.length : 0)
-    }
-    return 0
-  }
-
   const getSelectedItems = (): string[] => {
-    // Fusionner les listes full et excerpt pour chaque type
-    // Sécurité: s'assurer que les propriétés sont toujours des tableaux
     if (activeTab === 'characters') {
       return [
         ...(Array.isArray(selections.characters_full) ? selections.characters_full : []),
@@ -212,23 +426,30 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     }
   }
 
+  const handleRemoveEntity = useCallback((entityType: EntityType, name: string) => {
+    if (entityType === 'characters') toggleCharacter(name)
+    else if (entityType === 'locations') toggleLocation(name)
+    else if (entityType === 'items') toggleItem(name)
+    else if (entityType === 'species') toggleSpecies(name)
+    else if (entityType === 'communities') toggleCommunity(name)
+  }, [toggleCharacter, toggleLocation, toggleItem, toggleSpecies, toggleCommunity])
+
+  const handleSelectionPanelModeChange = useCallback((entityType: EntityType, name: string, mode: 'full' | 'excerpt') => {
+    setElementMode(entityType, name, mode)
+  }, [setElementMode])
+
   const getElementModeForList = (name: string): 'full' | 'excerpt' | null => {
-    if (activeTab === 'characters') {
-      return getElementMode('characters', name)
-    } else if (activeTab === 'locations') {
-      return getElementMode('locations', name)
-    } else if (activeTab === 'items') {
-      return getElementMode('items', name)
-    } else if (activeTab === 'species') {
-      return getElementMode('species', name)
-    } else if (activeTab === 'communities') {
-      return getElementMode('communities', name)
-    }
+    if (activeTab === 'characters') return getElementMode('characters', name)
+    if (activeTab === 'locations') return getElementMode('locations', name)
+    if (activeTab === 'items') return getElementMode('items', name)
+    if (activeTab === 'species') return getElementMode('species', name)
+    if (activeTab === 'communities') return getElementMode('communities', name)
     return null
   }
 
   return (
     <div
+      data-testid="context-selector"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -241,103 +462,149 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         paddingBottom: 4,
       }}
     >
-      <div style={{ flexShrink: 0, display: 'flex', borderBottom: `1px solid ${theme.border.primary}` }}>
+      {/* Barre d'onglets avec overflow dynamique */}
+      <div
+        ref={tabBarRef}
+        style={{
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'stretch',
+          gap: '0.2rem',
+          padding: '4px 6px 2px',
+          borderBottom: `1px solid ${theme.border.primary}`,
+          position: 'relative',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Onglets visibles */}
+        {TAB_DEFS.slice(0, visibleTabCount).map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            className="context-gdd-tab"
+            onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null, null) }}
+            style={{
+              flex: 1,
+              padding: '0.42rem 0.35rem',
+              border: 'none',
+              borderRadius: '6px',
+              borderBottom: activeTab === key ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
+              backgroundColor: activeTab === key ? theme.background.tertiary : 'transparent',
+              color: theme.text.primary,
+              cursor: 'pointer',
+              fontWeight: activeTab === key ? 'bold' : 'normal',
+              fontSize: '0.85rem',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              minWidth: 0,
+              boxSizing: 'border-box',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+
+        {/* Bouton overflow "▾ N" — visible quand des onglets débordent */}
+        {visibleTabCount < TAB_DEFS.length && (() => {
+          const overflowTabs = TAB_DEFS.slice(visibleTabCount)
+          const overflowHasActive = overflowTabs.some(t => t.key === activeTab)
+          return (
+            <div ref={overflowMenuRef} style={{ position: 'relative', flexShrink: 0 }}>
+              <button
+                type="button"
+                className="context-gdd-tab"
+                data-testid="btn-overflow-tabs"
+                aria-label="Plus d'onglets"
+                aria-expanded={showOverflowMenu}
+                onClick={() => setShowOverflowMenu(v => !v)}
+                style={{
+                  padding: '0.42rem 0.45rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  borderBottom: overflowHasActive ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
+                  backgroundColor: overflowHasActive ? theme.background.tertiary : 'transparent',
+                  color: theme.text.primary,
+                  cursor: 'pointer',
+                  fontWeight: overflowHasActive ? 'bold' : 'normal',
+                  fontSize: '0.85rem',
+                  whiteSpace: 'nowrap',
+                  boxSizing: 'border-box',
+                }}
+              >
+                ▾ {overflowTabs.length}
+              </button>
+              {showOverflowMenu && (
+                <div
+                  role="menu"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    backgroundColor: theme.background.secondary,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: 4,
+                    zIndex: 200,
+                    minWidth: '9rem',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  {overflowTabs.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      role="menuitem"
+                      onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null, null); setShowOverflowMenu(false) }}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.6rem 0.9rem',
+                        border: 'none',
+                        borderLeft: activeTab === key ? `3px solid ${theme.button.primary.background}` : '3px solid transparent',
+                        backgroundColor: activeTab === key ? theme.background.tertiary : 'transparent',
+                        color: theme.text.primary,
+                        cursor: 'pointer',
+                        fontWeight: activeTab === key ? 'bold' : 'normal',
+                        fontSize: '0.85rem',
+                        textAlign: 'left',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* Bouton Règles (Story 3.4) — toujours visible */}
         <button
-          onClick={() => {
-            setActiveTab('characters')
-            setSelectedDetail(null)
-            onItemSelected?.(null)
-          }}
+          type="button"
+          className="context-gdd-tab"
+          data-testid="btn-toggle-rules"
+          aria-label="Règles de sélection"
+          aria-pressed={showRulesEditor}
+          onClick={() => setShowRulesEditor(v => !v)}
+          title="Règles de sélection de contexte"
           style={{
-            flex: 1,
-            padding: '0.75rem',
+            flexShrink: 0,
+            padding: '0.42rem 0.45rem',
             border: 'none',
-            borderBottom: activeTab === 'characters' ? `2px solid ${theme.button.primary.background}` : 'none',
-            backgroundColor: activeTab === 'characters' ? theme.background.tertiary : 'transparent',
+            borderRadius: '6px',
+            borderBottom: showRulesEditor ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
+            backgroundColor: showRulesEditor ? theme.background.tertiary : 'transparent',
             color: theme.text.primary,
             cursor: 'pointer',
-            fontWeight: activeTab === 'characters' ? 'bold' : 'normal',
+            fontSize: '1rem',
+            boxSizing: 'border-box',
           }}
         >
-          Personnages {activeTab === 'characters' && getSelectedCount() > 0 ? `(${getSelectedCount()}/${characters.length})` : `(${characters.length})`}
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('locations')
-            setSelectedDetail(null)
-            onItemSelected?.(null)
-          }}
-          style={{
-            flex: 1,
-            padding: '0.75rem',
-            border: 'none',
-            borderBottom: activeTab === 'locations' ? `2px solid ${theme.button.primary.background}` : 'none',
-            backgroundColor: activeTab === 'locations' ? theme.background.tertiary : 'transparent',
-            color: theme.text.primary,
-            cursor: 'pointer',
-            fontWeight: activeTab === 'locations' ? 'bold' : 'normal',
-          }}
-        >
-          Lieux {activeTab === 'locations' && getSelectedCount() > 0 ? `(${getSelectedCount()}/${locations.length})` : `(${locations.length})`}
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('items')
-            setSelectedDetail(null)
-            onItemSelected?.(null)
-          }}
-          style={{
-            flex: 1,
-            padding: '0.75rem',
-            border: 'none',
-            borderBottom: activeTab === 'items' ? `2px solid ${theme.button.primary.background}` : 'none',
-            backgroundColor: activeTab === 'items' ? theme.background.tertiary : 'transparent',
-            color: theme.text.primary,
-            cursor: 'pointer',
-            fontWeight: activeTab === 'items' ? 'bold' : 'normal',
-          }}
-        >
-          Objets {activeTab === 'items' && getSelectedCount() > 0 ? `(${getSelectedCount()}/${items.length})` : `(${items.length})`}
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('species')
-            setSelectedDetail(null)
-            onItemSelected?.(null)
-          }}
-          style={{
-            flex: 1,
-            padding: '0.75rem',
-            border: 'none',
-            borderBottom: activeTab === 'species' ? `2px solid ${theme.button.primary.background}` : 'none',
-            backgroundColor: activeTab === 'species' ? theme.background.tertiary : 'transparent',
-            color: theme.text.primary,
-            cursor: 'pointer',
-            fontWeight: activeTab === 'species' ? 'bold' : 'normal',
-          }}
-        >
-          Espèces {activeTab === 'species' && getSelectedCount() > 0 ? `(${getSelectedCount()}/${species.length})` : `(${species.length})`}
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('communities')
-            setSelectedDetail(null)
-            onItemSelected?.(null)
-          }}
-          style={{
-            flex: 1,
-            padding: '0.75rem',
-            border: 'none',
-            borderBottom: activeTab === 'communities' ? `2px solid ${theme.button.primary.background}` : 'none',
-            backgroundColor: activeTab === 'communities' ? theme.background.tertiary : 'transparent',
-            color: theme.text.primary,
-            cursor: 'pointer',
-            fontWeight: activeTab === 'communities' ? 'bold' : 'normal',
-          }}
-        >
-          Communautés {activeTab === 'communities' && getSelectedCount() > 0 ? `(${getSelectedCount()}/${communities.length})` : `(${communities.length})`}
+          ⚙
         </button>
       </div>
+
+      {/* Éditeur de règles — masqué par défaut */}
+      {showRulesEditor && <ContextRulesEditor />}
 
       {error && (
         <div style={{ 
@@ -351,6 +618,8 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         </div>
       )}
 
+      <ContextSuggestionsPanel />
+
       <div style={{ flex: '1 1 0', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <ContextList
           items={getCurrentItems()}
@@ -363,16 +632,48 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           getElementMode={getElementModeForList}
           onModeChange={handleModeChange}
           tabId={activeTab}
+          showCheckboxes
+          entityTypeLabel={ENTITY_TYPE_LABELS[activeTab]}
+          onScrollToBottom={loadMore}
+          loadingMore={loadingMore}
         />
       </div>
+      <ContextTokenBudgetSection />
       <div style={{ flex: '0 0 auto' }}>
         <SelectedContextSummary 
           selections={selections} 
           onClear={clearSelections}
+          onRemoveEntity={handleRemoveEntity}
+          onModeChange={handleSelectionPanelModeChange}
           onError={(err) => setError(err)}
           onSuccess={() => setError(null)}
         />
       </div>
+      <details
+        data-testid="context-llm-diagnostics"
+        style={{
+          flexShrink: 0,
+          borderTop: `1px solid ${theme.border.primary}`,
+          backgroundColor: theme.background.secondary,
+        }}
+      >
+        <summary
+          style={{
+            padding: '0.45rem 0.75rem',
+            cursor: 'pointer',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            color: theme.text.primary,
+            listStyle: 'none',
+          }}
+        >
+          Diagnostic LLM — pertinence et sections GDD
+        </summary>
+        <div>
+          <ContextRelevancePanel embedded />
+          <ContextUsagePanel />
+        </div>
+      </details>
     </div>
   )
 }

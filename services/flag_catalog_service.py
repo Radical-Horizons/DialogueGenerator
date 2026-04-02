@@ -336,8 +336,8 @@ class FlagCatalogService:
             # Nettoyer le fichier temporaire en cas d'erreur
             try:
                 os.remove(temp_path)
-            except:
-                pass
+            except OSError as rm_exc:
+                logger.debug("Suppression fichier temp CSV ignorée: %s", rm_exc)
             raise ValueError(f"Erreur lors de l'écriture du CSV: {e}")
     
     def reload(self) -> None:

@@ -3,7 +3,9 @@ import pytest
 import json
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, patch, MagicMock
+
 from api.main import app
+from api.routers.auth import get_current_user
 from api.schemas.dialogue import ContextSelection
 
 @pytest.fixture
@@ -12,130 +14,9 @@ def client():
     return TestClient(app)
 
 
-def test_streaming_endpoint_returns_sse_format(client):
-    """Test que l'endpoint SSE retourne le format SSE correct.
-    
-    NOTE: Ce test utilise l'ancien endpoint /generate/stream qui n'existe plus.
-    Utiliser test_create_job_and_stream_real_generation à la place.
-    """
-    pytest.skip("Ancien endpoint /generate/stream supprimé. Utiliser test_create_job_and_stream_real_generation.")
-    # Mock du service LLM pour retourner des chunks
-    with patch('api.routers.streaming.get_dialogue_generation_service') as mock_service:
-        # Configurer le mock pour retourner un générateur async
-        async def mock_generator():
-            yield 'data: {"type": "chunk", "content": "Hello"}\n\n'
-            yield 'data: {"type": "chunk", "content": " World"}\n\n'
-            yield 'data: {"type": "complete"}\n\n'
-        
-        mock_service.return_value.stream_generate = mock_generator
-        
-        # Appeler l'endpoint
-        response = client.get('/api/v1/dialogues/generate/stream')
-        
-        # Vérifier le status code
-        assert response.status_code == 200
-        
-        # Vérifier le content-type SSE
-        assert response.headers['content-type'] == 'text/event-stream; charset=utf-8'
-        
-        # Vérifier le contenu
-        content = response.text
-        assert 'data: {"type": "chunk"' in content
-        assert 'data: {"type": "complete"}' in content
-
-
-def test_streaming_endpoint_sends_metadata_events(client):
-    """Test que l'endpoint envoie des événements metadata.
-    
-    NOTE: Ce test utilise l'ancien endpoint /generate/stream qui n'existe plus.
-    Utiliser test_create_job_and_stream_real_generation à la place.
-    """
-    pytest.skip("Ancien endpoint /generate/stream supprimé. Utiliser test_create_job_and_stream_real_generation.")
-    with patch('api.routers.streaming.get_dialogue_generation_service') as mock_service:
-        async def mock_generator():
-            yield 'data: {"type": "metadata", "tokens": 150, "cost": 0.001}\n\n'
-            yield 'data: {"type": "complete"}\n\n'
-        
-        mock_service.return_value.stream_generate = mock_generator
-        
-        response = client.get('/api/v1/dialogues/generate/stream')
-        
-        assert response.status_code == 200
-        assert '"type": "metadata"' in response.text
-        assert '"tokens": 150' in response.text
-
-
-def test_streaming_endpoint_sends_step_events(client):
-    """Test que l'endpoint envoie des événements step.
-    
-    NOTE: Ce test utilise l'ancien endpoint /generate/stream qui n'existe plus.
-    Utiliser test_create_job_and_stream_real_generation à la place.
-    """
-    pytest.skip("Ancien endpoint /generate/stream supprimé. Utiliser test_create_job_and_stream_real_generation.")
-    with patch('api.routers.streaming.get_dialogue_generation_service') as mock_service:
-        async def mock_generator():
-            yield 'data: {"type": "step", "step": "Prompting"}\n\n'
-            yield 'data: {"type": "step", "step": "Generating"}\n\n'
-            yield 'data: {"type": "complete"}\n\n'
-        
-        mock_service.return_value.stream_generate = mock_generator
-        
-        response = client.get('/api/v1/dialogues/generate/stream')
-        
-        assert response.status_code == 200
-        assert '"type": "step"' in response.text
-        assert '"step": "Prompting"' in response.text
-        assert '"step": "Generating"' in response.text
-
-
-def test_streaming_endpoint_handles_errors(client):
-    """Test que l'endpoint gère les erreurs correctement.
-    
-    NOTE: Ce test utilise l'ancien endpoint /generate/stream qui n'existe plus.
-    Utiliser test_create_job_and_stream_real_generation à la place.
-    """
-    pytest.skip("Ancien endpoint /generate/stream supprimé. Utiliser test_create_job_and_stream_real_generation.")
-    with patch('api.routers.streaming.get_dialogue_generation_service') as mock_service:
-        async def mock_generator():
-            yield 'data: {"type": "chunk", "content": "Start"}\n\n'
-            yield 'data: {"type": "error", "message": "Test error"}\n\n'
-        
-        mock_service.return_value.stream_generate = mock_generator
-        
-        response = client.get('/api/v1/dialogues/generate/stream')
-        
-        assert response.status_code == 200
-        assert '"type": "error"' in response.text
-        assert '"message": "Test error"' in response.text
-
-
-def test_streaming_endpoint_respects_cancellation_flag(client):
-    """Test que l'endpoint respecte le flag cancelled.
-    
-    NOTE: Ce test utilise l'ancien endpoint /generate/stream qui n'existe plus.
-    Utiliser test_cancel_job à la place.
-    """
-    pytest.skip("Ancien endpoint /generate/stream supprimé. Utiliser test_cancel_job à la place.")
-    with patch('api.routers.streaming.get_dialogue_generation_service') as mock_service:
-        # Simuler une interruption après 2 chunks
-        chunks_sent = 0
-        
-        async def mock_generator():
-            nonlocal chunks_sent
-            while chunks_sent < 5:
-                if chunks_sent == 2:
-                    # Simuler l'interruption
-                    break
-                yield f'data: {{"type": "chunk", "content": "Chunk {chunks_sent}"}}\n\n'
-                chunks_sent += 1
-        
-        mock_service.return_value.stream_generate = mock_generator
-        
-        response = client.get('/api/v1/dialogues/generate/stream')
-        
-        assert response.status_code == 200
-        # Vérifier que seulement 2 chunks ont été envoyés
-        assert response.text.count('"type": "chunk"') == 2
+# Anciens tests pour /generate/stream (endpoint supprimé) retirés.
+# Le flux streaming est couvert par test_create_job_and_stream_real_generation,
+# test_cancel_job et test_cleanup_automatic_after_completion (jobs + stream).
 
 
 @pytest.mark.asyncio
@@ -161,11 +42,11 @@ async def test_create_job_and_stream_real_generation(client: TestClient, monkeyp
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-        "llm_model_identifier": "gpt-4o"
+            "llm_model_identifier": "gpt-5-mini"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
-    assert response.status_code == 200
+    assert response.status_code == 201
     
     job_data = response.json()
     assert "job_id" in job_data
@@ -202,7 +83,7 @@ async def test_create_job_and_stream_real_generation(client: TestClient, monkeyp
         mock_orchestrator.generate_with_events = mock_events
         
         # Streamer le job
-        stream_response = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}/stream")
+        stream_response = client.get(job_data["stream_url"])
         assert stream_response.status_code == 200
         assert stream_response.headers['content-type'] == 'text/event-stream; charset=utf-8'
         
@@ -256,10 +137,11 @@ def test_cancel_job(client: TestClient):
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-        "llm_model_identifier": "gpt-4o"
+            "llm_model_identifier": "gpt-5-mini"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
     job_id = response.json()["job_id"]
     
     # Annuler le job
@@ -269,6 +151,67 @@ def test_cancel_job(client: TestClient):
     cancel_data = cancel_response.json()
     assert cancel_data["success"] is True
     assert cancel_data["job_id"] == job_id
+
+
+def test_stream_job_uses_job_id_as_orchestrator_request_id(client: TestClient, monkeypatch):
+    """Test que le routeur de stream passe le job_id comme request_id orchestrateur."""
+    context_selection = ContextSelection(
+        characters_full=["character_1"],
+        characters_excerpt=[],
+        locations_full=[],
+        locations_excerpt=[],
+        items_full=[],
+        items_excerpt=[],
+        species_full=[],
+        species_excerpt=[],
+        communities_full=[],
+        communities_excerpt=[],
+        dialogues_examples=[],
+        scene_location=None
+    )
+    job_request = {
+        "user_instructions": "Test dialogue",
+        "context_selections": context_selection.model_dump(mode='json'),
+        "llm_model_identifier": "gpt-5-mini"
+    }
+    response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
+    job_id = response.json()["job_id"]
+
+    received_request_ids = {}
+
+    def fake_get_unity_orchestrator(request, request_id: str):
+        received_request_ids["value"] = request_id
+
+        async def fake_events(request_data, check_cancelled):
+            from services.unity_dialogue_orchestrator import GenerationEvent
+            yield GenerationEvent(
+                type="complete",
+                data={
+                    "result": {
+                        "json_content": "{\"nodes\": []}",
+                        "title": "Test Dialogue",
+                        "raw_prompt": "Test prompt",
+                        "prompt_hash": "hash123",
+                        "estimated_tokens": 100,
+                        "warning": None,
+                        "structured_prompt": None,
+                        "reasoning_trace": None,
+                    }
+                },
+            )
+
+        fake_orchestrator = MagicMock()
+        fake_orchestrator.generate_with_events = fake_events
+        return fake_orchestrator
+
+    monkeypatch.setattr("api.routers.streaming.get_unity_dialogue_orchestrator", fake_get_unity_orchestrator)
+
+    stream_url = response.json()["stream_url"]
+    stream_response = client.get(stream_url)
+    assert stream_response.status_code == 200
+    assert '"type": "complete"' in stream_response.text
+    assert received_request_ids.get("value") == job_id
 
 
 @pytest.mark.asyncio
@@ -293,10 +236,11 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
     job_request = {
         "user_instructions": "Test dialogue",
         "context_selections": context_selection.model_dump(mode='json'),
-        "llm_model_identifier": "gpt-4o"
+            "llm_model_identifier": "gpt-5-mini"
     }
     
     response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
     job_id = response.json()["job_id"]
     
     job_manager = get_job_manager()
@@ -327,24 +271,24 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
         
         mock_orchestrator.generate_with_events = mock_events
         
-        # Streamer le job jusqu'à completion
-        stream_response = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}/stream")
+        stream_url = response.json()["stream_url"]
+        stream_response = client.get(stream_url)
         assert stream_response.status_code == 200
         
         # Lire tous les événements pour déclencher le cleanup
         content = stream_response.text
         assert '"type": "complete"' in content
-        
-        # Attendre un peu pour que le cleanup se termine
+
+        # Attendre conditionnellement la fin du cleanup (évite sleep fixe flaky)
         import asyncio
-        await asyncio.sleep(0.2)
-        
-        # Vérifier que la tâche a été désenregistrée (cleanup automatique dans finally)
-        # Note: La tâche est désenregistrée dans le finally block de stream_generation
-        # On vérifie que le job est dans l'état completed
-        job = job_manager.get_job(job_id)
+        job = None
+        for _ in range(200):
+            job = job_manager.get_job(job_id)
+            if job is not None and job.get("status") == "completed":
+                break
+            await asyncio.sleep(0.01)
         assert job is not None
-        assert job['status'] == 'completed'
+        assert job["status"] == "completed"
         
         # Vérifier que les logs de cleanup automatique sont présents
         log_records = [r for r in caplog.records if 'Génération terminée, cleanup automatique' in r.message]
@@ -355,3 +299,165 @@ async def test_cleanup_automatic_after_completion(client: TestClient, monkeypatc
         assert f"job_id: {job_id}" in log_message
         assert "durée:" in log_message
         assert "timestamp:" in log_message
+
+
+def test_stream_job_when_claim_fails_emits_sse_error(client: TestClient, monkeypatch):
+    """Si try_claim_stream_job échoue, le flux SSE doit émettre un événement error."""
+    context_selection = ContextSelection(
+        characters_full=["character_1"],
+        characters_excerpt=[],
+        locations_full=[],
+        locations_excerpt=[],
+        items_full=[],
+        items_excerpt=[],
+        species_full=[],
+        species_excerpt=[],
+        communities_full=[],
+        communities_excerpt=[],
+        dialogues_examples=[],
+        scene_location=None,
+    )
+    job_request = {
+        "user_instructions": "Test dialogue",
+        "context_selections": context_selection.model_dump(mode="json"),
+        "llm_model_identifier": "gpt-5-mini",
+    }
+    response = client.post("/api/v1/dialogues/generate/jobs", json=job_request)
+    assert response.status_code == 201
+    stream_url = response.json()["stream_url"]
+    job_id = response.json()["job_id"]
+
+    from api.services.generation_job_manager import get_job_manager
+
+    jm = get_job_manager()
+
+    async def deny_claim(_jid: str) -> bool:
+        return False
+
+    monkeypatch.setattr(jm, "try_claim_stream_job", deny_claim)
+
+    stream_response = client.get(stream_url)
+    assert stream_response.status_code == 200
+    events = []
+    for line in stream_response.text.split("\n"):
+        if line.startswith("data:"):
+            s = line[5:].strip()
+            if s:
+                events.append(json.loads(s))
+    assert any(e.get("type") == "error" for e in events)
+    err = next(e for e in events if e.get("type") == "error")
+    assert job_id
+    assert "message" in err
+
+
+@pytest.mark.asyncio
+async def test_stream_generation_with_billable_user_sets_context_during_stream(monkeypatch):
+    """Le flux SSE doit pousser l'utilisateur facturable aligné sur le job (sse_token), pas seulement le middleware."""
+    from api.routers import streaming as streaming_mod
+    from api.middleware.billable_user_context import (
+        get_billable_user_id,
+        push_billable_user_id,
+        reset_billable_user_id,
+    )
+
+    seen_during_inner: list[str] = []
+
+    async def fake_stream_generation(_job_id: str, _orchestrator):
+        seen_during_inner.append(get_billable_user_id())
+        yield 'data: {"type":"complete","result":{}}\n\n'
+
+    monkeypatch.setattr(streaming_mod, "stream_generation", fake_stream_generation)
+
+    outer = push_billable_user_id("default_user")
+    try:
+        chunks: list[str] = []
+        async for line in streaming_mod.stream_generation_with_billable_user(
+            "job-1", MagicMock(), "alice"
+        ):
+            chunks.append(line)
+        assert seen_during_inner == ["alice"]
+        assert get_billable_user_id() == "default_user"
+        assert chunks
+    finally:
+        reset_billable_user_id(outer)
+
+
+def _minimal_job_request() -> dict:
+    """Payload minimal pour POST /generate/jobs (réutilisé par les tests ownership)."""
+    context_selection = ContextSelection(
+        characters_full=["character_1"],
+        characters_excerpt=[],
+        locations_full=[],
+        locations_excerpt=[],
+        items_full=[],
+        items_excerpt=[],
+        species_full=[],
+        species_excerpt=[],
+        communities_full=[],
+        communities_excerpt=[],
+        dialogues_examples=[],
+        scene_location=None,
+    )
+    return {
+        "user_instructions": "Test dialogue",
+        "context_selections": context_selection.model_dump(mode="json"),
+        "llm_model_identifier": "gpt-5-mini",
+    }
+
+
+def test_cancel_job_forbidden_for_non_owner(client: TestClient, monkeypatch) -> None:
+    """Un utilisateur ne peut pas annuler le job d'un autre (auth réelle simulée)."""
+    monkeypatch.setattr(
+        "api.routers.streaming._security_skips_job_ownership",
+        lambda: False,
+    )
+
+    async def user_alice() -> dict:
+        return {"id": "1", "username": "alice", "email": "alice@example.com"}
+
+    app.dependency_overrides[get_current_user] = user_alice
+    try:
+        create_resp = client.post(
+            "/api/v1/dialogues/generate/jobs",
+            json=_minimal_job_request(),
+        )
+        assert create_resp.status_code == 201
+        job_id = create_resp.json()["job_id"]
+
+        async def user_bob() -> dict:
+            return {"id": "2", "username": "bob", "email": "bob@example.com"}
+
+        app.dependency_overrides[get_current_user] = user_bob
+        cancel_resp = client.post(f"/api/v1/dialogues/generate/jobs/{job_id}/cancel")
+        assert cancel_resp.status_code == 403
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_get_job_status_forbidden_for_non_owner(client: TestClient, monkeypatch) -> None:
+    """Un utilisateur ne peut pas lire le statut du job d'un autre."""
+    monkeypatch.setattr(
+        "api.routers.streaming._security_skips_job_ownership",
+        lambda: False,
+    )
+
+    async def user_alice() -> dict:
+        return {"id": "1", "username": "alice", "email": "alice@example.com"}
+
+    app.dependency_overrides[get_current_user] = user_alice
+    try:
+        create_resp = client.post(
+            "/api/v1/dialogues/generate/jobs",
+            json=_minimal_job_request(),
+        )
+        assert create_resp.status_code == 201
+        job_id = create_resp.json()["job_id"]
+
+        async def user_bob() -> dict:
+            return {"id": "2", "username": "bob", "email": "bob@example.com"}
+
+        app.dependency_overrides[get_current_user] = user_bob
+        status_resp = client.get(f"/api/v1/dialogues/generate/jobs/{job_id}")
+        assert status_resp.status_code == 403
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)

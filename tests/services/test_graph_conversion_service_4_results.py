@@ -139,8 +139,9 @@ def test_graph_to_unity_json_exports_4_test_results():
     
     # WHEN: Conversion en Unity JSON
     unity_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-    unity_nodes = json.loads(unity_json)
-    
+    doc = json.loads(unity_json)
+    unity_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
     # THEN: Le JSON Unity doit contenir les 4 champs test*Node dans le choix (pas de TestNode)
     start_node = next((n for n in unity_nodes if n["id"] == "START"), None)
     assert start_node is not None
@@ -157,6 +158,88 @@ def test_graph_to_unity_json_exports_4_test_results():
     # Vérifier que le TestNode n'est PAS dans le JSON Unity
     test_nodes = [n for n in unity_nodes if n["id"].startswith("test-node-")]
     assert len(test_nodes) == 0, "Le TestNode ne doit pas être exporté dans le JSON Unity"
+
+
+def test_graph_to_unity_json_4_results_without_choice_index_on_choice_to_test_edge():
+    """Sans data.choiceIndex sur l'arête Dialogue→TestNode, l'export reste correct (E2E / sérialisation)."""
+    nodes = [
+        {
+            "id": "START",
+            "type": "dialogueNode",
+            "data": {
+                "id": "START",
+                "speaker": "E2E",
+                "line": "Fixture",
+                "choices": [
+                    {
+                        "text": "Tenter",
+                        "choiceId": "c0",
+                        "test": "Raison+Diplomatie:8",
+                    }
+                ],
+            },
+        },
+        {
+            "id": "test-node-START-choice-0",
+            "type": "testNode",
+            "data": {"test": "Raison+Diplomatie:8", "line": "Tenter"},
+        },
+        {"id": "NODE_CF", "type": "dialogueNode", "data": {"id": "NODE_CF", "line": "CF"}},
+        {"id": "NODE_F", "type": "dialogueNode", "data": {"id": "NODE_F", "line": "F"}},
+        {"id": "NODE_S", "type": "dialogueNode", "data": {"id": "NODE_S", "line": "S"}},
+        {"id": "NODE_CS", "type": "dialogueNode", "data": {"id": "NODE_CS", "line": "CS"}},
+    ]
+    edges = [
+        {
+            "id": "e:START:choice:c0:test",
+            "source": "START",
+            "target": "test-node-START-choice-0",
+            "sourceHandle": "choice:c0",
+            "type": "smoothstep",
+            "data": {"edgeType": "choice"},
+        },
+        {
+            "id": "tn-cf",
+            "source": "test-node-START-choice-0",
+            "target": "NODE_CF",
+            "sourceHandle": "critical-failure",
+            "type": "smoothstep",
+            "data": {},
+        },
+        {
+            "id": "tn-f",
+            "source": "test-node-START-choice-0",
+            "target": "NODE_F",
+            "sourceHandle": "failure",
+            "type": "smoothstep",
+            "data": {},
+        },
+        {
+            "id": "tn-s",
+            "source": "test-node-START-choice-0",
+            "target": "NODE_S",
+            "sourceHandle": "success",
+            "type": "smoothstep",
+            "data": {},
+        },
+        {
+            "id": "tn-cs",
+            "source": "test-node-START-choice-0",
+            "target": "NODE_CS",
+            "sourceHandle": "critical-success",
+            "type": "smoothstep",
+            "data": {},
+        },
+    ]
+    unity_json = GraphConversionService.graph_to_unity_json(nodes, edges)
+    doc = json.loads(unity_json)
+    unity_nodes = doc["nodes"]
+    start_node = next((n for n in unity_nodes if n["id"] == "START"), None)
+    choice = start_node["choices"][0]
+    assert choice["testCriticalFailureNode"] == "NODE_CF"
+    assert choice["testFailureNode"] == "NODE_F"
+    assert choice["testSuccessNode"] == "NODE_S"
+    assert choice["testCriticalSuccessNode"] == "NODE_CS"
 
 
 def test_graph_to_unity_json_exports_2_test_results_retrocompatibilite():
@@ -223,8 +306,9 @@ def test_graph_to_unity_json_exports_2_test_results_retrocompatibilite():
     
     # WHEN: Conversion en Unity JSON
     unity_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-    unity_nodes = json.loads(unity_json)
-    
+    doc = json.loads(unity_json)
+    unity_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
     # THEN: Le choix doit avoir testFailureNode et testSuccessNode (rétrocompatibilité)
     start_node = next((n for n in unity_nodes if n["id"] == "START"), None)
     assert start_node is not None

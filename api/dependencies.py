@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Annotated
 from fastapi import Depends
 from starlette.requests import Request
+from api.container import ServiceContainer
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from core.llm.llm_client import ILLMClient
@@ -23,18 +24,18 @@ from services.repositories.llm_usage_repository import FileLLMUsageRepository
 from services.repositories.cost_budget_repository import FileCostBudgetRepository
 from services.llm_usage_service import LLMUsageService
 from services.llm_pricing_service import LLMPricingService
+from services.token_estimation_service import TokenEstimationService
 from services.cost_governance_service import CostGovernanceService
 from factories.llm_factory import LLMClientFactory
 from services.vocabulary_service import VocabularyService
 from services.narrative_guides_service import NarrativeGuidesService
 from services.notion_import_service import NotionImportService
+from services.context_rule_service import ContextRuleService
 from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from constants import FilePaths, Defaults
-from api.config.security_config import get_security_config
-from api.exceptions import NotFoundException
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +61,7 @@ def get_config_service(request: Request) -> ConfigurationService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_config_service()
 
 
@@ -88,9 +87,7 @@ def get_context_builder(request: Request) -> ContextBuilder:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_context_builder()
 
 
@@ -108,9 +105,7 @@ def get_prompt_engine(request: Request) -> PromptEngine:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_prompt_engine()
 
 
@@ -121,22 +116,18 @@ def get_prompt_engine(request: Request) -> PromptEngine:
 
 
 def get_dialogue_generation_service(
-    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
-    prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)]
+    request: Request
 ) -> DialogueGenerationService:
     """Retourne le service de génération de dialogues.
     
     Args:
-        context_builder: ContextBuilder injecté.
-        prompt_engine: PromptEngine injecté.
+        request: La requête HTTP (injecté par FastAPI).
         
     Returns:
         Instance de DialogueGenerationService.
     """
-    return DialogueGenerationService(
-        context_builder=context_builder,
-        prompt_engine=prompt_engine
-    )
+    container = get_service_container(request)
+    return container.get_dialogue_generation_service()
 
 
 def get_llm_client(
@@ -166,18 +157,19 @@ def get_llm_client(
     )
 
 
-def get_linked_selector_service(
-    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)]
-) -> LinkedSelectorService:
+def get_linked_selector_service(request: Request) -> LinkedSelectorService:
     """Retourne le service de sélection d'éléments liés.
     
+    Utilise le ServiceContainer depuis app.state (système unifié).
+    
     Args:
-        context_builder: ContextBuilder injecté.
+        request: La requête HTTP (injecté automatiquement par FastAPI).
         
     Returns:
         Instance de LinkedSelectorService.
     """
-    return LinkedSelectorService(context_builder=context_builder)
+    container = get_service_container(request)
+    return container.get_linked_selector_service()
 
 
 def get_llm_usage_repository() -> FileLLMUsageRepository:
@@ -216,45 +208,15 @@ def get_cost_governance_service(
 
 
 def create_llm_usage_service() -> LLMUsageService:
-    """Crée un service de tracking d'utilisation LLM (sans dépendances FastAPI).
-    
-    Cette fonction peut être appelée directement sans passer par le système
-    de dépendances FastAPI. Pour l'injection de dépendances dans les routes,
-    utiliser get_llm_usage_service() avec Depends().
-    
-    Le service est configuré avec CostGovernanceService pour mettre à jour
-    automatiquement le budget après chaque génération.
-    
-    Returns:
-        Instance de LLMUsageService.
-    """
-    repository = get_llm_usage_repository()
-    # Injecter CostGovernanceService pour mise à jour automatique du budget
-    cost_repository = get_cost_budget_repository()
-    cost_service = CostGovernanceService(repository=cost_repository)
-    return LLMUsageService(
-        repository=repository,
-        cost_governance_service=cost_service
-    )
+    """Délègue à ``api.llm_usage_factory`` (évite cycle container ↔ dependencies)."""
+    from api.llm_usage_factory import create_llm_usage_service as _factory_create
+
+    return _factory_create()
 
 
-def get_llm_usage_service(
-    repository: Annotated[FileLLMUsageRepository, Depends(get_llm_usage_repository)],
-    cost_service: Annotated[CostGovernanceService, Depends(get_cost_governance_service)]
-) -> LLMUsageService:
-    """Retourne le service de tracking d'utilisation LLM.
-    
-    Args:
-        repository: Repository injecté via dépendance.
-        cost_service: Service de cost governance injecté.
-        
-    Returns:
-        Instance de LLMUsageService avec cost governance intégré.
-    """
-    return LLMUsageService(
-        repository=repository,
-        cost_governance_service=cost_service
-    )
+def get_llm_usage_service(request: Request) -> LLMUsageService:
+    """Retourne le service de tracking d'utilisation LLM (singleton du ``ServiceContainer``)."""
+    return get_service_container(request).get_llm_usage_service()
 
 
 def get_request_id(request: Request) -> str:
@@ -269,24 +231,84 @@ def get_request_id(request: Request) -> str:
     return getattr(request.state, "request_id", "unknown")
 
 
-def require_debug_access(request: Request) -> None:
-    """Bloque les endpoints de debug quand ils ne sont pas explicitement autorisés.
+def get_service_container(request: Request) -> ServiceContainer:
+    """Retourne le ServiceContainer depuis l'état de l'application.
+
+    Centralise l'accès au container pour éviter les accès directs à
+    ``request.app.state.container`` dans les dépendances métier.
 
     Args:
-        request: La requête HTTP courante.
+        request: La requête HTTP.
+
+    Returns:
+        Instance de ServiceContainer stockée dans app.state.container.
 
     Raises:
-        NotFoundException: Si les endpoints de debug sont désactivés.
+        RuntimeError: Si le ServiceContainer n'est pas initialisé.
     """
-    security_config = get_security_config()
-    if security_config.are_debug_endpoints_enabled:
-        return
+    container = getattr(request.app.state, "container", None)
+    if container is None:
+        raise RuntimeError(
+            "ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan."
+        )
+    return container
 
-    raise NotFoundException(
-        resource_type="Endpoint",
-        resource_id=request.url.path,
-        request_id=get_request_id(request)
-    )
+
+def get_unity_dialogue_orchestrator(
+    request: Request,
+    request_id: Annotated[str, Depends(get_request_id)]
+) -> "UnityDialogueOrchestrator":
+    """Retourne l'orchestrateur Unity Dialogue via le container.
+
+    Le ``request_id`` de la requête est injecté pour homogénéiser les
+    métadonnées de logs et faciliter les tests.
+
+    Args:
+        request: La requête HTTP.
+        request_id: Identifiant de la requête.
+
+    Returns:
+        Instance de UnityDialogueOrchestrator.
+    """
+    container = get_service_container(request)
+    return container.get_unity_dialogue_orchestrator(request_id=request_id)
+
+
+def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
+    """Retourne l'orchestrateur de nœuds de graphe via le container.
+
+    Args:
+        request: La requête HTTP.
+
+    Returns:
+        Instance de GraphNodeOrchestrator avec dépendances injectées.
+    """
+    container = get_service_container(request)
+    return container.get_graph_node_orchestrator()
+
+
+def get_token_estimation_service(request: Request) -> TokenEstimationService:
+    """Retourne le service d'estimation de tokens (prompt + completion sans appel LLM).
+
+    Args:
+        request: La requête HTTP (non utilisé, pour cohérence Depends).
+
+    Returns:
+        Instance de TokenEstimationService.
+    """
+    return TokenEstimationService()
+
+
+def get_llm_pricing_service(request: Request) -> LLMPricingService:
+    """Retourne le service de calcul des prix LLM (config llm_pricing.json).
+
+    Args:
+        request: La requête HTTP (non utilisé, pour cohérence Depends).
+
+    Returns:
+        Instance de LLMPricingService.
+    """
+    return LLMPricingService()
 
 
 # Variables globales _vocab_service et _guides_service supprimées - utilisez ServiceContainer
@@ -306,9 +328,7 @@ def get_vocabulary_service(request: Request) -> VocabularyService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_vocabulary_service()
 
 
@@ -326,19 +346,36 @@ def get_narrative_guides_service(request: Request) -> NarrativeGuidesService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_narrative_guides_service()
 
 
-def get_notion_import_service() -> NotionImportService:
-    """Retourne le service d'import Notion (singleton).
+def get_notion_import_service(request: Request) -> NotionImportService:
+    """Retourne le service d'import Notion.
     
+    Utilise le ServiceContainer depuis app.state (système unifié).
+    
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+        
     Returns:
         Instance de NotionImportService.
     """
-    return NotionImportService()
+    container = get_service_container(request)
+    return container.get_notion_import_service()
+
+
+def get_context_rule_service(request: Request) -> ContextRuleService:
+    """Retourne le service de règles de sélection de contexte GDD.
+
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+
+    Returns:
+        Instance de ContextRuleService.
+    """
+    container = get_service_container(request)
+    return container.get_context_rule_service()
 
 
 def get_skill_catalog_service(request: Request) -> SkillCatalogService:
@@ -355,9 +392,7 @@ def get_skill_catalog_service(request: Request) -> SkillCatalogService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_skill_catalog_service()
 
 
@@ -375,9 +410,7 @@ def get_trait_catalog_service(request: Request) -> TraitCatalogService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_trait_catalog_service()
 
 
@@ -395,8 +428,22 @@ def get_preset_service(request: Request) -> PresetService:
     Raises:
         RuntimeError: Si le ServiceContainer n'est pas initialisé dans app.state.
     """
-    container = getattr(request.app.state, "container", None)
-    if container is None:
-        raise RuntimeError("ServiceContainer not initialized in app.state. Ensure app.state.container is set in lifespan.")
+    container = get_service_container(request)
     return container.get_preset_service()
+
+
+def get_gdd_notion_sync_service(request: Request):
+    """Retourne le service de synchronisation GDD Notion (FR18).
+
+    Args:
+        request: Requête HTTP courante.
+
+    Returns:
+        Instance de GddNotionSyncService depuis le ServiceContainer.
+    """
+    from services.gdd_notion_sync_service import GddNotionSyncService
+
+    container = get_service_container(request)
+    svc: GddNotionSyncService = container.get_gdd_notion_sync_service()
+    return svc
 

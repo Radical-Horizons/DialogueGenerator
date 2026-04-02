@@ -2,15 +2,13 @@
  * Vue graphe intégrée pour afficher un dialogue Unity sous forme de graphe ReactFlow.
  * Utilisé dans UnityDialogueEditor pour basculer entre vue liste et vue graphe.
  */
-import { memo, useMemo, useCallback, useEffect, useState } from 'react'
+import { memo, useMemo, useCallback, useEffect } from 'react'
 import ReactFlow, {
   Background,
   Controls,
   MiniMap,
   useNodesState,
   useEdgesState,
-  addEdge,
-  type Connection,
   type Node,
   type Edge,
   type NodeTypes,
@@ -19,6 +17,13 @@ import 'reactflow/dist/style.css'
 import { DialogueNode, TestNode, EndNode } from '../graph/nodes'
 import { theme } from '../../theme'
 import type { UnityDialogueNode } from '../../types/api'
+import {
+  buildChoiceEdge,
+  buildTestResultEdge,
+  choiceEdgeId,
+  choiceToTestEdgeId,
+  TEST_RESULT_EDGE_CONFIG,
+} from '../../utils/graphEdgeBuilders'
 
 interface GraphViewProps {
   json_content: string
@@ -34,12 +39,17 @@ interface GraphViewProps {
  * 
  * Voir docs/architecture/graph-conversion-architecture.md pour plus de détails.
  */
+/* eslint-disable react-refresh/only-export-components -- helper partagé avec le composant, déplacer en fichier séparé si besoin */
 export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: Edge[] } {
   try {
-    const unityNodes: UnityDialogueNode[] = JSON.parse(jsonContent)
-    
-    if (!Array.isArray(unityNodes)) {
-      throw new Error('Le JSON Unity doit être un tableau de nœuds')
+    const parsed: unknown = JSON.parse(jsonContent)
+    let unityNodes: UnityDialogueNode[]
+    if (Array.isArray(parsed)) {
+      unityNodes = parsed
+    } else if (typeof parsed === 'object' && parsed !== null && 'nodes' in parsed && Array.isArray((parsed as { nodes: unknown }).nodes)) {
+      unityNodes = (parsed as { nodes: UnityDialogueNode[] }).nodes
+    } else {
+      throw new Error('Le JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)')
     }
     
     const reactflowNodes: Node[] = []
@@ -133,79 +143,45 @@ export function unityJsonToGraph(jsonContent: string): { nodes: Node[]; edges: E
                 },
               })
               
-              // Créer l'edge depuis le DialogueNode vers le TestNode (via le handle du choix)
-              const choiceText = choice.text || `Choix ${index + 1}`
-              // Tronquer le label pour l'affichage (comme pour les autres edges)
-              const truncatedLabel = choiceText.length > 30 ? `${choiceText.substring(0, 30)}...` : choiceText
-              reactflowEdges.push({
-                id: `${nodeId}-choice-${index}-to-test`,
-                source: nodeId,
-                target: testNodeId,
-                sourceHandle: `choice-${index}`,
-                type: 'smoothstep',
-                label: truncatedLabel,
-              })
+              // Edge DialogueNode → TestNode (buildChoiceEdge DRY)
+              reactflowEdges.push(
+                buildChoiceEdge({
+                  sourceId: nodeId,
+                  targetId: testNodeId,
+                  choiceIndex: index,
+                  choiceText: choice.text,
+                  edgeId: choiceToTestEdgeId(nodeId, index),
+                })
+              )
               
-              // Créer les 4 edges depuis le TestNode vers les nœuds de résultat (si ils existent)
-              const testResults = [
-                {
-                  field: 'testCriticalFailureNode',
-                  nodeId: choice.testCriticalFailureNode,
-                  label: 'Échec critique',
-                  color: '#C0392B',
-                  handleId: 'critical-failure',
-                },
-                {
-                  field: 'testFailureNode',
-                  nodeId: choice.testFailureNode,
-                  label: 'Échec',
-                  color: '#E74C3C',
-                  handleId: 'failure',
-                },
-                {
-                  field: 'testSuccessNode',
-                  nodeId: choice.testSuccessNode,
-                  label: 'Réussite',
-                  color: '#27AE60',
-                  handleId: 'success',
-                },
-                {
-                  field: 'testCriticalSuccessNode',
-                  nodeId: choice.testCriticalSuccessNode,
-                  label: 'Réussite critique',
-                  color: '#229954',
-                  handleId: 'critical-success',
-                },
-              ]
-              
-              testResults.forEach((result) => {
-                if (result.nodeId) {
-                  // Vérifier que le nœud cible existe dans le graphe
-                  const targetNodeExists = unityNodes.some((n) => n.id === result.nodeId)
-                  if (targetNodeExists) {
-                    reactflowEdges.push({
-                      id: `${testNodeId}-${result.handleId}-${result.nodeId}`,
-                      source: testNodeId,
-                      target: result.nodeId,
-                      sourceHandle: result.handleId,
-                      type: 'smoothstep',
-                      label: result.label,
-                      style: { stroke: result.color },
-                    })
-                  }
+              // 4 edges TestNode → nœuds de résultat (config centralisée)
+              TEST_RESULT_EDGE_CONFIG.forEach((result) => {
+                const rawTarget = choice[result.field as keyof typeof choice]
+                const targetNodeId = typeof rawTarget === 'string' ? rawTarget : undefined
+                if (targetNodeId && unityNodes.some((n) => n.id === targetNodeId)) {
+                  reactflowEdges.push(
+                    buildTestResultEdge(
+                      testNodeId!,
+                      targetNodeId,
+                      result.handleId,
+                      result.label,
+                      result.color
+                    )
+                  )
                 }
               })
             }
           } else if (choice.targetNode) {
-            // Choix normal sans test
-            reactflowEdges.push({
-              id: `${nodeId}-choice-${index}-${choice.targetNode}`,
-              source: nodeId,
-              target: choice.targetNode,
-              sourceHandle: `choice-${index}`,  // Correspond à l'ID du handle dans DialogueNode
-              type: 'smoothstep',
-              label: choice.text || `Choix ${index + 1}`,
-            })
+            // Choix normal sans test (buildChoiceEdge + label tronqué)
+            reactflowEdges.push(
+              buildChoiceEdge({
+                sourceId: nodeId,
+                targetId: choice.targetNode,
+                choiceIndex: index,
+                choiceText: choice.text,
+                edgeId: choiceEdgeId(nodeId, index, choice.targetNode),
+              })
+            )
           }
         })
       }
@@ -246,29 +222,44 @@ export const GraphView = memo(function GraphView({
     []
   )
   
-  const onConnect = useCallback(
-    (params: Connection) => {
-      setEdges((eds) => addEdge(params, eds))
-    },
-    [setEdges]
-  )
-  
   const onNodeClick = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- signature requise par ReactFlow, usage prévu plus tard
     (_event: React.MouseEvent, _node: Node) => {
       // TODO: Ouvrir le panneau d'édition
-      // _event et _node préfixés avec _ car intentionnellement non utilisés pour l'instant
     },
     []
   )
   
   return (
-    <div style={{ width: '100%', height: '100%', backgroundColor: theme.background.panel }}>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: theme.background.panel,
+      }}
+    >
+      <div
+        style={{
+          flexShrink: 0,
+          padding: '6px 10px',
+          fontSize: '0.78rem',
+          color: theme.text.secondary,
+          borderBottom: `1px solid ${theme.border.primary}`,
+          backgroundColor: theme.background.tertiary,
+        }}
+      >
+        Aperçu non persistant — les connexions ne sont pas enregistrées (éditer dans l’éditeur de graphe).
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChangeLocal}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        nodesConnectable={false}
+        edgesUpdatable={false}
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         fitView
@@ -285,6 +276,7 @@ export const GraphView = memo(function GraphView({
           style={{ backgroundColor: theme.background.secondary }}
         />
       </ReactFlow>
+      </div>
     </div>
   )
 })

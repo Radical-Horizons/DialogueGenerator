@@ -34,7 +34,10 @@ class VocabularyService:
         Args:
             cache: Instance de NotionCache. Si None, utilise le singleton.
         """
-        self.cache = cache or get_notion_cache()
+        # IMPORTANT: ne pas résoudre le singleton au __init__ pour faciliter les tests.
+        # Certains tests patchent `get_notion_cache` après l'initialisation du container FastAPI.
+        # En résolvant le cache au moment de l'usage, on évite un couplage à l'ordre d'initialisation.
+        self.cache = cache
         logger.info("VocabularyService initialisé")
     
     def load_vocabulary(self, force_refresh: bool = False) -> List[Dict[str, Any]]:
@@ -50,7 +53,11 @@ class VocabularyService:
             logger.info("Rechargement forcé du vocabulaire (cache ignoré)")
             return []
         
-        vocabulary_data = self.cache.get("vocabulary")
+        cache = self.cache
+        if cache is None:
+            cache = get_notion_cache()
+
+        vocabulary_data = cache.get("vocabulary")
         
         if vocabulary_data is None:
             logger.warning("Vocabulaire non trouvé dans le cache. Synchronisation nécessaire.")

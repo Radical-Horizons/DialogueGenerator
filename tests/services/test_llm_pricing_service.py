@@ -53,14 +53,27 @@ def test_calculate_cost_gpt35(pricing_service):
     assert cost == pytest.approx(expected, rel=1e-6)
 
 
-def test_calculate_cost_unknown_model(pricing_service):
-    """Teste le calcul de coût pour un modèle inconnu."""
+def test_calculate_cost_unknown_model_development_returns_zero(pricing_service, monkeypatch):
+    """Hors production, modèle inconnu → 0 (comportement historique)."""
+    monkeypatch.setenv("ENVIRONMENT", "development")
     cost = pricing_service.calculate_cost(
         model_name="unknown-model",
         prompt_tokens=1000,
-        completion_tokens=500
+        completion_tokens=500,
     )
     assert cost == 0.0
+
+
+def test_calculate_cost_unknown_model_production_uses_conservative_max(pricing_service, monkeypatch):
+    """En production, modèle inconnu → coût de référence maximal sur la grille."""
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    pt, ct = 1_000_000, 500_000
+    cost = pricing_service.calculate_cost(
+        model_name="unknown-model",
+        prompt_tokens=pt,
+        completion_tokens=ct,
+    )
+    assert cost == pytest.approx(pricing_service.max_reference_cost(pt, ct), rel=1e-6)
 
 
 def test_get_model_pricing(pricing_service):

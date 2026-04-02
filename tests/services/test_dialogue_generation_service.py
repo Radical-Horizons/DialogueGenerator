@@ -12,10 +12,8 @@ def mock_context_builder():
     mock_builder = MagicMock(spec=ContextBuilder)
     mock_builder.build_context = MagicMock(return_value="Test context")
     mock_builder.build_context_with_custom_fields = MagicMock(return_value="Test context with custom fields")
-    # Mock _context_serializer utilisé dans _build_context_summary
-    mock_serializer = MagicMock()
-    mock_serializer.serialize_to_text = MagicMock(return_value="Test context")
-    mock_builder._context_serializer = mock_serializer
+    # Mock sérialisation de contexte utilisée dans _build_context_summary
+    mock_builder.serialize_context_to_text = MagicMock(return_value="Test context")
     return mock_builder
 
 
@@ -36,9 +34,11 @@ def dialogue_service(mock_context_builder, mock_prompt_engine):
     )
 
 
+@pytest.mark.unit
 class TestDialogueGenerationService:
     """Tests pour DialogueGenerationService."""
-    
+
+    @pytest.mark.p1
     def test_init(self, mock_context_builder, mock_prompt_engine):
         """Test d'initialisation du service."""
         service = DialogueGenerationService(
@@ -48,7 +48,8 @@ class TestDialogueGenerationService:
         
         assert service.context_builder == mock_context_builder
         assert service.prompt_engine == mock_prompt_engine
-    
+
+    @pytest.mark.p0
     def test_build_context_summary_basic(self, dialogue_service, mock_context_builder):
         """Test de construction de résumé contextuel basique."""
         context_selections = {
@@ -70,8 +71,9 @@ class TestDialogueGenerationService:
         
         assert result == "Test context"
         mock_context_builder.build_context_json.assert_called_once()
-        mock_context_builder._context_serializer.serialize_to_text.assert_called_once_with(mock_context_structure)
-    
+        mock_context_builder.serialize_context_to_text.assert_called_once_with(mock_context_structure)
+
+    @pytest.mark.p0
     def test_build_context_summary_with_field_configs(self, dialogue_service, mock_context_builder):
         """Test de construction avec field_configs."""
         context_selections = {
@@ -100,7 +102,8 @@ class TestDialogueGenerationService:
         # Vérifier que field_configs est passé à build_context_json
         call_kwargs = mock_context_builder.build_context_json.call_args[1]
         assert call_kwargs.get("field_configs") == field_configs
-    
+
+    @pytest.mark.p1
     def test_build_context_summary_with_organization_mode(self, dialogue_service, mock_context_builder):
         """Test de construction avec organization_mode."""
         context_selections = {
@@ -122,7 +125,8 @@ class TestDialogueGenerationService:
         
         assert isinstance(result, str)
         assert len(result) > 0
-    
+
+    @pytest.mark.p1
     def test_build_context_summary_no_limit(self, dialogue_service, mock_context_builder):
         """Test de construction avec no_limit=True."""
         context_selections = {
@@ -143,7 +147,8 @@ class TestDialogueGenerationService:
         # Vérifier que max_tokens élevé est utilisé
         call_kwargs = mock_context_builder.build_context_json.call_args[1]
         assert call_kwargs["max_tokens"] == 999999
-    
+
+    @pytest.mark.p0
     def test_restore_prompt_on_error(self, dialogue_service, mock_prompt_engine):
         """Test de restauration du prompt après erreur."""
         original_prompt = "Original prompt"
@@ -152,7 +157,8 @@ class TestDialogueGenerationService:
         dialogue_service._restore_prompt_on_error(original_prompt)
         
         assert mock_prompt_engine.system_prompt_template == original_prompt
-    
+
+    @pytest.mark.p1
     def test_restore_prompt_on_error_no_change(self, dialogue_service, mock_prompt_engine):
         """Test de restauration quand le prompt n'a pas changé."""
         original_prompt = "Original prompt"
@@ -160,12 +166,14 @@ class TestDialogueGenerationService:
         
         # Ne devrait pas lever d'erreur
         dialogue_service._restore_prompt_on_error(original_prompt)
-    
+
+    @pytest.mark.p1
     def test_restore_prompt_on_error_none(self, dialogue_service, mock_prompt_engine):
         """Test de restauration avec None (pas de prompt original)."""
         # Ne devrait pas lever d'erreur
         dialogue_service._restore_prompt_on_error(None)
-    
+
+    @pytest.mark.p0
     def test_extract_json_from_text_markdown_block(self, dialogue_service):
         """Test d'extraction JSON depuis bloc markdown."""
         text = "```json\n{\"key\": \"value\"}\n```"
@@ -173,7 +181,8 @@ class TestDialogueGenerationService:
         result = dialogue_service._extract_json_from_text(text)
         
         assert result == "{\"key\": \"value\"}"
-    
+
+    @pytest.mark.p1
     def test_extract_json_from_text_code_block(self, dialogue_service):
         """Test d'extraction JSON depuis bloc code sans json."""
         text = "```\n{\"key\": \"value\"}\n```"
@@ -181,7 +190,8 @@ class TestDialogueGenerationService:
         result = dialogue_service._extract_json_from_text(text)
         
         assert result == "{\"key\": \"value\"}"
-    
+
+    @pytest.mark.p1
     def test_extract_json_from_text_direct(self, dialogue_service):
         """Test d'extraction JSON directement dans le texte."""
         text = "Some text {\"key\": \"value\"} more text"
@@ -190,7 +200,8 @@ class TestDialogueGenerationService:
         
         assert result is not None
         assert "key" in result
-    
+
+    @pytest.mark.p1
     def test_extract_json_from_text_no_json(self, dialogue_service):
         """Test d'extraction avec texte sans JSON."""
         text = "Just plain text without JSON"
@@ -198,7 +209,8 @@ class TestDialogueGenerationService:
         result = dialogue_service._extract_json_from_text(text)
         
         assert result is None
-    
+
+    @pytest.mark.p1
     def test_extract_json_from_text_nested_braces(self, dialogue_service):
         """Test d'extraction JSON avec accolades imbriquées."""
         text = "```json\n{\"key\": {\"nested\": \"value\"}}\n```"

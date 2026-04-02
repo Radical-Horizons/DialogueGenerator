@@ -5,6 +5,7 @@ permettant de l'utiliser à la fois pour l'endpoint REST et le streaming SSE.
 """
 import logging
 import asyncio
+import numbers
 from typing import AsyncGenerator, Callable, Dict, Any, Optional
 from dataclasses import dataclass
 
@@ -14,6 +15,7 @@ from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
+from services.context_truncator import cap_context_text_to_budget
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
 from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
@@ -24,10 +26,48 @@ from models.dialogue_structure.unity_dialogue_node import UnityDialogueGeneratio
 logger = logging.getLogger(__name__)
 
 
+def _coerce_context_text(summary: object) -> str:
+    """Convertit le résumé de contexte en ``str`` (mocks de tests inclus)."""
+    if isinstance(summary, str):
+        return summary
+    if summary is None:
+        return ""
+    return str(summary)
+
+
+def _safe_int_usage(value: object, default: int = 0) -> int:
+    """Retourne un entier d'usage LLM ; ignore les mocks et types non numériques."""
+    if isinstance(value, numbers.Integral) and not isinstance(value, bool):
+        return int(value)
+    if isinstance(value, numbers.Real) and not isinstance(value, bool):
+        return int(value)
+    return default
+
+
+def _safe_float_cost(value: object, default: float = 0.0) -> float:
+    """Retourne un coût numérique ; ignore les mocks et types non numériques."""
+    if isinstance(value, numbers.Real) and not isinstance(value, bool):
+        return float(value)
+    return default
+
+
 @dataclass
 class GenerationEvent:
-    """Événement de génération pour SSE streaming."""
-    type: str  # 'step', 'metadata', 'complete', 'error'
+    """Événement de génération pour SSE streaming.
+    
+    Représente un événement émis pendant le processus de génération
+    de dialogue Unity, utilisé pour le streaming Server-Sent Events (SSE).
+    
+    Attributes:
+        type: Type d'événement. Valeurs possibles :
+            - 'step' : Étape de progression (ex: 'Prompting', 'Generating', 'Validating')
+            - 'metadata' : Métadonnées de génération (tokens, coût, etc.)
+            - 'chunk' : Chunk de contenu streamé (texte ou JSON delta)
+            - 'complete' : Génération terminée avec résultat
+            - 'error' : Erreur survenue pendant la génération
+        data: Données associées à l'événement, format dépendant du type.
+    """
+    type: str
     data: Dict[str, Any]
 
 
@@ -46,7 +86,8 @@ class UnityDialogueOrchestrator:
         trait_service: TraitCatalogService,
         config_service: ConfigurationService,
         usage_service: LLMUsageService,
-        request_id: str
+        request_id: str,
+        unity_generation_service: Optional[UnityDialogueGenerationService] = None,
     ):
         """Initialise l'orchestrateur avec toutes les dépendances.
         
@@ -58,6 +99,7 @@ class UnityDialogueOrchestrator:
             config_service: Service de configuration.
             usage_service: Service de tracking usage LLM.
             request_id: ID de la requête pour logging.
+            unity_generation_service: Service de génération Unity (injecté par le container).
         """
         self.dialogue_service = dialogue_service
         self.prompt_engine = prompt_engine
@@ -66,6 +108,7 @@ class UnityDialogueOrchestrator:
         self.config_service = config_service
         self.usage_service = usage_service
         self.request_id = request_id
+        self._unity_generation_service = unity_generation_service
     
     async def generate_with_events(
         self,
@@ -136,8 +179,13 @@ class UnityDialogueOrchestrator:
                 include_dialogue_type=True,
                 element_modes=context_selections_dict.get("_element_modes")
             )
-            # Sérialiser en texte pour le LLM
-            context_summary = context_builder._context_serializer.serialize_to_text(structured_context)
+            # Sérialiser en texte pour le LLM, puis appliquer le plafond utilisateur (budget contexte)
+            context_summary = cap_context_text_to_budget(
+                _coerce_context_text(
+                    context_builder.serialize_context_to_text(structured_context)
+                ),
+                request_data.max_context_tokens,
+            )
             
             # 5. Construire le prompt Unity via le builder unique
             prompt_input = PromptInput(
@@ -155,7 +203,9 @@ class UnityDialogueOrchestrator:
                 author_profile=request_data.author_profile,
                 vocabulary_config=request_data.vocabulary_config,
                 include_narrative_guides=request_data.include_narrative_guides,
-                in_game_flags=request_data.in_game_flags
+                in_game_flags=request_data.in_game_flags,
+                max_context_tokens=request_data.max_context_tokens,
+                llm_model_identifier=request_data.llm_model_identifier,
             )
             
             built = self.prompt_engine.build_prompt(prompt_input)
@@ -170,15 +220,29 @@ class UnityDialogueOrchestrator:
                 yield GenerationEvent(type='error', data={'message': 'Génération annulée', 'code': 'cancelled'})
                 return
             
-            # 6. Créer le client LLM
-            llm_client = LLMClientFactory.create_client(
-                model_id=request_data.llm_model_identifier,
-                config=self.config_service.get_llm_config(),
-                available_models=self.config_service.get_available_llm_models(),
-                usage_service=self.usage_service,
-                request_id=self.request_id,
-                endpoint="generate/unity-dialogue"
-            )
+            # 6. Créer le client LLM (avec fallback si configuré, Story 1.16)
+            fallback_chain = self.config_service.get_llm_fallback_chain()
+            if not isinstance(fallback_chain, list):
+                fallback_chain = []
+            if len(fallback_chain) >= 2 and fallback_chain[0] == request_data.llm_model_identifier:
+                llm_client = LLMClientFactory.create_client_with_fallback(
+                    primary_model_id=request_data.llm_model_identifier,
+                    fallback_model_ids=fallback_chain[1:],
+                    config=self.config_service.get_llm_config(),
+                    available_models=self.config_service.get_available_llm_models(),
+                    usage_service=self.usage_service,
+                    request_id=self.request_id,
+                    endpoint="generate/unity-dialogue",
+                )
+            else:
+                llm_client = LLMClientFactory.create_client(
+                    model_id=request_data.llm_model_identifier,
+                    config=self.config_service.get_llm_config(),
+                    available_models=self.config_service.get_available_llm_models(),
+                    usage_service=self.usage_service,
+                    request_id=self.request_id,
+                    endpoint="generate/unity-dialogue",
+                )
             
             # Configurer max_tokens : utiliser la valeur fournie ou la valeur par défaut
             from constants import Defaults
@@ -201,10 +265,19 @@ class UnityDialogueOrchestrator:
                 llm_client.top_p = request_data.top_p
             
             # 7. Générer via Structured Output avec streaming natif
-            unity_service = UnityDialogueGenerationService()
+            unity_service = self._unity_generation_service or UnityDialogueGenerationService()
             
             # Vérifier si le client supporte le streaming natif
-            has_streaming = hasattr(llm_client, 'generate_variants_streaming')
+            # NOTE: `hasattr(mock, "generate_variants_streaming")` retourne True avec unittest.mock,
+            # ce qui fait basculer à tort en mode streaming dans certains tests.
+            # On exige donc une callable async (coroutine ou async generator).
+            import inspect
+            streaming_attr = getattr(llm_client, 'generate_variants_streaming', None)
+            has_streaming = (
+                streaming_attr is not None
+                and callable(streaming_attr)
+                and (inspect.isasyncgenfunction(streaming_attr) or asyncio.iscoroutinefunction(streaming_attr))
+            )
             
             if has_streaming:
                 # Utiliser le streaming natif
@@ -326,18 +399,25 @@ class UnityDialogueOrchestrator:
             # Extraire le reasoning trace du client LLM si disponible
             reasoning_trace = getattr(llm_client, 'reasoning_trace', None)
             
-            # Calculer le coût (si disponible)
-            cost = 0.0
-            if hasattr(llm_client, 'last_call_cost'):
-                cost = llm_client.last_call_cost or 0.0
-            elif hasattr(self.usage_service, 'get_last_call_cost'):
-                cost = self.usage_service.get_last_call_cost() or 0.0
+            cost = _safe_float_cost(getattr(llm_client, "last_call_cost", 0.0), 0.0)
+            usage_pt = _safe_int_usage(getattr(llm_client, "last_usage_prompt_tokens", 0), 0)
+            usage_ct = _safe_int_usage(getattr(llm_client, "last_usage_completion_tokens", 0), 0)
             
-            # Metadata
-            yield GenerationEvent(type='metadata', data={
-                'tokens': estimated_tokens,
-                'cost': cost
-            })
+            # Metadata (Story 1.16: fallback si utilisé)
+            metadata_data: Dict[str, Any] = {
+                "tokens": estimated_tokens,
+                "prompt_tokens_estimated": estimated_tokens,
+                "usage_prompt_tokens": usage_pt,
+                "usage_completion_tokens": usage_ct,
+                "cost_usd": cost,
+                "cost": cost,
+            }
+            fallback_info = getattr(llm_client, '_last_used_fallback', None)
+            if fallback_info and isinstance(fallback_info, (list, tuple)) and len(fallback_info) >= 2:
+                metadata_data['used_fallback'] = True
+                metadata_data['fallback_from'] = fallback_info[0]
+                metadata_data['fallback_to'] = fallback_info[1]
+            yield GenerationEvent(type='metadata', data=metadata_data)
             
             # Étape 4: Complete
             result = GenerateUnityDialogueResponse(

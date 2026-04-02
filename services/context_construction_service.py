@@ -100,6 +100,12 @@ class ContextConstructionService:
         if self._context_truncator is None:
             return 0
         return self._context_truncator.count_tokens(text)
+
+    def _estimate_tokens(self, text: str) -> int:
+        """Estimation rapide des tokens sans tiktoken (pour boucles par élément)."""
+        if self._context_truncator is None:
+            return max(1, len(text) // 4) if text else 0
+        return self._context_truncator.estimate_tokens(text)
     
     def _format_element_content(
         self,
@@ -389,7 +395,7 @@ class ContextConstructionService:
                     organizer=organizer
                 )
                 
-                token_count = self._count_tokens(formatted_content)
+                token_count = self._estimate_tokens(formatted_content)
                 
                 # Construction ContextItem si demandé
                 if build_json_items:

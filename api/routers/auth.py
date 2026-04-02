@@ -23,8 +23,10 @@ logger = logging.getLogger(__name__)
 security_config = get_security_config()
 
 router = APIRouter()
-# En développement, rendre le security optionnel pour permettre l'accès sans token
-security = HTTPBearer(auto_error=False) if security_config.is_development else HTTPBearer()
+# Bearer optionnel uniquement en dev avec DISABLE_AUTH=true ; sinon erreur 403 si header absent
+security = HTTPBearer(auto_error=False) if (
+    security_config.is_development and security_config.disable_auth
+) else HTTPBearer()
 auth_service = AuthService()
 _is_production = security_config.is_production
 _cookie_domain = None  # Peut être étendu via config si nécessaire
@@ -119,9 +121,11 @@ async def get_current_user(
     Raises:
         AuthenticationException: Si le token est invalide ou expiré (production uniquement).
     """
-    # En développement, retourner un utilisateur mock sans vérifier le token
-    if security_config.is_development:
-        logger.debug("Mode développement: authentification désactivée, retour utilisateur mock")
+    # Développement + DISABLE_AUTH=true : utilisateur mock sans JWT
+    if security_config.is_development and security_config.disable_auth:
+        logger.debug(
+            "DISABLE_AUTH=true: JWT ignoré, utilisateur mock (développement uniquement)"
+        )
         return {
             "id": "1",
             "username": "admin",
@@ -301,19 +305,26 @@ async def get_current_user_info(
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
-    current_user: Annotated[dict, Depends(get_current_user)],
-    response: Response
+    response: Response,
+    credentials: Annotated[
+        Optional[HTTPAuthorizationCredentials],
+        Depends(HTTPBearer(auto_error=False)),
+    ] = None,
 ) -> None:
     """Endpoint de déconnexion.
     
+    Efface toujours le cookie ``refresh_token`` même si l'access token est expiré
+    (``EventSource`` / onglet fermé : l'utilisateur doit pouvoir terminer la session).
+    
     Args:
-        current_user: Utilisateur courant (injecté via dépendance).
         response: La réponse HTTP.
-        
-    Note:
-        En production, on pourrait invalider le token côté serveur (blacklist).
-        Pour l'instant, on supprime juste le cookie refresh_token.
+        credentials: Bearer optionnel pour journaliser le ``sub`` si encore valide.
     """
     _delete_refresh_cookie(response)
-    logger.info(f"Utilisateur '{current_user['username']}' déconnecté")
+    if credentials is not None:
+        payload = auth_service.verify_token(credentials.credentials, token_type="access")
+        if payload and payload.get("sub"):
+            logger.info("Déconnexion (cookie refresh effacé), sub=%s", payload.get("sub"))
+            return
+    logger.info("Déconnexion : cookie refresh effacé (access token absent ou expiré)")
 

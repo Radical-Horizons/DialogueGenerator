@@ -1,0 +1,187 @@
+/**
+ * Tests de régression pour le mode controlled React Flow (ADR-007 / Story 1.17).
+ * Vérifient que la sélection et les positions ne corrompent pas nodes/edges dans le store.
+ */
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { useGraphStore } from '../store/graphStore'
+import type { Node, NodeChange } from 'reactflow'
+
+vi.mock('../api/graph', () => ({
+  loadGraph: vi.fn(),
+  saveGraph: vi.fn(),
+  saveGraphAndWrite: vi.fn(),
+  generateNode: vi.fn(),
+  validateGraph: vi.fn(),
+  calculateLayout: vi.fn(),
+}))
+
+describe('graphStore - Controlled mode (ADR-007)', () => {
+  beforeEach(() => {
+    useGraphStore.getState().resetGraph()
+  })
+
+  describe('Regression: edges remain visible after selection', () => {
+    it('setSelectedNode does not alter nodes or edges', () => {
+      const { addNode, connectNodes, setSelectedNode } = useGraphStore.getState()
+      const n1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: { text: 'A' },
+      }
+      const n2: Node = {
+        id: 'n2',
+        type: 'dialogueNode',
+        position: { x: 100, y: 0 },
+        data: { text: 'B' },
+      }
+      addNode(n1)
+      addNode(n2)
+      connectNodes('n1', 'n2', 0, 'choice')
+
+      let state = useGraphStore.getState()
+      expect(state.nodes).toHaveLength(2)
+      expect(state.edges).toHaveLength(1)
+      const edgesBefore = state.edges
+
+      setSelectedNode('n1')
+
+      state = useGraphStore.getState()
+      expect(state.selectedNodeId).toBe('n1')
+      expect(state.nodes).toHaveLength(2)
+      expect(state.edges).toHaveLength(1)
+      expect(state.edges[0].source).toBe('n1')
+      expect(state.edges[0].target).toBe('n2')
+      expect(state.edges).toEqual(edgesBefore)
+    })
+
+    it('setSelectedNode(null) does not alter nodes or edges', () => {
+      const { addNode, setSelectedNode } = useGraphStore.getState()
+      const n1: Node = { id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
+      addNode(n1)
+      setSelectedNode('n1')
+      const stateBefore = useGraphStore.getState()
+      const edgesBefore = stateBefore.edges
+      const nodesBefore = stateBefore.nodes
+
+      setSelectedNode(null)
+
+      const state = useGraphStore.getState()
+      expect(state.selectedNodeId).toBeNull()
+      expect(state.nodes).toEqual(nodesBefore)
+      expect(state.edges).toEqual(edgesBefore)
+    })
+  })
+
+  describe('Regression: positions in store after drag', () => {
+    it('updateNodePosition updates node position in store', () => {
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      const n1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 10, y: 20 },
+        data: {},
+      }
+      addNode(n1)
+
+      updateNodePosition('n1', { x: 50, y: 60 })
+
+      const state = useGraphStore.getState()
+      const node = state.nodes.find((n) => n.id === 'n1')
+      expect(node?.position).toEqual({ x: 50, y: 60 })
+    })
+
+    it('group drag: batch updateNodePosition with skipMarkDirty then markDirty once (Story 2.10)', () => {
+      const { addNode, updateNodePosition, setSelectedNodes, markDirty } =
+        useGraphStore.getState()
+      addNode({ id: 'g1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} })
+      addNode({ id: 'g2', type: 'dialogueNode', position: { x: 50, y: 0 }, data: {} })
+      addNode({ id: 'g3', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} })
+      setSelectedNodes(['g1', 'g2', 'g3'])
+      const delta = { x: 100, y: 100 }
+      updateNodePosition('g1', { x: 0 + delta.x, y: 0 + delta.y }, true)
+      updateNodePosition('g2', { x: 50 + delta.x, y: 0 + delta.y }, true)
+      updateNodePosition('g3', { x: 100 + delta.x, y: 0 + delta.y }, true)
+      markDirty()
+      const state = useGraphStore.getState()
+      expect(state.nodes.find((n) => n.id === 'g1')?.position).toEqual({ x: 100, y: 100 })
+      expect(state.nodes.find((n) => n.id === 'g2')?.position).toEqual({ x: 150, y: 100 })
+      expect(state.nodes.find((n) => n.id === 'g3')?.position).toEqual({ x: 200, y: 100 })
+      expect(state.hasUnsavedChanges).toBe(true)
+    })
+
+    // Story 2.4 AC #1, #2: onNodeDragStop commits via updateNodePosition; markDirty triggers; auto-save chains
+    it('drag-stop flow: updateNodePosition commits position and triggers markDirty (GraphCanvas onNodeDragStop contract)', () => {
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      const n1: Node = {
+        id: 'n1',
+        type: 'dialogueNode',
+        position: { x: 0, y: 0 },
+        data: {},
+      }
+      addNode(n1)
+
+      // Simulate GraphCanvas onNodeDragStop: commit final position via updateNodePosition
+      updateNodePosition('n1', { x: 100, y: 200 })
+
+      const state = useGraphStore.getState()
+      expect(state.nodes.find((n) => n.id === 'n1')?.position).toEqual({ x: 100, y: 200 })
+      expect(state.hasUnsavedChanges).toBe(true)
+    })
+  })
+
+  describe('Selection updated in store (onNodesChange type select)', () => {
+    it('setSelectedNode updates selectedNodeId', () => {
+      const { addNode, setSelectedNode } = useGraphStore.getState()
+      const n1: Node = { id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
+      addNode(n1)
+
+      expect(useGraphStore.getState().selectedNodeId).toBeNull()
+      setSelectedNode('n1')
+      expect(useGraphStore.getState().selectedNodeId).toBe('n1')
+      setSelectedNode(null)
+      expect(useGraphStore.getState().selectedNodeId).toBeNull()
+    })
+
+    it('updateNodePosition only replaces the updated node reference (Story 2.2 AC #5 - localized re-render)', () => {
+      const { addNode, updateNodePosition } = useGraphStore.getState()
+      const n1: Node = { id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
+      const n2: Node = { id: 'n2', type: 'dialogueNode', position: { x: 100, y: 0 }, data: {} }
+      addNode(n1)
+      addNode(n2)
+      const nodesBefore = useGraphStore.getState().nodes
+      updateNodePosition('n1', { x: 50, y: 50 })
+      const nodesAfter = useGraphStore.getState().nodes
+      expect(nodesAfter).not.toBe(nodesBefore)
+      const node1After = nodesAfter.find((n) => n.id === 'n1')
+      const node2After = nodesAfter.find((n) => n.id === 'n2')
+      expect(node1After?.position).toEqual({ x: 50, y: 50 })
+      expect(node2After).toBe(nodesBefore.find((n) => n.id === 'n2'))
+    })
+
+    it('onNodesChange([{ type: "select", id, selected }]) updates store (React Flow event shape)', () => {
+      const { addNode, setSelectedNode } = useGraphStore.getState()
+      const n1: Node = { id: 'n1', type: 'dialogueNode', position: { x: 0, y: 0 }, data: {} }
+      addNode(n1)
+      expect(useGraphStore.getState().selectedNodeId).toBeNull()
+
+      // Simulate GraphCanvas onNodesChange handler for select (same payload shape as React Flow)
+      const changes: NodeChange[] = [{ type: 'select', id: 'n1', selected: true }]
+      for (const change of changes) {
+        if (change.type === 'select' && change.id !== undefined) {
+          setSelectedNode(change.selected ? change.id : null)
+        }
+      }
+      expect(useGraphStore.getState().selectedNodeId).toBe('n1')
+
+      // Deselect
+      const deselectChanges: NodeChange[] = [{ type: 'select', id: 'n1', selected: false }]
+      for (const change of deselectChanges) {
+        if (change.type === 'select' && change.id !== undefined) {
+          setSelectedNode(change.selected ? change.id : null)
+        }
+      }
+      expect(useGraphStore.getState().selectedNodeId).toBeNull()
+    })
+  })
+})

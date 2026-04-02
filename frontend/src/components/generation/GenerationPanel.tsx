@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import * as configAPI from '../../api/config'
 import * as dialoguesAPI from '../../api/dialogues'
 import { useGenerationStore } from '../../store/generationStore'
+import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useLLMStore } from '../../store/llmStore'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
@@ -30,6 +31,7 @@ import { usePresetManagement } from '../../hooks/usePresetManagement'
 // Composants UI extraits
 import { GenerationPanelControls } from './GenerationPanelControls'
 import { GenerationPanelModals } from './GenerationPanelModals'
+import { EstimationBadge } from '../estimation'
 
 
 export function GenerationPanel() {
@@ -63,10 +65,13 @@ export function GenerationPanel() {
   
   // État local UI
   const [userInstructions, setUserInstructions] = useState('')
-  const [maxContextTokens, setMaxContextTokens] = useState<number>(CONTEXT_TOKENS_LIMITS.DEFAULT)
+  const maxContextTokens = useContextConfigStore((s) => s.contextTokenBudgetMax)
+  const setMaxContextTokens = useContextConfigStore((s) => s.setContextTokenBudgetMax)
   const [maxCompletionTokens, setMaxCompletionTokens] = useState<number | null>(null)
   const [llmModel, setLlmModel] = useState<string>(DEFAULT_MODEL)
-  const [reasoningEffort, setReasoningEffort] = useState<'none' | 'low' | 'medium' | 'high' | 'xhigh' | null>(null)
+  const [reasoningEffort, setReasoningEffort] = useState<
+    'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  >(null)
   const [topP, setTopP] = useState<number | null>(null)
   const [maxChoices, setMaxChoices] = useState<number | null>(null)
   const choicesMode: 'free' | 'capped' = maxChoices !== null ? 'capped' : 'free'
@@ -83,6 +88,21 @@ export function GenerationPanel() {
   const maxCompletionSliderRef = useRef<HTMLInputElement>(null)
   
   // Hooks métier extraits
+  useEffect(() => {
+    const getState = useGenerationStore.getState
+    if (typeof getState !== 'function') {
+      return
+    }
+    const st = getState() as { setGenerationUserInstructions?: (s: string) => void } | undefined
+    if (!st) {
+      return
+    }
+    const sync = st.setGenerationUserInstructions
+    if (typeof sync === 'function') {
+      sync(userInstructions)
+    }
+  }, [userInstructions])
+
   const draft = useGenerationDraft({
     userInstructions,
     maxContextTokens,
@@ -220,7 +240,7 @@ export function GenerationPanel() {
         setAvailableModels(modelsCacheRef.current.models)
       }
     }
-  }, [llmModel])
+  }, [llmModel, MODELS_CACHE_TTL])
 
   useEffect(() => {
     loadModels()
@@ -293,8 +313,10 @@ export function GenerationPanel() {
       handleReset: handlersRef.current.handleReset,
       isLoading,
       isDirty: draft.isDirty,
+      saveStatus: draft.saveStatus,
+      draftLastSavedAt: draft.draftLastSavedAt,
     })
-  }, [isLoading, draft.isDirty, setActions])
+  }, [isLoading, draft.isDirty, draft.saveStatus, draft.draftLastSavedAt, setActions])
   
   // Initialiser le store au montage
   useEffect(() => {
@@ -305,6 +327,8 @@ export function GenerationPanel() {
       handleReset: handlersRef.current.handleReset,
       isLoading,
       isDirty: draft.isDirty,
+      saveStatus: draft.saveStatus,
+      draftLastSavedAt: draft.draftLastSavedAt,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Exécuter une seule fois au montage
@@ -626,6 +650,33 @@ export function GenerationPanel() {
         onDirty={draft.markDirty}
       />
 
+      {/* Estimation unifiée (même composant que graphe) : tokens + coût si backend exposé */
+      (() => {
+        const tokenCount = orchestrator.tokenCount
+        const result = tokenCount != null
+          ? { prompt_tokens: tokenCount, completion_tokens: 0, estimated_cost_eur: null as number | null }
+          : null
+        const state = orchestrator.isEstimating
+          ? 'loading'
+          : orchestrator.estimationError
+            ? 'error'
+            : result != null
+              ? 'success'
+              : 'idle'
+        return (
+          <div style={{ marginTop: '0.75rem' }}>
+            <EstimationBadge
+              result={result}
+              state={state}
+              error={orchestrator.estimationError}
+              onEstimate={orchestrator.estimateTokens}
+              budgetExceeded={false}
+              budgetWarning90={false}
+              showWhenIdle={true}
+            />
+          </div>
+        )
+      })()}
 
 
 

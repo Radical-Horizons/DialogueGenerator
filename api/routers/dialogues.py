@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Annotated, Dict, Any
 from fastapi import APIRouter, Depends, Request, status
+
+from api.routers.auth import get_current_user
 from starlette.requests import Request
 from api.schemas.dialogue import (
     EstimateTokensRequest,
@@ -24,7 +26,7 @@ from api.dependencies import (
     get_config_service,
     get_skill_catalog_service,
     get_trait_catalog_service,
-    require_debug_access,
+    get_unity_dialogue_orchestrator
 )
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from api.exceptions import InternalServerException, ValidationException, NotFoundException, OpenAIException
@@ -32,11 +34,16 @@ from services.dialogue_generation_service import DialogueGenerationService
 from services.configuration_service import ConfigurationService
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
+from services.unity_dialogue_export_service import write_unity_dialogue_to_file
+from constants import Defaults
+from services.context_token_budget import compute_context_selection_token_metrics
+from services.context_truncator import cap_context_text_to_budget
+from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _transform_openai_error(error: Exception, request_id: str) -> OpenAIException:
@@ -150,8 +157,11 @@ def _build_prompt_from_request(
         include_dialogue_type=True,
         element_modes=context_selections_dict.get("_element_modes")
     )
-    # Sérialiser en texte pour le LLM
-    context_text = context_builder._context_serializer.serialize_to_text(structured_context)
+    # Sérialiser en texte pour le LLM puis appliquer le plafond (aligné orchestrateur SSE)
+    context_text = cap_context_text_to_budget(
+        context_builder.serialize_context_to_text(structured_context),
+        request_data.max_context_tokens,
+    )
 
     # 5. Construire le prompt unifié via le builder unique (PromptInput)
     prompt_input = PromptInput(
@@ -169,9 +179,11 @@ def _build_prompt_from_request(
         author_profile=request_data.author_profile,
         vocabulary_config=request_data.vocabulary_config,
         include_narrative_guides=request_data.include_narrative_guides,
-        in_game_flags=request_data.in_game_flags  # Ajouter les flags
+        in_game_flags=request_data.in_game_flags,
+        max_context_tokens=request_data.max_context_tokens,
+        llm_model_identifier=request_data.llm_model_identifier,
     )
-    
+
     return prompt_engine.build_prompt(prompt_input)
 
 
@@ -340,8 +352,20 @@ async def estimate_tokens(
             include_dialogue_type=True,
             element_modes=context_selections_dict.get("_element_modes")
         )
-        context_text = context_builder._context_serializer.serialize_to_text(structured_context)
+        context_text = cap_context_text_to_budget(
+            context_builder.serialize_context_to_text(structured_context),
+            request_data.max_context_tokens,
+        )
         context_tokens = context_builder._count_tokens(context_text)
+
+        metrics = compute_context_selection_token_metrics(
+            context_builder,
+            full_selection=request_data.context_selections,
+            user_instructions=request_data.user_instructions,
+            field_configs=request_data.field_configs,
+            organization_mode=request_data.organization_mode or "narrative",
+            measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+        )
         
         # Convertir structured_prompt en dict pour la réponse
         structured_prompt_dict = None
@@ -353,6 +377,9 @@ async def estimate_tokens(
 
         return EstimateTokensResponse(
             context_tokens=context_tokens,
+            selection_tokens=metrics.selection_tokens,
+            context_token_breakdown=metrics.breakdown,
+            context_breakdown_note=metrics.breakdown_note,
             token_count=built.token_count,
             raw_prompt=built.raw_prompt,
             prompt_hash=built.prompt_hash,
@@ -388,11 +415,7 @@ async def estimate_tokens(
 )
 async def generate_unity_dialogue(
     request_data: GenerateUnityDialogueRequest,
-    request: Request,
-    dialogue_service: Annotated[DialogueGenerationService, Depends(get_dialogue_generation_service)],
-    prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
-    skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
-    trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
+    orchestrator: Annotated[UnityDialogueOrchestrator, Depends(get_unity_dialogue_orchestrator)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> GenerateUnityDialogueResponse:
     """Génère un nœud de dialogue au format Unity JSON.
@@ -401,23 +424,6 @@ async def generate_unity_dialogue(
     avec le streaming SSE.
     """
     try:
-        # Créer orchestrateur avec toutes les dépendances
-        from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
-        from api.dependencies import get_config_service, create_llm_usage_service
-        
-        config_service = get_config_service(request)
-        usage_service = create_llm_usage_service()
-        
-        orchestrator = UnityDialogueOrchestrator(
-            dialogue_service=dialogue_service,
-            prompt_engine=prompt_engine,
-            skill_service=skill_service,
-            trait_service=trait_service,
-            config_service=config_service,
-            usage_service=usage_service,
-            request_id=request_id
-        )
-        
         # Appel simple sans streaming (usage REST)
         return await orchestrator.generate(request_data)
         
@@ -455,87 +461,26 @@ async def export_unity_dialogue(
         InternalServerException: Si l'écriture du fichier échoue.
     """
     try:
-        # 1. Récupérer le chemin Unity configuré
-        unity_path = config_service.get_unity_dialogues_path()
-        if not unity_path:
-            raise ValidationException(
-                message="Le chemin Unity dialogues n'est pas configuré. Configurez-le dans les paramètres.",
-                details={"field": "unity_dialogues_path"},
-                request_id=request_id
-            )
-        
-        unity_dir = Path(unity_path)
-        
-        # Créer le dossier s'il n'existe pas
-        unity_dir.mkdir(parents=True, exist_ok=True)
-        
-        # 2. Valider que le JSON est valide et conforme au schéma Unity
-        try:
-            json_data = json.loads(request_data.json_content)
-            if not isinstance(json_data, list):
-                raise ValidationException(
-                    message="Le JSON Unity doit être un tableau de nœuds",
-                    details={"json_content": "Doit être un tableau []"},
-                    request_id=request_id
-                )
-        except json.JSONDecodeError as e:
-            raise ValidationException(
-                message="Le JSON fourni n'est pas valide",
-                details={"json_content": f"Erreur JSON: {str(e)}"},
-                request_id=request_id
-            )
-        
-        # 3. Valider le schéma Unity (IDs uniques, références valides, etc.)
-        from services.json_renderer.unity_json_renderer import UnityJsonRenderer
-        renderer = UnityJsonRenderer()
-        is_valid, validation_errors = renderer.validate_nodes(json_data)
-        if not is_valid:
-            raise ValidationException(
-                message="Le dialogue Unity contient des erreurs de validation",
-                details={
-                    "validation_errors": validation_errors,
-                    "json_content": "Le JSON ne respecte pas le schéma Unity (IDs uniques, références valides, etc.)"
-                },
-                request_id=request_id
-            )
-        
-        # 4. Générer le nom de fichier
-        if request_data.filename:
-            # Utiliser le nom fourni (sans extension)
-            filename = request_data.filename
-        else:
-            # Générer un slug à partir du titre
-            # Convertir en minuscules, remplacer espaces et caractères spéciaux par underscores
-            slug = re.sub(r'[^\w\s-]', '', request_data.title.lower())
-            slug = re.sub(r'[-\s]+', '_', slug)
-            filename = slug[:100]  # Limiter la longueur
-        
-        # Ajouter l'extension .json si pas présente
-        if not filename.endswith('.json'):
-            filename += '.json'
-        
-        file_path = unity_dir / filename
-        
-        # 5. Écrire le fichier JSON (pretty-print avec 2 espaces)
-        json_content_formatted = json.dumps(json_data, indent=2, ensure_ascii=False)
-        file_path.write_text(json_content_formatted, encoding='utf-8')
-        
-        logger.info(f"Dialogue Unity exporté: {file_path} (request_id: {request_id})")
-        
+        file_path, filename = write_unity_dialogue_to_file(
+            config_service=config_service,
+            json_content=request_data.json_content,
+            filename=request_data.filename,
+            title=request_data.title,
+            request_id=request_id,
+        )
         return ExportUnityDialogueResponse(
             file_path=str(file_path.absolute()),
             filename=filename,
-            success=True
+            success=True,
         )
-        
     except ValidationException:
         raise
     except Exception as e:
-        logger.exception(f"Erreur lors de l'export Unity JSON (request_id: {request_id})")
+        logger.exception("Erreur lors de l'export Unity JSON (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de l'export du dialogue Unity JSON",
             details={"error": str(e)},
-            request_id=request_id
+            request_id=request_id,
         )
 
 
@@ -563,7 +508,6 @@ async def get_raw_json_context(
     prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
     skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
     trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
-    _: Annotated[None, Depends(require_debug_access)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> RawJsonContextResponse:
     """Expose le JSON brut du contexte structuré pour debug.
@@ -619,14 +563,17 @@ async def get_raw_json_context(
         all_characters = context_selections_dict.get('characters', [])
         npc_speaker_id = request_data.npc_speaker_id or (all_characters[0] if all_characters else "UNKNOWN")
         
-        # Construire le prompt pour obtenir le hash
+        context_text_for_prompt = cap_context_text_to_budget(
+            context_builder.serialize_context_to_text(structured_context),
+            request_data.max_context_tokens,
+        )
         prompt_input = PromptInput(
             user_instructions=request_data.user_instructions,
             npc_speaker_id=npc_speaker_id,
             player_character_id="URESAIR",
             skills_list=skills_list,
             traits_list=traits_list,
-            context_summary=None,  # On utilise structured_context
+            context_summary=context_text_for_prompt,
             structured_context=structured_context,
             scene_location=request_data.context_selections.scene_location,
             max_choices=request_data.max_choices,
@@ -634,7 +581,9 @@ async def get_raw_json_context(
             narrative_tags=request_data.narrative_tags,
             author_profile=request_data.author_profile,
             vocabulary_config=request_data.vocabulary_config,
-            include_narrative_guides=request_data.include_narrative_guides
+            include_narrative_guides=request_data.include_narrative_guides,
+            max_context_tokens=request_data.max_context_tokens,
+            llm_model_identifier=request_data.llm_model_identifier,
         )
         
         built = prompt_engine.build_prompt(prompt_input)

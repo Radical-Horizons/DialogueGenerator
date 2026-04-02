@@ -21,12 +21,18 @@ interface GenerationState {
   rawPrompt: RawPrompt | null
   structuredPrompt: PromptStructure | null
   promptHash: string | null
+  /** Hash des paramètres d’entrée (SHA des params normalisés) — aligné avec computeStateHash ; sert au cache d’estimation. */
+  previewInputHash: string | null
   tokenCount: number | null
   isEstimating: boolean
   
   // Résultats de génération
   unityDialogueResponse: GenerateUnityDialogueResponse | null
   tokensUsed: number | null
+
+  /** Instructions scène (panneau génération) — pour estimation budget contexte côté ContextSelector */
+  generationUserInstructions: string
+  setGenerationUserInstructions: (value: string) => void
   
   // État streaming (Task 2 - Story 0.2)
   isGenerating: boolean
@@ -45,7 +51,14 @@ interface GenerationState {
   setSystemPromptOverride: (prompt: string | null) => void
   setDefaultSystemPrompt: (prompt: string | null) => void
   resetSystemPrompt: () => void
-  setRawPrompt: (prompt: RawPrompt | null, tokens: number | null, hash: string | null, isEstimating: boolean, structuredPrompt?: PromptStructure | null) => void
+  setRawPrompt: (
+    prompt: RawPrompt | null,
+    tokens: number | null,
+    hash: string | null,
+    isEstimating: boolean,
+    structuredPrompt?: PromptStructure | null,
+    previewHashUpdate?: 'invalidate' | 'preserve' | string
+  ) => void
   setUnityDialogueResponse: (response: GenerateUnityDialogueResponse | null) => void
   setTokensUsed: (tokens: number | null) => void
   clearGenerationResults: () => void
@@ -80,10 +93,13 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   rawPrompt: null,
   structuredPrompt: null,
   promptHash: null,
+  previewInputHash: null,
   tokenCount: null,
   isEstimating: false,
   unityDialogueResponse: null,
   tokensUsed: null,
+  generationUserInstructions: '',
+  setGenerationUserInstructions: (value) => set({ generationUserInstructions: value }),
 
   // État streaming initial (Task 2 - Story 0.2)
   isGenerating: false,
@@ -115,8 +131,25 @@ export const useGenerationStore = create<GenerationState>((set) => ({
       systemPromptOverride: state.defaultSystemPrompt,
     })),
 
-  setRawPrompt: (prompt, tokens, hash, isEstimating, structuredPrompt = null) =>
-    set({ rawPrompt: prompt, structuredPrompt, tokenCount: tokens, promptHash: hash, isEstimating }),
+  setRawPrompt: (prompt, tokens, hash, isEstimating, structuredPrompt = null, previewHashUpdate) =>
+    set((state) => {
+      let nextPreview = state.previewInputHash
+      if (previewHashUpdate === undefined || previewHashUpdate === 'invalidate') {
+        nextPreview = null
+      } else if (previewHashUpdate === 'preserve') {
+        nextPreview = state.previewInputHash
+      } else {
+        nextPreview = previewHashUpdate
+      }
+      return {
+        rawPrompt: prompt,
+        structuredPrompt: structuredPrompt ?? null,
+        tokenCount: tokens,
+        promptHash: hash,
+        isEstimating,
+        previewInputHash: nextPreview,
+      }
+    }),
 
   setUnityDialogueResponse: (response) =>
     set({ unityDialogueResponse: response }),

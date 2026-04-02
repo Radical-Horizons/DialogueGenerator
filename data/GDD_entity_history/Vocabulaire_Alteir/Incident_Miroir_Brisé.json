@@ -1,0 +1,70 @@
+[
+  {
+    "at": "2026-03-27T21:17:15.755793+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Incident Miroir Brisé",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Événement 3198 AG créant Observautomatons.",
+        "Importance": "Secondaire",
+        "Origine": "D'incident avec miroir brisé (catastrophe visuelle).",
+        "Popularité": "Localement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "dd9c9224-774b-4d32-9bf6-fb7fd3b79fa8"
+    }
+  },
+  {
+    "at": "2026-03-28T01:47:16.014921+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Incident Miroir Brisé",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Événement 3198 AG créant Observautomatons.",
+        "Importance": "Secondaire",
+        "Origine": "D'incident avec miroir brisé (catastrophe visuelle).",
+        "Popularité": "Localement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "dd9c9224-774b-4d32-9bf6-fb7fd3b79fa8"
+    }
+  },
+  {
+    "at": "2026-03-29T20:27:48.532228+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Incident Miroir Brisé",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Événement 3198 AG créant Observautomatons.",
+        "Importance": "Secondaire",
+        "Origine": "D'incident avec miroir brisé (catastrophe visuelle).",
+        "Popularité": "Localement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "dd9c9224-774b-4d32-9bf6-fb7fd3b79fa8"
+    }
+  },
+  {
+    "at": "2026-03-30T00:34:09.849646+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "Incident Miroir Brisé",
+      "values": {
+        "Catégorie": "Concept",
+        "Définition": "Événement 3198 AG créant Observautomatons.",
+        "Importance": "Secondaire",
+        "Origine": "D'incident avec miroir brisé (catastrophe visuelle).",
+        "Popularité": "Localement",
+        "Type": "Emprunt détourné"
+      },
+      "notion_page_id": "dd9c9224-774b-4d32-9bf6-fb7fd3b79fa8"
+    }
+  }
+]

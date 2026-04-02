@@ -1,6 +1,6 @@
 """Modèles de données pour le suivi de l'utilisation des LLM."""
 from datetime import datetime, UTC
-from typing import Optional
+from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field, ConfigDict, field_serializer
 
 
@@ -21,7 +21,26 @@ class LLMUsageRecord(BaseModel):
     endpoint: str = Field(..., description="Endpoint appelé (ex: generate/variants, generate/interactions)")
     k_variants: int = Field(default=1, ge=1, description="Nombre de variantes générées")
     error_message: Optional[str] = Field(default=None, description="Message d'erreur si success=False")
-    
+    fallback_from: Optional[str] = Field(default=None, description="model_id du provider initial en échec (fallback utilisé)")
+    fallback_reason: Optional[str] = Field(default=None, description="Raison de l'échec du provider initial (ex: Timeout, 503)")
+    dialogue_id: Optional[str] = Field(default=None, description="ID du dialogue associé (annotation post-hoc)")
+    node_id: Optional[str] = Field(default=None, description="ID du nœud généré associé (annotation post-hoc)")
+    deleted: bool = Field(default=False, description="Nœud supprimé du graphe (marqué lors du rejet)")
+    prompt: Optional[str] = Field(default=None, description="Prompt complet envoyé au LLM (Story 1.15)")
+    response: Optional[str] = Field(default=None, description="Réponse brute du LLM (Story 1.15)")
+    context_relevance: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Rapport de pertinence contexte GDD (Story 3.6, FR16)",
+    )
+    context_section_usage: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Détail d’usage par section GDD injectée (Story 3.7, FR17)",
+    )
+    billable_user_id: Optional[str] = Field(
+        default=None,
+        description="Identifiant scope coûts (JWT sub / username) pour agrégation multi-utilisateur",
+    )
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {

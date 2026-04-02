@@ -1,7 +1,7 @@
 """Middleware pour la gouvernance des coûts LLM."""
-import json
 import logging
-from typing import Callable
+import os
+from typing import Callable, Optional
 
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
@@ -9,25 +9,47 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from services.cost_governance_service import CostGovernanceService
 from services.llm_pricing_service import LLMPricingService
-from api.dependencies import get_cost_governance_service, get_cost_budget_repository
-from constants import ModelNames, Defaults
+from api.dependencies import get_cost_budget_repository
+from constants import Defaults
+
+from api.middleware.billable_user_context import get_billable_user_id
 
 logger = logging.getLogger(__name__)
-
-# User ID par défaut (V1.0: pas d'authentification, utilisateur unique)
-DEFAULT_USER_ID = "default_user"
 
 # Endpoints à intercepter pour vérification budget
 GENERATION_ENDPOINTS = [
     "/api/v1/dialogues/generate/unity-dialogue",
     "/api/v1/dialogues/generate/variants",
-    "/api/v1/graph/generate-node",
+    "/api/v1/unity-dialogues/graph/generate-node",
     "/api/v1/dialogues/generate/jobs",  # Streaming generation
 ]
 
 # Estimation par défaut des tokens (si non disponibles dans la requête)
 DEFAULT_PROMPT_TOKENS = 5000  # Estimation conservatrice
 DEFAULT_COMPLETION_TOKENS = 1000  # Estimation conservatrice
+
+# Plafond anti-abus pour les en-têtes d'estimation client (POST body illisible en middleware)
+_MAX_HEADER_TOKEN_ESTIMATE = 2_000_000
+
+_HEADER_PROMPT = "x-estimated-prompt-tokens"
+_HEADER_COMPLETION = "x-estimated-completion-tokens"
+_HEADER_LLM_MODEL = "x-llm-model"
+
+
+def _parse_positive_int_header(request: Request, header_name: str) -> Optional[int]:
+    """Lit un entier positif borné depuis les en-têtes (clés ASGI en minuscules)."""
+    raw = request.headers.get(header_name)
+    if raw is None:
+        return None
+    try:
+        value = int(str(raw).strip())
+    except (TypeError, ValueError):
+        logger.debug("En-tête %s ignoré (valeur non entière): %r", header_name, raw)
+        return None
+    if value < 0 or value > _MAX_HEADER_TOKEN_ESTIMATE:
+        logger.debug("En-tête %s ignoré (hors plage): %s", header_name, value)
+        return None
+    return value
 
 
 class CostGovernanceMiddleware(BaseHTTPMiddleware):
@@ -76,7 +98,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             
             # Vérifier le budget
             budget_check = cost_service.check_budget(
-                user_id=DEFAULT_USER_ID,
+                user_id=get_billable_user_id(),
                 estimated_cost=estimated_cost
             )
             
@@ -118,30 +140,59 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
             # Erreurs de données (JSON invalide, clés manquantes, etc.)
             # Fail-safe: bloquer la génération pour protéger le budget
             logger.error(f"Erreur de données dans CostGovernanceMiddleware: {e}", exc_info=True)
+            _prod = os.getenv("ENVIRONMENT", "development") == "production"
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
                     "error": {
                         "code": "BUDGET_CHECK_ERROR",
                         "message": "Erreur lors de la vérification du budget. La génération a été bloquée pour protéger votre budget.",
-                        "details": {"error": str(e)}
+                        "details": {} if _prod else {"error": str(e)},
                     }
                 }
             )
         except Exception as e:
             # Erreur inattendue: fail-safe en bloquant la génération
             logger.error(f"Erreur inattendue dans CostGovernanceMiddleware: {e}", exc_info=True)
+            _prod = os.getenv("ENVIRONMENT", "development") == "production"
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
                     "error": {
                         "code": "BUDGET_CHECK_ERROR",
                         "message": "Erreur lors de la vérification du budget. La génération a été bloquée pour protéger votre budget.",
-                        "details": {"error": str(e)}
+                        "details": {} if _prod else {"error": str(e)},
                     }
                 }
             )
     
+    def _resolve_model_for_cost_estimate(self, request: Request) -> str:
+        """Détermine l'identifiant modèle pour le tarif (body illisible ici).
+
+        Priorité : en-tête ``X-LLM-Model`` si présent **et** présent dans
+        ``llm_pricing.json``, sinon query ``model`` / ``llm_model``, sinon défaut.
+
+        Args:
+            request: Requête entrante.
+
+        Returns:
+            Identifiant modèle passé à ``calculate_cost``.
+        """
+        raw = request.headers.get(_HEADER_LLM_MODEL)
+        if raw is not None:
+            mid = str(raw).strip()
+            if mid and self.pricing_service.get_model_pricing(mid) is not None:
+                return mid
+            logger.debug(
+                "En-tête %s ignoré (vide ou modèle absent de la grille tarifaire): %r",
+                _HEADER_LLM_MODEL,
+                raw,
+            )
+        q = request.query_params.get("model") or request.query_params.get("llm_model")
+        if q:
+            return str(q).strip()
+        return Defaults.MODEL_ID
+
     async def _estimate_cost(self, request: Request) -> float:
         """Estime le coût d'une génération basé sur la requête.
         
@@ -157,10 +208,7 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
         Returns:
             Coût estimé en USD (estimation conservatrice).
         """
-        # Essayer d'extraire le modèle depuis les query params
-        model_name = request.query_params.get("model") or request.query_params.get("llm_model")
-        if not model_name:
-            model_name = Defaults.MODEL_ID
+        model_name = self._resolve_model_for_cost_estimate(request)
         
         # Estimation selon le type d'endpoint
         path = request.url.path
@@ -171,12 +219,19 @@ class CostGovernanceMiddleware(BaseHTTPMiddleware):
         elif "/generate/jobs" in path:
             # Streaming generation: tokens similaires mais traitement spécial
             prompt_tokens = DEFAULT_PROMPT_TOKENS
-            completion_tokens = DEFAULT_COMPLETION_TOKENS * 1.5
+            completion_tokens = int(DEFAULT_COMPLETION_TOKENS * 1.5)
         else:
             # Génération standard (unity-dialogue, generate-node)
             prompt_tokens = DEFAULT_PROMPT_TOKENS
             completion_tokens = DEFAULT_COMPLETION_TOKENS
-        
+
+        hdr_pt = _parse_positive_int_header(request, _HEADER_PROMPT)
+        hdr_ct = _parse_positive_int_header(request, _HEADER_COMPLETION)
+        if hdr_pt is not None:
+            prompt_tokens = hdr_pt
+        if hdr_ct is not None:
+            completion_tokens = hdr_ct
+
         return self.pricing_service.calculate_cost(
             model_name=model_name,
             prompt_tokens=prompt_tokens,

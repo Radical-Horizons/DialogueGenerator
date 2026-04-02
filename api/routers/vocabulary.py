@@ -2,6 +2,8 @@
 import logging
 from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Query, status
+
+from api.routers.auth import get_current_user
 from datetime import datetime
 
 from api.dependencies import (
@@ -22,7 +24,11 @@ from api.utils.notion_cache import get_notion_cache
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/vocabulary", tags=["vocabulary"])
+router = APIRouter(
+    prefix="/api/vocabulary",
+    tags=["vocabulary"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get(

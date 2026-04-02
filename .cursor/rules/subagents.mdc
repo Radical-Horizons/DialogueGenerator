@@ -1,0 +1,65 @@
+---
+description: Subagents Cursor — liste, usage et bonnes pratiques pour ce repo
+globs: []
+alwaysApply: false
+---
+
+## Subagents disponibles (`.cursor/agents/`)
+
+| Nom | Modèle | Scope principal | Quand l'utiliser |
+|-----|--------|-----------------|------------------|
+| `api-contracts-reviewer` | fast | `api/routers/`, `api/schemas/`, `frontend/src/api/` | Drift schema/router/client, status codes |
+| `graph-editor-reviewer` | inherit | `frontend/src/store/*Slice*`, `components/graph/` | Zustand, React Flow, flush NodeEditorPanel |
+| `llm-pipeline-reviewer` | fast | `core/llm/`, `services/llm_*`, `api/routers/streaming.py` | Streaming SSE, coûts, token counting |
+| `context-gdd-reviewer` | fast | `core/context/`, `services/context_*`, `services/gdd_*` | Cache GDD, budget token, pipeline contexte |
+| `security-reviewer` | fast | `api/middleware/`, auth, secrets | JWT, CORS, secrets, injection |
+| `backend-services-reviewer` | fast | `services/`, `api/container.py` | Logique métier, Notion sync, Unity export |
+| `test-coverage-reviewer` | fast | `tests/`, `frontend/src/__tests__/` | Couverture manquante, qualité tests |
+| `transcript-history-researcher` | fast | `~/.cursor/.../agent-transcripts/` (hors git) | Optionnel : grep/mining sur JSONL de sessions pour rétro **comportement agent / rules** (pas un journal des subagents) |
+| `playwright-e2e-specialist` | fast | `e2e/`, `playwright.config.ts`, graphe/auth E2E | **Exécute** Playwright, corrige specs/helpers (écriture autorisée) ; voir parallélisation ci-dessous |
+
+**Revue complète du repo** : pas d’agent orchestrateur dédié — **Composer** avec les 7 reviewers en parallèle, ou **7× `Task`** dans le même message (les 7 lignes du tableau sauf `transcript-history-researcher` si optionnel). Le parent synthétise ensuite. Un seul `Task` multi-rôles ≠ 7 contextes isolés.
+
+**Déclencheurs implicites** : toute demande de revue **globale** / **complète** / **holistique** du codebase (y compris en anglais) = ce protocole 7×, **sans** demander confirmation pour « économiser » — sauf si l’utilisateur précise un périmètre réduit ou un seul domaine.
+
+**Coût** : ne pas substituer une passe unique « généraliste » aux sept reviewers ; voir `.cursor/rules/agentivity.mdc`.
+
+## Invocation
+
+```
+# Explicite — un seul subagent
+/graph-editor-reviewer vérifie les slices Zustand
+
+# Revue large — lancer les 7 reviewers en parallèle (Composer ou 7 Task), puis synthèse parent
+
+# Naturel
+Use the security-reviewer subagent on the auth module
+```
+
+## Règles de délégation
+
+- **Isoler** les tâches longues (exploration multi-dossiers, revue profonde) dans un subagent → contexte séparé
+- **Paralléliser** : envoyer plusieurs Task() dans le même message quand les zones sont indépendantes
+- **Playwright E2E** : plusieurs `Task` en parallèle, chacun avec **chemins `e2e/*.spec.ts` explicites** dans la commande (pas `npx playwright test` seul). Full suite = **une** passe parent/CI après les lots. Prompt : `.cursor/agents/playwright-e2e-specialist.md` + commande exacte. `subagent_type`: `generalPurpose` — **pas** `readonly`.
+- **`model: fast`** pour les reviewers qui font surtout de la lecture/grep
+- **`model: inherit`** pour les reviewers qui ont besoin du même raisonnement que le parent (ex. graph-editor)
+- **`readonly: true`** sur les **reviewers** — ils lisent, ils ne modifient pas ; **exception** : `playwright-e2e-specialist` (`readonly: false`) pour exécuter les tests et appliquer des correctifs
+
+## Création d'un nouveau subagent
+
+Fichier `.cursor/agents/<nom>.md` avec frontmatter YAML :
+```yaml
+---
+name: nom-du-subagent
+description: Rôle précis. Use when [condition spécifique].
+model: fast   # ou inherit
+readonly: true
+---
+```
+Le champ `description` est critique — c'est ce que lit l'agent parent pour décider de déléguer.
+
+## Anti-patterns à éviter
+- Ne pas créer de subagents génériques ("helper", "assistant")
+- Ne pas dupliquer la logique des slash commands pour des tâches simples one-shot
+- Ne pas lancer la suite de tests complète depuis un subagent (`vitest run` sans filtre = interdit) — voir `.cursor/rules/workflow.mdc`
+- Playwright : **éviter** N agents sur le même spec si les tests partagent encore un id de document non isolé ; préférer **fichiers ou groupes disjoints** par `Task`

@@ -1,0 +1,365 @@
+{
+  "type": "function",
+  "name": "generate_interaction",
+  "description": "Génère une interaction de dialogue structurée.",
+  "parameters": {
+    "$defs": {
+      "UnityDialogueChoiceContent": {
+        "description": "Contenu d'un choix généré par l'IA.",
+        "properties": {
+          "text": {
+            "description": "Texte du choix",
+            "title": "Text",
+            "type": "string"
+          },
+          "test": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Format: AttributeType+SkillId:DD (ex: 'Raison+Rhétorique:8')",
+            "title": "Test"
+          },
+          "testCriticalFailureNode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID du nœud cible en cas d'échec critique (score < DD - 5)",
+            "title": "Testcriticalfailurenode"
+          },
+          "testFailureNode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID du nœud cible en cas d'échec (score >= DD - 5 et < DD)",
+            "title": "Testfailurenode"
+          },
+          "testSuccessNode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID du nœud cible en cas de réussite (score >= DD et < DD + 5)",
+            "title": "Testsuccessnode"
+          },
+          "testCriticalSuccessNode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID du nœud cible en cas de réussite critique (score >= DD + 5)",
+            "title": "Testcriticalsuccessnode"
+          },
+          "traitRequirements": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/UnityDialogueTraitRequirementContent"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Exigences de traits (ex: [{'trait': 'Courageux', 'minValue': 5}])",
+            "title": "Traitrequirements"
+          },
+          "allowInfluenceForcing": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Permet forcing via influence",
+            "title": "Allowinfluenceforcing"
+          },
+          "influenceThreshold": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Seuil d'influence requis",
+            "title": "Influencethreshold"
+          },
+          "influenceDelta": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Modification d'influence (peut être négatif)",
+            "title": "Influencedelta"
+          },
+          "respectDelta": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Modification de respect (peut être négatif)",
+            "title": "Respectdelta"
+          },
+          "condition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Condition d'affichage (format: 'FLAG_NAME', 'NOT FLAG_NAME', ou 'startState == 1')",
+            "title": "Condition"
+          }
+        },
+        "required": [
+          "allowInfluenceForcing",
+          "condition",
+          "influenceDelta",
+          "influenceThreshold",
+          "respectDelta",
+          "test",
+          "testCriticalFailureNode",
+          "testCriticalSuccessNode",
+          "testFailureNode",
+          "testSuccessNode",
+          "text",
+          "traitRequirements"
+        ],
+        "title": "UnityDialogueChoiceContent",
+        "type": "object",
+        "additionalProperties": false
+      },
+      "UnityDialogueConsequencesContent": {
+        "description": "Contenu des conséquences (flags narratifs) généré par l'IA.",
+        "properties": {
+          "flag": {
+            "description": "Nom du flag narratif",
+            "title": "Flag",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Description de la conséquence",
+            "title": "Description"
+          }
+        },
+        "required": [
+          "description",
+          "flag"
+        ],
+        "title": "UnityDialogueConsequencesContent",
+        "type": "object",
+        "additionalProperties": false
+      },
+      "UnityDialogueNodeContent": {
+        "description": "Contenu d'un nœud de dialogue généré par l'IA (sans ID technique).\n\nL'ID sera généré automatiquement par le système.",
+        "properties": {
+          "speaker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID du personnage qui parle (contrôlé par l'auteur)",
+            "title": "Speaker"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Texte du dialogue (peut contenir \\n pour retours à la ligne)",
+            "title": "Line"
+          },
+          "test": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Format: AttributeType+SkillId:DD (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire.",
+            "title": "Test"
+          },
+          "consequences": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/UnityDialogueConsequencesContent"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Flags narratifs à activer"
+          },
+          "isLongRest": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Si true, déclenche un repos long",
+            "title": "Islongrest"
+          },
+          "startState": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "État de démarrage pour dialogues multi-entrées",
+            "title": "Startstate"
+          },
+          "choices": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/$defs/UnityDialogueChoiceContent"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Choix disponibles pour le joueur",
+            "title": "Choices"
+          }
+        },
+        "title": "UnityDialogueNodeContent",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "choices",
+          "consequences",
+          "isLongRest",
+          "line",
+          "speaker",
+          "startState",
+          "test"
+        ]
+      },
+      "UnityDialogueTraitRequirementContent": {
+        "description": "Exigence de trait pour débloquer un choix.",
+        "properties": {
+          "trait": {
+            "description": "Nom du trait requis (ex: 'Courageux')",
+            "title": "Trait",
+            "type": "string"
+          },
+          "minValue": {
+            "description": "Valeur minimale requise pour ce trait (ex: 5).",
+            "maximum": 100,
+            "minimum": -100,
+            "title": "Minvalue",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "minValue",
+          "trait"
+        ],
+        "title": "UnityDialogueTraitRequirementContent",
+        "type": "object",
+        "additionalProperties": false
+      }
+    },
+    "description": "Réponse de génération : un seul nœud de dialogue (sans ID technique).\n\nLe système génère un nœud à la fois contenant une réplique du PNJ et les choix du joueur.\nLes IDs seront ajoutés automatiquement par le système.",
+    "properties": {
+      "title": {
+        "description": "Titre descriptif du dialogue (ex: 'Rencontre avec le tavernier', 'Discussion sur la quête')",
+        "title": "Title",
+        "type": "string"
+      },
+      "node": {
+        "$ref": "#/$defs/UnityDialogueNodeContent"
+      }
+    },
+    "required": [
+      "node",
+      "title"
+    ],
+    "title": "UnityDialogueGenerationResponse",
+    "type": "object",
+    "additionalProperties": false
+  },
+  "strict": true
+}

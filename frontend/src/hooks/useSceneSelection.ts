@@ -6,6 +6,7 @@ import * as contextAPI from '../api/context'
 import type { SceneSelection } from '../types/generation'
 import { useContextStore } from '../store/contextStore'
 import { useGenerationStore } from '../store/generationStore'
+import { suggestionRefreshAfterSceneChange } from '../utils/contextSuggestionSync'
 
 export interface SceneSelectionData {
   characters: string[]
@@ -19,6 +20,7 @@ export interface UseSceneSelectionReturn {
   isLoading: boolean
   updateSelection: (updates: Partial<SceneSelection>) => void
   swapCharacters: () => void
+  randomizeField: (field: keyof SceneSelection) => void
 }
 
 export function useSceneSelection() {
@@ -91,36 +93,33 @@ export function useSceneSelection() {
     }
   }, [])
 
-  const loadRegions = useCallback(async () => {
+  const loadSceneRegions = useCallback(async () => {
     const contextStore = useContextStore.getState()
-    
-    // Vérifier le cache avant l'appel API
-    if (contextStore.isCacheValid(contextStore.cachedRegions)) {
+
+    if (contextStore.isCacheValid(contextStore.cachedSceneRegions)) {
       setData((prev) => ({
         ...prev,
-        regions: contextStore.cachedRegions!.data,
+        regions: contextStore.cachedSceneRegions!.data,
       }))
       return
     }
-    
+
     try {
-      const response = await contextAPI.listRegions()
-      const regionNames = response.regions.sort()
-      
-      // Mettre à jour le cache
-      contextStore.setCachedRegions(regionNames)
-      
+      const response = await contextAPI.listSceneRegions()
+      const regionNames = [...response.regions].sort()
+
+      contextStore.setCachedSceneRegions(regionNames)
+
       setData((prev) => ({
         ...prev,
         regions: regionNames,
       }))
     } catch (err) {
-      console.error('Erreur lors du chargement des régions:', err)
-      // En cas d'erreur, utiliser le cache même s'il est expiré si disponible
-      if (contextStore.cachedRegions) {
+      console.error('Erreur lors du chargement des régions (scène):', err)
+      if (contextStore.cachedSceneRegions) {
         setData((prev) => ({
           ...prev,
-          regions: contextStore.cachedRegions!.data,
+          regions: contextStore.cachedSceneRegions!.data,
         }))
       }
     }
@@ -133,9 +132,8 @@ export function useSceneSelection() {
     }
 
     const contextStore = useContextStore.getState()
-    const cached = contextStore.cachedSubLocations.get(regionName)
-    
-    // Vérifier le cache avant l'appel API
+    const cached = contextStore.cachedSceneSubLocations.get(regionName)
+
     if (cached && contextStore.isCacheValid(cached)) {
       setData((prev) => ({
         ...prev,
@@ -145,11 +143,10 @@ export function useSceneSelection() {
     }
 
     try {
-      const response = await contextAPI.getSubLocations(regionName)
-      const subLocationNames = response.sub_locations.sort()
-      
-      // Mettre à jour le cache pour cette région
-      contextStore.setCachedSubLocations(regionName, subLocationNames)
+      const response = await contextAPI.getSceneSubLocations(regionName)
+      const subLocationNames = [...response.sub_locations].sort()
+
+      contextStore.setCachedSceneSubLocations(regionName, subLocationNames)
       
       setData((prev) => ({
         ...prev,
@@ -158,10 +155,11 @@ export function useSceneSelection() {
     } catch (err) {
       console.error('Erreur lors du chargement des sous-lieux:', err)
       // En cas d'erreur, utiliser le cache même s'il est expiré si disponible
-      if (cached) {
+      const stale = contextStore.cachedSceneSubLocations.get(regionName)
+      if (stale) {
         setData((prev) => ({
           ...prev,
-          subLocations: cached.data,
+          subLocations: stale.data,
         }))
       } else {
         setData((prev) => ({ ...prev, subLocations: [] }))
@@ -169,12 +167,14 @@ export function useSceneSelection() {
     }
   }, [])
 
+  const gddDataRevision = useContextStore((s) => s.gddDataRevision)
+
   useEffect(() => {
     setIsLoading(true)
-    Promise.all([loadCharacters(), loadRegions()]).finally(() => {
+    Promise.all([loadCharacters(), loadSceneRegions()]).finally(() => {
       setIsLoading(false)
     })
-  }, [loadCharacters, loadRegions])
+  }, [loadCharacters, loadSceneRegions, gddDataRevision])
 
   useEffect(() => {
     if (selection.sceneRegion) {
@@ -308,6 +308,13 @@ export function useSceneSelection() {
       return
     }
 
+    const prevSnap: SceneSelection = {
+      characterA: prevSelection.current.characterA,
+      characterB: prevSelection.current.characterB,
+      sceneRegion: prevSelection.current.sceneRegion,
+      subLocation: prevSelection.current.subLocation,
+    }
+
     // Détecter si c'est un échange de personnages
     const isSwap = 
       prevSelection.current.characterA === selection.characterB &&
@@ -410,6 +417,15 @@ export function useSceneSelection() {
         }
       }
     }
+
+    // Même flux que ContextSelector (checkbox) : 🎲 / combobox mettent à jour le store ici, pas via handleItemToggle.
+    const suggestionAction = suggestionRefreshAfterSceneChange(selection, prevSnap)
+    const ctx = useContextStore.getState()
+    if (suggestionAction.kind === 'fetch') {
+      ctx.refreshSuggestionsForTrigger(suggestionAction.triggerType, suggestionAction.triggerName)
+    } else if (suggestionAction.kind === 'clear') {
+      ctx.setSuggestions([])
+    }
     
     // Mettre à jour la référence pour la prochaine itération
     prevSelection.current = {
@@ -419,7 +435,7 @@ export function useSceneSelection() {
       subLocation: selection.subLocation,
     }
     isSwappingRef.current = false
-  }, [selection.characterA, selection.characterB, selection.sceneRegion, selection.subLocation, contextSelections.characters_full, contextSelections.characters_excerpt, contextSelections.locations_full, contextSelections.locations_excerpt, contextRegion, contextSubLocations, toggleCharacter, setRegion, toggleSubLocation, toggleLocation, locations])
+  }, [selection, contextSelections.characters_full, contextSelections.characters_excerpt, contextSelections.locations_full, contextSelections.locations_excerpt, contextRegion, contextSubLocations, toggleCharacter, setRegion, toggleSubLocation, toggleLocation, locations])
 
   const updateSelection = useCallback((updates: Partial<SceneSelection>) => {
     setSelection((prev) => ({ ...prev, ...updates }))
@@ -434,12 +450,43 @@ export function useSceneSelection() {
     }))
   }, [])
 
+  const randomizeField = useCallback(
+    (field: keyof SceneSelection) => {
+      if (field === 'characterA' || field === 'characterB') {
+        if (data.characters.length > 0) {
+          const randomIndex = Math.floor(Math.random() * data.characters.length)
+          const randomChar = data.characters[randomIndex]
+          // Éviter de choisir le même personnage pour A et B si possible
+          const otherField = field === 'characterA' ? 'characterB' : 'characterA'
+          if (randomChar === selection[otherField] && data.characters.length > 1) {
+            const nextIndex = (randomIndex + 1) % data.characters.length
+            updateSelection({ [field]: data.characters[nextIndex] })
+          } else {
+            updateSelection({ [field]: randomChar })
+          }
+        }
+      } else if (field === 'sceneRegion') {
+        if (data.regions.length > 0) {
+          const random = data.regions[Math.floor(Math.random() * data.regions.length)]
+          updateSelection({ sceneRegion: random, subLocation: null })
+        }
+      } else if (field === 'subLocation') {
+        if (data.subLocations.length > 0) {
+          const random = data.subLocations[Math.floor(Math.random() * data.subLocations.length)]
+          updateSelection({ subLocation: random })
+        }
+      }
+    },
+    [data, selection, updateSelection]
+  )
+
   return {
     data,
     selection,
     isLoading,
     updateSelection,
     swapCharacters,
+    randomizeField,
   }
 }
 

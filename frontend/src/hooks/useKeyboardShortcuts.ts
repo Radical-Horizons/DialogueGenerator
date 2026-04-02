@@ -141,7 +141,7 @@ export function useKeyboardShortcuts(
       
       // Certains raccourcis doivent fonctionner même dans les inputs (ex: Ctrl+S, Ctrl+E)
       // Note: "/" n'est PAS autorisé dans les inputs car c'est un caractère normal de saisie
-      const allowedInInputs = ['ctrl+s', 'ctrl+e', 'ctrl+k', 'escape', 'ctrl+/']
+      const allowedInInputs = ['ctrl+s', 'ctrl+e', 'ctrl+k', 'ctrl+f', 'escape', 'ctrl+/']
       
       const isAllowedInInput = allowedInInputs.some(allowed => {
         const parsed = parseShortcut(allowed)

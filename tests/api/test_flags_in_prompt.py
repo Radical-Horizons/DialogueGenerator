@@ -16,8 +16,7 @@ def mock_dialogue_service():
     mock_structured_context = MagicMock()
     
     mock_service.context_builder.build_context_json = MagicMock(return_value=mock_structured_context)
-    mock_service.context_builder._context_serializer = MagicMock()
-    mock_service.context_builder._context_serializer.serialize_to_text = MagicMock(return_value="context text")
+    mock_service.context_builder.serialize_context_to_text = MagicMock(return_value="context text")
     
     # Mock de serialize_to_xml pour retourner un élément XML <context>
     import xml.etree.ElementTree as ET
@@ -81,7 +80,7 @@ def test_preview_prompt_with_flags(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True, "category": "Event"},
             {"id": "CURRENT_EFFORT", "value": 2, "category": "Stat"}
@@ -113,7 +112,7 @@ def test_preview_prompt_without_flags(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000
+        "max_context_tokens": 10000
     }
     
     response = client.post("/api/v1/dialogues/preview-prompt", json=request_data)
@@ -138,7 +137,7 @@ def test_estimate_tokens_with_flags(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True}
         ]
@@ -168,7 +167,7 @@ def test_flags_instruction_in_technical_section(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True}
         ]
@@ -196,7 +195,7 @@ def test_multiple_flags_serialization(client, mock_dialogue_service):
             "species_full": [],
             "communities_full": []
         },
-        "max_context_tokens": 1000,
+        "max_context_tokens": 100000,
         "in_game_flags": [
             {"id": "PLAYER_KILLED_BOSS", "value": True},
             {"id": "ALLIED_WITH_CULTE", "value": False},

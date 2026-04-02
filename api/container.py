@@ -4,7 +4,12 @@ Ce container stocke toutes les instances de services dans app.state,
 permettant une meilleure gestion du cycle de vie et facilitant les tests.
 """
 import logging
-from typing import Optional
+import os
+from pathlib import Path
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from services.gdd_notion_sync_service import GddNotionSyncService
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
 from services.configuration_service import ConfigurationService
@@ -17,6 +22,10 @@ from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
+from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.linked_selector import LinkedSelectorService
+from services.notion_import_service import NotionImportService
+from services.context_rule_service import ContextRuleService
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +38,17 @@ class ServiceContainer:
     """
     
     def __init__(self):
-        """Initialise le container avec tous les services None (lazy loading)."""
+        """Initialise le container avec tous les services None (lazy loading).
+        
+        Les services sont créés à la demande lors du premier accès via les méthodes
+        get_* correspondantes. Cette approche de lazy loading permet :
+        - D'éviter la création de services non utilisés
+        - De réduire le temps de démarrage de l'application
+        - De faciliter les tests en permettant l'injection de mocks
+        
+        Tous les services sont initialisés à None et seront créés au premier appel
+        à leur méthode get_* respective.
+        """
         self._config_service: Optional[ConfigurationService] = None
         self._context_builder: Optional[ContextBuilder] = None
         self._vocab_service: Optional[VocabularyService] = None
@@ -40,6 +59,12 @@ class ServiceContainer:
         self._preset_service: Optional[PresetService] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
+        self._unity_generation_service: Optional[UnityDialogueGenerationService] = None
+        self._graph_node_orchestrator: Optional["GraphNodeOrchestrator"] = None
+        self._linked_selector_service: Optional[LinkedSelectorService] = None
+        self._notion_import_service: Optional[NotionImportService] = None
+        self._context_rule_service: Optional[ContextRuleService] = None
+        self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
     def get_config_service(self) -> ConfigurationService:
@@ -194,19 +219,128 @@ class ServiceContainer:
             Instance de LLMUsageService.
         """
         if self._llm_usage_service is None:
-            from api.dependencies import create_llm_usage_service
+            from api.llm_usage_factory import create_llm_usage_service
+
             self._llm_usage_service = create_llm_usage_service()
             logger.info("LLMUsageService initialisé dans le container.")
         return self._llm_usage_service
     
+    def get_unity_dialogue_generation_service(self) -> UnityDialogueGenerationService:
+        """Retourne le service de génération Unity Dialogue.
+        
+        Returns:
+            Instance de UnityDialogueGenerationService.
+        """
+        if self._unity_generation_service is None:
+            self._unity_generation_service = UnityDialogueGenerationService()
+            logger.info("UnityDialogueGenerationService initialisé dans le container.")
+        return self._unity_generation_service
+    
+    def get_graph_node_orchestrator(self) -> "GraphNodeOrchestrator":
+        """Retourne l'orchestrateur de nœuds de graphe.
+        
+        Returns:
+            Instance de GraphNodeOrchestrator avec dépendances injectées.
+        """
+        if self._graph_node_orchestrator is None:
+            from services.graph_node_orchestrator import GraphNodeOrchestrator
+            
+            unity_service = self.get_unity_dialogue_generation_service()
+            self._graph_node_orchestrator = GraphNodeOrchestrator(
+                generation_service=unity_service
+            )
+            logger.info("GraphNodeOrchestrator initialisé dans le container.")
+        return self._graph_node_orchestrator
+    
+    def get_linked_selector_service(self) -> LinkedSelectorService:
+        """Retourne le service de sélection d'éléments liés.
+        
+        Returns:
+            Instance de LinkedSelectorService.
+        """
+        if self._linked_selector_service is None:
+            context_builder = self.get_context_builder()
+            self._linked_selector_service = LinkedSelectorService(
+                context_builder=context_builder
+            )
+            logger.info("LinkedSelectorService initialisé dans le container.")
+        return self._linked_selector_service
+    
+    def get_notion_import_service(self) -> NotionImportService:
+        """Retourne le service d'import Notion.
+        
+        Returns:
+            Instance de NotionImportService.
+        """
+        if self._notion_import_service is None:
+            self._notion_import_service = NotionImportService()
+            logger.info("NotionImportService initialisé dans le container.")
+        return self._notion_import_service
+
+    def get_context_rule_service(self) -> ContextRuleService:
+        """Retourne le service de règles de sélection de contexte GDD.
+
+        Returns:
+            Instance de ContextRuleService.
+        """
+        if self._context_rule_service is None:
+            from pathlib import Path
+            from constants import FilePaths
+            storage_file = Path(__file__).resolve().parent.parent / FilePaths.CONTEXT_RULES_FILE
+            self._context_rule_service = ContextRuleService(storage_file=storage_file)
+            logger.info("ContextRuleService initialisé dans le container.")
+        return self._context_rule_service
+
+    def get_gdd_notion_sync_service(self) -> "GddNotionSyncService":
+        """Retourne le service de synchronisation GDD depuis Notion (FR18).
+
+        Returns:
+            Instance configurée avec chemins projet et data/.
+        """
+        if self._gdd_notion_sync_service is None:
+            from constants import FilePaths
+            from services.gdd_notion_sync_config_store import GddNotionSyncConfigStore
+            from services.gdd_notion_sync_service import GddNotionSyncService
+
+            root = Path(__file__).resolve().parent.parent
+            store = GddNotionSyncConfigStore(
+                settings_path=root / FilePaths.GDD_NOTION_SYNC_CONFIG_FILE,
+                token_path=root / FilePaths.GDD_NOTION_SYNC_TOKEN_FILE,
+            )
+            gdd_dir = self._resolve_gdd_categories_path()
+            manifest = root / FilePaths.GDD_NOTION_SYNC_MANIFEST_FILE
+            status_path = root / FilePaths.GDD_NOTION_SYNC_DIR / "status.json"
+            from services.gdd_context_refresh import reload_context_builder_if_loaded
+
+            self._gdd_notion_sync_service = GddNotionSyncService(
+                config_store=store,
+                manifest_path=manifest,
+                gdd_categories_path=gdd_dir,
+                status_path=status_path,
+                after_gdd_disk_mutation=lambda: reload_context_builder_if_loaded(self),
+            )
+            logger.info("GddNotionSyncService initialisé dans le container.")
+        return self._gdd_notion_sync_service
+
+    def _resolve_gdd_categories_path(self) -> Path:
+        """Répertoire des catégories GDD (helper partagé ``services.gdd_paths``)."""
+        from services.gdd_paths import resolve_gdd_categories_path
+
+        root = Path(__file__).resolve().parent.parent
+        return resolve_gdd_categories_path(root)
+    
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.
         
+        Utilise le pattern Factory pour créer une nouvelle instance d'orchestrateur
+        à chaque appel, injectant toutes les dépendances nécessaires depuis le container.
+        Chaque requête obtient sa propre instance avec un request_id unique pour le logging.
+        
         Args:
-            request_id: ID de la requête pour logging.
+            request_id: ID unique de la requête pour le logging et le suivi.
             
         Returns:
-            Instance de UnityDialogueOrchestrator.
+            Instance de UnityDialogueOrchestrator configurée avec toutes les dépendances.
         """
         from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
         
@@ -217,6 +351,7 @@ class ServiceContainer:
             trait_service=self.get_trait_catalog_service(),
             config_service=self.get_config_service(),
             usage_service=self.get_llm_usage_service(),
+            unity_generation_service=self.get_unity_dialogue_generation_service(),
             request_id=request_id
         )
     
@@ -236,4 +371,10 @@ class ServiceContainer:
         self._preset_service = None
         self._dialogue_generation_service = None
         self._llm_usage_service = None
+        self._unity_generation_service = None
+        self._graph_node_orchestrator = None
+        self._linked_selector_service = None
+        self._notion_import_service = None
+        self._context_rule_service = None
+        self._gdd_notion_sync_service = None
         logger.info("ServiceContainer réinitialisé (reload détecté).")

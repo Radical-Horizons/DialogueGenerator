@@ -1,4 +1,4 @@
-﻿## Epic 3: Gestion du contexte narratif (GDD)
+## Epic 3: Gestion du contexte narratif (GDD)
 
 Les utilisateurs peuvent explorer, sélectionner et utiliser le Game Design Document (500+ pages) pour enrichir la génération de dialogues. Le système permet le browse des entités (personnages, lieux, régions), sélection manuelle/automatique, règles de contexte, budget tokens, et sync Notion (V2.0+).
 
@@ -472,12 +472,12 @@ So that **je peux contrôler la taille du prompt et optimiser les coûts LLM**.
 
 **Given** je suis dans les paramètres de contexte
 **When** j'ouvre "Budget tokens contexte"
-**Then** un champ de saisie s'affiche pour définir le budget max (ex: 4000 tokens)
+**Then** un champ de saisie s'affiche pour définir le budget max (plancher produit **≥ 10 000** tokens ; défaut typique ex. 50 000)
 **And** un indicateur montre le budget actuel utilisé vs budget max
 
-**Given** je définis un budget de 4000 tokens
+**Given** je définis un budget de 50 000 tokens
 **When** je sélectionne du contexte GDD
-**Then** un compteur s'affiche "Tokens contexte : 2500 / 4000"
+**Then** un compteur s'affiche par ex. « Tokens contexte : 25 000 / 50 000 »
 **And** un warning s'affiche si le budget est dépassé "Budget dépassé - réduire la sélection"
 
 **Given** je sélectionne trop de contexte (dépasse budget)
@@ -486,7 +486,7 @@ So that **je peux contrôler la taille du prompt et optimiser les coûts LLM**.
 **And** je peux accepter l'optimisation ou réduire manuellement la sélection
 
 **Given** je modifie le budget tokens
-**When** le budget est réduit (ex: 4000 → 2000)
+**When** le budget est réduit (ex: 50 000 → 12 000)
 **Then** si la sélection actuelle dépasse le nouveau budget, un warning s'affiche
 **And** je dois ajuster la sélection pour respecter le nouveau budget
 

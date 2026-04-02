@@ -10,7 +10,7 @@ import type { Preset } from '../types/preset';
 // Mock le store
 vi.mock('../store/presetStore');
 
-// Mock le theme
+// Mock le theme (complet pour SaveStatusIndicator importé via shared)
 vi.mock('../theme', () => ({
   theme: {
     background: {
@@ -27,15 +27,20 @@ vi.mock('../theme', () => ({
       secondary: '#333',
     },
     button: {
+      default: {
+        background: '#333',
+        color: '#fff',
+      },
       primary: {
         background: '#007bff',
         color: '#fff',
       },
     },
     state: {
-      error: {
-        color: '#dc3545',
-      },
+      error: { color: '#dc3545' },
+      success: { color: '#28a745' },
+      info: { color: '#17a2b8' },
+      warning: { color: '#ffc107' },
     },
   },
 }));
@@ -86,7 +91,7 @@ describe('PresetSelector', () => {
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 
       expect(screen.getByText(/charger preset/i)).toBeInTheDocument();
-      expect(screen.getByText(/sauvegarder preset/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /sauvegarder/i })).toBeInTheDocument();
     });
 
     it('should load presets on mount', () => {
@@ -165,7 +170,7 @@ describe('PresetSelector', () => {
         />
       );
 
-      const saveButton = screen.getByText(/sauvegarder preset/i);
+      const saveButton = screen.getByRole('button', { name: /sauvegarder/i });
       fireEvent.click(saveButton);
 
       await waitFor(() => {
@@ -190,7 +195,7 @@ describe('PresetSelector', () => {
       );
 
       // Ouvrir modal
-      const saveButton = screen.getByText(/sauvegarder preset/i);
+      const saveButton = screen.getByRole('button', { name: /sauvegarder/i });
       fireEvent.click(saveButton);
 
       // Remplir formulaire

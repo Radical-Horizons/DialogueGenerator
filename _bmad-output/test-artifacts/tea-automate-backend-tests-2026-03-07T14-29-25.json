@@ -1,0 +1,14 @@
+{
+  "subagentType": "backend",
+  "testsGenerated": [],
+  "coverageSummary": {
+    "totalTests": 0,
+    "testLevels": [],
+    "fixtureNeeds": []
+  },
+  "status": "complete",
+  "success": true,
+  "subagent": "backend-tests",
+  "knowledge_fragments_used": ["test-levels-framework", "test-priorities-matrix"],
+  "summary": "No backend service gaps in this run; existing coverage sufficient for targeted scope."
+}

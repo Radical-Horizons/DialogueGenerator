@@ -26,6 +26,15 @@ class FilePaths:
     INTERACTIONS_DIR = DATA_DIR / "interactions"
     LLM_USAGE_DIR = DATA_DIR / "llm_usage"
     COST_BUDGETS_FILE = DATA_DIR / "cost_budgets.json"
+    CONTEXT_RULES_FILE = DATA_DIR / "context-rules" / "rules.json"
+    GDD_NOTION_SYNC_DIR = DATA_DIR / "gdd_notion_sync"
+    GDD_NOTION_SYNC_CONFIG_FILE = GDD_NOTION_SYNC_DIR / "settings.json"
+    GDD_NOTION_SYNC_TOKEN_FILE = GDD_NOTION_SYNC_DIR / "notion_token.secret"
+    GDD_NOTION_SYNC_MANIFEST_FILE = DATA_DIR / ".gdd_snapshot" / "manifest.json"
+    GDD_NOTION_FULL_SYNC_CHECKPOINT_FILE = GDD_NOTION_SYNC_DIR / "full_sync_checkpoint.json"
+    GDD_NOTION_FULL_SYNC_CHECKPOINT_MANIFEST_FILE = (
+        GDD_NOTION_SYNC_DIR / "full_sync_checkpoint.manifest.json"
+    )
     LOGS_DIR = DATA_DIR / "logs"
     LLM_CONFIG = "llm_config.json"
 
@@ -62,7 +71,7 @@ class ModelNames:
     MODELS_WITH_STRUCTURED_OUTPUT_ISSUES = [GPT_5_MINI, GPT_5_NANO]
 
 class Defaults:
-    CONTEXT_TOKENS = 1500
+    CONTEXT_TOKENS = 10000  # Plancher produit aligné MIN_CONTEXT_TOKENS (contexte LLM utilisable)
     VARIANTS_COUNT = 2
     TEMPERATURE = 0.7
     MODEL_ID = ModelNames.GPT_5_MINI  # Modèle par défaut
@@ -74,7 +83,7 @@ class Defaults:
     INTERACTION_AUTOSAVE_INTERVAL_MS = 300000 # 5 minutes (nouvelle constante)
     # Limites pour les tokens de contexte (utilisées par l'API et le frontend)
     MAX_CONTEXT_TOKENS = 100000  # Maximum autorisé pour max_context_tokens
-    MIN_CONTEXT_TOKENS = 10000   # Minimum pour le slider frontend
+    MIN_CONTEXT_TOKENS = 10000  # Plancher sérieux contexte LLM + budget FR20 (Pydantic ge=, UI slider min)
     # Valeur par défaut pour max_completion_tokens (quand None)
     DEFAULT_MAX_COMPLETION_TOKENS = 5000  # Valeur par défaut pour la génération de dialogues
 

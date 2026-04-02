@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ContextDetail } from './ContextDetail'
 import type { CharacterResponse, LocationResponse, ItemResponse } from '../../types/api'
 
@@ -10,7 +11,7 @@ describe('ContextDetail', () => {
     expect(screen.getByText(/sélectionnez un élément/i)).toBeInTheDocument()
   })
 
-  it('affiche les détails d\'un personnage', () => {
+  it('affiche les détails d\'un personnage avec sections GDD expand/collapse', () => {
     const character: CharacterResponse = {
       name: 'Test Character',
       data: {
@@ -25,10 +26,11 @@ describe('ContextDetail', () => {
     render(<ContextDetail item={character} />)
 
     expect(screen.getByText('Test Character')).toBeInTheDocument()
-    expect(screen.getAllByText(/portrait/i).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/tags/i).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/traits/i).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/rôle narratif/i).length).toBeGreaterThan(0)
+    expect(screen.getByText('Sections GDD')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /portrait/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /tags/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /traits/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /rôle_narratif/i })).toBeInTheDocument()
   })
 
   it('affiche les détails d\'un lieu', () => {
@@ -44,7 +46,7 @@ describe('ContextDetail', () => {
     render(<ContextDetail item={location} />)
 
     expect(screen.getByText('Test Location')).toBeInTheDocument()
-    expect(screen.getByText(/détails complets/i)).toBeInTheDocument()
+    expect(screen.getByText('Sections GDD')).toBeInTheDocument()
   })
 
   it('affiche les détails d\'un objet', () => {
@@ -60,10 +62,10 @@ describe('ContextDetail', () => {
     render(<ContextDetail item={item} />)
 
     expect(screen.getByText('Test Item')).toBeInTheDocument()
-    expect(screen.getByText(/détails complets/i)).toBeInTheDocument()
+    expect(screen.getByText('Sections GDD')).toBeInTheDocument()
   })
 
-  it('affiche les données imbriquées correctement', () => {
+  it('affiche les données imbriquées en sections expand/collapse', () => {
     const character: CharacterResponse = {
       name: 'Test Character',
       data: {
@@ -79,10 +81,10 @@ describe('ContextDetail', () => {
     render(<ContextDetail item={character} />)
 
     expect(screen.getByText('Test Character')).toBeInTheDocument()
-    expect(screen.getByText(/nested/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /nested/i })).toBeInTheDocument()
   })
 
-  it('affiche les tableaux correctement', () => {
+  it('affiche les tableaux en section expand/collapse', () => {
     const character: CharacterResponse = {
       name: 'Test Character',
       data: {
@@ -94,7 +96,29 @@ describe('ContextDetail', () => {
     render(<ContextDetail item={character} />)
 
     expect(screen.getByText('Test Character')).toBeInTheDocument()
-    expect(screen.getByText(/skills/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /skills/i })).toBeInTheDocument()
+  })
+
+  it('affiche "—" pour une chaîne repr rich_text vide (fiche type Barvas)', async () => {
+    const user = userEvent.setup()
+    const reprString = "{'id': 'Ifqh', 'type': 'rich_text', 'rich_text': []}"
+    const character: CharacterResponse = {
+      name: 'Barvas le Juge-Mendiant',
+      data: {
+        Résumé: reprString,
+      },
+    }
+
+    render(<ContextDetail item={character} />)
+
+    expect(screen.getByText('Barvas le Juge-Mendiant')).toBeInTheDocument()
+    const propButton = screen.getByRole('button', { name: /propriétés/i })
+    expect(propButton).toBeInTheDocument()
+    await user.click(propButton)
+    expect(screen.getByRole('region', { name: 'Propriétés' })).toHaveTextContent('Résumé')
+    expect(screen.getByText((_content, el) => el?.textContent === 'Résumé:')).toBeInTheDocument()
+    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.queryByText(/rich_text/)).not.toBeInTheDocument()
   })
 })
 

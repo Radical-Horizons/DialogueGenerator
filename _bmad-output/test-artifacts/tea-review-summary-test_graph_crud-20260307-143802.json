@@ -1,0 +1,38 @@
+{
+  "file": "tests/api/test_graph_crud.py",
+  "overall_score": 91,
+  "overall_grade": "A",
+  "dimension_scores": { "determinism": 100, "isolation": 95, "maintainability": 70, "performance": 100 },
+  "violations_summary": { "total": 4, "HIGH": 0, "MEDIUM": 2, "LOW": 2 },
+  "all_violations": [
+    {
+      "severity": "MEDIUM",
+      "category": "file-length",
+      "description": "Fichier 486 lignes (>300). Recommandation: scinder par endpoint (load, save, save-and-write, validate, calculate-layout) en modules ou au moins extraire fixtures partagées.",
+      "line": 0,
+      "file": "tests/api/test_graph_crud.py"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "missing-test-ids",
+      "description": "Docstrings mentionnent [P0]/[P1] mais pas de marqueurs pytest @pytest.mark.p0/p1 ni test IDs pour trace.",
+      "line": 0,
+      "file": "tests/api/test_graph_crud.py"
+    },
+    {
+      "severity": "LOW",
+      "category": "dependency-overrides",
+      "description": "TestGraphSaveAndWrite utilise app.dependency_overrides dans une fixture autouse ; cleanup correct (finally pop) mais à documenter pour exécution parallèle.",
+      "line": 222,
+      "file": "tests/api/test_graph_crud.py"
+    },
+    {
+      "severity": "LOW",
+      "category": "assert-in-branch",
+      "description": "Plusieurs tests utilisent assert response.status_code in [200, 400] ou [200, 422] ; acceptable pour flexibilité API, mais préférer un code attendu unique quand possible.",
+      "line": 139,
+      "file": "tests/api/test_graph_crud.py"
+    }
+  ],
+  "strengths": ["GIVEN/WHEN/THEN dans docstrings", "Fixtures sample_unity_json et sample_graph_nodes_edges réutilisables", "Priorités P0/P1 documentées en en-tête de classe", "Fixture tmp_path pour save-and-write isolée"]
+}

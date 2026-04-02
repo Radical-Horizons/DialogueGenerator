@@ -1,0 +1,17 @@
+
+ RUN  v4.0.16 F:/Projets/Notion_Scrapper/DialogueGenerator/frontend
+
+ Ô£ô src/components/context/ContextList.test.tsx (8 tests) 134ms
+ Ô£ô src/components/context/ContextDetail.test.tsx (7 tests) 518ms
+ Ô£ô src/components/context/ContextSuggestionsPanel.test.tsx (9 tests) 1271ms
+ Ô£ô src/components/context/ContextSelector.test.tsx (16 tests) 1323ms
+ Ô£ô src/components/context/SelectedContextSummary.test.tsx (14 tests) 1358ms
+ Ô£ô src/components/context/ContextRulesEditor.test.tsx (9 tests) 2030ms
+     Ô£ô soumission formulaire valide ÔåÆ createRule appel├® avec bonnes valeurs  541ms
+     Ô£ô formulaire invalide (aucun suggestedType) ÔåÆ createRule non appel├®  421ms
+
+ Test Files  6 passed (6)
+      Tests  63 passed (63)
+   Start at  00:09:19
+   Duration  4.02s (transform 305ms, setup 1.89s, import 1.43s, tests 6.63s, environment 7.31s)
+

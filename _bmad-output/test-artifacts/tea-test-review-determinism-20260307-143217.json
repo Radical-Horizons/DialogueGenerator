@@ -1,0 +1,13 @@
+{
+  "dimension": "determinism",
+  "score": 100,
+  "max_score": 100,
+  "grade": "A",
+  "violations": [],
+  "passed_checks": 8,
+  "failed_checks": 0,
+  "total_checks": 8,
+  "violation_summary": { "HIGH": 0, "MEDIUM": 0, "LOW": 0 },
+  "recommendations": [],
+  "summary": "Aucune violation de déterminisme. Pas de random, time.sleep, waitForTimeout ni conditionnels de flux. Le seul 'if response.status_code == 200' sert à des assertions conditionnelles (vérifier le payload), pas au flux du test."
+}

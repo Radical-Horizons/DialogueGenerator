@@ -1,0 +1,62 @@
+[
+  {
+    "at": "2026-03-27T01:15:15.989689+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "L’Atelier de Voknir",
+      "sections": {
+        "_general": "ID : [Auto] · Catégorie : [Exploration/Combat/Boss/UI/Stinger/Ciné/Diégétique]\n\nZone/Scène : [Nom] · Priorité : [P1/P2/P3] · Durée cible : [mm:ss]\n\nIntention (1 phrase) : [Ex. “Calme minéral, tension sous-jacente.”]\n\nSuno – prompt tags (V5)\n\n- BPM [84] · Mesure [4/4] · Tonalité [Amin]\n\n- Palette [piano felt, strings sul tasto, soft brass, granular pads]\n\n- Motif(s) [ex. motif 3 notes descendantes]\n\n- Autres\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Pre-chorus], [chorus], [Bridge], [Interlude], [Break], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : [Male / Female / None (instrumental)]\n\n- Weirdness : [0-100%, défaut 50%] · Contrôle l'expérimentation et l'étrangeté\n\n- Style Influence : [0-100%, défaut 50%] · Force avec laquelle le style est appliqué\n\n- Exclude styles : [styles proches mais non désirables susceptibles de remonter, séparés par virgules] (inutile d’exclure les styles éloignés)\n\n- Audio upload : [URL de référence audio, max 8 min / none]\n\n- Persona : [Persona basée sur une musique / none]\n\n- Inspo : [Playlist de référence pour inspiration / none]\n\nSuno – prompt (EN, à coller tel quel)\n\n[Genre/Style] [opens/begins] at [BPM] BPM in [key]: [instrument principal] [verbe d'action fort] [description dramatique]. [Instruments secondaires] [verbe d'action], [descripteurs d'ambiance]; [moment clé] [verbe d'action fort]. Loopable core [timestamps]. [style tags positifs seulement]\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · [Stems si dispo]\n\nIntégration\n\n- Event [ex. mus/expl_zoneA] · Snapshot/Bus [mix/music] · Parameters [intensity 0–1]\n\n- Transitions [expl → combat crossfade 500 ms]"
+      },
+      "notion_page_id": "2a36e4d2-1b45-8057-b324-c523ffda0a4d"
+    }
+  },
+  {
+    "at": "2026-03-27T20:36:29.884752+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "L’Atelier de Voknir",
+      "sections": {
+        "_general": "ID : [Auto] · Catégorie : [Exploration/Combat/Boss/UI/Stinger/Ciné/Diégétique]\n\nZone/Scène : [Nom] · Priorité : [P1/P2/P3] · Durée cible : [mm:ss]\n\nIntention (1 phrase) : [Ex. “Calme minéral, tension sous-jacente.”]\n\nSuno – prompt tags (V5)\n\n- BPM [84] · Mesure [4/4] · Tonalité [Amin]\n\n- Palette [piano felt, strings sul tasto, soft brass, granular pads]\n\n- Motif(s) [ex. motif 3 notes descendantes]\n\n- Autres\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Pre-chorus], [chorus], [Bridge], [Interlude], [Break], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : [Male / Female / None (instrumental)]\n\n- Weirdness : [0-100%, défaut 50%] · Contrôle l'expérimentation et l'étrangeté\n\n- Style Influence : [0-100%, défaut 50%] · Force avec laquelle le style est appliqué\n\n- Exclude styles : [styles proches mais non désirables susceptibles de remonter, séparés par virgules] (inutile d’exclure les styles éloignés)\n\n- Audio upload : [URL de référence audio, max 8 min / none]\n\n- Persona : [Persona basée sur une musique / none]\n\n- Inspo : [Playlist de référence pour inspiration / none]\n\nSuno – prompt (EN, à coller tel quel)\n\n[Genre/Style] [opens/begins] at [BPM] BPM in [key]: [instrument principal] [verbe d'action fort] [description dramatique]. [Instruments secondaires] [verbe d'action], [descripteurs d'ambiance]; [moment clé] [verbe d'action fort]. Loopable core [timestamps]. [style tags positifs seulement]\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · [Stems si dispo]\n\nIntégration\n\n- Event [ex. mus/expl_zoneA] · Snapshot/Bus [mix/music] · Parameters [intensity 0–1]\n\n- Transitions [expl → combat crossfade 500 ms]"
+      },
+      "notion_page_id": "2a36e4d2-1b45-8057-b324-c523ffda0a4d"
+    }
+  },
+  {
+    "at": "2026-03-28T01:06:36.814395+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "L’Atelier de Voknir",
+      "sections": {
+        "_general": "ID : [Auto] · Catégorie : [Exploration/Combat/Boss/UI/Stinger/Ciné/Diégétique]\n\nZone/Scène : [Nom] · Priorité : [P1/P2/P3] · Durée cible : [mm:ss]\n\nIntention (1 phrase) : [Ex. “Calme minéral, tension sous-jacente.”]\n\nSuno – prompt tags (V5)\n\n- BPM [84] · Mesure [4/4] · Tonalité [Amin]\n\n- Palette [piano felt, strings sul tasto, soft brass, granular pads]\n\n- Motif(s) [ex. motif 3 notes descendantes]\n\n- Autres\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Pre-chorus], [chorus], [Bridge], [Interlude], [Break], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : [Male / Female / None (instrumental)]\n\n- Weirdness : [0-100%, défaut 50%] · Contrôle l'expérimentation et l'étrangeté\n\n- Style Influence : [0-100%, défaut 50%] · Force avec laquelle le style est appliqué\n\n- Exclude styles : [styles proches mais non désirables susceptibles de remonter, séparés par virgules] (inutile d’exclure les styles éloignés)\n\n- Audio upload : [URL de référence audio, max 8 min / none]\n\n- Persona : [Persona basée sur une musique / none]\n\n- Inspo : [Playlist de référence pour inspiration / none]\n\nSuno – prompt (EN, à coller tel quel)\n\n[Genre/Style] [opens/begins] at [BPM] BPM in [key]: [instrument principal] [verbe d'action fort] [description dramatique]. [Instruments secondaires] [verbe d'action], [descripteurs d'ambiance]; [moment clé] [verbe d'action fort]. Loopable core [timestamps]. [style tags positifs seulement]\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · [Stems si dispo]\n\nIntégration\n\n- Event [ex. mus/expl_zoneA] · Snapshot/Bus [mix/music] · Parameters [intensity 0–1]\n\n- Transitions [expl → combat crossfade 500 ms]"
+      },
+      "notion_page_id": "2a36e4d2-1b45-8057-b324-c523ffda0a4d"
+    }
+  },
+  {
+    "at": "2026-03-29T19:43:05.187825+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "L’Atelier de Voknir",
+      "sections": {
+        "_general": "ID : [Auto] · Catégorie : [Exploration/Combat/Boss/UI/Stinger/Ciné/Diégétique]\n\nZone/Scène : [Nom] · Priorité : [P1/P2/P3] · Durée cible : [mm:ss]\n\nIntention (1 phrase) : [Ex. “Calme minéral, tension sous-jacente.”]\n\nSuno – prompt tags (V5)\n\n- BPM [84] · Mesure [4/4] · Tonalité [Amin]\n\n- Palette [piano felt, strings sul tasto, soft brass, granular pads]\n\n- Motif(s) [ex. motif 3 notes descendantes]\n\n- Autres\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Pre-chorus], [chorus], [Bridge], [Interlude], [Break], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : [Male / Female / None (instrumental)]\n\n- Weirdness : [0-100%, défaut 50%] · Contrôle l'expérimentation et l'étrangeté\n\n- Style Influence : [0-100%, défaut 50%] · Force avec laquelle le style est appliqué\n\n- Exclude styles : [styles proches mais non désirables susceptibles de remonter, séparés par virgules] (inutile d’exclure les styles éloignés)\n\n- Audio upload : [URL de référence audio, max 8 min / none]\n\n- Persona : [Persona basée sur une musique / none]\n\n- Inspo : [Playlist de référence pour inspiration / none]\n\nSuno – prompt (EN, à coller tel quel)\n\n[Genre/Style] [opens/begins] at [BPM] BPM in [key]: [instrument principal] [verbe d'action fort] [description dramatique]. [Instruments secondaires] [verbe d'action], [descripteurs d'ambiance]; [moment clé] [verbe d'action fort]. Loopable core [timestamps]. [style tags positifs seulement]\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · [Stems si dispo]\n\nIntégration\n\n- Event [ex. mus/expl_zoneA] · Snapshot/Bus [mix/music] · Parameters [intensity 0–1]\n\n- Transitions [expl → combat crossfade 500 ms]"
+      },
+      "notion_page_id": "2a36e4d2-1b45-8057-b324-c523ffda0a4d"
+    }
+  },
+  {
+    "at": "2026-03-29T23:47:31.673987+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "L’Atelier de Voknir",
+      "sections": {
+        "_general": "ID : [Auto] · Catégorie : [Exploration/Combat/Boss/UI/Stinger/Ciné/Diégétique]\n\nZone/Scène : [Nom] · Priorité : [P1/P2/P3] · Durée cible : [mm:ss]\n\nIntention (1 phrase) : [Ex. “Calme minéral, tension sous-jacente.”]\n\nSuno – prompt tags (V5)\n\n- BPM [84] · Mesure [4/4] · Tonalité [Amin]\n\n- Palette [piano felt, strings sul tasto, soft brass, granular pads]\n\n- Motif(s) [ex. motif 3 notes descendantes]\n\n- Autres\n\nSuno – lyrics (V5)\n\n- Structure [Intro], [Verse], [Pre-chorus], [chorus], [Bridge], [Interlude], [Break], [Outro]\n\nSuno – paramètres (V5)\n\n- Vocal Gender : [Male / Female / None (instrumental)]\n\n- Weirdness : [0-100%, défaut 50%] · Contrôle l'expérimentation et l'étrangeté\n\n- Style Influence : [0-100%, défaut 50%] · Force avec laquelle le style est appliqué\n\n- Exclude styles : [styles proches mais non désirables susceptibles de remonter, séparés par virgules] (inutile d’exclure les styles éloignés)\n\n- Audio upload : [URL de référence audio, max 8 min / none]\n\n- Persona : [Persona basée sur une musique / none]\n\n- Inspo : [Playlist de référence pour inspiration / none]\n\nSuno – prompt (EN, à coller tel quel)\n\n[Genre/Style] [opens/begins] at [BPM] BPM in [key]: [instrument principal] [verbe d'action fort] [description dramatique]. [Instruments secondaires] [verbe d'action], [descripteurs d'ambiance]; [moment clé] [verbe d'action fort]. Loopable core [timestamps]. [style tags positifs seulement]\n\nVariantes requises\n\n- Low/Med/High intensity · Instrumental · No percussion · Short loop [30s] · Stinger [1–2s]\n\nSorties attendues\n\n- WAV master · WAV loop segment · MP3 preview · CUE/JSON loop points · [Stems si dispo]\n\nIntégration\n\n- Event [ex. mus/expl_zoneA] · Snapshot/Bus [mix/music] · Parameters [intensity 0–1]\n\n- Transitions [expl → combat crossfade 500 ms]"
+      },
+      "notion_page_id": "2a36e4d2-1b45-8057-b324-c523ffda0a4d"
+    }
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "id": "794e09e0-8b09-418a-9464-2ef0e2c11f83",
+  "name": "Test Preset E2E",
+  "icon": "🎭",
+  "metadata": {
+    "created": "2026-03-07T23:15:02.703563Z",
+    "modified": "2026-03-07T23:15:02.703563Z"
+  },
+  "configuration": {
+    "characters": [],
+    "locations": [],
+    "region": "",
+    "subLocation": null,
+    "sceneType": "Generic",
+    "instructions": "",
+    "fieldConfigs": {
+      "character": [],
+      "location": [],
+      "item": [],
+      "species": [],
+      "community": []
+    },
+    "contextSelections": {
+      "characters_full": [],
+      "characters_excerpt": [],
+      "locations_full": [],
+      "locations_excerpt": [],
+      "items_full": [],
+      "items_excerpt": [],
+      "species_full": [],
+      "species_excerpt": [],
+      "communities_full": [],
+      "communities_excerpt": [],
+      "dialogues_examples": []
+    },
+    "selectedRegion": null,
+    "selectedSubLocations": []
+  }
+}

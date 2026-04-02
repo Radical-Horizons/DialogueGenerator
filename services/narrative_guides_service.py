@@ -21,7 +21,9 @@ class NarrativeGuidesService:
         Args:
             cache: Instance de NotionCache. Si None, utilise le singleton.
         """
-        self.cache = cache or get_notion_cache()
+        # IMPORTANT: ne pas résoudre le singleton au __init__ pour faciliter les tests.
+        # Certains tests patchent `get_notion_cache` après l'initialisation du container FastAPI.
+        self.cache = cache
         logger.info("NarrativeGuidesService initialisé")
     
     def load_guides(self, force_refresh: bool = False) -> Dict[str, Any]:
@@ -36,9 +38,13 @@ class NarrativeGuidesService:
         if force_refresh:
             logger.info("Rechargement forcé des guides (cache ignoré)")
             return {}
-        
-        dialogue_guide_data = self.cache.get("dialogue_guide")
-        narrative_guide_data = self.cache.get("narrative_guide")
+
+        cache = self.cache
+        if cache is None:
+            cache = get_notion_cache()
+
+        dialogue_guide_data = cache.get("dialogue_guide")
+        narrative_guide_data = cache.get("narrative_guide")
         
         guides = {
             "dialogue_guide": dialogue_guide_data.get("content", "") if dialogue_guide_data else "",

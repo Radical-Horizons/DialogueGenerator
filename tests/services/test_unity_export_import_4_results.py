@@ -115,8 +115,9 @@ def test_export_import_cycle_with_4_test_results():
     
     # WHEN: Export vers Unity JSON
     unity_json = GraphConversionService.graph_to_unity_json(nodes, edges)
-    unity_nodes = json.loads(unity_json)
-    
+    doc = json.loads(unity_json)
+    unity_nodes = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
+
     # THEN: Le JSON Unity doit contenir les 4 champs test*Node dans le choix
     start_node = next((n for n in unity_nodes if n["id"] == "START"), None)
     assert start_node is not None

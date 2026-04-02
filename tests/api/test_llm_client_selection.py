@@ -105,14 +105,16 @@ def test_llm_factory_creates_dummy_when_api_key_missing():
 
 def test_api_endpoint_uses_correct_llm_client(client_with_real_config):
     """Test que l'endpoint API utilise le bon client LLM (pas DummyLLMClient par défaut)."""
-    from factories.llm_factory import LLMClientFactory
     from api.dependencies import get_dialogue_generation_service
+    from api.routers.auth import get_current_user
     from unittest.mock import MagicMock
     
     # Mock correct du dialogue_service avec context_builder
     mock_context_builder = MagicMock()
     mock_context_builder._count_tokens = MagicMock(return_value=100)
     mock_context_builder.build_context = MagicMock(return_value="test context")
+    mock_context_builder.build_context_json = MagicMock(return_value={})
+    mock_context_builder.serialize_context_to_text = MagicMock(return_value="")
     
     from core.prompt.prompt_engine import BuiltPrompt
     
@@ -130,7 +132,16 @@ def test_api_endpoint_uses_correct_llm_client(client_with_real_config):
     mock_dialogue_service.prompt_engine._count_tokens = MagicMock(return_value=100)
     
     app.dependency_overrides[get_dialogue_generation_service] = lambda: mock_dialogue_service
-    
+
+    async def _test_user() -> dict:
+        return {
+            "id": "1",
+            "username": "test",
+            "email": "test@example.com",
+        }
+
+    app.dependency_overrides[get_current_user] = _test_user
+
     try:
         # Faire une requête d'estimation de tokens (plus simple qu'une génération)
         response = client_with_real_config.post(
@@ -144,7 +155,7 @@ def test_api_endpoint_uses_correct_llm_client(client_with_real_config):
                     "communities": []
                 },
                 "user_instructions": "Test",
-                "max_context_tokens": 1000
+                "max_context_tokens": 10000
             }
         )
         
@@ -154,6 +165,8 @@ def test_api_endpoint_uses_correct_llm_client(client_with_real_config):
         # Nettoyer
         if get_dialogue_generation_service in app.dependency_overrides:
             del app.dependency_overrides[get_dialogue_generation_service]
+        if get_current_user in app.dependency_overrides:
+            del app.dependency_overrides[get_current_user]
 
 
 def test_llm_factory_handles_model_without_client_type():

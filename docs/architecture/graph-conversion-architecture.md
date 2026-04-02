@@ -59,9 +59,14 @@ Ce document explique la distinction entre **Source of Truth métier**, **project
 **Définition** : Les **positions** et autres états d'édition (zoom, pan, sélection) sont des données de confort d'édition persistantes, mais **pas** une vérité métier Unity.
 
 **Caractéristiques** :
-- Positions stockées dans localStorage (clé: `node_positions:{filename}`)
-- Priorité de merge : positions localStorage > positions draft > positions backend
-- **Ne doit pas** influencer la sémantique (edges, handles, règles `test*Node`)
+- **SoT des positions** : unique = backend via `GET/PUT /api/v1/documents/{id}/layout` (API documents). Les positions ne sont ni lues ni écrites dans localStorage.
+- **En session** : les positions viennent du store (layout → projection `documentToGraph`). Toute modification (drag) met à jour `layout` puis est persistée via `PUT layout` (autosave).
+- **Chemin legacy** (chargement sans document API, ex. 404) : positions fournies par la réponse de l'API (ex. `loadGraph`), pas de merge avec localStorage.
+- **Ne doit pas** influencer la sémantique (edges, handles, règles `test*Node`).
+
+**React Flow et source de vérité (ADR-007)** : Le canvas utilise React Flow en **mode controlled** : les nodes et edges passés à `<ReactFlow>` viennent **uniquement** du store (graphStore). Le **viewport** (zoom, pan, caméra) reste en état **local** à React Flow (non persisté). Détails : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (ADR-007).
+
+**Export visuel (PNG/SVG)** : en mode controlled (ADR-007), l'export reflète l'état du store.
 
 ## Flux de données
 
@@ -74,7 +79,7 @@ API /load → GraphConversionService.unity_json_to_graph()
     ↓
 GraphModel canonique (nodes/edges + métadonnées)
     ↓
-Frontend : Merge avec positions localStorage
+Frontend : positions depuis layout (API documents) ou depuis réponse loadGraph (legacy)
     ↓
 ReactFlow (nodes/edges avec positions)
 ```
@@ -112,9 +117,11 @@ Les `TestNode` (barre avec 4 handles) sont **uniquement** des artefacts de visua
 - La reconstruction complexe des connexions depuis les edges
 - La validation Unity
 
-**Solution** : Toujours utiliser `saveDialogue()` → API `/save` pour obtenir le JSON canonique avant de sauvegarder.
+**Solution** : Toujours utiliser `saveDialogue()` → API `/save` (ou `/save-and-write`) pour obtenir le JSON canonique avant de sauvegarder.
 
-**Exception acceptable** : Le draft local (auto-save) peut utiliser `exportToUnity()` car c'est un brouillon temporaire, mais l'export final doit passer par l'API.
+**Stratégie save/sync (ADR-006)** : Store = document (une seule source de vérité). Pas de mode draft/save : toute modification est journalisée localement (IndexedDB) et synchronisée vers le serveur en micro-batch 100 ms max avec **seq** monotone. Le serveur applique seq/last_seq et écriture atomique (tmp → fsync → rename). Détails : `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md` (ADR-006).
+
+**Exception acceptable (hors ADR-006)** : `graphStore.exportToUnity()` reste utilisable pour export local (draft) si besoin ; la persistance disque et la cohérence passent par l'API.
 
 ## Décisions architecturales
 
@@ -136,7 +143,7 @@ Les `TestNode` (barre avec 4 handles) sont **uniquement** des artefacts de visua
 
 ### Pourquoi le frontend a aussi unityJsonToGraph() ?
 
-**Contexte** : `GraphView.tsx` (composant read-only) utilise `unityJsonToGraph()` localement.
+**Contexte** : `GraphView.tsx` (composant read-only) utilise `unityJsonToGraph()` localement. **GraphView** n'est pas couverte par ADR-007 (canvas éditeur) ; sa source est le prop `json_content` ; elle peut rester en mode uncontrolled.
 
 **Raison actuelle** : Composant d'affichage simple qui reçoit déjà le JSON Unity et le convertit directement pour la visualisation.
 
@@ -157,8 +164,14 @@ Les `TestNode` (barre avec 4 handles) sont **uniquement** des artefacts de visua
 
 ## Références
 
-- Schéma Unity officiel : `docs/resources/JsonDocUnity/Documentation/dialogue-format.schema.json`
+- Schéma Unity officiel : `docs/resources/dialogue-format.schema.json`
 - Service de conversion backend : `services/graph_conversion_service.py`
 - API Graph : `api/routers/graph.py`
 - Store frontend : `frontend/src/store/graphStore.ts`
 - Documentation Story 0-10 (4 résultats de test) : `_bmad-output/implementation-artifacts/0-10-tests-4-resultats-critiques.md`
+- Stratégie autosave / seq / résilience : ADR-006 dans `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`
+- React Flow mode controlled (nodes/edges depuis le store, viewport local) : ADR-007 dans `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`
+
+---
+
+**Dernière mise à jour** : 2026-01-29 (ADR-007 React Flow controlled ; référence viewport local)

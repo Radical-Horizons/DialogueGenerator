@@ -15,6 +15,7 @@ export const traitRequirementSchema = z.object({
  * Schéma pour un choix de dialogue.
  */
 export const choiceSchema = z.object({
+  choiceId: z.string().optional(), // ADR-008 / v1.1.0 : identité stable pour handles et edges
   text: z.string().min(1, 'Le texte du choix est requis'),
   targetNode: z.string().optional(),
   condition: z.string().optional(),
@@ -31,14 +32,31 @@ export const choiceSchema = z.object({
 })
 
 /**
+ * Schéma pour une entrée d'historique de régénération (Story 1.10).
+ */
+export const regenerationEntrySchema = z.object({
+  timestamp: z.string(),
+  instructions: z.string(),
+  generationId: z.string(),
+  cost: z.number().optional(),
+  provider: z.string().optional(),
+})
+
+/**
  * Schéma pour les données d'un nœud de dialogue.
  */
 export const dialogueNodeDataSchema = z.object({
   id: z.string(),
+  title: z.string().optional(),
   speaker: z.string().optional(),
   line: z.string().optional(),
   choices: z.array(choiceSchema).optional(),
   nextNode: z.string().optional(),
+  lastGenerationInstructions: z.string().optional(),
+  regenerationHistory: z.array(regenerationEntrySchema).optional(),
+  contextGddHash: z.string().optional(),
+  contextGddContentFingerprint: z.string().optional(),
+  gddContextSelectionsSnapshot: z.record(z.string(), z.unknown()).optional(),
 })
 
 /**
@@ -60,6 +78,11 @@ export const testNodeDataSchema = z.object({
 export const endNodeDataSchema = z.object({
   id: z.string(),
 })
+
+/**
+ * Type inféré pour une entrée d'historique de régénération.
+ */
+export type RegenerationEntry = z.infer<typeof regenerationEntrySchema>
 
 /**
  * Type inféré pour un choix.

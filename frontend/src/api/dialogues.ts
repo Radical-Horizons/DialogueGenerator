@@ -3,6 +3,7 @@
  */
 import apiClient from './client'
 import { API_TIMEOUTS } from '../constants'
+import { buildCostEstimateHeaders, type CostEstimateHeadersInput } from './costEstimateHeaders'
 import type {
   GenerateUnityDialogueRequest,
   GenerateUnityDialogueResponse,
@@ -11,7 +12,8 @@ import type {
   EstimateTokensRequest,
   EstimateTokensResponse,
   PreviewPromptRequest,
-  PreviewPromptResponse
+  PreviewPromptResponse,
+  GenerationJobStatus,
 } from '../types/api'
 
 // NOTE: generateDialogueVariants et generateInteractionVariants ont été supprimés. Utiliser generateUnityDialogue à la place.
@@ -22,13 +24,16 @@ import type {
  * Utilise un timeout étendu (5 minutes) pour permettre aux générations LLM longues de se terminer.
  */
 export async function generateUnityDialogue(
-  request: GenerateUnityDialogueRequest
+  request: GenerateUnityDialogueRequest,
+  costEstimate?: CostEstimateHeadersInput
 ): Promise<GenerateUnityDialogueResponse> {
+  const hdr = buildCostEstimateHeaders(costEstimate)
   const response = await apiClient.post<GenerateUnityDialogueResponse>(
     '/api/v1/dialogues/generate/unity-dialogue',
     request,
     {
       timeout: API_TIMEOUTS.LLM_GENERATION, // 5 minutes pour les générations LLM
+      ...(hdr ? { headers: hdr } : {}),
     }
   )
   return response.data
@@ -40,11 +45,14 @@ export async function generateUnityDialogue(
  * Retourne un job_id et une stream_url pour EventSource.
  */
 export async function createGenerationJob(
-  request: GenerateUnityDialogueRequest
+  request: GenerateUnityDialogueRequest,
+  costEstimate?: CostEstimateHeadersInput
 ): Promise<{ job_id: string; stream_url: string; status: string }> {
+  const hdr = buildCostEstimateHeaders(costEstimate)
   const response = await apiClient.post<{ job_id: string; stream_url: string; status: string }>(
     '/api/v1/dialogues/generate/jobs',
-    request
+    request,
+    hdr ? { headers: hdr } : {}
   )
   return response.data
 }
@@ -52,9 +60,21 @@ export async function createGenerationJob(
 /**
  * Annule un job de génération en cours (Story 0.2).
  */
-export async function cancelGenerationJob(job_id: string): Promise<{ success: boolean; message: string }> {
-  const response = await apiClient.post<{ success: boolean; message: string }>(
+export async function cancelGenerationJob(
+  job_id: string
+): Promise<{ success: boolean; message: string; job_id: string }> {
+  const response = await apiClient.post<{ success: boolean; message: string; job_id: string }>(
     `/api/v1/dialogues/generate/jobs/${job_id}/cancel`
+  )
+  return response.data
+}
+
+/**
+ * Statut d'un job de génération (polling ; le flux principal reste SSE).
+ */
+export async function getGenerationJobStatus(job_id: string): Promise<GenerationJobStatus> {
+  const response = await apiClient.get<GenerationJobStatus>(
+    `/api/v1/dialogues/generate/jobs/${job_id}`
   )
   return response.data
 }

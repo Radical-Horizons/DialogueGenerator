@@ -39,10 +39,25 @@
       "input_price_per_1M": 0.50,
       "output_price_per_1M": 1.50,
       "description": "GPT-3.5 Turbo - Modèle économique"
+    },
+    "mistral-small-latest": {
+      "input_price_per_1M": 0.10,
+      "output_price_per_1M": 0.30,
+      "description": "Mistral Small - Modèle économique et rapide"
+    },
+    "mistral-medium": {
+      "input_price_per_1M": 2.70,
+      "output_price_per_1M": 8.10,
+      "description": "Mistral Medium - Bon équilibre performance/coût"
+    },
+    "mistral-large-latest": {
+      "input_price_per_1M": 3.00,
+      "output_price_per_1M": 9.00,
+      "description": "Mistral Large - Modèle haute performance"
     }
   },
-  "last_updated": "2025-01-15",
-  "note": "Les prix sont en USD par million de tokens. Les prix peuvent varier selon les mises à jour d'OpenAI. Les prix pour GPT-5.2 sont estimés et doivent être vérifiés avec la documentation officielle OpenAI."
+  "last_updated": "2026-03-06",
+  "note": "Les prix sont en USD par million de tokens. Taux de conversion USD→EUR : 0.92 (constante dans graph.py, à mettre à jour périodiquement)."
 }
 
 

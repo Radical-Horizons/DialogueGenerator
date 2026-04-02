@@ -3,7 +3,6 @@
  */
 import { useMemo } from 'react'
 import { hasJsonContent } from '../utils/jsonPrettifier'
-import { estimateTokens } from '../utils/tokenEstimation'
 import type { PromptStructure, ItemSection, ContextCategory } from '../types/prompt'
 
 export interface PromptSection {
@@ -47,6 +46,15 @@ const CATEGORY_TO_ITEM_NAME: Record<string, string> = {
   'QUESTS': 'QUÊTE',
   'QUÊTES': 'QUÊTE',
   'QUETES': 'QUÊTE',
+}
+
+/**
+ * Estimation rapide des tokens pour le parsing (évite les appels répétés à estimateTokens).
+ * ~4 caractères par token, utilisé uniquement dans parsePromptSections / parseSubSections.
+ */
+function estimateTokensFast(text: string): number {
+  if (!text || text.length === 0) return 0
+  return Math.max(1, Math.ceil(text.length / 4))
 }
 
 /**
@@ -169,7 +177,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
             title: `${marker.label} ${marker.number}`,
             content: itemContent,
             hasJson: hasJsonContent(itemContent),
-            tokenCount: estimateTokens(itemContent),
+            tokenCount: estimateTokensFast(itemContent),
           })
         }
 
@@ -224,7 +232,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
                 title: `${itemName} ${idx + 1}`,
                 content: itemContent,
                 hasJson: hasJsonContent(itemContent),
-                tokenCount: estimateTokens(itemContent),
+                tokenCount: estimateTokensFast(itemContent),
               })
             }
           }
@@ -234,7 +242,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
             title: `${itemName} 1`,
             content: categoryContent,
             hasJson: hasJsonContent(categoryContent),
-            tokenCount: estimateTokens(categoryContent),
+            tokenCount: estimateTokensFast(categoryContent),
           })
         }
 
@@ -293,7 +301,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
           const level3Content = categoryContent.substring(level3ContentStart, level3End).trim()
           
           if (level3Content) {
-            const level3TokenCount = estimateTokens(level3Content)
+            const level3TokenCount = estimateTokensFast(level3Content)
             currentItemSections.push({
               title: level3Match.title,
               content: level3Content,
@@ -345,7 +353,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
           
           // Calculer le token count récursivement
           const childrenTokenCount = grandChildren.reduce((sum, child) => sum + (child.tokenCount || 0), 0)
-          const contentTokenCount = estimateTokens(finalContent)
+          const contentTokenCount = estimateTokensFast(finalContent)
           const totalTokenCount = childrenTokenCount + contentTokenCount
           
           children.push({
@@ -570,7 +578,7 @@ export function parsePromptSections(prompt: string): PromptSection[] {
       title: 'System Prompt',
       content: trimmedPrompt,
       hasJson: hasJsonContent(trimmedPrompt),
-      tokenCount: estimateTokens(trimmedPrompt),
+      tokenCount: estimateTokensFast(trimmedPrompt),
     }]
   }
   
@@ -582,7 +590,7 @@ export function parsePromptSections(prompt: string): PromptSection[] {
         title: 'System Prompt',
         content: systemPromptContent,
         hasJson: hasJsonContent(systemPromptContent),
-        tokenCount: estimateTokens(systemPromptContent),
+        tokenCount: estimateTokensFast(systemPromptContent),
       })
     }
   }
@@ -609,7 +617,7 @@ export function parsePromptSections(prompt: string): PromptSection[] {
         
         // Calculer le token count récursivement
         const childrenTokenCount = children.reduce((sum, child) => sum + (child.tokenCount || 0), 0)
-        const contentTokenCount = estimateTokens(remainingContent)
+        const contentTokenCount = estimateTokensFast(remainingContent)
         const totalTokenCount = childrenTokenCount + contentTokenCount
         
         // Si on a des enfants mais pas de remainingContent, c'est que tout le contenu a été parsé en sections

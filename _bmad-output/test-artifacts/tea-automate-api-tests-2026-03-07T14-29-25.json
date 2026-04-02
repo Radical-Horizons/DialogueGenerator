@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "subagent": "api-tests",
+  "tests": [
+    {
+      "file": "tests/api/test_health_auth_gaps.py",
+      "content": "\"\"\"Tests API pour les routes non couvertes (gaps brownfield): healthcheck, health/detailed, auth/refresh, auth/logout.\"\"\"\nimport pytest\nfrom fastapi.testclient import TestClient\n\n\n@pytest.fixture\ndef client():\n    from api.main import app\n    return TestClient(app)\n\n\nclass TestHealthGaps:\n    \"\"\"[P0] Health endpoints non couverts par test_health.py.\"\"\"\n\n    def test_get_healthcheck_alias_returns_200(self, client: TestClient):\n        \"\"\"GET /api/v1/healthcheck (alias monitoring) retourne 200 et status healthy.\"\"\"\n        response = client.get(\"/api/v1/healthcheck\")\n        assert response.status_code == 200\n        data = response.json()\n        assert data.get(\"status\") == \"healthy\"\n        assert \"service\" in data\n\n    def test_get_health_detailed_returns_200(self, client: TestClient):\n        \"\"\"GET /health/detailed retourne 200 avec détails des dépendances.\"\"\"\n        response = client.get(\"/health/detailed\")\n        assert response.status_code == 200\n        data = response.json()\n        assert \"status\" in data\n        assert \"timestamp\" in data\n\n\nclass TestAuthGaps:\n    \"\"\"[P0] Auth endpoints non couverts par test_auth.py: refresh, logout.\"\"\"\n\n    def test_refresh_without_token_returns_401(self, client: TestClient):\n        \"\"\"POST /api/v1/auth/refresh sans refresh token retourne 401.\"\"\"\n        response = client.post(\"/api/v1/auth/refresh\", json={})\n        assert response.status_code == 401\n\n    def test_refresh_with_valid_cookie_returns_200(self, client: TestClient):\n        \"\"\"POST /api/v1/auth/refresh avec cookie refresh_token (après login) retourne 200.\"\"\"\n        login_resp = client.post(\n            \"/api/v1/auth/login\",\n            json={\"username\": \"admin\", \"password\": \"admin123\"}\n        )\n        assert login_resp.status_code == 200\n        # refresh_token est dans le cookie\n        response = client.post(\"/api/v1/auth/refresh\", json={})\n        assert response.status_code == 200\n        data = response.json()\n        assert \"access_token\" in data\n        assert data[\"token_type\"] == \"bearer\"\n\n    def test_logout_authenticated_returns_204(self, client: TestClient):\n        \"\"\"POST /api/v1/auth/logout avec token valide retourne 204.\"\"\"\n        login_resp = client.post(\n            \"/api/v1/auth/login\",\n            json={\"username\": \"admin\", \"password\": \"admin123\"}\n        )\n        assert login_resp.status_code == 200\n        token = login_resp.json()[\"access_token\"]\n        response = client.post(\n            \"/api/v1/auth/logout\",\n            headers={\"Authorization\": f\"Bearer {token}\"}\n        )\n        assert response.status_code == 204\n",
+      "description": "API tests pour healthcheck, health/detailed, auth/refresh, auth/logout (gaps)",
+      "priority_coverage": {
+        "P0": 5,
+        "P1": 0,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": ["client"],
+  "knowledge_fragments_used": ["test-levels-framework", "test-priorities-matrix"],
+  "test_count": 5,
+  "summary": "Generated 5 API tests for brownfield gaps: healthcheck, health/detailed, auth/refresh (2), auth/logout"
+}

@@ -10,10 +10,26 @@ import { useContextStore } from '../../store/contextStore'
 vi.mock('../../store/generationStore')
 vi.mock('../../store/generationActionsStore')
 vi.mock('../../store/contextStore')
+vi.mock('../../store/contextConfigStore', () => ({
+  useContextConfigStore: vi.fn(() => ({
+    loadDefaultConfig: vi.fn().mockResolvedValue(undefined),
+  })),
+}))
+vi.mock('../../store/graphStore', () => ({
+  useGraphStore: vi.fn(() => ({
+    selectedNodeId: null,
+    nodes: [],
+    isGenerating: false,
+  })),
+}))
 
 // Mock des composants complexes
 vi.mock('../generation/GenerationPanel', () => ({
   GenerationPanel: () => <div data-testid="generation-panel">Generation Panel</div>,
+}))
+
+vi.mock('../graph/GraphEditor', () => ({
+  GraphEditor: () => <div data-testid="graph-editor">Graph Editor</div>,
 }))
 
 vi.mock('../context/ContextSelector', () => ({
@@ -75,17 +91,19 @@ describe('Dashboard', () => {
 
     mockUseGenerationActionsStore.mockReturnValue({
       actions: {
-        handleGenerate: undefined,
-        handlePreview: undefined,
-        handleExportUnity: undefined,
-        handleReset: undefined,
+        handleGenerate: null,
+        handlePreview: null,
+        handleExportUnity: null,
+        handleReset: null,
         isLoading: false,
         isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
       },
     } as ReturnType<typeof useGenerationActionsStore>)
   })
 
-  it('affiche les trois panneaux', () => {
+  it('affiche les trois panneaux', async () => {
     render(
       <BrowserRouter>
         <Dashboard />
@@ -93,13 +111,14 @@ describe('Dashboard', () => {
     )
 
     // Le composant ResizablePanels devrait être présent
-    // On vérifie indirectement en cherchant les composants enfants
     expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     expect(screen.getByTestId('generation-panel')).toBeInTheDocument()
-    // Les onglets devraient être présents
-    expect(screen.getByText(/^prompt$/i)).toBeInTheDocument()
-    expect(screen.getByText(/dialogue généré/i)).toBeInTheDocument()
-    expect(screen.getByText(/^détails$/i)).toBeInTheDocument()
+    // Les onglets du panneau droit (Prompt, Dialogue généré, Détails)
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
+    })
   })
 
   it('affiche le panneau de sélection de contexte à gauche', () => {
@@ -124,16 +143,18 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('generation-panel')).toBeInTheDocument()
   })
 
-  it('affiche les onglets dans le panneau de droite', () => {
+  it('affiche les onglets dans le panneau de droite', async () => {
     render(
       <BrowserRouter>
         <Dashboard />
       </BrowserRouter>
     )
 
-    expect(screen.getByText(/^prompt$/i)).toBeInTheDocument()
-    expect(screen.getByText(/dialogue généré/i)).toBeInTheDocument()
-    expect(screen.getByText(/^détails$/i)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
+    })
   })
 
   it('affiche le message par défaut dans l\'onglet Détails', async () => {
@@ -144,11 +165,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    // Cliquer sur l'onglet Détails pour l'activer
-    const detailsTab = screen.getByText(/détails/i)
+    const detailsTab = await screen.findByRole('button', { name: /détails/i })
     await user.click(detailsTab)
 
-    // Maintenant le message devrait être visible
     await waitFor(() => {
       expect(screen.getByText(/sélectionnez un élément de contexte pour voir ses détails/i)).toBeInTheDocument()
     })
@@ -162,14 +181,9 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
-    await waitFor(() => {
-      expect(screen.getByText(/détails/i)).toBeInTheDocument()
-    })
-
-    const detailsTab = screen.getByText(/détails/i)
+    const detailsTab = await screen.findByRole('button', { name: /détails/i })
     await user.click(detailsTab)
 
-    // L'onglet Détails devrait être actif
     expect(detailsTab).toBeInTheDocument()
   })
 
@@ -182,6 +196,8 @@ describe('Dashboard', () => {
         handleReset: vi.fn(),
         isLoading: false,
         isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
       },
     } as ReturnType<typeof useGenerationActionsStore>)
 
@@ -191,14 +207,13 @@ describe('Dashboard', () => {
       </BrowserRouter>
     )
 
+    // Le Dashboard affiche le bouton Générer dans le panneau droit (pas Exporter/Reset qui sont dans le Header)
     await waitFor(() => {
-      expect(screen.getByText(/exporter/i)).toBeInTheDocument()
-      expect(screen.getByText(/reset/i)).toBeInTheDocument()
-      expect(screen.getByText(/générer/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /générer/i })).toBeInTheDocument()
     })
   })
 
-  it('affiche l\'indicateur de brouillon non sauvegardé', async () => {
+  it('affiche le statut brouillon discret quand le brouillon n’est pas synchronisé', async () => {
     mockUseGenerationActionsStore.mockReturnValue({
       actions: {
         handleGenerate: vi.fn(),
@@ -207,6 +222,8 @@ describe('Dashboard', () => {
         handleReset: vi.fn(),
         isLoading: false,
         isDirty: true,
+        saveStatus: 'unsaved',
+        draftLastSavedAt: null,
       },
     } as ReturnType<typeof useGenerationActionsStore>)
 
@@ -217,7 +234,7 @@ describe('Dashboard', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/brouillon non sauvegardé/i)).toBeInTheDocument()
+      expect(screen.getByText(/modifications non enregistrées/i)).toBeInTheDocument()
     })
   })
 

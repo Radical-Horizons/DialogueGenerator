@@ -4,7 +4,7 @@
  * Affiche le texte généré en temps réel, la progression par étapes,
  * et permet l'interruption ou la réduction de la modal.
  */
-import { Fragment, type ReactNode, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { theme } from '../../theme'
 
 /**
@@ -159,35 +159,19 @@ function formatStreamingContent(rawContent: string): {
         // Chercher toutes les occurrences de "text" dans le contexte des choix
         // (chaque choix a un champ "text")
         let searchIndex = 0
-        let hasMoreChoices = true
-        while (hasMoreChoices) {
+        for (;;) {
           const textValue = extractPartialStringValue(choicesContext.substring(searchIndex), 'text')
-          if (!textValue) {
-            hasMoreChoices = false
-            continue
-          }
-          
-          // Trouver la position de ce "text" pour chercher "test" après
+          if (!textValue) break
           const textFieldPos = choicesContext.indexOf(`"text"`, searchIndex)
-          if (textFieldPos === -1) {
-            hasMoreChoices = false
-            continue
-          }
-          
-          // Chercher "test" après ce "text" (dans le même objet choix)
+          if (textFieldPos === -1) break
           const afterText = choicesContext.substring(textFieldPos)
           const testValue = extractPartialStringValue(afterText, 'test')
-          
           choices.push({
             text: textValue,
             test: testValue || undefined,
           })
-          
-          // Continuer la recherche après ce choix
-          searchIndex = textFieldPos + `"text"`.length + textValue.length + 10 // Approximatif
-          if (searchIndex >= choicesContext.length) {
-            hasMoreChoices = false
-          }
+          searchIndex = textFieldPos + `"text"`.length + textValue.length + 10
+          if (searchIndex >= choicesContext.length) break
         }
       }
     }
@@ -209,73 +193,48 @@ function formatStreamingContent(rawContent: string): {
 }
 
 /**
- * Normalise le texte streamé avant rendu.
+ * Interprète le markdown basique et les séquences d'échappement.
  */
-function normalizeStreamingText(text: string): string {
+function interpretMarkdown(text: string): string {
   if (!text) return ''
+  
+  // Remplacer \n par de vrais sauts de ligne
   return text.replace(/\\n/g, '\n')
 }
 
 /**
- * Rend un sous-ensemble volontairement limité du markdown sans injecter de HTML.
+ * Échappe les caractères HTML dangereux avant un rendu via innerHTML.
  */
-function renderInlineMarkdown(text: string): ReactNode[] {
-  const nodes: ReactNode[] = []
-  const pattern = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g
-  let lastIndex = 0
-  let match: RegExpExecArray | null = pattern.exec(text)
-
-  while (match) {
-    if (match.index > lastIndex) {
-      nodes.push(text.slice(lastIndex, match.index))
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;'
+      case '<':
+        return '&lt;'
+      case '>':
+        return '&gt;'
+      case '"':
+        return '&quot;'
+      case '\'':
+        return '&#39;'
+      default:
+        return char
     }
-
-    const token = match[0]
-    if (token.startsWith('**') && token.endsWith('**')) {
-      nodes.push(
-        <strong key={`strong-${match.index}`}>
-          {token.slice(2, -2)}
-        </strong>
-      )
-    } else {
-      nodes.push(
-        <em key={`em-${match.index}`}>
-          {token.slice(1, -1)}
-        </em>
-      )
-    }
-
-    lastIndex = match.index + token.length
-    match = pattern.exec(text)
-  }
-
-  if (lastIndex < text.length) {
-    nodes.push(text.slice(lastIndex))
-  }
-
-  return nodes
+  })
 }
 
 /**
- * Rend le markdown compatible streaming sous forme de noeuds React sûrs.
+ * Convertit la ligne streamée en HTML sûr (markdown basique uniquement).
  */
-function renderMarkdownText(text: string): ReactNode[] {
-  const normalizedText = normalizeStreamingText(text)
-  const lines = normalizedText.split('\n')
+function renderStreamingLineHtml(text: string): string {
+  const escaped = escapeHtml(interpretMarkdown(text))
 
-  return lines.flatMap((line, lineIndex) => {
-    const lineNodes = (
-      <Fragment key={`line-${lineIndex}`}>
-        {renderInlineMarkdown(line)}
-      </Fragment>
-    )
-
-    if (lineIndex === lines.length - 1) {
-      return [lineNodes]
-    }
-
-    return [lineNodes, <br key={`line-break-${lineIndex}`} />]
-  })
+  return escaped
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/_([^_]+)_/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>')
 }
 
 export interface GenerationProgressModalProps {
@@ -613,14 +572,16 @@ export function GenerationProgressModal({
                       )}
                       {formattedContent.line && (
                         <div
+                          data-testid="streaming-line"
                           style={{
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word',
                             color: theme.text.primary,
                           }}
-                        >
-                          {renderMarkdownText(formattedContent.line)}
-                        </div>
+                          dangerouslySetInnerHTML={{
+                            __html: renderStreamingLineHtml(formattedContent.line),
+                          }}
+                        />
                       )}
                     </div>
                   )}

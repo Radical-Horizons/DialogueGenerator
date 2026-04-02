@@ -55,7 +55,7 @@ def sample_request_data():
     return GenerateUnityDialogueRequest(
         user_instructions="Test dialogue",
         context_selections=context_selection,
-        llm_model_identifier="gpt-4o"
+        llm_model_identifier="gpt-5-mini"
     )
 
 
@@ -66,7 +66,7 @@ async def test_orchestrator_generate_with_events_sequence(orchestrator, sample_r
     # Mock context_builder
     mock_context_builder = Mock()
     mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder._context_serializer.serialize_to_text.return_value = "Context summary"
+    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine
@@ -84,7 +84,7 @@ async def test_orchestrator_generate_with_events_sequence(orchestrator, sample_r
     # Mock config service
     mock_services['config_service'].get_llm_config.return_value = {}
     mock_services['config_service'].get_available_llm_models.return_value = [
-        {"model_identifier": "gpt-4o"}
+        {"model_identifier": "gpt-5-mini"}
     ]
     
     # Mock LLM client factory
@@ -175,7 +175,7 @@ async def test_orchestrator_cancellation(orchestrator, sample_request_data, mock
     # Mock context_builder
     mock_context_builder = Mock()
     mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder._context_serializer.serialize_to_text.return_value = "Context summary"
+    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine
@@ -193,59 +193,29 @@ async def test_orchestrator_cancellation(orchestrator, sample_request_data, mock
     # Mock config service
     mock_services['config_service'].get_llm_config.return_value = {}
     mock_services['config_service'].get_available_llm_models.return_value = [
-        {"model_identifier": "gpt-4o"}
+        {"model_identifier": "gpt-5-mini"}
     ]
-    
-    # Mock UnityDialogueGenerationService pour retourner un dialogue avec texte à streamer
-    from unittest.mock import AsyncMock
-    mock_unity_service = AsyncMock()
-    mock_node = Mock()
-    mock_node.speaker = "Test Speaker"
-    mock_node.line = "Test line"
-    mock_node.choices = []
-    mock_response = Mock()
-    mock_response.node = mock_node
-    mock_response.title = "Test Dialogue"
-    mock_unity_service.generate_dialogue_node.return_value = mock_response
-    
-    # Remplacer temporairement le service Unity
-    import services.unity_dialogue_generation_service
-    original_service = services.unity_dialogue_generation_service.UnityDialogueGenerationService
-    services.unity_dialogue_generation_service.UnityDialogueGenerationService = lambda: mock_unity_service
-    
-    try:
-        # Simuler annulation pendant streaming (après quelques chunks)
-        cancelled = False
-        chunk_count = 0
-        
-        def check_cancelled():
-            return cancelled
-        
-        events = []
-        async for event in orchestrator.generate_with_events(sample_request_data, check_cancelled):
-            events.append(event)
-            # Annuler après quelques chunks pour tester l'arrêt immédiat
-            if event.type == 'chunk':
-                chunk_count += 1
-                if chunk_count == 3:  # Annuler après 3 chunks
-                    cancelled = True
-        
-        # Vérifier que erreur annulation est yieldée
-        error_events = [e for e in events if e.type == 'error']
-        assert len(error_events) > 0
-        assert 'annulée' in error_events[0].data['message'].lower() or 'cancelled' in error_events[0].data['message'].lower()
-        
-        # Vérifier que le streaming s'arrête immédiatement (pas de chunks après annulation)
-        error_index = next(i for i, e in enumerate(events) if e.type == 'error')
-        chunks_after_cancellation = [e for i, e in enumerate(events) if i > error_index and e.type == 'chunk']
-        assert len(chunks_after_cancellation) == 0, "Le streaming doit s'arrêter immédiatement après annulation"
-        
-        # Vérifier qu'aucun événement 'complete' n'est envoyé si annulé
-        complete_events = [e for e in events if e.type == 'complete']
-        assert len(complete_events) == 0, "Aucun dialogue partiel ne doit être sauvegardé si annulé"
-    finally:
-        # Restaurer le service original
-        services.unity_dialogue_generation_service.UnityDialogueGenerationService = original_service
+
+    # Simuler annulation juste après l'étape "Generating".
+    # Le générateur vérifie `check_cancelled()` immédiatement après avoir yieldé l'événement step,
+    # donc on annule côté test après réception du step.
+    cancelled = False
+
+    def check_cancelled():
+        return cancelled
+
+    events = []
+    async for event in orchestrator.generate_with_events(sample_request_data, check_cancelled):
+        events.append(event)
+        if event.type == 'step' and event.data.get('step') == 'Generating':
+            cancelled = True
+
+    error_events = [e for e in events if e.type == 'error']
+    assert len(error_events) > 0
+    assert error_events[0].data.get('code') == 'cancelled'
+
+    complete_events = [e for e in events if e.type == 'complete']
+    assert len(complete_events) == 0, "Aucun résultat ne doit être envoyé si annulé"
 
 
 @pytest.mark.asyncio
@@ -255,7 +225,7 @@ async def test_orchestrator_generate_rest_usage(orchestrator, sample_request_dat
     # Mock context_builder
     mock_context_builder = Mock()
     mock_context_builder.build_context_json.return_value = {"test": "context"}
-    mock_context_builder._context_serializer.serialize_to_text.return_value = "Context summary"
+    mock_context_builder.serialize_context_to_text = Mock(return_value="Context summary")
     orchestrator.dialogue_service.context_builder = mock_context_builder
     
     # Mock prompt_engine
@@ -273,7 +243,7 @@ async def test_orchestrator_generate_rest_usage(orchestrator, sample_request_dat
     # Mock config service
     mock_services['config_service'].get_llm_config.return_value = {}
     mock_services['config_service'].get_available_llm_models.return_value = [
-        {"model_identifier": "gpt-4o"}
+        {"model_identifier": "gpt-5-mini"}
     ]
     
     # Mock LLM client factory
@@ -317,7 +287,7 @@ async def test_orchestrator_generate_rest_usage(orchestrator, sample_request_dat
 
 @pytest.mark.asyncio
 async def test_orchestrator_validation_error(orchestrator, mock_services):
-    """Test que ValidationException est re-raise correctement."""
+    """Test que les validators Pydantic rejettent une requête Unity invalide."""
     
     # Créer une requête sans personnages (devrait lever ValidationException)
     context_selection = ContextSelection(
@@ -335,13 +305,12 @@ async def test_orchestrator_validation_error(orchestrator, mock_services):
         scene_location=None
     )
     
-    request_data = GenerateUnityDialogueRequest(
-        user_instructions="Test",
-        context_selections=context_selection,
-        llm_model_identifier="gpt-4o"
-    )
-    
-    # Vérifier que ValidationException est levée
-    with pytest.raises(ValidationException):
-        async for _ in orchestrator.generate_with_events(request_data, lambda: False):
-            pass
+    from pydantic import ValidationError
+
+    # Les règles métier (au moins un personnage) sont validées dès la construction du modèle.
+    with pytest.raises(ValidationError):
+        GenerateUnityDialogueRequest(
+            user_instructions="Test",
+            context_selections=context_selection,
+            llm_model_identifier="gpt-5-mini"
+        )

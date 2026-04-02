@@ -187,7 +187,11 @@ Le service `UnityJsonRenderer` valide que toutes les références pointent vers 
 
 ## Références
 
-- **Schéma Unity officiel** : `docs/resources/JsonDocUnity/Documentation/dialogue-format.schema.json` (version 1.0.0)
+- **Schéma Unity officiel** : `docs/resources/dialogue-format.schema.json` (version 1.0.0)
 - **Service de validation** : `services/json_renderer/unity_json_renderer.py`
 - **Service de conversion** : `services/graph_conversion_service.py`
 - **Modèles Pydantic** : `models/dialogue_structure/unity_dialogue_node.py`
+
+---
+
+**Dernière mise à jour** : 2026-01-25 (correction chemin schéma JSON Unity)

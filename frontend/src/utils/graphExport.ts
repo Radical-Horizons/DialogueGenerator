@@ -7,7 +7,7 @@
  * Utilise html-to-image pour capturer le canvas ReactFlow.
  */
 export async function exportGraphToPNG(
-  reactFlowInstance: any,
+  _reactFlowInstance: unknown,
   filename: string = 'graph',
   quality: number = 1.0
 ): Promise<void> {
@@ -25,7 +25,7 @@ export async function exportGraphToPNG(
     const options = {
       quality,
       pixelRatio: 2, // Pour une meilleure qualité
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#1a1a1a',
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#121214',
       filter: (node: HTMLElement) => {
         // Exclure les contrôles et la minimap
         return !node.classList.contains('react-flow__controls') &&
@@ -51,7 +51,7 @@ export async function exportGraphToPNG(
  * Exporte le graphe visible en SVG.
  */
 export async function exportGraphToSVG(
-  reactFlowInstance: any,
+  _reactFlowInstance: unknown,
   filename: string = 'graph'
 ): Promise<void> {
   try {
@@ -66,7 +66,7 @@ export async function exportGraphToSVG(
     
     // Options pour l'export SVG
     const options = {
-      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#1a1a1a',
+      backgroundColor: getComputedStyle(reactFlowElement).backgroundColor || '#121214',
       filter: (node: HTMLElement) => {
         // Exclure les contrôles et la minimap
         return !node.classList.contains('react-flow__controls') &&
@@ -93,25 +93,30 @@ export async function exportGraphToSVG(
  * Ajuste le viewport pour inclure tous les nœuds avant l'export.
  */
 export async function exportFullGraphToPNG(
-  reactFlowInstance: any,
+  reactFlowInstance: unknown,
   filename: string = 'graph-full',
   quality: number = 1.0
 ): Promise<void> {
   try {
+    const rf = reactFlowInstance as {
+      getViewport: () => { x: number; y: number; zoom: number }
+      fitView: (opts: { padding: number; duration: number }) => void
+      setViewport: (v: { x: number; y: number; zoom: number }) => void
+    }
     // Sauvegarder le viewport actuel
-    const currentViewport = reactFlowInstance.getViewport()
-    
+    const currentViewport = rf.getViewport()
+
     // Ajuster le viewport pour inclure tous les nœuds
-    reactFlowInstance.fitView({ padding: 0.1, duration: 0 })
-    
+    rf.fitView({ padding: 0.1, duration: 0 })
+
     // Attendre que le viewport soit ajusté
     await new Promise((resolve) => setTimeout(resolve, 200))
-    
+
     // Exporter
     await exportGraphToPNG(reactFlowInstance, filename, quality)
-    
+
     // Restaurer le viewport original
-    reactFlowInstance.setViewport(currentViewport)
+    rf.setViewport(currentViewport)
   } catch (error) {
     console.error('Erreur lors de l\'export du graphe complet:', error)
     throw error

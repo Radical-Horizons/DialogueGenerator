@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const services = require('./dev-services');
 const { venvExists } = require('./getPythonPath');
+const devStartupTiming = require('./dev-startup-timing');
 
 // Parse des arguments
 const args = process.argv.slice(2);
@@ -15,6 +16,12 @@ const shouldClearCache = args.includes('--clear-cache') || args.includes('-c');
 const backendOnly = args.includes('--backend') || args.includes('--back');
 const frontendOnly = args.includes('--frontend') || args.includes('--front');
 const stopOnly = args.includes('--stop');
+const fastStartup =
+  args.includes('--fast') || process.env.DEV_FAST_STARTUP === '1';
+if (fastStartup) {
+  process.env.SKIP_STARTUP_CONTEXT_VALIDATION = 'true';
+  process.env.SKIP_STARTUP_LOG_CLEANUP = 'true';
+}
 
 // Parse log level flags
 let logLevel = null;
@@ -48,6 +55,15 @@ if (logLevel) {
   process.env.LOG_CONSOLE_LEVEL = logLevel;
 }
 
+const enableDevStartupTiming =
+  args.includes('--timing') ||
+  ['1', 'true', 'yes'].includes(String(process.env.DEV_STARTUP_TIMING || '').toLowerCase());
+devStartupTiming.setEnabled(enableDevStartupTiming);
+if (enableDevStartupTiming) {
+  process.env.API_STARTUP_TIMING = '1';
+  devStartupTiming.mark('cli_parsed');
+}
+
 // Vérifier que Node.js et Python sont disponibles
 function checkCommand(command, errorMsg) {
   return new Promise((resolve) => {
@@ -60,6 +76,14 @@ function checkCommand(command, errorMsg) {
       resolve();
     });
   });
+}
+
+/** Vérifie python et node en parallèle (Windows : évite ~300–500 ms vs séquentiel). */
+function checkPythonAndNode() {
+  return Promise.all([
+    checkCommand('python', 'Python n\'est pas installé ou pas dans le PATH'),
+    checkCommand('node', 'Node.js n\'est pas installé ou pas dans le PATH'),
+  ]);
 }
 
 // Fonction pour nettoyer le cache Vite
@@ -196,6 +220,7 @@ async function handleStop() {
 
 // Commande: Démarrer uniquement le backend
 async function handleBackendOnly() {
+  devStartupTiming.mark('before_acquire_lock');
   await services.acquireLock();
   
   // Enregistrer le cleanup IMMÉDIATEMENT après l'acquisition du lock
@@ -207,6 +232,11 @@ async function handleBackendOnly() {
   const apiPort = parseInt(process.env.API_PORT || '4243', 10);
   
   console.log(`\n📦 Démarrage du backend uniquement...\n`);
+  if (fastStartup) {
+    console.log(
+      '   ⚡ Mode --fast : pas de validate_all_configs ni nettoyage logs au startup API (hors production).\n'
+    );
+  }
   console.log(`   Backend API:  http://localhost:${apiPort}`);
   console.log(`   API Docs:     http://localhost:${apiPort}/api/docs\n`);
   
@@ -215,6 +245,7 @@ async function handleBackendOnly() {
     const status = await services.getStatus();
     displayStatus(status);
     console.log('✅ Backend démarré. Utilisez Ctrl+C pour arrêter.\n');
+    devStartupTiming.printReport();
   } catch (error) {
     console.error(`❌ Erreur: ${error.message}\n`);
     // Le cleanup est déjà enregistré, il sera appelé automatiquement
@@ -226,6 +257,7 @@ async function handleBackendOnly() {
 
 // Commande: Démarrer uniquement le frontend
 async function handleFrontendOnly() {
+  devStartupTiming.mark('before_acquire_lock');
   await services.acquireLock();
   
   // Enregistrer le cleanup IMMÉDIATEMENT après l'acquisition du lock
@@ -246,6 +278,7 @@ async function handleFrontendOnly() {
     displayStatus(status);
     console.log('✅ Frontend démarré. Utilisez Ctrl+C pour arrêter.\n');
     openBrowser(frontendUrl);
+    devStartupTiming.printReport();
   } catch (error) {
     console.error(`❌ Erreur: ${error.message}\n`);
     // Le cleanup est déjà enregistré, il sera appelé automatiquement
@@ -257,6 +290,7 @@ async function handleFrontendOnly() {
 
 // Commande: Démarrer backend + frontend
 async function handleAll() {
+  devStartupTiming.mark('before_acquire_lock');
   await services.acquireLock();
   
   // Enregistrer le cleanup IMMÉDIATEMENT après l'acquisition du lock
@@ -269,6 +303,11 @@ async function handleAll() {
   const frontendUrl = `http://localhost:${frontendPort}`;
   
   console.log('\n📦 Démarrage des serveurs...\n');
+  if (fastStartup) {
+    console.log(
+      '   ⚡ Mode --fast : pas de validate_all_configs ni nettoyage logs au startup API (hors production).\n'
+    );
+  }
   console.log(`   Backend API:  http://localhost:${apiPort}`);
   console.log(`   Frontend:     ${frontendUrl}`);
   console.log(`   API Docs:     http://localhost:${apiPort}/api/docs\n`);
@@ -282,8 +321,9 @@ async function handleAll() {
     
     // Afficher le statut
     const status = await services.getStatus();
+    devStartupTiming.mark('status_polled');
     displayStatus(status);
-    
+
     console.log('📡 HMR (Hot Module Replacement) activé');
     console.log('   Les modifications de fichiers seront automatiquement reflétées dans le navigateur.');
     console.log('   Si les changements ne sont pas visibles:');
@@ -291,8 +331,10 @@ async function handleAll() {
     console.log('   - Vérifiez que le WebSocket HMR est connecté (onglet Network > WS)');
     console.log('   - Utilisez \'npm run dev:clean\' pour forcer un rebuild complet\n');
     console.log('🌐 Ouverture du navigateur...\n');
-    
+
     openBrowser(frontendUrl);
+    devStartupTiming.mark('browser_launch_scheduled');
+    devStartupTiming.printReport();
   } catch (error) {
     console.error(`❌ Erreur: ${error.message}\n`);
     // Le cleanup est déjà enregistré, il sera appelé automatiquement
@@ -303,6 +345,7 @@ async function handleAll() {
 
 // Point d'entrée principal
 async function main() {
+  devStartupTiming.mark('main_begin');
   // Vérifier que le venv existe (warning si absent)
   const projectRoot = path.join(__dirname, '..');
   if (!venvExists(projectRoot)) {
@@ -310,14 +353,15 @@ async function main() {
     console.warn('   Le système utilisera Python global en attendant.\n');
   }
   
-  // Vérifications rapides
-  await checkCommand('python', 'Python n\'est pas installé ou pas dans le PATH');
-  await checkCommand('node', 'Node.js n\'est pas installé ou pas dans le PATH');
-  
+  // Vérifications rapides (parallèle)
+  await checkPythonAndNode();
+  devStartupTiming.mark('prechecks_python_node');
+
   // Nettoyer le cache si demandé
   if (shouldClearCache) {
     await clearViteCache();
   }
+  devStartupTiming.mark('after_vite_cache_step');
   
   // Vérifier que frontend/node_modules existe
   const frontendNodeModules = path.join(__dirname, '..', 'frontend', 'node_modules');

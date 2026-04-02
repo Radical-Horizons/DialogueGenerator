@@ -6,7 +6,7 @@ import pytest
 import xml.etree.ElementTree as ET
 from fastapi.testclient import TestClient
 from api.main import app
-from context_builder import ContextBuilder
+from core.context.context_builder import ContextBuilder
 from models.prompt_structure import PromptStructure, PromptSection, ContextCategory, ContextItem, ItemSection, PromptMetadata
 from datetime import datetime
 
@@ -148,7 +148,7 @@ def test_serialize_context_to_xml_escapes_special_characters(context_builder):
 @pytest.mark.api
 def test_prompt_xml_format(real_client):
     """Test que le prompt retourné par l'API est en format XML."""
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     cb = ContextBuilder()
     cb.load_gdd_files()
     all_characters = cb.get_characters_names()
@@ -165,7 +165,7 @@ def test_prompt_xml_format(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test XML format",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     
@@ -191,7 +191,7 @@ def test_prompt_xml_format(real_client):
 @pytest.mark.api
 def test_debug_raw_json_endpoint(real_client):
     """Test que l'endpoint debug/raw-json retourne le JSON brut."""
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     cb = ContextBuilder()
     cb.load_gdd_files()
     all_characters = cb.get_characters_names()
@@ -208,7 +208,7 @@ def test_debug_raw_json_endpoint(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test debug endpoint",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     
@@ -232,7 +232,7 @@ def test_debug_raw_json_endpoint(real_client):
 @pytest.mark.api
 def test_structured_prompt_remains_json(real_client):
     """Test que structured_prompt reste en JSON pour l'UI."""
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     cb = ContextBuilder()
     cb.load_gdd_files()
     all_characters = cb.get_characters_names()
@@ -249,7 +249,7 @@ def test_structured_prompt_remains_json(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test structured prompt",
-            "max_context_tokens": 1000
+            "max_context_tokens": 10000
         }
     )
     
@@ -591,7 +591,7 @@ def test_end_to_end_no_duplicate_fields_real_data(real_client):
     Charge des données GDD réelles, construit un prompt, et vérifie qu'aucun champ
     n'apparaît à la fois dans <metadata> ET dans une section structurée.
     """
-    from context_builder import ContextBuilder
+    from core.context.context_builder import ContextBuilder
     cb = ContextBuilder()
     cb.load_gdd_files()
     all_characters = cb.get_characters_names()
@@ -613,7 +613,7 @@ def test_end_to_end_no_duplicate_fields_real_data(real_client):
                 "communities_full": []
             },
             "user_instructions": "Test end-to-end déduplication",
-            "max_context_tokens": 5000,
+            "max_context_tokens": 10000,
             "include_narrative_guides": True
         }
     )

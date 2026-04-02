@@ -14,10 +14,10 @@ alwaysApply: false
 
 ### 1. Métadonnées vs Contexte narratif (`is_metadata`)
 
-- **Métadonnées** : Tous les champs **AVANT "Introduction"** dans l'ordre du JSON
-- **Contexte narratif** : "Introduction" et tous les champs qui viennent après
+- **Export classique** : métadonnées = clés **avant "Introduction"** ; contexte = "Introduction" et la suite.
+- **Fiches shard Notion** (racine avec `sections`) : métadonnées = clés **avant `sections`** ; `sections` et descendants = contexte.
 
-Détection : `_is_metadata_field()` compare la position de la clé racine avec "Introduction" dans l'ordre des clés du JSON.
+Détection : `_is_metadata_field()` utilise d’abord `Introduction` si présent, sinon `sections`, sinon l’heuristique historique sans ces clés.
 
 ### 2. Champs essentiels (`is_essential`)
 

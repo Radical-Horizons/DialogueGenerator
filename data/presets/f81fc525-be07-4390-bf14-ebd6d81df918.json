@@ -1,0 +1,44 @@
+{
+  "id": "f81fc525-be07-4390-bf14-ebd6d81df918",
+  "name": "Test Preset E2E",
+  "icon": "PR",
+  "metadata": {
+    "created": "2026-04-01T21:20:47.063461Z",
+    "modified": "2026-04-01T21:20:47.063461Z"
+  },
+  "configuration": {
+    "characters": [],
+    "locations": [],
+    "region": "",
+    "subLocation": null,
+    "sceneType": "Generic",
+    "instructions": "",
+    "fieldConfigs": {
+      "character": [],
+      "location": [],
+      "item": [],
+      "species": [],
+      "community": []
+    },
+    "contextSelections": {
+      "characters_full": [],
+      "characters_excerpt": [],
+      "locations_full": [],
+      "locations_excerpt": [],
+      "items_full": [],
+      "items_excerpt": [],
+      "species_full": [],
+      "species_excerpt": [],
+      "communities_full": [],
+      "communities_excerpt": [],
+      "dialogues_examples": []
+    },
+    "selectedRegion": null,
+    "selectedSubLocations": [],
+    "topP": null,
+    "reasoningEffort": null,
+    "maxCompletionTokens": null,
+    "maxChoices": null,
+    "llmModel": "gpt-5.2"
+  }
+}

@@ -2,7 +2,7 @@
  * Tests pour NodeEditorPanel avec TestNode et 4 résultats de test.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { NodeEditorPanel } from '../components/graph/NodeEditorPanel'
 import { useGraphStore } from '../store/graphStore'
 import { useContextStore } from '../store/contextStore'
@@ -42,8 +42,10 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
     },
   }
 
+  let mockState: ReturnType<typeof useGraphStore>
+
   beforeEach(() => {
-    vi.mocked(useGraphStore).mockReturnValue({
+    mockState = {
       selectedNodeId: 'test-node-1',
       nodes: [mockTestNode, ...mockNodes],
       updateNode: vi.fn(),
@@ -52,11 +54,20 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       isGenerating: false,
       setSelectedNode: vi.fn(),
       setShowDeleteNodeConfirm: vi.fn(),
-    } as any)
+      createEmptyNode: vi.fn(),
+      addNode: vi.fn(),
+      connectNodes: vi.fn(),
+      disconnectNodes: vi.fn(),
+    } as ReturnType<typeof useGraphStore>
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
+      if (typeof selector === 'function') return selector(mockState)
+      return mockState
+    }) as typeof useGraphStore)
+    ;(useGraphStore as { getState: () => typeof mockState }).getState = vi.fn(() => mockState)
 
     vi.mocked(useContextStore).mockReturnValue({
       selections: {},
-    } as any)
+    } as ReturnType<typeof useContextStore>)
   })
 
   it('devrait afficher les 4 champs de connexion pour un TestNode', async () => {
@@ -67,12 +78,11 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       </ReactFlowProvider>
     )
 
-    // THEN: Les 4 champs de connexion doivent être visibles
     await waitFor(() => {
-      expect(screen.getByLabelText('Échec critique')).toBeInTheDocument()
-      expect(screen.getByLabelText('Échec')).toBeInTheDocument()
-      expect(screen.getByLabelText('Réussite')).toBeInTheDocument()
-      expect(screen.getByLabelText('Réussite critique')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-cf')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-f')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-s')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-cs')).toBeInTheDocument()
     })
   })
 
@@ -84,17 +94,15 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       </ReactFlowProvider>
     )
 
-    // THEN: Les valeurs doivent être affichées dans les champs
     await waitFor(() => {
-      const criticalFailureField = screen.getByLabelText('Échec critique') as HTMLInputElement
-      const failureField = screen.getByLabelText('Échec') as HTMLInputElement
-      const successField = screen.getByLabelText('Réussite') as HTMLInputElement
-      const criticalSuccessField = screen.getByLabelText('Réussite critique') as HTMLInputElement
-
-      expect(criticalFailureField.value).toBe('NODE_CRITICAL_FAILURE')
-      expect(failureField.value).toBe('NODE_FAILURE')
-      expect(successField.value).toBe('NODE_SUCCESS')
-      expect(criticalSuccessField.value).toBe('NODE_CRITICAL_SUCCESS')
+      expect(
+        within(screen.getByTestId('panel-test-cf')).getByText('NODE_CRITICAL_FAILURE')
+      ).toBeInTheDocument()
+      expect(within(screen.getByTestId('panel-test-f')).getByText('NODE_FAILURE')).toBeInTheDocument()
+      expect(within(screen.getByTestId('panel-test-s')).getByText('NODE_SUCCESS')).toBeInTheDocument()
+      expect(
+        within(screen.getByTestId('panel-test-cs')).getByText('NODE_CRITICAL_SUCCESS')
+      ).toBeInTheDocument()
     })
   })
 
@@ -110,7 +118,7 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       },
     }
 
-    vi.mocked(useGraphStore).mockReturnValue({
+    const state2 = {
       selectedNodeId: 'test-node-2',
       nodes: [testNodeWith2Results, ...mockNodes],
       updateNode: vi.fn(),
@@ -119,7 +127,16 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       isGenerating: false,
       setSelectedNode: vi.fn(),
       setShowDeleteNodeConfirm: vi.fn(),
-    } as any)
+      createEmptyNode: vi.fn(),
+      addNode: vi.fn(),
+      connectNodes: vi.fn(),
+      disconnectNodes: vi.fn(),
+    } as ReturnType<typeof useGraphStore>
+    vi.mocked(useGraphStore).mockImplementation(((selector?: (s: unknown) => unknown) => {
+      if (typeof selector === 'function') return selector(state2)
+      return state2
+    }) as typeof useGraphStore)
+    ;(useGraphStore as { getState: () => typeof state2 }).getState = vi.fn(() => state2)
 
     // WHEN: Rendu du NodeEditorPanel
     render(
@@ -128,12 +145,11 @@ describe('NodeEditorPanel - TestNode avec 4 résultats', () => {
       </ReactFlowProvider>
     )
 
-    // THEN: Les 4 champs doivent être visibles (même si seulement 2 ont des valeurs)
     await waitFor(() => {
-      expect(screen.getByLabelText('Échec critique')).toBeInTheDocument()
-      expect(screen.getByLabelText('Échec')).toBeInTheDocument()
-      expect(screen.getByLabelText('Réussite')).toBeInTheDocument()
-      expect(screen.getByLabelText('Réussite critique')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-cf')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-f')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-s')).toBeInTheDocument()
+      expect(screen.getByTestId('panel-test-cs')).toBeInTheDocument()
     })
   })
 })

@@ -1,5 +1,7 @@
 # Epic List
 
+**Séquençage (SM, mise à jour 2026-03) :** **Epic 17** (mobile / responsive web) est priorisé **tôt** : après **Epics 0–3**, et **avant** d’approfondir massivement **Epics 4–6** (validation, export Unity, templates) sur une UI encore desktop-only. L’identifiant 17 évite de renuméroter les epics déjà suivis dans `sprint-status.yaml`.
+
 ## Epic 0: Infrastructure & Setup (Brownfield Adjustments)
 
 Les utilisateurs peuvent travailler sur une application stable avec l'infrastructure technique nécessaire. Le système configure ADR-001 à ADR-004 (Progress Modal SSE, Presets, Graph Fixes, Multi-Provider LLM), ID-001 à ID-005 (Auto-save, Validation cycles, Cost governance, Streaming cleanup, Preset validation).
@@ -59,3 +61,7 @@ Les utilisateurs peuvent monitorer les métriques de performance du système (te
 ## Epic 14: Accessibilité
 
 Les utilisateurs peuvent naviguer l'éditeur de graphe entièrement au clavier avec indicateurs de focus visibles. Le système supporte personnalisation contraste couleurs (WCAG AA), et lecteurs d'écran avec ARIA labels (V2.0+).
+
+## Epic 17: Expérience mobile et responsive (web)
+
+Les utilisateurs peuvent utiliser l’application sur navigateur mobile et tablette (viewports étroits) avec shell adaptatif, interactions tactiles sur le graphe et panneaux accessibles en patterns mobile. PWA installable en option (V1.5+). Voir [epic-17.md](epic-17.md).

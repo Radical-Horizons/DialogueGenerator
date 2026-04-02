@@ -1,20 +1,27 @@
 """Point d'entrée principal de l'API REST FastAPI."""
+import time
+
+_API_MAIN_MODULE_T0 = time.perf_counter()
+
 import os
 import logging
 import sys
+import asyncio
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from api.middleware import RequestIDMiddleware, LoggingMiddleware
+from api.middleware.billable_user_context import BillableUserContextMiddleware
 from api.middleware.cost_governance import CostGovernanceMiddleware
 from api.exceptions import APIException, ValidationException
-from api.dependencies import get_request_id, require_debug_access
+from api.dependencies import get_request_id
 from api.config.security_config import get_security_config
 from api.middleware.rate_limiter import get_limiter, rate_limit_exception_handler
+from api.app_version import APP_VERSION
 
 # Charger le fichier .env en dev (éviter sous pytest pour des tests déterministes)
 if "pytest" not in sys.modules:
@@ -60,160 +67,237 @@ async def lifespan(app: FastAPI):
     Args:
         app: L'application FastAPI.
     """
-    # Startup
-    logger.info("Démarrage de l'API DialogueGenerator...")
-    logger.info(f"Timestamp: {datetime.now(timezone.utc).isoformat()}Z")
-    
-    # Debug probe optionnel (désactivé par défaut pour éviter le bruit)
-    if os.getenv("STARTUP_PROBE", "false").lower() in ("true", "1", "yes"):
-        import logging
-        uvicorn_log = logging.getLogger("uvicorn.error")
-        uvicorn_log.warning("=== APP STARTUP - CODE LOADED ===")
-    
-    # Valider la configuration de sécurité
     try:
-        _validate_security_config()
-    except ValueError:
-        logger.critical("L'application ne peut pas démarrer avec une configuration de sécurité invalide.")
-        raise
-    
-    # Nettoyer les anciens logs au démarrage
-    try:
-        from api.utils.log_cleanup import cleanup_on_startup
-        cleanup_on_startup()
-    except Exception as e:
-        logger.warning(f"Erreur lors du nettoyage des logs au démarrage: {e}")
-    
-    # Valider que context_config.json ne référence que des champs existants
-    try:
-        from services.context_field_validator import ContextFieldValidator
-        from api.container import ServiceContainer
-        
-        container_for_validation = ServiceContainer()
-        context_builder = container_for_validation.get_context_builder()
-        config_service = container_for_validation.get_config_service()
-        context_config = config_service.get_context_config()
-        
-        if context_config:
-            validator = ContextFieldValidator(context_builder)
-            validation_results = validator.validate_all_configs(context_config)
-            
-            # Compter les erreurs et warnings
-            total_errors = sum(1 for r in validation_results.values() if r.has_errors())
-            total_warnings = sum(1 for r in validation_results.values() if r.has_warnings())
-            
-            if total_errors > 0 or total_warnings > 0:
-                # Par défaut: résumé concis (le rapport complet est verbeux)
-                logger.warning(
-                    "Validation des champs GDD: %d erreur(s) critique(s), %d avertissement(s). "
-                    "Pour le rapport complet: STARTUP_REPORT=full",
-                    total_errors,
-                    total_warnings,
-                )
-                
-                startup_report_mode = os.getenv("STARTUP_REPORT", "summary").lower().strip()
-                if startup_report_mode in ("full", "true", "1", "yes"):
-                    report = validator.get_validation_report(context_config)
-                    logger.warning(f"Validation des champs GDD (rapport complet):\n{report}")
-                
-                # En production, fail-fast sur les erreurs critiques
-                environment = os.getenv("ENVIRONMENT", "development")
-                if environment == "production" and total_errors > 0:
-                    logger.critical("Champs invalides détectés dans context_config.json - l'application ne peut pas démarrer en production.")
-                    raise ValueError(f"Configuration invalide: {total_errors} champs invalides détectés")
-            else:
-                logger.info("Validation des champs GDD: tous les champs sont valides")
-    except Exception as e:
-        # Ne pas bloquer le démarrage si la validation échoue (mais logger l'erreur)
-        logger.error(f"Erreur lors de la validation des champs GDD au démarrage: {e}", exc_info=True)
-    
-    # Initialiser le container de services dans app.state
-    try:
-        from api.container import ServiceContainer
-        container = ServiceContainer()
-        # Stocker dans app.state pour accès depuis les dépendances
-        app.state.container = container
-        logger.info("ServiceContainer initialisé dans app.state.")
-        
-        # Le ServiceContainer gère déjà le cycle de vie des services.
-        # Pas besoin de réinitialiser des singletons (système unifié).
-    except Exception as e:
-        logger.warning(f"Erreur lors de l'initialisation du container: {e}")
-    
-    # Debug: Liste TOUTES les routes réelles au runtime (seulement si DEBUG_ROUTES=true)
-    if os.getenv("DEBUG_ROUTES", "false").lower() in ("true", "1", "yes"):
-        from fastapi.routing import APIRoute
-        import sys
-        log_routes = logging.getLogger("uvicorn.error")
-        log_routes.warning("=== TOUTES LES ROUTES API AU RUNTIME ===")
-        routes_by_path = {}
-        for r in app.routes:
-            if isinstance(r, APIRoute):
-                endpoint_str = str(r.endpoint)
-                # Extraire le nom du fichier et de la fonction depuis l'endpoint
-                if hasattr(r.endpoint, '__module__') and hasattr(r.endpoint, '__name__'):
-                    endpoint_str = f"{r.endpoint.__module__}.{r.endpoint.__name__}"
-                methods_str = ', '.join(sorted(r.methods)) if r.methods else 'N/A'
-                route_key = f"{methods_str} {r.path}"
-                if route_key not in routes_by_path:
-                    routes_by_path[route_key] = []
-                routes_by_path[route_key].append(endpoint_str)
-        
-        # Trier par chemin pour un affichage ordonné
-        for route_key in sorted(routes_by_path.keys()):
-            endpoints = routes_by_path[route_key]
-            for endpoint in endpoints:
-                log_routes.warning("ROUTE: %s -> %s", route_key, endpoint)
-                print(f"ROUTE: {route_key} -> {endpoint}", file=sys.stderr, flush=True)
-        
-        log_routes.warning("=== TOTAL: %d routes API ===", len(routes_by_path))
-        print(f"=== TOTAL: {len(routes_by_path)} routes API ===", file=sys.stderr, flush=True)
-        
-        # Liste spécifique pour estimate-tokens
-        log_routes.warning("=== ROUTES ESTIMATE-TOKENS ===")
-        found_any = False
-        for r in app.routes:
-            if isinstance(r, APIRoute) and "estimate-tokens" in r.path:
-                found_any = True
-                endpoint_str = str(r.endpoint)
-                if hasattr(r.endpoint, '__module__') and hasattr(r.endpoint, '__name__'):
-                    endpoint_str = f"{r.endpoint.__module__}.{r.endpoint.__name__}"
-                log_routes.warning("ROUTE: %s %s -> %s", r.methods, r.path, endpoint_str)
-                print(f"ROUTE: {r.methods} {r.path} -> {endpoint_str}", file=sys.stderr, flush=True)
-        if not found_any:
-            log_routes.warning("AUCUNE ROUTE estimate-tokens trouvée!")
-            print("AUCUNE ROUTE estimate-tokens trouvée!", file=sys.stderr, flush=True)
-        log_routes.warning("=== FIN LISTE ROUTES ===")
-    
-    # Démarrer la tâche de cleanup des jobs de génération (Story 0.2)
-    try:
-        from api.services.generation_job_manager import get_job_manager
-        job_manager = get_job_manager()
-        await job_manager.start_cleanup_task()
-        logger.info("Cleanup task des jobs de génération démarrée")
-    except Exception as e:
-        logger.warning(f"Erreur lors du démarrage de la cleanup task: {e}")
-    
-    yield
-    # Shutdown
-    logger.info("Arrêt de l'API DialogueGenerator...")
-    
-    # Arrêter la tâche de cleanup des jobs (Story 0.2)
-    try:
-        await job_manager.stop_cleanup_task()
-        logger.info("Cleanup task des jobs de génération arrêtée")
-    except Exception as e:
-        logger.warning(f"Erreur lors de l'arrêt de la cleanup task: {e}")
+        # Startup
+        logger.info("Démarrage de l'API DialogueGenerator...")
+        logger.info(f"Timestamp: {datetime.now(timezone.utc).isoformat()}Z")
 
+        from api.utils.startup_timing import StartupPhaseTimer, is_startup_timing_enabled
+
+        _startup_timer = StartupPhaseTimer(
+            enabled=is_startup_timing_enabled(),
+            module_import_started_at=_API_MAIN_MODULE_T0,
+        )
+        _startup_timer.log_time_since_module_start("chargement module api.main → entrée lifespan")
+
+        # Debug probe optionnel (désactivé par défaut pour éviter le bruit)
+        if os.getenv("STARTUP_PROBE", "false").lower() in ("true", "1", "yes"):
+            import logging
+            uvicorn_log = logging.getLogger("uvicorn.error")
+            uvicorn_log.warning("=== APP STARTUP - CODE LOADED ===")
+        
+        # Valider la configuration de sécurité
+        try:
+            _validate_security_config()
+        except ValueError:
+            logger.critical("L'application ne peut pas démarrer avec une configuration de sécurité invalide.")
+            raise
+        _startup_timer.mark("security_config_ok")
+
+        # Nettoyer les anciens logs au démarrage (désactivable pour accélérer le cold start en dev)
+        if os.getenv("SKIP_STARTUP_LOG_CLEANUP", "").lower() not in ("true", "1", "yes"):
+            try:
+                from api.utils.log_cleanup import cleanup_on_startup
+                cleanup_on_startup()
+            except Exception as e:
+                logger.warning(f"Erreur lors du nettoyage des logs au démarrage: {e}")
+        _startup_timer.mark("log_cleanup_done")
+
+        # Créer le container une seule fois : chargement GDD + validation puis réutilisation pour les requêtes
+        try:
+            from api.container import ServiceContainer
+            from services.context_field_validator import ContextFieldValidator
+
+            container = ServiceContainer()
+            _startup_timer.mark("service_container_created")
+
+            context_builder = container.get_context_builder()
+            _startup_timer.mark("context_builder_gdd_loaded")
+
+            config_service = container.get_config_service()
+            context_config = config_service.get_context_config()
+            _startup_timer.mark("context_config_read")
+
+            environment = os.getenv("ENVIRONMENT", "development").lower().strip()
+            skip_context_validation = (
+                environment != "production"
+                and os.getenv("SKIP_STARTUP_CONTEXT_VALIDATION", "").lower() in ("true", "1", "yes")
+            )
+
+            if context_config and not skip_context_validation:
+                validator = ContextFieldValidator(context_builder)
+                validation_results = validator.validate_all_configs(context_config)
+
+                total_errors = sum(1 for r in validation_results.values() if r.has_errors())
+                total_warnings = sum(1 for r in validation_results.values() if r.has_warnings())
+
+                if total_errors > 0 or total_warnings > 0:
+                    logger.warning(
+                        "Validation des champs GDD: %d erreur(s) critique(s), %d avertissement(s). "
+                        "Pour le rapport complet: STARTUP_REPORT=full",
+                        total_errors,
+                        total_warnings,
+                    )
+
+                    startup_report_mode = os.getenv("STARTUP_REPORT", "summary").lower().strip()
+                    if startup_report_mode in ("full", "true", "1", "yes"):
+                        report = validator.get_validation_report(context_config)
+                        logger.warning(f"Validation des champs GDD (rapport complet):\n{report}")
+
+                    if environment == "production" and total_errors > 0:
+                        logger.critical("Champs invalides détectés dans context_config.json - l'application ne peut pas démarrer en production.")
+                        raise ValueError(f"Configuration invalide: {total_errors} champs invalides détectés")
+                else:
+                    logger.info("Validation des champs GDD: tous les champs sont valides")
+            elif context_config and skip_context_validation:
+                logger.info(
+                    "Startup: SKIP_STARTUP_CONTEXT_VALIDATION=1 — pas de validate_all_configs "
+                    "(GDD chargé). Réactiver avant de modifier context_config / champs GDD."
+                )
+
+            _startup_timer.mark("context_validation_phase_done")
+
+            app.state.container = container
+            logger.info("ServiceContainer initialisé dans app.state (GDD chargé une seule fois).")
+        except Exception as e:
+            logger.error(f"Erreur lors de l'initialisation du container ou de la validation GDD: {e}", exc_info=True)
+            _startup_timer.mark("container_init_failed")
+            if "container" in locals() and container is not None:
+                app.state.container = container
+                logger.warning("Container partiellement initialisé stocké dans app.state malgré l'erreur.")
+            else:
+                _startup_timer.log_report()
+                raise
+        
+        # Debug: Liste TOUTES les routes réelles au runtime (seulement si DEBUG_ROUTES=true)
+        if os.getenv("DEBUG_ROUTES", "false").lower() in ("true", "1", "yes"):
+            from fastapi.routing import APIRoute
+            import sys
+            log_routes = logging.getLogger("uvicorn.error")
+            log_routes.warning("=== TOUTES LES ROUTES API AU RUNTIME ===")
+            routes_by_path = {}
+            for r in app.routes:
+                if isinstance(r, APIRoute):
+                    endpoint_str = str(r.endpoint)
+                    # Extraire le nom du fichier et de la fonction depuis l'endpoint
+                    if hasattr(r.endpoint, '__module__') and hasattr(r.endpoint, '__name__'):
+                        endpoint_str = f"{r.endpoint.__module__}.{r.endpoint.__name__}"
+                    methods_str = ', '.join(sorted(r.methods)) if r.methods else 'N/A'
+                    route_key = f"{methods_str} {r.path}"
+                    if route_key not in routes_by_path:
+                        routes_by_path[route_key] = []
+                    routes_by_path[route_key].append(endpoint_str)
+            
+            # Trier par chemin pour un affichage ordonné
+            for route_key in sorted(routes_by_path.keys()):
+                endpoints = routes_by_path[route_key]
+                for endpoint in endpoints:
+                    log_routes.warning("ROUTE: %s -> %s", route_key, endpoint)
+                    print(f"ROUTE: {route_key} -> {endpoint}", file=sys.stderr, flush=True)
+            
+            log_routes.warning("=== TOTAL: %d routes API ===", len(routes_by_path))
+            print(f"=== TOTAL: {len(routes_by_path)} routes API ===", file=sys.stderr, flush=True)
+            
+            # Liste spécifique pour estimate-tokens
+            log_routes.warning("=== ROUTES ESTIMATE-TOKENS ===")
+            found_any = False
+            for r in app.routes:
+                if isinstance(r, APIRoute) and "estimate-tokens" in r.path:
+                    found_any = True
+                    endpoint_str = str(r.endpoint)
+                    if hasattr(r.endpoint, '__module__') and hasattr(r.endpoint, '__name__'):
+                        endpoint_str = f"{r.endpoint.__module__}.{r.endpoint.__name__}"
+                    log_routes.warning("ROUTE: %s %s -> %s", r.methods, r.path, endpoint_str)
+                    print(f"ROUTE: {r.methods} {r.path} -> {endpoint_str}", file=sys.stderr, flush=True)
+            if not found_any:
+                log_routes.warning("AUCUNE ROUTE estimate-tokens trouvée!")
+                print("AUCUNE ROUTE estimate-tokens trouvée!", file=sys.stderr, flush=True)
+            log_routes.warning("=== FIN LISTE ROUTES ===")
+        _startup_timer.mark("before_job_manager_cleanup_task")
+
+        # Démarrer la tâche de cleanup des jobs de génération (Story 0.2)
+        try:
+            from api.services.generation_job_manager import get_job_manager
+            job_manager = get_job_manager()
+            await job_manager.start_cleanup_task()
+            logger.info("Cleanup task des jobs de génération démarrée")
+        except Exception as e:
+            logger.warning(f"Erreur lors du démarrage de la cleanup task: {e}")
+
+        async def gdd_notion_scheduler() -> None:
+            """Sync GDD Notion périodique si activée (FR18, pas de cron OS)."""
+            await asyncio.sleep(20)
+            while True:
+                delay_sec = 3600
+                try:
+                    container = getattr(app.state, "container", None)
+                    if container is not None:
+                        svc = container.get_gdd_notion_sync_service()
+                        delay_sec = svc.poll_interval_seconds()
+                        if svc.is_auto_sync_enabled():
+                            await svc.run_sync(
+                                force_full=False,
+                                mirror_rebuild=False,
+                                request_id="gdd-notion-scheduler",
+                            )
+                except asyncio.CancelledError:
+                    raise
+                except Exception as sched_exc:
+                    logger.warning(
+                        "Planificateur sync GDD Notion: %s",
+                        sched_exc,
+                        exc_info=True,
+                    )
+                await asyncio.sleep(delay_sec)
+
+        app.state._gdd_notion_scheduler_task = asyncio.create_task(
+            gdd_notion_scheduler()
+        )
+
+        _startup_timer.mark("lifespan_startup_complete")
+        _startup_timer.log_report()
+
+        yield
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        # Gérer proprement les interruptions (Ctrl+C, arrêt du serveur)
+        logger.info("Arrêt de l'API DialogueGenerator (interruption)...")
+        raise
+    except Exception as e:
+        # Logger toute autre exception pendant le startup
+        logger.error(f"Erreur critique pendant le startup: {e}", exc_info=True)
+        raise
+    finally:
+        # Shutdown
+        logger.info("Arrêt de l'API DialogueGenerator...")
+        
+        # Arrêter la tâche de cleanup des jobs (Story 0.2)
+        try:
+            from api.services.generation_job_manager import get_job_manager
+            job_manager = get_job_manager()
+            await job_manager.stop_cleanup_task()
+            logger.info("Cleanup task des jobs de génération arrêtée")
+        except Exception as e:
+            logger.warning(f"Erreur lors de l'arrêt de la cleanup task: {e}")
+
+        sched_task = getattr(app.state, "_gdd_notion_scheduler_task", None)
+        if sched_task is not None:
+            sched_task.cancel()
+            try:
+                await sched_task
+            except asyncio.CancelledError:
+                pass
+
+
+_IS_PRODUCTION_ENV = os.getenv("ENVIRONMENT", "development").lower() == "production"
 
 # Création de l'application FastAPI
 app = FastAPI(
     title="DialogueGenerator API",
     description="API REST pour la génération de dialogues IA pour jeux de rôle",
-    version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json",
+    version=APP_VERSION,
+    docs_url=None if _IS_PRODUCTION_ENV else "/api/docs",
+    redoc_url=None if _IS_PRODUCTION_ENV else "/api/redoc",
+    openapi_url=None if _IS_PRODUCTION_ENV else "/api/openapi.json",
     lifespan=lifespan
 )
 
@@ -223,12 +307,15 @@ if limiter is not None:
 
 # Configuration CORS
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
-is_production_env = os.getenv("ENVIRONMENT", "development") == "production"
+is_production_env = _IS_PRODUCTION_ENV
 
-# En production, lire depuis CORS_ORIGINS (format CSV)
+# En production, lire depuis CORS_ORIGINS (format CSV) — obligatoire (validé aussi dans SecurityConfig.validate_config)
 # IMPORTANT: Quand allow_credentials=True, on ne peut pas utiliser "*" - il faut spécifier les origines
-if is_production_env and cors_origins_env:
-    cors_origins = [origin.strip() for origin in cors_origins_env.split(",")]
+if is_production_env:
+    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+    cors_origin_regex = None
+elif cors_origins_env:
+    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
     cors_origin_regex = None
 else:
     # En développement, accepter localhost et toutes les origines ngrok via regex
@@ -262,6 +349,7 @@ app.add_middleware(
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(CostGovernanceMiddleware)  # Cost governance (Story 0.7)
+app.add_middleware(BillableUserContextMiddleware)
 
 # Middleware anti-cache en développement (doit être avant le cache HTTP)
 if not is_production_env:
@@ -334,7 +422,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
     
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={
             "error": {
                 "code": "VALIDATION_ERROR",
@@ -360,6 +448,40 @@ if limiter is not None:
             Réponse JSON avec erreur 429.
         """
         return await rate_limit_exception_handler(request, exc)
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    """Uniformise les ``HTTPException`` génériques avec l'enveloppe ``error``."""
+    request_id = getattr(request.state, "request_id", "unknown")
+    detail = exc.detail
+    if isinstance(detail, list):
+        message = "Erreur de validation"
+        details_body: dict = {"detail": detail}
+    else:
+        message = str(detail) if detail is not None else "Erreur HTTP"
+        details_body = {}
+    code_map = {
+        401: "AUTHENTICATION_ERROR",
+        403: "AUTHORIZATION_ERROR",
+        404: "NOT_FOUND",
+        405: "METHOD_NOT_ALLOWED",
+        409: "CONFLICT",
+        422: "VALIDATION_ERROR",
+        429: "QUOTA_EXCEEDED",
+    }
+    code = code_map.get(exc.status_code, f"HTTP_{exc.status_code}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": code,
+                "message": message,
+                "details": details_body,
+                "request_id": request_id,
+            }
+        },
+    )
 
 
 # Handler global d'exceptions
@@ -450,6 +572,9 @@ async def health_check_detailed() -> JSONResponse:
     Returns:
         Statut de santé détaillé avec vérification de toutes les dépendances (200 si healthy, 503 si unhealthy).
     """
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+
     from api.utils.health_check import perform_health_checks
     
     health_result = perform_health_checks(detailed=True)
@@ -466,12 +591,13 @@ async def health_check_detailed() -> JSONResponse:
 
 
 # Inclusion des routers
-from api.routers import auth, dialogues, context, config, llm_usage, unity_dialogues, logs, mechanics_flags, graph, streaming, presets, costs
+from api.routers import auth, dialogues, context, config, llm_usage, unity_dialogues, documents, logs, mechanics_flags, graph, streaming, presets, costs
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(dialogues.router, prefix="/api/v1/dialogues", tags=["Dialogues"])
 app.include_router(streaming.router, prefix="/api/v1/dialogues", tags=["Dialogues"])  # SSE streaming (Story 0.2)
 app.include_router(unity_dialogues.router, prefix="/api/v1/unity-dialogues", tags=["Unity Dialogues"])
+app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
 app.include_router(context.router, prefix="/api/v1/context", tags=["Context"])
 app.include_router(config.router, prefix="/api/v1/config", tags=["Configuration"])
 app.include_router(llm_usage.router, prefix="/api/v1/llm-usage", tags=["LLM Usage"])
@@ -492,12 +618,17 @@ app.include_router(graph.router)
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
 
+from api.routers import gdd_notion_sync
+
+app.include_router(gdd_notion_sync.router)
+
 # Debug endpoint (dev only): inspect PromptEngine code loaded by server
 @app.get("/debug/prompt-engine", tags=["Debug"])
-async def debug_prompt_engine(
-    _: None = Depends(require_debug_access)
-) -> JSONResponse:
+async def debug_prompt_engine() -> JSONResponse:
     """Expose basic PromptEngine debug info (development only)."""
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Not found"})
+
     import inspect
     import core.prompt.prompt_engine as pe_module
     from core.prompt.prompt_engine import PromptEngine

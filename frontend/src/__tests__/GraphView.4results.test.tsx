@@ -5,6 +5,17 @@ import { describe, it, expect } from 'vitest'
 import { unityJsonToGraph } from '../components/generation/GraphView'
 
 describe('GraphView - 4 résultats de test', () => {
+  it('accepte le format document (schemaVersion + nodes) comme le format tableau', () => {
+    const documentJson = JSON.stringify({
+      schemaVersion: '1.1.0',
+      nodes: [{ id: 'START', speaker: 'NPC', line: 'Hello', choices: [] }],
+    })
+    const { nodes } = unityJsonToGraph(documentJson)
+    expect(nodes).toHaveLength(1)
+    expect(nodes[0].id).toBe('START')
+    expect(nodes[0].data).toMatchObject({ line: 'Hello' })
+  })
+
   it('devrait créer un TestNode automatiquement quand un choix contient un test', () => {
     // GIVEN: JSON Unity avec un DialogueNode contenant un choix avec test
     const unityJson = JSON.stringify([
@@ -127,7 +138,7 @@ describe('GraphView - 4 résultats de test', () => {
 
     const criticalSuccessEdge = testNodeEdges.find((e) => e.target === 'NODE_CRITICAL_SUCCESS')
     expect(criticalSuccessEdge?.label).toBe('Réussite critique')
-    expect(criticalSuccessEdge?.style?.stroke).toBe('#229954')
+    expect(criticalSuccessEdge?.style?.stroke).toBe('#0088FF')
   })
 
   it('devrait créer un TestNode même si les 4 nœuds de résultat ne sont pas encore générés', () => {
@@ -208,9 +219,9 @@ describe('GraphView - 4 résultats de test', () => {
     expect(testNode).toBeDefined()
 
     const choiceToTestEdge = edges.find(
-      (e) => e.source === 'START' && e.target === testNode?.id && e.sourceHandle?.startsWith('choice-')
+      (e) => e.source === 'START' && e.target === testNode?.id && e.sourceHandle?.startsWith('choice:')
     )
     expect(choiceToTestEdge).toBeDefined()
-    expect(choiceToTestEdge?.sourceHandle).toBe('choice-0')
+    expect(choiceToTestEdge?.sourceHandle).toBe('choice:__idx_0')
   })
 })

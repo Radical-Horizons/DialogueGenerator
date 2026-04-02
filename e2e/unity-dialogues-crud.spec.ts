@@ -8,26 +8,28 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 
+import { E2E_MS } from './timeouts'
+
 test.describe('Unity Dialogues CRUD Operations [P0]', () => {
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: /connexion/i })
-    const isLoginPage = await loginHeading.isVisible({ timeout: 2000 }).catch(() => false)
+    const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)
     
     if (isLoginPage) {
       await page.getByLabel(/nom d'utilisateur/i).fill('admin')
       await page.getByLabel(/mot de passe/i).fill('admin123')
       await page.getByRole('button', { name: /se connecter/i }).click()
       await Promise.race([
-        page.waitForURL('**/', { timeout: 5000 }).catch(() => {}),
-        page.waitForSelector('h2:has-text("Génération")', { timeout: 5000 }).catch(() => {})
+        page.waitForURL('**/', { timeout: E2E_MS.short }).catch(() => {}),
+        page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.short }).catch(() => {})
       ])
     }
   }
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000')
+    await page.goto('/')
     await login(page)
-    await page.waitForSelector('h2:has-text("Génération")', { timeout: 10000 })
+    await page.getByRole('button', { name: /Génération de Dialogues/i }).waitFor({ state: 'visible', timeout: E2E_MS.ui })
   })
 
   test('[P0] should list Unity dialogues', async ({ page }) => {
@@ -37,13 +39,13 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
       page.locator('button').filter({ hasText: /dialogue/i })
     )
     
-    if (await dialoguesTab.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await dialoguesTab.isVisible({ timeout: E2E_MS.control }).catch(() => false)) {
       await dialoguesTab.click()
       
       // Attendre que la liste se charge
-      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: 5000 }).catch(() => {
+      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: E2E_MS.short }).catch(() => {
         // Si pas de data-testid, chercher une liste ou table
-        return page.waitForSelector('div:has-text(".json")', { timeout: 5000 })
+        return page.waitForSelector('div:has-text(".json")', { timeout: E2E_MS.short })
       })
       
       // THEN: La liste des dialogues Unity s'affiche
@@ -64,11 +66,11 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
     // WHEN: Je clique sur un dialogue dans la liste
     const dialoguesTab = page.getByRole('button', { name: /dialogues|bibliothèque/i })
     
-    if (await dialoguesTab.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await dialoguesTab.isVisible({ timeout: E2E_MS.control }).catch(() => false)) {
       await dialoguesTab.click()
       
-      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: 5000 }).catch(() => {
-        return page.waitForSelector('div:has-text(".json")', { timeout: 5000 })
+      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: E2E_MS.short }).catch(() => {
+        return page.waitForSelector('div:has-text(".json")', { timeout: E2E_MS.short })
       })
       
       // Cliquer sur le premier dialogue
@@ -76,7 +78,7 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
         page.locator('div:has-text(".json")')
       ).first()
       
-      if (await firstDialogue.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await firstDialogue.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
         await firstDialogue.click()
         
         // THEN: Le contenu du dialogue s'affiche
@@ -87,7 +89,7 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
           ).or(
             page.getByText(/id.*speaker.*line/i)
           )
-        ).toBeVisible({ timeout: 3000 })
+        ).toBeVisible({ timeout: E2E_MS.control })
       }
     } else {
       test.skip('Fonctionnalité Dialogues Unity non disponible - test ignoré')
@@ -99,11 +101,11 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
     // WHEN: Je supprime le dialogue
     const dialoguesTab = page.getByRole('button', { name: /dialogues|bibliothèque/i })
     
-    if (await dialoguesTab.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await dialoguesTab.isVisible({ timeout: E2E_MS.control }).catch(() => false)) {
       await dialoguesTab.click()
       
-      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: 5000 }).catch(() => {
-        return page.waitForSelector('div:has-text(".json")', { timeout: 5000 })
+      await page.waitForSelector('[data-testid*="dialogue"]', { timeout: E2E_MS.short }).catch(() => {
+        return page.waitForSelector('div:has-text(".json")', { timeout: E2E_MS.short })
       })
       
       // Cliquer droit sur un dialogue ou utiliser un bouton supprimer
@@ -111,7 +113,7 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
         page.locator('div:has-text(".json")')
       ).first()
       
-      if (await firstDialogue.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await firstDialogue.isVisible({ timeout: E2E_MS.probe }).catch(() => false)) {
         // Clic droit pour menu contextuel
         await firstDialogue.click({ button: 'right' })
         
@@ -120,21 +122,21 @@ test.describe('Unity Dialogues CRUD Operations [P0]', () => {
           page.getByText(/supprimer/i)
         )
         
-        if (await deleteButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+        if (await deleteButton.isVisible({ timeout: E2E_MS.micro }).catch(() => false)) {
           await deleteButton.click()
           
           // Confirmer si modal de confirmation
           const confirmButton = page.getByRole('button', { name: /confirmer|oui/i })
-          if (await confirmButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+          if (await confirmButton.isVisible({ timeout: E2E_MS.micro }).catch(() => false)) {
             await confirmButton.click()
           }
           
           // THEN: Le dialogue est supprimé
           await expect(
             page.getByText(/supprimé|deleted/i)
-          ).toBeVisible({ timeout: 3000 }).catch(() => {
+          ).toBeVisible({ timeout: E2E_MS.control }).catch(() => {
             // Si pas de message, vérifier que le dialogue a disparu
-            expect(firstDialogue).not.toBeVisible({ timeout: 2000 })
+            expect(firstDialogue).not.toBeVisible({ timeout: E2E_MS.probe })
           })
         }
       }

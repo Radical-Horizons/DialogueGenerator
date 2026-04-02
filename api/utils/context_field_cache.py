@@ -2,9 +2,11 @@
 import logging
 from typing import Dict, Optional, Any
 from datetime import datetime, timedelta
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# Incrémenter lors d’un changement de sémantique de détection (ex. découpage ``sections._general``).
+_CACHE_SCHEMA_VERSION = 4
 
 
 class ContextFieldCache:
@@ -35,6 +37,16 @@ class ContextFieldCache:
             return None
         
         cached_data = self.cache[cache_key]
+        
+        if cached_data.get("schema_version") != _CACHE_SCHEMA_VERSION:
+            logger.debug(
+                "Cache champs contexte obsolète (schema %s → %s) pour '%s'",
+                cached_data.get("schema_version"),
+                _CACHE_SCHEMA_VERSION,
+                element_type,
+            )
+            del self.cache[cache_key]
+            return None
         
         # Vérifier l'expiration
         last_scan = cached_data.get("last_scan")
@@ -73,6 +85,7 @@ class ContextFieldCache:
             "fields": fields,
             "last_scan": datetime.now().isoformat(),
             "gdd_hash": gdd_data_hash,
+            "schema_version": _CACHE_SCHEMA_VERSION,
         }
         
         logger.debug(f"Cache mis à jour pour '{element_type}' ({len(fields)} champs)")

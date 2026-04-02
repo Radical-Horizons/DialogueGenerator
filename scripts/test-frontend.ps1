@@ -36,7 +36,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # 3. Tests unitaires
 Write-Host "`n3. Unit tests (Vitest)..." -ForegroundColor Cyan
-npm test -- --run 2>&1 | Out-Null
+npm test 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
     $errors += "Tests unitaires échoués"
     Write-Host "  X Unit tests failed" -ForegroundColor Red

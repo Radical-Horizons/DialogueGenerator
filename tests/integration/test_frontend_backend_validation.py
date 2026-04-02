@@ -5,6 +5,7 @@ et que le frontend n'a plus besoin de dupliquer cette validation.
 """
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from unittest.mock import patch, MagicMock
 
 from api.main import app
@@ -60,18 +61,18 @@ class TestBackendRejectsInvalidRequests:
     def test_backend_rejects_invalid_tokens(self, client):
         """TEST INTÉGRATION : Backend rejette les requêtes avec tokens invalides.
         
-        Règle métier : max_context_tokens doit être entre 100 et MAX_CONTEXT_TOKENS.
+        Règle métier : max_context_tokens doit être entre MIN_CONTEXT_TOKENS et MAX_CONTEXT_TOKENS.
         """
         from constants import Defaults
         
-        # GIVEN: Requête avec max_context_tokens < 100
+        # GIVEN: Requête avec max_context_tokens < MIN_CONTEXT_TOKENS
         request_data = {
             "user_instructions": "Test",
             "context_selections": {
                 "characters_full": ["Test Character"],
                 "characters_excerpt": [],
             },
-            "max_context_tokens": 50,  # Trop petit
+            "max_context_tokens": 5000,  # Sous le plancher produit (10k)
             "llm_model_identifier": "gpt-4o-mini"
         }
         
@@ -86,7 +87,7 @@ class TestBackendRejectsInvalidRequests:
         # Vérifier que le message mentionne la limite (dans message ou details)
         error_obj = error_data.get("error", {}) if "error" in error_data else {}
         error_text = f"{error_obj.get('message', '')} {str(error_obj.get('details', {}))} {str(error_data.get('detail', ''))}"
-        assert "100" in error_text or "minimum" in error_text.lower()
+        assert str(Defaults.MIN_CONTEXT_TOKENS) in error_text or "minimum" in error_text.lower()
     
     def test_backend_rejects_invalid_completion_tokens(self, client):
         """TEST INTÉGRATION : Backend rejette les requêtes avec max_completion_tokens invalides.
@@ -117,8 +118,8 @@ class TestBackendRejectsInvalidRequests:
         error_text = f"{error_obj.get('message', '')} {str(error_obj.get('details', {}))}"
         assert "100" in error_text or "minimum" in error_text.lower()
         
-        # GIVEN: Requête avec max_completion_tokens > 16000
-        request_data["max_completion_tokens"] = 20000
+        # GIVEN: Requête avec max_completion_tokens > 50000 (limite du schéma)
+        request_data["max_completion_tokens"] = 60000
         
         # WHEN: Tentative de génération
         response = client.post("/api/v1/dialogues/generate/unity-dialogue", json=request_data)
@@ -137,7 +138,7 @@ class TestBackendRejectsInvalidRequests:
                 error_text = " ".join([err.get("msg", "") for err in detail if isinstance(err, dict)])
             else:
                 error_text = str(detail)
-        assert "16000" in error_text or "maximum" in error_text.lower()
+        assert "50000" in error_text or "maximum" in error_text.lower()
     
     def test_backend_returns_clear_error_messages(self, client):
         """TEST INTÉGRATION : Backend retourne des messages d'erreur clairs et actionnables.
@@ -280,7 +281,7 @@ class TestPydanticValidators:
             request = GenerateUnityDialogueRequest(
                 user_instructions="Test",
                 context_selections=context_selection,
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
             # Le validator doit être appelé lors de la création
             pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
@@ -298,18 +299,18 @@ class TestPydanticValidators:
             characters_excerpt=[],
         )
         
-        # WHEN: max_context_tokens < 100
+        # WHEN: max_context_tokens < MIN_CONTEXT_TOKENS
         try:
             request = GenerateUnityDialogueRequest(
                 user_instructions="Test",
                 context_selections=context_selection,
-                max_context_tokens=50,  # Invalide
-                llm_model_identifier="gpt-4o-mini"
+                max_context_tokens=5000,  # Invalide
+                llm_model_identifier="gpt-5-mini"
             )
             pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
         except ValueError as e:
             # THEN: ValueError doit être levée
-            assert "100" in str(e) or "minimum" in str(e).lower()
+            assert str(Defaults.MIN_CONTEXT_TOKENS) in str(e) or "minimum" in str(e).lower()
         
         # WHEN: max_context_tokens > MAX_CONTEXT_TOKENS
         try:
@@ -317,7 +318,7 @@ class TestPydanticValidators:
                 user_instructions="Test",
                 context_selections=context_selection,
                 max_context_tokens=Defaults.MAX_CONTEXT_TOKENS + 1000,  # Trop grand
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
             pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
         except ValueError as e:
@@ -333,27 +334,25 @@ class TestPydanticValidators:
         )
         
         # WHEN: max_completion_tokens < 100
-        try:
-            request = GenerateUnityDialogueRequest(
+        with pytest.raises(ValidationError) as exc_info:
+            GenerateUnityDialogueRequest(
                 user_instructions="Test",
                 context_selections=context_selection,
                 max_completion_tokens=50,  # Invalide
-                llm_model_identifier="gpt-4o-mini"
+                llm_model_identifier="gpt-5-mini"
             )
-            pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
-        except ValueError as e:
-            # THEN: ValueError doit être levée
-            assert "100" in str(e) or "minimum" in str(e).lower()
+        # THEN: message doit mentionner la limite minimum
+        error_text = str(exc_info.value)
+        assert "100" in error_text or "minimum" in error_text.lower()
         
-        # WHEN: max_completion_tokens > 16000
-        try:
-            request = GenerateUnityDialogueRequest(
+        # WHEN: max_completion_tokens > 50000 (limite du schéma)
+        with pytest.raises(ValidationError) as exc_info2:
+            GenerateUnityDialogueRequest(
                 user_instructions="Test",
                 context_selections=context_selection,
-                max_completion_tokens=20000,  # Trop grand
-                llm_model_identifier="gpt-4o-mini"
+                max_completion_tokens=60000,  # Trop grand
+                llm_model_identifier="gpt-5-mini"
             )
-            pytest.fail("Le validator Pydantic aurait dû lever une ValueError")
-        except ValueError as e:
-            # THEN: ValueError doit être levée
-            assert "16000" in str(e) or "maximum" in str(e).lower()
+        # THEN: message doit mentionner la limite maximum
+        error_text2 = str(exc_info2.value)
+        assert "50000" in error_text2 or "maximum" in error_text2.lower()

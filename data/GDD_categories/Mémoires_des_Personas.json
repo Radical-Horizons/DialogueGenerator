@@ -1,0 +1,380 @@
+[
+  {
+    "Nom": "Inventaire — design validé, catégories, slots, nouvelles catégories Témoignages+Savoirs",
+    "sections": {
+      "_general": "Système Inventaire créé (Inventaire). Inventaire partagé unique, 6 catégories-onglets mappées 1:1 sur les systèmes : Équipement (Caract.&Comp.), Consommables (Effort), Matériaux (Économie), Objets de quête (Quêtes), Témoignages=NOUVEAU (Dialogues+Influence&Respect — montrer réversible/offrir irréversible), Savoirs=NOUVEAU (Connaissances — non consommé après étude, un livre ne disparaît pas). ObjetsDePouvoir SUPPRIMÉ (trop flou → redistribuer vers Équipement ou Témoignages). Slots : 3 universels (Relique/Sceau/Catalyseur) + 1 unique par hôte (Uresaïr=Aspect, Vethraak=Gadget, Eonundé=Greffon). Pas d'encombrement V1. Trois concepts orthogonaux : slots uniques/hôte, restrictions usage/hôte, espace partagé. Principe clé validé par Marc : \"une catégorie = un système\" — dérivé directement des systèmes existants."
+    },
+    "notion_page_id": "0004ca85-b66a-46c2-be47-767a067b3d79"
+  },
+  {
+    "Nom": "L'Éthérée — émotions vives, pas d'empathie perceptuelle",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "06be47da-57e4-4e1c-9043-404e3484e703"
+  },
+  {
+    "Nom": "Ancres d'artiste Gemini — seuil de qualité, pas option",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "0faa8ff1-4f15-4058-9224-318eb74cb317"
+  },
+  {
+    "Nom": "Déclencheurs immédiats pour création de mémoires",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "102962a1-55d3-4a78-a86a-cbd8fac65224"
+  },
+  {
+    "Nom": "Migration 10 personas vers gabarit simplifié",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "1b048909-c135-465c-b346-bf7485a0114f"
+  },
+  {
+    "Nom": "Simplification des fiches personas et architecture skills",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "1f1b79c7-81e2-4480-984e-ba155a761f39"
+  },
+  {
+    "Nom": "Création persona PromptEngineer (Iris) + Skill Prompt Engineering",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "2304d5e6-57ee-460b-8f01-28e5ccfccf15"
+  },
+  {
+    "Nom": "Évaluation patterns — porter sur le pattern lui-même",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "2eea22b4-5714-44c2-9a9b-b442c1d5ba85"
+  },
+  {
+    "Nom": "Veille RPG commerciaux — préférences design transversales de Marc",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "35342ba7-9c4e-442e-80e9-df3aadafbc50"
+  },
+  {
+    "Nom": "Skill Recherche Deep Dive — v1 créé, v2 à faire",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "3642537b-b2e8-4530-80ca-c986b91e99df"
+  },
+  {
+    "Nom": "Brainstorming multiculturel intégré aux 7 skills créatifs",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "404f578c-5a9c-49a5-8ace-1c6c4b8fa3d5"
+  },
+  {
+    "Nom": "Base Actes narratifs et structure en 3 actes",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "4061feeb-82a8-4a7e-a665-76cdd1e18951"
+  },
+  {
+    "Nom": "Worldbuilding des religions",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "432c2a7a-02a4-4996-ab3c-310d079dd847"
+  },
+  {
+    "Nom": "Audit taxonomie Vifs-Formes — mars 2026",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "4978ac88-1d4d-4463-88f6-e133b82f9d73"
+  },
+  {
+    "Nom": "Uresaïr — empathie par descente de niveau",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "4bd3f998-2bd3-4f19-aa17-504beb6ef9db"
+  },
+  {
+    "Nom": "Jalon Phase d'écriture (sept. 2026)",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "4f65d0b6-e346-4199-965e-c8a33f2d1a79"
+  },
+  {
+    "Nom": "Création de 6 skills dédiés pour personas migrés",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "4f87ac45-ec7a-479d-b955-01c71479d0c7"
+  },
+  {
+    "Nom": "Section Histoire = historiographie narrative, pas essai thématique",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "4f884bf4-e215-4e5c-87a3-6415512b175e"
+  },
+  {
+    "Nom": "Obligations CNC FAJV aide à l'écriture — durée et portée",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "51c980b7-40c6-4afd-95c2-04754c0646ce"
+  },
+  {
+    "Nom": "Mémoires persona — view direct, pas SQL LIKE",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "5db3718c-2351-428d-9254-2bad401d5d8e"
+  },
+  {
+    "Nom": "Restructuration skills + réécriture Gestion de Lieux",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "61505588-a643-41b4-812c-a8ff028f97f0"
+  },
+  {
+    "Nom": "Registre préféré pour le Marché Automaton",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "635c9b3e-468f-4983-bf12-3a9127e0d1b8"
+  },
+  {
+    "Nom": "FAJV déposé au CNC (jan. 2026)",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "642371fe-d095-430d-ba34-dbec8c4aec54"
+  },
+  {
+    "Nom": "Dialogues hors Notion — base JSON jeu",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "691db225-7a45-4a83-b53a-600d0119659f"
+  },
+  {
+    "Nom": "Split skills espèces : civilisées vs faune/flore/classes",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "6f470822-e3c7-4757-be28-88b67d30bc8e"
+  },
+  {
+    "Nom": "Sous-pages : bloc <unknown> non lisible",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "73b66241-e285-4b2d-9d47-37317da0df62"
+  },
+  {
+    "Nom": "Sujet 1 — Classes Vifs-Formes complété",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "79299b92-f129-49ac-ab8d-381c220079ab"
+  },
+  {
+    "Nom": "Personnages Gemini — composition et résistances du modèle",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "7ec3ef39-2fa8-4729-8d9c-834adb75115b"
+  },
+  {
+    "Nom": "Artisans transmutateurs — création complète + propagation",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "83ece051-73b0-4d8c-abee-f3c9d525b251"
+  },
+  {
+    "Nom": "Influence/Respect : rôles distincts",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "86c40a7d-c0d8-475e-bef6-eb3df177528d"
+  },
+  {
+    "Nom": "Intégration système mémoire dans 12 personas",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "89ce0246-9cfb-4b4a-ba28-4fecc0ab9893"
+  },
+  {
+    "Nom": "Ne jamais créer une US sans remplir le template",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "98f97d46-7930-4b18-a57f-c74e07175ab5"
+  },
+  {
+    "Nom": "Dialogues — accès via data source direct",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "9bdc11a6-1e33-4dd4-89bb-d2fbc56d3ab3"
+  },
+  {
+    "Nom": "Propagation de noms propres — toujours vérifier le nom complet à la source",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a37d01e4-1bec-4e3c-83e9-67d02a1f9e96"
+  },
+  {
+    "Nom": "Création persona Analyste (mode Exploratoire)",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a4c6d87d-45de-4fe7-9cd9-97b050a52693"
+  },
+  {
+    "Nom": "Point de vue de l'Éthérée dans les rêves",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "aeff4ced-e793-49b3-b7b3-0279294e7d0c"
+  },
+  {
+    "Nom": "Structure de prompt Nano Banana validée (mars 2026)",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "b63ea809-bb8d-458d-9952-70c9fd270110"
+  },
+  {
+    "Nom": "Point de vue joueur — jamais les pensées des PNJ",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "b9590788-95b1-4e53-a38b-bafb18ec9cc0"
+  },
+  {
+    "Nom": "Cosmologie pré-Agénèse - principes clés",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "bbc82e2f-8ffe-4ffa-9c52-a4c42cf66622"
+  },
+  {
+    "Nom": "Restructuration skills RDD + Personnages sur gabarit",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "bd0884dc-82c5-4a76-b67e-02844256d3ab"
+  },
+  {
+    "Nom": "Oppression intra-spécifique — le racisme n'a pas besoin des espèces",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c18d259f-7bbd-4019-aa16-64ed48f853ef"
+  },
+  {
+    "Nom": "Prompts Léviathan — leçons comparaison mars 2026",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c36a7ec7-8507-4f7e-88ff-0d1f10ebfbc7"
+  },
+  {
+    "Nom": "Terminologie réputation (Influence / Respect / Prestige)",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c9e7008e-63c3-4391-b302-6b2f62cc470b"
+  },
+  {
+    "Nom": "Choix structurés type CRPG",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "ce92ff28-d593-4946-931f-2a7d8f722ce3"
+  },
+  {
+    "Nom": "Élargissement Vérification Patterns → Gestion de Patterns",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "cf7e6f95-2b86-4e6b-9f2c-d2787c713771"
+  },
+  {
+    "Nom": "Abraldique = langue de la Magocratie, pas des Aldravinds",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "dd2698d6-0007-4016-a6bd-eee88d9784e4"
+  },
+  {
+    "Nom": "Structure Macro restructurée (fév. 2026)",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "e2462ec8-2573-4bf0-87fb-c404c59ddfe1"
+  },
+  {
+    "Nom": "Guides prompts actuels = Flux + LoRA custom (style géré par le LoRA)",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "eb1b8150-9153-4517-9b8a-0dcbd3105ffe"
+  },
+  {
+    "Nom": "Création du Glossaire — Méthodologie Entité supérieure biopunk",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "ed28c841-a7ae-4fc8-88ad-892d53306a14"
+  },
+  {
+    "Nom": "Transparence : ne pas prétendre savoir sans requête",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f0ba68a8-1ff9-4ad8-b25c-297a9bd74c30"
+  },
+  {
+    "Nom": "Prioriser les relations DB avant la recherche sémantique",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f2f3eb45-3ebf-4918-a66b-917835df0a44"
+  },
+  {
+    "Nom": "Analyste : ajout culture générale et Inspirations",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f478916d-6f46-47da-9e36-6a0fec60553b"
+  },
+  {
+    "Nom": "Langues étrangères dans Escelion — principe d'usage",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "fdebc2af-c3c3-4350-b109-1043b49d19c2"
+  },
+  {
+    "Nom": "PNJ amusant : assumer la caricature",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "fedc8a53-f3b2-41d2-a8ce-32aa8e88ea09"
+  }
+]

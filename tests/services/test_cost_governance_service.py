@@ -21,8 +21,9 @@ def cost_governance_service(mock_budget_repository):
 def test_check_budget_allowed_under_90_percent(cost_governance_service, mock_budget_repository):
     """Teste check_budget quand budget < 90% (pas de warning)."""
     # Setup: budget actuel = 50€ sur 100€ (50%)
+    current_month = datetime.now().strftime("%Y-%m")
     mock_budget_repository.get_budget.return_value = {
-        "month": "2026-01",
+        "month": current_month,
         "amount": 50.0,
         "quota": 100.0,
         "updated_at": datetime.now().isoformat()
@@ -38,8 +39,9 @@ def test_check_budget_allowed_under_90_percent(cost_governance_service, mock_bud
 def test_check_budget_soft_warning_at_90_percent(cost_governance_service, mock_budget_repository):
     """Teste check_budget avec soft warning à 90%."""
     # Setup: budget actuel = 80€ sur 100€, coût estimé = 10€ → 90€ total (90%)
+    current_month = datetime.now().strftime("%Y-%m")
     mock_budget_repository.get_budget.return_value = {
-        "month": "2026-01",
+        "month": current_month,
         "amount": 80.0,
         "quota": 100.0,
         "updated_at": datetime.now().isoformat()
@@ -57,8 +59,9 @@ def test_check_budget_soft_warning_at_90_percent(cost_governance_service, mock_b
 def test_check_budget_hard_block_at_100_percent(cost_governance_service, mock_budget_repository):
     """Teste check_budget avec hard block à 100%."""
     # Setup: budget actuel = 90€ sur 100€, coût estimé = 10€ → 100€ total (100%)
+    current_month = datetime.now().strftime("%Y-%m")
     mock_budget_repository.get_budget.return_value = {
-        "month": "2026-01",
+        "month": current_month,
         "amount": 90.0,
         "quota": 100.0,
         "updated_at": datetime.now().isoformat()
@@ -74,8 +77,9 @@ def test_check_budget_hard_block_at_100_percent(cost_governance_service, mock_bu
 def test_check_budget_hard_block_over_100_percent(cost_governance_service, mock_budget_repository):
     """Teste check_budget avec hard block > 100%."""
     # Setup: budget actuel = 95€ sur 100€, coût estimé = 10€ → 105€ total (105%)
+    current_month = datetime.now().strftime("%Y-%m")
     mock_budget_repository.get_budget.return_value = {
-        "month": "2026-01",
+        "month": current_month,
         "amount": 95.0,
         "quota": 100.0,
         "updated_at": datetime.now().isoformat()
@@ -116,8 +120,9 @@ def test_check_budget_reset_monthly(cost_governance_service, mock_budget_reposit
 
 def test_get_budget_status(cost_governance_service, mock_budget_repository):
     """Teste get_budget_status."""
+    current_month = datetime.now().strftime("%Y-%m")
     mock_budget_repository.get_budget.return_value = {
-        "month": "2026-01",
+        "month": current_month,
         "amount": 75.0,
         "quota": 100.0,
         "updated_at": datetime.now().isoformat()
@@ -155,3 +160,20 @@ def test_update_budget(cost_governance_service, mock_budget_repository):
     assert call_args[0][1] == current_month  # month
     assert call_args[0][2] == 65.0  # amount (50 + 15 = 65)
     assert call_args[0][3] == 100.0  # quota (préservé)
+
+
+def test_check_budget_quota_zero_means_unlimited(cost_governance_service, mock_budget_repository):
+    """Quota 0 (ou absent) = pas de plafond : générations autorisées."""
+    current_month = datetime.now().strftime("%Y-%m")
+    mock_budget_repository.get_budget.return_value = {
+        "month": current_month,
+        "amount": 0.0,
+        "quota": 0.0,
+        "updated_at": datetime.now().isoformat(),
+    }
+
+    result = cost_governance_service.check_budget(user_id="user_1", estimated_cost=50.0)
+
+    assert result["allowed"] is True
+    assert result["percentage"] == 0.0
+    assert result["warning"] is None

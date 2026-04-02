@@ -9,7 +9,7 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { theme } from '../../theme'
 
 export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
-  const { data, selection, updateSelection, swapCharacters, isLoading } =
+  const { data, selection, updateSelection, swapCharacters, randomizeField, isLoading } =
     useSceneSelection()
   const { setSceneSelection } = useGenerationStore()
   const [recentCharacters, setRecentCharacters] = useState<string[]>([])
@@ -79,6 +79,27 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     label: name,
   }))
 
+  const iconActionSize = 36
+
+  const randomButtonStyle: React.CSSProperties = {
+    width: `${iconActionSize}px`,
+    height: `${iconActionSize}px`,
+    minWidth: `${iconActionSize}px`,
+    minHeight: `${iconActionSize}px`,
+    padding: 0,
+    border: `1px solid ${theme.border.primary}`,
+    borderRadius: '6px',
+    backgroundColor: theme.button.default.background,
+    color: theme.button.default.color,
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    opacity: 1,
+  }
+
   const hasContext = selection.characterA || selection.characterB || selection.sceneRegion
 
   if (!hasContext && !isLoading) {
@@ -87,7 +108,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
         style={{
           padding: '2rem',
           border: `1px dashed ${theme.border.primary}`,
-          borderRadius: '4px',
+          borderRadius: '8px',
           backgroundColor: theme.background.tertiary,
           marginBottom: '1rem',
           textAlign: 'center',
@@ -106,10 +127,10 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   return (
     <div
       style={{
-        padding: '0.75rem',
+        padding: '1rem',
         border: `1px solid ${theme.border.primary}`,
-        borderRadius: '4px',
-        backgroundColor: theme.background.panel,
+        borderRadius: '8px',
+        backgroundColor: theme.background.tertiary,
         marginBottom: '1rem',
       }}
     >
@@ -134,17 +155,31 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           marginBottom: '0.5rem',
         }}
       >
-        <div style={{ flex: '1 1 0' }}>
-          <Combobox
-            options={characterOptions}
-            value={selection.characterA}
-            onChange={handleCharacterAChange}
-            placeholder="PJ: (Aucun) - Rechercher..."
-            disabled={isLoading}
-            allowClear
-            recentlyUsed={recentCharacters}
-            onRecentUpdate={setRecentCharacters}
-          />
+        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <Combobox
+              options={characterOptions}
+              value={selection.characterA}
+              onChange={handleCharacterAChange}
+              placeholder="PJ: (Aucun) - Rechercher..."
+              disabled={isLoading}
+              allowClear
+              recentlyUsed={recentCharacters}
+              onRecentUpdate={setRecentCharacters}
+            />
+          </div>
+          <button
+            onClick={() => randomizeField('characterA')}
+            disabled={isLoading || data.characters.length === 0}
+            title="PJ Aléatoire"
+            style={{
+              ...randomButtonStyle,
+              cursor: isLoading || data.characters.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: isLoading || data.characters.length === 0 ? 0.5 : 1,
+            }}
+          >
+            🎲
+          </button>
         </div>
 
         <button
@@ -152,11 +187,13 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           disabled={isLoading || (!selection.characterA && !selection.characterB)}
           title="Échanger PJ et PNJ (Alt+S)"
           style={{
-            width: '28px',
-            height: '28px',
+            width: `${iconActionSize}px`,
+            height: `${iconActionSize}px`,
+            minWidth: `${iconActionSize}px`,
+            minHeight: `${iconActionSize}px`,
             padding: 0,
             border: `1px solid ${theme.border.primary}`,
-            borderRadius: '4px',
+            borderRadius: '6px',
             backgroundColor: theme.button.default.background,
             color: theme.button.default.color,
             cursor:
@@ -167,7 +204,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               isLoading || (!selection.characterA && !selection.characterB)
                 ? 0.5
                 : 1,
-            fontSize: '1.1rem',
+            fontSize: '1.15rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -177,17 +214,31 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           ⇄
         </button>
 
-        <div style={{ flex: '1 1 0' }}>
-          <Combobox
-            options={characterOptions}
-            value={selection.characterB}
-            onChange={handleCharacterBChange}
-            placeholder="PNJ: (Aucun) - Rechercher..."
-            disabled={isLoading}
-            allowClear
-            recentlyUsed={recentCharacters}
-            onRecentUpdate={setRecentCharacters}
-          />
+        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <Combobox
+              options={characterOptions}
+              value={selection.characterB}
+              onChange={handleCharacterBChange}
+              placeholder="PNJ: (Aucun) - Rechercher..."
+              disabled={isLoading}
+              allowClear
+              recentlyUsed={recentCharacters}
+              onRecentUpdate={setRecentCharacters}
+            />
+          </div>
+          <button
+            onClick={() => randomizeField('characterB')}
+            disabled={isLoading || data.characters.length === 0}
+            title="PNJ Aléatoire"
+            style={{
+              ...randomButtonStyle,
+              cursor: isLoading || data.characters.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: isLoading || data.characters.length === 0 ? 0.5 : 1,
+            }}
+          >
+            🎲
+          </button>
         </div>
       </div>
 
@@ -199,40 +250,68 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           alignItems: 'center',
         }}
       >
-        <div style={{ flex: '1 1 0' }}>
-          <Combobox
-            options={regionOptions}
-            value={selection.sceneRegion}
-            onChange={handleRegionChange}
-            placeholder="Région: (Aucune) - Rechercher..."
-            disabled={isLoading}
-            allowClear
-            recentlyUsed={recentRegions}
-            onRecentUpdate={setRecentRegions}
-          />
+        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <Combobox
+              options={regionOptions}
+              value={selection.sceneRegion}
+              onChange={handleRegionChange}
+              placeholder="Région (macro / parent) — Rechercher…"
+              disabled={isLoading}
+              allowClear
+              recentlyUsed={recentRegions}
+              onRecentUpdate={setRecentRegions}
+            />
+          </div>
+          <button
+            onClick={() => randomizeField('sceneRegion')}
+            disabled={isLoading || data.regions.length === 0}
+            title="Région Aléatoire"
+            style={{
+              ...randomButtonStyle,
+              cursor: isLoading || data.regions.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: isLoading || data.regions.length === 0 ? 0.5 : 1,
+            }}
+          >
+            🎲
+          </button>
         </div>
 
         {/* Espaceur pour aligner avec le bouton swap de la ligne supérieure */}
         <div
           style={{
-            width: '28px',
+            width: `${iconActionSize}px`,
             flexShrink: 0,
           }}
         />
 
-        <div style={{ flex: '1 1 0' }}>
-          <Combobox
-            options={subLocationOptions}
-            value={selection.subLocation}
-            onChange={handleSubLocationChange}
-            placeholder={
-              selection.sceneRegion
-                ? 'Lieu: (Aucun) - Rechercher...'
-                : 'Lieu: Sélectionnez d\'abord une région'
-            }
-            disabled={isLoading || !selection.sceneRegion}
-            allowClear
-          />
+        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <Combobox
+              options={subLocationOptions}
+              value={selection.subLocation}
+              onChange={handleSubLocationChange}
+              placeholder={
+                selection.sceneRegion
+                  ? 'Lieu ou zone détaillée — Rechercher…'
+                  : 'Choisir d’abord une région'
+              }
+              disabled={isLoading || !selection.sceneRegion}
+              allowClear
+            />
+          </div>
+          <button
+            onClick={() => randomizeField('subLocation')}
+            disabled={isLoading || !selection.sceneRegion || data.subLocations.length === 0}
+            title="Lieu Aléatoire"
+            style={{
+              ...randomButtonStyle,
+              cursor: isLoading || !selection.sceneRegion || data.subLocations.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: isLoading || !selection.sceneRegion || data.subLocations.length === 0 ? 0.5 : 1,
+            }}
+          >
+            🎲
+          </button>
         </div>
       </div>
     </div>

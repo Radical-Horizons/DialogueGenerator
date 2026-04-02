@@ -247,10 +247,17 @@ export function ToastContainer() {
   )
 }
 
-// Hook pour utiliser les toasts facilement
+/** Type de la fonction retournée par useToast, pour typage des hooks qui la reçoivent en paramètre. */
+export type UseToastFn = (
+  message: string,
+  type?: ToastType,
+  duration?: number,
+  actions?: ToastAction[]
+) => string
+
 export function useToast() {
-  return useCallback(
-    (message: string, type: ToastType = 'info', duration?: number, actions?: ToastAction[]): string => {
+  return useCallback<UseToastFn>(
+    (message: string, type: ToastType = 'info', duration?: number, actions?: ToastAction[]) => {
       return toastManager.show(message, type, duration, actions)
     },
     []

@@ -1,8 +1,32 @@
 /**
  * Store Zustand pour la gestion des presets de génération
  */
+import { AxiosError } from 'axios';
 import { create } from 'zustand';
 import type { Preset, PresetCreate, PresetUpdate, PresetValidationResult } from '../types/preset';
+import {
+  listPresetsApi,
+  getPresetApi,
+  createPresetApi,
+  updatePresetApi,
+  deletePresetApi,
+  validatePresetApi,
+} from '../api/presets';
+
+function formatPresetRequestError(actionLabel: string, error: unknown): string {
+  if (error instanceof AxiosError && error.response?.status != null) {
+    return `Failed to ${actionLabel}: ${error.response.status}`;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return `Failed to ${actionLabel}`;
+}
+
+/** Retour de création : message serveur d’auto-nettoyage éventuel (toast). */
+export interface PresetCreateOutcome {
+  cleanupMessage: string | null;
+}
 
 interface PresetStore {
   // État
@@ -13,8 +37,8 @@ interface PresetStore {
 
   // Actions
   loadPresets: () => Promise<void>;
-  createPreset: (presetData: PresetCreate) => Promise<Response>;
-  updatePreset: (id: string, updateData: PresetUpdate) => Promise<Response>;
+  createPreset: (presetData: PresetCreate) => Promise<PresetCreateOutcome>;
+  updatePreset: (id: string, updateData: PresetUpdate) => Promise<void>;
   deletePreset: (id: string) => Promise<void>;
   loadPreset: (id: string) => Promise<void>;
   validatePreset: (id: string) => Promise<PresetValidationResult>;
@@ -33,44 +57,31 @@ export const usePresetStore = create<PresetStore>((set) => ({
   loadPresets: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/v1/presets');
-      if (!response.ok) {
-        throw new Error(`Failed to load presets: ${response.status}`);
-      }
-      const presets = await response.json();
+      const presets = await listPresetsApi();
       set({ presets, isLoading: false });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      set({ error: errorMessage, isLoading: false });
+      set({
+        error: formatPresetRequestError('load presets', error),
+        isLoading: false,
+      });
     }
   },
 
   createPreset: async (presetData: PresetCreate) => {
     set({ isLoading: true, error: null });
     try {
-      const body = JSON.stringify(presetData);
-      const response = await fetch('/api/v1/presets', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to create preset: ${response.status}`);
-      }
-
-      const newPreset = await response.json();
+      const { preset: newPreset, cleanupMessage } = await createPresetApi(presetData);
       set((state) => ({
         presets: [...state.presets, newPreset],
         isLoading: false,
       }));
-      
-      return response;
+
+      return { cleanupMessage };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      set({ error: errorMessage, isLoading: false });
+      set({
+        error: formatPresetRequestError('create preset', error),
+        isLoading: false,
+      });
       throw error;
     }
   },
@@ -78,31 +89,18 @@ export const usePresetStore = create<PresetStore>((set) => ({
   updatePreset: async (id: string, updateData: PresetUpdate) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/v1/presets/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update preset: ${response.status}`);
-      }
-
-      const updatedPreset = await response.json();
+      const updatedPreset = await updatePresetApi(id, updateData);
       set((state) => ({
         presets: state.presets.map((p) => (p.id === id ? updatedPreset : p)),
-        selectedPreset: state.selectedPreset?.id === id ? updatedPreset : state.selectedPreset,
+        selectedPreset:
+          state.selectedPreset?.id === id ? updatedPreset : state.selectedPreset,
         isLoading: false,
       }));
-      
-      // Note: Header X-Preset-Cleanup-Message doit être lu par le composant appelant
-      // pour afficher le toast (comme dans PresetSelector.handleCreatePreset)
-      return response;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      set({ error: errorMessage, isLoading: false });
+      set({
+        error: formatPresetRequestError('update preset', error),
+        isLoading: false,
+      });
       throw error;
     }
   },
@@ -110,50 +108,40 @@ export const usePresetStore = create<PresetStore>((set) => ({
   deletePreset: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/v1/presets/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete preset: ${response.status}`);
-      }
-
+      await deletePresetApi(id);
       set((state) => ({
         presets: state.presets.filter((p) => p.id !== id),
-        selectedPreset: state.selectedPreset?.id === id ? null : state.selectedPreset,
+        selectedPreset:
+          state.selectedPreset?.id === id ? null : state.selectedPreset,
         isLoading: false,
       }));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      set({ error: errorMessage, isLoading: false });
+      set({
+        error: formatPresetRequestError('delete preset', error),
+        isLoading: false,
+      });
     }
   },
 
   loadPreset: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/v1/presets/${id}`);
-      if (!response.ok) {
-        throw new Error(`Failed to load preset: ${response.status}`);
-      }
-      const preset = await response.json();
+      const preset = await getPresetApi(id);
       set({ selectedPreset: preset, isLoading: false });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      set({ error: errorMessage, isLoading: false, selectedPreset: null });
+      set({
+        error: formatPresetRequestError('load preset', error),
+        isLoading: false,
+        selectedPreset: null,
+      });
     }
   },
 
   validatePreset: async (id: string): Promise<PresetValidationResult> => {
     try {
-      const response = await fetch(`/api/v1/presets/${id}/validate`);
-      if (!response.ok) {
-        throw new Error(`Failed to validate preset: ${response.status}`);
-      }
-      return await response.json();
+      return await validatePresetApi(id);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(errorMessage);
+      throw new Error(formatPresetRequestError('validate preset', error));
     }
   },
 

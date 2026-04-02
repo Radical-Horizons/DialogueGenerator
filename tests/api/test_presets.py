@@ -144,7 +144,7 @@ class TestPresetsEndpoints:
         response = client.get("/api/v1/presets/non-existent-id")
         
         assert response.status_code == 404
-        assert "not found" in response.json()["detail"].lower()
+        assert "not found" in response.json()["error"]["message"].lower()
     
     def test_update_preset_success(self, client: TestClient, mock_preset_service: MagicMock):
         """PUT /api/v1/presets/{id} : mettre à jour preset."""
@@ -252,7 +252,7 @@ class TestPresetsErrorHandling:
         response = client.post("/api/v1/presets", json=preset_data)
         
         assert response.status_code == 500
-        assert "permission" in response.json()["detail"].lower()
+        assert "permission" in response.json()["error"]["message"].lower()
     
     def test_create_preset_disk_full_error(self, client: TestClient, mock_preset_service: MagicMock):
         """POST /api/v1/presets : 500 si disque plein."""

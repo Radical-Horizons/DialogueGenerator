@@ -5,11 +5,12 @@
  */
 import { useState, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
+import { usePresetStore } from '../store/presetStore'
 import { useContextStore } from '../store/contextStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
 import { filterObsoleteReferences } from '../utils/presetUtils'
 import { getErrorMessage } from '../types/errors'
-import type { Preset } from '../types/preset'
+import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
 
 export interface UsePresetManagementReturn {
   /** Charger un preset avec validation */
@@ -17,11 +18,11 @@ export interface UsePresetManagementReturn {
   /** Appliquer un preset directement */
   applyPreset: (preset: Preset) => void
   /** Obtenir la configuration actuelle pour sauvegarde */
-  getCurrentConfiguration: () => any
+  getCurrentConfiguration: () => PresetConfiguration
   /** État du modal de validation */
   isValidationModalOpen: boolean
   /** Résultat de validation */
-  validationResult: any
+  validationResult: PresetValidationResult | null
   /** Preset en attente d'application */
   pendingPreset: Preset | null
   /** Ouvrir/fermer le modal de validation */
@@ -48,9 +49,11 @@ export interface UsePresetManagementOptions {
   /** Setter pour topP - optionnel */
   setTopP?: (value: number | null) => void
   /** Reasoning effort - optionnel */
-  reasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  reasoningEffort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
   /** Setter pour reasoningEffort - optionnel */
-  setReasoningEffort?: (value: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | null) => void
+  setReasoningEffort?: (
+    value: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null
+  ) => void
   /** Max completion tokens - optionnel */
   maxCompletionTokens?: number | null
   /** Setter pour maxCompletionTokens - optionnel */
@@ -81,29 +84,20 @@ export function usePresetManagement(
     setIsDirty,
     setSaveStatus,
     toast,
-    topP,
     setTopP,
-    reasoningEffort,
     setReasoningEffort,
-    maxCompletionTokens,
     setMaxCompletionTokens,
-    maxChoices,
     setMaxChoices,
-    llmModel,
     setLlmModel,
   } = options
 
   const [isValidationModalOpen, setIsValidationModalOpen] = useState(false)
-  const [validationResult, setValidationResult] = useState<any>(null)
+  const [validationResult, setValidationResult] = useState<PresetValidationResult | null>(null)
   const [pendingPreset, setPendingPreset] = useState<Preset | null>(null)
 
   const {
     sceneSelection,
     setSceneSelection,
-    setDialogueStructure,
-    setSystemPromptOverride,
-    // setUnityDialogueResponse non utilisé - gardé pour usage futur
-    // setUnityDialogueResponse,
   } = useGenerationStore()
 
   const applyPreset = useCallback((preset: Preset) => {
@@ -172,9 +166,9 @@ export function usePresetManagement(
 
   const handlePresetLoaded = useCallback(async (preset: Preset) => {
     try {
-      // Validation du preset
-      const validation = await fetch(`/api/v1/presets/${preset.id}/validate`)
-      const validationResult = await validation.json()
+      const validationResult = await usePresetStore
+        .getState()
+        .validatePreset(preset.id)
 
       if (!validationResult.valid) {
         // Afficher modal de validation si références obsolètes
@@ -259,7 +253,7 @@ export function usePresetManagement(
       ...(options.llmModel !== undefined ? { llmModel: options.llmModel } : {}),
     }
     
-    return config
+    return config as PresetConfiguration
   }, [sceneSelection, options.userInstructions, options.topP, options.reasoningEffort, options.maxCompletionTokens, options.maxChoices, options.llmModel])
 
   return {

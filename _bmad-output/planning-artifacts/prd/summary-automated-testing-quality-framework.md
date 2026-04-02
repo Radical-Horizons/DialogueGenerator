@@ -6,7 +6,7 @@ DialogueGenerator implements a **4-layer quality framework** inspired by EQ-Benc
 
 **Layer 1 (MVP, $0):** Structural tests (orphans, cycles, agency, branching) - real-time inline badges
 
-**Layer 2 (V1.0, $0):** Slop detection (EQ-Bench metrics + CRPG patterns) - automated text analysis
+**Layer 2 (V1.0, $0):** Slop detection — Slop Score **EQ-Bench aligned** (60% words, 25% not-x-but-y, 15% trigrams, listes officielles) + métriques DG (lore dumps, lexical diversity) et méta-métrique DG Quality Index
 
 **Layer 3 (V1.5, $0.01/node):** Rubric LLM judge (13 CRPG abilities, user toggle) - targeted quality feedback
 
@@ -21,7 +21,7 @@ DialogueGenerator implements a **4-layer quality framework** inspired by EQ-Benc
 - **Selective LLM judging** (user toggle, 10% sampling) balances quality feedback with cost
 
 **Success criteria:**
-- 80%+ generated nodes within baseline thresholds (slop ±2, vocab ±0.5)
+- 80%+ generated nodes within baseline thresholds (Slop Score EQ-bench ≤ PS:T+margin, vocab ±0.5, DG Quality Index dans cible)
 - <20% manual revision rate (Marc accepts 80%+ as-is)
 - 70%+ dialogues achieve "PS:T Quality: 8+/10" (marketing benchmark)
 

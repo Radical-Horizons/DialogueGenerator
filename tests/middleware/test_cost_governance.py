@@ -239,3 +239,50 @@ def test_middleware_concurrent_requests_at_90_percent(temp_budget_file):
         assert len(responses) == 3
         for thread_id, status_code in responses:
             assert status_code == 200, f"Thread {thread_id} devrait être autorisé avec warning"
+
+
+def test_middleware_resolve_model_uses_x_llm_model_header_when_known() -> None:
+    """L'en-tête X-LLM-Model (si présent dans llm_pricing.json) prime sur le défaut."""
+    from starlette.requests import Request
+
+    test_app = FastAPI()
+    mw = CostGovernanceMiddleware(test_app)
+    scope = {
+        "type": "http",
+        "asgi": {"version": "3.0"},
+        "method": "POST",
+        "path": "/api/v1/dialogues/generate/jobs",
+        "raw_path": b"/",
+        "root_path": "",
+        "scheme": "http",
+        "query_string": b"",
+        "headers": [(b"x-llm-model", b"gpt-5-nano")],
+        "client": ("127.0.0.1", 12345),
+        "server": ("127.0.0.1", 80),
+    }
+    req = Request(scope)
+    assert mw._resolve_model_for_cost_estimate(req) == "gpt-5-nano"
+
+
+def test_middleware_resolve_model_ignores_unknown_x_llm_model_header() -> None:
+    """Un modèle inconnu dans l'en-tête est ignoré ; retour au défaut sans query."""
+    from starlette.requests import Request
+    from constants import Defaults
+
+    test_app = FastAPI()
+    mw = CostGovernanceMiddleware(test_app)
+    scope = {
+        "type": "http",
+        "asgi": {"version": "3.0"},
+        "method": "POST",
+        "path": "/api/v1/dialogues/generate/jobs",
+        "raw_path": b"/",
+        "root_path": "",
+        "scheme": "http",
+        "query_string": b"",
+        "headers": [(b"x-llm-model", b"totally-unknown-model-xyz")],
+        "client": ("127.0.0.1", 12345),
+        "server": ("127.0.0.1", 80),
+    }
+    req = Request(scope)
+    assert mw._resolve_model_for_cost_estimate(req) == Defaults.MODEL_ID

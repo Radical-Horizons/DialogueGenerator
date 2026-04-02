@@ -187,6 +187,16 @@ def setup_logging() -> None:
     Configure le format (JSON ou text) selon l'environnement et les variables
     d'environnement. Ajoute également un handler de fichier si activé.
     """
+    # Windows: éviter UnicodeEncodeError (ex. caractère ≤ dans les prompts loggés en DEBUG)
+    if sys.platform == "win32":
+        for stream in (sys.stdout, sys.stderr):
+            if hasattr(stream, "reconfigure"):
+                try:
+                    stream.reconfigure(encoding="utf-8", errors="replace")
+                except Exception:
+                    pass
+                break
+
     log_format = get_log_format()
     log_level = get_log_level()
     console_level = get_console_log_level()

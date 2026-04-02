@@ -1,0 +1,24 @@
+{
+  "file": "tests/integration/test_full_generation_flow.py",
+  "overall_score": 93,
+  "overall_grade": "A",
+  "dimension_scores": { "determinism": 100, "isolation": 100, "maintainability": 72, "performance": 100 },
+  "violations_summary": { "total": 2, "HIGH": 0, "MEDIUM": 1, "LOW": 1 },
+  "all_violations": [
+    {
+      "severity": "MEDIUM",
+      "category": "file-length",
+      "description": "Fichier 357 lignes (>300). Recommandation: extraire des helpers ou scinder en modules (ex. flow vs error-handling).",
+      "line": 0,
+      "file": "tests/integration/test_full_generation_flow.py"
+    },
+    {
+      "severity": "LOW",
+      "category": "missing-test-ids",
+      "description": "Aucun identifiant de test ni marqueurs P0/P1/P2/P3 pour traçabilité et sélection ciblée.",
+      "line": 0,
+      "file": "tests/integration/test_full_generation_flow.py"
+    }
+  ],
+  "strengths": ["GIVEN/WHEN/THEN explicites", "Mocks LLM uniquement (déterministe)", "Fixture renderer/unity_service réutilisables", "Test skip documenté (fallback future)"]
+}

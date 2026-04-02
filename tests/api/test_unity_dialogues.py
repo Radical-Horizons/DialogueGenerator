@@ -35,22 +35,16 @@ def client(mock_config_service):
 
 @pytest.fixture
 def sample_unity_dialogue():
-    """Contenu JSON Unity de test."""
+    """Contenu JSON Unity de test (v1.1.0 avec choiceId)."""
     return [
         {
             "id": "START",
             "speaker": "TEST_NPC",
             "line": "Bonjour, comment allez-vous ?",
             "choices": [
-                {
-                    "text": "Je vais bien",
-                    "targetNode": "node1"
-                },
-                {
-                    "text": "Pas très bien",
-                    "targetNode": "node2"
-                }
-            ]
+                {"choiceId": "c1", "text": "Je vais bien", "targetNode": "node1"},
+                {"choiceId": "c2", "text": "Pas très bien", "targetNode": "node2"},
+            ],
         },
         {
             "id": "node1",
@@ -116,6 +110,33 @@ class TestListUnityDialogues:
         data = response.json()
         assert data["total"] == 0
         assert data["dialogues"] == []
+
+    def test_list_unity_dialogues_ignores_sidecar_files(
+        self, client, mock_config_service, tmp_path
+    ):
+        """Ignore les sidecars layout/document générés par l'éditeur de graphe."""
+        (tmp_path / "dialogue_ok.json").write_text(
+            json.dumps([{"id": "START", "line": "OK"}]),
+            encoding="utf-8",
+        )
+        (tmp_path / "dialogue_ok.json.layout.json").write_text(
+            json.dumps({"nodes": {}}),
+            encoding="utf-8",
+        )
+        (tmp_path / "dialogue_ok.json.json").write_text(
+            json.dumps({"schemaVersion": "1.1.0", "nodes": []}),
+            encoding="utf-8",
+        )
+
+        mock_config_service.get_unity_dialogues_path.return_value = str(tmp_path)
+
+        response = client.get("/api/v1/unity-dialogues")
+
+        assert response.status_code == 200
+        data = response.json()
+        filenames = [d["filename"] for d in data["dialogues"]]
+        assert filenames == ["dialogue_ok.json"]
+        assert data["total"] == 1
     
     def test_list_unity_dialogues_path_not_configured(self, client, mock_config_service):
         """Test avec chemin Unity non configuré."""
@@ -260,7 +281,24 @@ class TestReadUnityDialogue:
         data = response.json()
         assert "error" in data
         assert data["error"]["code"] == "VALIDATION_ERROR"
-    
+
+    def test_read_unity_dialogue_document_format(self, client, mock_config_service, tmp_path, sample_unity_dialogue):
+        """GET accepte le format document (schemaVersion + nodes) et renvoie la liste des nœuds (ADR-008)."""
+        test_dir = tmp_path / "test_dialogues_doc_format"
+        test_dir.mkdir(parents=True, exist_ok=True)
+        doc_file = test_dir / "document_format.json"
+        document = {"schemaVersion": "1.1.0", "nodes": sample_unity_dialogue}
+        doc_file.write_text(json.dumps(document), encoding="utf-8")
+        mock_config_service.get_unity_dialogues_path.return_value = str(test_dir)
+        response = client.get("/api/v1/unity-dialogues/document_format.json")
+        assert response.status_code == 200
+        data = response.json()
+        assert "json_content" in data
+        content = json.loads(data["json_content"])
+        assert isinstance(content, list)
+        assert len(content) == len(sample_unity_dialogue)
+        assert content[0].get("id") == "START"
+
     def test_read_unity_dialogue_path_not_configured(self, client, mock_config_service):
         """Test avec chemin Unity non configuré."""
         mock_config_service.get_unity_dialogues_path.return_value = None
@@ -354,6 +392,36 @@ class TestDeleteUnityDialogue:
         data = response.json()
         assert "error" in data
         assert data["error"]["code"] == "VALIDATION_ERROR"
+
+    def test_delete_unity_dialogue_also_deletes_layout_and_seq(
+        self, client, mock_config_service, tmp_path, sample_unity_dialogue
+    ):
+        """Suppression d'un dialogue supprime aussi son layout (Assets/Layouts) et le fichier .seq."""
+        dialogue_dir = tmp_path / "Dialogue"
+        dialogue_dir.mkdir(parents=True, exist_ok=True)
+        layouts_dir = tmp_path / "Layouts"
+        layouts_dir.mkdir(parents=True, exist_ok=True)
+
+        doc_id = "to_delete"
+        dialogue_file = dialogue_dir / f"{doc_id}.json"
+        dialogue_file.write_text(json.dumps(sample_unity_dialogue), encoding="utf-8")
+        layout_file = layouts_dir / f"{doc_id}.layout.json"
+        layout_file.write_text(json.dumps({"nodes": {"START": {"x": 0, "y": 0}}}), encoding="utf-8")
+        layout_meta = layouts_dir / f"{doc_id}.layout.meta"
+        layout_meta.write_text(json.dumps({"revision": 1}), encoding="utf-8")
+        seq_file = dialogue_dir / f"{doc_id}.seq"
+        seq_file.write_text("1", encoding="utf-8")
+
+        mock_config_service.get_unity_dialogues_path.return_value = dialogue_dir
+        mock_config_service.get_unity_layouts_path.return_value = layouts_dir
+
+        response = client.delete(f"/api/v1/unity-dialogues/{doc_id}.json")
+
+        assert response.status_code == 204
+        assert not dialogue_file.exists()
+        assert not layout_file.exists()
+        assert not layout_meta.exists()
+        assert not seq_file.exists()
 
 
 class TestPreviewUnityDialogue:

@@ -256,3 +256,16 @@ class TestContextBuilderRealData:
 - Utiliser UTF-8 pour tous les fichiers de test
 - Éviter les caractères Unicode dans les `print()` (problèmes Windows)
 - Utiliser des fichiers de sortie pour les tests avec beaucoup de texte
+
+## Tests E2E (Playwright) — graphe
+
+Les specs sous `e2e/*.spec.ts` lancent API + frontend (voir `playwright.config.ts`).
+
+- **Chargement / drag** : `e2e/graph-load-display-nodes.spec.ts`
+- **ADR-008 / documents** : `e2e/documents-layout-adr008.spec.ts`
+- **Combobox de cible (Nœud suivant) + persistance document** : `e2e/graph-connection-target-dropdown.spec.ts`  
+  - Le panneau **`NodeEditorPanel`** n’est **pas** monté sur `/graph-editor` standalone : ce scénario passe par le **Dashboard** (bouton « Éditeur de Graphe ») puis sélection du document seedé. Détails : [`docs/architecture/adr-graph-connection-targets-ui-shell.md`](../architecture/adr-graph-connection-targets-ui-shell.md).
+
+```bash
+npx playwright test e2e/graph-connection-target-dropdown.spec.ts --project=chromium
+```

@@ -1,7 +1,7 @@
 """Service pour gérer les relations et liens entre éléments GDD."""
 import logging
 import re
-from typing import Dict, List, Optional, Set, TYPE_CHECKING
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from services.element_repository import ElementRepository
@@ -34,49 +34,117 @@ class ElementLinker:
         self._element_resolver = element_resolver
     
     def get_regions(self, locations: List[Dict]) -> List[str]:
-        """Retourne une liste de noms de régions uniques à partir des données de localisation.
+        """Retourne des noms de lieux pour l'index « régions » / catalogue.
+        
+        Comportement :
+        - Si au moins une fiche a ``Catégorie == "Région"`` (GDD agrégé classique), ne
+          retourne que ces noms (rétrocompatibilité).
+        - Sinon (fiches Notion individuelles sans champ ``Catégorie``), retourne tous
+          les ``Nom`` non vides, triés (insensible à la casse).
         
         Args:
             locations: Liste des lieux depuis GDDData.
             
         Returns:
-            Liste des noms de régions (catégorie "Région").
+            Noms de régions (mode classique) ou de tous les lieux (mode fiches).
         """
         if not locations:
             return []
-        return [
-            loc.get("Nom") for loc in locations
+        legacy_regions = [
+            loc.get("Nom")
+            for loc in locations
             if isinstance(loc, dict) and loc.get("Nom") and loc.get("Catégorie") == "Région"
         ]
+        if legacy_regions:
+            return sorted(set(legacy_regions), key=lambda n: str(n).casefold())
+        names = [
+            loc.get("Nom")
+            for loc in locations
+            if isinstance(loc, dict) and loc.get("Nom")
+        ]
+        return sorted(set(names), key=lambda n: str(n).casefold())
     
     def get_sub_locations(self, region_name: str, locations: List[Dict]) -> List[str]:
-        """Récupère les sous-lieux d'une région.
+        """Récupère les sous-lieux listés dans le champ ``Contient`` d'une fiche lieu.
         
         Args:
-            region_name: Nom de la région.
+            region_name: Nom du lieu (région classique ou toute fiche avec ``Contient``).
             locations: Liste des lieux depuis GDDData.
             
         Returns:
-            Liste des noms de sous-lieux.
+            Noms issus de ``Contient`` (séparés par des virgules), ou liste vide.
         """
         if not locations or not region_name:
             return []
-        
-        # Trouver la région
         region_details = None
         for loc in locations:
             if isinstance(loc, dict) and loc.get("Nom") == region_name:
                 region_details = loc
                 break
-        
-        if not region_details or region_details.get("Catégorie") != "Région":
-            logger.warning(f"'{region_name}' n'est pas une région valide ou n'a pas été trouvée.")
+        if not region_details:
+            logger.debug("Lieu introuvable pour sous-lieux: %s", region_name)
             return []
-        
         sub_locations_str = region_details.get("Contient")
-        if isinstance(sub_locations_str, str) and sub_locations_str:
-            return [name.strip() for name in sub_locations_str.split(',') if name.strip()]
+        if isinstance(sub_locations_str, str) and sub_locations_str.strip():
+            return [name.strip() for name in sub_locations_str.split(",") if name.strip()]
         return []
+
+    def get_scene_region_names(self, locations: List[Dict]) -> List[str]:
+        """Noms pour le sélecteur « région » de la scène principale.
+
+        Priorité : fiches ``Catégorie == "Région"`` ; sinon lieux avec ``Contient`` non vide ;
+        sinon tous les lieux (même logique que ``get_regions`` sans hiérarchie explicite).
+
+        Args:
+            locations: Liste des lieux GDD.
+
+        Returns:
+            Noms triés (casse ignorée).
+        """
+        if not locations:
+            return []
+        typed = [
+            loc.get("Nom")
+            for loc in locations
+            if isinstance(loc, dict) and loc.get("Nom") and loc.get("Catégorie") == "Région"
+        ]
+        if typed:
+            return sorted(set(typed), key=lambda n: str(n).casefold())
+        with_contient: List[str] = []
+        for loc in locations:
+            if not isinstance(loc, dict) or not loc.get("Nom"):
+                continue
+            raw = loc.get("Contient")
+            if isinstance(raw, str) and raw.strip():
+                with_contient.append(str(loc["Nom"]))
+        if with_contient:
+            return sorted(set(with_contient), key=lambda n: str(n).casefold())
+        return self.get_regions(locations)
+
+    def get_scene_sub_location_names(self, parent_name: str, locations: List[Dict]) -> List[str]:
+        """Noms pour le sélecteur « lieu » sous la région parente (scène principale).
+
+        Utilise ``Contient`` du parent si renseigné ; sinon tous les autres lieux sauf le parent.
+
+        Args:
+            parent_name: Nom de la fiche « région » sélectionnée.
+            locations: Liste des lieux GDD.
+
+        Returns:
+            Noms triés.
+        """
+        if not locations or not parent_name:
+            return []
+        from_contient = self.get_sub_locations(parent_name, locations)
+        if from_contient:
+            return from_contient
+        all_names = [
+            str(loc["Nom"])
+            for loc in locations
+            if isinstance(loc, dict) and loc.get("Nom")
+        ]
+        others = [n for n in all_names if n != parent_name]
+        return sorted(set(others), key=lambda n: n.casefold())
     
     def extract_linked_names(self, text_field: Optional[str], known_names_list: List[str]) -> Set[str]:
         """Extrait les noms liés depuis un champ texte.
@@ -97,6 +165,40 @@ class ElementLinker:
                 linked_found.add(pname)
         return linked_found
     
+    @staticmethod
+    def _sections_narrative_text(entity: Optional[Dict]) -> str:
+        """Concatène les champs texte sous ``sections`` (fiches shard / export Notion)."""
+        if not isinstance(entity, dict):
+            return ""
+        sections = entity.get("sections")
+        if not isinstance(sections, dict):
+            return ""
+        chunks: List[str] = []
+        for _key, val in sorted(sections.items(), key=lambda kv: str(kv[0])):
+            if isinstance(val, str) and val.strip():
+                chunks.append(val)
+        return "\n\n".join(chunks)
+
+    def _merge_mentions_from_narrative(
+        self,
+        narrative: str,
+        linked_elements: Dict[str, Set[str]],
+        name_bundles: Tuple[Tuple[str, List[str]], ...],
+    ) -> None:
+        """Détecte des noms GDD connus dans un bloc narratif (même heuristique que Relations)."""
+        if not narrative or not isinstance(narrative, str):
+            return
+        pairs: List[Tuple[str, str]] = []
+        for category, names in name_bundles:
+            for raw in names:
+                name = str(raw).strip()
+                if name:
+                    pairs.append((name, category))
+        pairs.sort(key=lambda x: len(x[0]), reverse=True)
+        for name, category in pairs:
+            if re.search(r"\b" + re.escape(name) + r"\b", narrative):
+                linked_elements[category].add(name)
+
     def find_related_names_in_text(self, text: str, known_character_names: List[str]) -> Set[str]:
         """Trouve les noms de personnages mentionnés dans un texte.
         
@@ -148,7 +250,16 @@ class ElementLinker:
         all_species_names = self._element_resolver.get_names("species")
         all_comm_names = self._element_resolver.get_names("communities")
         all_quest_names = self._element_resolver.get_names("quests")
-        
+
+        name_bundles: Tuple[Tuple[str, List[str]], ...] = (
+            ("characters", all_char_names),
+            ("locations", all_loc_names),
+            ("items", all_item_names),
+            ("species", all_species_names),
+            ("communities", all_comm_names),
+            ("quests", all_quest_names),
+        )
+
         # Traiter le personnage
         if character_name:
             char_details = self._element_resolver.get_by_name("characters", character_name)
@@ -178,7 +289,11 @@ class ElementLinker:
                     for word_or_phrase in self.find_related_names_in_text(relations_text, all_char_names):
                         if word_or_phrase != character_name:
                             linked_elements["characters"].add(word_or_phrase)
-        
+
+                narrative = self._sections_narrative_text(char_details)
+                if narrative:
+                    self._merge_mentions_from_narrative(narrative, linked_elements, name_bundles)
+
         # Traiter les lieux
         if location_names:
             for loc_name in location_names:
@@ -199,7 +314,11 @@ class ElementLinker:
                     linked_elements["locations"].update(
                         self.extract_linked_names(loc_details.get("Contenu par"), all_loc_names)
                     )
-        
+
+                    loc_narrative = self._sections_narrative_text(loc_details)
+                    if loc_narrative:
+                        self._merge_mentions_from_narrative(loc_narrative, linked_elements, name_bundles)
+
         # Exclure les éléments sources
         if character_name:
             linked_elements["characters"].discard(character_name)

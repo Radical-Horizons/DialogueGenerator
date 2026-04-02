@@ -6,6 +6,8 @@ from fastapi.testclient import TestClient
 # IMPORTANT: certains singletons (SecurityConfig / rate limiter) sont initialisés à l'import de `api.main`.
 # On fixe donc l'env AVANT l'import pour éviter des 429 en tests.
 os.environ.setdefault("AUTH_RATE_LIMIT_ENABLED", "false")
+# JWT requis sur les routeurs métier ; mock user si DISABLE_AUTH=true (défaut aligné .env.example dev).
+os.environ.setdefault("DISABLE_AUTH", "true")
 
 from api.main import app
 

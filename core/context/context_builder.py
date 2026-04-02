@@ -24,19 +24,13 @@ try:
 except ImportError:
     tiktoken = None
 
-# Imports d'Interaction supprimés - utilisation de texte formaté Unity JSON à la place
-
 logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') # Déjà configuré dans main_app
 
 # Mise à jour des chemins pour le nouveau emplacement dans core/context/
 CONTEXT_BUILDER_DIR = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent  # Remonter à la racine du projet
 PROJECT_ROOT_DIR = CONTEXT_BUILDER_DIR
 DEFAULT_CONFIG_FILE = CONTEXT_BUILDER_DIR / "context_config.json"
 
-
-# Dataclasses déplacées vers services/context_construction_service.py
-# Importées depuis là pour compatibilité
 from services.context_construction_service import (
     ElementBuildResult,
     CategoryBuildResult,
@@ -220,40 +214,61 @@ class ContextBuilder:
         self._context_construction_service: Optional['ContextConstructionService'] = context_construction_service
 
     def _count_tokens(self, text: str) -> int:
-        """Compte les tokens (délègue à ContextTruncator)."""
+        """Compte le nombre de tokens dans un texte.
+        
+        Délègue le comptage à ContextTruncator qui utilise tiktoken
+        si disponible, sinon un comptage approximatif basé sur les mots.
+        
+        Args:
+            text: Le texte pour lequel compter les tokens.
+        
+        Returns:
+            Le nombre de tokens dans le texte.
+        """
         return self._context_truncator.count_tokens(text)
+
+    def count_tokens(self, text: str) -> int:
+        """Compte le nombre de tokens via l'API publique.
+
+        Cette méthode évite l'utilisation externe de ``_count_tokens`` qui est
+        une API interne de compatibilité.
+
+        Args:
+            text: Le texte à analyser.
+
+        Returns:
+            Le nombre de tokens estimé.
+        """
+        return self._count_tokens(text)
 
     def load_gdd_files(self):
         """Charge les fichiers JSON du GDD depuis les chemins relatifs au projet.
-        
-        Délègue le chargement à GDDLoader et initialise ElementRepository et ElementResolver.
-        Utilise un cache intelligent avec vérification mtime pour éviter les rechargements inutiles.
+
+        Délègue le chargement à GDDLoader et rattache ElementRepository / ElementResolver /
+        ElementLinker aux données **courantes**. À chaque appel, le repository et la chaîne
+        de résolution sont reconstruits pour suivre le nouvel objet ``GDDData`` renvoyé par
+        ``load_all()`` (évite de servir un snapshot mémoire obsolète après sync disque).
         """
         # Charger via GDDLoader
         self._gdd_data = self._gdd_loader.load_all()
-        
-        # Initialiser ElementRepository si nécessaire
-        if self._element_repository is None:
-            from services.element_repository import ElementRepository
-            self._element_repository = ElementRepository(self._gdd_data)
-        
-        # Initialiser ElementResolver si nécessaire
-        if self._element_resolver is None:
-            from services.element_resolver import ElementResolver
-            self._element_resolver = ElementResolver(self._element_repository)
-        
-        # Initialiser ContextFieldManager si nécessaire
+
+        from services.element_repository import ElementRepository
+        from services.element_resolver import ElementResolver
+        from services.element_linker import ElementLinker
+
+        self._element_repository = ElementRepository(self._gdd_data)
+        self._element_resolver = ElementResolver(self._element_repository)
+
+        # Initialiser ContextFieldManager si nécessaire (référence seulement ce builder)
         if self._context_field_manager is None:
             from services.context_field_manager import ContextFieldManager
+
             self._context_field_manager = ContextFieldManager(self.context_config, self)
-        
-        # Initialiser ElementLinker si nécessaire
-        if self._element_linker is None:
-            from services.element_linker import ElementLinker
-            self._element_linker = ElementLinker(
-                element_repository=self._element_repository,
-                element_resolver=self._element_resolver
-            )
+
+        self._element_linker = ElementLinker(
+            element_repository=self._element_repository,
+            element_resolver=self._element_resolver,
+        )
         
         # Initialiser ou mettre à jour GDDDataAccessor
         if self._gdd_data_accessor is None:
@@ -292,84 +307,168 @@ class ContextBuilder:
     # Propriétés pour compatibilité rétroactive (délèguent à GDDDataAccessor)
     @property
     def characters(self) -> List[Dict[str, Any]]:
-        """Liste des personnages (compatibilité)."""
+        """Liste des personnages du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les personnages.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.characters
     
     @property
     def locations(self) -> List[Dict[str, Any]]:
-        """Liste des lieux (compatibilité)."""
+        """Liste des lieux du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les lieux.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.locations
     
     @property
     def items(self) -> List[Dict[str, Any]]:
-        """Liste des objets (compatibilité)."""
+        """Liste des objets du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les objets.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.items
     
     @property
     def species(self) -> List[Dict[str, Any]]:
-        """Liste des espèces (compatibilité)."""
+        """Liste des espèces du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les espèces.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.species
     
     @property
     def communities(self) -> List[Dict[str, Any]]:
-        """Liste des communautés (compatibilité)."""
+        """Liste des communautés du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les communautés.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.communities
     
     @property
     def quests(self) -> List[Dict[str, Any]]:
-        """Liste des quêtes (compatibilité)."""
+        """Liste des quêtes du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les quêtes.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.quests
     
     @property
     def narrative_structures(self) -> List[Dict[str, Any]]:
-        """Liste des structures narratives (compatibilité)."""
+        """Liste des structures narratives du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les structures narratives.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.narrative_structures
     
     @property
     def macro_structure(self) -> Optional[Dict[str, Any]]:
-        """Structure macro (compatibilité)."""
+        """Structure macro du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne None si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Dictionnaire représentant la structure macro, ou None.
+        """
         if self._gdd_data_accessor is None:
             return None
         return self._gdd_data_accessor.macro_structure
     
     @property
     def micro_structure(self) -> Optional[Dict[str, Any]]:
-        """Structure micro (compatibilité)."""
+        """Structure micro du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne None si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Dictionnaire représentant la structure micro, ou None.
+        """
         if self._gdd_data_accessor is None:
             return None
         return self._gdd_data_accessor.micro_structure
     
     @property
     def dialogues_examples(self) -> List[Dict[str, Any]]:
-        """Liste des exemples de dialogues (compatibilité)."""
+        """Liste des exemples de dialogues du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne une liste vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Liste des dictionnaires représentant les exemples de dialogues.
+        """
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.dialogues_examples
     
     @property
     def vision_data(self) -> Optional[Dict[str, Any]]:
-        """Données Vision (compatibilité)."""
+        """Données Vision du GDD.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne None si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Dictionnaire représentant les données Vision, ou None.
+        """
         if self._gdd_data_accessor is None:
             return None
         return self._gdd_data_accessor.vision_data
     
     @property
     def gdd_data(self) -> Dict[str, Any]:
-        """Données GDD (compatibilité - retourne dict vide pour compatibilité)."""
+        """Données GDD complètes.
+        
+        Propriété de compatibilité qui délègue à GDDDataAccessor.
+        Retourne un dictionnaire vide si les données GDD ne sont pas chargées.
+        
+        Returns:
+            Dictionnaire contenant toutes les données GDD.
+        """
         if self._gdd_data_accessor is None:
             return {}
         return self._gdd_data_accessor.gdd_data
@@ -494,10 +593,17 @@ class ContextBuilder:
         self._previous_dialogue_manager.set_previous_dialogue_context(preview_text)
 
     def _format_previous_dialogue_for_context(self, max_tokens_for_history: int) -> str:
-        """Formate le dialogue précédent stocké pour l'inclure dans le contexte LLM (délègue à PreviousDialogueManager).
+        """Formate le dialogue précédent stocké pour l'inclure dans le contexte LLM.
         
-        Le texte est déjà formaté (généré par preview_unity_dialogue_for_context),
-        on vérifie juste les tokens et tronque si nécessaire.
+        Délègue à PreviousDialogueManager. Le texte est déjà formaté
+        (généré par preview_unity_dialogue_for_context), on vérifie juste
+        les tokens et tronque si nécessaire.
+        
+        Args:
+            max_tokens_for_history: Nombre maximum de tokens autorisés pour l'historique.
+        
+        Returns:
+            Le dialogue précédent formaté et tronqué si nécessaire.
         """
         return self._previous_dialogue_manager.format_previous_dialogue_for_context(max_tokens_for_history)
     
@@ -506,8 +612,17 @@ class ContextBuilder:
         """Récupère le contexte du dialogue précédent (compatibilité)."""
         return self._previous_dialogue_manager.previous_dialogue_context
 
-    def _throttled_info_log(self, log_key: str, message: str):
-        """Log avec throttling (méthode utilitaire conservée pour compatibilité)."""
+    def _throttled_info_log(self, log_key: str, message: str) -> None:
+        """Enregistre un message de log avec limitation de fréquence.
+        
+        Évite le spam de logs en limitant la fréquence d'enregistrement
+        des messages pour une clé donnée. Un message avec la même clé
+        ne sera loggé qu'une fois toutes les 5 secondes maximum.
+        
+        Args:
+            log_key: Clé unique pour identifier le type de log (utilisée pour le throttling).
+            message: Message à enregistrer dans les logs.
+        """
         import time
         now = time.time()
         last_time = ContextBuilder._last_info_log_time.get(log_key, 0)
@@ -526,7 +641,29 @@ class ContextBuilder:
         element_modes: Optional[Dict[str, Dict[str, str]]] = None,
         build_json_items: bool = False
     ) -> ContextBuildResult:
-        """Construit la structure de données commune (délègue à ContextConstructionService)."""
+        """Construit la structure de données commune pour le contexte.
+        
+        Délègue la construction à ContextConstructionService qui assemble
+        les éléments GDD sélectionnés selon les paramètres fournis.
+        
+        Args:
+            selected_elements: Dictionnaire des éléments sélectionnés par catégorie
+                (ex: {"characters": ["PNJ1"], "locations": ["Lieu1"]}).
+            scene_instruction: Instructions de scène pour guider la génération.
+            field_configs: Configuration optionnelle des champs à inclure par catégorie.
+            organization_mode: Mode d'organisation du contexte ("default", "narrative", etc.).
+            max_tokens: Nombre maximum de tokens pour le contexte généré.
+            include_dialogue_type: Si True, inclut le type de dialogue dans le contexte.
+            element_modes: Modes optionnels par élément (ex: {"characters": {"PNJ1": "summary"}}).
+            build_json_items: Si True, construit également les items JSON.
+        
+        Returns:
+            ContextBuildResult contenant la structure de données construite.
+        
+        Raises:
+            RuntimeError: Si ContextConstructionService n'est pas initialisé.
+                Appeler load_gdd_files() d'abord.
+        """
         if self._context_construction_service is None:
             raise RuntimeError("ContextConstructionService n'est pas initialisé. Appelez load_gdd_files() d'abord.")
         return self._context_construction_service.build_context_core(
@@ -598,6 +735,21 @@ class ContextBuilder:
 
 
 
+    def serialize_context_to_text(self, structured_context: 'PromptStructure') -> str:
+        """Sérialise une structure de contexte en texte exploitable par les prompts.
+
+        Centralise l'accès au sérialiseur interne pour éviter les usages directs de
+        ``_context_serializer`` hors de cette façade.
+
+        Args:
+            structured_context: Structure de contexte construite via
+                ``build_context_json``.
+
+        Returns:
+            Représentation textuelle du contexte.
+        """
+        return self._context_serializer.serialize_to_text(structured_context)
+
     def build_context(self, selected_elements: dict[str, list[str]], scene_instruction: str, max_tokens: int = 70000, include_dialogue_type: bool = True) -> str:
         """Construit un résumé contextuel basé sur les éléments sélectionnés (délègue à ContextConstructionService)."""
         if self._context_construction_service is None:
@@ -612,7 +764,7 @@ class ContextBuilder:
         )
 
     def get_regions(self) -> list[str]:
-        """Retourne une liste de noms de régions uniques à partir des données de localisation."""
+        """Retourne les noms du catalogue lieu (régions typées ou toutes les fiches lieux)."""
         # Lazy-load GDD files if not already loaded
         if self._gdd_data_accessor is None:
             logger.warning("GDD data accessor not initialized, attempting to load GDD files...")
@@ -640,6 +792,32 @@ class ContextBuilder:
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.get_sub_locations(region_name)
+
+    def get_scene_region_names(self) -> list[str]:
+        """Noms pour le sélecteur région (Scène principale)."""
+        if self._gdd_data_accessor is None:
+            logger.warning("GDD data accessor not initialized, attempting to load GDD files...")
+            try:
+                self.load_gdd_files()
+            except Exception as e:
+                logger.error(f"Failed to load GDD files: {e}", exc_info=True)
+                return []
+        if self._gdd_data_accessor is None:
+            return []
+        return self._gdd_data_accessor.get_scene_region_names()
+
+    def get_scene_sub_location_names(self, parent_name: str) -> list[str]:
+        """Noms pour le sélecteur lieu sous une région (Scène principale)."""
+        if self._gdd_data_accessor is None:
+            logger.warning("GDD data accessor not initialized, attempting to load GDD files...")
+            try:
+                self.load_gdd_files()
+            except Exception as e:
+                logger.error(f"Failed to load GDD files: {e}", exc_info=True)
+                return []
+        if self._gdd_data_accessor is None:
+            return []
+        return self._gdd_data_accessor.get_scene_sub_location_names(parent_name)
 
     def get_linked_elements(self, character_name: str | None = None, location_names: list[str] | None = None) -> dict[str, set[str]]:
         """Récupère les éléments liés à un personnage et/ou des lieux."""

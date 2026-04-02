@@ -20,24 +20,27 @@ class GenerationJobManager:
         self._ttl_seconds = ttl_seconds
         self._cleanup_task: Optional[asyncio.Task] = None
         self._tasks: Dict[str, asyncio.Task] = {}
+        self._stream_claim_locks: Dict[str, asyncio.Lock] = {}
     
-    def create_job(self, params: dict) -> str:
+    def create_job(self, params: dict, owner_username: str) -> str:
         """
         Crée un nouveau job de génération.
-        
+
         Args:
-            params: Paramètres de génération (sera passé au service)
-        
+            params: Paramètres de génération (sera passé au service).
+            owner_username: Identifiant stable du créateur (username JWT ``sub`` ou équivalent).
+
         Returns:
             job_id: UUID du job créé
         """
         job_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc)
-        
+
         self._jobs[job_id] = {
             'job_id': job_id,
             'status': 'queued',
             'params': params,
+            'owner_username': owner_username,
             'result': None,
             'error': None,
             'cancelled': False,
@@ -131,6 +134,9 @@ class GenerationJobManager:
                 'status': 'cancelled'
             }
         )
+        done_event = job.get("done_event")
+        if isinstance(done_event, asyncio.Event):
+            done_event.set()
         return True
     
     def is_cancelled(self, job_id: str) -> bool:
@@ -155,6 +161,32 @@ class GenerationJobManager:
             del self._tasks[job_id]
             logger.debug(f"Job {job_id} removed from memory")
     
+    async def try_claim_stream_job(self, job_id: str) -> bool:
+        """Réserve exclusivement le passage ``queued`` → ``running`` pour un flux SSE.
+
+        Évite deux clients qui streament le même job en parallèle.
+
+        Args:
+            job_id: Identifiant du job.
+
+        Returns:
+            True si ce flux est devenu propriétaire (statut mis à ``running``).
+        """
+        lock = self._stream_claim_locks.setdefault(job_id, asyncio.Lock())
+        async with lock:
+            job = self._jobs.get(job_id)
+            if not job or self._is_expired(job):
+                return False
+            if job.get("status") != "queued":
+                return False
+            job["status"] = "running"
+            job["updated_at"] = datetime.now(timezone.utc).isoformat()
+            logger.info(
+                "Job stream claim: queued→running",
+                extra={"job_id": job_id, "status": "running"},
+            )
+            return True
+
     def register_task(self, job_id: str, task: asyncio.Task) -> None:
         """Enregistre la tâche de génération pour permettre l'annulation."""
         self._tasks[job_id] = task

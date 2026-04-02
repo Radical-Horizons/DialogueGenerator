@@ -3,12 +3,14 @@
  */
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { ContextSelector } from '../context/ContextSelector'
+import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
 import { GenerationPanel } from '../generation/GenerationPanel'
 import { EstimatedPromptPanel } from '../generation/EstimatedPromptPanel'
 import { UnityDialogueEditor, type UnityDialogueEditorHandle } from '../generation/UnityDialogueEditor'
 import { ReasoningTraceViewer } from '../generation/ReasoningTraceViewer'
 import { ContextDetail } from '../context/ContextDetail'
 import { ResizablePanels, type ResizablePanelsRef } from '../shared/ResizablePanels'
+import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { Tabs, type Tab } from '../shared/Tabs'
 import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
 import { UnityDialogueDetails } from '../unityDialogues/UnityDialogueDetails'
@@ -26,17 +28,17 @@ import { theme } from '../../theme'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 
-function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
+function ChevronIcon({ direction, size = 16 }: { direction: 'left' | 'right'; size?: number }) {
   const isLeft = direction === 'left'
   return (
     <svg
-      width="16"
-      height="16"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
       focusable="false"
-      style={{ display: 'block', transition: 'transform 0.2s ease' }}
+      style={{ display: 'block', flexShrink: 0 }}
     >
       <path
         d={isLeft ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'}
@@ -49,8 +51,177 @@ function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
   )
 }
 
+/**
+ * Bouton d'en-tête pour replier un panneau latéral.
+ * Affiche un chevron + label court; le label disparaît sur les petits panneaux via overflow hidden.
+ */
+/**
+ * direction : sens de repliement (détermine l'icône chevron et son animation).
+ * chevronPosition : côté où le chevron apparaît par rapport au label (défaut = même côté que direction).
+ */
+function PanelCollapseButton({
+  direction,
+  chevronPosition,
+  label,
+  onClick,
+  ariaLabel,
+}: {
+  direction: 'left' | 'right'
+  chevronPosition?: 'left' | 'right'
+  label: string
+  onClick: () => void
+  ariaLabel: string
+}) {
+  const [hovered, setHovered] = useState(false)
+  const [pressed, setPressed] = useState(false)
+
+  const chevronSide = chevronPosition ?? direction
+  const translateX = hovered ? (direction === 'left' ? -2 : 2) : 0
+
+  const scale = pressed ? 0.93 : hovered ? 1.04 : 1
+  const bg = hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)'
+  const borderColor = hovered ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.09)'
+  const textColor = hovered ? theme.text.primary : theme.text.tertiary
+
+  const chevron = (
+    <span style={{ transform: `translateX(${translateX}px)`, transition: 'transform 0.18s ease', display: 'flex' }}>
+      <ChevronIcon direction={direction} size={13} />
+    </span>
+  )
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setPressed(false) }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      title={ariaLabel}
+      aria-label={ariaLabel}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.3rem',
+        padding: '0.2rem 0.45rem',
+        height: 26,
+        borderRadius: 99,
+        border: `1px solid ${borderColor}`,
+        backgroundColor: bg,
+        color: textColor,
+        cursor: 'pointer',
+        flexShrink: 0,
+        overflow: 'hidden',
+        maxWidth: 90,
+        transform: `scale(${scale})`,
+        transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+      }}
+    >
+      {chevronSide === 'left' && chevron}
+      <span style={{
+        fontSize: '0.72rem',
+        fontWeight: 600,
+        letterSpacing: '0.03em',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        lineHeight: 1,
+      }}>
+        {label}
+      </span>
+      {chevronSide === 'right' && chevron}
+    </button>
+  )
+}
+
+/**
+ * Bouton flottant sur le bord du panneau central pour ré-ouvrir un panneau replié.
+ * Pill vertical avec une ligne de texte rotée et halo coloré au hover.
+ */
+function PanelExpandButton({
+  side,
+  label,
+  onClick,
+  ariaLabel,
+}: {
+  side: 'left' | 'right'
+  label: string
+  onClick: () => void
+  ariaLabel: string
+}) {
+  const [hovered, setHovered] = useState(false)
+  const [pressed, setPressed] = useState(false)
+
+  const accentColor = theme.button.primary.background
+  const scale = pressed ? 0.94 : hovered ? 1.08 : 1
+  const bg = hovered ? `rgba(0,123,255,0.18)` : 'rgba(45, 45, 45, 0.9)'
+  const borderColor = hovered ? accentColor : 'rgba(255,255,255,0.12)'
+  const glow = hovered ? `0 0 18px ${accentColor}55, 0 6px 18px rgba(0,0,0,0.5)` : '0 4px 14px rgba(0,0,0,0.45)'
+  const translateX = hovered ? (side === 'left' ? 2 : -2) : 0
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setPressed(false) }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      title={ariaLabel}
+      aria-label={ariaLabel}
+      style={{
+        position: 'absolute',
+        [side]: 6,
+        top: '50%',
+        transform: `translateY(-50%) scale(${scale}) translateX(${translateX}px)`,
+        zIndex: 50,
+        width: 22,
+        height: 56,
+        borderRadius: 11,
+        border: `1px solid ${borderColor}`,
+        backgroundColor: bg,
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        color: hovered ? '#fff' : theme.text.secondary,
+        cursor: 'pointer',
+        boxShadow: glow,
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 3,
+        padding: '4px 0',
+        overflow: 'hidden',
+      }}
+    >
+      <ChevronIcon direction={side === 'left' ? 'right' : 'left'} size={12} />
+      <span
+        style={{
+          fontSize: '0.58rem',
+          fontWeight: 700,
+          letterSpacing: '0.06em',
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed',
+          transform: side === 'left' ? 'rotate(180deg)' : 'none',
+          lineHeight: 1,
+          maxHeight: 34,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          color: 'inherit',
+          opacity: hovered ? 1 : 0.6,
+          transition: 'opacity 0.18s ease',
+          textTransform: 'uppercase',
+        }}
+      >
+        {label}
+      </span>
+    </button>
+  )
+}
+
 export function Dashboard() {
   const [selectedContextItem, setSelectedContextItem] = useState<ContextItem | null>(null)
+  const [selectedContextHistoryStem, setSelectedContextHistoryStem] = useState<string | null>(null)
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [rightPanelTab, setRightPanelTab] = useState<'prompt' | 'dialogue' | 'node' | 'details'>('prompt')
   const [centerPanelTab, setCenterPanelTab] = useState<'generation' | 'edition' | 'graph'>('generation')
@@ -251,7 +422,10 @@ export function Dashboard() {
       content: (
         <div style={{ flex: 1, minHeight: 0, maxHeight: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
           {selectedContextItem ? (
-            <ContextDetail item={selectedContextItem} />
+            <ContextDetail
+              item={selectedContextItem}
+              historyCategoryStem={selectedContextHistoryStem}
+            />
           ) : (
             <div style={{ 
               padding: '2rem', 
@@ -268,8 +442,27 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedNodeId, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
-  
+  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
+
+  // En mode éditeur de graphe : masquer "Prompt". En mode Génération : masquer "Édition de nœud"
+  const visibleRightPanelTabs = useMemo(() => {
+    if (centerPanelTab === 'graph') {
+      return rightPanelTabs.filter((t) => t.id !== 'prompt')
+    }
+    if (centerPanelTab === 'generation') {
+      return rightPanelTabs.filter((t) => t.id !== 'node')
+    }
+    return rightPanelTabs
+  }, [centerPanelTab, rightPanelTabs])
+
+  // Onglet actif affiché : ne jamais rester sur un onglet caché pour le panneau central actuel
+  const effectiveRightPanelTab =
+    centerPanelTab === 'graph' && rightPanelTab === 'prompt'
+      ? 'node'
+      : centerPanelTab === 'generation' && rightPanelTab === 'node'
+        ? 'prompt'
+        : rightPanelTab
+
   // Basculer automatiquement vers l'onglet "Édition de nœud" quand un NOUVEAU nœud est sélectionné dans le graphe
   // (seulement lors de la sélection initiale, pas à chaque changement d'onglet manuel)
   useEffect(() => {
@@ -286,6 +479,15 @@ export function Dashboard() {
     // Ne pas inclure rightPanelTab dans les dépendances pour éviter les basculements
     // lors des changements manuels d'onglet
   }, [selectedNodeId, centerPanelTab])
+
+  // Si l'onglet actif est caché pour le panneau central actuel, basculer vers un onglet visible
+  useEffect(() => {
+    if (centerPanelTab === 'graph' && rightPanelTab === 'prompt') {
+      setRightPanelTab('node')
+    } else if (centerPanelTab === 'generation' && rightPanelTab === 'node') {
+      setRightPanelTab('prompt')
+    }
+  }, [centerPanelTab, rightPanelTab])
 
   const applyCollapsedLayout = useCallback(
     (nextLeftCollapsed: boolean, nextRightCollapsed: boolean) => {
@@ -326,28 +528,6 @@ export function Dashboard() {
     applyCollapsedLayout(isLeftPanelCollapsed, next)
   }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed])
 
-  const applyToggleHover = useCallback(
-    (el: HTMLButtonElement, isHover: boolean) => {
-      el.style.backgroundColor = isHover ? 'rgba(60, 60, 60, 0.95)' : 'rgba(45, 45, 45, 0.85)'
-      el.style.borderColor = isHover ? theme.button.primary.background : 'rgba(255, 255, 255, 0.1)'
-      el.style.transform = isHover ? 'translateY(-50%) scale(1.1)' : 'translateY(-50%) scale(1)'
-      el.style.boxShadow = isHover 
-        ? `0 0 20px ${theme.button.primary.background}44, 0 8px 16px rgba(0, 0, 0, 0.5)` 
-        : '0 4px 12px rgba(0, 0, 0, 0.4)'
-      el.style.color = isHover ? '#fff' : theme.text.primary
-    },
-    []
-  )
-
-  const applyHeaderToggleHover = useCallback(
-    (el: HTMLButtonElement, isHover: boolean) => {
-      el.style.backgroundColor = isHover ? 'rgba(255, 255, 255, 0.08)' : 'transparent'
-      el.style.borderColor = isHover ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'
-      el.style.transform = isHover ? 'scale(1.05)' : 'scale(1)'
-      el.style.color = isHover ? '#fff' : theme.text.secondary
-    },
-    []
-  )
 
 
   return (
@@ -374,7 +554,7 @@ export function Dashboard() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.secondary,
           height: '100%',
           minHeight: 0,
           position: 'relative',
@@ -395,39 +575,19 @@ export function Dashboard() {
               }}
             >
               <div style={{ fontSize: '0.9rem', fontWeight: 700, color: theme.text.primary }}>
-                Contexte
+                {GDD_CONTEXT_PANEL_TITLE}
               </div>
-              <button
+              <PanelCollapseButton
+                direction="left"
+                label="Replier"
                 onClick={toggleLeftPanel}
-                onMouseDown={(e) => {
-                  e.currentTarget.style.transform = 'scale(0.92)'
-                }}
-                onMouseUp={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)'
-                }}
-                title="Replier le panneau gauche"
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 6,
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  backgroundColor: 'transparent',
-                  color: theme.text.secondary,
-                  cursor: 'pointer',
-                  display: 'grid',
-                  placeItems: 'center',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-                onMouseEnter={(e) => applyHeaderToggleHover(e.currentTarget, true)}
-                onMouseLeave={(e) => applyHeaderToggleHover(e.currentTarget, false)}
-                aria-label="Replier le panneau gauche"
-              >
-                <ChevronIcon direction="left" />
-              </button>
+                ariaLabel="Replier le panneau gauche"
+              />
             </div>
             <ContextSelector 
-              onItemSelected={(item) => {
+              onItemSelected={(item, historyStem) => {
                 setSelectedContextItem(item)
+                setSelectedContextHistoryStem(item ? (historyStem ?? null) : null)
                 if (item) {
                   setRightPanelTab('details')
                 }
@@ -450,84 +610,27 @@ export function Dashboard() {
       >
         {/* Rails (boutons) visibles quand un panneau latéral est replié */}
         {isLeftPanelCollapsed && (
-          <button
+          <PanelExpandButton
+            side="left"
+            label="GDD"
             onClick={toggleLeftPanel}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'translateY(-50%) scale(0.95)'
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'
-            }}
-            title="Déplier le panneau gauche"
-            style={{
-              position: 'absolute',
-              left: 8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 50,
-              width: 24,
-              height: 48,
-              borderRadius: 12,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'rgba(45, 45, 45, 0.85)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              color: theme.text.primary,
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              display: 'grid',
-              placeItems: 'center',
-            }}
-            onMouseEnter={(e) => applyToggleHover(e.currentTarget, true)}
-            onMouseLeave={(e) => applyToggleHover(e.currentTarget, false)}
-            aria-label="Déplier le panneau gauche"
-          >
-            <ChevronIcon direction="right" />
-          </button>
+            ariaLabel="Déplier le panneau gauche"
+          />
         )}
         {isRightPanelCollapsed && (
-          <button
+          <PanelExpandButton
+            side="right"
+            label="Détails"
             onClick={toggleRightPanel}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'translateY(-50%) scale(0.95)'
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'
-            }}
-            title="Déplier le panneau droit"
-            style={{
-              position: 'absolute',
-              right: 8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 50,
-              width: 24,
-              height: 48,
-              borderRadius: 12,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'rgba(45, 45, 45, 0.85)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              color: theme.text.primary,
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              display: 'grid',
-              placeItems: 'center',
-            }}
-            onMouseEnter={(e) => applyToggleHover(e.currentTarget, true)}
-            onMouseLeave={(e) => applyToggleHover(e.currentTarget, false)}
-            aria-label="Déplier le panneau droit"
-          >
-            <ChevronIcon direction="left" />
-          </button>
+            ariaLabel="Déplier le panneau droit"
+          />
         )}
-        <Tabs
-          tabs={[
-            {
-              id: 'generation',
-              label: 'Génération de Dialogues',
+          <Tabs
+            variant="segmented"
+            tabs={[
+              {
+                id: 'generation',
+              label: '💬 Génération de Dialogues',
               content: (
                 <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                   <GenerationPanel />
@@ -536,7 +639,7 @@ export function Dashboard() {
             },
             {
               id: 'edition',
-              label: 'Édition de Dialogues',
+              label: '✏️ Édition de Dialogues',
               content: (
                 <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
                   <div
@@ -560,15 +663,8 @@ export function Dashboard() {
                       <UnityDialogueDetails
                         filename={selectedDialogue.filename}
                         onClose={() => setSelectedDialogue(null)}
-                        onDeleted={() => {
-                          // onClose() gère déjà la fermeture (setSelectedDialogue(null))
-                          // On ne fait que rafraîchir la liste pour retirer le dialogue supprimé
-                          if (dialogueListRef.current) {
-                            console.log('[Dashboard] Rafraîchissement de la liste des dialogues')
-                            dialogueListRef.current.refresh()
-                          } else {
-                            console.error('[Dashboard] dialogueListRef.current est null, impossible de rafraîchir')
-                          }
+                        onDeleted={async () => {
+                          await dialogueListRef.current?.refresh()
                         }}
                         onGenerateContinuation={() => {
                           // Basculer vers l'onglet Génération
@@ -596,6 +692,7 @@ export function Dashboard() {
           ]}
           activeTabId={centerPanelTab}
           onTabChange={(tabId) => setCenterPanelTab(tabId as 'generation' | 'edition' | 'graph')}
+          keepAliveTabIds={['graph']}
           style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
           contentStyle={centerPanelTab === 'graph' ? { overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' } : undefined}
         />
@@ -606,7 +703,7 @@ export function Dashboard() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: theme.background.panel,
+          backgroundColor: theme.background.secondary,
           height: '100%',
           minHeight: 0,
           maxHeight: '100%',
@@ -621,6 +718,7 @@ export function Dashboard() {
         <div
           style={{
             padding: '0.5rem 0.75rem',
+            paddingRight: '1.25rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             backgroundColor: theme.background.panelHeader,
             display: 'flex',
@@ -628,63 +726,40 @@ export function Dashboard() {
             justifyContent: 'space-between',
             gap: '0.5rem',
             flexShrink: 0,
+            minHeight: 40,
+            boxSizing: 'border-box',
           }}
         >
-          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: theme.text.primary }}>
-            Détails
-          </div>
-          <button
+          <PanelCollapseButton
+            direction="right"
+            chevronPosition="right"
+            label="Replier"
             onClick={toggleRightPanel}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'scale(0.92)'
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)'
-            }}
-            title="Replier le panneau droit"
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 6,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'transparent',
-              color: theme.text.secondary,
-              cursor: 'pointer',
-              display: 'grid',
-              placeItems: 'center',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-            onMouseEnter={(e) => applyHeaderToggleHover(e.currentTarget, true)}
-            onMouseLeave={(e) => applyHeaderToggleHover(e.currentTarget, false)}
-            aria-label="Replier le panneau droit"
-          >
-            <ChevronIcon direction="right" />
-          </button>
-        </div>
-        {/* Indicateur de brouillon non sauvegardé */}
-        {actions.handleGenerate && actions.isDirty && (
+            ariaLabel="Replier le panneau droit"
+          />
           <div
             style={{
-              padding: '0.5rem',
-              borderBottom: `1px solid ${theme.border.primary}`,
-              backgroundColor: theme.background.panelHeader,
-              display: 'flex',
-              alignItems: 'center',
-              flexShrink: 0,
-              boxSizing: 'border-box',
+              flex: 1,
+              minWidth: 0,
+              textAlign: 'center',
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              color: theme.text.primary,
             }}
           >
-            <div
-              style={{
-                fontSize: '0.85rem',
-                color: theme.state.info.color,
-                fontStyle: 'italic',
-              }}
-            >
-              ● Brouillon non sauvegardé
-            </div>
+            Détails
           </div>
-        )}
+          {actions.handleGenerate ? (
+            <SaveStatusIndicator
+              appearance="discreet"
+              status={actions.saveStatus}
+              lastSavedAt={actions.draftLastSavedAt}
+              style={{ flexShrink: 0, maxWidth: 'min(200px, 38vw)' }}
+            />
+          ) : (
+            <span style={{ width: 'min(200px, 38vw)', flexShrink: 0 }} aria-hidden />
+          )}
+        </div>
         {/* Zone de contenu avec scroll (prend l'espace restant, mais laisse toujours de la place pour le bouton) */}
         <div
           style={{
@@ -697,8 +772,9 @@ export function Dashboard() {
           }}
         >
           <Tabs
-            tabs={rightPanelTabs}
-            activeTabId={rightPanelTab}
+            variant="segmented"
+            tabs={visibleRightPanelTabs}
+            activeTabId={effectiveRightPanelTab}
             onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
             style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
             // Important: overflow: 'hidden' pour éviter le double scroll, mais scrollbar-gutter réserve l'espace
@@ -707,7 +783,7 @@ export function Dashboard() {
           />
         </div>
         {/* Boutons en bas (visible sur Prompt et Dialogue généré) */}
-        {actions.handleGenerate && (rightPanelTab === 'prompt' || rightPanelTab === 'dialogue') && (
+        {actions.handleGenerate && (effectiveRightPanelTab === 'prompt' || effectiveRightPanelTab === 'dialogue') && (
           <div
             style={{
               padding: '0.75rem 1rem',
@@ -784,9 +860,9 @@ export function Dashboard() {
                   disabled={!unityDialogueEditorRef.current?.isValid || unityDialogueEditorRef.current?.isSaving || actions.isLoading || isGraphGenerating}
                   style={{
                     flex: 1,
-                    padding: '0.875rem 1rem',
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
+                    padding: '0.65rem 1rem',
+                    fontSize: '1rem',
+                    fontWeight: 700,
                     backgroundColor: theme.button.primary.background,
                     color: theme.button.primary.color,
                     border: 'none',
@@ -807,8 +883,8 @@ export function Dashboard() {
                   onClick={actions.handleGenerate}
                   disabled={actions.isLoading || isGraphGenerating}
                   style={{
-                    padding: '0.875rem',
-                    fontSize: '1.1rem',
+                    padding: '0.65rem',
+                    fontSize: '1rem',
                     backgroundColor: theme.button.default.background,
                     color: theme.button.default.color,
                     border: `1px solid ${theme.border.primary}`,
@@ -818,8 +894,8 @@ export function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '48px',
-                    height: '48px',
+                    width: '44px',
+                    height: '44px',
                     transition: 'all 0.2s',
                     boxSizing: 'border-box',
                   }}
@@ -848,7 +924,7 @@ export function Dashboard() {
                   `}</style>
                 </button>
               </div>
-            ) : (rightPanelTab === 'dialogue' || rightPanelTab === 'prompt') ? (
+            ) : (effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt') ? (
               // Sur l'onglet Prompt ou Dialogue généré sans dialogue, afficher le bouton Générer normal
               <button
                 onClick={actions.handleGenerate}

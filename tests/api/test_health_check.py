@@ -1,8 +1,9 @@
 """Tests pour les health checks."""
 import os
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock
 from pathlib import Path
+from api.app_version import APP_VERSION
 from api.utils.health_check import (
     HealthCheckResult,
     check_config,
@@ -138,6 +139,7 @@ def test_perform_health_checks_basic():
         assert result["status"] == "healthy"
         assert len(result["checks"]) == 2
         assert result["timestamp"] is None  # Sera ajouté par l'endpoint
+        assert "app_version" not in result
 
 
 def test_perform_health_checks_detailed():
@@ -156,6 +158,7 @@ def test_perform_health_checks_detailed():
         
         assert result["status"] == "healthy"
         assert len(result["checks"]) == 4
+        assert result["app_version"] == APP_VERSION
 
 
 def test_perform_health_checks_unhealthy():

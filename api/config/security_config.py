@@ -39,7 +39,7 @@ class SecurityConfig(BaseSettings):
     @classmethod
     def settings_customise_sources(
         cls,
-        settings_cls: type["SecurityConfig"],
+        _settings_cls: type["SecurityConfig"],
         init_settings: PydanticBaseSettingsSource,
         env_settings: PydanticBaseSettingsSource,
         dotenv_settings: PydanticBaseSettingsSource,
@@ -67,7 +67,11 @@ class SecurityConfig(BaseSettings):
     
     # Environment
     environment: str = "development"
-    debug_endpoints_enabled: Optional[bool] = None
+
+    # Dev only: skip JWT and use mock user (ignored when ENVIRONMENT=production).
+    # Défaut True : le dev local fonctionne sans .env ni login (voir .env.example).
+    # En production, validate_config() impose DISABLE_AUTH=false explicitement.
+    disable_auth: bool = True
     
     @property
     def is_production(self) -> bool:
@@ -86,18 +90,6 @@ class SecurityConfig(BaseSettings):
             True si ENVIRONMENT=development (ou non défini), False sinon.
         """
         return not self.is_production
-
-    @property
-    def are_debug_endpoints_enabled(self) -> bool:
-        """Indique si les endpoints de debug peuvent être exposés.
-
-        Returns:
-            True si l'exposition est explicitement autorisée, sinon uniquement
-            en développement par défaut.
-        """
-        if self.debug_endpoints_enabled is not None:
-            return self.debug_endpoints_enabled
-        return self.is_development
     
     def validate_config(self) -> None:
         """Valide la configuration de sécurité.
@@ -109,6 +101,16 @@ class SecurityConfig(BaseSettings):
             ValueError: Si la configuration est invalide en production.
         """
         if self.is_production:
+            if self.disable_auth:
+                raise ValueError(
+                    "DISABLE_AUTH ne peut pas être activé en production. "
+                    "Définissez DISABLE_AUTH=false (ou supprimez la variable)."
+                )
+            cors_origins = os.getenv("CORS_ORIGINS", "").strip()
+            if not cors_origins:
+                raise ValueError(
+                    "CORS_ORIGINS doit être défini (liste CSV d'origines) lorsque ENVIRONMENT=production."
+                )
             if self.jwt_secret_key == DEFAULT_JWT_SECRET_KEY:
                 raise ValueError(
                     "JWT_SECRET_KEY ne peut pas être la valeur par défaut en production. "
@@ -116,8 +118,14 @@ class SecurityConfig(BaseSettings):
                 )
             logger.info("Configuration de sécurité validée (production)")
         else:
-            # En développement, ne pas logger de warning pour la clé par défaut (c'est acceptable en dev)
-            # Les warnings sont loggés uniquement en production via les exceptions
+            if (
+                not _is_running_under_pytest()
+                and self.jwt_secret_key == DEFAULT_JWT_SECRET_KEY
+            ):
+                logger.warning(
+                    "JWT_SECRET_KEY utilise encore la valeur par défaut. "
+                    "Définissez une clé dédiée dans .env (obligatoire hors machine de dev isolée)."
+                )
             if self.jwt_secret_key != DEFAULT_JWT_SECRET_KEY:
                 logger.debug("Configuration de sécurité chargée (développement)")
 

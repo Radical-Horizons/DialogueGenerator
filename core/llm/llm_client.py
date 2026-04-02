@@ -44,6 +44,9 @@ class DummyLLMClient(ILLMClient):
     def __init__(self, delay_seconds: float = 0.0):
         super().__init__()
         self.delay_seconds = delay_seconds
+        self.last_call_cost: float = 0.0
+        self.last_usage_prompt_tokens: int = 0
+        self.last_usage_completion_tokens: int = 0
         logger.info(f"DummyLLMClient initialisé avec un délai de {self.delay_seconds}s par variante.")
 
     async def generate_variants(self, prompt: str, k: int, response_model: Optional[Type[BaseModel]] = None, previous_dialogue_context: Optional[List[Dict[str, Any]]] = None, user_system_prompt_override: Optional[str] = None) -> List[Union[str, BaseModel]]:

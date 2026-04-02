@@ -69,6 +69,71 @@ class ILLMUsageRepository(Protocol):
         """
         ...
 
+    def get_by_request_id(self, request_id: str) -> Optional[LLMUsageRecord]:
+        """Récupère un enregistrement par son request_id (tous les fichiers).
+        
+        Args:
+            request_id: ID unique de la requête.
+            
+        Returns:
+            L'enregistrement trouvé, ou None.
+        """
+        ...
+
+    def update(self, record: LLMUsageRecord) -> None:
+        """Met à jour un enregistrement existant (même request_id, même jour).
+        
+        Args:
+            record: L'enregistrement modifié à persister.
+        """
+        ...
+
+    def get_by_dialogue_id(self, dialogue_id: str) -> List[LLMUsageRecord]:
+        """Récupère tous les enregistrements associés à un dialogue.
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            
+        Returns:
+            Liste des enregistrements, triés par timestamp croissant.
+        """
+        ...
+
+    def get_by_dialogue_and_node(
+        self,
+        dialogue_id: str,
+        node_id: str,
+    ) -> Optional[LLMUsageRecord]:
+        """Récupère l'enregistrement associé à un dialogue et un nœud (Story 1.14/1.15).
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            node_id: ID du nœud généré.
+            
+        Returns:
+            L'enregistrement trouvé, ou None.
+        """
+        ...
+
+    def mark_node_deleted(self, node_id: str) -> bool:
+        """Marque comme supprimé l'enregistrement associé à un nœud.
+        
+        Args:
+            node_id: ID du nœud supprimé.
+            
+        Returns:
+            True si un enregistrement a été trouvé et mis à jour, False sinon.
+        """
+        ...
+
+    def get_all_by_dialogue_ids(self) -> Dict[str, List[LLMUsageRecord]]:
+        """Récupère tous les enregistrements groupés par dialogue_id.
+        
+        Returns:
+            Dictionnaire {dialogue_id: [records]}, excluant les records sans dialogue_id.
+        """
+        ...
+
 
 class FileLLMUsageRepository:
     """Repository d'utilisation LLM basé sur fichiers JSON.
@@ -245,6 +310,125 @@ class FileLLMUsageRepository:
         
         return all_records
     
+    def get_by_request_id(self, request_id: str) -> Optional[LLMUsageRecord]:
+        """Récupère un enregistrement par son request_id (recherche dans tous les fichiers).
+        
+        Args:
+            request_id: ID unique de la requête.
+            
+        Returns:
+            L'enregistrement trouvé, ou None.
+        """
+        if not self.storage_dir.exists():
+            return None
+        
+        for file_path in sorted(self.storage_dir.glob("usage_*.json"), reverse=True):
+            try:
+                date_str = file_path.stem.replace("usage_", "")
+                file_date = datetime.fromisoformat(date_str).date()
+                records = self._load_records_for_date(file_date)
+                for record in records:
+                    if record.request_id == request_id:
+                        return record
+            except (ValueError, AttributeError) as e:
+                logger.warning(f"Impossible de parser la date du fichier {file_path}: {e}")
+                continue
+        
+        return None
+    
+    def update(self, record: LLMUsageRecord) -> None:
+        """Met à jour un enregistrement existant identifié par request_id.
+        
+        Trouve le fichier du jour correspondant au timestamp du record et
+        remplace l'entrée avec le même request_id.
+        
+        Args:
+            record: L'enregistrement modifié à persister.
+        """
+        record_date = record.timestamp.date()
+        existing_records = self._load_records_for_date(record_date)
+        
+        updated = False
+        new_records = []
+        for r in existing_records:
+            if r.request_id == record.request_id:
+                new_records.append(record)
+                updated = True
+            else:
+                new_records.append(r)
+        
+        if updated:
+            self._save_records_for_date(record_date, new_records)
+        else:
+            logger.warning(f"update(): request_id '{record.request_id}' introuvable dans {record_date}")
+    
+    def get_by_dialogue_id(self, dialogue_id: str) -> List[LLMUsageRecord]:
+        """Récupère tous les enregistrements associés à un dialogue.
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            
+        Returns:
+            Liste des enregistrements triés par timestamp croissant.
+        """
+        all_records = self.get_all()
+        matched = [r for r in all_records if r.dialogue_id == dialogue_id]
+        matched.sort(key=lambda r: r.timestamp)
+        return matched
+
+    def get_by_dialogue_and_node(
+        self,
+        dialogue_id: str,
+        node_id: str,
+    ) -> Optional[LLMUsageRecord]:
+        """Récupère l'enregistrement associé à un dialogue et un nœud (Story 1.14/1.15).
+        
+        Args:
+            dialogue_id: ID du dialogue.
+            node_id: ID du nœud généré.
+            
+        Returns:
+            L'enregistrement trouvé, ou None.
+        """
+        records = self.get_by_dialogue_id(dialogue_id)
+        for record in reversed(records):
+            if record.node_id == node_id and not record.deleted:
+                return record
+        return None
+
+    def mark_node_deleted(self, node_id: str) -> bool:
+        """Marque comme supprimé l'enregistrement associé à un nœud.
+        
+        Cherche dans tous les fichiers le record avec node_id correspondant
+        et passe son champ deleted à True.
+        
+        Args:
+            node_id: ID du nœud supprimé.
+            
+        Returns:
+            True si un enregistrement a été trouvé et mis à jour, False sinon.
+        """
+        all_records = self.get_all()
+        for record in all_records:
+            if record.node_id == node_id and not record.deleted:
+                record.deleted = True
+                self.update(record)
+                return True
+        return False
+
+    def get_all_by_dialogue_ids(self) -> Dict[str, List[LLMUsageRecord]]:
+        """Récupère tous les enregistrements groupés par dialogue_id.
+        
+        Returns:
+            Dictionnaire {dialogue_id: [records]}, excluant les records sans dialogue_id.
+        """
+        all_records = self.get_all()
+        grouped: Dict[str, List[LLMUsageRecord]] = {}
+        for record in all_records:
+            if record.dialogue_id:
+                grouped.setdefault(record.dialogue_id, []).append(record)
+        return grouped
+
     def get_statistics(
         self,
         start_date: Optional[date] = None,
