@@ -13,7 +13,8 @@ param(
     [string]$ServerUser = "ubuntu",
     [string]$ServerPath = "/opt/DialogueGeneratorV2",
     [string]$HealthCheckHost = "demo.auto-diffusion.net",
-    [string]$GitRemoteBranch = "main"
+    [string]$GitRemoteBranch = "main",
+    [switch]$SkipDistPermissions = $false
 )
 
 $ErrorActionPreference = "Stop"
@@ -194,6 +195,20 @@ Write-Success "Upload terminé avec succès"
 
 # Nettoyer le dossier temporaire
 Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+# SCP depuis Windows peut laisser des fichiers sans lecture pour www-data -> 403 sur /assets/*
+if (-not $SkipDistPermissions) {
+    Write-Host "`n=== Étape 2b: Permissions frontend/dist (nginx) ===" -ForegroundColor Cyan
+    $permRemote = "sudo chown -R ${ServerUser}:${ServerUser} ${ServerPath}/frontend/dist && sudo chmod -R 755 ${ServerPath}/frontend/dist && sudo find ${ServerPath}/frontend/dist -type f -exec chmod 644 {} \;"
+    $permExit = Invoke-SshRemote -SshTarget "${ServerUser}@${ServerHost}" -RemoteShellCommand $permRemote
+    if ($permExit -ne 0) {
+        Write-Warning "chown/chmod dist a echoue (code $permExit). En SSH: $permRemote"
+    } else {
+        Write-Success "frontend/dist lisible par nginx (www-data)"
+    }
+} else {
+    Write-Warning 'Permissions dist ignorees (--SkipDistPermissions)'
+}
 
 # Étape 3: Synchronisation git sur le serveur (optionnel)
 if (-not $SkipGitPull) {
