@@ -1,10 +1,15 @@
 """Client pour l'API Notion officielle."""
 import os
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Mapping, Tuple
 import httpx
 
 logger = logging.getLogger(__name__)
+
+# Pages / blocs : version stable historique.
+NOTION_VERSION_LEGACY = "2022-06-28"
+# Bases au modèle multi-sources : découverte + query via data_sources (Notion 2025-09-03).
+NOTION_VERSION_DATA_SOURCES = "2025-09-03"
 
 
 class NotionAPIClient:
@@ -26,10 +31,132 @@ class NotionAPIClient:
         self.base_url = "https://api.notion.com/v1"
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Notion-Version": "2022-06-28",
+            "Notion-Version": NOTION_VERSION_LEGACY,
             "Content-Type": "application/json"
         }
         logger.info("NotionAPIClient initialisé")
+
+    def _headers_with_version(self, notion_version: str) -> Dict[str, str]:
+        """En-têtes identiques au client mais avec une ``Notion-Version`` explicite."""
+        h = dict(self.headers)
+        h["Notion-Version"] = notion_version
+        return h
+
+    async def _retrieve_database_for_data_sources(
+        self, database_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """GET /v1/databases/{id} avec API 2025-09-03 (liste ``data_sources``).
+
+        Returns:
+            Objet JSON base, ou ``None`` si la requête échoue (ex. 404).
+        """
+        url = f"{self.base_url}/databases/{database_id}"
+        headers = self._headers_with_version(NOTION_VERSION_DATA_SOURCES)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            try:
+                response = await client.get(url, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                return data if isinstance(data, dict) else None
+            except httpx.HTTPStatusError as e:
+                logger.debug(
+                    "GET database (data_sources discovery) %s → %s : %s",
+                    database_id,
+                    e.response.status_code,
+                    e.response.text[:500] if e.response.text else "",
+                )
+                return None
+            except (httpx.RequestError, ValueError) as e:
+                logger.debug("GET database (data_sources discovery) %s échoué: %s", database_id, e)
+                return None
+
+    async def _query_data_source(
+        self,
+        data_source_id: str,
+        filter_properties: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        """POST /v1/data_sources/{id}/query (API 2025-09-03), pagination incluse."""
+        url = f"{self.base_url}/data_sources/{data_source_id}/query"
+        headers = self._headers_with_version(NOTION_VERSION_DATA_SOURCES)
+        payload: Dict[str, Any] = {}
+        params: Optional[List[Tuple[str, str]]] = None
+        if filter_properties:
+            params = [("filter_properties", fp) for fp in filter_properties]
+
+        all_pages: List[Dict[str, Any]] = []
+        has_more = True
+        start_cursor: Optional[str] = None
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            while has_more:
+                body = dict(payload)
+                if start_cursor:
+                    body["start_cursor"] = start_cursor
+                try:
+                    response = await client.post(
+                        url, headers=headers, json=body, params=params
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                except httpx.HTTPStatusError as e:
+                    logger.error(
+                        "Erreur HTTP Notion (data_sources query): %s - %s",
+                        e.response.status_code,
+                        e.response.text,
+                    )
+                    raise
+                except Exception as e:
+                    logger.error("Erreur lors de la requête data_source Notion: %s", e)
+                    raise
+
+                all_pages.extend(data.get("results", []))
+                has_more = data.get("has_more", False)
+                start_cursor = data.get("next_cursor")
+
+        return all_pages
+
+    async def _query_database_legacy(
+        self,
+        database_id: str,
+        filter_properties: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        """POST /v1/databases/{id}/query (API 2022-06-28)."""
+        url = f"{self.base_url}/databases/{database_id}/query"
+
+        payload: Dict[str, Any] = {}
+        if filter_properties:
+            payload["filter_properties"] = filter_properties
+
+        all_pages: List[Dict[str, Any]] = []
+        has_more = True
+        start_cursor: Optional[str] = None
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            while has_more:
+                if start_cursor:
+                    payload["start_cursor"] = start_cursor
+
+                try:
+                    response = await client.post(url, headers=self.headers, json=payload)
+                    response.raise_for_status()
+                    data = response.json()
+
+                    all_pages.extend(data.get("results", []))
+                    has_more = data.get("has_more", False)
+                    start_cursor = data.get("next_cursor")
+
+                except httpx.HTTPStatusError as e:
+                    logger.error(
+                        "Erreur HTTP lors de la requête Notion: %s - %s",
+                        e.response.status_code,
+                        e.response.text,
+                    )
+                    raise
+                except Exception as e:
+                    logger.error(f"Erreur lors de la requête Notion: {e}")
+                    raise
+
+        return all_pages
     
     async def query_database(
         self,
@@ -38,6 +165,12 @@ class NotionAPIClient:
     ) -> List[Dict[str, Any]]:
         """Interroge une base de données Notion.
         
+        Utilise d'abord le modèle **data sources** (Notion API ``2025-09-03``) lorsque
+        la base expose des ``data_sources`` ; sinon retombe sur ``POST .../databases/.../query``
+        (``2022-06-28``). Sans cela, les bases migrées renvoient une erreur du type
+        « does not contain any data sources accessible by this API bot » alors que
+        l'intégration a bien accès.
+
         Args:
             database_id: ID de la base de données.
             filter_properties: Liste des propriétés à récupérer (optionnel).
@@ -45,38 +178,34 @@ class NotionAPIClient:
         Returns:
             Liste des pages de la base de données.
         """
-        url = f"{self.base_url}/databases/{database_id}/query"
-        
-        payload = {}
-        if filter_properties:
-            payload["filter_properties"] = filter_properties
-        
-        all_pages = []
-        has_more = True
-        start_cursor = None
-        
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            while has_more:
-                if start_cursor:
-                    payload["start_cursor"] = start_cursor
-                
-                try:
-                    response = await client.post(url, headers=self.headers, json=payload)
-                    response.raise_for_status()
-                    data = response.json()
-                    
-                    all_pages.extend(data.get("results", []))
-                    has_more = data.get("has_more", False)
-                    start_cursor = data.get("next_cursor")
-                    
-                except httpx.HTTPStatusError as e:
-                    logger.error(f"Erreur HTTP lors de la requête Notion: {e.response.status_code} - {e.response.text}")
-                    raise
-                except Exception as e:
-                    logger.error(f"Erreur lors de la requête Notion: {e}")
-                    raise
-        
-        logger.info(f"Récupération de {len(all_pages)} pages depuis la base de données {database_id}")
+        db_meta = await self._retrieve_database_for_data_sources(database_id)
+        if db_meta is not None:
+            raw_sources = db_meta.get("data_sources")
+            if isinstance(raw_sources, list) and len(raw_sources) > 0:
+                merged: List[Dict[str, Any]] = []
+                for item in raw_sources:
+                    if not isinstance(item, Mapping):
+                        continue
+                    ds_id = item.get("id")
+                    if not ds_id or not isinstance(ds_id, str):
+                        continue
+                    part = await self._query_data_source(
+                        ds_id.strip(), filter_properties=filter_properties
+                    )
+                    merged.extend(part)
+                logger.info(
+                    "Récupération de %s pages (data_sources, base %s)",
+                    len(merged),
+                    database_id,
+                )
+                return merged
+
+        all_pages = await self._query_database_legacy(database_id, filter_properties)
+        logger.info(
+            "Récupération de %s pages depuis la base de données %s (legacy query)",
+            len(all_pages),
+            database_id,
+        )
         return all_pages
     
     async def get_page(self, page_id: str) -> Dict[str, Any]:

@@ -48,8 +48,16 @@ class TestNotionAPIClient:
     
     @pytest.mark.asyncio
     async def test_query_database_success(self, notion_client):
-        """Test de requête de base de données avec succès."""
+        """Test de requête de base de données avec succès (chemin data_sources)."""
         database_id = "test_database_id"
+        mock_get_response = MagicMock()
+        mock_get_response.json.return_value = {
+            "object": "database",
+            "id": database_id,
+            "data_sources": [{"id": "ds-1", "name": "Default"}],
+        }
+        mock_get_response.raise_for_status = MagicMock()
+
         mock_response_data = {
             "results": [
                 {"id": "page1", "properties": {}},
@@ -60,22 +68,31 @@ class TestNotionAPIClient:
         
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
-            mock_response = MagicMock()
-            mock_response.json.return_value = mock_response_data
-            mock_response.raise_for_status = MagicMock()
-            mock_client.post = AsyncMock(return_value=mock_response)
+            mock_post_response = MagicMock()
+            mock_post_response.json.return_value = mock_response_data
+            mock_post_response.raise_for_status = MagicMock()
+            mock_client.get = AsyncMock(return_value=mock_get_response)
+            mock_client.post = AsyncMock(return_value=mock_post_response)
             mock_client_class.return_value.__aenter__.return_value = mock_client
             
             result = await notion_client.query_database(database_id)
             
             assert len(result) == 2
             assert result[0]["id"] == "page1"
+            mock_client.get.assert_called_once()
             mock_client.post.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_query_database_with_pagination(self, notion_client):
-        """Test de requête de base de données avec pagination."""
+        """Test de requête de base de données avec pagination (chemin data_sources)."""
         database_id = "test_database_id"
+
+        mock_get_response = MagicMock()
+        mock_get_response.json.return_value = {
+            "object": "database",
+            "data_sources": [{"id": "ds-1"}],
+        }
+        mock_get_response.raise_for_status = MagicMock()
         
         # Première page
         mock_response_1 = MagicMock()
@@ -96,6 +113,7 @@ class TestNotionAPIClient:
         
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
+            mock_client.get = AsyncMock(return_value=mock_get_response)
             mock_client.post = AsyncMock(side_effect=[mock_response_1, mock_response_2])
             mock_client_class.return_value.__aenter__.return_value = mock_client
             
@@ -106,11 +124,19 @@ class TestNotionAPIClient:
     
     @pytest.mark.asyncio
     async def test_query_database_http_error(self, notion_client):
-        """Test de requête de base de données avec erreur HTTP."""
+        """Test de requête de base de données avec erreur HTTP (fallback legacy)."""
         database_id = "test_database_id"
         
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
+            mock_get_response = MagicMock()
+            mock_get_response.json.return_value = {
+                "object": "database",
+                "data_sources": [],
+            }
+            mock_get_response.raise_for_status = MagicMock()
+            mock_client.get = AsyncMock(return_value=mock_get_response)
+
             mock_response = MagicMock()
             mock_response.status_code = 401
             mock_response.text = "Unauthorized"
