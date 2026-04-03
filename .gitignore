@@ -86,9 +86,8 @@ data/cost_budgets.json
 data/llm_usage/
 data/notion_cache/
 data/gdd_notion_sync/notion_token.secret
-# État / cache sync Notion (régénérable). Garder settings.json versionné si l’équipe s’en sert.
+# État / cache sync Notion (régénérable). settings.json / status.json versionnés si l’équipe les suit.
 data/gdd_notion_sync/notion_search_snapshot.json
-data/gdd_notion_sync/status.json
 data/gdd_notion_sync/full_sync_checkpoint.json
 data/gdd_notion_sync/full_sync_checkpoint.manifest.json
 
