@@ -184,6 +184,26 @@
       "category_file": "Évaluation_des_aspects_culturels___études.json"
     },
     {
+      "kind": "database",
+      "notion_id": "2be6e4d2-1b45-807c-bb2b-ee22e7209042",
+      "category_file": "Systèmes_de_jeu.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "5a3b2abf-221b-40c1-9b2a-98c91e13dfd9",
+      "category_file": "Flags.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "75ab57dc-e48c-4172-8cab-d48f45bda04e",
+      "category_file": "Inventaires_PNJ.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "09204171-5d4d-40e8-9237-d7bac6a5c1a0",
+      "category_file": "Valeurs_de_Flag.json"
+    },
+    {
       "kind": "page",
       "notion_id": "45a0dee0-f8f8-4973-b4dc-5dbf8c18d241",
       "category_file": "Action-RPG.json"
@@ -659,5 +679,7 @@
       "category_file": "Évaluation_des_aspects_culturels_d'Alteir.json"
     }
   ],
-  "included_categories": []
+  "included_categories": [],
+  "mirror_rebuild_on_full_sync": false,
+  "archive_retention_count": 10
 }

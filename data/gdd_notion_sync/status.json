@@ -1,12 +1,10 @@
 {
-  "last_started_at": "2026-04-03T10:34:17.625346+00:00",
-  "last_finished_at": "2026-04-03T10:34:18.385708+00:00",
-  "last_success": false,
-  "message": "Miroir non appliqué : erreurs bloquantes (1). État GDD inchangé. Snapshot : .archive/20260403T103417Z_dd75abc9",
-  "updated_entities": 0,
-  "partial_errors": [
-    "Dialogues.json: fetch — HTTP 400 — Client error '400 Bad Request' for url 'https://api.notion.com/v1/databases/2766e4d2-1b45-8073-b9e3-fa39ae137938/query'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
-  ],
-  "last_archive_relative": ".archive/20260403T103417Z_dd75abc9",
-  "last_mirror_rebuild_used": true
+  "last_started_at": "2026-04-03T22:59:01.066463+00:00",
+  "last_finished_at": "2026-04-03T23:05:43.599626+00:00",
+  "last_success": true,
+  "message": "206 entité(s) mise(s) à jour",
+  "updated_entities": 206,
+  "partial_errors": [],
+  "last_archive_relative": null,
+  "last_mirror_rebuild_used": false
 }

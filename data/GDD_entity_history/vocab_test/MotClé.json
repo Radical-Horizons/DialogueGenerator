@@ -358,5 +358,29 @@
       },
       "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
     }
+  },
+  {
+    "at": "2026-04-03T22:42:52.508740+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "MotClé",
+      "values": {
+        "Sens": "Définition courte"
+      },
+      "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+    }
+  },
+  {
+    "at": "2026-04-03T22:54:26.374118+00:00",
+    "source": "notion_sync",
+    "summary": "Mise à jour (notion_sync)",
+    "snapshot": {
+      "Nom": "MotClé",
+      "values": {
+        "Sens": "Définition courte"
+      },
+      "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+    }
   }
 ]

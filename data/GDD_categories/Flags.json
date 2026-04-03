@@ -1,0 +1,576 @@
+[
+  {
+    "Nom": "Flag_acte_3_debut",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "033a3eb6-2bec-4444-ac20-b821a4ca0e39"
+  },
+  {
+    "Nom": "Flag_faction_rep_culte_prestige_max",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "096e890b-be7d-47b8-9e05-49aaba028044"
+  },
+  {
+    "Nom": "Flag_progression_role_leviathan",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "1219e760-f37b-498e-914b-7b7c7ec4d711"
+  },
+  {
+    "Nom": "Flag_lieu_tunnel_vertebral_portail_profond",
+    "sections": {
+      "_general": "## Valeurs\n\n- FERME — Le portail est scellé ; aucun accès aux Plis d'ossements.\n\n- OUVERT — Le portail a été franchi (acte de quête ou autorisation cultiste).\n\n- CONDAMNE — Le portail est définitivement bloqué suite à un événement narratif majeur."
+    },
+    "notion_page_id": "19e94665-044f-4e2d-9140-f06b2db2d19d"
+  },
+  {
+    "Nom": "Flag_khairgul_role_visibility",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "1ad2a39f-bdff-452b-95a2-5dcdcb4e5657"
+  },
+  {
+    "Nom": "Flag_perso_genka_arc_outcome",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "1c4ff6e4-9605-412d-ad32-02d77532c184"
+  },
+  {
+    "Nom": "Flag_objet_plis_autel_ancres_sonde",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "25e01609-5906-43d4-a522-4087a1b3283e"
+  },
+  {
+    "Nom": "Flag_khairgul_cabinet_access",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "2bcbef60-0e9b-427a-ac76-f2e8b0f1a69f"
+  },
+  {
+    "Nom": "Flag_respect_uresair_aide_proactive_active",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "2facd85a-0801-4a6a-a230-12f0c122f021"
+  },
+  {
+    "Nom": "Flag_acte_2_fin",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "3383b0da-b2c2-41ea-9247-10cc7231985b"
+  },
+  {
+    "Nom": "Flag_lieu_tunnel_vertebral_canal_rituel",
+    "sections": {
+      "_general": "## Valeurs\n\n- INTOUCHE — Le joueur n'a pas encore interagi avec le canal.\n\n- TOUCHE — Le joueur a trempé ses doigts dans le canal (geste rituel reconnu par les Consolés ; ouvre des options de dialogue).\n\n- PROFANE — Le joueur a intentionnellement perturbé le canal (réputation Culte de l'Anentropie Crainte +5)."
+    },
+    "notion_page_id": "3b5c3a1a-0660-40fa-ac41-addb5f9e4df8"
+  },
+  {
+    "Nom": "Flag_campement_etabli",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "3d51bd49-35a0-41ec-8ca6-a0fa3235c604"
+  },
+  {
+    "Nom": "Flag_perso_akthar_pacte",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "3e82eaaa-dcc1-4067-ac1c-71d647cfb015"
+  },
+  {
+    "Nom": "Flag_perso_akthar_masque",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "3ecac4fd-259f-448c-97dd-df314032734d"
+  },
+  {
+    "Nom": "Flag_acte_2_debut",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "418738cd-87ee-4bf2-866a-a33e5227afbd"
+  },
+  {
+    "Nom": "Flag_acte_1_fin",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "48323a21-5687-4112-acaa-3ac9c83821df"
+  },
+  {
+    "Nom": "Flag_lieu_tunnel_vertebral_rite_elevation",
+    "sections": {
+      "_general": "## Valeurs\n\n- IGNORE — Le joueur n'a pas encore été témoin du rituel.\n\n- TEMOIN — Le joueur a observé le rite sans y prendre part.\n\n- ANCRE_DEPOSE — Le joueur a offert une ancre mémorielle au sage en cours de crucifixion."
+    },
+    "notion_page_id": "4bf10c37-535b-426d-a9fc-651b396d8a49"
+  },
+  {
+    "Nom": "Flag_quete_murmurateur_banni_resolution",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "4ce17497-a0a7-4f27-9ea4-5e3a935c4fcc"
+  },
+  {
+    "Nom": "Flag_explo_poi_conclave_passage_repere",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "5a552134-5b8c-4457-ba43-fc3085668609"
+  },
+  {
+    "Nom": "Flag_inventaire_traite_liquides_etudie",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "5b45f2fa-a2a6-4a51-b358-82da2883377c"
+  },
+  {
+    "Nom": "Flag_acte_1_debut",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "5bdaa4cf-9447-4dd2-b30b-b37144d44627"
+  },
+  {
+    "Nom": "Flag_dialogue_interactions_pnj",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "5cd0ab6e-ea34-4880-8079-6166fe4aa3a9"
+  },
+  {
+    "Nom": "Flag_perso_khairgul_arc_outcome",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "5d368d73-e730-40de-ad27-df02b486cdc4"
+  },
+  {
+    "Nom": "Flag_perso_akthar_journal",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "60eae806-d19b-4fae-881c-041563e55ba7"
+  },
+  {
+    "Nom": "Flag_perso_khairgul_role_visibility",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "64e0e360-fe4c-4300-8004-6de1da9ded17"
+  },
+  {
+    "Nom": "Flag_perso_voknir_confiance",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "660b8085-64e7-4638-bf39-62bd23ebb1a8"
+  },
+  {
+    "Nom": "Flag_explo_zone_plis_ossements_etat",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "6622ff5a-9c75-4ec2-bf72-3539707a4925"
+  },
+  {
+    "Nom": "Flag_perso_khairgul_etude_secrete",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "669c5d17-e82c-44a3-a084-2eddfd04e2ad"
+  },
+  {
+    "Nom": "Flag_allies_compagnon_actif",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "698d3e24-5691-4550-9c37-c1a91a93232c"
+  },
+  {
+    "Nom": "Flag_cutscene_vision_intro_choix",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "762c51b6-a680-4124-99fd-8d1251032cba"
+  },
+  {
+    "Nom": "Flag_perso_akthar_manuscrits_choix",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "78d75c47-46ce-4f99-947c-b69d63dd34ea"
+  },
+  {
+    "Nom": "Flag_perso_akthar_fissures",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "7d4876d8-3126-4c8a-b30f-870e5eb80098"
+  },
+  {
+    "Nom": "Flag_souvenirs_uresair_vol_interpretation",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "7e4292e4-dac8-4862-af68-0576ebd905b5"
+  },
+  {
+    "Nom": "Flag_khairgul_flacons_discovered",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "7f03333a-60f0-4045-818c-f318bcb639d1"
+  },
+  {
+    "Nom": "Flag_perso_genka_recrutement",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "7f0ac51d-13a4-4d9d-a33d-08a983cc6b09"
+  },
+  {
+    "Nom": "Flag_perso_akthar_rencontre",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "7ff225fc-0449-4d2d-b854-cfc85baad0ba"
+  },
+  {
+    "Nom": "Flag_perso_akthar_krypte",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "80bcc3f2-30a1-49fb-b7b9-c69a88b4aa13"
+  },
+  {
+    "Nom": "Flag_khairgul_arc_outcome",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "80c53aad-2a65-47bd-8f78-f60f1732a51a"
+  },
+  {
+    "Nom": "Flag_lieu_tunnel_vertebral_genka_presence",
+    "sections": {
+      "_general": "## Valeurs\n\n- PRESENT — Genka Lien campe dans le tunnel ; dialogues et Débats Suspendus disponibles.\n\n- EN_TOURNEE — Genka Lien est temporairement absent pour une performance hors du tunnel.\n\n- EXPULSE — Genka Lien a été banni par le Culte suite à une performance jugée trop hérétique ; le tunnel perd l'accès aux Débats Suspendus."
+    },
+    "notion_page_id": "80dfc659-0a9f-4d25-af29-3510651db393"
+  },
+  {
+    "Nom": "Flag_faction_titre_culte",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "812e85ac-4786-4831-8a8b-152955240361"
+  },
+  {
+    "Nom": "Flag_perso_khairgul_confrérie",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "84bb4982-2290-4228-8408-f88f9864a1e6"
+  },
+  {
+    "Nom": "Flag_tutoriel_complete",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "85008103-4906-4e5d-a0bb-90b4575f9b9b"
+  },
+  {
+    "Nom": "Flag_perso_khairgul_kalresh",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "85117304-325e-46b7-9425-45988f4479a0"
+  },
+  {
+    "Nom": "Flag_eco_economie_service_comprise",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "8ad554d5-9628-44d1-8fb6-8337f73325b8"
+  },
+  {
+    "Nom": "Flag_khairgul_kalresh_medical_authorisation",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "94d5c969-0b69-4929-a239-21c2694a7a70"
+  },
+  {
+    "Nom": "Flag_perso_voknir_recrutement",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "960f3328-69e6-493a-b5f2-8d707f7fe4cb"
+  },
+  {
+    "Nom": "Flag_perso_voknir_thyra_revelation",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "9828b90e-aa5c-4ff4-a49d-9ab29c1e2843"
+  },
+  {
+    "Nom": "Flag_transport_kresh_rencontre",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "991f0820-11c8-4d7f-85e5-afc2687de7d3"
+  },
+  {
+    "Nom": "Flag_perso_voknir_cercle_traceurs",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "99a0e253-bdd0-4ef7-aa13-5622b56087e2"
+  },
+  {
+    "Nom": "Flag_perso_khairgul_confiance",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a0ab92f7-6943-49b6-99d7-6bf2a5d03165"
+  },
+  {
+    "Nom": "Flag_cutscene_vision_intro_echec",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a46568b3-a946-46f4-b599-e8ca5abbd6ac"
+  },
+  {
+    "Nom": "culturel:sept_sceaux:compris",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a5143dc7-1624-4098-9882-3968284f5934"
+  },
+  {
+    "Nom": "Flag_influence_uresair_forcing_total",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a6e11b70-cb27-430d-80a8-13dbfaf50b99"
+  },
+  {
+    "Nom": "Flag_perso_voknir_bannissement_cause",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a83fcb09-12ab-4b4c-9232-3a3147db4a53"
+  },
+  {
+    "Nom": "Flag_quete_artisan_sursis_expire",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a902e66f-4151-4df6-83f8-a05e77366b1a"
+  },
+  {
+    "Nom": "Flag_perso_voknir_yul_enquete",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "a9a42804-927a-4e63-9bcf-56dd679f8b63"
+  },
+  {
+    "Nom": "Flag_khairgul_duqsha_case_status",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "ad2f87e6-b85b-4617-b810-db00a97e6492"
+  },
+  {
+    "Nom": "Flag_acte_3_fin",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "b4ef3f29-b26c-42bb-bafa-e987207978d9"
+  },
+  {
+    "Nom": "Flag_perso_akthar_insufflations_choix",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "b891bd34-d391-4839-825f-7d022de6b236"
+  },
+  {
+    "Nom": "Flag_perso_khairgul_duqsha",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "b9aeed05-bebc-43e8-a934-4079c5692702"
+  },
+  {
+    "Nom": "Flag_citadelle_debloquee",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "bea3d1fe-2193-4cc2-a85e-b694d84dc4ef"
+  },
+  {
+    "Nom": "Flag_eco_abus_angelique",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "bf5ae430-124a-4135-8477-270143a3794f"
+  },
+  {
+    "Nom": "Flag_possession_uresair_premiere",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "bfc3aaad-0b48-4eec-a6f6-430b5d6e1cf0"
+  },
+  {
+    "Nom": "Flag_perso_voknir_arc_outcome",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c2876548-31ab-40a2-bc1c-bcebd731494a"
+  },
+  {
+    "Nom": "Flag_perso_voknir_relique_tentative",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c6db9ee8-0368-4a97-8353-99c627b19728"
+  },
+  {
+    "Nom": "Flag_progression_culte_premier_noeud_active",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c835e9ae-188a-4f8f-8a1a-74b92bf59edc"
+  },
+  {
+    "Nom": "Flag_perso_akthar_arc_outcome",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "c98123a7-8502-41c5-aa9b-a7136630fc5b"
+  },
+  {
+    "Nom": "Flag_lieu_tunnel_vertebral_debats_suspendus",
+    "sections": {
+      "_general": "## Valeurs\n\n- INACTIF — Aucun débat en cours ni annoncé.\n\n- ANNONCE — Genka Lien a annoncé un prochain débat ; le joueur peut s'y préparer.\n\n- EN_COURS — Le débat est actif ; le joueur peut intervenir ou observer.\n\n- CONCLUE_ORTHODOXE — Le débat s'est conclu en faveur de l'interprétation orthodoxe du Barvasinkul.\n\n- CONCLUE_DISSIDENT — Le débat s'est conclu en faveur d'une interprétation dissidente, ouvrant des options narratives avec les Murmurateurs."
+    },
+    "notion_page_id": "d1aee1ff-7915-4e59-8ea8-9c45ff7812b8"
+  },
+  {
+    "Nom": "Flag_camp_allié_recruté_[id_allié]",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "d6d4383a-b08d-4131-8a6a-e51900cdc614"
+  },
+  {
+    "Nom": "Flag_quete_flacons_murmureurs",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "d90aefd8-d008-4559-949d-d9b05193b470"
+  },
+  {
+    "Nom": "Flag_possession_eonunde_premiere",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "db22c068-db5a-407a-b8cb-1f51353896d4"
+  },
+  {
+    "Nom": "Flag_perso_akthar_dernier_rituel",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "dcae3ed9-4c0f-4f54-9d96-ab2e9cbcb180"
+  },
+  {
+    "Nom": "Flag_perso_genka_bras_revele",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "dd9c6a88-d65e-4af0-89ed-6c20e34be549"
+  },
+  {
+    "Nom": "Flag_objet_plis_lichen_sang_examine",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "de1fe0c5-21ef-41a5-83ea-3f7b25396ff3"
+  },
+  {
+    "Nom": "Flag_transport_tunnel_profond_debloque",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "e329a2e6-b5bc-4825-a946-9c1e55512846"
+  },
+  {
+    "Nom": "Flag_souvenirs_uresair_vol_resolu",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f09f5ca6-3833-47ab-b60f-f0935645189c"
+  },
+  {
+    "Nom": "biologique:lichen_sang:identifie",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f63a3a3d-a23f-4d3c-997c-a050714032d5"
+  },
+  {
+    "Nom": "Flag_perso_genka_convergence",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f67d3167-be48-42fe-8b47-8a8c6f174813"
+  },
+  {
+    "Nom": "Flag_perso_genka_manuscrit",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f7c9a095-1f01-462c-8456-a3e0ba3e1239"
+  },
+  {
+    "Nom": "Flag_inventaire_sceau_tisserandes_offert",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "f7f1247e-2e45-4e9d-b984-5a796aabcf66"
+  },
+  {
+    "Nom": "Flag_possession_vethraak_premiere",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "fbc0a6aa-93e8-4c8a-aa95-fa764d58173b"
+  },
+  {
+    "Nom": "Flag_perso_voknir_rencontre",
+    "sections": {
+      "_general": ""
+    },
+    "notion_page_id": "fdbb4056-ab88-4b26-8c93-1184d86182f9"
+  }
+]
