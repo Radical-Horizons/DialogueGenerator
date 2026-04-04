@@ -106,9 +106,16 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
         # Seulement les requêtes GET
         if request.method != "GET":
             return False
+
+        path = request.url.path
+
+        # Ne jamais mettre en cache le shell SPA ni les assets servis hors /api/ :
+        # StaticFiles (/, /assets/*, etc.) passait ici et recevait public,max-age=TTL,
+        # ce qui figeait index.html en RAM et dans le navigateur après déploiement.
+        if not path.startswith("/api/"):
+            return False
         
         # Ne pas mettre en cache les endpoints avec données dynamiques
-        path = request.url.path
         non_cacheable_paths = [
             "/api/v1/interactions",
             "/api/v1/dialogues",
