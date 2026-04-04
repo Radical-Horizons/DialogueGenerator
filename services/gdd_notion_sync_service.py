@@ -419,8 +419,15 @@ class GddNotionSyncService:
         partial_out: List[str],
         request_id: Optional[str],
     ) -> List[Tuple[Any, str, str]]:
-        """Liste les sources à traiter (kind, notion_id, category_file)."""
+        """Liste les sources à traiter (kind, notion_id, category_file).
+
+        Si ``included_categories`` est vide : toutes les bases et toutes les fiches
+        (``page``). Sinon : **uniquement** les bases qui matchent le filtre — les
+        fiches sont ignorées sur ce run (sync ciblée rapide, sans parcourir toutes
+        les pages du hub).
+        """
         eligible: List[Tuple[Any, str, str]] = []
+        restrict_to_databases_only = bool(included_list)
         for src in sources:
             if not isinstance(src, dict):
                 continue
@@ -429,6 +436,16 @@ class GddNotionSyncService:
             cat_file = str(src.get("category_file", "")).strip()
             if not nid or not cat_file:
                 partial_out.append("Source ignorée (notion_id ou category_file vide)")
+                continue
+            kind_str = str(kind or "").strip().lower()
+            if kind_str == "page":
+                if restrict_to_databases_only:
+                    log_sync_event(
+                        f"{cat_file} ignoré (périmètre restreint aux bases listées)",
+                        request_id=request_id,
+                    )
+                    continue
+                eligible.append((kind, nid, cat_file))
                 continue
             if not category_file_matches_included(cat_file, included_list):
                 log_sync_event(
@@ -701,24 +718,25 @@ class GddNotionSyncService:
             for x in (settings.get("included_categories") or [])
             if isinstance(x, str) and str(x).strip()
         ]
-        category_files_from_sources: List[str] = []
+        database_category_files: List[str] = []
         for src in sources:
             if not isinstance(src, dict):
                 continue
             cat_file = str(src.get("category_file", "")).strip()
             nid = str(src.get("notion_id", "")).strip()
-            if nid and cat_file:
-                category_files_from_sources.append(cat_file)
-        if included_list and category_files_from_sources:
+            kind_str = str(src.get("kind", "")).strip().lower()
+            if nid and cat_file and kind_str == "database":
+                database_category_files.append(cat_file)
+        if included_list and database_category_files:
             if not any(
                 category_file_matches_included(cf, included_list)
-                for cf in category_files_from_sources
+                for cf in database_category_files
             ):
                 return GddNotionSyncResult(
                     success=False,
                     message=(
-                        "included_categories ne correspond à aucun category_file "
-                        "des sources configurées."
+                        "included_categories ne correspond à aucune base (database) "
+                        "parmi les sources configurées."
                     ),
                 )
 

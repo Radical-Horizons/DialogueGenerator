@@ -24,7 +24,14 @@ class GddNotionSyncConfigPublic(BaseModel):
     sync_interval_minutes: int = 60
     auto_sync_enabled: bool = False
     sources: List[GddNotionSourceSchema] = Field(default_factory=list)
-    included_categories: List[str] = Field(default_factory=list)
+    included_categories: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Noms de fichier cible (ex. personnages.json) restreignant les sources "
+            "kind=database. Vide = toutes les bases et toutes les fiches (page). "
+            "Non vide = uniquement ces bases sur ce run ; les fiches page sont exclues."
+        ),
+    )
     mirror_rebuild_on_full_sync: bool = Field(
         default=False,
         description="Déprécié : ignoré par le serveur (sync complète = miroir automatique).",
@@ -39,7 +46,10 @@ class GddNotionSyncConfigUpdate(BaseModel):
     sync_interval_minutes: Optional[int] = None
     auto_sync_enabled: Optional[bool] = None
     sources: Optional[List[GddNotionSourceSchema]] = None
-    included_categories: Optional[List[str]] = None
+    included_categories: Optional[List[str]] = Field(
+        default=None,
+        description="Filtre bases ; si défini et non vide, les sources page ne sont pas sync sur ce run.",
+    )
     mirror_rebuild_on_full_sync: Optional[bool] = Field(
         default=None,
         description="Déprécié : sans effet sur le comportement (conservé pour compat. JSON).",

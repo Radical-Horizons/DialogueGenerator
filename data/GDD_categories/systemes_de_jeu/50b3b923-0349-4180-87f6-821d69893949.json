@@ -1,0 +1,7 @@
+{
+  "Nom": "Registre des Flags",
+  "sections": {
+    "_general": "## Flags du système\n\nCe système est l’infrastructure des flags — il définit leur convention et leur base de données, mais ne produit pas de flags sur son propre état. Pas de flags. Ajouter une base inline ici serait circulaire.\n\n## Rôle du système\n\nLes flags sont la mémoire discrète du jeu. Ils mémorisent qu'un événement a eu lieu, qu'un choix a été fait, ou qu'un état particulier du monde est atteint.\n\nDistinction clé : Un flag n'est PAS une jauge. Ne pas utiliser un flag pour modéliser quelque chose de continu ou de graduel (utiliser la Réputation, l'Influence ou le Respect à la place). Un flag mémorise un événement ponctuel et irréversible, ou un état à valeurs discrrètes fini.\n\n## Portées\n\n## Convention de nommage\n\n- Toujours commencer par Flag_\n\n- snake_case, pas de majuscules après Flag_\n\n- Éviter les noms de personnages comme préfixe (utiliser un identifiant court)\n\n- Pour les flags de questête : Flag_quete_[id]_[phase|resolution]\n\n## Catalogue\n\nLa base dédiée : Flags"
+  },
+  "notion_page_id": "50b3b923-0349-4180-87f6-821d69893949"
+}

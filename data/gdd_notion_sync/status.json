@@ -1,9 +1,9 @@
 {
-  "last_started_at": "2026-04-03T22:59:01.066463+00:00",
-  "last_finished_at": "2026-04-03T23:05:43.599626+00:00",
+  "last_started_at": "2026-04-03T23:49:31.547086+00:00",
+  "last_finished_at": "2026-04-03T23:49:33.649771+00:00",
   "last_success": true,
-  "message": "206 entité(s) mise(s) à jour",
-  "updated_entities": 206,
+  "message": "Aucune mise à jour",
+  "updated_entities": 0,
   "partial_errors": [],
   "last_archive_relative": null,
   "last_mirror_rebuild_used": false

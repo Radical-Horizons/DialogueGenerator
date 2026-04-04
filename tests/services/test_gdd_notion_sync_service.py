@@ -85,6 +85,69 @@ async def test_run_sync_list_category_writes_shard_files(tmp_path: Path) -> None
 
 
 @pytest.mark.asyncio
+async def test_run_sync_systemes_de_jeu_writes_shard_dir(tmp_path: Path) -> None:
+    """Systèmes de jeu : même mode shards que Personnages (dossier systemes_de_jeu)."""
+    pid = "2be6e4d2-1b45-807c-bb2b-ee22e7209042"
+
+    class FakeClient:
+        async def verify_credentials(self) -> dict:
+            return {"id": "bot", "type": "bot"}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-01-02T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "Système test"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return "Règles."
+
+        async def query_database(self, database_id: str) -> list:
+            return []
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "page",
+                    "notion_id": pid,
+                    "category_file": "Systèmes_de_jeu.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="unit-systemes-shards")
+    assert res.updated_entities == 1
+    assert res.success
+    shard = gdd_dir / "systemes_de_jeu" / f"{pid}.json"
+    assert shard.is_file()
+    out = json.loads(shard.read_text(encoding="utf-8"))
+    assert out["Nom"] == "Système test"
+    assert out["notion_page_id"] == pid
+
+
+@pytest.mark.asyncio
 async def test_run_sync_page_source_writes_gdd(tmp_path: Path) -> None:
     pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
 
@@ -304,24 +367,25 @@ async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_included_categories_skips_non_matching_sources(tmp_path: Path) -> None:
-    pid_a = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
-    pid_b = "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+    """Filtre included_categories : uniquement les bases ; une base exclue n'est pas interrogée."""
+    db_keep = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+    db_skip = "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+    row_id = "2886e4d2-1b45-8039-b51b-eb3826fce1b7"
 
     class FakeClient:
-        fetched: list[str] = []
+        queried: list[str] = []
 
         async def verify_credentials(self) -> dict:
             return {}
 
         async def get_page(self, page_id: str) -> dict:
-            FakeClient.fetched.append(page_id)
             return {
                 "id": page_id,
                 "last_edited_time": "2025-02-01T00:00:00.000Z",
                 "properties": {
                     "Name": {
                         "type": "title",
-                        "title": [{"plain_text": "X"}],
+                        "title": [{"plain_text": "Ligne"}],
                     },
                 },
             }
@@ -330,9 +394,10 @@ async def test_included_categories_skips_non_matching_sources(tmp_path: Path) ->
             return "body"
 
         async def query_database(self, database_id: str) -> list:
-            return []
+            FakeClient.queried.append(database_id)
+            return [{"id": row_id, "last_edited_time": "2025-02-01T00:00:00.000Z"}]
 
-    FakeClient.fetched.clear()
+    FakeClient.queried.clear()
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
     store.write_token("dummy-token")
     store.save_settings(
@@ -342,13 +407,13 @@ async def test_included_categories_skips_non_matching_sources(tmp_path: Path) ->
             "auto_sync_enabled": False,
             "sources": [
                 {
-                    "kind": "page",
-                    "notion_id": pid_a,
+                    "kind": "database",
+                    "notion_id": db_keep,
                     "category_file": "keep.json",
                 },
                 {
-                    "kind": "page",
-                    "notion_id": pid_b,
+                    "kind": "database",
+                    "notion_id": db_skip,
                     "category_file": "skip.json",
                 },
             ],
@@ -366,13 +431,47 @@ async def test_included_categories_skips_non_matching_sources(tmp_path: Path) ->
     )
     res = await svc.run_sync(force_full=True, request_id="unit-filter")
     assert res.updated_entities == 1
-    assert FakeClient.fetched.count(pid_a) >= 1
-    assert pid_b not in FakeClient.fetched
+    assert db_keep in FakeClient.queried
+    assert db_skip not in FakeClient.queried
+    assert (gdd_dir / "keep.json").is_file()
     assert (gdd_dir / "skip.json").exists() is False
 
 
 @pytest.mark.asyncio
-async def test_included_categories_no_match_returns_error(tmp_path: Path) -> None:
+async def test_included_categories_skips_pages_when_filter_set(tmp_path: Path) -> None:
+    """Périmètre restreint : pas de sync des fiches (page), seulement les bases filtrées."""
+    pid_page = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
+    db_id = "1886e4d2-1b45-8039-b51b-eb3826fce1b6"
+    row_id = "2886e4d2-1b45-8039-b51b-eb3826fce1b7"
+
+    class FakeClient:
+        page_root_fetches: list[str] = []
+
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            if page_id == pid_page:
+                FakeClient.page_root_fetches.append(page_id)
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-02-01T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "X"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return "body"
+
+        async def query_database(self, database_id: str) -> list:
+            assert database_id == db_id
+            return [{"id": row_id, "last_edited_time": "2025-02-01T00:00:00.000Z"}]
+
+    FakeClient.page_root_fetches.clear()
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
     store.write_token("dummy-token")
     store.save_settings(
@@ -383,6 +482,47 @@ async def test_included_categories_no_match_returns_error(tmp_path: Path) -> Non
             "sources": [
                 {
                     "kind": "page",
+                    "notion_id": pid_page,
+                    "category_file": "hub_page.json",
+                },
+                {
+                    "kind": "database",
+                    "notion_id": db_id,
+                    "category_file": "keep.json",
+                },
+            ],
+            "included_categories": ["keep"],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="unit-filter-pages-skip")
+    assert res.updated_entities >= 1
+    assert pid_page not in FakeClient.page_root_fetches
+    assert (gdd_dir / "keep.json").is_file()
+    assert (gdd_dir / "hub_page.json").exists() is False
+
+
+@pytest.mark.asyncio
+async def test_included_categories_no_match_returns_error(tmp_path: Path) -> None:
+    """Filtre incompatible : aucune base ne correspond (pages seules → filtre ignoré)."""
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
                     "notion_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b5",
                     "category_file": "a.json",
                 },

@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { useContextStore } from '../../store/contextStore'
@@ -39,6 +39,8 @@ const idleProgressBody = {
   paused: false,
 }
 
+const mockPutConfig = vi.fn()
+
 vi.mock('../../api/gddNotionSync', () => ({
   getGddNotionSyncStatus: (...a: unknown[]) => mockGetStatus(...a),
   getGddNotionSyncConfig: (...a: unknown[]) => mockGetConfig(...a),
@@ -49,7 +51,7 @@ vi.mock('../../api/gddNotionSync', () => ({
   postGddFullSyncPause: (...a: unknown[]) => mockPostPause(...a),
   postGddFullSyncUnpause: (...a: unknown[]) => mockPostUnpause(...a),
   postGddFullSyncCancel: (...a: unknown[]) => mockPostCancel(...a),
-  putGddNotionSyncConfig: vi.fn(),
+  putGddNotionSyncConfig: (...a: unknown[]) => mockPutConfig(...a),
   postGddNotionSync: (...a: unknown[]) => mockPostSync(...a),
   postGddNotionTestConnection: (...a: unknown[]) => mockPostTest(...a),
   postGddNotionArchiveRestore: (...a: unknown[]) => mockPostRestore(...a),
@@ -58,6 +60,21 @@ vi.mock('../../api/gddNotionSync', () => ({
 describe('GddNotionSyncSection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockPutConfig.mockImplementation(async (body: { included_categories?: string[] }) => ({
+      config: {
+        schema_version: 1,
+        sync_interval_minutes: 60,
+        auto_sync_enabled: false,
+        sources: [
+          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
+          { notion_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', kind: 'database', category_file: 'Beta.json' },
+        ],
+        included_categories: body.included_categories ?? [],
+        mirror_rebuild_on_full_sync: false,
+        archive_retention_count: 10,
+        token_configured: true,
+      },
+    }))
     useContextStore.setState({ gddDataRevision: 0 })
     mockGetStatus.mockResolvedValue({
       last_started_at: null,
@@ -123,6 +140,60 @@ describe('GddNotionSyncSection', () => {
     expect(await screen.findByText(/Résumé configuration/i)).toBeInTheDocument()
     expect(screen.getByText(/Sources :/i)).toBeInTheDocument()
     expect(mockGetConfig).toHaveBeenCalled()
+  })
+
+  it('affiche des cases à cocher pour chaque source database (filtre périmètre)', async () => {
+    mockGetConfig.mockResolvedValue({
+      config: {
+        schema_version: 1,
+        sync_interval_minutes: 60,
+        auto_sync_enabled: false,
+        sources: [
+          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
+          { notion_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', kind: 'database', category_file: 'Beta.json' },
+          { notion_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc', kind: 'page', category_file: 'Fiche.json' },
+        ],
+        included_categories: [],
+        mirror_rebuild_on_full_sync: false,
+        archive_retention_count: 10,
+        token_configured: true,
+      },
+    })
+    render(<GddNotionSyncSection />)
+    expect(await screen.findByRole('group', { name: /Bases de données Notion/i })).toBeInTheDocument()
+    expect(screen.getByText('Alpha.json')).toBeInTheDocument()
+    expect(screen.getByText('Beta.json')).toBeInTheDocument()
+    expect(screen.queryByText('Fiche.json')).not.toBeInTheDocument()
+  })
+
+  it('Tout décocher puis enregistrer envoie included_categories vide (toutes les bases)', async () => {
+    const user = userEvent.setup()
+    mockGetConfig.mockResolvedValue({
+      config: {
+        schema_version: 1,
+        sync_interval_minutes: 60,
+        auto_sync_enabled: false,
+        sources: [
+          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
+          { notion_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', kind: 'database', category_file: 'Beta.json' },
+        ],
+        included_categories: [],
+        mirror_rebuild_on_full_sync: false,
+        archive_retention_count: 10,
+        token_configured: true,
+      },
+    })
+    render(<GddNotionSyncSection />)
+    const group = await screen.findByRole('group', { name: /Bases de données Notion/i })
+    await user.click(screen.getByRole('button', { name: /Tout décocher/i }))
+    const checkboxes = within(group).getAllByRole('checkbox')
+    expect(checkboxes.every((cb) => !(cb as HTMLInputElement).checked)).toBe(true)
+    await user.click(screen.getByRole('button', { name: /Enregistrer les paramètres/i }))
+    await waitFor(() => {
+      expect(mockPutConfig).toHaveBeenCalled()
+    })
+    const body = mockPutConfig.mock.calls[0]?.[0] as { included_categories?: string[] }
+    expect(body.included_categories).toEqual([])
   })
 
   it('appelle postGddNotionSync(true) pour Sync complète', async () => {

@@ -18,6 +18,7 @@ _GDD_LIST_CATEGORY_KEYS: frozenset[str] = frozenset(
         "dialogues",
         "structure_narrative",
         "quetes",
+        "systemes_de_jeu",
     }
 )
 
