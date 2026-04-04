@@ -4,8 +4,8 @@ from __future__ import annotations
 import re
 import unicodedata
 import uuid
-from pathlib import PurePath
-from typing import Iterable, Optional
+from pathlib import Path, PurePath
+from typing import Any, Iterable, Optional
 
 # Clés catégories GDD de type liste (aligné sur ``GDDLoader.CATEGORIES_CONFIG``).
 _GDD_LIST_CATEGORY_KEYS: frozenset[str] = frozenset(
@@ -136,3 +136,33 @@ def redact_notion_token_from_text(text: str) -> str:
     # long alphanumeric runs (integration tokens)
     out = re.sub(r"secret_[a-zA-Z0-9_]{20,}", "[REDACTED]", out)
     return out
+
+
+# region agent log
+def agent_debug_log_d9fa38(
+    hypothesis_id: str,
+    location: str,
+    message: str,
+    data: dict[str, Any],
+) -> None:
+    """Session debug d9fa38 — append NDJSON (aucun secret ni token)."""
+    import json
+    import time
+
+    try:
+        path = Path(__file__).resolve().parent.parent / "debug-d9fa38.log"
+        payload = {
+            "sessionId": "d9fa38",
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": int(time.time() * 1000),
+        }
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+
+# endregion agent log

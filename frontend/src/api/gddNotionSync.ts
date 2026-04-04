@@ -127,6 +127,34 @@ export async function postGddNotionTestConnection(): Promise<GddNotionConnection
   return data
 }
 
+/** Réponse POST prévisualisation première ligne d’une base (alignée Pydantic). */
+export interface GddNotionPreviewDatabaseResponse {
+  ok: boolean
+  message: string
+  category_file: string
+  notion_database_id: string
+  data_sources_count: number
+  data_source_entries: Array<{ id: string; name: string }>
+  query_total_rows: number
+  first_page_id: string
+  property_keys_from_query_row: string[]
+  property_keys_from_get_page: string[]
+  mapped_record: Record<string, unknown> | null
+  compact_table: boolean
+}
+
+/** Une ligne comme en sync : utile pour vérifier Notion avant une sync complète. */
+export async function postGddNotionPreviewDatabaseRow(
+  categoryFile: string,
+): Promise<GddNotionPreviewDatabaseResponse> {
+  const { data } = await apiClient.post<GddNotionPreviewDatabaseResponse>(
+    '/api/v1/gdd-notion-sync/preview-database-row',
+    { category_file: categoryFile },
+    { timeout: API_TIMEOUTS.LLM_GENERATION },
+  )
+  return data
+}
+
 export interface PostGddNotionSyncOptions {
   resume?: boolean
   fresh?: boolean

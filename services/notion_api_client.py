@@ -4,7 +4,7 @@ import logging
 from typing import List, Dict, Any, Optional, Mapping, Tuple
 import httpx
 
-from services.gdd_notion_sync_utils import normalize_notion_id
+from services.gdd_notion_sync_utils import agent_debug_log_d9fa38, normalize_notion_id
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,25 @@ class NotionAPIClient:
                 response = await client.get(url, headers=headers)
                 response.raise_for_status()
                 data = response.json()
+                # region agent log
+                if isinstance(data, dict):
+                    raw_ds = data.get("data_sources")
+                    ds_n = (
+                        len(raw_ds)
+                        if isinstance(raw_ds, list)
+                        else -1
+                    )
+                    agent_debug_log_d9fa38(
+                        "A",
+                        "notion_api_client._retrieve_database_for_data_sources",
+                        "GET database 2025-09-03 ok",
+                        {
+                            "database_id": database_id,
+                            "data_sources_len": ds_n,
+                            "has_title": bool(data.get("title")),
+                        },
+                    )
+                # endregion agent log
                 return data if isinstance(data, dict) else None
             except httpx.HTTPStatusError as e:
                 logger.warning(
@@ -317,6 +336,23 @@ class NotionAPIClient:
             entries, db_meta, data_source_ids
         )
         if not ds_ids:
+            # region agent log
+            agent_debug_log_d9fa38(
+                "A",
+                "notion_api_client._query_database_via_data_sources",
+                "no ds_ids will try legacy query",
+                {
+                    "database_id": database_id,
+                    "entries_parsed": len(entries),
+                    "raw_data_sources_is_list": isinstance(raw_sources, list),
+                    "raw_data_sources_len": (
+                        len(raw_sources)
+                        if isinstance(raw_sources, list)
+                        else -1
+                    ),
+                },
+            )
+            # endregion agent log
             logger.warning(
                 "GET database %s (API %s) : aucun data_source_id exploitable "
                 "(data_sources=%r, clés=%s)",
@@ -332,6 +368,18 @@ class NotionAPIClient:
                 ds_id, filter_properties=filter_properties
             )
             merged.extend(part)
+        # region agent log
+        agent_debug_log_d9fa38(
+            "D",
+            "notion_api_client._query_database_via_data_sources",
+            "data_source query completed",
+            {
+                "database_id": database_id,
+                "ds_chosen_count": len(ds_ids),
+                "merged_row_count": len(merged),
+            },
+        )
+        # endregion agent log
         logger.info(
             "Récupération de %s pages via %d data_source(s) (base %s) ids=%s",
             len(merged),
@@ -371,6 +419,17 @@ class NotionAPIClient:
             database_id, filter_properties, data_source_ids=data_source_ids
         )
         if via_ds is not None:
+            # region agent log
+            agent_debug_log_d9fa38(
+                "B",
+                "notion_api_client.query_database",
+                "using data_source path result",
+                {
+                    "database_id": database_id,
+                    "row_count": len(via_ds),
+                },
+            )
+            # endregion agent log
             return via_ds
 
         try:
@@ -380,6 +439,17 @@ class NotionAPIClient:
         except httpx.HTTPStatusError as e:
             # Notion peut répondre 400 pour les bases multi-sources sans mentionner
             # explicitement « data source » (libellés localisés ou messages génériques).
+            # region agent log
+            agent_debug_log_d9fa38(
+                "A",
+                "notion_api_client.query_database",
+                "legacy query HTTPStatusError",
+                {
+                    "database_id": database_id,
+                    "status_code": e.response.status_code,
+                },
+            )
+            # endregion agent log
             if e.response.status_code == 400:
                 retry = await self._query_database_via_data_sources(
                     database_id,
@@ -389,6 +459,17 @@ class NotionAPIClient:
                 if retry is not None:
                     return retry
             raise
+        # region agent log
+        agent_debug_log_d9fa38(
+            "B",
+            "notion_api_client.query_database",
+            "legacy query ok",
+            {
+                "database_id": database_id,
+                "row_count": len(all_pages),
+            },
+        )
+        # endregion agent log
         logger.info(
             "Récupération de %s pages depuis la base de données %s (legacy query)",
             len(all_pages),

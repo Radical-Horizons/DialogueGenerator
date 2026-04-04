@@ -40,6 +40,7 @@ const idleProgressBody = {
 }
 
 const mockPutConfig = vi.fn()
+const mockPostPreview = vi.fn()
 
 vi.mock('../../api/gddNotionSync', () => ({
   getGddNotionSyncStatus: (...a: unknown[]) => mockGetStatus(...a),
@@ -54,6 +55,7 @@ vi.mock('../../api/gddNotionSync', () => ({
   putGddNotionSyncConfig: (...a: unknown[]) => mockPutConfig(...a),
   postGddNotionSync: (...a: unknown[]) => mockPostSync(...a),
   postGddNotionTestConnection: (...a: unknown[]) => mockPostTest(...a),
+  postGddNotionPreviewDatabaseRow: (...a: unknown[]) => mockPostPreview(...a),
   postGddNotionArchiveRestore: (...a: unknown[]) => mockPostRestore(...a),
 }))
 
@@ -115,6 +117,20 @@ describe('GddNotionSyncSection', () => {
     mockPostPause.mockResolvedValue({ ok: false, message: '' })
     mockPostUnpause.mockResolvedValue({ ok: false, message: '' })
     mockPostCancel.mockResolvedValue({ ok: false, message: '' })
+    mockPostPreview.mockResolvedValue({
+      ok: true,
+      message: 'OK',
+      category_file: 'Alpha.json',
+      notion_database_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      data_sources_count: 1,
+      data_source_entries: [{ id: 'ds1', name: 'Main' }],
+      query_total_rows: 1,
+      first_page_id: 'page-1',
+      property_keys_from_query_row: ['Name'],
+      property_keys_from_get_page: ['Name'],
+      mapped_record: { Nom: 'Test', sections: { _general: 'x' } },
+      compact_table: false,
+    })
   })
 
   it('affiche chargement puis succès sur Synchroniser maintenant', async () => {
@@ -131,6 +147,9 @@ describe('GddNotionSyncSection', () => {
     await waitFor(() => {
       expect(screen.getByText(/1 entité/i)).toBeInTheDocument()
     })
+    expect(mockPutConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ included_categories: [] }),
+    )
     expect(mockPostSync).toHaveBeenCalled()
     expect(useContextStore.getState().gddDataRevision).toBe(1)
   })
@@ -210,6 +229,34 @@ describe('GddNotionSyncSection', () => {
     await waitFor(() => {
       expect(mockPostSync.mock.calls[0]?.[0]).toBe(true)
     })
+    expect(mockPutConfig).toHaveBeenCalled()
+  })
+
+  it('Tester 1 ligne appelle preview-database-row et affiche le JSON', async () => {
+    const user = userEvent.setup()
+    mockGetConfig.mockResolvedValue({
+      config: {
+        schema_version: 1,
+        sync_interval_minutes: 60,
+        auto_sync_enabled: false,
+        sources: [
+          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
+        ],
+        included_categories: [],
+        mirror_rebuild_on_full_sync: false,
+        archive_retention_count: 10,
+        token_configured: true,
+      },
+    })
+    render(<GddNotionSyncSection />)
+    const row = await screen.findByRole('button', { name: /Tester 1 ligne/i })
+    await user.click(row)
+    await waitFor(() => {
+      expect(mockPostPreview).toHaveBeenCalledWith('Alpha.json')
+    })
+    expect(await screen.findByRole('dialog', { name: /Test Notion/i })).toBeInTheDocument()
+    expect(screen.getByText(/Data sources/i)).toBeInTheDocument()
+    expect(screen.getByText(/"Nom"/)).toBeInTheDocument()
   })
 
   it('affiche le bandeau reprise et appelle postGddNotionSync avec resume', async () => {

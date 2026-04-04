@@ -14,11 +14,13 @@ import {
   postGddFullSyncPause,
   postGddFullSyncUnpause,
   postGddNotionArchiveRestore,
+  postGddNotionPreviewDatabaseRow,
   postGddNotionSync,
   postGddNotionTestConnection,
   putGddNotionSyncConfig,
   type GddArchiveEntry,
   type GddFullSyncCheckpointResponse,
+  type GddNotionPreviewDatabaseResponse,
   type GddNotionSyncConfigPublic,
   type GddNotionSyncProgressResponse,
   type GddNotionSyncStatusResponse,
@@ -98,6 +100,12 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
   const [restoreBackupCurrent, setRestoreBackupCurrent] = useState(true)
   const [checkpoint, setCheckpoint] = useState<GddFullSyncCheckpointResponse | null>(null)
   const [checkpointBannerError, setCheckpointBannerError] = useState<string | null>(null)
+
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewForFile, setPreviewForFile] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const [previewData, setPreviewData] = useState<GddNotionPreviewDatabaseResponse | null>(null)
 
   const refreshCheckpoint = useCallback(async () => {
     setCheckpointBannerError(null)
@@ -214,6 +222,42 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
     setIncludedDbFiles([])
   }, [])
 
+  const computeIncludedCategoriesPayload = useCallback((): string[] => {
+    const dbs = (config?.sources ?? []).filter((s) => s.kind === 'database')
+    const allDbFiles = dbs.map((s) => s.category_file).sort()
+    const sortedSel = [...includedDbFiles].sort()
+    const allSelected =
+      dbs.length > 0 &&
+      sortedSel.length === allDbFiles.length &&
+      sortedSel.every((f, i) => f === allDbFiles[i])
+    if (dbs.length === 0 || sortedSel.length === 0 || allSelected) {
+      return []
+    }
+    return sortedSel
+  }, [config?.sources, includedDbFiles])
+
+  const runPreviewOneRow = useCallback(
+    async (categoryFile: string) => {
+      setPreviewForFile(categoryFile)
+      setPreviewOpen(true)
+      setPreviewLoading(true)
+      setPreviewError(null)
+      setPreviewData(null)
+      try {
+        const r = await postGddNotionPreviewDatabaseRow(categoryFile)
+        setPreviewData(r)
+        if (!r.ok) {
+          setPreviewError(r.message || 'Échec du test')
+        }
+      } catch (e) {
+        setPreviewError(e instanceof Error ? e.message : 'Requête échouée')
+      } finally {
+        setPreviewLoading(false)
+      }
+    },
+    [],
+  )
+
   const runGddSync = useCallback(
     (full: boolean, syncOpts?: PostGddNotionSyncOptions) => {
       setSyncModeFull(full)
@@ -230,6 +274,12 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
           }
         }, 400)
         try {
+          if (config) {
+            const includedPayload = computeIncludedCategoriesPayload()
+            const rCfg = await putGddNotionSyncConfig({ included_categories: includedPayload })
+            setConfig(rCfg.config)
+            setIncludedDbFiles(deriveIncludedDbFilesFromConfig(rCfg.config))
+          }
           const r = await postGddNotionSync(full, syncOpts)
           await refreshStatus()
           if (full) {
@@ -249,7 +299,15 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
         }
       })
     },
-    [run, refreshStatus, refreshArchives, refreshCheckpoint, onCheckpointDiskChanged],
+    [
+      run,
+      refreshStatus,
+      refreshArchives,
+      refreshCheckpoint,
+      onCheckpointDiskChanged,
+      config,
+      computeIncludedCategoriesPayload,
+    ],
   )
 
   const handleSaveSettings = async () => {
@@ -257,15 +315,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
     setSaveMessage(null)
     setSaving(true)
     try {
-      const dbs = (config?.sources ?? []).filter((s) => s.kind === 'database')
-      const allDbFiles = dbs.map((s) => s.category_file).sort()
-      const sortedSel = [...includedDbFiles].sort()
-      const allSelected =
-        dbs.length > 0 &&
-        sortedSel.length === allDbFiles.length &&
-        sortedSel.every((f, i) => f === allDbFiles[i])
-      const includedPayload =
-        dbs.length === 0 || sortedSel.length === 0 || allSelected ? [] : sortedSel
+      const includedPayload = computeIncludedCategoriesPayload()
       const body: Parameters<typeof putGddNotionSyncConfig>[0] = {
         sync_interval_minutes: Math.max(1, Math.floor(Number(intervalMin)) || 60),
         auto_sync_enabled: autoSync,
@@ -475,6 +525,9 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 (toutes les bases + toutes les fiches page). Si vous restreignez les bases, chaque sync ne traite{' '}
                 <strong style={{ color: theme.text.primary }}>que</strong> ces bases — les fiches (sources page) sont
                 alors ignorées sur ce run (évite de parcourir tout le hub). Retirez le filtre pour tout resynchroniser.
+                <br />
+                <strong style={{ color: theme.text.primary }}>Sync normale ou complète :</strong> les cases sont
+                enregistrées automatiquement sur le serveur au lancement (inutile de cliquer « Enregistrer » avant).
               </p>
               {databaseSources.length === 0 ? (
                 <p style={{ margin: 0, fontSize: '0.85rem', color: theme.text.secondary }}>
@@ -519,32 +572,54 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                       const checked = includedDbFiles.includes(s.category_file)
                       const id = `gdd-sync-db-${s.notion_id}-${s.category_file}`
                       return (
-                        <label
+                        <div
                           key={`${s.notion_id}:${s.category_file}`}
                           style={{
                             display: 'flex',
+                            flexWrap: 'wrap',
                             alignItems: 'flex-start',
-                            gap: '0.5rem',
-                            cursor: !config || saving || busy ? 'not-allowed' : 'pointer',
-                            fontSize: '0.86rem',
-                            color: theme.text.primary,
+                            gap: '0.35rem 0.5rem',
+                            justifyContent: 'space-between',
                           }}
                         >
-                          <input
-                            id={id}
-                            type="checkbox"
-                            disabled={!config || saving || busy}
-                            checked={checked}
-                            onChange={(e) => toggleDbInclusion(s.category_file, e.target.checked)}
-                          />
-                          <span style={{ wordBreak: 'break-word' }}>
-                            <span style={{ fontWeight: 600 }}>{s.category_file}</span>
-                            <span style={{ color: theme.text.secondary, fontSize: '0.8rem' }}>
-                              {' '}
-                              · {s.notion_id}
+                          <label
+                            htmlFor={id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '0.5rem',
+                              cursor: !config || saving || busy ? 'not-allowed' : 'pointer',
+                              fontSize: '0.86rem',
+                              color: theme.text.primary,
+                              flex: '1 1 200px',
+                              minWidth: 0,
+                            }}
+                          >
+                            <input
+                              id={id}
+                              type="checkbox"
+                              disabled={!config || saving || busy}
+                              checked={checked}
+                              onChange={(e) => toggleDbInclusion(s.category_file, e.target.checked)}
+                            />
+                            <span style={{ wordBreak: 'break-word' }}>
+                              <span style={{ fontWeight: 600 }}>{s.category_file}</span>
+                              <span style={{ color: theme.text.secondary, fontSize: '0.8rem' }}>
+                                {' '}
+                                · {s.notion_id}
+                              </span>
                             </span>
-                          </span>
-                        </label>
+                          </label>
+                          <button
+                            type="button"
+                            disabled={!config || saving || busy || previewLoading}
+                            onClick={() => void runPreviewOneRow(s.category_file)}
+                            style={buttonStyle(saving || busy || previewLoading)}
+                            title="Récupère la première ligne Notion et le JSON mappé (comme la sync)"
+                          >
+                            Tester 1 ligne
+                          </button>
+                        </div>
                       )
                     })}
                   </div>
@@ -1004,6 +1079,107 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
         onUnpause={() => void postGddFullSyncUnpause()}
         onCancel={() => void postGddFullSyncCancel()}
       />
+
+      {previewOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="gdd-preview-title"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 2150,
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 'min(920px, 100vw - 2rem)',
+              maxHeight: 'min(85vh, 720px)',
+              borderRadius: '10px',
+              padding: '1.25rem 1.5rem',
+              backgroundColor: theme.background.panel,
+              border: `1px solid ${theme.border.primary}`,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+            }}
+          >
+            <h3 id="gdd-preview-title" style={{ margin: 0, color: theme.text.primary }}>
+              Test Notion — {previewForFile ?? 'base'}
+            </h3>
+            <p style={{ margin: 0, color: theme.text.secondary, fontSize: '0.88rem' }}>
+              Première ligne de la base, même pipeline que la sync (query → get_page → mapping). Aucune écriture sur
+              le GDD.
+            </p>
+            {previewLoading && (
+              <p style={{ margin: 0, color: theme.text.secondary }}>Chargement…</p>
+            )}
+            {previewError && (
+              <p style={{ margin: 0, color: theme.state.error.color, fontSize: '0.9rem' }}>{previewError}</p>
+            )}
+            {previewData && !previewLoading && (
+              <>
+                <ul
+                  style={{
+                    margin: 0,
+                    paddingLeft: '1.2rem',
+                    color: theme.text.secondary,
+                    fontSize: '0.82rem',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <li>
+                    Data sources (API 2025-09-03) : <strong>{previewData.data_sources_count}</strong>
+                  </li>
+                  <li>Lignes retournées par query : {previewData.query_total_rows}</li>
+                  <li>Clés propriétés (ligne query / get_page) : {previewData.property_keys_from_query_row.length} /{' '}
+                    {previewData.property_keys_from_get_page.length}</li>
+                  <li>Mode compact table : {previewData.compact_table ? 'oui' : 'non'}</li>
+                </ul>
+                <pre
+                  style={{
+                    margin: 0,
+                    flex: 1,
+                    minHeight: '200px',
+                    overflow: 'auto',
+                    padding: '0.65rem',
+                    fontSize: '0.75rem',
+                    lineHeight: 1.35,
+                    backgroundColor: theme.background.secondary,
+                    borderRadius: '6px',
+                    border: `1px solid ${theme.border.primary}`,
+                    color: theme.text.primary,
+                  }}
+                >
+                  {JSON.stringify(previewData.mapped_record ?? previewData, null, 2)}
+                </pre>
+              </>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                disabled={previewLoading}
+                onClick={() => {
+                  setPreviewOpen(false)
+                  setPreviewForFile(null)
+                  setPreviewData(null)
+                  setPreviewError(null)
+                }}
+                style={buttonStyle(previewLoading)}
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {restoreTargetId ? (
         <div

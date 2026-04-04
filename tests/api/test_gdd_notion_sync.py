@@ -45,6 +45,82 @@ def test_get_config_no_secret_in_response(client: TestClient, tmp_path: Path) ->
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
 
 
+def test_preview_database_row_ok(client: TestClient, tmp_path: Path) -> None:
+    """Prévisualisation : première ligne mappée (client Notion mock)."""
+
+    class FakeClient:
+        async def _retrieve_database_for_data_sources(self, database_id: str) -> dict:
+            return {
+                "data_sources": [{"id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "name": "Main"}],
+                "title": [],
+            }
+
+        async def query_database(self, database_id: str, **_kw) -> list:
+            return [
+                {
+                    "id": "1886e4d2-1b45-8039-b51b-eb3826fce1b5",
+                    "properties": {
+                        "Name": {
+                            "type": "title",
+                            "title": [{"plain_text": "L1"}],
+                        },
+                    },
+                }
+            ]
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "L1"}],
+                    },
+                    "Col": {
+                        "type": "rich_text",
+                        "rich_text": [{"plain_text": "val"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return "corps"
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": "2766e4d2-1b45-8073-b9e3-fa39ae137938",
+                    "category_file": "Dialogues.json",
+                },
+            ],
+            "included_categories": [],
+        }
+    )
+    svc = _build_service(tmp_path)
+    svc._client_factory = lambda _t: FakeClient()  # type: ignore[method-assign]
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/preview-database-row",
+            json={"category_file": "Dialogues.json"},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data["ok"] is True
+        assert data["query_total_rows"] == 1
+        assert data["mapped_record"]["Nom"] == "L1"
+        assert data["data_sources_count"] == 1
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
 def test_test_connection_no_token(
     client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

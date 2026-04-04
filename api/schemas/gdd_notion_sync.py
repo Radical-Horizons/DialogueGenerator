@@ -1,7 +1,7 @@
 """Schémas Pydantic pour la sync GDD Notion (FR18)."""
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -79,6 +79,29 @@ class GddNotionConnectionTestResponse(BaseModel):
     message: str
     bot_id: Optional[str] = None
     bot_type: Optional[str] = None
+
+
+class GddNotionPreviewDatabaseRequest(BaseModel):
+    """Corps POST prévisualisation d’une base (première ligne)."""
+
+    category_file: str = Field(..., description="Ex. Dialogues.json — doit exister en source database")
+
+
+class GddNotionPreviewDatabaseResponse(BaseModel):
+    """Résultat prévisualisation : métadonnées Notion + enregistrement mappé comme en sync."""
+
+    ok: bool
+    message: str = ""
+    category_file: str = ""
+    notion_database_id: str = ""
+    data_sources_count: int = 0
+    data_source_entries: List[Dict[str, str]] = Field(default_factory=list)
+    query_total_rows: int = 0
+    first_page_id: str = ""
+    property_keys_from_query_row: List[str] = Field(default_factory=list)
+    property_keys_from_get_page: List[str] = Field(default_factory=list)
+    mapped_record: Optional[Dict[str, Any]] = None
+    compact_table: bool = False
 
 
 class GddNotionSyncRunResponse(BaseModel):
