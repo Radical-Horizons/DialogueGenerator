@@ -1,7 +1,8 @@
 /**
  * Store Zustand pour la sélection du provider et modèle LLM
  */
-import { create } from 'zustand';
+import { create } from 'zustand'
+import { listLLMModels } from '../api/config'
 
 interface LLMModel {
   api_identifier: string;
@@ -46,26 +47,20 @@ export const useLLMStore = create<LLMStore>((set) => ({
 
   loadModels: async () => {
     try {
-      const response = await fetch('/api/v1/config/llm/models');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      // L'endpoint /api/v1/config/llm/models retourne {models: [...], total: ...}
-      // Il faut transformer les modèles du format API vers le format du store
-      const apiModels = data.models || [];
-      const models = apiModels.map((m: { model_identifier: string; display_name: string; client_type: string; max_tokens?: number }) => ({
+      const data = await listLLMModels()
+      const apiModels = data.models || []
+      const models = apiModels.map((m) => ({
         api_identifier: m.model_identifier,
         display_name: m.display_name,
         client_type: m.client_type as 'openai' | 'mistral',
         parameters: {
-          default_temperature: 0.7, // Valeur par défaut si non fournie
+          default_temperature: 0.7,
           max_tokens: m.max_tokens || 4096,
         },
-      }));
-      set({ availableModels: models });
+      }))
+      set({ availableModels: models })
     } catch (error) {
-      console.error('Erreur lors du chargement des modèles LLM:', error);
+      console.error('Erreur lors du chargement des modèles LLM:', error)
     }
   },
 }));

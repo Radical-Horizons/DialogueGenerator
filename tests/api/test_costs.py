@@ -50,8 +50,8 @@ def test_get_budget(client, temp_budget_file):
         assert "amount" in data
         assert "percentage" in data
         assert "remaining" in data
-        # Budget par défaut (pas de budget configuré)
-        assert data["quota"] == 0.0
+        # Budget par défaut (pas de budget configuré) — aligné sur Defaults.DEFAULT_MONTHLY_LLM_QUOTA_USD
+        assert data["quota"] == 10.0
         assert data["amount"] == 0.0
     finally:
         # Nettoyer l'override

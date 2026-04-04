@@ -7,6 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, Protocol
 
+from constants import Defaults
+
 logger = logging.getLogger(__name__)
 
 
@@ -261,11 +263,10 @@ class FileCostBudgetRepository:
             user_budget = budgets.get(user_id)
             
             if user_budget is None:
-                # Pas de budget existant, créer un nouveau avec quota=0
                 budgets[user_id] = {
                     "month": new_month,
                     "amount": 0.0,
-                    "quota": 0.0,
+                    "quota": float(Defaults.DEFAULT_MONTHLY_LLM_QUOTA_USD),
                     "updated_at": datetime.now().isoformat()
                 }
             else:

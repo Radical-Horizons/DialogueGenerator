@@ -7,9 +7,9 @@
 #
 # Note: Gunicorn est principalement pour Linux. Sur Windows, utiliser uvicorn directement.
 
-# Nombre de workers (ajuster selon les ressources CPU)
-# Formule recommandée: (2 x CPU cores) + 1
-workers = 2
+# Un seul worker : les jobs de génération + SSE sont en mémoire processus.
+# workers > 1 sans sticky sessions → 404 sur GET .../stream (job créé sur un autre worker).
+workers = 1
 
 # Classe de worker (utiliser uvicorn.workers.UvicornWorker pour FastAPI)
 worker_class = "uvicorn.workers.UvicornWorker"

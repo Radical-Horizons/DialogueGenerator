@@ -186,8 +186,9 @@ log_info "Step 7: Configuring Gunicorn..."
 cat > gunicorn.conf.py << 'EOF'
 import multiprocessing
 
-# Number of workers (3 for VPS-1 with 4 cores)
-workers = 3
+# Single worker: generation jobs + SSE live in process memory; multiple workers
+# cause POST /generate/jobs on worker A and EventSource on worker B → 404 stream.
+workers = 1
 
 # Worker class
 worker_class = "uvicorn.workers.UvicornWorker"

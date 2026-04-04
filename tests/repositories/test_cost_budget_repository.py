@@ -122,7 +122,7 @@ def test_reset_month_new_user(budget_repository, temp_storage_file):
     user_budget = data["budgets"]["user_1"]
     assert user_budget["month"] == "2026-01"
     assert user_budget["amount"] == 0.0
-    assert user_budget["quota"] == 0.0
+    assert user_budget["quota"] == 10.0
 
 
 def test_reset_month_existing_user_preserve_quota(budget_repository, temp_storage_file):

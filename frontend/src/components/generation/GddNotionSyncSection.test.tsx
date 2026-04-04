@@ -128,7 +128,7 @@ describe('GddNotionSyncSection', () => {
       first_page_id: 'page-1',
       property_keys_from_query_row: ['Name'],
       property_keys_from_get_page: ['Name'],
-      mapped_record: { Nom: 'Test', sections: { _general: 'x' } },
+      mapped_record: { Nom: 'Test', values: { Col: 'v' }, sections: { _general: 'x' } },
       compact_table: false,
     })
   })
@@ -207,7 +207,7 @@ describe('GddNotionSyncSection', () => {
     await user.click(screen.getByRole('button', { name: /Tout décocher/i }))
     const checkboxes = within(group).getAllByRole('checkbox')
     expect(checkboxes.every((cb) => !(cb as HTMLInputElement).checked)).toBe(true)
-    await user.click(screen.getByRole('button', { name: /Enregistrer les paramètres/i }))
+    await user.click(screen.getByRole('button', { name: /Sauver sans sync/i }))
     await waitFor(() => {
       expect(mockPutConfig).toHaveBeenCalled()
     })
@@ -257,6 +257,7 @@ describe('GddNotionSyncSection', () => {
     expect(await screen.findByRole('dialog', { name: /Test Notion/i })).toBeInTheDocument()
     expect(screen.getByText(/Data sources/i)).toBeInTheDocument()
     expect(screen.getByText(/"Nom"/)).toBeInTheDocument()
+    expect(screen.getByText(/"values"/)).toBeInTheDocument()
   })
 
   it('affiche le bandeau reprise et appelle postGddNotionSync avec resume', async () => {

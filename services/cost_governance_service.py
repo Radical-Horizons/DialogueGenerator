@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
 
+from constants import Defaults
 from services.repositories.cost_budget_repository import ICostBudgetRepository
 
 logger = logging.getLogger(__name__)
@@ -46,15 +47,16 @@ class CostGovernanceService:
         # Récupérer le budget actuel
         budget = self.repository.get_budget(user_id, current_month)
         
-        # Si pas de budget, créer un budget par défaut (quota = 0 → illimité jusqu'à définition d'un quota > 0)
+        # Si pas de budget, créer une entrée avec le quota produit par défaut (modifiable via paramètres / fichier)
         if budget is None:
+            default_quota = float(Defaults.DEFAULT_MONTHLY_LLM_QUOTA_USD)
             budget = {
                 "month": current_month,
                 "amount": 0.0,
-                "quota": 0.0,
+                "quota": default_quota,
                 "updated_at": datetime.now().isoformat()
             }
-            self.repository.update_budget(user_id, current_month, 0.0, 0.0)
+            self.repository.update_budget(user_id, current_month, 0.0, default_quota)
         
         # Vérifier reset mensuel
         if budget.get("month") != current_month:
@@ -117,13 +119,14 @@ class CostGovernanceService:
         current_month = datetime.now().strftime("%Y-%m")
         budget = self.repository.get_budget(user_id, current_month)
         
-        # Si pas de budget, retourner valeurs par défaut
+        # Pas d'entrée fichier : afficher le quota par défaut produit (aligné sur première génération / check_budget)
         if budget is None:
+            q = float(Defaults.DEFAULT_MONTHLY_LLM_QUOTA_USD)
             return {
-                "quota": 0.0,
+                "quota": q,
                 "amount": 0.0,
                 "percentage": 0.0,
-                "remaining": 0.0
+                "remaining": q,
             }
         
         # Vérifier reset mensuel
@@ -168,7 +171,12 @@ class CostGovernanceService:
         if hasattr(self.repository, "add_cost"):
             try:
                 # quota: si existant, sera préservé par le repository
-                new_amount = self.repository.add_cost(user_id, current_month, cost, quota=0.0)  # type: ignore[attr-defined]
+                new_amount = self.repository.add_cost(  # type: ignore[attr-defined]
+                    user_id,
+                    current_month,
+                    cost,
+                    quota=float(Defaults.DEFAULT_MONTHLY_LLM_QUOTA_USD),
+                )
                 logger.debug(f"Budget mis à jour (atomique) pour {user_id}: {new_amount:.2f} USD")
                 return
             except Exception:
@@ -179,7 +187,7 @@ class CostGovernanceService:
 
         # Si pas de budget, créer un budget par défaut
         if budget is None:
-            quota = 0.0
+            quota = float(Defaults.DEFAULT_MONTHLY_LLM_QUOTA_USD)
             amount = cost
         else:
             # Vérifier reset mensuel

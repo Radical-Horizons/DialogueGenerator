@@ -1,9 +1,9 @@
 {
-  "last_started_at": "2026-04-04T11:20:06.767830+00:00",
-  "last_finished_at": "2026-04-04T11:20:43.352336+00:00",
-  "last_success": false,
-  "message": "Synchronisation annulée.",
-  "updated_entities": 0,
+  "last_started_at": "2026-04-04T11:55:21.654761+00:00",
+  "last_finished_at": "2026-04-04T11:55:47.943369+00:00",
+  "last_success": true,
+  "message": "10 entité(s) mise(s) à jour",
+  "updated_entities": 10,
   "partial_errors": [],
   "last_archive_relative": null,
   "last_mirror_rebuild_used": false

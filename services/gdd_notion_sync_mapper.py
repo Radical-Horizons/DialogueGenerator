@@ -158,6 +158,21 @@ def properties_to_general_text(
     return "\n".join(lines)
 
 
+def notion_properties_to_values_flat(properties: Mapping[str, Any]) -> Dict[str, str]:
+    """Colonnes Notion (hors titre) → texte plat, une entrée par nom de propriété."""
+    values: Dict[str, str] = {}
+    for key in sorted(properties.keys()):
+        prop = properties.get(key)
+        if not isinstance(prop, dict):
+            continue
+        if prop.get("type") == "title":
+            continue
+        val = _format_property_value(prop)
+        if val:
+            values[str(key)] = val
+    return values
+
+
 def notion_page_to_compact_row_record(page: Mapping[str, Any]) -> Dict[str, Any]:
     """Construit une ligne de base Notion au format compact (colonnes → ``values``).
 
@@ -171,17 +186,8 @@ def notion_page_to_compact_row_record(page: Mapping[str, Any]) -> Dict[str, Any]
         Dict avec ``Nom``, ``values`` (colonnes) et ``sections._general`` (propriétés en texte).
     """
     title = extract_page_title(page)
-    values: Dict[str, str] = {}
     props = page.get("properties") or {}
-    for key in sorted(props.keys()):
-        prop = props.get(key)
-        if not isinstance(prop, dict):
-            continue
-        if prop.get("type") == "title":
-            continue
-        val = _format_property_value(prop)
-        if val:
-            values[str(key)] = val
+    values = notion_properties_to_values_flat(props)
     prop_blob = properties_to_general_text(props)
     return {
         "Nom": title or "SansTitre",
@@ -215,20 +221,24 @@ def notion_page_to_gdd_record(page: Mapping[str, Any], body_text: str) -> Dict[s
 def notion_page_to_gdd_record_merge_body_and_properties(
     page: Mapping[str, Any], body_text: str
 ) -> Dict[str, Any]:
-    """Enregistrement GDD pour sync base Notion : ``_general`` = corps + propriétés (les deux si non vides)."""
+    """Enregistrement GDD pour sync base Notion : ``values`` = colonnes (texte) ; ``_general`` = corps + résumé propriétés."""
     title = extract_page_title(page)
     body = (body_text or "").strip()
-    prop_blob = properties_to_general_text(page.get("properties") or {})
+    props = page.get("properties") or {}
+    values = notion_properties_to_values_flat(props)
+    prop_blob = properties_to_general_text(props)
     parts: List[str] = []
     if body:
         parts.append(body)
     if prop_blob:
         parts.append(prop_blob)
     general = "\n\n".join(parts)
-    return {
+    out: Dict[str, Any] = {
         "Nom": title or "SansTitre",
+        "values": values,
         "sections": {"_general": general},
     }
+    return out
 
 
 def is_record_empty_for_sync(record: Mapping[str, Any]) -> bool:

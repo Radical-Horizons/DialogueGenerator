@@ -67,6 +67,7 @@ def test_notion_page_to_gdd_record_merge_always_includes_properties() -> None:
     }
     rec = notion_page_to_gdd_record_merge_body_and_properties(page, "")
     assert rec["Nom"] == "Alteir"
+    assert rec["values"] == {"Glossaire": "Monde"}
     assert "Glossaire" in rec["sections"]["_general"]
     assert "Monde" in rec["sections"]["_general"]
 
@@ -87,6 +88,7 @@ def test_notion_page_to_gdd_record_merge_body_then_properties() -> None:
     }
     rec = notion_page_to_gdd_record_merge_body_and_properties(page, "Intro narrative.")
     gen = rec["sections"]["_general"]
+    assert rec["values"] == {"Type": "Quête"}
     assert gen.startswith("Intro narrative.")
     assert "Quête" in gen
     assert "Type" in gen

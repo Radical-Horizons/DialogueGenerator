@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useLLMStore } from '../store/llmStore';
+import * as configApi from '../api/config';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -175,13 +176,7 @@ describe('useLLMStore', () => {
       },
     ];
 
-    // Mock fetch API
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockApiResponse),
-      } as Response)
-    );
+    vi.spyOn(configApi, 'listLLMModels').mockResolvedValue(mockApiResponse);
 
     const { result } = renderHook(() => useLLMStore());
 
@@ -190,17 +185,11 @@ describe('useLLMStore', () => {
     });
 
     expect(result.current.availableModels).toEqual(expectedModels);
-    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/v1/config/llm/models'));
+    expect(configApi.listLLMModels).toHaveBeenCalled();
   });
 
   it('should handle API error when loading models', async () => {
-    // Mock fetch API avec erreur
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: false,
-        status: 500,
-      } as Response)
-    );
+    vi.spyOn(configApi, 'listLLMModels').mockRejectedValue(new Error('HTTP 500'));
 
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 

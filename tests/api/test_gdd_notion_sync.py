@@ -116,6 +116,7 @@ def test_preview_database_row_ok(client: TestClient, tmp_path: Path) -> None:
         assert data["ok"] is True
         assert data["query_total_rows"] == 1
         assert data["mapped_record"]["Nom"] == "L1"
+        assert data["mapped_record"]["values"] == {"Col": "val"}
         assert data["data_sources_count"] == 1
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

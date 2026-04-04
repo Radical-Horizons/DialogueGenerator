@@ -329,7 +329,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
       setConfig(r.config)
       setIncludedDbFiles(deriveIncludedDbFilesFromConfig(r.config))
       setTokenInput('')
-      setSaveMessage('Paramètres enregistrés.')
+      setSaveMessage('Réglages sauvegardés sur le serveur.')
       void refreshArchives()
     } catch (e) {
       const text = e instanceof Error ? e.message : 'Échec de l’enregistrement'
@@ -638,6 +638,19 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 style={inputStyle}
               />
             </label>
+            <p
+              style={{
+                margin: 0,
+                fontSize: '0.8rem',
+                color: theme.text.secondary,
+                lineHeight: 1.45,
+              }}
+            >
+              <strong style={{ color: theme.text.primary }}>Sauver sans sync</strong> : écrit sur le serveur
+              l’intervalle, l’auto-sync, la rétention <code style={{ fontSize: '0.85em' }}>.archive/</code>, le token
+              ci-dessus et les cases des bases — <strong style={{ color: theme.text.primary }}>sans</strong>{' '}
+              lancer de synchronisation. Une sync enregistre déjà les cases automatiquement.
+            </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
               <button
                 type="button"
@@ -645,7 +658,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 onClick={() => void handleSaveSettings()}
                 style={buttonStyle(saving || busy, true)}
               >
-                {saving ? 'Enregistrement…' : 'Enregistrer les paramètres'}
+                {saving ? 'Sauvegarde…' : 'Sauver sans sync'}
               </button>
               <button
                 type="button"
@@ -1141,6 +1154,17 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                   <li>Lignes retournées par query : {previewData.query_total_rows}</li>
                   <li>Clés propriétés (ligne query / get_page) : {previewData.property_keys_from_query_row.length} /{' '}
                     {previewData.property_keys_from_get_page.length}</li>
+                  <li>
+                    Colonnes dans <code style={{ fontSize: '0.85em' }}>values</code> (hors titre) :{' '}
+                    {previewData.mapped_record &&
+                    typeof previewData.mapped_record === 'object' &&
+                    previewData.mapped_record !== null &&
+                    'values' in previewData.mapped_record &&
+                    typeof previewData.mapped_record.values === 'object' &&
+                    previewData.mapped_record.values !== null
+                      ? Object.keys(previewData.mapped_record.values as object).length
+                      : 0}
+                  </li>
                   <li>Mode compact table : {previewData.compact_table ? 'oui' : 'non'}</li>
                 </ul>
                 <pre

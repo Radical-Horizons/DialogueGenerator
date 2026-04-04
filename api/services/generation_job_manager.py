@@ -1,4 +1,10 @@
-"""Gestionnaire d'état des jobs de génération en cours."""
+"""Gestionnaire d'état des jobs de génération en cours.
+
+Les jobs sont stockés en mémoire du processus Python. Avec plusieurs workers
+(Gunicorn/Uvicorn, ``workers`` > 1), le POST de création et le GET SSE peuvent
+atterrir sur des processus différents → job introuvable (404). En production,
+utiliser un seul worker process pour l'API ou un magasin partagé (non implémenté ici).
+"""
 import uuid
 import asyncio
 from datetime import datetime, timedelta, timezone
