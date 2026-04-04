@@ -44,7 +44,7 @@ async def test_run_sync_list_category_writes_shard_files(tmp_path: Path) -> None
         async def get_page_content(self, page_id: str) -> str:
             return "Corps."
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -108,7 +108,7 @@ async def test_run_sync_systemes_de_jeu_writes_shard_dir(tmp_path: Path) -> None
         async def get_page_content(self, page_id: str) -> str:
             return "Règles."
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -170,7 +170,7 @@ async def test_run_sync_page_source_writes_gdd(tmp_path: Path) -> None:
         async def get_page_content(self, page_id: str) -> str:
             return "Introduction\n\nTexte."
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -235,7 +235,7 @@ async def test_run_sync_skips_when_manifest_current(tmp_path: Path) -> None:
         async def get_page_content(self, page_id: str) -> str:
             raise AssertionError("get_page_content ne doit pas être appelé si rien n'est stale")
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -321,7 +321,7 @@ async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
             FakeClient.content_calls += 1
             return "NE_DOIT_PAS_S_IMPORTER"
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return [
                 {
                     "id": row_id,
@@ -362,7 +362,8 @@ async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
     out = json.loads((gdd_dir / "vocab_test.json").read_text(encoding="utf-8"))
     assert out[0]["Nom"] == "MotClé"
     assert out[0]["values"]["Sens"] == "Définition courte"
-    assert "sections" not in out[0]
+    assert "Sens" in out[0]["sections"]["_general"]
+    assert "Définition courte" in out[0]["sections"]["_general"]
 
 
 @pytest.mark.asyncio
@@ -393,7 +394,7 @@ async def test_included_categories_skips_non_matching_sources(tmp_path: Path) ->
         async def get_page_content(self, page_id: str) -> str:
             return "body"
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             FakeClient.queried.append(database_id)
             return [{"id": row_id, "last_edited_time": "2025-02-01T00:00:00.000Z"}]
 
@@ -467,7 +468,7 @@ async def test_included_categories_skips_pages_when_filter_set(tmp_path: Path) -
         async def get_page_content(self, page_id: str) -> str:
             return "body"
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             assert database_id == db_id
             return [{"id": row_id, "last_edited_time": "2025-02-01T00:00:00.000Z"}]
 
@@ -572,7 +573,7 @@ async def test_run_sync_mirror_rebuild_promotes_and_drops_orphan_shard(
         async def get_page_content(self, page_id: str) -> str:
             return "Corps."
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -635,7 +636,7 @@ async def test_run_sync_mirror_rebuild_rollback_on_fetch_error(tmp_path: Path) -
         async def get_page_content(self, page_id: str) -> str:
             return ""
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -717,7 +718,7 @@ async def test_run_sync_mirror_retries_transient_502_on_page_content(
                 raise _http_status_error(502)
             return "Corps."
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -784,7 +785,7 @@ async def test_run_sync_mirror_preserves_staging_on_persistent_502(
         async def get_page_content(self, page_id: str) -> str:
             raise _http_status_error(502)
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -876,7 +877,7 @@ async def test_full_sync_resume_skips_completed_source(tmp_path: Path) -> None:
         async def get_page_content(self, page_id: str) -> str:
             return f"body-{page_id}"
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     settings = {

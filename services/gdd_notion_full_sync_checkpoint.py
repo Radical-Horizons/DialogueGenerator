@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
+from services.gdd_notion_sync_utils import normalize_notion_id
+
 from services.gdd_notion_atomic_io import read_json_file, write_json_atomic
 from services.gdd_notion_manifest import GddNotionManifest, save_manifest
 
@@ -70,11 +72,22 @@ def compute_sources_fingerprint(
     for s in sources:
         if not isinstance(s, dict):
             continue
+        ds_norm: List[str] = []
+        raw_ds = s.get("notion_data_source_ids")
+        if isinstance(raw_ds, list):
+            for d in raw_ds:
+                if isinstance(d, str) and d.strip():
+                    try:
+                        ds_norm.append(normalize_notion_id(d.strip()))
+                    except ValueError:
+                        pass
+        ds_norm.sort()
         norm_sources.append(
             {
                 "kind": s.get("kind"),
                 "notion_id": str(s.get("notion_id", "")).strip(),
                 "category_file": str(s.get("category_file", "")).strip(),
+                "notion_data_source_ids": ds_norm,
             }
         )
     norm_sources.sort(key=lambda x: x.get("category_file", ""))

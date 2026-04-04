@@ -4,6 +4,8 @@ import logging
 from typing import List, Dict, Any, Optional, Mapping, Tuple
 import httpx
 
+from services.gdd_notion_sync_utils import normalize_notion_id
+
 logger = logging.getLogger(__name__)
 
 # Pages / blocs : version stable historique.
@@ -163,25 +165,142 @@ class NotionAPIClient:
         return all_pages
 
     @staticmethod
-    def _data_source_ids_from_meta(raw_sources: Any) -> List[str]:
-        """Extrait les IDs ``data_source`` depuis la clé ``data_sources`` du GET database."""
-        out: List[str] = []
+    def _rich_text_array_to_plain(rich: Any) -> str:
+        """Extrait le texte brut d’un tableau ``rich_text`` Notion."""
+        if not isinstance(rich, list):
+            return ""
+        parts: List[str] = []
+        for t in rich:
+            if not isinstance(t, Mapping):
+                continue
+            pt = t.get("plain_text")
+            if isinstance(pt, str) and pt:
+                parts.append(pt)
+                continue
+            inner = t.get("text")
+            if isinstance(inner, Mapping):
+                c = inner.get("content")
+                if isinstance(c, str) and c:
+                    parts.append(c)
+        return "".join(parts).strip()
+
+    @classmethod
+    def _database_title_plain(cls, db_meta: Mapping[str, Any]) -> str:
+        """Titre affiché de la base (GET database), texte plat."""
+        title = db_meta.get("title")
+        if isinstance(title, list):
+            return cls._rich_text_array_to_plain(title)
+        if isinstance(title, str):
+            return title.strip()
+        return ""
+
+    @staticmethod
+    def _data_source_entries_from_meta(raw_sources: Any) -> List[Tuple[str, str]]:
+        """Liste ``(data_source_id, nom_affiché)`` depuis ``data_sources`` du GET database."""
+        out: List[Tuple[str, str]] = []
         if not isinstance(raw_sources, list):
             return out
         for item in raw_sources:
             if isinstance(item, str) and item.strip():
-                out.append(item.strip())
+                out.append((item.strip(), ""))
                 continue
             if isinstance(item, Mapping):
                 ds_id = item.get("id")
-                if isinstance(ds_id, str) and ds_id.strip():
-                    out.append(ds_id.strip())
+                if not (isinstance(ds_id, str) and ds_id.strip()):
+                    continue
+                name_raw = item.get("name")
+                name_s = ""
+                if isinstance(name_raw, str):
+                    name_s = name_raw.strip()
+                elif isinstance(name_raw, list):
+                    name_s = NotionAPIClient._rich_text_array_to_plain(name_raw)
+                out.append((ds_id.strip(), name_s))
         return out
+
+    @staticmethod
+    def _notion_ids_equivalent(a: str, b: str) -> bool:
+        """True si deux identifiants Notion désignent le même UUID."""
+        try:
+            return normalize_notion_id(a) == normalize_notion_id(b)
+        except ValueError:
+            return False
+
+    @classmethod
+    def _resolve_data_source_ids_to_query(
+        cls,
+        entries: List[Tuple[str, str]],
+        db_meta: Mapping[str, Any],
+        explicit: Optional[List[str]],
+    ) -> List[str]:
+        """Choisit les ``data_source`` à interroger (évite les vues inline type « récompenses »).
+
+        Ordre : ``explicit`` (config) → titre base = nom de source → exclusion heuristique
+        (nom contenant récompens/reward) → première entrée.
+        """
+        ids_in_meta = [e[0] for e in entries]
+        if explicit:
+            chosen: List[str] = []
+            seen: set[str] = set()
+            for raw in explicit:
+                if not isinstance(raw, str) or not str(raw).strip():
+                    continue
+                for eid in ids_in_meta:
+                    if cls._notion_ids_equivalent(eid, raw) and eid not in seen:
+                        chosen.append(eid)
+                        seen.add(eid)
+                        break
+            if chosen:
+                return chosen
+            logger.warning(
+                "notion_data_source_ids %s ne correspond à aucun data_source connu "
+                "(base %s) — repli heuristique",
+                explicit,
+                db_meta.get("id"),
+            )
+        if not entries:
+            return []
+        if len(entries) == 1:
+            return [entries[0][0]]
+        db_title = cls._database_title_plain(db_meta).lower().strip()
+        if db_title:
+            same = [
+                eid
+                for eid, name in entries
+                if name.strip().lower() == db_title
+            ]
+            if len(same) == 1:
+                return same
+        block_substr = ("récompens", "recompens", "reward")
+        filtered = [
+            (eid, name)
+            for eid, name in entries
+            if not any(s in name.lower() for s in block_substr)
+        ]
+        if len(filtered) == 1:
+            return [filtered[0][0]]
+        if len(filtered) > 1:
+            logger.warning(
+                "Base %s : %d data_source(s) après exclusion heuristique ; "
+                "seule la première est interrogée : %s",
+                db_meta.get("id"),
+                len(filtered),
+                filtered[0][0],
+            )
+            return [filtered[0][0]]
+        if entries:
+            logger.warning(
+                "Base %s : toutes les data_sources correspondent à l’exclusion "
+                "« récompens/reward » ; repli sur la première entrée.",
+                db_meta.get("id"),
+            )
+            return [entries[0][0]]
+        return []
 
     async def _query_database_via_data_sources(
         self,
         database_id: str,
         filter_properties: Optional[List[str]],
+        data_source_ids: Optional[List[str]] = None,
     ) -> Optional[List[Dict[str, Any]]]:
         """Interroge la base via ``POST /data_sources/.../query`` si le GET expose des IDs.
 
@@ -193,7 +312,10 @@ class NotionAPIClient:
         if db_meta is None:
             return None
         raw_sources = db_meta.get("data_sources")
-        ds_ids = self._data_source_ids_from_meta(raw_sources)
+        entries = self._data_source_entries_from_meta(raw_sources)
+        ds_ids = self._resolve_data_source_ids_to_query(
+            entries, db_meta, data_source_ids
+        )
         if not ds_ids:
             logger.warning(
                 "GET database %s (API %s) : aucun data_source_id exploitable "
@@ -211,17 +333,19 @@ class NotionAPIClient:
             )
             merged.extend(part)
         logger.info(
-            "Récupération de %s pages via %d data_source(s) (base %s)",
+            "Récupération de %s pages via %d data_source(s) (base %s) ids=%s",
             len(merged),
             len(ds_ids),
             database_id,
+            ds_ids,
         )
         return merged
     
     async def query_database(
         self,
         database_id: str,
-        filter_properties: Optional[List[str]] = None
+        filter_properties: Optional[List[str]] = None,
+        data_source_ids: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """Interroge une base de données Notion.
         
@@ -231,15 +355,20 @@ class NotionAPIClient:
         « does not contain any data sources accessible by this API bot » alors que
         l'intégration a bien accès.
 
+        Les bases multi-vues Notion peuvent exposer plusieurs ``data_sources`` (ex. vue
+        principale + base inline). Par défaut, une heuristique limite la requête ;
+        ``data_source_ids`` permet de forcer la liste.
+
         Args:
             database_id: ID de la base de données.
             filter_properties: Liste des propriétés à récupérer (optionnel).
-            
+            data_source_ids: UUIDs de data sources à interroger (optionnel, sinon auto).
+
         Returns:
             Liste des pages de la base de données.
         """
         via_ds = await self._query_database_via_data_sources(
-            database_id, filter_properties
+            database_id, filter_properties, data_source_ids=data_source_ids
         )
         if via_ds is not None:
             return via_ds
@@ -253,7 +382,9 @@ class NotionAPIClient:
             # explicitement « data source » (libellés localisés ou messages génériques).
             if e.response.status_code == 400:
                 retry = await self._query_database_via_data_sources(
-                    database_id, filter_properties
+                    database_id,
+                    filter_properties,
+                    data_source_ids=data_source_ids,
                 )
                 if retry is not None:
                     return retry

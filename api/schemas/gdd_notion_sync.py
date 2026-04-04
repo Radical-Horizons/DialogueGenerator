@@ -15,6 +15,13 @@ class GddNotionSourceSchema(BaseModel):
         ...,
         description="Nom de fichier cible (ex. personnages.json)",
     )
+    notion_data_source_ids: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Optionnel (bases multi-vues Notion) : UUIDs des data sources à interroger. "
+            "Vide = sélection automatique (exclut les vues type « récompenses »)."
+        ),
+    )
 
 
 class GddNotionSyncConfigPublic(BaseModel):

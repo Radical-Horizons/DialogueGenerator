@@ -11,7 +11,13 @@ export interface GddNotionSyncConfigPublic {
   schema_version: number
   sync_interval_minutes: number
   auto_sync_enabled: boolean
-  sources: Array<{ notion_id: string; kind: 'database' | 'page'; category_file: string }>
+  sources: Array<{
+    notion_id: string
+    kind: 'database' | 'page'
+    category_file: string
+    /** Bases multi-vues : forcer les UUID data source Notion (vide = auto côté serveur). */
+    notion_data_source_ids?: string[]
+  }>
   included_categories: string[]
   mirror_rebuild_on_full_sync: boolean
   archive_retention_count: number

@@ -83,7 +83,7 @@ def test_post_sync_and_get_status(client: TestClient, tmp_path: Path) -> None:
         async def get_page_content(self, page_id: str) -> str:
             return "intro"
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
@@ -148,7 +148,7 @@ def test_post_sync_full_query_param(client: TestClient, tmp_path: Path) -> None:
         async def get_page_content(self, page_id: str) -> str:
             return "c"
 
-        async def query_database(self, database_id: str) -> list:
+        async def query_database(self, database_id: str, **_kw) -> list:
             return []
 
     store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")

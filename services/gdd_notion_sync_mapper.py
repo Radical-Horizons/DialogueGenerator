@@ -168,7 +168,7 @@ def notion_page_to_compact_row_record(page: Mapping[str, Any]) -> Dict[str, Any]
         page: Payload JSON page/ligne retourné par l’API (``get_page``).
 
     Returns:
-        Dict avec ``Nom`` et ``values``.
+        Dict avec ``Nom``, ``values`` (colonnes) et ``sections._general`` (propriétés en texte).
     """
     title = extract_page_title(page)
     values: Dict[str, str] = {}
@@ -182,18 +182,20 @@ def notion_page_to_compact_row_record(page: Mapping[str, Any]) -> Dict[str, Any]
         val = _format_property_value(prop)
         if val:
             values[str(key)] = val
+    prop_blob = properties_to_general_text(props)
     return {
         "Nom": title or "SansTitre",
         "values": values,
+        "sections": {"_general": prop_blob},
     }
 
 
 def notion_page_to_gdd_record(page: Mapping[str, Any], body_text: str) -> Dict[str, Any]:
     """Construit un objet compatible charge GDD (liste d'entités).
 
-    ``sections._general`` provient **uniquement** du corps (blocs), jamais d’un repli
-    sur les propriétés : pour les lignes « colonnes seules », utiliser
-    :func:`notion_page_to_compact_row_record` (bases listées en compact).
+    ``sections._general`` provient **uniquement** du corps (blocs), sans propriétés.
+    Pour la sync Notion des bases (hors mode compact), utiliser
+    :func:`notion_page_to_gdd_record_merge_body_and_properties`.
 
     Args:
         page: Payload JSON page Notion.
@@ -204,6 +206,25 @@ def notion_page_to_gdd_record(page: Mapping[str, Any], body_text: str) -> Dict[s
     """
     title = extract_page_title(page)
     general = (body_text or "").strip()
+    return {
+        "Nom": title or "SansTitre",
+        "sections": {"_general": general},
+    }
+
+
+def notion_page_to_gdd_record_merge_body_and_properties(
+    page: Mapping[str, Any], body_text: str
+) -> Dict[str, Any]:
+    """Enregistrement GDD pour sync base Notion : ``_general`` = corps + propriétés (les deux si non vides)."""
+    title = extract_page_title(page)
+    body = (body_text or "").strip()
+    prop_blob = properties_to_general_text(page.get("properties") or {})
+    parts: List[str] = []
+    if body:
+        parts.append(body)
+    if prop_blob:
+        parts.append(prop_blob)
+    general = "\n\n".join(parts)
     return {
         "Nom": title or "SansTitre",
         "sections": {"_general": general},
