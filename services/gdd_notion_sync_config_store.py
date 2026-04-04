@@ -138,3 +138,25 @@ class GddNotionSyncConfigStore:
                 src["notion_id"] = normalize_notion_id(raw_id)
             except ValueError as exc:
                 raise ValueError(f"sources[{i}].notion_id: {exc}") from exc
+            raw_ds = src.get("notion_data_source_ids")
+            if raw_ds is None:
+                pass
+            elif not isinstance(raw_ds, list):
+                raise ValueError(
+                    f"sources[{i}].notion_data_source_ids doit être une liste"
+                )
+            else:
+                norm_ds: List[str] = []
+                for j, d in enumerate(raw_ds):
+                    if not isinstance(d, str) or not str(d).strip():
+                        raise ValueError(
+                            f"sources[{i}].notion_data_source_ids[{j}] "
+                            "doit être une chaîne non vide"
+                        )
+                    try:
+                        norm_ds.append(normalize_notion_id(str(d).strip()))
+                    except ValueError as exc:
+                        raise ValueError(
+                            f"sources[{i}].notion_data_source_ids[{j}]: {exc}"
+                        ) from exc
+                src["notion_data_source_ids"] = norm_ds

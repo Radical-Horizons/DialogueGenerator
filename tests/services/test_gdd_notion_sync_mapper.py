@@ -7,6 +7,7 @@ from services.gdd_notion_sync_mapper import (
     is_record_empty_for_sync,
     notion_page_to_compact_row_record,
     notion_page_to_gdd_record,
+    notion_page_to_gdd_record_merge_body_and_properties,
     properties_to_general_text,
 )
 
@@ -30,8 +31,8 @@ def test_properties_to_general_text_skips_title_duplicate() -> None:
     assert "Rare" in text
 
 
-def test_notion_page_to_gdd_record_no_property_fallback_when_body_empty() -> None:
-    """Corps vide : pas de sérialisation des colonnes dans _general (règle déclarative)."""
+def test_notion_page_to_gdd_record_body_only_in_general() -> None:
+    """Mapper de base : corps seul dans _general (pas de propriétés)."""
     page = {
         "properties": {
             "Terme": {
@@ -48,6 +49,47 @@ def test_notion_page_to_gdd_record_no_property_fallback_when_body_empty() -> Non
     assert rec["Nom"] == "Alteir"
     assert rec["sections"]["_general"] == ""
     assert "Glossaire" not in rec["sections"]["_general"]
+
+
+def test_notion_page_to_gdd_record_merge_always_includes_properties() -> None:
+    """Sync : propriétés toujours dans _general (corps vide ici)."""
+    page = {
+        "properties": {
+            "Terme": {
+                "type": "title",
+                "title": [{"plain_text": "Alteir", "type": "text"}],
+            },
+            "Glossaire": {
+                "type": "rich_text",
+                "rich_text": [{"plain_text": "Monde", "type": "text"}],
+            },
+        }
+    }
+    rec = notion_page_to_gdd_record_merge_body_and_properties(page, "")
+    assert rec["Nom"] == "Alteir"
+    assert "Glossaire" in rec["sections"]["_general"]
+    assert "Monde" in rec["sections"]["_general"]
+
+
+def test_notion_page_to_gdd_record_merge_body_then_properties() -> None:
+    """Sync : corps et propriétés concaténés dans _general."""
+    page = {
+        "properties": {
+            "Titre": {
+                "type": "title",
+                "title": [{"plain_text": "Fiche", "type": "text"}],
+            },
+            "Type": {
+                "type": "select",
+                "select": {"name": "Quête"},
+            },
+        }
+    }
+    rec = notion_page_to_gdd_record_merge_body_and_properties(page, "Intro narrative.")
+    gen = rec["sections"]["_general"]
+    assert gen.startswith("Intro narrative.")
+    assert "Quête" in gen
+    assert "Type" in gen
 
 
 def test_is_record_empty_for_sync() -> None:
@@ -78,7 +120,8 @@ def test_notion_page_to_compact_row_record() -> None:
     rec = notion_page_to_compact_row_record(page)
     assert rec["Nom"] == "Entrée"
     assert rec["values"] == {"Score": "3"}
-    assert "sections" not in rec
+    assert "Score" in rec["sections"]["_general"]
+    assert "3" in rec["sections"]["_general"]
 
 
 def test_database_id_should_skip_page_blocks_vocab() -> None:

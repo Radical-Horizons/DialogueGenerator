@@ -55,7 +55,7 @@
     },
     {
       "kind": "database",
-      "notion_id": "1886e4d2-1b45-81df-8b05-fcdd43604be5",
+      "notion_id": "2766e4d2-1b45-8073-b9e3-fa39ae137938",
       "category_file": "Dialogues.json"
     },
     {
@@ -182,6 +182,26 @@
       "kind": "database",
       "notion_id": "e1066f02-734d-4d32-802f-1f17ae8882e8",
       "category_file": "Évaluation_des_aspects_culturels___études.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "2be6e4d2-1b45-807c-bb2b-ee22e7209042",
+      "category_file": "Systèmes_de_jeu.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "5a3b2abf-221b-40c1-9b2a-98c91e13dfd9",
+      "category_file": "Flags.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "75ab57dc-e48c-4172-8cab-d48f45bda04e",
+      "category_file": "Inventaires_PNJ.json"
+    },
+    {
+      "kind": "database",
+      "notion_id": "09204171-5d4d-40e8-9237-d7bac6a5c1a0",
+      "category_file": "Valeurs_de_Flag.json"
     },
     {
       "kind": "page",
@@ -659,5 +679,7 @@
       "category_file": "Évaluation_des_aspects_culturels_d'Alteir.json"
     }
   ],
-  "included_categories": []
+  "included_categories": [],
+  "mirror_rebuild_on_full_sync": false,
+  "archive_retention_count": 10
 }

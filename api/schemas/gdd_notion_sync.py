@@ -1,7 +1,7 @@
 """Schémas Pydantic pour la sync GDD Notion (FR18)."""
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,13 @@ class GddNotionSourceSchema(BaseModel):
         ...,
         description="Nom de fichier cible (ex. personnages.json)",
     )
+    notion_data_source_ids: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Optionnel (bases multi-vues Notion) : UUIDs des data sources à interroger. "
+            "Vide = sélection automatique (exclut les vues type « récompenses »)."
+        ),
+    )
 
 
 class GddNotionSyncConfigPublic(BaseModel):
@@ -24,7 +31,14 @@ class GddNotionSyncConfigPublic(BaseModel):
     sync_interval_minutes: int = 60
     auto_sync_enabled: bool = False
     sources: List[GddNotionSourceSchema] = Field(default_factory=list)
-    included_categories: List[str] = Field(default_factory=list)
+    included_categories: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Noms de fichier cible (ex. personnages.json) restreignant les sources "
+            "kind=database. Vide = toutes les bases et toutes les fiches (page). "
+            "Non vide = uniquement ces bases sur ce run ; les fiches page sont exclues."
+        ),
+    )
     mirror_rebuild_on_full_sync: bool = Field(
         default=False,
         description="Déprécié : ignoré par le serveur (sync complète = miroir automatique).",
@@ -39,7 +53,10 @@ class GddNotionSyncConfigUpdate(BaseModel):
     sync_interval_minutes: Optional[int] = None
     auto_sync_enabled: Optional[bool] = None
     sources: Optional[List[GddNotionSourceSchema]] = None
-    included_categories: Optional[List[str]] = None
+    included_categories: Optional[List[str]] = Field(
+        default=None,
+        description="Filtre bases ; si défini et non vide, les sources page ne sont pas sync sur ce run.",
+    )
     mirror_rebuild_on_full_sync: Optional[bool] = Field(
         default=None,
         description="Déprécié : sans effet sur le comportement (conservé pour compat. JSON).",
@@ -62,6 +79,29 @@ class GddNotionConnectionTestResponse(BaseModel):
     message: str
     bot_id: Optional[str] = None
     bot_type: Optional[str] = None
+
+
+class GddNotionPreviewDatabaseRequest(BaseModel):
+    """Corps POST prévisualisation d’une base (première ligne)."""
+
+    category_file: str = Field(..., description="Ex. Dialogues.json — doit exister en source database")
+
+
+class GddNotionPreviewDatabaseResponse(BaseModel):
+    """Résultat prévisualisation : métadonnées Notion + enregistrement mappé comme en sync."""
+
+    ok: bool
+    message: str = ""
+    category_file: str = ""
+    notion_database_id: str = ""
+    data_sources_count: int = 0
+    data_source_entries: List[Dict[str, str]] = Field(default_factory=list)
+    query_total_rows: int = 0
+    first_page_id: str = ""
+    property_keys_from_query_row: List[str] = Field(default_factory=list)
+    property_keys_from_get_page: List[str] = Field(default_factory=list)
+    mapped_record: Optional[Dict[str, Any]] = None
+    compact_table: bool = False
 
 
 class GddNotionSyncRunResponse(BaseModel):

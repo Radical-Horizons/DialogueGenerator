@@ -1,0 +1,78 @@
+# GitHub n'offre pas d'arbitre "data = branche PR". Ce workflow applique la règle du dépôt :
+# sur une PR vers main, fusionner origin/main dans la branche PR ; tout conflit sous data/ est
+# résolu en faveur de la branche PR (ours pendant ce merge). Puis push → la PR redevient mergeable.
+name: PR — merge main, préférer la PR pour data/
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+concurrency:
+  group: pr-prefer-head-data-${{ github.repository }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  merge-main-resolve-data:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge main into PR branch (résoudre data/ pour la PR)
+        env:
+          BASE_REF: main
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin "${BASE_REF}:${BASE_REF}"
+
+          if git merge "${BASE_REF}" --no-edit; then
+            echo "Merge main → PR sans conflit (ou déjà à jour)."
+          else
+            echo "Conflits détectés — application de la règle: sous data/, garder la version de la branche PR."
+            mapfile -t UNMERGED < <(git diff --name-only --diff-filter=U)
+            if [ "${#UNMERGED[@]}" -eq 0 ] || [ -z "${UNMERGED[0]:-}" ]; then
+              echo "État inattendu: merge en échec mais pas de fichiers unmerged."
+              git merge --abort || true
+              exit 1
+            fi
+
+            for f in "${UNMERGED[@]}"; do
+              [ -z "$f" ] && continue
+              case "$f" in
+                data/*)
+                  git checkout --ours -- "$f" 2>/dev/null || git rm -f -- "$f" 2>/dev/null || true
+                  git add -u -- "$f" 2>/dev/null || git add -- "$f" 2>/dev/null || true
+                  ;;
+                *)
+                  echo "ERREUR: conflit hors data/ — arbitrage non défini pour: $f"
+                  echo "Résolvez manuellement ou étendez la politique du workflow."
+                  git merge --abort
+                  exit 1
+                  ;;
+              esac
+            done
+
+            mapfile -t STILL < <(git diff --name-only --diff-filter=U)
+            if [ "${#STILL[@]}" -gt 0 ] && [ -n "${STILL[0]:-}" ]; then
+              echo "ERREUR: fichiers encore en conflit après résolution data/:"
+              printf '%s\n' "${STILL[@]}"
+              git merge --abort
+              exit 1
+            fi
+
+            git commit --no-edit || git commit -m "chore(merge): main into PR, prefer PR for data/"
+          fi
+
+          git push origin "HEAD:${HEAD_REF}"

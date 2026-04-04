@@ -17,6 +17,8 @@ from api.schemas.gdd_notion_sync import (
     GddFullSyncCheckpointResponse,
     GddFullSyncPauseResponse,
     GddNotionConnectionTestResponse,
+    GddNotionPreviewDatabaseRequest,
+    GddNotionPreviewDatabaseResponse,
     GddNotionSyncConfigPublic,
     GddNotionSyncConfigResponse,
     GddNotionSyncConfigUpdate,
@@ -75,6 +77,23 @@ async def test_gdd_notion_connection(
     """Teste le token Notion (users/me)."""
     result = await svc.test_connection(request_id=request_id)
     return GddNotionConnectionTestResponse.model_validate(result)
+
+
+@router.post(
+    "/preview-database-row",
+    response_model=GddNotionPreviewDatabaseResponse,
+)
+async def preview_gdd_notion_database_row(
+    body: GddNotionPreviewDatabaseRequest,
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> GddNotionPreviewDatabaseResponse:
+    """Récupère la première ligne d’une base (même mapping que la sync) pour vérification UI."""
+    raw = await svc.preview_database_first_row(
+        category_file=body.category_file.strip(),
+        request_id=request_id,
+    )
+    return GddNotionPreviewDatabaseResponse.model_validate(raw)
 
 
 @router.post("/sync", response_model=GddNotionSyncRunResponse)

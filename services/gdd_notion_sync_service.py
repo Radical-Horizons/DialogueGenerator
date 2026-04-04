@@ -65,7 +65,7 @@ from services.gdd_notion_sync_mapper import (
     is_record_empty_for_sync,
     merge_records_by_nom,
     notion_page_to_compact_row_record,
-    notion_page_to_gdd_record,
+    notion_page_to_gdd_record_merge_body_and_properties,
 )
 from services.gdd_notion_sync_retry import (
     SyncBackoffPolicy,
@@ -73,6 +73,7 @@ from services.gdd_notion_sync_retry import (
     run_with_retries,
 )
 from services.gdd_notion_sync_utils import (
+    agent_debug_log_d9fa38,
     category_file_matches_included,
     category_stem_to_list_category_key,
     normalize_notion_id,
@@ -413,22 +414,56 @@ class GddNotionSyncService:
                 )
 
     @staticmethod
+    def _data_source_ids_from_settings_source(
+        src: Mapping[str, Any],
+    ) -> Optional[List[str]]:
+        """Liste optionnelle d’UUID data source Notion (forcer la vue interrogée)."""
+        raw = src.get("notion_data_source_ids")
+        if not isinstance(raw, list) or not raw:
+            return None
+        out: List[str] = []
+        for x in raw:
+            if isinstance(x, str) and x.strip():
+                out.append(x.strip())
+        return out or None
+
+    @staticmethod
     def _collect_eligible_sources(
         sources: List[Any],
         included_list: List[str],
         partial_out: List[str],
         request_id: Optional[str],
-    ) -> List[Tuple[Any, str, str]]:
-        """Liste les sources à traiter (kind, notion_id, category_file)."""
-        eligible: List[Tuple[Any, str, str]] = []
+    ) -> List[Tuple[Any, str, str, Optional[List[str]]]]:
+        """Liste les sources à traiter (kind, notion_id, category_file, data_source_ids).
+
+        Si ``included_categories`` est vide : toutes les bases et toutes les fiches
+        (``page``). Sinon : **uniquement** les bases qui matchent le filtre — les
+        fiches sont ignorées sur ce run (sync ciblée rapide, sans parcourir toutes
+        les pages du hub).
+        """
+        eligible: List[Tuple[Any, str, str, Optional[List[str]]]] = []
+        restrict_to_databases_only = bool(included_list)
         for src in sources:
             if not isinstance(src, dict):
                 continue
             kind = src.get("kind")
             nid = str(src.get("notion_id", "")).strip()
             cat_file = str(src.get("category_file", "")).strip()
+            ds_ids = GddNotionSyncService._data_source_ids_from_settings_source(
+                src
+            )
             if not nid or not cat_file:
                 partial_out.append("Source ignorée (notion_id ou category_file vide)")
+                continue
+            kind_str = str(kind or "").strip().lower()
+            if kind_str == "page":
+                if restrict_to_databases_only:
+                    log_sync_event(
+                        f"{cat_file} ignoré (périmètre restreint aux bases listées)",
+                        request_id=request_id,
+                    )
+                    continue
+                eligible.append((kind, nid, cat_file, None))
                 continue
             if not category_file_matches_included(cat_file, included_list):
                 log_sync_event(
@@ -436,7 +471,7 @@ class GddNotionSyncService:
                     request_id=request_id,
                 )
                 continue
-            eligible.append((kind, nid, cat_file))
+            eligible.append((kind, nid, cat_file, ds_ids))
         return eligible
 
     @staticmethod
@@ -516,6 +551,136 @@ class GddNotionSyncService:
                 "prochaine sync incrémentale rechargera selon Notion."
             ),
             "new_backup_id": new_backup_name,
+        }
+
+    async def preview_database_first_row(
+        self,
+        *,
+        category_file: str,
+        request_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Récupère la première ligne d’une base Notion (même pipeline que la sync) pour diagnostic UI.
+
+        Args:
+            category_file: ``category_file`` de la source ``kind=database`` dans settings.
+            request_id: Identifiant de requête pour logs.
+
+        Returns:
+            Dict sérialisable (ok, métadonnées base, enregistrement mappé ou message d’erreur).
+        """
+        cat = str(category_file or "").strip()
+        if not cat:
+            return {"ok": False, "message": "category_file requis"}
+        settings = self._store.load_settings()
+        sources = settings.get("sources") or []
+        src: Optional[Dict[str, Any]] = None
+        for s in sources:
+            if not isinstance(s, dict):
+                continue
+            if str(s.get("kind", "")).lower() != "database":
+                continue
+            if str(s.get("category_file", "")).strip() == cat:
+                src = s
+                break
+        if src is None:
+            return {
+                "ok": False,
+                "message": f"Aucune source database avec category_file={cat!r}",
+            }
+        nid = str(src.get("notion_id", "")).strip()
+        if not nid:
+            return {"ok": False, "message": "notion_id manquant pour cette source"}
+        token = self._store.read_token()
+        if not token:
+            return {
+                "ok": False,
+                "message": "Token Notion absent : configurez le token avant le test.",
+            }
+        ds_ids = GddNotionSyncService._data_source_ids_from_settings_source(src)
+        client = self._client_factory(token)
+        db_meta = await client._retrieve_database_for_data_sources(nid)
+        data_sources_count = 0
+        data_source_entries: List[Dict[str, str]] = []
+        if isinstance(db_meta, dict):
+            raw_ds = db_meta.get("data_sources")
+            if isinstance(raw_ds, list):
+                data_sources_count = len(raw_ds)
+                for item in raw_ds:
+                    if isinstance(item, Mapping):
+                        iid = str(item.get("id") or "").strip()
+                        name = str(item.get("name") or "").strip()
+                        if iid:
+                            data_source_entries.append({"id": iid, "name": name})
+        try:
+            pages = await client.query_database(nid, data_source_ids=ds_ids)
+        except Exception as exc:
+            detail = redact_notion_token_from_text(str(exc))
+            log_sync_event(
+                f"preview-database-row échec query {cat}: {detail[:500]}",
+                request_id=request_id,
+            )
+            return {
+                "ok": False,
+                "message": f"Échec requête Notion (liste des lignes) — {detail}",
+                "category_file": cat,
+                "notion_database_id": nid,
+                "data_sources_count": data_sources_count,
+                "data_source_entries": data_source_entries,
+            }
+        if not pages:
+            return {
+                "ok": True,
+                "message": "Base accessible mais 0 ligne retournée par Notion.",
+                "category_file": cat,
+                "notion_database_id": nid,
+                "data_sources_count": data_sources_count,
+                "data_source_entries": data_source_entries,
+                "query_total_rows": 0,
+                "first_page_id": "",
+                "property_keys_from_query_row": [],
+                "property_keys_from_get_page": [],
+                "mapped_record": None,
+                "compact_table": False,
+            }
+        p0 = pages[0]
+        pid = p0.get("id") if isinstance(p0, dict) else None
+        if not pid:
+            return {
+                "ok": False,
+                "message": "Première entrée sans id de page",
+                "category_file": cat,
+                "notion_database_id": nid,
+            }
+        try:
+            norm_source_id = normalize_notion_id(nid)
+        except ValueError:
+            norm_source_id = ""
+        compact_table = bool(norm_source_id) and database_id_is_compact_table_export(
+            norm_source_id
+        )
+        pq = p0.get("properties") if isinstance(p0, dict) else {}
+        q_keys = sorted(pq.keys()) if isinstance(pq, dict) else []
+        full_page = await client.get_page(str(pid))
+        pf = full_page.get("properties") if isinstance(full_page, dict) else {}
+        gp_keys = sorted(pf.keys()) if isinstance(pf, dict) else []
+        if compact_table:
+            rec = notion_page_to_compact_row_record(full_page)
+        else:
+            body = await client.get_page_content(str(pid))
+            rec = notion_page_to_gdd_record_merge_body_and_properties(full_page, body)
+        return {
+            "ok": True,
+            "message": "OK — première ligne mappée comme en sync.",
+            "category_file": cat,
+            "notion_database_id": nid,
+            "data_sources_count": data_sources_count,
+            "data_source_entries": data_source_entries,
+            "query_total_rows": len(pages),
+            "first_page_id": str(pid),
+            "property_keys_from_query_row": q_keys,
+            "property_keys_from_get_page": gp_keys,
+            "mapped_record": rec,
+            "compact_table": compact_table,
         }
 
     async def test_connection(self, request_id: Optional[str] = None) -> Dict[str, Any]:
@@ -701,24 +866,25 @@ class GddNotionSyncService:
             for x in (settings.get("included_categories") or [])
             if isinstance(x, str) and str(x).strip()
         ]
-        category_files_from_sources: List[str] = []
+        database_category_files: List[str] = []
         for src in sources:
             if not isinstance(src, dict):
                 continue
             cat_file = str(src.get("category_file", "")).strip()
             nid = str(src.get("notion_id", "")).strip()
-            if nid and cat_file:
-                category_files_from_sources.append(cat_file)
-        if included_list and category_files_from_sources:
+            kind_str = str(src.get("kind", "")).strip().lower()
+            if nid and cat_file and kind_str == "database":
+                database_category_files.append(cat_file)
+        if included_list and database_category_files:
             if not any(
                 category_file_matches_included(cf, included_list)
-                for cf in category_files_from_sources
+                for cf in database_category_files
             ):
                 return GddNotionSyncResult(
                     success=False,
                     message=(
-                        "included_categories ne correspond à aucun category_file "
-                        "des sources configurées."
+                        "included_categories ne correspond à aucune base (database) "
+                        "parmi les sources configurées."
                     ),
                 )
 
@@ -871,7 +1037,7 @@ class GddNotionSyncService:
         if cp_state is not None:
             completed_membership = set(cp_state.completed_category_files)
 
-        for i, (kind, nid, cat_file) in enumerate(eligible, start=1):
+        for i, (kind, nid, cat_file, ds_ids) in enumerate(eligible, start=1):
             await self._cooperative_sync_point()
             self._sync_progress_update(
                 current_source_index=i,
@@ -889,11 +1055,24 @@ class GddNotionSyncService:
             try:
 
                 async def _load_pages() -> List[Mapping[str, Any]]:
-                    return await self._fetch_pages(client, kind, nid)
+                    return await self._fetch_pages(client, kind, nid, ds_ids)
 
                 pages = await self._notion_read_with_retries(
                     _load_pages, retry_policy=retry_policy
                 )
+                # region agent log
+                if str(kind).lower() == "database":
+                    agent_debug_log_d9fa38(
+                        "E",
+                        "gdd_notion_sync_service.run_sync",
+                        "pages fetched for database source",
+                        {
+                            "category_file": cat_file,
+                            "notion_id_prefix": (str(nid).replace("-", "")[:8]),
+                            "pages_count": len(pages),
+                        },
+                    )
+                # endregion agent log
             except _SYNC_RECOVERABLE as exc:
                 partial.append(f"{cat_file}: fetch — {_format_partial_error_detail(exc)}")
                 self._sync_progress_update(sources_completed=i)
@@ -959,6 +1138,31 @@ class GddNotionSyncService:
                     full_page = await self._notion_read_with_retries(
                         _read_meta, retry_policy=retry_policy
                     )
+                    # region agent log
+                    if (
+                        str(kind).lower() == "database"
+                        and page_num == 1
+                        and isinstance(p, dict)
+                        and isinstance(full_page, dict)
+                    ):
+                        pq = p.get("properties")
+                        pf = full_page.get("properties")
+                        agent_debug_log_d9fa38(
+                            "C",
+                            "gdd_notion_sync_service.run_sync",
+                            "first database row property key counts",
+                            {
+                                "category_file": cat_file,
+                                "query_properties_keys": (
+                                    len(pq) if isinstance(pq, dict) else -1
+                                ),
+                                "get_page_properties_keys": (
+                                    len(pf) if isinstance(pf, dict) else -1
+                                ),
+                                "compact_table": compact_table,
+                            },
+                        )
+                    # endregion agent log
                     if compact_table:
                         rec = notion_page_to_compact_row_record(full_page)
                     else:
@@ -969,7 +1173,9 @@ class GddNotionSyncService:
                         body = await self._notion_read_with_retries(
                             _read_body, retry_policy=retry_policy
                         )
-                        rec = notion_page_to_gdd_record(full_page, body)
+                        rec = notion_page_to_gdd_record_merge_body_and_properties(
+                            full_page, body
+                        )
                     edited = p.get("last_edited_time") or ""
                     if is_record_empty_for_sync(rec):
                         if edited:
@@ -1139,8 +1345,11 @@ class GddNotionSyncService:
         client: NotionAPIClient,
         kind: str,
         notion_id: str,
+        data_source_ids: Optional[List[str]] = None,
     ) -> List[Mapping[str, Any]]:
         if kind == "page":
             page = await client.get_page(notion_id)
             return [page]
-        return await client.query_database(notion_id)
+        return await client.query_database(
+            notion_id, data_source_ids=data_source_ids
+        )

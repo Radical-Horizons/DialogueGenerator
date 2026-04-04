@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from services.gdd_loader import GDDLoader
+from services.gdd_notion_sync_utils import category_stem_to_list_category_key
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,11 @@ def _records_from_monolith(path: Path) -> List[Dict[str, Any]]:
 def _find_shard_dir(gdd_root: Path, stem: str) -> Optional[Path]:
     if not gdd_root.is_dir():
         return None
+    list_key = category_stem_to_list_category_key(stem)
+    if list_key:
+        d = gdd_root / list_key
+        if d.is_dir():
+            return d
     low = stem.lower()
     for c in gdd_root.iterdir():
         if c.is_dir() and c.name.lower() == low:

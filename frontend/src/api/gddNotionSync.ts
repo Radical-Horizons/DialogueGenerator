@@ -11,7 +11,13 @@ export interface GddNotionSyncConfigPublic {
   schema_version: number
   sync_interval_minutes: number
   auto_sync_enabled: boolean
-  sources: Array<{ notion_id: string; kind: 'database' | 'page'; category_file: string }>
+  sources: Array<{
+    notion_id: string
+    kind: 'database' | 'page'
+    category_file: string
+    /** Bases multi-vues : forcer les UUID data source Notion (vide = auto côté serveur). */
+    notion_data_source_ids?: string[]
+  }>
   included_categories: string[]
   mirror_rebuild_on_full_sync: boolean
   archive_retention_count: number
@@ -117,6 +123,34 @@ export async function putGddNotionSyncConfig(
 export async function postGddNotionTestConnection(): Promise<GddNotionConnectionTestResponse> {
   const { data } = await apiClient.post<GddNotionConnectionTestResponse>(
     '/api/v1/gdd-notion-sync/test-connection',
+  )
+  return data
+}
+
+/** Réponse POST prévisualisation première ligne d’une base (alignée Pydantic). */
+export interface GddNotionPreviewDatabaseResponse {
+  ok: boolean
+  message: string
+  category_file: string
+  notion_database_id: string
+  data_sources_count: number
+  data_source_entries: Array<{ id: string; name: string }>
+  query_total_rows: number
+  first_page_id: string
+  property_keys_from_query_row: string[]
+  property_keys_from_get_page: string[]
+  mapped_record: Record<string, unknown> | null
+  compact_table: boolean
+}
+
+/** Une ligne comme en sync : utile pour vérifier Notion avant une sync complète. */
+export async function postGddNotionPreviewDatabaseRow(
+  categoryFile: string,
+): Promise<GddNotionPreviewDatabaseResponse> {
+  const { data } = await apiClient.post<GddNotionPreviewDatabaseResponse>(
+    '/api/v1/gdd-notion-sync/preview-database-row',
+    { category_file: categoryFile },
+    { timeout: API_TIMEOUTS.LLM_GENERATION },
   )
   return data
 }

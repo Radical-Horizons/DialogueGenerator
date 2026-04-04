@@ -26,3 +26,16 @@ def test_live_gdd_entity_exists_arbitrary_monolith(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     assert live_gdd_entity_exists(tmp_path, "custom_cat", "Ent1") is True
+
+
+def test_live_gdd_entity_exists_folded_list_shard_dir(tmp_path: Path) -> None:
+    """Stem avec accents (ex. Systèmes_de_jeu) → répertoire shard ASCII (systemes_de_jeu)."""
+    gdd = tmp_path / "data" / "GDD_categories"
+    sd = gdd / "systemes_de_jeu"
+    sd.mkdir(parents=True)
+    (sd / "2be6e4d2-1b45-807c-bb2b-ee22e7209042.json").write_text(
+        json.dumps({"Nom": "Tests"}),
+        encoding="utf-8",
+    )
+    assert live_gdd_entity_exists(tmp_path, "Systèmes_de_jeu", "Tests") is True
+    assert live_gdd_entity_exists(tmp_path, "Systèmes_de_jeu", "Absent") is False

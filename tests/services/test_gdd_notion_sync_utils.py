@@ -45,6 +45,7 @@ def test_category_file_matches_included_by_stem_or_name() -> None:
 def test_category_stem_to_list_category_key() -> None:
     assert category_stem_to_list_category_key("Personnages") == "personnages"
     assert category_stem_to_list_category_key("Communautés") == "communautes"
+    assert category_stem_to_list_category_key("Systèmes_de_jeu") == "systemes_de_jeu"
     assert category_stem_to_list_category_key("vocab_test") is None
 
 

@@ -1,10 +1,17 @@
 """Client pour l'API Notion officielle."""
 import os
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Mapping, Tuple
 import httpx
 
+from services.gdd_notion_sync_utils import agent_debug_log_d9fa38, normalize_notion_id
+
 logger = logging.getLogger(__name__)
+
+# Pages / blocs : version stable historique.
+NOTION_VERSION_LEGACY = "2022-06-28"
+# Bases au modèle multi-sources : découverte + query via data_sources (Notion 2025-09-03).
+NOTION_VERSION_DATA_SOURCES = "2025-09-03"
 
 
 class NotionAPIClient:
@@ -26,57 +33,448 @@ class NotionAPIClient:
         self.base_url = "https://api.notion.com/v1"
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Notion-Version": "2022-06-28",
+            "Notion-Version": NOTION_VERSION_LEGACY,
             "Content-Type": "application/json"
         }
         logger.info("NotionAPIClient initialisé")
-    
-    async def query_database(
+
+    def _headers_with_version(self, notion_version: str) -> Dict[str, str]:
+        """En-têtes identiques au client mais avec une ``Notion-Version`` explicite."""
+        h = dict(self.headers)
+        h["Notion-Version"] = notion_version
+        return h
+
+    async def _retrieve_database_for_data_sources(
+        self, database_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """GET /v1/databases/{id} avec API 2025-09-03 (liste ``data_sources``).
+
+        Returns:
+            Objet JSON base, ou ``None`` si la requête échoue (ex. 404).
+        """
+        url = f"{self.base_url}/databases/{database_id}"
+        headers = self._headers_with_version(NOTION_VERSION_DATA_SOURCES)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            try:
+                response = await client.get(url, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                # region agent log
+                if isinstance(data, dict):
+                    raw_ds = data.get("data_sources")
+                    ds_n = (
+                        len(raw_ds)
+                        if isinstance(raw_ds, list)
+                        else -1
+                    )
+                    agent_debug_log_d9fa38(
+                        "A",
+                        "notion_api_client._retrieve_database_for_data_sources",
+                        "GET database 2025-09-03 ok",
+                        {
+                            "database_id": database_id,
+                            "data_sources_len": ds_n,
+                            "has_title": bool(data.get("title")),
+                        },
+                    )
+                # endregion agent log
+                return data if isinstance(data, dict) else None
+            except httpx.HTTPStatusError as e:
+                logger.warning(
+                    "GET database (data_sources discovery) %s → %s : %s",
+                    database_id,
+                    e.response.status_code,
+                    (e.response.text or "")[:800],
+                )
+                return None
+            except (httpx.RequestError, ValueError) as e:
+                logger.warning(
+                    "GET database (data_sources discovery) %s erreur réseau/parse: %s",
+                    database_id,
+                    e,
+                )
+                return None
+
+    async def _query_data_source(
+        self,
+        data_source_id: str,
+        filter_properties: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        """POST /v1/data_sources/{id}/query (API 2025-09-03), pagination incluse."""
+        url = f"{self.base_url}/data_sources/{data_source_id}/query"
+        headers = self._headers_with_version(NOTION_VERSION_DATA_SOURCES)
+        payload: Dict[str, Any] = {}
+        params: Optional[List[Tuple[str, str]]] = None
+        if filter_properties:
+            params = [("filter_properties", fp) for fp in filter_properties]
+
+        all_pages: List[Dict[str, Any]] = []
+        has_more = True
+        start_cursor: Optional[str] = None
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            while has_more:
+                body = dict(payload)
+                if start_cursor:
+                    body["start_cursor"] = start_cursor
+                try:
+                    response = await client.post(
+                        url, headers=headers, json=body, params=params
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                except httpx.HTTPStatusError as e:
+                    logger.error(
+                        "Erreur HTTP Notion (data_sources query): %s - %s",
+                        e.response.status_code,
+                        e.response.text,
+                    )
+                    raise
+                except Exception as e:
+                    logger.error("Erreur lors de la requête data_source Notion: %s", e)
+                    raise
+
+                all_pages.extend(data.get("results", []))
+                has_more = data.get("has_more", False)
+                start_cursor = data.get("next_cursor")
+
+        return all_pages
+
+    async def _query_database_legacy(
         self,
         database_id: str,
-        filter_properties: Optional[List[str]] = None
+        filter_properties: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
-        """Interroge une base de données Notion.
-        
-        Args:
-            database_id: ID de la base de données.
-            filter_properties: Liste des propriétés à récupérer (optionnel).
-            
-        Returns:
-            Liste des pages de la base de données.
-        """
+        """POST /v1/databases/{id}/query (API 2022-06-28)."""
         url = f"{self.base_url}/databases/{database_id}/query"
-        
-        payload = {}
+
+        payload: Dict[str, Any] = {}
         if filter_properties:
             payload["filter_properties"] = filter_properties
-        
-        all_pages = []
+
+        all_pages: List[Dict[str, Any]] = []
         has_more = True
-        start_cursor = None
-        
+        start_cursor: Optional[str] = None
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             while has_more:
                 if start_cursor:
                     payload["start_cursor"] = start_cursor
-                
+
                 try:
                     response = await client.post(url, headers=self.headers, json=payload)
                     response.raise_for_status()
                     data = response.json()
-                    
+
                     all_pages.extend(data.get("results", []))
                     has_more = data.get("has_more", False)
                     start_cursor = data.get("next_cursor")
-                    
+
                 except httpx.HTTPStatusError as e:
-                    logger.error(f"Erreur HTTP lors de la requête Notion: {e.response.status_code} - {e.response.text}")
+                    logger.error(
+                        "Erreur HTTP lors de la requête Notion: %s - %s",
+                        e.response.status_code,
+                        e.response.text,
+                    )
                     raise
                 except Exception as e:
                     logger.error(f"Erreur lors de la requête Notion: {e}")
                     raise
+
+        return all_pages
+
+    @staticmethod
+    def _rich_text_array_to_plain(rich: Any) -> str:
+        """Extrait le texte brut d’un tableau ``rich_text`` Notion."""
+        if not isinstance(rich, list):
+            return ""
+        parts: List[str] = []
+        for t in rich:
+            if not isinstance(t, Mapping):
+                continue
+            pt = t.get("plain_text")
+            if isinstance(pt, str) and pt:
+                parts.append(pt)
+                continue
+            inner = t.get("text")
+            if isinstance(inner, Mapping):
+                c = inner.get("content")
+                if isinstance(c, str) and c:
+                    parts.append(c)
+        return "".join(parts).strip()
+
+    @classmethod
+    def _database_title_plain(cls, db_meta: Mapping[str, Any]) -> str:
+        """Titre affiché de la base (GET database), texte plat."""
+        title = db_meta.get("title")
+        if isinstance(title, list):
+            return cls._rich_text_array_to_plain(title)
+        if isinstance(title, str):
+            return title.strip()
+        return ""
+
+    @staticmethod
+    def _data_source_entries_from_meta(raw_sources: Any) -> List[Tuple[str, str]]:
+        """Liste ``(data_source_id, nom_affiché)`` depuis ``data_sources`` du GET database."""
+        out: List[Tuple[str, str]] = []
+        if not isinstance(raw_sources, list):
+            return out
+        for item in raw_sources:
+            if isinstance(item, str) and item.strip():
+                out.append((item.strip(), ""))
+                continue
+            if isinstance(item, Mapping):
+                ds_id = item.get("id")
+                if not (isinstance(ds_id, str) and ds_id.strip()):
+                    continue
+                name_raw = item.get("name")
+                name_s = ""
+                if isinstance(name_raw, str):
+                    name_s = name_raw.strip()
+                elif isinstance(name_raw, list):
+                    name_s = NotionAPIClient._rich_text_array_to_plain(name_raw)
+                out.append((ds_id.strip(), name_s))
+        return out
+
+    @staticmethod
+    def _notion_ids_equivalent(a: str, b: str) -> bool:
+        """True si deux identifiants Notion désignent le même UUID."""
+        try:
+            return normalize_notion_id(a) == normalize_notion_id(b)
+        except ValueError:
+            return False
+
+    @classmethod
+    def _resolve_data_source_ids_to_query(
+        cls,
+        entries: List[Tuple[str, str]],
+        db_meta: Mapping[str, Any],
+        explicit: Optional[List[str]],
+    ) -> List[str]:
+        """Choisit les ``data_source`` à interroger (évite les vues inline type « récompenses »).
+
+        Ordre : ``explicit`` (config) → titre base = nom de source → exclusion heuristique
+        (nom contenant récompens/reward) → première entrée.
+        """
+        ids_in_meta = [e[0] for e in entries]
+        if explicit:
+            chosen: List[str] = []
+            seen: set[str] = set()
+            for raw in explicit:
+                if not isinstance(raw, str) or not str(raw).strip():
+                    continue
+                for eid in ids_in_meta:
+                    if cls._notion_ids_equivalent(eid, raw) and eid not in seen:
+                        chosen.append(eid)
+                        seen.add(eid)
+                        break
+            if chosen:
+                return chosen
+            logger.warning(
+                "notion_data_source_ids %s ne correspond à aucun data_source connu "
+                "(base %s) — repli heuristique",
+                explicit,
+                db_meta.get("id"),
+            )
+        if not entries:
+            return []
+        if len(entries) == 1:
+            return [entries[0][0]]
+        db_title = cls._database_title_plain(db_meta).lower().strip()
+        if db_title:
+            same = [
+                eid
+                for eid, name in entries
+                if name.strip().lower() == db_title
+            ]
+            if len(same) == 1:
+                return same
+        block_substr = ("récompens", "recompens", "reward")
+        filtered = [
+            (eid, name)
+            for eid, name in entries
+            if not any(s in name.lower() for s in block_substr)
+        ]
+        if len(filtered) == 1:
+            return [filtered[0][0]]
+        if len(filtered) > 1:
+            logger.warning(
+                "Base %s : %d data_source(s) après exclusion heuristique ; "
+                "seule la première est interrogée : %s",
+                db_meta.get("id"),
+                len(filtered),
+                filtered[0][0],
+            )
+            return [filtered[0][0]]
+        if entries:
+            logger.warning(
+                "Base %s : toutes les data_sources correspondent à l’exclusion "
+                "« récompens/reward » ; repli sur la première entrée.",
+                db_meta.get("id"),
+            )
+            return [entries[0][0]]
+        return []
+
+    async def _query_database_via_data_sources(
+        self,
+        database_id: str,
+        filter_properties: Optional[List[str]],
+        data_source_ids: Optional[List[str]] = None,
+    ) -> Optional[List[Dict[str, Any]]]:
+        """Interroge la base via ``POST /data_sources/.../query`` si le GET expose des IDs.
+
+        Returns:
+            Liste de pages si au moins un data source a été interrogé avec succès, sinon
+            ``None`` pour indiquer qu'il faut tenter le chemin legacy.
+        """
+        db_meta = await self._retrieve_database_for_data_sources(database_id)
+        if db_meta is None:
+            return None
+        raw_sources = db_meta.get("data_sources")
+        entries = self._data_source_entries_from_meta(raw_sources)
+        ds_ids = self._resolve_data_source_ids_to_query(
+            entries, db_meta, data_source_ids
+        )
+        if not ds_ids:
+            # region agent log
+            agent_debug_log_d9fa38(
+                "A",
+                "notion_api_client._query_database_via_data_sources",
+                "no ds_ids will try legacy query",
+                {
+                    "database_id": database_id,
+                    "entries_parsed": len(entries),
+                    "raw_data_sources_is_list": isinstance(raw_sources, list),
+                    "raw_data_sources_len": (
+                        len(raw_sources)
+                        if isinstance(raw_sources, list)
+                        else -1
+                    ),
+                },
+            )
+            # endregion agent log
+            logger.warning(
+                "GET database %s (API %s) : aucun data_source_id exploitable "
+                "(data_sources=%r, clés=%s)",
+                database_id,
+                NOTION_VERSION_DATA_SOURCES,
+                raw_sources,
+                list(db_meta.keys())[:40],
+            )
+            return None
+        merged: List[Dict[str, Any]] = []
+        for ds_id in ds_ids:
+            part = await self._query_data_source(
+                ds_id, filter_properties=filter_properties
+            )
+            merged.extend(part)
+        # region agent log
+        agent_debug_log_d9fa38(
+            "D",
+            "notion_api_client._query_database_via_data_sources",
+            "data_source query completed",
+            {
+                "database_id": database_id,
+                "ds_chosen_count": len(ds_ids),
+                "merged_row_count": len(merged),
+            },
+        )
+        # endregion agent log
+        logger.info(
+            "Récupération de %s pages via %d data_source(s) (base %s) ids=%s",
+            len(merged),
+            len(ds_ids),
+            database_id,
+            ds_ids,
+        )
+        return merged
+    
+    async def query_database(
+        self,
+        database_id: str,
+        filter_properties: Optional[List[str]] = None,
+        data_source_ids: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Interroge une base de données Notion.
         
-        logger.info(f"Récupération de {len(all_pages)} pages depuis la base de données {database_id}")
+        Utilise d'abord le modèle **data sources** (Notion API ``2025-09-03``) lorsque
+        la base expose des ``data_sources`` ; sinon retombe sur ``POST .../databases/.../query``
+        (``2022-06-28``). Sans cela, les bases migrées renvoient une erreur du type
+        « does not contain any data sources accessible by this API bot » alors que
+        l'intégration a bien accès.
+
+        Les bases multi-vues Notion peuvent exposer plusieurs ``data_sources`` (ex. vue
+        principale + base inline). Par défaut, une heuristique limite la requête ;
+        ``data_source_ids`` permet de forcer la liste.
+
+        Args:
+            database_id: ID de la base de données.
+            filter_properties: Liste des propriétés à récupérer (optionnel).
+            data_source_ids: UUIDs de data sources à interroger (optionnel, sinon auto).
+
+        Returns:
+            Liste des pages de la base de données.
+        """
+        via_ds = await self._query_database_via_data_sources(
+            database_id, filter_properties, data_source_ids=data_source_ids
+        )
+        if via_ds is not None:
+            # region agent log
+            agent_debug_log_d9fa38(
+                "B",
+                "notion_api_client.query_database",
+                "using data_source path result",
+                {
+                    "database_id": database_id,
+                    "row_count": len(via_ds),
+                },
+            )
+            # endregion agent log
+            return via_ds
+
+        try:
+            all_pages = await self._query_database_legacy(
+                database_id, filter_properties
+            )
+        except httpx.HTTPStatusError as e:
+            # Notion peut répondre 400 pour les bases multi-sources sans mentionner
+            # explicitement « data source » (libellés localisés ou messages génériques).
+            # region agent log
+            agent_debug_log_d9fa38(
+                "A",
+                "notion_api_client.query_database",
+                "legacy query HTTPStatusError",
+                {
+                    "database_id": database_id,
+                    "status_code": e.response.status_code,
+                },
+            )
+            # endregion agent log
+            if e.response.status_code == 400:
+                retry = await self._query_database_via_data_sources(
+                    database_id,
+                    filter_properties,
+                    data_source_ids=data_source_ids,
+                )
+                if retry is not None:
+                    return retry
+            raise
+        # region agent log
+        agent_debug_log_d9fa38(
+            "B",
+            "notion_api_client.query_database",
+            "legacy query ok",
+            {
+                "database_id": database_id,
+                "row_count": len(all_pages),
+            },
+        )
+        # endregion agent log
+        logger.info(
+            "Récupération de %s pages depuis la base de données %s (legacy query)",
+            len(all_pages),
+            database_id,
+        )
         return all_pages
     
     async def get_page(self, page_id: str) -> Dict[str, Any]:
