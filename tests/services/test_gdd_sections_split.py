@@ -71,3 +71,13 @@ class TestExtractGddFieldValue:
         data = {"sections": {"_general": md}}
         assert extract_virtual_sections_general_path(data, "sections._general.nope") is None
 
+    def test_virtual_path_flat_slug_sections_post_sync(self) -> None:
+        """Sync Notion : ``sections[slug]`` sans monolithe ``_general``."""
+        data = {
+            "Nom": "PNJ",
+            "sections": {"preamble": "Ligne A", "guides": "Ligne B"},
+            "section_titles": {"preamble": "Préambule", "guides": "Guides"},
+        }
+        assert extract_gdd_field_value(data, "sections._general.preamble") == "Ligne A"
+        assert extract_gdd_field_value(data, "sections._general.guides") == "Ligne B"
+

@@ -5,6 +5,7 @@ from services.gdd_notion_sync_mapper import (
     database_id_is_compact_table_export,
     database_id_should_skip_page_blocks,
     is_record_empty_for_sync,
+    markdown_body_to_sync_sections,
     notion_page_to_compact_row_record,
     notion_page_to_gdd_record,
     notion_page_to_gdd_record_merge_body_and_properties,
@@ -31,8 +32,17 @@ def test_properties_to_general_text_skips_title_duplicate() -> None:
     assert "Rare" in text
 
 
-def test_notion_page_to_gdd_record_body_only_in_general() -> None:
-    """Mapper de base : corps seul dans _general (pas de propriétés)."""
+def test_markdown_body_to_sync_sections_splits_headings() -> None:
+    body = "Intro line\n## Part A\nAAA\n## Part B\nBBB"
+    sections, titles = markdown_body_to_sync_sections(body)
+    assert sections["preamble"] == "Intro line"
+    assert "AAA" in sections["part_a"]
+    assert titles["preamble"] == "Préambule"
+    assert titles["part_a"] == "Part A"
+
+
+def test_notion_page_to_gdd_record_body_only_split_sections() -> None:
+    """Corps seul : sections par slug, pas de colonnes dans le texte."""
     page = {
         "properties": {
             "Terme": {
@@ -47,12 +57,13 @@ def test_notion_page_to_gdd_record_body_only_in_general() -> None:
     }
     rec = notion_page_to_gdd_record(page, "")
     assert rec["Nom"] == "Alteir"
-    assert rec["sections"]["_general"] == ""
-    assert "Glossaire" not in rec["sections"]["_general"]
+    assert rec["sections"] == {}
+    assert "section_titles" not in rec
+    assert "Glossaire" not in str(rec.get("sections"))
 
 
-def test_notion_page_to_gdd_record_merge_always_includes_properties() -> None:
-    """Sync : propriétés toujours dans _general (corps vide ici)."""
+def test_notion_page_to_gdd_record_merge_columns_only_in_values() -> None:
+    """Colonnes uniquement dans ``values``, jamais dans ``sections``."""
     page = {
         "properties": {
             "Terme": {
@@ -68,12 +79,12 @@ def test_notion_page_to_gdd_record_merge_always_includes_properties() -> None:
     rec = notion_page_to_gdd_record_merge_body_and_properties(page, "")
     assert rec["Nom"] == "Alteir"
     assert rec["values"] == {"Glossaire": "Monde"}
-    assert "Glossaire" in rec["sections"]["_general"]
-    assert "Monde" in rec["sections"]["_general"]
+    assert rec["sections"] == {}
+    assert "Glossaire" not in str(rec.get("sections"))
 
 
-def test_notion_page_to_gdd_record_merge_body_then_properties() -> None:
-    """Sync : corps et propriétés concaténés dans _general."""
+def test_notion_page_to_gdd_record_merge_body_split_no_prop_blob() -> None:
+    """Corps découpé ; colonnes absentes du markdown agrégé."""
     page = {
         "properties": {
             "Titre": {
@@ -86,12 +97,15 @@ def test_notion_page_to_gdd_record_merge_body_then_properties() -> None:
             },
         }
     }
-    rec = notion_page_to_gdd_record_merge_body_and_properties(page, "Intro narrative.")
-    gen = rec["sections"]["_general"]
+    rec = notion_page_to_gdd_record_merge_body_and_properties(
+        page, "## Intro\nIntro narrative.\n## Suite\nMore."
+    )
     assert rec["values"] == {"Type": "Quête"}
-    assert gen.startswith("Intro narrative.")
-    assert "Quête" in gen
-    assert "Type" in gen
+    assert "intro" in rec["sections"]
+    assert "Intro narrative" in rec["sections"]["intro"]
+    assert "suite" in rec["sections"]
+    assert "Quête" not in "".join(rec["sections"].values())
+    assert rec["section_titles"]["intro"] == "Intro"
 
 
 def test_is_record_empty_for_sync() -> None:
@@ -106,6 +120,9 @@ def test_is_record_empty_for_sync() -> None:
     )
     assert not is_record_empty_for_sync(
         {"Nom": "SansTitre", "values": {"Col": "v"}, "sections": {"_general": ""}}
+    )
+    assert not is_record_empty_for_sync(
+        {"Nom": "SansTitre", "sections": {"preamble": "hello"}, "values": {}}
     )
 
 
@@ -122,8 +139,7 @@ def test_notion_page_to_compact_row_record() -> None:
     rec = notion_page_to_compact_row_record(page)
     assert rec["Nom"] == "Entrée"
     assert rec["values"] == {"Score": "3"}
-    assert "Score" in rec["sections"]["_general"]
-    assert "3" in rec["sections"]["_general"]
+    assert rec["sections"] == {}
 
 
 def test_database_id_should_skip_page_blocks_vocab() -> None:

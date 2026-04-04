@@ -81,7 +81,9 @@ async def test_run_sync_list_category_writes_shard_files(tmp_path: Path) -> None
     out = json.loads(shard.read_text(encoding="utf-8"))
     assert out["Nom"] == "Héros"
     assert out["notion_page_id"] == pid
-    assert out["sections"]["_general"] == "Corps."
+    assert out["sections"]["preamble"] == "Corps."
+    assert out["section_titles"]["preamble"] == "Préambule"
+    assert "_general" not in out["sections"]
 
 
 @pytest.mark.asyncio
@@ -204,7 +206,9 @@ async def test_run_sync_page_source_writes_gdd(tmp_path: Path) -> None:
     assert res.success
     out = json.loads((gdd_dir / "test_cat.json").read_text(encoding="utf-8"))
     assert out[0]["Nom"] == "Héros"
-    assert out[0]["sections"]["_general"] == "Introduction\n\nTexte."
+    assert out[0]["sections"]["preamble"] == "Introduction\n\nTexte."
+    assert out[0]["section_titles"]["preamble"] == "Préambule"
+    assert "_general" not in out[0]["sections"]
     manifest = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
     assert manifest.get("last_full_sync_at")
 
@@ -362,8 +366,85 @@ async def test_database_vocab_skips_blocks_uses_columns(tmp_path: Path) -> None:
     out = json.loads((gdd_dir / "vocab_test.json").read_text(encoding="utf-8"))
     assert out[0]["Nom"] == "MotClé"
     assert out[0]["values"]["Sens"] == "Définition courte"
-    assert "Sens" in out[0]["sections"]["_general"]
-    assert "Définition courte" in out[0]["sections"]["_general"]
+    assert out[0]["sections"] == {}
+    assert "Sens" not in str(out[0].get("sections"))
+
+
+@pytest.mark.asyncio
+async def test_run_sync_database_non_compact_splits_body_columns_in_values(
+    tmp_path: Path,
+) -> None:
+    """Base hors liste compacte : ``values`` = colonnes, corps découpé (pas dans ``_general``)."""
+    db_id = "1886e4d2-1b45-8039-b51b-eb3826fce199"
+    row_id = "2886e4d2-1b45-8039-b51b-eb3826fce1b5"
+
+    class FakeClient:
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "Quête"}],
+                    },
+                    "Difficulté": {
+                        "type": "select",
+                        "select": {"name": "Hard"},
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return "## Objectifs\nTuer le dragon\n## Récompense\nOr"
+
+        async def query_database(self, database_id: str, **_kw) -> list:
+            return [
+                {
+                    "id": row_id,
+                    "last_edited_time": "2025-06-01T00:00:00.000Z",
+                }
+            ]
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": db_id,
+                    "category_file": "mix_db_test.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="mix-db")
+    assert res.updated_entities == 1
+    out = json.loads((gdd_dir / "mix_db_test.json").read_text(encoding="utf-8"))
+    assert out[0]["Nom"] == "Quête"
+    assert out[0]["values"]["Difficulté"] == "Hard"
+    assert "_general" not in out[0].get("sections", {})
+    assert "objectifs" in out[0]["sections"]
+    assert "dragon" in out[0]["sections"]["objectifs"]
+    assert "re_compense" in out[0]["sections"]
+    joined = "\n".join(out[0]["sections"].values())
+    assert "Hard" not in joined
 
 
 @pytest.mark.asyncio

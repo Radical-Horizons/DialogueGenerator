@@ -72,6 +72,11 @@ def split_sections_general_text(text: str) -> List[Tuple[str, str, str]]:
 def extract_virtual_sections_general_path(data: Dict[str, Any], path: str) -> Optional[str]:
     """Extrait le corps d'une sous-section si ``path`` est ``sections._general.<slug>``.
 
+    Résolution dans l'ordre :
+
+    1. Monolithe legacy : ``sections._general`` (chaîne) découpée par titres markdown.
+    2. Sync Notion actuel : ``sections[slug]`` (corps déjà découpé à l'export).
+
     Args:
         data: Fiche GDD (dict racine).
         path: Chemin pointé.
@@ -90,11 +95,14 @@ def extract_virtual_sections_general_path(data: Dict[str, Any], path: str) -> Op
     if not isinstance(sections, dict):
         return None
     raw = sections.get("_general")
-    if not isinstance(raw, str):
+    if isinstance(raw, str) and raw.strip():
+        for s_slug, _title, body in split_sections_general_text(raw):
+            if s_slug == slug:
+                return body
         return None
-    for s_slug, _title, body in split_sections_general_text(raw):
-        if s_slug == slug:
-            return body
+    direct = sections.get(slug)
+    if isinstance(direct, str) and direct.strip():
+        return direct
     return None
 
 

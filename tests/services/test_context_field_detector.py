@@ -74,6 +74,25 @@ class TestContextFieldDetector:
         assert "sections._general" in fields
         assert "sections._general.part_a" in fields
 
+    def test_shard_flat_sections_sync_notion_virtual_paths(self):
+        """Corps déjà découpé (sync) : chemins virtuels ``sections._general.<slug>`` + titres."""
+        detector = ContextFieldDetector()
+        sample = [
+            {
+                "Nom": "Ligne table",
+                "sections": {"objectifs": "Tuer le dragon", "re_compense": "Or"},
+                "section_titles": {"objectifs": "Objectifs", "re_compense": "Récompense"},
+                "values": {"Difficulté": "Hard"},
+                "notion_page_id": "row-1",
+            }
+        ]
+        fields = detector.detect_available_fields("quest", sample)
+        assert "sections._general.objectifs" in fields
+        assert "sections._general.re_compense" in fields
+        assert fields["sections._general.objectifs"].label == "Sections > Objectifs"
+        assert "values.Difficulté" in fields
+        assert fields["values.Difficulté"].path == "values.Difficulté"
+
     def test_detect_available_fields_nested(self):
         """Test de détection de champs imbriqués."""
         detector = ContextFieldDetector()

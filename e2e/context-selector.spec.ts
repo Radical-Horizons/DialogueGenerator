@@ -58,6 +58,23 @@ test.describe('Sélecteur de contexte', () => {
       expect(summaryBounds.height).toBeGreaterThan(50) // Au moins 50px de hauteur
     }
   })
+
+  test('clic sur une ligne personnage ouvre le panneau Détails (Sections GDD)', async ({ page }) => {
+    const contextPanel = page.getByTestId('context-selector')
+    await expect(page.getByRole('button', { name: /personnages/i })).toBeVisible({
+      timeout: E2E_MS.graphField,
+    })
+    const scroll = contextPanel.getByTestId('context-list-scroll')
+    const checkboxes = scroll.locator('input[type="checkbox"]')
+    const n = await checkboxes.count()
+    if (n === 0) {
+      test.skip(true, 'Aucun personnage dans le GDD - test ignoré')
+    }
+    const row = checkboxes.first().locator('xpath=..')
+    await page.getByRole('button', { name: /^Détails$/ }).click()
+    await row.click({ position: { x: 220, y: 14 } })
+    await expect(page.getByText('Sections GDD')).toBeVisible({ timeout: E2E_MS.ui })
+  })
 })
 
 

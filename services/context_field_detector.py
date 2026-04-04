@@ -221,7 +221,48 @@ class ContextFieldDetector:
         )
         if drop_monolith:
             del field_stats["sections._general"]
-    
+
+        self._expand_flat_slug_sections_virtual(field_stats, sample_data)
+
+    def _expand_flat_slug_sections_virtual(
+        self,
+        field_stats: Dict[str, Dict[str, Any]],
+        sample_data: List[Dict],
+    ) -> None:
+        """Ajoute ``sections._general.<slug>`` pour fiches dont le corps est déjà découpé (sync Notion)."""
+        for item in sample_data:
+            if not isinstance(item, dict):
+                continue
+            item_name = self._get_item_name(item)
+            sections = item.get("sections")
+            if not isinstance(sections, dict):
+                continue
+            raw = sections.get("_general")
+            if isinstance(raw, str) and raw.strip():
+                continue
+            titles_raw = item.get("section_titles")
+            titles_map: Dict[str, str] = (
+                {str(k): str(v) for k, v in titles_raw.items()}
+                if isinstance(titles_raw, dict)
+                else {}
+            )
+            for slug, body in sections.items():
+                if slug == "_general" or not isinstance(body, str) or not body.strip():
+                    continue
+                path = f"sections._general.{slug}"
+                st = field_stats[path]
+                st["count"] += 1
+                st["types"].add("string")
+                st["max_depth"] = max(st["max_depth"], 3)
+                st["paths"].add(path)
+                if item_name:
+                    st["item_names"].add(item_name)
+                disp = titles_map.get(slug)
+                if isinstance(disp, str) and disp.strip():
+                    st["display_title"] = disp.strip()
+                elif "display_title" not in st:
+                    st["display_title"] = slug.replace("_", " ").title()
+
     def _get_item_name(self, item: Dict) -> Optional[str]:
         """Extrait le nom d'une fiche pour l'identifier.
         

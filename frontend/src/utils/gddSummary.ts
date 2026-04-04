@@ -1,9 +1,16 @@
 /**
  * Extrait un aperçu (résumé) depuis les données GDD pour affichage dans les listes.
- * Conforme à la structure Notion/GDD : Nom, Résumé, sections, Introduction.
+ * Conforme à la structure Notion/GDD : Nom, Résumé, sections, Introduction, values, _general.
  * Gère les blocs Notion (rich_text) quand les fiches ne sont pas normalisées en chaîne.
  */
 const SUMMARY_KEYS = ['Résumé', 'Introduction', 'résumé', 'introduction'] as const
+const VALUES_SUMMARY_KEYS = [
+  'Résumé',
+  'Résumé de la fiche',
+  'Introduction',
+  'résumé',
+  'introduction',
+] as const
 const MAX_SUMMARY_LENGTH = 120
 
 /**
@@ -69,12 +76,54 @@ function getFirstMeaningfulStringFromObject(obj: Record<string, unknown>): strin
   return undefined
 }
 
+function sliceSummary(text: string): string {
+  const t = text.trim()
+  if (!t) return ''
+  return t.slice(0, MAX_SUMMARY_LENGTH) + (t.length > MAX_SUMMARY_LENGTH ? '…' : '')
+}
+
+function trySummaryFromValues(values: Record<string, unknown>): string | undefined {
+  for (const key of VALUES_SUMMARY_KEYS) {
+    const text = extractTextFromGddValue(values[key])
+    if (text) return text
+  }
+  return undefined
+}
+
+/** Extrait un paragraphe après **Résumé** / **Résumé de la fiche** dans ``sections._general``. */
+function trySummaryFromGeneralMarkdown(general: string): string | undefined {
+  const patterns = [
+    /\*\*Résumé de la fiche\*\*\s*\n+([\s\S]*?)(?=\n\n\*\*|\n\n#{1,3}|\n#{1,3}|\s*$)/i,
+    /\*\*Résumé\*\*\s*\n+([\s\S]*?)(?=\n\n\*\*|\n\n#{1,3}|\n#{1,3}|\s*$)/i,
+  ]
+  for (const re of patterns) {
+    const m = general.match(re)
+    if (m?.[1]) {
+      const t = m[1].trim().replace(/\s+/g, ' ')
+      if (t) return t
+    }
+  }
+  return undefined
+}
+
+/** Première ligne utile du markdown (hors titres # et étiquettes **…** :). */
+function excerptFirstLineFromGeneral(general: string): string | undefined {
+  const lines = general.split(/\r?\n/)
+  for (const line of lines) {
+    let s = line.trim()
+    if (!s) continue
+    s = s.replace(/^#{1,3}\s+/, '').replace(/^\*\*[^*]+\*\*\s*:\s*/, '').trim()
+    if (s) return s
+  }
+  return undefined
+}
+
 export function getGddEntitySummary(data: Record<string, unknown> | undefined): string {
   if (!data || typeof data !== 'object') return ''
   for (const key of SUMMARY_KEYS) {
     const val = data[key]
     const text = extractTextFromGddValue(val)
-    if (text) return text.slice(0, MAX_SUMMARY_LENGTH) + (text.length > MAX_SUMMARY_LENGTH ? '…' : '')
+    if (text) return sliceSummary(text)
   }
   const introObj = data['Introduction'] ?? data['introduction']
   if (introObj && typeof introObj === 'object' && !Array.isArray(introObj) && introObj !== null) {
@@ -82,12 +131,26 @@ export function getGddEntitySummary(data: Record<string, unknown> | undefined): 
       getNestedString(introObj, 'Résumé de la fiche') ??
       getNestedString(introObj, 'Résumé') ??
       getFirstMeaningfulStringFromObject(introObj as Record<string, unknown>)
-    if (fromIntro) return fromIntro.slice(0, MAX_SUMMARY_LENGTH) + (fromIntro.length > MAX_SUMMARY_LENGTH ? '…' : '')
+    if (fromIntro) return sliceSummary(fromIntro)
   }
   const sections = data['sections'] as Record<string, unknown> | undefined
   if (sections && typeof sections === 'object') {
     const intro = getNestedString(sections, 'Introduction') ?? getNestedString(sections, 'Résumé')
-    if (intro) return intro.slice(0, MAX_SUMMARY_LENGTH) + (intro.length > MAX_SUMMARY_LENGTH ? '…' : '')
+    if (intro) return sliceSummary(intro)
+  }
+  const rawValues = data['values']
+  if (rawValues && typeof rawValues === 'object' && !Array.isArray(rawValues)) {
+    const fromVals = trySummaryFromValues(rawValues as Record<string, unknown>)
+    if (fromVals) return sliceSummary(fromVals)
+  }
+  if (sections && typeof sections === 'object') {
+    const gen = sections['_general']
+    if (typeof gen === 'string' && gen.trim()) {
+      const fromMd = trySummaryFromGeneralMarkdown(gen)
+      if (fromMd) return sliceSummary(fromMd)
+      const line = excerptFirstLineFromGeneral(gen)
+      if (line) return sliceSummary(line)
+    }
   }
   return ''
 }

@@ -75,5 +75,34 @@ describe('gddSummary', () => {
       const data = { Nom: 'Alice', Résumé: 'Un héros du récit.' }
       expect(getGddEntitySummary(data as Record<string, unknown>)).toBe('Un héros du récit.')
     })
+
+    it('lit le résumé depuis values (sync Notion)', () => {
+      const data = {
+        Nom: 'Bob',
+        values: { 'Résumé de la fiche': 'Court texte depuis la table Notion.' },
+      }
+      expect(getGddEntitySummary(data as Record<string, unknown>)).toBe('Court texte depuis la table Notion.')
+    })
+
+    it('extrait le résumé depuis sections._general markdown', () => {
+      const data = {
+        Nom: 'Cara',
+        sections: {
+          _general:
+            '**Résumé de la fiche**\nUn extrait narratif assez long pour dépasser la limite et être tronqué avec des points de suspension en fin de chaîne visible dans la liste.',
+        },
+      }
+      const s = getGddEntitySummary(data as Record<string, unknown>)
+      expect(s).toContain('Un extrait narratif')
+      expect(s.endsWith('…')).toBe(true)
+    })
+
+    it('utilise la première ligne de _general si pas de bloc Résumé', () => {
+      const data = {
+        Nom: 'Dan',
+        sections: { _general: '**Détient** : épée\n\nSuite.' },
+      }
+      expect(getGddEntitySummary(data as Record<string, unknown>)).toContain('épée')
+    })
   })
 })

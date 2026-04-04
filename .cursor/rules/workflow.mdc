@@ -12,6 +12,11 @@ alwaysApply: false
   - Vérification : `npm run verify:venv` (vérifier que le venv est correctement configuré)
   - Activation manuelle (si besoin) : `.\scripts\activate-venv.ps1` ou `.\.venv\Scripts\Activate.ps1`
 
+- **Preuve UI (changements visibles ou flux utilisateur)** :
+  - Seuls pytest / Vitest / lint **ne constituent pas** une preuve suffisante quand il s’agit de ce que l’utilisateur voit ou manipule dans l’app.
+  - **Preuve attendue** : démarrer l’app (`npm run dev`), ouvrir le navigateur sur l’UI (ex. `http://localhost:3000`), et **vérifier** le comportement ou l’affichage concerné ; de préférence via le MCP navigateur Cursor (`cursor-ide-browser`) lorsqu’il est disponible.
+  - Ne pas présenter « preuve complète » sur une feature UI sans cette étape (sauf impossibilité technique explicite, à mentionner).
+
 - **Obligation agents (mode Agent — exécution réelle des tests)** :
   - Après toute modification de code, correctif ou fin de tâche d’implémentation, l’agent **exécute** les tests pertinents dans le terminal intégré (pytest ciblé, Vitest ciblé, lint si TS/TSX), et **ne conclut pas** « terminé », « vert », « OK » ou « prêt à merger » **sans** sortie de commande montrant le passage (résumé pass/fail ou extrait d’échec à corriger).
   - **Interdit** : se limiter à « vous pouvez lancer `pytest`… » à la place de l’exécution, sauf blocage technique avéré (sandbox, pas d’accès shell) — dans ce cas le signaler explicitement.

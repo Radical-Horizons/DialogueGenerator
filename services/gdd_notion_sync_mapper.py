@@ -1,7 +1,9 @@
 """Transformation Notion → enregistrement GDD minimal (Nom + sections)."""
 from __future__ import annotations
 
-from typing import Any, Dict, List, Mapping, MutableSequence, Optional, Sequence
+from typing import Any, Dict, List, Mapping, MutableSequence, Optional, Sequence, Tuple
+
+from services.gdd_sections_split import split_sections_general_text
 
 # Bases synchronisées comme **tables** : une source ``kind: database`` suffit ; pas d’appel
 # aux blocs enfants ; export **compact** ``Nom`` + ``values`` (colonnes → chaînes).
@@ -139,12 +141,33 @@ def _format_property_value(prop: Mapping[str, Any]) -> str:
     return ""
 
 
+def markdown_body_to_sync_sections(body_text: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+    """Découpe le markdown du corps de page en sections nommées par slug (titres #/##/###).
+
+    Les colonnes de base Notion ne sont **pas** incluses ici : uniquement ``get_page_content``.
+
+    Returns:
+        Tuple ``(sections, section_titles)`` avec ``sections[slug] = corps`` et
+        ``section_titles[slug] = titre affichable`` (ex. « Préambule », « Caractérisation »).
+    """
+    body = (body_text or "").strip()
+    if not body:
+        return {}, {}
+    chunks = split_sections_general_text(body)
+    sections: Dict[str, str] = {}
+    titles: Dict[str, str] = {}
+    for slug, title, chunk_body in chunks:
+        sections[slug] = chunk_body
+        titles[slug] = title
+    return sections, titles
+
+
 def properties_to_general_text(
     properties: Mapping[str, Any],
     *,
     skip_title_property: bool = True,
 ) -> str:
-    """Agrège les propriétés d’une page Notion en texte pour ``sections._general``."""
+    """Agrège les propriétés Notion en texte (outil / debug ; plus injecté dans ``sections`` en sync)."""
     lines: List[str] = []
     for key in sorted(properties.keys()):
         prop = properties.get(key)
@@ -177,30 +200,30 @@ def notion_page_to_compact_row_record(page: Mapping[str, Any]) -> Dict[str, Any]
     """Construit une ligne de base Notion au format compact (colonnes → ``values``).
 
     Le titre Notion devient ``Nom`` ; chaque autre propriété non vide devient une entrée
-    ``values[nom_colonne]`` (texte plat). Pas de parcours des blocs de page.
+    ``values[nom_colonne]`` (texte plat). Pas de parcours des blocs de page ; les colonnes
+    ne sont pas recopiées dans ``sections``.
 
     Args:
         page: Payload JSON page/ligne retourné par l’API (``get_page``).
 
     Returns:
-        Dict avec ``Nom``, ``values`` (colonnes) et ``sections._general`` (propriétés en texte).
+        Dict avec ``Nom``, ``values`` et ``sections`` vide.
     """
     title = extract_page_title(page)
     props = page.get("properties") or {}
     values = notion_properties_to_values_flat(props)
-    prop_blob = properties_to_general_text(props)
     return {
         "Nom": title or "SansTitre",
         "values": values,
-        "sections": {"_general": prop_blob},
+        "sections": {},
     }
 
 
 def notion_page_to_gdd_record(page: Mapping[str, Any], body_text: str) -> Dict[str, Any]:
     """Construit un objet compatible charge GDD (liste d'entités).
 
-    ``sections._general`` provient **uniquement** du corps (blocs), sans propriétés.
-    Pour la sync Notion des bases (hors mode compact), utiliser
+    Le corps est découpé en ``sections[slug]`` (titres markdown # / ## / ###), sans
+    monolithe ``_general``. Pour la sync base Notion avec colonnes, utiliser
     :func:`notion_page_to_gdd_record_merge_body_and_properties`.
 
     Args:
@@ -208,37 +231,49 @@ def notion_page_to_gdd_record(page: Mapping[str, Any], body_text: str) -> Dict[s
         body_text: Contenu texte/markdown agrégé des blocs.
 
     Returns:
-        Dict avec clés Nom et sections.
+        Dict avec clés Nom, sections et optionnellement section_titles.
     """
-    title = extract_page_title(page)
-    general = (body_text or "").strip()
-    return {
-        "Nom": title or "SansTitre",
-        "sections": {"_general": general},
-    }
+    title = extract_page_title(page) or "SansTitre"
+    sections, titles = markdown_body_to_sync_sections(body_text)
+    out: Dict[str, Any] = {"Nom": title, "sections": sections}
+    if titles:
+        out["section_titles"] = titles
+    return out
 
 
 def notion_page_to_gdd_record_merge_body_and_properties(
     page: Mapping[str, Any], body_text: str
 ) -> Dict[str, Any]:
-    """Enregistrement GDD pour sync base Notion : ``values`` = colonnes (texte) ; ``_general`` = corps + résumé propriétés."""
-    title = extract_page_title(page)
-    body = (body_text or "").strip()
+    """Enregistrement GDD pour sync base Notion.
+
+    - ``values`` : colonnes (hors titre), texte plat.
+    - ``sections`` : corps de page uniquement, découpé par titres markdown (clés = slugs).
+    - ``section_titles`` : libellés affichables slug → titre de section.
+    Les colonnes ne sont **pas** fusionnées dans le corps ni dans ``_general``.
+    """
+    title = extract_page_title(page) or "SansTitre"
     props = page.get("properties") or {}
     values = notion_properties_to_values_flat(props)
-    prop_blob = properties_to_general_text(props)
-    parts: List[str] = []
-    if body:
-        parts.append(body)
-    if prop_blob:
-        parts.append(prop_blob)
-    general = "\n\n".join(parts)
+    sections, titles = markdown_body_to_sync_sections(body_text)
     out: Dict[str, Any] = {
-        "Nom": title or "SansTitre",
+        "Nom": title,
         "values": values,
-        "sections": {"_general": general},
+        "sections": sections,
     }
+    if titles:
+        out["section_titles"] = titles
     return out
+
+
+def _sections_have_text_content(sections: Any) -> bool:
+    if not isinstance(sections, dict):
+        return False
+    for key, val in sections.items():
+        if isinstance(val, str) and val.strip():
+            return True
+        if isinstance(val, dict) and val:
+            return True
+    return False
 
 
 def is_record_empty_for_sync(record: Mapping[str, Any]) -> bool:
@@ -253,11 +288,7 @@ def is_record_empty_for_sync(record: Mapping[str, Any]) -> bool:
     vals = record.get("values")
     if isinstance(vals, dict) and any(str(v).strip() for v in vals.values()):
         return False
-    sections = record.get("sections")
-    gen = ""
-    if isinstance(sections, dict):
-        gen = str(sections.get("_general") or "").strip()
-    if gen:
+    if _sections_have_text_content(record.get("sections")):
         return False
     return True
 

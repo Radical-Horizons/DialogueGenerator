@@ -99,6 +99,58 @@ describe('ContextDetail', () => {
     expect(screen.getByRole('button', { name: /skills/i })).toBeInTheDocument()
   })
 
+  it('affiche les colonnes Notion (values) et le libellé Propriétés (table Notion)', async () => {
+    const user = userEvent.setup()
+    const character: CharacterResponse = {
+      name: 'PNJ Sync',
+      data: {
+        Nom: 'PNJ Sync',
+        values: { Région: 'Nord', Type: 'Marchand' },
+        sections: {
+          _general: 'Phrase d’accroche.\n\n## Section test\nContenu sous-section.',
+        },
+      },
+    }
+    render(<ContextDetail item={character} />)
+    expect(screen.getByText('PNJ Sync')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /propriétés \(table notion\)/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /propriétés \(table notion\)/i }))
+    const propPanel = screen.getByTestId('context-detail-proprietes-body')
+    expect(propPanel).toHaveTextContent('Région:')
+    expect(propPanel).toHaveTextContent('Nord')
+    expect(propPanel).toHaveTextContent('Type:')
+    expect(propPanel).toHaveTextContent('Marchand')
+    expect(screen.getByRole('button', { name: /préambule/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /section test/i })).toBeInTheDocument()
+  })
+
+  it('affiche sync Notion : values en Propriétés, sections plates + section_titles (pas de _general)', async () => {
+    const user = userEvent.setup()
+    const character: CharacterResponse = {
+      name: 'Quête',
+      data: {
+        Nom: 'Quête',
+        values: { Difficulté: 'Hard' },
+        sections: {
+          objectifs: 'Tuer le dragon',
+          re_compense: 'Or',
+        },
+        section_titles: {
+          objectifs: 'Objectifs',
+          re_compense: 'Récompense',
+        },
+      },
+    }
+    render(<ContextDetail item={character} />)
+    expect(screen.getByRole('button', { name: /propriétés \(table notion\)/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /propriétés \(table notion\)/i }))
+    expect(screen.getByTestId('context-detail-proprietes-body')).toHaveTextContent('Difficulté')
+    expect(screen.getByTestId('context-detail-proprietes-body')).toHaveTextContent('Hard')
+    expect(screen.getByRole('button', { name: /^objectifs$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^récompense$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /re_compense/i })).not.toBeInTheDocument()
+  })
+
   it('affiche "—" pour une chaîne repr rich_text vide (fiche type Barvas)', async () => {
     const user = userEvent.setup()
     const reprString = "{'id': 'Ifqh', 'type': 'rich_text', 'rich_text': []}"
@@ -115,7 +167,7 @@ describe('ContextDetail', () => {
     const propButton = screen.getByRole('button', { name: /propriétés/i })
     expect(propButton).toBeInTheDocument()
     await user.click(propButton)
-    expect(screen.getByRole('region', { name: 'Propriétés' })).toHaveTextContent('Résumé')
+    expect(screen.getByTestId('context-detail-proprietes-body')).toHaveTextContent('Résumé')
     expect(screen.getByText((_content, el) => el?.textContent === 'Résumé:')).toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()
     expect(screen.queryByText(/rich_text/)).not.toBeInTheDocument()
