@@ -189,8 +189,12 @@ export function GenerationOptionsModal({
         bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
+        paddingTop: '5vh',
+        paddingBottom: '5vh',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
         zIndex: 1000,
       }}
       onClick={onClose}
@@ -201,7 +205,7 @@ export function GenerationOptionsModal({
           borderRadius: '8px',
           width: '90%',
           maxWidth: '1200px',
-          maxHeight: '90vh',
+          maxHeight: 'min(90vh, calc(100vh - 10vh))',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
@@ -220,7 +224,7 @@ export function GenerationOptionsModal({
             flexShrink: 0,
           }}
         >
-          <h2 style={{ margin: 0, color: theme.text.primary }}>Options de Génération</h2>
+          <h2 style={{ margin: 0, color: theme.text.primary }}>Options</h2>
           <button
             onClick={onClose}
             style={{

@@ -157,9 +157,13 @@ class ContextOrganizer:
                         )
                 
                 if len(validated_fields) < len(fields_to_include):
-                    logger.warning(
-                        f"[{element_type}] {len(fields_to_include) - len(validated_fields)} "
-                        f"champ(s) invalide(s) filtré(s) sur {len(fields_to_include)} total"
+                    # Attendu : la config agrège des chemins présents sur *d'autres* fiches ;
+                    # chaque élément n'expose qu'un sous-ensemble. Éviter WARNING en boucle (spam console).
+                    logger.debug(
+                        "[%s] %s champ(s) absent(s) de cette fiche filtré(s) sur %s chemins demandés",
+                        element_type,
+                        len(fields_to_include) - len(validated_fields),
+                        len(fields_to_include),
                     )
                 
                 fields_to_include = validated_fields

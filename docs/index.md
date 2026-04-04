@@ -17,11 +17,11 @@
 
 ## Source de vérité (suivi & décisions)
 
-**Pour la planification, les épics/stories, les ADRs canoniques et le suivi d’implémentation récent :** consulter en priorité **`_bmad-output/`** :
+**Pour la planification, les épics/stories, les ADRs canoniques et le suivi d’implémentation récent :** consulter en priorité `**_bmad-output/`** :
 
-- **Planning** : [`_bmad-output/planning-artifacts/`](../_bmad-output/planning-artifacts/) — PRD, architecture, épics, readiness, recherche.
-- **Implémentation** : [`_bmad-output/implementation-artifacts/`](../_bmad-output/implementation-artifacts/) — stories livrées, rétros, notes de suivi alignées sur le travail courant.
-- **Registre ADR** : [`_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`](../_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md)
+- **Planning** : `[_bmad-output/planning-artifacts/](../_bmad-output/planning-artifacts/)` — PRD, architecture, épics, readiness, recherche.
+- **Implémentation** : `[_bmad-output/implementation-artifacts/](../_bmad-output/implementation-artifacts/)` — stories livrées, rétros, notes de suivi alignées sur le travail courant.
+- **Registre ADR** : `[_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md](../_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md)`
 
 **Rôle de `docs/`** : référence technique durable (architecture détaillée, contrats API, guides, specs, troubleshooting). Certains fichiers sont des **miroirs** ou approfondissements ; en cas d’écart avec `_bmad-output/`, privilégier les artifacts BMad pour l’historique de décision et le statut produit.
 
@@ -36,7 +36,7 @@
 
 ### Architecture Documentation
 
-Located in [`architecture/`](./architecture/)
+Located in `[architecture/](./architecture/)`
 
 - [Frontend Architecture](./architecture/architecture-frontend.md) - React application architecture
 - [Backend Architecture](./architecture/architecture-api.md) - FastAPI API architecture
@@ -55,7 +55,7 @@ Located in [`architecture/`](./architecture/)
 
 ### API Documentation
 
-Located in [`api/`](./api/)
+Located in `[api/](./api/)`
 
 - [Backend API Contracts](./api/api-contracts-api.md) - Complete REST API endpoint documentation
 - [Frontend API Client](./api/api-contracts-frontend.md) - Frontend API client modules
@@ -64,7 +64,7 @@ Located in [`api/`](./api/)
 
 ### Guides
 
-Located in [`guides/`](./guides/)
+Located in `[guides/](./guides/)`
 
 - [Development Guide](./guides/development-guide.md) - Setup, commands, and workflow
 - [Development Troubleshooting](./guides/DEVELOPMENT.md) - Development troubleshooting
@@ -75,7 +75,7 @@ Located in [`guides/`](./guides/)
 
 ### Troubleshooting
 
-Located in [`troubleshooting/`](./troubleshooting/)
+Located in `[troubleshooting/](./troubleshooting/)`
 
 - [Port 4242 Troubleshooting](./troubleshooting/TROUBLESHOOTING_PORT_4242.md) - Port troubleshooting
 - [Scrollbar Fix](./troubleshooting/SCROLLBAR_FIX.md) - Scrollbar issue resolution
@@ -86,7 +86,7 @@ Located in [`troubleshooting/`](./troubleshooting/)
 
 ### Prompts Documentation
 
-Located in [`prompts/`](./prompts/)
+Located in `[prompts/](./prompts/)`
 
 - [Prompt Structure](./prompts/PROMPT_STRUCTURE.md) - Prompt structure documentation
 - [Prompt XML Format](./prompts/PROMPT_XML_FORMAT.md) - XML prompt format
@@ -94,14 +94,14 @@ Located in [`prompts/`](./prompts/)
 
 ### Specifications
 
-Located in [`specifications/`](./specifications/)
+Located in `[specifications/](./specifications/)`
 
 - [Technical Specification](./specifications/Spécification%20technique.md) - Technical specification
 - [Modular Dialogue Generation Spec](./specifications/Specification_Generation_Modulaire_Dialogues.md) - Modular dialogue generation spec
 
 ### Analysis Documentation
 
-Located in [`analysis/`](./analysis/)
+Located in `[analysis/](./analysis/)`
 
 - [Prompt Level Analysis](./analysis/ANALYSE_PROMPTS_NIVEAUX.md) - Prompt level analysis
 - [XML Prompt Evaluation](./analysis/EVALUATION_PROMPT_XML.md) - XML prompt evaluation
@@ -109,14 +109,14 @@ Located in [`analysis/`](./analysis/)
 
 ### Mechanics Documentation
 
-Located in [`mechanics/`](./mechanics/)
+Located in `[mechanics/](./mechanics/)`
 
 - [Relations Approach Analysis](./mechanics/ANALYSE_APPROCHE_RELATIONS.md) - Relations approach analysis
 - [Stable Mechanics Integration](./mechanics/INTEGRATION_MECANIQUES_STABLE.md) - Stable mechanics integration
 
 ### Features Documentation
 
-Located in [`features/`](./features/)
+Located in `[features/](./features/)`
 
 - [Graph — livraison cibles de connexion (suivi)](./features/graph-connection-targets-delivery.md) - Synthèse livraison 2026-03 (dropdowns, merge, E2E) ; lien ADR
 - [Current UI Structure](./features/current-ui-structure.md) - Current UI structure documentation (3-column layout, existing components)
@@ -126,7 +126,7 @@ Located in [`features/`](./features/)
 
 ### Deployment Configuration
 
-Located in [`deployment/`](./deployment/)
+Located in `[deployment/](./deployment/)`
 
 - **[Production (OVH VPS) — référence](./deployment/PRODUCTION.md)** : hébergement réel du DialogueGenerator (IP, SSH, Nginx, `demo.auto-diffusion.net`). À lire avant les guides génériques.
 - [Gunicorn Configuration](./deployment/gunicorn.conf.example) - Gunicorn configuration example
@@ -135,19 +135,19 @@ Located in [`deployment/`](./deployment/)
 
 ### Resources
 
-Located in [`resources/`](./resources/)
+Located in `[resources/](./resources/)`
 
 - Sample XML and text resources for testing and reference
 
 ### Diagrams
 
-Located in [`diagrams/`](./diagrams/)
+Located in `[diagrams/](./diagrams/)`
 
 - [Workflow Method Diagram](./diagrams/workflow-method-greenfield.svg) - Workflow diagram
 
 ### Project Metadata
 
-Located in [`metadata/`](./metadata/)
+Located in `[metadata/](./metadata/)`
 
 - [Project Parts](./metadata/project-parts.json) - Multi-part project structure metadata
 - [Project Scan Report](./metadata/project-scan-report.json) - Project scan report
@@ -164,6 +164,7 @@ Located in [`metadata/`](./metadata/)
 ### For Creating PRD
 
 When creating a brownfield PRD:
+
 - Reference this index as primary input
 - Use architecture documents for technical context
 - Review API contracts for feature understanding
@@ -191,4 +192,4 @@ When creating a brownfield PRD:
 
 ---
 
-**Note** : Point d’entrée indexé pour la doc technique sous `docs/`. Pour l’IA et l’équipe, le **fil décisionnel et le suivi à jour** sont dans **`_bmad-output/`** ; ce fichier les référence explicitement ci-dessus.
+**Note** : Point d’entrée indexé pour la doc technique sous `docs/`. Pour l’IA et l’équipe, le **fil décisionnel et le suivi à jour** sont dans `**_bmad-output/`** ; ce fichier les référence explicitement ci-dessus.

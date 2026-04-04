@@ -97,7 +97,7 @@ describe('GenerationOptionsModal', () => {
       />
     )
     
-    expect(screen.queryByText(/options de génération/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 2, name: 'Options' })).not.toBeInTheDocument()
   })
 
   it('devrait s\'afficher quand isOpen est true', () => {
@@ -109,7 +109,7 @@ describe('GenerationOptionsModal', () => {
       />
     )
     
-    expect(screen.getByText(/options de génération/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Options' })).toBeInTheDocument()
   })
 
   it('devrait afficher les onglets', () => {

@@ -73,7 +73,6 @@ from services.gdd_notion_sync_retry import (
     run_with_retries,
 )
 from services.gdd_notion_sync_utils import (
-    agent_debug_log_d9fa38,
     category_file_matches_included,
     category_stem_to_list_category_key,
     normalize_notion_id,
@@ -1060,19 +1059,6 @@ class GddNotionSyncService:
                 pages = await self._notion_read_with_retries(
                     _load_pages, retry_policy=retry_policy
                 )
-                # region agent log
-                if str(kind).lower() == "database":
-                    agent_debug_log_d9fa38(
-                        "E",
-                        "gdd_notion_sync_service.run_sync",
-                        "pages fetched for database source",
-                        {
-                            "category_file": cat_file,
-                            "notion_id_prefix": (str(nid).replace("-", "")[:8]),
-                            "pages_count": len(pages),
-                        },
-                    )
-                # endregion agent log
             except _SYNC_RECOVERABLE as exc:
                 partial.append(f"{cat_file}: fetch — {_format_partial_error_detail(exc)}")
                 self._sync_progress_update(sources_completed=i)
@@ -1138,31 +1124,6 @@ class GddNotionSyncService:
                     full_page = await self._notion_read_with_retries(
                         _read_meta, retry_policy=retry_policy
                     )
-                    # region agent log
-                    if (
-                        str(kind).lower() == "database"
-                        and page_num == 1
-                        and isinstance(p, dict)
-                        and isinstance(full_page, dict)
-                    ):
-                        pq = p.get("properties")
-                        pf = full_page.get("properties")
-                        agent_debug_log_d9fa38(
-                            "C",
-                            "gdd_notion_sync_service.run_sync",
-                            "first database row property key counts",
-                            {
-                                "category_file": cat_file,
-                                "query_properties_keys": (
-                                    len(pq) if isinstance(pq, dict) else -1
-                                ),
-                                "get_page_properties_keys": (
-                                    len(pf) if isinstance(pf, dict) else -1
-                                ),
-                                "compact_table": compact_table,
-                            },
-                        )
-                    # endregion agent log
                     if compact_table:
                         rec = notion_page_to_compact_row_record(full_page)
                     else:
