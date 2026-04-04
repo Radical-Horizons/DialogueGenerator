@@ -1,7 +1,25 @@
 {
   "Nom": "Pilleur des cieux",
+  "values": {
+    "Biologie": "Faible",
+    "Culture": "Faible",
+    "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b36e4d2-1b45-807e-8342-d1b4cd0cdade, 1b36e4d2-1b45-800f-9bbf-c54642122b32, 1886e4d2-1b45-8150-a894-cfe31d31abd4",
+    "Règne (ou classe)": "0b70dca1-3cde-4e58-9350-624ccb735faa",
+    "Résumé IA": "Rapace se nourrissant d'insectes bioluminescents, les Pilleurs des cieux possèdent de grandes plumes blanches et sont considérés comme des figures mystiques. Leur rôle culturel inclut l'utilisation de leurs plumes pour l'écriture et les cérémonies. Ils se nourrissent en montant au-delà du ciel de brume pour récolter des peaux mortes et sécrétions de deimos, qu'ils stockent dans une poche ventrale.",
+    "Surnaturel": "Nulle",
+    "Technologie": "Nulle",
+    "Type": "Faune",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1b36e4d2-1b45-8091-bba3-ffdeeaa50b6c"
 }

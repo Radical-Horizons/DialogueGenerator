@@ -1,7 +1,11 @@
 {
   "Nom": "Structure",
+  "values": {},
   "sections": {
-    "_general": "**Comment faire si mon jeu n’est pas linéaire ?**\nLa nomenclature est ici en scène mais il est tout à fait possible d’appliquer la méthode pour des quêtes pour vos jeux non linéaires, voir de mixer les deux. \nPour un jeu non linéaire, il peut être intéressant de faire un schéma visuel des embranchements sur un outil de tableau blanc comme Miro ou Figjam, ou dans un outil qui gère les embranchements comme Twine ou Inkle. \n\n**Proposition de nomenclature**\nVisiter la page Untitled."
+    "preamble": "**Comment faire si mon jeu n’est pas linéaire ?**\nLa nomenclature est ici en scène mais il est tout à fait possible d’appliquer la méthode pour des quêtes pour vos jeux non linéaires, voir de mixer les deux. \nPour un jeu non linéaire, il peut être intéressant de faire un schéma visuel des embranchements sur un outil de tableau blanc comme Miro ou Figjam, ou dans un outil qui gère les embranchements comme Twine ou Inkle. \n\n**Proposition de nomenclature**\nVisiter la page Untitled."
+  },
+  "section_titles": {
+    "preamble": "Préambule"
   },
   "notion_page_id": "1886e4d2-1b45-814c-8319-e51f55798e98"
 }

@@ -1,7 +1,25 @@
 {
   "Nom": "Archiviste du Cairn",
+  "values": {
+    "Biologie": "Avancée",
+    "Culture": "Nulle",
+    "Présence dans Escelion": "Rarissime",
+    "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
+    "Résumé IA": "L'espèce est rare dans Escelion, avec une biologie avancée et un état de brouillon IA. Des sections sont dédiées à son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi qu'à son écosystème, incluant son habitat naturel, mode d'alimentation, reproduction et interaction avec l'écosystème.",
+    "Surnaturel": "Moyenne",
+    "Technologie": "Nulle",
+    "Type": "Faune",
+    "État": "Brouillon IA"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "19efb9f9-7815-407e-8927-2a30e62d8e58"
 }

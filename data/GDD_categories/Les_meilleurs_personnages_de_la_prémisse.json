@@ -1,8 +1,18 @@
 [
   {
     "Nom": "Les meilleurs personnages de la prémisse",
+    "values": {},
     "sections": {
-      "_general": "### 1. L’Ethérée — L'entité collective en quête de possession\n\n- Pourquoi elle est fascinante : L’Ethérée est une ruche spirituelle qui lutte entre son instinct de possession et la nécessité de respecter l’intégrité des êtres qu’elle touche. Elle représente la tension entre contrôle total et coexistence.\n\n- Ligne narrative : Elle incarne la lutte entre instinct de domination et volonté de coexistence.\n\n### 2. Uresaïr — La thaumaturge déchue, autrefois omnipotente\n\n- Pourquoi elle est fascinante : Privée de ses pouvoirs divins, Uresaïr tente de reconstruire sa vie après la chute de son monde. Son passé d’omnipotence la hante, mais elle doit trouver un nouvel équilibre dans sa déchéance.\n\n- Ligne narrative : Elle explore la chute et la rédemption, en cherchant un nouveau sens à son existence.\n\n### 3. Eonundé — La rebelle en quête de liberté\n\n- Pourquoi elle est fascinante : En tant que copie d’une amante morte, Eonundé lutte pour se libérer de son rôle d’objet et se forger une identité propre après avoir assassiné son créateur.\n\n- Ligne narrative : Elle incarne la quête de l’autodétermination et de la révolte contre son passé.\n\n### 4. Vethraak — Le courtisan hors caste, confronté à ses crimes\n\n- Pourquoi il est fascinant : Vethraak a refusé de rejoindre le cycle de régénération de son peuple pour préserver ses souvenirs, mais il est hanté par les crimes qu’il a commis pour maintenir l’ordre.\n\n- Ligne narrative : Il incarne la lutte entre mémoire et survie, cherchant à affronter ou enfouir son passé."
+      "1__l_ethe_re_e___l_entite__collective_en_que_te_de_possession": "- Pourquoi elle est fascinante : L’Ethérée est une ruche spirituelle qui lutte entre son instinct de possession et la nécessité de respecter l’intégrité des êtres qu’elle touche. Elle représente la tension entre contrôle total et coexistence.\n\n- Ligne narrative : Elle incarne la lutte entre instinct de domination et volonté de coexistence.",
+      "2__uresai_r___la_thaumaturge_de_chue__autrefois_omnipotente": "- Pourquoi elle est fascinante : Privée de ses pouvoirs divins, Uresaïr tente de reconstruire sa vie après la chute de son monde. Son passé d’omnipotence la hante, mais elle doit trouver un nouvel équilibre dans sa déchéance.\n\n- Ligne narrative : Elle explore la chute et la rédemption, en cherchant un nouveau sens à son existence.",
+      "3__eonunde____la_rebelle_en_que_te_de_liberte": "- Pourquoi elle est fascinante : En tant que copie d’une amante morte, Eonundé lutte pour se libérer de son rôle d’objet et se forger une identité propre après avoir assassiné son créateur.\n\n- Ligne narrative : Elle incarne la quête de l’autodétermination et de la révolte contre son passé.",
+      "4__vethraak___le_courtisan_hors_caste__confronte__a__ses_crimes": "- Pourquoi il est fascinant : Vethraak a refusé de rejoindre le cycle de régénération de son peuple pour préserver ses souvenirs, mais il est hanté par les crimes qu’il a commis pour maintenir l’ordre.\n\n- Ligne narrative : Il incarne la lutte entre mémoire et survie, cherchant à affronter ou enfouir son passé."
+    },
+    "section_titles": {
+      "1__l_ethe_re_e___l_entite__collective_en_que_te_de_possession": "1. L’Ethérée — L'entité collective en quête de possession",
+      "2__uresai_r___la_thaumaturge_de_chue__autrefois_omnipotente": "2. Uresaïr — La thaumaturge déchue, autrefois omnipotente",
+      "3__eonunde____la_rebelle_en_que_te_de_liberte": "3. Eonundé — La rebelle en quête de liberté",
+      "4__vethraak___le_courtisan_hors_caste__confronte__a__ses_crimes": "4. Vethraak — Le courtisan hors caste, confronté à ses crimes"
     },
     "notion_page_id": "11f6e4d2-1b45-809b-84e6-e06c0e19307d"
   }

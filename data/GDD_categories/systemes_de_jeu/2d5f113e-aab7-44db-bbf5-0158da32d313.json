@@ -1,7 +1,17 @@
 {
   "Nom": "Temporalité",
+  "values": {
+    "Catégorie": "Core loop",
+    "Résumé IA": "Système non encore conçu. Doit définir comment le temps s'écoule mécaniquement dans le jeu, quelle unité temporelle est perceptible par le joueur, et comment les autres systèmes (Quêtes, Campement, Transport, Économie) s'y rattachent. En attente de décision de design.",
+    "Statut": "À définir",
+    "Systèmes liés": "4d860678-49ac-4702-aa66-8f29abf53db9, 2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, de0651bb-e1ce-4677-9b31-b04cf17193ca, a5320c3c-58e9-42e2-bbee-d9c1f2f6db4d",
+    "Type": "Système"
+  },
   "sections": {
-    "_general": "### 6b. Flags du système\n\nSystème non encore conçu — aucune règle de persistance définissable. Pas de flags. À reconsidérer quand la conception sera formalisée.\n\n**Système en attente de conception. Plusieurs systèmes (Quêtes, Campement, Transport, Économie) dépendent d'une notion de passage du temps qui n'a pas encore été formalisée. Ce système devra définir :**\n• - Comment le temps s'écoule (temps réel, événementiel, narratif ?)\n• - Quelle est l'unité de temps perceptible par le joueur\n• - Comment les mécaniques temporelles des autres systèmes s'y rattachent\n\nEn attente de décision de design. Les systèmes dépendants fonctionnent temporairement sans temporalité formelle."
+    "6b__flags_du_syste_me": "Système non encore conçu — aucune règle de persistance définissable. Pas de flags. À reconsidérer quand la conception sera formalisée.\n\n**Système en attente de conception. Plusieurs systèmes (Quêtes, Campement, Transport, Économie) dépendent d'une notion de passage du temps qui n'a pas encore été formalisée. Ce système devra définir :**\n• - Comment le temps s'écoule (temps réel, événementiel, narratif ?)\n• - Quelle est l'unité de temps perceptible par le joueur\n• - Comment les mécaniques temporelles des autres systèmes s'y rattachent\n\nEn attente de décision de design. Les systèmes dépendants fonctionnent temporairement sans temporalité formelle."
+  },
+  "section_titles": {
+    "6b__flags_du_syste_me": "6b. Flags du système"
   },
   "notion_page_id": "2d5f113e-aab7-44db-bbf5-0158da32d313"
 }

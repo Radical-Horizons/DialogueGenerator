@@ -1,23 +1,94 @@
 [
   {
     "Nom": "Uresaïr — FP",
+    "values": {
+      "Agilité": "4",
+      "Build": "Acte 1",
+      "Créativité": "5",
+      "Notes d’équilibrage": "Import initial depuis la fiche. Base FP pour équilibrage.",
+      "Perception": "9",
+      "Personnage": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Puissance": "2",
+      "Raison": "10",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "6",
+      "Technique": "3",
+      "Total Caracs": "45",
+      "Volonté": "6",
+      "id": "STAT1",
+      "🧩 Compétences de perso": "0f2e2784-9e57-4410-8b7e-6aca8c720413, 1fa8a928-6148-4c78-828b-44bcff815974, 48fd94c9-ef66-4353-8473-e861bf38568f, 63abf415-024c-4543-85c8-fba5373fe151, 6400d11a-4760-40dc-88e4-f0b2aab9b1e5, 76e8e934-6ff6-4d7b-b779-0d0a278a6f5f, 94e697a2-477f-4f30-9bb8-0d425a11aba1, 9d1de2cd-369b-44d8-82a0-ad7985ddfd9c, b28b2086-a85f-42e7-9a96-c1ea4a601c40, c579977a-197a-47f5-8691-6ce2d9e8fe4a, ea535cbb-c18d-481e-bc4e-e438e3ce4298, ed9464bc-16c8-4f60-9f93-01555b2391a8, f64f04e5-458d-45d9-955d-d4821d21da4e"
+    },
     "sections": {
-      "_general": "> Filtre appliqué: Feuille contient Cette page. Tri par Compétence ascendant."
+      "preamble": "> Filtre appliqué: Feuille contient Cette page. Tri par Compétence ascendant."
+    },
+    "section_titles": {
+      "preamble": "Préambule"
     },
     "notion_page_id": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b"
   },
   {
     "Nom": "Valkazer Reitar — FP",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Agilité": "12",
+      "Build": "VS",
+      "Créativité": "11",
+      "Notes d’équilibrage": "Boss antagoniste principal niveau Divin. Pour atteindre Divin (28+) dans ses points forts : Raison 18 + Stratégie 10 = 28. Pour Extrême (11-14) dans ses points faibles : Sociabilité 5 + compétences/modificateurs. Stats amplifiées pour refléter : 27 ans d'expérience intensive, maîtrise du Cercle d'Octon (8 disciplines), absorption du Glossaire, prothèses vivantes (Bras du Pacte/Foi), immortalité défectueuse avec décennies d'adaptation, synthèse théorique avec Velkan Tehr. Ratio Cloud/Sephiroth : doit dominer une équipe complète.",
+      "Perception": "16",
+      "Personnage": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
+      "Puissance": "16",
+      "Raison": "15",
+      "Rôle / Archétype": "DPS",
+      "Sociabilité": "8",
+      "Technique": "12",
+      "Total Caracs": "108",
+      "Volonté": "18",
+      "id": "STAT2",
+      "🧩 Compétences de perso": "0f306ccb-d545-4ce2-87aa-0a821c67befb, 36ef59e0-d225-4cd6-9812-2a24880a4706, 4433ddb4-1ea8-41e9-8c80-f00b539b9767, 5e537b1a-25e2-4211-af29-7614b693f1b8, 6229ab80-0bd6-425f-838d-db27972c454d, 77dc9cdb-30a4-4956-a0ca-29092c8640c1, 9dcb154f-f129-48b3-9a09-dc1a3f9a883d, b50575d3-724d-4222-9fa5-822e1063c433, ef221cf2-83a8-493f-83c5-6f2c2f7d86e1, fc53e068-32e9-452d-91c8-7decc35e5b4f, 0b6d5046-c73e-4118-859b-7139324048b3, 154a75ab-03de-4cd5-8d75-86ce7cdb7577, 2f78000a-5fbf-4804-a877-8077f58e5054, 619b55f4-e1c7-417e-97df-47f83dc72301, a749d640-d367-459f-8199-4db59d7e3e4a, b336b4ea-e7ee-43e8-b9d7-73ceffb812eb, bee6b0cc-43ac-42cf-b7c6-94565f3fd7bb, c2e79c4b-3825-4c08-8988-b28109b38869, e52e154a-8643-467b-8799-85ac49f84b51, fa348998-7c38-4d81-8008-cb4d74b96e7d, 41ed77d6-a1f1-42ae-aa0d-f1a5facf0b84, 7026e24a-8618-49e1-bf82-dd46373e9475, 847eed9f-75ab-43bf-881e-51b24bb679f6, aff0f479-7c69-453e-877e-e6d4228d63e2, bcf41642-5754-4c57-8672-737df11386c7"
     },
+    "sections": {},
     "notion_page_id": "c197a14e-0c3c-41b1-85de-77aabc62d114"
   },
   {
     "Nom": "Voknir Esh'Maradel — FP",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Notes d’équilibrage": "Ancien cartographe prodige du Culte, exilé depuis 17 Nuées. Expertise spatiale exceptionnelle (Perception 9, Raison 8) compensée par dégradation physique et isolement social. Innovateur technique (encres auto-actualisantes, symbiose avec les Plis). Budget augmenté pour refléter son statut d'ancien Scripteur Topographique d'élite et sa survie prolongée dans un environnement hostile.",
+      "Perception": "8",
+      "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Puissance": "1",
+      "Raison": "6",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "6",
+      "Total Caracs": "37",
+      "Volonté": "4",
+      "id": "STAT3",
+      "🧩 Compétences de perso": "687241c0-5af7-4527-af26-332f549c76d3, 7a99ee91-6341-4f20-b6ca-a2b94397ac3f, d46b7868-2db5-4b50-814a-1811362b2e57, e6b0a10d-2119-47d7-9920-62ea0953413b, 23bda509-d771-4ff4-9001-e7503cb43d4a, 07e1fc6a-074c-4427-8147-23c23141c117, b69a2075-3a09-4764-8465-24b69bbff5de, c6c1ca5a-93f6-424b-a6e7-4bec1aaf9823, ef08823c-3c58-4c95-b856-86e8a08409c8, 8eec7650-8fa1-40e4-a181-15fae23954f2, 38852cb7-0c3b-4665-9526-d5bf06bbcfb7, db37881e-f040-424d-b68b-f0cd4b0a37ad, 229e87d9-64d8-48d5-9d34-4e44a0006f26"
     },
+    "sections": {},
     "notion_page_id": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91"
+  },
+  {
+    "Nom": "Avili de l'Éternel Retour — Acte 1",
+    "values": {
+      "Agilité": "4",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Notes d’équilibrage": "Lexicorphe analytique : Raison et Technique élevées (manipulation des lois physiques, mémoire photographique). Créativité haute (dérivations). Perception haute (yeux multiples, détection d'anomalies). Sociabilité basse (présence calculée, extraversion basse). Puissance très basse (pas un combattant). Agilité modérée (vohar mais polymorphisme inhibé par discipline). Volonté moyenne (discipline formelle mais anxiété de fond).",
+      "Perception": "6",
+      "Personnage": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Puissance": "2",
+      "Raison": "8",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "7",
+      "Total Caracs": "42",
+      "Volonté": "5",
+      "id": "STAT4"
+    },
+    "sections": {},
+    "notion_page_id": "dfb9d00f-282a-41d8-8603-823643aac619"
   }
 ]

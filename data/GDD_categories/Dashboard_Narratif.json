@@ -1,9 +1,8 @@
 [
   {
     "Nom": "Dashboard Narratif",
-    "sections": {
-      "_general": ""
-    },
+    "values": {},
+    "sections": {},
     "notion_page_id": "99ee87ab-c7f2-478d-b013-e86135a9b9c7"
   }
 ]

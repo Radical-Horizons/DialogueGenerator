@@ -1,58 +1,183 @@
 [
   {
     "Nom": "inventory_stabilitaires_osseux_leviathan",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "Collection d'os infusés prélevés sur le Léviathan pétrifié, imprégnés d'énergie anentropique résiduelle. Akthar-Neth les stocke dans des boîtes verrouillées dans ses appartements privés. Ces artefacts sont le matériau principal du Dernier Rituel — leur accumulation témoigne de la préparation secrète depuis des années.",
+      "ID": "INV8",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
     },
+    "sections": {},
     "notion_page_id": "2405fc68-9940-4a7f-be48-310af6f0bb2f"
   },
   {
     "Nom": "inventory_Gedroth_Tambour",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "Symbiose avec son violon-vagabond",
+      "ID": "INV2",
+      "Personnage": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
     },
+    "sections": {},
     "notion_page_id": "3366e4d2-1b45-807b-8f1b-c3d8e9202a8a"
   },
   {
     "Nom": "inventory_masque_pyramidal_rituel",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "Porté en permanence par Akthar-Neth depuis plus de deux siècles, ce masque pyramidal en os fossilisé est une capitulation psychologique transformée en liturgie. Le retirer constitue un acte rituel d'une portée symbolique extrême — nul ne l'a vu se découvrir depuis des décennies. Inaccessible au joueur sauf dans la résolution BESOIN_RÉSOLU.",
+      "ID": "INV6",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
     },
+    "sections": {},
     "notion_page_id": "3be5d578-ffe9-42f6-bfa1-9d0ae5b652a8"
   },
   {
     "Nom": "inventory_collection_flacons_influence",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "73 flacons de résidus neuro-humoraux stockés dans l'étude secrète, classés par date et profil réactionnel. Chacun porte un nom. Nœud moral de la quête \"Les Flacons Murmureurs\" — leur sort détermine l'issue de la confrontation avec Khair-gul.",
+      "ID": "INV4",
+      "Personnage": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Quantité": "73",
+      "Type d'accès": "Stocké",
+      "État": "Terminé"
     },
+    "sections": {},
     "notion_page_id": "727592b1-94a0-48c5-9690-1e27f5632a4e"
   },
   {
     "Nom": "inventory_journal_secret_abraldique",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "Journal personnel d'Akthar-Neth rédigé en Abraldique, une écriture mystique qu'il est seul à maîtriser. Il y consigne ses doutes théologiques, la théorie de la Convergence Rétrocausale, et ses interrogations sur la légitimité de sa doctrine. Caché dans une chambre secrète derrière les Gedroths. Objet central de la quête Les Manuscrits Interdits.",
+      "ID": "INV7",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
     },
+    "sections": {},
     "notion_page_id": "7c6e4383-5a4e-4be8-a78b-ecc299d61e1d"
   },
   {
     "Nom": "inventory_fioles_de_couleur",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "Fioles colorées portées à la ceinture, classées selon un code chromatique connu de lui seul. Mélangent remèdes officiels et substances non répertoriées. Le joueur peut en obtenir une via un soin, un vol ou une récompense de quête.",
+      "ID": "INV5",
+      "Personnage": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
     },
+    "sections": {},
     "notion_page_id": "87f88bc7-43ad-4718-bc4f-c02cb69d5fb4"
   },
   {
     "Nom": "inventory_cadran_des_sept_fractures",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "Artefact unique lié à l'identité même d'Uresaïr. Le Cadran est apparu entre ses mains après la Fracture originelle — elle ne l'a pas trouvé, il l'a choisie. Il sert à la fois d'ancre temporelle (empêche la dissolution complète de sa conscience dans les boucles) et d'outil de navigation entre les strates de mémoire. Uresaïr le porte en permanence, dissimulé sous sa cape ; le perdre équivaudrait à perdre le dernier fil qui la relie à une chronologie linéaire. Le joueur découvre progressivement que le Cadran n'est pas un instrument neutre : chaque utilisation altère irréversiblement l'un des sept fragments temporels qu'il contient.",
+      "ID": "INV1",
+      "Objet": "1ed6e4d2-1b45-800b-a6ab-c51160ac3895",
+      "Personnage": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Terminé"
     },
+    "sections": {},
     "notion_page_id": "cf7e25fc-eca5-4152-b95b-d9af65528666"
   },
   {
     "Nom": "inventory_qaidan_seru",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Contexte narratif": "Bracelet-armure ancien sur le bras gauche, gravé de symboles de renaissance et de formules alchimiques. Seul objet hérité de son prédécesseur qu'il a \" aidé\" à momifier. Inaccessible sauf confrontation directe ou mort de Khair-gul.",
+      "ID": "INV3",
+      "Personnage": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
     },
+    "sections": {},
     "notion_page_id": "decc20b5-6e3c-4af4-81f7-96f4dec3aac5"
+  },
+  {
+    "Nom": "inventory_lexique_familial",
+    "values": {
+      "Contexte narratif": "Lexique d'apprentissage familial caché dans la poche dérivée de la tunique. Tombeau et testament de la communauté vohar dispersée. Contient des formulations ancestrales et des textes potentiellement liés à la destruction d'Uval. Consultable uniquement lors du dialogue feu de camp 'Bibliothèque des dérivations interdites' (perso_avili_confiance ≥ 4).",
+      "ID": "INV10",
+      "Personnage": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "018f52a1-2b8a-4c86-8f3e-d8434bba16ce"
+  },
+  {
+    "Nom": "inventory_armure_carcasse_exuvies_leviathaniennes",
+    "values": {
+      "Contexte narratif": "Armure-carcasse taillée dans des exuvies léviathaniennes, portée comme signe d'appartenance et protection corporelle.",
+      "ID": "INV12",
+      "Personnage": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "4bbd0b45-3275-4a22-ab67-db84600d5a5d"
+  },
+  {
+    "Nom": "inventory_lexique_vivant",
+    "values": {
+      "Contexte narratif": "Tome de cuir bleu-nuit attaché par une chaîne adaptative, infusé de matériaux rares des souterrains de la Citadelle. Possède une conscience rudimentaire et peut refuser certaines dérivations en fermant ses pages. Mécanique : jamais utilisable directement par l'Éthérée ; récupérable uniquement si Avili est mort ou a quitté le groupe.",
+      "ID": "INV9",
+      "Personnage": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "83ac3b35-9211-43dc-bb5b-26d1d87090cb"
+  },
+  {
+    "Nom": "inventory_tunique_a_formules",
+    "values": {
+      "Contexte narratif": "Tunique gris-bleu asymétrique avec 291 symboles brodés formant un système de notation personnel (jamais enseigné). Comporte une poche spatiale dérivée contenant le Lexique familial. Les équations s'estompent légèrement quand Avili ment — indicateur visuel détectable avec Perception visuelle (DD à calibrer).",
+      "ID": "INV11",
+      "Personnage": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "94d915b2-50e7-413f-ad39-aa28741d825e"
+  },
+  {
+    "Nom": "inventory_prosopon_masque_membrane_leviathien",
+    "values": {
+      "Contexte narratif": "Masque-membrane poreux taillé par Ori-Bikar dans des exuvies léviathiennes et du cartilage sensible. Filtre la lumière visible et laisse passer les rayonnements thermiques, permettant une vision infrarouge rudimentaire des structures biologiques. Porté en permanence, il est l'un des rares signes d'une auto-maîtrise d'Ori-Bikar sur sa propre physiologie.",
+      "ID": "INV14",
+      "Personnage": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "9ac83ad4-c79b-42c6-a2d2-31e2cc5162ce"
+  },
+  {
+    "Nom": "inventory_eclats_heures_brisees",
+    "values": {
+      "Contexte narratif": "Collection d'éclats d'heures brisées portée par Ori-Bikar, cueillie dans les anomalies temporelles qu'il provoque.",
+      "ID": "INV13",
+      "Personnage": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "b10e4a0e-066b-4565-9cbe-f37ff16a7fe9"
   }
 ]

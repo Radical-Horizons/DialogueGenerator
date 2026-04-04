@@ -1,7 +1,37 @@
 {
   "Nom": "Murmure-Éteint",
+  "values": {
+    "Actes de présence": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+    "Alias": "Le Sage de Cendre, L'Ascète des Puits, Le Visage de Pierre, Le Mourant Volontaire",
+    "Archétype littéraire": "Magicienne / Sorcier",
+    "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+    "Date de création": "2025-03-15T13:08:00.000Z",
+    "Date de naissance": "3353",
+    "Dernière modification": "2026-04-03T17:28:00.000Z",
+    "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+    "Genre": "Masculin",
+    "Lieux de vie": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+    "Niveau d’IA": "humain",
+    "Occupation": "Sage",
+    "Qualité": "5",
+    "Relations principales": "2286e4d2-1b45-80cd-bf22-d2fadf218fb2",
+    "Résumé": "Un vieux sage suit un rituel d’auto-momification, se nourrissant uniquement de cendres de graines et de racines. Son apparence est celle d'une statue, avec un visage craquelé et une robe couverte de cendres. Des détails sur son histoire, ses relations et son rôle dans des quêtes annexes sont également mentionnés.",
+    "Type": "PNJ tertiaire",
+    "Âge": "37",
+    "Épithète": "Sage",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nVieux sage en train de suivre le rituel d’auto-momification. Il ne se nourrit que de cendres de graines et de racines depuis des mois pour assécher son corps.\n\n# Caractéristiques\n\n**Apparence**\nProsôpon de cendre vitrifiée, gris profond, craquelé comme une poterie trop cuite, avec une bande horizontale scellée sur la bouche. Deux fentes d’yeux très étroites donnent un regard de statue; sous le masque, la peau a pris une teinte poussiéreuse, comme si le visage se desséchait déjà. Sa robe et ses doigts portent la même poudre de cendres de graines qui nourrit son rituel.\n\n# Background\n\n**Histoire**\n\n**Relations**\n\n# Arcs Narratifs\n\n**Rencontre initiale**\n\n**Rôle dans des quêtes annexes**\n\n**Exemples de dialogues**"
+    "preamble": "**Résumé de la fiche**\nVieux sage en train de suivre le rituel d’auto-momification. Il ne se nourrit que de cendres de graines et de racines depuis des mois pour assécher son corps.",
+    "caracte_ristiques": "**Apparence**\nProsôpon de cendre vitrifiée, gris profond, craquelé comme une poterie trop cuite, avec une bande horizontale scellée sur la bouche. Deux fentes d’yeux très étroites donnent un regard de statue; sous le masque, la peau a pris une teinte poussiéreuse, comme si le visage se desséchait déjà. Sa robe et ses doigts portent la même poudre de cendres de graines qui nourrit son rituel.",
+    "background": "**Histoire**\n\n**Relations**",
+    "arcs_narratifs": "**Rencontre initiale**\n\n**Rôle dans des quêtes annexes**\n\n**Exemples de dialogues**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "caracte_ristiques": "Caractéristiques",
+    "background": "Background",
+    "arcs_narratifs": "Arcs Narratifs"
   },
   "notion_page_id": "1b76e4d2-1b45-801e-bccb-d44c219b951c"
 }

@@ -18,6 +18,7 @@ const SLOW_INTEGRATION_TESTS = [
 ] as const
 
 const runFullSuite = process.env.VITEST_FULL === '1'
+const isCi = process.env.CI === 'true'
 
 export default defineConfig({
   // @ts-expect-error - Rollup version mismatch between vitest and vite, but works at runtime
@@ -31,10 +32,15 @@ export default defineConfig({
     testTimeout: 30_000,
     hookTimeout: 15_000,
     /**
-     * 4 workers max — évite le thundering herd jsdom sur machines multi-cœurs.
-     * Chaque fork crée une VM + env jsdom ; au-delà de ~4-6 le startup domine le test.
+     * CI : pool forks + moins de workers (évite blocages jsdom / workers sur ubuntu-latest).
+     * Local : threads + jusqu'à 4 workers.
      */
-    maxWorkers: 4,
+    pool: isCi ? 'forks' : 'threads',
+    /**
+     * 4 workers max en local — évite le thundering herd jsdom sur machines multi-cœurs.
+     * CI : 2 (aligné sur la commande workflow ; vitest.config prime si non passé en CLI).
+     */
+    maxWorkers: isCi ? 2 : 4,
     minWorkers: 1,
     /**
      * Force l'arrêt des workers après 3s de teardown pour éviter les processus zombies

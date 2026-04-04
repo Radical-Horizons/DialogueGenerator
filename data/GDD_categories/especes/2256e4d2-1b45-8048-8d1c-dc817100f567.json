@@ -1,7 +1,28 @@
 {
   "Nom": "Xyléophore",
+  "values": {
+    "Biologie": "Avancée",
+    "Culture": "Faible",
+    "Espérance de vie": "25",
+    "Evénements liés": "2c3050e7-bd48-4b0b-a249-2f1630e46210",
+    "Lieux de vie": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 2256e4d2-1b45-800f-bad7-e3e59e47a8e3, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+    "Présence dans Escelion": "Peu courant",
+    "Règne (ou classe)": "e608ef9b-06cd-4792-bdd4-6ee3fcab84d5",
+    "Résumé IA": "Les Xyléophores sont des transformateurs amphibies capables d'assimiler des matériaux ingérés pour créer des kérallures, des excroissances dermiques. Ils vivent en groupes appelés chorales et utilisent un langage basé sur des cliquetis. Leur histoire débute comme un rejeton expérimental, et ils sont devenus des éclaireurs pour les caravanes Imuins. Leur reproduction est triphasée, et ils jouent un rôle écologique en tant que bioturbateurs et pollinisateurs minéraux.",
+    "Surnaturel": "Faible",
+    "Technologie": "Nulle",
+    "Type": "Faune",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\nLes kérallures des Xyléophores (plaques bio-minérales aux propriétés variant selon les matières ingérées) sont prisées comme matériaux artisanaux et composants techniques. Les caravanes Imuins emploient des chorales de Xyléophores comme éclaireurs et messagers, exploitant leur cliquetis modulaire pour communiquer à distance. Le commerce de kérallures rares (conductrices, magnétisables, spongieuses) alimente un marché spécialisé. La « diète claire » (jeûne rituel effaçant les formes précédentes) a inspiré des pratiques ascétiques chez certains peuples. Les trois lignées tempéramentales (Astre, Pore, Heurt) issues de chaque éclosion sont parfois interprétées comme symboles de la diversité nécessaire au sein d'une communauté.\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\nLes kérallures des Xyléophores (plaques bio-minérales aux propriétés variant selon les matières ingérées) sont prisées comme matériaux artisanaux et composants techniques. Les caravanes Imuins emploient des chorales de Xyléophores comme éclaireurs et messagers, exploitant leur cliquetis modulaire pour communiquer à distance. Le commerce de kérallures rares (conductrices, magnétisables, spongieuses) alimente un marché spécialisé. La « diète claire » (jeûne rituel effaçant les formes précédentes) a inspiré des pratiques ascétiques chez certains peuples. Les trois lignées tempéramentales (Astre, Pore, Heurt) issues de chaque éclosion sont parfois interprétées comme symboles de la diversité nécessaire au sein d'une communauté.\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "2256e4d2-1b45-8048-8d1c-dc817100f567"
 }

@@ -1,576 +1,1495 @@
 [
   {
     "Nom": "Flag_acte_3_debut",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "69d4bd00-1234-4ec3-b0ae-e405d3b26ccd",
+      "Description narrative": "Début de l'Acte 3.",
+      "ID": "FLAG5",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "033a3eb6-2bec-4444-ac20-b821a4ca0e39"
   },
   {
     "Nom": "Flag_faction_rep_culte_prestige_max",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Communauté liée": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Description narrative": "Niveau de Prestige maximal atteint auprès du Culte.",
+      "ID": "FLAG23",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Type de valeur": "enum"
     },
+    "sections": {},
     "notion_page_id": "096e890b-be7d-47b8-9e05-49aaba028044"
   },
   {
     "Nom": "Flag_progression_role_leviathan",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Communauté liée": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Description narrative": "Rôle actuel d'Uresaïr au Léviathan.",
+      "ID": "FLAG43",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "2bf6e4d2-1b45-80dd-a7f6-d625952fee4a"
     },
+    "sections": {},
     "notion_page_id": "1219e760-f37b-498e-914b-7b7c7ec4d711"
   },
   {
     "Nom": "Flag_lieu_tunnel_vertebral_portail_profond",
+    "values": {
+      "Description narrative": "État du Portail Médullaire Profond vers les Plis d'ossements.",
+      "ID": "FLAG91",
+      "Lieu lié": "1b36e4d2-1b45-80ec-93bd-da8514c1c784",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum"
+    },
     "sections": {
-      "_general": "## Valeurs\n\n- FERME — Le portail est scellé ; aucun accès aux Plis d'ossements.\n\n- OUVERT — Le portail a été franchi (acte de quête ou autorisation cultiste).\n\n- CONDAMNE — Le portail est définitivement bloqué suite à un événement narratif majeur."
+      "valeurs": "- FERME — Le portail est scellé ; aucun accès aux Plis d'ossements.\n\n- OUVERT — Le portail a été franchi (acte de quête ou autorisation cultiste).\n\n- CONDAMNE — Le portail est définitivement bloqué suite à un événement narratif majeur."
+    },
+    "section_titles": {
+      "valeurs": "Valeurs"
     },
     "notion_page_id": "19e94665-044f-4e2d-9140-f06b2db2d19d"
   },
   {
     "Nom": "Flag_khairgul_role_visibility",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Comment les protagonistes perçoivent Khair-gul.",
+      "ID": "FLAG49",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "89fb977f-d7e1-4b19-aa7c-9d7c9283c1bd",
+      "Valeurs": "89fb977f-d7e1-4b19-aa7c-9d7c9283c1bd, 33aafaf6-41b1-452c-a7dd-ae4a6e106526, 0d1ae5e1-a405-42bf-b5ac-9662ae43d300"
     },
+    "sections": {},
     "notion_page_id": "1ad2a39f-bdff-452b-95a2-5dcdcb4e5657"
   },
   {
     "Nom": "Flag_perso_genka_arc_outcome",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Résolution de l'arc personnel de Genka au campement.",
+      "ID": "FLAG55",
+      "Personnage lié": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2ff6e4d2-1b45-8048-bf39-c3cf437d0e04",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "enum",
+      "Valeurs": "17df8158-3a13-4a1c-9230-fd41476cdf36, aab856ca-f236-469e-a2d2-55fe4a0c8c23, 9d30f41a-ec9b-4820-a408-a9f2e2ff9b29"
     },
+    "sections": {},
     "notion_page_id": "1c4ff6e4-9605-412d-ad32-02d77532c184"
   },
   {
     "Nom": "Flag_objet_plis_autel_ancres_sonde",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Autel des Ancres sondé avec succès.",
+      "ID": "FLAG41",
+      "Lieu lié": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
+      "Portée": "Lieu",
+      "Systèmes consommateurs": "4d860678-49ac-4702-aa66-8f29abf53db9, dda13b50-2e96-491e-8e21-008865221005",
+      "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c"
     },
+    "sections": {},
     "notion_page_id": "25e01609-5906-43d4-a522-4087a1b3283e"
   },
   {
     "Nom": "Flag_khairgul_cabinet_access",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau d'accès des protagonistes à l'étude secrète de Khair-gul.",
+      "ID": "FLAG50",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "490c146f-f31a-4333-a598-002d3b83517d",
+      "Valeurs": "1f341e45-b5d0-4cb7-8f51-76b55ffe7ee9, 490c146f-f31a-4333-a598-002d3b83517d, b5f4fc75-b973-4e4d-a1d9-6fbb8e2dce80"
     },
+    "sections": {},
     "notion_page_id": "2bcbef60-0e9b-427a-ac76-f2e8b0f1a69f"
   },
   {
     "Nom": "Flag_respect_uresair_aide_proactive_active",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Seuil de Respect d'Uresaïr activant l'aide proactive.",
+      "ID": "FLAG38",
+      "Personnage lié": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "9ad386e6-c74d-4f8d-8509-d295f19cdd01"
     },
+    "sections": {},
     "notion_page_id": "2facd85a-0801-4a6a-a230-12f0c122f021"
   },
   {
     "Nom": "Flag_acte_2_fin",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+      "Description narrative": "Fin de l'Acte 2.",
+      "ID": "FLAG3",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "3383b0da-b2c2-41ea-9247-10cc7231985b"
   },
   {
     "Nom": "Flag_lieu_tunnel_vertebral_canal_rituel",
+    "values": {
+      "Description narrative": "Interaction du joueur avec le canal cérébrospinal sacré du Tunnel Vertébral.",
+      "ID": "FLAG94",
+      "Lieu lié": "1b36e4d2-1b45-80ec-93bd-da8514c1c784",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum"
+    },
     "sections": {
-      "_general": "## Valeurs\n\n- INTOUCHE — Le joueur n'a pas encore interagi avec le canal.\n\n- TOUCHE — Le joueur a trempé ses doigts dans le canal (geste rituel reconnu par les Consolés ; ouvre des options de dialogue).\n\n- PROFANE — Le joueur a intentionnellement perturbé le canal (réputation Culte de l'Anentropie Crainte +5)."
+      "valeurs": "- INTOUCHE — Le joueur n'a pas encore interagi avec le canal.\n\n- TOUCHE — Le joueur a trempé ses doigts dans le canal (geste rituel reconnu par les Consolés ; ouvre des options de dialogue).\n\n- PROFANE — Le joueur a intentionnellement perturbé le canal (réputation Culte de l'Anentropie Crainte +5)."
+    },
+    "section_titles": {
+      "valeurs": "Valeurs"
     },
     "notion_page_id": "3b5c3a1a-0660-40fa-ac41-addb5f9e4df8"
   },
   {
     "Nom": "Flag_campement_etabli",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Établissement du campement de base.",
+      "ID": "FLAG6",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "3d51bd49-35a0-41ec-8ca6-a0fa3235c604"
   },
   {
     "Nom": "Flag_perso_akthar_pacte",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de compréhension de l'Éthérée sur le pacte d'Akthar-Neth avec l'Ensevelie.",
+      "ID": "FLAG62",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Récompenses par situation": "99896e33-fdfc-42fa-93a3-a6928a29a54a",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
+      "Type de valeur": "enum",
+      "Valeurs": "7e10c82e-5498-452d-bf13-d9a9be9acda0, c6acb9c8-ee75-41d1-afde-94686b680ba4, 6fbf4af1-8e8e-40df-8816-010f7c9bbb49"
     },
+    "sections": {},
     "notion_page_id": "3e82eaaa-dcc1-4067-ac1c-71d647cfb015"
   },
   {
     "Nom": "Flag_perso_akthar_masque",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de compréhension de l'Éthérée sur le masque pyramidal d'Akthar-Neth.",
+      "ID": "FLAG61",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
+      "Type de valeur": "enum",
+      "Valeurs": "f5d60547-1ef7-4a8c-8818-353ad9923fdd, eaf4c22e-2efa-40fa-abcc-018653e30d59"
     },
+    "sections": {},
     "notion_page_id": "3ecac4fd-259f-448c-97dd-df314032734d"
   },
   {
     "Nom": "Flag_acte_2_debut",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+      "Description narrative": "Début de l'Acte 2.",
+      "ID": "FLAG4",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "418738cd-87ee-4bf2-866a-a33e5227afbd"
   },
   {
     "Nom": "Flag_acte_1_fin",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "2066e4d2-1b45-80ea-a176-d146be176d3b",
+      "Description narrative": "Fin de l'Acte 1.",
+      "ID": "FLAG2",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "48323a21-5687-4112-acaa-3ac9c83821df"
   },
   {
     "Nom": "Flag_lieu_tunnel_vertebral_rite_elevation",
+    "values": {
+      "Description narrative": "Relation du joueur au Rite de l'Élévation observé dans le Tunnel Vertébral.",
+      "ID": "FLAG95",
+      "Lieu lié": "1b36e4d2-1b45-80ec-93bd-da8514c1c784",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum"
+    },
     "sections": {
-      "_general": "## Valeurs\n\n- IGNORE — Le joueur n'a pas encore été témoin du rituel.\n\n- TEMOIN — Le joueur a observé le rite sans y prendre part.\n\n- ANCRE_DEPOSE — Le joueur a offert une ancre mémorielle au sage en cours de crucifixion."
+      "valeurs": "- IGNORE — Le joueur n'a pas encore été témoin du rituel.\n\n- TEMOIN — Le joueur a observé le rite sans y prendre part.\n\n- ANCRE_DEPOSE — Le joueur a offert une ancre mémorielle au sage en cours de crucifixion."
+    },
+    "section_titles": {
+      "valeurs": "Valeurs"
     },
     "notion_page_id": "4bf10c37-535b-426d-a9fc-651b396d8a49"
   },
   {
     "Nom": "Flag_quete_murmurateur_banni_resolution",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Communauté liée": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Description narrative": "État de résolution de la quête « Le Murmurateur banni ».",
+      "ID": "FLAG45",
+      "Portée": "Quête",
+      "Systèmes consommateurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9"
     },
+    "sections": {},
     "notion_page_id": "4ce17497-a0a7-4f27-9ea4-5e3a935c4fcc"
   },
   {
     "Nom": "Flag_explo_poi_conclave_passage_repere",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Passage vers le Conclave des Murmurateurs repéré.",
+      "ID": "FLAG31",
+      "Lieu lié": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
+      "Portée": "Lieu",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, de0651bb-e1ce-4677-9b31-b04cf17193ca",
+      "Systèmes producteurs": "7d4905b5-1967-4488-b28f-6c69f6abc262"
     },
+    "sections": {},
     "notion_page_id": "5a552134-5b8c-4457-ba43-fc3085668609"
   },
   {
     "Nom": "Flag_inventaire_traite_liquides_etudie",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Traité des Cinq Liquides étudié au campement.",
+      "ID": "FLAG40",
+      "Systèmes consommateurs": "dda13b50-2e96-491e-8e21-008865221005, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "abcf64c8-7fc1-4b50-992f-fd11459b0295"
     },
+    "sections": {},
     "notion_page_id": "5b45f2fa-a2a6-4a51-b358-82da2883377c"
   },
   {
     "Nom": "Flag_acte_1_debut",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "1886e4d2-1b45-8168-a7d6-dd9cbcdc41da",
+      "Description narrative": "Début de l'Acte 1 avec la première possession d'Uresaïr.",
+      "ID": "FLAG1",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "5bdaa4cf-9447-4dd2-b30b-b37144d44627"
   },
   {
     "Nom": "Flag_dialogue_interactions_pnj",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Nombre de conversations approfondies complétées avec ce PNJ.",
+      "ID": "FLAG18",
+      "Max": "3",
+      "Min": "0",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "compteur"
     },
+    "sections": {},
     "notion_page_id": "5cd0ab6e-ea34-4880-8079-6166fe4aa3a9"
   },
   {
     "Nom": "Flag_perso_khairgul_arc_outcome",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Issue de l'arc antagoniste de Khair-gul à la fin de l'Acte 1.",
+      "ID": "FLAG97",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Récompenses par situation": "c72359af-dd96-450d-9755-0cc1a347b2b3, 961b62cc-0a8c-4750-8479-18d7f5b799b1, b68d88df-3096-4bfc-979d-4df8b3f93093",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "54814cb6-a5af-484a-9cca-6366e3af0048",
+      "Valeurs": "54814cb6-a5af-484a-9cca-6366e3af0048, b708bf14-6e34-47d1-9fc4-dc6b72dc8a59, c1d234eb-75f4-4219-8dde-0824b2208d08, 4c00bb9a-4bad-443b-bf58-677e40b43af7, 61a08797-4551-4a3f-b3ef-5c214648ab0b"
     },
+    "sections": {},
     "notion_page_id": "5d368d73-e730-40de-ad27-df02b486cdc4"
   },
   {
     "Nom": "Flag_perso_akthar_journal",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Progression de la découverte du journal secret d'Akthar-Neth.",
+      "ID": "FLAG63",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "d1f1e0c8-29fc-436c-8efe-14167a2d32ae, 0c0521fa-961a-42b1-8d48-b80422ad4c08, 20956e64-d463-4fd2-90c4-3de27423dfa3"
     },
+    "sections": {},
     "notion_page_id": "60eae806-d19b-4fae-881c-041563e55ba7"
   },
   {
     "Nom": "Flag_perso_khairgul_role_visibility",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de connaissance des protagonistes sur la nature prédatrice de Khair-gul.",
+      "ID": "FLAG98",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Récompenses par situation": "3153f727-7b08-4b89-b5cf-2e130bfd687f",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "006c0a69-cdaf-4aa3-9eee-764f7dbfc71c",
+      "Valeurs": "5e0685bd-102a-465e-88f9-de5e79a9f40e, 006c0a69-cdaf-4aa3-9eee-764f7dbfc71c, 16108b47-8c11-43da-ab92-22d6930a3819"
     },
+    "sections": {},
     "notion_page_id": "64e0e360-fe4c-4300-8004-6de1da9ded17"
   },
   {
     "Nom": "Flag_perso_voknir_confiance",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Compteur de confiance de Voknir au campement.",
+      "ID": "FLAG84",
+      "Max": "4",
+      "Min": "0",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "compteur"
     },
+    "sections": {},
     "notion_page_id": "660b8085-64e7-4638-bf39-62bd23ebb1a8"
   },
   {
     "Nom": "Flag_explo_zone_plis_ossements_etat",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "État qualitatif d'exploration des Plis d'ossements.",
+      "ID": "FLAG29",
+      "Lieu lié": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "7d4905b5-1967-4488-b28f-6c69f6abc262"
     },
+    "sections": {},
     "notion_page_id": "6622ff5a-9c75-4ec2-bf72-3539707a4925"
   },
   {
     "Nom": "Flag_perso_khairgul_etude_secrete",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État de découverte de l'étude secrète de Khair-gul et de sa collection de flacons.",
+      "ID": "FLAG96",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "1b48d836-2b83-45ce-822e-1cad4954fc58",
+      "Valeurs": "1b48d836-2b83-45ce-822e-1cad4954fc58, dcd9f453-647e-42bb-9927-ed22461b5b58, 60f9bba6-890b-48c2-ad12-f07faf445caa, 9029733c-b135-4da2-b452-c876bc42b2f3"
     },
+    "sections": {},
     "notion_page_id": "669c5d17-e82c-44a3-a084-2eddfd04e2ad"
   },
   {
     "Nom": "Flag_allies_compagnon_actif",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Compagnon secondaire actuellement sélectionné.",
+      "ID": "FLAG27",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2bf6e4d2-1b45-80b3-8a1e-d823ca63311b"
     },
+    "sections": {},
     "notion_page_id": "698d3e24-5691-4550-9c37-c1a91a93232c"
   },
   {
     "Nom": "Flag_cutscene_vision_intro_choix",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Choix effectué lors de la Vision d'Uresaïr en introduction.",
+      "ID": "FLAG35",
+      "Personnage lié": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "2c16e4d2-1b45-8047-a942-f9d3499aff9e"
     },
+    "sections": {},
     "notion_page_id": "762c51b6-a680-4124-99fd-8d1251032cba"
   },
   {
     "Nom": "Flag_perso_akthar_manuscrits_choix",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Résolution de la quête « Les Manuscrits Interdits ».",
+      "ID": "FLAG65",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Récompenses par situation": "ac4424a6-3e9c-420e-b9f8-5d68c2500537, c175a1d4-e206-4a31-ad3d-bee03cc16592, 10ae3d7a-e75d-4cb8-8884-fe1e85f36787, 6caa5e87-7124-44f3-beac-b57540baf0f4",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "68217fc8-f7ea-41cb-9498-ac9b4f74ff43, 9610ed84-240c-4c1e-a23c-483681ff0e5b, d674fd75-50dc-442b-9bad-9a5a81734fa4"
     },
+    "sections": {},
     "notion_page_id": "78d75c47-46ce-4f99-947c-b69d63dd34ea"
   },
   {
     "Nom": "Flag_perso_akthar_fissures",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Nombre de fissures narratives accumulées dans la certitude d'Akthar-Neth.",
+      "ID": "FLAG69",
+      "Max": "3",
+      "Min": "0",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "compteur"
     },
+    "sections": {},
     "notion_page_id": "7d4876d8-3126-4c8a-b30f-870e5eb80098"
   },
   {
     "Nom": "Flag_souvenirs_uresair_vol_interpretation",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Choix d'interprétation du nœud « Vol Reitar ».",
+      "ID": "FLAG32",
+      "Personnage lié": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc"
     },
+    "sections": {},
     "notion_page_id": "7e4292e4-dac8-4862-af68-0576ebd905b5"
   },
   {
     "Nom": "Flag_khairgul_flacons_discovered",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Avancement de la découverte de la collection secrète de flacons d'Influence.",
+      "ID": "FLAG51",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs": "98f37058-d204-427b-81a1-4760bd17546e, 5796579c-846c-4edf-bb8f-8d76f00caf42, 40681f9b-74d8-4f4a-8c55-b534a2456a1c"
     },
+    "sections": {},
     "notion_page_id": "7f03333a-60f0-4045-818c-f318bcb639d1"
   },
   {
     "Nom": "Flag_perso_genka_recrutement",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Issue du recrutement de Genka au campement.",
+      "ID": "FLAG57",
+      "Personnage lié": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9, 2ff6e4d2-1b45-8048-bf39-c3cf437d0e04",
+      "Type de valeur": "enum",
+      "Valeurs": "3144afb7-7434-400b-8439-89502a57033e"
     },
+    "sections": {},
     "notion_page_id": "7f0ac51d-13a4-4d9d-a33d-08a983cc6b09"
   },
   {
     "Nom": "Flag_perso_akthar_rencontre",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau d'interaction directe entre l'Éthérée et Akthar-Neth.",
+      "ID": "FLAG14",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "5df41a91-1159-4ffe-b3b4-b412d94e3363, ab27c57c-42c5-48e4-8011-70ab26c9ee0f"
     },
+    "sections": {},
     "notion_page_id": "7ff225fc-0449-4d2d-b854-cfc85baad0ba"
   },
   {
     "Nom": "Flag_perso_akthar_krypte",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de connaissance de l'Éthérée sur la Krypte des Sept Témoins.",
+      "ID": "FLAG64",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Récompenses par situation": "b4b579d7-c002-487c-b43a-a1ce49883a30",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e",
+      "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "a458d069-edee-4689-9420-70432dd413e8, b9ff657f-ee61-46e3-aa07-9edebd7d3506, f78501fb-3534-4b7c-975a-c2b6ceb7a0d2"
     },
+    "sections": {},
     "notion_page_id": "80bcc3f2-30a1-49fb-b7b9-c69a88b4aa13"
   },
   {
     "Nom": "Flag_khairgul_arc_outcome",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Issue finale de l'arc antagoniste de Khair-gul.",
+      "ID": "FLAG52",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeurs": "30eea329-f682-46e1-882a-04d11882c08a, ba5b56d1-55d7-46cc-9db6-4c50619a16ff, 62b4d085-6775-4552-8cec-a1cb9236b1a3"
     },
+    "sections": {},
     "notion_page_id": "80c53aad-2a65-47bd-8f78-f60f1732a51a"
   },
   {
     "Nom": "Flag_lieu_tunnel_vertebral_genka_presence",
+    "values": {
+      "Description narrative": "Présence de Genka Lien dans le Tunnel Vertébral.",
+      "ID": "FLAG93",
+      "Lieu lié": "1b36e4d2-1b45-80ec-93bd-da8514c1c784",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum"
+    },
     "sections": {
-      "_general": "## Valeurs\n\n- PRESENT — Genka Lien campe dans le tunnel ; dialogues et Débats Suspendus disponibles.\n\n- EN_TOURNEE — Genka Lien est temporairement absent pour une performance hors du tunnel.\n\n- EXPULSE — Genka Lien a été banni par le Culte suite à une performance jugée trop hérétique ; le tunnel perd l'accès aux Débats Suspendus."
+      "valeurs": "- PRESENT — Genka Lien campe dans le tunnel ; dialogues et Débats Suspendus disponibles.\n\n- EN_TOURNEE — Genka Lien est temporairement absent pour une performance hors du tunnel.\n\n- EXPULSE — Genka Lien a été banni par le Culte suite à une performance jugée trop hérétique ; le tunnel perd l'accès aux Débats Suspendus."
+    },
+    "section_titles": {
+      "valeurs": "Valeurs"
     },
     "notion_page_id": "80dfc659-0a9f-4d25-af29-3510651db393"
   },
   {
     "Nom": "Flag_faction_titre_culte",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Communauté liée": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Description narrative": "Position narrative d'Uresaïr vis-à-vis du Culte de l'Anentropie.",
+      "ID": "FLAG24",
+      "Portée": "Faction",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "4aa77ab2-6b14-4da4-9823-ee7f0743826c",
+      "Valeurs": "d96f5a6c-89f3-4700-894e-dde0b0a5dc18, 87e3784d-8ea0-4e95-97c0-ca7dc893a2f3, 4aa77ab2-6b14-4da4-9823-ee7f0743826c, 2e70655f-ee64-413d-a899-37d53ca6c2a4"
     },
+    "sections": {},
     "notion_page_id": "812e85ac-4786-4831-8a8b-152955240361"
   },
   {
     "Nom": "Flag_perso_khairgul_confrérie",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de connaissance des protagonistes sur la Confrérie du Souffle Suspendu.",
+      "ID": "FLAG102",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "5d198948-028b-49c0-a516-7b72b19416e5",
+      "Valeurs": "5d198948-028b-49c0-a516-7b72b19416e5, 5e61fc43-c0af-4a90-aaea-0dadfaed8eff, 3f4a02a1-c922-4a58-ad08-56464867c7eb, 5e14409a-7686-410c-ac76-171a16b51f4f"
     },
+    "sections": {},
     "notion_page_id": "84bb4982-2290-4228-8408-f88f9864a1e6"
   },
   {
     "Nom": "Flag_tutoriel_complete",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Fin du tutoriel initial.",
+      "ID": "FLAG9",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ef6e4d2-1b45-8016-a220-cf44d02c111f",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "85008103-4906-4e5d-a0bb-90b4575f9b9b"
   },
   {
     "Nom": "Flag_perso_khairgul_kalresh",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État de Kal'Resh face à la menace de Khair-gul.",
+      "ID": "FLAG99",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Récompenses par situation": "a2c21eef-6335-4195-91d2-b206d03f8b6e, e81c7725-e9c8-4801-b22b-4ca1f25f17e6",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "84ea6f51-3e7f-41df-ba44-00dbbc62cb55",
+      "Valeurs": "73785511-a3c2-4f0d-b05f-8fce26e83d6f, 040403d2-9b5a-483f-8f90-d2d234e5159d, 84ea6f51-3e7f-41df-ba44-00dbbc62cb55, 3a0f547b-518e-49fd-b90c-cafdf96a00f4"
     },
+    "sections": {},
     "notion_page_id": "85117304-325e-46b7-9425-45988f4479a0"
   },
   {
     "Nom": "Flag_eco_economie_service_comprise",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Compréhension et première utilisation réussie de l'économie de service du Léviathan.",
+      "ID": "FLAG26",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "a5320c3c-58e9-42e2-bbee-d9c1f2f6db4d",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "8ad554d5-9628-44d1-8fb6-8337f73325b8"
   },
   {
     "Nom": "Flag_khairgul_kalresh_medical_authorisation",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Statut de la demande de Khair-gul pour accéder médicalement à Kal'Resh.",
+      "ID": "FLAG53",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "cc4d875a-9d96-47b7-9e3e-b7f7b80a6c87",
+      "Valeurs": "cc4d875a-9d96-47b7-9e3e-b7f7b80a6c87, 3c80a4c2-546c-4eaa-bf03-1f336e09bb0d, bc9d6d68-e32b-4678-a467-e3563e77bd0f"
     },
+    "sections": {},
     "notion_page_id": "94d5c969-0b69-4929-a239-21c2694a7a70"
   },
   {
     "Nom": "Flag_perso_voknir_recrutement",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Issue du recrutement de Voknir au campement.",
+      "ID": "FLAG83",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9, 2ff6e4d2-1b45-8048-bf39-c3cf437d0e04",
+      "Type de valeur": "enum",
+      "Valeurs": "ce340491-51cb-4ead-a83a-5aa8ff2939c9, 70e2f8e7-6f9d-4d68-be4e-7e55ab387931, fd206db9-d92c-4a51-a5e5-2c89e88290d0, 259e3ac3-187a-44c5-a583-95e11571c954"
     },
+    "sections": {},
     "notion_page_id": "960f3328-69e6-493a-b5f2-8d707f7fe4cb"
   },
   {
     "Nom": "Flag_perso_voknir_thyra_revelation",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de connaissance du joueur sur la conscience résiduelle de Thyra.",
+      "ID": "FLAG85",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "7f393c6d-c04e-458d-8090-f03bdba2505e, c79816e2-261d-4bb8-a2b9-29089bc76bfd"
     },
+    "sections": {},
     "notion_page_id": "9828b90e-aa5c-4ff4-a49d-9ab29c1e2843"
   },
   {
     "Nom": "Flag_transport_kresh_rencontre",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Première rencontre avec Kresh et Siphon Argenté.",
+      "ID": "FLAG47",
+      "Personnage lié": "2cc6e4d2-1b45-8062-9d49-f252d825bc90",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+      "Systèmes producteurs": "de0651bb-e1ce-4677-9b31-b04cf17193ca"
     },
+    "sections": {},
     "notion_page_id": "991f0820-11c8-4d7f-85e5-afc2687de7d3"
   },
   {
     "Nom": "Flag_perso_voknir_cercle_traceurs",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État de la relation de Voknir avec le Cercle des Sept Traceurs reconstitué.",
+      "ID": "FLAG87",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "cf5407ff-9559-44c2-b236-f01658e0b5fc, 7275f4e6-57c3-4dbf-bdc5-32934271ae25, 90b6d43c-1314-485b-ad93-91d965fa8988, ffcbaaea-c0cd-4e49-9a35-f76c663d9f09"
     },
+    "sections": {},
     "notion_page_id": "99a0e253-bdd0-4ef7-aa13-5622b56087e2"
   },
   {
     "Nom": "Flag_perso_khairgul_confiance",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Phase de la relation entre les protagonistes et Khair-gul.",
+      "ID": "FLAG101",
+      "Max": "3",
+      "Min": "0",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "compteur"
     },
+    "sections": {},
     "notion_page_id": "a0ab92f7-6943-49b6-99d7-6bf2a5d03165"
   },
   {
     "Nom": "Flag_cutscene_vision_intro_echec",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Échec du test lors de la Vision d'intro.",
+      "ID": "FLAG36",
+      "Personnage lié": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "2c16e4d2-1b45-8047-a942-f9d3499aff9e"
     },
+    "sections": {},
     "notion_page_id": "a46568b3-a946-46f4-b599-e8ca5abbd6ac"
   },
   {
     "Nom": "culturel:sept_sceaux:compris",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Communauté liée": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Description narrative": "Compréhension des Sept Sceaux de Daïlon.",
+      "ID": "FLAG34",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "dda13b50-2e96-491e-8e21-008865221005, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc"
     },
+    "sections": {},
     "notion_page_id": "a5143dc7-1624-4098-9882-3968284f5934"
   },
   {
     "Nom": "Flag_influence_uresair_forcing_total",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Nombre de fois que l'Éthérée a forcé Uresaïr.",
+      "ID": "FLAG37",
+      "Personnage lié": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "9ad386e6-c74d-4f8d-8509-d295f19cdd01"
     },
+    "sections": {},
     "notion_page_id": "a6e11b70-cb27-430d-80a8-13dbfaf50b99"
   },
   {
     "Nom": "Flag_perso_voknir_bannissement_cause",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de connaissance du joueur sur la vraie cause du bannissement de Voknir.",
+      "ID": "FLAG89",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "ed4bdcc8-e54b-4698-9407-9d2976e39291, 1e94670f-0246-44b2-8df6-77f8c8ee50ab"
     },
+    "sections": {},
     "notion_page_id": "a83fcb09-12ab-4b4c-9232-3a3147db4a53"
   },
   {
     "Nom": "Flag_quete_artisan_sursis_expire",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Communauté liée": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Description narrative": "Expiration de la quête « L'artisan en sursis » faute d'intervention.",
+      "ID": "FLAG46",
+      "Portée": "Quête",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b, 2ff6e4d2-1b45-8048-bf39-c3cf437d0e04",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9"
     },
+    "sections": {},
     "notion_page_id": "a902e66f-4151-4df6-83f8-a05e77366b1a"
   },
   {
     "Nom": "Flag_perso_voknir_yul_enquete",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Progression de l'enquête sur le sort de Yul Esh'Maradel.",
+      "ID": "FLAG86",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "1e14bac6-9aad-4db4-aa67-df36f808db81, 5980b337-b3d0-4e05-a4b2-c7bf7fb4695e, 7b5b7dd6-8dba-4c9a-ad80-58d402e1e646"
     },
+    "sections": {},
     "notion_page_id": "a9a42804-927a-4e63-9bcf-56dd679f8b63"
   },
   {
     "Nom": "Flag_khairgul_duqsha_case_status",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État de l'enquête de Duq'Sha sur Khair-gul et de son devenir.",
+      "ID": "FLAG54",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "93c5621d-9214-452c-91e3-44cc4c7a6f91",
+      "Valeurs": "93c5621d-9214-452c-91e3-44cc4c7a6f91, 144755f5-fb4e-44bc-ad78-6cb7f1d88923, 8a10ebbb-0322-4a78-bb6e-9e3e777a0aaf, 851a078e-cf9e-4c1c-b1ed-ee2d376fbf7e"
     },
+    "sections": {},
     "notion_page_id": "ad2f87e6-b85b-4617-b810-db00a97e6492"
   },
   {
     "Nom": "Flag_acte_3_fin",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "69d4bd00-1234-4ec3-b0ae-e405d3b26ccd",
+      "Description narrative": "Fin de l'Acte 3.",
+      "ID": "FLAG7",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "b4ef3f29-b26c-42bb-bafa-e987207978d9"
   },
   {
     "Nom": "Flag_perso_akthar_insufflations_choix",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Résolution de la quête « Les Insufflations de la Nef ».",
+      "ID": "FLAG68",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Récompenses par situation": "b9a6bc95-5b14-45ad-8da0-4fee63bf5f09, b47cbb37-3fb9-45f2-b2b3-dd2a89db6fac, 7e530bef-9075-4da7-aff0-a5b9ab6d0681, a83fba14-69a0-4ff2-a902-a570a9d4c14e",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b, 2c16e4d2-1b45-8047-a942-f9d3499aff9e, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
+      "Type de valeur": "enum",
+      "Valeurs": "5eb3f79e-6f1b-488b-b6c3-f84cbfa63356, c6c6142e-3d6c-4b31-af5a-ee77cea192e0, a6488b21-3bd8-4a15-9565-f66cf352f0e8, e5f390f8-b014-4cfb-898b-150e0226c49a"
     },
+    "sections": {},
     "notion_page_id": "b891bd34-d391-4839-825f-7d022de6b236"
   },
   {
     "Nom": "Flag_perso_khairgul_duqsha",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Sort de Duq'Sha dans son enquête sur Khair-gul.",
+      "ID": "FLAG103",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Personnage",
+      "Récompenses par situation": "f9f20295-bc92-459b-a200-d955b9ffce3d",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "26876636-c2bf-4b8f-9bbd-d2b3838a96b0",
+      "Valeurs": "29fe1c42-3d29-497a-a021-9fc58c3f9258, 31b99699-ec44-4844-b90c-48479979d8a1, 422a6173-d99e-486a-b49c-247ce8bd9d3a, 26876636-c2bf-4b8f-9bbd-d2b3838a96b0"
     },
+    "sections": {},
     "notion_page_id": "b9aeed05-bebc-43e8-a934-4079c5692702"
   },
   {
     "Nom": "Flag_citadelle_debloquee",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Déverrouillage de la Citadelle et augmentation de la capacité du campement.",
+      "ID": "FLAG8",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80b3-8a1e-d823ca63311b",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "bea3d1fe-2193-4cc2-a85e-b694d84dc4ef"
   },
   {
     "Nom": "Flag_eco_abus_angelique",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Communauté liée": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Description narrative": "Nombre d'abus du statut de Théomaque par Uresaïr.",
+      "ID": "FLAG25",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2be6e4d2-1b45-800d-b7df-c3af800db40b, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "a5320c3c-58e9-42e2-bbee-d9c1f2f6db4d"
     },
+    "sections": {},
     "notion_page_id": "bf5ae430-124a-4135-8477-270143a3794f"
   },
   {
     "Nom": "Flag_possession_uresair_premiere",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Première possession d'Uresaïr par l'Éthérée.",
+      "ID": "FLAG10",
+      "Personnage lié": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 9ad386e6-c74d-4f8d-8509-d295f19cdd01, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Systèmes producteurs": "2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "bfc3aaad-0b48-4eec-a6f6-430b5d6e1cf0"
   },
   {
     "Nom": "Flag_perso_voknir_arc_outcome",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Résolution de l'arc personnel de Voknir au campement.",
+      "ID": "FLAG88",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "ab577a92-7d20-4711-b434-be3a2a1403b7, d3899144-c8f8-4567-ad87-9836e979c18b, f4ba56aa-4ccf-4174-954e-f92e9dc21650"
     },
+    "sections": {},
     "notion_page_id": "c2876548-31ab-40a2-bc1c-bcebd731494a"
   },
   {
     "Nom": "Flag_perso_voknir_relique_tentative",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État de découverte de la Relique de la Tentative.",
+      "ID": "FLAG90",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "7d4905b5-1967-4488-b28f-6c69f6abc262",
+      "Type de valeur": "enum",
+      "Valeurs": "c7faff9a-aa12-439c-9519-9e0acbf05b88"
     },
+    "sections": {},
     "notion_page_id": "c6db9ee8-0368-4a97-8353-99c627b19728"
   },
   {
     "Nom": "Flag_progression_culte_premier_noeud_active",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Communauté liée": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Description narrative": "Activation du premier nœud de l'arbre Culte de l'Anentropie.",
+      "ID": "FLAG44",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "2bf6e4d2-1b45-80dd-a7f6-d625952fee4a"
     },
+    "sections": {},
     "notion_page_id": "c835e9ae-188a-4f8f-8a1a-74b92bf59edc"
   },
   {
     "Nom": "Flag_perso_akthar_arc_outcome",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Issue finale de l'arc d'Akthar-Neth.",
+      "ID": "FLAG67",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Récompenses par situation": "b8fea9de-63f4-4094-ab58-f11f7511c8d4, 02f1f441-8e0e-4d7d-9990-d28588fa2420, c4ed898b-140b-4480-9486-157bd0e8a5b7",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e",
+      "Type de valeur": "enum",
+      "Valeurs": "fc92279f-d3be-40cd-98c6-9c7d555e409f, 8b12c9ed-e009-4831-98ef-0b6e57004aec, 245e0509-344c-47a1-ac2c-97fd216e9a2b"
     },
+    "sections": {},
     "notion_page_id": "c98123a7-8502-41c5-aa9b-a7136630fc5b"
   },
   {
     "Nom": "Flag_lieu_tunnel_vertebral_debats_suspendus",
+    "values": {
+      "Description narrative": "État des Débats Suspendus organisés par Genka Lien.",
+      "ID": "FLAG92",
+      "Lieu lié": "1b36e4d2-1b45-80ec-93bd-da8514c1c784",
+      "Portée": "Lieu",
+      "Statut": "Défini",
+      "Type de valeur": "enum"
+    },
     "sections": {
-      "_general": "## Valeurs\n\n- INACTIF — Aucun débat en cours ni annoncé.\n\n- ANNONCE — Genka Lien a annoncé un prochain débat ; le joueur peut s'y préparer.\n\n- EN_COURS — Le débat est actif ; le joueur peut intervenir ou observer.\n\n- CONCLUE_ORTHODOXE — Le débat s'est conclu en faveur de l'interprétation orthodoxe du Barvasinkul.\n\n- CONCLUE_DISSIDENT — Le débat s'est conclu en faveur d'une interprétation dissidente, ouvrant des options narratives avec les Murmurateurs."
+      "valeurs": "- INACTIF — Aucun débat en cours ni annoncé.\n\n- ANNONCE — Genka Lien a annoncé un prochain débat ; le joueur peut s'y préparer.\n\n- EN_COURS — Le débat est actif ; le joueur peut intervenir ou observer.\n\n- CONCLUE_ORTHODOXE — Le débat s'est conclu en faveur de l'interprétation orthodoxe du Barvasinkul.\n\n- CONCLUE_DISSIDENT — Le débat s'est conclu en faveur d'une interprétation dissidente, ouvrant des options narratives avec les Murmurateurs."
+    },
+    "section_titles": {
+      "valeurs": "Valeurs"
     },
     "notion_page_id": "d1aee1ff-7915-4e59-8ea8-9c45ff7812b8"
   },
   {
     "Nom": "Flag_camp_allié_recruté_[id_allié]",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Famille de flags marquant le recrutement d'un allié au campement.",
+      "ID": "FLAG28",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2bf6e4d2-1b45-80dd-a7f6-d625952fee4a, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "d6d4383a-b08d-4131-8a6a-e51900cdc614"
   },
   {
     "Nom": "Flag_quete_flacons_murmureurs",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État d'avancement de la quête « Les Flacons Murmureurs ».",
+      "ID": "FLAG100",
+      "Personnage lié": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Portée": "Quête",
+      "Récompenses par situation": "413e8ac2-e9f2-43e7-8c1b-8193977cd3c3, 3a36dde9-ca76-4cc7-8dd7-2361fc5c93c4, 066de821-7ac6-40f5-b02e-020015385d8c",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "50b3b923-0349-4180-87f6-821d69893949",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "650f093e-5ec0-4d6d-a406-fe7180a10162",
+      "Valeurs": "782995d1-2c3f-401d-920a-834f75b4cfcc, 650f093e-5ec0-4d6d-a406-fe7180a10162, 8cee0f7b-352a-4aa0-88ba-f90e3bc55f77, 0926f960-3472-4cb1-9041-bafc2eca94ee, 769fece7-4409-4316-b929-47c5332c23d0"
     },
+    "sections": {},
     "notion_page_id": "d90aefd8-d008-4559-949d-d9b05193b470"
   },
   {
     "Nom": "Flag_possession_eonunde_premiere",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Première possession d'Eonundé par l'Éthérée.",
+      "ID": "FLAG12",
+      "Personnage lié": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 9ad386e6-c74d-4f8d-8509-d295f19cdd01, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Systèmes producteurs": "2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "db22c068-db5a-407a-b8cb-1f51353896d4"
   },
   {
     "Nom": "Flag_perso_akthar_dernier_rituel",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de connaissance de l'Éthérée sur le Dernier Rituel.",
+      "ID": "FLAG66",
+      "Personnage lié": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Portée": "Personnage",
+      "Récompenses par situation": "77b80b6c-28cd-4411-9231-db0d3fc67d7c",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2c16e4d2-1b45-8047-a942-f9d3499aff9e",
+      "Type de valeur": "enum",
+      "Valeurs": "c9b782a5-0e0c-4f0d-b3e9-9997b57be68f, 270135be-f6b4-44f6-afb5-be0122c986fc, af152906-96c1-4ffe-b249-ec6701391eae"
     },
+    "sections": {},
     "notion_page_id": "dcae3ed9-4c0f-4f54-9d96-ab2e9cbcb180"
   },
   {
     "Nom": "Flag_perso_genka_bras_revele",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de connaissance du joueur sur le bras atrophié de Genka.",
+      "ID": "FLAG58",
+      "Personnage lié": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-800d-b7df-c3af800db40b",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "b46a431a-f012-4011-a11f-f3b20985d3f6, 6ad2b9b7-6c8f-4441-ba00-888f475cc26a"
     },
+    "sections": {},
     "notion_page_id": "dd9c6a88-d65e-4af0-89ed-6c20e34be549"
   },
   {
     "Nom": "Flag_objet_plis_lichen_sang_examine",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Lichen-Sang des Plis d'ossements examiné et identifié.",
+      "ID": "FLAG42",
+      "Lieu lié": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
+      "Portée": "Lieu",
+      "Systèmes consommateurs": "dda13b50-2e96-491e-8e21-008865221005, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "ed986ac3-3600-4d29-b4fb-8fac7d61857c"
     },
+    "sections": {},
     "notion_page_id": "de1fe0c5-21ef-41a5-83ea-3f7b25396ff3"
   },
   {
     "Nom": "Flag_transport_tunnel_profond_debloque",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Déverrouillage de la route du Tunnel Profond.",
+      "ID": "FLAG48",
+      "Lieu lié": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Systèmes consommateurs": "de0651bb-e1ce-4677-9b31-b04cf17193ca, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "de0651bb-e1ce-4677-9b31-b04cf17193ca"
     },
+    "sections": {},
     "notion_page_id": "e329a2e6-b5bc-4825-a946-9c1e55512846"
   },
   {
     "Nom": "Flag_souvenirs_uresair_vol_resolu",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Nœud de mémoire « Première rencontre avec Vol Reitar » résolu.",
+      "ID": "FLAG30",
+      "Personnage lié": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 2be6e4d2-1b45-8007-b2a7-cfcab1bf4400",
+      "Systèmes producteurs": "2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc"
     },
+    "sections": {},
     "notion_page_id": "f09f5ca6-3833-47ab-b60f-f0935645189c"
   },
   {
     "Nom": "biologique:lichen_sang:identifie",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Lichen-Sang nommé, catégorisé et relié au domaine biologique.",
+      "ID": "FLAG33",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, ed986ac3-3600-4d29-b4fb-8fac7d61857c",
+      "Systèmes producteurs": "dda13b50-2e96-491e-8e21-008865221005, ed986ac3-3600-4d29-b4fb-8fac7d61857c"
     },
+    "sections": {},
     "notion_page_id": "f63a3a3d-a23f-4d3c-997c-a050714032d5"
   },
   {
     "Nom": "Flag_perso_genka_convergence",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "État de la Convergence Rituelle organisée par Genka.",
+      "ID": "FLAG59",
+      "Personnage lié": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "fcb935c5-3394-4f70-8829-2a3055fdba64",
+      "Valeurs": "0a4db701-0d58-4c05-9c2d-5d2ab9411029, fcb935c5-3394-4f70-8829-2a3055fdba64, 32beddbf-e6ec-454e-ab0d-6a912ba82ee2, ef4ec57f-0f2e-47e8-8254-3d34eac219c4"
     },
+    "sections": {},
     "notion_page_id": "f67d3167-be48-42fe-8b47-8a8c6f174813"
   },
   {
     "Nom": "Flag_perso_genka_manuscrit",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Avancement de la reconstitution du Manuscrit de Synthèse.",
+      "ID": "FLAG60",
+      "Personnage lié": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Portée": "Personnage",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, dda13b50-2e96-491e-8e21-008865221005",
+      "Systèmes producteurs": "4d860678-49ac-4702-aa66-8f29abf53db9, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "dccb6602-99cd-4f7a-bab5-1fd526275f87",
+      "Valeurs": "dccb6602-99cd-4f7a-bab5-1fd526275f87, f24d7373-54fc-40b4-ab8c-3eaff1525beb, 1a99108e-37a8-4264-b9b8-68faa4ec26b9"
     },
+    "sections": {},
     "notion_page_id": "f7c9a095-1f01-462c-8456-a3e0ba3e1239"
   },
   {
     "Nom": "Flag_inventaire_sceau_tisserandes_offert",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Sceau de l'Ordre des Tisserandes offert à un allié.",
+      "ID": "FLAG39",
+      "Systèmes consommateurs": "2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Systèmes producteurs": "abcf64c8-7fc1-4b50-992f-fd11459b0295"
     },
+    "sections": {},
     "notion_page_id": "f7f1247e-2e45-4e9d-b984-5a796aabcf66"
   },
   {
     "Nom": "Flag_possession_vethraak_premiere",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description narrative": "Première possession de Vethraak par l'Éthérée.",
+      "ID": "FLAG11",
+      "Personnage lié": "1996e4d2-1b45-80a5-a7ae-e9d43372323f",
+      "Portée": "Système",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 9ad386e6-c74d-4f8d-8509-d295f19cdd01, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Systèmes producteurs": "2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc",
+      "Type de valeur": "bool"
     },
+    "sections": {},
     "notion_page_id": "fbc0a6aa-93e8-4c8a-aa95-fa764d58173b"
   },
   {
     "Nom": "Flag_perso_voknir_rencontre",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau d'interaction directe entre l'Éthérée et Voknir.",
+      "ID": "FLAG82",
+      "Personnage lié": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Systèmes consommateurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9",
+      "Systèmes producteurs": "2ef6e4d2-1b45-8073-a456-d45d695154b9",
+      "Type de valeur": "enum",
+      "Valeurs": "d7454bf0-8c37-4dc6-96e9-5b1d4a4183d7, dafa2c9b-2271-471b-82b7-a24a6059f1d1"
     },
+    "sections": {},
     "notion_page_id": "fdbb4056-ab88-4b26-8c93-1184d86182f9"
+  },
+  {
+    "Nom": "Flag_perso_ori_bikar_connexion_uresair",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "6985dc4c-f3e6-492d-90da-6f3d57d37d7e, 7215b6b1-6707-40f4-abf7-f559298503a2",
+      "Description narrative": "Révélation de la connexion empathique profonde entre Ori-Bikar et Uresaïr (résonance liée à l'instabilité neurologique et à la nature d'Éthérée). IGNORE : aucune conscience du lien. PRESSENTI : signes ambigus, Ori-Bikar réagit étrangement à la présence d'Uresaïr. REVELE : la connexion est explicitement nommée et comprise. ACCEPTE : les deux personnages ont intégré ce lien dans leur relation.",
+      "ID": "FLAG116",
+      "Personnage lié": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "7d27ff34-6912-4aab-92fb-c53a070cb81e",
+      "Valeurs": "7d27ff34-6912-4aab-92fb-c53a070cb81e, d56343a5-c9c7-48ba-8b68-e0921d9b37dd, 1c51fb51-cd21-4d84-ad8c-0bffd9fa9db7, 08b862a5-060e-4113-933c-195710ac81e3"
+    },
+    "sections": {},
+    "notion_page_id": "01ef7ce4-0e71-4a6e-9486-362d4a64ebca"
+  },
+  {
+    "Nom": "Flag_quete_derivations_instables_etat",
+    "values": {
+      "Chapitres liés": "8a46fb65-26a3-40f6-a516-e2186d4a747b",
+      "Description narrative": "État de la quête Dérivations Instables. INACTIVE → DÉCLENCHÉE lors d'un dialogue privé (confiance ≥ 2 + RECRUTÉ_A). RÉSOLUE si les 7 formules récupérées. ÉCHOUÉE sinon.",
+      "ID": "FLAG108",
+      "Personnage lié": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Portée": "Quête",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "e93ec0ce-3511-4a0c-8b98-8479f340f640",
+      "Valeurs": "724480d8-943e-40eb-b8d6-941e5aebe7e7, 9715236f-4ae7-497a-80b9-a6d7350e5c19, e93ec0ce-3511-4a0c-8b98-8479f340f640, 90a17313-ade5-4948-8755-f3742f1bef0f"
+    },
+    "sections": {},
+    "notion_page_id": "1117930a-e366-4c9f-8e96-107442d4a5b6"
+  },
+  {
+    "Nom": "Flag_perso_avili_recrutement_outcome",
+    "values": {
+      "Description narrative": "Résultat de la quête de recrutement d'Avili. Détermine si Avili est au campement et comment il y est arrivé.",
+      "ID": "FLAG106",
+      "Personnage lié": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "ce3c8772-b61f-4450-85a4-0cc7f388909b",
+      "Valeurs": "ce3c8772-b61f-4450-85a4-0cc7f388909b, 2597157a-6023-478d-8aa4-a08e565964cd, e1a75c84-7aa3-42c8-9335-2d34da0edb5d, b80284f9-7717-4b50-8415-a9daf7539ccd"
+    },
+    "sections": {},
+    "notion_page_id": "174b8734-9f33-46e3-a062-786495b18b35"
+  },
+  {
+    "Nom": "Flag_perso_avili_eonunde_revelation",
+    "values": {
+      "Description narrative": "Degré auquel l'implication d'Avili dans la création d'Eonundé a été révélée à l'Éthérée.",
+      "ID": "FLAG104",
+      "Personnage lié": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "901f8ad7-b52d-44ca-a253-1c209367193e",
+      "Valeurs": "901f8ad7-b52d-44ca-a253-1c209367193e, f6a6357f-5096-49a5-b724-dd73eb904931, f1e64e53-e0ef-496a-8efd-2a9cbd3fbdea"
+    },
+    "sections": {},
+    "notion_page_id": "35bd58f5-4c01-49b9-aa0e-fb880766990d"
+  },
+  {
+    "Nom": "Flag_perso_avili_confiance",
+    "values": {
+      "Description narrative": "Niveau de confiance accumulé avec Avili. Débloque les dialogues au campement par paliers (1–2–3–4).",
+      "ID": "FLAG107",
+      "Max": "4",
+      "Min": "0",
+      "Personnage lié": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "580e7ee5-ea43-4911-8268-05793f451438"
+  },
+  {
+    "Nom": "Flag_perso_ori_bikar_recrutement",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "6985dc4c-f3e6-492d-90da-6f3d57d37d7e",
+      "Description narrative": "Issue de la quête de recrutement L'Empreinte déliée. EN_ATTENTE : avant déclenchement. COUVERT : Uresaïr a protégé Ori-Bikar du Culte sans l'aider. LIBERE : Uresaïr a aidé Ori-Bikar à maîtriser sa crise (recrutement plein). EXPOSE : Ori-Bikar a été dénoncé ou sa situation révélée au Culte.",
+      "ID": "FLAG111",
+      "Personnage lié": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "4011cb92-2651-49a5-950e-68026388cd1e",
+      "Valeurs": "e36d28bc-acca-44a1-93b8-0ef94c26207a, b504ab0b-ae5e-4ce1-98d3-419a791f3bc0, 863bc7cb-a7d6-49bb-8989-630413d5200c, 4011cb92-2651-49a5-950e-68026388cd1e"
+    },
+    "sections": {},
+    "notion_page_id": "6d38eee4-86ab-47eb-9840-d2151f17c54d"
+  },
+  {
+    "Nom": "Flag_perso_ori_bikar_proto_reveil",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db, 9cc28a16-9802-459f-b23b-827bc6399a39",
+      "Description narrative": "Ce que le groupe sait du Prototype du Réveil qu'Ori-Bikar construit secrètement (dispositif d'éveil du Léviathan). IGNORE : le prototype est inconnu. SUSPECTE : le groupe perçoit une activité étrange mais n'a pas confirmé. DECOUVERT : le prototype est identifié et compris. ARRETE : le prototype a été neutralisé, détruit ou repris.",
+      "ID": "FLAG115",
+      "Personnage lié": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "9783b50b-53f0-4b06-91e9-c9c36b108513",
+      "Valeurs": "9783b50b-53f0-4b06-91e9-c9c36b108513, e02712fd-a627-4d47-b03b-59924010761a, 7bac7fbd-15e4-4a24-bc61-35d8c99f9aba, ae99f87c-953e-41a5-b2f7-e8f99e6cf5bf"
+    },
+    "sections": {},
+    "notion_page_id": "8e7f811e-2c59-4e19-9ebc-32e421d82d12"
+  },
+  {
+    "Nom": "Flag_perso_ori_bikar_arc_personnel",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "6985dc4c-f3e6-492d-90da-6f3d57d37d7e",
+      "Description narrative": "Résolution de l'arc personnel d'Ori-Bikar au campement. NON_DECLENCHE : Ori-Bikar non recruté ou arc pas initié. EN_COURS : arc actif, dialogues de feu de camp débloqués. GUERISSEUR : Ori-Bikar intègre sa dualité, stabilisation. CHAOTIQUE : Ori-Bikar bascule vers la destruction pure. FUSIONNE : Ori-Bikar réconcilie destruction et création (fin optimale).",
+      "ID": "FLAG113",
+      "Personnage lié": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "2366edc9-dd75-42c8-8270-7c82e1dbce88",
+      "Valeurs": "2366edc9-dd75-42c8-8270-7c82e1dbce88, 45ffa492-8a4e-4fee-a56f-b800efa3b09c, 41dcb440-7076-4825-8a79-014b67098e73, 33597ff4-5b46-4ee9-a89e-ffe4a1dfbed9, 2272b532-f1b0-4cfd-a2ca-d2379b8b694e"
+    },
+    "sections": {},
+    "notion_page_id": "90603d2e-10c4-4e08-ba74-6317cc9b983e"
+  },
+  {
+    "Nom": "Flag_perso_avili_arc_outcome",
+    "values": {
+      "Description narrative": "État de l'arc personnel d'Avili (la confrontation avec son besoin d'indispensabilité). Détermine la résolution narrative de son personnage.",
+      "ID": "FLAG105",
+      "Personnage lié": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "50f1da8c-c379-4513-82cd-ebf52384e379",
+      "Valeurs": "50f1da8c-c379-4513-82cd-ebf52384e379, 9b8ae807-6802-4487-b36c-1d19e1e87ce5, d9945caa-2066-437f-88b2-a1ee654c709c, 14dd8979-584e-421f-9aaa-00991c3ac37e"
+    },
+    "sections": {},
+    "notion_page_id": "98e15cb4-d9ee-4d44-8e6d-d9155b519ef6"
+  },
+  {
+    "Nom": "Flag_perso_ori_bikar_oracle_autonome",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "9cc28a16-9802-459f-b23b-827bc6399a39",
+      "Description narrative": "État de l'oracle autonome créé par Ori-Bikar dans la quête L'Oracle Autonome. INEXISTANT : l'oracle n'a pas encore été créé. ACTIF : l'oracle fonctionne et génère des prédictions incontrôlées. MAITRISE : Ori-Bikar ou le groupe a appris à guider l'oracle. BRISE : l'oracle a été détruit ou est hors d'état de fonctionner.",
+      "ID": "FLAG114",
+      "Personnage lié": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "ee6acfce-a3ac-4cc1-a641-e638e2a3b8b1",
+      "Valeurs": "ee6acfce-a3ac-4cc1-a641-e638e2a3b8b1, fc652245-7124-4223-b25b-889cc8f70ef2, 2a9de035-b784-4ee8-b9ea-77a86f4ef75a, 9080c323-1025-47ed-b871-8049306229ff"
+    },
+    "sections": {},
+    "notion_page_id": "99760fea-27d3-4386-ad83-126b1b08df8d"
+  },
+  {
+    "Nom": "Flag_perso_ori_bikar_secret_56",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Chapitres liés": "2b86e4d2-1b45-8087-ac50-cb4035a318db, 7215b6b1-6707-40f4-abf7-f559298503a2",
+      "Description narrative": "Connaissance par le groupe des 56 expériences précédentes d'Ori-Bikar (les 56 versions antérieures, dont les échecs du Culte). IGNORE : les 56 ne sont pas évoqués. MENTIONNE : Ori-Bikar ou un PNJ y fait allusion sans détail. REVELE : l'histoire complète des 56 expériences est connue du groupe.",
+      "ID": "FLAG112",
+      "Personnage lié": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "606faaf4-c2ff-468b-b7f3-3ab236e7cca6",
+      "Valeurs": "606faaf4-c2ff-468b-b7f3-3ab236e7cca6, 4c6f73e6-345c-4364-9fc8-50a9811396fc, 8e16281c-32a9-46b3-95b6-0d93e2dc051b"
+    },
+    "sections": {},
+    "notion_page_id": "9eb747d6-bf55-4426-8d76-c495d1e07ed9"
+  },
+  {
+    "Nom": "Flag_perso_avili_preuves_manipulation",
+    "values": {
+      "Description narrative": "Nombre de preuves distinctes de manipulation interprétative découvertes par l'Éthérée. Débloque l'Option C de renvoi à 2.",
+      "ID": "FLAG109",
+      "Max": "2",
+      "Min": "0",
+      "Personnage lié": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Portée": "Personnage",
+      "Statut": "Défini",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "a7c92744-1219-493a-9771-90cee8ab6e6a"
+  },
+  {
+    "Nom": "Flag_quete_equation_interdite_etat",
+    "values": {
+      "Chapitres liés": "d9051223-68f0-4781-aa27-5dd9b585cba0",
+      "Description narrative": "État de la quête L'Équation Interdite. DÉCLENCHÉE après confiance ≥ 3 (ou ALTERNATIVE si Option C recrutement). RÉSOLUE si dérivation complète.",
+      "ID": "FLAG110",
+      "Personnage lié": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
+      "Portée": "Quête",
+      "Statut": "Défini",
+      "Type de valeur": "enum",
+      "Valeur par défaut (enum)": "9b113c0d-8ab4-46f0-90ec-ac04fe62ac84",
+      "Valeurs": "9b113c0d-8ab4-46f0-90ec-ac04fe62ac84, 4aa2dd1a-1f94-4e2c-b25e-c48f5ed29a7b, ee61cd22-9e54-49c9-85b2-cf780f0428ee, 9826cb85-bf37-4b84-b2d2-7c73551b3dae"
+    },
+    "sections": {},
+    "notion_page_id": "cd3def49-c598-4938-b3d6-2518af852c4f"
+  },
+  {
+    "Nom": "perso_ori_bikar_confiance",
+    "values": {
+      "Actes liés": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+      "Description narrative": "Niveau de confiance progressif d'Ori-Bikar envers le groupe. 0 = Neutre (premier contact). 1 = Curieux (interactions positives initiales). 2 = Complice (complicité établie). 3 = Confiant (secrets partagés, dialogue de feu de camp avancé). 4 = Intime (arc personnel pleinement débloqué, dialogue privé). Alimenté par les quêtes et les choix dialogiques.",
+      "ID": "FLAG117",
+      "Max": "4",
+      "Min": "0",
+      "Personnage lié": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Portée": "Personnage",
+      "Statut": "À définir",
+      "Type de valeur": "compteur"
+    },
+    "sections": {},
+    "notion_page_id": "de1d1578-7247-48a7-bb1e-fc6501ee03b9"
   }
 ]

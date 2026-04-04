@@ -1,7 +1,28 @@
 {
   "Nom": "Condensats informationnels",
+  "values": {
+    "Biologie": "Nulle",
+    "Culture": "Nulle",
+    "Espérance de vie": "1",
+    "Lieux de vie": "1ac6e4d2-1b45-802d-b8ee-f726b177913e",
+    "Présence dans Escelion": "Endémique",
+    "Représentants": "1996e4d2-1b45-8043-9847-ef675478f485",
+    "Règne (ou classe)": "7005a6a1-9a02-40f7-af84-4b7cf6ead7f8",
+    "Résumé IA": "Les Condensats Informationnels Quantiques sont des agrégations d'information pure, capables d'auto-organisation et de pensée autonome, nées des conditions extrêmes de l'Océan de Ténèbres. Leur apparition est liée à des bouleversements cosmiques majeurs, et l'Éthérée est le premier condensat stable documenté. Ces entités, qui existent dans un état quantique, influencent les pensées humaines sans contrôle direct, suscitant des débats philosophiques sur la conscience. Elles se nourrissent d'énergie informationnelle et se reproduisent par bourgeonnement, tout en jouant un rôle écologique en recyclant des fragments psychiques non résolus.",
+    "Surnaturel": "Avancée",
+    "Technologie": "Nulle",
+    "Type": "Faune",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Hypothèses matérialistes**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Hypothèses matérialistes**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "2546e4d2-1b45-8003-b2cf-fba0a267df74"
 }

@@ -1,8 +1,36 @@
 [
   {
     "Nom": "troubleshooting-lieux",
+    "values": {},
     "sections": {
-      "_general": "# Troubleshooting (Lieux)\n\nSolutions aux problèmes fréquents lors de la création et mise à jour de lieux.\n\n## Erreur 1 : Contexte trop chargé\n\n### Symptômes\n\n- Trop de pages ouvertes\n\n- Réponses longues\n\n- Perte de cohérence\n\n### Correctif\n\n- Appliquer strictement : résumés + propriétés (pas de descriptions longues).\n\n- Limiter : 1 parent, 0-2 limitrophes, 0-2 communautés, 0-5 personnages, 0-5 espèces.\n\n- Si besoin : choisir UNE seule fonction narrative prioritaire.\n\n## Erreur 2 : Lieu cliché / twist superficiel\n\n### Symptômes\n\n- \"forêt MAIS...\" / \"taverne cosy\" / ambiance générique\n\n### Correctif\n\n- Appliquer la stratégie : Identifier cliché → inverser → ajouter 2 éléments inattendus.\n\n- Vérifier clichés internes Alteir (cadavre titanesque, zone atemporelle, corruption/mutation).\n\n## Erreur 3 : Hiérarchie incohérente\n\n### Symptômes\n\n- Taille incompatible avec parent\n\n- Confusion Lieu vs Région\n\n### Correctif\n\n- Repartir : Parent → Catégorie → Taille.\n\n- Autoriser sauts hiérarchiques, mais jamais une taille supérieure dans un enfant.\n\n## Erreur 4 : Relations spatiales cassées\n\n### Symptômes\n\n- Contient / Contenu par non réciproques\n\n- Zones limitrophes à sens unique\n\n### Correctif\n\n- Vérifier et corriger la réciprocité systématiquement.\n\n## Erreur 5 : Écologie plaquée\n\n### Symptômes\n\n- Liste d’espèces sans justification\n\n### Correctif\n\n- Ajouter : 1 ressource, 1 danger, 1 cycle, 1 symbiose lieu-espèce.\n\n- Distinguer : endémiques vs migrantes.\n\n## Erreur 6 : Social sans dynamique\n\n### Symptômes\n\n- Communautés présentes sans lois/tensions/économie\n\n### Correctif\n\n- Ajouter : 1 règle locale, 1 tension interne, 1 dépendance économique, 1 relation au voisinage."
+      "troubleshooting__lieux": "Solutions aux problèmes fréquents lors de la création et mise à jour de lieux.",
+      "sympto_mes": "- Trop de pages ouvertes\n\n- Réponses longues\n\n- Perte de cohérence",
+      "correctif": "- Appliquer strictement : résumés + propriétés (pas de descriptions longues).\n\n- Limiter : 1 parent, 0-2 limitrophes, 0-2 communautés, 0-5 personnages, 0-5 espèces.\n\n- Si besoin : choisir UNE seule fonction narrative prioritaire.",
+      "sympto_mes_2": "- \"forêt MAIS...\" / \"taverne cosy\" / ambiance générique",
+      "correctif_2": "- Appliquer la stratégie : Identifier cliché → inverser → ajouter 2 éléments inattendus.\n\n- Vérifier clichés internes Alteir (cadavre titanesque, zone atemporelle, corruption/mutation).",
+      "sympto_mes_3": "- Taille incompatible avec parent\n\n- Confusion Lieu vs Région",
+      "correctif_3": "- Repartir : Parent → Catégorie → Taille.\n\n- Autoriser sauts hiérarchiques, mais jamais une taille supérieure dans un enfant.",
+      "sympto_mes_4": "- Contient / Contenu par non réciproques\n\n- Zones limitrophes à sens unique",
+      "correctif_4": "- Vérifier et corriger la réciprocité systématiquement.",
+      "sympto_mes_5": "- Liste d’espèces sans justification",
+      "correctif_5": "- Ajouter : 1 ressource, 1 danger, 1 cycle, 1 symbiose lieu-espèce.\n\n- Distinguer : endémiques vs migrantes.",
+      "sympto_mes_6": "- Communautés présentes sans lois/tensions/économie",
+      "correctif_6": "- Ajouter : 1 règle locale, 1 tension interne, 1 dépendance économique, 1 relation au voisinage."
+    },
+    "section_titles": {
+      "troubleshooting__lieux": "Troubleshooting (Lieux)",
+      "sympto_mes": "Symptômes",
+      "correctif": "Correctif",
+      "sympto_mes_2": "Symptômes",
+      "correctif_2": "Correctif",
+      "sympto_mes_3": "Symptômes",
+      "correctif_3": "Correctif",
+      "sympto_mes_4": "Symptômes",
+      "correctif_4": "Correctif",
+      "sympto_mes_5": "Symptômes",
+      "correctif_5": "Correctif",
+      "sympto_mes_6": "Symptômes",
+      "correctif_6": "Correctif"
     },
     "notion_page_id": "3bbdddde-af2e-40e6-9eab-f194f87ff957"
   }

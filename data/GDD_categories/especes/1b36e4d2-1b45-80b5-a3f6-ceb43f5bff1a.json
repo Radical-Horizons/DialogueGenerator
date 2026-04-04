@@ -1,7 +1,20 @@
 {
   "Nom": "Iclot",
+  "values": {
+    "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+    "Résumé IA": "L'iclot est une plante de grande taille avec une forme cylindrique, colorée en bleu sombre avec des veines argentées. Elle utilise des graines multicolores pour des teintures rituelles. Son habitat et son mode d'alimentation sont liés à une symbiose avec des bactéries, permettant l'échange de ressources et d'informations entre les plantes. Les iclots sont également perçus comme un signe de vitalité souterraine, attirant l'attention des voyageurs du désert.",
+    "Type": "Flore",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1b36e4d2-1b45-80b5-a3f6-ceb43f5bff1a"
 }

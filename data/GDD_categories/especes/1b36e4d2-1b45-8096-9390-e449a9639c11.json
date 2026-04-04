@@ -1,7 +1,20 @@
 {
   "Nom": "Juruno",
+  "values": {
+    "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+    "Résumé IA": "Les juruno, ou bulles éphémères, sont des plantes rondes qui deviennent transparentes en grandissant, révélant des graines multicolores. Elles sont appréciées pour leur beauté et leur explosion violente à la mort, perçue comme un présage. Leur mode de reproduction se fait par éclatement, dispersant les graines, qui peuvent germer dans des milieux favorables. Plus l'environnement est riche, plus elles peuvent atteindre des dimensions impressionnantes.",
+    "Type": "Flore",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1b36e4d2-1b45-8096-9390-e449a9639c11"
 }

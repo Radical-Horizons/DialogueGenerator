@@ -1,8 +1,12 @@
 [
   {
     "Nom": "Autres",
+    "values": {},
     "sections": {
-      "_general": "Objectif : regrouper ici les rapports qui ne rentrent pas proprement dans JRPG/CRPG/TRPG/Action-RPG."
+      "preamble": "Objectif : regrouper ici les rapports qui ne rentrent pas proprement dans JRPG/CRPG/TRPG/Action-RPG."
+    },
+    "section_titles": {
+      "preamble": "Préambule"
     },
     "notion_page_id": "fb503b69-a0d2-4ae5-afa4-986bd9fa7186"
   }

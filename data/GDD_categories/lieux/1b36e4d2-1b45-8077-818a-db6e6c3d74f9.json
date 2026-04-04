@@ -1,7 +1,28 @@
 {
   "Nom": "La zone atemporelle",
+  "values": {
+    "Contenu par": "1a96e4d2-1b45-8090-89eb-cd5168580e06",
+    "Date de création": "2025-03-11T13:22:00.000Z",
+    "Dernière modification": "2026-04-03T18:05:00.000Z",
+    "Niveau d’IA": "humain",
+    "Qualité": "7.5",
+    "Résumé": "Zone atemporelle, aussi appelée Mailirasak, est un lieu dangereux avec des créatures primordiales agressives, représentant une menace pour les écosystèmes environnants. Son nom provient d'une plante envahissante, la racine sanguine. Des sections sur l'histoire, l'apparence, les éléments de jeu, la géographie et les voies d'accès sont également mentionnées.",
+    "Rêveur local": "1c76e4d2-1b45-805a-b457-e64ae338d6f9",
+    "Taille": "Secteur",
+    "Type": "Lieu principal",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nParfois nommée Mailirasak, les racines de l'effroi, cette zone atemporelle est longtemps restée en sommeil dans les étages supérieurs du pilier d'Amath'ka. Pourtant, ce lieu, caractérisé par l'agressivité toujours intacte des créatures primordiales qui l'habite, n'a cessé de croître depuis la disparition des raephon. Elle représente un danger potentiel pour les écosystèmes déjà en place, et plus encore pour ceux qui voudraient progresser vers les sommets du pilieu. Le nom de racines de l'effroi, quant à lui, vient d'une plante rouge particulièrement envahissante parfois nommée racine sanguine.\n\n# Identité & Vue d'ensemble\n\n**Histoire du lieu**\n\n**Apparence**\n\n# Eléments de jeu\n\n**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**\n\n# Géographie & Environnement\n\n**Géographie**\n\n**Voies d’accès**"
+    "preamble": "**Résumé de la fiche**\nParfois nommée Mailirasak, les racines de l'effroi, cette zone atemporelle est longtemps restée en sommeil dans les étages supérieurs du pilier d'Amath'ka. Pourtant, ce lieu, caractérisé par l'agressivité toujours intacte des créatures primordiales qui l'habite, n'a cessé de croître depuis la disparition des raephon. Elle représente un danger potentiel pour les écosystèmes déjà en place, et plus encore pour ceux qui voudraient progresser vers les sommets du pilieu. Le nom de racines de l'effroi, quant à lui, vient d'une plante rouge particulièrement envahissante parfois nommée racine sanguine.",
+    "identite____vue_d_ensemble": "**Histoire du lieu**\n\n**Apparence**",
+    "ele_ments_de_jeu": "**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**",
+    "ge_ographie___environnement": "**Géographie**\n\n**Voies d’accès**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "identite____vue_d_ensemble": "Identité & Vue d'ensemble",
+    "ele_ments_de_jeu": "Eléments de jeu",
+    "ge_ographie___environnement": "Géographie & Environnement"
   },
   "notion_page_id": "1b36e4d2-1b45-8077-818a-db6e6c3d74f9"
 }

@@ -1,7 +1,21 @@
 {
   "Nom": "Mange-sable",
+  "values": {
+    "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+    "Présence dans Escelion": "Endémique",
+    "Résumé IA": "Plante endémique à grande tige capable de dissoudre des minerais, avec des feuilles bleu foncé. Elle possède des organes en forme de récipients remplis d'un liquide noir acide, utilisé par les nomades pour le travail artisanal. Elle se nourrit en convertissant le sable et les roches en nutriments pour sa croissance.",
+    "Type": "Flore",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1b36e4d2-1b45-8068-a378-d5f8968de470"
 }

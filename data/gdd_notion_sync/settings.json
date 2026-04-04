@@ -679,9 +679,7 @@
       "category_file": "Évaluation_des_aspects_culturels_d'Alteir.json"
     }
   ],
-  "included_categories": [
-    "Actes.json"
-  ],
+  "included_categories": [],
   "mirror_rebuild_on_full_sync": false,
   "archive_retention_count": 10
 }

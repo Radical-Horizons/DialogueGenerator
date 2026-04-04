@@ -1,7 +1,27 @@
 {
   "Nom": "Deimos",
+  "values": {
+    "Biologie": "Avancée",
+    "Culture": "Nulle",
+    "Espérance de vie": "500",
+    "Lieux de vie": "2236e4d2-1b45-8093-aefc-fb4738deebb5",
+    "Présence dans Escelion": "Rare",
+    "Règne (ou classe)": "7f921af6-de75-4487-9438-6caca8f43eac",
+    "Résumé IA": "Les Deimos sont des titans arthropodes géants, bioluminescents, qui influencent les rythmes temporels des civilisations d'Escelion. Leur morphologie unique, sans ailes, repose sur des pattes-ventouses et des tendrils semi-gazeux. Ils jouent un rôle central dans la culture locale, étant vénérés et intégrés dans les calendriers et mythologies. Leur biologie complexe leur permet de capturer de l'énergie et de se reproduire par des cycles reproductifs élaborés, tout en interagissant symbiotiquement avec leur environnement.",
+    "Surnaturel": "Faible",
+    "Technologie": "Nulle",
+    "Type": "Faune",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\n# Besoin de l’intrigue\n\n**Apparence**\n\n**Sous-espèces**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Métabolisme**\n\n**Fonctionnement avec l’écosystème**\n\n**Répartition par région**"
+    "preamble": "**Résumé de la fiche**",
+    "besoin_de_l_intrigue": "**Apparence**\n\n**Sous-espèces**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Métabolisme**\n\n**Fonctionnement avec l’écosystème**\n\n**Répartition par région**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l’intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1ba6e4d2-1b45-8086-b247-d253799b8241"
 }

@@ -1,9 +1,8 @@
 [
   {
     "Nom": "Carte d’Escelion",
-    "sections": {
-      "_general": ""
-    },
+    "values": {},
+    "sections": {},
     "notion_page_id": "1cd6e4d2-1b45-80eb-9373-fb9b774a47c2"
   }
 ]

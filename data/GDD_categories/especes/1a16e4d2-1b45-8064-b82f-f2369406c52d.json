@@ -1,7 +1,31 @@
 {
   "Nom": "Seigneurs Originels",
+  "values": {
+    "Biologie": "Avancée",
+    "Culture": "Avancée",
+    "Espérance de vie": "99999",
+    "Lieux de vie": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+    "Présence dans Escelion": "Rarissime",
+    "Relation assets": "e8fef0c3-7886-498a-aaef-d86f03ff3e1a",
+    "Représentants": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+    "Règne (ou classe)": "484cd421-db84-425a-84eb-2414d5f042c5",
+    "Résumé IA": "Les Seigneurs Originels sont des créatures immortelles, autrefois des dieux, maintenant exilées sur Escelion après avoir perdu leurs pouvoirs suite à la destruction de leur monde. Créés comme \"antivirus\" contre les Paradoxes, ils ont développé leur propre conscience et ont formé un panthéon sur Merid. Bien qu'immortels, leurs capacités sont désormais limitées, et ils doivent s'adapter à leur nouvel environnement tout en conservant des relations complexes avec les civilisations mortelles.",
+    "Surnaturel": "Avancée",
+    "Technologie": "Avancée",
+    "Type": "Espèce civilisée",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Biologie\n\n**Physiologie**\n\n**Reproduction et croissance**\n\n**Mode d'alimentation**\n\n# Société et culture\n\n**Histoire de l'Espèce**\n\n**Culture et traditions**\n\n**Costumes et ornements**\n\n**Organisation sociale**\n\n**Relations extra-spécifiques**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Distribution géographique**\n\n**Relations avec l'écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "biologie": "**Physiologie**\n\n**Reproduction et croissance**\n\n**Mode d'alimentation**",
+    "socie_te__et_culture": "**Histoire de l'Espèce**\n\n**Culture et traditions**\n\n**Costumes et ornements**\n\n**Organisation sociale**\n\n**Relations extra-spécifiques**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Distribution géographique**\n\n**Relations avec l'écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "biologie": "Biologie",
+    "socie_te__et_culture": "Société et culture",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1a16e4d2-1b45-8064-b82f-f2369406c52d"
 }

@@ -1,8 +1,12 @@
 [
   {
     "Nom": "Personnages (stats)",
+    "values": {},
     "sections": {
-      "_general": "**Espace d’équilibrage**\nPoint d’entrée pour les feuilles de perso et les caracs. La base vit dans la sous‑page ci‑dessous.\n### Guide rapide"
+      "preamble": "**Espace d’équilibrage**\nPoint d’entrée pour les feuilles de perso et les caracs. La base vit dans la sous‑page ci‑dessous."
+    },
+    "section_titles": {
+      "preamble": "Préambule"
     },
     "notion_page_id": "d9b1a891-6136-47b1-949e-e289cad6fc9c"
   }

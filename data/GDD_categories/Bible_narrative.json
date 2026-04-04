@@ -1,43 +1,47 @@
 [
   {
     "Nom": "Lieux",
+    "values": {},
     "sections": {
-      "_general": "**En cas d’évolution d’un lieu**\nVos lieux peuvent évoluer au cours de l’histoire. Exemple : Village → Ruine → Reconstruction du Village)\n• - Si ses évolutions sont mineures vous pouvez les intégrer directement dans la page lieu dédiée.\n• - Si les évolutions sont majeures, dupliquez le lieu en question, ajoutez son nouvel état à son Nom et modifiez la fiche en conséquence des évolutions."
+      "preamble": "**En cas d’évolution d’un lieu**\nVos lieux peuvent évoluer au cours de l’histoire. Exemple : Village → Ruine → Reconstruction du Village)\n• - Si ses évolutions sont mineures vous pouvez les intégrer directement dans la page lieu dédiée.\n• - Si les évolutions sont majeures, dupliquez le lieu en question, ajoutez son nouvel état à son Nom et modifiez la fiche en conséquence des évolutions."
+    },
+    "section_titles": {
+      "preamble": "Préambule"
     },
     "notion_page_id": "1886e4d2-1b45-8142-b6f9-fc6612574788"
   },
   {
     "Nom": "Personnages",
-    "sections": {
-      "_general": ""
-    },
+    "values": {},
+    "sections": {},
     "notion_page_id": "1886e4d2-1b45-8167-9ea4-df6420d85e9e"
   },
   {
     "Nom": "Faunes & Flores",
-    "sections": {
-      "_general": ""
-    },
+    "values": {},
+    "sections": {},
     "notion_page_id": "1886e4d2-1b45-8169-8546-edbba6672371"
   },
   {
     "Nom": "Communautés",
-    "sections": {
-      "_general": ""
-    },
+    "values": {},
+    "sections": {},
     "notion_page_id": "1886e4d2-1b45-81cf-8248-f410784e609b"
   },
   {
     "Nom": "Objets",
-    "sections": {
-      "_general": ""
-    },
+    "values": {},
+    "sections": {},
     "notion_page_id": "1886e4d2-1b45-81de-b98c-ea3ab22177ea"
   },
   {
     "Nom": "Références",
+    "values": {},
     "sections": {
-      "_general": "**Comment utiliser les références ?**\nElles servent autant pour du visuel que pour tout autre élément de votre jeu. \nLe but ici est de les recenser à un endroit et d’expliquer ce en quoi vous voulez vous inspirer, que ce soit l’UI, la musique, une mécanique de gameplay ou autre."
+      "preamble": "**Comment utiliser les références ?**\nElles servent autant pour du visuel que pour tout autre élément de votre jeu. \nLe but ici est de les recenser à un endroit et d’expliquer ce en quoi vous voulez vous inspirer, que ce soit l’UI, la musique, une mécanique de gameplay ou autre."
+    },
+    "section_titles": {
+      "preamble": "Préambule"
     },
     "notion_page_id": "1886e4d2-1b45-81f5-9338-ffa7a8ab36d0"
   }

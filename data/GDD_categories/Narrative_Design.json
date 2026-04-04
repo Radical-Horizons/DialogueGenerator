@@ -1,8 +1,12 @@
 [
   {
     "Nom": "Narrative Design",
+    "values": {},
     "sections": {
-      "_general": "**Conseil de navigation**\n• - Commencez par lire les pages Vision et État des lieux pour comprendre les fondements du projet.\n• - Explorez ensuite les bases de données narratives selon vos besoins.\n• - Consultez le Kanban pour voir les tâches actuelles et utilisez les Guides pour approfondir des aspects spécifiques.\nPlus de détails dans Onboarding.\nDashboard Narratif - Vue d'ensemble de l'avancement."
+      "preamble": "**Conseil de navigation**\n• - Commencez par lire les pages Vision et État des lieux pour comprendre les fondements du projet.\n• - Explorez ensuite les bases de données narratives selon vos besoins.\n• - Consultez le Kanban pour voir les tâches actuelles et utilisez les Guides pour approfondir des aspects spécifiques.\nPlus de détails dans Onboarding.\nDashboard Narratif - Vue d'ensemble de l'avancement."
+    },
+    "section_titles": {
+      "preamble": "Préambule"
     },
     "notion_page_id": "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
   }

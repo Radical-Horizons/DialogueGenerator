@@ -4,7 +4,7 @@ PyYAML>=6.0 # Potentiellement utile pour configuration YAML (non utilisé actuel
 jinja2>=3.0
 tiktoken>=0.4 
 pytest>=7.0
-pytest-asyncio # Ajout pour le support asyncio dans pytest 
+pytest-asyncio>=0.24.0  # requis pour asyncio_default_fixture_loop_scope (pytest.ini) ; versions <0.24 → erreur CLI pytest
 pydantic>=2.0 # Ajout pour les modèles de données et la validation de schéma 
 pytest-cov>=2.12 # Ajout pour la couverture de tests 
 pytest-mock>=3.6 # Ajout pour la fixture 'mocker'

@@ -1,7 +1,40 @@
 {
   "Nom": "L’Enlumineur",
+  "values": {
+    "Actes de présence": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+    "Alias": "Le Sculpteur de Chair Vive, Le Tisserand de Visages, L'Artiste des Supplices, Le Peintre Vivant",
+    "Archétype littéraire": "Artiste / Cynique",
+    "Axe idéologique": "Contrôle",
+    "Date de création": "2025-03-01T00:18:00.000Z",
+    "Date de naissance": "3390",
+    "Dernière modification": "2026-04-03T17:28:00.000Z",
+    "Espèce": "1a16e4d2-1b45-8099-be36-db66acb76390",
+    "Genre": "Masculin",
+    "Lieux de vie": "1b36e4d2-1b45-8028-aa6f-ef3bb6a60ed3",
+    "Niveau d’IA": "humain",
+    "Occupation": "Artiste de la Chair",
+    "Qualité": "2.5",
+    "Relations principales": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+    "Résumé": "L’Enlumineur est un artiste de la chair qui sculpte des fresques cauchemardesques à partir d'individus vivants, considérant cela comme un sacrifice ultime pour l'art. Il se distingue par son apparence, ne cachant que sa tête dans un halo de ténèbres, tandis que son corps est un amas de tentacules. Son passé est marqué par des événements traumatisants, notamment la transformation de ses compagnons en œuvres d'art vivantes. Les relations et les motivations du personnage restent à développer, tout comme son impact sur l'histoire et son évolution narrative.",
+    "Type": "Antagoniste",
+    "Épithète": "Le Masque de chair",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nL’Enlumineur est un artiste de la chair, une célébrité qui sculpte les individus encore vivants en fresques cauchemardesques. Il y voit l’expression de l’ultime sacrifice de lui-même et des autres au nom de l’art, pour rendre vivants les lieux les plus désolés.\n\n# Caractéristiques\n\n**Apparence**\nContrairement à ses semblables, l’Enlumineur ne dissimule qu’une partie de son corps (sa tête) dans son halo de ténèbres. Il montre constamment le reste de son corps, un amas de tentacules vêtu d’une tunique de visages cousus.\n\n**Qualités**\n\n**Défauts**\n\n**Contradictions**\n\n# Background\n\n**Contexte**\n\n**Valeurs**\n\n**Évènements marquants**\nDe sa vie d’enfant :\nDe sa vie d’ado :\nDe sa vie d’adulte :\n• - A transformé les compagnons d’Eonundé Alinen-Egan en œuvres d’art vivantes pour avoir tenté d’interrompre son travail.\n• - S’apprête à faire de même avec Eonundé quand Uresaïr et l’Ethérée arrivent.\n\n**Relations**\nA sa famille :\nAux autres :\n\n**Fluff**\nRajouter tout ce qui vous semble pertinent pour décrire le personnage, comme ses centres d’intérêt, ses capacités magiques, etc…\n\n**Envie vs Besoin**\nCe qu’il veut : \nCe dont il a besoin : \n\n# Arcs Narratifs\n\n**Grandes étapes**\nÉtat initial du personnage :\nObjectif à atteindre :\nObstacles rencontrés :\nÉtat final du personnage : \n\n**Point de bascule**\n\n**Étapes de l’évolution reprenant le point de bascule**\n1. Point de bascule\n1. État final du personnage\n\n**Transformation**\nChangements internes :\nChangements externes :\n\n**Impact sur l'histoire**\n\n# Dialogue Type\n\n Guide des dialogues du jeu\n\n**Registre de langage du personnage**\n\n**Tons de voix et contextes**\n\n**Champs lexicaux utilisés**\n\n**Expressions courantes**\n\n# Dialogue du personnage\n\n**Le tableau ci-dessous permet d’analyser toutes les répliques de votre personnage dans les différentes scènes, afin de voir s’il garde ou non une cohérence de langage.**"
+    "preamble": "**Résumé de la fiche**\nL’Enlumineur est un artiste de la chair, une célébrité qui sculpte les individus encore vivants en fresques cauchemardesques. Il y voit l’expression de l’ultime sacrifice de lui-même et des autres au nom de l’art, pour rendre vivants les lieux les plus désolés.",
+    "caracte_ristiques": "**Apparence**\nContrairement à ses semblables, l’Enlumineur ne dissimule qu’une partie de son corps (sa tête) dans son halo de ténèbres. Il montre constamment le reste de son corps, un amas de tentacules vêtu d’une tunique de visages cousus.\n\n**Qualités**\n\n**Défauts**\n\n**Contradictions**",
+    "background": "**Contexte**\n\n**Valeurs**\n\n**Évènements marquants**\nDe sa vie d’enfant :\nDe sa vie d’ado :\nDe sa vie d’adulte :\n• - A transformé les compagnons d’Eonundé Alinen-Egan en œuvres d’art vivantes pour avoir tenté d’interrompre son travail.\n• - S’apprête à faire de même avec Eonundé quand Uresaïr et l’Ethérée arrivent.\n\n**Relations**\nA sa famille :\nAux autres :\n\n**Fluff**\nRajouter tout ce qui vous semble pertinent pour décrire le personnage, comme ses centres d’intérêt, ses capacités magiques, etc…\n\n**Envie vs Besoin**\nCe qu’il veut : \nCe dont il a besoin :",
+    "arcs_narratifs": "**Grandes étapes**\nÉtat initial du personnage :\nObjectif à atteindre :\nObstacles rencontrés :\nÉtat final du personnage : \n\n**Point de bascule**\n\n**Étapes de l’évolution reprenant le point de bascule**\n1. Point de bascule\n1. État final du personnage\n\n**Transformation**\nChangements internes :\nChangements externes :\n\n**Impact sur l'histoire**",
+    "dialogue_type": "Guide des dialogues du jeu\n\n**Registre de langage du personnage**\n\n**Tons de voix et contextes**\n\n**Champs lexicaux utilisés**\n\n**Expressions courantes**",
+    "dialogue_du_personnage": "**Le tableau ci-dessous permet d’analyser toutes les répliques de votre personnage dans les différentes scènes, afin de voir s’il garde ou non une cohérence de langage.**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "caracte_ristiques": "Caractéristiques",
+    "background": "Background",
+    "arcs_narratifs": "Arcs Narratifs",
+    "dialogue_type": "Dialogue Type",
+    "dialogue_du_personnage": "Dialogue du personnage"
   },
   "notion_page_id": "1a96e4d2-1b45-8077-b534-dae9777c6a12"
 }
