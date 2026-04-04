@@ -9,11 +9,8 @@ from typing import Any, Optional
 from jose import JWTError, jwt
 
 from api.config.security_config import get_security_config
-from api.utils.debug_agent_ndjson import write_agent_debug_log
 
 logger = logging.getLogger(__name__)
-
-_DEBUG_LOG = "debug-d08897.log"
 
 ALGORITHM = "HS256"
 SSE_TOKEN_TYPE = "sse_job"
@@ -61,42 +58,9 @@ def verify_sse_job_token(token: str, expected_job_id: str) -> Optional[dict[str,
         )
     except JWTError as e:
         logger.debug("SSE token invalide: %s", e)
-        # region agent log
-        write_agent_debug_log(
-            log_filename=_DEBUG_LOG,
-            hypothesis_id="H1",
-            location="sse_job_token.py:verify_sse_job_token",
-            message="jwt_decode_failed",
-            data={"expected_job_id": expected_job_id, "error_type": type(e).__name__},
-        )
-        # endregion agent log
         return None
     if payload.get("typ") != SSE_TOKEN_TYPE:
-        # region agent log
-        write_agent_debug_log(
-            log_filename=_DEBUG_LOG,
-            hypothesis_id="H1",
-            location="sse_job_token.py:verify_sse_job_token",
-            message="wrong_typ",
-            data={
-                "expected_job_id": expected_job_id,
-                "typ": payload.get("typ"),
-            },
-        )
-        # endregion agent log
         return None
     if payload.get("job_id") != expected_job_id:
-        # region agent log
-        write_agent_debug_log(
-            log_filename=_DEBUG_LOG,
-            hypothesis_id="H1",
-            location="sse_job_token.py:verify_sse_job_token",
-            message="job_id_mismatch",
-            data={
-                "expected_job_id": expected_job_id,
-                "token_job_id": payload.get("job_id"),
-            },
-        )
-        # endregion agent log
         return None
     return payload

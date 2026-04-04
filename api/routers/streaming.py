@@ -18,7 +18,6 @@ Types d'événements :
 import logging
 import json
 import asyncio
-import os
 from typing import Annotated, AsyncGenerator, Dict, Any, NamedTuple, Optional
 from urllib.parse import quote_plus
 
@@ -35,11 +34,8 @@ from api.exceptions import AuthenticationException
 from api.config.security_config import get_security_config
 from api.utils.sse_job_token import create_sse_job_token, verify_sse_job_token
 from api.middleware.billable_user_context import push_billable_user_id, reset_billable_user_id
-from api.utils.debug_agent_ndjson import write_agent_debug_log
 
 logger = logging.getLogger(__name__)
-
-_DEBUG_LOG = "debug-d08897.log"
 
 router = APIRouter()
 
@@ -119,21 +115,6 @@ async def authenticate_sse_stream(
         )
 
     request_id = getattr(request.state, "request_id", "unknown")
-    # region agent log
-    write_agent_debug_log(
-        log_filename=_DEBUG_LOG,
-        hypothesis_id="H3",
-        location="streaming.py:authenticate_sse_stream:entry",
-        message="sse_auth_request",
-        data={
-            "pid": os.getpid(),
-            "job_id": job_id,
-            "has_sse_token": bool(sse_token),
-            "sse_token_len": len(sse_token) if sse_token else 0,
-            "has_bearer": credentials is not None,
-        },
-    )
-    # endregion agent log
 
     if sse_token:
         payload = verify_sse_job_token(sse_token, job_id)
@@ -142,29 +123,7 @@ async def authenticate_sse_stream(
             if username:
                 user = auth_service.get_user_by_username(username)
                 if user:
-                    # region agent log
-                    write_agent_debug_log(
-                        log_filename=_DEBUG_LOG,
-                        hypothesis_id="H1",
-                        location="streaming.py:authenticate_sse_stream",
-                        message="auth_ok_sse_token",
-                        data={
-                            "pid": os.getpid(),
-                            "job_id": job_id,
-                            "username": username,
-                        },
-                    )
-                    # endregion agent log
                     return SSEStreamAuth(user=user, authenticated_via_sse_token=True)
-                # region agent log
-                write_agent_debug_log(
-                    log_filename=_DEBUG_LOG,
-                    hypothesis_id="H2",
-                    location="streaming.py:authenticate_sse_stream",
-                    message="user_not_found_after_valid_jwt",
-                    data={"pid": os.getpid(), "job_id": job_id, "username": username},
-                )
-                # endregion agent log
 
     if credentials is not None:
         pl = auth_service.verify_token(credentials.credentials, token_type="access")
@@ -173,30 +132,8 @@ async def authenticate_sse_stream(
             if username:
                 user = auth_service.get_user_by_username(username)
                 if user:
-                    # region agent log
-                    write_agent_debug_log(
-                        log_filename=_DEBUG_LOG,
-                        hypothesis_id="H5",
-                        location="streaming.py:authenticate_sse_stream",
-                        message="auth_ok_bearer",
-                        data={"pid": os.getpid(), "job_id": job_id},
-                    )
-                    # endregion agent log
                     return SSEStreamAuth(user=user, authenticated_via_sse_token=False)
 
-    # region agent log
-    write_agent_debug_log(
-        log_filename=_DEBUG_LOG,
-        hypothesis_id="H1",
-        location="streaming.py:authenticate_sse_stream",
-        message="auth_failed_401_pending",
-        data={
-            "pid": os.getpid(),
-            "job_id": job_id,
-            "had_sse_token": bool(sse_token),
-        },
-    )
-    # endregion agent log
     raise AuthenticationException(
         message="Authentification requise pour le flux SSE (sse_token ou Bearer)",
         request_id=request_id,
@@ -441,15 +378,6 @@ async def create_generation_job(
         job_data.model_dump(mode='json'),
         owner_username=owner_username,
     )
-    # region agent log
-    write_agent_debug_log(
-        log_filename=_DEBUG_LOG,
-        hypothesis_id="H4",
-        location="streaming.py:create_generation_job",
-        message="job_created",
-        data={"pid": os.getpid(), "job_id": job_id, "owner": owner_username},
-    )
-    # endregion agent log
 
     sse_token = create_sse_job_token(job_id=job_id, username=owner_username)
     stream_url = (
@@ -490,19 +418,6 @@ async def stream_job(
     """
     job_manager = get_job_manager()
     job = job_manager.get_job(job_id)
-    # region agent log
-    write_agent_debug_log(
-        log_filename=_DEBUG_LOG,
-        hypothesis_id="H4",
-        location="streaming.py:stream_job",
-        message="stream_job_lookup",
-        data={
-            "pid": os.getpid(),
-            "job_id": job_id,
-            "job_found": bool(job),
-        },
-    )
-    # endregion agent log
 
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
