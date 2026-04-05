@@ -39,7 +39,7 @@ import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
 import { getChoiceIndexFromSourceHandle } from '../../utils/choiceHandleIndex'
-import { isStructuralValidationErrorType } from '../../utils/graphStructuralValidation'
+import { getValidationHighlightKind } from '../../utils/graphStructuralValidation'
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
 const GraphCanvasInner = memo(function GraphCanvasInner() {
@@ -419,22 +419,29 @@ export const GraphCanvas = memo(function GraphCanvas() {
       const nodeErrors = validationErrors.filter((err) => err.node_id === node.id)
       const errors = nodeErrors.filter((err) => err.severity === 'error')
       const warnings = nodeErrors.filter((err) => err.severity === 'warning')
-      const hasStructuralError = errors.some((e) => isStructuralValidationErrorType(e.type))
+      const highlightKind = getValidationHighlightKind(errors.map((e) => e.type))
+      const hasStructuralHighlight = highlightKind === 'structural'
+      const hasContentCompletenessHighlight = highlightKind === 'content'
       const isHighlighted = highlightedNodeIds.includes(node.id)
       const isInCycle = highlightedCycleNodes.includes(node.id)
+      const cycleOverlay =
+        isInCycle && !hasStructuralHighlight && !hasContentCompletenessHighlight
       return {
         ...node,
         selected: selectedNodeIds.includes(node.id),
         style: {
           ...node.style,
-          ...(isInCycle &&
-            !hasStructuralError && {
-              border: '3px solid orange',
-              backgroundColor: 'rgba(255, 165, 0, 0.2)',
-            }),
-          ...(hasStructuralError && {
+          ...(cycleOverlay && {
+            border: '3px solid orange',
+            backgroundColor: 'rgba(255, 165, 0, 0.2)',
+          }),
+          ...(hasStructuralHighlight && {
             border: `2px solid ${theme.state.error.border}`,
             boxShadow: `0 0 0 1px ${theme.state.error.border}`,
+          }),
+          ...(hasContentCompletenessHighlight && {
+            border: `2px solid ${theme.state.warning.border}`,
+            boxShadow: `0 0 0 1px ${theme.state.warning.border}`,
           }),
         },
         data: {

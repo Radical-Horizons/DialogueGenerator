@@ -3,7 +3,10 @@ import time
 
 import pytest
 
-from services.graph_validation_service import GraphValidationService, ValidationResult
+from services.graph_validation_service import (
+    GraphValidationService,
+    ValidationResult,
+)
 
 
 class TestValidateCycles:
@@ -211,6 +214,44 @@ class TestUnityDialogueStructureFr36:
         ]
         result = GraphValidationService.validate_graph(nodes, [])
         assert not any(e.type == "missing_display_name" for e in result.errors)
+        assert not any(e.type == "missing_dialogue_text" for e in result.errors)
+
+
+class TestFr37ContentCompleteness:
+    """Messages FR37 et exemptions END (story 4.2)."""
+
+    def test_empty_dialogue_content_message(self):
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogueNode",
+                "data": {
+                    "id": "D1",
+                    "displayName": "Scène",
+                    "choices": [],
+                },
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        err = next(e for e in result.errors if e.type == "missing_dialogue_text")
+        assert "contenu vide" in err.message
+        assert "ni dialogue ni choix" in err.message
+
+    def test_missing_test_message(self):
+        nodes = [{"id": "T1", "type": "testNode", "data": {"id": "T1"}}]
+        result = ValidationResult()
+        GraphValidationService._validate_test_node_content(nodes, result)
+        assert len(result.errors) == 1
+        err = result.errors[0]
+        assert err.type == "missing_test"
+        assert err.node_id == "T1"
+        assert "Nœud test [T1]" in err.message
+        assert "test d'attribut manquant" in err.message
+
+    def test_end_node_empty_no_dialogue_text_error(self):
+        nodes = [{"id": "END", "type": "endNode", "data": {"id": "END"}}]
+        result = ValidationResult()
+        GraphValidationService._validate_unity_dialogue_structure(nodes, result)
         assert not any(e.type == "missing_dialogue_text" for e in result.errors)
 
 

@@ -612,6 +612,65 @@ class TestGraphValidate:
         t2 = {e["type"] for e in r2.json()["errors"]}
         assert "missing_stable_id" in t2
 
+    def test_validate_graph_fr37_empty_dialogue_message(self, client: TestClient):
+        """POST validate : message FR37 pour dialogue sans line ni choix texte (AC 4.2)."""
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogue",
+                "data": {
+                    "id": "D1",
+                    "label": "Scène",
+                    "speaker": "PNJ",
+                    "choices": [],
+                },
+                "position": {"x": 0, "y": 0},
+            },
+        ]
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate",
+            json={"nodes": nodes, "edges": []},
+        )
+        assert response.status_code == 200
+        errors = response.json()["errors"]
+        err = next(e for e in errors if e.get("type") == "missing_dialogue_text")
+        msg = err.get("message", "")
+        assert "contenu vide" in msg
+        assert "ni dialogue ni choix" in msg
+
+    def test_validate_graph_fr37_missing_test_message(self, client: TestClient):
+        """POST validate : message FR37 pour testNode sans attribut test."""
+        nodes = [
+            {
+                "id": "START",
+                "type": "dialogue",
+                "data": {
+                    "id": "START",
+                    "label": "Début",
+                    "line": "Hello",
+                },
+                "position": {"x": 0, "y": 0},
+            },
+            {
+                "id": "T1",
+                "type": "testNode",
+                "data": {"id": "T1"},
+                "position": {"x": 100, "y": 0},
+            },
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "T1"}]
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate",
+            json={"nodes": nodes, "edges": edges},
+        )
+        assert response.status_code == 200
+        errors = response.json()["errors"]
+        err = next(e for e in errors if e.get("type") == "missing_test")
+        assert err.get("node_id") == "T1"
+        msg = err.get("message", "")
+        assert "Nœud test [T1]" in msg
+        assert "test d'attribut manquant" in msg
+
 
 @pytest.mark.api
 @pytest.mark.p1

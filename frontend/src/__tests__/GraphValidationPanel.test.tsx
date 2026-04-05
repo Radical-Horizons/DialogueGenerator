@@ -50,6 +50,24 @@ describe('GraphValidationPanel (FR36)', () => {
     expect(focusNodeMock).toHaveBeenCalledWith('n1')
   })
 
+  it('affiche le libellé FR37 pour missing_dialogue_text et bouton Éditer le nœud', () => {
+    const errors = [
+      {
+        type: 'missing_dialogue_text',
+        node_id: 'n1',
+        message: 'Nœud [n1] : contenu vide (ni dialogue ni choix)',
+        severity: 'error',
+      },
+    ]
+    render(
+      <GraphValidationPanel validationErrors={errors} reactFlowInstance={null} />
+    )
+    expect(screen.getByText(/Contenu dialogue vide \(FR37\)/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /Éditer le nœud/i }))
+    expect(setSelectedNodeMock).toHaveBeenCalledWith('n1')
+    expect(focusNodeMock).toHaveBeenCalledWith('n1')
+  })
+
   it('affiche Générer stableID pour missing_stable_id lié à data.id', () => {
     const errors = [
       {

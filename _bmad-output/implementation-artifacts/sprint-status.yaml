@@ -116,7 +116,7 @@ development_status:
   epic-17-retrospective: optional
   epic-4: in-progress
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done
-  4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: backlog
+  4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: review
   4-3-détecter-contradictions-lore-explicites-faits-gdd-conflictuels-fr38: backlog
   4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39: backlog
   4-5-détecter-nœuds-orphelins-non-connectés-au-graphe-fr40: backlog

@@ -87,6 +87,69 @@ describe('GraphCanvas validation structurelle FR36', () => {
     )
   })
 
+  it('applique bordure complétude (orange) pour missing_dialogue_text seul (FR37)', () => {
+    useGraphStore.setState({
+      nodes: [
+        {
+          id: 'n1',
+          type: 'dialogueNode',
+          position: { x: 0, y: 0 },
+          data: { id: 'n1', displayName: 'OK', line: '' },
+        },
+      ],
+      edges: [],
+      validationErrors: [
+        {
+          type: 'missing_dialogue_text',
+          node_id: 'n1',
+          message: 'Nœud [n1] : contenu vide (ni dialogue ni choix)',
+          severity: 'error' as const,
+        },
+      ],
+    })
+
+    render(React.createElement(GraphCanvas))
+
+    const rfNodes = capturedReactFlowProps?.nodes as Array<{ id: string; style?: { border?: string } }>
+    const n1 = rfNodes!.find((n) => n.id === 'n1')
+    expect(String(n1?.style?.border)).toContain(theme.state.warning.border)
+    expect(String(n1?.style?.border)).not.toContain(theme.state.error.border)
+  })
+
+  it('priorise le rouge structure si missing_display_name et missing_dialogue_text (FR36 > FR37)', () => {
+    useGraphStore.setState({
+      nodes: [
+        {
+          id: 'n1',
+          type: 'dialogueNode',
+          position: { x: 0, y: 0 },
+          data: { id: 'n1', line: '' },
+        },
+      ],
+      edges: [],
+      validationErrors: [
+        {
+          type: 'missing_display_name',
+          node_id: 'n1',
+          message: 'Nœud [n1] : DisplayName manquant',
+          severity: 'error' as const,
+        },
+        {
+          type: 'missing_dialogue_text',
+          node_id: 'n1',
+          message: 'Nœud [n1] : contenu vide (ni dialogue ni choix)',
+          severity: 'error' as const,
+        },
+      ],
+    })
+
+    render(React.createElement(GraphCanvas))
+
+    const rfNodes = capturedReactFlowProps?.nodes as Array<{ id: string; style?: { border?: string } }>
+    const n1 = rfNodes!.find((n) => n.id === 'n1')
+    expect(String(n1?.style?.border)).toContain(theme.state.error.border)
+  })
+
   it('ne surligne pas en erreur structurelle pour broken_reference (hors FR36)', () => {
     useGraphStore.setState({
       nodes: [

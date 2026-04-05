@@ -139,7 +139,11 @@ def _is_dialogue_like(node_type: Optional[str]) -> bool:
 
 
 def _choices_have_exploitable_text(choices: Any) -> bool:
-    """True si la liste contient au moins un choix avec texte non vide (FR36, aligné UnityDialogueChoice.text)."""
+    """True si la liste contient au moins un choix avec texte non vide (UnityDialogueChoice.text).
+
+    Partagé entre FR36 (champs requis / cohérence) et FR37 (complétude du contenu) : la même
+    définition de « texte exploitable » évite des divergences tests / prod.
+    """
     if not isinstance(choices, list):
         return False
     for item in choices:
@@ -216,7 +220,13 @@ class GraphValidationService:
     def _validate_unity_dialogue_structure(
         nodes: List[Dict[str, Any]], result: ValidationResult
     ) -> None:
-        """Vérifie DisplayName, cohérence data.id et texte pour les nœuds dialogue (FR36).
+        """Vérifie DisplayName, cohérence data.id et texte pour les nœuds dialogue.
+
+        - **FR36 (structure)** : DisplayName, alignement ``data.id`` / racine, champs requis.
+        - **FR37 (complétude contenu)** : absence de ``line`` et de choix au texte exploitable ;
+          message et surlignage côté client distincts des seules erreurs « structure ».
+
+        ``endNode`` / ``START`` / ``END`` : pas de règle texte dialogue (END vide exclu, AC 4.2).
 
         Complexité O(n) sur le nombre de nœuds (une passe, sans re-parcours).
         """
@@ -267,12 +277,12 @@ class GraphValidationService:
                 result.add_error(
                     "missing_dialogue_text",
                     node_id,
-                    f"Nœud [{node_id}] : texte de dialogue manquant (line ou choices requis)",
+                    f"Nœud [{node_id}] : contenu vide (ni dialogue ni choix)",
                 )
 
     @staticmethod
     def _validate_test_node_content(nodes: List[Dict[str, Any]], result: ValidationResult):
-        """Valide que les nœuds de test ont un attribut test."""
+        """Valide que les nœuds de test ont un attribut ``test`` (FR37 complétude, type ``missing_test``)."""
         for node in nodes:
             node_id = _node_id(node)
             node_type = _node_type(node) or "dialogueNode"
@@ -286,7 +296,7 @@ class GraphValidationService:
                     result.add_error(
                         "missing_test",
                         node_id,
-                        f"Nœud de test '{node_id}' n'a pas de test d'attribut défini",
+                        f"Nœud test [{node_id}] : test d'attribut manquant",
                     )
     
     @staticmethod

@@ -1,5 +1,6 @@
 import type { ValidationErrorDetail } from '../../types/graph'
 
+/** Libellés et icônes par type d’erreur (FR36 structure + FR37 complétude). */
 export const ICON_FOR_TYPE: Record<string, string> = {
   orphan_node: '🔗',
   broken_reference: '🔴',
@@ -18,8 +19,8 @@ export const LABEL_FOR_TYPE: Record<string, string> = {
   empty_node: 'Nœuds vides',
   missing_display_name: 'DisplayName manquant',
   missing_stable_id: 'StableID / identifiant document',
-  missing_dialogue_text: 'Texte de dialogue manquant',
-  missing_test: 'Tests manquants',
+  missing_dialogue_text: 'Contenu dialogue vide (FR37)',
+  missing_test: 'Test d’attribut manquant (FR37)',
   unreachable_node: 'Nœuds inaccessibles',
   cycle_detected: 'Cycles détectés',
 }

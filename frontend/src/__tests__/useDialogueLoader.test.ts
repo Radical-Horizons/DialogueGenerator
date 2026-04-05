@@ -137,12 +137,11 @@ describe('useDialogueLoader', () => {
 
   it('handleSave still calls saveDialogue when flush times out (best-effort persist)', async () => {
     vi.useFakeTimers()
-    const saveDialogueMock = vi.fn().mockResolvedValue({
-      filename: 'd.json',
-      node_count: 0,
-      edge_count: 0,
-    })
     const validateGraphMock = vi.fn().mockResolvedValue(undefined)
+    const saveDialogueMock = vi.fn().mockImplementation(async () => {
+      await validateGraphMock()
+      return { filename: 'd.json', node_count: 0, edge_count: 0 }
+    })
     useGraphStore.setState({
       saveDialogue: saveDialogueMock,
       validateGraph: validateGraphMock,

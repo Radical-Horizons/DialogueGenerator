@@ -287,6 +287,16 @@ export const createPersistenceSlice: StateCreator<
       return true
     }
 
+    /** Relance la validation API après persistance réussie (FR37 AC#5, tous chemins save). */
+    const runValidationAfterPersist = async () => {
+      if (!checkStillActive()) return
+      try {
+        await get().validateGraph()
+      } catch (err) {
+        console.error('Validation après sauvegarde:', err)
+      }
+    }
+
     if (state.nodes.length === 0) {
       set({ isSaving: false })
       return {
@@ -333,6 +343,7 @@ export const createPersistenceSlice: StateCreator<
               lastSavedAt: Date.now(),
               syncStatus: 'synced',
             })
+            await runValidationAfterPersist()
             return { success: true, filename: documentId } as SaveGraphResponse
           } catch (docErr: unknown) {
             const status = (
@@ -436,6 +447,7 @@ export const createPersistenceSlice: StateCreator<
           filename: response.filename,
         },
       })
+      await runValidationAfterPersist()
       return response
     } catch (error) {
       if (!checkStillActive()) throw error

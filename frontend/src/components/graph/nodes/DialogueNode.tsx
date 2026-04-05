@@ -12,6 +12,7 @@ import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
+import { getValidationHighlightKind } from '../../../utils/graphStructuralValidation'
 
 interface ValidationError {
   type: string
@@ -203,7 +204,12 @@ export const DialogueNode = memo(function DialogueNode({
   let borderColor = selected ? '#27AE60' : '#4A90E2'
   let borderStyle: 'solid' | 'dashed' = 'solid'
   
-  if (hasErrors) {
+  const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
+  if (validationHighlightKind === 'structural') {
+    borderColor = theme.state.error.border
+  } else if (validationHighlightKind === 'content') {
+    borderColor = theme.state.warning.border
+  } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
     borderColor = theme.state.warning.color
@@ -289,7 +295,10 @@ export const DialogueNode = memo(function DialogueNode({
             position: 'absolute',
             top: 4,
             right: 4,
-            backgroundColor: theme.state.error.border,
+            backgroundColor:
+              validationHighlightKind === 'content'
+                ? theme.state.warning.border
+                : theme.state.error.border,
             color: 'white',
             borderRadius: '50%',
             width: 20,

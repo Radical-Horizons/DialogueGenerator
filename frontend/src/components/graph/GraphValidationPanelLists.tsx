@@ -74,6 +74,29 @@ export function ValidationErrorsByType({
                 {err.node_id ? `[${err.node_id}] ` : ''}
                 {err.message}
               </span>
+              {err.node_id ? (
+                <button
+                  type="button"
+                  aria-label="Éditer le nœud"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedNode(err.node_id as string)
+                    useGraphViewStore.getState().focusNode(err.node_id as string)
+                  }}
+                  style={{
+                    fontSize: '0.7rem',
+                    padding: '0.2rem 0.45rem',
+                    borderRadius: '4px',
+                    border: `1px solid ${theme.state.error.border}`,
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    color: theme.state.error.color,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  Éditer le nœud
+                </button>
+              ) : null}
               {isDocumentIdRepairable(err) && err.node_id ? (
                 <button
                   type="button"

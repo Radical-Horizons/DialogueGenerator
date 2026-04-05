@@ -6,6 +6,7 @@ import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
+import { getValidationHighlightKind } from '../../../utils/graphStructuralValidation'
 
 interface ValidationError {
   type: string
@@ -71,22 +72,29 @@ export const TestNode = memo(function TestNode({
   const hasWarnings = warnings.length > 0
   const isHighlighted = data.isHighlighted || false
   
-  // Déterminer la couleur de la bordure selon les erreurs
+  const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
   let borderColor = selected ? '#27AE60' : '#F5A623'
-  if (hasErrors) {
+  if (validationHighlightKind === 'structural') {
+    borderColor = theme.state.error.border
+  } else if (validationHighlightKind === 'content') {
+    borderColor = theme.state.warning.border
+  } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
     borderColor = theme.state.warning.color
   }
-  
-  // Couleur de fond appropriée pour mode sombre (harmonisée avec bordure orange)
-  const backgroundColor = isHighlighted 
-    ? theme.state.selected.background 
-    : hasErrors
-    ? theme.state.error.background // '#3a1a1a'
-    : hasWarnings
-    ? theme.state.warning.background // '#3a3a1a'
-    : '#16a085' 
+
+  const backgroundColor = isHighlighted
+    ? theme.state.selected.background
+    : validationHighlightKind === 'structural'
+      ? theme.state.error.background
+      : validationHighlightKind === 'content'
+        ? theme.state.warning.background
+        : hasErrors
+          ? theme.state.error.background
+          : hasWarnings
+            ? theme.state.warning.background
+            : '#16a085'
   
   // Barre compacte avec 4 handles
   return (
@@ -122,7 +130,10 @@ export const TestNode = memo(function TestNode({
             position: 'absolute',
             top: 4,
             right: 4,
-            backgroundColor: theme.state.error.border,
+            backgroundColor:
+              validationHighlightKind === 'content'
+                ? theme.state.warning.border
+                : theme.state.error.border,
             color: 'white',
             borderRadius: '50%',
             width: 20,
