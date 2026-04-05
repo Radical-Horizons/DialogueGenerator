@@ -1,6 +1,6 @@
 # Story 4.1 : Valider structure nœuds (champs requis : DisplayName, stableID, text)
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
 
@@ -21,25 +21,25 @@ so that **je peux détecter les erreurs structurelles avant export et garantir l
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1** : Règles backend — erreurs structurelles alignées FR36 (AC: #1, #2, #3, #4, #6)  
-  - [ ] 🔴 Test échoue : pour un payload graphe avec nœud dialogue sans `displayName` (ou vide selon règle), sans id stable attendu, ou sans `line`/`choices`, `GraphValidationService.validate_graph` produit des erreurs typées avec `node_id` / index et messages stables ; succès → 0 erreur structurelle de ce groupe.  
-  - [ ] 🟢 Étendre `services/graph_validation_service.py` (et contrat renvoyé par l’endpoint validate existant) pour couvrir DisplayName, stableID et text requis sans casser les validations déjà livrées (orphelins, cycles, etc.). Voir Dev Notes pour forme des nœuds.  
-  - [ ] 🔵 Refactor : factoriser l’extraction des champs depuis nœud React Flow **et** forme document (`id` racine vs `data`) pour éviter duplication entre nouvelles règles et `_validate_node_content` ; si déjà satisfait après GREEN, refactor sur lisibilité des messages / constantes de `error_type` et nommage des tests.
+- [x] **Task 1** : Règles backend — erreurs structurelles alignées FR36 (AC: #1, #2, #3, #4, #6)  
+  - [x] 🔴 Test échoue : pour un payload graphe avec nœud dialogue sans `displayName` (ou vide selon règle), sans id stable attendu, ou sans `line`/`choices`, `GraphValidationService.validate_graph` produit des erreurs typées avec `node_id` / index et messages stables ; succès → 0 erreur structurelle de ce groupe.  
+  - [x] 🟢 Étendre `services/graph_validation_service.py` (et contrat renvoyé par l’endpoint validate existant) pour couvrir DisplayName, stableID et text requis sans casser les validations déjà livrées (orphelins, cycles, etc.). Voir Dev Notes pour forme des nœuds.  
+  - [x] 🔵 Refactor : factoriser l’extraction des champs depuis nœud React Flow **et** forme document (`id` racine vs `data`) pour éviter duplication entre nouvelles règles et `_validate_node_content` ; si déjà satisfait après GREEN, refactor sur lisibilité des messages / constantes de `error_type` et nommage des tests.
 
-- [ ] **Task 2** : Contrat API + non-régression (AC: #1, #6)  
-  - [ ] 🔴 Test échoue : `POST /api/v1/unity-dialogues/graph/validate` retourne les nouveaux codes/types d’erreur dans le JSON attendu par le frontend (`errors[]` avec `type`, `message`, `severity`, `node_id`).  
-  - [ ] 🟢 Ajuster router/service si nécessaire pour sérialiser les nouveaux types ; mettre à jour ou ajouter tests dans `tests/api/test_graph_validate.py` / `tests/api/test_graph_crud.py` en cohérence avec les chemins réels.  
-  - [ ] 🔵 Refactor : mutualiser fixtures graphe minimal entre tests API et tests service si duplication non triviale apparaît ; sinon clarifier noms de cas pytest (given/when explicite dans le docstring).
+- [x] **Task 2** : Contrat API + non-régression (AC: #1, #6)  
+  - [x] 🔴 Test échoue : `POST /api/v1/unity-dialogues/graph/validate` retourne les nouveaux codes/types d’erreur dans le JSON attendu par le frontend (`errors[]` avec `type`, `message`, `severity`, `node_id`).  
+  - [x] 🟢 Ajuster router/service si nécessaire pour sérialiser les nouveaux types ; mettre à jour ou ajouter tests dans `tests/api/test_graph_validate.py` / `tests/api/test_graph_crud.py` en cohérence avec les chemins réels.  
+  - [x] 🔵 Refactor : mutualiser fixtures graphe minimal entre tests API et tests service si duplication non triviale apparaît ; sinon clarifier noms de cas pytest (given/when explicite dans le docstring).
 
-- [ ] **Task 3** : Panneau validation — libellés, navigation, action stableID (AC: #2, #3)  
-  - [ ] 🔴 Test échoue : avec erreurs mockées ou API, `GraphValidationPanel` affiche un regroupement lisible pour les nouveaux `type` ; clic sur une ligne avec `node_id` appelle la sélection de nœud (store) ; présence ou accessibilité de l’action « Générer stableID » lorsque l’erreur concerne stableID manquant.  
-  - [ ] 🟢 Mettre à jour `frontend/src/components/graph/GraphValidationPanel.tsx`, `ICON_FOR_TYPE` / `LABEL_FOR_TYPE`, types dans `frontend/src/types/graph.ts` si besoin ; brancher génération stableID sur utilitaires / actions store existants (pas de nouvelle roue).  
-  - [ ] 🔵 Refactor : si le panneau grossit, extraire une petite sous-composante « liste d’erreurs par type » ou hook `useValidationPanelErrors` pour respecter ~300 lignes fichier et clarifier les handlers de clic.
+- [x] **Task 3** : Panneau validation — libellés, navigation, action stableID (AC: #2, #3)  
+  - [x] 🔴 Test échoue : avec erreurs mockées ou API, `GraphValidationPanel` affiche un regroupement lisible pour les nouveaux `type` ; clic sur une ligne avec `node_id` appelle la sélection de nœud (store) ; présence ou accessibilité de l’action « Générer stableID » lorsque l’erreur concerne stableID manquant.  
+  - [x] 🟢 Mettre à jour `frontend/src/components/graph/GraphValidationPanel.tsx`, `ICON_FOR_TYPE` / `LABEL_FOR_TYPE`, types dans `frontend/src/types/graph.ts` si besoin ; brancher génération stableID sur utilitaires / actions store existants (pas de nouvelle roue).  
+  - [x] 🔵 Refactor : si le panneau grossit, extraire une petite sous-composante « liste d’erreurs par type » ou hook `useValidationPanelErrors` pour respecter ~300 lignes fichier et clarifier les handlers de clic.
 
-- [ ] **Task 4** : Surlignage graphe des nœuds en erreur structurelle (AC: #2, #4)  
-  - [ ] 🔴 Test échoue : étant donné `validationErrors` contenant au moins une erreur structurelle FR36 avec `node_id`, le nœud correspondant sur le canvas reçoit un style distinctif (bordure / classe erreur rouge) jusqu’à correction ou nouvelle validation.  
-  - [ ] 🟢 Implémenter via React Flow (`nodeClassName`, `style` ou data dérivée du store) en réutilisant les patterns déjà utilisés pour états sélection / warning ; éviter de dupliquer la logique de résolution d’id.  
-  - [ ] 🔵 Refactor : centraliser le calcul « set des node_id en erreur » dans un sélecteur store ou memo pour éviter recalculs et garder un seul endroit pour futurs types d’erreurs.
+- [x] **Task 4** : Surlignage graphe des nœuds en erreur structurelle (AC: #2, #4)  
+  - [x] 🔴 Test échoue : étant donné `validationErrors` contenant au moins une erreur structurelle FR36 avec `node_id`, le nœud correspondant sur le canvas reçoit un style distinctif (bordure / classe erreur rouge) jusqu’à correction ou nouvelle validation.  
+  - [x] 🟢 Implémenter via React Flow (`nodeClassName`, `style` ou data dérivée du store) en réutilisant les patterns déjà utilisés pour états sélection / warning ; éviter de dupliquer la logique de résolution d’id.  
+  - [x] 🔵 Refactor : centraliser le calcul « set des node_id en erreur » dans un sélecteur store ou memo pour éviter recalculs et garder un seul endroit pour futurs types d’erreurs.
 
 ## Dev Notes
 
@@ -65,13 +65,54 @@ so that **je peux détecter les erreurs structurelles avant export et garantir l
 
 ### Agent Model Used
 
-_(À compléter par l’agent dev)_
+Composer (agent Cursor)
 
 ### Debug Log References
 
+_(aucun incident bloquant)_
+
 ### Completion Notes List
 
+- Types d’erreur stables : `missing_display_name`, `missing_stable_id` (index sans id + `data.id` manquant/incohérent), `missing_dialogue_text` ; `missing_id` remplacé par `missing_stable_id` pour l’absence d’id utilisable.
+- DisplayName métier : `displayName` | `title` | `label` (trim) ; nœuds `dialogue` / `dialogueNode` hors START/END/testNode/endNode.
+- 🔵 Task 1 refactor : helpers `_node_data`, `_is_dialogue_like` ; docstrings NFR (pas de scans redondants, O(n) sur `_validate_unity_dialogue_structure`).
+- 🔵 Task 2 : docstrings / payloads API enrichis (`data.id` + label) dans fixtures ; `test_validate_graph_fr36_structural_error_types`.
+- 🔵 Task 3 : extraction `validationPanelLabels.ts` + `GraphValidationPanelLists.tsx` ; `GraphValidationPanel.tsx` ~170 lignes ; clic erreur → `focusNode` ; bouton « Générer stableID » → `syncNodeDocumentId`.
+- 🔵 Task 4 : `graphStructuralValidation.ts` (`isStructuralValidationErrorType`) ; `GraphCanvas` bordure rouge si erreur structurelle (priorité sur surlignage cycle orange).
+- Badge header : « Validation structurelle : 0 erreurs » si graphe sans erreurs ni warnings visibles.
+- Tests : `tests/services/test_graph_validation_service.py` (classe FR36), API + E2E payloads `data.id` ; Vitest `GraphValidationPanel.test.tsx`, `graphStructuralValidation.test.ts`.
+- **Preuve** : `pytest tests/` → 1482 passed ; Vitest ciblé graph + lint frontend verts après refactor panneau.
+- **Code review (suivi [1])** : `GraphCanvas.structuralValidation.test.tsx` (bordure FR36 sur props `nodes` React Flow) ; `_choices_have_exploitable_text` + test `test_choices_without_text_not_exploitable` ; `find_orphan_nodes` / `find_broken_references` / `find_unreachable_nodes` via `_node_id` ; NFR-P3 : `TestGraphValidationPerformance` (`pytest -m slow`).
+
 ### File List
+
+- `services/graph_validation_service.py`
+- `tests/services/test_graph_validation_service.py`
+- `tests/api/test_graph_crud.py`
+- `tests/api/test_graph_validate.py`
+- `e2e/graph-cycle-validation.spec.ts`
+- `frontend/src/utils/graphStructuralValidation.ts`
+- `frontend/src/components/graph/GraphCanvas.tsx`
+- `frontend/src/components/graph/GraphValidationPanel.tsx`
+- `frontend/src/components/graph/GraphValidationPanelLists.tsx`
+- `frontend/src/components/graph/validationPanelLabels.ts`
+- `frontend/src/components/graph/GraphEditorHeader.tsx`
+- `frontend/src/components/graph/nodes/DialogueNode.tsx`
+- `frontend/src/components/graph/nodes/TestNode.tsx`
+- `frontend/src/components/graph/nodes/EndNode.tsx`
+- `frontend/src/store/slices/nodeSlice.ts`
+- `frontend/src/store/types/graphState.ts`
+- `frontend/src/__tests__/GraphValidationPanel.test.tsx`
+- `frontend/src/__tests__/graphStructuralValidation.test.ts`
+- `frontend/src/__tests__/useBatchOperations.test.ts`
+- `frontend/src/__tests__/GraphEditor.multiSelection.test.tsx`
+- `frontend/src/__tests__/GraphCanvas.structuralValidation.test.tsx`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+### Change Log
+
+- 2026-04-05 — Implémentation FR36 (backend + API + UI + E2E fixtures) ; extraction sous-composants panneau validation ; statut sprint → review.
+- 2026-04-05 — Revue code : correctifs auto (tests canvas FR36, perf NFR-P3 marquée `slow`, helpers `_node_id` sur find_*, choices à texte exploitable) ; statut → done.
 
 ---
 
@@ -121,7 +162,14 @@ _(À compléter par l’agent dev)_
 
 - Lire `_bmad-output/project-context.md` avant implémentation (règles imports Python, chemins API, interdiction tests sur entités GDD réelles).
 
+## Senior Developer Review (AI)
+
+- **Date** : 2026-04-05  
+- **Outcome** : Changes requested → **corrigé** (option [1] correctifs auto).  
+- **Constats traités** : preuve surlignage canvas (test React Flow mock) ; NFR-P3 documenté par test perf graphe linéaire 200 nœuds (`@pytest.mark.slow`) ; cohérence `_node_id` sur helpers publics ; choices sans `text` utile → `missing_dialogue_text`.  
+- **Reste connu (acceptable)** : erreur `missing_stable_id` sans `node_id` (index seul) — pas de bouton « Générer stableID » tant qu’aucun id racine n’existe (AC3 partiel limité modèle).
+
 ## Story completion status
 
-- **Statut** : ready-for-dev  
-- **Note** : Analyse contexte « ultimate story » terminée — garde-fous alignés sur le code réel (endpoint `unity-dialogues`, `GraphValidationPanel`, `GraphValidationService`).
+- **Statut** : done  
+- **Note** : `pytest tests/services/test_graph_validation_service.py` + `tests/api/test_graph_validate.py` ; Vitest `GraphCanvas.structuralValidation.test.tsx` ; `npm --prefix frontend run lint` — verts après correctifs review.

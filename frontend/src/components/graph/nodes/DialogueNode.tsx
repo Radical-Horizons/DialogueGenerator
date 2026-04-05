@@ -303,7 +303,18 @@ export const DialogueNode = memo(function DialogueNode({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
           title={errors.map((e, idx) => {
-            const icon = e.type === 'orphan_node' ? '🔗' : e.type === 'broken_reference' ? '🔴' : e.type === 'empty_node' ? '⚪' : '⚠️'
+            const icon =
+              e.type === 'orphan_node'
+                ? '🔗'
+                : e.type === 'broken_reference'
+                  ? '🔴'
+                  : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
+                    ? '⚪'
+                    : e.type === 'missing_display_name'
+                      ? '📝'
+                      : e.type === 'missing_stable_id'
+                        ? '🆔'
+                        : '⚠️'
             return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
           }).join('')}
         >

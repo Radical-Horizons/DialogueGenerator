@@ -28,6 +28,7 @@ export type NodeSlice = Pick<
   | 'addNode'
   | 'createEmptyNode'
   | 'updateNode'
+  | 'syncNodeDocumentId'
   | 'deleteNode'
   | 'batchDeleteNodes'
   | 'batchTagNodes'
@@ -407,6 +408,16 @@ function updateDialogueNodeDirectly(
 // ---------------------------------------------------------------------------
 
 export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set, get) => ({
+  syncNodeDocumentId: (nodeId: string) => {
+    const state = get()
+    const node = state.nodes.find((n) => n.id === nodeId)
+    if (!node?.data || typeof node.data !== 'object') return
+    const d = { ...(node.data as Record<string, unknown>) }
+    if (d.id === nodeId) return
+    d.id = nodeId
+    get().updateNode(nodeId, { data: d })
+  },
+
   addNode: (node: Node) => {
     runGraphTransaction(get, set, (state) => {
       const newNodes = [...state.nodes, node]

@@ -108,6 +108,8 @@ export interface GraphState {
   createEmptyNode: (position?: { x: number; y: number }) => Node
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
   updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty?: boolean) => void
+  /** Aligner `data.id` sur l'id React Flow (correctif validation missing_stable_id / data.id). */
+  syncNodeDocumentId: (nodeId: string) => void
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
   /** @param skipPushUndoSnapshot Si true, ne pousse pas de snapshot (batch: un snapshot avant le lot). */
   deleteNode: (nodeId: string, skipMarkDirty?: boolean, skipPushUndoSnapshot?: boolean) => void

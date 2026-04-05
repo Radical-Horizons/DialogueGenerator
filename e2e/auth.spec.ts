@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 import { E2E_MS } from './timeouts'
 
-test.describe('Authentification', () => {
+test.describe('Authentification', { tag: '@smoke' }, () => {
   test('doit afficher le formulaire de connexion', async ({ page }) => {
     await page.goto('/login')
 

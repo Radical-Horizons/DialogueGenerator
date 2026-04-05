@@ -1,7 +1,7 @@
 """Service de validation de graphes de dialogues."""
 import logging
 import hashlib
-from typing import List, Dict, Any, Set, Optional
+from typing import Any, Dict, List, Optional, Set
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)
@@ -125,6 +125,32 @@ def _node_type(node: Dict[str, Any]) -> Optional[str]:
     return None
 
 
+def _node_data(node: Dict[str, Any]) -> Dict[str, Any]:
+    """Retourne le dict `data` du nœud (React Flow / document), ou {}."""
+    data = node.get("data")
+    return data if isinstance(data, dict) else {}
+
+
+def _is_dialogue_like(node_type: Optional[str]) -> bool:
+    """True si le nœud est un nœud de dialogue au sens Unity / éditeur."""
+    if not node_type:
+        return False
+    return node_type in ("dialogueNode", "dialogue")
+
+
+def _choices_have_exploitable_text(choices: Any) -> bool:
+    """True si la liste contient au moins un choix avec texte non vide (FR36, aligné UnityDialogueChoice.text)."""
+    if not isinstance(choices, list):
+        return False
+    for item in choices:
+        if not isinstance(item, dict):
+            continue
+        text = item.get("text")
+        if text is not None and str(text).strip():
+            return True
+    return False
+
+
 class GraphValidationService:
     """Service pour valider des graphes de dialogues."""
     
@@ -135,6 +161,9 @@ class GraphValidationService:
     ) -> ValidationResult:
         """Valide un graphe complet.
         
+        Chaque étape parcourt au plus une fois la liste des nœuds ou des arêtes
+        (pas de scan répété inutile) — cible NFR perf sur graphes typiques.
+        
         Args:
             nodes: Liste de nœuds ReactFlow.
             edges: Liste d'edges ReactFlow.
@@ -144,8 +173,8 @@ class GraphValidationService:
         """
         result = ValidationResult()
         
-        # Validation 1: Nœuds sans ID
-        GraphValidationService._validate_node_ids(nodes, result)
+        # Validation 1: Nœuds sans identifiant technique utilisable (stableID)
+        GraphValidationService._validate_stable_ids(nodes, result)
         
         # Validation 2: Références cassées (edges vers nœuds inexistants)
         GraphValidationService._validate_broken_references(nodes, edges, result)
@@ -156,10 +185,13 @@ class GraphValidationService:
         # Validation 4: Nœuds inatteignables depuis START
         GraphValidationService._validate_unreachable_nodes(nodes, edges, result)
         
-        # Validation 5: Nœuds de dialogue sans contenu
-        GraphValidationService._validate_node_content(nodes, result)
+        # Validation 5: Structure Unity FR36 (DisplayName, data.id, texte dialogue)
+        GraphValidationService._validate_unity_dialogue_structure(nodes, result)
         
-        # Validation 6: Cycles (optionnel, warning seulement)
+        # Validation 6: Nœuds de test sans attribut test
+        GraphValidationService._validate_test_node_content(nodes, result)
+        
+        # Validation 7: Cycles (optionnel, warning seulement)
         GraphValidationService._validate_cycles(nodes, edges, result)
         
         logger.info(
@@ -170,15 +202,92 @@ class GraphValidationService:
         return result
     
     @staticmethod
-    def _validate_node_ids(nodes: List[Dict[str, Any]], result: ValidationResult):
-        """Valide que tous les nœuds ont un ID (racine ou data.id)."""
+    def _validate_stable_ids(nodes: List[Dict[str, Any]], result: ValidationResult):
+        """Valide que chaque nœud a un identifiant technique (racine ou data.id)."""
         for i, node in enumerate(nodes):
             if not _node_id(node):
                 result.add_error(
-                    "missing_id",
+                    "missing_stable_id",
                     None,
-                    f"Nœud à l'index {i} n'a pas d'ID"
+                    f"Nœud à l'index {i} : stableID manquant",
                 )
+
+    @staticmethod
+    def _validate_unity_dialogue_structure(
+        nodes: List[Dict[str, Any]], result: ValidationResult
+    ) -> None:
+        """Vérifie DisplayName, cohérence data.id et texte pour les nœuds dialogue (FR36).
+
+        Complexité O(n) sur le nombre de nœuds (une passe, sans re-parcours).
+        """
+        for node in nodes:
+            node_id = _node_id(node)
+            node_type = _node_type(node)
+            data = _node_data(node)
+
+            if not node_id:
+                continue
+            if node_id in ("START", "END") or node_type in ("testNode", "endNode"):
+                continue
+            if not _is_dialogue_like(node_type):
+                continue
+
+            root_id = node.get("id")
+            if root_id:
+                data_id = data.get("id")
+                if data_id is None or str(data_id).strip() == "":
+                    result.add_error(
+                        "missing_stable_id",
+                        str(root_id),
+                        f"Nœud [{root_id}] : identifiant document (data.id) manquant",
+                    )
+                elif str(data_id) != str(root_id):
+                    result.add_error(
+                        "missing_stable_id",
+                        str(root_id),
+                        f"Nœud [{root_id}] : data.id incohérent avec l'identifiant du nœud",
+                    )
+
+            raw_display = (
+                data.get("displayName") or data.get("title") or data.get("label") or ""
+            )
+            display = str(raw_display).strip() if raw_display is not None else ""
+            if not display:
+                result.add_error(
+                    "missing_display_name",
+                    node_id,
+                    f"Nœud [{node_id}] : DisplayName manquant",
+                )
+
+            line_val = data.get("line")
+            has_line = bool(line_val and str(line_val).strip())
+            choices = data.get("choices")
+            has_choices = _choices_have_exploitable_text(choices)
+            if not has_line and not has_choices:
+                result.add_error(
+                    "missing_dialogue_text",
+                    node_id,
+                    f"Nœud [{node_id}] : texte de dialogue manquant (line ou choices requis)",
+                )
+
+    @staticmethod
+    def _validate_test_node_content(nodes: List[Dict[str, Any]], result: ValidationResult):
+        """Valide que les nœuds de test ont un attribut test."""
+        for node in nodes:
+            node_id = _node_id(node)
+            node_type = _node_type(node) or "dialogueNode"
+            node_data = _node_data(node)
+
+            if node_id == "END":
+                continue
+
+            if node_type == "testNode":
+                if not node_data.get("test"):
+                    result.add_error(
+                        "missing_test",
+                        node_id,
+                        f"Nœud de test '{node_id}' n'a pas de test d'attribut défini",
+                    )
     
     @staticmethod
     def _validate_broken_references(
@@ -332,39 +441,6 @@ class GraphValidationService:
         return reachable
     
     @staticmethod
-    def _validate_node_content(nodes: List[Dict[str, Any]], result: ValidationResult):
-        """Valide que les nœuds de dialogue ont du contenu (id/type via _node_id/_node_type)."""
-        for node in nodes:
-            node_id = _node_id(node)
-            node_data = node.get("data") if isinstance(node.get("data"), dict) else {}
-            node_type = _node_type(node) or "dialogueNode"
-
-            # Skip validation pour END
-            if node_id == "END":
-                continue
-
-            # Nœuds de dialogue doivent avoir line ou choices
-            if node_type == "dialogueNode":
-                has_line = bool(node_data.get("line"))
-                has_choices = bool(node_data.get("choices"))
-                
-                if not has_line and not has_choices:
-                    result.add_error(
-                        "empty_node",
-                        node_id,
-                        f"Nœud '{node_id}' n'a ni dialogue ni choix"
-                    )
-            
-            # Nœuds de test doivent avoir un test
-            if node_type == "testNode":
-                if not node_data.get("test"):
-                    result.add_error(
-                        "missing_test",
-                        node_id,
-                        f"Nœud de test '{node_id}' n'a pas de test d'attribut défini"
-                    )
-    
-    @staticmethod
     def _validate_cycles(
         nodes: List[Dict[str, Any]], 
         edges: List[Dict[str, Any]], 
@@ -425,9 +501,9 @@ class GraphValidationService:
             rec_stack.remove(node_id)
             path_stack.pop()
         
-        # Tester depuis tous les nœuds non visités
+        # Tester depuis tous les nœuds non visités (id racine ou data.id)
         for node in nodes:
-            node_id = node.get("id")
+            node_id = _node_id(node)
             if node_id and node_id not in visited:
                 dfs_cycle_detection(node_id)
         
@@ -458,7 +534,7 @@ class GraphValidationService:
         Returns:
             Liste d'IDs de nœuds orphelins.
         """
-        node_ids = {node.get("id") for node in nodes if node.get("id")}
+        node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         targets = {edge.get("target") for edge in edges if edge.get("target")}
         
         orphans = []
@@ -480,12 +556,12 @@ class GraphValidationService:
         Returns:
             Liste de dictionnaires avec les références cassées.
         """
-        node_ids = {node.get("id") for node in nodes if node.get("id")}
+        node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         broken_refs: List[Dict[str, Any]] = []
         
         for node in nodes:
-            node_id = node.get("id")
-            node_data = node.get("data", {})
+            node_id = _node_id(node)
+            node_data = _node_data(node)
             
             # Vérifier nextNode
             next_node = node_data.get("nextNode")
@@ -543,7 +619,7 @@ class GraphValidationService:
             Liste d'IDs de nœuds inatteignables.
         """
         reachable = GraphValidationService._find_reachable_nodes(start_id, edges)
-        all_node_ids = {node.get("id") for node in nodes if node.get("id")}
+        all_node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         
         unreachable = []
         for node_id in all_node_ids:

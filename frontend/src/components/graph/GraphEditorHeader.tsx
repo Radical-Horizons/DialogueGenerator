@@ -340,7 +340,7 @@ export function GraphEditorHeader({
             ...(canToggle && { cursor: 'pointer' }),
           } as React.CSSProperties
           const title = isValid
-            ? 'Graphe valide (validation automatique à chaque sauvegarde)'
+            ? 'Validation structurelle : 0 erreurs (validation automatique à chaque sauvegarde)'
             : canToggle
             ? showValidationPanel
               ? 'Cliquer pour masquer les détails'
@@ -355,7 +355,7 @@ export function GraphEditorHeader({
               <span>{isValid ? '✓' : hasErrors ? '✗' : '⚠'}</span>
               <span>
                 {isValid
-                  ? 'Graphe valide'
+                  ? 'Validation structurelle : 0 erreurs'
                   : hasErrors
                   ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
                   : warningLabel}

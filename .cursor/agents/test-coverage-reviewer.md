@@ -1,6 +1,6 @@
 ---
 name: test-coverage-reviewer
-description: Test quality specialist. Use when reviewing test files, checking for missing coverage, or validating that tests actually test behavior and not just implementation details. Covers both pytest (backend) and Vitest (frontend).
+description: Test quality specialist. Use when reviewing test files, checking for missing coverage, or validating that tests actually test behavior and not just implementation details. Covers both pytest (backend) and Vitest (frontend). New slow or heavy tests must use pytest markers (slow/integration) and fit tier T0–T3 in .cursor/commands/test-tiers.md; Playwright smoke uses tag @smoke.
 model: fast
 readonly: true
 ---
@@ -39,6 +39,7 @@ You are a test quality specialist reviewing a React + FastAPI application's test
 - Do API tests use `TestClient` properly with dependency overrides for LLM/GDD services?
 - Are integration tests in `tests/integration/` actually testing end-to-end flows, not just unit behavior?
 - Are there any tests that hit real external APIs (Notion, OpenAI) without being marked/skipped?
+- Are expensive tests marked `@pytest.mark.slow` and/or `@pytest.mark.integration` per `pytest.ini`, and documented against **T0–T3** (`.cursor/commands/test-tiers.md`)?
 
 ### Frontend test patterns
 - Do store tests use the same Zustand composition as production (`graphStore.ts` composing slices)?

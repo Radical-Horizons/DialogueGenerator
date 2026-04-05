@@ -13,9 +13,21 @@ class TestGraphValidateCycles:
         """Test: Validation retourne cycle_path et cycle_nodes pour un cycle."""
         nodes = [
             {"id": "START", "type": "startNode", "data": {"label": "Start"}},
-            {"id": "A", "type": "dialogueNode", "data": {"label": "Node A", "line": "Hello"}},
-            {"id": "B", "type": "dialogueNode", "data": {"label": "Node B", "line": "World"}},
-            {"id": "C", "type": "dialogueNode", "data": {"label": "Node C", "line": "Test"}},
+            {
+                "id": "A",
+                "type": "dialogueNode",
+                "data": {"id": "A", "label": "Node A", "line": "Hello"},
+            },
+            {
+                "id": "B",
+                "type": "dialogueNode",
+                "data": {"id": "B", "label": "Node B", "line": "World"},
+            },
+            {
+                "id": "C",
+                "type": "dialogueNode",
+                "data": {"id": "C", "label": "Node C", "line": "Test"},
+            },
         ]
         edges = [
             {"id": "e0", "source": "START", "target": "A"},
@@ -51,10 +63,26 @@ class TestGraphValidateCycles:
         """Test: Validation retourne tous les cycles avec leurs chemins."""
         nodes = [
             {"id": "START", "type": "startNode", "data": {"label": "Start"}},
-            {"id": "A", "type": "dialogueNode", "data": {"label": "Node A", "line": "Hello"}},
-            {"id": "B", "type": "dialogueNode", "data": {"label": "Node B", "line": "World"}},
-            {"id": "C", "type": "dialogueNode", "data": {"label": "Node C", "line": "Test1"}},
-            {"id": "D", "type": "dialogueNode", "data": {"label": "Node D", "line": "Test2"}},
+            {
+                "id": "A",
+                "type": "dialogueNode",
+                "data": {"id": "A", "label": "Node A", "line": "Hello"},
+            },
+            {
+                "id": "B",
+                "type": "dialogueNode",
+                "data": {"id": "B", "label": "Node B", "line": "World"},
+            },
+            {
+                "id": "C",
+                "type": "dialogueNode",
+                "data": {"id": "C", "label": "Node C", "line": "Test1"},
+            },
+            {
+                "id": "D",
+                "type": "dialogueNode",
+                "data": {"id": "D", "label": "Node D", "line": "Test2"},
+            },
         ]
         edges = [
             {"id": "e0", "source": "START", "target": "A"},
@@ -92,9 +120,21 @@ class TestGraphValidateCycles:
         """Test: Graphe sans cycles ne retourne pas de champs cycle_*."""
         nodes = [
             {"id": "START", "type": "startNode", "data": {"label": "Start"}},
-            {"id": "A", "type": "dialogueNode", "data": {"label": "Node A", "line": "Hello"}},
-            {"id": "B", "type": "dialogueNode", "data": {"label": "Node B", "line": "World"}},
-            {"id": "C", "type": "dialogueNode", "data": {"label": "Node C", "line": "Test"}},
+            {
+                "id": "A",
+                "type": "dialogueNode",
+                "data": {"id": "A", "label": "Node A", "line": "Hello"},
+            },
+            {
+                "id": "B",
+                "type": "dialogueNode",
+                "data": {"id": "B", "label": "Node B", "line": "World"},
+            },
+            {
+                "id": "C",
+                "type": "dialogueNode",
+                "data": {"id": "C", "label": "Node C", "line": "Test"},
+            },
         ]
         edges = [
             {"id": "e0", "source": "START", "target": "A"},
