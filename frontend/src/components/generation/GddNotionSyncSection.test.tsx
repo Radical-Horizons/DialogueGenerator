@@ -43,6 +43,7 @@ const mockPutConfig = vi.fn()
 const mockPostPreview = vi.fn()
 
 vi.mock('../../api/gddNotionSync', () => ({
+  getGddNotebooklmExportZip: vi.fn().mockResolvedValue(new Blob(['zip'], { type: 'application/zip' })),
   getGddNotionSyncStatus: (...a: unknown[]) => mockGetStatus(...a),
   getGddNotionSyncConfig: (...a: unknown[]) => mockGetConfig(...a),
   getGddNotionSyncProgress: (...a: unknown[]) => mockGetProgress(...a),
