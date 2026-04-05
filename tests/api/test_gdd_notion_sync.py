@@ -462,3 +462,39 @@ def test_pause_when_no_active_sync(client: TestClient, tmp_path: Path) -> None:
         assert r.json().get("ok") is False
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_notebooklm_export_zip(client: TestClient, tmp_path: Path) -> None:
+    import json as json_lib
+    import zipfile
+    from io import BytesIO
+
+    svc = _build_service(tmp_path)
+    gdd = tmp_path / "gdd"
+    (gdd / "Pitch.json").write_text(
+        json_lib.dumps([{"Nom": "X", "sections": {"a": "b"}}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        put = client.put(
+            "/api/v1/gdd-notion-sync/config",
+            json={
+                "sources": [
+                    {
+                        "kind": "page",
+                        "category_file": "Pitch.json",
+                        "notion_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                    }
+                ],
+                "included_categories": [],
+            },
+        )
+        assert put.status_code == 200
+        r = client.get("/api/v1/gdd-notion-sync/notebooklm-export")
+        assert r.status_code == 200
+        assert r.headers.get("content-type", "").startswith("application/zip")
+        zf = zipfile.ZipFile(BytesIO(r.content))
+        assert any(n.endswith(".md") for n in zf.namelist())
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

@@ -1,0 +1,82 @@
+"""Tests export Markdown NotebookLM depuis le GDD local."""
+from __future__ import annotations
+
+import json
+import uuid
+import zipfile
+from io import BytesIO
+from pathlib import Path
+
+from services.gdd_notebooklm_export import (
+    build_gdd_notebooklm_zip_bytes,
+    eligible_sync_category_files,
+)
+
+
+def _nid() -> str:
+    return str(uuid.uuid4())
+
+
+def test_eligible_sync_category_files_respects_included() -> None:
+    settings = {
+        "sources": [
+            {"kind": "database", "category_file": "A.json", "notion_id": _nid()},
+            {"kind": "page", "category_file": "B.json", "notion_id": _nid()},
+            {"kind": "database", "category_file": "C.json", "notion_id": _nid()},
+        ],
+        "included_categories": ["A.json"],
+    }
+    assert eligible_sync_category_files(settings) == ["A.json"]
+
+
+def test_build_zip_contains_markdown_and_vision(tmp_path: Path) -> None:
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    (gdd / "Pitch.json").write_text(
+        json.dumps(
+            [
+                {
+                    "Nom": "Pitch",
+                    "sections": {"x": "Hello"},
+                    "section_titles": {"x": "Intro"},
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    data_dir = tmp_path / "data"
+    data_dir.mkdir(parents=True)
+    (data_dir / "Vision.json").write_text(
+        json.dumps({"ok": True}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [
+            {
+                "kind": "page",
+                "category_file": "Pitch.json",
+                "notion_id": _nid(),
+            }
+        ],
+        "included_categories": [],
+    }
+    raw = build_gdd_notebooklm_zip_bytes(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=9,
+    )
+    zf = zipfile.ZipFile(BytesIO(raw))
+    names = zf.namelist()
+    assert any(n.endswith("00-README.md") for n in names)
+    md_names = [n for n in names if n.endswith(".md")]
+    assert len(md_names) <= 9
+    # Pitch page → bucket production (fallback)
+    prod = next(n for n in names if n.endswith("08-production-et-autres.md"))
+    body = zf.read(prod).decode("utf-8")
+    assert "Pitch" in body
+    assert "Hello" in body
+    uni = next(n for n in names if n.endswith("01-univers-narratif.md"))
+    uni_body = zf.read(uni).decode("utf-8")
+    assert '"ok": true' in uni_body
