@@ -5,6 +5,7 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 
 from api.dependencies import get_gdd_notion_sync_service, get_request_id
 from api.routers.auth import get_current_user
@@ -230,6 +231,38 @@ async def get_gdd_notion_sync_progress(
     """Lit la progression d'une synchronisation en cours (polling)."""
     raw = svc.read_sync_progress()
     return GddNotionSyncProgressResponse.model_validate(raw)
+
+
+@router.get("/notebooklm-export")
+async def download_gdd_notebooklm_export(
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+    max_files: Annotated[
+        int,
+        Query(
+            ge=1,
+            le=10,
+            description="Nombre max de fichiers Markdown dans le ZIP (défaut 10).",
+        ),
+    ] = 10,
+) -> Response:
+    """ZIP : GDD local (Notion sync) regroupé en Markdown pour NotebookLM / présentations."""
+    try:
+        payload = svc.build_notebooklm_export_zip(max_files=max_files)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except OSError as exc:
+        logger.warning("Export NotebookLM GDD échoué: %s", exc, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Échec lecture GDD — {exc}",
+        ) from exc
+    return Response(
+        content=payload,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="gdd-notebooklm-export.zip"',
+        },
+    )
 
 
 @router.get("/archives", response_model=GddArchivesListResponse)

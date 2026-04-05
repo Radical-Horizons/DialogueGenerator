@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   deleteGddFullSyncCheckpoint,
   getGddFullSyncCheckpoint,
+  getGddNotebooklmExportZip,
   getGddNotionArchives,
   getGddNotionSyncConfig,
   getGddNotionSyncProgress,
@@ -106,6 +107,9 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
   const [previewData, setPreviewData] = useState<GddNotionPreviewDatabaseResponse | null>(null)
+
+  const [notebooklmExporting, setNotebooklmExporting] = useState(false)
+  const [notebooklmExportError, setNotebooklmExportError] = useState<string | null>(null)
 
   const refreshCheckpoint = useCallback(async () => {
     setCheckpointBannerError(null)
@@ -342,6 +346,30 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
   const dbCount = databaseSources.length
   const pageCount = sources.filter((s) => s.kind === 'page').length
 
+  const handleNotebooklmExport = useCallback(async () => {
+    setNotebooklmExportError(null)
+    setNotebooklmExporting(true)
+    try {
+      const blob = await getGddNotebooklmExportZip(9)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const d = new Date().toISOString().slice(0, 10)
+      a.download = `gdd-notebooklm-export-${d}.zip`
+      a.rel = 'noopener'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setNotebooklmExportError(
+        e instanceof Error ? e.message : 'Échec du téléchargement de l’export NotebookLM',
+      )
+    } finally {
+      setNotebooklmExporting(false)
+    }
+  }, [])
+
   return (
     <div
       style={{
@@ -386,6 +414,55 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
           <strong style={{ color: theme.text.primary }}>Reprendre la sync</strong> — le serveur conserve le
           checkpoint et le staging tant que vous n&apos;annulez pas.
         </p>
+
+        <div
+          style={{
+            marginBottom: '1rem',
+            padding: '0.75rem',
+            borderRadius: '6px',
+            border: `1px solid ${theme.border.primary}`,
+            backgroundColor: theme.background.panel,
+          }}
+        >
+          <p style={{ margin: '0 0 0.5rem 0', color: theme.text.primary, fontWeight: 'bold' }}>
+            Export NotebookLM (présentations)
+          </p>
+          <p
+            style={{
+              margin: '0 0 0.75rem 0',
+              color: theme.text.secondary,
+              fontSize: '0.88rem',
+              lineHeight: 1.45,
+            }}
+          >
+            Télécharge un ZIP avec jusqu’à <strong style={{ color: theme.text.primary }}>9 fichiers</strong>{' '}
+            Markdown : le GDD local (bases/pages du périmètre Notion ci-dessous, comme une sync) regroupé par
+            thèmes, plus <code style={{ fontSize: '0.85em' }}>Vision.json</code> en tête du volet univers. Les
+            très gros blocs peuvent être tronqués pour rester exploitables dans NotebookLM.
+          </p>
+          <button
+            type="button"
+            onClick={() => void handleNotebooklmExport()}
+            disabled={notebooklmExporting || busy || !config || sources.length === 0}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: `1px solid ${theme.border.primary}`,
+              backgroundColor: theme.background.secondary,
+              color: theme.text.primary,
+              cursor:
+                notebooklmExporting || busy || !config || sources.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: notebooklmExporting || busy || !config || sources.length === 0 ? 0.6 : 1,
+            }}
+          >
+            {notebooklmExporting ? 'Préparation du ZIP…' : 'Télécharger export NotebookLM (.zip)'}
+          </button>
+          {notebooklmExportError && (
+            <p style={{ margin: '0.5rem 0 0 0', color: theme.state.error.color, fontSize: '0.88rem' }}>
+              {notebooklmExportError}
+            </p>
+          )}
+        </div>
 
         {configLoadError && (
           <p style={{ color: theme.state.error.color, fontSize: '0.9rem', margin: '0 0 1rem 0' }}>
