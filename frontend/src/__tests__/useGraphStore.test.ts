@@ -525,6 +525,7 @@ describe('useGraphStore - Pending save state', () => {
   describe('generateFromNode - Batch generation support', () => {
     beforeEach(() => {
       useGraphStore.getState().resetGraph()
+      vi.mocked(graphAPI.generateNode).mockClear()
     })
 
     it('should pass target_choice_index to API when provided', async () => {
@@ -572,13 +573,14 @@ describe('useGraphStore - Pending save state', () => {
         generate_all_choices: false,
       })
       
-      // Vérifier que l'API a été appelée avec target_choice_index
+      // Vérifier que l'API a été appelée avec target_choice_index (2e arg = en-têtes coût)
       expect(mockGenerateNode).toHaveBeenCalledWith(
         expect.objectContaining({
           parent_node_id: 'parent-1',
           target_choice_index: 0,
           generate_all_choices: false,
-        })
+        }),
+        expect.any(Object),
       )
     })
 
@@ -666,7 +668,8 @@ describe('useGraphStore - Pending save state', () => {
       expect(mockGenerateNode).toHaveBeenCalledWith(
         expect.objectContaining({
           generate_all_choices: true,
-        })
+        }),
+        expect.any(Object),
       )
     })
 
