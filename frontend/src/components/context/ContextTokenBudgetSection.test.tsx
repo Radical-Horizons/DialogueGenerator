@@ -6,7 +6,7 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 vi.mock('../../hooks/useContextSelectionTokenEstimate', () => ({
   useContextSelectionTokenEstimate: () => ({
     data: {
-      context_tokens: 10,
+      context_tokens: 25_000,
       selection_tokens: 25_000,
       context_token_breakdown: [
         { entity_type: 'characters', mode: 'full', token_count: 80 },

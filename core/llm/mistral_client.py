@@ -6,8 +6,15 @@ import os
 import time
 from typing import List, Optional, Type, Dict, Any, Callable, Coroutine
 from pydantic import BaseModel, ValidationError
-from mistralai import Mistral
-from mistralai.models import SDKError, ChatCompletionResponse
+
+try:
+    # mistralai >= 2.0 (see https://docs.mistral.ai/getting-started/clients/)
+    from mistralai.client import Mistral
+    from mistralai.client.errors import SDKError
+    from mistralai.client.models import ChatCompletionResponse
+except ImportError:
+    from mistralai import Mistral
+    from mistralai.models import SDKError, ChatCompletionResponse
 
 from core.llm.llm_client import ILLMClient
 

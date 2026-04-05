@@ -157,8 +157,11 @@ class TestMistralClient:
     @pytest.mark.asyncio
     async def test_generate_variants_api_error(self, mistral_client):
         """Test la gestion des erreurs API Mistral."""
-        from mistralai.models import SDKError
-        
+        try:
+            from mistralai.client.errors import SDKError
+        except ImportError:
+            from mistralai.models import SDKError
+
         # Mock d'une erreur API (SDKError nécessite un raw_response)
         mock_response = MagicMock()
         mock_response.status_code = 503
