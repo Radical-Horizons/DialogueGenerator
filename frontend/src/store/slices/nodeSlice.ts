@@ -19,6 +19,7 @@ import { runGraphTransaction } from '../utils/runGraphTransaction'
 import { documentToGraph } from '../../utils/documentToGraph'
 import { syncDocAndLayout } from '../../utils/syncDocLayout'
 import { applyLinearNextNodeFromGraphEdges } from '../../utils/mergeNodeEditorForm'
+import { pruneGraphValidationDiagnostics } from '../../utils/pruneGraphValidationDiagnostics'
 
 /** Nombre max d'entrées dans l'historique de régénération (Story 1.10 - AC#3). */
 const MAX_REGENERATION_HISTORY = 10
@@ -554,15 +555,20 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         const newSelectedNodeId =
           state.selectedNodeId === nodeId ? (parent?.dialogueNodeId ?? null) : state.selectedNodeId
 
+        const surviving = new Set(newNodes.map((n) => n.id))
+        const pruned = pruneGraphValidationDiagnostics(state, surviving)
+
         return {
           nodes: newNodes,
           edges: newEdges,
           selectedNodeId: newSelectedNodeId,
+          selectedNodeIds: state.selectedNodeIds.filter((id) => id !== nodeId),
           dialogueMetadata: {
             ...state.dialogueMetadata,
             node_count: newNodes.length,
             edge_count: newEdges.length,
           },
+          ...pruned,
         }
       }
 
@@ -647,16 +653,20 @@ export const createNodeSlice: StateCreator<GraphState, [], [], NodeSlice> = (set
         (e) => !nodesToDelete.includes(e.source) && !nodesToDelete.includes(e.target)
       )
       const selectedNodeToRemove = nodesToDelete.includes(state.selectedNodeId || '')
+      const survivingIds = new Set(newNodes.map((n) => n.id))
+      const pruned = pruneGraphValidationDiagnostics(state, survivingIds)
 
       return {
         nodes: newNodes,
         edges: newEdges,
         selectedNodeId: selectedNodeToRemove ? null : state.selectedNodeId,
+        selectedNodeIds: state.selectedNodeIds.filter((id) => !nodesToDelete.includes(id)),
         dialogueMetadata: {
           ...state.dialogueMetadata,
           node_count: newNodes.length,
           edge_count: newEdges.length,
         },
+        ...pruned,
       }
     }, { skipUndo: skipPushUndoSnapshot, skipMarkDirty })
   },

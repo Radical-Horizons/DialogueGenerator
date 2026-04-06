@@ -4,21 +4,47 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { GraphValidationPanel } from '../components/graph/GraphValidationPanel'
+import { useGraphStore } from '../store/graphStore'
 
-const focusNodeMock = vi.fn()
-const setSelectedNodeMock = vi.fn()
-const syncNodeDocumentIdMock = vi.fn()
-
-vi.mock('../store/graphStore', () => ({
-  useGraphStore: vi.fn(() => ({
-    nodes: [],
+const hoisted = vi.hoisted(() => {
+  const focusNodeMock = vi.fn()
+  const setSelectedNodeMock = vi.fn()
+  const syncNodeDocumentIdMock = vi.fn()
+  const batchDeleteNodesMock = vi.fn()
+  const validateGraphMock = vi.fn(() => Promise.resolve())
+  const defaultGraphStoreMock = () => ({
+    nodes: [{ id: 'O1', position: { x: 0, y: 0 }, data: {} }],
     edges: [],
+    selectedNodeIds: [] as string[],
     setSelectedNode: setSelectedNodeMock,
     syncNodeDocumentId: syncNodeDocumentIdMock,
     intentionalCycles: [],
     markCycleAsIntentional: vi.fn(),
     unmarkCycleAsIntentional: vi.fn(),
-  })),
+    batchDeleteNodes: batchDeleteNodesMock,
+    validateGraph: validateGraphMock,
+  })
+  return {
+    focusNodeMock,
+    setSelectedNodeMock,
+    syncNodeDocumentIdMock,
+    batchDeleteNodesMock,
+    validateGraphMock,
+    defaultGraphStoreMock,
+  }
+})
+
+const {
+  focusNodeMock,
+  setSelectedNodeMock,
+  syncNodeDocumentIdMock,
+  batchDeleteNodesMock,
+  validateGraphMock,
+  defaultGraphStoreMock,
+} = hoisted
+
+vi.mock('../store/graphStore', () => ({
+  useGraphStore: vi.fn(() => hoisted.defaultGraphStoreMock()),
 }))
 
 vi.mock('../store/graphViewStore', () => ({
@@ -32,6 +58,7 @@ describe('GraphValidationPanel (FR36)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(useGraphStore).mockImplementation(() => defaultGraphStoreMock() as ReturnType<typeof useGraphStore>)
   })
 
   it('affiche un groupe pour missing_display_name et focus au clic', () => {
@@ -164,6 +191,91 @@ describe('GraphValidationPanel (FR36)', () => {
     expect(screen.getByTestId('lore-potential-display-count').textContent).toMatch(/1 incohérence/)
     fireEvent.click(screen.getByRole('button', { name: /Ignorer/i }))
     expect(screen.getByTestId('lore-potential-display-count').textContent).toMatch(/0 incohérence/)
+  })
+
+  it('FR40 : résumé topologie visible même si des erreurs structurelles coexistent', () => {
+    const mixed = [
+      {
+        type: 'missing_display_name',
+        node_id: 'n1',
+        message: 'Nœud [n1] : DisplayName manquant',
+        severity: 'error',
+      },
+      {
+        type: 'orphan_node',
+        node_id: 'O1',
+        message: 'Orphelin test',
+        severity: 'warning',
+      },
+    ]
+    render(
+      <GraphValidationPanel
+        validationErrors={mixed}
+        reactFlowInstance={null}
+        onClose={noopClose}
+      />
+    )
+    expect(screen.getByTestId('structural-topology-summary').textContent).toMatch(/orphelin/)
+  })
+
+  it('FR40 : résumé orphelin + inaccessible et focus sur avertissement orphelin', () => {
+    const errors = [
+      {
+        type: 'orphan_node',
+        node_id: 'O1',
+        message: 'Orphelin test',
+        severity: 'warning',
+      },
+      {
+        type: 'unreachable_node',
+        node_id: 'U1',
+        message: 'Inaccessible test',
+        severity: 'warning',
+      },
+    ]
+    render(
+      <GraphValidationPanel
+        validationErrors={errors}
+        reactFlowInstance={null}
+        onClose={noopClose}
+      />
+    )
+    const summary = screen.getByTestId('structural-topology-summary')
+    expect(summary.textContent).toMatch(/orphelin/)
+    expect(summary.textContent).toMatch(/inaccessible/)
+    fireEvent.click(screen.getByText(/Orphelin test/))
+    expect(setSelectedNodeMock).toHaveBeenCalledWith('O1')
+    expect(focusNodeMock).toHaveBeenCalledWith('O1')
+  })
+
+  it('FR40 : bouton supprimer orphelins sélectionnés appelle batchDeleteNodes + validateGraph', () => {
+    vi.mocked(useGraphStore).mockImplementation(
+      () =>
+        ({
+          ...defaultGraphStoreMock(),
+          selectedNodeIds: ['O1'],
+        }) as ReturnType<typeof useGraphStore>
+    )
+
+    render(
+      <GraphValidationPanel
+        validationErrors={[
+          {
+            type: 'orphan_node',
+            node_id: 'O1',
+            message: 'x',
+            severity: 'warning',
+          },
+        ]}
+        reactFlowInstance={null}
+        onClose={noopClose}
+      />
+    )
+    const btn = screen.getByTestId('validation-delete-selected-orphans')
+    expect(btn).not.toBeDisabled()
+    fireEvent.click(btn)
+    expect(batchDeleteNodesMock).toHaveBeenCalledWith(['O1'])
+    expect(validateGraphMock).toHaveBeenCalled()
   })
 
   it('appelle onClose au clic sur la croix', () => {

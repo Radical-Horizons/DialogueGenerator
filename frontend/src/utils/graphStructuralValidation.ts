@@ -46,3 +46,27 @@ export function getValidationHighlightKind(errorTypes: readonly string[]): Valid
 export function isStructuralValidationErrorType(type: string): boolean {
   return STRUCTURAL_VALIDATION_ERROR_TYPES.has(type)
 }
+
+/** FR40 : distinction visuelle orphelin (orange) vs îlot inatteignable (indigo). */
+export type GraphTopologyWarningKind = 'orphan' | 'unreachable'
+
+export function getGraphTopologyWarningKind(
+  warningTypes: readonly string[]
+): GraphTopologyWarningKind | null {
+  const s = new Set(warningTypes)
+  if (s.has('orphan_node')) {
+    return 'orphan'
+  }
+  if (s.has('unreachable_node')) {
+    return 'unreachable'
+  }
+  return null
+}
+
+export const GRAPH_TOPOLOGY_WARNING_STYLES: Record<
+  GraphTopologyWarningKind,
+  { border: string; background: string }
+> = {
+  orphan: { border: '#ff9800', background: 'rgba(255, 152, 0, 0.14)' },
+  unreachable: { border: '#5c6bc0', background: 'rgba(92, 107, 192, 0.14)' },
+}

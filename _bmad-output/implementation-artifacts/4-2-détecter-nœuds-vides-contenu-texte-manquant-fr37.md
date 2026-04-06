@@ -1,6 +1,6 @@
 # Story 4.2 : Détecter nœuds vides (contenu texte manquant) (FR37)
 
-Status: review
+Status: done
 
 <!-- Note: Validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
 
@@ -118,6 +118,7 @@ _(aucun incident bloquant)_
 - 2026-04-06 : Implémentation FR37 (messages, orange complétude, panneau, validation post-save) — story passée en `review`.
 - 2026-04-06 : Code review (workflow BMAD) — **Changes Requested**, statut `in-progress`, section « Senior Developer Review (AI) » + « Review Follow-ups (AI) ».
 - 2026-04-06 : Suivi revue — correctifs **MEDIUM** (tests API FR37, `EndNode` + `getValidationHighlightKind`, `broken_reference` → surlignage structurel canvas) ; story repassée en **`review`**.
+- 2026-04-06 : Statut **done** (sprint + story) — confirmation Marc.
 
 ---
 
@@ -184,5 +185,5 @@ _(aucun incident bloquant)_
 
 ## Story completion status
 
-- **Statut** : `review` (LOW restants optionnels dans « Review Follow-ups »)  
-- **Note** : Prêt pour re-revue / merge après validation humaine des LOW si souhaité.
+- **Statut** : `done` (LOW restants optionnels dans « Review Follow-ups »)  
+- **Note** : Marqué done (sprint + story) sur confirmation produit — 2026-04-06.

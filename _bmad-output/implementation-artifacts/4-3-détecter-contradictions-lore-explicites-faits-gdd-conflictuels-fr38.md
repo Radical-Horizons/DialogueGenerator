@@ -1,6 +1,6 @@
 # Story 4.3 : Détecter contradictions lore explicites (faits GDD conflictuels)
 
-Status: review
+Status: done
 
 <!-- Note : validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
 
@@ -149,6 +149,7 @@ Composer (implémentation agent unique session)
 - 2026-04-06 : Implémentation FR38 — `validate-lore-explicit`, UI, tests ; sprint → **review**.
 - 2026-04-06 : Code review (BMAD) — **Changes Requested** ; statut → **in-progress** ; action items HIGH/MEDIUM (AC #4, `build_lore_summary`, doc perf).
 - 2026-04-06 : Correctifs auto (choix workflow **[1]**) — `lore_contradiction_potential`, résumé avec nœuds analysés, doc perf module, schéma/API/UI/store/Canvas ; statut → **review**.
+- 2026-04-06 : Statut **done** (sprint + story) — confirmation Marc.
 
 ---
 
@@ -156,7 +157,7 @@ Composer (implémentation agent unique session)
 
 **Revue :** Amelia (Dev + code-review BMAD) — **Marc** — 2026-04-06  
 **Outcome (initial) :** Changes Requested → **corrigé** 2026-04-06 (option fix automatique **[1]**).  
-**Outcome (actuel) :** **Approuvé pour re-revue humaine** — AC #4 couvert (warnings stables) ; résumé zéro-explicite + perf documentée module.
+**Outcome (actuel) :** **done** (sprint + story, 2026-04-06, confirmation Marc) — AC #4 couvert (warnings stables) ; résumé zéro-explicite + perf documentée module.
 
 **Preuves exécutées (post-fix) :**
 
@@ -176,6 +177,6 @@ Composer (implémentation agent unique session)
 
 ## Story Completion Status
 
-**review** — HIGH/MEDIUM code review traités ; prêt merge après validation humaine.
+**done** — HIGH/MEDIUM code review traités ; marqué done (sprint + story) sur confirmation — 2026-04-06.
 
 **Tranchées :** (1) endpoint sous `/api/v1/unity-dialogues/graph/validate-lore-explicit` ; (2) couleur lore `theme.state.lore` (violet) ; (3) MVP faits = vitalité personnages depuis `PromptStructure` + override `gdd_lore_facts`.

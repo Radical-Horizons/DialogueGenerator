@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  getGraphTopologyWarningKind,
   getValidationHighlightKind,
   isStructuralValidationErrorType,
   STRUCTURAL_VALIDATION_ERROR_TYPES,
@@ -22,6 +23,12 @@ describe('graphStructuralValidation', () => {
       'structural'
     )
     expect(getValidationHighlightKind(['broken_reference'])).toBe('structural')
+  })
+
+  it('FR40 : orphelin prioritaire sur inatteignable pour le style topologie', () => {
+    expect(getGraphTopologyWarningKind(['unreachable_node'])).toBe('unreachable')
+    expect(getGraphTopologyWarningKind(['orphan_node', 'unreachable_node'])).toBe('orphan')
+    expect(getGraphTopologyWarningKind(['cycle_detected'])).toBe(null)
   })
 
   it('getValidationHighlightKind : lore (FR38) après complétude, sous structure', () => {

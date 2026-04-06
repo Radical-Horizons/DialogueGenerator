@@ -6,7 +6,11 @@ import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
-import { getValidationHighlightKind } from '../../../utils/graphStructuralValidation'
+import {
+  getGraphTopologyWarningKind,
+  getValidationHighlightKind,
+  GRAPH_TOPOLOGY_WARNING_STYLES,
+} from '../../../utils/graphStructuralValidation'
 
 interface ValidationError {
   type: string
@@ -73,6 +77,9 @@ export const TestNode = memo(function TestNode({
   const isHighlighted = data.isHighlighted || false
   
   const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
+  const topologyKind = getGraphTopologyWarningKind(warnings.map((w) => w.type))
+  const topologyStyle = topologyKind ? GRAPH_TOPOLOGY_WARNING_STYLES[topologyKind] : null
+
   let borderColor = selected ? '#27AE60' : '#F5A623'
   if (validationHighlightKind === 'structural') {
     borderColor = theme.state.error.border
@@ -83,7 +90,7 @@ export const TestNode = memo(function TestNode({
   } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
-    borderColor = theme.state.warning.color
+    borderColor = topologyStyle?.border ?? theme.state.warning.color
   }
 
   const backgroundColor = isHighlighted
@@ -96,9 +103,11 @@ export const TestNode = memo(function TestNode({
           ? theme.state.lore.background
           : hasErrors
             ? theme.state.error.background
-            : hasWarnings
-              ? theme.state.warning.background
-              : '#16a085'
+            : hasWarnings && topologyStyle && !validationHighlightKind
+              ? topologyStyle.background
+              : hasWarnings
+                ? theme.state.warning.background
+                : '#16a085'
   
   // Barre compacte avec 4 handles
   return (

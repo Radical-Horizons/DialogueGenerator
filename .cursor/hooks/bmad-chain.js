@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 /**
- * Cursor `stop` hook — optional follow-up loop (see hooks.json `loop_limit`).
+ * Cursor `stop` hook — enchaîne dev-story → code-review → `1` si la chaîne AUTO a été armée
+ * (voir `bmad-auto-chain-lib.js` + `bmad-chain-before.js`).
  *
- * Consumes hook input on stdin. Returns no follow-up by default; set
- * `followup_message` in the output JSON to auto-continue the agent loop.
+ * Sortie JSON : `{ "followup_message": "..." }` ou `{}`.
+ *
+ * @see https://cursor.com/docs/agent/hooks
  */
-
 "use strict";
+
+const chain = require("./bmad-auto-chain-lib.js");
 
 /**
  * Read the full stdin stream as UTF-8 text.
@@ -22,8 +25,22 @@ async function readStdinUtf8() {
 }
 
 async function main() {
-  await readStdinUtf8();
-  process.stdout.write(JSON.stringify({}));
+  const raw = await readStdinUtf8();
+  try {
+    const payload = JSON.parse(raw || "{}");
+    chain.debug("stop hook stdin keys", payload && typeof payload === "object" ? Object.keys(payload) : typeof payload);
+  } catch {
+    chain.debug("stop hook stdin (non-JSON)", String(raw).slice(0, 200));
+  }
+
+  const next = chain.consumeNextFollowup();
+  if (!next) {
+    process.stdout.write(JSON.stringify({}));
+    return;
+  }
+
+  chain.debug("followup step", next.step);
+  process.stdout.write(JSON.stringify({ followup_message: next.message }));
 }
 
 main().catch((err) => {

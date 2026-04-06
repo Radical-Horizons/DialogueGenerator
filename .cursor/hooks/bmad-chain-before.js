@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * Cursor `beforeSubmitPrompt` hook — first stage of the BMAD chain.
+ * Cursor `beforeSubmitPrompt` hook — arme la chaîne AUTO (create-story → dev-story → review → 1)
+ * lorsque le prompt utilisateur contient la commande create-story ET `auto` / `#yolo`.
  *
- * Consumes hook input on stdin and allows submission. Replace this script
- * if you need validation, logging, or prompt transformation for your workflow.
+ * @see bmad-auto-chain-lib.js
  */
-
 "use strict";
+
+const chain = require("./bmad-auto-chain-lib.js");
 
 /**
  * Read the full stdin stream as UTF-8 text.
@@ -22,7 +23,21 @@ async function readStdinUtf8() {
 }
 
 async function main() {
-  await readStdinUtf8();
+  const raw = await readStdinUtf8();
+  /** @type {Record<string, unknown>} */
+  let payload = {};
+  try {
+    payload = JSON.parse(raw || "{}");
+  } catch {
+    payload = {};
+  }
+
+  const prompt = chain.promptFromHookPayload(payload);
+  if (chain.shouldArmAutoChain(prompt)) {
+    chain.armChain();
+    chain.debug("Armed from beforeSubmit, prompt snippet:", prompt.slice(0, 240));
+  }
+
   process.stdout.write(JSON.stringify({ continue: true }));
 }
 

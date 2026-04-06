@@ -505,8 +505,9 @@ class TestGraphValidate:
         # THEN
         assert response.status_code == 200
         data = response.json()
-        # Devrait détecter le nœud orphelin
-        assert len(data["warnings"]) > 0 or len(data["errors"]) > 0
+        orphan_warnings = [w for w in data.get("warnings", []) if w.get("type") == "orphan_node"]
+        assert any(w.get("node_id") == "ORPHAN" for w in orphan_warnings)
+        assert not any(w.get("node_id") == "START" for w in orphan_warnings)
     
     def test_validate_graph_cycle(
         self, client: TestClient
@@ -558,7 +559,7 @@ class TestGraphValidate:
     def test_validate_graph_start_found_when_id_in_data_only(self, client: TestClient):
         """GIVEN un graphe où le nœud d'entrée a id uniquement dans data (pas à la racine)
         WHEN je valide le graphe
-        THEN pas d'erreur 'Aucun nœud START trouvé' (id résolu via data.id)."""
+        THEN pas d'erreur missing_start (entrée résolue via data.id)."""
         nodes = [
             {
                 "type": "dialogueNode",

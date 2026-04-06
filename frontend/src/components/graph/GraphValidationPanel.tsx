@@ -3,7 +3,7 @@
  * Extrait de GraphEditor pour isoler ce bloc JSX.
  * Appelle useGraphStore() en interne pour les actions de navigation et les cycles intentionnels.
  */
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { ReactFlowInstance } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
@@ -21,6 +21,7 @@ import {
   ValidationErrorsByType,
   ValidationWarningsByType,
 } from './GraphValidationPanelLists'
+import { GraphStructuralWarningsSummary } from './GraphStructuralWarningsSummary'
 
 interface GraphValidationPanelProps {
   validationErrors: ValidationErrorDetail[]
@@ -43,11 +44,14 @@ export function GraphValidationPanel({
   const {
     nodes,
     edges,
+    selectedNodeIds,
     setSelectedNode,
     syncNodeDocumentId,
     intentionalCycles,
     markCycleAsIntentional,
     unmarkCycleAsIntentional,
+    batchDeleteNodes,
+    validateGraph,
   } = useGraphStore()
 
   const {
@@ -112,6 +116,31 @@ export function GraphValidationPanel({
     },
     {} as Record<string, ValidationErrorDetail[]>
   )
+
+  const orphanIdsInPanel = useMemo(() => {
+    const s = new Set<string>()
+    for (const e of filteredValidationErrors) {
+      if (e.severity === 'warning' && e.type === 'orphan_node' && e.node_id) {
+        s.add(e.node_id)
+      }
+    }
+    return s
+  }, [filteredValidationErrors])
+
+  const selectedOrphanIdsToDelete = useMemo(
+    () => selectedNodeIds.filter((id) => orphanIdsInPanel.has(id)),
+    [selectedNodeIds, orphanIdsInPanel]
+  )
+
+  const handleDeleteSelectedOrphans = useCallback(async () => {
+    if (selectedOrphanIdsToDelete.length === 0) return
+    batchDeleteNodes(selectedOrphanIdsToDelete)
+    try {
+      await validateGraph()
+    } catch {
+      /* validateGraph loggue déjà */
+    }
+  }, [batchDeleteNodes, selectedOrphanIdsToDelete, validateGraph])
 
   const tone: 'error' | 'warning' | 'success' =
     errors.length > 0 ? 'error' : warnings.length > 0 ? 'warning' : 'success'
@@ -200,34 +229,50 @@ export function GraphValidationPanel({
         </button>
       </div>
 
-      {errors.length === 0 && warnings.length > 0 && (
-        <div
-          style={{
-            fontSize: '0.75rem',
-            color: theme.state.warning.color,
-            marginBottom: '0.75rem',
-            opacity: 0.95,
-          }}
-        >
-          {warningSummary.disconnectedBranchCount > 0 && (
-            <span>
-              {warningSummary.disconnectedBranchCount} branche
-              {warningSummary.disconnectedBranchCount > 1 ? 's' : ''} déconnectée
-              {warningSummary.disconnectedBranchCount > 1 ? 's' : ''}
-              {warningSummary.countsByType.unreachable_node
-                ? `, ${warningSummary.countsByType.unreachable_node} nœud${
-                    warningSummary.countsByType.unreachable_node > 1 ? 's' : ''
-                  } inaccessibles`
-                : ''}
-              {warningSummary.countsByType.cycle_detected
-                ? `, ${warningSummary.countsByType.cycle_detected} cycle${
-                    warningSummary.countsByType.cycle_detected > 1 ? 's' : ''
-                  }`
-                : ''}
-            </span>
-          )}
-        </div>
+      {((warningSummary.countsByType.orphan_node ?? 0) > 0 ||
+        (warningSummary.countsByType.unreachable_node ?? 0) > 0 ||
+        warningSummary.cycleCount > 0) && (
+        <>
+          <GraphStructuralWarningsSummary warningSummary={warningSummary} />
+          {warningSummary.cycleCount > 0 ? (
+            <div
+              style={{
+                fontSize: '0.72rem',
+                color: theme.state.warning.color,
+                marginBottom: '0.65rem',
+                opacity: 0.92,
+              }}
+            >
+              {warningSummary.cycleCount} cycle{warningSummary.cycleCount > 1 ? 's' : ''} signalé
+              {warningSummary.cycleCount > 1 ? 's' : ''} (voir la liste ci-dessous)
+            </div>
+          ) : null}
+        </>
       )}
+
+      {selectedNodeIds.length > 0 ? (
+        <div style={{ marginBottom: '0.65rem' }}>
+          <button
+            type="button"
+            data-testid="validation-delete-selected-orphans"
+            disabled={selectedOrphanIdsToDelete.length === 0}
+            onClick={() => void handleDeleteSelectedOrphans()}
+            style={{
+              fontSize: '0.72rem',
+              padding: '0.35rem 0.55rem',
+              borderRadius: 6,
+              border: `1px solid ${panelBorder}`,
+              backgroundColor: 'rgba(0, 0, 0, 0.25)',
+              color: headerColor,
+              cursor: selectedOrphanIdsToDelete.length > 0 ? 'pointer' : 'not-allowed',
+              opacity: selectedOrphanIdsToDelete.length > 0 ? 1 : 0.55,
+            }}
+          >
+            Supprimer la sélection (orphelins uniquement — {selectedOrphanIdsToDelete.length} nœud
+            {selectedOrphanIdsToDelete.length > 1 ? 's' : ''})
+          </button>
+        </div>
+      ) : null}
 
       {loreExplicitSummary ? (
         <div

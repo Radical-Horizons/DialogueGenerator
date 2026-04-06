@@ -259,10 +259,83 @@ class TestFindOrphanNodesNodeId:
     """Régression : find_orphan_nodes aligné sur _node_id (id racine ou data.id)."""
 
     def test_orphan_when_id_only_in_data(self):
-        nodes = [{"data": {"id": "onlyInData", "type": "dialogueNode"}}]
+        """Le premier nœud dialogue est l'entrée ; un second sans arête entrante est orphelin."""
+        nodes = [
+            {"data": {"id": "onlyInData", "type": "dialogueNode"}},
+            {"data": {"id": "second", "type": "dialogueNode"}},
+        ]
         edges: list[dict] = []
         orphans = GraphValidationService.find_orphan_nodes(nodes, edges)
-        assert "onlyInData" in orphans
+        assert "second" in orphans
+        assert "onlyInData" not in orphans
+
+
+class TestOrphanNodesFr40:
+    """FR40 : orphelin = sans arête entrante ; entrée = START ou premier nœud dialogue."""
+
+    def test_start_plus_orphan_emits_orphan_warning_with_node_id(self):
+        nodes = [
+            {
+                "id": "START",
+                "type": "dialogueNode",
+                "data": {"id": "START", "displayName": "Entrée", "line": "Go"},
+            },
+            {
+                "id": "ORPHAN",
+                "type": "dialogueNode",
+                "data": {"id": "ORPHAN", "displayName": "Seul", "line": "Hi"},
+            },
+        ]
+        edges: list[dict] = []
+        result = ValidationResult()
+        GraphValidationService._validate_orphan_nodes(nodes, edges, result)
+        types = [w.type for w in result.warnings]
+        assert "orphan_node" in types
+        orphan = next(w for w in result.warnings if w.type == "orphan_node")
+        assert orphan.node_id == "ORPHAN"
+        assert "orphelin" in orphan.message.lower()
+        assert "entrée" in orphan.message.lower() or "inatteignable" in orphan.message.lower()
+
+    def test_start_never_orphan_even_without_incoming_edge(self):
+        nodes = [
+            {
+                "id": "START",
+                "type": "dialogueNode",
+                "data": {"id": "START", "displayName": "Entrée", "line": "Go"},
+            },
+        ]
+        edges: list[dict] = []
+        result = ValidationResult()
+        GraphValidationService._validate_orphan_nodes(nodes, edges, result)
+        assert not any(w.node_id == "START" for w in result.warnings)
+
+    def test_without_start_first_dialogue_is_entry_second_is_orphan(self):
+        """Sans START, le premier nœud dialogue est l'entrée — le suivant sans cible entrante est orphelin."""
+        nodes = [
+            {
+                "id": "A",
+                "type": "dialogueNode",
+                "data": {"id": "A", "displayName": "A", "line": "a"},
+            },
+            {
+                "id": "B",
+                "type": "dialogueNode",
+                "data": {"id": "B", "displayName": "B", "line": "b"},
+            },
+        ]
+        edges: list[dict] = []
+        result = ValidationResult()
+        GraphValidationService._validate_orphan_nodes(nodes, edges, result)
+        orphan_ids = {w.node_id for w in result.warnings if w.type == "orphan_node"}
+        assert "B" in orphan_ids
+        assert "A" not in orphan_ids
+
+    def test_find_orphan_nodes_excludes_implicit_entry_without_start(self):
+        nodes = [
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A", "displayName": "A", "line": "x"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B", "displayName": "B", "line": "y"}},
+        ]
+        assert GraphValidationService.find_orphan_nodes(nodes, []) == ["B"]
 
 
 @pytest.mark.slow

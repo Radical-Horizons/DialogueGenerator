@@ -138,6 +138,30 @@ def _is_dialogue_like(node_type: Optional[str]) -> bool:
     return node_type in ("dialogueNode", "dialogue")
 
 
+def _resolve_graph_entry_node_id(nodes: List[Dict[str, Any]]) -> Optional[str]:
+    """Résout l'identifiant du nœud d'entrée du graphe (FR40 / atteignabilité).
+
+    Priorité : ``START`` si présent ; sinon premier nœud avec id (hors ``END`` et hors
+    ``testNode``), comme premier nœud « dialogue » utilisable comme entrée.
+
+    Args:
+        nodes: Nœuds React Flow ou format document.
+
+    Returns:
+        Identifiant d'entrée ou ``None`` si aucun candidat.
+    """
+    for node in nodes:
+        nid = _node_id(node)
+        if nid == "START":
+            return nid
+    for node in nodes:
+        nid = _node_id(node)
+        ntype = _node_type(node)
+        if nid and nid != "END" and ntype != "testNode":
+            return nid
+    return None
+
+
 def _choices_have_exploitable_text(choices: Any) -> bool:
     """True si la liste contient au moins un choix avec texte non vide (UnityDialogueChoice.text).
 
@@ -341,19 +365,7 @@ class GraphValidationService:
         """Détecte les nœuds orphelins (pas de connexion entrante).
         Le nœud d'entrée (START ou premier nœud dialogue) est exclu.
         """
-        entry_id = None
-        for node in nodes:
-            nid = _node_id(node)
-            if nid == "START":
-                entry_id = nid
-                break
-        if not entry_id:
-            for node in nodes:
-                nid = _node_id(node)
-                ntype = _node_type(node)
-                if nid and nid != "END" and ntype != "testNode":
-                    entry_id = nid
-                    break
+        entry_id = _resolve_graph_entry_node_id(nodes)
 
         node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         targets = {edge.get("target") for edge in edges if edge.get("target")}
@@ -365,7 +377,11 @@ class GraphValidationService:
                 result.add_warning(
                     "orphan_node",
                     node_id,
-                    f"Nœud '{node_id}' n'a pas de connexion entrante (orphelin)"
+                    (
+                        f"Nœud « {node_id} » : aucune connexion entrante (orphelin). "
+                        "À ne pas confondre avec un nœud relié mais sur une branche "
+                        "inaccessible depuis l'entrée (voir « inatteignable »)."
+                    ),
                 )
     
     @staticmethod
@@ -377,24 +393,12 @@ class GraphValidationService:
         """Détecte les nœuds inatteignables depuis le nœud d'entrée (START ou premier nœud dialogue).
         L'id est résolu via _node_id (racine ou data.id) pour accepter ReactFlow et format document.
         """
-        start_node_id = None
-        for node in nodes:
-            nid = _node_id(node)
-            if nid == "START":
-                start_node_id = nid
-                break
-        if not start_node_id:
-            for node in nodes:
-                nid = _node_id(node)
-                ntype = _node_type(node)
-                if nid and nid != "END" and ntype != "testNode":
-                    start_node_id = nid
-                    break
+        start_node_id = _resolve_graph_entry_node_id(nodes)
         if not start_node_id:
             result.add_error(
                 "missing_start",
                 None,
-                "Aucun nœud START trouvé"
+                "Aucun nœud d'entrée résolu (START ou premier nœud dialogue hors test/END)",
             )
             return
 
@@ -413,7 +417,10 @@ class GraphValidationService:
                 result.add_warning(
                     "unreachable_node",
                     node_id,
-                    f"Nœud '{node_id}' est inatteignable depuis le nœud d'entrée"
+                    (
+                        f"Nœud « {node_id} » : inatteignable depuis l'entrée du dialogue "
+                        "(peut toutefois avoir des connexions entrantes ; îlot séparé)."
+                    ),
                 )
     
     @staticmethod
@@ -546,14 +553,15 @@ class GraphValidationService:
         """
         node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         targets = {edge.get("target") for edge in edges if edge.get("target")}
-        
+        entry_id = _resolve_graph_entry_node_id(nodes)
+
         orphans = []
         for node_id in node_ids:
-            if node_id == "START" or node_id == "END":
+            if node_id == entry_id or node_id == "END":
                 continue
             if node_id not in targets:
                 orphans.append(node_id)
-        
+
         return orphans
     
     @staticmethod
@@ -618,13 +626,18 @@ class GraphValidationService:
         edges: List[Dict[str, Any]], 
         start_id: str = "START"
     ) -> List[str]:
-        """Trouve les nœuds inatteignables depuis START.
-        
+        """Trouve les nœuds inatteignables depuis un nœud de départ donné.
+
+        Pour le même critère que ``validate_graph`` (entrée START ou premier dialogue),
+        préférer l’id retourné par la fonction module ``_resolve_graph_entry_node_id(nodes)``
+        puis appeler avec cet id explicite ;
+        la valeur par défaut ``START`` ne couvre pas les graphes sans nœud nommé START.
+
         Args:
             nodes: Liste de nœuds.
             edges: Liste d'edges.
-            start_id: ID du nœud de départ.
-            
+            start_id: ID du nœud de départ pour le BFS.
+
         Returns:
             Liste d'IDs de nœuds inatteignables.
         """

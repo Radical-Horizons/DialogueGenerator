@@ -57,6 +57,9 @@ playwright-report/
 playwright/.cache/
 e2e/.auth/
 
+# BMAD / Cursor — état éphémère chaîne AUTO (create-story auto → dev-story → code-review → 1)
+.bmad-auto-chain.pending.json
+
 # Cursor IDE — plans et prefs machine (ne pas versionner)
 # Note: `.cursor/hooks/` est versionné (scripts BMAD / chaîne Cursor) pour rester aligné avec hooks.json.
 .cursor/plans/

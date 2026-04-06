@@ -12,7 +12,11 @@ import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
-import { getValidationHighlightKind } from '../../../utils/graphStructuralValidation'
+import {
+  getGraphTopologyWarningKind,
+  getValidationHighlightKind,
+  GRAPH_TOPOLOGY_WARNING_STYLES,
+} from '../../../utils/graphStructuralValidation'
 
 interface ValidationError {
   type: string
@@ -205,6 +209,9 @@ export const DialogueNode = memo(function DialogueNode({
   let borderStyle: 'solid' | 'dashed' = 'solid'
   
   const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
+  const topologyKind = getGraphTopologyWarningKind(warnings.map((w) => w.type))
+  const topologyStyle = topologyKind ? GRAPH_TOPOLOGY_WARNING_STYLES[topologyKind] : null
+
   if (validationHighlightKind === 'structural') {
     borderColor = theme.state.error.border
   } else if (validationHighlightKind === 'content') {
@@ -214,7 +221,7 @@ export const DialogueNode = memo(function DialogueNode({
   } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
-    borderColor = theme.state.warning.color
+    borderColor = topologyStyle?.border ?? theme.state.warning.color
   } else if (isPending) {
     borderColor = theme.state.pending.border
     borderStyle = 'dashed'
@@ -222,6 +229,11 @@ export const DialogueNode = memo(function DialogueNode({
     borderColor = theme.state.accepted.border
     borderStyle = 'solid'
   }
+
+  const canvasBackground =
+    !hasErrors && hasWarnings && topologyStyle && !validationHighlightKind
+      ? topologyStyle.background
+      : undefined
 
   const getChoiceHandleLeftPercent = (index: number): number => {
     // Répartition uniforme sur la largeur du node, sans coller aux bords
@@ -249,7 +261,10 @@ export const DialogueNode = memo(function DialogueNode({
         maxHeight: 500,
         border: `2px ${borderStyle} ${borderColor}`,
         borderRadius: 8,
-        backgroundColor: isHighlighted ? theme.state.selected.background : theme.background.tertiary,
+        backgroundColor:
+          isHighlighted
+            ? theme.state.selected.background
+            : (canvasBackground ?? theme.background.tertiary),
         boxShadow: selected
           ? '0 4px 12px rgba(0, 0, 0, 0.3)'
           : isHighlighted
@@ -372,7 +387,7 @@ export const DialogueNode = memo(function DialogueNode({
             position: 'absolute',
             top: 4,
             right: 4,
-            backgroundColor: theme.state.warning.color,
+            backgroundColor: topologyStyle?.border ?? theme.state.warning.color,
             color: 'black',
             borderRadius: '50%',
             width: 20,
@@ -386,7 +401,14 @@ export const DialogueNode = memo(function DialogueNode({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
           title={warnings.map((w, idx) => {
-            const icon = w.type === 'unreachable_node' ? '📍' : w.type === 'cycle_detected' ? '🔄' : '⚠️'
+            const icon =
+              w.type === 'orphan_node'
+                ? '🔗'
+                : w.type === 'unreachable_node'
+                  ? '📍'
+                  : w.type === 'cycle_detected'
+                    ? '🔄'
+                    : '⚠️'
             return `${icon} ${w.message}${idx < warnings.length - 1 ? '\n' : ''}`
           }).join('')}
         >

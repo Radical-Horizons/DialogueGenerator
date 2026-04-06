@@ -17,14 +17,14 @@ export const ICON_FOR_TYPE: Record<string, string> = {
 }
 
 export const LABEL_FOR_TYPE: Record<string, string> = {
-  orphan_node: 'Nœud orphelin détecté',
+  orphan_node: 'Nœuds orphelins (sans connexion entrante)',
   broken_reference: 'Références cassées',
   empty_node: 'Nœuds vides',
   missing_display_name: 'DisplayName manquant',
   missing_stable_id: 'StableID / identifiant document',
   missing_dialogue_text: 'Contenu dialogue vide (FR37)',
   missing_test: 'Test d’attribut manquant (FR37)',
-  unreachable_node: 'Nœuds inaccessibles',
+  unreachable_node: 'Nœuds inaccessibles depuis l’entrée',
   cycle_detected: 'Cycles détectés',
   lore_contradiction_explicit: 'Lore — contradictions explicites (FR38)',
   lore_contradiction_potential: 'Lore — incohérences potentielles (AC 4.3 #4)',
