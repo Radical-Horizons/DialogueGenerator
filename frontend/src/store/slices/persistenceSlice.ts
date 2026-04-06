@@ -21,6 +21,10 @@ import {
   normalizeTestBars,
   documentRequiresChoiceIdMigration,
 } from '../../utils/graphNormalizers'
+import {
+  mergeIntentionalCycleIdsIntoLayout,
+  readIntentionalCycleIdsFromLayout,
+} from '../../utils/layoutIntentionalCycles'
 
 export type PersistenceSlice = Pick<
   GraphState,
@@ -130,9 +134,11 @@ export const createPersistenceSlice: StateCreator<
           : (parsed as Record<string, unknown>)
 
       let layoutPositions: { nodes: Record<string, { x: number; y: number }> } | undefined
+      let serverLayout: Record<string, unknown> = {}
       try {
         const layoutRes = await documentsAPI.getLayout(documentId)
-        const nodes = (layoutRes?.layout as { nodes?: Record<string, { x: number; y: number }> })?.nodes
+        serverLayout = (layoutRes?.layout ?? {}) as Record<string, unknown>
+        const nodes = serverLayout.nodes as Record<string, { x: number; y: number }> | undefined
         if (nodes && typeof nodes === 'object' && Object.keys(nodes).length > 0) {
           layoutPositions = { nodes }
         }
@@ -142,7 +148,7 @@ export const createPersistenceSlice: StateCreator<
 
       const { nodes: projectedNodes, edges: projectedEdges } = documentToGraph(doc, layoutPositions)
       const normalized = normalizeTestBars(projectedNodes, projectedEdges)
-      const layoutBlob = mergeLayoutWithNodePositions({}, normalized.nodes)
+      const layoutBlob = mergeLayoutWithNodePositions(serverLayout, normalized.nodes)
       const nodeCount = normalized.nodes.filter((n) => n.type !== 'testNode').length
 
       get().applyLoadResult({
@@ -250,6 +256,15 @@ export const createPersistenceSlice: StateCreator<
       return false
     }
 
+    const intentionalCycles = readIntentionalCycleIdsFromLayout(
+      rest.layout as Record<string, unknown>
+    )
+    try {
+      localStorage.setItem('graph_intentional_cycles', JSON.stringify(intentionalCycles))
+    } catch (e) {
+      console.warn('[Persistence] localStorage intentional cycles:', e)
+    }
+
     set({
       nodes: rest.nodes,
       edges: rest.edges,
@@ -264,6 +279,7 @@ export const createPersistenceSlice: StateCreator<
       loreExplicitValidationSummary: null,
       highlightedNodeIds: [],
       highlightedCycleNodes: [],
+      intentionalCycles,
       hasUnsavedChanges: false,
       lastSaveError: null,
       lastSavedAt: null,
@@ -313,10 +329,13 @@ export const createPersistenceSlice: StateCreator<
       if (state.document != null && documentId) {
         const snap = get()
         const doc = graphToDocument(snap.nodes, snap.edges) as unknown as Record<string, unknown>
-        const layoutPayload = mergeLayoutWithNodePositions(
-          snap.layout ?? buildLayoutFromNodes(snap.nodes),
-          snap.nodes
-        ) as Record<string, unknown>
+        const layoutPayload = mergeIntentionalCycleIdsIntoLayout(
+          mergeLayoutWithNodePositions(
+            snap.layout ?? buildLayoutFromNodes(snap.nodes),
+            snap.nodes
+          ) as Record<string, unknown>,
+          snap.intentionalCycles
+        )
         const docRev = state.documentRevision ?? 1
         const layoutRev = state.layoutRevision ?? 1
         const requiresChoiceIdMigration = documentRequiresChoiceIdMigration(doc)

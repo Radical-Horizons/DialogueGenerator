@@ -4,7 +4,6 @@
  * Appelle useGraphStore() en interne pour les actions de navigation et les cycles intentionnels.
  */
 import { useCallback, useMemo } from 'react'
-import type { ReactFlowInstance } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 import type { ValidationErrorDetail } from '../../types/graph'
@@ -25,7 +24,6 @@ import { GraphStructuralWarningsSummary } from './GraphStructuralWarningsSummary
 
 interface GraphValidationPanelProps {
   validationErrors: ValidationErrorDetail[]
-  reactFlowInstance: ReactFlowInstance | null
   /** Résumé contradictions explicites uniquement (`summary_explicit_only`, FR39 AC #5). */
   loreExplicitSummary?: string | null
   /** Clé stable dialogue (filename ou documentId) pour persistance FR39 */
@@ -36,7 +34,6 @@ interface GraphValidationPanelProps {
 
 export function GraphValidationPanel({
   validationErrors,
-  reactFlowInstance,
   loreExplicitSummary,
   loreDialogueScopeKey = 'default',
   onClose,
@@ -232,22 +229,7 @@ export function GraphValidationPanel({
       {((warningSummary.countsByType.orphan_node ?? 0) > 0 ||
         (warningSummary.countsByType.unreachable_node ?? 0) > 0 ||
         warningSummary.cycleCount > 0) && (
-        <>
-          <GraphStructuralWarningsSummary warningSummary={warningSummary} />
-          {warningSummary.cycleCount > 0 ? (
-            <div
-              style={{
-                fontSize: '0.72rem',
-                color: theme.state.warning.color,
-                marginBottom: '0.65rem',
-                opacity: 0.92,
-              }}
-            >
-              {warningSummary.cycleCount} cycle{warningSummary.cycleCount > 1 ? 's' : ''} signalé
-              {warningSummary.cycleCount > 1 ? 's' : ''} (voir la liste ci-dessous)
-            </div>
-          ) : null}
-        </>
+        <GraphStructuralWarningsSummary warningSummary={warningSummary} />
       )}
 
       {selectedNodeIds.length > 0 ? (
@@ -311,7 +293,6 @@ export function GraphValidationPanel({
       {warnings.length > 0 ? (
         <ValidationWarningsByType
           warningsByType={warningsByType}
-          reactFlowInstance={reactFlowInstance}
           setSelectedNode={setSelectedNode}
           intentionalCycles={intentionalCycles}
           markCycleAsIntentional={markCycleAsIntentional}

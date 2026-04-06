@@ -8,6 +8,7 @@ import { useGraphStore } from '../store/graphStore'
 
 const hoisted = vi.hoisted(() => {
   const focusNodeMock = vi.fn()
+  const requestFitViewOnNodeIdsMock = vi.fn()
   const setSelectedNodeMock = vi.fn()
   const syncNodeDocumentIdMock = vi.fn()
   const batchDeleteNodesMock = vi.fn()
@@ -26,6 +27,7 @@ const hoisted = vi.hoisted(() => {
   })
   return {
     focusNodeMock,
+    requestFitViewOnNodeIdsMock,
     setSelectedNodeMock,
     syncNodeDocumentIdMock,
     batchDeleteNodesMock,
@@ -36,6 +38,7 @@ const hoisted = vi.hoisted(() => {
 
 const {
   focusNodeMock,
+  requestFitViewOnNodeIdsMock,
   setSelectedNodeMock,
   syncNodeDocumentIdMock,
   batchDeleteNodesMock,
@@ -49,7 +52,10 @@ vi.mock('../store/graphStore', () => ({
 
 vi.mock('../store/graphViewStore', () => ({
   useGraphViewStore: Object.assign(vi.fn(), {
-    getState: () => ({ focusNode: focusNodeMock }),
+    getState: () => ({
+      focusNode: focusNodeMock,
+      requestFitViewOnNodeIds: requestFitViewOnNodeIdsMock,
+    }),
   }),
 }))
 
@@ -73,7 +79,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={errors}
-        reactFlowInstance={null}
         onClose={noopClose}
       />
     )
@@ -95,7 +100,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={errors}
-        reactFlowInstance={null}
         onClose={noopClose}
       />
     )
@@ -117,7 +121,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={errors}
-        reactFlowInstance={null}
         onClose={noopClose}
       />
     )
@@ -141,7 +144,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={errors}
-        reactFlowInstance={null}
         loreExplicitSummary="1 contradiction dans 1 nœud"
         onClose={noopClose}
       />
@@ -159,7 +161,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={[]}
-        reactFlowInstance={null}
         loreExplicitSummary="Aucune contradiction lore explicite (1 nœud dialogue analysé)"
         onClose={noopClose}
       />
@@ -182,7 +183,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={errors}
-        reactFlowInstance={null}
         loreExplicitSummary="Résumé API"
         loreDialogueScopeKey="test-fr39-panel"
         onClose={noopClose}
@@ -191,6 +191,32 @@ describe('GraphValidationPanel (FR36)', () => {
     expect(screen.getByTestId('lore-potential-display-count').textContent).toMatch(/1 incohérence/)
     fireEvent.click(screen.getByRole('button', { name: /Ignorer/i }))
     expect(screen.getByTestId('lore-potential-display-count').textContent).toMatch(/0 incohérence/)
+  })
+
+  it('FR41 : résumé cycles + clic déclenche requestFitViewOnNodeIds', () => {
+    vi.mocked(useGraphStore).mockImplementation(
+      () =>
+        ({
+          ...defaultGraphStoreMock(),
+          nodes: [{ id: 'A', position: { x: 0, y: 0 }, data: {} }],
+          edges: [],
+        }) as ReturnType<typeof useGraphStore>
+    )
+    const warnings = [
+      {
+        type: 'cycle_detected',
+        severity: 'warning',
+        message: 'm',
+        cycle_id: 'c1',
+        cycle_nodes: ['A'],
+        cycle_path: 'A → A',
+      },
+    ]
+    render(<GraphValidationPanel validationErrors={warnings} onClose={noopClose} />)
+    expect(screen.getByTestId('structural-cycles-summary')).toHaveTextContent(/1 cycle détecté/)
+    fireEvent.click(screen.getByTitle('Cliquer pour zoomer sur les nœuds du cycle'))
+    expect(setSelectedNodeMock).toHaveBeenCalledWith('A')
+    expect(requestFitViewOnNodeIdsMock).toHaveBeenCalledWith(['A'])
   })
 
   it('FR40 : résumé topologie visible même si des erreurs structurelles coexistent', () => {
@@ -211,7 +237,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={mixed}
-        reactFlowInstance={null}
         onClose={noopClose}
       />
     )
@@ -236,7 +261,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={errors}
-        reactFlowInstance={null}
         onClose={noopClose}
       />
     )
@@ -267,7 +291,6 @@ describe('GraphValidationPanel (FR36)', () => {
             severity: 'warning',
           },
         ]}
-        reactFlowInstance={null}
         onClose={noopClose}
       />
     )
@@ -283,7 +306,6 @@ describe('GraphValidationPanel (FR36)', () => {
     render(
       <GraphValidationPanel
         validationErrors={[]}
-        reactFlowInstance={null}
         loreExplicitSummary="Résumé"
         onClose={onClose}
       />

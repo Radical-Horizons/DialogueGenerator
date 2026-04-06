@@ -87,7 +87,6 @@ export function GraphEditor({
     showFiltersPanel,
     setShowFiltersPanel,
     actionsDropdownBtnRef,
-    reactFlowInstance,
     handleExportPNG,
     handleExportSVG,
   } = toolbar
@@ -248,7 +247,6 @@ export function GraphEditor({
             {showValidationOverlay && (
               <GraphValidationPanel
                 validationErrors={graphValidationErrors}
-                reactFlowInstance={reactFlowInstance}
                 loreExplicitSummary={loreExplicitValidationSummary}
                 loreDialogueScopeKey={loreDialogueScopeKey}
                 onClose={() => toolbar.setShowValidationPanel(false)}

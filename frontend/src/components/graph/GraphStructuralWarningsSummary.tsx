@@ -1,19 +1,21 @@
 import { theme } from '../../theme'
 import type { GraphValidationWarningSummary } from '../../utils/graphValidationSummary'
+import { CyclesSummary } from './CyclesSummary'
 
 interface GraphStructuralWarningsSummaryProps {
   warningSummary: GraphValidationWarningSummary
 }
 
 /**
- * Résumé textuel des avertissements de topologie (orphelin vs inatteignable), FR40.
+ * Résumé textuel topologie : orphelin / inatteignable (FR40) + cycles visibles (FR41).
  */
 export function GraphStructuralWarningsSummary({
   warningSummary,
 }: GraphStructuralWarningsSummaryProps) {
   const orphanCount = warningSummary.countsByType.orphan_node ?? 0
   const unreachableCount = warningSummary.countsByType.unreachable_node ?? 0
-  if (orphanCount === 0 && unreachableCount === 0) {
+  const cycleCount = warningSummary.cycleCount
+  if (orphanCount === 0 && unreachableCount === 0 && cycleCount === 0) {
     return null
   }
 
@@ -34,17 +36,22 @@ export function GraphStructuralWarningsSummary({
   }
 
   return (
-    <div
-      data-testid="structural-topology-summary"
-      style={{
-        fontSize: '0.75rem',
-        color: theme.state.warning.color,
-        marginBottom: '0.75rem',
-        opacity: 0.95,
-        lineHeight: 1.35,
-      }}
-    >
-      {parts.join(' · ')}
+    <div style={{ marginBottom: '0.75rem' }}>
+      {parts.length > 0 ? (
+        <div
+          data-testid="structural-topology-summary"
+          style={{
+            fontSize: '0.75rem',
+            color: theme.state.warning.color,
+            marginBottom: cycleCount > 0 ? '0.35rem' : 0,
+            opacity: 0.95,
+            lineHeight: 1.35,
+          }}
+        >
+          {parts.join(' · ')}
+        </div>
+      ) : null}
+      <CyclesSummary visibleCycleCount={cycleCount} />
     </div>
   )
 }

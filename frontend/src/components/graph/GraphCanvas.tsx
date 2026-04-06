@@ -94,6 +94,18 @@ const GraphCanvasInner = memo(function GraphCanvasInner() {
     }
   }, [focusHeadId, getNode, fitView, setSelectedNodeInner, setHighlightedNodesInner])
 
+  const pendingFitViewNodeIds = useGraphViewStore((s) => s.pendingFitViewNodeIds)
+  useEffect(() => {
+    if (!pendingFitViewNodeIds || pendingFitViewNodeIds.length === 0) return
+    useGraphViewStore.getState().clearFitViewNodeIdsRequest()
+    const nodeObjects = pendingFitViewNodeIds
+      .map((id) => getNode(id))
+      .filter((n): n is ReactFlowNode => n != null)
+    if (nodeObjects.length > 0) {
+      fitView({ nodes: nodeObjects, padding: 0.2, duration: 300 })
+    }
+  }, [pendingFitViewNodeIds, getNode, fitView])
+
   const pendingFitView = useGraphViewStore((s) => s.pendingFitView)
   useEffect(() => {
     if (!pendingFitView) return

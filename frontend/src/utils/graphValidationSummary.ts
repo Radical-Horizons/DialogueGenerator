@@ -13,6 +13,31 @@ export interface GraphValidationWarningSummary {
   actionableWarningCount: number
 }
 
+/**
+ * Nœuds à surligner pour les cycles encore non marqués intentionnels (aligné sur le filtre du panneau).
+ */
+export function visibleCycleHighlightNodeIds(
+  validationErrors: ValidationErrorDetail[],
+  intentionalCycleIds: readonly string[]
+): string[] {
+  const intentional = new Set(intentionalCycleIds)
+  const ids = new Set<string>()
+  for (const w of validationErrors) {
+    if (w.type !== 'cycle_detected' || !w.cycle_nodes || !Array.isArray(w.cycle_nodes)) {
+      continue
+    }
+    if (w.cycle_id && intentional.has(w.cycle_id)) {
+      continue
+    }
+    for (const id of w.cycle_nodes) {
+      if (typeof id === 'string') {
+        ids.add(id)
+      }
+    }
+  }
+  return Array.from(ids)
+}
+
 function filterVisibleWarnings(
   validationErrors: ValidationErrorDetail[],
   intentionalCycles: string[]

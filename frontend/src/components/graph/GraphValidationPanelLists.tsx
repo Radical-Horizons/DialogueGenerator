@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react'
-import type { ReactFlowInstance } from 'reactflow'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { theme } from '../../theme'
 import type { ValidationErrorDetail } from '../../types/graph'
@@ -168,9 +167,31 @@ export function ValidationErrorsByType({
   )
 }
 
+/** Navigation depuis une entrée du panneau de validation (cycle → fitView multi-nœuds, sinon focus). */
+function navigateToValidationWarningTarget(
+  warn: ValidationErrorDetail,
+  ctx: {
+    isCycle: boolean
+    cycleNodeIds: string[] | undefined
+    setSelectedNode: (id: string) => void
+  }
+): void {
+  if (ctx.isCycle && ctx.cycleNodeIds && ctx.cycleNodeIds.length > 0) {
+    const first = ctx.cycleNodeIds[0]
+    if (first) {
+      ctx.setSelectedNode(first)
+    }
+    useGraphViewStore.getState().requestFitViewOnNodeIds(ctx.cycleNodeIds)
+    return
+  }
+  if (warn.node_id) {
+    ctx.setSelectedNode(warn.node_id)
+    useGraphViewStore.getState().focusNode(warn.node_id)
+  }
+}
+
 interface ValidationWarningsByTypeProps {
   warningsByType: Record<string, ValidationErrorDetail[]>
-  reactFlowInstance: ReactFlowInstance | null
   setSelectedNode: (id: string) => void
   intentionalCycles: string[]
   markCycleAsIntentional: (id: string) => void
@@ -185,7 +206,6 @@ interface ValidationWarningsByTypeProps {
 
 export function ValidationWarningsByType({
   warningsByType,
-  reactFlowInstance,
   setSelectedNode,
   intentionalCycles,
   markCycleAsIntentional,
@@ -216,21 +236,11 @@ export function ValidationWarningsByType({
             const isCycle =
               type === 'cycle_detected' && warn.cycle_path && warn.cycle_nodes
             const handleClick = () => {
-              if (isCycle && reactFlowInstance && warn.cycle_nodes) {
-                const cycleNodeObjects = warn.cycle_nodes
-                  .map((nodeId) => reactFlowInstance.getNode(nodeId))
-                  .filter((node) => node !== undefined)
-                if (cycleNodeObjects.length > 0) {
-                  reactFlowInstance.fitView({
-                    nodes: cycleNodeObjects,
-                    padding: 0.2,
-                    duration: 300,
-                  })
-                }
-              } else if (warn.node_id) {
-                setSelectedNode(warn.node_id)
-                useGraphViewStore.getState().focusNode(warn.node_id)
-              }
+              navigateToValidationWarningTarget(warn, {
+                isCycle: Boolean(isCycle),
+                cycleNodeIds: warn.cycle_nodes,
+                setSelectedNode,
+              })
             }
             return (
               <div

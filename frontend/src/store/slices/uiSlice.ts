@@ -14,6 +14,7 @@ import {
 } from '../../utils/graphJournal'
 import { useGraphViewStore } from '../graphViewStore'
 import { nodeTargetDisplayLabel } from '../../utils/nodeTargetLabel'
+import { visibleCycleHighlightNodeIds } from '../../utils/graphValidationSummary'
 
 /** Types lore renvoyés par validate-lore-explicit (erreurs + avertissements AC #4). */
 const LORE_VALIDATION_TYPES = new Set<string>([
@@ -66,21 +67,14 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
         })),
       })
 
-      const cycleWarnings = response.warnings.filter(
-        (w) => w.type === 'cycle_detected' && w.cycle_nodes && Array.isArray(w.cycle_nodes)
-      )
-      const cycleNodeIds = new Set<string>()
-      cycleWarnings.forEach((warn) => {
-        if (warn.cycle_nodes && Array.isArray(warn.cycle_nodes)) {
-          warn.cycle_nodes.forEach((nodeId) => cycleNodeIds.add(nodeId))
-        }
-      })
-
       const loreKept = get().validationErrors.filter((e) => LORE_VALIDATION_TYPES.has(e.type))
       const newValidationErrors = [...response.errors, ...response.warnings, ...loreKept]
       const prevErrors = get().validationErrors
       const prevCycleNodes = get().highlightedCycleNodes
-      const newCycleNodes = Array.from(cycleNodeIds)
+      const newCycleNodes = visibleCycleHighlightNodeIds(
+        newValidationErrors,
+        get().intentionalCycles
+      )
       const errorsUnchanged =
         prevErrors.length === newValidationErrors.length &&
         newValidationErrors.every((e, i) => prevErrors[i]?.node_id === e.node_id && prevErrors[i]?.type === e.type && prevErrors[i]?.severity === e.severity)
@@ -261,7 +255,13 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
         }
       }
 
-      return { intentionalCycles: newIntentionalCycles }
+      return {
+        intentionalCycles: newIntentionalCycles,
+        highlightedCycleNodes: visibleCycleHighlightNodeIds(
+          state.validationErrors,
+          newIntentionalCycles
+        ),
+      }
     })
   },
 
@@ -280,7 +280,13 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
         }
       }
 
-      return { intentionalCycles: newIntentionalCycles }
+      return {
+        intentionalCycles: newIntentionalCycles,
+        highlightedCycleNodes: visibleCycleHighlightNodeIds(
+          state.validationErrors,
+          newIntentionalCycles
+        ),
+      }
     })
   },
 
