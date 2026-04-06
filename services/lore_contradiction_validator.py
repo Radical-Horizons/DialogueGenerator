@@ -1,13 +1,14 @@
-"""Validation des contradictions lore explicites (FR38) — faits GDD vs texte du graphe.
+"""Validation des contradictions lore explicites (FR38) et avertissements potentiels (4.3 / 4.4).
 
-Heuristiques déterministes (pas de LLM). Les contradictions explicites produisent des
-erreurs ``lore_contradiction_explicit``. Les cas ambigus (fiche GDD contradictoire,
-mention de vitalité sans ancrage GDD) produisent des avertissements stables
-``lore_contradiction_potential`` (AC 4.3 #4) — la story 4.4 pourra enrichir les heuristiques.
+Heuristiques déterministes (pas de LLM). Les contradictions explicites → erreurs
+``lore_contradiction_explicit``. Vitalité ambiguë / sans ancrage GDD → warnings
+``lore_contradiction_potential`` (AC 4.3). Mentions vagues (article + nom) pouvant viser
+≥2 entités lieu/objet du contexte → ``lore_potential_ambiguity`` (FR39), implémenté dans
+``services.lore_vague_reference`` pour limiter la taille de ce module.
 
-Performance (AC 4.3 #7) : complexité O(F×N) où F est le nombre de faits vitalité/contextes
-distincts et N le nombre de nœuds dialogue avec texte non vide ; chaque test de proximité
-est borné par ``_PROXIMITY_RADIUS`` (pas de scan quadratique sur la longueur totale du graphe).
+Performance : vitalité O(F×N) avec fenêtre ``_PROXIMITY_RADIUS`` ; ambiguïtés O(N×(M+P)) avec
+M motifs vagues par nœud et P entités hors-personnage du contexte (pas de produit cartésien
+global texte × entités).
 """
 from __future__ import annotations
 
@@ -23,6 +24,11 @@ if TYPE_CHECKING:
     from core.context.context_builder import ContextBuilder
 
 from services.graph_dialogue_text import build_node_id_to_lore_text, iter_dialogue_like_nodes
+from services.lore_vague_reference import (
+    LoreGddEntityCandidate,
+    extract_ambiguity_scope_entities_from_prompt_structure,
+    find_vague_phrase_ambiguity_warnings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -333,33 +339,56 @@ def find_explicit_contradictions(
     return errors
 
 
+def build_lore_summary_explicit_only(
+    contradiction_count: int,
+    nodes_with_contradictions: int,
+    dialogue_nodes_analyzed: int,
+) -> str:
+    """Texte de résumé pour le volet contradictions explicites uniquement (bandeau UI).
+
+    Découple du résumé agrégé : les avertissements révisables (potentiel / ambiguïté) sont
+    comptés côté client après filtres (FR39 AC #5).
+    """
+    c = max(0, contradiction_count)
+    n = max(0, nodes_with_contradictions)
+    analyzed = max(0, dialogue_nodes_analyzed)
+    if c == 0:
+        w_an = "nœud dialogue analysé" if analyzed == 1 else "nœuds dialogues analysés"
+        return f"Aucune contradiction lore explicite ({analyzed} {w_an})"
+    w_contra = "contradiction" if c == 1 else "contradictions"
+    w_node = "nœud" if n == 1 else "nœuds"
+    return f"{c} {w_contra} explicite{'s' if c != 1 else ''} dans {n} {w_node}"
+
+
 def build_lore_summary(
     contradiction_count: int,
     nodes_with_contradictions: int,
     potential_warnings_count: int,
     nodes_with_potential_warnings: int,
     dialogue_nodes_analyzed: int,
+    ambiguity_warnings_count: int = 0,
+    nodes_with_ambiguity_warnings: int = 0,
 ) -> str:
-    """Résumé FR : contradictions explicites, avertissements potentiels, nœuds analysés."""
-    c = max(0, contradiction_count)
-    n = max(0, nodes_with_contradictions)
+    """Résumé FR : contradictions explicites, avertissements potentiels, ambiguïtés, nœuds analysés."""
     p = max(0, potential_warnings_count)
     np = max(0, nodes_with_potential_warnings)
-    analyzed = max(0, dialogue_nodes_analyzed)
-    parts: List[str] = []
-
-    if c == 0:
-        w_an = "nœud dialogue analysé" if analyzed == 1 else "nœuds dialogues analysés"
-        parts.append(f"Aucune contradiction lore explicite ({analyzed} {w_an})")
-    else:
-        w_contra = "contradiction" if c == 1 else "contradictions"
-        w_node = "nœud" if n == 1 else "nœuds"
-        parts.append(f"{c} {w_contra} explicite{'s' if c != 1 else ''} dans {n} {w_node}")
+    a = max(0, ambiguity_warnings_count)
+    na = max(0, nodes_with_ambiguity_warnings)
+    parts: List[str] = [
+        build_lore_summary_explicit_only(
+            contradiction_count, nodes_with_contradictions, dialogue_nodes_analyzed
+        )
+    ]
 
     if p > 0:
         w_p = "avertissement lore potentiel" if p == 1 else "avertissements lore potentiels"
         w_np = "nœud" if np == 1 else "nœuds"
         parts.append(f"{p} {w_p} dans {np} {w_np}")
+
+    if a > 0:
+        w_a = "ambiguïté référentielle" if a == 1 else "ambiguïtés référentielles"
+        w_na = "nœud" if na == 1 else "nœuds"
+        parts.append(f"{a} {w_a} potentielle{'s' if a != 1 else ''} dans {na} {w_na}")
 
     return " — ".join(parts)
 
@@ -397,8 +426,8 @@ def merge_lore_facts_with_context_builder(
     context_selections: Dict[str, Any],
     scene_instruction: str,
     context_builder: Optional["ContextBuilder"],
-) -> Tuple[List[LoreGddFact], List[LoreVitalityContext]]:
-    """Complète les faits explicites et retourne les contextes vitalité (avertissements AC #4).
+) -> Tuple[List[LoreGddFact], List[LoreVitalityContext], List[LoreGddEntityCandidate]]:
+    """Complète les faits explicites et retourne vitalité + entités hors-personnage (ambiguïtés FR39).
 
     Args:
         base_facts: Faits déjà fournis (prioritaires ; déduplication par nom normalisé + vitalité).
@@ -407,16 +436,17 @@ def merge_lore_facts_with_context_builder(
         context_builder: Builder injecté ; si None, retourne ``base_facts`` tel quel.
 
     Returns:
-        Tuple (faits dédupliqués, contextes vitalité extraits du prompt — vide si pas de build).
+        Tuple (faits dédupliqués, contextes vitalité, entités candidats ambiguïté).
     """
     merged: List[LoreGddFact] = list(base_facts)
     contexts: List[LoreVitalityContext] = []
+    ambiguity_entities: List[LoreGddEntityCandidate] = []
     if context_builder is None or not context_selections:
-        return _dedupe_lore_facts(merged), contexts
+        return _dedupe_lore_facts(merged), contexts, ambiguity_entities
 
     selected = selections_dict_to_selected_elements(context_selections)
     if not any(selected.values()):
-        return _dedupe_lore_facts(merged), contexts
+        return _dedupe_lore_facts(merged), contexts, ambiguity_entities
 
     try:
         structure = context_builder.build_context_json(
@@ -431,6 +461,7 @@ def merge_lore_facts_with_context_builder(
         extracted = extract_vitality_facts_from_prompt_structure(structure)
         merged.extend(extracted)
         contexts = extract_vitality_contexts_from_prompt_structure(structure)
+        ambiguity_entities = extract_ambiguity_scope_entities_from_prompt_structure(structure)
     except Exception:
         # Pas bloquant : la validation lore peut s'appuyer uniquement sur gdd_lore_facts.
         logger.warning(
@@ -438,7 +469,7 @@ def merge_lore_facts_with_context_builder(
             exc_info=True,
         )
 
-    return _dedupe_lore_facts(merged), contexts
+    return _dedupe_lore_facts(merged), contexts, ambiguity_entities
 
 
 def _dedupe_lore_facts(facts: Sequence[LoreGddFact]) -> List[LoreGddFact]:
@@ -458,11 +489,15 @@ def validate_explicit_lore_contradictions(
     edges: List[Dict[str, Any]],  # noqa: ARG001 — réservé alignement API / extensions
     facts: Sequence[LoreGddFact],
     vitality_contexts: Optional[Sequence[LoreVitalityContext]] = None,
+    ambiguity_entities: Optional[Sequence[LoreGddEntityCandidate]] = None,
 ) -> Tuple[
     bool,
     List[Dict[str, Any]],
     List[Dict[str, Any]],
     str,
+    str,
+    int,
+    int,
     int,
     int,
     int,
@@ -475,10 +510,12 @@ def validate_explicit_lore_contradictions(
         edges: Arêtes (non utilisées pour l'heuristique MVP).
         facts: Faits GDD structurés.
         vitality_contexts: Contextes issus du ``ContextBuilder`` pour avertissements AC #4.
+        ambiguity_entities: Entités lieu/objet/etc. pour ambiguïtés de mentions vagues (FR39).
 
     Returns:
-        Tuple ``(valid, errors, warnings, summary, c_count, n_c_count, p_count, n_p_count)``.
-        ``valid`` est faux dès qu'il existe une contradiction explicite (les warnings ne bloquent pas).
+        Tuple ``(valid, errors, warnings, summary, summary_explicit_only, c_count, n_c_count,
+        p_count, n_p_count, amb_count, n_amb_count)``. ``valid`` est faux dès qu'il existe une
+        contradiction explicite. ``summary_explicit_only`` alimente le bandeau UI (FR39 AC #5).
     """
     _ = edges
     node_text_by_id = build_node_id_to_lore_text(nodes)
@@ -497,23 +534,35 @@ def validate_explicit_lore_contradictions(
         )
     nodes_affected = len({e[0] for e in raw})
     ctx_seq = vitality_contexts if vitality_contexts is not None else ()
-    warning_dicts = find_potential_lore_warnings(node_text_by_id, ctx_seq)
-    nodes_potential = len({w["node_id"] for w in warning_dicts if w.get("node_id")})
+    vitality_warnings = find_potential_lore_warnings(node_text_by_id, ctx_seq)
+    amb_seq = ambiguity_entities if ambiguity_entities is not None else ()
+    ambiguity_warnings = find_vague_phrase_ambiguity_warnings(node_text_by_id, amb_seq)
+    warning_dicts = vitality_warnings + ambiguity_warnings
+    nodes_potential = len({w["node_id"] for w in vitality_warnings if w.get("node_id")})
+    nodes_ambiguity = len({w["node_id"] for w in ambiguity_warnings if w.get("node_id")})
     dialogue_analyzed = len(iter_dialogue_like_nodes(nodes))
+    summary_explicit_only = build_lore_summary_explicit_only(
+        len(raw), nodes_affected, dialogue_analyzed
+    )
     summary = build_lore_summary(
         len(raw),
         nodes_affected,
-        len(warning_dicts),
+        len(vitality_warnings),
         nodes_potential,
         dialogue_analyzed,
+        len(ambiguity_warnings),
+        nodes_ambiguity,
     )
     return (
         len(raw) == 0,
         error_dicts,
         warning_dicts,
         summary,
+        summary_explicit_only,
         len(raw),
         nodes_affected,
-        len(warning_dicts),
+        len(vitality_warnings),
         nodes_potential,
+        len(ambiguity_warnings),
+        nodes_ambiguity,
     )

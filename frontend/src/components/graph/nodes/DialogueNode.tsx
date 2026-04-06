@@ -321,7 +321,9 @@ export const DialogueNode = memo(function DialogueNode({
                 ? '🔗'
                 : e.type === 'broken_reference'
                   ? '🔴'
-                  : e.type === 'lore_contradiction_explicit' || e.type === 'lore_contradiction_potential'
+                  : e.type === 'lore_contradiction_explicit' ||
+                    e.type === 'lore_contradiction_potential' ||
+                    e.type === 'lore_potential_ambiguity'
                     ? '📜'
                     : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
                       ? '⚪'

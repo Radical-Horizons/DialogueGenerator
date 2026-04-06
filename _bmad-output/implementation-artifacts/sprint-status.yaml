@@ -19,8 +19,8 @@
 #   - backlog: Story only exists in epic file
 #   - ready-for-dev: Story file created in stories folder
 #   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
-#   - done: Story completed
+#   - review: Ready for the FIRST code-review pass (set by dev-story when impl. complete)
+#   - done: Story completed (including after code-review option [1] when HIGH/MEDIUM cleared — see code-review instructions step 5)
 #
 # Retrospective Status:
 #   - optional: Can be completed but not required
@@ -31,7 +31,7 @@
 # - Epic transitions to 'in-progress' automatically when first story is created
 # - Stories can be worked in parallel if team capacity allows
 # - SM typically creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Dev-story sets 'review' when impl. is complete; then run code-review. End of code-review sets 'done' or 'in-progress' only — never leaves the story on 'review' as a fake "human gate" after fixes ([1]).
 
 generated: '2026-01-25'
 project: DialogueGenerator
@@ -118,7 +118,7 @@ development_status:
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: review
   4-3-détecter-contradictions-lore-explicites-faits-gdd-conflictuels-fr38: review
-  4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39: backlog
+  4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39: done
   4-5-détecter-nœuds-orphelins-non-connectés-au-graphe-fr40: backlog
   4-6-détecter-cycles-dans-flux-dialogue-fr41: backlog
   4-7-évaluer-qualité-dialogue-avec-llm-judge-score-0-10-1-marge-fr42: backlog

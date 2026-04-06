@@ -147,6 +147,14 @@ class ValidateGraphRequest(BaseModel):
     edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
 
 
+class LoreAmbiguityCandidatePayload(BaseModel):
+    """Candidat GDD pour une ambiguïté de mention vague (FR39)."""
+
+    name: str = Field(..., description="Nom affichable de l'entité")
+    category: str = Field(..., description="Catégorie GDD (ex. locations)")
+    gdd_path: str = Field(..., description="Chemin stable affichable (ex. Lieux › Nom)")
+
+
 class ValidationErrorDetail(BaseModel):
     """Détail d'une erreur de validation."""
     type: str = Field(..., description="Type d'erreur")
@@ -160,6 +168,18 @@ class ValidationErrorDetail(BaseModel):
     gdd_reference: Optional[str] = Field(
         None,
         description="Référence entrée GDD (ex. catégorie › nom) pour erreurs lore (FR38)",
+    )
+    lore_subtype: Optional[str] = Field(
+        None,
+        description="Sous-type heuristique pour avertissements lore (FR39)",
+    )
+    lore_warning_key: Optional[str] = Field(
+        None,
+        description="Clé stable pour persistance état warning (FR39, ex. localStorage)",
+    )
+    ambiguity_candidates: Optional[List[LoreAmbiguityCandidatePayload]] = Field(
+        None,
+        description="Candidats GDD lorsque type=lore_potential_ambiguity (FR39)",
     )
 
 
@@ -201,7 +221,10 @@ class ValidateLoreExplicitResponse(BaseModel):
     )
     warnings: List[ValidationErrorDetail] = Field(
         default_factory=list,
-        description="Avertissements lore (type lore_contradiction_potential, AC 4.3 #4)",
+        description=(
+            "Avertissements lore révisables : lore_contradiction_potential (AC 4.3), "
+            "lore_potential_ambiguity (FR39), sans erreurs explicites"
+        ),
     )
     contradiction_count: int = Field(..., description="Nombre de contradictions explicites")
     nodes_with_contradictions_count: int = Field(..., description="Nombre de nœuds distincts concernés (explicite)")
@@ -213,7 +236,22 @@ class ValidateLoreExplicitResponse(BaseModel):
         0,
         description="Nombre de nœuds distincts avec avertissement potentiel",
     )
-    summary: str = Field(..., description="Résumé contradictions explicites + potentiel + nœuds analysés")
+    ambiguity_warnings_count: int = Field(
+        0,
+        description="Nombre d'avertissements lore_potential_ambiguity (FR39)",
+    )
+    nodes_with_ambiguity_warnings_count: int = Field(
+        0,
+        description="Nombre de nœuds distincts avec ambiguïté référentielle vague",
+    )
+    summary: str = Field(
+        ...,
+        description="Résumé agrégé : explicite + avertissements potentiels + ambiguïtés + nœuds analysés",
+    )
+    summary_explicit_only: str = Field(
+        ...,
+        description="Résumé contradictions explicites seul (bandeau UI ; aligné filtres client FR39 AC #5)",
+    )
 
 
 class ValidateGraphResponse(BaseModel):

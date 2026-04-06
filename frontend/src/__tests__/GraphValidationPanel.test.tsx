@@ -142,6 +142,30 @@ describe('GraphValidationPanel (FR36)', () => {
     expect(headerRow?.textContent).toContain('✓')
   })
 
+  it('FR39: Ignorer masque l’avertissement lore révisable et remet le compteur affiché à 0', () => {
+    const errors = [
+      {
+        type: 'lore_potential_ambiguity',
+        node_id: 'N1',
+        message: 'Ambigu test message',
+        severity: 'warning',
+        lore_warning_key: 'k-fr39-panel',
+      },
+    ]
+    render(
+      <GraphValidationPanel
+        validationErrors={errors}
+        reactFlowInstance={null}
+        loreExplicitSummary="Résumé API"
+        loreDialogueScopeKey="test-fr39-panel"
+        onClose={noopClose}
+      />
+    )
+    expect(screen.getByTestId('lore-potential-display-count').textContent).toMatch(/1 incohérence/)
+    fireEvent.click(screen.getByRole('button', { name: /Ignorer/i }))
+    expect(screen.getByTestId('lore-potential-display-count').textContent).toMatch(/0 incohérence/)
+  })
+
   it('appelle onClose au clic sur la croix', () => {
     const onClose = vi.fn()
     render(

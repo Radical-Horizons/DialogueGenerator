@@ -3,11 +3,20 @@
  * Extrait de GraphEditor pour isoler ce bloc JSX.
  * Appelle useGraphStore() en interne pour les actions de navigation et les cycles intentionnels.
  */
+import { useMemo } from 'react'
 import type { ReactFlowInstance } from 'reactflow'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
 import type { ValidationErrorDetail } from '../../types/graph'
+import { useLoreWarningPanelState } from '../../hooks/useLoreWarningPanelState'
+import {
+  applyLoreWarningFilters,
+  countVisibleDismissibleLoreWarnings,
+  isDismissibleLoreWarning,
+  resolveLoreWarningKey,
+} from '../../utils/loreWarningUi'
 import { summarizeGraphValidationWarnings } from '../../utils/graphValidationSummary'
+import { LoreWarningFilterBar } from './LoreWarningFilterBar'
 import {
   ValidationErrorsByType,
   ValidationWarningsByType,
@@ -16,8 +25,10 @@ import {
 interface GraphValidationPanelProps {
   validationErrors: ValidationErrorDetail[]
   reactFlowInstance: ReactFlowInstance | null
-  /** Résumé API dernière validation lore explicite (FR38) */
+  /** Résumé contradictions explicites uniquement (`summary_explicit_only`, FR39 AC #5). */
   loreExplicitSummary?: string | null
+  /** Clé stable dialogue (filename ou documentId) pour persistance FR39 */
+  loreDialogueScopeKey?: string
   /** Ferme le bandeau (masque le panneau dans l’éditeur). */
   onClose: () => void
 }
@@ -26,6 +37,7 @@ export function GraphValidationPanel({
   validationErrors,
   reactFlowInstance,
   loreExplicitSummary,
+  loreDialogueScopeKey = 'default',
   onClose,
 }: GraphValidationPanelProps) {
   const {
@@ -38,11 +50,45 @@ export function GraphValidationPanel({
     unmarkCycleAsIntentional,
   } = useGraphStore()
 
-  const errors = validationErrors.filter((e) => e.severity === 'error')
+  const {
+    showIgnored,
+    setShowIgnored,
+    typeFilter,
+    setTypeFilter,
+    dispositions,
+    setDisposition,
+  } = useLoreWarningPanelState(loreDialogueScopeKey)
+
+  const loreFilterOpts = useMemo(
+    () => ({ dispositions, showIgnored, typeFilter }),
+    [dispositions, showIgnored, typeFilter]
+  )
+
+  const filteredValidationErrors = useMemo(
+    () => applyLoreWarningFilters(validationErrors, loreFilterOpts),
+    [validationErrors, loreFilterOpts]
+  )
+
+  const dismissibleVisibleCount = useMemo(
+    () => countVisibleDismissibleLoreWarnings(validationErrors, loreFilterOpts),
+    [validationErrors, loreFilterOpts]
+  )
+
+  const loreTypeOptions = useMemo(() => {
+    const s = new Set<string>()
+    for (const e of validationErrors) {
+      if (isDismissibleLoreWarning(e)) {
+        s.add(e.type)
+      }
+    }
+    return Array.from(s)
+  }, [validationErrors])
+
+  const errors = filteredValidationErrors.filter((e) => e.severity === 'error')
   const warningSummary = summarizeGraphValidationWarnings(
     nodes,
     edges,
-    validationErrors,
+    filteredValidationErrors,
     intentionalCycles
   )
   const warnings = warningSummary.visibleWarnings
@@ -196,9 +242,18 @@ export function GraphValidationPanel({
           }}
           data-testid="lore-explicit-summary"
         >
-          <strong>Lore (explicite)</strong> — {loreExplicitSummary}
+          <strong>Contradictions lore</strong> — {loreExplicitSummary}
         </div>
       ) : null}
+
+      <LoreWarningFilterBar
+        loreTypeOptions={loreTypeOptions}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+        showIgnored={showIgnored}
+        setShowIgnored={setShowIgnored}
+        dismissibleVisibleCount={dismissibleVisibleCount}
+      />
 
       {errors.length > 0 ? (
         <ValidationErrorsByType
@@ -216,6 +271,11 @@ export function GraphValidationPanel({
           intentionalCycles={intentionalCycles}
           markCycleAsIntentional={markCycleAsIntentional}
           unmarkCycleAsIntentional={unmarkCycleAsIntentional}
+          loreWarningUi={{
+            getDisposition: (w) => dispositions[resolveLoreWarningKey(w)] ?? 'active',
+            onDisposition: (w, d) => setDisposition(resolveLoreWarningKey(w), d),
+            showIgnored,
+          }}
         />
       ) : null}
     </div>

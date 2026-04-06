@@ -1,12 +1,36 @@
+import type { CSSProperties } from 'react'
 import type { ReactFlowInstance } from 'reactflow'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { theme } from '../../theme'
 import type { ValidationErrorDetail } from '../../types/graph'
+import type { LoreWarningDisposition } from '../../utils/loreWarningUi'
+import {
+  isDismissibleLoreWarning,
+  resolveLoreWarningKey,
+} from '../../utils/loreWarningUi'
 import {
   getIconForType,
   getLabelForType,
   isDocumentIdRepairable,
 } from './validationPanelLabels'
+
+const LORE_BADGE_TYPES = new Set([
+  'lore_contradiction_explicit',
+  'lore_contradiction_potential',
+  'lore_potential_ambiguity',
+])
+
+function loreWarnBtnStyle(border: string, color: string): CSSProperties {
+  return {
+    fontSize: '0.7rem',
+    padding: '0.15rem 0.4rem',
+    borderRadius: 4,
+    border: `1px solid ${border}`,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    color,
+    cursor: 'pointer',
+  }
+}
 
 interface ValidationErrorsByTypeProps {
   errorsByType: Record<string, ValidationErrorDetail[]>
@@ -70,7 +94,7 @@ export function ValidationErrorsByType({
                 if (err.node_id) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
               }}
             >
-              {type === 'lore_contradiction_explicit' || type === 'lore_contradiction_potential' ? (
+              {LORE_BADGE_TYPES.has(type) ? (
                 <span
                   style={{
                     fontSize: '0.62rem',
@@ -151,6 +175,12 @@ interface ValidationWarningsByTypeProps {
   intentionalCycles: string[]
   markCycleAsIntentional: (id: string) => void
   unmarkCycleAsIntentional: (id: string) => void
+  /** FR39 — actions Examiné / Ignoré / Réactiver sur avertissements lore révisables */
+  loreWarningUi?: {
+    getDisposition: (w: ValidationErrorDetail) => LoreWarningDisposition
+    onDisposition: (w: ValidationErrorDetail, d: LoreWarningDisposition) => void
+    showIgnored: boolean
+  }
 }
 
 export function ValidationWarningsByType({
@@ -160,6 +190,7 @@ export function ValidationWarningsByType({
   intentionalCycles,
   markCycleAsIntentional,
   unmarkCycleAsIntentional,
+  loreWarningUi,
 }: ValidationWarningsByTypeProps) {
   return (
     <>
@@ -181,7 +212,7 @@ export function ValidationWarningsByType({
               {getLabelForType(type)} ({typeWarnings.length})
             </span>
           </div>
-          {typeWarnings.map((warn, idx) => {
+          {typeWarnings.map((warn, widx) => {
             const isCycle =
               type === 'cycle_detected' && warn.cycle_path && warn.cycle_nodes
             const handleClick = () => {
@@ -203,7 +234,7 @@ export function ValidationWarningsByType({
             }
             return (
               <div
-                key={idx}
+                key={`${type}-${widx}-${warn.node_id ?? ''}`}
                 onClick={handleClick}
                 style={{
                   fontSize: '0.75rem',
@@ -270,8 +301,101 @@ export function ValidationWarningsByType({
                   </div>
                 ) : (
                   <>
-                    {warn.node_id ? `[${warn.node_id}] ` : ''}
-                    {warn.message}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.35rem' }}>
+                      {LORE_BADGE_TYPES.has(type) ? (
+                        <span
+                          style={{
+                            fontSize: '0.62rem',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                            color: theme.state.lore.color,
+                            border: `1px solid ${theme.state.lore.border}`,
+                            borderRadius: 4,
+                            padding: '1px 5px',
+                            flexShrink: 0,
+                          }}
+                        >
+                          Lore
+                        </span>
+                      ) : null}
+                      <span style={{ flex: '1 1 12rem', minWidth: 0 }}>
+                        {warn.node_id ? `[${warn.node_id}] ` : ''}
+                        {warn.message}
+                      </span>
+                      {warn.ambiguity_candidates && warn.ambiguity_candidates.length > 0 ? (
+                        <span style={{ fontSize: '0.65rem', opacity: 0.92, width: '100%' }}>
+                          Candidats :{' '}
+                          {warn.ambiguity_candidates
+                            .map((c) => `${c.name} (${c.gdd_path})`)
+                            .join(' · ')}
+                        </span>
+                      ) : null}
+                      {loreWarningUi && isDismissibleLoreWarning(warn) ? (
+                        <span
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '0.25rem',
+                            marginTop: 2,
+                            width: '100%',
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {(() => {
+                            const key = resolveLoreWarningKey(warn)
+                            const tid = `${warn.node_id ?? widx}-${key.length}`
+                            const d = loreWarningUi.getDisposition(warn)
+                            if (d === 'ignored' && loreWarningUi.showIgnored) {
+                              return (
+                                <button
+                                  type="button"
+                                  data-testid={`lore-reactivate-${tid}`}
+                                  onClick={() => loreWarningUi.onDisposition(warn, 'active')}
+                                  style={loreWarnBtnStyle(theme.state.warning.border, theme.state.warning.color)}
+                                >
+                                  Réactiver
+                                </button>
+                              )
+                            }
+                            if (d === 'ignored') {
+                              return null
+                            }
+                            return (
+                              <>
+                                <button
+                                  type="button"
+                                  data-testid={`lore-examine-${tid}`}
+                                  onClick={() => loreWarningUi.onDisposition(warn, 'examined')}
+                                  style={loreWarnBtnStyle(theme.state.lore.border, theme.state.lore.color)}
+                                >
+                                  Examiné
+                                </button>
+                                <button
+                                  type="button"
+                                  data-testid={`lore-ignore-${tid}`}
+                                  onClick={() => loreWarningUi.onDisposition(warn, 'ignored')}
+                                  style={loreWarnBtnStyle(theme.state.warning.border, theme.state.warning.color)}
+                                >
+                                  Ignorer
+                                </button>
+                                {d === 'examined' ? (
+                                  <span
+                                    style={{
+                                      fontSize: '0.65rem',
+                                      fontWeight: 600,
+                                      color: theme.state.lore.color,
+                                    }}
+                                  >
+                                    (marqué examiné)
+                                  </span>
+                                ) : null}
+                              </>
+                            )
+                          })()}
+                        </span>
+                      ) : null}
+                    </div>
                   </>
                 )}
               </div>

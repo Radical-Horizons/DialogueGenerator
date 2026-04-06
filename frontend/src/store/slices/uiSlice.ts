@@ -19,6 +19,7 @@ import { nodeTargetDisplayLabel } from '../../utils/nodeTargetLabel'
 const LORE_VALIDATION_TYPES = new Set<string>([
   'lore_contradiction_explicit',
   'lore_contradiction_potential',
+  'lore_potential_ambiguity',
 ])
 
 export type UISlice = Pick<
@@ -129,7 +130,7 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
       }))
       set({
         validationErrors: [...structuralAndOther, ...loreIssues],
-        loreExplicitValidationSummary: response.summary,
+        loreExplicitValidationSummary: response.summary_explicit_only,
         loreExplicitValidationLoading: false,
       })
     } catch (error) {

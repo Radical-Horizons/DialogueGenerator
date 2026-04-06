@@ -143,6 +143,6 @@ describe('GraphEditor — panneau validation + résumé lore seul', () => {
     )
 
     expect(screen.getByTestId('lore-explicit-summary')).toBeInTheDocument()
-    expect(screen.getByText(/Lore \(explicite\)/)).toBeInTheDocument()
+    expect(screen.getByText(/Contradictions lore/)).toBeInTheDocument()
   })
 })

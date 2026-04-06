@@ -171,6 +171,12 @@ export interface ValidateGraphRequest {
   edges: unknown[]
 }
 
+export interface LoreAmbiguityCandidate {
+  name: string
+  category: string
+  gdd_path: string
+}
+
 export interface ValidationErrorDetail {
   type: string
   node_id?: string
@@ -182,6 +188,12 @@ export interface ValidationErrorDetail {
   cycle_id?: string
   /** Référence GDD (FR38 lore) */
   gdd_reference?: string
+  /** FR39 — sous-type heuristique */
+  lore_subtype?: string
+  /** FR39 — clé stable pour persistance UI */
+  lore_warning_key?: string
+  /** FR39 — candidats GDD (ambiguïté) */
+  ambiguity_candidates?: LoreAmbiguityCandidate[]
 }
 
 /** Fait GDD pour validation lore explicite (aligné Pydantic `GddLoreFactPayload`). */
@@ -208,7 +220,13 @@ export interface ValidateLoreExplicitResponse {
   nodes_with_contradictions_count: number
   potential_warnings_count: number
   nodes_with_potential_warnings_count: number
+  /** FR39 */
+  ambiguity_warnings_count?: number
+  nodes_with_ambiguity_warnings_count?: number
+  /** Résumé agrégé (explicite + potentiel + ambiguïté) — logs / débogage. */
   summary: string
+  /** Bandeau UI : contradictions explicites uniquement (FR39 AC #5). */
+  summary_explicit_only: string
 }
 
 export interface ValidateGraphResponse {

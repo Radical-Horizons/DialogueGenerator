@@ -39,6 +39,9 @@ def test_validate_lore_explicit_returns_contradiction_when_mocked_fact() -> None
     assert data["contradiction_count"] >= 1
     assert data["nodes_with_contradictions_count"] >= 1
     assert "contradiction" in data["summary"].lower()
+    assert "summary_explicit_only" in data
+    assert "contradiction" in data["summary_explicit_only"].lower()
+    assert "potentiel" not in data["summary_explicit_only"].lower()
     assert len(data["errors"]) >= 1
     err = data["errors"][0]
     assert err["type"] == "lore_contradiction_explicit"
@@ -65,4 +68,7 @@ def test_validate_lore_explicit_empty_facts_valid() -> None:
     assert data["valid"] is True
     assert data["contradiction_count"] == 0
     assert data.get("potential_warnings_count", 0) >= 0
+    assert data.get("ambiguity_warnings_count", 0) >= 0
+    assert data.get("nodes_with_ambiguity_warnings_count", 0) >= 0
     assert "Aucune contradiction lore explicite" in data["summary"]
+    assert data["summary_explicit_only"] == data["summary"].split(" — ")[0]

@@ -755,7 +755,7 @@ async def validate_lore_explicit(
             )
             for p in request_data.gdd_lore_facts
         ]
-        facts, vitality_contexts = merge_lore_facts_with_context_builder(
+        facts, vitality_contexts, ambiguity_entities = merge_lore_facts_with_context_builder(
             base_facts,
             request_data.context_selections,
             request_data.scene_instruction,
@@ -766,24 +766,29 @@ async def validate_lore_explicit(
             err_dicts,
             warn_dicts,
             summary,
+            summary_explicit_only,
             c_count,
             n_count,
             pw_count,
             pn_count,
+            amb_count,
+            amb_nodes,
         ) = validate_explicit_lore_contradictions(
             request_data.nodes,
             request_data.edges,
             facts,
             vitality_contexts,
+            ambiguity_entities,
         )
         errors = [ValidationErrorDetail(**e) for e in err_dicts]
         warnings = [ValidationErrorDetail(**w) for w in warn_dicts]
         logger.info(
-            "Validation lore explicite: %s contradictions, %s nœuds, %s avertissements potentiels "
-            "(request_id=%s)",
+            "Validation lore explicite: %s contradictions, %s nœuds, %s avertissements vitalité, "
+            "%s ambiguïtés (request_id=%s)",
             c_count,
             n_count,
             pw_count,
+            amb_count,
             request_id,
         )
         return ValidateLoreExplicitResponse(
@@ -794,7 +799,10 @@ async def validate_lore_explicit(
             nodes_with_contradictions_count=n_count,
             potential_warnings_count=pw_count,
             nodes_with_potential_warnings_count=pn_count,
+            ambiguity_warnings_count=amb_count,
+            nodes_with_ambiguity_warnings_count=amb_nodes,
             summary=summary,
+            summary_explicit_only=summary_explicit_only,
         )
     except Exception as e:
         logger.exception(

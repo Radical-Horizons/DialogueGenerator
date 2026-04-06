@@ -10,6 +10,7 @@ from models.prompt_structure import (
     PromptStructure,
 )
 from services.graph_dialogue_text import build_node_id_to_lore_text
+from services.lore_vague_reference import LORE_POTENTIAL_AMBIGUITY_TYPE, LoreGddEntityCandidate
 from services.lore_contradiction_validator import (
     LoreGddFact,
     LoreVitalityContext,
@@ -55,13 +56,15 @@ def test_validate_explicit_alive_fact_vs_death_line() -> None:
             vitality="alive",
         )
     ]
-    valid, errors, warnings, summary, c_count, n_count, pw, pn = validate_explicit_lore_contradictions(
-        nodes, [], facts
+    valid, errors, warnings, summary, se_only, c_count, n_count, pw, pn, _, _ = (
+        validate_explicit_lore_contradictions(nodes, [], facts)
     )
     assert valid is False
     assert c_count == 1
     assert n_count == 1
     assert "1 contradiction" in summary and "1 nœud" in summary
+    assert se_only in summary
+    assert "potentiel" not in se_only.lower() and "ambiguïté" not in se_only.lower()
     assert warnings == []
     assert pw == 0 and pn == 0
     assert errors[0]["type"] == "lore_contradiction_explicit"
@@ -89,7 +92,7 @@ def test_validate_explicit_dead_fact_vs_alive_line() -> None:
             vitality="dead",
         )
     ]
-    valid, errors, _, _, _, _, _, _ = validate_explicit_lore_contradictions(nodes, [], facts)
+    valid, errors, _, _, _, _, _, _, _, _, _ = validate_explicit_lore_contradictions(nodes, [], facts)
     assert valid is False
     assert len(errors) == 1
 
@@ -115,7 +118,7 @@ def test_ambiguous_no_entity_name_no_error() -> None:
             vitality="alive",
         )
     ]
-    valid, errors, _, _, _, _, _, _ = validate_explicit_lore_contradictions(nodes, [], facts)
+    valid, errors, _, _, _, _, _, _, _, _, _ = validate_explicit_lore_contradictions(nodes, [], facts)
     assert valid is True
     assert errors == []
 
@@ -141,7 +144,7 @@ def test_choice_text_scanned() -> None:
             vitality="alive",
         )
     ]
-    valid, errors, _, _, _, _, _, _ = validate_explicit_lore_contradictions(nodes, [], facts)
+    valid, errors, _, _, _, _, _, _, _, _, _ = validate_explicit_lore_contradictions(nodes, [], facts)
     assert valid is False
     assert len(errors) >= 1
 
@@ -191,9 +194,10 @@ def test_merge_lore_facts_without_builder_returns_base() -> None:
             vitality="alive",
         ),
     ]
-    merged, contexts = merge_lore_facts_with_context_builder(base, {}, "", None)
+    merged, contexts, amb = merge_lore_facts_with_context_builder(base, {}, "", None)
     assert len(merged) == 1
     assert contexts == []
+    assert amb == []
 
 
 def test_build_node_id_to_lore_text_skips_start() -> None:
@@ -244,8 +248,8 @@ def test_potential_warning_gdd_contradictory_and_mention_in_dialogue() -> None:
             has_vitality_signals_in_gdd=True,
         )
     ]
-    valid, errors, warnings, summary, _, _, pw, pn = validate_explicit_lore_contradictions(
-        nodes, [], [], contexts
+    valid, errors, warnings, summary, se_only, _, _, pw, pn, _, _ = (
+        validate_explicit_lore_contradictions(nodes, [], [], contexts)
     )
     assert valid is True
     assert errors == []
@@ -253,6 +257,8 @@ def test_potential_warning_gdd_contradictory_and_mention_in_dialogue() -> None:
     assert pn >= 1
     assert warnings[0]["type"] == "lore_contradiction_potential"
     assert "potentiel" in summary.lower()
+    assert "Aucune contradiction lore explicite" in se_only
+    assert "potentiel" not in se_only.lower()
 
 
 def test_potential_warning_no_gdd_anchor_but_vitality_in_dialogue() -> None:
@@ -277,13 +283,52 @@ def test_potential_warning_no_gdd_anchor_but_vitality_in_dialogue() -> None:
             has_vitality_signals_in_gdd=False,
         )
     ]
-    valid, errors, warnings, _, _, _, pw, _ = validate_explicit_lore_contradictions(
+    valid, errors, warnings, _, _, _, _, pw, _, _, _ = validate_explicit_lore_contradictions(
         nodes, [], [], contexts
     )
     assert valid is True
     assert errors == []
     assert pw == 1
     assert warnings[0]["severity"] == "warning"
+
+
+def test_potential_ambiguity_vague_le_port_two_locations() -> None:
+    """FR39 : mention « le port » + ≥2 lieux GDD contenant « port » → lore_potential_ambiguity."""
+    nodes = [
+        {
+            "id": "N1",
+            "type": "dialogueNode",
+            "data": {
+                "id": "N1",
+                "displayName": "Scène",
+                "line": "Rendez-vous le port avant la nuit.",
+            },
+        }
+    ]
+    entities = [
+        LoreGddEntityCandidate("Lieu Alpha Port Royal", "locations", "Lieux › Lieu Alpha Port Royal"),
+        LoreGddEntityCandidate("Port du Synthétique", "locations", "Lieux › Port du Synthétique"),
+    ]
+    valid, errors, warnings, summary, se_only, _, _, _, _, amb_w, amb_n = (
+        validate_explicit_lore_contradictions(nodes, [], [], None, entities)
+    )
+    assert valid is True
+    assert errors == []
+    assert amb_w >= 1
+    assert amb_n >= 1
+    amb = [w for w in warnings if w["type"] == LORE_POTENTIAL_AMBIGUITY_TYPE]
+    assert len(amb) >= 1
+    assert amb[0].get("lore_subtype") == "vague_article_noun"
+    assert amb[0].get("lore_warning_key")
+    assert len(amb[0].get("ambiguity_candidates", [])) >= 2
+    assert "ambiguïté" in summary.lower()
+    assert "Aucune contradiction lore explicite" in se_only
+    assert "ambiguïté" not in se_only.lower()
+
+
+def test_build_lore_summary_includes_ambiguity_segment() -> None:
+    s = build_lore_summary(0, 0, 0, 0, 2, 1, 1)
+    assert "ambiguïté" in s.lower()
 
 
 def test_extract_vitality_contexts_contradictory_gdd() -> None:

@@ -66,7 +66,10 @@ export function GraphEditor({
     validationErrors: graphValidationErrors,
     loreExplicitValidationSummary,
     isLoading: isGraphLoading,
+    documentId: graphDocumentId,
   } = useGraphStore()
+
+  const loreDialogueScopeKey = activeDialogueFilename ?? graphDocumentId ?? 'untitled'
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
 
@@ -247,6 +250,7 @@ export function GraphEditor({
                 validationErrors={graphValidationErrors}
                 reactFlowInstance={reactFlowInstance}
                 loreExplicitSummary={loreExplicitValidationSummary}
+                loreDialogueScopeKey={loreDialogueScopeKey}
                 onClose={() => toolbar.setShowValidationPanel(false)}
               />
             )}

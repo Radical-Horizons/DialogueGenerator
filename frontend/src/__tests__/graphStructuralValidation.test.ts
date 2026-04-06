@@ -27,6 +27,7 @@ describe('graphStructuralValidation', () => {
   it('getValidationHighlightKind : lore (FR38) après complétude, sous structure', () => {
     expect(getValidationHighlightKind(['lore_contradiction_explicit'])).toBe('lore')
     expect(getValidationHighlightKind(['lore_contradiction_potential'])).toBe('lore')
+    expect(getValidationHighlightKind(['lore_potential_ambiguity'])).toBe('lore')
     expect(
       getValidationHighlightKind(['missing_display_name', 'lore_contradiction_explicit'])
     ).toBe('structural')

@@ -18,6 +18,7 @@ export const CONTENT_COMPLETENESS_ERROR_TYPES = new Set<string>([
 export const LORE_EXPLICIT_ERROR_TYPES = new Set<string>([
   'lore_contradiction_explicit',
   'lore_contradiction_potential',
+  'lore_potential_ambiguity',
 ])
 
 export type ValidationHighlightKind = 'structural' | 'content' | 'lore'

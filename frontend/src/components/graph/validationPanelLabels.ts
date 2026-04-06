@@ -13,6 +13,7 @@ export const ICON_FOR_TYPE: Record<string, string> = {
   cycle_detected: '🔄',
   lore_contradiction_explicit: '📜',
   lore_contradiction_potential: '📋',
+  lore_potential_ambiguity: '❓',
 }
 
 export const LABEL_FOR_TYPE: Record<string, string> = {
@@ -27,6 +28,7 @@ export const LABEL_FOR_TYPE: Record<string, string> = {
   cycle_detected: 'Cycles détectés',
   lore_contradiction_explicit: 'Lore — contradictions explicites (FR38)',
   lore_contradiction_potential: 'Lore — incohérences potentielles (AC 4.3 #4)',
+  lore_potential_ambiguity: 'Lore — ambiguïté référentielle (FR39)',
 }
 
 export function isDocumentIdRepairable(err: ValidationErrorDetail): boolean {

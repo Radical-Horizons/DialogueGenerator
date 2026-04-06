@@ -47,7 +47,7 @@ export interface GraphState {
   isLoading: boolean
   isSaving: boolean
   validationErrors: ValidationErrorDetail[]
-  /** Résumé API dernière validation lore explicite (FR38), ex. « 2 contradictions dans 1 nœud » */
+  /** Bandeau contradictions explicites (champ API `summary_explicit_only`, FR39 AC #5). */
   loreExplicitValidationSummary: string | null
   /** True pendant l’appel validate-lore-explicit */
   loreExplicitValidationLoading: boolean

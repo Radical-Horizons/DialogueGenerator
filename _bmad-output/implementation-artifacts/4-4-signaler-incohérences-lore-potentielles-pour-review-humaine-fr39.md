@@ -1,6 +1,6 @@
 # Story 4.4 : Signaler incohérences lore potentielles pour review humaine (FR39)
 
-Status: in-progress
+Status: done
 
 <!-- Note : validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
 
@@ -104,6 +104,7 @@ _(aucun incident bloquant)_
 ### Completion Notes List
 
 - **FR39** : type `lore_potential_ambiguity` + champs additifs `lore_subtype`, `lore_warning_key`, `ambiguity_candidates` ; compteurs API `ambiguity_warnings_count` / `nodes_with_ambiguity_warnings_count` ; résumé texte enrichi.
+- **Post–code-review [1]** : champ API additif `summary_explicit_only` + `build_lore_summary_explicit_only` ; bandeau UI = explicite seul ; `summary` agrégé inchangé pour traçabilité ; libellé « Contradictions lore explicites » ; description Pydantic `warnings` étendue ; story fichier stagé git.
 - **Choix endpoint** : enrichissement sur `POST /api/v1/unity-dialogues/graph/validate-lore-explicit` (pas de route nouvelle).
 - **🔵 Refactor Task 1** : extraction `services/lore_vague_reference.py` — avant : monolithe validator ; après : ambiguïtés + extraction entités hors-personnage dans module dédié ; `merge_lore_facts_with_context_builder` retourne `(facts, vitality_ctx, ambiguity_entities)`.
 - **🔵 Refactor Task 2** : `frontend/src/utils/loreWarningUi.ts` — clés stables, filtres, préfixe stockage `dg.loreWarnDispo.v1` ; hook `useLoreWarningPanelState.ts`.
@@ -138,10 +139,8 @@ _(aucun incident bloquant)_
 ## Change Log
 
 - 2026-04-06 : Implémentation FR39 (ambiguïtés, API additif, UI filtre/ignoré/examiné, tests).
-
-## Story Completion Status
-
-**review** — Prêt pour workflow `code-review` (idéalement autre LLM que l’implémentation).
+- 2026-04-06 : Correctifs post-revue [1] — `summary_explicit_only`, bandeau explicite seul, Pydantic `warnings`, story stagée git.
+- 2026-04-06 : Statut story + sprint → **done** (alignement workflow code-review après fix HIGH/MEDIUM ; pas de statut « review » résiduel).
 
 **Note SM :** `_bmad/core/tasks/validate-workflow.xml` absent du dépôt — validation checklist « validate-create-story » manuelle ou restauration du fichier si le workflow le requiert.
 
@@ -150,31 +149,29 @@ _(aucun incident bloquant)_
 ## Senior Developer Review (AI)
 
 **Revue :** Amelia (Dev + workflow `code-review` BMAD) — **Marc** — 2026-04-06  
-**Outcome :** **Changes Requested** (suite à revue adversariale ; correctifs non appliqués automatiquement — suivi via *Review Follow-ups* ci-dessous).  
-**Décision workflow étape 4 :** **[2] Action items** (pas de correctif auto dans cette passe).
+**Outcome (initial) :** Changes Requested — follow-ups HIGH/MEDIUM.  
+**Outcome (post-fix [1]) :** **Done** — AC #5 bandeau vs compteur potentiel : bandeau = contradictions explicites uniquement (`summary_explicit_only`) ; résumé agrégé conservé dans `summary` (API). Statut final corrigé (done, pas « review » résiduel).
 
-**Preuves exécutées (revue) :**
+**Preuves revue initiale :**
 
 - `pytest tests/services/test_lore_contradiction_validator.py tests/api/test_graph_validate_lore_explicit.py` → 19 passed  
 - `npx vitest run src/__tests__/loreWarningUi.test.ts src/__tests__/GraphValidationPanel.test.tsx` → 13 passed  
 
-**Git vs File List :** fichier story `4-4-…md` encore **non versionné** au moment de la revue (`git status` : untracked) ; reste du lot modifié cohérent avec la File List (tolérance branche : pas d’écart critique sur fichiers applicatifs hors `_bmad-output`).
+**Preuves post-fix [1] :**
 
-### Synthèse adversariale (extraits vérifiables)
-
-- **AC #1 / #2 / #6 / #7 :** présence `services/lore_vague_reference.py`, type `lore_potential_ambiguity`, champs `ambiguity_candidates` / `lore_warning_key`, branchement `validate-lore-explicit` — **conforme** intention story.  
-- **AC #3 / #4 :** persistance `dg.loreWarnDispo.v1`, filtres ignorés — **conforme** (tests `loreWarningUi`).  
-- **AC #5 :** **écart** — deux résumés distincts : (1) bandeau `loreExplicitSummary` = texte API agrégé (totaux serveur) ; (2) compteur `dismissibleVisibleCount` dans `LoreWarningFilterBar` = filtrage client. L’AC demande que le résumé reflète le **nombre affiché** après ignorés/filtres : le bandeau API peut **contredire** la ligne « X incohérences potentielles affichées (hors ignorés) » lorsque des warnings sont ignorés ou filtrés par type.
+- `pytest` (mêmes modules) → 19 passed  
+- Vitest : `graphStore.loreValidation`, `GraphEditor.loreValidationPanel`, `GraphValidationPanel`, `loreWarningUi` → 16 passed  
+- `npm --prefix frontend run lint` → OK  
 
 ### Review Follow-ups (AI)
 
-- [ ] [AI-Review][HIGH] **AC #5 — cohérence résumé / liste** : soit retirer du bandeau les segments « avertissements potentiels / ambiguïtés » et n’y garder que le volet **explicite**, soit générer côté client un résumé lore révisable aligné sur `applyLoreWarningFilters` + `dismissibleVisibleCount` (documenter le choix dans Completion Notes). Fichiers : `frontend/src/components/graph/GraphValidationPanel.tsx`, évent. `uiSlice` / source de `loreExplicitValidationSummary`.  
-- [ ] [AI-Review][MEDIUM] **Libellé bandeau** : remplacer « Lore (explicite) » si le texte inclut potentiels + ambiguïtés (`build_lore_summary` côté `services/lore_contradiction_validator.py`).  
-- [ ] [AI-Review][MEDIUM] **Contrat OpenAPI / Pydantic** : description du champ `warnings` sur `ValidateLoreExplicitResponse` — inclure `lore_potential_ambiguity` en plus de `lore_contradiction_potential` (`api/schemas/graph.py`).  
-- [ ] [AI-Review][MEDIUM] **Hygiène git** : ajouter au commit le fichier story `4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39.md` avec le reste du lot FR39.  
-- [ ] [AI-Review][LOW] **Stabilité clé fallback** : `resolveLoreWarningKey` utilise `simpleHash(detail.message)` si pas de `lore_warning_key` — documenter fragilité ou baser le fallback sur champs stables (`type`, `node_id`, `target`, `gdd_reference`).  
-- [ ] [AI-Review][LOW] **Couverture catégories GDD** : `_category_is_ambiguity_scope` dépend de sous-chaînes `location` / `lieu` / etc. — risque de faux négatifs si taxonomie `ContextCategory` évolue ; test de régression ou commentaire de périmètre MVP.
+- [x] [AI-Review][HIGH] **AC #5 — cohérence résumé / liste** : champ additif `summary_explicit_only` + store lit ce champ pour le bandeau ; résumé agrégé inchangé (`summary`).  
+- [x] [AI-Review][MEDIUM] **Libellé bandeau** : « Contradictions lore explicites » (`GraphValidationPanel.tsx`).  
+- [x] [AI-Review][MEDIUM] **Contrat Pydantic** : description `warnings` + `summary` / `summary_explicit_only` documentés (`api/schemas/graph.py`).  
+- [x] [AI-Review][MEDIUM] **Hygiène git** : `git add` story 4-4 (stagé avec le lot).  
+- [ ] [AI-Review][LOW] **Stabilité clé fallback** : `resolveLoreWarningKey` — optionnel.  
+- [ ] [AI-Review][LOW] **Couverture catégories GDD** : `_category_is_ambiguity_scope` — optionnel.
 
 ## Story Completion Status
 
-**in-progress** — HIGH/MEDIUM ouverts ci-dessus ; repasser en **review** après traitement des follow-ups et preuves (pytest + Vitest + lint).
+**done** — HIGH/MEDIUM traités ; LOW optionnels ; merge / clôture selon process équipe.

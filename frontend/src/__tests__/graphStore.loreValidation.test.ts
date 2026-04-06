@@ -43,6 +43,7 @@ describe('graphStore — validateLoreExplicit / validateGraph + lore', () => {
       potential_warnings_count: 0,
       nodes_with_potential_warnings_count: 0,
       summary: '1 contradiction explicite dans 1 nœud',
+      summary_explicit_only: '1 contradiction explicite dans 1 nœud',
     })
     await useGraphStore.getState().validateLoreExplicit({})
     const s = useGraphStore.getState()
