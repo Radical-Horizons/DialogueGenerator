@@ -78,6 +78,8 @@ export const TestNode = memo(function TestNode({
     borderColor = theme.state.error.border
   } else if (validationHighlightKind === 'content') {
     borderColor = theme.state.warning.border
+  } else if (validationHighlightKind === 'lore') {
+    borderColor = theme.state.lore.border
   } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
@@ -90,11 +92,13 @@ export const TestNode = memo(function TestNode({
       ? theme.state.error.background
       : validationHighlightKind === 'content'
         ? theme.state.warning.background
-        : hasErrors
-          ? theme.state.error.background
-          : hasWarnings
-            ? theme.state.warning.background
-            : '#16a085'
+        : validationHighlightKind === 'lore'
+          ? theme.state.lore.background
+          : hasErrors
+            ? theme.state.error.background
+            : hasWarnings
+              ? theme.state.warning.background
+              : '#16a085'
   
   // Barre compacte avec 4 handles
   return (
@@ -133,7 +137,9 @@ export const TestNode = memo(function TestNode({
             backgroundColor:
               validationHighlightKind === 'content'
                 ? theme.state.warning.border
-                : theme.state.error.border,
+                : validationHighlightKind === 'lore'
+                  ? theme.state.lore.border
+                  : theme.state.error.border,
             color: 'white',
             borderRadius: '50%',
             width: 20,

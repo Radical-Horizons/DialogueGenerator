@@ -70,6 +70,23 @@ export function ValidationErrorsByType({
                 if (err.node_id) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
               }}
             >
+              {type === 'lore_contradiction_explicit' || type === 'lore_contradiction_potential' ? (
+                <span
+                  style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    color: theme.state.lore.color,
+                    border: `1px solid ${theme.state.lore.border}`,
+                    borderRadius: 4,
+                    padding: '1px 5px',
+                    flexShrink: 0,
+                  }}
+                >
+                  Lore
+                </span>
+              ) : null}
               <span style={{ flex: '1 1 auto', minWidth: 0 }}>
                 {err.node_id ? `[${err.node_id}] ` : ''}
                 {err.message}

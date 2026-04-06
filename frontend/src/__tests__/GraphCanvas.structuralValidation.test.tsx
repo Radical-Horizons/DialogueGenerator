@@ -150,7 +150,7 @@ describe('GraphCanvas validation structurelle FR36', () => {
     expect(String(n1?.style?.border)).toContain(theme.state.error.border)
   })
 
-  it('ne surligne pas en erreur structurelle pour broken_reference (hors FR36)', () => {
+  it('surligne le nœud en rouge canvas pour broken_reference (kind structural hors types FR36 stricts)', () => {
     useGraphStore.setState({
       nodes: [
         {
@@ -176,8 +176,6 @@ describe('GraphCanvas validation structurelle FR36', () => {
 
     const rfNodes = capturedReactFlowProps?.nodes as Array<{ id: string; style?: { border?: string } }>
     const n1 = rfNodes!.find((n) => n.id === 'n1')
-    expect(n1?.style?.border === undefined || !String(n1?.style?.border).includes(theme.state.error.border)).toBe(
-      true
-    )
+    expect(String(n1?.style?.border)).toContain(theme.state.error.border)
   })
 })

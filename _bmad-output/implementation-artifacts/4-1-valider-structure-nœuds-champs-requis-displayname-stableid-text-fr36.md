@@ -2,7 +2,7 @@
 
 Status: done
 
-<!-- Note: Validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
+
 
 ## Story
 
@@ -17,34 +17,31 @@ so that **je peux détecter les erreurs structurelles avant export et garantir l
 3. **Given** un nœud sans stableID cohérent avec le modèle document (id technique manquant alors qu’exigé), **When** validation, **Then** message « Nœud [index] : stableID manquant » si pas d’id utilisable ; **And** action UI « Générer stableID » proposée pour corriger.
 4. **Given** un nœud dialogue sans texte (pas de `line` ni `choices` exploitables — chevauchement contrôlé avec 4.2 : 4.1 = conformité champs requis export Unity, 4.2 = sémantique « vide » étendue), **When** validation, **Then** erreur explicite ; **And** marquage visuel « vide / invalide » sur le graphe.
 5. **Given** graphe valide structurellement, **When** validation, **Then** message de succès du type « Validation structurelle : 0 erreurs ».
-6. **NFR-P3** : la validation côté API reste rapide (cible &lt; 200 ms pour graphes typiques ; documenter / tester sur taille référence).
+6. **NFR-P3** : la validation côté API reste rapide (cible < 200 ms pour graphes typiques ; documenter / tester sur taille référence).
 
 ## Tasks / Subtasks
 
-- [x] **Task 1** : Règles backend — erreurs structurelles alignées FR36 (AC: #1, #2, #3, #4, #6)  
-  - [x] 🔴 Test échoue : pour un payload graphe avec nœud dialogue sans `displayName` (ou vide selon règle), sans id stable attendu, ou sans `line`/`choices`, `GraphValidationService.validate_graph` produit des erreurs typées avec `node_id` / index et messages stables ; succès → 0 erreur structurelle de ce groupe.  
-  - [x] 🟢 Étendre `services/graph_validation_service.py` (et contrat renvoyé par l’endpoint validate existant) pour couvrir DisplayName, stableID et text requis sans casser les validations déjà livrées (orphelins, cycles, etc.). Voir Dev Notes pour forme des nœuds.  
-  - [x] 🔵 Refactor : factoriser l’extraction des champs depuis nœud React Flow **et** forme document (`id` racine vs `data`) pour éviter duplication entre nouvelles règles et `_validate_node_content` ; si déjà satisfait après GREEN, refactor sur lisibilité des messages / constantes de `error_type` et nommage des tests.
-
-- [x] **Task 2** : Contrat API + non-régression (AC: #1, #6)  
-  - [x] 🔴 Test échoue : `POST /api/v1/unity-dialogues/graph/validate` retourne les nouveaux codes/types d’erreur dans le JSON attendu par le frontend (`errors[]` avec `type`, `message`, `severity`, `node_id`).  
-  - [x] 🟢 Ajuster router/service si nécessaire pour sérialiser les nouveaux types ; mettre à jour ou ajouter tests dans `tests/api/test_graph_validate.py` / `tests/api/test_graph_crud.py` en cohérence avec les chemins réels.  
-  - [x] 🔵 Refactor : mutualiser fixtures graphe minimal entre tests API et tests service si duplication non triviale apparaît ; sinon clarifier noms de cas pytest (given/when explicite dans le docstring).
-
-- [x] **Task 3** : Panneau validation — libellés, navigation, action stableID (AC: #2, #3)  
-  - [x] 🔴 Test échoue : avec erreurs mockées ou API, `GraphValidationPanel` affiche un regroupement lisible pour les nouveaux `type` ; clic sur une ligne avec `node_id` appelle la sélection de nœud (store) ; présence ou accessibilité de l’action « Générer stableID » lorsque l’erreur concerne stableID manquant.  
-  - [x] 🟢 Mettre à jour `frontend/src/components/graph/GraphValidationPanel.tsx`, `ICON_FOR_TYPE` / `LABEL_FOR_TYPE`, types dans `frontend/src/types/graph.ts` si besoin ; brancher génération stableID sur utilitaires / actions store existants (pas de nouvelle roue).  
-  - [x] 🔵 Refactor : si le panneau grossit, extraire une petite sous-composante « liste d’erreurs par type » ou hook `useValidationPanelErrors` pour respecter ~300 lignes fichier et clarifier les handlers de clic.
-
-- [x] **Task 4** : Surlignage graphe des nœuds en erreur structurelle (AC: #2, #4)  
-  - [x] 🔴 Test échoue : étant donné `validationErrors` contenant au moins une erreur structurelle FR36 avec `node_id`, le nœud correspondant sur le canvas reçoit un style distinctif (bordure / classe erreur rouge) jusqu’à correction ou nouvelle validation.  
-  - [x] 🟢 Implémenter via React Flow (`nodeClassName`, `style` ou data dérivée du store) en réutilisant les patterns déjà utilisés pour états sélection / warning ; éviter de dupliquer la logique de résolution d’id.  
-  - [x] 🔵 Refactor : centraliser le calcul « set des node_id en erreur » dans un sélecteur store ou memo pour éviter recalculs et garder un seul endroit pour futurs types d’erreurs.
+- **Task 1** : Règles backend — erreurs structurelles alignées FR36 (AC: #1, #2, #3, #4, #6)  
+  - 🔴 Test échoue : pour un payload graphe avec nœud dialogue sans `displayName` (ou vide selon règle), sans id stable attendu, ou sans `line`/`choices`, `GraphValidationService.validate_graph` produit des erreurs typées avec `node_id` / index et messages stables ; succès → 0 erreur structurelle de ce groupe.  
+  - 🟢 Étendre `services/graph_validation_service.py` (et contrat renvoyé par l’endpoint validate existant) pour couvrir DisplayName, stableID et text requis sans casser les validations déjà livrées (orphelins, cycles, etc.). Voir Dev Notes pour forme des nœuds.  
+  - 🔵 Refactor : factoriser l’extraction des champs depuis nœud React Flow **et** forme document (`id` racine vs `data`) pour éviter duplication entre nouvelles règles et `_validate_node_content` ; si déjà satisfait après GREEN, refactor sur lisibilité des messages / constantes de `error_type` et nommage des tests.
+- **Task 2** : Contrat API + non-régression (AC: #1, #6)  
+  - 🔴 Test échoue : `POST /api/v1/unity-dialogues/graph/validate` retourne les nouveaux codes/types d’erreur dans le JSON attendu par le frontend (`errors[]` avec `type`, `message`, `severity`, `node_id`).  
+  - 🟢 Ajuster router/service si nécessaire pour sérialiser les nouveaux types ; mettre à jour ou ajouter tests dans `tests/api/test_graph_validate.py` / `tests/api/test_graph_crud.py` en cohérence avec les chemins réels.  
+  - 🔵 Refactor : mutualiser fixtures graphe minimal entre tests API et tests service si duplication non triviale apparaît ; sinon clarifier noms de cas pytest (given/when explicite dans le docstring).
+- **Task 3** : Panneau validation — libellés, navigation, action stableID (AC: #2, #3)  
+  - 🔴 Test échoue : avec erreurs mockées ou API, `GraphValidationPanel` affiche un regroupement lisible pour les nouveaux `type` ; clic sur une ligne avec `node_id` appelle la sélection de nœud (store) ; présence ou accessibilité de l’action « Générer stableID » lorsque l’erreur concerne stableID manquant.  
+  - 🟢 Mettre à jour `frontend/src/components/graph/GraphValidationPanel.tsx`, `ICON_FOR_TYPE` / `LABEL_FOR_TYPE`, types dans `frontend/src/types/graph.ts` si besoin ; brancher génération stableID sur utilitaires / actions store existants (pas de nouvelle roue).  
+  - 🔵 Refactor : si le panneau grossit, extraire une petite sous-composante « liste d’erreurs par type » ou hook `useValidationPanelErrors` pour respecter ~300 lignes fichier et clarifier les handlers de clic.
+- **Task 4** : Surlignage graphe des nœuds en erreur structurelle (AC: #2, #4)  
+  - 🔴 Test échoue : étant donné `validationErrors` contenant au moins une erreur structurelle FR36 avec `node_id`, le nœud correspondant sur le canvas reçoit un style distinctif (bordure / classe erreur rouge) jusqu’à correction ou nouvelle validation.  
+  - 🟢 Implémenter via React Flow (`nodeClassName`, `style` ou data dérivée du store) en réutilisant les patterns déjà utilisés pour états sélection / warning ; éviter de dupliquer la logique de résolution d’id.  
+  - 🔵 Refactor : centraliser le calcul « set des node_id en erreur » dans un sélecteur store ou memo pour éviter recalculs et garder un seul endroit pour futurs types d’erreurs.
 
 ## Dev Notes
 
 - **Garde-fous architecture** : logique métier validation dans `services/` ; router `api/routers/` mince ; injection via `ServiceContainer` / `Depends` ; pas de singleton global. Frontend : pas de logique métier côté client au-delà de présentation et actions déjà existantes (sauvegarde, sélection). ADR-003 : `node.id` (React Flow) = identifiant stable ; `displayName` dans `data` pour l’affichage — la validation doit être cohérente avec le modèle document Unity v1.1.0 (`_bmad-output/project-context.md`).
-- **Réutiliser** : `GraphValidationService.validate_graph`, endpoint déjà exposé sous **`POST /api/v1/unity-dialogues/graph/validate`** (le PRD épique mentionne `/api/v1/graph/validate` — **chemin canonique = unity-dialogues** comme `frontend/src/api/graph.ts`). Composant UI : **`GraphValidationPanel.tsx`** (pas `ValidationPanel.tsx`). Store : `validateGraph` dans `uiSlice` / `useGraphStore`.
+- **Réutiliser** : `GraphValidationService.validate_graph`, endpoint déjà exposé sous `**POST /api/v1/unity-dialogues/graph/validate`** (le PRD épique mentionne `/api/v1/graph/validate` — **chemin canonique = unity-dialogues** comme `frontend/src/api/graph.ts`). Composant UI : `**GraphValidationPanel.tsx`** (pas `ValidationPanel.tsx`). Store : `validateGraph` dans `uiSlice` / `useGraphStore`.
 - **Cartographie existante** : `_validate_node_ids` vérifie la présence d’un id (racine ou `data.id`) ; `_validate_node_content` vérifie `line`/`choices` pour `dialogueNode` et `test` pour `testNode`. La story **affine** les messages et types pour FR36 (DisplayName, stableID explicite, text) sans supprimer les comportements utiles existants.
 - **Qualité / tests** : pytest miroir `tests/services/`, `tests/api/` ; Vitest pour UI critique ; pas de données GDD réelles dans les tests. Conserver verts les tests existants `test_graph_validation_service.py`, e2e validate si touchés.
 - **Barre refactor (défaut dev-story)** : ~300 lignes par fichier source touché, ~60 lignes par fonction, pas de duplication non triviale, responsabilité unique.
@@ -69,7 +66,7 @@ Composer (agent Cursor)
 
 ### Debug Log References
 
-_(aucun incident bloquant)_
+*(aucun incident bloquant)*
 
 ### Completion Notes List
 
@@ -146,7 +143,7 @@ _(aucun incident bloquant)_
 
 ## Previous story intelligence
 
-- Story 4.1 est la **première** de l’épique 4 : pas de story file `4-0-*` dans le même epic.  
+- Story 4.1 est la **première** de l’épique 4 : pas de story file `4-0-`* dans le même epic.  
 - Épique 3 et 0 ont livré validation cycles, graphe stable, sync GDD — réutiliser les patterns de tests API et de store déjà présents pour le graphe.
 
 ## Git intelligence summary

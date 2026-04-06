@@ -47,6 +47,10 @@ export interface GraphState {
   isLoading: boolean
   isSaving: boolean
   validationErrors: ValidationErrorDetail[]
+  /** Résumé API dernière validation lore explicite (FR38), ex. « 2 contradictions dans 1 nœud » */
+  loreExplicitValidationSummary: string | null
+  /** True pendant l’appel validate-lore-explicit */
+  loreExplicitValidationLoading: boolean
   highlightedNodeIds: string[]
   highlightedCycleNodes: string[]
   intentionalCycles: string[]
@@ -193,6 +197,8 @@ export interface GraphState {
 
   // Validation
   validateGraph: () => Promise<void>
+  /** FR38 — fusionne les erreurs lore avec la validation structurelle courante */
+  validateLoreExplicit: (contextSelections?: Record<string, unknown>) => Promise<void>
 
   // Persistence
   saveDialogue: () => Promise<SaveGraphResponse>
@@ -246,6 +252,8 @@ export const initialState = {
   isLoading: false,
   isSaving: false,
   validationErrors: [] as ValidationErrorDetail[],
+  loreExplicitValidationSummary: null as string | null,
+  loreExplicitValidationLoading: false,
   highlightedNodeIds: [] as string[],
   highlightedCycleNodes: [] as string[],
   intentionalCycles: (() => {

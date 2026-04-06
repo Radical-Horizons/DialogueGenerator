@@ -64,6 +64,7 @@ export function GraphEditor({
     selectedNodeId,
     selectedNodeIds,
     validationErrors: graphValidationErrors,
+    loreExplicitValidationSummary,
     isLoading: isGraphLoading,
   } = useGraphStore()
 
@@ -100,6 +101,11 @@ export function GraphEditor({
   } = useBatchOperations(toast)
 
   const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
+
+  /** Lore explicite peut n’ajouter aucune entrée dans validationErrors (graphe OK) : afficher quand même le résumé. */
+  const showValidationOverlay =
+    showValidationPanel &&
+    (graphValidationErrors.length > 0 || Boolean(loreExplicitValidationSummary))
 
   const handleSelectDialogue = useCallback(
     (dialogue: UnityDialogueMetadata | null) => {
@@ -236,10 +242,12 @@ export function GraphEditor({
                 </ReactFlowProvider>
               </div>
             )}
-            {showValidationPanel && graphValidationErrors.length > 0 && (
+            {showValidationOverlay && (
               <GraphValidationPanel
                 validationErrors={graphValidationErrors}
                 reactFlowInstance={reactFlowInstance}
+                loreExplicitSummary={loreExplicitValidationSummary}
+                onClose={() => toolbar.setShowValidationPanel(false)}
               />
             )}
             {showCostBreakdown && activeDialogueFilename && (

@@ -17,6 +17,8 @@ import type {
   NodePromptResponse,
   ValidateGraphRequest,
   ValidateGraphResponse,
+  ValidateLoreExplicitRequest,
+  ValidateLoreExplicitResponse,
   CalculateLayoutRequest,
   CalculateLayoutResponse,
 } from '../types/graph'
@@ -103,6 +105,19 @@ export async function validateGraph(
 ): Promise<ValidateGraphResponse> {
   const response = await apiClient.post<ValidateGraphResponse>(
     `/api/v1/unity-dialogues/graph/validate`,
+    request
+  )
+  return response.data
+}
+
+/**
+ * Contradictions lore explicites (FR38) — faits GDD vs texte nœuds.
+ */
+export async function validateLoreExplicit(
+  request: ValidateLoreExplicitRequest
+): Promise<ValidateLoreExplicitResponse> {
+  const response = await apiClient.post<ValidateLoreExplicitResponse>(
+    `/api/v1/unity-dialogues/graph/validate-lore-explicit`,
     request
   )
   return response.data

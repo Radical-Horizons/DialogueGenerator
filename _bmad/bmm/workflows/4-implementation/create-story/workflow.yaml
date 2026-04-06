@@ -1,5 +1,5 @@
 name: create-story
-description: 'Creates a dedicated story file with all the context the agent will need to implement it later. Use when the user says "create the next story" or "create story [story identifier]"'
+description: 'Creates a dedicated story file with all the context the agent will need to implement it later. Use when the user says "create the next story" or "create story [story identifier]". When no story id is given, the agent resolves the target epic from the current Git branch name when unambiguous (e.g. Epic/04-...); otherwise it uses the default sprint-status order (first backlog story top-to-bottom).'
 
 # Critical variables from config
 config_source: "{project-root}/_bmad/bmm/config.yaml"
@@ -24,6 +24,8 @@ prd_file: "{planning_artifacts}/prd.md" # Fallback for requirements (if not in e
 architecture_file: "{planning_artifacts}/architecture.md" # Fallback for constraints (if not in epics file)
 ux_file: "{planning_artifacts}/*ux*.md" # Fallback for UX requirements (if not in epics file)
 story_title: "" # Will be elicited if not derivable
+# Optional: epic number inferred from `git rev-parse --abbrev-ref HEAD` (see instructions.xml); empty if not unambiguous
+git_branch_epic_num: ""
 project_context: "**/project-context.md"
 default_output_file: "{implementation_artifacts}/{{story_key}}.md"
 

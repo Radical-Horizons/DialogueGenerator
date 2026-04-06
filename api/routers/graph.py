@@ -24,6 +24,8 @@ from api.schemas.graph import (
     SuggestedConnection,
     ValidateGraphRequest,
     ValidateGraphResponse,
+    ValidateLoreExplicitRequest,
+    ValidateLoreExplicitResponse,
     ValidationErrorDetail,
     CalculateLayoutRequest,
     CalculateLayoutResponse,
@@ -54,6 +56,11 @@ from services.unity_dialogue_export_service import (
     read_last_seq,
 )
 from services.graph_validation_service import GraphValidationService
+from services.lore_contradiction_validator import (
+    LoreGddFact,
+    merge_lore_facts_with_context_builder,
+    validate_explicit_lore_contradictions,
+)
 from services.graph_node_orchestrator import GraphNodeOrchestrator
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService
@@ -715,6 +722,89 @@ async def validate_graph(
             message="Erreur lors de la validation du graphe",
             details={"error": str(e)},
             request_id=request_id
+        )
+
+
+@router.post(
+    "/validate-lore-explicit",
+    response_model=ValidateLoreExplicitResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def validate_lore_explicit(
+    request_data: ValidateLoreExplicitRequest,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> ValidateLoreExplicitResponse:
+    """Détecte les contradictions lore explicites (texte graphe vs faits GDD).
+
+    Args:
+        request_data: Nœuds, arêtes, sélections contexte et faits optionnels.
+        context_builder: ContextBuilder pour dériver des faits depuis le GDD.
+        request_id: Identifiant de corrélation.
+
+    Returns:
+        Liste d'erreurs ``lore_contradiction_explicit`` et résumé agrégé.
+    """
+    try:
+        base_facts = [
+            LoreGddFact(
+                entity_name=p.entity_name,
+                category=p.category,
+                gdd_path=p.gdd_path,
+                vitality=p.vitality,
+            )
+            for p in request_data.gdd_lore_facts
+        ]
+        facts, vitality_contexts = merge_lore_facts_with_context_builder(
+            base_facts,
+            request_data.context_selections,
+            request_data.scene_instruction,
+            context_builder,
+        )
+        (
+            valid,
+            err_dicts,
+            warn_dicts,
+            summary,
+            c_count,
+            n_count,
+            pw_count,
+            pn_count,
+        ) = validate_explicit_lore_contradictions(
+            request_data.nodes,
+            request_data.edges,
+            facts,
+            vitality_contexts,
+        )
+        errors = [ValidationErrorDetail(**e) for e in err_dicts]
+        warnings = [ValidationErrorDetail(**w) for w in warn_dicts]
+        logger.info(
+            "Validation lore explicite: %s contradictions, %s nœuds, %s avertissements potentiels "
+            "(request_id=%s)",
+            c_count,
+            n_count,
+            pw_count,
+            request_id,
+        )
+        return ValidateLoreExplicitResponse(
+            valid=valid,
+            errors=errors,
+            warnings=warnings,
+            contradiction_count=c_count,
+            nodes_with_contradictions_count=n_count,
+            potential_warnings_count=pw_count,
+            nodes_with_potential_warnings_count=pn_count,
+            summary=summary,
+        )
+    except Exception as e:
+        logger.exception(
+            "Erreur lors de la validation lore explicite (request_id: %s)",
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la validation lore explicite",
+            details={"error": str(e)},
+            request_id=request_id,
         )
 
 

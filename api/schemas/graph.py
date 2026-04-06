@@ -1,6 +1,6 @@
 """Schémas Pydantic pour l'API de gestion de graphes."""
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -157,6 +157,63 @@ class ValidationErrorDetail(BaseModel):
     cycle_path: Optional[str] = Field(None, description="Chemin complet du cycle (format: 'A → B → C → A')")
     cycle_nodes: Optional[List[str]] = Field(None, description="Liste des nœuds dans le cycle")
     cycle_id: Optional[str] = Field(None, description="ID stable du cycle (pour marquage intentionnel)")
+    gdd_reference: Optional[str] = Field(
+        None,
+        description="Référence entrée GDD (ex. catégorie › nom) pour erreurs lore (FR38)",
+    )
+
+
+class GddLoreFactPayload(BaseModel):
+    """Fait GDD injecté (tests / client) pour validation lore explicite."""
+
+    entity_name: str = Field(..., description="Nom canonique de l'entité")
+    category: str = Field(..., description="Catégorie GDD (ex. characters)")
+    gdd_path: str = Field(..., description="Chemin stable affichable (ex. Personnages › Nom)")
+    vitality: Literal["alive", "dead"] = Field(..., description="Vitalité selon le GDD")
+
+
+class ValidateLoreExplicitRequest(BaseModel):
+    """Requête validation contradictions lore explicites (FR38)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
+    context_selections: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Sélections contexte (même forme que génération) pour extraction via ContextBuilder",
+    )
+    scene_instruction: str = Field(
+        default="",
+        description="Instruction de scène (optionnelle, passée au ContextBuilder)",
+    )
+    gdd_lore_facts: List[GddLoreFactPayload] = Field(
+        default_factory=list,
+        description="Faits explicites (prioritaires, fusionnés avec l'extraction contexte)",
+    )
+
+
+class ValidateLoreExplicitResponse(BaseModel):
+    """Réponse validation lore explicite."""
+
+    valid: bool = Field(..., description="True si aucune contradiction explicite")
+    errors: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description="Erreurs lore (type lore_contradiction_explicit)",
+    )
+    warnings: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description="Avertissements lore (type lore_contradiction_potential, AC 4.3 #4)",
+    )
+    contradiction_count: int = Field(..., description="Nombre de contradictions explicites")
+    nodes_with_contradictions_count: int = Field(..., description="Nombre de nœuds distincts concernés (explicite)")
+    potential_warnings_count: int = Field(
+        0,
+        description="Nombre d'avertissements lore_contradiction_potential",
+    )
+    nodes_with_potential_warnings_count: int = Field(
+        0,
+        description="Nombre de nœuds distincts avec avertissement potentiel",
+    )
+    summary: str = Field(..., description="Résumé contradictions explicites + potentiel + nœuds analysés")
 
 
 class ValidateGraphResponse(BaseModel):

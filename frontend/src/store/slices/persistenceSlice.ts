@@ -261,6 +261,7 @@ export const createPersistenceSlice: StateCreator<
       layoutRevision: rest.layoutRevision,
       isLoading: false,
       validationErrors: [],
+      loreExplicitValidationSummary: null,
       highlightedNodeIds: [],
       highlightedCycleNodes: [],
       hasUnsavedChanges: false,

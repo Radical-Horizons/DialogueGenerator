@@ -209,6 +209,8 @@ export const DialogueNode = memo(function DialogueNode({
     borderColor = theme.state.error.border
   } else if (validationHighlightKind === 'content') {
     borderColor = theme.state.warning.border
+  } else if (validationHighlightKind === 'lore') {
+    borderColor = theme.state.lore.border
   } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
@@ -298,7 +300,9 @@ export const DialogueNode = memo(function DialogueNode({
             backgroundColor:
               validationHighlightKind === 'content'
                 ? theme.state.warning.border
-                : theme.state.error.border,
+                : validationHighlightKind === 'lore'
+                  ? theme.state.lore.border
+                  : theme.state.error.border,
             color: 'white',
             borderRadius: '50%',
             width: 20,
@@ -317,13 +321,15 @@ export const DialogueNode = memo(function DialogueNode({
                 ? '🔗'
                 : e.type === 'broken_reference'
                   ? '🔴'
-                  : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
-                    ? '⚪'
-                    : e.type === 'missing_display_name'
-                      ? '📝'
-                      : e.type === 'missing_stable_id'
-                        ? '🆔'
-                        : '⚠️'
+                  : e.type === 'lore_contradiction_explicit' || e.type === 'lore_contradiction_potential'
+                    ? '📜'
+                    : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
+                      ? '⚪'
+                      : e.type === 'missing_display_name'
+                        ? '📝'
+                        : e.type === 'missing_stable_id'
+                          ? '🆔'
+                          : '⚠️'
             return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
           }).join('')}
         >

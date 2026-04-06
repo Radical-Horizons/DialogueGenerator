@@ -419,13 +419,17 @@ export const GraphCanvas = memo(function GraphCanvas() {
       const nodeErrors = validationErrors.filter((err) => err.node_id === node.id)
       const errors = nodeErrors.filter((err) => err.severity === 'error')
       const warnings = nodeErrors.filter((err) => err.severity === 'warning')
-      const highlightKind = getValidationHighlightKind(errors.map((e) => e.type))
+      const highlightKind = getValidationHighlightKind(nodeErrors.map((e) => e.type))
       const hasStructuralHighlight = highlightKind === 'structural'
       const hasContentCompletenessHighlight = highlightKind === 'content'
+      const hasLoreHighlight = highlightKind === 'lore'
       const isHighlighted = highlightedNodeIds.includes(node.id)
       const isInCycle = highlightedCycleNodes.includes(node.id)
       const cycleOverlay =
-        isInCycle && !hasStructuralHighlight && !hasContentCompletenessHighlight
+        isInCycle &&
+        !hasStructuralHighlight &&
+        !hasContentCompletenessHighlight &&
+        !hasLoreHighlight
       return {
         ...node,
         selected: selectedNodeIds.includes(node.id),
@@ -442,6 +446,10 @@ export const GraphCanvas = memo(function GraphCanvas() {
           ...(hasContentCompletenessHighlight && {
             border: `2px solid ${theme.state.warning.border}`,
             boxShadow: `0 0 0 1px ${theme.state.warning.border}`,
+          }),
+          ...(hasLoreHighlight && {
+            border: `2px solid ${theme.state.lore.border}`,
+            boxShadow: `0 0 0 1px ${theme.state.lore.border}`,
           }),
         },
         data: {

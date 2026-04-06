@@ -23,4 +23,15 @@ describe('graphStructuralValidation', () => {
     )
     expect(getValidationHighlightKind(['broken_reference'])).toBe('structural')
   })
+
+  it('getValidationHighlightKind : lore (FR38) après complétude, sous structure', () => {
+    expect(getValidationHighlightKind(['lore_contradiction_explicit'])).toBe('lore')
+    expect(getValidationHighlightKind(['lore_contradiction_potential'])).toBe('lore')
+    expect(
+      getValidationHighlightKind(['missing_display_name', 'lore_contradiction_explicit'])
+    ).toBe('structural')
+    expect(
+      getValidationHighlightKind(['missing_dialogue_text', 'lore_contradiction_explicit'])
+    ).toBe('content')
+  })
 })

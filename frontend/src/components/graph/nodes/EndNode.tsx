@@ -40,6 +40,8 @@ export const EndNode = memo(function EndNode({
     borderColor = theme.state.error.border
   } else if (validationHighlightKind === 'content') {
     borderColor = theme.state.warning.border
+  } else if (validationHighlightKind === 'lore') {
+    borderColor = theme.state.lore.border
   } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
@@ -52,7 +54,9 @@ export const EndNode = memo(function EndNode({
       ? theme.state.error.background
       : validationHighlightKind === 'content'
         ? theme.state.warning.background
-        : hasErrors
+        : validationHighlightKind === 'lore'
+          ? theme.state.lore.background
+          : hasErrors
           ? theme.state.error.background
           : hasWarnings
             ? theme.state.warning.background

@@ -180,6 +180,35 @@ export interface ValidationErrorDetail {
   cycle_path?: string
   cycle_nodes?: string[]
   cycle_id?: string
+  /** Référence GDD (FR38 lore) */
+  gdd_reference?: string
+}
+
+/** Fait GDD pour validation lore explicite (aligné Pydantic `GddLoreFactPayload`). */
+export interface GddLoreFactPayload {
+  entity_name: string
+  category: string
+  gdd_path: string
+  vitality: 'alive' | 'dead'
+}
+
+export interface ValidateLoreExplicitRequest {
+  nodes: unknown[]
+  edges: unknown[]
+  context_selections?: Record<string, unknown>
+  scene_instruction?: string
+  gdd_lore_facts?: GddLoreFactPayload[]
+}
+
+export interface ValidateLoreExplicitResponse {
+  valid: boolean
+  errors: ValidationErrorDetail[]
+  warnings: ValidationErrorDetail[]
+  contradiction_count: number
+  nodes_with_contradictions_count: number
+  potential_warnings_count: number
+  nodes_with_potential_warnings_count: number
+  summary: string
 }
 
 export interface ValidateGraphResponse {
