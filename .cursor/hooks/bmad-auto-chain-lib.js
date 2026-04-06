@@ -3,7 +3,7 @@
  *
  * État persistant : fichier `.bmad-auto-chain.pending.json` à la racine du workspace (gitignored).
  *
- * @typedef {{ version?: number; pending: string[]; armedAt?: string }} ChainState
+ * @typedef {{ version?: number; pending: string[]; armedAt?: string; workspaceRoot?: string }} ChainState
  * @module bmad-auto-chain-lib
  */
 "use strict";
@@ -14,9 +14,67 @@ const path = require("path");
 /** @type {string} */
 const STATE_FILENAME = ".bmad-auto-chain.pending.json";
 
+/**
+ * Racines candidates pour l'état chaîne (ordre : workspace Cursor, puis cwd du process hook).
+ * Cursor envoie en général `workspace_roots` sur beforeSubmit / stop — le cwd du hook n'est pas garanti.
+ *
+ * @param {unknown} payload
+ * @returns {string[]}
+ */
+function candidateWorkspaceRoots(payload) {
+  /** @type {string[]} */
+  const out = [];
+  if (payload && typeof payload === "object") {
+    /** @type {Record<string, unknown>} */
+    const o = /** @type {Record<string, unknown>} */ (payload);
+    const wr = o.workspace_roots;
+    if (Array.isArray(wr)) {
+      for (const r of wr) {
+        if (typeof r === "string" && r.trim()) {
+          out.push(path.normalize(r.trim()));
+        }
+      }
+    }
+    for (const k of ["workspaceRoot", "workspace_root", "root", "project_path"]) {
+      const v = o[k];
+      if (typeof v === "string" && v.trim()) {
+        out.push(path.normalize(v.trim()));
+      }
+    }
+  }
+  out.push(path.normalize(process.cwd()));
+  const seen = new Set();
+  return out.filter((r) => {
+    if (seen.has(r)) {
+      return false;
+    }
+    seen.add(r);
+    return true;
+  });
+}
+
+/**
+ * Première racine workspace utile pour écrire l'état à l'armement.
+ *
+ * @param {unknown} payload
+ * @returns {string}
+ */
+function pickWorkspaceRootForWrite(payload) {
+  const roots = candidateWorkspaceRoots(payload);
+  return roots[0] || path.normalize(process.cwd());
+}
+
 /** @returns {string} */
 function getStatePath() {
   return path.join(process.cwd(), STATE_FILENAME);
+}
+
+/**
+ * @param {unknown} payload
+ * @returns {string}
+ */
+function getStatePathForPayload(payload) {
+  return path.join(pickWorkspaceRootForWrite(payload), STATE_FILENAME);
 }
 
 /**
@@ -74,10 +132,22 @@ function promptFromHookPayload(payload) {
     "message",
     "content",
     "submission",
+    "body",
+    "user_message",
   ];
   for (const k of direct) {
     if (typeof o[k] === "string") {
       return o[k];
+    }
+  }
+  const messages = o.messages;
+  if (Array.isArray(messages) && messages.length > 0) {
+    const last = messages[messages.length - 1];
+    if (last && typeof last === "object") {
+      const c = /** @type {Record<string, unknown>} */ (last).content;
+      if (typeof c === "string") {
+        return c;
+      }
     }
   }
   return collectStrings(payload).join("\n");
@@ -109,56 +179,66 @@ MODE AUTO (#yolo) : exécuter le workflow code-review (workflow.xml + \`_bmad/bm
 const FOLLOWUP_REVIEW_OPTION_1 = `1`;
 
 /**
- * @returns {ChainState | null}
+ * @param {unknown} payload
+ * @returns {{ state: ChainState; filePath: string } | null}
  */
-function loadState() {
-  try {
-    const p = getStatePath();
-    if (!fs.existsSync(p)) {
-      return null;
+function loadStateWithPath(payload) {
+  const roots = candidateWorkspaceRoots(payload);
+  for (const root of roots) {
+    const p = path.join(root, STATE_FILENAME);
+    try {
+      if (!fs.existsSync(p)) {
+        continue;
+      }
+      const raw = fs.readFileSync(p, "utf8");
+      const data = JSON.parse(raw);
+      if (!data || typeof data !== "object" || !Array.isArray(data.pending)) {
+        continue;
+      }
+      return { state: data, filePath: p };
+    } catch (e) {
+      debug("loadStateWithPath error", p, e);
     }
-    const raw = fs.readFileSync(p, "utf8");
-    const data = JSON.parse(raw);
-    if (!data || typeof data !== "object" || !Array.isArray(data.pending)) {
-      return null;
-    }
-    return data;
-  } catch (e) {
-    debug("loadState error", e);
-    return null;
   }
+  return null;
 }
 
 /**
+ * @param {string} filePath
  * @param {ChainState} state
  * @returns {void}
  */
-function saveState(state) {
-  fs.writeFileSync(getStatePath(), JSON.stringify(state, null, 2), "utf8");
+function saveStateToPath(filePath, state) {
+  fs.writeFileSync(filePath, JSON.stringify(state, null, 2), "utf8");
 }
 
 /**
+ * @param {string} filePath
  * @returns {void}
  */
-function clearState() {
+function clearStatePath(filePath) {
   try {
-    fs.unlinkSync(getStatePath());
+    fs.unlinkSync(filePath);
   } catch {
     /* noop */
   }
 }
 
 /**
+ * @param {unknown} [hookPayload] stdin JSON du hook Cursor (pour workspace_roots)
  * @returns {void}
  */
-function armChain() {
+function armChain(hookPayload) {
+  const root = pickWorkspaceRootForWrite(hookPayload);
+  const filePath = path.join(root, STATE_FILENAME);
   const state = {
     version: 1,
     pending: ["dev-story", "code-review", "review-finalize"],
     armedAt: new Date().toISOString(),
+    workspaceRoot: root,
   };
-  saveState(state);
-  debug("Armed chain", state);
+  saveStateToPath(filePath, state);
+  debug("Armed chain", { filePath, state });
 }
 
 /**
@@ -179,24 +259,27 @@ function messageForStep(step) {
 }
 
 /**
+ * @param {unknown} [hookPayload] stdin JSON du hook `stop` (workspace_roots)
  * @returns {{ step: string; message: string } | null}
  */
-function consumeNextFollowup() {
-  const state = loadState();
-  if (!state || state.pending.length === 0) {
+function consumeNextFollowup(hookPayload) {
+  const loaded = loadStateWithPath(hookPayload);
+  if (!loaded || !loaded.state.pending.length) {
     return null;
   }
+  const { state, filePath } = loaded;
   const step = state.pending[0];
   const rest = state.pending.slice(1);
   const message = messageForStep(step);
   if (!message) {
-    clearState();
+    clearStatePath(filePath);
     return null;
   }
   if (rest.length === 0) {
-    clearState();
+    clearStatePath(filePath);
   } else {
-    saveState({ ...state, pending: rest });
+    const { workspaceRoot: _w, ...restState } = state;
+    saveStateToPath(filePath, { ...restState, pending: rest });
   }
   return { step, message };
 }
@@ -207,5 +290,7 @@ module.exports = {
   armChain,
   consumeNextFollowup,
   getStatePath,
+  getStatePathForPayload,
+  candidateWorkspaceRoots,
   debug,
 };

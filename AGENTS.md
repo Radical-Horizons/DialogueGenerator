@@ -45,6 +45,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 - **Frontend ESLint**: `npm --prefix frontend run lint` is green. Treat any new lint error as a regression to fix, not as accepted baseline debt.
 - **Frontend Vitest (agents)** : protocole détaillé, PowerShell et sortie fichier → **`.cursor/rules/workflow.mdc`** (section Vitest + Frontend tests Windows). Si un test échoue, vérifier qu'une feature n'a pas été silencieusement retirée avant de le considérer obsolète.
 - **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
+- **Git — commit** : sauf périmètre explicite (« uniquement ces fichiers », liste de chemins), **`git add .`** puis commit (push si demandé). Ne pas déduire un staging partiel depuis l’UI Cursor. Détail : `.cursor/rules/git_commit.mdc`.
 
 ### Subagents (`.cursor/agents/`)
 

@@ -52,6 +52,44 @@ describe('graphStore — validateLoreExplicit / validateGraph + lore', () => {
     expect(s.loreExplicitValidationLoading).toBe(false)
   })
 
+  it('validateLoreExplicit recalcule highlightedCycleNodes après fusion avec les warnings structurels', async () => {
+    const nodeB = {
+      ...minimalNode,
+      id: 'B',
+      data: { ...minimalNode.data, id: 'B', displayName: 'B' },
+    }
+    useGraphStore.setState({
+      nodes: [minimalNode, nodeB],
+      edges: [],
+      intentionalCycles: [],
+      validationErrors: [
+        {
+          type: 'cycle_detected',
+          severity: 'warning' as const,
+          message: 'Cycle détecté',
+          cycle_id: 'cycle_test',
+          cycle_path: 'A → B → A',
+          cycle_nodes: ['A', 'B'],
+        },
+      ],
+      highlightedCycleNodes: ['A', 'B'],
+    })
+    vi.mocked(graphAPI.validateLoreExplicit).mockResolvedValue({
+      valid: true,
+      errors: [],
+      warnings: [],
+      contradiction_count: 0,
+      nodes_with_contradictions_count: 0,
+      potential_warnings_count: 0,
+      nodes_with_potential_warnings_count: 0,
+      summary: '',
+      summary_explicit_only: '',
+    })
+    await useGraphStore.getState().validateLoreExplicit({})
+    const after = useGraphStore.getState()
+    expect(after.highlightedCycleNodes.slice().sort()).toEqual(['A', 'B'])
+  })
+
   it('validateGraph conserve les erreurs lore existantes', async () => {
     useGraphStore.setState({
       nodes: [minimalNode],

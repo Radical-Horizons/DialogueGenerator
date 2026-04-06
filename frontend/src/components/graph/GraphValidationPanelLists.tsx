@@ -234,7 +234,9 @@ export function ValidationWarningsByType({
           </div>
           {typeWarnings.map((warn, widx) => {
             const isCycle =
-              type === 'cycle_detected' && warn.cycle_path && warn.cycle_nodes
+              type === 'cycle_detected' &&
+              Array.isArray(warn.cycle_nodes) &&
+              warn.cycle_nodes.length > 0
             const handleClick = () => {
               navigateToValidationWarningTarget(warn, {
                 isCycle: Boolean(isCycle),
@@ -277,7 +279,9 @@ export function ValidationWarningsByType({
                       flexWrap: 'wrap',
                     }}
                   >
-                    <span style={{ fontWeight: 500, flex: 1 }}>{warn.cycle_path}</span>
+                    <span style={{ fontWeight: 500, flex: 1 }}>
+                      {warn.cycle_path?.trim() ? warn.cycle_path : warn.message}
+                    </span>
                     {warn.cycle_id && (
                       <label
                         style={{

@@ -1,6 +1,6 @@
 # Story 4.6 : Détecter cycles dans flux dialogue (FR41)
 
-Status: review
+Status: done
 
 <!-- Note : validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
 
@@ -98,7 +98,7 @@ Composer / Amelia (dev-story workflow)
 
 ### Debug Log References
 
-- Vitest : `graphValidationSummary.test.ts`, `GraphValidationPanel.test.tsx`, `graphStore.documents.test.ts`, `pruneGraphValidationDiagnostics.test.ts`, `graphViewStore.test.ts`
+- Vitest : `graphValidationSummary.test.ts`, `GraphValidationPanel.test.tsx`, `graphStore.documents.test.ts`, `graphStore.loreValidation.test.ts`, `pruneGraphValidationDiagnostics.test.ts`, `graphViewStore.test.ts`
 - Pytest : `tests/services/test_graph_validation_service.py`, `tests/api/test_graph_validate.py` (23 passed)
 
 ### Completion Notes List
@@ -129,16 +129,37 @@ Composer / Amelia (dev-story workflow)
 - `frontend/src/__tests__/graphStore.documents.test.ts`
 - `frontend/src/__tests__/pruneGraphValidationDiagnostics.test.ts`
 - `frontend/src/__tests__/graphViewStore.test.ts`
+- `frontend/src/__tests__/graphStore.loreValidation.test.ts`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 - `_bmad-output/implementation-artifacts/4-6-détecter-cycles-dans-flux-dialogue-fr41.md`
 
 ### Change Log
 
 - 2026-04-06 : Impl FR41 — résumé cycles, persistance layout `intentionalCycleIds`, surlignage filtré, navigation cycle via `graphViewStore`, prune cycle renforcée.
+- 2026-04-06 : Code review (AI) — recalcul `highlightedCycleNodes` après `validateLoreExplicit` ; entrées cycle exploitables sans `cycle_path` (libellé de repli) ; test Vitest associé.
+
+### Senior Developer Review (AI)
+
+**Reviewer :** Amelia (workflow code-review) · **Date :** 2026-04-06
+
+**Périmètre :** File List story + AC #1–#7 ; exclusion `_bmad/`, `.cursor/` conformément instructions workflow.
+
+**Preuves exécutées :** `pytest tests/services/test_graph_validation_service.py tests/api/test_graph_validate.py` → 23 passed ; `vitest` ciblés FR41 + `graphStore.loreValidation.test.ts` ; `npm --prefix frontend run lint` → 0 erreur.
+
+**Constats adversariaux (corrigés où HIGH/MEDIUM) :**
+
+1. **MEDIUM (corrigé)** — `validateLoreExplicit` mettait à jour `validationErrors` sans recalculer `highlightedCycleNodes` → risque de décalage surlignage / liste après fusion lore. **Fix :** `uiSlice.ts` + test `graphStore.loreValidation.test.ts`.
+2. **MEDIUM (corrigé)** — `isCycle` exigeait `cycle_path` truthy : si API ou sérialisation affaiblie, pas de clic fitView ni case « intentionnel » malgré `cycle_nodes`. **Fix :** critère sur `cycle_nodes` non vide ; libellé `cycle_path ?? message`.
+3. **LOW** — Surlignage cycle dans `GraphCanvas.tsx` : `border: '3px solid orange'` hors `theme` (incohérence token vs FR40 topologie).
+4. **LOW** — `filterVisibleWarnings` : `cycle_detected` sans `cycle_id` ne peut pas être masqué comme intentionnel (backend fournit toujours `cycle_id` — `_validate_cycles` SHA256).
+5. **LOW** — Vitest : `runValidationAfterPersist` loggue `Network Error` si validate non mockée (bruit stderr pré-existant, tests verts).
+6. **INFO** — Fichiers frontend FR41 encore non suivis git dans certaines copies de travail ; la File List reste la vérité fonctionnelle jusqu’au commit utilisateur.
+
+**Décision :** tous les AC validés sur code + tests ; aucun HIGH/MEDIUM ouvert après correctifs → statut **done**.
 
 ---
 
 ## Story completion status
 
-**Statut :** review  
-**Note :** Implémentation alignée epic (localStorage + sidecar layout par document). Prochaine étape recommandée : workflow `code-review` (idéalement autre LLM).
+**Statut :** done  
+**Note :** Revue code passée ; persistance intentionnelle documentée (layout sidecar + localStorage).

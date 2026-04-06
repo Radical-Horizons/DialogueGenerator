@@ -34,8 +34,14 @@ async function main() {
 
   const prompt = chain.promptFromHookPayload(payload);
   if (chain.shouldArmAutoChain(prompt)) {
-    chain.armChain();
+    chain.armChain(payload);
     chain.debug("Armed from beforeSubmit, prompt snippet:", prompt.slice(0, 240));
+  } else {
+    chain.debug("Not arming chain", {
+      promptLen: prompt.length,
+      promptHead: prompt.slice(0, 120),
+      roots: chain.candidateWorkspaceRoots(payload),
+    });
   }
 
   process.stdout.write(JSON.stringify({ continue: true }));

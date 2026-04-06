@@ -122,8 +122,13 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
         ...e,
         node_id: e.node_id,
       }))
+      const mergedValidationErrors = [...structuralAndOther, ...loreIssues]
       set({
-        validationErrors: [...structuralAndOther, ...loreIssues],
+        validationErrors: mergedValidationErrors,
+        highlightedCycleNodes: visibleCycleHighlightNodeIds(
+          mergedValidationErrors,
+          get().intentionalCycles
+        ),
         loreExplicitValidationSummary: response.summary_explicit_only,
         loreExplicitValidationLoading: false,
       })

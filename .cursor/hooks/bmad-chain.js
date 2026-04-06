@@ -26,14 +26,20 @@ async function readStdinUtf8() {
 
 async function main() {
   const raw = await readStdinUtf8();
+  /** @type {Record<string, unknown>} */
+  let payload = {};
   try {
-    const payload = JSON.parse(raw || "{}");
-    chain.debug("stop hook stdin keys", payload && typeof payload === "object" ? Object.keys(payload) : typeof payload);
+    payload = JSON.parse(raw || "{}");
+    chain.debug(
+      "stop hook stdin keys",
+      payload && typeof payload === "object" ? Object.keys(payload) : typeof payload,
+    );
   } catch {
     chain.debug("stop hook stdin (non-JSON)", String(raw).slice(0, 200));
+    payload = {};
   }
 
-  const next = chain.consumeNextFollowup();
+  const next = chain.consumeNextFollowup(payload);
   if (!next) {
     process.stdout.write(JSON.stringify({}));
     return;
