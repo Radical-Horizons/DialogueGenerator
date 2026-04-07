@@ -4,9 +4,6 @@
     "beforeSubmitPrompt": [
       {
         "command": "node .cursor/hooks/bmad-chain-before.js"
-      },
-      {
-        "command": "node .cursor/hooks/bmad-chain-bmad-before.js"
       }
     ],
     "stop": [

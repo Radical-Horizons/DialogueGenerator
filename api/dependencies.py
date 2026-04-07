@@ -287,6 +287,13 @@ def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
     return container.get_graph_node_orchestrator()
 
 
+def get_llm_quality_judge_service() -> "LLMQualityJudgeService":
+    """Retourne le service juge qualité dialogue (stateless, FR42)."""
+    from services.llm_quality_judge_service import LLMQualityJudgeService
+
+    return LLMQualityJudgeService()
+
+
 def get_token_estimation_service(request: Request) -> TokenEstimationService:
     """Retourne le service d'estimation de tokens (prompt + completion sans appel LLM).
 

@@ -2,6 +2,7 @@
 import hashlib
 import json
 import logging
+import time
 import re
 from pathlib import Path
 from typing import Annotated, Optional
@@ -48,6 +49,7 @@ from api.dependencies import (
     get_token_estimation_service,
     get_llm_pricing_service,
     get_llm_usage_service,
+    get_llm_quality_judge_service,
 )
 from services.configuration_service import ConfigurationService
 from services.graph_conversion_service import GraphConversionService
@@ -65,7 +67,12 @@ from services.graph_node_orchestrator import GraphNodeOrchestrator
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
+from services.llm_quality_judge_service import LLMQualityJudgeService
 from core.context.context_builder import ContextBuilder
+from api.schemas.dialogue_quality import (
+    EvaluateDialogueQualityRequest,
+    EvaluateDialogueQualityResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -723,6 +730,141 @@ async def validate_graph(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+@router.post(
+    "/evaluate-dialogue-quality",
+    response_model=EvaluateDialogueQualityResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def evaluate_dialogue_quality(
+    request_data: EvaluateDialogueQualityRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    judge_service: Annotated[LLMQualityJudgeService, Depends(get_llm_quality_judge_service)],
+    usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> EvaluateDialogueQualityResponse:
+    """Évalue la qualité narrative du graphe via un juge LLM (FR42).
+
+    Même charge utile que ``POST .../validate`` (nodes + edges). Utilise le provider
+    configuré (OpenAI / Mistral / DummyLLM sans clé).
+
+    Args:
+        request_data: Graphe ReactFlow et modèle optionnel.
+        config_service: Configuration (modèles disponibles).
+        judge_service: Service juge qualité.
+        usage_service: Suivi d'utilisation LLM (best-effort).
+        request_id: Corrélation.
+
+    Returns:
+        Scores, critères, commentaires et rappel variance ±1.
+
+    Raises:
+        ValidationException: Graphe non convertible.
+        InternalServerException: Échec juge ou parsing.
+    """
+    from factories.llm_factory import LLMClientFactory
+
+    raw_model = request_data.llm_model_identifier
+    if raw_model and str(raw_model).strip():
+        primary_model = str(raw_model).strip()
+    else:
+        primary_model = LLMQualityJudgeService.resolve_default_model_id(config_service)
+
+    fallback_chain = config_service.get_llm_fallback_chain()
+    if not isinstance(fallback_chain, list):
+        fallback_chain = []
+    t0 = time.perf_counter()
+    try:
+        if len(fallback_chain) >= 2 and fallback_chain[0] == primary_model:
+            llm_client = LLMClientFactory.create_client_with_fallback(
+                primary_model_id=primary_model,
+                fallback_model_ids=fallback_chain[1:],
+                config=config_service.get_llm_config(),
+                available_models=config_service.get_available_llm_models(),
+                usage_service=usage_service,
+                request_id=request_id,
+            )
+        else:
+            llm_client = LLMClientFactory.create_client(
+                model_id=primary_model,
+                config=config_service.get_llm_config(),
+                available_models=config_service.get_available_llm_models(),
+                usage_service=usage_service,
+                request_id=request_id,
+            )
+
+        result = await judge_service.evaluate_graph(
+            nodes=request_data.nodes,
+            edges=request_data.edges,
+            llm_client=llm_client,
+            config_service=config_service,
+            model_id=primary_model,
+        )
+        duration_ms = int((time.perf_counter() - t0) * 1000)
+        pt = int(getattr(llm_client, "last_usage_prompt_tokens", 0) or 0)
+        ct = int(getattr(llm_client, "last_usage_completion_tokens", 0) or 0)
+        try:
+            usage_service.track_usage(
+                request_id=request_id,
+                model_name=primary_model,
+                prompt_tokens=pt,
+                completion_tokens=ct,
+                total_tokens=pt + ct,
+                duration_ms=max(1, duration_ms),
+                success=True,
+                endpoint="/api/v1/unity-dialogues/graph/evaluate-dialogue-quality",
+                k_variants=1,
+            )
+        except Exception as track_exc:
+            logger.warning(
+                "track_usage juge qualité ignoré (request_id=%s): %s",
+                request_id,
+                track_exc,
+            )
+        return result
+    except ValueError as exc:
+        logger.warning(
+            "Évaluation qualité: validation graphe (request_id=%s): %s",
+            request_id,
+            exc,
+        )
+        raise ValidationException(
+            message=str(exc),
+            request_id=request_id,
+        ) from exc
+    except AllLLMProvidersUnavailableError:
+        raise
+    except Exception as exc:
+        logger.exception(
+            "Évaluation qualité LLM échouée (request_id=%s)",
+            request_id,
+        )
+        duration_ms = int((time.perf_counter() - t0) * 1000)
+        try:
+            usage_service.track_usage(
+                request_id=request_id,
+                model_name=primary_model,
+                prompt_tokens=0,
+                completion_tokens=0,
+                total_tokens=0,
+                duration_ms=max(1, duration_ms),
+                success=False,
+                endpoint="/api/v1/unity-dialogues/graph/evaluate-dialogue-quality",
+                k_variants=1,
+                error_message=str(exc),
+            )
+        except Exception as track_exc:
+            logger.debug(
+                "track_usage échec juge ignoré (request_id=%s): %s",
+                request_id,
+                track_exc,
+            )
+        raise InternalServerException(
+            message=f"Échec de l'évaluation qualité LLM : {exc}",
+            details={"error": str(exc)},
+            request_id=request_id,
+        ) from exc
 
 
 @router.post(

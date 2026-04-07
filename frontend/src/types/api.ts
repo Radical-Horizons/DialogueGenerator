@@ -459,3 +459,10 @@ export interface UnityDialogueNode {
   [key: string]: unknown
 }
 
+// FR42 — types juge qualité (canoniques dans graph.ts).
+export type {
+  DialogueQualityCriterionDetail,
+  DialogueQualityCriterionId,
+  EvaluateDialogueQualityRequest,
+  EvaluateDialogueQualityResponse,
+} from './graph'

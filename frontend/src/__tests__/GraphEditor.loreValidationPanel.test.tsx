@@ -57,6 +57,8 @@ const mockToolbar = vi.hoisted((): UseGraphToolbarReturn => {
     setShowExportFormatDialog: () => {},
     showValidationPanel: true,
     setShowValidationPanel: () => {},
+    showQualityLlmPanel: false,
+    setShowQualityLlmPanel: () => {},
     showCostBreakdown: false,
     setShowCostBreakdown: () => {},
     showShortcutsTooltip: false,

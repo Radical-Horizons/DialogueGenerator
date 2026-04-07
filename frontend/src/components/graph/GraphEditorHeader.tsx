@@ -106,6 +106,8 @@ export function GraphEditorHeader({
     setShowAIGenerationPanel,
     showValidationPanel,
     setShowValidationPanel,
+    showQualityLlmPanel,
+    setShowQualityLlmPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -850,6 +852,29 @@ export function GraphEditorHeader({
             </div>
           )}
         </div>
+        <button
+          type="button"
+          data-testid="btn-quality-llm-panel"
+          onClick={() => setShowQualityLlmPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showQualityLlmPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showQualityLlmPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showQualityLlmPanel ? theme.button.primary.color : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Évaluer la qualité narrative du dialogue (juge LLM, FR42)"
+        >
+          ✨ Qualité LLM
+        </button>
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}
           disabled={!hasActiveDialogue}

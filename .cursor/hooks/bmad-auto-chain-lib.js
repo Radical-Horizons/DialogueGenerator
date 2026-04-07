@@ -11,8 +11,17 @@
 const fs = require("fs");
 const path = require("path");
 
+/** Répertoire de ce module (`.cursor/hooks/`) — fiable même si `cwd` du hook est ailleurs. */
+const MODULE_DIR = __dirname;
+
 /** @type {string} */
 const STATE_FILENAME = ".bmad-auto-chain.pending.json";
+
+/** Trace lisible dans l’IDE : Cursor n’affiche souvent pas le stderr des hooks Node. */
+const LAST_RUN_FILE = path.join(MODULE_DIR, "bmad-hook-last-run.json");
+
+/** Append si `BMAD_CHAIN_DEBUG=1` (en plus de stderr). */
+const VERBOSE_LOG_FILE = path.join(MODULE_DIR, "bmad-chain-debug.log");
 
 /**
  * Racines candidates pour l'état chaîne (ordre : workspace Cursor, puis cwd du process hook).
@@ -21,6 +30,30 @@ const STATE_FILENAME = ".bmad-auto-chain.pending.json";
  * @param {unknown} payload
  * @returns {string[]}
  */
+/**
+ * Remonte quelques niveaux depuis `startDir` pour retrouver la racine du dépôt
+ * quand le hook `stop` n'envoie pas `workspace_roots` (cas fréquent Windows / agent).
+ *
+ * @param {string} startDir
+ * @param {number} [maxDepth]
+ * @returns {string[]}
+ */
+function ancestorWorkspaceCandidates(startDir, maxDepth = 12) {
+  /** @type {string[]} */
+  const out = [];
+  let dir = path.resolve(startDir);
+  const root = path.parse(dir).root;
+  for (let i = 0; i < maxDepth && dir && dir !== root; i++) {
+    out.push(path.normalize(dir));
+    const parent = path.dirname(dir);
+    if (parent === dir) {
+      break;
+    }
+    dir = parent;
+  }
+  return out;
+}
+
 function candidateWorkspaceRoots(payload) {
   /** @type {string[]} */
   const out = [];
@@ -43,6 +76,7 @@ function candidateWorkspaceRoots(payload) {
     }
   }
   out.push(path.normalize(process.cwd()));
+  out.push(...ancestorWorkspaceCandidates(process.cwd()));
   const seen = new Set();
   return out.filter((r) => {
     if (seen.has(r)) {
@@ -78,11 +112,68 @@ function getStatePathForPayload(payload) {
 }
 
 /**
+ * Dernière exécution d’un hook BMAD (écrasé à chaque run). Toujours appeler — ne pas throw.
+ *
+ * @param {Record<string, unknown>} record
+ * @returns {void}
+ */
+function traceHookRun(record) {
+  try {
+    const line = {
+      hint: "Cursor masque souvent stderr des hooks ; ce fichier est la source de vérité locale.",
+      lastRunFile: LAST_RUN_FILE,
+      at: new Date().toISOString(),
+      node: process.version,
+      cwd: process.cwd(),
+      ...record,
+    };
+    fs.writeFileSync(LAST_RUN_FILE, JSON.stringify(line, null, 2), "utf8");
+  } catch {
+    /* ne jamais faire échouer un hook */
+  }
+}
+
+/**
+ * @param {string} line
+ * @returns {void}
+ */
+function appendVerboseLog(line) {
+  if (process.env.BMAD_CHAIN_DEBUG !== "1") {
+    return;
+  }
+  try {
+    fs.appendFileSync(
+      VERBOSE_LOG_FILE,
+      `[${new Date().toISOString()}] ${line}\n`,
+      "utf8",
+    );
+  } catch {
+    /* noop */
+  }
+}
+
+/**
  * @param {...unknown} args
  * @returns {void}
  */
 function debug(...args) {
   if (process.env.BMAD_CHAIN_DEBUG === "1") {
+    const line = args
+      .map((a) => {
+        if (a instanceof Error) {
+          return a.message;
+        }
+        if (typeof a === "object") {
+          try {
+            return JSON.stringify(a);
+          } catch {
+            return String(a);
+          }
+        }
+        return String(a);
+      })
+      .join(" ");
+    appendVerboseLog(line);
     console.error("[bmad-auto-chain]", ...args);
   }
 }
@@ -113,6 +204,30 @@ function collectStrings(value, out = []) {
  * @param {unknown} payload
  * @returns {string}
  */
+/**
+ * @param {unknown} content
+ * @returns {string}
+ */
+function stringFromMessageContent(content) {
+  if (typeof content === "string") {
+    return content;
+  }
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => {
+        if (part && typeof part === "object" && typeof part.text === "string") {
+          return part.text;
+        }
+        if (typeof part === "string") {
+          return part;
+        }
+        return "";
+      })
+      .join("");
+  }
+  return "";
+}
+
 function promptFromHookPayload(payload) {
   if (typeof payload === "string") {
     return payload;
@@ -134,19 +249,40 @@ function promptFromHookPayload(payload) {
     "submission",
     "body",
     "user_message",
+    "user_input",
+    "command",
+    "slashCommand",
+    "slash_command",
   ];
   for (const k of direct) {
     if (typeof o[k] === "string") {
       return o[k];
     }
   }
+  const data = o.data;
+  if (data && typeof data === "object") {
+    const d = /** @type {Record<string, unknown>} */ (data);
+    for (const k of direct) {
+      if (typeof d[k] === "string") {
+        return d[k];
+      }
+    }
+  }
   const messages = o.messages;
   if (Array.isArray(messages) && messages.length > 0) {
-    const last = messages[messages.length - 1];
-    if (last && typeof last === "object") {
-      const c = /** @type {Record<string, unknown>} */ (last).content;
-      if (typeof c === "string") {
-        return c;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const last = messages[i];
+      if (last && typeof last === "object") {
+        const rec = /** @type {Record<string, unknown>} */ (last);
+        const role = rec.role;
+        if (role === "assistant" || role === "model") {
+          continue;
+        }
+        const c = rec.content;
+        const s = stringFromMessageContent(c);
+        if (s) {
+          return s;
+        }
       }
     }
   }
@@ -184,8 +320,17 @@ const FOLLOWUP_REVIEW_OPTION_1 = `1`;
  */
 function loadStateWithPath(payload) {
   const roots = candidateWorkspaceRoots(payload);
+  /** @type {string[]} */
+  const pathsToTry = [];
   for (const root of roots) {
-    const p = path.join(root, STATE_FILENAME);
+    pathsToTry.push(path.join(root, STATE_FILENAME));
+  }
+  const seenPaths = new Set();
+  for (const p of pathsToTry) {
+    if (seenPaths.has(p)) {
+      continue;
+    }
+    seenPaths.add(p);
     try {
       if (!fs.existsSync(p)) {
         continue;
@@ -262,6 +407,24 @@ function messageForStep(step) {
  * @param {unknown} [hookPayload] stdin JSON du hook `stop` (workspace_roots)
  * @returns {{ step: string; message: string } | null}
  */
+/**
+ * Lit l’état chaîne sans le modifier (pour traces hook `stop`).
+ *
+ * @param {unknown} hookPayload
+ * @returns {{ chainArmed: false } | { chainArmed: true; stateFile: string; pendingSteps: string[] }}
+ */
+function peekPendingState(hookPayload) {
+  const loaded = loadStateWithPath(hookPayload);
+  if (!loaded || !loaded.state.pending.length) {
+    return { chainArmed: false };
+  }
+  return {
+    chainArmed: true,
+    stateFile: loaded.filePath,
+    pendingSteps: loaded.state.pending.slice(),
+  };
+}
+
 function consumeNextFollowup(hookPayload) {
   const loaded = loadStateWithPath(hookPayload);
   if (!loaded || !loaded.state.pending.length) {
@@ -278,8 +441,7 @@ function consumeNextFollowup(hookPayload) {
   if (rest.length === 0) {
     clearStatePath(filePath);
   } else {
-    const { workspaceRoot: _w, ...restState } = state;
-    saveStateToPath(filePath, { ...restState, pending: rest });
+    saveStateToPath(filePath, { ...state, pending: rest });
   }
   return { step, message };
 }
@@ -289,8 +451,10 @@ module.exports = {
   shouldArmAutoChain,
   armChain,
   consumeNextFollowup,
+  peekPendingState,
   getStatePath,
   getStatePathForPayload,
   candidateWorkspaceRoots,
   debug,
+  traceHookRun,
 };

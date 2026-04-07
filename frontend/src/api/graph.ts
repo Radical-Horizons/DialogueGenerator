@@ -19,6 +19,8 @@ import type {
   ValidateGraphResponse,
   ValidateLoreExplicitRequest,
   ValidateLoreExplicitResponse,
+  EvaluateDialogueQualityRequest,
+  EvaluateDialogueQualityResponse,
   CalculateLayoutRequest,
   CalculateLayoutResponse,
 } from '../types/graph'
@@ -119,6 +121,20 @@ export async function validateLoreExplicit(
   const response = await apiClient.post<ValidateLoreExplicitResponse>(
     `/api/v1/unity-dialogues/graph/validate-lore-explicit`,
     request
+  )
+  return response.data
+}
+
+/**
+ * Évalue la qualité narrative du graphe via juge LLM (FR42).
+ */
+export async function evaluateDialogueQuality(
+  request: EvaluateDialogueQualityRequest
+): Promise<EvaluateDialogueQualityResponse> {
+  const response = await apiClient.post<EvaluateDialogueQualityResponse>(
+    `/api/v1/unity-dialogues/graph/evaluate-dialogue-quality`,
+    request,
+    { timeout: 120000 }
   )
   return response.data
 }

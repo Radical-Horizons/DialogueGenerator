@@ -59,6 +59,8 @@ e2e/.auth/
 
 # BMAD / Cursor — état éphémère chaîne AUTO (create-story auto → dev-story → code-review → 1)
 .bmad-auto-chain.pending.json
+.cursor/hooks/bmad-hook-last-run.json
+.cursor/hooks/bmad-chain-debug.log
 
 # Cursor IDE — plans et prefs machine (ne pas versionner)
 # Note: `.cursor/hooks/` est versionné (scripts BMAD / chaîne Cursor) pour rester aligné avec hooks.json.

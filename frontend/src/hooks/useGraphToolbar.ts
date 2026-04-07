@@ -24,6 +24,8 @@ export interface UseGraphToolbarReturn {
   setShowExportFormatDialog: (v: boolean) => void
   showValidationPanel: boolean
   setShowValidationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showQualityLlmPanel: boolean
+  setShowQualityLlmPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showCostBreakdown: boolean
   setShowCostBreakdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showShortcutsTooltip: boolean
@@ -63,6 +65,7 @@ export function useGraphToolbar(
   const [showAIGenerationPanel, setShowAIGenerationPanel] = useState(false)
   const [showExportFormatDialog, setShowExportFormatDialog] = useState(false)
   const [showValidationPanel, setShowValidationPanel] = useState(false)
+  const [showQualityLlmPanel, setShowQualityLlmPanel] = useState(false)
   const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
   const [showSearchBar, setShowSearchBar] = useState(false)
@@ -400,6 +403,8 @@ export function useGraphToolbar(
     setShowExportFormatDialog,
     showValidationPanel,
     setShowValidationPanel,
+    showQualityLlmPanel,
+    setShowQualityLlmPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,

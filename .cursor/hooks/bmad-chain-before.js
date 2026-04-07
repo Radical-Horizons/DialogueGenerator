@@ -33,7 +33,8 @@ async function main() {
   }
 
   const prompt = chain.promptFromHookPayload(payload);
-  if (chain.shouldArmAutoChain(prompt)) {
+  const armed = chain.shouldArmAutoChain(prompt);
+  if (armed) {
     chain.armChain(payload);
     chain.debug("Armed from beforeSubmit, prompt snippet:", prompt.slice(0, 240));
   } else {
@@ -44,10 +45,30 @@ async function main() {
     });
   }
 
+  chain.traceHookRun({
+    hook: "beforeSubmitPrompt",
+    stdinLength: raw.length,
+    payloadParsed: Object.keys(payload).length > 0,
+    payloadKeys: Object.keys(payload),
+    promptLength: prompt.length,
+    promptHead: prompt.slice(0, 400),
+    armed,
+    stateFileWritten: armed ? chain.getStatePathForPayload(payload) : null,
+    workspaceRoots: chain.candidateWorkspaceRoots(payload).slice(0, 8),
+  });
+
   process.stdout.write(JSON.stringify({ continue: true }));
 }
 
 main().catch((err) => {
+  try {
+    chain.traceHookRun({
+      hook: "beforeSubmitPrompt",
+      error: err instanceof Error ? err.message : String(err),
+    });
+  } catch {
+    /* noop */
+  }
   console.error("[bmad-chain-before]", err);
   process.exit(1);
 });

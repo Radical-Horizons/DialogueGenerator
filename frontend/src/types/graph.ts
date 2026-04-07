@@ -235,6 +235,38 @@ export interface ValidateGraphResponse {
   warnings: ValidationErrorDetail[]
 }
 
+/** FR42 — critère renvoyé par le juge LLM. */
+export type DialogueQualityCriterionId =
+  | 'narrative_coherence'
+  | 'characterization'
+  | 'agency'
+  | 'style'
+
+export interface DialogueQualityCriterionDetail {
+  criterion_id: DialogueQualityCriterionId
+  label: string
+  score: number
+  comment: string
+}
+
+export interface EvaluateDialogueQualityRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+  llm_model_identifier?: string | null
+}
+
+export interface EvaluateDialogueQualityResponse {
+  overall_score: number
+  score_variance_margin: number
+  score_variance_note: string
+  criteria: DialogueQualityCriterionDetail[]
+  global_comment?: string | null
+  suggestions: string[]
+  strengths: string[]
+  model_id: string
+  provider: string
+}
+
 export interface CalculateLayoutRequest {
   nodes: unknown[]
   edges: unknown[]
