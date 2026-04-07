@@ -296,18 +296,18 @@ function promptFromHookPayload(payload) {
 function shouldArmAutoChain(promptText) {
   const s = String(promptText || "");
   const createStory =
-    /0-custom-sm-create-story|sm-create-story|create-story\/workflow\.yaml|create-story workflow|Context Story:\s*Prepare|\[CS\]\s*Context Story/i.test(
+    /01-custom-sm-create-story|sm-create-story|create-story\/workflow\.yaml|create-story workflow|Context Story:\s*Prepare|\[CS\]\s*Context Story/i.test(
       s,
     );
   const auto = /\bauto\b|#yolo|\byolo mode\b/i.test(s);
   return createStory && auto;
 }
 
-const FOLLOWUP_DEV_STORY = `/0-custom-dev-story
+const FOLLOWUP_DEV_STORY = `/02-custom-dev-story
 
 MODE AUTO (#yolo) : exécuter immédiatement le workflow Dev Story (charger dev.md, config.yaml, workflow.xml, puis \`_bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml\`). Pas de menu, pas d’attente utilisateur entre les sections. Implémenter la story en statut **ready-for-dev** (fichier sous \`_bmad-output/implementation-artifacts/\` + \`sprint-status.yaml\`).`;
 
-const FOLLOWUP_CODE_REVIEW = `/0-custom-dev-code-review
+const FOLLOWUP_CODE_REVIEW = `/03-custom-dev-code-review
 
 MODE AUTO (#yolo) : exécuter le workflow code-review (workflow.xml + \`_bmad/bmm/workflows/4-implementation/code-review/workflow.yaml\`). Enchaîner sans bloquer sur les confirmations ; aux choix numérotés, suivre la logique du workflow.`;
 

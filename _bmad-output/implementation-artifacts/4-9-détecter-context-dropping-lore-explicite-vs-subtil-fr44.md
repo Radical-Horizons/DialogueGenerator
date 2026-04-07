@@ -1,6 +1,6 @@
 # Story 4.9 : détecter-context-dropping-lore-explicite-vs-subtil-fr44
 
-Status: review
+Status: done
 
 <!-- Note : validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
 
@@ -70,6 +70,7 @@ Composer (implémentation agentique dev-story)
 
 ### Completion Notes List
 
+- **Code review (2026-04-07)** : revue adversariale — AC validés sur fichiers File List ; pytest `test_context_dropping_*` + Vitest `GraphContextDroppingPanel` + ESLint verts. Correction review : `summary` distingue absence (`context_dropping`) vs `too_subtle` (`services/context_dropping_detector.py`).
 - **Task 1** : `POST /api/v1/unity-dialogues/graph/detect-context-dropping` ; schémas `DetectContextDroppingRequest/Response` ; extraction listes GDD dans `services/context_dropping_facts.py`, comparaison dans `services/context_dropping_detector.py`, mapping HTTP dans `api/utils/context_dropping_response.py` (router mince).
 - **Task 2** : Panneau `GraphContextDroppingPanel` + sous-composants résumé/liste ; état `showContextDroppingPanel` dans `useGraphToolbar` (distinct slop / juge LLM) ; bouton toolbar « 📎 Contexte ».
 - **Task 3** : Seuil « subtil » = mention multi-mots avec recouvrement partiel des mots (≥2 mots significatifs) ; alignement accent-insensible via `normalize_entity_name` sur le texte agrégé pour éviter faux positifs.
@@ -147,5 +148,5 @@ Composer (implémentation agentique dev-story)
 
 ## Story completion status
 
-**Statut :** review  
+**Statut :** done  
 **Note :** Implémentation FR44 ; heuristique MVP (mots des sélections + lignes `scene_instruction` / `context_text`) — faux positifs/négatifs possibles ; Story 4.10 pourra activer `rules_profile` / `tolerance` côté règles métier.

@@ -123,7 +123,7 @@ development_status:
   4-6-détecter-cycles-dans-flux-dialogue-fr41: done
   4-7-évaluer-qualité-dialogue-avec-llm-judge-score-0-10-1-marge-fr42: done
   4-8-détecter-patterns-ai-slop-gpt-isms-répétition-phrases-génériques-fr43: done
-  4-9-détecter-context-dropping-lore-explicite-vs-subtil-fr44: review
+  4-9-détecter-context-dropping-lore-explicite-vs-subtil-fr44: done
   4-10-configurer-règles-validation-anti-context-dropping-fr45: backlog
   4-11-simuler-flux-dialogue-pour-détecter-dead-ends-fr46: backlog
   4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: backlog

@@ -194,7 +194,19 @@ class ContextDroppingDetector:
 
         n = len(result.cases)
         result.case_count = n
-        result.summary = f"{n} cas de context dropping détectés" if n else "0 cas de context dropping détectés"
+        if n == 0:
+            result.summary = "0 cas de context dropping détectés"
+        else:
+            dropping_n = sum(1 for c in result.cases if c.kind == "context_dropping")
+            subtle_n = sum(1 for c in result.cases if c.kind == "too_subtle")
+            if subtle_n > 0 and dropping_n == 0:
+                result.summary = f"{n} cas de subtilité du contexte détectés"
+            elif subtle_n > 0 and dropping_n > 0:
+                result.summary = (
+                    f"{n} cas détectés ({dropping_n} absence(s) de contexte, {subtle_n} subtilité)"
+                )
+            else:
+                result.summary = f"{n} cas de context dropping détectés"
         if n == 0:
             result.message = (
                 "Les informations clés du contexte sont présentes dans le dialogue "
