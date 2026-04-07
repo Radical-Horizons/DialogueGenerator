@@ -108,6 +108,8 @@ export function GraphEditorHeader({
     setShowValidationPanel,
     showQualityLlmPanel,
     setShowQualityLlmPanel,
+    showAiSlopPanel,
+    setShowAiSlopPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -874,6 +876,29 @@ export function GraphEditorHeader({
           title="Évaluer la qualité narrative du dialogue (juge LLM, FR42)"
         >
           ✨ Qualité LLM
+        </button>
+        <button
+          type="button"
+          data-testid="btn-ai-slop-panel"
+          onClick={() => setShowAiSlopPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showAiSlopPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showAiSlopPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showAiSlopPanel ? theme.button.primary.color : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Détecter les formulations type GPT-ism, répétitions et phrases génériques (FR43)"
+        >
+          🤖 AI slop
         </button>
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}

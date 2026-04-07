@@ -277,3 +277,51 @@ export interface CalculateLayoutRequest {
 export interface CalculateLayoutResponse {
   nodes: Array<{ id: string; position: { x: number; y: number }; [key: string]: unknown }>
 }
+
+/** Options détection AI slop (FR43) — alignées Pydantic `AiSlopDetectionOptions`. */
+export interface AiSlopDetectionOptionsState {
+  include_gpt_isms: boolean
+  include_repetitions: boolean
+  include_generic_phrases: boolean
+  custom_keywords: string[]
+  custom_regex_patterns: string[]
+}
+
+export type AiSlopOccurrenceKind = 'gpt_ism' | 'repetition' | 'generic_phrase'
+
+export interface AiSlopOccurrenceItem {
+  kind: AiSlopOccurrenceKind
+  node_id: string
+  node_display_id?: string | null
+  field: string
+  excerpt: string
+  matched_span: string
+  suggestion: string
+  severity: 'warning'
+}
+
+export interface AiSlopRepetitionGroup {
+  normalized_phrase: string
+  occurrence_count: number
+  node_ids: string[]
+  sample_excerpt: string
+}
+
+export interface DetectAiSlopRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+  options?: AiSlopDetectionOptionsState
+}
+
+export interface DetectAiSlopResponse {
+  summary_gpt_isms: string
+  summary_repetitions: string
+  summary_generic_phrases: string
+  gpt_ism_occurrence_count: number
+  gpt_ism_distinct_node_count: number
+  generic_phrase_occurrence_count: number
+  repetition_group_count: number
+  occurrences: AiSlopOccurrenceItem[]
+  repetition_groups: AiSlopRepetitionGroup[]
+  message?: string | null
+}

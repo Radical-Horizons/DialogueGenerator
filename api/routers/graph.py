@@ -25,6 +25,11 @@ from api.schemas.graph import (
     SuggestedConnection,
     ValidateGraphRequest,
     ValidateGraphResponse,
+    DetectAiSlopRequest,
+    DetectAiSlopResponse,
+    AiSlopOccurrenceItem,
+    AiSlopRepetitionGroup,
+    AiSlopDetectionOptions,
     ValidateLoreExplicitRequest,
     ValidateLoreExplicitResponse,
     ValidationErrorDetail,
@@ -58,6 +63,7 @@ from services.unity_dialogue_export_service import (
     read_last_seq,
 )
 from services.graph_validation_service import GraphValidationService
+from services.ai_slop_detector import AISlopDetector, AiSlopDetectionOptionsData, AiSlopDetectionResult
 from services.lore_contradiction_validator import (
     LoreGddFact,
     merge_lore_facts_with_context_builder,
@@ -75,6 +81,80 @@ from api.schemas.dialogue_quality import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _ai_slop_options_to_data(
+    options: Optional[AiSlopDetectionOptions],
+) -> AiSlopDetectionOptionsData:
+    """Mappe le schéma API vers les options du service."""
+    if options is None:
+        return AiSlopDetectionOptionsData()
+    return AiSlopDetectionOptionsData(
+        include_gpt_isms=options.include_gpt_isms,
+        include_repetitions=options.include_repetitions,
+        include_generic_phrases=options.include_generic_phrases,
+        custom_keywords=list(options.custom_keywords),
+        custom_regex_patterns=list(options.custom_regex_patterns),
+    )
+
+
+def _detect_ai_slop_response_from_result(raw: AiSlopDetectionResult) -> DetectAiSlopResponse:
+    """Construit la réponse HTTP à partir du résultat interne."""
+    gpt_occs = [x for x in raw.occurrences if x.kind == "gpt_ism"]
+    gen_occs = [x for x in raw.occurrences if x.kind == "generic_phrase"]
+    gpt_nodes = len({x.node_id for x in gpt_occs})
+    gen_nodes = len({x.node_id for x in gen_occs})
+    summary_gpt = (
+        f"GPT-isms : {len(gpt_occs)} occurrence(s) dans {gpt_nodes} nœud(s)"
+        if gpt_occs
+        else "GPT-isms : 0 occurrence"
+    )
+    summary_gen = (
+        f"Phrases génériques : {len(gen_occs)} occurrence(s) dans {gen_nodes} nœud(s)"
+        if gen_occs
+        else "Phrases génériques : 0 occurrence"
+    )
+    n_rep_groups = len(raw.repetition_groups)
+    total_rep_segs = sum(g.occurrence_count for g in raw.repetition_groups)
+    summary_rep = (
+        f"Répétitions : {n_rep_groups} phrase(s) répétée(s), {total_rep_segs} occurrence(s) au total"
+        if n_rep_groups
+        else "Répétitions : aucune phrase détectée"
+    )
+    items = [
+        AiSlopOccurrenceItem(
+            kind=x.kind,
+            node_id=x.node_id,
+            node_display_id=x.node_display_id,
+            field=x.field,
+            excerpt=x.excerpt,
+            matched_span=x.matched_span,
+            suggestion=x.suggestion,
+            severity="warning",
+        )
+        for x in raw.occurrences
+    ]
+    groups = [
+        AiSlopRepetitionGroup(
+            normalized_phrase=g.normalized_phrase,
+            occurrence_count=g.occurrence_count,
+            node_ids=g.node_ids,
+            sample_excerpt=g.sample_excerpt,
+        )
+        for g in raw.repetition_groups
+    ]
+    return DetectAiSlopResponse(
+        summary_gpt_isms=summary_gpt,
+        summary_repetitions=summary_rep,
+        summary_generic_phrases=summary_gen,
+        gpt_ism_occurrence_count=len(gpt_occs),
+        gpt_ism_distinct_node_count=gpt_nodes,
+        generic_phrase_occurrence_count=len(gen_occs),
+        repetition_group_count=n_rep_groups,
+        occurrences=items,
+        repetition_groups=groups,
+        message=raw.message,
+    )
 
 
 def _fingerprint_for_selections_safe(
@@ -730,6 +810,38 @@ async def validate_graph(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+@router.post(
+    "/detect-ai-slop",
+    response_model=DetectAiSlopResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def detect_ai_slop(
+    request_data: DetectAiSlopRequest,
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> DetectAiSlopResponse:
+    """Détecte les motifs « AI slop » (GPT-isms, répétitions, phrases génériques) — FR43.
+
+    Même charge utile que ``POST .../validate`` : ``nodes`` + ``edges`` et options optionnelles.
+    """
+    try:
+        raw = AISlopDetector.detect(
+            request_data.nodes,
+            request_data.edges,
+            _ai_slop_options_to_data(request_data.options),
+        )
+        return _detect_ai_slop_response_from_result(raw)
+    except Exception as e:
+        logger.exception(
+            "Erreur lors de la détection AI slop (request_id: %s)",
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la détection AI slop",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
 
 
 @router.post(

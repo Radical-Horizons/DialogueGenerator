@@ -16,6 +16,7 @@ import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { GraphValidationPanel } from './GraphValidationPanel'
 import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
+import { GraphAiSlopPanel } from './GraphAiSlopPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
@@ -77,6 +78,7 @@ export function GraphEditor({
   const {
     showValidationPanel,
     showQualityLlmPanel,
+    showAiSlopPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showAIGenerationPanel,
@@ -258,6 +260,9 @@ export function GraphEditor({
               <GraphQualityLlmPanel
                 onClose={() => toolbar.setShowQualityLlmPanel(false)}
               />
+            )}
+            {showAiSlopPanel && (
+              <GraphAiSlopPanel onClose={() => toolbar.setShowAiSlopPanel(false)} />
             )}
             {showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal

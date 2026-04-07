@@ -23,6 +23,8 @@ import type {
   EvaluateDialogueQualityResponse,
   CalculateLayoutRequest,
   CalculateLayoutResponse,
+  DetectAiSlopRequest,
+  DetectAiSlopResponse,
 } from '../types/graph'
 
 /**
@@ -135,6 +137,18 @@ export async function evaluateDialogueQuality(
     `/api/v1/unity-dialogues/graph/evaluate-dialogue-quality`,
     request,
     { timeout: 120000 }
+  )
+  return response.data
+}
+
+/**
+ * Détecte les motifs « AI slop » (GPT-isms, répétitions, génériques) — FR43.
+ */
+export async function detectAiSlop(request: DetectAiSlopRequest): Promise<DetectAiSlopResponse> {
+  const response = await apiClient.post<DetectAiSlopResponse>(
+    `/api/v1/unity-dialogues/graph/detect-ai-slop`,
+    request,
+    { timeout: 60000 }
   )
   return response.data
 }

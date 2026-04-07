@@ -21,6 +21,8 @@ function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGra
     setShowValidationPanel: () => {},
     showQualityLlmPanel: false,
     setShowQualityLlmPanel: () => {},
+    showAiSlopPanel: false,
+    setShowAiSlopPanel: () => {},
     showCostBreakdown: false,
     setShowCostBreakdown: () => {},
     showShortcutsTooltip: false,

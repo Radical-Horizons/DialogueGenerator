@@ -1,7 +1,8 @@
 """Schémas Pydantic pour l'API de gestion de graphes."""
+import re
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Literal
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class LoadGraphRequest(BaseModel):
@@ -315,3 +316,83 @@ class NodePromptResponse(BaseModel):
     timestamp: Optional[datetime] = Field(None, description="Horodatage de la génération (si stocké)")
     is_historical: bool = Field(..., description="True si prompt stocké à l'époque, False si reconstruit")
     message: Optional[str] = Field(None, description="Message informatif (ex: prompt reconstruit, contexte modifié)")
+
+
+class AiSlopDetectionOptions(BaseModel):
+    """Options de détection AI slop (FR43) — corps optionnel de la requête."""
+
+    include_gpt_isms: bool = Field(True, description="Activer la détection de formulations type GPT-ism")
+    include_repetitions: bool = Field(True, description="Activer la détection de répétitions textuelles")
+    include_generic_phrases: bool = Field(True, description="Activer les phrases génériques du catalogue")
+    custom_keywords: List[str] = Field(default_factory=list, description="Mots ou sous-chaînes supplémentaires")
+    custom_regex_patterns: List[str] = Field(
+        default_factory=list,
+        description="Motifs regex Python (IGNORECASE appliqué côté service)",
+    )
+
+    @field_validator("custom_regex_patterns", mode="after")
+    @classmethod
+    def validate_regex_patterns(cls, patterns: List[str]) -> List[str]:
+        """Valide la syntaxe des regex avant exécution."""
+        for p in patterns:
+            if not str(p).strip():
+                continue
+            try:
+                re.compile(str(p))
+            except re.error as exc:
+                raise ValueError(f"Regex invalide : {p!r} ({exc})") from exc
+        return patterns
+
+
+class DetectAiSlopRequest(BaseModel):
+    """Requête détection « AI slop » — même charge utile que validate (nodes + edges)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
+    options: Optional[AiSlopDetectionOptions] = Field(
+        None,
+        description="Options de détection (familles, motifs personnalisés)",
+    )
+
+
+class AiSlopOccurrenceItem(BaseModel):
+    """Une occurrence détectée (avertissement non bloquant)."""
+
+    kind: Literal["gpt_ism", "repetition", "generic_phrase"] = Field(
+        ...,
+        description="Famille : gpt_ism, repetition ou generic_phrase",
+    )
+    node_id: str = Field(..., description="ID ReactFlow du nœud")
+    node_display_id: Optional[str] = Field(None, description="stableId / id document affichable")
+    field: str = Field(..., description="Champ source (line, choice_N, …)")
+    excerpt: str = Field(..., description="Texte du segment (tronqué pour l’UI)")
+    matched_span: str = Field(..., description="Portion correspondant au motif")
+    suggestion: str = Field(..., description="Piste de remplacement heuristique")
+    severity: Literal["warning"] = Field("warning", description="Sévérité (toujours warning pour FR43)")
+
+
+class AiSlopRepetitionGroup(BaseModel):
+    """Groupe de répétitions d’une même phrase normalisée."""
+
+    normalized_phrase: str = Field(..., description="Phrase normalisée (casse / espaces)")
+    occurrence_count: int = Field(..., description="Nombre d’occurrences du segment")
+    node_ids: List[str] = Field(..., description="Nœuds distincts concernés")
+    sample_excerpt: str = Field(..., description="Exemple de texte brut")
+
+
+class DetectAiSlopResponse(BaseModel):
+    """Réponse détection AI slop."""
+
+    summary_gpt_isms: str = Field(..., description="Résumé lisible pour GPT-isms")
+    summary_repetitions: str = Field(..., description="Résumé lisible pour répétitions")
+    summary_generic_phrases: str = Field(..., description="Résumé lisible pour phrases génériques")
+    gpt_ism_occurrence_count: int = Field(0, description="Nombre d’occurrences GPT-ism (hors regex seule)")
+    gpt_ism_distinct_node_count: int = Field(0, description="Nombre de nœuds distincts touchés (GPT-ism)")
+    generic_phrase_occurrence_count: int = Field(0, description="Nombre d’occurrences génériques")
+    repetition_group_count: int = Field(0, description="Nombre de phrases répétées (groupes)")
+    occurrences: List[AiSlopOccurrenceItem] = Field(default_factory=list)
+    repetition_groups: List[AiSlopRepetitionGroup] = Field(default_factory=list)
+    message: Optional[str] = Field(
+        None,
+        description="Contexte (graphe vide, tout désactivé, etc.) — ne pas confondre avec succès silencieux",
+    )

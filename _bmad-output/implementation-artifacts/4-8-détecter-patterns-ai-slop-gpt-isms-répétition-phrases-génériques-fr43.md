@@ -1,6 +1,6 @@
 # Story 4.8 : détecter-patterns-ai-slop-gpt-isms-répétition-phrases-génériques-fr43
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note : validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
 
@@ -22,20 +22,23 @@ so that **je peux identifier et corriger les dialogues qui sonnent trop artifici
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1** : Service backend + route API « detect slop » sur payload graphe (AC: #1, #2, #3, #4, #6, #7)  
-  - [ ] 🔴 Test échoue : fixture graphe avec **deux nœuds** contenant la **même ligne** → réponse contient au moins une entrée **répétition** ; graphe avec chaîne **GPT-ism** connue → entrée **gpt_ism** ; appel avec **nodes vides** → comportement documenté (0 occurrence ou erreur explicite, mais **pas** 500 silencieux).  
-  - [ ] 🟢 Implémenter **`AISlopDetector`** (ou nom aligné dépôt) dans **`services/`** avec API **mince** dans **`api/routers/`** — **même convention que** `POST /api/v1/unity-dialogues/graph/validate` : corps **`nodes` + `edges`** (et optionnellement **options** de détection), **pas** de dépendance à `/dialogues/{id}` si le produit travaille en **document + graphe** ([Source: `_bmad-output/project-context.md`]). Schémas Pydantic + types **`frontend/src/types/api.ts`**.  
-  - [ ] 🔵 Refactor : séparer **catalogue de patterns** par défaut (constantes / petit module data) de la **logique de scan** ; éviter un router > 300 lignes — extraire construction de réponse si besoin.
+- [x] **Task 1** : Service backend + route API « detect slop » sur payload graphe (AC: #1, #2, #3, #4, #6, #7)  
+  - [x] 🔴 Test échoue : fixture graphe avec **deux nœuds** contenant la **même ligne** → réponse contient au moins une entrée **répétition** ; graphe avec chaîne **GPT-ism** connue → entrée **gpt_ism** ; appel avec **nodes vides** → comportement documenté (0 occurrence ou erreur explicite, mais **pas** 500 silencieux).  
+  - [x] 🟢 Implémenter **`AISlopDetector`** (ou nom aligné dépôt) dans **`services/`** avec API **mince** dans **`api/routers/`** — **même convention que** `POST /api/v1/unity-dialogues/graph/validate` : corps **`nodes` + `edges`** (et optionnellement **options** de détection), **pas** de dépendance à `/dialogues/{id}` si le produit travaille en **document + graphe** ([Source: `_bmad-output/project-context.md`]). Schémas Pydantic (`api/schemas/graph.py`) + types **`frontend/src/types/graph.ts`** (alignés Pydantic).  
+  - [x] 🔵 Refactor : séparer **catalogue de patterns** par défaut (constantes / petit module data) de la **logique de scan** ; éviter un router > 300 lignes — extraire construction de réponse si besoin.  
+    - **Fait** : `services/ai_slop_default_catalog.py` + helpers `_ai_slop_options_to_data` / `_detect_ai_slop_response_from_result` dans `api/routers/graph.py`.
 
-- [ ] **Task 2** : Panneau UI « AI slop » dans l’éditeur graphe (liste, résumés, navigation nœud) (AC: #1–#7)  
-  - [ ] 🔴 Test échoue : mock API → clic « Détecter slop » → **loading** puis **résumé** + **au moins une ligne** de détail ; erreur API → message visible.  
-  - [ ] 🟢 Ajouter UI dans **`frontend/src/components/graph/`** (section ou onglet du panneau validation existant pour **ne pas** saturer la colonne — même principe que story 4.7) ; client dans **`frontend/src/api/graph.ts`** (ou fichier voisin) ; **Zustand** / **`graphViewStore`** pour **focus** nœud si pattern déjà utilisé pour lore/orphelins/cycles.  
-  - [ ] 🔵 Refactor : sous-composants **Résumé**, **Liste d’occurrences**, **Paramètres** si le fichier dépasse ~300 lignes ; assertions ESLint propres.
+- [x] **Task 2** : Panneau UI « AI slop » dans l’éditeur graphe (liste, résumés, navigation nœud) (AC: #1–#7)  
+  - [x] 🔴 Test échoue : mock API → clic « Détecter slop » → **loading** puis **résumé** + **au moins une ligne** de détail ; erreur API → message visible.  
+  - [x] 🟢 Ajouter UI dans **`frontend/src/components/graph/`** (section ou onglet du panneau validation existant pour **ne pas** saturer la colonne — même principe que story 4.7) ; client dans **`frontend/src/api/graph.ts`** (ou fichier voisin) ; **Zustand** / **`graphViewStore`** pour **focus** nœud si pattern déjà utilisé pour lore/orphelins/cycles.  
+  - [x] 🔵 Refactor : sous-composants **Résumé**, **Liste d’occurrences**, **Paramètres** si le fichier dépasse ~300 lignes ; assertions ESLint propres.  
+    - **Fait** : `GraphAiSlopPanel.tsx` reste ~288 lignes ; sections structurées sans découpage supplémentaire nécessaire.
 
-- [ ] **Task 3** : Paramètres utilisateur (toggles + patterns custom) et intégration requête (AC: #5, #7)  
-  - [ ] 🔴 Test échoue : désactiver **répétitions** via état → mock reçoit `include_repetitions: false` (ou équivalent) **ou** le client n’affiche pas de section répétitions quand désactivé ; ajout d’un **mot-clé** custom → présent dans le payload ou filtré côté client selon design choisi.  
-  - [ ] 🟢 Persistance **session / localStorage** pour toggles et liste custom ; documenter en Dev Notes si **backend** reporté (KISS).  
-  - [ ] 🔵 Refactor : module util **`slopDetectionSettings.ts`** (seuils, clés storage, sérialisation) pour garder le composant lisible et testable.
+- [x] **Task 3** : Paramètres utilisateur (toggles + patterns custom) et intégration requête (AC: #5, #7)  
+  - [x] 🔴 Test échoue : désactiver **répétitions** via état → mock reçoit `include_repetitions: false` (ou équivalent) **ou** le client n’affiche pas de section répétitions quand désactivé ; ajout d’un **mot-clé** custom → présent dans le payload ou filtré côté client selon design choisi.  
+  - [x] 🟢 Persistance **session / localStorage** pour toggles et liste custom ; documenter en Dev Notes si **backend** reporté (KISS).  
+  - [x] 🔵 Refactor : module util **`slopDetectionSettings.ts`** (seuils, clés storage, sérialisation) pour garder le composant lisible et testable.  
+    - **Fait** : `frontend/src/utils/slopDetectionSettings.ts` + tests `slopDetectionSettings.test.ts`.
 
 ## Dev Notes
 
@@ -45,6 +48,8 @@ so that **je peux identifier et corriger les dialogues qui sonnent trop artifici
 - **Performance** : scan **textuel** sur liste de nœuds — viser **< 200 ms** sur graphes typiques pour la partie locale (hors LLM) ; pas d’appel LLM requis pour FR43 (heuristiques / regex).
 - **Données tests** : jamais de texte dépendant du GDD réel ; phrases inventées courtes.
 - **Epic** mentionne `POST /api/v1/dialogues/{id}/detect-slop` — **ajuster** au contrat réel du repo (**unity-dialogues/graph/...** + body) et le noter comme **écart documenté** pour éviter que le dev cherche un endpoint inexistant.
+
+**MVP (AC #5)** : persistance **client-only** `localStorage` (`dialogueGenerator.aiSlopDetection.v1`) ; options envoyées dans le corps `POST /api/v1/unity-dialogues/graph/detect-ai-slop`. Pas de persistance serveur dans cette story.
 
 ### Project Structure Notes
 
@@ -99,15 +104,51 @@ so that **je peux identifier et corriger les dialogues qui sonnent trop artifici
 
 ### Agent Model Used
 
-_(à compléter par l’agent dev)_
+Composer (implémentation agent Cursor)
 
 ### Debug Log References
 
 ### Completion Notes List
 
+- **Code review (2026-04-07)** : revue adversariale — AC couverts ; pytest/Vitest/lint OK ; correction doc story (référence `api.ts` → types dans `graph.ts` uniquement). Finding LOW : pas d’index caractère `start`/`end` dans la réponse (champ `field` + `matched_span` / extrait suffisent pour l’UI actuelle).
+- Implémenté `POST /api/v1/unity-dialogues/graph/detect-ai-slop` avec `AISlopDetector` (répétitions par phrase normalisée, GPT-isms + génériques + mots-clés / regex custom).
+- UI : panneau **AI slop** (toolbar), état local séparé du juge LLM ; navigation via `jumpToNode`.
+- Persistance options : `localStorage` + `slopDetectionSettings.ts`.
+- Tests : `tests/services/test_ai_slop_detector.py`, `tests/api/test_graph_detect_ai_slop.py`, `GraphAiSlopPanel.test.tsx`, `slopDetectionSettings.test.ts`.
+
+**🔵 Refactor Task 1** : catalogue `DEFAULT_GPT_ISMS` / `DEFAULT_GENERIC_PHRASES` extrait dans `services/ai_slop_default_catalog.py` — avant : inline dans `ai_slop_detector.py` → après : import dédié.
+
+**🔵 Refactor Task 2** : panneau structuré en sections (paramètres / résumé / liste) sans fichier > 300 lignes.
+
+**🔵 Refactor Task 3** : `slopDetectionSettings.ts` centralise `SLOP_DETECTION_STORAGE_KEY`, load/save, `parseKeywordLine`.
+
 ### File List
+
+- `services/ai_slop_default_catalog.py`
+- `services/ai_slop_detector.py`
+- `api/schemas/graph.py`
+- `api/routers/graph.py`
+- `tests/services/test_ai_slop_detector.py`
+- `tests/api/test_graph_detect_ai_slop.py`
+- `frontend/src/types/graph.ts`
+- `frontend/src/api/graph.ts`
+- `frontend/src/utils/slopDetectionSettings.ts`
+- `frontend/src/utils/slopDetectionSettings.test.ts`
+- `frontend/src/components/graph/GraphAiSlopPanel.tsx`
+- `frontend/src/components/graph/GraphAiSlopPanel.test.tsx`
+- `frontend/src/hooks/useGraphToolbar.ts`
+- `frontend/src/components/graph/GraphEditorHeader.tsx`
+- `frontend/src/components/graph/GraphEditor.tsx`
+- `frontend/src/__tests__/GraphEditorHeader.undoRedo.test.tsx`
+- `frontend/src/__tests__/GraphEditor.loreValidationPanel.test.tsx`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+## Change Log
+
+- 2026-04-07 : Code-review — statut `done`, sprint `4-8` synchronisé ; correction doc (types FR43 dans `graph.ts` seulement).
+- 2026-04-07 : Story 4.8 — API `detect-ai-slop`, service déterministe, panneau UI + paramètres localStorage, tests pytest/Vitest, lint OK.
 
 ## Story completion status
 
-**Statut :** ready-for-dev  
-**Note :** Ultimate context engine analysis completed — comprehensive developer guide created (workflow create-story, mode auto).
+**Statut :** done  
+**Note :** Code-review workflow terminé ; sprint synchronisé.
