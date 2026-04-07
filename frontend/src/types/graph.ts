@@ -325,3 +325,39 @@ export interface DetectAiSlopResponse {
   repetition_groups: AiSlopRepetitionGroup[]
   message?: string | null
 }
+
+/** Options détection context dropping (FR44) — extension 4.10. */
+export interface DetectContextDroppingOptionsState {
+  rules_profile?: 'strict' | 'light'
+  /** Réservé 4.10 */
+  tolerance?: number
+}
+
+export type ContextDroppingCaseKind = 'context_dropping' | 'too_subtle'
+
+export interface ContextDroppingCaseItem {
+  kind: ContextDroppingCaseKind
+  node_id?: string | null
+  node_display_id?: string | null
+  context_label: string
+  message: string
+  suggestion: string
+  severity: 'warning' | 'info'
+}
+
+export interface DetectContextDroppingRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+  context_selections: Record<string, unknown>
+  scene_instruction?: string
+  context_text?: string | null
+  options?: DetectContextDroppingOptionsState
+}
+
+export interface DetectContextDroppingResponse {
+  summary: string
+  case_count: number
+  cases: ContextDroppingCaseItem[]
+  message?: string | null
+  rules_profile_effective: string
+}

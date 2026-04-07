@@ -30,6 +30,9 @@ from api.schemas.graph import (
     AiSlopOccurrenceItem,
     AiSlopRepetitionGroup,
     AiSlopDetectionOptions,
+    DetectContextDroppingRequest,
+    DetectContextDroppingResponse,
+    DetectContextDroppingOptions,
     ValidateLoreExplicitRequest,
     ValidateLoreExplicitResponse,
     ValidationErrorDetail,
@@ -64,6 +67,11 @@ from services.unity_dialogue_export_service import (
 )
 from services.graph_validation_service import GraphValidationService
 from services.ai_slop_detector import AISlopDetector, AiSlopDetectionOptionsData, AiSlopDetectionResult
+from services.context_dropping_detector import (
+    ContextDroppingDetector,
+    ContextDroppingOptionsData,
+)
+from api.utils.context_dropping_response import build_detect_context_dropping_response
 from services.lore_contradiction_validator import (
     LoreGddFact,
     merge_lore_facts_with_context_builder,
@@ -96,6 +104,18 @@ def _ai_slop_options_to_data(
         custom_keywords=list(options.custom_keywords),
         custom_regex_patterns=list(options.custom_regex_patterns),
     )
+
+
+def _context_dropping_options_to_data(
+    options: Optional[DetectContextDroppingOptions],
+) -> ContextDroppingOptionsData:
+    """Mappe le schéma API vers les options du service (4.10 : tolérance réservée)."""
+    if options is None:
+        return ContextDroppingOptionsData()
+    profile = options.rules_profile or "strict"
+    if profile not in ("strict", "light"):
+        profile = "strict"
+    return ContextDroppingOptionsData(rules_profile=profile, tolerance=options.tolerance)
 
 
 def _detect_ai_slop_response_from_result(raw: AiSlopDetectionResult) -> DetectAiSlopResponse:
@@ -839,6 +859,42 @@ async def detect_ai_slop(
         )
         raise InternalServerException(
             message="Erreur lors de la détection AI slop",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
+
+
+@router.post(
+    "/detect-context-dropping",
+    response_model=DetectContextDroppingResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def detect_context_dropping(
+    request_data: DetectContextDroppingRequest,
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> DetectContextDroppingResponse:
+    """Détecte l'absence ou l'usage trop indirect du contexte GDD dans le dialogue (FR44).
+
+    Même famille de charge utile que ``validate-lore-explicit`` : ``nodes``, ``edges``,
+    ``context_selections`` et champs optionnels pour extension 4.10.
+    """
+    try:
+        raw = ContextDroppingDetector.detect(
+            request_data.nodes,
+            request_data.edges,
+            request_data.context_selections,
+            scene_instruction=request_data.scene_instruction,
+            context_text=request_data.context_text,
+            options=_context_dropping_options_to_data(request_data.options),
+        )
+        return build_detect_context_dropping_response(raw)
+    except Exception as e:
+        logger.exception(
+            "Erreur lors de la détection context dropping (request_id: %s)",
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la détection context dropping",
             details={"error": str(e)},
             request_id=request_id,
         ) from e

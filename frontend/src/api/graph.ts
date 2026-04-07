@@ -25,6 +25,8 @@ import type {
   CalculateLayoutResponse,
   DetectAiSlopRequest,
   DetectAiSlopResponse,
+  DetectContextDroppingRequest,
+  DetectContextDroppingResponse,
 } from '../types/graph'
 
 /**
@@ -147,6 +149,20 @@ export async function evaluateDialogueQuality(
 export async function detectAiSlop(request: DetectAiSlopRequest): Promise<DetectAiSlopResponse> {
   const response = await apiClient.post<DetectAiSlopResponse>(
     `/api/v1/unity-dialogues/graph/detect-ai-slop`,
+    request,
+    { timeout: 60000 }
+  )
+  return response.data
+}
+
+/**
+ * Détecte l'absence ou l'usage trop indirect du contexte GDD (FR44).
+ */
+export async function detectContextDropping(
+  request: DetectContextDroppingRequest
+): Promise<DetectContextDroppingResponse> {
+  const response = await apiClient.post<DetectContextDroppingResponse>(
+    `/api/v1/unity-dialogues/graph/detect-context-dropping`,
     request,
     { timeout: 60000 }
   )

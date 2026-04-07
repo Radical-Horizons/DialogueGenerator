@@ -17,6 +17,7 @@ import { GraphEditorHeader } from './GraphEditorHeader'
 import { GraphValidationPanel } from './GraphValidationPanel'
 import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
+import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
@@ -79,6 +80,7 @@ export function GraphEditor({
     showValidationPanel,
     showQualityLlmPanel,
     showAiSlopPanel,
+    showContextDroppingPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showAIGenerationPanel,
@@ -263,6 +265,11 @@ export function GraphEditor({
             )}
             {showAiSlopPanel && (
               <GraphAiSlopPanel onClose={() => toolbar.setShowAiSlopPanel(false)} />
+            )}
+            {showContextDroppingPanel && (
+              <GraphContextDroppingPanel
+                onClose={() => toolbar.setShowContextDroppingPanel(false)}
+              />
             )}
             {showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal

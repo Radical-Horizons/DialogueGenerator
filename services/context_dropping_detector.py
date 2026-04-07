@@ -1,0 +1,203 @@
+"""Détection context dropping : absence ou usage trop faible du contexte dans le dialogue (FR44)."""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple
+
+from services.context_dropping_constants import (
+    GLOBAL_NODE_ID,
+    MIN_WORDS_FOR_SUBTLETY,
+    RulesProfile,
+)
+from services.context_dropping_facts import (
+    ContextKeyPhrase,
+    extract_key_phrases_from_context,
+    significant_words,
+)
+from services.graph_dialogue_text import build_node_id_to_lore_text, iter_dialogue_like_nodes
+from services.graph_validation_service import _node_data, _node_id
+from services.lore_contradiction_validator import normalize_entity_name
+
+CaseKind = Literal["context_dropping", "too_subtle"]
+
+
+@dataclass
+class ContextDroppingCaseInternal:
+    """Occurrence interne avant sérialisation API."""
+
+    kind: CaseKind
+    node_id: Optional[str]
+    node_display_id: Optional[str]
+    context_label: str
+    message: str
+    suggestion: str
+    severity: Literal["warning", "info"]
+
+
+@dataclass
+class ContextDroppingOptionsData:
+    """Options alignées sur le schéma HTTP (4.10 : champs ignorés ou partiels)."""
+
+    rules_profile: RulesProfile = "strict"
+    tolerance: Optional[float] = None
+
+
+@dataclass
+class ContextDroppingDetectionResult:
+    """Résultat du scan."""
+
+    cases: List[ContextDroppingCaseInternal] = field(default_factory=list)
+    message: Optional[str] = None
+    rules_profile_effective: str = "strict"
+    summary: str = ""
+    case_count: int = 0
+
+
+def _display_id_for_node(node: Dict[str, Any]) -> str:
+    data = _node_data(node)
+    nid = _node_id(node) or ""
+    sid = data.get("stableId")
+    if isinstance(sid, str) and sid.strip():
+        return sid.strip()
+    doc_id = data.get("id")
+    if isinstance(doc_id, str) and doc_id.strip():
+        return doc_id.strip()
+    return nid
+
+
+def _combined_graph_text(node_text_map: Dict[str, str]) -> str:
+    return "\n".join(node_text_map.values())
+
+
+def _word_in_text(word: str, haystack: str) -> bool:
+    return re.search(rf"(?<!\w){re.escape(word)}(?!\w)", haystack) is not None
+
+
+def _classify_phrase(
+    phrase: ContextKeyPhrase,
+    combined_norm: str,
+) -> Tuple[Optional[CaseKind], Optional[str]]:
+    """Retourne (kind, suggestion) ou (None, None) si la mention est jugée utilisée."""
+    full = phrase.normalized
+    if not full:
+        return None, None
+    # Même normalisation accent-insensible que pour les faits lore (évite faux « subtil »).
+    if full in combined_norm:
+        return None, None
+
+    words = significant_words(full)
+    if len(words) >= MIN_WORDS_FOR_SUBTLETY:
+        hits = sum(1 for w in words if _word_in_text(w, combined_norm))
+        if 0 < hits < len(words):
+            return (
+                "too_subtle",
+                (
+                    f"Renforcez l'explicitation : la mention « {phrase.label} » du contexte "
+                    f"n'est reflétée que partiellement dans le dialogue (signal trop indirect pour le MVP)."
+                ),
+            )
+        if hits == 0:
+            return (
+                "context_dropping",
+                (
+                    f"Context dropping : « {phrase.label} » (contexte) n'apparaît pas de façon "
+                    f"détectable dans les lignes et choix analysés."
+                ),
+            )
+        return None, None
+
+    # Mot unique ou deux mots courts : absence stricte
+    return (
+        "context_dropping",
+        (
+            f"Context dropping : « {phrase.label} » du contexte n'est pas utilisé dans le dialogue "
+            f"avec un signal détectable."
+        ),
+    )
+
+
+class ContextDroppingDetector:
+    """Compare des mentions clés du contexte au texte des nœuds dialogue."""
+
+    @classmethod
+    def detect(
+        cls,
+        nodes: Sequence[Dict[str, Any]],
+        _edges: Sequence[Dict[str, Any]],
+        context_selections: Optional[Dict[str, Any]],
+        scene_instruction: str = "",
+        context_text: Optional[str] = None,
+        options: Optional[ContextDroppingOptionsData] = None,
+    ) -> ContextDroppingDetectionResult:
+        """Analyse le graphe ; ``edges`` réservé pour cohérence d'API avec les autres détecteurs."""
+        opts = options or ContextDroppingOptionsData()
+        profile: RulesProfile = opts.rules_profile if opts.rules_profile in ("strict", "light") else "strict"
+        result = ContextDroppingDetectionResult(rules_profile_effective=profile)
+
+        if not nodes:
+            result.message = "Aucun nœud à analyser : graphe vide."
+            result.summary = "0 cas de context dropping détectés"
+            result.case_count = 0
+            return result
+
+        phrases = extract_key_phrases_from_context(
+            context_selections,
+            scene_instruction=scene_instruction,
+            context_text=context_text,
+            rules_profile=profile,
+        )
+        if not phrases:
+            result.message = (
+                "Aucune information clé exploitable dans le contexte "
+                "(sélections vides, texte absent ou trop court). "
+                "Ajoutez des entités en contexte ou un texte de contexte."
+            )
+            result.summary = "0 cas de context dropping détectés"
+            result.case_count = 0
+            return result
+
+        node_text_map = build_node_id_to_lore_text(list(nodes))
+        if not node_text_map:
+            result.message = (
+                "Aucun texte de dialogue ou de choix exploitable dans les nœuds "
+                "(graphe sans contenu textuel)."
+            )
+            result.summary = "0 cas de context dropping détectés"
+            result.case_count = 0
+            return result
+
+        combined_lower = _combined_graph_text(node_text_map)
+        combined_norm = normalize_entity_name(combined_lower)
+        dialogue_nodes = iter_dialogue_like_nodes(list(nodes))
+        first_id = _node_id(dialogue_nodes[0]) if dialogue_nodes else None
+        first_disp = _display_id_for_node(dialogue_nodes[0]) if dialogue_nodes else None
+
+        for phrase in phrases:
+            kind, user_hint = _classify_phrase(phrase, combined_norm)
+            if kind is None:
+                continue
+            assert user_hint is not None
+            sev: Literal["warning", "info"] = "warning" if kind == "context_dropping" else "info"
+            msg = user_hint if kind == "context_dropping" else f"Subtilité : {user_hint}"
+            result.cases.append(
+                ContextDroppingCaseInternal(
+                    kind=kind,
+                    node_id=first_id or GLOBAL_NODE_ID,
+                    node_display_id=first_disp,
+                    context_label=phrase.label[:300],
+                    message=msg,
+                    suggestion=user_hint,
+                    severity=sev,
+                )
+            )
+
+        n = len(result.cases)
+        result.case_count = n
+        result.summary = f"{n} cas de context dropping détectés" if n else "0 cas de context dropping détectés"
+        if n == 0:
+            result.message = (
+                "Les informations clés du contexte sont présentes dans le dialogue "
+                "(heuristique MVP ; faux négatifs possibles)."
+            )
+        return result

@@ -110,6 +110,8 @@ export function GraphEditorHeader({
     setShowQualityLlmPanel,
     showAiSlopPanel,
     setShowAiSlopPanel,
+    showContextDroppingPanel,
+    setShowContextDroppingPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -899,6 +901,31 @@ export function GraphEditorHeader({
           title="Détecter les formulations type GPT-ism, répétitions et phrases génériques (FR43)"
         >
           🤖 AI slop
+        </button>
+        <button
+          type="button"
+          data-testid="btn-context-dropping-panel"
+          onClick={() => setShowContextDroppingPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showContextDroppingPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showContextDroppingPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showContextDroppingPanel
+              ? theme.button.primary.color
+              : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Détecter si le contexte GDD sélectionné est absent ou trop indirect dans le dialogue (FR44)"
+        >
+          📎 Contexte
         </button>
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}

@@ -396,3 +396,75 @@ class DetectAiSlopResponse(BaseModel):
         None,
         description="Contexte (graphe vide, tout désactivé, etc.) — ne pas confondre avec succès silencieux",
     )
+
+
+class DetectContextDroppingOptions(BaseModel):
+    """Options détection context dropping (FR44) — extension Story 4.10 (profil / tolérance)."""
+
+    rules_profile: Optional[Literal["strict", "light"]] = Field(
+        None,
+        description="Profil par défaut côté serveur si absent : strict. Story 4.10 pourra affiner.",
+    )
+    tolerance: Optional[float] = Field(
+        None,
+        ge=0.0,
+        le=1.0,
+        description="Réservé 4.10 — seuil souple ; ignoré pour le MVP si non implémenté.",
+    )
+
+
+class DetectContextDroppingRequest(BaseModel):
+    """Requête détection context dropping — alignée validate-lore-explicit + graphe."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
+    context_selections: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Sélections contexte GDD (même famille que validate_graph / génération)",
+    )
+    scene_instruction: str = Field(
+        default="",
+        description="Consigne de scène optionnelle (lignes analysées comme faits candidats)",
+    )
+    context_text: Optional[str] = Field(
+        None,
+        description="Texte libre optionnel (tests ou client) complémentaire aux sélections",
+    )
+    options: Optional[DetectContextDroppingOptions] = Field(
+        None,
+        description="Profil strict/léger ; champs futurs sans casser les clients",
+    )
+
+
+class ContextDroppingCaseItem(BaseModel):
+    """Un cas détecté (absence ou usage trop indirect)."""
+
+    kind: Literal["context_dropping", "too_subtle"] = Field(
+        ...,
+        description="Absence détectable ou signal trop faible (subtilité)",
+    )
+    node_id: Optional[str] = Field(
+        None,
+        description="Nœud cible pour focus (premier dialogue) ou portée globale",
+    )
+    node_display_id: Optional[str] = Field(None, description="stableId / id document affichable")
+    context_label: str = Field(..., description="Fragment du contexte concerné")
+    message: str = Field(..., description="Message actionnable affiché")
+    suggestion: str = Field(..., description="Piste pour renforcer l'explicitation")
+    severity: Literal["warning", "info"] = Field(..., description="warning = absence ; info = subtilité")
+
+
+class DetectContextDroppingResponse(BaseModel):
+    """Réponse détection context dropping (FR44)."""
+
+    summary: str = Field(..., description="Résumé du type « X cas de context dropping détectés »")
+    case_count: int = Field(..., description="Nombre d'entrées dans cases (cohérent avec summary)")
+    cases: List[ContextDroppingCaseItem] = Field(default_factory=list)
+    message: Optional[str] = Field(
+        None,
+        description="Contexte (graphe vide, contexte vide, RAS heuristique) — explicite pour ne pas confondre avec succès silencieux",
+    )
+    rules_profile_effective: str = Field(
+        ...,
+        description="Profil réellement appliqué (strict ou light)",
+    )
