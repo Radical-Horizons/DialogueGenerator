@@ -39,6 +39,12 @@ import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
 import { getChoiceIndexFromSourceHandle } from '../../utils/choiceHandleIndex'
+import { clampContextMenuToViewport } from '../../utils/contextMenuPlacement'
+import {
+  useCoarsePointerMatch,
+  useGraphContextMenuLongPress,
+} from '../../hooks/useGraphContextMenuLongPress'
+import { GRAPH_VIEWPORT_INTERACTION_OPTIONS } from './graphViewportInteraction'
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
 const GraphCanvasInner = memo(function GraphCanvasInner() {
@@ -204,6 +210,8 @@ export const GraphCanvas = memo(function GraphCanvas() {
   const toast = useToast()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
+  const suppressNextPaneClickRef = useRef(false)
+  const coarsePointer = useCoarsePointerMatch()
 
   const [dropChoiceMenu, setDropChoiceMenu] = useState<{
     sourceNodeId: string
@@ -335,31 +343,45 @@ export const GraphCanvas = memo(function GraphCanvas() {
     [generateFromNode, setSelectedNode, toast]
   )
 
-  const openContextMenu = (nodeId: string, clientX: number, clientY: number) => {
-    const menuWidth = 200
-    const menuHeight = 220
-    const padding = 8
-    let left = clientX + padding
-    let top = clientY + padding
-    if (left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - padding
-    if (top + menuHeight > window.innerHeight) top = window.innerHeight - menuHeight - padding
-    if (left < padding) left = padding
-    if (top < padding) top = padding
+  const openContextMenuAt = useCallback((nodeId: string, clientX: number, clientY: number) => {
+    const { left, top } = clampContextMenuToViewport(clientX, clientY, 200, 220)
     setPaneMenu(null)
     setMenu({ id: nodeId, top, left, right: undefined, bottom: undefined })
-  }
+  }, [])
+
+  const openPaneContextMenuAt = useCallback((clientX: number, clientY: number) => {
+    const { left, top } = clampContextMenuToViewport(clientX, clientY, 180, 90)
+    const position = reactFlowInstanceRef.current?.screenToFlowPosition({
+      x: clientX,
+      y: clientY,
+    })
+    setMenu(null)
+    setPaneMenu({ top, left, position })
+  }, [])
+
+  const longPress = useGraphContextMenuLongPress({
+    enabled: coarsePointer,
+    onNodeLongPress: (nodeId, x, y) => {
+      suppressNextPaneClickRef.current = true
+      openContextMenuAt(nodeId, x, y)
+    },
+    onPaneLongPress: (x, y) => {
+      suppressNextPaneClickRef.current = true
+      openPaneContextMenuAt(x, y)
+    },
+  })
 
   const onNodeContextMenu = (event: React.MouseEvent, node: ReactFlowNode) => {
     event.preventDefault()
-    openContextMenu(node.id, event.clientX, event.clientY)
+    openContextMenuAt(node.id, event.clientX, event.clientY)
   }
 
   const contextMenuRequest = useGraphViewStore((s) => s.contextMenuRequest)
   useEffect(() => {
     if (!contextMenuRequest) return
     useGraphViewStore.getState().closeContextMenu()
-    openContextMenu(contextMenuRequest.nodeId, contextMenuRequest.x, contextMenuRequest.y)
-  }, [contextMenuRequest])
+    openContextMenuAt(contextMenuRequest.nodeId, contextMenuRequest.x, contextMenuRequest.y)
+  }, [contextMenuRequest, openContextMenuAt])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -374,42 +396,39 @@ export const GraphCanvas = memo(function GraphCanvas() {
   }, [])
 
   useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
+    const handleDown = (e: MouseEvent | PointerEvent) => {
       if (ref.current && !ref.current.contains(e.target as globalThis.Node)) {
         setMenu(null)
         setPaneMenu(null)
         setDropChoiceMenu(null)
       }
     }
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('mousedown', handleDown)
+    document.addEventListener('pointerdown', handleDown)
+    return () => {
+      document.removeEventListener('mousedown', handleDown)
+      document.removeEventListener('pointerdown', handleDown)
+    }
   }, [])
 
   const onPaneContextMenu = (event: React.MouseEvent) => {
     event.preventDefault()
-    const padding = 8
-    const menuWidth = 180
-    const menuHeight = 90
-    let left = event.clientX + padding
-    let top = event.clientY + padding
-    if (left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - padding
-    if (top + menuHeight > window.innerHeight) top = window.innerHeight - menuHeight - padding
-    if (left < padding) left = padding
-    if (top < padding) top = padding
-    const position = reactFlowInstanceRef.current
-      ? reactFlowInstanceRef.current.screenToFlowPosition({
-          x: event.clientX,
-          y: event.clientY,
-        })
-      : undefined
-    setMenu(null)
-    setPaneMenu({ top, left, position })
+    openPaneContextMenuAt(event.clientX, event.clientY)
   }
 
   const onPaneClick = () => {
+    if (suppressNextPaneClickRef.current) {
+      suppressNextPaneClickRef.current = false
+      return
+    }
     onPaneClickBase()
     setMenu(null)
     setPaneMenu(null)
+  }
+
+  const onNodeDragStartWrapped: typeof onNodeDragStart = (e, node) => {
+    longPress.cancelForViewportInteraction()
+    onNodeDragStart(e, node)
   }
 
   // Dériver nodes du store avec enrichissement (validation, highlight, sélection)
@@ -509,11 +528,16 @@ export const GraphCanvas = memo(function GraphCanvas() {
         edges={edges}
         fitView={false}
         defaultViewport={DEFAULT_VIEWPORT}
-        minZoom={0.1}
-        maxZoom={2}
-        panActivationKeyCode="Space"
+        {...GRAPH_VIEWPORT_INTERACTION_OPTIONS}
         onlyRenderVisibleElements={true}
         onMove={onMove}
+        onMoveStart={() => {
+          longPress.cancelForViewportInteraction()
+        }}
+        onPointerDownCapture={longPress.onPointerDownCapture}
+        onPointerMoveCapture={longPress.onPointerMoveCapture}
+        onPointerUpCapture={longPress.onPointerUpCapture}
+        onPointerCancelCapture={longPress.onPointerCancelCapture}
         onInit={(instance) => {
           reactFlowInstanceRef.current = instance
           useGraphViewStore.getState().registerReactFlowInstance(instance)
@@ -528,7 +552,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         onNodeContextMenu={onNodeContextMenu}
         onPaneContextMenu={onPaneContextMenu}
         onPaneClick={onPaneClick}
-        onNodeDragStart={onNodeDragStart}
+        onNodeDragStart={onNodeDragStartWrapped}
         onNodeDragStop={onNodeDragStop}
         multiSelectionKeyCode="Shift"
         selectionOnDrag

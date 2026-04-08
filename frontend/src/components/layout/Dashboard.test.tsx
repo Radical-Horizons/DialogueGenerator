@@ -344,5 +344,107 @@ describe('Dashboard', () => {
       expect(screen.getByText(/aucun dialogue unity généré/i)).toBeInTheDocument()
     })
   })
+
+  it('active un mode narrow à 320px: panneaux latéraux repliés mais ré-ouvrables', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    // En mode narrow, le contenu du panneau gauche ne doit pas forcer un 3-panneaux compressé
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    // Et des contrôles explicites permettent de ré-ouvrir les panneaux
+    const expandLeft = screen.getByRole('button', { name: /déplier le panneau gauche/i })
+    const expandRight = screen.getByRole('button', { name: /déplier le panneau droit/i })
+    expect(expandLeft).toBeInTheDocument()
+    expect(expandRight).toBeInTheDocument()
+
+    await user.click(expandLeft)
+    expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+  })
+
+  it('active un mode tablette à 768px: panneau gauche replié, panneau droit accessible', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 768 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    // Le panneau droit n’est pas replié par défaut en mode tablette (onglets visibles)
+    expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
+
+    // Contrôle explicite pour ré-ouvrir le panneau gauche
+    expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /déplier le panneau droit/i })).not.toBeInTheDocument()
+  })
+
+  it('mobile 375px: même comportement narrow que 320px (panneaux latéraux repliés)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
+  })
+
+  it('desktop 1024px: panneaux latéraux visibles par défaut (non-régression layout 3 colonnes)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('button', { name: /déplier le panneau gauche/i })).not.toBeInTheDocument()
+  })
+
+  it('mobile: accès à l’onglet Éditeur de Graphe (FR118 zones critiques)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
+    await user.click(graphTab)
+    expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
+  })
 })
 

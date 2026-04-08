@@ -9,6 +9,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { GenerationOptionsModal } from '../generation/GenerationOptionsModal'
 import { theme } from '../../theme'
+import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore()
@@ -35,18 +36,21 @@ export function Header() {
 
   // Fermer les dropdowns quand on clique ailleurs
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (actionsDropdownRef.current && !actionsDropdownRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (event: Event) => {
+      const t = event.target as Node
+      if (actionsDropdownRef.current && !actionsDropdownRef.current.contains(t)) {
         setIsActionsDropdownOpen(false)
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(t)) {
         setIsUserMenuOpen(false)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('pointerdown', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('pointerdown', handleClickOutside)
     }
   }, [])
 
@@ -82,9 +86,14 @@ export function Header() {
       display: 'flex', 
       justifyContent: 'space-between', 
       alignItems: 'center',
+      flexWrap: 'wrap',
+      rowGap: '0.5rem',
       backgroundColor: theme.background.secondary,
       gap: '1rem',
       position: 'relative',
+      minWidth: 0,
+      width: '100%',
+      boxSizing: 'border-box',
     }}>
       {/* Section gauche : Titre */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
@@ -112,7 +121,7 @@ export function Header() {
       
       {/* Section centrale : Barre de recherche */}
       {isAuthenticated && (
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '600px', margin: '0 auto', minWidth: 0 }}>
           <div
             onClick={handleSearchClick}
             style={{
@@ -121,6 +130,8 @@ export function Header() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
+              minHeight: TOUCH_TARGET_MIN_PX,
+              boxSizing: 'border-box',
               padding: '0.5rem 0.75rem',
               backgroundColor: theme.input.background,
               border: `1px solid ${theme.border.primary}`,
@@ -162,7 +173,7 @@ export function Header() {
       )}
       
       {/* Section droite : Options, Actions, Utilisateur */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
         {isAuthenticated && user && actions.handleGenerate && (
           <>
             {/* Bouton Options */}
@@ -180,6 +191,9 @@ export function Header() {
                 borderRadius: '4px',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                minWidth: TOUCH_TARGET_MIN_PX,
+                minHeight: TOUCH_TARGET_MIN_PX,
+                boxSizing: 'border-box',
               }}
             >
               Options
@@ -210,6 +224,9 @@ export function Header() {
                   alignItems: 'center',
                   gap: '0.25rem',
                   whiteSpace: 'nowrap',
+                  minWidth: TOUCH_TARGET_MIN_PX,
+                  minHeight: TOUCH_TARGET_MIN_PX,
+                  boxSizing: 'border-box',
                 }}
               >
                 Actions
@@ -316,8 +333,8 @@ export function Header() {
               aria-expanded={isUserMenuOpen}
               aria-haspopup="menu"
               style={{
-                width: '36px',
-                height: '36px',
+                width: TOUCH_TARGET_MIN_PX,
+                height: TOUCH_TARGET_MIN_PX,
                 borderRadius: '50%',
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
