@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useShellKeyboardFocusScroller } from '../../hooks/useShellKeyboardFocusScroller'
 import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
@@ -42,8 +44,21 @@ const mockUseGenerationStore = vi.mocked(useGenerationStore)
 const mockUseGenerationActionsStore = vi.mocked(useGenerationActionsStore)
 const mockUseContextStore = vi.mocked(useContextStore)
 
+/** Même listener que `MainLayout` (tests sans layout parent). */
+function TestShellKeyboardFocus({ children }: { children: ReactNode }) {
+  useShellKeyboardFocusScroller(true)
+  return <>{children}</>
+}
+
 describe('Dashboard', () => {
   let Dashboard: typeof import('./Dashboard').Dashboard
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'visualViewport')
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: 768 })
+    window.dispatchEvent(new Event('resize'))
+  })
 
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -606,6 +621,194 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
     expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('17.4 narrow: inset bas via visualViewport sur le drawer détails', async () => {
+    const user = userEvent.setup()
+    const listeners = { resize: new Set<EventListener>() }
+    const vv = {
+      height: 400,
+      offsetTop: 0,
+      width: 375,
+      addEventListener: vi.fn((ev: string, fn: EventListener) => {
+        if (ev === 'resize') listeners.resize.add(fn)
+      }),
+      removeEventListener: vi.fn(),
+    }
+    Object.defineProperty(window, 'visualViewport', { value: vv, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate: vi.fn(),
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+    await waitFor(() => {
+      expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
+    })
+
+    const slot = screen.getByTestId('narrow-drawer-scroll-slot')
+    await waitFor(() => {
+      expect(slot).toHaveStyle({ paddingBottom: '400px' })
+    })
+  })
+
+  it('17.4 narrow: focus champ dans drawer détails appelle scrollIntoView', async () => {
+    const user = userEvent.setup()
+    const scrollIntoViewMock = vi.fn()
+    const desc = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
+    try {
+      Object.defineProperty(Element.prototype, 'scrollIntoView', {
+        configurable: true,
+        writable: true,
+        value: scrollIntoViewMock,
+      })
+
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+      Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: 800 })
+      window.dispatchEvent(new Event('resize'))
+
+      mockUseGenerationStore.mockReturnValue({
+        rawPrompt: 'contenu prompt test',
+        tokenCount: 5,
+        promptHash: 'x',
+        isEstimating: false,
+        unityDialogueResponse: null,
+        sceneSelection: {
+          characterA: null,
+          characterB: null,
+          sceneRegion: null,
+          subLocation: null,
+        },
+        dialogueStructure: ['', '', '', '', '', ''] as [string, string, string, string, string, string],
+        systemPromptOverride: null,
+        setDialogueStructure: vi.fn(),
+        setSystemPromptOverride: vi.fn(),
+        setRawPrompt: vi.fn(),
+        setSceneSelection: vi.fn(),
+        setUnityDialogueResponse: vi.fn(),
+        tokensUsed: null,
+        setTokensUsed: vi.fn(),
+        clearGenerationResults: vi.fn(),
+      } as ReturnType<typeof useGenerationStore>)
+
+      mockUseGenerationActionsStore.mockReturnValue({
+        actions: {
+          handleGenerate: vi.fn(),
+          handlePreview: vi.fn(),
+          handleExportUnity: vi.fn(),
+          handleReset: vi.fn(),
+          isLoading: false,
+          isDirty: false,
+          saveStatus: 'saved',
+          draftLastSavedAt: null,
+        },
+      } as ReturnType<typeof useGenerationActionsStore>)
+
+      render(
+        <BrowserRouter>
+          <TestShellKeyboardFocus>
+            <Dashboard />
+          </TestShellKeyboardFocus>
+        </BrowserRouter>
+      )
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+      await waitFor(() => {
+        expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
+      })
+
+      const promptTab = screen.getByRole('button', { name: /^prompt$/i })
+      await user.click(promptTab)
+
+      const checkbox = await screen.findByRole('checkbox')
+      expect(checkbox).toBeTruthy()
+      checkbox.focus()
+      expect(scrollIntoViewMock).toHaveBeenCalled()
+    } finally {
+      if (desc) {
+        Object.defineProperty(Element.prototype, 'scrollIntoView', desc)
+      } else {
+        Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+      }
+    }
+  })
+
+  it('17.4 narrow: CTA Générer dans le drawer avec zone paddée (inset clavier)', async () => {
+    const user = userEvent.setup()
+    const listeners = { resize: new Set<EventListener>() }
+    const vv = {
+      height: 400,
+      offsetTop: 0,
+      width: 375,
+      addEventListener: vi.fn((ev: string, fn: EventListener) => {
+        if (ev === 'resize') listeners.resize.add(fn)
+      }),
+      removeEventListener: vi.fn(),
+    }
+    Object.defineProperty(window, 'visualViewport', { value: vv, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate: vi.fn(),
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <TestShellKeyboardFocus>
+          <Dashboard />
+        </TestShellKeyboardFocus>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+    const slot = await screen.findByTestId('narrow-drawer-scroll-slot')
+    await waitFor(() => {
+      expect(slot).toHaveStyle({ paddingBottom: '400px' })
+    })
+
+    const gen = within(slot).getByRole('button', { name: /générer/i })
+    expect(gen).toBeEnabled()
   })
 })
 

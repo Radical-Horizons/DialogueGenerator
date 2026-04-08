@@ -13,6 +13,8 @@ import { useGenerationActionsStore } from '../../store/generationActionsStore'
 export interface CommandPaletteProps {
   isOpen: boolean
   onClose: () => void
+  /** Espace au-dessus du clavier logiciel (visual viewport), story 17.4 */
+  keyboardBottomInsetPx?: number
 }
 
 const CATEGORY_LABELS: Record<CommandPaletteItem['category'], string> = {
@@ -24,7 +26,7 @@ const CATEGORY_LABELS: Record<CommandPaletteItem['category'], string> = {
   navigation: 'Navigation',
 }
 
-export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
+export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: CommandPaletteProps) {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(0)
@@ -242,7 +244,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     if (listRef.current && filteredItems.length > 0) {
       const itemElement = listRef.current.querySelector(`[data-item-index="${highlightedIndex}"]`)
       if (itemElement) {
-        itemElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+        itemElement.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' })
       }
     }
   }, [highlightedIndex, filteredItems.length])
@@ -267,10 +269,12 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       onClick={onClose}
     >
       <div
+        data-shell-keyboard-zone="true"
         style={{
           backgroundColor: theme.background.panel,
           borderRadius: '8px',
           padding: '1rem',
+          paddingBottom: `calc(1rem + ${keyboardBottomInsetPx}px)`,
           width: '90%',
           maxWidth: '600px',
           maxHeight: '60vh',
@@ -278,6 +282,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
           display: 'flex',
           flexDirection: 'column',
+          boxSizing: 'border-box',
         }}
         onClick={(e) => e.stopPropagation()}
       >

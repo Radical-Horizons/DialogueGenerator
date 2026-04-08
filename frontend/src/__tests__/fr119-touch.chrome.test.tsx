@@ -10,17 +10,22 @@ import { TOUCH_TARGET_MIN_PX } from '../constants'
 import { Header } from '../components/layout/Header'
 import { Tabs } from '../components/shared/Tabs'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
+import { graphToolbarChrome } from '../theme/responsiveChrome'
 import { useGenerationStore } from '../store/generationStore'
 import { useGenerationActionsStore } from '../store/generationActionsStore'
 import { useContextStore } from '../store/contextStore'
 import { useGraphStore } from '../store/graphStore'
 import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
 
-function expectInlineMinTouch(el: HTMLElement, label: string) {
+function expectInlineMinTouchPx(el: HTMLElement, label: string, px: number) {
   const h = el.style.minHeight
   const w = el.style.minWidth
-  expect(h, `${label} minHeight`).toBe(`${TOUCH_TARGET_MIN_PX}px`)
-  expect(w, `${label} minWidth`).toBe(`${TOUCH_TARGET_MIN_PX}px`)
+  expect(h, `${label} minHeight`).toBe(`${px}px`)
+  expect(w, `${label} minWidth`).toBe(`${px}px`)
+}
+
+function expectInlineMinTouch(el: HTMLElement, label: string) {
+  expectInlineMinTouchPx(el, label, TOUCH_TARGET_MIN_PX)
 }
 
 vi.mock('../store/authStore', () => ({
@@ -192,22 +197,24 @@ describe('FR119 touch targets — chrome', () => {
     expectInlineMinTouch(screen.getByRole('button', { name: 'Onglet A' }) as HTMLElement, 'tab A')
   })
 
-  it('GraphEditorHeader : Undo et Actions dropdown min 44px (styles inline)', () => {
+  it('GraphEditorHeader : confortable (large) min 44px', () => {
     const toolbar = makeMockToolbar()
     render(
-      <GraphEditorHeader
-        toolbar={toolbar}
-        isLoadingDialogue={false}
-        hasActiveDialogue={true}
-        activeDialogueTitle="T"
-        activeDialogueFilename="f.json"
-        handleSave={async () => {}}
-        onBatchTagApply={() => {}}
-        handleBatchValidateSelection={() => {}}
-        handleBatchDeleteSelection={() => {}}
-        canEditGraph={true}
-        isStandalone={false}
-      />
+      <div style={{ width: '900px' }}>
+        <GraphEditorHeader
+          toolbar={toolbar}
+          isLoadingDialogue={false}
+          hasActiveDialogue={true}
+          activeDialogueTitle="T"
+          activeDialogueFilename="f.json"
+          handleSave={async () => {}}
+          onBatchTagApply={() => {}}
+          handleBatchValidateSelection={() => {}}
+          handleBatchDeleteSelection={() => {}}
+          canEditGraph={true}
+          isStandalone={false}
+        />
+      </div>
     )
     expectInlineMinTouch(screen.getByTestId('btn-undo'), 'graph toolbar Undo')
     expectInlineMinTouch(screen.getByTestId('btn-actions-dropdown'), 'graph toolbar Actions')
@@ -219,6 +226,46 @@ describe('FR119 touch targets — chrome', () => {
     const shortcutsBtn = screen.getByTitle('Raccourcis du graphe').closest('button') as HTMLElement
     expect(shortcutsBtn.style.minHeight).toBe(`${TOUCH_TARGET_MIN_PX}px`)
     expect(shortcutsBtn.style.minWidth).toBe(`${TOUCH_TARGET_MIN_PX}px`)
+  })
+
+  it('GraphEditorHeader : narrow (écran réduit) cible tactile réduite', () => {
+    const toolbar = makeMockToolbar()
+    render(
+      <div style={{ width: '320px' }}>
+        <GraphEditorHeader
+          toolbar={toolbar}
+          isLoadingDialogue={false}
+          hasActiveDialogue={true}
+          activeDialogueTitle="T"
+          activeDialogueFilename="f.json"
+          handleSave={async () => {}}
+          onBatchTagApply={() => {}}
+          handleBatchValidateSelection={() => {}}
+          handleBatchDeleteSelection={() => {}}
+          canEditGraph={true}
+          isStandalone={false}
+        />
+      </div>
+    )
+    const narrowMin = graphToolbarChrome.narrow.touchMinPx
+    expectInlineMinTouchPx(screen.getByTestId('btn-undo'), 'graph toolbar Undo (narrow)', narrowMin)
+    expectInlineMinTouchPx(
+      screen.getByTestId('btn-actions-dropdown'),
+      'graph toolbar Actions (narrow)',
+      narrowMin
+    )
+    expectInlineMinTouchPx(
+      screen.getByTestId('btn-search-graph'),
+      'graph toolbar Rechercher (narrow)',
+      narrowMin
+    )
+    const costBtn = screen
+      .getByTitle('Afficher le breakdown des coûts LLM pour ce dialogue')
+      .closest('button') as HTMLElement
+    expectInlineMinTouchPx(costBtn, 'graph toolbar Coûts (narrow)', narrowMin)
+    const shortcutsBtn = screen.getByTitle('Raccourcis du graphe').closest('button') as HTMLElement
+    expect(shortcutsBtn.style.minHeight).toBe(`${narrowMin}px`)
+    expect(shortcutsBtn.style.minWidth).toBe(`${narrowMin}px`)
   })
 
   it('Dashboard mobile : onglet Éditeur de graphe actif (chemin utilisateur FR119)', async () => {

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
+import { shellSafeAreaCssVars } from '../../theme/responsiveChrome'
 
 vi.mock('./Header', () => ({
   Header: () => <div data-testid="header" />,
@@ -32,6 +33,17 @@ describe('MainLayout responsive shell', () => {
 
     expect(document.documentElement.style.overflowX).toBe(prevHtmlOverflowX)
     expect(document.body.style.overflowX).toBe(prevBodyOverflowX)
+  })
+
+  it('17.4 : shell root applique env(safe-area-inset-*) via tokens responsiveChrome', async () => {
+    const { MainLayout } = await import('./MainLayout')
+    const { getByTestId } = render(<MainLayout><div>content</div></MainLayout>)
+    const root = getByTestId('main-layout-root')
+    const inline = root.getAttribute('style') ?? ''
+    expect(inline).toContain(`var(${shellSafeAreaCssVars.top})`)
+    expect(inline).toContain(`var(${shellSafeAreaCssVars.bottom})`)
+    expect(inline).toContain(`var(${shellSafeAreaCssVars.left})`)
+    expect(inline).toContain(`var(${shellSafeAreaCssVars.right})`)
   })
 })
 
