@@ -107,10 +107,10 @@ development_status:
   3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
   3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
   epic-3-retrospective: done
-  epic-17: backlog
-  17-1-shell-responsive-breakpoints-layout-320px-fr118: backlog
-  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: backlog
-  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: backlog
+  epic-17: in-progress
+  17-1-shell-responsive-breakpoints-layout-320px-fr118: done
+  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
+  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: ready-for-dev
   17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: backlog
   17-5-pwa-install-manifest-option-fr121: backlog
   epic-17-retrospective: optional

@@ -31,13 +31,18 @@ export function BatchOperationsMenu({
 
   useEffect(() => {
     if (!tagDropdownOpen) return
-    const handleClickOutside = (e: MouseEvent) => {
-      if (tagDropdownRef.current && !tagDropdownRef.current.contains(e.target as Node)) {
+    const handleDown = (e: Event) => {
+      const t = e.target as Node
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(t)) {
         setTagDropdownOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleDown)
+    document.addEventListener('pointerdown', handleDown)
+    return () => {
+      document.removeEventListener('mousedown', handleDown)
+      document.removeEventListener('pointerdown', handleDown)
+    }
   }, [tagDropdownOpen])
 
   if (selectedNodeIds.length <= 1) return null

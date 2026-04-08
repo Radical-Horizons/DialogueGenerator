@@ -23,6 +23,10 @@ const isCi = process.env.CI === 'true'
 export default defineConfig({
   // @ts-expect-error - Rollup version mismatch between vitest and vite, but works at runtime
   plugins: [react()],
+  /** Aligné sur vite.config (Header affiche la date de build). */
+  define: {
+    __BUILD_DATE__: JSON.stringify('1970-01-01T00:00:00.000Z'),
+  },
   test: {
     environment: 'jsdom',
     globals: true,

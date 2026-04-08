@@ -10,6 +10,7 @@
  */
 import { ReactNode, useState, useEffect } from 'react'
 import { theme } from '../../theme'
+import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 export interface Tab {
   id: string
@@ -102,6 +103,9 @@ export function Tabs({
             style={{
               ...(variant === 'segmented'
                 ? {
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    minWidth: TOUCH_TARGET_MIN_PX,
+                    boxSizing: 'border-box',
                     padding: '0.45rem 0.95rem',
                     borderRadius: '8px',
                     border: 'none',
@@ -118,6 +122,9 @@ export function Tabs({
                     fontWeight: tab.id === activeTabId ? 600 : 500,
                   }
                 : {
+                    minHeight: TOUCH_TARGET_MIN_PX,
+                    minWidth: TOUCH_TARGET_MIN_PX,
+                    boxSizing: 'border-box',
                     padding: '0.75rem 1.5rem',
                     border: 'none',
                     borderBottom:

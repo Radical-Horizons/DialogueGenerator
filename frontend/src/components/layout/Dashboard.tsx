@@ -23,8 +23,10 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGraphStore } from '../../store/graphStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
+import { useViewportMode } from '../../hooks/useViewportMode'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
+import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 
@@ -102,8 +104,10 @@ function PanelCollapseButton({
         display: 'flex',
         alignItems: 'center',
         gap: '0.3rem',
-        padding: '0.2rem 0.45rem',
-        height: 26,
+        padding: '0.35rem 0.5rem',
+        minHeight: TOUCH_TARGET_MIN_PX,
+        minWidth: TOUCH_TARGET_MIN_PX,
+        boxSizing: 'border-box',
         borderRadius: 99,
         border: `1px solid ${borderColor}`,
         backgroundColor: bg,
@@ -174,7 +178,9 @@ function PanelExpandButton({
         top: '50%',
         transform: `translateY(-50%) scale(${scale}) translateX(${translateX}px)`,
         zIndex: 50,
-        width: 22,
+        minWidth: TOUCH_TARGET_MIN_PX,
+        width: TOUCH_TARGET_MIN_PX,
+        minHeight: TOUCH_TARGET_MIN_PX,
         height: 56,
         borderRadius: 11,
         border: `1px solid ${borderColor}`,
@@ -247,6 +253,9 @@ export function Dashboard() {
   const suppressSizesSyncRef = useRef(false)
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false)
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false)
+  const viewportMode = useViewportMode()
+  const lastViewportModeRef = useRef(viewportMode)
+  const didApplyInitialViewportRef = useRef(false)
   
   // Charger la configuration par défaut au démarrage pour initialiser les fieldConfigs
   // Cela garantit que tous les navigateurs ont la même configuration initiale
@@ -510,6 +519,46 @@ export function Dashboard() {
     []
   )
 
+  useEffect(() => {
+    const isInitialApply = !didApplyInitialViewportRef.current
+    if (!isInitialApply && lastViewportModeRef.current === viewportMode) return
+    didApplyInitialViewportRef.current = true
+    lastViewportModeRef.current = viewportMode
+
+    if (!panelsRef.current) return
+
+    // Capture expanded sizes once before forcing a responsive collapse
+    if (viewportMode !== 'desktop' && !expandedSizesRef.current) {
+      expandedSizesRef.current = panelsRef.current.getSizes()
+    }
+
+    if (viewportMode === 'mobile') {
+      setIsLeftPanelCollapsed(true)
+      setIsRightPanelCollapsed(true)
+      applyCollapsedLayout(true, true)
+      return
+    }
+
+    if (viewportMode === 'tablet') {
+      setIsLeftPanelCollapsed(true)
+      setIsRightPanelCollapsed(false)
+      applyCollapsedLayout(true, false)
+      return
+    }
+
+    // desktop: restore (do not persist; storage remains authoritative)
+    setIsLeftPanelCollapsed(false)
+    setIsRightPanelCollapsed(false)
+    const restore = expandedSizesRef.current
+    if (restore && restore.length >= 3) {
+      suppressSizesSyncRef.current = true
+      panelsRef.current.setSizes(restore, { persist: false })
+      setTimeout(() => {
+        suppressSizesSyncRef.current = false
+      }, 0)
+    }
+  }, [viewportMode, applyCollapsedLayout])
+
   const toggleLeftPanel = useCallback(() => {
     const next = !isLeftPanelCollapsed
     if (!expandedSizesRef.current && panelsRef.current) {
@@ -532,10 +581,17 @@ export function Dashboard() {
 
   return (
     <ResizablePanels
+      key={viewportMode}
       ref={panelsRef}
-      storageKey="dashboard_panels"
+      storageKey={viewportMode === 'desktop' ? 'dashboard_panels' : undefined}
       defaultSizes={[20, 50, 30]}
-      minSizes={[200, 400, 250]}
+      minSizes={
+        viewportMode === 'mobile'
+          ? [0, 320, 0]
+          : viewportMode === 'tablet'
+            ? [0, 400, 250]
+            : [200, 400, 250]
+      }
       direction="horizontal"
       style={{
         height: '100%',

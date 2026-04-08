@@ -30,6 +30,11 @@ export const MODEL_NAMES = {
 export const DEFAULT_MODEL = MODEL_NAMES.GPT_5_MINI
 
 /**
+ * Cible tactile minimale (HIG / WCAG 2.5.5) — chrome shell & toolbar graphe (Story 17.2 FR119).
+ */
+export const TOUCH_TARGET_MIN_PX = 44
+
+/**
  * Limites pour les tokens de contexte.
  * 
  * Ces valeurs doivent correspondre à celles définies dans constants.py (Defaults.MAX_CONTEXT_TOKENS, Defaults.MIN_CONTEXT_TOKENS)

@@ -11,6 +11,7 @@ import { useContextStore } from '../../store/contextStore'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
+import { TOUCH_TARGET_MIN_PX } from '../../constants'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import { NODE_DRAG_TOOLTIP } from './nodeDragTooltip'
 import {
@@ -34,6 +35,12 @@ const GRAPH_SHORTCUTS_TOOLTIP_Z = 10050
 
 const GRAPH_SHORTCUTS_TOOLTIP_GAP_PX = 6
 const GRAPH_SHORTCUTS_TOOLTIP_ESTIMATE_WIDTH_PX = 320
+
+const GRAPH_CHROME_TOUCH: React.CSSProperties = {
+  minWidth: TOUCH_TARGET_MIN_PX,
+  minHeight: TOUCH_TARGET_MIN_PX,
+  boxSizing: 'border-box',
+}
 
 interface GraphEditorHeaderProps {
   toolbar: UseGraphToolbarReturn
@@ -282,6 +289,7 @@ export function GraphEditorHeader({
               onClick={() => undo()}
               disabled={!canUndoNow}
               style={{
+                ...GRAPH_CHROME_TOUCH,
                 padding: '0.5rem 0.75rem',
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
@@ -302,6 +310,7 @@ export function GraphEditorHeader({
               onClick={() => redo()}
               disabled={!canRedoNow}
               style={{
+                ...GRAPH_CHROME_TOUCH,
                 padding: '0.5rem 0.75rem',
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
@@ -320,11 +329,12 @@ export function GraphEditorHeader({
         )}
         {/* Badge de santé global du graphe */}
         {(() => {
-          const errors = graphValidationErrors.filter((e) => e.severity === 'error')
+          const graphErrs = graphValidationErrors ?? []
+          const errors = graphErrs.filter((e) => e.severity === 'error')
           const warningSummary = summarizeGraphValidationWarnings(
             nodes,
             edges,
-            graphValidationErrors,
+            graphErrs,
             intentionalCycles
           )
           const warnings = warningSummary.visibleWarnings
@@ -441,6 +451,7 @@ export function GraphEditorHeader({
             onClick={() => canEditGraph && setShowAutoLayoutDropdown((v) => !v)}
             disabled={!canEditGraph}
             style={{
+              ...GRAPH_CHROME_TOUCH,
               padding: '0.5rem 1rem',
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '6px',
@@ -588,6 +599,7 @@ export function GraphEditorHeader({
             onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
             disabled={!canEditGraph}
             style={{
+              ...GRAPH_CHROME_TOUCH,
               padding: '0.5rem 1rem',
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '6px',
@@ -873,6 +885,7 @@ export function GraphEditorHeader({
             </div>
           )}
         </div>
+<<<<<<< HEAD
         {(() => {
           const validationToolsActive =
             showQualityLlmPanel ||
@@ -884,6 +897,13 @@ export function GraphEditorHeader({
           const menuItemStyle = {
             display: 'block',
             width: '100%',
+=======
+        <button
+          onClick={() => setShowCostBreakdown((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            ...GRAPH_CHROME_TOUCH,
+>>>>>>> 4d7f74ea5 (feat: update sprint status and enhance UI responsiveness)
             padding: '0.5rem 1rem',
             border: 'none',
             background: 'transparent',
@@ -1090,6 +1110,7 @@ export function GraphEditorHeader({
           }
           disabled={!hasActiveDialogue}
           style={{
+            ...GRAPH_CHROME_TOUCH,
             padding: '0.5rem 1rem',
             border: `1px solid ${
               showSearchBar ? theme.button.primary.background : theme.border.primary
@@ -1118,8 +1139,9 @@ export function GraphEditorHeader({
             }}
             onMouseLeave={() => scheduleHideShortcutsTooltip()}
             style={{
-              width: 28,
-              height: 28,
+              ...GRAPH_CHROME_TOUCH,
+              width: TOUCH_TARGET_MIN_PX,
+              height: TOUCH_TARGET_MIN_PX,
               padding: 0,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '50%',
