@@ -9,12 +9,12 @@ const __dirname = dirname(__filename)
 
 /**
  * Tests lourds exclus de `npm test` (défaut) pour un retour en minutes, pas en heures.
+ * `Dashboard.test.tsx` est inclus par défaut (régressions layout / responsive / FR120).
  * Suite complète : `npm run test:full` ou CI (VITEST_FULL=1).
  */
 const SLOW_INTEGRATION_TESTS = [
   '**/GraphCanvas.virtualization.test.tsx',
   '**/GenerationPanel.integration.test.tsx',
-  '**/Dashboard.test.tsx',
 ] as const
 
 const runFullSuite = process.env.VITEST_FULL === '1'

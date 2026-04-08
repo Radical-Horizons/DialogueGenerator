@@ -51,10 +51,11 @@ export const UnityDialogueItem = memo(function UnityDialogueItem({
       type="button"
       data-testid="unity-dialogue-item"
       aria-pressed={isSelected}
+      title={titleText}
       onClick={onClick}
       style={{
         width: '100%',
-        padding: '0.75rem',
+        padding: '0.5rem',
         borderBottom: `1px solid ${theme.border.primary}`,
         borderTop: 'none',
         borderLeft: 'none',
@@ -76,31 +77,47 @@ export const UnityDialogueItem = memo(function UnityDialogueItem({
         }
       }}
     >
-      <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>
+      <div
+        data-testid="unity-dialogue-item-title"
+        style={{
+          fontSize: '0.82rem',
+          fontWeight: 600,
+          lineHeight: 1.25,
+          marginBottom: '0.2rem',
+          display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: 2,
+          overflow: 'hidden',
+          wordBreak: 'break-word',
+        }}
+      >
         {highlightText(titleText, searchQuery)}
       </div>
       <div
         style={{
-          fontSize: '0.75rem',
+          fontSize: '0.7rem',
           color: theme.text.tertiary,
-          marginBottom: '0.25rem',
+          marginBottom: '0.2rem',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
       >
         {highlightText(dialogue.filename, searchQuery)}
       </div>
       <div
         style={{
-          fontSize: '0.75rem',
+          fontSize: '0.7rem',
           color: theme.text.tertiary,
           display: 'flex',
-          gap: '0.5rem',
+          flexWrap: 'wrap',
+          gap: '0.35rem',
         }}
       >
         <span>{formatSize(dialogue.size_bytes)}</span>
-        <span>•</span>
+        <span aria-hidden>•</span>
         <span>{formatDate(dialogue.modified_time)}</span>
       </div>
     </button>
   )
 })
-
