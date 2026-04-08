@@ -11,6 +11,11 @@
 import { ReactNode, useState, useEffect } from 'react'
 import { theme } from '../../theme'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import {
+  SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
+  segmentedTabTypography,
+} from '../../theme/responsiveChrome'
 
 export interface Tab {
   id: string
@@ -40,6 +45,24 @@ export interface TabsProps {
   keepAliveTabIds?: string[]
 }
 
+/** Libellé tronqué dans le rail segmenté ; le libellé complet reste sur `title` du bouton parent. */
+function SegmentedTabLabelText({ text }: { text: string }) {
+  return (
+    <span
+      style={{
+        display: 'block',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        minWidth: 0,
+        maxWidth: '100%',
+      }}
+    >
+      {text}
+    </span>
+  )
+}
+
 export function Tabs({
   tabs,
   activeTabId,
@@ -51,6 +74,12 @@ export function Tabs({
 }: TabsProps) {
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
   const keepAliveSet = new Set(keepAliveTabIds ?? [])
+  const { ref: segmentedBarRef, isNarrow: isSegmentedBarNarrow } = useNarrowInlineSize(
+    SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX
+  )
+  const segTypography = isSegmentedBarNarrow
+    ? segmentedTabTypography.narrow
+    : segmentedTabTypography.comfortable
 
   // Lazy keepAlive : ne monter un onglet keepAlive qu'après sa première activation.
   // Empêche React Flow (et d'autres composants) de se rendre dans un conteneur display:none
@@ -67,12 +96,14 @@ export function Tabs({
 
   return (
     <div
+      ref={variant === 'segmented' ? segmentedBarRef : undefined}
       style={{
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
         minHeight: 0,
         overflow: 'hidden',
+        minWidth: 0,
         ...style,
       }}
     >
@@ -81,12 +112,18 @@ export function Tabs({
           display: 'flex',
           alignItems: 'center',
           flexShrink: 0,
+          width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
           ...(variant === 'segmented'
             ? {
-                gap: '0.35rem',
-                padding: '0.5rem 0.65rem',
+                gap: `${segTypography.rowGapRem}rem`,
+                padding: segTypography.rowPadding,
                 backgroundColor: theme.background.tertiary,
                 borderBottom: `1px solid ${theme.border.primary}`,
+                flexWrap: 'nowrap',
+                overflowX: 'auto',
+                containerType: 'inline-size',
               }
             : {
                 borderBottom: `2px solid ${theme.border.primary}`,
@@ -100,13 +137,14 @@ export function Tabs({
             type="button"
             onClick={() => !tab.disabled && onTabChange(tab.id)}
             disabled={tab.disabled}
+            title={tab.label}
             style={{
               ...(variant === 'segmented'
                 ? {
                     minHeight: TOUCH_TARGET_MIN_PX,
                     minWidth: TOUCH_TARGET_MIN_PX,
                     boxSizing: 'border-box',
-                    padding: '0.45rem 0.95rem',
+                    padding: segTypography.buttonPadding,
                     borderRadius: '8px',
                     border: 'none',
                     backgroundColor:
@@ -120,6 +158,12 @@ export function Tabs({
                         ? `${theme.shadow.card}, 0 0 0 1px ${theme.border.primary}`
                         : 'none',
                     fontWeight: tab.id === activeTabId ? 600 : 500,
+                    fontSize: `${segTypography.fontSizeRem}rem`,
+                    flex: '1 1 0',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }
                 : {
                     minHeight: TOUCH_TARGET_MIN_PX,
@@ -165,7 +209,11 @@ export function Tabs({
               }
             }}
           >
-            {tab.label}
+            {variant === 'segmented' ? (
+              <SegmentedTabLabelText text={tab.label} />
+            ) : (
+              tab.label
+            )}
           </button>
         ))}
       </div>
@@ -207,4 +255,3 @@ export function Tabs({
     </div>
   )
 }
-

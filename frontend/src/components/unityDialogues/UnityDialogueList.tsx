@@ -114,7 +114,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
 
   if (isLoading) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
+      <div style={{ padding: '0.65rem', textAlign: 'center', fontSize: '0.8rem', color: theme.text.secondary }}>
         <div>Chargement des dialogues Unity...</div>
       </div>
     )
@@ -153,21 +153,31 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     <div data-testid="unity-dialogue-list" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div
         style={{
-          padding: '0.75rem 0.75rem 0.5rem 0.75rem',
+          padding: '0.5rem',
           borderBottom: `1px solid ${theme.border.primary}`,
           backgroundColor: theme.background.panelHeader,
         }}
       >
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.6rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.4rem',
+            marginBottom: '0.45rem',
+            alignItems: 'center',
+          }}
+        >
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Rechercher un dialogue... (/)"
+            placeholder="Rechercher… (/)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              flex: 1,
-              padding: '0.6rem 0.75rem',
+              flex: '1 1 120px',
+              minWidth: 0,
+              padding: '0.45rem 0.55rem',
+              fontSize: '0.8rem',
               border: `1px solid ${theme.input.border}`,
               borderRadius: '6px',
               boxSizing: 'border-box',
@@ -179,12 +189,13 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
             value={sortType}
             onChange={(e) => setSortType(e.target.value as typeof sortType)}
             style={{
-              padding: '0.6rem 0.75rem',
+              padding: '0.45rem 0.5rem',
               border: `1px solid ${theme.input.border}`,
               borderRadius: '6px',
               backgroundColor: theme.input.background,
               color: theme.input.color,
-              fontSize: '0.85rem',
+              fontSize: '0.78rem',
+              flexShrink: 0,
             }}
             title="Trier les dialogues"
           >
@@ -195,14 +206,14 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           </select>
         </div>
 
-        <div style={{ fontSize: '0.85rem', color: theme.text.secondary }}>
+        <div style={{ fontSize: '0.78rem', color: theme.text.secondary }}>
           {filteredDialogues.length} dialogue{filteredDialogues.length !== 1 ? 's' : ''}
           {searchQuery && ` (sur ${dialogues.length} total)`}
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '0.5rem', minHeight: 0 }}>
         {filteredDialogues.length === 0 ? (
-          <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
+          <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', color: theme.text.secondary }}>
             {searchQuery ? 'Aucun dialogue trouvé' : 'Aucun dialogue Unity'}
           </div>
         ) : (

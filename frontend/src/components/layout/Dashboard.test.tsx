@@ -5,6 +5,8 @@ import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
+import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
+import { panelHeaderTitleTypography } from '../../theme/responsiveChrome'
 
 // Mock des stores
 vi.mock('../../store/generationStore')
@@ -371,7 +373,8 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('context-selector')).toBeInTheDocument()
   })
 
-  it('active un mode tablette à 768px: panneau gauche replié, panneau droit accessible', async () => {
+  it('active un mode tablette à 768px: drawers GDD + détails (FR120)', async () => {
+    const user = userEvent.setup()
     Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 768 })
     window.dispatchEvent(new Event('resize'))
 
@@ -385,14 +388,27 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    // Le panneau droit n’est pas replié par défaut en mode tablette (onglets visibles)
-    expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /dialogue généré/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /détails/i })).toBeInTheDocument()
-
-    // Contrôle explicite pour ré-ouvrir le panneau gauche
     expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /déplier le panneau droit/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /déplier le panneau droit/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await waitFor(() => {
+      const dlg = screen.getByRole('dialog', { name: /contexte gdd/i })
+      expect(dlg).toHaveAttribute('aria-modal', 'true')
+      expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /fermer le panneau contexte gdd/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /fermer le panneau contexte gdd/i }))
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /contexte gdd/i })).not.toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /^détails$/i })).toHaveAttribute('aria-modal', 'true')
+      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
+    })
   })
 
   it('mobile 375px: même comportement narrow que 320px (panneaux latéraux repliés)', async () => {
@@ -427,6 +443,69 @@ describe('Dashboard', () => {
     expect(screen.queryByRole('button', { name: /déplier le panneau gauche/i })).not.toBeInTheDocument()
   })
 
+  it('FR118 17.6: titre panneau GDD plus compact quand la colonne centrale est étroite (desktop)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    window.dispatchEvent(new Event('resize'))
+
+    const { unmount } = render(
+      <BrowserRouter>
+        <div style={{ width: 1400, height: 700 }}>
+          <Dashboard />
+        </div>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+
+    const titleComfortable = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+    expect(titleComfortable).toHaveStyle({
+      fontSize: `${panelHeaderTitleTypography.comfortableFontRem}rem`,
+    })
+    unmount()
+
+    // Avec defaultSizes [20, 58, 22], conteneur plus étroit pour garder la colonne centrale sous 480px (seuil narrow).
+    render(
+      <BrowserRouter>
+        <div style={{ width: 760, height: 700 }}>
+          <Dashboard />
+        </div>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      const titleNarrow = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+      expect(titleNarrow).toHaveStyle({
+        fontSize: `${panelHeaderTitleTypography.narrowFontRem}rem`,
+      })
+    })
+  })
+
+  it('FR118 17.6 AC2: onglets segmentés centraux — title complet et pas de scroll horizontal document (Dashboard)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <div style={{ width: 720, height: 700 }}>
+          <Dashboard />
+        </div>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+
+    const generationTab = screen.getByRole('button', { name: '💬 Génération de Dialogues' })
+    expect(generationTab).toHaveAttribute('title', '💬 Génération de Dialogues')
+
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+      document.documentElement.clientWidth + 1
+    )
+  })
+
   it('mobile: accès à l’onglet Éditeur de Graphe (FR118 zones critiques)', async () => {
     const user = userEvent.setup()
     Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
@@ -445,6 +524,88 @@ describe('Dashboard', () => {
     const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
     await user.click(graphTab)
     expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
+  })
+
+  it('narrow 375px: panneau contexte en overlay dialog + fermeture explicite (FR120)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toHaveAttribute('aria-modal', 'true')
+      expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+  })
+
+  it('narrow: Escape referme le drawer contexte (FR120 — équivalent clavier)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toBeInTheDocument()
+    })
+
+    await user.keyboard('{Escape}')
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /contexte gdd/i })).not.toBeInTheDocument()
+      expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
+    })
+  })
+
+  it('narrow: fermeture drawer + onglets génération → graphe sans overlay persistant (FR120)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await waitFor(() => {
+      expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
+    })
+    await user.click(screen.getByRole('button', { name: /fermer le panneau contexte gdd/i }))
+    await waitFor(() => {
+      expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
+    })
+
+    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
+    await user.click(graphTab)
+    expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
+    expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })
 

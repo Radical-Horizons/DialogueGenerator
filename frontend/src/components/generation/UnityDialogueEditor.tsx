@@ -297,11 +297,11 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       <div
         style={{
           flexShrink: 0,
-          padding: '1rem',
+          padding: '0.55rem 0.75rem',
           borderBottom: `1px solid ${theme.border.primary}`,
           backgroundColor: theme.background.panelHeader,
           display: 'flex',
-          gap: '0.75rem',
+          gap: '0.5rem',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
@@ -312,28 +312,29 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
             style={{
               margin: 0,
               color: theme.text.primary,
-              fontSize: '1.1rem',
+              fontSize: '0.92rem',
               fontWeight: 700,
-              lineHeight: 1.2,
+              lineHeight: 1.25,
               wordBreak: 'break-word',
             }}
           >
             {title || 'Éditeur de Dialogue Unity'}
           </div>
           {subtitle && (
-            <div style={{ fontSize: '0.85rem', color: theme.text.secondary, marginTop: '0.25rem' }}>
+            <div style={{ fontSize: '0.78rem', color: theme.text.secondary, marginTop: '0.2rem' }}>
               {subtitle}
             </div>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {extraActions}
           {onCancel && (
             <button
               onClick={onCancel}
               style={{
-                padding: '0.5rem 1rem',
+                padding: '0.4rem 0.75rem',
+                fontSize: '0.8rem',
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
                 backgroundColor: theme.button.default.background,
@@ -349,7 +350,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               onClick={handleSave}
               disabled={isSaving || !isValid}
               style={{
-                padding: '0.5rem 1rem',
+                padding: '0.4rem 0.75rem',
+                fontSize: '0.8rem',
                 border: 'none',
                 borderRadius: '6px',
                 backgroundColor: theme.button.primary.background,

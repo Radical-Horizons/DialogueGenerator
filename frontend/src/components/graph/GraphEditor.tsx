@@ -21,6 +21,10 @@ import { GraphExportFormatDialog } from './GraphExportFormatDialog'
 import { useGraphStore } from '../../store/graphStore'
 import { useToast, ConfirmDialog } from '../shared'
 import { theme } from '../../theme'
+import {
+  unityDialogueListColumnStyle,
+  unityDialogueWorkspaceColumnStyle,
+} from '../../theme/unityDialogueListShell'
 import { resolveGraphRouteTarget } from './graphEditorStandalone'
 import { useDialogueLoader } from '../../hooks/useDialogueLoader'
 import { useGraphToolbar } from '../../hooks/useGraphToolbar'
@@ -117,25 +121,15 @@ export function GraphEditor({
       style={{
         display: 'flex',
         height: '100%',
+        width: '100%',
+        minWidth: 0,
         minHeight: 0,
         overflow: 'hidden',
         flex: 1,
       }}
     >
-      {/* Panneau gauche : Liste des dialogues */}
-      <div
-        style={{
-          width: 'clamp(260px, 22vw, 340px)',
-          minWidth: '240px',
-          borderRight: `1px solid ${theme.border.primary}`,
-          overflow: 'hidden',
-          backgroundColor: theme.background.panel,
-          height: '100%',
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      {/* Panneau gauche : Liste des dialogues (≤25 % ; droit prioritaire ~75 %) */}
+      <div style={{ ...unityDialogueListColumnStyle, height: '100%' }}>
         <UnityDialogueList
           ref={dialogueListRef}
           onSelectDialogue={handleSelectDialogue}
@@ -146,10 +140,7 @@ export function GraphEditor({
       {/* Panneau droit : Graphe */}
       <div
         style={{
-          flex: 1,
-          minHeight: 0,
-          overflow: 'hidden',
-          backgroundColor: theme.background.panel,
+          ...unityDialogueWorkspaceColumnStyle,
           display: 'flex',
           flexDirection: 'column',
         }}
