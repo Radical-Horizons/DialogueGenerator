@@ -7,21 +7,17 @@ import type React from 'react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useGraphStore } from '../../store/graphStore'
-import { useContextStore } from '../../store/contextStore'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
-import { TOUCH_TARGET_MIN_PX } from '../../constants'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import { NODE_DRAG_TOOLTIP } from './nodeDragTooltip'
 import {
   formatGraphWarningBadgeLabel,
   summarizeGraphValidationWarnings,
 } from '../../utils/graphValidationSummary'
-import {
-  GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
-  GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
-} from './graphToolbarConstants'
+import { GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX, graphToolbarChrome } from '../../theme/responsiveChrome'
 
 /** Offsets pour positionner les nœuds créés manuellement sans chevauchement (Story 1.6). */
 const MANUAL_NODE_OFFSET_X = 150
@@ -35,12 +31,6 @@ const GRAPH_SHORTCUTS_TOOLTIP_Z = 10050
 
 const GRAPH_SHORTCUTS_TOOLTIP_GAP_PX = 6
 const GRAPH_SHORTCUTS_TOOLTIP_ESTIMATE_WIDTH_PX = 320
-
-const GRAPH_CHROME_TOUCH: React.CSSProperties = {
-  minWidth: TOUCH_TARGET_MIN_PX,
-  minHeight: TOUCH_TARGET_MIN_PX,
-  boxSizing: 'border-box',
-}
 
 interface GraphEditorHeaderProps {
   toolbar: UseGraphToolbarReturn
@@ -92,9 +82,6 @@ export function GraphEditorHeader({
   } = useGraphStore()
   const canUndoNow = useGraphStore((s) => s.undoStack.length > 0)
   const canRedoNow = useGraphStore((s) => s.redoStack.length > 0)
-  const validateLoreExplicit = useGraphStore((s) => s.validateLoreExplicit)
-  const loreExplicitLoading = useGraphStore((s) => s.loreExplicitValidationLoading)
-  const contextSelections = useContextStore((s) => s.selections)
 
   const handleExportUnity = () => {
     const json = exportToUnity()
@@ -114,21 +101,9 @@ export function GraphEditorHeader({
     setShowAutoLayoutDropdown,
     showActionsDropdown,
     setShowActionsDropdown,
-    showValidationToolsDropdown,
-    setShowValidationToolsDropdown,
     setShowAIGenerationPanel,
     showValidationPanel,
     setShowValidationPanel,
-    showQualityLlmPanel,
-    setShowQualityLlmPanel,
-    showAiSlopPanel,
-    setShowAiSlopPanel,
-    showContextDroppingPanel,
-    setShowContextDroppingPanel,
-    showFlowSimulationPanel,
-    setShowFlowSimulationPanel,
-    showSchemaValidationPanel,
-    handleToggleSchemaValidation,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -143,7 +118,6 @@ export function GraphEditorHeader({
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,
-    validationToolsDropdownRef,
     reactFlowInstance,
     handleAutoLayout,
     handleOpenExportDialog,
@@ -209,15 +183,27 @@ export function GraphEditorHeader({
     return () => clearHideShortcutsTooltip()
   }, [clearHideShortcutsTooltip])
 
+  const { ref: toolbarRef, isNarrow: isNarrowToolbar } = useNarrowInlineSize(
+    GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+    { measureParentClientWidth: true }
+  )
+  const chrome = isNarrowToolbar ? graphToolbarChrome.narrow : graphToolbarChrome.comfortable
+  const graphChromeTouch: React.CSSProperties = {
+    minWidth: chrome.touchMinPx,
+    minHeight: chrome.touchMinPx,
+    boxSizing: 'border-box',
+  }
+
   return (
     <div
+      ref={toolbarRef}
       style={{
         flexShrink: 0,
-        padding: '0.75rem 1rem',
+        padding: chrome.containerPadding,
         borderBottom: `1px solid ${theme.border.primary}`,
         backgroundColor: theme.background.panelHeader,
         display: 'flex',
-        gap: '0.5rem',
+        gap: `${chrome.containerGapRem}rem`,
         alignItems: 'center',
         justifyContent: 'flex-end',
         flexWrap: 'wrap',
@@ -228,7 +214,7 @@ export function GraphEditorHeader({
           flex: 1,
           minWidth: 0,
           display: 'flex',
-          gap: '0.5rem',
+          gap: `${chrome.groupGapRem}rem`,
           alignItems: 'center',
           flexWrap: 'wrap',
           justifyContent: 'flex-start',
@@ -289,20 +275,20 @@ export function GraphEditorHeader({
               onClick={() => undo()}
               disabled={!canUndoNow}
               style={{
-                ...GRAPH_CHROME_TOUCH,
-                padding: '0.5rem 0.75rem',
+                ...graphChromeTouch,
+                padding: chrome.buttonPadding,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
                 backgroundColor: theme.button.default.background,
                 color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
                 cursor: canUndoNow ? 'pointer' : 'not-allowed',
                 opacity: canUndoNow ? 1 : 0.6,
-                fontSize: '0.9rem',
+                fontSize: `${chrome.buttonFontSizeRem}rem`,
               }}
               title="Annuler (Ctrl+Z)"
               aria-label="Annuler"
             >
-              ↩ Undo
+              {isNarrowToolbar ? '↩' : '↩ Undo'}
             </button>
             <button
               type="button"
@@ -310,20 +296,20 @@ export function GraphEditorHeader({
               onClick={() => redo()}
               disabled={!canRedoNow}
               style={{
-                ...GRAPH_CHROME_TOUCH,
-                padding: '0.5rem 0.75rem',
+                ...graphChromeTouch,
+                padding: chrome.buttonPadding,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
                 backgroundColor: theme.button.default.background,
                 color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
                 cursor: canRedoNow ? 'pointer' : 'not-allowed',
                 opacity: canRedoNow ? 1 : 0.6,
-                fontSize: '0.9rem',
+                fontSize: `${chrome.buttonFontSizeRem}rem`,
               }}
               title="Refaire (Ctrl+Y)"
               aria-label="Refaire"
             >
-              ↪ Redo
+              {isNarrowToolbar ? '↪' : '↪ Redo'}
             </button>
           </>
         )}
@@ -344,9 +330,9 @@ export function GraphEditorHeader({
           const canToggle = hasErrors || hasWarnings
           const warningLabel = formatGraphWarningBadgeLabel(warningSummary)
           const badgeStyle = {
-            padding: '0.4rem 0.75rem',
+            padding: chrome.badgePadding,
             borderRadius: '6px',
-            fontSize: '0.85rem',
+            fontSize: `${chrome.badgeFontSizeRem}rem`,
             fontWeight: 600,
             backgroundColor: isValid
               ? theme.state.success.background
@@ -371,7 +357,7 @@ export function GraphEditorHeader({
             ...(canToggle && { cursor: 'pointer' }),
           } as React.CSSProperties
           const title = isValid
-            ? 'Structure : 0 erreurs (validation automatique à chaque sauvegarde)'
+            ? 'Graphe valide (validation automatique à chaque sauvegarde)'
             : canToggle
             ? showValidationPanel
               ? 'Cliquer pour masquer les détails'
@@ -386,7 +372,9 @@ export function GraphEditorHeader({
               <span>{isValid ? '✓' : hasErrors ? '✗' : '⚠'}</span>
               <span>
                 {isValid
-                  ? 'Structure : 0 erreurs'
+                  ? isNarrowToolbar
+                    ? 'Valide'
+                    : 'Graphe valide'
                   : hasErrors
                   ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
                   : warningLabel}
@@ -451,15 +439,15 @@ export function GraphEditorHeader({
             onClick={() => canEditGraph && setShowAutoLayoutDropdown((v) => !v)}
             disabled={!canEditGraph}
             style={{
-              ...GRAPH_CHROME_TOUCH,
-              padding: '0.5rem 1rem',
+              ...graphChromeTouch,
+              padding: chrome.buttonPadding,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '6px',
               backgroundColor: theme.button.default.background,
               color: theme.button.default.color,
               cursor: canEditGraph ? 'pointer' : 'not-allowed',
               opacity: canEditGraph ? 1 : 0.6,
-              fontSize: '0.9rem',
+              fontSize: `${chrome.buttonFontSizeRem}rem`,
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
@@ -467,7 +455,19 @@ export function GraphEditorHeader({
             title="Auto-layout (Dagre) — choisir la direction"
             aria-label="Auto-layout (Dagre) — choisir la direction"
           >
-            📐 Auto-layout
+            {isNarrowToolbar ? '📐' : '📐 Auto-layout'}
+            <span
+              style={{
+                padding: chrome.chipPadding,
+                borderRadius: '999px',
+                backgroundColor: theme.background.panel,
+                color: theme.text.secondary,
+                fontSize: `${chrome.chipFontSizeRem}rem`,
+                textTransform: 'capitalize',
+              }}
+            >
+              {layoutSpacingMode}
+            </span>
             <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
           </button>
           {showAutoLayoutDropdown && (
@@ -480,22 +480,19 @@ export function GraphEditorHeader({
                 left: 0,
                 marginTop: '4px',
                 minWidth: '100%',
-                maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
-                overflowY: 'auto',
-                overflowX: 'hidden',
                 padding: '4px 0',
                 border: `1px solid ${theme.input.border}`,
                 borderRadius: '6px',
                 backgroundColor: theme.input.background,
                 color: theme.input.color,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+                zIndex: 1000,
               }}
             >
               <div
                 style={{
                   padding: '0.4rem 0.75rem 0.25rem',
-                  fontSize: '0.72rem',
+                  fontSize: `${chrome.chipFontSizeRem}rem`,
                   fontWeight: 700,
                   color: theme.text.secondary,
                   textTransform: 'uppercase',
@@ -523,13 +520,13 @@ export function GraphEditorHeader({
                   style={{
                     display: 'block',
                     width: '100%',
-                    padding: '0.45rem 0.75rem',
+                    padding: chrome.dropdownItemPadding,
                     border: 'none',
                     background:
                       layoutSpacingMode === value ? theme.button.default.background : 'transparent',
                     color: theme.input.color,
                     textAlign: 'left',
-                    fontSize: '0.85rem',
+                    fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                     cursor: 'pointer',
                   }}
                 >
@@ -546,7 +543,7 @@ export function GraphEditorHeader({
               <div
                 style={{
                   padding: '0.15rem 0.75rem 0.25rem',
-                  fontSize: '0.72rem',
+                  fontSize: `${chrome.chipFontSizeRem}rem`,
                   fontWeight: 700,
                   color: theme.text.secondary,
                   textTransform: 'uppercase',
@@ -575,13 +572,13 @@ export function GraphEditorHeader({
                   style={{
                     display: 'block',
                     width: '100%',
-                    padding: '0.5rem 0.75rem',
+                    padding: chrome.dropdownItemPadding,
                     border: 'none',
                     background:
                       layoutDirection === value ? theme.button.default.background : 'transparent',
                     color: theme.input.color,
                     textAlign: 'left',
-                    fontSize: '0.85rem',
+                    fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                     cursor: 'pointer',
                   }}
                 >
@@ -599,22 +596,22 @@ export function GraphEditorHeader({
             onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
             disabled={!canEditGraph}
             style={{
-              ...GRAPH_CHROME_TOUCH,
-              padding: '0.5rem 1rem',
+              ...graphChromeTouch,
+              padding: chrome.buttonPadding,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '6px',
               backgroundColor: theme.button.default.background,
               color: theme.button.default.color,
               cursor: canEditGraph ? 'pointer' : 'not-allowed',
               opacity: canEditGraph ? 1 : 0.6,
-              fontSize: '0.9rem',
+              fontSize: `${chrome.buttonFontSizeRem}rem`,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.35rem',
             }}
             title="Actions sur le graphe"
           >
-            Actions
+            {isNarrowToolbar ? '⋯' : 'Actions'}
             <span style={{ fontSize: '0.7rem' }}>▼</span>
           </button>
           {showActionsDropdown && (
@@ -626,15 +623,12 @@ export function GraphEditorHeader({
                 left: 0,
                 marginTop: '4px',
                 minWidth: '200px',
-                maxWidth: 'min(320px, 92vw)',
-                maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
-                overflowY: 'auto',
-                overflowX: 'hidden',
                 backgroundColor: theme.background.tertiary,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '8px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-                zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+                zIndex: 50,
+                overflow: 'hidden',
               }}
             >
               <button
@@ -663,12 +657,12 @@ export function GraphEditorHeader({
                 style={{
                   display: 'block',
                   width: '100%',
-                  padding: '0.5rem 1rem',
+                  padding: chrome.dropdownItemPadding,
                   border: 'none',
                   background: 'transparent',
                   color: theme.text.primary,
                   textAlign: 'left',
-                  fontSize: '0.9rem',
+                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                   cursor: 'pointer',
                 }}
                 onMouseEnter={(e) => {
@@ -691,12 +685,12 @@ export function GraphEditorHeader({
                 style={{
                   display: 'block',
                   width: '100%',
-                  padding: '0.5rem 1rem',
+                  padding: chrome.dropdownItemPadding,
                   border: 'none',
                   background: 'transparent',
                   color: !selectedNodeId ? theme.text.secondary : theme.text.primary,
                   textAlign: 'left',
-                  fontSize: '0.9rem',
+                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                   cursor: selectedNodeId ? 'pointer' : 'not-allowed',
                   opacity: selectedNodeId ? 1 : 0.6,
                 }}
@@ -713,52 +707,6 @@ export function GraphEditorHeader({
               <button
                 type="button"
                 role="menuitem"
-                data-testid="btn-validate-lore-explicit"
-                disabled={!hasActiveDialogue || loreExplicitLoading}
-                onClick={() => {
-                  void (async () => {
-                    setShowActionsDropdown(false)
-                    setShowValidationPanel(true)
-                    try {
-                      await validateLoreExplicit(
-                        contextSelections as Record<string, unknown>
-                      )
-                    } catch {
-                      window.alert(
-                        'La validation lore n’a pas pu s’exécuter. Vérifiez la connexion au serveur ou réessayez plus tard.'
-                      )
-                    }
-                  })()
-                }}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '0.5rem 1rem',
-                  border: 'none',
-                  background: 'transparent',
-                  color:
-                    !hasActiveDialogue || loreExplicitLoading
-                      ? theme.text.secondary
-                      : theme.text.primary,
-                  textAlign: 'left',
-                  fontSize: '0.9rem',
-                  cursor:
-                    hasActiveDialogue && !loreExplicitLoading ? 'pointer' : 'not-allowed',
-                  opacity: hasActiveDialogue && !loreExplicitLoading ? 1 : 0.6,
-                }}
-                onMouseEnter={(e) => {
-                  if (hasActiveDialogue && !loreExplicitLoading)
-                    e.currentTarget.style.backgroundColor = theme.state.hover.background
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                {loreExplicitLoading ? '⏳ Lore…' : '📜 Valider lore'}
-              </button>
-              <button
-                type="button"
-                role="menuitem"
                 onClick={() => {
                   setShowActionsDropdown(false)
                   setShowJumpToNodeModal(true)
@@ -766,12 +714,12 @@ export function GraphEditorHeader({
                 style={{
                   display: 'block',
                   width: '100%',
-                  padding: '0.5rem 1rem',
+                  padding: chrome.dropdownItemPadding,
                   border: 'none',
                   background: 'transparent',
                   color: theme.text.primary,
                   textAlign: 'left',
-                  fontSize: '0.9rem',
+                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                   cursor: 'pointer',
                 }}
                 onMouseEnter={(e) => {
@@ -781,7 +729,7 @@ export function GraphEditorHeader({
                   e.currentTarget.style.backgroundColor = 'transparent'
                 }}
               >
-                🎯 Aller à un nœud
+                🎯 Aller à un nœud (Ctrl+J)
               </button>
               <button
                 type="button"
@@ -794,12 +742,12 @@ export function GraphEditorHeader({
                 style={{
                   display: 'block',
                   width: '100%',
-                  padding: '0.5rem 1rem',
+                  padding: chrome.dropdownItemPadding,
                   border: 'none',
                   background: 'transparent',
                   color: !reactFlowInstance ? theme.text.secondary : theme.text.primary,
                   textAlign: 'left',
-                  fontSize: '0.9rem',
+                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                   cursor: reactFlowInstance ? 'pointer' : 'not-allowed',
                   opacity: reactFlowInstance ? 1 : 0.6,
                 }}
@@ -812,7 +760,7 @@ export function GraphEditorHeader({
                 }}
                 title="Exporter le graphe en image (PNG ou SVG)"
               >
-                📤 Exporter en image
+                📤 Exporter en image (PNG/SVG)
               </button>
               <button
                 type="button"
@@ -826,12 +774,12 @@ export function GraphEditorHeader({
                 style={{
                   display: 'block',
                   width: '100%',
-                  padding: '0.5rem 1rem',
+                  padding: chrome.dropdownItemPadding,
                   border: 'none',
                   background: 'transparent',
                   color: nodes.length === 0 ? theme.text.secondary : theme.text.primary,
                   textAlign: 'left',
-                  fontSize: '0.9rem',
+                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                   cursor: nodes.length === 0 ? 'not-allowed' : 'pointer',
                   opacity: nodes.length === 0 ? 0.6 : 1,
                 }}
@@ -859,12 +807,12 @@ export function GraphEditorHeader({
                 style={{
                   display: 'block',
                   width: '100%',
-                  padding: '0.5rem 1rem',
+                  padding: chrome.dropdownItemPadding,
                   border: 'none',
                   background: 'transparent',
                   color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
                   textAlign: 'left',
-                  fontSize: '0.9rem',
+                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
                   cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
                   opacity: hasActiveDialogue ? 1 : 0.6,
                 }}
@@ -885,220 +833,28 @@ export function GraphEditorHeader({
             </div>
           )}
         </div>
-<<<<<<< HEAD
-        {(() => {
-          const validationToolsActive =
-            showQualityLlmPanel ||
-            showAiSlopPanel ||
-            showContextDroppingPanel ||
-            showFlowSimulationPanel ||
-            showSchemaValidationPanel ||
-            showCostBreakdown
-          const menuItemStyle = {
-            display: 'block',
-            width: '100%',
-=======
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}
           disabled={!hasActiveDialogue}
           style={{
-            ...GRAPH_CHROME_TOUCH,
->>>>>>> 4d7f74ea5 (feat: update sprint status and enhance UI responsiveness)
-            padding: '0.5rem 1rem',
-            border: 'none',
-            background: 'transparent',
-            color: theme.text.primary,
-            textAlign: 'left' as const,
-            fontSize: '0.9rem',
-            cursor: 'pointer' as const,
-          }
-          return (
-            <div ref={validationToolsDropdownRef} style={{ position: 'relative' }}>
-              <button
-                type="button"
-                data-testid="btn-validation-tools-dropdown"
-                onClick={() =>
-                  hasActiveDialogue &&
-                  setShowValidationToolsDropdown((v) => !v)
-                }
-                disabled={!hasActiveDialogue}
-                style={{
-                  padding: '0.5rem 1rem',
-                  border: `1px solid ${
-                    showValidationToolsDropdown || validationToolsActive
-                      ? theme.button.primary.background
-                      : theme.border.primary
-                  }`,
-                  borderRadius: '6px',
-                  backgroundColor:
-                    showValidationToolsDropdown || validationToolsActive
-                      ? theme.button.primary.background
-                      : theme.button.default.background,
-                  color:
-                    showValidationToolsDropdown || validationToolsActive
-                      ? theme.button.primary.color
-                      : theme.button.default.color,
-                  cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-                  opacity: !hasActiveDialogue ? 0.6 : 1,
-                  fontSize: '0.9rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                }}
-                title="Qualité narrative, détections, simulation de flux, schéma Unity et coûts LLM"
-              >
-                Qualité
-                {validationToolsActive ? (
-                  <span style={{ fontSize: '0.75rem' }}>•</span>
-                ) : null}
-                <span style={{ fontSize: '0.7rem' }}>▼</span>
-              </button>
-              {showValidationToolsDropdown && (
-                <div
-                  role="menu"
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    marginTop: '4px',
-                    minWidth: '280px',
-                    maxWidth: 'min(360px, 92vw)',
-                    maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    backgroundColor: theme.background.tertiary,
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-                    zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
-                  }}
-                >
-                  <button
-                    type="button"
-                    role="menuitem"
-                    data-testid="btn-quality-llm-panel"
-                    onClick={() => {
-                      setShowValidationToolsDropdown(false)
-                      setShowQualityLlmPanel((v) => !v)
-                    }}
-                    style={menuItemStyle}
-                    title="Évaluer la qualité narrative du dialogue (juge LLM, FR42)"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.state.hover.background
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    ✨ Qualité LLM
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    data-testid="btn-ai-slop-panel"
-                    onClick={() => {
-                      setShowValidationToolsDropdown(false)
-                      setShowAiSlopPanel((v) => !v)
-                    }}
-                    style={menuItemStyle}
-                    title="Détecter les formulations type GPT-ism, répétitions et phrases génériques (FR43)"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.state.hover.background
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    🤖 Détection AI slop
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    data-testid="btn-context-dropping-panel"
-                    onClick={() => {
-                      setShowValidationToolsDropdown(false)
-                      setShowContextDroppingPanel((v) => !v)
-                    }}
-                    style={menuItemStyle}
-                    title="Détecter si le contexte GDD sélectionné est absent ou trop indirect dans le dialogue (FR44)"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.state.hover.background
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    📎 Context dropping
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    data-testid="btn-flow-simulation-panel"
-                    onClick={() => {
-                      setShowValidationToolsDropdown(false)
-                      setShowFlowSimulationPanel((v) => !v)
-                    }}
-                    style={menuItemStyle}
-                    title="Simuler le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46)"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.state.hover.background
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    🔀 Simulation de flux
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    data-testid="btn-schema-validation-panel"
-                    onClick={() => {
-                      setShowValidationToolsDropdown(false)
-                      void handleToggleSchemaValidation()
-                    }}
-                    style={menuItemStyle}
-                    title="Valider la conformité du schéma JSON Unity (FR48)"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.state.hover.background
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    🧩 Schéma Unity
-                  </button>
-                  <div
-                    style={{
-                      height: 1,
-                      margin: '0.15rem 0',
-                      backgroundColor: theme.border.primary,
-                    }}
-                  />
-                  <button
-                    type="button"
-                    role="menuitem"
-                    data-testid="btn-cost-breakdown-panel"
-                    onClick={() => {
-                      setShowValidationToolsDropdown(false)
-                      setShowCostBreakdown((v) => !v)
-                    }}
-                    style={menuItemStyle}
-                    title="Afficher le breakdown des coûts LLM pour ce dialogue"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = theme.state.hover.background
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    💰 Coûts LLM
-                  </button>
-                </div>
-              )}
-            </div>
-          )
-        })()}
+            ...graphChromeTouch,
+            padding: chrome.buttonPadding,
+            border: `1px solid ${
+              showCostBreakdown ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showCostBreakdown
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showCostBreakdown ? theme.button.primary.color : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: `${chrome.buttonFontSizeRem}rem`,
+          }}
+          title="Afficher le breakdown des coûts LLM pour ce dialogue"
+        >
+          {isNarrowToolbar ? '💰' : '💰 Coûts'}
+        </button>
         <button
           type="button"
           data-testid="btn-search-graph"
@@ -1110,8 +866,8 @@ export function GraphEditorHeader({
           }
           disabled={!hasActiveDialogue}
           style={{
-            ...GRAPH_CHROME_TOUCH,
-            padding: '0.5rem 1rem',
+            ...graphChromeTouch,
+            padding: chrome.buttonPadding,
             border: `1px solid ${
               showSearchBar ? theme.button.primary.background : theme.border.primary
             }`,
@@ -1122,12 +878,12 @@ export function GraphEditorHeader({
             color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
             cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
             opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: '0.9rem',
+            fontSize: `${chrome.buttonFontSizeRem}rem`,
           }}
           title="Rechercher dans le graphe (Ctrl+F)"
           aria-label="Rechercher"
         >
-          🔍 Rechercher
+          {isNarrowToolbar ? '🔍' : '🔍 Rechercher'}
         </button>
         <div style={{ position: 'relative' }}>
           <button
@@ -1139,16 +895,16 @@ export function GraphEditorHeader({
             }}
             onMouseLeave={() => scheduleHideShortcutsTooltip()}
             style={{
-              ...GRAPH_CHROME_TOUCH,
-              width: TOUCH_TARGET_MIN_PX,
-              height: TOUCH_TARGET_MIN_PX,
+              ...graphChromeTouch,
+              width: chrome.touchMinPx,
+              height: chrome.touchMinPx,
               padding: 0,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '50%',
               backgroundColor: theme.button.default.background,
               color: theme.text.secondary,
               cursor: 'pointer',
-              fontSize: '0.95rem',
+              fontSize: isNarrowToolbar ? '0.85rem' : '0.95rem',
               fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',

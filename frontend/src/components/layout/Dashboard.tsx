@@ -1,7 +1,7 @@
 /**
  * Composant Dashboard avec layout 3 panneaux redimensionnables.
  */
-import { useState, useEffect, useRef, useMemo, useCallback, type ReactNode } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, type CSSProperties, type ReactNode } from 'react'
 import { ContextSelector } from '../context/ContextSelector'
 import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
 import { GenerationPanel } from '../generation/GenerationPanel'
@@ -24,6 +24,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
 import { useViewportMode } from '../../hooks/useViewportMode'
+import { useMobileShellKeyboardComfort } from '../../hooks/useMobileShellKeyboardComfort'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
@@ -270,6 +271,24 @@ export function Dashboard() {
   const viewportMode = useViewportMode()
   /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
   const useNarrowSidePanels = viewportMode !== 'desktop'
+  const { bottomInsetPx: keyboardBottomInsetPx } = useMobileShellKeyboardComfort(useNarrowSidePanels)
+  const shellKeyboardInsetStyle = useMemo(
+    (): CSSProperties => ({
+      paddingBottom: keyboardBottomInsetPx,
+      boxSizing: 'border-box',
+    }),
+    [keyboardBottomInsetPx]
+  )
+  /** Drawer narrow plein écran : ne pas réserver d’inset sous le canvas masqué par l’overlay. */
+  const narrowDrawerObscuresCenter =
+    useNarrowSidePanels && (!isLeftPanelCollapsed || !isRightPanelCollapsed)
+  const centerColumnKeyboardStyle = useMemo(
+    (): CSSProperties => ({
+      paddingBottom: narrowDrawerObscuresCenter ? 0 : keyboardBottomInsetPx,
+      boxSizing: 'border-box',
+    }),
+    [narrowDrawerObscuresCenter, keyboardBottomInsetPx]
+  )
   const { ref: centerColumnRef, isNarrow: isNarrowCenterColumn } = useNarrowInlineSize(
     SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
@@ -872,7 +891,17 @@ export function Dashboard() {
   }
 
   return (
-    <>
+    <div
+      data-dashboard-shell="true"
+      style={{
+        height: '100%',
+        minHeight: 0,
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
     <ResizablePanels
       key={viewportMode}
       ref={panelsRef}
@@ -949,6 +978,7 @@ export function Dashboard() {
           height: '100%',
           position: 'relative',
           minWidth: 0,
+          ...centerColumnKeyboardStyle,
         }}
       >
         {/* Rails (boutons) visibles quand un panneau latéral est replié */}
@@ -1108,6 +1138,7 @@ export function Dashboard() {
         </div>
         {/* Zone de contenu avec scroll (prend l'espace restant, mais laisse toujours de la place pour le bouton) */}
         <div
+          data-testid="right-panel-keyboard-inset"
           style={{
             flex: 1,
             minHeight: 0,
@@ -1115,6 +1146,7 @@ export function Dashboard() {
             flexDirection: 'column',
             overflow: 'hidden',
             position: 'relative',
+            ...shellKeyboardInsetStyle,
           }}
         >
           <Tabs
@@ -1147,6 +1179,7 @@ export function Dashboard() {
         title={GDD_CONTEXT_PANEL_TITLE}
         closeLabel="Fermer le panneau contexte GDD"
         onClose={() => setIsLeftPanelCollapsed(true)}
+        contentBottomInsetPx={keyboardBottomInsetPx}
       >
         <ContextSelector onItemSelected={onContextItemSelected} />
       </NarrowOverlayDrawer>
@@ -1161,6 +1194,7 @@ export function Dashboard() {
         headerEnd={narrowDetailsHeaderEnd}
         closeLabel="Fermer le panneau détails"
         onClose={() => setIsRightPanelCollapsed(true)}
+        contentBottomInsetPx={keyboardBottomInsetPx}
       >
         <div
           style={{
@@ -1184,7 +1218,7 @@ export function Dashboard() {
         {renderRightActionsFooter()}
       </NarrowOverlayDrawer>
     )}
-    </>
+    </div>
   )
 }
 

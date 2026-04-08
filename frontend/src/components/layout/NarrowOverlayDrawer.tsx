@@ -17,6 +17,8 @@ export type NarrowOverlayDrawerProps = {
   onClose: () => void
   headerEnd?: ReactNode
   children: ReactNode
+  /** Espace réservé au-dessus du clavier logiciel (visual viewport), story 17.4 */
+  contentBottomInsetPx?: number
 }
 
 /**
@@ -33,6 +35,7 @@ export function NarrowOverlayDrawer({
   onClose,
   headerEnd,
   children,
+  contentBottomInsetPx = 0,
 }: NarrowOverlayDrawerProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -73,6 +76,7 @@ export function NarrowOverlayDrawer({
         aria-modal="true"
         aria-labelledby={titleId}
         data-testid={`narrow-drawer-${side}`}
+        data-narrow-drawer-root="true"
         style={{
           position: 'fixed',
           top: 0,
@@ -140,12 +144,15 @@ export function NarrowOverlayDrawer({
           </button>
         </div>
         <div
+          data-testid="narrow-drawer-scroll-slot"
           style={{
             flex: 1,
             minHeight: 0,
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
+            paddingBottom: contentBottomInsetPx,
+            boxSizing: 'border-box',
           }}
         >
           {children}
