@@ -7,15 +7,21 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 
 const SEARCH_DEBOUNCE_MS = 200
 
 export interface GraphSearchBarProps {
   /** Appelé à la fermeture (Escape ou bouton) : le parent doit appeler setHighlightedNodes([]) et masquer la barre. */
   onClose: () => void
+  /**
+   * Si true, la barre est rendue "embarquée" (dans une toolbar) et ne doit pas se positionner en absolute.
+   * Par défaut, elle se place en overlay dans le canvas.
+   */
+  embedded?: boolean
 }
 
-export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
+export function GraphSearchBar({ onClose, embedded = false }: GraphSearchBarProps) {
   const searchNodes = useGraphStore((s) => s.searchNodes)
   const setHighlightedNodes = useGraphStore((s) => s.setHighlightedNodes)
   const getUniqueSpeakers = useGraphStore((s) => s.getUniqueSpeakers)
@@ -101,10 +107,10 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
     <div
       role="search"
       style={{
-        position: 'absolute',
-        top: 8,
-        left: 12,
-        right: 12,
+        position: embedded ? 'static' : 'absolute',
+        top: embedded ? undefined : 8,
+        left: embedded ? undefined : 12,
+        right: embedded ? undefined : 12,
         zIndex: 10,
         display: 'flex',
         flexWrap: 'wrap',
@@ -136,7 +142,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
           border: `1px solid ${theme.border.primary}`,
           borderRadius: 6,
           color: theme.input.color,
-          fontSize: 14,
+          fontSize: remSize('body'),
           boxSizing: 'border-box',
         }}
       />
@@ -151,7 +157,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
             border: `1px solid ${theme.border.primary}`,
             borderRadius: 6,
             color: theme.input.color,
-            fontSize: 14,
+            fontSize: remSize('body'),
             minWidth: 80,
             maxWidth: 160,
             flex: '0 1 auto',
@@ -166,7 +172,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
           ))}
         </select>
       )}
-      <span style={{ fontSize: 13, color: theme.text.secondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
+      <span style={{ fontSize: remSize('small'), color: theme.text.secondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
         {count === 0 && !query.trim() && !speaker
           ? '—'
           : `${count} résultat${count !== 1 ? 's' : ''} trouvé${count !== 1 ? 's' : ''}`}
@@ -185,6 +191,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
           color: theme.text.primary,
           cursor: hasResults ? 'pointer' : 'not-allowed',
           opacity: hasResults ? 1 : 0.5,
+          fontSize: remSize('body'),
         }}
       >
         ←
@@ -203,6 +210,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
           color: theme.text.primary,
           cursor: hasResults ? 'pointer' : 'not-allowed',
           opacity: hasResults ? 1 : 0.5,
+          fontSize: remSize('body'),
         }}
       >
         →
@@ -219,6 +227,7 @@ export function GraphSearchBar({ onClose }: GraphSearchBarProps) {
           borderRadius: 6,
           color: theme.text.primary,
           cursor: 'pointer',
+          fontSize: remSize('body'),
         }}
       >
         Fermer
