@@ -78,6 +78,11 @@ from services.lore_contradiction_validator import (
     validate_explicit_lore_contradictions,
 )
 from services.graph_node_orchestrator import GraphNodeOrchestrator
+from services.context_dropping_rules_service import ContextDroppingRulesService as _CDRulesService
+
+# Singleton module-level (lazy) pour les règles anti-context-dropping (Story 4.10).
+_CD_RULES_FILE = Path("data") / "validation-rules" / "context-dropping.json"
+_cd_rules_service = _CDRulesService(storage_file=_CD_RULES_FILE)
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
@@ -106,16 +111,68 @@ def _ai_slop_options_to_data(
     )
 
 
+def _load_persisted_cd_rules():
+    """Retourne les règles persistées, ou None en cas d'absence/erreur."""
+    try:
+        return _cd_rules_service.get_rules()
+    except Exception:
+        return None
+
+
 def _context_dropping_options_to_data(
     options: Optional[DetectContextDroppingOptions],
 ) -> ContextDroppingOptionsData:
-    """Mappe le schéma API vers les options du service (4.10 : tolérance réservée)."""
-    if options is None:
-        return ContextDroppingOptionsData()
-    profile = options.rules_profile or "strict"
+    """Fusionne options requête + règles persistées (Story 4.10).
+
+    Priorité : champs requête explicites > règles persistées > constantes par défaut.
+    """
+    persisted = _load_persisted_cd_rules()
+
+    # Profil : requête > persisté > défaut "strict"
+    if options is not None and options.rules_profile is not None:
+        profile = options.rules_profile
+    elif persisted is not None:
+        profile = persisted.rules_profile
+    else:
+        profile = "strict"
+
     if profile not in ("strict", "light"):
         profile = "strict"
-    return ContextDroppingOptionsData(rules_profile=profile, tolerance=options.tolerance)
+
+    # Tolérance : requête > persisté > None
+    if options is not None and options.tolerance is not None:
+        tolerance = options.tolerance
+    elif persisted is not None:
+        tolerance = persisted.tolerance
+    else:
+        tolerance = None
+
+    # Informations obligatoires : requête > persisté > liste vide
+    if options is not None and options.mandatory_info is not None:
+        mandatory_info = list(options.mandatory_info)
+    elif persisted is not None:
+        mandatory_info = list(persisted.mandatory_info)
+    else:
+        mandatory_info = []
+
+    # Surcharges par type : requête > persisté > vide
+    if options is not None and options.dialogue_type_overrides is not None:
+        dialogue_type_overrides = dict(options.dialogue_type_overrides)
+    elif persisted is not None:
+        dialogue_type_overrides = {
+            k: v if isinstance(v, dict) else v.model_dump()
+            for k, v in persisted.dialogue_type_overrides.items()
+        }
+    else:
+        dialogue_type_overrides = {}
+
+    return ContextDroppingOptionsData(
+        rules_profile=profile,
+        tolerance=tolerance,
+        mandatory_info=mandatory_info,
+        dialogue_type=options.dialogue_type if options is not None else None,
+        dialogue_type_overrides=dialogue_type_overrides,
+    )
 
 
 def _detect_ai_slop_response_from_result(raw: AiSlopDetectionResult) -> DetectAiSlopResponse:

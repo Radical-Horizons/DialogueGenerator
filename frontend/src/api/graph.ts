@@ -27,6 +27,7 @@ import type {
   DetectAiSlopResponse,
   DetectContextDroppingRequest,
   DetectContextDroppingResponse,
+  ContextDroppingRules,
 } from '../types/graph'
 
 /**
@@ -165,6 +166,27 @@ export async function detectContextDropping(
     `/api/v1/unity-dialogues/graph/detect-context-dropping`,
     request,
     { timeout: 60000 }
+  )
+  return response.data
+}
+
+/**
+ * Récupère les règles anti-context-dropping persistées (Story 4.10).
+ */
+export async function getContextDroppingRules(): Promise<ContextDroppingRules> {
+  const response = await apiClient.get<ContextDroppingRules>(
+    `/api/v1/validation/rules/context-dropping`
+  )
+  return response.data
+}
+
+/**
+ * Sauvegarde les règles anti-context-dropping (Story 4.10).
+ */
+export async function putContextDroppingRules(rules: ContextDroppingRules): Promise<ContextDroppingRules> {
+  const response = await apiClient.put<ContextDroppingRules>(
+    `/api/v1/validation/rules/context-dropping`,
+    rules
   )
   return response.data
 }

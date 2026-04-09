@@ -326,14 +326,31 @@ export interface DetectAiSlopResponse {
   message?: string | null
 }
 
-/** Options détection context dropping (FR44) — extension 4.10. */
+/** Options détection context dropping (FR44 / Story 4.10). */
 export interface DetectContextDroppingOptionsState {
   rules_profile?: 'strict' | 'light'
-  /** Réservé 4.10 */
+  tolerance?: number
+  mandatory_info?: string[]
+  dialogue_type?: string
+  dialogue_type_overrides?: Record<string, { rules_profile?: 'strict' | 'light'; tolerance?: number }>
+}
+
+export type ContextDroppingCaseKind = 'context_dropping' | 'too_subtle' | 'mandatory_missing'
+
+/** Surcharge de règles pour un type de dialogue (Story 4.10). */
+export interface DialogueTypeRuleOverride {
+  rules_profile?: 'strict' | 'light'
   tolerance?: number
 }
 
-export type ContextDroppingCaseKind = 'context_dropping' | 'too_subtle'
+/** Règles anti-context-dropping persistées (Story 4.10). */
+export interface ContextDroppingRules {
+  rules_profile: 'strict' | 'light'
+  tolerance?: number | null
+  mandatory_info: string[]
+  dialogue_type_overrides: Record<string, DialogueTypeRuleOverride>
+  schema_version?: string
+}
 
 export interface ContextDroppingCaseItem {
   kind: ContextDroppingCaseKind

@@ -399,17 +399,29 @@ class DetectAiSlopResponse(BaseModel):
 
 
 class DetectContextDroppingOptions(BaseModel):
-    """Options détection context dropping (FR44) — extension Story 4.10 (profil / tolérance)."""
+    """Options détection context dropping (FR44 / Story 4.10)."""
 
     rules_profile: Optional[Literal["strict", "light"]] = Field(
         None,
-        description="Profil par défaut côté serveur si absent : strict. Story 4.10 pourra affiner.",
+        description="Profil : 'strict' (défaut) ou 'light' (tolérance élevée).",
     )
     tolerance: Optional[float] = Field(
         None,
         ge=0.0,
         le=1.0,
-        description="Réservé 4.10 — seuil souple ; ignoré pour le MVP si non implémenté.",
+        description="Seuil souple [0, 1] — None = comportement par défaut du profil.",
+    )
+    mandatory_info: Optional[List[str]] = Field(
+        None,
+        description="Labels d'informations dont la présence est obligatoire dans le graphe (AC #4).",
+    )
+    dialogue_type: Optional[str] = Field(
+        None,
+        description="Type de dialogue (ex. 'combat') pour appliquer les surcharges de règles (AC #5).",
+    )
+    dialogue_type_overrides: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Surcharges par type (ex. {'combat': {'rules_profile': 'strict'}}) (AC #5).",
     )
 
 
@@ -437,9 +449,9 @@ class DetectContextDroppingRequest(BaseModel):
 
 
 class ContextDroppingCaseItem(BaseModel):
-    """Un cas détecté (absence ou usage trop indirect)."""
+    """Un cas détecté (absence, usage trop indirect, ou information obligatoire manquante)."""
 
-    kind: Literal["context_dropping", "too_subtle"] = Field(
+    kind: Literal["context_dropping", "too_subtle", "mandatory_missing"] = Field(
         ...,
         description="Absence détectable ou signal trop faible (subtilité)",
     )

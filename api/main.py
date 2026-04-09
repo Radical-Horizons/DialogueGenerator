@@ -616,6 +616,10 @@ app.include_router(mechanics_flags.router)
 # Router pour l'éditeur de graphe
 app.include_router(graph.router)
 
+# Router pour les règles de validation (Story 4.10)
+from api.routers import validation_rules
+app.include_router(validation_rules.router, prefix="/api/v1", tags=["Validation Rules"])
+
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])
 

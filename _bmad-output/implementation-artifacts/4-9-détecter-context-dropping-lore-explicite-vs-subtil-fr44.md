@@ -2,7 +2,7 @@
 
 Status: done
 
-<!-- Note : validation optionnelle. Exécuter validate-create-story avant dev-story si besoin. -->
+
 
 ## Story
 
@@ -18,34 +18,32 @@ so that **je peux garantir que le contexte GDD sélectionné est effectivement r
 4. **Given** la **Story 4.10** n’est pas encore implémentée, **When** la détection tourne **Then** un **jeu de règles par défaut** (strict / léger ou équivalent minimal) est appliqué **côté serveur** **And** le contrat API prévoit (champs optionnels ou stub documenté) l’**extension** par règles utilisateur sans casser les clients.
 5. **Given** plusieurs cas sont détectés, **When** la réponse revient **Then** un **résumé** du type « X cas de context dropping détectés » est présent **And** la liste détaillée reste non vide si X > 0.
 6. **Given** graphe vide, contexte vide ou erreur serveur, **When** l’API répond **Then** le comportement est **explicite** (message clair, pas de succès silencieux vide confondu avec « RAS »).
-7. **Tests** : **pytest** (service pur + route, données **génériques** inventées — pas de personnages/lieux GDD réels) ; **Vitest** (UI / client) ; **`npm --prefix frontend run lint`** sans régression.
+7. **Tests** : **pytest** (service pur + route, données **génériques** inventées — pas de personnages/lieux GDD réels) ; **Vitest** (UI / client) ; `**npm --prefix frontend run lint`** sans régression.
 
 ## Tasks / Subtasks
 
-- [x] **Task 1** : Service `ContextDroppingDetector` + route API sur payload graphe + contexte (AC: #1, #2, #4, #6, #7)  
-  - [x] 🔴 Test échoue : fixture avec **contexte texte minimal** contenant une **entité / fait** clairement extractible par la heuristique MVP, et **nœuds** sans mention → réponse contient **au moins un** cas `context_dropping` (ou type nommé équivalent) ; fixture **sans contexte** → erreur ou message **documenté**, pas 500 opaque.  
-  - [x] 🟢 Implémenter **`ContextDroppingDetector`** dans **`services/`**, route sous **`/api/v1/unity-dialogues/graph/`** alignée sur **`detect-ai-slop`** / **`validate_graph`** (corps avec `nodes`/`edges` + champs contexte — réutiliser ou mirroir de `context_selections` / blob construit côté client si déjà disponible). Schémas **Pydantic** (`api/schemas/graph.py`) + types **`frontend/src/types/graph.ts`**. Logique **hors router** ; injection **`ServiceContainer`**.  
-  - [x] 🔵 Refactor : isoler **extraction « faits / entités »** (MVP : heuristique simple, pas NLP lourd) de la **comparaison texte** ; éviter fichier router > 300 lignes — extraire helpers réponse comme pour slop.
-
-- [x] **Task 2** : Panneau UI « Context dropping » dans l’éditeur graphe (résumé, liste, navigation nœud) (AC: #1–#6, #7)  
-  - [x] 🔴 Test échoue : mock API → action « Détecter context dropping » → **loading** puis **résumé** + **au moins une ligne** de détail ; erreur API → message visible ; **pas** d’écrasement des états **juge LLM** / **AI slop** (clés d’état distinctes, même principe que story 4.8).  
-  - [x] 🟢 Ajouter composant sous **`frontend/src/components/graph/`** ; client **`frontend/src/api/graph.ts`** ; **`graphViewStore`** / **`jumpToNode`** pour focus. Placer l’entrée **toolbar** / panneau validation de façon **cohérente** avec **FR42/43** (pas trois loaders mutuellement écrasants).  
-  - [x] 🔵 Refactor : si le panneau dépasse **~300 lignes**, extraire **Résumé** + **Liste** ; garder accessibilité basique (titres, listes).
-
-- [x] **Task 3** : Seuil « subtil vs explicite » + suggestions (AC: #3, #5, #7)  
-  - [x] 🔴 Test échoue : cas où l’information est présente sous forme **très indirecte** → le service retourne soit **warning subtilité** soit **absence** selon la règle documentée — **comportement stable** couvert par test nommé.  
-  - [x] 🟢 Implémenter branche **« too_subtle »** ou score minimal **sans LLM obligatoire** pour le MVP ; documenter limites dans Dev Notes (faux positifs / négatifs attendus).  
-  - [x] 🔵 Refactor : centraliser constantes de seuils / messages dans un petit module **`context_dropping_*`** (Python) ou objet de config pour éviter magie dans le détecteur.
+- **Task 1** : Service `ContextDroppingDetector` + route API sur payload graphe + contexte (AC: #1, #2, #4, #6, #7)  
+  - 🔴 Test échoue : fixture avec **contexte texte minimal** contenant une **entité / fait** clairement extractible par la heuristique MVP, et **nœuds** sans mention → réponse contient **au moins un** cas `context_dropping` (ou type nommé équivalent) ; fixture **sans contexte** → erreur ou message **documenté**, pas 500 opaque.  
+  - 🟢 Implémenter `**ContextDroppingDetector`** dans `**services/**`, route sous `**/api/v1/unity-dialogues/graph/**` alignée sur `**detect-ai-slop**` / `**validate_graph**` (corps avec `nodes`/`edges` + champs contexte — réutiliser ou mirroir de `context_selections` / blob construit côté client si déjà disponible). Schémas **Pydantic** (`api/schemas/graph.py`) + types `**frontend/src/types/graph.ts`**. Logique **hors router** ; injection `**ServiceContainer`**.  
+  - 🔵 Refactor : isoler **extraction « faits / entités »** (MVP : heuristique simple, pas NLP lourd) de la **comparaison texte** ; éviter fichier router > 300 lignes — extraire helpers réponse comme pour slop.
+- **Task 2** : Panneau UI « Context dropping » dans l’éditeur graphe (résumé, liste, navigation nœud) (AC: #1–#6, #7)  
+  - 🔴 Test échoue : mock API → action « Détecter context dropping » → **loading** puis **résumé** + **au moins une ligne** de détail ; erreur API → message visible ; **pas** d’écrasement des états **juge LLM** / **AI slop** (clés d’état distinctes, même principe que story 4.8).  
+  - 🟢 Ajouter composant sous `**frontend/src/components/graph/`** ; client `**frontend/src/api/graph.ts**` ; `**graphViewStore**` / `**jumpToNode**` pour focus. Placer l’entrée **toolbar** / panneau validation de façon **cohérente** avec **FR42/43** (pas trois loaders mutuellement écrasants).  
+  - 🔵 Refactor : si le panneau dépasse **~300 lignes**, extraire **Résumé** + **Liste** ; garder accessibilité basique (titres, listes).
+- **Task 3** : Seuil « subtil vs explicite » + suggestions (AC: #3, #5, #7)  
+  - 🔴 Test échoue : cas où l’information est présente sous forme **très indirecte** → le service retourne soit **warning subtilité** soit **absence** selon la règle documentée — **comportement stable** couvert par test nommé.  
+  - 🟢 Implémenter branche **« too_subtle »** ou score minimal **sans LLM obligatoire** pour le MVP ; documenter limites dans Dev Notes (faux positifs / négatifs attendus).  
+  - 🔵 Refactor : centraliser constantes de seuils / messages dans un petit module `**context_dropping_*`** (Python) ou objet de config pour éviter magie dans le détecteur.
 
 ## Dev Notes
 
-- **Architecture** : FastAPI routers minces ; logique **`services/`** ; **`ConfigurationService`** / **`ServiceContainer`** — pas de singletons. Pas de logique métier lourde dans le frontend.  
-- **Réutiliser** : `services/graph_dialogue_text.py` pour parcourir texte nœuds comme lore/slop ; patterns **`GraphValidationService`** / payload **`validate_graph`** pour **context_selections** et enrichment **ContextBuilder** — ne pas dupliquer la construction JSON contexte si une fonction existe déjà ; sinon **appel unique** documenté.  
+- **Architecture** : FastAPI routers minces ; logique `**services/`** ; `**ConfigurationService**` / `**ServiceContainer**` — pas de singletons. Pas de logique métier lourde dans le frontend.  
+- **Réutiliser** : `services/graph_dialogue_text.py` pour parcourir texte nœuds comme lore/slop ; patterns `**GraphValidationService`** / payload `**validate_graph**` pour **context_selections** et enrichment **ContextBuilder** — ne pas dupliquer la construction JSON contexte si une fonction existe déjà ; sinon **appel unique** documenté.  
 - **Ne pas confondre** : **FR38/39** = contradictions / ambiguïtés ; **FR44** = **absence** d’usage du contexte sélectionné. Réutiliser les **structures** de faits si utile, mais le **signal métier** est différent.  
 - **Epic doc** mentionne `POST /api/v1/dialogues/{id}/detect-context-dropping` — **contrat réel du repo** = `POST /api/v1/unity-dialogues/graph/detect-context-dropping` (graphe + `context_selections`, comme FR43 / validate-lore-explicit).  
 - **Story 4.10** : prévoir champs optionnels (`rules_profile`, `tolerance`) **ignorés** ou **partiellement lus** avec défauts sûrs — pas de dépendance dure à 4.10 pour merger 4.9.  
 - **Performance** : pas d’appel LLM **requis** pour le MVP ; viser latence comparable au **slop** sur graphes moyens.  
-- **Tests** : respect **`project-context.md`** — pas de noms GDD réels dans les tests.
+- **Tests** : respect `**project-context.md`** — pas de noms GDD réels dans les tests.
 
 ### Project Structure Notes
 
@@ -132,7 +130,7 @@ Composer (implémentation agentique dev-story)
 
 - **4.8 (done)** : `POST .../detect-ai-slop`, `GraphAiSlopPanel`, `slopDetectionSettings`, états **séparés** du juge LLM — **répliquer le même discipline d’état** pour context dropping.  
 - **4.7** : juge LLM = autre pipeline ; ne pas fusionner loaders.  
-- Fichiers chauds : **`api/routers/graph.py`**, **`GraphEditor*.tsx`**, **`useGraphToolbar.ts`**, **`frontend/src/api/graph.ts`**.
+- Fichiers chauds : `**api/routers/graph.py`**, `**GraphEditor*.tsx**`, `**useGraphToolbar.ts**`, `**frontend/src/api/graph.ts**`.
 
 ## Git Intelligence Summary
 

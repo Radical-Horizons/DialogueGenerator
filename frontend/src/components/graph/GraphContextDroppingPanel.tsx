@@ -1,5 +1,5 @@
 /**
- * Panneau « Context dropping » : absence ou usage trop indirect du contexte GDD (FR44).
+ * Panneau « Context dropping » : absence ou usage trop indirect du contexte GDD (FR44 / 4.10).
  */
 import { useCallback, useState } from 'react'
 import { useGraphStore } from '../../store/graphStore'
@@ -10,6 +10,7 @@ import { getErrorMessage } from '../../types/errors'
 import type { ContextDroppingCaseItem, DetectContextDroppingResponse } from '../../types/graph'
 import { GraphContextDroppingCaseList } from './GraphContextDroppingCaseList'
 import { GraphContextDroppingSummary } from './GraphContextDroppingSummary'
+import { ContextDroppingRulesEditor } from './ContextDroppingRulesEditor'
 
 interface GraphContextDroppingPanelProps {
   onClose: () => void
@@ -24,6 +25,7 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [last, setLast] = useState<DetectContextDroppingResponse | null>(null)
+  const [showRulesEditor, setShowRulesEditor] = useState(false)
 
   const runDetect = useCallback(async () => {
     setLoading(true)
@@ -89,22 +91,47 @@ export function GraphContextDroppingPanel({ onClose }: GraphContextDroppingPanel
         }}
       >
         <strong id="context-dropping-title">Context dropping</strong>
-        <button
-          type="button"
-          data-testid="graph-context-dropping-close"
-          onClick={onClose}
-          style={{
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: 6,
-            background: theme.button.default.background,
-            color: theme.text.primary,
-            cursor: 'pointer',
-            padding: '0.25rem 0.5rem',
-          }}
-        >
-          Fermer
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            type="button"
+            data-testid="graph-context-dropping-settings"
+            onClick={() => setShowRulesEditor((v) => !v)}
+            title="Configurer les règles anti-context-dropping"
+            style={{
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: 6,
+              background: showRulesEditor ? theme.button.selected.background : theme.button.default.background,
+              color: showRulesEditor ? theme.button.selected.color : theme.text.primary,
+              cursor: 'pointer',
+              padding: '0.25rem 0.5rem',
+              fontSize: '0.8rem',
+            }}
+          >
+            ⚙ Règles
+          </button>
+          <button
+            type="button"
+            data-testid="graph-context-dropping-close"
+            onClick={onClose}
+            style={{
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: 6,
+              background: theme.button.default.background,
+              color: theme.text.primary,
+              cursor: 'pointer',
+              padding: '0.25rem 0.5rem',
+            }}
+          >
+            Fermer
+          </button>
+        </div>
       </div>
+
+      {showRulesEditor && (
+        <div style={{ marginBottom: 12 }}>
+          <ContextDroppingRulesEditor onClose={() => setShowRulesEditor(false)} />
+        </div>
+      )}
 
       <button
         type="button"
