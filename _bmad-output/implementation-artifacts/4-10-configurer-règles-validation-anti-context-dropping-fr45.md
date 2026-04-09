@@ -1,6 +1,6 @@
 # Story 4.10 : configurer-règles-validation-anti-context-dropping-fr45
 
-Status: review
+Status: done
 
 <!-- Note: Validation optionnelle. Exécuter validate-create-story pour contrôle qualité avant dev-story si besoin. -->
 
@@ -144,5 +144,5 @@ claude-4.6-sonnet-medium-thinking (2026-04-09)
 
 ## Story completion status
 
-**Statut :** review
-**Note :** Story 4.10 FR45 implémentée — persistance règles GET/PUT, application dans le pipeline, éditeur UI intégré dans GraphContextDroppingPanel. 1550 tests backend ✅, 7 tests Vitest ✅, lint ✅.
+**Statut :** done
+**Note :** Story 4.10 FR45 implémentée et revue — persistance règles GET/PUT, application dans le pipeline, éditeur UI intégré dans GraphContextDroppingPanel. Code review [2026-04-09] : 2 HIGH + 3 MEDIUM corrigés (dual singletons → ServiceContainer, tolerance implémentée, logging restauré, imports intercalés déplacés, section dialogue_type_overrides ajoutée à l'UI). 19 tests backend ✅, 5 tests Vitest ✅, lint ✅.

@@ -50,6 +50,7 @@ from api.exceptions import (
     ValidationException,
 )
 from api.dependencies import (
+    get_cd_rules_service,
     get_config_service,
     get_context_builder,
     get_request_id,
@@ -78,11 +79,7 @@ from services.lore_contradiction_validator import (
     validate_explicit_lore_contradictions,
 )
 from services.graph_node_orchestrator import GraphNodeOrchestrator
-from services.context_dropping_rules_service import ContextDroppingRulesService as _CDRulesService
-
-# Singleton module-level (lazy) pour les règles anti-context-dropping (Story 4.10).
-_CD_RULES_FILE = Path("data") / "validation-rules" / "context-dropping.json"
-_cd_rules_service = _CDRulesService(storage_file=_CD_RULES_FILE)
+from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
@@ -111,22 +108,26 @@ def _ai_slop_options_to_data(
     )
 
 
-def _load_persisted_cd_rules():
-    """Retourne les règles persistées, ou None en cas d'absence/erreur."""
+def _load_persisted_cd_rules(cd_rules_service: ContextDroppingRulesService):
+    """Retourne les règles persistées, ou None en cas d'absence/erreur (avec log)."""
     try:
-        return _cd_rules_service.get_rules()
-    except Exception:
+        return cd_rules_service.get_rules()
+    except Exception as exc:
+        logger.warning(
+            "Règles anti-context-dropping illisibles — fallback sur défauts : %s", exc
+        )
         return None
 
 
 def _context_dropping_options_to_data(
     options: Optional[DetectContextDroppingOptions],
+    cd_rules_service: ContextDroppingRulesService,
 ) -> ContextDroppingOptionsData:
     """Fusionne options requête + règles persistées (Story 4.10).
 
     Priorité : champs requête explicites > règles persistées > constantes par défaut.
     """
-    persisted = _load_persisted_cd_rules()
+    persisted = _load_persisted_cd_rules(cd_rules_service)
 
     # Profil : requête > persisté > défaut "strict"
     if options is not None and options.rules_profile is not None:
@@ -928,6 +929,7 @@ async def detect_ai_slop(
 )
 async def detect_context_dropping(
     request_data: DetectContextDroppingRequest,
+    cd_rules_service: Annotated[ContextDroppingRulesService, Depends(get_cd_rules_service)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> DetectContextDroppingResponse:
     """Détecte l'absence ou l'usage trop indirect du contexte GDD dans le dialogue (FR44).
@@ -942,7 +944,7 @@ async def detect_context_dropping(
             request_data.context_selections,
             scene_instruction=request_data.scene_instruction,
             context_text=request_data.context_text,
-            options=_context_dropping_options_to_data(request_data.options),
+            options=_context_dropping_options_to_data(request_data.options, cd_rules_service),
         )
         return build_detect_context_dropping_response(raw)
     except Exception as e:

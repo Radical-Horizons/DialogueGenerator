@@ -256,7 +256,8 @@
     <critical>REFACTOR QUALITY CRITERIA (defaults; Dev Notes may override thresholds or document an approved exception):
       SOLID/DRY/KISS are the intent; the following checks make that operational:
       - Tests: after refactor, tests scoped to this task still pass 100%.
-      - File size: no source file created or substantively modified for this task exceeds 300 lines unless Dev Notes set a different explicit limit.
+      - File size (new files): no source file CREATED for this task exceeds 300 lines unless Dev Notes set a different explicit limit.
+      - File size (pre-existing hot files): if a pre-existing file TOUCHED by this task (even with a small addition) already exceeded 500 lines at the START of this story, every addition is a quality trigger. Acceptable outcomes: (a) the handler/addition is ≤ 30 lines and delegates entirely to a service (no business logic in the caller), (b) logic is extracted into a new module, OR (c) a named tech-debt item is documented in Dev Agent Record with estimated effort. "I only added N lines" is not acceptable if the file was already a hot file flagged in Dev Notes.
       - Function size: no function/method introduced or materially changed in this task exceeds ~60 lines without splitting or documenting why an exception is warranted in Dev Agent Record.
       - Duplication: no non-trivial duplicated logic across files touched in this task; align with existing helpers/hooks/services per project architecture.
       - Naming: identifiers reflect domain/story language; avoid vague names (data, temp, handle, process) without clear scope.
@@ -264,6 +265,7 @@
       - Comments: only for non-obvious intent or constraints — not line-by-line narration of what the code does.
       - Boundaries: respect layers and patterns in Dev Notes (e.g. no business rules sneaking into UI against project rules); no new dependencies without story approval.
       - Test code: cases and assertions remain readable; no vacuous conditional assertions (see TEST QUALITY GATE in this workflow).
+      - Singletons: never create module-level singleton instances outside ServiceContainer — use dependency injection. If a service is needed per-request, register it in ServiceContainer or pass it as a parameter.
     </critical>
     <action>Improve code structure while keeping tests green; ensure code follows architecture patterns and coding standards from Dev Notes.</action>
 

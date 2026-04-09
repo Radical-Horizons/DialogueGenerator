@@ -124,10 +124,11 @@ development_status:
   4-7-évaluer-qualité-dialogue-avec-llm-judge-score-0-10-1-marge-fr42: done
   4-8-détecter-patterns-ai-slop-gpt-isms-répétition-phrases-génériques-fr43: done
   4-9-détecter-context-dropping-lore-explicite-vs-subtil-fr44: done
-  4-10-configurer-règles-validation-anti-context-dropping-fr45: review
+  4-10-configurer-règles-validation-anti-context-dropping-fr45: done
   4-11-simuler-flux-dialogue-pour-détecter-dead-ends-fr46: ready-for-dev
   4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: backlog
   4-13-valider-conformité-schéma-json-unity-100-fr48: backlog
+  4-14-refactorer-api-routers-graph-dette-technique: backlog
   epic-4-retrospective: optional
   epic-9: backlog
   9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog

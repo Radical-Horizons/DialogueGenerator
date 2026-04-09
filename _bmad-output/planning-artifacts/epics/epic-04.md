@@ -656,3 +656,35 @@ So that **je peux garantir que les exports Unity sont valides et ne causent pas 
 **References:** FR48 (validation schéma Unity), Epic 5 (export Unity), Story 1.5 (édition nœuds)
 
 ---
+
+### Story 4.14: Refactorer `api/routers/graph.py` — découpage en modules cohérents (dette technique)
+
+As a **développeur maintenant la codebase**,
+I want **éclater `api/routers/graph.py` (1 650+ lignes) en modules router cohérents par domaine**,
+So that **chaque module reste lisible, testable indépendamment, et que les futures stories d'epic 4+ ne continuent pas d'alimenter un god-file**.
+
+**Acceptance Criteria:**
+
+**Given** `api/routers/graph.py` contient les domaines suivants : génération de nœuds, estimation de coût, validation lore/structure, détection AI slop, context dropping, simulation de flux, layout, gestion des prompts/accept/reject
+**When** le refactor est terminé
+**Then** chaque module router ne dépasse pas ~400 lignes, chaque module adresse un seul domaine fonctionnel, et tous les endpoints existants répondent identiquement (zéro régression API).
+
+**Given** des helpers privés (`_load_unity_nodes_from_dialogue`, `_reconstruct_prompt_for_node`, etc.) sont actuellement inlined dans `graph.py`
+**When** le refactor est terminé
+**Then** ces helpers sont soit dans le service approprié, soit dans un module `graph_router_helpers.py` si vraiment transverses.
+
+**Given** le singleton `_cd_rules_service` introduit hors `ServiceContainer`
+**When** le refactor est terminé
+**Then** il est remplacé par une injection propre via `ServiceContainer` / `api/dependencies.py`.
+
+**Technical Requirements:**
+
+- Pas de nouveau comportement — refactor pur, zéro feature ajoutée
+- Taille cible par module : ≤ 400 lignes (idéalement ≤ 300)
+- Candidats de découpage : `graph_generation.py`, `graph_validation.py`, `graph_flow_simulation.py`, `graph_cost.py`, `graph_prompt_history.py` (à affiner à l'analyse)
+- `api/main.py` inclut les nouveaux routers avec les mêmes prefixes — contrat URL inchangé
+- Tests : full backend suite verte (1 550+ tests), lint ✅ — preuve de non-régression obligatoire
+
+**References:** Dette accumulée sur epic 4 (stories 4.7 → 4.13), `api/routers/graph.py` commit history
+
+---

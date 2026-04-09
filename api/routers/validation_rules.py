@@ -7,10 +7,11 @@ Routes :
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
+from api.dependencies import get_cd_rules_service
 from api.schemas.validation_rules import ContextDroppingRulesSchema
 from services.context_dropping_rules_service import ContextDroppingRulesService
 
@@ -21,10 +22,6 @@ router = APIRouter(
     tags=["validation-rules"],
 )
 
-# Chemin de stockage relatif à la racine du projet (résolu à l'import).
-_RULES_FILE = Path("data") / "validation-rules" / "context-dropping.json"
-_rules_service = ContextDroppingRulesService(storage_file=_RULES_FILE)
-
 
 @router.get(
     "/context-dropping",
@@ -32,13 +29,15 @@ _rules_service = ContextDroppingRulesService(storage_file=_RULES_FILE)
     status_code=status.HTTP_200_OK,
     summary="Obtenir les règles de détection anti-context-dropping",
 )
-def get_context_dropping_rules() -> ContextDroppingRulesSchema:
+def get_context_dropping_rules(
+    cd_rules_service: Annotated[ContextDroppingRulesService, Depends(get_cd_rules_service)],
+) -> ContextDroppingRulesSchema:
     """Retourne les règles persistées, ou les défauts documentés si le fichier est absent.
 
     Ne retourne jamais 500 opaque : JSON invalide → 422 avec message explicite.
     """
     try:
-        return _rules_service.get_rules()
+        return cd_rules_service.get_rules()
     except ValueError as exc:
         logger.warning("Fichier de règles corrompu : %s", exc)
         raise HTTPException(
@@ -55,6 +54,7 @@ def get_context_dropping_rules() -> ContextDroppingRulesSchema:
 )
 def put_context_dropping_rules(
     body: ContextDroppingRulesSchema,
+    cd_rules_service: Annotated[ContextDroppingRulesService, Depends(get_cd_rules_service)],
 ) -> ContextDroppingRulesSchema:
     """Remplace les règles persistées par les nouvelles valeurs.
 
@@ -62,7 +62,7 @@ def put_context_dropping_rules(
     Erreur d'écriture → 422 avec message explicite.
     """
     try:
-        return _rules_service.save_rules(body)
+        return cd_rules_service.save_rules(body)
     except (ValueError, OSError) as exc:
         logger.error("Impossible de sauvegarder les règles : %s", exc)
         raise HTTPException(

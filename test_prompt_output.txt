@@ -155,9 +155,9 @@ Les traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche').
     </dialogue_guide>
   <narrative_guide />
   <extracted_rules>STRUCTURE:
-- Narration systémique
-- Narration linéaire / directe
 - La Prémisse (John Truby)
+- Narration linéaire / directe
+- Narration systémique
 - Narration environnementale
 </extracted_rules>
   </narrative_guides>

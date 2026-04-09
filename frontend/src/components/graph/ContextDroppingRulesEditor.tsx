@@ -7,14 +7,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import * as graphAPI from '../../api/graph'
 import { getErrorMessage } from '../../types/errors'
-import type { ContextDroppingRules } from '../../types/graph'
+import type { ContextDroppingRules, DialogueTypeRuleOverride } from '../../types/graph'
 import { theme } from '../../theme'
 
 interface ContextDroppingRulesEditorProps {
   onClose: () => void
 }
 
-const DEFAULT_RULES: ContextDroppingRules = { rules_profile: 'strict', tolerance: null, mandatory_info: [], dialogue_type_overrides: {} }
+const DEFAULT_RULES: ContextDroppingRules = {
+  rules_profile: 'strict',
+  tolerance: null,
+  mandatory_info: [],
+  dialogue_type_overrides: {},
+  schema_version: '1.0',
+}
 
 export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEditorProps) {
   const [rules, setRules] = useState<ContextDroppingRules>(DEFAULT_RULES)
@@ -70,6 +76,22 @@ export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEdit
 
   const removeMandatoryInfo = (idx: number) =>
     setRules((r) => ({ ...r, mandatory_info: r.mandatory_info.filter((_, i) => i !== idx) }))
+
+  const addTypeOverride = (dialogueType: string, override: DialogueTypeRuleOverride) => {
+    const key = dialogueType.trim()
+    if (!key) return
+    setRules((r) => ({
+      ...r,
+      dialogue_type_overrides: { ...r.dialogue_type_overrides, [key]: override },
+    }))
+  }
+
+  const removeTypeOverride = (dialogueType: string) =>
+    setRules((r) => {
+      const next = { ...r.dialogue_type_overrides }
+      delete next[dialogueType]
+      return { ...r, dialogue_type_overrides: next }
+    })
 
   // ── Rendu ─────────────────────────────────────────────────────────────────
 
@@ -191,6 +213,14 @@ export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEdit
         disabled={loading}
       />
 
+      {/* ── Règles par type de dialogue ────────────────────────────────────── */}
+      <DialogueTypeOverridesSection
+        overrides={rules.dialogue_type_overrides}
+        onAdd={addTypeOverride}
+        onRemove={removeTypeOverride}
+        disabled={loading}
+      />
+
       {/* ── Actions ────────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'flex-end' }}>
         <button
@@ -214,6 +244,140 @@ export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEdit
           }}
         >
           {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Sous-composant : règles par type de dialogue ──────────────────────────────
+
+interface DialogueTypeOverridesSectionProps {
+  overrides: Record<string, DialogueTypeRuleOverride>
+  onAdd: (dialogueType: string, override: DialogueTypeRuleOverride) => void
+  onRemove: (dialogueType: string) => void
+  disabled: boolean
+}
+
+function DialogueTypeOverridesSection({
+  overrides,
+  onAdd,
+  onRemove,
+  disabled,
+}: DialogueTypeOverridesSectionProps) {
+  const [draftType, setDraftType] = useState('')
+  const [draftProfile, setDraftProfile] = useState<'strict' | 'light'>('strict')
+  const [draftTolerance, setDraftTolerance] = useState('')
+
+  const handleAdd = () => {
+    if (!draftType.trim()) return
+    const override: DialogueTypeRuleOverride = { rules_profile: draftProfile }
+    const t = parseFloat(draftTolerance)
+    if (!isNaN(t)) override.tolerance = Math.min(1, Math.max(0, t))
+    onAdd(draftType, override)
+    setDraftType('')
+    setDraftTolerance('')
+  }
+
+  const entries = Object.entries(overrides)
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <span style={{ display: 'block', fontSize: 12, color: theme.text.secondary, marginBottom: 4 }}>
+        Règles par type de dialogue
+      </span>
+
+      {entries.length === 0 && (
+        <p style={{ fontSize: 11, color: theme.text.tertiary, margin: '4px 0' }}>
+          Aucune surcharge par type définie (règles globales appliquées).
+        </p>
+      )}
+
+      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 6px 0' }}>
+        {entries.map(([typeKey, override]) => (
+          <li
+            key={typeKey}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}
+          >
+            <span style={{ flex: 1, fontSize: 12, color: theme.text.primary }}>
+              <strong>{typeKey}</strong>
+              {' — '}
+              {override.rules_profile ?? '(profil global)'}
+              {override.tolerance != null ? ` · tol. ${override.tolerance}` : ''}
+            </span>
+            <button
+              onClick={() => onRemove(typeKey)}
+              disabled={disabled}
+              aria-label={`Supprimer règle pour ${typeKey}`}
+              style={{ fontSize: 10, padding: '2px 6px', cursor: 'pointer' }}
+            >
+              ✕
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          type="text"
+          value={draftType}
+          onChange={(e) => setDraftType(e.target.value)}
+          aria-label="Type de dialogue"
+          placeholder="Type (ex. combat)"
+          disabled={disabled}
+          style={{
+            flex: '1 1 100px',
+            fontSize: 12,
+            padding: '3px 8px',
+            background: theme.input.background,
+            color: theme.text.primary,
+            border: `1px solid ${theme.input.border}`,
+            borderRadius: 4,
+          }}
+        />
+        <select
+          value={draftProfile}
+          onChange={(e) => setDraftProfile(e.target.value as 'strict' | 'light')}
+          aria-label="Mode de détection pour ce type"
+          disabled={disabled}
+          style={{
+            fontSize: 12,
+            padding: '3px 6px',
+            background: theme.input.background,
+            color: theme.text.primary,
+            border: `1px solid ${theme.input.border}`,
+            borderRadius: 4,
+          }}
+        >
+          <option value="strict">Strict</option>
+          <option value="light">Léger</option>
+        </select>
+        <input
+          type="number"
+          min={0}
+          max={1}
+          step={0.05}
+          value={draftTolerance}
+          onChange={(e) => setDraftTolerance(e.target.value)}
+          aria-label="Tolérance pour ce type"
+          placeholder="Tol."
+          disabled={disabled}
+          style={{
+            width: 60,
+            fontSize: 12,
+            padding: '3px 6px',
+            background: theme.input.background,
+            color: theme.text.primary,
+            border: `1px solid ${theme.input.border}`,
+            borderRadius: 4,
+          }}
+        />
+        <button
+          onClick={handleAdd}
+          disabled={disabled || !draftType.trim()}
+          style={{ fontSize: 11, padding: '3px 10px', cursor: 'pointer' }}
+        >
+          Ajouter
         </button>
       </div>
     </div>

@@ -86,8 +86,17 @@ def _word_in_text(word: str, haystack: str) -> bool:
 def _classify_phrase(
     phrase: ContextKeyPhrase,
     combined_norm: str,
+    tolerance: Optional[float] = None,
 ) -> Tuple[Optional[CaseKind], Optional[str]]:
-    """Retourne (kind, suggestion) ou (None, None) si la mention est jugée utilisée."""
+    """Retourne (kind, suggestion) ou (None, None) si la mention est jugée utilisée.
+
+    Args:
+        phrase: Mention extraite du contexte GDD.
+        combined_norm: Texte agrégé normalisé de tous les nœuds.
+        tolerance: Ratio minimal [0, 1] de mots-clés trouvés pour accepter une
+            mention partielle sans la signaler ``too_subtle``.  ``None`` = seuil
+            strict (tout ou rien pour les mentions multi-mots).
+    """
     full = phrase.normalized
     if not full:
         return None, None
@@ -98,20 +107,23 @@ def _classify_phrase(
     words = significant_words(full)
     if len(words) >= MIN_WORDS_FOR_SUBTLETY:
         hits = sum(1 for w in words if _word_in_text(w, combined_norm))
-        if 0 < hits < len(words):
-            return (
-                "too_subtle",
-                (
-                    f"Renforcez l'explicitation : la mention « {phrase.label} » du contexte "
-                    f"n'est reflétée que partiellement dans le dialogue (signal trop indirect pour le MVP)."
-                ),
-            )
         if hits == 0:
             return (
                 "context_dropping",
                 (
                     f"Context dropping : « {phrase.label} » (contexte) n'apparaît pas de façon "
                     f"détectable dans les lignes et choix analysés."
+                ),
+            )
+        if 0 < hits < len(words):
+            # Avec tolérance : accepter si le ratio de mots trouvés >= seuil.
+            if tolerance is not None and hits / len(words) >= tolerance:
+                return None, None
+            return (
+                "too_subtle",
+                (
+                    f"Renforcez l'explicitation : la mention « {phrase.label} » du contexte "
+                    f"n'est reflétée que partiellement dans le dialogue (signal trop indirect pour le MVP)."
                 ),
             )
         return None, None
@@ -134,6 +146,21 @@ def _resolve_effective_profile(opts: ContextDroppingOptionsData) -> RulesProfile
         if candidate in ("strict", "light"):
             return candidate
     return opts.rules_profile if opts.rules_profile in ("strict", "light") else "strict"
+
+
+def _resolve_effective_tolerance(opts: ContextDroppingOptionsData) -> Optional[float]:
+    """Retourne la tolérance effective selon les overrides par type (fallback : globale).
+
+    La tolérance est le ratio minimal de mots-clés trouvés pour qu'une mention
+    partielle soit jugée acceptable (pas ``too_subtle``).  ``None`` = comportement
+    par défaut du profil (inchangé par rapport à FR44).
+    """
+    override = opts.dialogue_type_overrides.get(opts.dialogue_type or "")
+    if override:
+        t = override.get("tolerance")
+        if t is not None and isinstance(t, (int, float)):
+            return float(t)
+    return opts.tolerance
 
 
 def _check_mandatory_info(
@@ -186,6 +213,7 @@ class ContextDroppingDetector:
         """Analyse le graphe ; ``edges`` réservé pour cohérence d'API avec les autres détecteurs."""
         opts = options or ContextDroppingOptionsData()
         profile: RulesProfile = _resolve_effective_profile(opts)
+        effective_tolerance: Optional[float] = _resolve_effective_tolerance(opts)
         result = ContextDroppingDetectionResult(rules_profile_effective=profile)
 
         if not nodes:
@@ -234,7 +262,7 @@ class ContextDroppingDetector:
             return result
 
         for phrase in phrases:
-            kind, user_hint = _classify_phrase(phrase, combined_norm)
+            kind, user_hint = _classify_phrase(phrase, combined_norm, tolerance=effective_tolerance)
             if kind is None:
                 continue
             assert user_hint is not None
