@@ -3,6 +3,8 @@
  */
 import { UsageDashboard } from './UsageDashboard'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 interface UsageStatsModalProps {
   isOpen: boolean
@@ -10,6 +12,8 @@ interface UsageStatsModalProps {
 }
 
 export function UsageStatsModal({ isOpen, onClose }: UsageStatsModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(720)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   if (!isOpen) return null
 
   return (
@@ -41,11 +45,12 @@ export function UsageStatsModal({ isOpen, onClose }: UsageStatsModalProps) {
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         {/* Header */}
         <div
           style={{
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             display: 'flex',
             justifyContent: 'space-between',
@@ -53,14 +58,16 @@ export function UsageStatsModal({ isOpen, onClose }: UsageStatsModalProps) {
             flexShrink: 0,
           }}
         >
-          <h2 style={{ margin: 0, color: theme.text.primary }}>Statistiques d'utilisation LLM</h2>
+          <h2 style={{ margin: 0, color: theme.text.primary, fontSize: `${typo.titleFontRem}rem` }}>
+            Statistiques d'utilisation LLM
+          </h2>
           <button
             onClick={onClose}
             style={{
               background: 'none',
               border: 'none',
               color: theme.text.secondary,
-              fontSize: '1.5rem',
+              fontSize: `${typo.titleFontRem}rem`,
               cursor: 'pointer',
               padding: '0.25rem 0.5rem',
             }}
@@ -73,7 +80,7 @@ export function UsageStatsModal({ isOpen, onClose }: UsageStatsModalProps) {
           style={{
             flex: 1,
             overflow: 'auto',
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
           }}
         >
           <UsageDashboard />

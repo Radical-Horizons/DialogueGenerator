@@ -8,6 +8,7 @@ import type { ContextSectionUsageItem } from '../../api/llmUsage'
 import { useGraphStore } from '../../store/graphStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { labelForEntityType } from '../../utils/contextUsageLabels'
 import { ContextSectionUsageModal } from './ContextSectionUsageModal'
 import { ContextComparisonView } from './ContextComparisonView'
@@ -106,7 +107,7 @@ export function ContextUsagePanel() {
         data-testid="context-usage-panel"
         style={{
           padding: '0.6rem 0.75rem',
-          fontSize: '0.8rem',
+          fontSize: remSize('body'),
           color: theme.text.secondary,
           borderTop: `1px solid ${theme.border.primary}`,
         }}
@@ -122,7 +123,7 @@ export function ContextUsagePanel() {
         data-testid="context-usage-panel"
         style={{
           padding: '0.6rem 0.75rem',
-          fontSize: '0.8rem',
+          fontSize: remSize('body'),
           color: theme.text.secondary,
           borderTop: `1px solid ${theme.border.primary}`,
         }}
@@ -138,7 +139,7 @@ export function ContextUsagePanel() {
       style={{
         borderTop: `1px solid ${theme.border.primary}`,
         padding: '0.6rem 0.75rem',
-        fontSize: '0.8rem',
+        fontSize: remSize('body'),
       }}
     >
       <div style={{ fontWeight: 600, marginBottom: '0.35rem' }}>Détails contexte (sections)</div>
@@ -160,7 +161,7 @@ export function ContextUsagePanel() {
               data-testid="context-usage-parser-note"
               style={{
                 marginBottom: '0.45rem',
-                fontSize: '0.72rem',
+                fontSize: remSize('caption'),
                 color: theme.text.secondary,
                 lineHeight: 1.35,
               }}
@@ -259,7 +260,7 @@ export function ContextUsagePanel() {
                   width: '100%',
                   maxWidth: 320,
                   marginBottom: '0.5rem',
-                  fontSize: '0.85rem',
+                  fontSize: remSize('accent'),
                 }}
               >
                 <option value="">—</option>

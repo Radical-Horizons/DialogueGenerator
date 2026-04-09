@@ -7,6 +7,7 @@ import { memo, useEffect, useState } from 'react'
 import { useContextRulesStore } from '../../store/contextRulesStore'
 import type { ContextRule, EntityTypeStr } from '../../types/api'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 
 const ENTITY_TYPE_OPTIONS: { value: EntityTypeStr; label: string }[] = [
   { value: 'character', label: 'Personnage' },
@@ -56,10 +57,10 @@ const RuleItem = memo(function RuleItem({
         borderBottom: `1px solid ${theme.border.primary}`,
       }}
     >
-      <span style={{ flex: 1, color: theme.text.primary, fontSize: '0.85rem' }}>{rule.name}</span>
+      <span style={{ flex: 1, color: theme.text.primary, fontSize: remSize('accent') }}>{rule.name}</span>
       <span
         style={{
-          fontSize: '0.7rem',
+          fontSize: remSize('caption'),
           color: theme.text.secondary,
           minWidth: '1.5rem',
           textAlign: 'right',
@@ -71,7 +72,7 @@ const RuleItem = memo(function RuleItem({
       <span
         data-testid="rule-badge"
         style={{
-          fontSize: '0.7rem',
+          fontSize: remSize('caption'),
           padding: '1px 5px',
           borderRadius: 3,
           backgroundColor: rule.enabled ? '#2d6a4f' : theme.background.tertiary,
@@ -253,7 +254,7 @@ export function ContextRulesEditor() {
       style={{
         backgroundColor: theme.background.secondary,
         borderTop: `1px solid ${theme.border.primary}`,
-        fontSize: '0.85rem',
+        fontSize: remSize('accent'),
       }}
     >
       {/* Header */}
@@ -287,7 +288,7 @@ export function ContextRulesEditor() {
             cursor: 'pointer',
             backgroundColor: theme.background.tertiary,
             color: theme.text.primary,
-            fontSize: '0.8rem',
+            fontSize: remSize('small'),
           }}
         >
           + Ajouter règle
@@ -298,7 +299,7 @@ export function ContextRulesEditor() {
         <div
           style={{
             padding: '0.35rem 0.5rem',
-            fontSize: '0.78rem',
+            fontSize: remSize('small'),
             color: theme.text.secondary,
             borderBottom: `1px solid ${theme.border.primary}`,
           }}
@@ -308,18 +309,18 @@ export function ContextRulesEditor() {
       )}
 
       {error && (
-        <div style={{ padding: '0.3rem 0.5rem', color: theme.state.error.color, fontSize: '0.8rem' }}>
+        <div style={{ padding: '0.3rem 0.5rem', color: theme.state.error.color, fontSize: remSize('small') }}>
           {error}
         </div>
       )}
 
       {/* Liste des règles */}
       {isLoading ? (
-        <div style={{ padding: '0.4rem 0.5rem', color: theme.text.secondary, fontSize: '0.8rem' }}>
+        <div style={{ padding: '0.4rem 0.5rem', color: theme.text.secondary, fontSize: remSize('small') }}>
           Chargement…
         </div>
       ) : rules.length === 0 && !showForm ? (
-        <div style={{ padding: '0.4rem 0.5rem', color: theme.text.secondary, fontStyle: 'italic', fontSize: '0.8rem' }}>
+        <div style={{ padding: '0.4rem 0.5rem', color: theme.text.secondary, fontStyle: 'italic', fontSize: remSize('small') }}>
           Aucune règle définie. Cliquez "+ Ajouter règle" pour en créer une.
         </div>
       ) : (
@@ -367,7 +368,7 @@ export function ContextRulesEditor() {
                   aria-label="Opérateur de conditions"
                   value={form.conditionOperator}
                   onChange={e => setForm(prev => ({ ...prev, conditionOperator: e.target.value as 'AND' | 'OR' }))}
-                  style={{ ...inputStyle, width: 'auto', padding: '1px 4px', fontSize: '0.75rem' }}
+                  style={{ ...inputStyle, width: 'auto', padding: '1px 4px', fontSize: remSize('caption') }}
                 >
                   <option value="OR">AU MOINS UNE (OU)</option>
                   <option value="AND">TOUTES (ET)</option>
@@ -398,7 +399,7 @@ export function ContextRulesEditor() {
                   <button
                     aria-label={`Supprimer condition ${i + 1}`}
                     onClick={() => removeCondition(i)}
-                    style={{ ...iconBtnStyle, color: theme.state.error.color, fontSize: '0.8rem' }}
+                    style={{ ...iconBtnStyle, color: theme.state.error.color, fontSize: remSize('small') }}
                   >
                     ✕
                   </button>
@@ -407,7 +408,7 @@ export function ContextRulesEditor() {
             ))}
             <button
               onClick={addCondition}
-              style={{ ...actionBtnStyle, backgroundColor: theme.background.tertiary, color: theme.text.secondary, fontSize: '0.75rem', padding: '2px 6px', marginTop: '0.2rem' }}
+              style={{ ...actionBtnStyle, backgroundColor: theme.background.tertiary, color: theme.text.secondary, fontSize: remSize('caption'), padding: '2px 6px', marginTop: '0.2rem' }}
             >
               + Condition
             </button>
@@ -466,7 +467,7 @@ const iconBtnStyle: React.CSSProperties = {
   border: 'none',
   cursor: 'pointer',
   padding: '0 3px',
-  fontSize: '0.9rem',
+  fontSize: remSize('body'),
   color: theme.text.secondary,
 }
 
@@ -477,7 +478,7 @@ const inputStyle: React.CSSProperties = {
   border: `1px solid ${theme.border.primary}`,
   borderRadius: 3,
   color: theme.text.primary,
-  fontSize: '0.82rem',
+  fontSize: remSize('body'),
   boxSizing: 'border-box',
 }
 
@@ -486,6 +487,6 @@ const actionBtnStyle: React.CSSProperties = {
   borderRadius: 3,
   padding: '3px 10px',
   cursor: 'pointer',
-  fontSize: '0.82rem',
+  fontSize: remSize('body'),
   fontWeight: 600,
 }

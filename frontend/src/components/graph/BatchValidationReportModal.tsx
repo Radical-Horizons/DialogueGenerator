@@ -2,6 +2,8 @@
  * Modal affichant le rapport de validation pour les nœuds sélectionnés (Story 2.11 FR32).
  */
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 import type { ValidationErrorDetail } from '../../types/graph'
 
 export interface BatchValidationReportModalProps {
@@ -17,6 +19,8 @@ export function BatchValidationReportModal({
   validationErrors,
   selectedNodeIds,
 }: BatchValidationReportModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   if (!isOpen) return null
 
   const selectedSet = new Set(selectedNodeIds)
@@ -58,14 +62,15 @@ export function BatchValidationReportModal({
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         <div
           id="batch-validation-report-title"
           style={{
-            padding: '1rem 1.25rem',
+            padding: isNarrow ? '0.85rem' : '1rem 1.25rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             fontWeight: 700,
-            fontSize: '1rem',
+            fontSize: `${typo.titleFontRem}rem`,
             color: theme.text.primary,
           }}
         >
@@ -75,14 +80,14 @@ export function BatchValidationReportModal({
         </div>
         <div
           style={{
-            padding: '1rem 1.25rem',
+            padding: isNarrow ? '0.85rem' : '1rem 1.25rem',
             overflow: 'auto',
             flex: 1,
             minHeight: 0,
           }}
         >
           {filtered.length === 0 ? (
-            <p style={{ margin: 0, color: theme.state.success.color }}>
+            <p style={{ margin: 0, color: theme.state.success.color, fontSize: `${typo.bodyFontRem}rem` }}>
               Aucune erreur ni avertissement pour les nœuds sélectionnés.
             </p>
           ) : (
@@ -91,7 +96,7 @@ export function BatchValidationReportModal({
                 <div style={{ marginBottom: '1rem' }}>
                   <div
                     style={{
-                      fontSize: '0.85rem',
+                      fontSize: `${typo.subtitleFontRem}rem`,
                       fontWeight: 600,
                       color: theme.state.error.color,
                       marginBottom: '0.35rem',
@@ -104,7 +109,7 @@ export function BatchValidationReportModal({
                       <li
                         key={`e-${i}`}
                         style={{
-                          fontSize: '0.85rem',
+                          fontSize: `${typo.bodyFontRem}rem`,
                           color: theme.text.primary,
                           marginBottom: '0.25rem',
                         }}
@@ -122,7 +127,7 @@ export function BatchValidationReportModal({
                 <div>
                   <div
                     style={{
-                      fontSize: '0.85rem',
+                      fontSize: `${typo.subtitleFontRem}rem`,
                       fontWeight: 600,
                       color: theme.state.warning.color,
                       marginBottom: '0.35rem',
@@ -135,7 +140,7 @@ export function BatchValidationReportModal({
                       <li
                         key={`w-${i}`}
                         style={{
-                          fontSize: '0.85rem',
+                          fontSize: `${typo.bodyFontRem}rem`,
                           color: theme.text.primary,
                           marginBottom: '0.25rem',
                         }}
@@ -170,7 +175,7 @@ export function BatchValidationReportModal({
               backgroundColor: theme.button.default.background,
               color: theme.button.default.color,
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: `${typo.bodyFontRem}rem`,
             }}
           >
             Fermer

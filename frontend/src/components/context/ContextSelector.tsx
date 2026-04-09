@@ -40,6 +40,7 @@ import { useContextStore } from '../../store/contextStore'
 import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 
 type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -493,7 +494,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
               color: theme.text.primary,
               cursor: 'pointer',
               fontWeight: activeTab === key ? 'bold' : 'normal',
-              fontSize: '0.85rem',
+              fontSize: remSize('accent'),
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -527,7 +528,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
                   color: theme.text.primary,
                   cursor: 'pointer',
                   fontWeight: overflowHasActive ? 'bold' : 'normal',
-                  fontSize: '0.85rem',
+                  fontSize: remSize('accent'),
                   whiteSpace: 'nowrap',
                   boxSizing: 'border-box',
                 }}
@@ -564,7 +565,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
                         color: theme.text.primary,
                         cursor: 'pointer',
                         fontWeight: activeTab === key ? 'bold' : 'normal',
-                        fontSize: '0.85rem',
+                        fontSize: remSize('accent'),
                         textAlign: 'left',
                       }}
                     >
@@ -595,7 +596,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
             backgroundColor: showRulesEditor ? theme.background.tertiary : 'transparent',
             color: theme.text.primary,
             cursor: 'pointer',
-            fontSize: '1rem',
+            fontSize: remSize('section'),
             boxSizing: 'border-box',
           }}
         >
@@ -612,7 +613,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           padding: '0.5rem', 
           backgroundColor: theme.state.error.background, 
           color: theme.state.error.color, 
-          fontSize: '0.9rem' 
+          fontSize: remSize('body') 
         }}>
           {error}
         </div>
@@ -661,7 +662,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           style={{
             padding: '0.45rem 0.75rem',
             cursor: 'pointer',
-            fontSize: '0.78rem',
+            fontSize: remSize('small'),
             fontWeight: 600,
             color: theme.text.primary,
             listStyle: 'none',

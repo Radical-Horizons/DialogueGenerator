@@ -4,6 +4,8 @@
  */
 import { memo, useCallback, useState } from 'react'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 import type { NodePromptResponse } from '../../types/graph'
 
 export interface PromptViewerModalProps {
@@ -47,7 +49,7 @@ const preStyle: React.CSSProperties = {
   backgroundColor: theme.background.secondary,
   border: `1px solid ${theme.border.primary}`,
   borderRadius: '4px',
-  fontSize: '0.85rem',
+  fontSize: '0.75rem',
   lineHeight: 1.5,
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
@@ -103,6 +105,8 @@ export const PromptViewerModal = memo(function PromptViewerModal({
   isLoading = false,
   onClose,
 }: PromptViewerModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   const [copied, setCopied] = useState(false)
 
   const handleCopy = useCallback(async () => {
@@ -135,16 +139,29 @@ export const PromptViewerModal = memo(function PromptViewerModal({
       style={modalStyle}
       onClick={handleBackdropClick}
     >
-      <div onClick={(e) => e.stopPropagation()} style={panelStyle}>
+      <div
+        ref={panelRef}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          ...panelStyle,
+          padding: isNarrow ? '0.9rem' : panelStyle.padding,
+          minWidth: isNarrow ? 'unset' : panelStyle.minWidth,
+        }}
+      >
         <h3
           id="prompt-viewer-modal-title"
-          style={{ marginTop: 0, marginBottom: '1rem', color: theme.text.primary }}
+          style={{
+            marginTop: 0,
+            marginBottom: '1rem',
+            color: theme.text.primary,
+            fontSize: `${typo.titleFontRem}rem`,
+          }}
         >
           Prompt envoyé au LLM
         </h3>
 
         {isLoading && (
-          <p style={{ color: theme.text.secondary, marginBottom: '1rem' }}>
+          <p style={{ color: theme.text.secondary, marginBottom: '1rem', fontSize: `${typo.bodyFontRem}rem` }}>
             Chargement…
           </p>
         )}
@@ -159,7 +176,7 @@ export const PromptViewerModal = memo(function PromptViewerModal({
               border: `1px solid ${theme.state?.error?.color ?? '#E74C3C'}`,
               borderRadius: '4px',
               color: theme.text.primary,
-              fontSize: '0.9rem',
+              fontSize: `${typo.bodyFontRem}rem`,
             }}
           >
             {error}
@@ -176,7 +193,7 @@ export const PromptViewerModal = memo(function PromptViewerModal({
               border: `1px solid ${theme.state?.warning?.color ?? '#F5A623'}`,
               borderRadius: '4px',
               color: theme.text.primary,
-              fontSize: '0.85rem',
+              fontSize: `${typo.bodyFontRem}rem`,
             }}
           >
             {data.message}
@@ -197,7 +214,7 @@ export const PromptViewerModal = memo(function PromptViewerModal({
             >
               <span
                 style={{
-                  fontSize: '0.85rem',
+                  fontSize: `${typo.smallFontRem}rem`,
                   color: theme.text.secondary,
                 }}
               >
@@ -216,7 +233,7 @@ export const PromptViewerModal = memo(function PromptViewerModal({
                   borderRadius: '4px',
                   color: theme.text.primary,
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
+                  fontSize: `${typo.bodyFontRem}rem`,
                 }}
               >
                 {copied ? 'Copié' : 'Copier'}
@@ -227,7 +244,7 @@ export const PromptViewerModal = memo(function PromptViewerModal({
                 <div key={title}>
                   <div
                     style={{
-                      fontSize: '0.75rem',
+                      fontSize: `${typo.captionFontRem}rem`,
                       fontWeight: 600,
                       color: theme.text.secondary,
                       marginBottom: '0.25rem',
@@ -237,7 +254,7 @@ export const PromptViewerModal = memo(function PromptViewerModal({
                   >
                     {title}
                   </div>
-                  <pre style={preStyle}>{content}</pre>
+                  <pre style={{ ...preStyle, fontSize: `${typo.smallFontRem}rem` }}>{content}</pre>
                 </div>
               ))}
             </div>

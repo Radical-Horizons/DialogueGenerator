@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useContextStore } from '../../store/contextStore'
 import type { SuggestionEntityType, SuggestionItem } from '../../types/api'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 
 const TYPE_LABEL: Record<SuggestionEntityType, string> = {
   character: 'Personnages',
@@ -44,7 +45,7 @@ export function ContextSuggestionsPanel() {
       style={{
         borderTop: `1px solid ${theme.border.primary}`,
         backgroundColor: theme.background.secondary,
-        fontSize: '0.85rem',
+        fontSize: remSize('accent'),
       }}
     >
       {/* Header cliquable */}
@@ -63,12 +64,12 @@ export function ContextSuggestionsPanel() {
           cursor: 'pointer',
           color: suggestions.length > 0 ? theme.text.primary : theme.text.secondary,
           fontWeight: suggestions.length > 0 ? 600 : 400,
-          fontSize: '0.85rem',
+          fontSize: remSize('accent'),
           opacity: suggestions.length === 0 ? 0.6 : 1,
         }}
       >
         <span>💡 Suggestions ({suggestions.length})</span>
-        <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>{isOpen ? '▲' : '▼'}</span>
+        <span style={{ fontSize: remSize('caption'), opacity: 0.7 }}>{isOpen ? '▲' : '▼'}</span>
       </button>
 
       {/* Corps dépliant */}
@@ -80,7 +81,7 @@ export function ContextSuggestionsPanel() {
                 margin: 0,
                 padding: '0.25rem 0',
                 color: theme.text.secondary,
-                fontSize: '0.8rem',
+                fontSize: remSize('small'),
                 fontStyle: 'italic',
               }}
             >
@@ -161,7 +162,7 @@ const baseButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
   borderRadius: '3px',
   padding: '1px 6px',
-  fontSize: '0.78rem',
+  fontSize: remSize('caption'),
   fontWeight: 600,
 }
 

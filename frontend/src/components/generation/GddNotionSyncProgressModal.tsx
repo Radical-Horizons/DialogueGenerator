@@ -4,6 +4,9 @@
 import type { CSSProperties } from 'react'
 import type { GddNotionSyncProgressResponse } from '../../api/gddNotionSync'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 export interface GddNotionSyncProgressModalProps {
   open: boolean
@@ -34,9 +37,9 @@ export function GddNotionSyncProgressModal({
   onUnpause,
   onCancel,
 }: GddNotionSyncProgressModalProps) {
-  if (!open) {
-    return null
-  }
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
+  if (!open) return null
 
   const p = progress
   const pagesTotal = p?.pages_total_known ?? 0
@@ -53,14 +56,30 @@ export function GddNotionSyncProgressModal({
       aria-labelledby="gdd-notion-sync-progress-title"
       style={overlayStyle}
     >
-      <div style={cardStyle}>
+      <div
+        ref={panelRef}
+        style={{
+          ...cardStyle,
+          padding: isNarrow ? '0.85rem' : cardStyle.padding,
+        }}
+      >
         <h3
           id="gdd-notion-sync-progress-title"
-          style={{ margin: '0 0 0.75rem 0', color: theme.text.primary }}
+          style={{
+            margin: '0 0 0.75rem 0',
+            color: theme.text.primary,
+            fontSize: `${typo.titleFontRem}rem`,
+          }}
         >
           Synchronisation GDD en cours
         </h3>
-        <p style={{ margin: '0 0 1rem 0', color: theme.text.secondary, fontSize: '0.9rem' }}>
+        <p
+          style={{
+            margin: '0 0 1rem 0',
+            color: theme.text.secondary,
+            fontSize: `${typo.bodyFontRem}rem`,
+          }}
+        >
           Mode :{' '}
           <strong style={{ color: theme.text.primary }}>
             {modeFull
@@ -94,7 +113,7 @@ export function GddNotionSyncProgressModal({
           {p?.current_category_file ? (
             <>
               <dt>Fichier cible</dt>
-              <dd style={{ ...ddStyle, fontFamily: 'monospace', fontSize: '0.82rem' }}>
+              <dd style={{ ...ddStyle, fontFamily: 'monospace', fontSize: `${typo.bodyFontRem}rem` }}>
                 {p.current_category_file}
               </dd>
             </>
@@ -130,12 +149,18 @@ export function GddNotionSyncProgressModal({
               />
             )}
           </div>
-          <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.78rem', color: theme.text.secondary }}>
+          <p
+            style={{
+              margin: '0.35rem 0 0 0',
+              fontSize: `${typo.smallFontRem}rem`,
+              color: theme.text.secondary,
+            }}
+          >
             {p?.message || 'Connexion au serveur…'}
           </p>
         </div>
 
-        <p style={{ margin: 0, fontSize: '0.78rem', color: theme.text.secondary }}>
+        <p style={{ margin: 0, fontSize: `${typo.smallFontRem}rem`, color: theme.text.secondary }}>
           Le total « pages » augmente au fil des sources : ce n’est pas un bug.
         </p>
 
@@ -188,7 +213,7 @@ const modalButtonStyle: CSSProperties = {
   backgroundColor: theme.background.secondary,
   color: theme.text.primary,
   cursor: 'pointer',
-  fontSize: '0.88rem',
+  fontSize: remSize('body'),
 }
 
 const modalButtonStylePrimary: CSSProperties = {
@@ -230,7 +255,7 @@ const dlStyle: CSSProperties = {
   gridTemplateColumns: '1fr auto',
   gap: '0.35rem 1rem',
   margin: '0 0 1rem 0',
-  fontSize: '0.88rem',
+  fontSize: remSize('body'),
   color: theme.text.secondary,
 }
 

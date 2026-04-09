@@ -4,6 +4,9 @@
 import { useEffect, useCallback, useRef } from 'react'
 import { useFlagsStore } from '../../store/flagsStore'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 import { useToast } from '../shared'
 import type { FlagDefinition } from '../../types/flags'
 import * as flagsAPI from '../../api/flags'
@@ -15,6 +18,8 @@ export interface InGameFlagsModalProps {
 }
 
 export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(720)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   const {
     catalog,
     selectedFlags,
@@ -201,11 +206,11 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
               {flag.isFavorite && <span style={{ marginLeft: '0.5rem', color: theme.state.warning.color }}>★</span>}
             </div>
             {flag.description && (
-              <div style={{ fontSize: '0.85rem', color: theme.text.secondary, marginTop: '0.25rem' }}>
+              <div style={{ fontSize: remSize('accent'), color: theme.text.secondary, marginTop: '0.25rem' }}>
                 {flag.description}
               </div>
             )}
-            <div style={{ fontSize: '0.75rem', color: theme.text.secondary, marginTop: '0.25rem', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: remSize('caption'), color: theme.text.secondary, marginTop: '0.25rem', fontFamily: 'monospace' }}>
               {flag.id}
             </div>
           </div>
@@ -223,7 +228,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
               border: 'none',
               color: flag.isFavorite ? theme.state.warning.color : theme.text.secondary,
               cursor: 'pointer',
-              fontSize: '1.2rem'
+              fontSize: remSize('title'),
             }}
             title={flag.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           >
@@ -255,7 +260,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 {flag.label}
                 {flag.isFavorite && <span style={{ marginLeft: '0.5rem', color: theme.state.warning.color }}>★</span>}
               </div>
-              <div style={{ fontSize: '0.75rem', color: theme.text.secondary, marginTop: '0.25rem', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: remSize('caption'), color: theme.text.secondary, marginTop: '0.25rem', fontFamily: 'monospace' }}>
                 {flag.id}
               </div>
             </div>
@@ -268,7 +273,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 border: 'none',
                 color: flag.isFavorite ? theme.state.warning.color : theme.text.secondary,
                 cursor: 'pointer',
-                fontSize: '1.2rem'
+                fontSize: remSize('title'),
               }}
               title={flag.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             >
@@ -276,7 +281,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
             </button>
           </div>
           {flag.description && (
-            <div style={{ fontSize: '0.85rem', color: theme.text.secondary, marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: remSize('accent'), color: theme.text.secondary, marginBottom: '0.5rem' }}>
               {flag.description}
             </div>
           )}
@@ -325,7 +330,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 {flag.label}
                 {flag.isFavorite && <span style={{ marginLeft: '0.5rem', color: theme.state.warning.color }}>★</span>}
               </div>
-              <div style={{ fontSize: '0.75rem', color: theme.text.secondary, marginTop: '0.25rem', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: remSize('caption'), color: theme.text.secondary, marginTop: '0.25rem', fontFamily: 'monospace' }}>
                 {flag.id}
               </div>
             </div>
@@ -349,7 +354,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 }}
                 style={{ marginRight: '0.5rem' }}
               />
-              <span style={{ fontSize: '0.85rem', color: theme.text.secondary }}>Sélectionner</span>
+              <span style={{ fontSize: remSize('accent'), color: theme.text.secondary }}>Sélectionner</span>
             </label>
             <button
               type="button"
@@ -360,7 +365,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 border: 'none',
                 color: flag.isFavorite ? theme.state.warning.color : theme.text.secondary,
                 cursor: 'pointer',
-                fontSize: '1.2rem'
+                fontSize: remSize('title'),
               }}
               title={flag.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             >
@@ -368,7 +373,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
             </button>
           </div>
           {flag.description && (
-            <div style={{ fontSize: '0.85rem', color: theme.text.secondary, marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: remSize('accent'), color: theme.text.secondary, marginBottom: '0.5rem' }}>
               {flag.description}
             </div>
           )}
@@ -426,11 +431,12 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         {/* Header */}
         <div
           style={{
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             display: 'flex',
             justifyContent: 'space-between',
@@ -439,8 +445,10 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
           }}
         >
           <div>
-            <h2 style={{ margin: 0, color: theme.text.primary }}>Flags In-Game</h2>
-            <div style={{ fontSize: '0.85rem', color: theme.text.secondary, marginTop: '0.25rem' }}>
+            <h2 style={{ margin: 0, color: theme.text.primary, fontSize: `${typo.titleFontRem}rem` }}>
+              Flags In-Game
+            </h2>
+            <div style={{ fontSize: `${typo.bodyFontRem}rem`, color: theme.text.secondary, marginTop: '0.25rem' }}>
               Sélectionnez les flags in-game pour générer des dialogues réactifs à l'état du jeu.
               {selectedFlags.size > 0 && (
                 <span style={{ marginLeft: '0.5rem', color: theme.text.primary, fontWeight: 'bold' }}>
@@ -455,7 +463,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
               background: 'none',
               border: 'none',
               color: theme.text.secondary,
-              fontSize: '1.5rem',
+              fontSize: `${typo.titleFontRem}rem`,
               cursor: 'pointer',
               padding: '0.25rem 0.5rem',
             }}
@@ -470,7 +478,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
           }}
         >
           {/* Recherche et filtres */}
@@ -578,7 +586,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
             <div>
               {Object.entries(flagsByCategory()).map(([category, flags]) => (
                 <div key={category} style={{ marginBottom: '1.5rem' }}>
-                  <h3 style={{ margin: '0 0 0.75rem 0', color: theme.text.primary, fontSize: '1.1rem' }}>
+                  <h3 style={{ margin: '0 0 0.75rem 0', color: theme.text.primary, fontSize: remSize('title') }}>
                     {category} ({flags.length})
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -608,7 +616,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
             gap: '0.5rem'
           }}
         >
-          <div style={{ fontSize: '0.85rem', color: theme.text.secondary }}>
+          <div style={{ fontSize: remSize('accent'), color: theme.text.secondary }}>
             {selectedFlags.size > 0 
               ? `${selectedFlags.size} flag${selectedFlags.size > 1 ? 's' : ''} sélectionné${selectedFlags.size > 1 ? 's' : ''}`
               : 'Aucun flag sélectionné'
@@ -624,7 +632,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '0.9rem'
+                fontSize: remSize('body')
               }}
               title="Importer un snapshot Unity (JSON)"
             >
@@ -640,7 +648,7 @@ export function InGameFlagsModal({ isOpen, onClose }: InGameFlagsModalProps) {
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  fontSize: '0.9rem'
+                  fontSize: remSize('body')
                 }}
                 title="Exporter la sélection actuelle en snapshot JSON"
               >

@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react'
 import { getGddEntityHistory } from '../../api/gddContextStale'
 import type { GddEntityHistoryResponse, GddEntityHistoryEvent } from '../../api/gddContextStale'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 
 export interface GddEntityHistoryViewerProps {
   categoryStem: string
@@ -61,7 +62,7 @@ export function GddEntityHistoryViewer({
           border: 'none',
           color: theme.state.info.color,
           cursor: 'pointer',
-          fontSize: '0.85rem',
+          fontSize: remSize('accent'),
           fontWeight: 600,
           padding: 0,
         }}
@@ -70,7 +71,7 @@ export function GddEntityHistoryViewer({
         Historique des modifications (GDD){open ? ' ▲' : ' ▼'}
       </button>
       {open && (
-        <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: theme.text.secondary }}>
+        <div style={{ marginTop: '0.5rem', fontSize: remSize('body'), color: theme.text.secondary }}>
           {loading && <p>Chargement…</p>}
           {error && <p style={{ color: theme.state.error.color }}>{error}</p>}
           {!loading && !error && data && (
@@ -93,7 +94,7 @@ export function GddEntityHistoryViewer({
                             borderRadius: 4,
                             color: theme.text.primary,
                             cursor: 'pointer',
-                            fontSize: '0.78rem',
+                            fontSize: remSize('small'),
                             padding: '4px 8px',
                             textAlign: 'left',
                             width: '100%',
@@ -120,7 +121,7 @@ export function GddEntityHistoryViewer({
                               background: theme.background.primary,
                               padding: 8,
                               borderRadius: 4,
-                              fontSize: '0.7rem',
+                              fontSize: remSize('caption'),
                               whiteSpace: 'pre-wrap',
                             }}
                           >
@@ -138,7 +139,7 @@ export function GddEntityHistoryViewer({
                               background: theme.background.primary,
                               padding: 8,
                               borderRadius: 4,
-                              fontSize: '0.7rem',
+                              fontSize: remSize('caption'),
                               whiteSpace: 'pre-wrap',
                             }}
                           >
@@ -159,7 +160,7 @@ export function GddEntityHistoryViewer({
                     background: theme.background.primary,
                     padding: 8,
                     borderRadius: 4,
-                    fontSize: '0.72rem',
+                    fontSize: remSize('caption'),
                     whiteSpace: 'pre-wrap',
                   }}
                 >
