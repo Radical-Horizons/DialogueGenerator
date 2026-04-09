@@ -25,6 +25,8 @@ from api.schemas.graph import (
     SuggestedConnection,
     ValidateGraphRequest,
     ValidateGraphResponse,
+    SimulateFlowRequest,
+    SimulateFlowResponse,
     DetectAiSlopRequest,
     DetectAiSlopResponse,
     AiSlopOccurrenceItem,
@@ -888,6 +890,58 @@ async def validate_graph(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+@router.post(
+    "/simulate-flow",
+    response_model=SimulateFlowResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def simulate_flow(
+    request_data: SimulateFlowRequest,
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> SimulateFlowResponse:
+    """Simule le flux de dialogue et retourne dead ends + cul-de-sacs (FR46).
+
+    Pas d'appel LLM — analyse BFS O(V+E).
+
+    Args:
+        request_data: Nœuds et arêtes ReactFlow.
+        request_id: Identifiant de corrélation.
+
+    Returns:
+        ``dead_ends`` (nœuds inatteignables, severity=error) et
+        ``cul_de_sacs`` (nœuds sans sortie non-END, severity=warning).
+
+    Raises:
+        InternalServerException: Si la simulation échoue de manière inattendue.
+    """
+    try:
+        flow_result = GraphValidationService.simulate_flow(
+            request_data.nodes,
+            request_data.edges,
+        )
+        dead_ends = [ValidationErrorDetail(**e.to_dict()) for e in flow_result.errors]
+        cul_de_sacs = [ValidationErrorDetail(**w.to_dict()) for w in flow_result.warnings]
+
+        logger.info(
+            "simulate-flow: %d dead ends, %d cul-de-sacs (request_id: %s)",
+            len(dead_ends),
+            len(cul_de_sacs),
+            request_id,
+        )
+        return SimulateFlowResponse(dead_ends=dead_ends, cul_de_sacs=cul_de_sacs)
+
+    except Exception as e:
+        logger.exception(
+            "Erreur lors de simulate-flow (request_id: %s)",
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la simulation de flux",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
 
 
 @router.post(

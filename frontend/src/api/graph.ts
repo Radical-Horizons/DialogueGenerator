@@ -17,6 +17,8 @@ import type {
   NodePromptResponse,
   ValidateGraphRequest,
   ValidateGraphResponse,
+  SimulateFlowRequest,
+  SimulateFlowResponse,
   ValidateLoreExplicitRequest,
   ValidateLoreExplicitResponse,
   EvaluateDialogueQualityRequest,
@@ -200,6 +202,18 @@ export async function calculateLayout(
   const response = await apiClient.post<CalculateLayoutResponse>(
     `/api/v1/unity-dialogues/graph/calculate-layout`,
     request
+  )
+  return response.data
+}
+
+/**
+ * Simule le flux de dialogue pour détecter dead ends + cul-de-sacs (FR46).
+ */
+export async function simulateFlow(request: SimulateFlowRequest): Promise<SimulateFlowResponse> {
+  const response = await apiClient.post<SimulateFlowResponse>(
+    `/api/v1/unity-dialogues/graph/simulate-flow`,
+    request,
+    { timeout: 30000 }
   )
   return response.data
 }

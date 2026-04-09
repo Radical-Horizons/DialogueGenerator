@@ -1,8 +1,8 @@
 """Service de validation de graphes de dialogues."""
 import logging
 import hashlib
-from typing import Any, Dict, List, Optional, Set
-from collections import defaultdict
+from collections import defaultdict, deque
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -442,19 +442,17 @@ class GraphValidationService:
             if source and target:
                 adjacency[source].append(target)
         
-        # BFS
+        # BFS — deque.popleft() O(1) vs list.pop(0) O(n)
         reachable: Set[str] = {start_id}
-        queue: List[str] = [start_id]
-        
+        queue: deque[str] = deque([start_id])
+
         while queue:
-            current = queue.pop(0)
-            neighbors = adjacency.get(current, [])
-            
-            for neighbor in neighbors:
+            current = queue.popleft()
+            for neighbor in adjacency.get(current, []):
                 if neighbor not in reachable:
                     reachable.add(neighbor)
                     queue.append(neighbor)
-        
+
         return reachable
     
     @staticmethod
@@ -537,6 +535,121 @@ class GraphValidationService:
                 cycle_id=cycle["cycle_id"]
             )
     
+    @staticmethod
+    def simulate_flow(
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+    ) -> "ValidationResult":
+        """Simule le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46).
+
+        Dead end (``dead_end_node``, sévérité ``error``) : nœud inatteignable depuis
+        l'entrée du graphe.  Cul-de-sac (``cul_de_sac_node``, sévérité ``warning``) :
+        nœud atteignable dont toutes les arêtes sortantes pointent vers END ou qui n'a
+        aucune arête sortante (et n'est pas END ni testNode).
+
+        Complexité O(V+E) — un seul BFS partagé entre les deux analyses.
+
+        Args:
+            nodes: Nœuds React Flow.
+            edges: Arêtes React Flow.
+
+        Returns:
+            :class:`ValidationResult` avec ``errors`` (dead ends) et ``warnings`` (cul-de-sacs).
+        """
+        result = ValidationResult()
+        start_id = _resolve_graph_entry_node_id(nodes)
+        if not start_id:
+            result.add_error(
+                "missing_start",
+                None,
+                "Aucun nœud d'entrée résolu (START ou premier nœud dialogue hors test/END)",
+            )
+            return result
+
+        reachable = GraphValidationService._find_reachable_nodes(start_id, edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        logger.info(
+            "simulate_flow terminé: %d dead ends, %d cul-de-sacs",
+            len(result.errors),
+            len(result.warnings),
+        )
+        return result
+
+    @staticmethod
+    def _validate_dead_ends(
+        nodes: List[Dict[str, Any]],
+        reachable: Set[str],
+        result: "ValidationResult",
+    ) -> None:
+        """Signale les nœuds inatteignables comme dead ends (``dead_end_node``, erreur).
+
+        Partage le set ``reachable`` pré-calculé pour éviter un second BFS.
+
+        Args:
+            nodes: Nœuds du graphe.
+            reachable: Set d'IDs atteignables depuis l'entrée (calculé par l'appelant).
+            result: Résultat de validation à compléter.
+        """
+        for node in nodes:
+            nid = _node_id(node)
+            if not nid or nid == "END":
+                continue
+            if nid not in reachable:
+                result.add_error(
+                    "dead_end_node",
+                    nid,
+                    f"Nœud « {nid} » : inatteignable depuis l'entrée du dialogue (dead end).",
+                )
+
+    @staticmethod
+    def _validate_cul_de_sacs(
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        reachable: Set[str],
+        result: "ValidationResult",
+    ) -> None:
+        """Signale les cul-de-sacs parmi les nœuds atteignables (``cul_de_sac_node``, warning).
+
+        Un nœud est cul-de-sac si toutes ses arêtes sortantes pointent vers END,
+        ou s'il n'a aucune arête sortante (et n'est pas un nœud END, testNode, ni le nœud d'entrée).
+
+        Args:
+            nodes: Nœuds du graphe.
+            edges: Arêtes du graphe.
+            reachable: Set d'IDs atteignables depuis l'entrée.
+            result: Résultat de validation à compléter.
+        """
+        entry_id = _resolve_graph_entry_node_id(nodes)
+
+        # Index arêtes sortantes par source
+        outgoing: Dict[str, List[str]] = defaultdict(list)
+        for edge in edges:
+            src = edge.get("source")
+            tgt = edge.get("target")
+            if src and tgt:
+                outgoing[src].append(tgt)
+
+        for node in nodes:
+            nid = _node_id(node)
+            ntype = _node_type(node)
+            if not nid or nid == "END" or ntype == "testNode" or nid == entry_id:
+                continue
+            if nid not in reachable:
+                continue  # dead end — déjà couvert
+            targets = outgoing.get(nid, [])
+            non_end_targets = [t for t in targets if t != "END"]
+            if not non_end_targets:
+                result.add_warning(
+                    "cul_de_sac_node",
+                    nid,
+                    (
+                        f"Nœud « {nid} » : cul-de-sac — toutes les sorties aboutissent à END "
+                        "ou aucune sortie (non-END) n'est définie."
+                    ),
+                )
+
     @staticmethod
     def find_orphan_nodes(
         nodes: List[Dict[str, Any]], 

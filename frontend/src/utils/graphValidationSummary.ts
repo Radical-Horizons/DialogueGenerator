@@ -116,7 +116,13 @@ export function summarizeGraphValidationWarnings(
   ).length
   const cycleCount = countsByType.cycle_detected ?? 0
   const otherWarningCount = Object.entries(countsByType).reduce((sum, [type, count]) => {
-    if (type === 'orphan_node' || type === 'unreachable_node' || type === 'cycle_detected') {
+    if (
+      type === 'orphan_node' ||
+      type === 'unreachable_node' ||
+      type === 'cycle_detected' ||
+      type === 'dead_end_node' ||
+      type === 'cul_de_sac_node'
+    ) {
       return sum
     }
     return sum + count

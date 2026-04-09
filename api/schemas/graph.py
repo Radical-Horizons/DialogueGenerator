@@ -262,6 +262,30 @@ class ValidateGraphResponse(BaseModel):
     warnings: List[ValidationErrorDetail] = Field(..., description="Liste des warnings")
 
 
+class SimulateFlowRequest(BaseModel):
+    """Requête de simulation de flux pour détecter dead ends et cul-de-sacs (FR46)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Arêtes ReactFlow")
+
+
+class SimulateFlowResponse(BaseModel):
+    """Réponse de simulation de flux (FR46).
+
+    ``dead_ends`` : nœuds inatteignables depuis l'entrée (sévérité ``error``).
+    ``cul_de_sacs`` : nœuds atteignables sans sortie vers un nœud non-END (sévérité ``warning``).
+    """
+
+    dead_ends: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description="Nœuds inatteignables depuis l'entrée (dead ends, severity=error)",
+    )
+    cul_de_sacs: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description="Nœuds sans sortie non-END (cul-de-sacs, severity=warning)",
+    )
+
+
 class CalculateLayoutRequest(BaseModel):
     """Requête pour calculer un layout automatique."""
     nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")

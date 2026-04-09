@@ -165,3 +165,119 @@ class TestGraphValidateCycles:
                     assert warning["cycle_nodes"] is None
                 if "cycle_id" in warning:
                     assert warning["cycle_id"] is None
+
+
+class TestSimulateFlowEndpoint:
+    """Tests pour POST /api/v1/unity-dialogues/graph/simulate-flow (FR46 / Story 4.11)."""
+
+    _START = {"id": "START", "type": "startNode", "data": {}}
+    _END = {"id": "END", "type": "endNode", "data": {}}
+
+    def _node(self, nid: str) -> dict:
+        return {"id": nid, "type": "dialogueNode", "data": {"id": nid}}
+
+    def test_unreachable_node_is_reported_as_dead_end(self):
+        """Nœud inatteignable → dead_end_node error dans la réponse HTTP 200."""
+        nodes = [self._START, self._node("A"), self._node("B")]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        dead_end_ids = {e["node_id"] for e in data["dead_ends"]}
+        assert "B" in dead_end_ids
+        assert "A" not in dead_end_ids
+
+    def test_reachable_node_all_edges_to_end_is_cul_de_sac(self):
+        """Nœud atteignable dont toutes les sorties vont vers END → cul_de_sac_node warning."""
+        nodes = [self._START, self._END, self._node("A")]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "END"},
+        ]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        cul_de_sac_ids = {w["node_id"] for w in data["cul_de_sacs"]}
+        assert "A" in cul_de_sac_ids
+
+    def test_valid_graph_returns_empty_lists(self):
+        """Graphe sans dead end ni cul-de-sac → listes vides, HTTP 200.
+
+        A et B forment un cycle : tous deux atteignables et avec des sorties non-END.
+        """
+        nodes = [self._START, self._node("A"), self._node("B")]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "B"},
+            {"id": "e3", "source": "B", "target": "A"},  # cycle intentionnel, pas de cul-de-sac
+        ]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["dead_ends"] == []
+        assert data["cul_de_sacs"] == []
+
+    def test_multiple_dead_ends_all_returned(self):
+        """Plusieurs dead ends → tous retournés dans la réponse."""
+        nodes = [self._START, self._node("A"), self._node("B"), self._node("C")]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        dead_end_ids = {e["node_id"] for e in data["dead_ends"]}
+        assert {"B", "C"} == dead_end_ids
+
+    def test_dead_end_items_have_correct_fields(self):
+        """Items dead_end_node ont type, node_id, severity=error et message."""
+        nodes = [self._START, self._node("A"), self._node("B")]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        data = response.json()
+        dead_end = next(e for e in data["dead_ends"] if e["node_id"] == "B")
+        assert dead_end["type"] == "dead_end_node"
+        assert dead_end["severity"] == "error"
+        assert "B" in dead_end["message"]
+
+    def test_cul_de_sac_items_have_correct_fields(self):
+        """Items cul_de_sac_node ont type, node_id, severity=warning et message."""
+        nodes = [self._START, self._END, self._node("A")]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "END"},
+        ]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        data = response.json()
+        cul_de_sac = next(w for w in data["cul_de_sacs"] if w["node_id"] == "A")
+        assert cul_de_sac["type"] == "cul_de_sac_node"
+        assert cul_de_sac["severity"] == "warning"
+        assert "A" in cul_de_sac["message"]

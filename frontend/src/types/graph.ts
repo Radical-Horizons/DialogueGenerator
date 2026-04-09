@@ -378,3 +378,15 @@ export interface DetectContextDroppingResponse {
   message?: string | null
   rules_profile_effective: string
 }
+
+/** Requête simulation de flux (FR46 / Story 4.11). */
+export interface SimulateFlowRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+}
+
+/** Réponse simulation de flux (FR46 / Story 4.11). */
+export interface SimulateFlowResponse {
+  dead_ends: ValidationErrorDetail[]
+  cul_de_sacs: ValidationErrorDetail[]
+}

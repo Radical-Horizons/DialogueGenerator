@@ -30,6 +30,8 @@ export interface UseGraphToolbarReturn {
   setShowAiSlopPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showContextDroppingPanel: boolean
   setShowContextDroppingPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showFlowSimulationPanel: boolean
+  setShowFlowSimulationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showCostBreakdown: boolean
   setShowCostBreakdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showShortcutsTooltip: boolean
@@ -72,6 +74,7 @@ export function useGraphToolbar(
   const [showQualityLlmPanel, setShowQualityLlmPanel] = useState(false)
   const [showAiSlopPanel, setShowAiSlopPanel] = useState(false)
   const [showContextDroppingPanel, setShowContextDroppingPanel] = useState(false)
+  const [showFlowSimulationPanel, setShowFlowSimulationPanel] = useState(false)
   const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
   const [showSearchBar, setShowSearchBar] = useState(false)
@@ -415,6 +418,8 @@ export function useGraphToolbar(
     setShowAiSlopPanel,
     showContextDroppingPanel,
     setShowContextDroppingPanel,
+    showFlowSimulationPanel,
+    setShowFlowSimulationPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,

@@ -70,3 +70,4 @@ export const GRAPH_TOPOLOGY_WARNING_STYLES: Record<
   orphan: { border: '#ff9800', background: 'rgba(255, 152, 0, 0.14)' },
   unreachable: { border: '#5c6bc0', background: 'rgba(92, 107, 192, 0.14)' },
 }
+

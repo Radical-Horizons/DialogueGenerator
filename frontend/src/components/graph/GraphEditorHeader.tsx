@@ -112,6 +112,8 @@ export function GraphEditorHeader({
     setShowAiSlopPanel,
     showContextDroppingPanel,
     setShowContextDroppingPanel,
+    showFlowSimulationPanel,
+    setShowFlowSimulationPanel,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -926,6 +928,31 @@ export function GraphEditorHeader({
           title="Détecter si le contexte GDD sélectionné est absent ou trop indirect dans le dialogue (FR44)"
         >
           📎 Contexte
+        </button>
+        <button
+          type="button"
+          data-testid="btn-flow-simulation-panel"
+          onClick={() => setShowFlowSimulationPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showFlowSimulationPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showFlowSimulationPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showFlowSimulationPanel
+              ? theme.button.primary.color
+              : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Simuler le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46)"
+        >
+          🔀 Flux
         </button>
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}

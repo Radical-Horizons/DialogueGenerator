@@ -1,6 +1,6 @@
 import type { ValidationErrorDetail } from '../../types/graph'
 
-/** Libellés et icônes par type d’erreur (FR36 structure + FR37 complétude). */
+/** Libellés et icônes par type d'erreur (FR36 structure + FR37 complétude + FR46 simulation). */
 export const ICON_FOR_TYPE: Record<string, string> = {
   orphan_node: '🔗',
   broken_reference: '🔴',
@@ -14,6 +14,8 @@ export const ICON_FOR_TYPE: Record<string, string> = {
   lore_contradiction_explicit: '📜',
   lore_contradiction_potential: '📋',
   lore_potential_ambiguity: '❓',
+  dead_end_node: '🚫',
+  cul_de_sac_node: '⚠️',
 }
 
 export const LABEL_FOR_TYPE: Record<string, string> = {
@@ -23,12 +25,14 @@ export const LABEL_FOR_TYPE: Record<string, string> = {
   missing_display_name: 'DisplayName manquant',
   missing_stable_id: 'StableID / identifiant document',
   missing_dialogue_text: 'Contenu dialogue vide (FR37)',
-  missing_test: 'Test d’attribut manquant (FR37)',
-  unreachable_node: 'Nœuds inaccessibles depuis l’entrée',
+  missing_test: "Test d'attribut manquant (FR37)",
+  unreachable_node: "Nœuds inaccessibles depuis l'entrée",
   cycle_detected: 'Cycles détectés',
   lore_contradiction_explicit: 'Lore — contradictions explicites (FR38)',
   lore_contradiction_potential: 'Lore — incohérences potentielles (AC 4.3 #4)',
   lore_potential_ambiguity: 'Lore — ambiguïté référentielle (FR39)',
+  dead_end_node: 'Dead ends (nœuds inatteignables)',
+  cul_de_sac_node: 'Cul-de-sacs (nœuds sans sortie non-END)',
 }
 
 export function isDocumentIdRepairable(err: ValidationErrorDetail): boolean {

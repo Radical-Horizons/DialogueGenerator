@@ -338,6 +338,197 @@ class TestOrphanNodesFr40:
         assert GraphValidationService.find_orphan_nodes(nodes, []) == ["B"]
 
 
+class TestSimulateFlow:
+    """Tests pour _validate_dead_ends et _validate_cul_de_sacs (FR46 / Story 4.11)."""
+
+    # --- dead ends ---
+
+    def test_unreachable_node_is_dead_end(self):
+        """Nœud inatteignable depuis START → dead_end_node error."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B"}},
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            # B is unreachable
+        ]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+
+        dead_end_ids = {e.node_id for e in result.errors if e.type == "dead_end_node"}
+        assert "B" in dead_end_ids
+        assert "A" not in dead_end_ids
+        assert "START" not in dead_end_ids
+        assert all(e.severity == "error" for e in result.errors if e.type == "dead_end_node")
+
+    def test_valid_graph_produces_no_dead_ends(self):
+        """Graphe entièrement atteignable → aucun dead_end_node."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+
+        assert all(e.type != "dead_end_node" for e in result.errors)
+
+    def test_multiple_unreachable_nodes_all_reported_as_dead_ends(self):
+        """Plusieurs nœuds inatteignables → tous remontés comme dead_end_node."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B"}},
+            {"id": "C", "type": "dialogueNode", "data": {"id": "C"}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+
+        dead_end_ids = {e.node_id for e in result.errors if e.type == "dead_end_node"}
+        assert {"B", "C"} == dead_end_ids
+
+    # --- cul-de-sacs ---
+
+    def test_reachable_node_with_all_edges_to_end_is_cul_de_sac(self):
+        """Nœud atteignable dont toutes les sorties pointent vers END → cul_de_sac_node warning."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "END"},
+        ]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "A" in cul_de_sac_ids
+        assert all(w.severity == "warning" for w in result.warnings if w.type == "cul_de_sac_node")
+
+    def test_reachable_node_with_no_outgoing_edges_non_end_is_cul_de_sac(self):
+        """Nœud atteignable sans aucune arête sortante (non-END) → cul_de_sac_node warning."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "A" in cul_de_sac_ids
+
+    def test_end_node_is_not_cul_de_sac(self):
+        """Le nœud END lui-même n'est jamais marqué cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "END", "type": "endNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "END"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "END" not in cul_de_sac_ids
+        assert "START" not in cul_de_sac_ids
+
+    def test_entry_node_is_not_cul_de_sac_when_only_edge_goes_to_end(self):
+        """Régression H2 : graphe trivial START → END ne doit pas signaler START comme cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "END", "type": "endNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "END"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert cul_de_sac_ids == set(), (
+            f"Faux positif : le nœud d'entrée ne doit pas être cul-de-sac, mais {cul_de_sac_ids!r} remontés"
+        )
+
+    def test_first_dialogue_entry_node_not_cul_de_sac_when_only_edge_goes_to_end(self):
+        """Régression H2 : graphe sans START nommé — le premier nœud dialogue est l'entrée."""
+        nodes = [
+            {"id": "FIRST", "type": "dialogueNode", "data": {"id": "FIRST"}},
+            {"id": "END", "type": "endNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "FIRST", "target": "END"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("FIRST", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "FIRST" not in cul_de_sac_ids
+
+    def test_test_node_is_not_cul_de_sac(self):
+        """Les nœuds testNode ne sont pas marqués cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "T1", "type": "testNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "T1"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "T1" not in cul_de_sac_ids
+
+    def test_node_with_outgoing_edge_to_non_end_is_not_cul_de_sac(self):
+        """Nœud avec arête sortante vers un nœud non-END → pas cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B"}},
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "B"},
+        ]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "A" not in cul_de_sac_ids
+
+    @pytest.mark.slow
+    def test_simulate_flow_on_500_nodes_under_1s(self):
+        """Performance AC#3 : simulation sur 500+ nœuds < 1 s."""
+        nodes = [{"id": "START", "type": "startNode", "data": {}}]
+        edges = []
+        prev = "START"
+        for i in range(499):
+            nid = f"n{i:03d}"
+            nodes.append({"id": nid, "type": "dialogueNode", "data": {"id": nid}})
+            edges.append({"id": f"e{i}", "source": prev, "target": nid})
+            prev = nid
+        # 50 unreachable nodes for dead end detection
+        for j in range(50):
+            nid = f"iso{j:02d}"
+            nodes.append({"id": nid, "type": "dialogueNode", "data": {"id": nid}})
+
+        t0 = time.perf_counter()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        result = ValidationResult()
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+        elapsed = time.perf_counter() - t0
+        assert elapsed < 1.0, f"simulate_flow {len(nodes)} nœuds : {elapsed:.3f}s, cible < 1s"
+
+
 @pytest.mark.slow
 class TestGraphValidationPerformance:
     """NFR-P3 : budget temps sur graphe de référence (exécuté en T3 / hors `not slow`)."""
