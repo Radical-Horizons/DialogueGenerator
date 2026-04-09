@@ -131,6 +131,27 @@ export const unityDialogueEditorChrome = {
   },
 } as const
 
+/**
+ * Tokens de base pour modales (titres, corps, légendes) — utilisés dans modules lourds.
+ * Préfère une densité compacte même en “comfortable”.
+ */
+export const modalTypography = {
+  comfortable: {
+    titleFontRem: 1.05,
+    subtitleFontRem: 0.82,
+    bodyFontRem: 0.8125,
+    smallFontRem: 0.75,
+    captionFontRem: 0.6875,
+  },
+  narrow: {
+    titleFontRem: 0.95,
+    subtitleFontRem: 0.78,
+    bodyFontRem: 0.78,
+    smallFontRem: 0.72,
+    captionFontRem: 0.67,
+  },
+} as const
+
 export const graphToolbarChrome = {
   comfortable: {
     containerPadding: '0.65rem 0.85rem',

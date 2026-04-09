@@ -4,6 +4,8 @@
  */
 import { memo } from 'react'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 import { GenerationLoaderContent } from './GenerationLoaderContent'
 
 export interface DropChoiceModalProps {
@@ -21,6 +23,8 @@ export const DropChoiceModal = memo(function DropChoiceModal({
   onGenerate,
   isGenerating = false,
 }: DropChoiceModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   if (!isOpen) return null
 
   return (
@@ -46,19 +50,20 @@ export const DropChoiceModal = memo(function DropChoiceModal({
         style={{
           backgroundColor: theme.background.panel,
           borderRadius: 8,
-          padding: '1.25rem 1.5rem',
+          padding: isNarrow ? '0.9rem 1rem' : '1.25rem 1.5rem',
           maxWidth: 360,
           width: '90%',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
           border: `1px solid ${theme.border.primary}`,
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         <h3
           id="drop-choice-modal-title"
           style={{
             margin: '0 0 1rem',
-            fontSize: '1rem',
+            fontSize: `${typo.titleFontRem}rem`,
             color: theme.text.primary,
           }}
         >
@@ -67,7 +72,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
         <p
           style={{
             margin: '0 0 1.25rem',
-            fontSize: '0.875rem',
+            fontSize: `${typo.bodyFontRem}rem`,
             color: theme.text.secondary,
           }}
         >
@@ -96,7 +101,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
                 backgroundColor: 'transparent',
                 color: theme.text.secondary,
                 cursor: 'pointer',
-                fontSize: '0.8rem',
+                fontSize: `${typo.smallFontRem}rem`,
                 marginTop: '0.25rem',
               }}
             >
@@ -124,7 +129,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
                 backgroundColor: theme.button.default.background,
                 color: theme.button.default.color,
                 cursor: 'pointer',
-                fontSize: '0.875rem',
+                fontSize: `${typo.bodyFontRem}rem`,
                 textAlign: 'left',
               }}
             >
@@ -140,7 +145,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
                 cursor: 'pointer',
-                fontSize: '0.875rem',
+                fontSize: `${typo.bodyFontRem}rem`,
                 textAlign: 'left',
               }}
             >
@@ -156,7 +161,7 @@ export const DropChoiceModal = memo(function DropChoiceModal({
                 backgroundColor: 'transparent',
                 color: theme.text.secondary,
                 cursor: 'pointer',
-                fontSize: '0.875rem',
+                fontSize: `${typo.bodyFontRem}rem`,
                 marginTop: '0.25rem',
               }}
             >

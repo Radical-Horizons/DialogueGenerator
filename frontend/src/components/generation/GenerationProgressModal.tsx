@@ -6,6 +6,9 @@
  */
 import { useEffect, useMemo } from 'react'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
+import { remSize } from '../../theme/uiTypography'
 
 /**
  * Extrait une valeur de chaîne JSON partielle en gérant les échappements.
@@ -279,6 +282,8 @@ export function GenerationProgressModal({
   onMinimize,
   onClose,
 }: GenerationProgressModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   // Auto-fermeture 3 secondes après complétion (si pas réduit)
   useEffect(() => {
     if (currentStep === 'Complete' && !isMinimized && !error) {
@@ -342,7 +347,7 @@ export function GenerationProgressModal({
               animation: error ? 'none' : 'pulse 1.5s ease-in-out infinite',
             }}
           />
-          <span style={{ color: theme.text.primary, fontSize: '0.9rem' }}>
+          <span style={{ color: theme.text.primary, fontSize: `${modalTypography.comfortable.bodyFontRem}rem` }}>
             {error ? 'Erreur' : currentStep}
           </span>
         </div>
@@ -391,11 +396,12 @@ export function GenerationProgressModal({
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         {/* Header */}
         <div
           style={{
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             display: 'flex',
             justifyContent: 'space-between',
@@ -403,7 +409,7 @@ export function GenerationProgressModal({
             flexShrink: 0,
           }}
         >
-          <h2 style={{ margin: 0, color: theme.text.primary }}>
+          <h2 style={{ margin: 0, color: theme.text.primary, fontSize: `${typo.titleFontRem}rem` }}>
             {isInterrupting 
               ? 'Interruption en cours...' 
               : currentStep === 'Complete' 
@@ -419,7 +425,7 @@ export function GenerationProgressModal({
                   background: 'none',
                   border: 'none',
                   color: theme.text.secondary,
-                  fontSize: '1.5rem',
+                  fontSize: `${typo.titleFontRem}rem`,
                   cursor: 'pointer',
                   padding: '0.25rem 0.5rem',
                 }}
@@ -435,7 +441,7 @@ export function GenerationProgressModal({
         {currentStep !== 'Complete' && !error && (
           <div
             style={{
-              padding: '1rem 1.5rem',
+              padding: isNarrow ? '0.75rem 0.9rem' : '1rem 1.5rem',
               borderBottom: `1px solid ${theme.border.primary}`,
               flexShrink: 0,
             }}
@@ -445,7 +451,7 @@ export function GenerationProgressModal({
                 <span
                   key={step}
                   style={{
-                    fontSize: '0.85rem',
+                    fontSize: `${typo.subtitleFontRem}rem`,
                     color: index <= currentStepIndex ? theme.text.primary : theme.text.secondary,
                     fontWeight: index === currentStepIndex ? 'bold' : 'normal',
                   }}
@@ -480,7 +486,7 @@ export function GenerationProgressModal({
           style={{
             flex: 1,
             overflow: 'auto',
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
@@ -525,7 +531,7 @@ export function GenerationProgressModal({
                     flexDirection: 'column',
                     gap: '1.5rem',
                     fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '0.95rem',
+                    fontSize: remSize('section'),
                     lineHeight: '1.6',
                     color: theme.text.primary,
                   }}
@@ -536,7 +542,7 @@ export function GenerationProgressModal({
                       <h3
                         style={{
                           margin: 0,
-                          fontSize: '1.1rem',
+                          fontSize: remSize('title'),
                           fontWeight: 'bold',
                           color: theme.text.primary,
                           borderBottom: `2px solid ${theme.border.primary}`,
@@ -564,7 +570,7 @@ export function GenerationProgressModal({
                             fontWeight: 'bold',
                             color: theme.border.focus,
                             marginBottom: '0.5rem',
-                            fontSize: '0.9rem',
+                            fontSize: remSize('body'),
                           }}
                         >
                           {formattedContent.speaker}
@@ -591,7 +597,7 @@ export function GenerationProgressModal({
                     <div>
                       <div
                         style={{
-                          fontSize: '0.85rem',
+                          fontSize: remSize('accent'),
                           fontWeight: 'bold',
                           color: theme.text.secondary,
                           marginBottom: '0.75rem',
@@ -630,7 +636,7 @@ export function GenerationProgressModal({
                             {choice.test && (
                               <div
                                 style={{
-                                  fontSize: '0.8rem',
+                                  fontSize: remSize('small'),
                                   color: theme.text.tertiary,
                                   fontStyle: 'italic',
                                   marginTop: '0.5rem',
@@ -651,7 +657,7 @@ export function GenerationProgressModal({
                   style={{
                     margin: 0,
                     fontFamily: 'monospace',
-                    fontSize: '0.85rem',
+                    fontSize: remSize('small'),
                     color: theme.text.secondary,
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',

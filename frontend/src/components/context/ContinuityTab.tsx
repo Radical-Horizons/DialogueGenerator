@@ -5,6 +5,7 @@ import { memo, useState, useEffect, useCallback } from 'react'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
 
 export interface ContinuityTabProps {
@@ -210,7 +211,7 @@ export const ContinuityTab = memo(function ContinuityTab({
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '4px',
                   fontFamily: 'monospace',
-                  fontSize: '0.85rem',
+                  fontSize: remSize('small'),
                   color: theme.text.secondary,
                   maxHeight: '200px',
                   overflowY: 'auto',

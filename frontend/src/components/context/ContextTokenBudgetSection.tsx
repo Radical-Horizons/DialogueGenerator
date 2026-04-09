@@ -6,6 +6,7 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useContextSelectionTokenEstimate } from '../../hooks/useContextSelectionTokenEstimate'
 import { CONTEXT_OPTIMIZE_API_ENABLED } from '../../constants'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { ContextOptimizeModal } from './ContextOptimizeModal'
 
 const ENTITY_LABELS: Record<string, string> = {
@@ -49,13 +50,13 @@ export function ContextTokenBudgetSection() {
         borderTop: `1px solid ${theme.border.primary}`,
         backgroundColor: theme.background.tertiary,
         padding: '0.5rem 0.65rem',
-        fontSize: '0.82rem',
+        fontSize: remSize('body'),
       }}
       aria-labelledby={`${budgetId}-title`}
     >
       <h3
         id={`${budgetId}-title`}
-        style={{ margin: '0 0 0.35rem', fontSize: '0.85rem', fontWeight: 600, color: theme.text.primary }}
+        style={{ margin: '0 0 0.35rem', fontSize: remSize('section'), fontWeight: 600, color: theme.text.primary }}
       >
         Contexte pour le modèle
       </h3>
@@ -81,7 +82,7 @@ export function ContextTokenBudgetSection() {
               style={{
                 display: 'block',
                 marginTop: 2,
-                fontSize: '0.74rem',
+                fontSize: remSize('caption'),
                 color: theme.text.secondary,
               }}
             >
@@ -133,7 +134,7 @@ export function ContextTokenBudgetSection() {
             }
             style={{
               padding: '0.25rem 0.5rem',
-              fontSize: '0.78rem',
+              fontSize: remSize('small'),
               borderRadius: 4,
               border: `1px solid ${theme.border.primary}`,
               backgroundColor: CONTEXT_OPTIMIZE_API_ENABLED
@@ -160,13 +161,13 @@ export function ContextTokenBudgetSection() {
             cursor: 'pointer',
             color: theme.text.secondary,
             fontWeight: 500,
-            fontSize: '0.78rem',
+            fontSize: remSize('small'),
           }}
         >
           Détails tokens
         </summary>
         {data?.context_breakdown_note && (
-          <p style={{ margin: '0.35rem 0', fontSize: '0.72rem', color: theme.text.secondary }}>
+          <p style={{ margin: '0.35rem 0', fontSize: remSize('caption'), color: theme.text.secondary }}>
             {data.context_breakdown_note}
           </p>
         )}
@@ -174,7 +175,7 @@ export function ContextTokenBudgetSection() {
           style={{
             width: '100%',
             borderCollapse: 'collapse',
-            fontSize: '0.72rem',
+            fontSize: remSize('caption'),
             marginTop: '0.25rem',
           }}
         >

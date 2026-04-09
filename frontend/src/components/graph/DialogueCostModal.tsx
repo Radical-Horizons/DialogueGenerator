@@ -4,6 +4,8 @@
  */
 import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 interface DialogueCostModalProps {
   filename: string
@@ -11,6 +13,8 @@ interface DialogueCostModalProps {
 }
 
 export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   return (
     <div
       role="dialog"
@@ -46,6 +50,7 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         <div
           style={{
@@ -53,11 +58,11 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0.75rem 1rem',
+            padding: isNarrow ? '0.65rem 0.8rem' : '0.75rem 1rem',
             borderBottom: `1px solid ${theme.border.primary}`,
           }}
         >
-          <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: theme.text.primary }}>
+          <span style={{ fontSize: `${typo.titleFontRem}rem`, fontWeight: 600, color: theme.text.primary }}>
             Coûts du dialogue
           </span>
           <button
@@ -65,7 +70,7 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
             onClick={onClose}
             style={{
               padding: '0.25rem 0.5rem',
-              fontSize: '1.25rem',
+              fontSize: `${typo.titleFontRem}rem`,
               lineHeight: 1,
               background: 'transparent',
               color: theme.text.secondary,
@@ -79,7 +84,7 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
             ×
           </button>
         </div>
-        <div style={{ flex: '1 1 auto', overflowY: 'auto', padding: '1rem' }}>
+        <div style={{ flex: '1 1 auto', overflowY: 'auto', padding: isNarrow ? '0.8rem' : '1rem' }}>
           <DialogueCostBreakdown dialogueId={filename} />
         </div>
         <div
@@ -87,7 +92,7 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
             flex: '0 0 auto',
             display: 'flex',
             justifyContent: 'flex-end',
-            padding: '0.5rem 1rem 1rem',
+            padding: isNarrow ? '0.5rem 0.8rem 0.8rem' : '0.5rem 1rem 1rem',
             borderTop: `1px solid ${theme.border.primary}`,
           }}
         >
@@ -96,7 +101,7 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
             onClick={onClose}
             style={{
               padding: '0.4rem 0.9rem',
-              fontSize: '0.875rem',
+              fontSize: `${typo.bodyFontRem}rem`,
               backgroundColor: theme.button.default.background,
               color: theme.button.default.color,
               border: `1px solid ${theme.border.primary}`,

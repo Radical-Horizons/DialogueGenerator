@@ -5,6 +5,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 const DEBOUNCE_MS = 200
 
@@ -16,6 +18,8 @@ export interface JumpToNodeModalProps {
 export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
   const findNodesByQuery = useGraphStore((s) => s.findNodesByQuery)
   const jumpToNode = useGraphStore((s) => s.jumpToNode)
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
 
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<Array<{ id: string; label: string }>>([])
@@ -162,15 +166,24 @@ export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
         style={{
           backgroundColor: theme.background.panel,
           borderRadius: '8px',
-          padding: '1rem 1.25rem',
-          minWidth: '320px',
+          padding: isNarrow ? '0.85rem' : '1rem 1.25rem',
+          minWidth: isNarrow ? 'unset' : '320px',
           maxWidth: '90vw',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
           border: `1px solid ${theme.border.primary}`,
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
-        <label htmlFor="jump-to-node-input" style={{ display: 'block', marginBottom: 8, color: theme.text.secondary, fontSize: '0.9rem' }}>
+        <label
+          htmlFor="jump-to-node-input"
+          style={{
+            display: 'block',
+            marginBottom: 8,
+            color: theme.text.secondary,
+            fontSize: `${typo.subtitleFontRem}rem`,
+          }}
+        >
           ID ou nom du nœud
         </label>
         <input
@@ -189,7 +202,7 @@ export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
           style={{
             width: '100%',
             padding: '8px 12px',
-            fontSize: '1rem',
+            fontSize: `${typo.bodyFontRem}rem`,
             border: `1px solid ${theme.border.primary}`,
             borderRadius: 6,
             backgroundColor: theme.background.primary,
@@ -198,7 +211,7 @@ export function JumpToNodeModal({ isOpen, onClose }: JumpToNodeModalProps) {
           }}
         />
         {notFoundMessage && (
-          <p role="alert" style={{ marginTop: 8, color: theme.state.error.color, fontSize: '0.9rem' }}>
+          <p role="alert" style={{ marginTop: 8, color: theme.state.error.color, fontSize: `${typo.bodyFontRem}rem` }}>
             {notFoundMessage}
           </p>
         )}
