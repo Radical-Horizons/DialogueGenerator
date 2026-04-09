@@ -1,5 +1,5 @@
 /**
- * Panneau simulation de flux : dead ends et cul-de-sacs (FR46 / Story 4.11).
+ * Panneau simulation de flux : dead ends, cul-de-sacs et couverture (FR46 + FR47).
  */
 import { useCallback, useState } from 'react'
 import { useGraphStore } from '../../store/graphStore'
@@ -8,6 +8,7 @@ import { theme } from '../../theme'
 import * as graphAPI from '../../api/graph'
 import { getErrorMessage } from '../../types/errors'
 import type { SimulateFlowResponse, ValidationErrorDetail } from '../../types/graph'
+import { CoverageSection } from './CoverageSection'
 
 interface FlowSimulationPanelProps {
   onClose: () => void
@@ -198,6 +199,11 @@ export function FlowSimulationPanel({ onClose }: FlowSimulationPanelProps) {
 
       {hasResults ? (
         <div data-testid="flow-simulation-report">
+          {last.coverage && (
+            <div style={{ marginBottom: '0.75rem' }}>
+              <CoverageSection coverage={last.coverage} />
+            </div>
+          )}
           {isEmpty ? (
             <p
               data-testid="flow-simulation-ok"

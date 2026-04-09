@@ -923,6 +923,11 @@ async def simulate_flow(
         )
         dead_ends = [ValidationErrorDetail(**e.to_dict()) for e in flow_result.errors]
         cul_de_sacs = [ValidationErrorDetail(**w.to_dict()) for w in flow_result.warnings]
+        has_entry = not any(e.type == "missing_start" for e in flow_result.errors)
+        dead_end_ids = [e.node_id for e in flow_result.errors if e.node_id] if has_entry else []
+        coverage = GraphValidationService._compute_coverage_stats(
+            request_data.nodes if has_entry else [], dead_end_ids, len(cul_de_sacs)
+        )
 
         logger.info(
             "simulate-flow: %d dead ends, %d cul-de-sacs (request_id: %s)",
@@ -930,7 +935,7 @@ async def simulate_flow(
             len(cul_de_sacs),
             request_id,
         )
-        return SimulateFlowResponse(dead_ends=dead_ends, cul_de_sacs=cul_de_sacs)
+        return SimulateFlowResponse(dead_ends=dead_ends, cul_de_sacs=cul_de_sacs, coverage=coverage)
 
     except Exception as e:
         logger.exception(

@@ -385,8 +385,18 @@ export interface SimulateFlowRequest {
   edges: GraphEdgePayload[]
 }
 
-/** Réponse simulation de flux (FR46 / Story 4.11). */
+/** Statistiques de couverture de simulation (FR47 / Story 4.12). */
+export interface FlowCoverageStats {
+  total_nodes: number
+  accessible_count: number
+  dead_end_count: number
+  cul_de_sac_count: number
+  coverage_percentage: number
+}
+
+/** Réponse simulation de flux (FR46 + FR47). */
 export interface SimulateFlowResponse {
   dead_ends: ValidationErrorDetail[]
   cul_de_sacs: ValidationErrorDetail[]
+  coverage?: FlowCoverageStats
 }

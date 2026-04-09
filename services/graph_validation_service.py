@@ -6,6 +6,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
+# Nœuds structurels exclus du décompte de couverture (total_nodes, FR47)
+_NON_CONTENT_NODE_TYPES: frozenset = frozenset({"endNode", "testNode", "startNode"})
+
 
 class ValidationError:
     """Représente une erreur de validation."""
@@ -139,10 +142,7 @@ def _is_dialogue_like(node_type: Optional[str]) -> bool:
 
 
 def _resolve_graph_entry_node_id(nodes: List[Dict[str, Any]]) -> Optional[str]:
-    """Résout l'identifiant du nœud d'entrée du graphe (FR40 / atteignabilité).
-
-    Priorité : ``START`` si présent ; sinon premier nœud avec id (hors ``END`` et hors
-    ``testNode``), comme premier nœud « dialogue » utilisable comme entrée.
+    """Résout l'identifiant du nœud d'entrée (FR40) : ``START`` si présent, sinon premier nœud hors ``END``/``testNode``.
 
     Args:
         nodes: Nœuds React Flow ou format document.
@@ -540,14 +540,7 @@ class GraphValidationService:
         nodes: List[Dict[str, Any]],
         edges: List[Dict[str, Any]],
     ) -> "ValidationResult":
-        """Simule le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46).
-
-        Dead end (``dead_end_node``, sévérité ``error``) : nœud inatteignable depuis
-        l'entrée du graphe.  Cul-de-sac (``cul_de_sac_node``, sévérité ``warning``) :
-        nœud atteignable dont toutes les arêtes sortantes pointent vers END ou qui n'a
-        aucune arête sortante (et n'est pas END ni testNode).
-
-        Complexité O(V+E) — un seul BFS partagé entre les deux analyses.
+        """Simule le flux pour détecter dead ends et cul-de-sacs (FR46). O(V+E) BFS.
 
         Args:
             nodes: Nœuds React Flow.
@@ -585,11 +578,9 @@ class GraphValidationService:
     ) -> None:
         """Signale les nœuds inatteignables comme dead ends (``dead_end_node``, erreur).
 
-        Partage le set ``reachable`` pré-calculé pour éviter un second BFS.
-
         Args:
             nodes: Nœuds du graphe.
-            reachable: Set d'IDs atteignables depuis l'entrée (calculé par l'appelant).
+            reachable: Set d'IDs atteignables (pré-calculé par l'appelant).
             result: Résultat de validation à compléter.
         """
         for node in nodes:
@@ -611,9 +602,6 @@ class GraphValidationService:
         result: "ValidationResult",
     ) -> None:
         """Signale les cul-de-sacs parmi les nœuds atteignables (``cul_de_sac_node``, warning).
-
-        Un nœud est cul-de-sac si toutes ses arêtes sortantes pointent vers END,
-        ou s'il n'a aucune arête sortante (et n'est pas un nœud END, testNode, ni le nœud d'entrée).
 
         Args:
             nodes: Nœuds du graphe.
@@ -651,8 +639,42 @@ class GraphValidationService:
                 )
 
     @staticmethod
+    def _compute_coverage_stats(
+        nodes: List[Dict[str, Any]],
+        dead_end_ids: List[str],
+        cul_de_sac_count: int,
+    ) -> "FlowCoverageStats":
+        """Calcule les statistiques de couverture (FR47). Exclut endNode/testNode/startNode.
+
+        Args:
+            nodes: Nœuds du graphe.
+            dead_end_ids: IDs inatteignables à compter parmi les nœuds contenu.
+            cul_de_sac_count: Nombre de cul-de-sacs.
+
+        Returns:
+            :class:`FlowCoverageStats` avec les métriques de couverture.
+        """
+        from api.schemas.graph import FlowCoverageStats
+
+        content_ids = {
+            _node_id(n) for n in nodes
+            if _node_type(n) not in _NON_CONTENT_NODE_TYPES and _node_id(n) not in (None, "END")
+        }
+        total = len(content_ids)
+        dead_end_content_count = sum(1 for nid in dead_end_ids if nid in content_ids)
+        accessible = total - dead_end_content_count
+        percentage = round(accessible / total * 100, 1) if total > 0 else 100.0
+        return FlowCoverageStats(
+            total_nodes=total,
+            accessible_count=accessible,
+            dead_end_count=dead_end_content_count,
+            cul_de_sac_count=cul_de_sac_count,
+            coverage_percentage=percentage,
+        )
+
+    @staticmethod
     def find_orphan_nodes(
-        nodes: List[Dict[str, Any]], 
+        nodes: List[Dict[str, Any]],
         edges: List[Dict[str, Any]]
     ) -> List[str]:
         """Trouve les nœuds orphelins (pas de connexion entrante sauf START).

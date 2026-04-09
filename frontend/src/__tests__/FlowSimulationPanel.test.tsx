@@ -47,6 +47,18 @@ const DEAD_END_RESPONSE = {
 
 const EMPTY_RESPONSE = { dead_ends: [], cul_de_sacs: [] }
 
+const coverageResponse = (coveragePercentage: number, totalNodes = 10, accessibleCount = 7) => ({
+  dead_ends: [],
+  cul_de_sacs: [],
+  coverage: {
+    total_nodes: totalNodes,
+    accessible_count: accessibleCount,
+    dead_end_count: totalNodes - accessibleCount,
+    cul_de_sac_count: 1,
+    coverage_percentage: coveragePercentage,
+  },
+})
+
 describe('FlowSimulationPanel (FR46)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -119,5 +131,92 @@ describe('FlowSimulationPanel (FR46)', () => {
     render(<FlowSimulationPanel onClose={onClose} />)
     fireEvent.click(screen.getByTestId('flow-simulation-close'))
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('FlowSimulationPanel — CoverageSection (FR47)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('renders orange badge for 70% coverage', async () => {
+    simulateFlowMock.mockResolvedValueOnce(coverageResponse(70.0, 10, 7))
+
+    render(<FlowSimulationPanel onClose={vi.fn()} />)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('flow-simulation-run'))
+    })
+
+    const badge = screen.getByTestId('coverage-badge')
+    expect(badge).toBeTruthy()
+    expect(badge.textContent).toContain('70')
+    expect(badge.getAttribute('data-color')).toBe('orange')
+  })
+
+  it('renders green badge for 95% coverage', async () => {
+    simulateFlowMock.mockResolvedValueOnce(coverageResponse(95.0, 10, 10))
+
+    render(<FlowSimulationPanel onClose={vi.fn()} />)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('flow-simulation-run'))
+    })
+
+    const badge = screen.getByTestId('coverage-badge')
+    expect(badge.getAttribute('data-color')).toBe('green')
+  })
+
+  it('renders red badge for 65% coverage', async () => {
+    simulateFlowMock.mockResolvedValueOnce(coverageResponse(65.0, 10, 6))
+
+    render(<FlowSimulationPanel onClose={vi.fn()} />)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('flow-simulation-run'))
+    })
+
+    const badge = screen.getByTestId('coverage-badge')
+    expect(badge.getAttribute('data-color')).toBe('red')
+  })
+
+  it('renders accessible/total fraction', async () => {
+    simulateFlowMock.mockResolvedValueOnce(coverageResponse(70.0, 10, 7))
+
+    render(<FlowSimulationPanel onClose={vi.fn()} />)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('flow-simulation-run'))
+    })
+
+    expect(screen.getByText(/7\s*\/\s*10/)).toBeTruthy()
+  })
+
+  it('does not render coverage section when coverage is absent', async () => {
+    simulateFlowMock.mockResolvedValueOnce({ dead_ends: [], cul_de_sacs: [] })
+
+    render(<FlowSimulationPanel onClose={vi.fn()} />)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('flow-simulation-run'))
+    })
+
+    expect(screen.queryByTestId('coverage-section')).toBeNull()
+  })
+
+  it('does not render coverage section when total_nodes is 0', async () => {
+    simulateFlowMock.mockResolvedValueOnce({
+      dead_ends: [],
+      cul_de_sacs: [],
+      coverage: {
+        total_nodes: 0,
+        accessible_count: 0,
+        dead_end_count: 0,
+        cul_de_sac_count: 0,
+        coverage_percentage: 100.0,
+      },
+    })
+
+    render(<FlowSimulationPanel onClose={vi.fn()} />)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('flow-simulation-run'))
+    })
+
+    expect(screen.queryByTestId('coverage-section')).toBeNull()
   })
 })

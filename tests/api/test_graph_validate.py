@@ -281,3 +281,130 @@ class TestSimulateFlowEndpoint:
         assert cul_de_sac["type"] == "cul_de_sac_node"
         assert cul_de_sac["severity"] == "warning"
         assert "A" in cul_de_sac["message"]
+
+
+class TestSimulateFlowCoverage:
+    """Tests endpoint /simulate-flow — champ coverage (FR47)."""
+
+    _START = {"id": "START", "type": "startNode", "data": {"label": "Start"}}
+    _END = {"id": "END", "type": "endNode", "data": {"label": "End"}}
+
+    @staticmethod
+    def _node(nid: str) -> dict:
+        return {"id": nid, "type": "dialogueNode", "data": {"id": nid, "label": nid, "line": nid}}
+
+    @staticmethod
+    def _test_node(nid: str) -> dict:
+        return {"id": nid, "type": "testNode", "data": {"id": nid}}
+
+    def test_coverage_stats_returned_with_partial_reachability(self):
+        """5 nœuds dialogue + END + 2 inatteignables → coverage reflète 3 accessibles sur 5."""
+        nodes = [
+            self._START,
+            self._END,
+            self._node("A"),
+            self._node("B"),
+            self._node("C"),
+            self._node("D"),
+            self._node("E"),
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "B"},
+            {"id": "e3", "source": "B", "target": "C"},
+        ]
+        # D et E sont inatteignables → dead ends
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "coverage" in data
+        cov = data["coverage"]
+        assert cov["total_nodes"] == 5
+        assert cov["accessible_count"] == 3
+        assert cov["dead_end_count"] == 2
+        assert cov["coverage_percentage"] == 60.0
+
+    def test_coverage_full_when_all_nodes_reachable(self):
+        """Tous les nœuds contenu accessibles → coverage_percentage == 100.0."""
+        nodes = [self._START, self._END, self._node("A"), self._node("B")]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "B"},
+            {"id": "e3", "source": "B", "target": "END"},
+        ]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        cov = data["coverage"]
+        assert cov["total_nodes"] == 2
+        assert cov["accessible_count"] == 2
+        assert cov["coverage_percentage"] == 100.0
+
+    def test_coverage_excludes_end_and_test_nodes_from_total(self):
+        """END et testNode sont exclus du décompte total_nodes."""
+        nodes = [
+            self._START,
+            self._END,
+            self._node("A"),
+            self._test_node("T1"),
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "END"},
+        ]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        cov = data["coverage"]
+        assert cov["total_nodes"] == 1  # seul "A" est un nœud contenu
+        assert cov["accessible_count"] == 1
+
+    def test_coverage_returns_100_when_no_content_nodes(self):
+        """Graphe sans nœud contenu (seulement END + testNode) → total_nodes==0, coverage_percentage==100.0."""
+        nodes = [self._END, self._test_node("T1")]
+        edges = []
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "coverage" in data
+        cov = data["coverage"]
+        assert cov["total_nodes"] == 0
+        assert cov["coverage_percentage"] == 100.0
+
+    def test_coverage_cul_de_sac_count_included(self):
+        """cul_de_sac_count reflète les cul-de-sacs dans coverage."""
+        nodes = [self._START, self._END, self._node("A")]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "END"},
+        ]
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/simulate-flow",
+            json={"nodes": nodes, "edges": edges},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        cov = data["coverage"]
+        assert cov["cul_de_sac_count"] == 1

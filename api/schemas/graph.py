@@ -269,11 +269,26 @@ class SimulateFlowRequest(BaseModel):
     edges: List[Dict[str, Any]] = Field(..., description="Arêtes ReactFlow")
 
 
+class FlowCoverageStats(BaseModel):
+    """Statistiques de couverture après simulation de flux (FR47).
+
+    Exclut ``endNode``/``testNode``/``startNode`` de ``total_nodes``.
+    ``coverage_percentage`` vaut 100.0 quand ``total_nodes == 0``.
+    """
+
+    total_nodes: int = Field(..., description="Nœuds contenu (hors END, testNode)")
+    accessible_count: int = Field(..., description="Nœuds contenu atteignables")
+    dead_end_count: int = Field(..., description="Nœuds inatteignables (dead ends)")
+    cul_de_sac_count: int = Field(..., description="Nœuds cul-de-sacs")
+    coverage_percentage: float = Field(..., description="Pourcentage de couverture (0–100, 1 décimale)")
+
+
 class SimulateFlowResponse(BaseModel):
-    """Réponse de simulation de flux (FR46).
+    """Réponse de simulation de flux (FR46 + FR47).
 
     ``dead_ends`` : nœuds inatteignables depuis l'entrée (sévérité ``error``).
     ``cul_de_sacs`` : nœuds atteignables sans sortie vers un nœud non-END (sévérité ``warning``).
+    ``coverage`` : statistiques de couverture (FR47).
     """
 
     dead_ends: List[ValidationErrorDetail] = Field(
@@ -283,6 +298,10 @@ class SimulateFlowResponse(BaseModel):
     cul_de_sacs: List[ValidationErrorDetail] = Field(
         default_factory=list,
         description="Nœuds sans sortie non-END (cul-de-sacs, severity=warning)",
+    )
+    coverage: Optional[FlowCoverageStats] = Field(
+        default=None,
+        description="Statistiques de couverture (FR47) ; None si non calculé",
     )
 
 

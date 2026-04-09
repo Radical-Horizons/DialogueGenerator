@@ -529,6 +529,56 @@ class TestSimulateFlow:
         assert elapsed < 1.0, f"simulate_flow {len(nodes)} nœuds : {elapsed:.3f}s, cible < 1s"
 
 
+class TestComputeCoverageStats:
+    """Tests unitaires pour GraphValidationService._compute_coverage_stats (FR47)."""
+
+    @staticmethod
+    def _node(nid: str, ntype: str = "dialogueNode") -> dict:
+        return {"id": nid, "type": ntype, "data": {"id": nid}}
+
+    def test_coverage_excludes_end_and_test_nodes(self):
+        """END et testNode exclus de total_nodes — seuls dialogueNode comptent."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [
+            self._node("A"),
+            self._node("B"),
+            self._node("END", "endNode"),
+            self._node("T1", "testNode"),
+        ]
+        # dead end IDs: only A is a content-node dead end (T1 is testNode, ignored)
+        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
+        assert isinstance(stats, FlowCoverageStats)
+        assert stats.total_nodes == 2  # A et B seulement
+        assert stats.dead_end_count == 1
+        assert stats.cul_de_sac_count == 0
+
+    def test_full_coverage_when_all_reachable(self):
+        """accessible_count == total_nodes → coverage_percentage == 100.0."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [self._node("A"), self._node("B"), self._node("C")]
+        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
+        assert stats.total_nodes == 3
+        assert stats.accessible_count == 3
+        assert stats.coverage_percentage == 100.0
+
+    def test_partial_coverage_rounds_to_one_decimal(self):
+        """1 dead end sur 3 nœuds → accessible=2, percentage=66.7."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [self._node("A"), self._node("B"), self._node("C")]
+        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
+        assert stats.total_nodes == 3
+        assert stats.accessible_count == 2
+        assert stats.coverage_percentage == 66.7
+
+    def test_coverage_no_division_by_zero_when_total_nodes_zero(self):
+        """Zéro nœud contenu → total_nodes==0, coverage_percentage==100.0 (pas de ZeroDivisionError)."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [self._node("END", "endNode"), self._node("T1", "testNode")]
+        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
+        assert stats.total_nodes == 0
+        assert stats.coverage_percentage == 100.0
+
+
 @pytest.mark.slow
 class TestGraphValidationPerformance:
     """NFR-P3 : budget temps sur graphe de référence (exécuté en T3 / hors `not slow`)."""
