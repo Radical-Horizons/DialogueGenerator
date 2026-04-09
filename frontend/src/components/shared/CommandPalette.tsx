@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { filterCommandPaletteItems, type CommandPaletteItem } from '../../hooks/useCommandPalette'
 import * as contextAPI from '../../api/context'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
@@ -300,7 +301,7 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
           style={{
             width: '100%',
             padding: '0.75rem',
-            fontSize: '1rem',
+            fontSize: remSize('section'),
             backgroundColor: theme.input.background,
             color: theme.text.primary,
             border: `1px solid ${theme.border.primary}`,
@@ -331,7 +332,7 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
               <div key={category} style={{ marginBottom: '1rem' }}>
                 <div
                   style={{
-                    fontSize: '0.75rem',
+                    fontSize: remSize('small'),
                     fontWeight: 'bold',
                     color: theme.text.secondary,
                     textTransform: 'uppercase',
@@ -362,7 +363,7 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
                     >
                       <div style={{ fontWeight: isHighlighted ? 'bold' : 'normal' }}>{item.label}</div>
                       {item.description && (
-                        <div style={{ fontSize: '0.85rem', color: theme.text.secondary }}>{item.description}</div>
+                        <div style={{ fontSize: remSize('accent'), color: theme.text.secondary }}>{item.description}</div>
                       )}
                     </div>
                   )
@@ -378,7 +379,7 @@ export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: C
             marginTop: '0.5rem',
             paddingTop: '0.5rem',
             borderTop: `1px solid ${theme.border.primary}`,
-            fontSize: '0.75rem',
+            fontSize: remSize('small'),
             color: theme.text.secondary,
             display: 'flex',
             gap: '1rem',

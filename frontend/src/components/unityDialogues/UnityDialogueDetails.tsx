@@ -6,7 +6,9 @@ import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
+import { useDialogueEditionNarrow } from './DialogueEditionNarrowContext'
 
 interface UnityDialogueDetailsProps {
   filename: string
@@ -21,6 +23,8 @@ export function UnityDialogueDetails({
   onDeleted,
   onGenerateContinuation,
 }: UnityDialogueDetailsProps) {
+  const isNarrow = useDialogueEditionNarrow()
+  const tb = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
   const [jsonContent, setJsonContent] = useState<string>('')
   const [title, setTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
@@ -141,13 +145,15 @@ export function UnityDialogueDetails({
               <button
                 onClick={() => onGenerateContinuation(jsonContent, title)}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: tb.toolbarButtonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.primary.background,
                   color: theme.button.primary.color,
                   cursor: 'pointer',
-                  fontWeight: 'bold',
+                  fontSize: `${tb.toolbarButtonFontRem}rem`,
+                  fontWeight: tb.toolbarButtonFontWeight,
+                  boxSizing: 'border-box',
                 }}
                 title="Générer un dialogue qui suit celui-ci"
               >
@@ -158,14 +164,16 @@ export function UnityDialogueDetails({
               onClick={handleDelete}
               disabled={isDeleting}
               style={{
-                padding: '0.5rem 1rem',
+                padding: tb.toolbarButtonPadding,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
                 backgroundColor: '#dc3545',
                 color: '#ffffff',
                 cursor: isDeleting ? 'not-allowed' : 'pointer',
                 opacity: isDeleting ? 0.6 : 1,
-                fontWeight: 700,
+                fontSize: `${tb.toolbarButtonFontRem}rem`,
+                fontWeight: tb.toolbarButtonFontWeight,
+                boxSizing: 'border-box',
               }}
             >
               {isDeleting ? 'Suppression...' : 'Supprimer'}

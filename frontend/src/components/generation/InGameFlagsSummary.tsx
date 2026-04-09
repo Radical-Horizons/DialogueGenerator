@@ -4,9 +4,13 @@
 import { useState } from 'react'
 import { useFlagsStore } from '../../store/flagsStore'
 import { theme } from '../../theme'
+import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { InGameFlagsModal } from './InGameFlagsModal'
+import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 
 export function InGameFlagsSummary() {
+  const isNarrow = useGenerationPanelNarrow()
+  const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const { selectedFlags, getSelectedFlagsArray, removeFlag, catalog } = useFlagsStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   
@@ -29,21 +33,40 @@ export function InGameFlagsSummary() {
   
   return (
     <>
-      <div style={{ marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-          <label style={{ color: theme.text.primary, fontWeight: 'bold' }}>
+      <div style={{ marginBottom: '1rem', minWidth: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: isNarrow ? 'column' : 'row',
+            justifyContent: 'space-between',
+            alignItems: isNarrow ? 'stretch' : 'center',
+            gap: `${chrome.controlGapRem}rem`,
+            marginBottom: '0.5rem',
+          }}
+        >
+          <label
+            style={{
+              color: theme.text.primary,
+              fontWeight: 'bold',
+              fontSize: `${chrome.labelFontRem}rem`,
+            }}
+          >
             Flags In-Game
           </label>
           <button
             onClick={() => setIsModalOpen(true)}
             style={{
-              padding: '0.5rem 1rem',
+              padding: chrome.buttonPadding,
               backgroundColor: theme.button.default.background,
               color: theme.button.default.color,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '0.9rem'
+              fontSize: `${chrome.buttonFontRem}rem`,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: isNarrow ? 'nowrap' : 'normal',
+              maxWidth: '100%',
             }}
             title="Ouvrir le sélecteur de flags"
           >

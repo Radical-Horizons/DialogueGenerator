@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useImperativeHandle, forwardRef, useCallb
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { UnityDialogueItem } from './UnityDialogueItem'
 
@@ -114,7 +115,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
 
   if (isLoading) {
     return (
-      <div style={{ padding: '0.65rem', textAlign: 'center', fontSize: '0.8rem', color: theme.text.secondary }}>
+      <div style={{ padding: '0.65rem', textAlign: 'center', fontSize: remSize('body'), color: theme.text.secondary }}>
         <div>Chargement des dialogues Unity...</div>
       </div>
     )
@@ -177,7 +178,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
               flex: '1 1 120px',
               minWidth: 0,
               padding: '0.45rem 0.55rem',
-              fontSize: '0.8rem',
+              fontSize: remSize('body'),
               border: `1px solid ${theme.input.border}`,
               borderRadius: '6px',
               boxSizing: 'border-box',
@@ -194,7 +195,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
               borderRadius: '6px',
               backgroundColor: theme.input.background,
               color: theme.input.color,
-              fontSize: '0.78rem',
+              fontSize: remSize('small'),
               flexShrink: 0,
             }}
             title="Trier les dialogues"
@@ -206,14 +207,14 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           </select>
         </div>
 
-        <div style={{ fontSize: '0.78rem', color: theme.text.secondary }}>
+        <div style={{ fontSize: remSize('small'), color: theme.text.secondary }}>
           {filteredDialogues.length} dialogue{filteredDialogues.length !== 1 ? 's' : ''}
           {searchQuery && ` (sur ${dialogues.length} total)`}
         </div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '0.5rem', minHeight: 0 }}>
         {filteredDialogues.length === 0 ? (
-          <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', color: theme.text.secondary }}>
+          <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: remSize('body'), color: theme.text.secondary }}>
             {searchQuery ? 'Aucun dialogue trouvé' : 'Aucun dialogue Unity'}
           </div>
         ) : (
