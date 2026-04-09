@@ -142,42 +142,50 @@ export function UnityDialogueDetails({
         extraActions={
           <>
             {onGenerateContinuation && (
+              <div style={{ gridArea: isNarrow ? 'generate' : undefined, width: isNarrow ? '100%' : undefined }}>
+                <button
+                  onClick={() => onGenerateContinuation(jsonContent, title)}
+                  style={{
+                    padding: tb.toolbarButtonPadding,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.button.primary.background,
+                    color: theme.button.primary.color,
+                    cursor: 'pointer',
+                    fontSize: `${tb.toolbarButtonFontRem}rem`,
+                    fontWeight: tb.toolbarButtonFontWeight,
+                    boxSizing: 'border-box',
+                    width: isNarrow ? '100%' : undefined,
+                    minWidth: isNarrow ? 0 : undefined,
+                  }}
+                  title="Générer un dialogue qui suit celui-ci"
+                >
+                  Générer la suite
+                </button>
+              </div>
+            )}
+            <div style={{ gridArea: isNarrow ? 'delete' : undefined, width: isNarrow ? '100%' : undefined }}>
               <button
-                onClick={() => onGenerateContinuation(jsonContent, title)}
+                onClick={handleDelete}
+                disabled={isDeleting}
                 style={{
                   padding: tb.toolbarButtonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
-                  cursor: 'pointer',
+                  backgroundColor: '#dc3545',
+                  color: '#ffffff',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  opacity: isDeleting ? 0.6 : 1,
                   fontSize: `${tb.toolbarButtonFontRem}rem`,
                   fontWeight: tb.toolbarButtonFontWeight,
                   boxSizing: 'border-box',
+                  width: isNarrow ? '100%' : undefined,
+                  minWidth: isNarrow ? 0 : undefined,
                 }}
-                title="Générer un dialogue qui suit celui-ci"
               >
-                Générer la suite
+                {isDeleting ? 'Suppression...' : 'Supprimer'}
               </button>
-            )}
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              style={{
-                padding: tb.toolbarButtonPadding,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: '#dc3545',
-                color: '#ffffff',
-                cursor: isDeleting ? 'not-allowed' : 'pointer',
-                opacity: isDeleting ? 0.6 : 1,
-                fontSize: `${tb.toolbarButtonFontRem}rem`,
-                fontWeight: tb.toolbarButtonFontWeight,
-                boxSizing: 'border-box',
-              }}
-            >
-              {isDeleting ? 'Suppression...' : 'Supprimer'}
-            </button>
+            </div>
           </>
         }
       />
