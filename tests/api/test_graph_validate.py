@@ -1,9 +1,91 @@
-"""Tests pour l'endpoint /api/v1/graph/validate."""
+"""Tests pour les endpoints de validation du graphe."""
 import pytest
 from fastapi.testclient import TestClient
 from api.main import app
 
 client = TestClient(app)
+
+
+class TestValidateSchemaEndpoint:
+    """Tests pour POST /api/v1/unity-dialogues/graph/validate-schema (FR48 / Story 4.13)."""
+
+    _VALID_NODE = {
+        "id": "node-a1b2c3d4e5f6789012345678abcdef01",
+        "type": "dialogueNode",
+        "position": {"x": 0, "y": 0},
+        "data": {
+            "stableId": "node-a1b2c3d4e5f6789012345678abcdef01",
+            "displayName": "Ouverture",
+            "line": "Bonjour aventurier !",
+            "speaker": "PNJ",
+            "choices": [{"choiceId": "choice_reply", "text": "Répondre"}],
+        },
+    }
+    _END_NODE = {
+        "id": "END",
+        "type": "endNode",
+        "position": {"x": 0, "y": 200},
+        "data": {"line": ""},
+    }
+    _EDGE_VALID = {
+        "id": "e1",
+        "source": "node-a1b2c3d4e5f6789012345678abcdef01",
+        "target": "END",
+        "data": {"edgeType": "choice", "choiceIndex": 0},
+    }
+
+    def test_valid_graph_returns_conformant(self):
+        """Graphe valide (stableId, line, choices[].choiceId) → is_valid True, errors []."""
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate-schema",
+            json={"nodes": [self._VALID_NODE, self._END_NODE], "edges": [self._EDGE_VALID]},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_valid"] is True
+        assert data["errors"] == []
+        assert data["error_count"] == 0
+
+    def test_missing_choice_id_detected(self):
+        """Choice sans choiceId → is_valid False, 'choiceId' dans la première erreur."""
+        invalid_node = {
+            "id": "node-b2c3d4e5f678901234567890abcdef12",
+            "type": "dialogueNode",
+            "position": {"x": 0, "y": 0},
+            "data": {
+                "stableId": "node-b2c3d4e5f678901234567890abcdef12",
+                "line": "Un choix sans choiceId",
+                "speaker": "PNJ",
+                "choices": [{"text": "Accepter"}],  # choiceId manquant
+            },
+        }
+        edge = {
+            "id": "e1",
+            "source": "node-b2c3d4e5f678901234567890abcdef12",
+            "target": "END",
+            "data": {"edgeType": "choice", "choiceIndex": 0},
+        }
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate-schema",
+            json={"nodes": [invalid_node, self._END_NODE], "edges": [edge]},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_valid"] is False
+        assert data["error_count"] >= 1
+        assert len(data["errors"]) >= 1
+        first_error = data["errors"][0]
+        assert "choiceId" in first_error
+
+    def test_empty_graph_accepted(self):
+        """Graphe vide (nodes=[], edges=[]) → is_valid True (document vide est accepté)."""
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate-schema",
+            json={"nodes": [], "edges": []},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_valid"] is True
 
 
 class TestGraphValidateCycles:

@@ -114,6 +114,8 @@ export function GraphEditorHeader({
     setShowContextDroppingPanel,
     showFlowSimulationPanel,
     setShowFlowSimulationPanel,
+    showSchemaValidationPanel,
+    handleToggleSchemaValidation,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -953,6 +955,25 @@ export function GraphEditorHeader({
           title="Simuler le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46)"
         >
           🔀 Flux
+        </button>
+        <button
+          type="button"
+          data-testid="btn-schema-validation-panel"
+          onClick={() => { void handleToggleSchemaValidation() }}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${showSchemaValidationPanel ? theme.button.primary.background : theme.border.primary}`,
+            borderRadius: '6px',
+            backgroundColor: showSchemaValidationPanel ? theme.button.primary.background : theme.button.default.background,
+            color: showSchemaValidationPanel ? theme.button.primary.color : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Valider la conformité du schéma JSON Unity (FR48)"
+        >
+          🧩 Schéma
         </button>
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}

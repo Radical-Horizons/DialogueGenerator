@@ -379,6 +379,19 @@ export interface DetectContextDroppingResponse {
   rules_profile_effective: string
 }
 
+/** Requête validation schéma JSON Unity (FR48 / Story 4.13). */
+export interface ValidateSchemaRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+}
+
+/** Réponse validation schéma JSON Unity (FR48 / Story 4.13). */
+export interface ValidateSchemaResponse {
+  is_valid: boolean
+  errors: string[]
+  error_count: number
+}
+
 /** Requête simulation de flux (FR46 / Story 4.11). */
 export interface SimulateFlowRequest {
   nodes: GraphNodePayload[]

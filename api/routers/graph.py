@@ -38,6 +38,8 @@ from api.schemas.graph import (
     ValidateLoreExplicitRequest,
     ValidateLoreExplicitResponse,
     ValidationErrorDetail,
+    ValidateSchemaRequest,
+    ValidateSchemaResponse,
     CalculateLayoutRequest,
     CalculateLayoutResponse,
     AcceptNodeRequest,
@@ -64,6 +66,7 @@ from api.dependencies import (
 )
 from services.configuration_service import ConfigurationService
 from services.graph_conversion_service import GraphConversionService
+from api.utils.unity_schema_validator import validate_unity_json
 from services.unity_dialogue_export_service import (
     write_unity_dialogue_to_file,
     read_last_seq,
@@ -944,6 +947,57 @@ async def simulate_flow(
         )
         raise InternalServerException(
             message="Erreur lors de la simulation de flux",
+            details={"error": str(e)},
+            request_id=request_id,
+        ) from e
+
+
+@router.post(
+    "/validate-schema",
+    response_model=ValidateSchemaResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def validate_schema(
+    request_data: ValidateSchemaRequest,
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> ValidateSchemaResponse:
+    """Valide la conformité du graphe courant contre le schéma JSON Unity (FR48).
+
+    Convertit le graphe ReactFlow en Unity JSON puis vérifie chaque nœud et
+    choix contre le schéma v1.1.0 (``schemaVersion``, ``choiceId`` requis).
+    Aucun appel LLM — validation structurelle locale uniquement.
+
+    Args:
+        request_data: Nœuds et arêtes ReactFlow.
+        request_id: Identifiant de corrélation.
+
+    Returns:
+        ``is_valid``, ``errors`` et ``error_count`` pour affichage UI.
+
+    Raises:
+        InternalServerException: Si la conversion ou la validation échoue.
+    """
+    try:
+        if not request_data.nodes:
+            logger.info("validate-schema: graphe vide, accepté sans validation (request_id: %s)", request_id)
+            return ValidateSchemaResponse(is_valid=True, errors=[], error_count=0)
+
+        unity_json_str = GraphConversionService.graph_to_unity_json(
+            request_data.nodes, request_data.edges
+        )
+        unity_doc = json.loads(unity_json_str)
+        is_valid, errors = validate_unity_json(unity_doc)
+        logger.info(
+            "validate-schema: is_valid=%s, %d error(s) (request_id: %s)",
+            is_valid,
+            len(errors),
+            request_id,
+        )
+        return ValidateSchemaResponse(is_valid=is_valid, errors=errors, error_count=len(errors))
+    except Exception as e:
+        logger.exception("Erreur lors de validate-schema (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de la validation du schéma Unity",
             details={"error": str(e)},
             request_id=request_id,
         ) from e

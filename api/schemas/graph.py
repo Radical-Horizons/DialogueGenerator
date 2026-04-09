@@ -305,6 +305,26 @@ class SimulateFlowResponse(BaseModel):
     )
 
 
+class ValidateSchemaRequest(BaseModel):
+    """Requête de validation conformité schéma JSON Unity (FR48 / Story 4.13)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Arêtes ReactFlow")
+
+
+class ValidateSchemaResponse(BaseModel):
+    """Réponse de validation conformité schéma JSON Unity (FR48 / Story 4.13).
+
+    ``is_valid`` : True si le document Unity produit est 100% conforme au schéma.
+    ``errors`` : liste des messages d'erreur (vide si conforme).
+    ``error_count`` : raccourci ``len(errors)`` pour faciliter l'affichage UI.
+    """
+
+    is_valid: bool = Field(..., description="True si le schéma Unity est conforme à 100%")
+    errors: List[str] = Field(..., description="Messages d'erreur détectés")
+    error_count: int = Field(..., description="Nombre d'erreurs (== len(errors))")
+
+
 class CalculateLayoutRequest(BaseModel):
     """Requête pour calculer un layout automatique."""
     nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")

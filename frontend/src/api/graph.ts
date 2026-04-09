@@ -17,6 +17,8 @@ import type {
   NodePromptResponse,
   ValidateGraphRequest,
   ValidateGraphResponse,
+  ValidateSchemaRequest,
+  ValidateSchemaResponse,
   SimulateFlowRequest,
   SimulateFlowResponse,
   ValidateLoreExplicitRequest,
@@ -202,6 +204,18 @@ export async function calculateLayout(
   const response = await apiClient.post<CalculateLayoutResponse>(
     `/api/v1/unity-dialogues/graph/calculate-layout`,
     request
+  )
+  return response.data
+}
+
+/**
+ * Valide la conformité du graphe courant contre le schéma JSON Unity (FR48).
+ */
+export async function validateSchema(request: ValidateSchemaRequest): Promise<ValidateSchemaResponse> {
+  const response = await apiClient.post<ValidateSchemaResponse>(
+    `/api/v1/unity-dialogues/graph/validate-schema`,
+    request,
+    { timeout: 30000 }
   )
   return response.data
 }

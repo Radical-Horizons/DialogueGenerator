@@ -19,6 +19,7 @@ import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
 import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
 import { FlowSimulationPanel } from './FlowSimulationPanel'
+import { SchemaValidationPanel } from './SchemaValidationPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
@@ -83,6 +84,13 @@ export function GraphEditor({
     showAiSlopPanel,
     showContextDroppingPanel,
     showFlowSimulationPanel,
+    showSchemaValidationPanel,
+    schemaValidationLoading,
+    schemaValidationIsValid,
+    schemaValidationErrors,
+    schemaValidationErrorCount,
+    handleToggleSchemaValidation,
+    handleSchemaErrorClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showAIGenerationPanel,
@@ -278,6 +286,15 @@ export function GraphEditor({
                 onClose={() => toolbar.setShowFlowSimulationPanel(false)}
               />
             )}
+            <SchemaValidationPanel
+              isOpen={showSchemaValidationPanel}
+              isLoading={schemaValidationLoading}
+              isValid={schemaValidationIsValid}
+              errors={schemaValidationErrors}
+              errorCount={schemaValidationErrorCount}
+              onClose={handleToggleSchemaValidation}
+              onErrorClick={handleSchemaErrorClick}
+            />
             {showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal
                 filename={activeDialogueFilename}
