@@ -13,6 +13,8 @@ import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { BatchOperationsMenu } from './BatchOperationsMenu'
 import { NODE_DRAG_TOOLTIP } from './nodeDragTooltip'
+import { GraphSearchBar } from './GraphSearchBar'
+import { GraphActionsDropdown } from './GraphActionsDropdown'
 import {
   formatGraphWarningBadgeLabel,
   summarizeGraphValidationWarnings,
@@ -72,7 +74,6 @@ export function GraphEditorHeader({
     lastSavedAt,
     syncStatus,
     lastAckSeq,
-    graphFilters,
     dialogueMetadata,
     createEmptyNode,
     addNode,
@@ -83,7 +84,7 @@ export function GraphEditorHeader({
   const canUndoNow = useGraphStore((s) => s.undoStack.length > 0)
   const canRedoNow = useGraphStore((s) => s.redoStack.length > 0)
 
-  const handleExportUnity = () => {
+  const handleExportUnity = useCallback(() => {
     const json = exportToUnity()
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -94,7 +95,7 @@ export function GraphEditorHeader({
       : 'dialogue.json'
     a.click()
     URL.revokeObjectURL(url)
-  }
+  }, [dialogueMetadata?.filename, exportToUnity])
 
   const {
     showAutoLayoutDropdown,
@@ -119,7 +120,6 @@ export function GraphEditorHeader({
     actionsDropdownRef,
     actionsDropdownBtnRef,
     reactFlowInstance,
-    handleAutoLayout,
     handleOpenExportDialog,
     undo,
     redo,
@@ -194,23 +194,420 @@ export function GraphEditorHeader({
     boxSizing: 'border-box',
   }
 
+  const renderActionsMenuItems = useCallback(() => {
+    return (
+      <>
+        <button
+          data-testid="btn-new-manual-node"
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            const count = nodes.filter((n) => n.type === 'dialogueNode').length
+            const position = {
+              x: MANUAL_NODE_OFFSET_X + count * MANUAL_NODE_STEP,
+              y: MANUAL_NODE_OFFSET_Y + count * MANUAL_NODE_STEP_Y,
+            }
+            const node = createEmptyNode(position)
+            addNode(node)
+            setSelectedNode(node.id)
+            if (reactFlowInstance) {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  const n = reactFlowInstance.getNode(node.id)
+                  if (n) reactFlowInstance.fitView({ nodes: [n], padding: 0.2, duration: 200 })
+                })
+              })
+            }
+          }}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          ➕ Nouveau nœud
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowAIGenerationPanel(true)
+          }}
+          disabled={!selectedNodeId}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: !selectedNodeId ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: selectedNodeId ? 'pointer' : 'not-allowed',
+            opacity: selectedNodeId ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (selectedNodeId) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          ✨ Générer nœud
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowJumpToNodeModal(true)
+          }}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          🎯 Aller à un nœud (Ctrl+J)
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            handleOpenExportDialog()
+          }}
+          disabled={!reactFlowInstance}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: !reactFlowInstance ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: reactFlowInstance ? 'pointer' : 'not-allowed',
+            opacity: reactFlowInstance ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (reactFlowInstance) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+          title="Exporter le graphe en image (PNG ou SVG)"
+        >
+          📤 Exporter en image (PNG/SVG)
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          data-testid="btn-export-unity"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            handleExportUnity()
+          }}
+          disabled={nodes.length === 0}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: nodes.length === 0 ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: nodes.length === 0 ? 'not-allowed' : 'pointer',
+            opacity: nodes.length === 0 ? 0.6 : 1,
+          }}
+          onMouseEnter={(e) => {
+            if (nodes.length > 0) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+          title="Exporter le dialogue au format Unity JSON"
+          aria-label="Export Unity"
+        >
+          📦 Export Unity
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          data-testid="btn-filters-panel"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowFiltersPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          🔽 Filtres
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowCostBreakdown((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          💰 Coûts
+        </button>
+      </>
+    )
+  }, [
+    addNode,
+    chrome.dropdownItemFontSizeRem,
+    chrome.dropdownItemPadding,
+    createEmptyNode,
+    handleExportUnity,
+    handleOpenExportDialog,
+    hasActiveDialogue,
+    nodes,
+    reactFlowInstance,
+    selectedNodeId,
+    setSelectedNode,
+    setShowAIGenerationPanel,
+    setShowActionsDropdown,
+    setShowCostBreakdown,
+    setShowFiltersPanel,
+    setShowJumpToNodeModal,
+  ])
+
   return (
     <div
       ref={toolbarRef}
+      data-graph-toolbar-narrow={isNarrowToolbar ? 'true' : 'false'}
       style={{
         flexShrink: 0,
         padding: chrome.containerPadding,
         borderBottom: `1px solid ${theme.border.primary}`,
         backgroundColor: theme.background.panelHeader,
-        display: 'flex',
+        display: isNarrowToolbar ? 'grid' : 'flex',
+        gridTemplateColumns: isNarrowToolbar ? 'minmax(0, 1fr)' : undefined,
+        gridTemplateAreas: isNarrowToolbar
+          ? showSearchBar
+            ? '"header" "tools" "search"'
+            : '"header" "tools"'
+          : undefined,
         gap: `${chrome.containerGapRem}rem`,
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        flexWrap: 'wrap',
+        rowGap: isNarrowToolbar ? `${chrome.containerGapRem}rem` : undefined,
+        alignItems: isNarrowToolbar ? 'stretch' : 'center',
+        justifyContent: isNarrowToolbar ? undefined : 'flex-end',
+        flexWrap: isNarrowToolbar ? undefined : 'wrap',
+        width: '100%',
+        minWidth: 0,
       }}
     >
       <div
+        data-testid="graph-toolbar-top-left"
         style={{
+          gridArea: isNarrowToolbar ? 'header' : undefined,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: `${chrome.groupGapRem}rem`,
+          minWidth: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+          {isStandalone && onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                padding: '0.45rem 0.8rem',
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                backgroundColor: theme.button.default.background,
+                color: theme.button.default.color,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ← Retour
+            </button>
+          )}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: `${chrome.buttonFontSizeRem}rem`, fontWeight: 700, color: theme.text.primary }}>
+              Éditeur de graphe
+            </div>
+            <div
+              style={{
+                fontSize: `${chrome.badgeFontSizeRem}rem`,
+                color: theme.text.secondary,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                maxWidth: isNarrowToolbar ? '100%' : '320px',
+              }}
+              title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+            >
+              {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: `${chrome.groupGapRem}rem`, alignItems: 'center' }}>
+          {canEditGraph && (
+            <>
+              <button
+                type="button"
+                data-testid="btn-undo"
+                onClick={() => undo()}
+                disabled={!canUndoNow}
+                style={{
+                  ...graphChromeTouch,
+                  padding: chrome.buttonPadding,
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
+                  cursor: canUndoNow ? 'pointer' : 'not-allowed',
+                  opacity: canUndoNow ? 1 : 0.6,
+                  fontSize: `${chrome.buttonFontSizeRem}rem`,
+                }}
+                title="Annuler (Ctrl+Z)"
+                aria-label="Annuler"
+              >
+                {isNarrowToolbar ? '↩' : '↩ Undo'}
+              </button>
+              <button
+                type="button"
+                data-testid="btn-redo"
+                onClick={() => redo()}
+                disabled={!canRedoNow}
+                style={{
+                  ...graphChromeTouch,
+                  padding: chrome.buttonPadding,
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
+                  cursor: canRedoNow ? 'pointer' : 'not-allowed',
+                  opacity: canRedoNow ? 1 : 0.6,
+                  fontSize: `${chrome.buttonFontSizeRem}rem`,
+                }}
+                title="Refaire (Ctrl+Y)"
+                aria-label="Refaire"
+              >
+                {isNarrowToolbar ? '↪' : '↪ Redo'}
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            data-testid="btn-search-graph-top"
+            onClick={() =>
+              setShowSearchBar((v) => {
+                if (v) setHighlightedNodes([])
+                return !v
+              })
+            }
+            disabled={!hasActiveDialogue}
+            style={{
+              ...graphChromeTouch,
+              padding: chrome.buttonPadding,
+              border: `1px solid ${
+                showSearchBar ? theme.button.primary.background : theme.border.primary
+              }`,
+              borderRadius: '6px',
+              backgroundColor: showSearchBar
+                ? theme.button.primary.background
+                : theme.button.default.background,
+              color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
+              cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+              opacity: !hasActiveDialogue ? 0.6 : 1,
+              fontSize: `${chrome.buttonFontSizeRem}rem`,
+            }}
+            title="Rechercher dans le graphe (Ctrl+F)"
+            aria-label="Rechercher"
+          >
+            🔍
+          </button>
+          <GraphActionsDropdown
+            canEditGraph={canEditGraph}
+            isNarrow={true}
+            graphChromeTouch={graphChromeTouch}
+            buttonPadding={chrome.buttonPadding}
+            buttonFontSizeRem={chrome.buttonFontSizeRem}
+            groupGapRem={chrome.groupGapRem}
+            actionsDropdownRef={actionsDropdownRef}
+            actionsDropdownBtnRef={actionsDropdownBtnRef}
+            showActionsDropdown={showActionsDropdown}
+            setShowActionsDropdown={setShowActionsDropdown}
+            renderMenuItems={renderActionsMenuItems}
+          />
+        </div>
+      </div>
+      <div
+        style={{
+          gridArea: isNarrowToolbar ? 'tools' : undefined,
           flex: 1,
           minWidth: 0,
           display: 'flex',
@@ -220,7 +617,7 @@ export function GraphEditorHeader({
           justifyContent: 'flex-start',
         }}
       >
-        {isStandalone && (
+        {!isNarrowToolbar && isStandalone && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
             {onBack && (
               <button
@@ -267,52 +664,6 @@ export function GraphEditorHeader({
           onBatchTagApply={onBatchTagApply}
           onBatchValidateClick={handleBatchValidateSelection}
         />
-        {canEditGraph && (
-          <>
-            <button
-              type="button"
-              data-testid="btn-undo"
-              onClick={() => undo()}
-              disabled={!canUndoNow}
-              style={{
-                ...graphChromeTouch,
-                padding: chrome.buttonPadding,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
-                cursor: canUndoNow ? 'pointer' : 'not-allowed',
-                opacity: canUndoNow ? 1 : 0.6,
-                fontSize: `${chrome.buttonFontSizeRem}rem`,
-              }}
-              title="Annuler (Ctrl+Z)"
-              aria-label="Annuler"
-            >
-              {isNarrowToolbar ? '↩' : '↩ Undo'}
-            </button>
-            <button
-              type="button"
-              data-testid="btn-redo"
-              onClick={() => redo()}
-              disabled={!canRedoNow}
-              style={{
-                ...graphChromeTouch,
-                padding: chrome.buttonPadding,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
-                cursor: canRedoNow ? 'pointer' : 'not-allowed',
-                opacity: canRedoNow ? 1 : 0.6,
-                fontSize: `${chrome.buttonFontSizeRem}rem`,
-              }}
-              title="Refaire (Ctrl+Y)"
-              aria-label="Refaire"
-            >
-              {isNarrowToolbar ? '↪' : '↪ Redo'}
-            </button>
-          </>
-        )}
         {/* Badge de santé global du graphe */}
         {(() => {
           const graphErrs = graphValidationErrors ?? []
@@ -588,251 +939,19 @@ export function GraphEditorHeader({
             </div>
           )}
         </div>
-        <div ref={actionsDropdownRef} style={{ position: 'relative' }}>
-          <button
-            ref={actionsDropdownBtnRef}
-            data-testid="btn-actions-dropdown"
-            type="button"
-            onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
-            disabled={!canEditGraph}
-            style={{
-              ...graphChromeTouch,
-              padding: chrome.buttonPadding,
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '6px',
-              backgroundColor: theme.button.default.background,
-              color: theme.button.default.color,
-              cursor: canEditGraph ? 'pointer' : 'not-allowed',
-              opacity: canEditGraph ? 1 : 0.6,
-              fontSize: `${chrome.buttonFontSizeRem}rem`,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-            }}
-            title="Actions sur le graphe"
-          >
-            {isNarrowToolbar ? '⋯' : 'Actions'}
-            <span style={{ fontSize: '0.7rem' }}>▼</span>
-          </button>
-          {showActionsDropdown && (
-            <div
-              role="menu"
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                marginTop: '4px',
-                minWidth: '200px',
-                backgroundColor: theme.background.tertiary,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-                zIndex: 50,
-                overflow: 'hidden',
-              }}
-            >
-              <button
-                data-testid="btn-new-manual-node"
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setShowActionsDropdown(false)
-                  const count = nodes.filter((n) => n.type === 'dialogueNode').length
-                  const position = {
-                    x: MANUAL_NODE_OFFSET_X + count * MANUAL_NODE_STEP,
-                    y: MANUAL_NODE_OFFSET_Y + count * MANUAL_NODE_STEP_Y,
-                  }
-                  const node = createEmptyNode(position)
-                  addNode(node)
-                  setSelectedNode(node.id)
-                  if (reactFlowInstance) {
-                    requestAnimationFrame(() => {
-                      requestAnimationFrame(() => {
-                        const n = reactFlowInstance.getNode(node.id)
-                        if (n) reactFlowInstance.fitView({ nodes: [n], padding: 0.2, duration: 200 })
-                      })
-                    })
-                  }
-                }}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: chrome.dropdownItemPadding,
-                  border: 'none',
-                  background: 'transparent',
-                  color: theme.text.primary,
-                  textAlign: 'left',
-                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.state.hover.background
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                ➕ Nouveau nœud
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setShowActionsDropdown(false)
-                  setShowAIGenerationPanel(true)
-                }}
-                disabled={!selectedNodeId}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: chrome.dropdownItemPadding,
-                  border: 'none',
-                  background: 'transparent',
-                  color: !selectedNodeId ? theme.text.secondary : theme.text.primary,
-                  textAlign: 'left',
-                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-                  cursor: selectedNodeId ? 'pointer' : 'not-allowed',
-                  opacity: selectedNodeId ? 1 : 0.6,
-                }}
-                onMouseEnter={(e) => {
-                  if (selectedNodeId)
-                    e.currentTarget.style.backgroundColor = theme.state.hover.background
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                ✨ Générer nœud
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setShowActionsDropdown(false)
-                  setShowJumpToNodeModal(true)
-                }}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: chrome.dropdownItemPadding,
-                  border: 'none',
-                  background: 'transparent',
-                  color: theme.text.primary,
-                  textAlign: 'left',
-                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.state.hover.background
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                🎯 Aller à un nœud (Ctrl+J)
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setShowActionsDropdown(false)
-                  handleOpenExportDialog()
-                }}
-                disabled={!reactFlowInstance}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: chrome.dropdownItemPadding,
-                  border: 'none',
-                  background: 'transparent',
-                  color: !reactFlowInstance ? theme.text.secondary : theme.text.primary,
-                  textAlign: 'left',
-                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-                  cursor: reactFlowInstance ? 'pointer' : 'not-allowed',
-                  opacity: reactFlowInstance ? 1 : 0.6,
-                }}
-                onMouseEnter={(e) => {
-                  if (reactFlowInstance)
-                    e.currentTarget.style.backgroundColor = theme.state.hover.background
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-                title="Exporter le graphe en image (PNG ou SVG)"
-              >
-                📤 Exporter en image (PNG/SVG)
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                data-testid="btn-export-unity"
-                onClick={() => {
-                  setShowActionsDropdown(false)
-                  handleExportUnity()
-                }}
-                disabled={nodes.length === 0}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: chrome.dropdownItemPadding,
-                  border: 'none',
-                  background: 'transparent',
-                  color: nodes.length === 0 ? theme.text.secondary : theme.text.primary,
-                  textAlign: 'left',
-                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-                  cursor: nodes.length === 0 ? 'not-allowed' : 'pointer',
-                  opacity: nodes.length === 0 ? 0.6 : 1,
-                }}
-                onMouseEnter={(e) => {
-                  if (nodes.length > 0)
-                    e.currentTarget.style.backgroundColor = theme.state.hover.background
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-                title="Exporter le dialogue au format Unity JSON"
-                aria-label="Export Unity"
-              >
-                📦 Export Unity
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                data-testid="btn-filters-panel"
-                onClick={() => {
-                  setShowActionsDropdown(false)
-                  setShowFiltersPanel((v) => !v)
-                }}
-                disabled={!hasActiveDialogue}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: chrome.dropdownItemPadding,
-                  border: 'none',
-                  background: 'transparent',
-                  color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
-                  textAlign: 'left',
-                  fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-                  cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
-                  opacity: hasActiveDialogue ? 1 : 0.6,
-                }}
-                onMouseEnter={(e) => {
-                  if (hasActiveDialogue)
-                    e.currentTarget.style.backgroundColor = theme.state.hover.background
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                🔽 Filtres
-                {(graphFilters.hiddenTypes?.length ?? 0) > 0 ||
-                (graphFilters.allowedSpeakers?.length ?? 0) > 0 ? (
-                  <span style={{ marginLeft: '0.35rem', fontSize: '0.75rem' }}>•</span>
-                ) : null}
-              </button>
-            </div>
-          )}
-        </div>
+        <GraphActionsDropdown
+          canEditGraph={canEditGraph}
+          isNarrow={isNarrowToolbar}
+          graphChromeTouch={graphChromeTouch}
+          buttonPadding={chrome.buttonPadding}
+          buttonFontSizeRem={chrome.buttonFontSizeRem}
+          groupGapRem={chrome.groupGapRem}
+          actionsDropdownRef={actionsDropdownRef}
+          actionsDropdownBtnRef={actionsDropdownBtnRef}
+          showActionsDropdown={showActionsDropdown}
+          setShowActionsDropdown={setShowActionsDropdown}
+          renderMenuItems={renderActionsMenuItems}
+        />
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}
           disabled={!hasActiveDialogue}
@@ -855,36 +974,7 @@ export function GraphEditorHeader({
         >
           {isNarrowToolbar ? '💰' : '💰 Coûts'}
         </button>
-        <button
-          type="button"
-          data-testid="btn-search-graph"
-          onClick={() =>
-            setShowSearchBar((v) => {
-              if (v) setHighlightedNodes([])
-              return !v
-            })
-          }
-          disabled={!hasActiveDialogue}
-          style={{
-            ...graphChromeTouch,
-            padding: chrome.buttonPadding,
-            border: `1px solid ${
-              showSearchBar ? theme.button.primary.background : theme.border.primary
-            }`,
-            borderRadius: '6px',
-            backgroundColor: showSearchBar
-              ? theme.button.primary.background
-              : theme.button.default.background,
-            color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
-            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-            opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: `${chrome.buttonFontSizeRem}rem`,
-          }}
-          title="Rechercher dans le graphe (Ctrl+F)"
-          aria-label="Rechercher"
-        >
-          {isNarrowToolbar ? '🔍' : '🔍 Rechercher'}
-        </button>
+        {/* Actions dropdown déjà rendu une seule fois plus haut */}
         <div style={{ position: 'relative' }}>
           <button
             ref={shortcutsButtonRef}
@@ -1084,6 +1174,23 @@ export function GraphEditorHeader({
             )}
         </div>
       </div>
+      {showSearchBar && isNarrowToolbar && (
+        <div
+          data-testid="graph-toolbar-search"
+          style={{
+            gridArea: isNarrowToolbar ? 'search' : undefined,
+            width: '100%',
+            minWidth: 0,
+          }}
+        >
+          <GraphSearchBar
+            embedded
+            onClose={() => {
+              toolbar.setShowSearchBar(false)
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }

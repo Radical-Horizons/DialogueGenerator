@@ -8,9 +8,9 @@ import { ReactFlowProvider } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
 import { UnityDialogueList } from '../unityDialogues/UnityDialogueList'
 import { GraphCanvas } from './GraphCanvas'
-import { GraphSearchBar } from './GraphSearchBar'
 import { JumpToNodeModal } from './JumpToNodeModal'
 import { GraphFiltersPanel } from './GraphFiltersPanel'
+import { GraphSearchBar } from './GraphSearchBar'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
@@ -29,6 +29,8 @@ import { resolveGraphRouteTarget } from './graphEditorStandalone'
 import { useDialogueLoader } from '../../hooks/useDialogueLoader'
 import { useGraphToolbar } from '../../hooks/useGraphToolbar'
 import { useBatchOperations } from '../../hooks/useBatchOperations'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
 import type { UnityDialogueMetadata } from '../../types/api'
 
 interface GraphEditorProps {
@@ -72,6 +74,10 @@ export function GraphEditor({
   } = useGraphStore()
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
+  const { ref: workspaceRef, isNarrow: isWorkspaceNarrow } = useNarrowInlineSize(
+    GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+    { measureParentClientWidth: true }
+  )
 
   const {
     showValidationPanel,
@@ -81,7 +87,6 @@ export function GraphEditor({
     setShowAIGenerationPanel,
     showExportFormatDialog,
     setShowExportFormatDialog,
-    showSearchBar,
     showJumpToNodeModal,
     setShowJumpToNodeModal,
     showFiltersPanel,
@@ -144,6 +149,7 @@ export function GraphEditor({
           display: 'flex',
           flexDirection: 'column',
         }}
+        ref={workspaceRef}
       >
         <GraphEditorHeader
           toolbar={toolbar}
@@ -215,7 +221,7 @@ export function GraphEditor({
                 data-testid="graph-canvas"
                 style={{ flex: 1, minHeight: 400, overflow: 'hidden', position: 'relative' }}
               >
-                {showSearchBar && (
+                {toolbar.showSearchBar && !isWorkspaceNarrow && (
                   <GraphSearchBar
                     onClose={() => {
                       toolbar.setShowSearchBar(false)
