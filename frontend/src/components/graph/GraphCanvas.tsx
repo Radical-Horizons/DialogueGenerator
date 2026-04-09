@@ -3,7 +3,7 @@
  * Mode controlled (ADR-007) : nodes et edges proviennent exclusivement du store.
  * Les handlers événementiels sont délégués à useReactFlowHandlers.
  */
-import { memo, useMemo, useEffect, useRef, useState, useCallback } from 'react'
+import { memo, useMemo, useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import ReactFlow, {
   Background,
@@ -45,6 +45,11 @@ import {
   useGraphContextMenuLongPress,
 } from '../../hooks/useGraphContextMenuLongPress'
 import { GRAPH_VIEWPORT_INTERACTION_OPTIONS } from './graphViewportInteraction'
+import {
+  computeGraphMinimapSizePx,
+  REACT_FLOW_MINIMAP_DEFAULT_HEIGHT,
+  REACT_FLOW_MINIMAP_DEFAULT_WIDTH,
+} from './graphMinimapLayout'
 import { getValidationHighlightKind } from '../../utils/graphStructuralValidation'
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
@@ -223,6 +228,10 @@ export const GraphCanvas = memo(function GraphCanvas() {
   const toast = useToast()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
+  const [minimapSize, setMinimapSize] = useState({
+    width: REACT_FLOW_MINIMAP_DEFAULT_WIDTH,
+    height: REACT_FLOW_MINIMAP_DEFAULT_HEIGHT,
+  })
   const suppressNextPaneClickRef = useRef(false)
   const coarsePointer = useCoarsePointerMatch()
 
@@ -237,6 +246,21 @@ export const GraphCanvas = memo(function GraphCanvas() {
   useEffect(() => {
     fitViewRequestedAfterDimensionsRef.current = false
   }, [documentId])
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const measure = () => {
+      const next = computeGraphMinimapSizePx(el.clientWidth, el.clientHeight)
+      if (next) setMinimapSize(next)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+    }
+  }, [])
 
   const handleChoiceDropOnPane = useCallback(
     (position: { x: number; y: number }, pending: { sourceNodeId: string; sourceHandleId: string }) => {
@@ -550,6 +574,16 @@ export const GraphCanvas = memo(function GraphCanvas() {
     []
   )
   const reactFlowStyle = useMemo(() => ({ backgroundColor: theme.background.panel }), [])
+  const minimapStyle = useMemo(
+    () =>
+      ({
+        backgroundColor: theme.background.secondary,
+        border: `1px solid ${theme.border.primary}`,
+        width: minimapSize.width,
+        height: minimapSize.height,
+      }) as const,
+    [minimapSize.height, minimapSize.width]
+  )
 
   const onMove = (_event: unknown, newViewport: Viewport) => {
     setViewport(newViewport)
@@ -631,10 +665,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
             }
           }}
           nodeBorderRadius={8}
-          style={{
-            backgroundColor: theme.background.secondary,
-            border: `1px solid ${theme.border.primary}`,
-          }}
+          style={minimapStyle}
           maskColor={`${theme.background.panel}80`}
         />
       </ReactFlow>

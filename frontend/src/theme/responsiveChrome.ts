@@ -14,23 +14,23 @@ export const SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX = 480
 
 export const segmentedTabTypography = {
   comfortable: {
-    fontSizeRem: 0.8125,
-    buttonPadding: '0.32rem 0.7rem',
-    rowGapRem: 0.28,
-    rowPadding: '0.4rem 0.55rem',
+    fontSizeRem: 0.8,
+    buttonPadding: '0.3rem 0.62rem',
+    rowGapRem: 0.26,
+    rowPadding: '0.36rem 0.5rem',
   },
   narrow: {
     /** Plancher lisibilité ≈ 12px si root 16px */
-    fontSizeRem: 0.75,
-    buttonPadding: '0.28rem 0.5rem',
-    rowGapRem: 0.22,
-    rowPadding: '0.34rem 0.45rem',
+    fontSizeRem: 0.72,
+    buttonPadding: '0.26rem 0.48rem',
+    rowGapRem: 0.2,
+    rowPadding: '0.32rem 0.42rem',
   },
 } as const
 
 export const panelHeaderTitleTypography = {
-  comfortableFontRem: 0.84,
-  narrowFontRem: 0.775,
+  comfortableFontRem: 0.8,
+  narrowFontRem: 0.75,
 } as const
 
 /**
@@ -38,8 +38,8 @@ export const panelHeaderTitleTypography = {
  * AC1 : plancher lisibilité ≥ ~12px (`0.75rem` si root 16px).
  */
 export const panelExpandRailCaptionTypography = {
-  comfortableFontRem: 0.78,
-  narrowFontRem: 0.75,
+  comfortableFontRem: 0.75,
+  narrowFontRem: 0.72,
 } as const
 
 /**
@@ -48,36 +48,119 @@ export const panelExpandRailCaptionTypography = {
  */
 export const GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX = 640
 
-export const graphToolbarChrome = {
+/** Même seuil conteneur pour panneau Génération, graphe, etc. */
+export const PANEL_COMFORT_MIN_WIDTH_PX = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX
+
+export const generationPanelChrome = {
   comfortable: {
-    containerPadding: '0.75rem 1rem',
-    containerGapRem: 0.5,
-    groupGapRem: 0.5,
-    touchMinPx: 44,
-    buttonFontSizeRem: 0.9,
-    buttonPadding: '0.5rem 1rem',
-    badgeFontSizeRem: 0.85,
-    badgePadding: '0.4rem 0.75rem',
-    chipFontSizeRem: 0.72,
-    chipPadding: '0.1rem 0.35rem',
-    dropdownItemFontSizeRem: 0.9,
-    dropdownItemPadding: '0.5rem 1rem',
+    containerPadding: '1.35rem',
+    sectionTitleFontRem: 0.92,
+    labelFontRem: 0.82,
+    controlGapRem: 0.45,
+    buttonPadding: '0.42rem 0.85rem',
+    buttonFontRem: 0.8,
+    textareaFontRem: 0.82,
+    selectTriggerMinHeightPx: 32,
+    selectTriggerPadding: '0.42rem 0.55rem',
+    selectTextFontRem: 0.8125,
+    dropdownOptionPadding: '0.62rem 0.7rem',
+    dropdownOptionFontRem: 0.82,
+    structureGridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
+    structureGapRem: 0.45,
+    cardPadding: '0.85rem',
+    iconActionSizePx: 32,
+    tabInnerPadding: '0.85rem',
   },
   narrow: {
-    containerPadding: '0.45rem 0.55rem',
-    containerGapRem: 0.35,
-    groupGapRem: 0.35,
+    containerPadding: '0.6rem 0.7rem',
+    sectionTitleFontRem: 0.85,
+    labelFontRem: 0.75,
+    controlGapRem: 0.32,
+    buttonPadding: '0.32rem 0.5rem',
+    buttonFontRem: 0.72,
+    textareaFontRem: 0.78,
+    selectTriggerMinHeightPx: 28,
+    selectTriggerPadding: '0.22rem 0.32rem',
+    selectTextFontRem: 0.75,
+    dropdownOptionPadding: '0.42rem 0.5rem',
+    dropdownOptionFontRem: 0.78,
+    structureGridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    structureGapRem: 0.32,
+    cardPadding: '0.6rem',
+    iconActionSizePx: 28,
+    tabInnerPadding: '0.6rem',
+  },
+} as const
+
+/**
+ * En-tête et zone scroll de l’éditeur Unity (onglet Édition de dialogues, page dédiée).
+ * Même seuil conteneur que {@link PANEL_COMFORT_MIN_WIDTH_PX} via `useNarrowInlineSize` sur la colonne workspace.
+ */
+export const unityDialogueEditorChrome = {
+  comfortable: {
+    headerPadding: '0.48rem 0.65rem',
+    headerLayoutGapRem: 0.42,
+    titleFontRem: 0.85,
+    subtitleFontRem: 0.75,
+    subtitleMarginTopRem: 0.18,
+    toolbarGapRem: 0.35,
+    toolbarButtonPadding: '0.35rem 0.62rem',
+    toolbarButtonFontRem: 0.78,
+    toolbarButtonFontWeight: 700,
+    contentPadding: '0.85rem',
+    nodeSectionGapRem: 1.25,
+    nodeCardPadding: '0.85rem',
+    labelFontRem: 0.82,
+    inputPadding: '0.45rem 0.55rem',
+  },
+  narrow: {
+    headerPadding: '0.35rem 0.48rem',
+    headerLayoutGapRem: 0.32,
+    titleFontRem: 0.78,
+    subtitleFontRem: 0.68,
+    subtitleMarginTopRem: 0.12,
+    toolbarGapRem: 0.26,
+    toolbarButtonPadding: '0.26rem 0.42rem',
+    toolbarButtonFontRem: 0.7,
+    toolbarButtonFontWeight: 600,
+    contentPadding: '0.58rem',
+    nodeSectionGapRem: 0.9,
+    nodeCardPadding: '0.58rem',
+    labelFontRem: 0.75,
+    inputPadding: '0.35rem 0.42rem',
+  },
+} as const
+
+export const graphToolbarChrome = {
+  comfortable: {
+    containerPadding: '0.65rem 0.85rem',
+    containerGapRem: 0.42,
+    groupGapRem: 0.42,
+    touchMinPx: 44,
+    buttonFontSizeRem: 0.84,
+    buttonPadding: '0.42rem 0.85rem',
+    badgeFontSizeRem: 0.8,
+    badgePadding: '0.35rem 0.65rem',
+    chipFontSizeRem: 0.68,
+    chipPadding: '0.08rem 0.3rem',
+    dropdownItemFontSizeRem: 0.84,
+    dropdownItemPadding: '0.45rem 0.85rem',
+  },
+  narrow: {
+    containerPadding: '0.42rem 0.5rem',
+    containerGapRem: 0.32,
+    groupGapRem: 0.32,
     touchMinPx: 32,
     /** Plancher lisibilité ≈ 12px si root 16px */
-    buttonFontSizeRem: 0.78,
+    buttonFontSizeRem: 0.75,
     /** Padding horizontal réduit, min 44px garanti par GRAPH_CHROME_TOUCH */
-    buttonPadding: '0.38rem 0.6rem',
-    badgeFontSizeRem: 0.78,
-    badgePadding: '0.32rem 0.55rem',
-    chipFontSizeRem: 0.68,
-    chipPadding: '0.08rem 0.28rem',
-    dropdownItemFontSizeRem: 0.82,
-    dropdownItemPadding: '0.42rem 0.75rem',
+    buttonPadding: '0.35rem 0.55rem',
+    badgeFontSizeRem: 0.75,
+    badgePadding: '0.28rem 0.5rem',
+    chipFontSizeRem: 0.65,
+    chipPadding: '0.06rem 0.25rem',
+    dropdownItemFontSizeRem: 0.78,
+    dropdownItemPadding: '0.38rem 0.68rem',
   },
 } as const
 

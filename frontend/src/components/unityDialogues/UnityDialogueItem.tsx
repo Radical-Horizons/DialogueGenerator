@@ -3,6 +3,7 @@
  */
 import { memo } from 'react'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
 
@@ -80,7 +81,7 @@ export const UnityDialogueItem = memo(function UnityDialogueItem({
       <div
         data-testid="unity-dialogue-item-title"
         style={{
-          fontSize: '0.82rem',
+          fontSize: remSize('unityListTitle'),
           fontWeight: 600,
           lineHeight: 1.25,
           marginBottom: '0.2rem',
@@ -107,7 +108,7 @@ export const UnityDialogueItem = memo(function UnityDialogueItem({
       </div>
       <div
         style={{
-          fontSize: '0.7rem',
+          fontSize: remSize('caption'),
           color: theme.text.tertiary,
           display: 'flex',
           flexWrap: 'wrap',

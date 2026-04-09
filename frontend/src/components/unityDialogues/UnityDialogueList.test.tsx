@@ -40,6 +40,6 @@ describe('UnityDialogueList', () => {
     })
 
     const titleEl = screen.getByTestId('unity-dialogue-item-title')
-    expect(titleEl).toHaveStyle({ fontSize: '0.82rem' })
+    expect(titleEl).toHaveStyle({ fontSize: '0.8rem' })
   })
 })

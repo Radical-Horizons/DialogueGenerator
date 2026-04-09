@@ -1,5 +1,8 @@
 /**
  * Constantes de thème pour l'application (mode sombre).
+ *
+ * Typographie responsive : `index.css` (base `html` + champs globaux), `theme/uiTypography.ts`
+ * (échelle rem pour styles inline), `theme/responsiveChrome.ts` (onglets / panneaux / graphe).
  */
 
 export const theme = {

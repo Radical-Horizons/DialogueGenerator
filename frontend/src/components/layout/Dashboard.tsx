@@ -13,6 +13,7 @@ import { ResizablePanels, type ResizablePanelsRef } from '../shared/ResizablePan
 import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { Tabs, type Tab } from '../shared/Tabs'
 import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
+import { DialogueEditionNarrowProvider } from '../unityDialogues/DialogueEditionNarrowContext'
 import { UnityDialogueDetails } from '../unityDialogues/UnityDialogueDetails'
 import { GraphEditor } from '../graph/GraphEditor'
 import { NodeEditorPanel } from '../graph/NodeEditorPanel'
@@ -27,10 +28,12 @@ import { useViewportMode } from '../../hooks/useViewportMode'
 import { useMobileShellKeyboardComfort } from '../../hooks/useMobileShellKeyboardComfort'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
+  PANEL_COMFORT_MIN_WIDTH_PX,
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
   panelExpandRailCaptionTypography,
   panelHeaderTitleTypography,
 } from '../../theme/responsiveChrome'
+import { remSize } from '../../theme/uiTypography'
 import {
   unityDialogueListColumnStyle,
   unityDialogueWorkspaceColumnStyle,
@@ -135,7 +138,7 @@ function PanelCollapseButton({
     >
       {chevronSide === 'left' && chevron}
       <span style={{
-        fontSize: '0.72rem',
+        fontSize: remSize('caption'),
         fontWeight: 600,
         letterSpacing: '0.03em',
         whiteSpace: 'nowrap',
@@ -292,6 +295,9 @@ export function Dashboard() {
   const { ref: centerColumnRef, isNarrow: isNarrowCenterColumn } = useNarrowInlineSize(
     SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
+  )
+  const { ref: dialogueEditionWorkspaceRef, isNarrow: isDialogueEditionNarrow } = useNarrowInlineSize(
+    PANEL_COMFORT_MIN_WIDTH_PX
   )
   const panelTitleFontRem = isNarrowCenterColumn
     ? panelHeaderTitleTypography.narrowFontRem
@@ -734,7 +740,7 @@ export function Dashboard() {
             </div>
             <div
               style={{
-                fontSize: '0.78rem',
+                fontSize: remSize('small'),
                 color: theme.text.secondary,
                 textAlign: 'center',
                 marginBottom: '0.4rem',
@@ -775,7 +781,7 @@ export function Dashboard() {
               style={{
                 flex: 1,
                 padding: '0.5rem 0.75rem',
-                fontSize: '0.875rem',
+                fontSize: remSize('body'),
                 fontWeight: 700,
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
@@ -810,7 +816,7 @@ export function Dashboard() {
               disabled={actions.isLoading || isGraphGenerating}
               style={{
                 padding: '0.5rem',
-                fontSize: '0.875rem',
+                fontSize: remSize('body'),
                 backgroundColor: theme.button.default.background,
                 color: theme.button.default.color,
                 border: `1px solid ${theme.border.primary}`,
@@ -857,7 +863,7 @@ export function Dashboard() {
             style={{
               width: '100%',
               padding: '0.55rem 0.75rem',
-              fontSize: '0.9rem',
+              fontSize: remSize('section'),
               fontWeight: 'bold',
               backgroundColor: theme.button.primary.background,
               color: theme.button.primary.color,
@@ -877,7 +883,7 @@ export function Dashboard() {
             <span>Générer</span>
             <span
               style={{
-                fontSize: '0.68rem',
+                fontSize: remSize('caption'),
                 opacity: 0.8,
                 fontWeight: 'normal',
               }}
@@ -1032,26 +1038,28 @@ export function Dashboard() {
                       selectedFilename={selectedDialogue?.filename || null}
                     />
                   </div>
-                  <div style={unityDialogueWorkspaceColumnStyle}>
-                    {selectedDialogue ? (
-                      <UnityDialogueDetails
-                        filename={selectedDialogue.filename}
-                        onClose={() => setSelectedDialogue(null)}
-                        onDeleted={async () => {
-                          await dialogueListRef.current?.refresh()
-                        }}
-                        onGenerateContinuation={() => {
-                          // Basculer vers l'onglet Génération
-                          setCenterPanelTab('generation')
-                          // TODO: Pré-remplir le contexte avec le dialogue existant pour générer la suite
-                          // Pour l'instant, on bascule juste vers l'onglet génération
-                        }}
-                      />
-                    ) : (
-                      <div style={{ padding: '2rem', textAlign: 'center', color: theme.text.secondary }}>
-                        Sélectionnez un dialogue Unity pour le voir et l'éditer
-                      </div>
-                    )}
+                  <div ref={dialogueEditionWorkspaceRef} style={unityDialogueWorkspaceColumnStyle}>
+                    <DialogueEditionNarrowProvider value={isDialogueEditionNarrow}>
+                      {selectedDialogue ? (
+                        <UnityDialogueDetails
+                          filename={selectedDialogue.filename}
+                          onClose={() => setSelectedDialogue(null)}
+                          onDeleted={async () => {
+                            await dialogueListRef.current?.refresh()
+                          }}
+                          onGenerateContinuation={() => {
+                            // Basculer vers l'onglet Génération
+                            setCenterPanelTab('generation')
+                            // TODO: Pré-remplir le contexte avec le dialogue existant pour générer la suite
+                            // Pour l'instant, on bascule juste vers l'onglet génération
+                          }}
+                        />
+                      ) : (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: theme.text.secondary }}>
+                          Sélectionnez un dialogue Unity pour le voir et l'éditer
+                        </div>
+                      )}
+                    </DialogueEditionNarrowProvider>
                   </div>
                 </div>
               ),
