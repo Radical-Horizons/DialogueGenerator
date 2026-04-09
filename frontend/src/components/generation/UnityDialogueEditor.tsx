@@ -11,6 +11,7 @@ import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { useToast } from '../shared'
 import { useDialogueEditionNarrow } from '../unityDialogues/DialogueEditionNarrowContext'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import type {
   UnityDialogueNode,
   UnityDialogueChoice,
@@ -53,6 +54,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   const toast = useToast()
   const isNarrow = useDialogueEditionNarrow()
   const chrome = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
+  const { ref: actionsRef, isNarrow: isActionsNarrow } = useNarrowInlineSize(520)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set())
@@ -342,53 +344,80 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
         <div
           style={{
-            display: 'flex',
-            gap: `${chrome.toolbarGapRem}rem`,
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            justifyContent: isNarrow ? 'flex-start' : 'flex-end',
+            // IMPORTANT: le wrapper force l'étirement en largeur.
+            // Sans ça, certains contextes de flex/grid peuvent "shrink-wrap" sur le contenu,
+            // ce qui donne exactement le symptôme vu (≈222px de large).
+            width: '100%',
+            maxWidth: '100%',
             minWidth: 0,
+            alignSelf: 'stretch',
+            display: 'block',
           }}
+          ref={actionsRef}
         >
-          {extraActions}
-          {onCancel && (
-            <button
-              onClick={onCancel}
-              style={{
-                padding: chrome.toolbarButtonPadding,
-                fontSize: `${chrome.toolbarButtonFontRem}rem`,
-                fontWeight: chrome.toolbarButtonFontWeight,
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                cursor: 'pointer',
-                boxSizing: 'border-box',
-              }}
-            >
-              Annuler
-            </button>
-          )}
-          {!hideHeaderSaveButton && (
-            <button
-              onClick={handleSave}
-              disabled={isSaving || !isValid}
-              style={{
-                padding: chrome.toolbarButtonPadding,
-                fontSize: `${chrome.toolbarButtonFontRem}rem`,
-                fontWeight: chrome.toolbarButtonFontWeight,
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: theme.button.primary.background,
-                color: theme.button.primary.color,
-                cursor: isValid && !isSaving ? 'pointer' : 'not-allowed',
-                opacity: isValid && !isSaving ? 1 : 0.6,
-                boxSizing: 'border-box',
-              }}
-            >
-              {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-            </button>
-          )}
+          <div
+            className="unity-dialogue-toolbar-actions"
+            data-actions-narrow={isActionsNarrow ? 'true' : 'false'}
+            style={{
+              display: isActionsNarrow ? 'grid' : 'flex',
+              gridTemplateColumns: isActionsNarrow ? 'minmax(0, 1fr) minmax(0, 1fr)' : undefined,
+              gridTemplateAreas: isActionsNarrow ? '"generate delete" "save cancel"' : undefined,
+              gap: `${chrome.toolbarGapRem}rem`,
+              alignItems: isActionsNarrow ? 'stretch' : 'center',
+              justifyItems: isActionsNarrow ? 'stretch' : undefined,
+              flexWrap: isActionsNarrow ? undefined : 'wrap',
+              justifyContent: isActionsNarrow ? undefined : 'flex-end',
+              minWidth: 0,
+              width: '100%',
+              maxWidth: '100%',
+            }}
+          >
+            {extraActions}
+            {!hideHeaderSaveButton && (
+              <button
+                onClick={handleSave}
+                disabled={isSaving || !isValid}
+                style={{
+                  gridArea: isActionsNarrow ? 'save' : undefined,
+                  padding: chrome.toolbarButtonPadding,
+                  fontSize: `${chrome.toolbarButtonFontRem}rem`,
+                  fontWeight: chrome.toolbarButtonFontWeight,
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.primary.background,
+                  color: theme.button.primary.color,
+                  cursor: isValid && !isSaving ? 'pointer' : 'not-allowed',
+                  opacity: isValid && !isSaving ? 1 : 0.6,
+                  boxSizing: 'border-box',
+                  width: isActionsNarrow ? '100%' : undefined,
+                  minWidth: isActionsNarrow ? 0 : undefined,
+                }}
+              >
+                {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+              </button>
+            )}
+            {onCancel && (
+              <button
+                onClick={onCancel}
+                style={{
+                  gridArea: isActionsNarrow ? 'cancel' : undefined,
+                  padding: chrome.toolbarButtonPadding,
+                  fontSize: `${chrome.toolbarButtonFontRem}rem`,
+                  fontWeight: chrome.toolbarButtonFontWeight,
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                  width: isActionsNarrow ? '100%' : undefined,
+                  minWidth: isActionsNarrow ? 0 : undefined,
+                }}
+              >
+                Annuler
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

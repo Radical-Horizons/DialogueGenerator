@@ -129,6 +129,29 @@ button:focus-visible {
 }
 
 /**
+ * Édition de dialogues (UnityDialogueEditor) — toolbar responsive :
+ * en mode narrow, on force une grille 2×2 full-width et des labels centrés.
+ */
+.unity-dialogue-toolbar-actions[data-actions-narrow="true"] {
+  width: 100%;
+  max-width: 100%;
+}
+
+.unity-dialogue-toolbar-actions[data-actions-narrow="true"] > * {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.unity-dialogue-toolbar-actions[data-actions-narrow="true"] button {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+/**
  * Onglets Contexte GDD : anneau intérieur pour éviter la découpe (outline-offset + parent overflow / bordure basse).
  */
 button.context-gdd-tab:focus,
