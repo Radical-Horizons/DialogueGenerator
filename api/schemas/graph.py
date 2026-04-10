@@ -4,6 +4,12 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from services.ai_slop_detector import (
+    MAX_CUSTOM_REGEX_PATTERN_CHARS,
+    MAX_CUSTOM_REGEX_PATTERN_COUNT,
+    custom_regex_pattern_policy_violation,
+)
+
 
 class LoadGraphRequest(BaseModel):
     """Requête pour charger un dialogue Unity JSON et le convertir en graphe."""
@@ -390,18 +396,27 @@ class AiSlopDetectionOptions(BaseModel):
     custom_keywords: List[str] = Field(default_factory=list, description="Mots ou sous-chaînes supplémentaires")
     custom_regex_patterns: List[str] = Field(
         default_factory=list,
-        description="Motifs regex Python (IGNORECASE appliqué côté service)",
+        max_length=MAX_CUSTOM_REGEX_PATTERN_COUNT,
+        description=(
+            "Motifs regex Python (IGNORECASE côté service) — "
+            f"max {MAX_CUSTOM_REGEX_PATTERN_COUNT} motifs, "
+            f"{MAX_CUSTOM_REGEX_PATTERN_CHARS} caractères chacun ; motifs à risque ReDoS refusés."
+        ),
     )
 
     @field_validator("custom_regex_patterns", mode="after")
     @classmethod
     def validate_regex_patterns(cls, patterns: List[str]) -> List[str]:
-        """Valide la syntaxe des regex avant exécution."""
+        """Valide limites, politique anti-ReDoS heuristique et syntaxe des regex."""
         for p in patterns:
-            if not str(p).strip():
+            s = str(p).strip()
+            if not s:
                 continue
+            violation = custom_regex_pattern_policy_violation(s)
+            if violation:
+                raise ValueError(violation) from None
             try:
-                re.compile(str(p))
+                re.compile(s)
             except re.error as exc:
                 raise ValueError(f"Regex invalide : {p!r} ({exc})") from exc
         return patterns

@@ -8,6 +8,36 @@ from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple
 
 from services.ai_slop_default_catalog import DEFAULT_GENERIC_PHRASES, DEFAULT_GPT_ISMS
 
+# Limites anti-abus / mitigation ReDoS (regex utilisateur sur tout le graphe).
+MAX_CUSTOM_REGEX_PATTERN_COUNT: int = 32
+MAX_CUSTOM_REGEX_PATTERN_CHARS: int = 512
+# Plafond d’occurrences par regex et par segment (évite explosion mémoire / CPU côté résultats).
+_MAX_FINDITER_MATCHES_PER_SEGMENT: int = 500
+
+
+def custom_regex_pattern_policy_violation(pattern: str) -> Optional[str]:
+    """Retourne un message d’erreur si le motif dépasse les limites ou semble à risque ReDoS.
+
+    Args:
+        pattern: Motif déjà normalisé (strip), non vide.
+
+    Returns:
+        Message d’erreur lisible, ou ``None`` si accepté.
+    """
+    if len(pattern) > MAX_CUSTOM_REGEX_PATTERN_CHARS:
+        return (
+            f"Regex trop longue (max {MAX_CUSTOM_REGEX_PATTERN_CHARS} caractères) : "
+            f"{pattern[:80]!r}…"
+        )
+    if re.search(r"\([^()]*[*+][^)]*\)[*+?]", pattern):
+        return (
+            "Regex refusée (quantificateurs imbriqués typiques ReDoS, ex. (a+)+, (.*)*) : "
+            f"{pattern[:120]!r}"
+        )
+    if re.search(r"\{\s*\d{4,}", pattern):
+        return f"Regex refusée (limite de répétition {{n}} trop élevée) : {pattern[:120]!r}"
+    return None
+
 
 def _normalize_phrase(text: str) -> str:
     """Normalise pour comparaison de répétitions (casse, espaces)."""
@@ -112,10 +142,20 @@ class AISlopDetector:
         cls, patterns: Sequence[str]
     ) -> Tuple[List[re.Pattern[str]], Optional[str]]:
         compiled: List[re.Pattern[str]] = []
+        non_empty = 0
         for p in patterns:
             p = str(p).strip()
             if not p:
                 continue
+            non_empty += 1
+            if non_empty > MAX_CUSTOM_REGEX_PATTERN_COUNT:
+                return (
+                    [],
+                    f"Trop de regex personnalisées (max {MAX_CUSTOM_REGEX_PATTERN_COUNT}).",
+                )
+            policy_err = custom_regex_pattern_policy_violation(p)
+            if policy_err:
+                return [], policy_err
             try:
                 compiled.append(re.compile(p, re.IGNORECASE))
             except re.error as exc:
@@ -238,7 +278,11 @@ class AISlopDetector:
         if regexes:
             for seg in segments:
                 for rx in regexes:
+                    match_count = 0
                     for m in rx.finditer(seg.text):
+                        match_count += 1
+                        if match_count > _MAX_FINDITER_MATCHES_PER_SEGMENT:
+                            break
                         result.occurrences.append(
                             SlopOccurrenceInternal(
                                 kind="gpt_ism",

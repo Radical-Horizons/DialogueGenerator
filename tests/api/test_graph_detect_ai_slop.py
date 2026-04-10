@@ -108,3 +108,22 @@ def test_detect_ai_slop_invalid_regex_422(client: TestClient):
         },
     )
     assert r.status_code == 422
+
+
+def test_detect_ai_slop_nested_quantifier_regex_422(client: TestClient):
+    """Motif à quantificateurs imbriqués → 422 (politique anti-ReDoS)."""
+    r = client.post(
+        "/api/v1/unity-dialogues/graph/detect-ai-slop",
+        json={
+            "nodes": [
+                {
+                    "id": "A",
+                    "type": "dialogueNode",
+                    "data": {"id": "A", "speaker": "P", "line": "abc", "choices": []},
+                },
+            ],
+            "edges": [],
+            "options": {"custom_regex_patterns": [r"(a+)+"]},
+        },
+    )
+    assert r.status_code == 422

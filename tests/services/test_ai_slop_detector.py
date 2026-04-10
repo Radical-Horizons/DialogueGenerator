@@ -86,3 +86,15 @@ def test_invalid_regex_returns_error():
     assert r.message
     assert "Regex invalide" in r.message
     assert not r.occurrences
+
+
+def test_nested_quantifier_regex_rejected():
+    """Motifs à quantificateurs imbriqués refusés (mitigation ReDoS)."""
+    nodes = [_dialogue_node("A", "aaaaaaaaaaaaaaaaaaaa")]
+    opts = AiSlopDetectionOptionsData(
+        custom_regex_patterns=[r"(a+)+"],
+    )
+    r = AISlopDetector.detect(nodes, [], opts)
+    assert r.message
+    assert "quantificateurs imbriqués" in r.message.lower()
+    assert not r.occurrences
