@@ -115,7 +115,12 @@ Amelia (Dev) — dev-story
 ### Review Follow-ups (AI)
 
 - [x] [AI-Review][MEDIUM] Ajouter un smoke test “prod build” (Playwright ou script CI) qui vérifie que le SW est effectivement servi après `vite build`/`vite preview` (sans tester le prompt d’installation).  
-- [ ] [AI-Review][MEDIUM] Triage `npm --prefix frontend audit` (les vulnérabilités signalées lors de l’installation) : corriger si non-breaking, sinon documenter une stratégie (pin/upgrade) dans la story ou un ticket dédié.
+- [x] [AI-Review][MEDIUM] Triage `npm --prefix frontend audit` (les vulnérabilités signalées lors de l’installation) : corriger si non-breaking, sinon documenter une stratégie (pin/upgrade) dans la story ou un ticket dédié.
+
+### Notes audit (post-fix)
+
+- `npm --prefix frontend audit fix` appliqué (non-breaking) ; `npm --prefix frontend run lint` + `npm --prefix frontend run test:ci` OK.
+- Vulnérabilités restantes nécessitent `--force` (breaking) : notamment upgrade majeur Vite (pour `esbuild`) et downgrade `vite-plugin-pwa` (pour `serialize-javascript`). Décision à prendre séparément si on veut “0 vulnérabilité”.
 
 ## Change Log
 
