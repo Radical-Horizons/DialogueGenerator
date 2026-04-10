@@ -652,9 +652,14 @@ for _graph_mod in _GRAPH_ROUTER_MODULES:
         dependencies=[Depends(get_current_user)],
     )
 
-# Router pour les règles de validation (Story 4.10)
+# Router pour les règles de validation (Story 4.10) — persistance disque : même auth que le graphe
 from api.routers import validation_rules
-app.include_router(validation_rules.router, prefix="/api/v1", tags=["Validation Rules"])
+app.include_router(
+    validation_rules.router,
+    prefix="/api/v1",
+    tags=["Validation Rules"],
+    dependencies=[Depends(get_current_user)],
+)
 
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])

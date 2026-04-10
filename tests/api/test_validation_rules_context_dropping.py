@@ -1,10 +1,13 @@
 """Tests intégration GET/PUT /api/v1/validation/rules/context-dropping (Story 4.10)."""
 from __future__ import annotations
 
-import json
 import pytest
 from pathlib import Path
 from fastapi.testclient import TestClient
+
+from api.exceptions import AuthenticationException
+from api.main import app
+from api.routers.auth import get_current_user
 
 _RULES_FILE = Path("data") / "validation-rules" / "context-dropping.json"
 
@@ -18,6 +21,26 @@ def _reset_rules_file():
 
 
 # ── GET sans fichier → défauts documentés ────────────────────────────────────
+
+async def _reject_current_user() -> dict:
+    """Override dependency: simulate JWT rejection (production-style)."""
+    raise AuthenticationException(message="denied", request_id="test-validation-rules-auth")
+
+
+def test_context_dropping_routes_require_authentication_dependency(client: TestClient) -> None:
+    """Les routes passent par get_current_user (pas d’écriture/lecture config sans barrière auth)."""
+    app.dependency_overrides[get_current_user] = _reject_current_user
+    try:
+        get_r = client.get("/api/v1/validation/rules/context-dropping")
+        assert get_r.status_code == 401
+        put_r = client.put(
+            "/api/v1/validation/rules/context-dropping",
+            json={"rules_profile": "strict"},
+        )
+        assert put_r.status_code == 401
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
 
 def test_get_rules_returns_defaults(client: TestClient):
     r = client.get("/api/v1/validation/rules/context-dropping")
