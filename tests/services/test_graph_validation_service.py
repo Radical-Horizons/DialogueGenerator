@@ -530,7 +530,7 @@ class TestSimulateFlow:
 
 
 class TestComputeCoverageStats:
-    """Tests unitaires pour GraphValidationService._compute_coverage_stats (FR47)."""
+    """Tests unitaires pour GraphValidationService.compute_coverage_stats (FR47)."""
 
     @staticmethod
     def _node(nid: str, ntype: str = "dialogueNode") -> dict:
@@ -546,7 +546,7 @@ class TestComputeCoverageStats:
             self._node("T1", "testNode"),
         ]
         # dead end IDs: only A is a content-node dead end (T1 is testNode, ignored)
-        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
         assert isinstance(stats, FlowCoverageStats)
         assert stats.total_nodes == 2  # A et B seulement
         assert stats.dead_end_count == 1
@@ -556,7 +556,7 @@ class TestComputeCoverageStats:
         """accessible_count == total_nodes → coverage_percentage == 100.0."""
         from api.schemas.graph import FlowCoverageStats
         nodes = [self._node("A"), self._node("B"), self._node("C")]
-        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
         assert stats.total_nodes == 3
         assert stats.accessible_count == 3
         assert stats.coverage_percentage == 100.0
@@ -565,7 +565,7 @@ class TestComputeCoverageStats:
         """1 dead end sur 3 nœuds → accessible=2, percentage=66.7."""
         from api.schemas.graph import FlowCoverageStats
         nodes = [self._node("A"), self._node("B"), self._node("C")]
-        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
         assert stats.total_nodes == 3
         assert stats.accessible_count == 2
         assert stats.coverage_percentage == 66.7
@@ -574,7 +574,7 @@ class TestComputeCoverageStats:
         """Zéro nœud contenu → total_nodes==0, coverage_percentage==100.0 (pas de ZeroDivisionError)."""
         from api.schemas.graph import FlowCoverageStats
         nodes = [self._node("END", "endNode"), self._node("T1", "testNode")]
-        stats = GraphValidationService._compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
         assert stats.total_nodes == 0
         assert stats.coverage_percentage == 100.0
 

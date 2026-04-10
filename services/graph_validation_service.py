@@ -639,7 +639,7 @@ class GraphValidationService:
                 )
 
     @staticmethod
-    def _compute_coverage_stats(
+    def compute_coverage_stats(
         nodes: List[Dict[str, Any]],
         dead_end_ids: List[str],
         cul_de_sac_count: int,

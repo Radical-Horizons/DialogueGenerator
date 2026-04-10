@@ -41,7 +41,7 @@ class TestRegenerateNode:
 
     def test_regenerate_node_success(self, client: TestClient):
         """Régénération réussie : retourne le nœud avec l'id demandé (remplacement in-place)."""
-        with patch("api.routers.graph._validate_dialogue_exists"), \
+        with patch("api.routers.graph_node_history._validate_dialogue_exists"), \
              patch("factories.llm_factory.LLMClientFactory") as mock_factory:
             mock_factory.create_client.return_value = MagicMock()
             resp = client.post(
@@ -65,7 +65,7 @@ class TestRegenerateNode:
 
     def test_regenerate_preserves_stable_id(self, client: TestClient):
         """Réponse préserve stableID (et autres champs) du nœud généré ; seul id est forcé à node_id."""
-        with patch("api.routers.graph._validate_dialogue_exists"), patch(
+        with patch("api.routers.graph_node_history._validate_dialogue_exists"), patch(
             "factories.llm_factory.LLMClientFactory"
         ) as mock_factory:
             mock_factory.create_client.return_value = MagicMock()
@@ -106,7 +106,7 @@ class TestRegenerateNode:
 
     def test_regenerate_node_missing_body_fields(self, client: TestClient):
         """Requête sans parent_node_id ou new_instructions → 422."""
-        with patch("api.routers.graph._validate_dialogue_exists"):
+        with patch("api.routers.graph_node_history._validate_dialogue_exists"):
             resp = client.post(
                 "/api/v1/unity-dialogues/graph/nodes/node-1/regenerate",
                 json={"dialogue_id": "current"},
@@ -115,7 +115,7 @@ class TestRegenerateNode:
 
     def test_regenerate_node_dialogue_not_found(self, client: TestClient):
         """dialogue_id inexistant → 404."""
-        with patch("api.routers.graph._validate_dialogue_exists") as validate:
+        with patch("api.routers.graph_node_history._validate_dialogue_exists") as validate:
             from api.exceptions import NotFoundException
             validate.side_effect = NotFoundException(
                 resource_type="Dialogue",

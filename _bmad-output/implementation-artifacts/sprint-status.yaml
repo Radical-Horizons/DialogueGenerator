@@ -128,7 +128,7 @@ development_status:
   4-11-simuler-flux-dialogue-pour-détecter-dead-ends-fr46: done
   4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: done
   4-13-valider-conformité-schéma-json-unity-100-fr48: done
-  4-14-refactorer-api-routers-graph-dette-technique: backlog
+  4-14-refactorer-api-routers-graph-dette-technique: done
   epic-4-retrospective: optional
   epic-9: backlog
   9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog
