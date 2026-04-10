@@ -5,6 +5,7 @@ import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
+import { getValidationHighlightKind } from '../../../utils/graphStructuralValidation'
 
 interface ValidationError {
   type: string
@@ -32,14 +33,34 @@ export const EndNode = memo(function EndNode({
   const hasErrors = errors.length > 0
   const hasWarnings = warnings.length > 0
   const isHighlighted = data?.isHighlighted || false
-  
-  // Déterminer la couleur de la bordure selon les erreurs
+
+  const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
   let borderColor = selected ? '#27AE60' : '#B8B8B8'
-  if (hasErrors) {
+  if (validationHighlightKind === 'structural') {
+    borderColor = theme.state.error.border
+  } else if (validationHighlightKind === 'content') {
+    borderColor = theme.state.warning.border
+  } else if (validationHighlightKind === 'lore') {
+    borderColor = theme.state.lore.border
+  } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
     borderColor = theme.state.warning.color
   }
+
+  const backgroundColor = isHighlighted
+    ? theme.state.selected.background
+    : validationHighlightKind === 'structural'
+      ? theme.state.error.background
+      : validationHighlightKind === 'content'
+        ? theme.state.warning.background
+        : validationHighlightKind === 'lore'
+          ? theme.state.lore.background
+          : hasErrors
+          ? theme.state.error.background
+          : hasWarnings
+            ? theme.state.warning.background
+            : theme.background.secondary
   
   return (
     <div
@@ -51,7 +72,7 @@ export const EndNode = memo(function EndNode({
         height: 80,
         border: `2px dashed ${borderColor}`,
         borderRadius: 8,
-        backgroundColor: isHighlighted ? theme.state.selected.background : theme.background.secondary,
+        backgroundColor,
         boxShadow: selected
           ? '0 4px 12px rgba(0, 0, 0, 0.3)'
           : isHighlighted
@@ -88,7 +109,20 @@ export const EndNode = memo(function EndNode({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
           title={errors.map((e, idx) => {
-            const icon = e.type === 'orphan_node' ? '🔗' : e.type === 'broken_reference' ? '🔴' : e.type === 'empty_node' ? '⚪' : '⚠️'
+            const icon =
+              e.type === 'orphan_node'
+                ? '🔗'
+                : e.type === 'broken_reference'
+                  ? '🔴'
+                  : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
+                    ? '⚪'
+                    : e.type === 'missing_display_name'
+                      ? '📝'
+                      : e.type === 'missing_stable_id'
+                        ? '🆔'
+                        : e.type === 'missing_test'
+                          ? '🧪'
+                          : '⚠️'
             return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
           }).join('')}
         >

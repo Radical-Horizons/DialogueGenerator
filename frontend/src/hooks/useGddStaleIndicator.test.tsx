@@ -14,15 +14,20 @@ vi.mock('../api/client', () => ({
   },
 }))
 
-vi.mock('../store/contextConfigStore', () => ({
-  useContextConfigStore: {
-    getState: () => ({
-      fieldConfigs: {},
-      essentialFields: {},
-      organization: 'narrative' as const,
-    }),
-  },
-}))
+vi.mock('../store/contextConfigStore', () => {
+  const contextConfigMockState = {
+    fieldConfigs: {} as Record<string, string[]>,
+    essentialFields: {} as Record<string, string[]>,
+    organization: 'narrative' as const,
+  }
+  function useContextConfigStore<T>(selector: (s: typeof contextConfigMockState) => T): T {
+    return selector(contextConfigMockState)
+  }
+  Object.assign(useContextConfigStore, {
+    getState: () => contextConfigMockState,
+  })
+  return { useContextConfigStore }
+})
 
 import { useGddStaleIndicator } from './useGddStaleIndicator'
 

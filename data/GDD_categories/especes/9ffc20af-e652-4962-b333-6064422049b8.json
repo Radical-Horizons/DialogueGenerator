@@ -1,7 +1,25 @@
 {
   "Nom": "Raclins des Abysses",
+  "values": {
+    "Biologie": "Moyenne",
+    "Culture": "Nulle",
+    "Présence dans Escelion": "Peu courant",
+    "Règne (ou classe)": "8ac374ca-e0ea-4fe4-867b-8be4fe04df2c",
+    "Résumé IA": "Les Raclins des Abysses sont des Aquavores de 30 cm, adaptés à un mode de vie sessile par succion dans les réservoirs souterrains. Ils se fixent sur les parois des océans cachés et jouent un rôle écologique en tant que racleurs/filtreurs de paroi, contribuant à l'entretien des surfaces organiques. Leur cycle de vie inclut des larves planctoniques avant de se fixer à l'âge sub-adulte. Peu courants dans Escelion, leur habitat exige des conditions spécifiques telles que l'obscurité et l'hypoxie.",
+    "Surnaturel": "Nulle",
+    "Technologie": "Nulle",
+    "Type": "Faune",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nLes Raclins des Abysses sont des Aquavores au corps comprimé (≈30 cm) adaptés à un mode de vie sessile par succion sur les surfaces rigides des réservoirs souterrains. Ils se fixent sur les parois des Océans cachés et sur les membranes organo-minérales, un habitat stable mais exigeant (obscurité, hypoxie, pression). Leur cycle de vie inclut des larves planctoniques qui dérivent dans les strates supérieures avant de se fixer à l'âge sub-adulte. Peu courants dans Escelion, ils occupent une niche écologique de racleurs/filtreurs de paroi, contribuant à l'entretien des surfaces organiques des Océans cachés.\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+    "preamble": "**Résumé de la fiche**\nLes Raclins des Abysses sont des Aquavores au corps comprimé (≈30 cm) adaptés à un mode de vie sessile par succion sur les surfaces rigides des réservoirs souterrains. Ils se fixent sur les parois des Océans cachés et sur les membranes organo-minérales, un habitat stable mais exigeant (obscurité, hypoxie, pression). Leur cycle de vie inclut des larves planctoniques qui dérivent dans les strates supérieures avant de se fixer à l'âge sub-adulte. Peu courants dans Escelion, ils occupent une niche écologique de racleurs/filtreurs de paroi, contribuant à l'entretien des surfaces organiques des Océans cachés.\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "9ffc20af-e652-4962-b333-6064422049b8"
 }

@@ -1,7 +1,29 @@
 {
   "Nom": "Les Cendres parlantes",
+  "values": {
+    "Créé par": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+    "Date de création": "2025-03-24T13:14:00.000Z",
+    "Dernière modification": "2026-03-30T09:41:00.000Z",
+    "Lieux de présence": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53",
+    "Poids": "Léger",
+    "Rareté": "Rare",
+    "Référence visuelle": "2446e4d2-1b45-81c2-92b8-f494463aea8e",
+    "Stackable": "non",
+    "Taille": "Petit",
+    "Type": "Témoignage",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nRésidus gris-iridescents obtenus après l'immolation rituelle des hérétiques sur l'Autel des Vérités Brûlantes de la Nef Centrale. Conservées dans des fioles d'obsidienne gravées des confessions du supplicié, ces cendres émettent d'imperceptibles vibrations phoniques lorsqu'on les approche de l'oreille, murmurant les dernières paroles et pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse permet au consommateur d'accéder temporairement aux connaissances de l'hérétique tout en ressentant son agonie morale, expérience considérée comme la \"plus pure forme d'empathie anti-entropique\" par le Maître-Flagellant. Leur consommation est une forme d'épreuve spirituelle.\n\n# Identité & Origine\n\n**Apparence physique**\n\n**Histoire & Création**\n\n**Lien avec personnages**\n\n# Fonction & Usage\n\n**Fonctionnement**\n\n**Conditions & Limites**\n\n# Circulation & Portée\n\n**Distribution géographique**\n\n**Valeur & Échange**\n• - Valeur en Dc : \n\nPour les multimédias"
+    "preamble": "**Résumé de la fiche**\nRésidus gris-iridescents obtenus après l'immolation rituelle des hérétiques sur l'Autel des Vérités Brûlantes de la Nef Centrale. Conservées dans des fioles d'obsidienne gravées des confessions du supplicié, ces cendres émettent d'imperceptibles vibrations phoniques lorsqu'on les approche de l'oreille, murmurant les dernières paroles et pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse permet au consommateur d'accéder temporairement aux connaissances de l'hérétique tout en ressentant son agonie morale, expérience considérée comme la \"plus pure forme d'empathie anti-entropique\" par le Maître-Flagellant. Leur consommation est une forme d'épreuve spirituelle.",
+    "identite____origine": "**Apparence physique**\n\n**Histoire & Création**\n\n**Lien avec personnages**",
+    "fonction___usage": "**Fonctionnement**\n\n**Conditions & Limites**",
+    "circulation___porte_e": "**Distribution géographique**\n\n**Valeur & Échange**\n• - Valeur en Dc : \n\nPour les multimédias"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "identite____origine": "Identité & Origine",
+    "fonction___usage": "Fonction & Usage",
+    "circulation___porte_e": "Circulation & Portée"
   },
   "notion_page_id": "1c06e4d2-1b45-80a7-8db9-e225677931cb"
 }

@@ -22,6 +22,8 @@ export interface GraphViewState {
   // --- Focus / FitView (FIFO : plusieurs focusNode successifs ne s'écrasent pas) ---
   focusQueue: string[]
   pendingFitView: boolean
+  /** Demande ponctuelle de fitView sur un ensemble de nœuds (ex. cycle FR41). */
+  pendingFitViewNodeIds: string[] | null
 
   // --- Edge label edit ---
   edgeLabelEditRequest: { edgeId: string } | null
@@ -53,6 +55,9 @@ export interface GraphViewState {
   clearFocus: () => void
   requestFitView: () => void
   clearFitView: () => void
+  /** Centre la vue sur les nœuds donnés (ids graphe), consommé par GraphCanvasInner. */
+  requestFitViewOnNodeIds: (nodeIds: string[]) => void
+  clearFitViewNodeIdsRequest: () => void
 
   // --- Actions : edge label edit ---
   requestEdgeLabelEdit: (edgeId: string) => void
@@ -86,6 +91,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   reactFlowInstance: null,
   focusQueue: [],
   pendingFitView: false,
+  pendingFitViewNodeIds: null,
   edgeLabelEditRequest: null,
   contextMenuRequest: null,
   promptViewerNodeId: null,
@@ -109,6 +115,13 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
 
   requestFitView: () => set({ pendingFitView: true }),
   clearFitView: () => set({ pendingFitView: false }),
+
+  requestFitViewOnNodeIds: (nodeIds) => {
+    const unique = [...new Set(nodeIds.filter((id) => id && id.trim() !== ''))]
+    if (unique.length === 0) return
+    set({ pendingFitViewNodeIds: unique })
+  },
+  clearFitViewNodeIdsRequest: () => set({ pendingFitViewNodeIds: null }),
 
   requestEdgeLabelEdit: (edgeId) => set({ edgeLabelEditRequest: { edgeId } }),
   clearEdgeLabelEdit: () => set({ edgeLabelEditRequest: null }),

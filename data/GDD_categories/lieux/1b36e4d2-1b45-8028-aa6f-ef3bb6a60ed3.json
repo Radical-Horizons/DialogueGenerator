@@ -1,7 +1,30 @@
 {
   "Nom": "Vernissage de l’Enlumineur",
+  "values": {
+    "Contenu par": "1a96e4d2-1b45-8090-89eb-cd5168580e06",
+    "Date de création": "2025-03-11T13:22:00.000Z",
+    "Dernière modification": "2026-04-03T18:14:00.000Z",
+    "Faunes & Flores présentes": "1a16e4d2-1b45-8099-be36-db66acb76390",
+    "Niveau d’IA": "humain",
+    "Personnages présents": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+    "Qualité": "7.5",
+    "Résumé": "Le Vernissage de l’Enlumineur présente une galerie d'œuvres d'art vivantes où des créatures sont partiellement intégrées aux murs, créant une expérience multisensorielle unique. Chaque œuvre dégage des odeurs distinctes qui racontent des histoires de peur, douleur et résignation, orchestrées par l'Enlumineur, un artiste renégat. La galerie est située sur une route essentielle et attire les visiteurs avec son ambiance hypnotique.",
+    "Rêveur local": "1c76e4d2-1b45-805a-b457-e64ae338d6f9",
+    "Taille": "Site",
+    "Type": "Lieu principal",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nGalerie des oeuvres d’art vivantes de  L’Enlumineur , fameuse dans toute Escelion. Les corps de ceux qu’il a “consolidés dans l’art” sont à moitié fondus dans les parois. Le Vernissage est situé sur une route essentielle menant du  Désert des Echos Perdus  aux  Couronnes intermédiaires  et l’Enlumineur se fait un plaisir de recevoir les visiteurs.\n\n# Identité & Vue d'ensemble\n\n**Histoire du lieu**\n\n**Apparence**\nLes galeries s'étendent sur plusieurs salles aux murs de pierre brute dans lesquels ont été incorporées, à moitié fondues, pétrifiées, des créatures vivantes. Chaque \"œuvre\" de l'Enlumineur exhale une odeur distinctive qui raconte son histoire : la peur cristallisée sent le fer et le vinaigre aigre, la douleur prolongée dégage des effluves pharmaceutiques âcres, la résignation finale produit une senteur de cire froide et de poussière.\nLes Qadul'Doei visiteurs, avec leur syncrétisme sensoriel, perçoivent ces odeurs comme des textures visibles et des harmonies sonores, transformant la galerie en une expérience multisensorielle épuisante mais hypnotique. L'Enlumineur lui-même, un Qadul'Doei renégat, orchestre délibérément ces signatures olfactives comme partie intégrante de son art transgressif.\n\n# Eléments de jeu\n\n**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**\n\n# Géographie & Environnement\n\n**Géographie**\n\n**Voies d’accès**"
+    "preamble": "**Résumé de la fiche**\nGalerie des oeuvres d’art vivantes de  L’Enlumineur , fameuse dans toute Escelion. Les corps de ceux qu’il a “consolidés dans l’art” sont à moitié fondus dans les parois. Le Vernissage est situé sur une route essentielle menant du  Désert des Echos Perdus  aux  Couronnes intermédiaires  et l’Enlumineur se fait un plaisir de recevoir les visiteurs.",
+    "identite____vue_d_ensemble": "**Histoire du lieu**\n\n**Apparence**\nLes galeries s'étendent sur plusieurs salles aux murs de pierre brute dans lesquels ont été incorporées, à moitié fondues, pétrifiées, des créatures vivantes. Chaque \"œuvre\" de l'Enlumineur exhale une odeur distinctive qui raconte son histoire : la peur cristallisée sent le fer et le vinaigre aigre, la douleur prolongée dégage des effluves pharmaceutiques âcres, la résignation finale produit une senteur de cire froide et de poussière.\nLes Qadul'Doei visiteurs, avec leur syncrétisme sensoriel, perçoivent ces odeurs comme des textures visibles et des harmonies sonores, transformant la galerie en une expérience multisensorielle épuisante mais hypnotique. L'Enlumineur lui-même, un Qadul'Doei renégat, orchestre délibérément ces signatures olfactives comme partie intégrante de son art transgressif.",
+    "ele_ments_de_jeu": "**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**",
+    "ge_ographie___environnement": "**Géographie**\n\n**Voies d’accès**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "identite____vue_d_ensemble": "Identité & Vue d'ensemble",
+    "ele_ments_de_jeu": "Eléments de jeu",
+    "ge_ographie___environnement": "Géographie & Environnement"
   },
   "notion_page_id": "1b36e4d2-1b45-8028-aa6f-ef3bb6a60ed3"
 }

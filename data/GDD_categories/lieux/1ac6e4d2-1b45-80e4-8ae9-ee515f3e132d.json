@@ -1,7 +1,40 @@
 {
   "Nom": "Citadelle de Daïlon",
+  "values": {
+    "Communautés présentes": "378ce7af-b23e-4ada-aac1-040dfcedb61f",
+    "Contenu par": "1b46e4d2-1b45-802a-8cc1-d19eea05d87d",
+    "Date de création": "2025-03-04T15:31:00.000Z",
+    "Dernière modification": "2026-04-03T18:01:00.000Z",
+    "Evénements liés": "22c6e4d2-1b45-803e-9a7c-d162ad882467, 22c6e4d2-1b45-8045-a4fa-eabba26e215b, 22c6e4d2-1b45-80e7-8960-cfa2e2d4926e, 2306e4d2-1b45-80de-b406-c519ea9561cf, 2306e4d2-1b45-8043-a2a2-e640272f4354, 119842ec-7b9a-43c7-ba47-37541481a9a8, 78b898a0-e163-462d-a595-d80d87c1c5d5",
+    "Faunes & Flores présentes": "2256e4d2-1b45-8048-8d1c-dc817100f567",
+    "Niveau d’IA": "humain",
+    "Personnages présents": "1b46e4d2-1b45-80fd-b84e-eab6a16a8bc9, 1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+    "Qualité": "7.5",
+    "Résumé": "La Citadelle de Daïlon, fondée en 2255 AG, était un centre d'innovation et d'art, mais sa chute est survenue après l'invasion du clan Sraden via une faille dimensionnelle. Les Gardiens ont sacrifié leurs vies pour protéger le lieu, mais Vol Reitar a pris le contrôle, transformant l'utopie en laboratoire tyrannique. Aujourd'hui, la Citadelle est un espace mystérieux, accessible par des voies mystiques, avec des jardins envahis et des créatures dangereuses. Elle est destinée à redevenir un refuge pour ceux qui vivent selon le principe du yì, en opposition à la loi.",
+    "Rôle": "Lieu unique",
+    "Sous partie de présence": "1886e4d2-1b45-8179-a485-eea054e40cdd",
+    "Taille": "District",
+    "Type": "Région principale",
+    "Zones limitrophes": "1a96e4d2-1b45-8090-89eb-cd5168580e06, 1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\n**Guide**\n\n# Besoin de l'intrigue\n\n**Histoire du lieu**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Fonctionnement de l'écosystème en place**\n\n**Découverte ou construction du lieu**\n\n**Manières de rejoindre cet endroit**\n\n# Zones principales\n\n**Lieux notables**\n\n# Personnages notables\n\n**Figures importantes**\n\n# Tradition & coutumes\n\n**Fêtes/moments importants prennant place dans ce lieu**\n\n**Déroulement des cérémonies et moments de pratique**\n\n**Alimentation spécifique**\n\n# Faune et Flore spécifiques\n\n**Créatures et plantes uniques**"
+    "preamble": "**Résumé de la fiche**\n\n**Guide**",
+    "besoin_de_l_intrigue": "**Histoire du lieu**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Fonctionnement de l'écosystème en place**\n\n**Découverte ou construction du lieu**\n\n**Manières de rejoindre cet endroit**",
+    "zones_principales": "**Lieux notables**",
+    "personnages_notables": "**Figures importantes**",
+    "tradition___coutumes": "**Fêtes/moments importants prennant place dans ce lieu**\n\n**Déroulement des cérémonies et moments de pratique**\n\n**Alimentation spécifique**",
+    "faune_et_flore_spe_cifiques": "**Créatures et plantes uniques**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème",
+    "zones_principales": "Zones principales",
+    "personnages_notables": "Personnages notables",
+    "tradition___coutumes": "Tradition & coutumes",
+    "faune_et_flore_spe_cifiques": "Faune et Flore spécifiques"
   },
   "notion_page_id": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d"
 }

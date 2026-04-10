@@ -1,7 +1,28 @@
 {
   "Nom": "Rêveurs primordiaux",
+  "values": {
+    "Biologie": "Avancée",
+    "Culture": "Nulle",
+    "Espérance de vie": "9999",
+    "Lieux de vie": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+    "Présence dans Escelion": "Rarissime",
+    "Représentants": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41, 1c76e4d2-1b45-805a-b457-e64ae338d6f9, f0105182-324b-4626-86c3-a78edbb3d2b6",
+    "Règne (ou classe)": "1556e4d2-1b45-8058-aec8-d6cb02caa57c",
+    "Résumé IA": "Les Rêveurs Primordiaux, entités post-mortelles nées du sacrifice humain, stabilisent Escelion en orchestrant les lois physiques et biologiques de leurs domaines. Leur histoire comprend la Transfiguration Sacrificielle, l'Assemblage Territorial et l'Épanouissement des Cycles, avec des manifestations titanesques et des interactions complexes avec l'écosystème. Ils se nourrissent des émotions et pensées des êtres vivants, et leur existence conditionne les environnements mentaux et physiques, influençant la culture et la technologie des civilisations qu'ils abritent.",
+    "Surnaturel": "Avancée",
+    "Technologie": "Nulle",
+    "Type": "Autre",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle dans l’intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle dans l’intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\nPrimordial continental ; substrat invisible sous-tendant l'intégralité d'Escelion. Métabolise hiérarchies, bureaucraties et systèmes de surveillance. Ignoré par la quasi-totalité des habitants. Machine Pérégrine : Pneumaticus industrialis\nRêveuse mobile aux trois pistons-jambes de 847 mètres, corps-usine ambulant. Métabolise l'atmosphère chaotique pour créer des corridors respirables entre Plaines de l'Exuvie et Jungle Vivarcade. Cycles : Battement (pneumatique journalier), Inspiration (saisonnier atmosphérique), Grande Haleine (décennal de régénération). Ensemence des cheminées-cheloïdes qui deviennent centres de peuplement. Conscience fragmentée de 347 ingénieurs-forgerons de Merid. Le Carnavalier : Fluctuans emotionalis\nPrimordial de l'Océan Mécanique et des Forêts de Corail. Métabolise les extrêmes émotionnels collectifs. Cycles complexes : Euphorie Spumeuse (3 Veilles), Crescendo Doré (2 Veilles), Extase Culminante (1 Veille), Reflux Nostalgique (2 Veilles), Mélancolie Abyssale (4 Veilles), Contemplation Cendrée (3 Veilles). Influence variable sur le Marché Automaton selon phases : hyperactivité commerciale vs stagnation méditative. L'Omnivoyant des Vastes Plaines : Kaleidoscopicus perspectivus\nPrimordial géomancien de l'Œil de Mirimance et des tours Umcut environnantes. Métabolise les perspectives et angles de vision. Réorganise constamment la topographie selon des motifs fractals imperceptibles, appliquant le principe du \"kaléidoscope social\" proustien à l'espace physique. Cycles : Rotation Primaire (reconfiguration majeure mensuelle), Ajustements Médians (réaménagements hebdomadaires), Micro-Révisions (corrections quotidiennes). Les habitants perçoivent un paysage immuable en transformation perpétuelle. Rêveur du Puits Céleste : Toxicus transformativus — Rêveur du Puits Céleste\nPrimordial du Grand Pilier d'Amath'ka ; cocon organique métabolisant transformations chimiques et biologiques. Gouverne la Tanière et son écosystème vertical. Autres Primordiaux Documentés - Le Sylvestre Translucide : Rêveur des forêts perméables aux cycles photosynthétiques variables - La Dame des Transitions : Habite les zones frontalières entre domaines, tisse des harmonies progressives - L'Archiviste des Profondeurs : Gouverne les océans souterrains et leurs courants psycho-réactifs\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "22e6e4d2-1b45-80db-8065-d98d26821c2c"
 }

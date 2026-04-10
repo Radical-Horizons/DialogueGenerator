@@ -1,8 +1,20 @@
 [
   {
     "Nom": "Référence : Structure des fiches Personas",
+    "values": {},
     "sections": {
-      "_general": "Référence chargée à la demande par le skill Gestion de Personas. Contient la structure de fiche, les propriétés de la base et le gabarit de contenu.\n\n### Base Personas\n\n- Base : Personas (data source : )\n\n- Mapping SoT : Référence : Mapping domaines → SoT\n\n### Propriétés de la base\n\nNom, Type (Rôle / Sous-rôle), Domaine, Mode par défaut, Canon, Clarification, Formats.\n\nToujours remplir au maximum les propriétés lors de la création.\n\n### Structure de fiche\n\nChaque fiche persona suit cette structure stricte :\n\n1. Ton identité - Prénom - Personnalité (1 phrase) - Emoji signature\n\n1. Mission : 1-2 phrases décrivant le périmètre et l'objectif.\n\n1. Sources of Truth : liste de pages Notion validées avec l'utilisateur.\n\n1. Skills - Initialisation (automatique) - Skills favoris (à la demande) pertinents pour cette persona.\n\nNe pas ajouter de sections supplémentaires.\n\n### Inférence des SoT\n\nCharger Référence : Mapping domaines → SoT, analyser le nom et le domaine de la persona, cumuler SoT communes + SoT spécifiques, dédupliquer, puis proposer la liste à l'utilisateur pour validation.\n\nNe jamais injecter des SoT sans validation explicite."
+      "preamble": "Référence chargée à la demande par le skill Gestion de Personas. Contient la structure de fiche, les propriétés de la base et le gabarit de contenu.",
+      "base_personas": "- Base : Personas (data source : )\n\n- Mapping SoT : Référence : Mapping domaines → SoT",
+      "proprie_te_s_de_la_base": "Nom, Type (Rôle / Sous-rôle), Domaine, Mode par défaut, Canon, Clarification, Formats.\n\nToujours remplir au maximum les propriétés lors de la création.",
+      "structure_de_fiche": "Chaque fiche persona suit cette structure stricte :\n\n1. Ton identité - Prénom - Personnalité (1 phrase) - Emoji signature\n\n1. Mission : 1-2 phrases décrivant le périmètre et l'objectif.\n\n1. Sources of Truth : liste de pages Notion validées avec l'utilisateur.\n\n1. Skills - Initialisation (automatique) - Skills favoris (à la demande) pertinents pour cette persona.\n\nNe pas ajouter de sections supplémentaires.",
+      "infe_rence_des_sot": "Charger Référence : Mapping domaines → SoT, analyser le nom et le domaine de la persona, cumuler SoT communes + SoT spécifiques, dédupliquer, puis proposer la liste à l'utilisateur pour validation.\n\nNe jamais injecter des SoT sans validation explicite."
+    },
+    "section_titles": {
+      "preamble": "Préambule",
+      "base_personas": "Base Personas",
+      "proprie_te_s_de_la_base": "Propriétés de la base",
+      "structure_de_fiche": "Structure de fiche",
+      "infe_rence_des_sot": "Inférence des SoT"
     },
     "notion_page_id": "e0f2f297-3b68-41d9-a9d4-b5bcff407350"
   }

@@ -1,7 +1,22 @@
 {
   "Nom": "Duron du désert",
+  "values": {
+    "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+    "Présence dans Escelion": "Peu courant",
+    "Règne (ou classe)": "73ec9bcb-c306-4b1b-be6e-e4702813dc6f",
+    "Résumé IA": "Le duron du désert est un petit prédateur vivant dans des terriers, apprécié pour sa capacité à chasser les vermines. Il a un corps plat, deux pattes avant et une longue queue, avec un pelage ras et brun. Sa discrétion en fait un compagnon toléré par les nomades du Désert des Échos, où il est considéré comme un porte-bonheur. Des informations sur son habitat, son alimentation et sa reproduction sont encore à définir.",
+    "Type": "Faune",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1b36e4d2-1b45-80d0-a942-dcac802cce14"
 }

@@ -440,6 +440,83 @@ Get field value suggestions.
 
 ---
 
+## GDD Notion Sync Endpoints
+
+All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schemas/gdd_notion_sync.py`.
+
+### GET `/gdd-notion-sync/config`
+
+**Response:** `GddNotionSyncConfigResponse` — `config` (sources, `included_categories`, `sync_interval_minutes`, `auto_sync_enabled`, `archive_retention_count`, `token_configured`, etc.) ; **aucun secret** dans le corps.
+
+### PUT `/gdd-notion-sync/config`
+
+**Request Body:** `GddNotionSyncConfigUpdate` — champs optionnels ; `notion_token` si fourni remplace le fichier token (jamais renvoyé).
+
+**Response:** même forme que GET.
+
+### POST `/gdd-notion-sync/test-connection`
+
+**Response:** `GddNotionConnectionTestResponse` (`ok`, `message`, métadonnées bot optionnelles).
+
+### POST `/gdd-notion-sync/preview-database-row`
+
+**Request Body:** `GddNotionPreviewDatabaseRequest` — `{ "category_file": "..." }` (doit correspondre à une source `database`).
+
+**Response:** `GddNotionPreviewDatabaseResponse` — première ligne mappée comme en sync (debug / UI).
+
+### POST `/gdd-notion-sync/sync`
+
+**Query Parameters:**
+
+- `full` (bool, default `false`) — sync complète (archive, staging, miroir).
+- `mirror_rebuild` (bool) — **déprécié, sans effet**.
+- `resume` (bool) — reprendre une sync complète (`full=true` obligatoire ; mutuellement exclusif avec `fresh`).
+- `fresh` (bool) — abandon checkpoint + nouveau run complet (`full=true` obligatoire).
+
+**Response:** `GddNotionSyncRunResponse` (`success`, `message`, `updated_entities`, `partial_errors`).
+
+### GET `/gdd-notion-sync/full-sync-checkpoint`
+
+**Response:** `GddFullSyncCheckpointResponse` — reprise possible, staging orphelin, fichiers terminés, etc.
+
+### DELETE `/gdd-notion-sync/full-sync-checkpoint`
+
+**Response:** `GddFullSyncCheckpointAbandonResponse` — supprime checkpoint et `.staging/` associé.
+
+### POST `/gdd-notion-sync/full-sync/pause` | `/unpause` | `/cancel`
+
+**Response:** `GddFullSyncPauseResponse` (`ok`, `message`).
+
+### GET `/gdd-notion-sync/status`
+
+**Response:** `GddNotionSyncStatusResponse` — dernier run persisté.
+
+### GET `/gdd-notion-sync/sync-progress`
+
+**Response:** `GddNotionSyncProgressResponse` — polling progression (phase, pages, source courante, `paused`).
+
+### GET `/gdd-notion-sync/notebooklm-export`
+
+**Query Parameters:** `max_files` (int, 1–10, default 10) — nombre max de fichiers Markdown dans le ZIP.
+
+**Response:** `application/zip` ; en-tête `Content-Disposition: attachment; filename="gdd-notebooklm-export.zip"`. Erreurs : `400` si validation métier (`ValueError`), `500` si lecture disque (`OSError`).
+
+### GET `/gdd-notion-sync/archives`
+
+**Query Parameters:** `limit` (1–100, default 20).
+
+**Response:** `GddArchivesListResponse` — liste de `GddArchiveEntrySchema`.
+
+### POST `/gdd-notion-sync/archives/{archive_id}/restore`
+
+**Request Body (optional):** `GddArchiveRestoreRequest` — `{ "backup_current": true }` par défaut si corps absent.
+
+**Response:** `GddArchiveRestoreResponse` (`ok`, `message`, `new_backup_id` optionnel).
+
+**Guide détaillé (chemins disque, comportement full/resume, NotebookLM) :** [GDD Notion Sync](../guides/GDD_NOTION_SYNC.md).
+
+---
+
 ## Unity Dialogues Endpoints (`/api/v1/unity-dialogues`)
 
 ### GET `/unity-dialogues`

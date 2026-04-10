@@ -5,12 +5,14 @@
       "Cadre": "Biologique",
       "Compétence": "71fc1e98-b72f-467c-90bc-d2003996a741",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI52",
       "Notes": "Distraction constante due aux obsessions cartographiques, dialogue avec l'atelier, attention fragmentée",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "07e1fc6a-074c-4427-8147-23c23141c117"
   },
   {
@@ -19,12 +21,14 @@
       "Cadre": "Biologique",
       "Compétence": "cb35d35a-39c9-4c7c-9bde-e061995e0100",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI32",
       "Notes": "Expertise : voix multiples du Glossaire affinent sa perception sonore, détection de patrouilles, surveillance",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "0b6d5046-c73e-4118-859b-7139324048b3"
   },
   {
@@ -33,24 +37,28 @@
       "Cadre": "Culturel",
       "Compétence": "038a5d66-40c5-4c40-8c10-bd50dca9b180",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI1",
       "Modificateur temporaire": "0",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "0f2e2784-9e57-4410-8b7e-6aca8c720413"
   },
   {
     "Nom": "Valkazer — FP — Greffes",
     "values": {
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI42",
       "Notes": "Maîtrise absolue : Bras du Pacte (aldravind), Bras de la Foi (Automaton), œil, jambes, organes multiples, 73% non-Vol selon sa comptabilité",
       "Score": "10",
       "Source": "Base",
       "Valeur": "10",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "0f306ccb-d545-4ce2-87aa-0a821c67befb"
   },
   {
@@ -59,12 +67,14 @@
       "Cadre": "Biologique",
       "Compétence": "b3f8a937-3360-417a-aca7-1a71b5e366ed",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI33",
       "Notes": "Expertise : fouille des archives de Vol, découverte de documents cachés, recherche méthodique d'informations",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "154a75ab-03de-4cd5-8d75-86ce7cdb7577"
   },
   {
@@ -73,12 +83,14 @@
       "Cadre": "Culturel",
       "Compétence": "5c3f25a4-585b-4a17-931a-13a7e0df14e4",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI2",
       "Modificateur temporaire": "0",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "1fa8a928-6148-4c78-828b-44bcff815974"
   },
   {
@@ -87,12 +99,14 @@
       "Cadre": "Culturel",
       "Compétence": "af750e6d-fa45-4fd6-8c54-7d66a2a9ebf5",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI53",
       "Notes": "Joue au Dangram contre lui-même, stratégies devenues répétitives et erratiques",
       "Score": "1",
       "Source": "Base",
       "Valeur": "1",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "229e87d9-64d8-48d5-9d34-4e44a0006f26"
   },
   {
@@ -101,24 +115,28 @@
       "Cadre": "Culturel",
       "Compétence": "77149fde-3bd1-47ac-9ef9-28adddd37be7",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI54",
       "Notes": "17 Nuées de survie dans les Plis, mais dépendance aux routines établies, réflexes diminués",
       "Score": "4",
       "Source": "Base",
       "Valeur": "4",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "23bda509-d771-4ff4-9001-e7503cb43d4a"
   },
   {
     "Nom": "Valkazer — FP — Législation",
     "values": {
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI34",
       "Notes": "Expertise : compréhension des systèmes juridiques et bureaucratiques de la Vieille Ville, exploitation des failles légales",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "2f78000a-5fbf-4804-a877-8077f58e5054"
   },
   {
@@ -127,12 +145,14 @@
       "Cadre": "Surnaturel",
       "Compétence": "33066d89-216e-469b-80c4-d18e0c4f2572",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI43",
       "Notes": "Expertise avancée : matérialisation de chimères absorbées, pratique douloureuse et hantante, capacité liée au Cercle d'Octon",
       "Score": "8",
       "Source": "Base",
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "36ef59e0-d225-4cd6-9812-2a24880a4706"
   },
   {
@@ -141,12 +161,14 @@
       "Cadre": "Culturel",
       "Compétence": "4a3649e5-e1db-4562-9bdb-1f4d42c6d1c5",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI55",
       "Notes": "Intérêt maintenu pour les textes sacrés et les cérémonies, pratique quotidienne solitaire",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "38852cb7-0c3b-4665-9526-d5bf06bbcfb7"
   },
   {
@@ -155,6 +177,7 @@
       "Cadre": "Culturel",
       "Compétence": "5c3f25a4-585b-4a17-931a-13a7e0df14e4",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI14",
       "Modificateur temporaire": "0",
       "Notes": "Maîtrise absolue : étude méthodique des échecs révolutionnaires sur 150 ans, analyse systémique avec Velkan Tehr, sociohistoire (Cercle d'Octon), cartographie des flux de pouvoir",
       "Score": "10",
@@ -162,6 +185,7 @@
       "Valeur": "10",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "4057e0d4-9f00-4fe4-8a3c-ace7b9c16048"
   },
   {
@@ -170,12 +194,14 @@
       "Cadre": "Technologique",
       "Compétence": "a00c0787-ac78-453c-8486-f8c8d58d51b8",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI22",
       "Notes": "Expertise exceptionnelle : sabotages des Relais, Bureaux, nœuds critiques, précision chirurgicale, dommages collatéraux calculés",
       "Score": "9",
       "Source": "Base",
       "Valeur": "9",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "41ed77d6-a1f1-42ae-aa0d-f1a5facf0b84"
   },
   {
@@ -184,12 +210,14 @@
       "Cadre": "Biologique",
       "Compétence": "031316fa-e521-4789-8189-92745754b30e",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI44",
       "Notes": "Expertise exceptionnelle : 27 ans d'adaptation à corps changeant, immortalité défectueuse, environnements hostiles multiples",
       "Score": "9",
       "Source": "Base",
       "Valeur": "9",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "4433ddb4-1ea8-41e9-8c80-f00b539b9767"
   },
   {
@@ -198,12 +226,14 @@
       "Cadre": "Culturel",
       "Compétence": "468c2f86-1197-4ad5-b717-37847f27d6d3",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI3",
       "Modificateur temporaire": "0",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "48fd94c9-ef66-4353-8473-e861bf38568f"
   },
   {
@@ -212,6 +242,7 @@
       "Cadre": "Culturel",
       "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI15",
       "Modificateur temporaire": "0",
       "Notes": "Très faible : refuse les compromis, confrontations directes, sociabilité minimale, préfère la destruction à la négociation",
       "Score": "2",
@@ -219,6 +250,7 @@
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "55c9d063-684d-43bd-9fc3-89567b8f2fde"
   },
   {
@@ -227,12 +259,14 @@
       "Cadre": "Culturel",
       "Compétence": "a0748849-9a63-43ba-af9f-bf9a602a7113",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI45",
       "Notes": "Compétence correcte : éducation à la Citadelle de Daïlon, formation aristocratique de l'enfance, désormais secondaire",
       "Score": "5",
       "Source": "Base",
       "Valeur": "5",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "5e537b1a-25e2-4211-af29-7614b693f1b8"
   },
   {
@@ -241,12 +275,14 @@
       "Cadre": "Biologique",
       "Compétence": "ad8a8d6c-d771-4aab-be13-c92b1e6d1f3e",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI35",
       "Notes": "Expertise exceptionnelle : œil gauche modifié avec vision multi-spectrale, pupille rectangulaire, détection des anomalies thermiques/énergétiques",
       "Score": "9",
       "Source": "Base",
       "Valeur": "9",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "619b55f4-e1c7-417e-97df-47f83dc72301"
   },
   {
@@ -255,12 +291,14 @@
       "Cadre": "Biologique",
       "Compétence": "0d7270f5-617b-4ad5-ac1b-689b22e64f0f",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI46",
       "Notes": "Expertise : Bras du Pacte (chitine articulée) permet prises impossibles, navigation verticale dans la Vieille Ville",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "6229ab80-0bd6-425f-838d-db27972c454d"
   },
   {
@@ -269,12 +307,14 @@
       "Cadre": "Culturel",
       "Compétence": "129c5672-795d-4185-9add-26f4051f4080",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI4",
       "Modificateur temporaire": "0",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "63abf415-024c-4543-85c8-fba5373fe151"
   },
   {
@@ -283,12 +323,14 @@
       "Cadre": "Surnaturel",
       "Compétence": "c79f896a-b649-4c75-a153-deeb84235c1d",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI5",
       "Modificateur temporaire": "0",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "6400d11a-4760-40dc-88e4-f0b2aab9b1e5"
   },
   {
@@ -297,24 +339,28 @@
       "Cadre": "Culturel",
       "Compétence": "6740617d-f4dc-4eb8-9aa7-acd892ff942c",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI56",
       "Notes": "Expertise : 17 Nuées de cartographie des Plis, capacité à sentir les distorsions spatiales, invention de l'encre auto-actualisante. Déclin progressif dû à l'isolement et à l'instabilité mentale",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "687241c0-5af7-4527-af26-332f549c76d3"
   },
   {
     "Nom": "Valkazer — FP — Langues",
     "values": {
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI23",
       "Notes": "Acqueux (langue maternelle), Abraldique ancien (héritage aldravind via Eonundé), plusieurs dialectes de la Vieille Ville",
       "Score": "8",
       "Source": "Base",
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "7026e24a-8618-49e1-bf82-dd46373e9475"
   },
   {
@@ -323,6 +369,7 @@
       "Cadre": "Culturel",
       "Compétence": "129c5672-795d-4185-9add-26f4051f4080",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI16",
       "Modificateur temporaire": "0",
       "Notes": "Expertise : confrontations philosophiques percutantes, métaphores organiques, expressions mémorables, double timbre vocal depuis l'absorption du Glossaire",
       "Score": "7",
@@ -330,6 +377,7 @@
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "76aa707b-42b8-4e6b-8756-b568ae9eada3"
   },
   {
@@ -338,12 +386,14 @@
       "Cadre": "Culturel",
       "Compétence": "f1000677-8ff0-4863-aff4-146533c311ce",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI6",
       "Modificateur temporaire": "0",
       "Score": "4",
       "Source": "Base",
       "Valeur": "4",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "76e8e934-6ff6-4d7b-b779-0d0a278a6f5f"
   },
   {
@@ -352,12 +402,14 @@
       "Cadre": "Culturel",
       "Compétence": "f7119bb6-8aa4-4232-a049-262dc2752beb",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI47",
       "Notes": "Expertise avancée : hybridation humain-vaideccan, immortalité défectueuse, chimérisation (absorption de créatures vivantes)",
       "Score": "8",
       "Source": "Base",
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "77dc9cdb-30a4-4956-a0ca-29092c8640c1"
   },
   {
@@ -366,12 +418,14 @@
       "Cadre": "Culturel",
       "Compétence": "038a5d66-40c5-4c40-8c10-bd50dca9b180",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI57",
       "Notes": "Ancien prodige du Culte de l'Anentropie, formé par l'Exégète Amatru. Pratiques religieuses maintenues mais obsessions délirantes contaminent sa foi",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "7a99ee91-6341-4f20-b6ca-a2b94397ac3f"
   },
   {
@@ -380,12 +434,14 @@
       "Cadre": "Technologique",
       "Compétence": "b1a0e008-96e8-4f76-83c7-f2919ca5ded7",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI24",
       "Notes": "Expertise exceptionnelle : auto-chirurgie sans organes (maintenu par la Marque d'Ardegaard), greffes compensatoires pour stabiliser le système, journal chirurgical obsessionnel",
       "Score": "9",
       "Source": "Base",
       "Valeur": "9",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "847eed9f-75ab-43bf-881e-51b24bb679f6"
   },
   {
@@ -394,12 +450,14 @@
       "Cadre": "Culturel",
       "Compétence": "c4c3eeee-08ed-4c6d-84fc-49ae075e3cbf",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI58",
       "Notes": "Discrétion développée pendant l'exil, mais agitation perpétuelle, marmonnements constants",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "8eec7650-8fa1-40e4-a181-15fae23954f2"
   },
   {
@@ -408,12 +466,14 @@
       "Cadre": "Culturel",
       "Compétence": "99438183-d591-4c7a-b3f0-edf0fbc918ea",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI7",
       "Modificateur temporaire": "0",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "94e697a2-477f-4f30-9bb8-0d425a11aba1"
   },
   {
@@ -422,6 +482,7 @@
       "Cadre": "Biologique",
       "Compétence": "5b0a2fc0-1bc0-4fec-98d9-5f1f8bdf3bde",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI17",
       "Modificateur temporaire": "0",
       "Notes": "Maîtrise absolue : greffes multiples auto-administrées, immortalité défectueuse, transformations à Hermogène, journal chirurgical obsessionnel, Marque d'Ardegaard",
       "Score": "10",
@@ -429,6 +490,7 @@
       "Valeur": "10",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "974e17bc-857a-4184-867d-6e3325f527e4"
   },
   {
@@ -437,12 +499,14 @@
       "Cadre": "Technologique",
       "Compétence": "f7956149-5ce0-45d0-a5a5-c0e016bb2cf2",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI8",
       "Modificateur temporaire": "0",
       "Score": "4",
       "Source": "Base",
       "Valeur": "4",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "9d1de2cd-369b-44d8-82a0-ad7985ddfd9c"
   },
   {
@@ -451,12 +515,14 @@
       "Cadre": "Culturel",
       "Compétence": "2c3b8753-66c4-4995-9c34-c5cb73f8bda0",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI48",
       "Notes": "Faible : phase réformiste (Cercle du Progrès) a nécessité négociations, mais préfère confrontation directe",
       "Score": "4",
       "Source": "Base",
       "Valeur": "4",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "9dcb154f-f129-48b3-9a09-dc1a3f9a883d"
   },
   {
@@ -465,12 +531,14 @@
       "Cadre": "Culturel",
       "Compétence": "a645ffc4-6614-4224-9a04-b81bdedd55a0",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI36",
       "Notes": "Expertise avancée : présence menaçante, corps hybride inquiétant, double timbre vocal provoque maux de tête, réputation d'Ennemi Public N°1",
       "Score": "8",
       "Source": "Base",
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "a749d640-d367-459f-8199-4db59d7e3e4a"
   },
   {
@@ -479,12 +547,14 @@
       "Cadre": "Biologique",
       "Compétence": "bdc8d2ce-9d5f-48a4-8f81-5f2205873477",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI25",
       "Notes": "Maîtrise absolue : maintenu en vie par la Marque d'Ardegaard (système énergétique remplaçant tous les organes), ne peut pas vraiment mourir mais dégénère sans greffes compensatoires, résistance à la douleur extrême",
       "Score": "10",
       "Source": "Base",
       "Valeur": "10",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "aff0f479-7c69-453e-877e-e6d4228d63e2"
   },
   {
@@ -493,12 +563,14 @@
       "Cadre": "Culturel",
       "Compétence": "32712215-8cc5-466e-82fc-f9ea1893decd",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI9",
       "Modificateur temporaire": "0",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "b28b2086-a85f-42e7-9a96-c1ea4a601c40"
   },
   {
@@ -507,12 +579,14 @@
       "Cadre": "Culturel",
       "Compétence": "930e5adf-2050-482a-b441-c1afaf798818",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI37",
       "Notes": "Compétence solide : masques d'identité, manipulation tactique, mais le Bras de la Foi le trahit (motifs géométriques quand il ment)",
       "Score": "6",
       "Source": "Base",
       "Valeur": "6",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "b336b4ea-e7ee-43e8-b9d7-73ceffb812eb"
   },
   {
@@ -521,12 +595,14 @@
       "Cadre": "Technologique",
       "Compétence": "a963c940-399a-47af-9c68-4de233a5d3d5",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI49",
       "Notes": "Expertise : explosifs pour sabotages, agents stabilisateurs pour greffes, toxines pour éliminations ciblées",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "b50575d3-724d-4222-9fa5-822e1063c433"
   },
   {
@@ -535,12 +611,14 @@
       "Cadre": "Culturel",
       "Compétence": "42ddb74b-243b-47b8-ade5-a63574d3ee2c",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI59",
       "Notes": "Formation au Kesh-Varash sous Qalamtû, journal crypté. Écriture devenue frénétique et moins cohérente",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "b69a2075-3a09-4764-8465-24b69bbff5de"
   },
   {
@@ -549,6 +627,7 @@
       "Cadre": "Culturel",
       "Compétence": "f1000677-8ff0-4863-aff4-146533c311ce",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI18",
       "Modificateur temporaire": "0",
       "Notes": "Faible : a dirigé des cellules (Dernier Bastion) mais préfère agir seul, isolement tactique, méfiance envers les structures hiérarchiques",
       "Score": "3",
@@ -556,6 +635,7 @@
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ba19d41d-224c-4ec0-ab8c-2d2f35521ac6"
   },
   {
@@ -564,12 +644,14 @@
       "Cadre": "Technologique",
       "Compétence": "62788ec1-29be-401d-bd93-08d7acbc573b",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI26",
       "Notes": "Expertise : infiltrations de Bureaux, Archives, systèmes de sécurité complexes, appris avec les Enfants des Conduits",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "bcf41642-5754-4c57-8672-737df11386c7"
   },
   {
@@ -578,6 +660,7 @@
       "Cadre": "Culturel",
       "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI19",
       "Modificateur temporaire": "0",
       "Notes": "Expertise avancée : fouille des archives de Vol, absorption du Glossaire, découverte d'Alteir et Jast, déchiffrage de systèmes anciens",
       "Score": "8",
@@ -585,6 +668,7 @@
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "bd7e4f30-874d-44d7-886f-0581dee38600"
   },
   {
@@ -593,12 +677,14 @@
       "Cadre": "Biologique",
       "Compétence": "fe80f53a-e4cd-4bb6-a0aa-99eb51452148",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI38",
       "Notes": "Expertise : héritage vaideccan permet respiration sous l'eau, mais évite cette pratique par dégoût psychologique",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "bee6b0cc-43ac-42cf-b7c6-94565f3fd7bb"
   },
   {
@@ -607,6 +693,7 @@
       "Cadre": "Culturel",
       "Compétence": "64614723-5dd6-480d-85a0-c8666c04ec52",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI20",
       "Modificateur temporaire": "0",
       "Notes": "Maîtrise absolue : cartographie des systèmes de contrôle, synthèse des échecs révolutionnaires historiques, plan d'offensive contre les 7 nœuds de Jast, 18 ans d'analyse stratégique",
       "Score": "10",
@@ -614,6 +701,7 @@
       "Valeur": "10",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "c2ca9205-5c24-4cd0-a3d3-3dd4e3c9980f"
   },
   {
@@ -622,12 +710,14 @@
       "Cadre": "Surnaturel",
       "Compétence": "51943c6b-1833-46f7-a108-3fa21bbb6e6e",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI39",
       "Notes": "Compétence solide : préparations alchimiques pour greffes, stabilisation de l'immortalité défectueuse, appris à Hermogène",
       "Score": "6",
       "Source": "Base",
       "Valeur": "6",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "c2e79c4b-3825-4c08-8988-b28109b38869"
   },
   {
@@ -636,12 +726,14 @@
       "Cadre": "Technologique",
       "Compétence": "420f1e19-164c-4711-8dea-d8002d1af5ca",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI10",
       "Modificateur temporaire": "0",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "c579977a-197a-47f5-8691-6ce2d9e8fe4a"
   },
   {
@@ -650,12 +742,14 @@
       "Cadre": "Culturel",
       "Compétence": "99438183-d591-4c7a-b3f0-edf0fbc918ea",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI60",
       "Notes": "Compréhension des motivations amoindrie par l'isolement, projection de ses propres obsessions sur autrui",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "c6c1ca5a-93f6-424b-a6e7-4bec1aaf9823"
   },
   {
@@ -664,12 +758,14 @@
       "Cadre": "Technologique",
       "Compétence": "197d085f-8092-4f0a-8fbe-2d3af643ddb6",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI27",
       "Notes": "Expertise avancée : compréhension des infrastructures de contrôle, identification des points de vulnérabilité structurelle",
       "Score": "8",
       "Source": "Base",
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ca3eef48-d8d5-4e77-8100-1195a4aa0a72"
   },
   {
@@ -678,6 +774,7 @@
       "Cadre": "Culturel",
       "Compétence": "99438183-d591-4c7a-b3f0-edf0fbc918ea",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI21",
       "Modificateur temporaire": "0",
       "Notes": "Expertise avancée : compréhension des mécanismes de récupération systémique, analyse des failles humaines, manipulation émotionnelle tactique",
       "Score": "8",
@@ -685,6 +782,7 @@
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "d25a6cd3-9b85-4045-8ddc-29d79ed9cf18"
   },
   {
@@ -693,12 +791,14 @@
       "Cadre": "Culturel",
       "Compétence": "6740617d-f4dc-4eb8-9aa7-acd892ff942c",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI61",
       "Notes": "Compréhension spatiale maintenue, symbiose avec l'Atelier des Plis, mais vision de plus en plus déformée par ses obsessions",
       "Score": "4",
       "Source": "Base",
       "Valeur": "4",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "d46b7868-2db5-4b50-814a-1811362b2e57"
   },
   {
@@ -707,12 +807,14 @@
       "Cadre": "Surnaturel",
       "Compétence": "c79f896a-b649-4c75-a153-deeb84235c1d",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI62",
       "Notes": "Formation au Culte, pratiques religieuses basiques maintenues malgré le bannissement",
       "Score": "1",
       "Source": "Base",
       "Valeur": "1",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "db37881e-f040-424d-b68b-f0cd4b0a37ad"
   },
   {
@@ -721,12 +823,14 @@
       "Cadre": "Technologique",
       "Compétence": "763d69b6-312c-47b9-b3ce-86da943e1101",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI28",
       "Notes": "Expertise : combat de rue (Enfants des Conduits), insurrections (Dernier Bastion), éliminations ciblées",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "dcc2f236-442f-453c-a917-4863cbc919a2"
   },
   {
@@ -735,12 +839,14 @@
       "Cadre": "Biologique",
       "Compétence": "f49a2366-276c-443d-8647-b989bf552df6",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI29",
       "Notes": "Expertise avancée : grâce paradoxale malgré l'asymétrie, décennies d'adaptation corporelle, régénération défectueuse encourage l'évitement",
       "Score": "8",
       "Source": "Base",
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "e490a23d-9c9d-4f0e-bd82-5dbbbbae9628"
   },
   {
@@ -749,12 +855,14 @@
       "Cadre": "Culturel",
       "Compétence": "c4c3eeee-08ed-4c6d-84fc-49ae075e3cbf",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI40",
       "Notes": "Expertise avancée : grâce paradoxale malgré asymétrie, infiltrations, sabotages non détectés, survie dans les rues",
       "Score": "8",
       "Source": "Base",
       "Valeur": "8",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "e52e154a-8643-467b-8799-85ac49f84b51"
   },
   {
@@ -763,12 +871,14 @@
       "Cadre": "Biologique",
       "Compétence": "c72fd571-3ef5-4da0-8e2d-b2e205ed47a7",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI63",
       "Notes": "Bras droit transformé en instrument de triangulation organique, mais contrôle dégradé, tremblements, précision en baisse",
       "Score": "5",
       "Source": "Trait",
       "Valeur": "5",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "e6b0a10d-2119-47d7-9920-62ea0953413b"
   },
   {
@@ -777,12 +887,14 @@
       "Cadre": "Culturel",
       "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI11",
       "Modificateur temporaire": "0",
       "Score": "4",
       "Source": "Base",
       "Valeur": "4",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ea535cbb-c18d-481e-bc4e-e438e3ce4298"
   },
   {
@@ -791,12 +903,14 @@
       "Cadre": "Technologique",
       "Compétence": "95602337-55a0-4431-bb7c-517555cc9334",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI30",
       "Notes": "Compétence solide : Bras de la Foi (métal vivant) utilisé comme arme contondante, frappe brutale",
       "Score": "6",
       "Source": "Base",
       "Valeur": "6",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ec625889-c3e0-40f6-abba-decb9e9f8f82"
   },
   {
@@ -805,12 +919,14 @@
       "Cadre": "Culturel",
       "Compétence": "69055902-492f-4654-aa6c-3b5e9509226b",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI31",
       "Notes": "Expertise exceptionnelle : 18 ans de clandestinité, masques improvisés, identités multiples, Ennemi Public N°1 jamais clairement identifié",
       "Score": "9",
       "Source": "Base",
       "Valeur": "9",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ed61ac4f-d075-4b80-a7c7-5a59bec61bd3"
   },
   {
@@ -819,12 +935,14 @@
       "Cadre": "Biologique",
       "Compétence": "5b0a2fc0-1bc0-4fec-98d9-5f1f8bdf3bde",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI12",
       "Modificateur temporaire": "0",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ed9464bc-16c8-4f60-9f93-01555b2391a8"
   },
   {
@@ -833,12 +951,14 @@
       "Cadre": "Culturel",
       "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
       "Feuilles de perso": "f752b1ec-1d97-4918-ad79-ae73d1c5eb91",
+      "Identifiant": "STSKI64",
       "Notes": "Expéditions avec Thyra, souvenirs qui s'estompent et se confondent avec ses délires cartographiques",
       "Score": "2",
       "Source": "Base",
       "Valeur": "2",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ef08823c-3c58-4c95-b856-86e8a08409c8"
   },
   {
@@ -847,12 +967,14 @@
       "Cadre": "Culturel",
       "Compétence": "5554a2a3-a024-4e34-9ba6-a4e4b76aff08",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI50",
       "Notes": "Expertise : connaissance des mythes de la Vieille Ville, traditions aldravinds (Bras du Pacte), légendes des Rêveurs",
       "Score": "7",
       "Source": "Base",
       "Valeur": "7",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "ef221cf2-83a8-493f-83c5-6f2c2f7d86e1"
   },
   {
@@ -861,12 +983,14 @@
       "Cadre": "Culturel",
       "Compétence": "64614723-5dd6-480d-85a0-c8666c04ec52",
       "Feuilles de perso": "376413ab-9e5f-4dc1-9b1b-6328c2dc694b",
+      "Identifiant": "STSKI13",
       "Modificateur temporaire": "0",
       "Score": "3",
       "Source": "Base",
       "Valeur": "3",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "f64f04e5-458d-45d9-955d-d4821d21da4e"
   },
   {
@@ -875,12 +999,14 @@
       "Cadre": "Culturel",
       "Compétence": "6740617d-f4dc-4eb8-9aa7-acd892ff942c",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI41",
       "Notes": "Expertise exceptionnelle : cartographie mentale de la Vieille Ville, réseaux de tunnels, 18 ans d'errance clandestine",
       "Score": "9",
       "Source": "Base",
       "Valeur": "9",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "fa348998-7c38-4d81-8008-cb4d74b96e7d"
   },
   {
@@ -889,12 +1015,14 @@
       "Cadre": "Culturel",
       "Compétence": "79e206ab-70e3-4abf-965d-75569488dcac",
       "Feuilles de perso": "c197a14e-0c3c-41b1-85de-77aabc62d114",
+      "Identifiant": "STSKI51",
       "Notes": "Compétence solide : compréhension du système nerveux pour auto-chirurgie, modifications neurologiques liées aux greffes",
       "Score": "6",
       "Source": "Base",
       "Valeur": "6",
       "Verrouillée ?": "non"
     },
+    "sections": {},
     "notion_page_id": "fc53e068-32e9-452d-91c8-7decc35e5b4f"
   }
 ]

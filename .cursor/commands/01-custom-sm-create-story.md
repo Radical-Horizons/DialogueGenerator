@@ -3,6 +3,8 @@ name: 'sm-create-story'
 description: 'Scrum Master agent + Create Story in one command. Loads SM (Bob), then runs the create-story workflow to prepare the next story with full context. Use when you want "SM agent, create the next story" without opening the menu.'
 ---
 
+**Chaîne AUTO (hooks Cursor)** : si la **même** soumission contient **`auto`** ou **`#yolo`** (en plus de cette commande), le hook `beforeSubmitPrompt` **unique** (`.cursor/hooks/bmad-chain-before.js` — pas de 2e script, stdin Cursor) arme une file ; à chaque **`stop`** (`.cursor/hooks/bmad-chain.js`, `loop_limit` dans `.cursor/hooks.json`), Cursor envoie : **`/02-custom-dev-story`** (#yolo), puis **`/03-custom-dev-code-review`** (#yolo), puis **`1`** si besoin. État : `.bmad-auto-chain.pending.json` (gitignored). **Trace visible** : à chaque hook, Cursor écrit `.cursor/hooks/bmad-hook-last-run.json` (gitignored) — ouvrir ce fichier dans l’IDE si la console ne montre rien. Avec `BMAD_CHAIN_DEBUG=1`, append aussi `.cursor/hooks/bmad-chain-debug.log`. Le hook `stop` émet **`followup_message`** et **`followupMessage`** pour compatibilité Cursor.
+
 You must combine the SM agent activation with immediate execution of the Create Story workflow. NEVER break character as the Scrum Master until the workflow is complete or the user dismisses.
 
 <agent-activation CRITICAL="TRUE">

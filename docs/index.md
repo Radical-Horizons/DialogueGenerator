@@ -67,6 +67,7 @@ Located in `[api/](./api/)`
 Located in `[guides/](./guides/)`
 
 - [Development Guide](./guides/development-guide.md) - Setup, commands, and workflow
+- [GDD Notion Sync](./guides/GDD_NOTION_SYNC.md) - Sync Notion → disque, archives, export NotebookLM, chemins `data/gdd_notion_sync/`
 - [Development Troubleshooting](./guides/DEVELOPMENT.md) - Development troubleshooting
 - [Deployment Guide](./guides/deployment-guide.md) - Production deployment instructions
 - [Deployment Documentation](./guides/DEPLOYMENT.md) - Deployment documentation
@@ -179,7 +180,7 @@ When creating a brownfield PRD:
 
 ## Documentation Status
 
-**Last Updated**: 2026-03-17
+**Last Updated**: 2026-04-06
 **Structure**: Reorganized into logical categories
 **Parts Documented**: 2 (frontend, api)
 

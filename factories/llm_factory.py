@@ -3,12 +3,34 @@ import json
 import time
 import logging
 from typing import Optional, Any, List
+
 from core.llm.llm_client import ILLMClient, DummyLLMClient
 from core.llm.openai.client import OpenAIClient
 from core.llm.mistral_client import MistralClient
 from core.llm.fallback_client import FallbackLLMClient
 
 logger = logging.getLogger(__name__)
+
+# Valeur utilisée en CI (`.github/workflows/ci.yml`, `docs/deployment/CI.md`) pour satisfaire
+# les checks « clé présente » sans appeler l'API OpenAI.
+_KNOWN_PLACEHOLDER_API_KEYS: frozenset[str] = frozenset({"sk-dummy"})
+
+
+def _is_placeholder_llm_api_key(api_key: Optional[str]) -> bool:
+    """Indique si la clé doit être ignorée (vide ou jeton factice CI / dev).
+
+    Args:
+        api_key: Valeur lue depuis la variable d'environnement configurée.
+
+    Returns:
+        True si aucun appel réel au fournisseur ne doit être fait avec cette valeur.
+    """
+    if api_key is None:
+        return True
+    stripped = str(api_key).strip()
+    if not stripped:
+        return True
+    return stripped.lower() in _KNOWN_PLACEHOLDER_API_KEYS
 
 
 class LLMClientFactory:
@@ -68,8 +90,13 @@ class LLMClientFactory:
                 return DummyLLMClient()
             
             api_key = os.getenv(api_key_env_var)
-            if not api_key:
-                logger.warning(f"Clé API non trouvée dans l'environnement (variable: {api_key_env_var}) pour le modèle OpenAI '{model_id}'. Utilisation de DummyLLMClient.")
+            if _is_placeholder_llm_api_key(api_key):
+                logger.warning(
+                    "Clé API absente ou factice (variable: %s) pour le modèle OpenAI '%s'. "
+                    "Utilisation de DummyLLMClient.",
+                    api_key_env_var,
+                    model_id,
+                )
                 return DummyLLMClient()
             
             try:
@@ -104,8 +131,13 @@ class LLMClientFactory:
                 return DummyLLMClient()
             
             api_key = os.getenv(mistral_api_key_env_var)
-            if not api_key:
-                logger.warning(f"Clé API Mistral non trouvée dans l'environnement (variable: {mistral_api_key_env_var}) pour le modèle '{model_id}'. Utilisation de DummyLLMClient.")
+            if _is_placeholder_llm_api_key(api_key):
+                logger.warning(
+                    "Clé API Mistral absente ou factice (variable: %s) pour le modèle '%s'. "
+                    "Utilisation de DummyLLMClient.",
+                    mistral_api_key_env_var,
+                    model_id,
+                )
                 return DummyLLMClient()
             
             try:

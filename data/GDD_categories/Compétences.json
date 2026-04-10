@@ -5,10 +5,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "La Robotique regroupe la conception et la fabrication de systèmes autonomes intelligents, incluant les ordinateurs, les robots et leurs intelligences artificielles. Cette compétence couvre la création matérielle, la programmation avancée et l'intégration d'IA pour l'automatisation, l'analyse de données et les processus décisionnels. Un niveau élevé permet de créer des machines puissantes dotées de capacités d'interaction sophistiquées avec leur environnement.",
       "Famille": "Technologique",
+      "Identifiant": "SKI30",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "00ca7410-5b36-4657-9094-3e2c9ab0242a"
   },
   {
@@ -17,10 +19,12 @@
       "Cadre (combiné)": "Technologique — Moyen",
       "Description": "Armes de Gros Calibre est une compétence qui permet d'utiliser certains modèles d'armes trop lourdes pour être transportées par une personne normale, mais pouvant être utilisées par un seul individu. Ces armes servent essentiellement à la défense de bases quand elles ne sont pas montées sur des véhicules.",
       "Famille": "Technologique",
+      "Identifiant": "SKI127",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "00d4838a-b486-4f50-9914-8a756a9361cd"
   },
   {
@@ -29,10 +33,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Cultures représente la connaissance des codes sociaux, des conventions, des usages et des formes culturelles courantes propres à différentes communautés et civilisations. Cette compétence permet à un personnage de savoir comment il est censé se comporter dans certaines situations, au sein d'un groupe social donné. Plus les codes culturels sont éloignés du mode de vie habituel du personnage, plus le jet est difficile. Un échec se solde par des malus aux interactions sociales.",
       "Famille": "Culturel",
+      "Identifiant": "SKI179",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "026aaacd-5bb8-4e69-9c95-b096cd4fec10"
   },
   {
@@ -41,10 +47,12 @@
       "Cadre (combiné)": "Biologique — Faible",
       "Description": "La compétence \"Adaptabilité\" sert à naviguer efficacement dans des environnements biologiques variés et changeants, en s'ajustant aux circonstances tout en maintenant une approche à faible niveau de cadre.",
       "Famille": "Biologique",
+      "Identifiant": "SKI90",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "031316fa-e521-4789-8189-92745754b30e"
   },
   {
@@ -53,10 +61,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Légalité permet de connaître les différentes législations en vigueur, ainsi que leurs failles. Cette compétence est utilisée aussi bien devant un tribunal que pour savoir quelle attitude adopter face à un représentant de l'ordre (coopération, résistance, pot de vin…). Elle permet aussi de se tirer d'affaire à l'amiable en cas de mise en illégalité.",
       "Famille": "Culturel",
+      "Identifiant": "SKI189",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "033343c0-b210-40f5-92f5-2d9807267b91"
   },
   {
@@ -65,10 +75,12 @@
       "Cadre (combiné)": "Culturel — Très faible",
       "Description": "Croyances représente la connaissance des systèmes de valeurs, des principes spirituels et des convictions philosophiques qui animent différentes communautés. Cette compétence permet de comprendre les motivations profondes, les tabous et les aspirations d'un groupe, au-delà des simples codes de conduite extérieurs.",
       "Famille": "Culturel",
+      "Identifiant": "SKI52",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "038a5d66-40c5-4c40-8c10-bd50dca9b180"
   },
   {
@@ -77,10 +89,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "L'Informatique permet de maîtriser les technologies informatiques avancées pour résoudre des problèmes complexes et optimiser des systèmes. Cette compétence couvre l'utilisation d'interfaces, de logiciels courants (bureautique), la compréhension des systèmes, l'interaction avec les environnements numériques, ainsi que la programmation de logiciels, de systèmes de défense et d'automates.",
       "Famille": "Technologique",
+      "Identifiant": "SKI31",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "05482895-d089-4a62-8835-dce86337b44d"
   },
   {
@@ -89,10 +103,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Escalade s'utilise à chaque fois qu'un personnage tente de gravir un obstacle. Cette compétence s'utilise également pour monter aux cordes.",
       "Famille": "Biologique",
+      "Identifiant": "SKI82",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "0d7270f5-617b-4ad5-ac1b-689b22e64f0f"
   },
   {
@@ -101,10 +117,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "La compétence \"Cybernétique\" est destinée à améliorer l'interaction entre les systèmes technologiques avancés et les utilisateurs, en intégrant des principes de rétroaction et d'automatisation pour optimiser les performances.",
       "Famille": "Technologique",
+      "Identifiant": "SKI36",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "0e929685-c07c-4c0a-b3eb-0358edd4926e"
   },
   {
@@ -113,10 +131,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Le Déblaiement permet de creuser dans la roche que ce soit pour réaliser des tunnels, des puits, des mines ou pour dégager l'entrée d'un bâtiment.",
       "Famille": "Technologique",
+      "Identifiant": "SKI166",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "125accb4-468e-467f-aed2-2e9bb5713a39"
   },
   {
@@ -125,10 +145,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La compétence \"Rhétorique\" sert à améliorer la capacité d'argumentation et de persuasion dans un cadre culturel, permettant ainsi de mieux communiquer des idées et des émotions.",
       "Famille": "Culturel",
+      "Identifiant": "SKI58",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "129c5672-795d-4185-9add-26f4051f4080"
   },
   {
@@ -137,10 +159,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Éloquence représente l'aptitude à convaincre une ou plusieurs personnes sans mentir, sans promettre de récompense et sans essayer de faire peur. C'est la compétence par excellence des tribuns et autres individus charismatiques.",
       "Famille": "Culturel",
+      "Identifiant": "SKI194",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "139430cd-d19d-4019-bb8f-483f4553e87c"
   },
   {
@@ -149,10 +173,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "La complicité permet de convaincre quelqu'un en jouant sur l'amitié, les intérêts communs, les affinités. Cette compétence sert généralement à se faire des alliés ou à approfondir une relation, sans nécessairement demander quelque chose de précis.",
       "Famille": "Culturel",
+      "Identifiant": "SKI195",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "16e55b17-61c2-4ba4-a538-661662caed91"
   },
   {
@@ -161,10 +187,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "Les Armes à Systèmes de Visée comptent parmi les armes les plus dévastatrices qui soient mais requièrent une solide formation.",
       "Famille": "Technologique",
+      "Identifiant": "SKI32",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "16e6f0e0-b863-44d9-8b2b-264749a19932"
   },
   {
@@ -173,10 +201,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La compétence en ingénierie permet de comprendre et d'appliquer des concepts techniques à un niveau faible, facilitant ainsi l'interaction avec des systèmes technologiques simples.",
       "Famille": "Technologique",
+      "Identifiant": "SKI1",
       "Niveau de Cadre": "Très faible",
       "Statut": "Retirée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "197d085f-8092-4f0a-8fbe-2d3af643ddb6"
   },
   {
@@ -185,10 +215,12 @@
       "Cadre (combiné)": "Biologique — Assez avancé",
       "Description": "La compétence \"Hybridation limitée\" permet de manipuler des éléments biologiques dans un cadre de jeu de rôle, favorisant des interactions et des évolutions spécifiques au sein d'un environnement biologique avancé.",
       "Famille": "Biologique",
+      "Identifiant": "SKI100",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "1a31d342-edde-4ebb-bda5-3a994a8e0419"
   },
   {
@@ -197,10 +229,12 @@
       "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "Occultisme reflète les connaissances académiques d'un personnage dans les obscurs domaines qui n'appartiennent pas au « monde rationnel » (si tant est qu'un tel monde existe). Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI190",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "1aa5fc2d-4e9b-405a-9e74-60d526818e88"
   },
   {
@@ -209,10 +243,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Connaissances Scientifiques reflète les connaissances académiques d'un personnage dans des domaines tels que les mathématiques et la géométrie. Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
       "Famille": "Culturel",
+      "Identifiant": "SKI180",
       "Niveau de Cadre": "Faible",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "1c65fe91-1737-436d-93c6-fcd98bce2e0d"
   },
   {
@@ -221,10 +257,12 @@
       "Cadre (combiné)": "Biologique — Assez avancé",
       "Description": "La compétence \"Mutation personnelle\" est utilisée pour modifier les caractéristiques biologiques d'un personnage dans un cadre de jeu de rôle, permettant ainsi d'améliorer ses capacités ou d'acquérir de nouvelles aptitudes.",
       "Famille": "Biologique",
+      "Identifiant": "SKI101",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "1c9ddd38-cff9-4709-9c1e-94d1a022096f"
   },
   {
@@ -233,10 +271,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Acrobaties sert à exécuter des roulés-boulés, des sauts périlleux et autres sauts de main. On peut ainsi impressionner un public ou bien amortir sa chute.",
       "Famille": "Biologique",
+      "Identifiant": "SKI83",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "1d458ff2-60d1-4f67-9733-b4db4ace89fe"
   },
   {
@@ -245,10 +285,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La compétence \"Navigation basique\" permet de se familiariser avec les concepts technologiques fondamentaux dans un cadre de jeu de rôle de faible complexité.",
       "Famille": "Technologique",
+      "Identifiant": "SKI2",
       "Niveau de Cadre": "Très faible",
       "Statut": "Retirée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "1ec5ac9e-6ed0-449c-9175-239e608b99f4"
   },
   {
@@ -257,10 +299,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La Forge et l'Armurerie regroupent toutes les formes de fabrication d'équipements de combat, qu'il s'agisse d'armes (via l'ébénisterie, la métallurgie ou les hautes technologies) ou d'armures et de boucliers (via le tannage, le forgeage ou les matériaux avancés). Cette compétence couvre l'ensemble de la chaîne de production d'armement défensif et offensif.",
       "Famille": "Technologique",
+      "Identifiant": "SKI3",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "1f2b7959-702e-4c99-98f0-1b51eb4d6adc"
   },
   {
@@ -269,10 +313,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Langages s'utilise pour savoir si un personnage comprend et peut parler une langue qu'il ne maîtrise pas vraiment. Plus l'utilisateur tente de faire passer un message complexe, et moins la langue est connue, plus la difficulté est élevée.",
       "Famille": "Culturel",
+      "Identifiant": "SKI64",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "1fd3d82e-b257-4201-8e59-fb2202f7b76b"
   },
   {
@@ -281,10 +327,12 @@
       "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "La compétence de télékinésie permet à un personnage de déplacer des objets par la seule force de sa pensée, offrant ainsi des possibilités créatives et stratégiques dans le cadre de jeux de rôle surnaturels.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI108",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "1fd8cb98-aea2-4bfb-a3d1-fe49f7425a87"
   },
   {
@@ -293,10 +341,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Augmente la résistance aux tentatives de persuasion, à la peur et à la folie.",
       "Famille": "Culturel",
+      "Identifiant": "SKI65",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "1fe8159e-198d-42f0-9831-f8382198f815"
   },
   {
@@ -305,10 +355,12 @@
       "Cadre (combiné)": "Technologique — Très avancé",
       "Description": "La compétence \"Terraforming\" permet de modifier des environnements planétaires pour les rendre habitables, en ajustant des éléments tels que l'atmosphère, la température et la topographie.",
       "Famille": "Technologique",
+      "Identifiant": "SKI42",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "2037d28e-4d99-4005-8b3e-afec508e1e37"
   },
   {
@@ -317,10 +369,12 @@
       "Cadre (combiné)": "Surnaturel — Avancé",
       "Description": "La compétence \"Création d’artefacts\" permet de concevoir des objets surnaturels avancés dans le cadre d'un jeu de rôle, enrichissant ainsi l'expérience de jeu et offrant de nouvelles possibilités aux personnages.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI117",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "233d1327-02fd-4507-95f3-07358ddb31ba"
   },
   {
@@ -329,10 +383,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "La compétence \"Arbalètes\" sert à utiliser des armes à projectiles qui permettent d'atteindre des cibles à distance avec précision dans un cadre de jeu de rôle.",
       "Famille": "Technologique",
+      "Identifiant": "SKI11",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "23e2adae-e4f9-4db8-9940-179e64fa6d1d"
   },
   {
@@ -341,10 +397,12 @@
       "Cadre (combiné)": "Surnaturel — Avancé",
       "Description": "Il arrive qu'un individu mime le tir d'un pistolet avec ses doigts, criant « Pan ! » et que la personne visée esquisse un sourire, avant de soudain s'effondrer comme une masse. Les armes imaginaires n'existent pas, mais leurs conséquences sont bien réelles.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI128",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "2767f7d7-78f8-4fcb-a9eb-8e353b695421"
   },
   {
@@ -353,10 +411,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "Pilotage de Grands Vaisseaux permet d'utiliser des vaisseaux nécessitant plusieurs pilotes.",
       "Famille": "Technologique",
+      "Identifiant": "SKI43",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "28285023-517b-459a-b998-31049da43846"
   },
   {
@@ -365,10 +425,12 @@
       "Cadre (combiné)": "Technologique — Moyen",
       "Description": "Les Protections Meurtrières (ou PM) ressemblent, avant activation, à de simples plaques de métal inoffensives. Quand on les déploie, elles prennent la forme d'un petit bouclier, d'un pavois voire d'une sphère entourant totalement l'utilisateur. De la PM jaillissent ensuite des lames, des pics ou des masses, que l'utilisateur doit manier avec précaution pour ne pas se blesser lui-même.",
       "Famille": "Technologique",
+      "Identifiant": "SKI129",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "28c1e261-5d8e-4783-82f3-d652ab5cf9eb"
   },
   {
@@ -377,10 +439,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "L'utilisation de cette compétence permet d'obtenir des informations sur la biologie d'une créature (comme ses caractéristiques, ses faiblesses, etc) ainsi que sur son modèle social, son alimentation et ses habitudes en général. Talents liés: Psychodressage.",
       "Famille": "Culturel",
+      "Identifiant": "SKI181",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "2b1e7566-8ff8-46b9-be17-0800be15ed52"
   },
   {
@@ -389,10 +453,12 @@
       "Cadre (combiné)": "Technologique — Assez faible",
       "Description": "La compétence \"Imprimerie\" sert à valider et gérer les processus liés à la production de documents imprimés dans un cadre technologique considéré comme assez faible.",
       "Famille": "Technologique",
+      "Identifiant": "SKI20",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Retirée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "2c0f1f74-8d69-48bf-8bd3-edb6e72087b3"
   },
   {
@@ -401,10 +467,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La compétence en négociation est essentielle pour établir des accords mutuellement bénéfiques dans un cadre culturel faible, en favorisant la compréhension et la collaboration entre les parties impliquées.",
       "Famille": "Culturel",
+      "Identifiant": "SKI59",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "2c3b8753-66c4-4995-9c34-c5cb73f8bda0"
   },
   {
@@ -413,10 +481,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "L'embuscade est opposée au jet de Vigilance de ceux qui la subissent. Une réussite classique permet aux assaillants de gagner 10 secondes, après quoi le jet d'initiative est fait normalement.",
       "Famille": "Culturel",
+      "Identifiant": "SKI160",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "2df59749-3d4d-4cc8-ab35-ecce25c47501"
   },
   {
@@ -425,10 +495,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La Création des fleurs permet de créer de nouvelles sortes de fleurs et de graines, parfois dotées de propriétés spéciales, ou simplement de créer des fleurs déjà existantes à condition d'en avoir déjà vu. De la terre, de l'eau et un peu de soleil suffisent comme matériaux.",
       "Famille": "Culturel",
+      "Identifiant": "SKI167",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "2ede781c-94ce-4df3-8f3d-aa5baf1c7634"
   },
   {
@@ -437,10 +509,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La Séduction permet de charmer un individu en faisant appel à ses pulsions sexuelles, à son esprit romantique ou à son désir de fonder une famille. Un malus de 5 à 10 est imposé pour tenter de séduire un individu d'une autre race et un malus de 10 à 20 est imposé pour séduire un individu qui n'aurait pas naturellement tendance à s'intéresser à quelqu'un de votre sexe. Un jet de Séduction réussi (et accompagné de quelques gestes favorables) permet d'exiger beaucoup plus de choses qu'une tentative classique de persuasion.",
       "Famille": "Culturel",
+      "Identifiant": "SKI60",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "3233b584-d078-4e1d-9bc8-8495980e13ad"
   },
   {
@@ -449,10 +523,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La compétence \"Diplomatie\" sert à gérer les interactions et les relations entre les individus ou les groupes dans un cadre culturel, en favorisant la communication et la compréhension mutuelle.",
       "Famille": "Culturel",
+      "Identifiant": "SKI61",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "32712215-8cc5-466e-82fc-f9ea1893decd"
   },
   {
@@ -461,10 +537,12 @@
       "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "La compétence \"Invocation\" permet d'appeler et de contrôler des entités surnaturelles pour obtenir leur aide ou réaliser des actions spécifiques dans le cadre d'un jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI109",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "33066d89-216e-469b-80c4-d18e0c4f2572"
   },
   {
@@ -473,10 +551,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "La Navigation permet de diriger un navire ou un vaisseau sur l'eau ou dans l'espace, en utilisant les instruments de navigation, en calculant les trajectoires et en s'adaptant aux conditions environnementales. Cette compétence couvre aussi bien la navigation basique que les manœuvres avancées.",
       "Famille": "Technologique",
+      "Identifiant": "SKI21",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "337315a4-baac-4253-a6f5-6d222c1818d1"
   },
   {
@@ -485,10 +565,12 @@
       "Cadre (combiné)": "Surnaturel — Moyen",
       "Description": "La pyrokinesie permet à un individu de manipuler et de contrôler le feu par la pensée, offrant ainsi des capacités offensives et défensives dans un cadre de jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI110",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "3e1f7e85-61e3-4aa4-912d-6bb3de757455"
   },
   {
@@ -497,10 +579,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Alphabétisation représente l'aptitude à lire et à écrire. Plus un texte est compliqué, obscure ou mal écrit, plus la difficulté est élevée.",
       "Famille": "Technologique",
+      "Identifiant": "SKI182",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "40167fa3-8269-4392-8eea-45e63bbe660d"
   },
   {
@@ -509,10 +593,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "L'Architecture permet de concevoir et de planifier des structures et des bâtiments, en établissant les plans, les calculs structurels et l'organisation spatiale. Cette compétence couvre la dimension intellectuelle et créative de la construction, de l'esquisse initiale aux plans détaillés.",
       "Famille": "Technologique",
+      "Identifiant": "SKI12",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "420f1e19-164c-4711-8dea-d8002d1af5ca"
   },
   {
@@ -521,10 +607,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La Littérature regroupe toutes les formes d'écriture ayant pour objectif une certaine recherche stylistique. Une œuvre littéraire réussie peut divertir ou impressionner un individu, mais surtout transmettre certaines idées, faisant de la Littérature un puissant moyen de propagande.",
       "Famille": "Culturel",
+      "Identifiant": "SKI168",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "42ddb74b-243b-47b8-ade5-a63574d3ee2c"
   },
   {
@@ -533,10 +621,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "La compétence \"Intelligence artificielle\" sert à intégrer des technologies avancées pour améliorer les processus décisionnels, l'automatisation et l'analyse de données dans divers domaines.",
       "Famille": "Technologique",
+      "Identifiant": "SKI37",
       "Niveau de Cadre": "Avancé",
       "Statut": "Retirée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "43629e50-e248-4a1d-8b50-982df30a31e0"
   },
   {
@@ -545,10 +635,12 @@
       "Cadre (combiné)": "Biologique — Faible",
       "Description": "Augmente la résistance aux agressions biologiques.",
       "Famille": "Biologique",
+      "Identifiant": "SKI91",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "44ae81ee-3bcb-4e3f-a6c3-97ada7a8c825"
   },
   {
@@ -557,10 +649,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La compétence \"Étiquette\" dans le cadre de jeu de rôle sert à comprendre et à respecter les normes sociales et culturelles appropriées dans des interactions variées.",
       "Famille": "Culturel",
+      "Identifiant": "SKI62",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "468c2f86-1197-4ad5-b717-37847f27d6d3"
   },
   {
@@ -569,10 +663,12 @@
       "Cadre (combiné)": "Surnaturel — Moyen",
       "Description": "La compétence \"Métamorphose\" permet aux personnages de se transformer ou d'altérer leur apparence physique, leur conférant ainsi des capacités surnaturelles et une flexibilité tactique en jeu.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI111",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "46e500d8-eadf-4125-9d9b-72846f8c030b"
   },
   {
@@ -581,10 +677,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "La compétence en aviation permet de naviguer et de piloter des aéronefs en utilisant des technologies avancées pour garantir la sécurité et l'efficacité des opérations aériennes.",
       "Famille": "Technologique",
+      "Identifiant": "SKI33",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "479c1a4a-901e-4ff1-ba08-42f7aca486a0"
   },
   {
@@ -593,10 +691,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Affaires permet au personnage de connaître les procédures commerciales et le monde des affaires en général. Un personnage maîtrisant cette compétence peut convaincre un marchand de lui faire visiter l'arrière-boutique, voire ses entrepôts, ou encore le convaincre de le laisser emprunter certains objets en cas de nécessité.",
       "Famille": "Culturel",
+      "Identifiant": "SKI66",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "4933e32d-3dcd-4232-834a-9716772d8dba"
   },
   {
@@ -605,10 +705,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Théologie reflète les connaissances académiques d'un personnage concernant les différentes religions. Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
       "Famille": "Culturel",
+      "Identifiant": "SKI183",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "4a3649e5-e1db-4562-9bdb-1f4d42c6d1c5"
   },
   {
@@ -617,10 +719,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "La compétence \"Nucléaire\" est utilisée pour développer des technologies avancées dans le domaine nucléaire, permettant des applications variées allant de la production d'énergie à la recherche scientifique.",
       "Famille": "Technologique",
+      "Identifiant": "SKI34",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "4a8eba62-8cf3-4532-a049-32df5285e633"
   },
   {
@@ -629,10 +733,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Les Premiers soins représente l'aptitude du personnage à administrer des soins rapides et basiques, comme des bandages ou un garrot. Premiers Soins permet de retirer le malus lié à une blessure simple (mais pas la blessure elle-même), de stabiliser un mourant ou de stopper une hémorragie.",
       "Famille": "Technologique",
+      "Identifiant": "SKI4",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "4f804aec-f83b-48a6-ae5b-c9af77464fa4"
   },
   {
@@ -641,10 +747,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Le Canotage représente l'aptitude à manier des embarcations à l'aide de rames.",
       "Famille": "Technologique",
+      "Identifiant": "SKI139",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "50d29297-193b-40d3-a0a9-965f28d6dc0f"
   },
   {
@@ -653,10 +761,12 @@
       "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence \"Alchimie\" permet d'explorer et d'interagir avec des éléments surnaturels à un niveau très faible dans un cadre de jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI73",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "51943c6b-1833-46f7-a108-3fa21bbb6e6e"
   },
   {
@@ -665,10 +775,12 @@
       "Cadre (combiné)": "Biologique — Avancé",
       "Description": "La compétence de contrôle génétique permet d'analyser et de manipuler les caractéristiques biologiques avancées des organismes pour des applications en recherche et en biotechnologie.",
       "Famille": "Biologique",
+      "Identifiant": "SKI102",
       "Niveau de Cadre": "Avancé",
       "Statut": "Retirée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "55094234-db53-41a8-a3f7-101bad3bb95c"
   },
   {
@@ -677,10 +789,12 @@
       "Cadre (combiné)": "Biologique — Avancé",
       "Description": "L'Élasticité est une façon pour le moins originale d'éviter les blessures. L'adepte de cette méthode de défense reçoit volontairement l'attaque, laissant son corps se déformer juste avant l'impact.",
       "Famille": "Biologique",
+      "Identifiant": "SKI134",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "55413f3f-8161-4c26-8e1e-18c323b61725"
   },
   {
@@ -689,10 +803,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Folklore représente la connaissance des légendes, des mythes, des contes populaires, des superstitions et des traditions orales propres à différentes cultures. Cette compétence permet d'identifier des symboles culturels, de reconnaître des références mythologiques et d'enrichir l'immersion narrative en s'appuyant sur le patrimoine immatériel des peuples.",
       "Famille": "Culturel",
+      "Identifiant": "SKI46",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "5554a2a3-a024-4e34-9ba6-a4e4b76aff08"
   },
   {
@@ -701,10 +817,12 @@
       "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La Sensibilité paranormale permet de percevoir et d'interagir avec des phénomènes surnaturels, des présences invisibles, des manifestations psychiques et des énergies occultes. Cette compétence confère une intuition face à l'étrange et au mystérieux, même à un niveau très faible.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI74",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "55f08c05-c81f-4fef-8473-b3b99edf4b9d"
   },
   {
@@ -713,10 +831,12 @@
       "Cadre (combiné)": "Surnaturel — Très avancé",
       "Description": "La compétence \"Création d’armes psychiques\" permet aux utilisateurs de manifester et de contrôler des armes basées sur leur énergie mentale, augmentant ainsi leur puissance au combat dans un cadre surnaturel.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI118",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création, Armes"
     },
+    "sections": {},
     "notion_page_id": "565b0010-93eb-4568-9404-530e0106000d"
   },
   {
@@ -725,10 +845,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "La compétence \"Premiers explosifs\" sert à introduire des éléments technologiques de base dans un cadre de jeu de rôle, permettant aux personnages d'interagir avec des dispositifs technologiques à faible niveau de complexité.",
       "Famille": "Technologique",
+      "Identifiant": "SKI13",
       "Niveau de Cadre": "Faible",
       "Statut": "Retirée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "589e478f-fa7b-46ce-bb6b-3748cca0ca8c"
   },
   {
@@ -737,10 +859,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "La Chirurgie permet de soigner les formes les plus graves de blessures critiques.",
       "Famille": "Technologique",
+      "Identifiant": "SKI151",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "58ab3ea0-5368-4672-84e8-20e9adac0e6d"
   },
   {
@@ -749,10 +873,12 @@
       "Cadre (combiné)": "Culturel — Moyen",
       "Description": "Renseignement représente l'aptitude du joueur à récolter des informations en faisant appel à la population. Cette compétence peut également servir à diffuser des nouvelles.",
       "Famille": "Culturel",
+      "Identifiant": "SKI67",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "5a967f53-b2b1-48ef-8e11-85e1d0ceb818"
   },
   {
@@ -761,10 +887,12 @@
       "Cadre (combiné)": "Biologique — Avancé",
       "Description": "La compétence en biotechnologies sert à appliquer des techniques biologiques avancées pour développer des solutions innovantes dans divers domaines, tels que la santé, l'agriculture et l'environnement.",
       "Famille": "Biologique",
+      "Identifiant": "SKI103",
       "Niveau de Cadre": "Avancé",
       "Statut": "Retirée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "5b0a2fc0-1bc0-4fec-98d9-5f1f8bdf3bde"
   },
   {
@@ -773,10 +901,12 @@
       "Cadre (combiné)": "Culturel — Moyen",
       "Description": "La compétence en sciences sociales permet d'analyser et de comprendre les comportements humains et les dynamiques culturelles au sein de divers contextes sociaux.",
       "Famille": "Culturel",
+      "Identifiant": "SKI68",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "5c3f25a4-585b-4a17-931a-13a7e0df14e4"
   },
   {
@@ -785,10 +915,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Déguisement s'utilise pour se faire passer pour quelqu'un d'autre en adoptant ses diverses caractéristiques. Le jet n'a lieu que quand quelqu'un essaie de percer à jour le déguisement. Plus la personne imitée est différente du personnage, plus la difficulté est élevée. L'utilisation de cette compétence nécessite généralement divers accessoires comme des vêtements.",
       "Famille": "Culturel",
+      "Identifiant": "SKI161",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "5d08343b-e240-4f09-b3b9-d869ad4fb775"
   },
   {
@@ -797,10 +929,12 @@
       "Cadre (combiné)": "Surnaturel — Avancé",
       "Description": "La compétence \"Maîtrise des artefacts\" permet aux personnages de comprendre, manipuler et utiliser efficacement des objets surnaturels dans le cadre d'un jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI119",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "6093e167-9560-406c-b813-acc033b0fa60"
   },
   {
@@ -809,10 +943,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Dépeçage permet au joueur de récupérer tout élément utile sur une créature (morte de préférence), que ce soit afin de les vendre ou de créer des objets avec. Une bonne maîtrise du Dépeçage permet de récupérer des composantes rares et prisées.",
       "Famille": "Biologique",
+      "Identifiant": "SKI152",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "60fd9e2b-1c3e-47ca-b86b-86953016b054"
   },
   {
@@ -821,10 +957,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Le Sabotage a diverses applications permettant de désamorcer des explosifs, d'enrayer une arme ou de rendre un mécanisme dangereux pour son utilisateur. L'utilisateur, une fois le sabotage effectué, n'a pas toujours la confirmation immédiate de sa réussite ou de son échec.",
       "Famille": "Technologique",
+      "Identifiant": "SKI162",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "612300ec-13a8-4629-a6a4-85228e0e4e7b"
   },
   {
@@ -833,10 +971,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "Pilotage de Petits Vaisseaux permet d'utiliser des vaisseaux suffisamment petits pour être pilotés par une seule personne.",
       "Famille": "Technologique",
+      "Identifiant": "SKI153",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "62747373-73dd-4bc5-8ea0-1658fb0a68e6"
   },
   {
@@ -845,10 +985,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Crochetage permet de déverrouiller aussi bien les serrures à clé que les serrures à code ou biométriques. Cette méthode d'ouverture ne casse pas les verrous.",
       "Famille": "Technologique",
+      "Identifiant": "SKI14",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "62788ec1-29be-401d-bd93-08d7acbc573b"
   },
   {
@@ -857,10 +999,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Une bonne connaissance de l'armement permet de consulter les spécificités d'une arme, d'une armure ou d'un bouclier, y compris en combat. Il faut pour cela avoir au moins autant de Connaissance de l'Armement que l'arme a de niveaux. Lors de l'achat d'une arme, si le joueur n'a pas une connaissance suffisante de l'armement, c'est le marchand lui-même qui lui décrit l'arme.",
       "Famille": "Culturel",
+      "Identifiant": "SKI184",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "63ff5f7c-fe0f-4b64-a226-4f6b80fcd7d7"
   },
   {
@@ -869,10 +1013,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La compétence \"Stratégie\" sert à établir des plans et des actions visant à atteindre des objectifs spécifiques dans un cadre culturel, en tenant compte des ressources disponibles et des contraintes opérationnelles.",
       "Famille": "Culturel",
+      "Identifiant": "SKI125",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "64614723-5dd6-480d-85a0-c8666c04ec52"
   },
   {
@@ -881,10 +1027,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "La compétence en nanotechnologies permet de développer et d'appliquer des matériaux et des systèmes à l'échelle nanométrique pour créer des solutions technologiques avancées dans divers domaines.",
       "Famille": "Technologique",
+      "Identifiant": "SKI38",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "6642ec01-6972-49a0-999c-92952bcc0af1"
   },
   {
@@ -893,10 +1041,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "L'Orientation s'utilise automatiquement dès qu'un personnage traverse une distance supérieure à un kilomètre sans pouvoir demander son chemin ou suivre une route correctement balisée. Plus une région est connue, plus le test est facile.",
       "Famille": "Culturel",
+      "Identifiant": "SKI47",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "6740617d-f4dc-4eb8-9aa7-acd892ff942c"
   },
   {
@@ -905,10 +1055,12 @@
       "Cadre (combiné)": "Culturel — Très faible",
       "Description": "Dissimulation représente l'aptitude d'un personnage à cacher efficacement toutes sortes d'objets : une arme sur soi, un objet dans une pièce, des marchandises de contrebande dans ses bagages, etc. La Dissimulation peut aussi être utilisée pour se cacher soi-même ou pour cacher quelqu'un d'autre. Cette capacité est opposée au jet de Perception Visuelle de l'adversaire.",
       "Famille": "Culturel",
+      "Identifiant": "SKI53",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "69055902-492f-4654-aa6c-3b5e9509226b"
   },
   {
@@ -917,10 +1069,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Les Arcs sont des armes à distance s'utilisant à deux mains et nécessitant une certaine dextérité pour le rechargement et dont les projectiles suivent rapidement une trajectoire courbe.",
       "Famille": "Technologique",
+      "Identifiant": "SKI15",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "69dd56a4-c6fa-4d63-aa37-2c7db1c05f28"
   },
   {
@@ -929,10 +1083,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "La Programmation permet de programmer des systèmes de défense, des logiciels ou encore des automates. Un système créé a automatiquement un niveau de sécurité égal au résultat du test. Cette compétence permet d'améliorer un programme déjà existant en augmentant sa qualité ou sa sécurité, voire les deux.",
       "Famille": "Technologique",
+      "Identifiant": "SKI191",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "6b3b200a-3065-40a9-8755-e8d5694ce1fc"
   },
   {
@@ -941,10 +1097,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "La compétence en ingénierie biomécanique permet de concevoir et d'optimiser des dispositifs technologiques avancés qui améliorent les performances humaines et la réhabilitation physique.",
       "Famille": "Technologique",
+      "Identifiant": "SKI39",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "6d4b4f24-b0af-46be-bd7d-51670bf0aa59"
   },
   {
@@ -953,10 +1111,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Le Dessin regroupe toutes les formes de représentation figurative sur une surface plane. Les dessins peuvent s'apprécier en un coup d'œil et sont des œuvres d'art particulièrement recherchées pour embellir un bâtiment.",
       "Famille": "Culturel",
+      "Identifiant": "SKI169",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "6f5c9e52-105a-430d-97db-5d196809c91f"
   },
   {
@@ -965,10 +1125,12 @@
       "Cadre (combiné)": "Technologique — Moyen",
       "Description": "L'Ingénierie mécanique permet de concevoir, développer, analyser et optimiser des systèmes, des machines et des dispositifs mécaniques, de la mécanique de précision à la mécanique industrielle lourde. Cette compétence joue un rôle essentiel dans l'innovation technologique et l'amélioration de l'efficacité des industries.",
       "Famille": "Technologique",
+      "Identifiant": "SKI22",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "70f50f00-3a1a-42bd-9307-a9307f83de7f"
   },
   {
@@ -977,10 +1139,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Falsification sert à falsifier des documents que ce soit pour modifier un document déjà existant ou en créer un de toutes pièces. Falsification sert aussi à repérer les faux.",
       "Famille": "Culturel",
+      "Identifiant": "SKI163",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "718c4af4-918a-468c-9838-65b350ae0251"
   },
   {
@@ -989,10 +1153,12 @@
       "Cadre (combiné)": "Biologique — Très faible",
       "Description": "La Vigilance représente la capacité à surveiller en permanence son environnement. Là où un test passif de Perception Auditive ou Visuelle ne peut être fait.",
       "Famille": "Biologique",
+      "Identifiant": "SKI92",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "71fc1e98-b72f-467c-90bc-d2003996a741"
   },
   {
@@ -1001,10 +1167,12 @@
       "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence \"Manifestations psychiques\" permet aux personnages d'interagir avec des phénomènes surnaturels, bien que son efficacité soit très limitée dans le cadre du jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI75",
       "Niveau de Cadre": "Très faible",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "75afcccb-b6ba-4cfa-8c06-27860c5640cc"
   },
   {
@@ -1013,10 +1181,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Les Armes Tranchantes infligent des dégâts par coupe et nécessitent une maîtrise technique.",
       "Famille": "Technologique",
+      "Identifiant": "SKI5",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "763d69b6-312c-47b9-b3ce-86da943e1101"
   },
   {
@@ -1025,10 +1195,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Survie représente ce qu'un personnage sait sur un environnement potentiellement hostile et fournit des indications sur la manière dont il convient d'affronter ses dangers naturels. Cette compétence permet de savoir si le personnage parvient à rester dans un environnement sans subir de séquelles physiques ou mentales.",
       "Famille": "Culturel",
+      "Identifiant": "SKI48",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "77149fde-3bd1-47ac-9ef9-28adddd37be7"
   },
   {
@@ -1037,10 +1209,12 @@
       "Cadre (combiné)": "Culturel — Avancé",
       "Description": "La compétence en neurosciences permet de comprendre et d'analyser le fonctionnement du cerveau et du système nerveux, contribuant ainsi à l'avancement des connaissances dans le cadre culturel avancé.",
       "Famille": "Culturel",
+      "Identifiant": "SKI69",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "79e206ab-70e3-4abf-965d-75569488dcac"
   },
   {
@@ -1049,10 +1223,12 @@
       "Cadre (combiné)": "Surnaturel — Nul",
       "Description": "La compétence \"Hypnose\" permet d'influencer l'esprit des personnages, leur faisant croire ou ressentir des choses qui ne sont pas réelles, dans un cadre surnaturel.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI76",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "7af7ba9d-602b-4cd1-97fb-d2693c1ac651"
   },
   {
@@ -1061,10 +1237,12 @@
       "Cadre (combiné)": "Surnaturel — Nul",
       "Description": "La compétence \"Effet placebo\" permet aux personnages d'influencer les résultats d'événements ou d'actions en utilisant des croyances ou des perceptions, même dans un cadre surnaturel.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI77",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "7bebdb60-5201-4de2-a12c-470b6f0967ab"
   },
   {
@@ -1073,10 +1251,12 @@
       "Cadre (combiné)": "Surnaturel — Moyen",
       "Description": "La compétence \"Sorcellerie\" permet aux personnages de manipuler des forces surnaturelles pour réaliser des sorts et des rituels, influençant ainsi le monde qui les entoure.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI112",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "7c8f6740-3ff7-458e-8318-78575b5efc9b"
   },
   {
@@ -1085,10 +1265,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "L'Infiltration Informatique permet de s'introduire dans un appareil informatique sécurisé, qu'il soit à proximité ou à distance. Cette compétence permet d'accéder aux données et de les copier, mais pas de les détruire ou de les corrompre.",
       "Famille": "Technologique",
+      "Identifiant": "SKI185",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "817a62a4-c59c-48c7-b5ee-f302b6bfe801"
   },
   {
@@ -1097,10 +1279,12 @@
       "Cadre (combiné)": "Biologique — Moyen",
       "Description": "La compétence \"Régénération\" sert à restaurer l'état biologique d'un organisme ou d'un environnement, facilitant ainsi sa récupération et son maintien à un niveau durable.",
       "Famille": "Biologique",
+      "Identifiant": "SKI93",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "82f1f372-f259-4536-a1bb-c4384a4042d5"
   },
   {
@@ -1109,10 +1293,12 @@
       "Cadre (combiné)": "Biologique — Avancé",
       "Description": "Engloutissement des Corps s'utilise pour déterminer si un individu arrive à s'approprier une partie de la force d'un cadavre qu'il a dévoré. Il peut ainsi gagner un point dans une compétence de Maîtrise des Armes, de Compétences Physiques, ou de Compétences Savoir-faires, à condition que la compétence de prédilection de la créature (ou de la personne) dévorée fasse bien partie de l'un de ces trois domaines. La difficulté est fixée au niveau actuel de la compétence à augmenter.",
       "Famille": "Biologique",
+      "Identifiant": "SKI140",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "8368824c-efa8-4616-a3c5-478b044e53a9"
   },
   {
@@ -1121,10 +1307,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Évaluation s'utilise pour déterminer la valeur d'un objet, mais aussi le prix « normal » qu'on peut en attendre selon les modalités de vente, la région, etc. Il est ainsi possible de repérer les objets les plus dignes d'intérêt, mais aussi de confondre un marchand qui essaierait de vous flouer.",
       "Famille": "Culturel",
+      "Identifiant": "SKI196",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "88f4b290-b36e-4050-aa22-5db2522fa676"
   },
   {
@@ -1133,10 +1321,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "L'Armurerie regroupe toutes les formes de fabrication d'armes, y compris via l'ébénisterie et les hautes technologies.",
       "Famille": "Technologique",
+      "Identifiant": "SKI170",
       "Niveau de Cadre": "Très faible",
       "Statut": "Retirée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "8c7f0ea2-49bf-4a27-8b1b-395a608e776c"
   },
   {
@@ -1145,10 +1335,12 @@
       "Cadre (combiné)": "Surnaturel — Moyen",
       "Description": "La compétence \"Vagues élémentaires\" permet de manipuler des forces surnaturelles pour créer des effets variés dans un cadre de jeu de rôle, offrant ainsi des opportunités stratégiques en combat ou en résolution de problèmes.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI113",
       "Niveau de Cadre": "Moyen",
       "Statut": "Retirée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "8d124780-1dde-4820-a303-3663039e22f1"
   },
   {
@@ -1157,10 +1349,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Le Domptage représente l'aptitude à rendre une créature agressive amicale. Il est possible de dompter plusieurs créatures à la fois, bien que cela soit plus difficile. Enfin, si le test de Domptage est réussi, les créatures concernées cessent toute action hostile dès la première seconde.",
       "Famille": "Culturel",
+      "Identifiant": "SKI154",
       "Niveau de Cadre": "Nul",
       "Statut": "Retirée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "8dbcb5eb-4196-419a-a739-b9cc4e4ed3c4"
   },
   {
@@ -1169,10 +1363,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Le Dressage représente l'aptitude d'un personnage à amadouer une créature, qu'elle soit agressive ou non, et à lui apprendre des tours. S'attirer la sympathie d'une créature ou calmer son agressivité peut être assez rapide, mais en faire un allié fidèle nécessite davantage d'efforts. Si le test réussit sur une créature agressive, celle-ci cesse toute action hostile dès la première seconde. Il est possible de dresser plusieurs créatures à la fois, bien que cela soit plus difficile.",
       "Famille": "Technologique",
+      "Identifiant": "SKI155",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "8fae2b33-8080-4540-8cf1-9a548c93c5f4"
   },
   {
@@ -1181,10 +1377,12 @@
       "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "Ces bracelets, une fois équipés par une personne dotée d'un grand charisme, émettent une aura qui fait hésiter quiconque tente de vous frapper. Chaque cran au-dessus du niveau diminue de 1 la gêne, chaque cran au-dessous du niveau augmente de 1 la gêne.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI114",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "8fcdbef7-534c-4447-9f75-192650c466f3"
   },
   {
@@ -1193,10 +1391,12 @@
       "Cadre (combiné)": "Biologique — Avancé",
       "Description": "La compétence \"Altération biologique\" permet de manipuler et d'améliorer les aspects biologiques des personnages ou des créatures dans un cadre de jeu de rôle avancé.",
       "Famille": "Biologique",
+      "Identifiant": "SKI104",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "90f35dd1-212e-418c-8e3b-c6ca5b4b1b3f"
   },
   {
@@ -1205,10 +1405,12 @@
       "Cadre (combiné)": "Technologique — Moyen",
       "Description": "La compétence en mécanique industrielle sert à concevoir, analyser et optimiser des systèmes et des machines dans un cadre technologique afin d'améliorer l'efficacité et la productivité dans les industries.",
       "Famille": "Technologique",
+      "Identifiant": "SKI25",
       "Niveau de Cadre": "Moyen",
       "Statut": "Retirée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "9221f87e-33a7-4350-8eb1-58091e23b687"
   },
   {
@@ -1217,10 +1419,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Duperie permet de tromper d'autres gens ou, d'une manière plus générale, de les convaincre de faire quelque chose qui n'est pas dans leur intérêt. En outre, Duperie s'utilise pour tenter de savoir si l'on a affaire ou non à un escroc.",
       "Famille": "Culturel",
+      "Identifiant": "SKI54",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "930e5adf-2050-482a-b441-c1afaf798818"
   },
   {
@@ -1229,10 +1433,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Soulever représente l'aptitude d'un personnage à soulever un objet pesant (essentiellement avec ses jambes). Cette compétence est aussi utilisée pour calculer le poids maximum transportable sans encombre. Enfin, un ennemi saisi peut être soulevé avec un malus de 10.",
       "Famille": "Biologique",
+      "Identifiant": "SKI141",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "93450eaf-e969-4897-b44b-2718da0ed687"
   },
   {
@@ -1241,10 +1447,12 @@
       "Cadre (combiné)": "Culturel — Moyen",
       "Description": "Augmente la résistance aux agressions psychologiques (intrusions dans l'esprit, hypnose, etc).",
       "Famille": "Culturel",
+      "Identifiant": "SKI135",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "940e44e0-ffd0-418a-b405-604a6c0ffad9"
   },
   {
@@ -1253,10 +1461,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Les Armes Contondantes infligent des dégâts par impact et nécessitent une bonne coordination.",
       "Famille": "Technologique",
+      "Identifiant": "SKI6",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "95602337-55a0-4431-bb7c-517555cc9334"
   },
   {
@@ -1265,10 +1475,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "La Course représente la capacité d'un personnage à courir plus ou moins vite sans perdre l'équilibre, surtout sur un terrain accidenté.",
       "Famille": "Biologique",
+      "Identifiant": "SKI84",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "98d07ad4-42b4-4062-9b4b-26eeb0da06f0"
   },
   {
@@ -1277,10 +1489,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La Psychologie permet de déterminer le caractère et les motivations réelles d'un individu grâce à l'étude de son intonation, de ses tics, de ses tournures de phrases. Ce talent nécessite de voir et d'entendre parler le sujet. Il peut également s'utiliser pour savoir si quelqu'un vous ment, à la place d'un test de Duperie. Enfin, il permet de détecter les folies et les comportements anormaux (lavage de cerveau, injonctions, etc). Talents liés: Psychodressage humain.",
       "Famille": "Culturel",
+      "Identifiant": "SKI70",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "99438183-d591-4c7a-b3f0-edf0fbc918ea"
   },
   {
@@ -1289,10 +1503,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Augmente la résistance aux armes naturelles ou artificielles.",
       "Famille": "Biologique",
+      "Identifiant": "SKI94",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "99aab630-cbf0-42a0-b8bf-66d5c83dadb9"
   },
   {
@@ -1301,10 +1517,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Ventriloquie permet de parler sans bouger les lèvres, en donnant l'impression que la voix vient d'ailleurs. Cette compétence est particulièrement efficace pour impressionner les esprits faibles ou faire croire qu'une voix provient d'un système de communication à proximité.",
       "Famille": "Culturel",
+      "Identifiant": "SKI164",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "9c51afaa-3e77-442d-877b-bb5f36ad0d26"
   },
   {
@@ -1313,10 +1531,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La Tactique représente la capacité à bâtir des plans pour des combats de grande ampleur. Elle permet aux troupes concernées de bénéficier des avantages liés au terrain et de prévoir les manœuvres de l'ennemi. L'issue des affrontements reste cependant déterminée par le Commandement et les forces des troupes en présence.",
       "Famille": "Culturel",
+      "Identifiant": "SKI192",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "9dc79f56-c542-4a52-a683-eab4d83031ae"
   },
   {
@@ -1325,10 +1545,12 @@
       "Cadre (combiné)": "Culturel — Très faible",
       "Description": "Le Vol à la Tire permet de subtiliser un objet ou de l'argent sans être vu, que ce soit dans les poches d'une personne ou sur un meuble quelconque.",
       "Famille": "Culturel",
+      "Identifiant": "SKI55",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "9edd900c-7a8c-4647-99fa-c1b70302693a"
   },
   {
@@ -1337,10 +1559,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Les Armes Perforantes utilisent la force de leur utilisateur pour infliger des dégâts pénétrants.",
       "Famille": "Technologique",
+      "Identifiant": "SKI7",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "9f1ef44b-7897-4781-8e51-02a28466a3fd"
   },
   {
@@ -1349,10 +1573,12 @@
       "Cadre (combiné)": "Technologique — Moyen",
       "Description": "Les Explosifs à Détonateur sont des armes complexes qu'il faut correctement armer et surtout bien positionner, en attendant que la cible soit à portée.",
       "Famille": "Technologique",
+      "Identifiant": "SKI26",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "a00c0787-ac78-453c-8486-f8c8d58d51b8"
   },
   {
@@ -1361,10 +1587,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La compétence \"Histoire de l'art\" sert à enrichir la compréhension culturelle des individus en explorant les évolutions et les tendances artistiques à travers le temps.",
       "Famille": "Culturel",
+      "Identifiant": "SKI63",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "a0748849-9a63-43ba-af9f-bf9a602a7113"
   },
   {
@@ -1373,10 +1601,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "Améliore l'aptitude à équiper les complexes armures articulées. Avoir moins que le niveau de l'armure multiplie par deux la gêne. Avoir deux fois le niveau de l'armure divise par deux la gêne.",
       "Famille": "Technologique",
+      "Identifiant": "SKI136",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "a38caad1-3248-4848-ae98-1c9860f94ddc"
   },
   {
@@ -1385,10 +1615,12 @@
       "Cadre (combiné)": "Technologique — Assez faible",
       "Description": "Les Armes de Poing sont des armes de tir utilisables à une main, mais d'une puissance réduite par rapport aux armes d'épaule.",
       "Famille": "Technologique",
+      "Identifiant": "SKI23",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "a3c9f916-43b3-46b0-870a-4f3158f57770"
   },
   {
@@ -1397,10 +1629,12 @@
       "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "L'Éveil des plantes permet de faire pousser, parfois de façon disproportionnée, diverses plantes et graines. Cet art a divers usages, y compris pour créer un camouflage, obtenir de la nourriture ou obtenir des interlocuteurs avec qui communiquer grâce au langage des arbres.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI156",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "a5f5cd27-af08-451e-9ce3-ec2329edcb64"
   },
   {
@@ -1409,10 +1643,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Intimidation correspond à l'aptitude d'un personnage à impressionner ou effrayer quelqu'un, pour l'obliger à obéir à ses ordres ou à révéler des informations quelconques. Le jet est modifié selon l'aura de la personne, son ascendant psychologique, et de ses capacités réelles.",
       "Famille": "Culturel",
+      "Identifiant": "SKI49",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "a645ffc4-6614-4224-9a04-b81bdedd55a0"
   },
   {
@@ -1421,10 +1657,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Certains systèmes de communication sont aussi primitifs que les signaux de fumée, tandis que d'autres permettent de communiquer à des milliers de kilomètres de distance.",
       "Famille": "Technologique",
+      "Identifiant": "SKI149",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "a7b8aef4-746a-45a9-a1ca-a6033116f183"
   },
   {
@@ -1433,10 +1671,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "Chimie sert à la combinaison d'ingrédients dans le but d'obtenir un effet spécifique. Cette compétence ne concerne pas seulement la création de liquides, mais aussi de solides et de gaz. On peut ainsi obtenir de nombreuses formes de médicaments et de poisons.",
       "Famille": "Technologique",
+      "Identifiant": "SKI27",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "a963c940-399a-47af-9c68-4de233a5d3d5"
   },
   {
@@ -1445,10 +1685,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Le Bâtiment concerne la réalisation concrète de constructions, de la simple demeure individuelle aux places fortes, usines et édifices collectifs. Cette compétence couvre l'aspect pratique de la construction : érection des murs, pose des toitures, assemblage des structures.",
       "Famille": "Technologique",
+      "Identifiant": "SKI171",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "ab7c33d7-9b82-4c1a-99b1-286fb8215efe"
   },
   {
@@ -1457,10 +1699,12 @@
       "Cadre (combiné)": "Biologique — Assez faible",
       "Description": "Augmente la résistance aux brûlures (causées par le feu, les explosions ou les rayons lasers), à la foudre et à la radioactivité.",
       "Famille": "Biologique",
+      "Identifiant": "SKI95",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "ab9ce26b-b1e1-44a3-80cd-fca8c272ce91"
   },
   {
@@ -1469,10 +1713,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Le Pistage permet de repérer les traces laissées par un individu ou une créature. Plus les traces sont petites, anciennes ou altérées par les évènements climatiques, plus le test est difficile. Suivre une piste permet de se passer d'un test d'Orientation.",
       "Famille": "Culturel",
+      "Identifiant": "SKI50",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "ac33ee59-a8de-4d7d-b8d3-538602a35507"
   },
   {
@@ -1481,10 +1727,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "La Perception Visuelle représente la capacité à se concentrer pour voir distinctement un objet lointain ou à repérer efficacement un individu caché.",
       "Famille": "Biologique",
+      "Identifiant": "SKI85",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "ad8a8d6c-d771-4aab-be13-c92b1e6d1f3e"
   },
   {
@@ -1493,10 +1741,12 @@
       "Cadre (combiné)": "Technologique — Très avancé",
       "Description": "La compétence \"Manipulation de matière\" permet d'interagir avec et de contrôler des éléments matériels dans un cadre technologique très avancé, facilitant des applications innovantes et complexes.",
       "Famille": "Technologique",
+      "Identifiant": "SKI44",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "ae47355a-28e8-4fb0-b5a7-bc64668d9c1b"
   },
   {
@@ -1505,10 +1755,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Le combattant ayant eu le plus petit score a toujours deux secondes d'avance sur le suivant. Les suivants sont classés par résultat. Le dernier a toujours deux secondes de retard sur l'avant-dernier.",
       "Famille": "Culturel",
+      "Identifiant": "SKI142",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "ae6ec6f9-0a38-4eb0-954f-834dd213cb94"
   },
   {
@@ -1517,10 +1769,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Divertissement permet de distraire un public par de petits jeux, des récits et d'autres propositions amusantes. En outre, Divertissement est utilisé en opposition pour déterminer le vainqueur dans un jeu ne dépendant pas du hasard (et où personne ne triche).",
       "Famille": "Culturel",
+      "Identifiant": "SKI120",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "af750e6d-fa45-4fd6-8c54-7d66a2a9ebf5"
   },
   {
@@ -1529,10 +1783,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La Médecine permet de soigner en profondeur les blessures graves. Un test réussi retire une blessure physique, mais chaque test supplémentaire sur une même personne dans la même journée est accompagné d'un malus cumulatif de 10. Un test réussi peut également ranimer une personne mourante.",
       "Famille": "Technologique",
+      "Identifiant": "SKI16",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "b1a0e008-96e8-4f76-83c7-f2919ca5ded7"
   },
   {
@@ -1541,10 +1797,12 @@
       "Cadre (combiné)": "Culturel — Avancé",
       "Description": "Le Langage des arbres permet de communiquer avec toutes sortes de plantes, mais essentiellement avec des arbres. Cela se fait en forgeant un lien mental qui, une fois créée, permet de communiquer à volonté en restant assez proches. Plus la plante est ancienne, plus la communication avec elle est difficile. Le Langage des Arbres détermine uniquement si les deux interlocuteurs se comprennent - charmer ou intimider une plante nécessitent un test de la compétence adéquate.",
       "Famille": "Culturel",
+      "Identifiant": "SKI197",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "b1df4e42-66df-4159-bf2e-fda668497d9d"
   },
   {
@@ -1553,10 +1811,12 @@
       "Cadre (combiné)": "Biologique — Assez avancé",
       "Description": "Améliore l'aptitude à porter des armures symbiotiques qui vivent et évoluent avec leur porteur. Chaque cran au-dessus du niveau diminue de 1 la gêne, chaque cran au-dessous du niveau augmente de 1 la gêne.",
       "Famille": "Biologique",
+      "Identifiant": "SKI96",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "b2bf5785-6700-4f4d-9c57-425ea80e2fb3"
   },
   {
@@ -1565,10 +1825,12 @@
       "Cadre (combiné)": "Surnaturel — Faible",
       "Description": "La compétence \"Bénédictions religieuses\" permet d'invoquer des effets surnaturels bénéfiques, influençant positivement le cadre de jeu de rôle à un niveau faible.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI78",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "b2d566e0-9645-4a32-a3d3-8c98f174a4f4"
   },
   {
@@ -1577,10 +1839,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Fouille permet de trouver des objets ou des individus dissimulés. Si ceux-ci ont été cachés intentionnellement, le jet de Fouille est opposé au jet de Dissimulation de celui qui s'est chargé de cette tâche. Sinon, la difficulté dépend des circonstances.",
       "Famille": "Biologique",
+      "Identifiant": "SKI86",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "b3f8a937-3360-417a-aca7-1a71b5e366ed"
   },
   {
@@ -1589,10 +1853,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "La compétence \"Troc\" sert à faciliter l'échange culturel au sein d'un cadre non structuré, permettant ainsi des interactions et des partages d'idées entre participants.",
       "Famille": "Culturel",
+      "Identifiant": "SKI51",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "b4dbe512-b66a-438c-9ca7-427fe5a5eb47"
   },
   {
@@ -1601,10 +1867,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "Écrans protecteurs représente l'aptitude à faire fonctionner des écrans déflecteurs pour amortir des dégâts.",
       "Famille": "Technologique",
+      "Identifiant": "SKI137",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "b65db40e-b28f-406f-87b2-7c7fb0301386"
   },
   {
@@ -1613,10 +1881,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "La compétence \"Armement de siège\" est utilisée pour renforcer les capacités technologiques d'un personnage dans un cadre de jeu de rôle, permettant ainsi une meilleure efficacité lors des sièges.",
       "Famille": "Technologique",
+      "Identifiant": "SKI17",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "b8591f1a-6836-4332-9674-8c127d9a9b71"
   },
   {
@@ -1625,10 +1895,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Améliore l'aptitude à encaisser les coups. Tous les trois crans, augmente d'un cran toutes les Résistances (sauf Psychologique et Parapsychologique). Ne se cumule pas avec une armure.",
       "Famille": "Biologique",
+      "Identifiant": "SKI138",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "b87589bb-bec4-4bb0-a187-0c1cf9addace"
   },
   {
@@ -1637,9 +1909,11 @@
       "Cadre (combiné)": "Biologique",
       "Description": "La compétence \"Endurance\" permet aux personnages de résister à des conditions difficiles et de maintenir leur performance sur de longues périodes, favorisant ainsi leur survie et leur efficacité dans un cadre de jeu de rôle biologique.",
       "Famille": "Biologique",
+      "Identifiant": "SKI97",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "bdc8d2ce-9d5f-48a4-8f81-5f2205873477"
   },
   {
@@ -1648,10 +1922,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Pousser / Tirer évalue la capacité d'un individu à déplacer un objet lourd sans le soulever (essentiellement avec ses pectoraux). Un ennemi peut être poussé ou tiré vers soi à main nues en test d'opposition après avoir été saisi.",
       "Famille": "Biologique",
+      "Identifiant": "SKI143",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "befd06cb-d93a-4260-8c8b-3e4baae87c7a"
   },
   {
@@ -1660,9 +1936,11 @@
       "Cadre (combiné)": "Surnaturel",
       "Description": "La compétence \"Télépathie limitée\" permet d'établir une communication mentale restreinte entre les individus, facilitant l'échange d'idées ou d'émotions sans nécessiter de langage verbal.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI79",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "bf6a9326-5f7e-4855-92e2-d953f48f2a7b"
   },
   {
@@ -1671,10 +1949,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Le Saut représente la capacité d'une personne à sauter plus ou moins haut et plus ou moins loin, avec de l'élan ou non.",
       "Famille": "Biologique",
+      "Identifiant": "SKI144",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "bf8c40ec-4890-4096-b612-712ecd815240"
   },
   {
@@ -1683,10 +1963,12 @@
       "Cadre (combiné)": "Technologique — Moyen",
       "Description": "Les détecteurs ont des applications diverses permettant de localiser les créatures environnantes, de trouver des filons de métaux, de vérifier qu'un individu dit la vérité ou encore de repérer les zones radioactives.",
       "Famille": "Technologique",
+      "Identifiant": "SKI150",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "bfd638cf-1294-4ae8-859f-871e3efa83a8"
   },
   {
@@ -1695,10 +1977,12 @@
       "Cadre (combiné)": "Surnaturel — Très avancé",
       "Description": "La compétence \"Magie innée\" permet aux personnages de canaliser des pouvoirs surnaturels de manière intuitive, offrant des capacités avancées dans les situations magiques du jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI121",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "bfe4ae86-2ef7-4ab6-b093-3f346335b317"
   },
   {
@@ -1707,10 +1991,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Équitation permet au personnage de monter toute créature vivante. Chacune d'elle possède son propre code d'indocilité qui est opposé au jet d'Équitation du joueur pour savoir si elle obéit ou non.",
       "Famille": "Technologique",
+      "Identifiant": "SKI145",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "c249f801-ec0d-42ff-9d34-f4409cea5f55"
   },
   {
@@ -1719,10 +2005,12 @@
       "Cadre (combiné)": "Technologique — Moyen",
       "Description": "Conduite de Véhicule permet de piloter des véhicules technologiques aussi bien sur ou sous la terre que sur ou sous la mer. Cette compétence peut également servir de compétence de réaction pour éviter une attaque.",
       "Famille": "Technologique",
+      "Identifiant": "SKI28",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "c3b00073-155a-43fd-a640-cb85a9dbe62c"
   },
   {
@@ -1731,10 +2019,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "L'équilibre s'utilise en réaction lorsque le personnage est sur le point de tomber, que ce soit à cause d'un coup violent, d'un tremblement de terre ou d'un vent violent. On peut utiliser l'équilibre comme compétence active pour traverser des passages étroits, comme une corde raide.",
       "Famille": "Biologique",
+      "Identifiant": "SKI146",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "c3cce6a4-9242-451f-b251-5c0bc9536766"
   },
   {
@@ -1743,10 +2033,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "La compétence en technologies portatives permet de comprendre et d'utiliser des dispositifs technologiques avancés pour améliorer l'interaction et la productivité dans divers contextes.",
       "Famille": "Technologique",
+      "Identifiant": "SKI40",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "c467ff0b-dc49-42c6-a1d2-5e203e373410"
   },
   {
@@ -1755,10 +2047,12 @@
       "Cadre (combiné)": "Culturel — Très faible",
       "Description": "Déplacement Silencieux représente l'aptitude d'un personnage à se déplacer sans faire de bruit et à se maintenir hors de vue. Le Déplacement Silencieux utilisé de façon passive subit un malus de 10. Le Déplacement Silencieux utilisé de façon active divise la vitesse de déplacement par deux. On oppose le Déplacement Silencieux à la Perception Auditive de la cible.",
       "Famille": "Culturel",
+      "Identifiant": "SKI56",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "c4c3eeee-08ed-4c6d-84fc-49ae075e3cbf"
   },
   {
@@ -1767,10 +2061,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "La compétence Métiers regroupe toutes les professions artisanales ne rentrant pas dans les autres types de compétences.",
       "Famille": "Culturel",
+      "Identifiant": "SKI172",
       "Niveau de Cadre": "Nul",
       "Statut": "Retirée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "c5435cf7-f972-400a-b922-bdf2ec27fd6f"
   },
   {
@@ -1779,10 +2075,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "L'Artisanat regroupe l'ensemble des savoir-faire techniques et créatifs permettant de créer, fabriquer et manipuler des objets et éléments divers avec ingéniosité. Cette compétence couvre toutes les professions artisanales ne disposant pas d'une compétence dédiée plus spécialisée.",
       "Famille": "Technologique",
+      "Identifiant": "SKI8",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "c57f3de1-9180-4e5b-83d2-430e53b75d13"
   },
   {
@@ -1791,10 +2089,12 @@
       "Cadre (combiné)": "Biologique — Assez avancé",
       "Description": "Les greffons sont des armes ignobles qui parasitent leur utilisateur et sont presque impossibles à retirer. Cependant, nombreux sont ceux qui seraient prêts à payer le prix pour apprendre à en manier une, car la puissance des greffons est mythique.",
       "Famille": "Biologique",
+      "Identifiant": "SKI41",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "c72fd571-3ef5-4da0-8e2d-b2e205ed47a7"
   },
   {
@@ -1803,10 +2103,12 @@
       "Cadre (combiné)": "Surnaturel — Très avancé",
       "Description": "La compétence \"Conjuration divine\" permet d'invoquer des entités surnaturelles pour obtenir leur aide ou leurs pouvoirs, à un niveau très avancé dans le cadre d'un jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI122",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "c79f896a-b649-4c75-a153-deeb84235c1d"
   },
   {
@@ -1815,10 +2117,12 @@
       "Cadre (combiné)": "Culturel — Très avancé",
       "Description": "La compétence \"Psycho-histoire\" permet d'analyser et de prédire les comportements sociaux et historiques à l'aide de méthodes scientifiques, influençant ainsi le développement culturel dans un cadre avancé.",
       "Famille": "Culturel",
+      "Identifiant": "SKI71",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "cb0d07c6-deba-4c4c-b7dc-b17a21d4dbb1"
   },
   {
@@ -1827,10 +2131,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "La Perception Auditive représente la capacité à se concentrer pour entendre distinctement un bruit lointain ou à entendre un individu qui essaie de se déplacer furtivement.",
       "Famille": "Biologique",
+      "Identifiant": "SKI87",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Investigation"
     },
+    "sections": {},
     "notion_page_id": "cb35d35a-39c9-4c7c-9bde-e061995e0100"
   },
   {
@@ -1839,10 +2145,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Augmente la résistance aux différents types de pressions physiologiques.",
       "Famille": "Biologique",
+      "Identifiant": "SKI98",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "cd25b256-9429-4c3b-8bfb-6ecbf86ea124"
   },
   {
@@ -1851,10 +2159,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Les Infrastructures concernent trois grands groupes. Les constructions hydrauliques concernent les barrages, ports, digues et jetées. Les infrastructures urbaines contiennent les aqueducs, les égouts. Enfin, les infrastructures de transport se concentrent sur les routes et voies ferrées.",
       "Famille": "Technologique",
+      "Identifiant": "SKI173",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "d5223f0f-9ad6-4246-b052-124c186ae13a"
   },
   {
@@ -1863,10 +2173,12 @@
       "Cadre (combiné)": "Technologique — Assez faible",
       "Description": "La compétence \"Armes d’Épaule\" est utilisée pour le maniement et l'utilisation efficace d'armes portées sur l'épaule dans un cadre de jeu de rôle technologique.",
       "Famille": "Technologique",
+      "Identifiant": "SKI24",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "d72a4ba8-ec9f-4d30-86aa-ae1f7b59e2c3"
   },
   {
@@ -1875,10 +2187,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Bibliothèque représente l'aptitude à trouver une information spécifique dans un système hiérarchisé comme une bibliothèque, qu'elle soit matérielle ou virtuelle.",
       "Famille": "Technologique",
+      "Identifiant": "SKI186",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "d9818b73-f985-4219-ae66-f5dbe263117b"
   },
   {
@@ -1887,10 +2201,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "Ces armes sont des dodécaèdres métalliques qui s'activent en faisant des mesures et en entrant des séquences de code. Elles exploitent ensuite les molécules environnantes pour déchaîner les puissances élémentaires.",
       "Famille": "Technologique",
+      "Identifiant": "SKI130",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "dc001d01-1327-45f2-81e8-7ea277bc8c66"
   },
   {
@@ -1899,10 +2215,12 @@
       "Cadre (combiné)": "Culturel — Moyen",
       "Description": "La Psychiatrie permet de soigner en profondeur les blessures psychologiques. Un test réussi retire une blessure morale, mais chaque test supplémentaire sur une même personne dans la même journée est accompagné d'un malus cumulatif de 2 crans. Un test réussi peut également raisonner une personne dominée.",
       "Famille": "Culturel",
+      "Identifiant": "SKI157",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "dce3b6e7-3826-478d-a872-b837db36a184"
   },
   {
@@ -1911,10 +2229,12 @@
       "Cadre (combiné)": "Surnaturel — Moyen",
       "Description": "Les convertisseurs regroupent toutes les créatures qui modifient les particules selon des règles bien établies. Un convertisseur de poche peut ainsi, si on le traite bien, orienter ses conversions selon les souhaits de son maître, avec des effets désastreux.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI131",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "de0379d8-56c9-486b-b782-fe0cea55edb1"
   },
   {
@@ -1923,10 +2243,12 @@
       "Cadre (combiné)": "Surnaturel — Faible",
       "Description": "La compétence de divination permet d'obtenir des informations ou des aperçus sur des événements futurs ou cachés à travers des méthodes surnaturelles de faible niveau.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI80",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "de5b5993-8867-4478-b445-f4d4a895a8de"
   },
   {
@@ -1935,10 +2257,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Améliore l'aptitude à porter des armures légères.",
       "Famille": "Technologique",
+      "Identifiant": "SKI18",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "de7b89aa-3b7e-464a-8c97-6192e398a641"
   },
   {
@@ -1947,10 +2271,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "La compétence \"Horlogerie\" sert à comprendre et à appliquer des concepts technologiques dans un cadre à faible niveau, facilitant ainsi le développement et l'utilisation d'outils techniques adaptés.",
       "Famille": "Technologique",
+      "Identifiant": "SKI19",
       "Niveau de Cadre": "Faible",
       "Statut": "Retirée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "df7f03e7-7864-4b8e-9c1e-863e67b04f8f"
   },
   {
@@ -1959,10 +2285,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Connaissances Générales reflète les connaissances académiques d'un personnage dans des domaines variés, incluant les sciences (mathématiques, géométrie, physique, etc.), l'histoire, la géographie et d'autres savoirs théoriques. Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
       "Famille": "Culturel",
+      "Identifiant": "SKI187",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "e47e2b9e-1c98-47e8-a037-8f508880ec7d"
   },
   {
@@ -1971,10 +2299,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "Le Bricolage sert à réparer des objets ou des constructions sans avoir la compétence correspondante. Il est ainsi possible à un bricoleur expérimenté de réparer un robot endommagé sans même avoir appris la robotique.",
       "Famille": "Technologique",
+      "Identifiant": "SKI174",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "e4bb621b-599b-4dd7-8c75-a5e2c61a270d"
   },
   {
@@ -1983,10 +2313,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Illégalité représente les connaissances du personnage sur les organisations criminelles (ou simplement prohibées), leur mode de fonctionnement, leurs membres influents et leurs activités. Cette compétence permet de contacter un membre d'une organisation illégale, d'obtenir des produits et services prohibés et de trouver quelqu'un prêt à enfreindre l'ordre établi.",
       "Famille": "Culturel",
+      "Identifiant": "SKI165",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Roublardise"
     },
+    "sections": {},
     "notion_page_id": "e615b7d1-f900-4ee5-bd0d-1eea0c3be433"
   },
   {
@@ -1995,10 +2327,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "L'Industrie Mobile regroupe les méthodes de fabrication de véhicules, de la simple charrette aux véhicules autopropulsés aériens, sous-marins et terrestres.",
       "Famille": "Technologique",
+      "Identifiant": "SKI175",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "e663de08-15ab-4d4f-a6f4-4e7fb5804fe9"
   },
   {
@@ -2007,10 +2341,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "Le Piratage informatique permet de s'introduire dans un appareil informatique sécurisé (à proximité ou à distance), d'accéder aux données, de les copier, mais aussi de les détruire ou de les corrompre. Cela peut se faire de manière directe ou par le biais de virus complexes agissant à grande échelle.",
       "Famille": "Technologique",
+      "Identifiant": "SKI193",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "e7418add-dad0-4fc9-92b8-a361a970ad1f"
   },
   {
@@ -2019,10 +2355,12 @@
       "Cadre (combiné)": "Technologique — Nul",
       "Description": "La Parade s'utilise autant pour utiliser correctement des boucliers pesants et encombrants, que pour toute tentative de parade à l'aide d'un bouclier.",
       "Famille": "Technologique",
+      "Identifiant": "SKI9",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "e801c747-7893-48f4-ab29-da8eebf07a8e"
   },
   {
@@ -2031,10 +2369,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La Musique regroupe autant la création de partitions que la représentation d'une œuvre musicale. Un musicien particulièrement doué peut apaiser ou motiver un individu en jouant la musique appropriée.",
       "Famille": "Culturel",
+      "Identifiant": "SKI176",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "e89a76ce-7c31-436b-8ca5-159f997bdead"
   },
   {
@@ -2043,9 +2383,11 @@
       "Cadre (combiné)": "Technologique",
       "Description": "La compétence \"Construction orbitale\" permet de concevoir et de réaliser des structures technologiques avancées dans un cadre de jeu de rôle futuriste.",
       "Famille": "Technologique",
+      "Identifiant": "SKI45",
       "Statut": "Retirée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "eacf0400-fc9f-4b25-b46c-67029bd8956d"
   },
   {
@@ -2054,10 +2396,12 @@
       "Cadre (combiné)": "Surnaturel — Avancé",
       "Description": "La compétence \"Distorsion de la réalité\" permet de manipuler la perception et l'interprétation des événements par les personnages, créant ainsi des situations surnaturelles et déroutantes dans le cadre du jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI123",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "eb58b2c6-c8f9-498c-9279-c2ce7e43b7d4"
   },
   {
@@ -2066,10 +2410,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "La Bureautique désigne l'utilisation d'interfaces informatiques et de tous les logiciels les plus courants.",
       "Famille": "Technologique",
+      "Identifiant": "SKI188",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "ebab9397-250a-41de-ad8d-be362372656e"
   },
   {
@@ -2078,10 +2424,12 @@
       "Cadre (combiné)": "Biologique — Avancé",
       "Description": "L'Ingénierie génétique permet d'analyser, de manipuler et d'optimiser les caractéristiques génétiques des organismes vivants. Elle couvre l'application de techniques biologiques avancées pour développer des solutions innovantes dans des domaines variés tels que l'agriculture, la médecine, la santé, l'environnement, la recherche et la biotechnologie.",
       "Famille": "Biologique",
+      "Identifiant": "SKI105",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "ec74e885-a79a-4e63-bf3f-30bfd740fc6f"
   },
   {
@@ -2090,10 +2438,12 @@
       "Cadre (combiné)": "Surnaturel — Moyen",
       "Description": "La Magie élémentaire permet de manipuler les éléments naturels (feu, eau, air, terre, etc.) pour créer des effets surnaturels variés, des simples manifestations élémentaires jusqu'aux vagues et déferlantes élémentaires massives. Elle offre des avantages stratégiques en combat comme en résolution de problèmes.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI115",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "ede174d1-5ab1-4097-9a20-9981b96cdac1"
   },
   {
@@ -2102,10 +2452,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "La compétence \"Électricité\" sert à comprendre et à appliquer les principes technologiques liés à l'électricité dans un cadre de jeu de rôle, facilitant ainsi l'interaction avec des systèmes énergétiques.",
       "Famille": "Technologique",
+      "Identifiant": "SKI29",
       "Niveau de Cadre": "Faible",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "ee251a0f-b3e4-4e18-be2e-5ffc1af3a60d"
   },
   {
@@ -2114,10 +2466,12 @@
       "Cadre (combiné)": "Surnaturel — Faible",
       "Description": "Les fragments de douleur sont des morceaux de souvenirs modelés pour concentrer la quintessence de la douleur éprouvée par une ou plusieurs personnes au cours de sa vie. Les fragments de douleur sont ensuite sertis dans un appareil qui permet d'orienter facilement par la pensée cette douleur vers une cible précise.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI132",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "f0763547-13a7-4673-b85f-062eca0d9498"
   },
   {
@@ -2126,10 +2480,12 @@
       "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "Engloutissement des Âmes s'utilise pour déterminer si un individu arrive à s'approprier une partie de l'imagination d'un cadavre qu'il a dévoré. Il peut ainsi gagner un point dans une compétence de Création, de Compétences Sociales ou de Maîtrise des Voies, à condition que la compétence de prédilection de la créature (ou de la personne) dévorée fasse bien partie de l'un de ces trois domaines. La difficulté est fixée au niveau actuel de la compétence à augmenter.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI147",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "f08fbe61-8c7f-4f18-a26b-76f1ff56e1b2"
   },
   {
@@ -2138,10 +2494,12 @@
       "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "Engloutissement des Esprits s'utilise pour déterminer si un individu arrive à s'approprier une partie du savoir d'un cadavre qu'il a dévoré. Il peut ainsi gagner un point dans une compétence d'Art de la Guerre, de Connaissances ou de Roublardises, à condition que la compétence de prédilection de la créature (ou de la personne) dévorée fasse bien partie de l'un de ces trois domaines. La difficulté est fixée au niveau actuel de la compétence à augmenter.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI148",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "f0dbad75-da5f-4395-b8a4-750b4a19686e"
   },
   {
@@ -2150,10 +2508,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La Conduite d'Attelage s'utilise pour diriger les véhicules tirés par des créatures de monte. Plus les créatures sont sauvages et plus le terrain est ardu, plus le test est difficile.",
       "Famille": "Technologique",
+      "Identifiant": "SKI158",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "f0ef66d5-eec4-4569-98c4-1323b32d46c9"
   },
   {
@@ -2162,10 +2522,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "Commandement représente l'aptitude du personnage à convaincre les PNJ et ses propres subordonnés d'obéir à ses ordres. Cette compétence ne sert pas à contraindre quelqu'un à agir contre sa volonté mais peut servir face à des subordonnés méfiants voire rebelles. Commandement est surtout utile pour diriger une unité lors de combats.",
       "Famille": "Culturel",
+      "Identifiant": "SKI57",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "f1000677-8ff0-4863-aff4-146533c311ce"
   },
   {
@@ -2174,9 +2536,11 @@
       "Cadre (combiné)": "Biologique",
       "Description": "La compétence \"Mutations naturelles\" permet d'explorer et de comprendre les adaptations biologiques qui se produisent naturellement dans les organismes vivants au sein d'un cadre de jeu de rôle biologique.",
       "Famille": "Biologique",
+      "Identifiant": "SKI99",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "f2598449-426c-403d-9560-558b340fb082"
   },
   {
@@ -2185,10 +2549,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "L'Écologie est une science visant à l'étude des écosystèmes et visant à leur maintien ou à leur altération. Il est ainsi possible, par l'introduction de nouvelles espèces, la modification du terrain ou l'usage de produits chimiques, de rendre une zone dangereuse agréable à vivre ou au contraire de transformer une morne plaine en barrière de défense biologique.",
       "Famille": "Technologique",
+      "Identifiant": "SKI177",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "f364080f-4ede-4946-b417-c1bd8c6393fa"
   },
   {
@@ -2197,10 +2563,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Esquive est une compétence de réaction utilisée pour éviter toute attaque sans effet de zone, ou avec un effet de zone réduit. L'esquive force à faire un déplacement d'un mètre dans une direction opposée à l'attaque (l'attaquant suivra le mouvement s'il a attaqué au corps à corps). Une esquive ne permet d'éviter une attaque de zone que si ce mouvement d'1m permet de sortir de sa zone d'effet.",
       "Famille": "Biologique",
+      "Identifiant": "SKI88",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "f49a2366-276c-443d-8647-b989bf552df6"
   },
   {
@@ -2209,10 +2577,12 @@
       "Cadre (combiné)": "Culturel — Assez avancé",
       "Description": "La compétence en biologie dans le cadre de jeu de rôle permet aux participants d'explorer et de comprendre les concepts biologiques tout en enrichissant leur expérience culturelle de manière assez avancée.",
       "Famille": "Culturel",
+      "Identifiant": "SKI72",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "f7119bb6-8aa4-4232-a049-262dc2752beb"
   },
   {
@@ -2221,10 +2591,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La compétence \"Écriture\" sert à créer et structurer des contenus écrits de manière claire et efficace dans un cadre technologique très faible.",
       "Famille": "Technologique",
+      "Identifiant": "SKI10",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "f7956149-5ce0-45d0-a5a5-c0e016bb2cf2"
   },
   {
@@ -2233,10 +2605,12 @@
       "Cadre (combiné)": "Technologique — Très faible",
       "Description": "Améliore l'aptitude à porter des armures lourdes. Chaque cran au-dessus du niveau diminue de 1 la gêne, chaque cran au-dessous du niveau augmente de 1 la gêne.",
       "Famille": "Technologique",
+      "Identifiant": "SKI124",
       "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Défense"
     },
+    "sections": {},
     "notion_page_id": "f7cd9921-0119-4ce4-a985-3a17714f5990"
   },
   {
@@ -2245,10 +2619,12 @@
       "Cadre (combiné)": "Technologique — Faible",
       "Description": "L'Électronique permet de maîtriser les technologies électriques et électroniques, de la compréhension des principes de l'électricité et des systèmes énergétiques jusqu'à la conception, le développement et l'optimisation de systèmes électroniques complexes.",
       "Famille": "Technologique",
+      "Identifiant": "SKI35",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
+    "sections": {},
     "notion_page_id": "f7e47754-f6c2-4030-9670-5f411d00195e"
   },
   {
@@ -2257,9 +2633,11 @@
       "Cadre (combiné)": "Surnaturel",
       "Description": "La compétence \"Superstition\" sert à influencer les événements et les décisions en s'appuyant sur des croyances surnaturelles, affectant ainsi les actions des personnages dans un cadre de jeu de rôle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI81",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "f86abece-0a1e-4d9a-80bc-8bd1be4ec7de"
   },
   {
@@ -2268,10 +2646,12 @@
       "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "Les Armes de Lancer Courbe regroupent toutes sortes d'armes dont l'efficacité ne dépend pas de la force du lanceur. La plupart de ces armes ont des effets de zone.",
       "Famille": "Technologique",
+      "Identifiant": "SKI133",
       "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Armes"
     },
+    "sections": {},
     "notion_page_id": "f8befa35-6100-4654-b6f2-734945e3753c"
   },
   {
@@ -2280,10 +2660,12 @@
       "Cadre (combiné)": "Biologique — Très avancé",
       "Description": "La compétence \"Modification instantanée du corps\" permet de transformer ou d'adapter instantanément le corps d'un individu dans un cadre de jeu de rôle biologique très avancé.",
       "Famille": "Biologique",
+      "Identifiant": "SKI106",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "fa3f468a-12da-4170-9ca6-1b786b4b1814"
   },
   {
@@ -2292,10 +2674,12 @@
       "Cadre (combiné)": "Culturel — Faible",
       "Description": "La compétence \"Archéologie\" sert à explorer et comprendre les vestiges du passé, permettant ainsi d'enrichir notre connaissance des cultures et des sociétés anciennes.",
       "Famille": "Culturel",
+      "Identifiant": "SKI126",
       "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
+    "sections": {},
     "notion_page_id": "fb264847-76ff-4be6-9399-5c7a4f600dfd"
   },
   {
@@ -2304,10 +2688,12 @@
       "Cadre (combiné)": "Technologique — Avancé",
       "Description": "L'Augmentation permet de renforcer un individu ou une créature en implémentant dans son corps des organes naturels ou artificiels performants.",
       "Famille": "Technologique",
+      "Identifiant": "SKI159",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
+    "sections": {},
     "notion_page_id": "fc2b96cb-f741-406b-a3a4-2cd748e23dcc"
   },
   {
@@ -2316,10 +2702,12 @@
       "Cadre (combiné)": "Culturel — Moyen",
       "Description": "Le Façonnage Spirituel est une méthode de construction sans matériaux, par la seule force de l'esprit. L'utilisation de cette compétence se fait toujours en combinaison avec une autre compétence d'Artisanat.",
       "Famille": "Culturel",
+      "Identifiant": "SKI178",
       "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "fc66fc0f-b09c-49e3-b011-c56df1b79aeb"
   },
   {
@@ -2328,10 +2716,12 @@
       "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "La compétence \"Fusion mécanique\" permet d'intégrer des éléments surnaturels dans le cadre d'un jeu de rôle, en facilitant des interactions et des créations qui transcendent les limites de la mécanique traditionnelle.",
       "Famille": "Surnaturel",
+      "Identifiant": "SKI116",
       "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "fe0c8fc2-2ecb-4639-becb-0ad3eeca73eb"
   },
   {
@@ -2340,10 +2730,12 @@
       "Cadre (combiné)": "Biologique — Nul",
       "Description": "Natation représente la capacité du joueur à ne pas se noyer et à progresser avec plus ou moins de facilité dans un milieu aquatique. La capacité à retenir son souffle au-delà d'une minute sans oxygène dépend de la Résistance Physiologique.",
       "Famille": "Biologique",
+      "Identifiant": "SKI89",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
+    "sections": {},
     "notion_page_id": "fe80f53a-e4cd-4bb6-a0aa-99eb51452148"
   },
   {
@@ -2352,10 +2744,12 @@
       "Cadre (combiné)": "Biologique — Très avancé",
       "Description": "La compétence \"Espèce individuelle\" permet de classer et de comprendre des organismes biologiques au sein d'un cadre très avancé, facilitant ainsi l'étude et l'interaction avec diverses formes de vie.",
       "Famille": "Biologique",
+      "Identifiant": "SKI107",
       "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
+    "sections": {},
     "notion_page_id": "ff037448-b2c8-47a2-b00f-de53fae84721"
   },
   {
@@ -2364,10 +2758,12 @@
       "Cadre (combiné)": "Culturel — Nul",
       "Description": "Négoce s'utilise pour discuter le prix de biens ou de services à la vente comme à l'achat. La difficulté du test dépend de la compétence du vendeur ou de l'acheteur concerné. Cette compétence est la compétence de prédilection pour faire valoir son travail au meilleur prix.",
       "Famille": "Culturel",
+      "Identifiant": "SKI198",
       "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Social"
     },
+    "sections": {},
     "notion_page_id": "ff69121c-3b5c-4a92-bf86-738af97b9c13"
   }
 ]

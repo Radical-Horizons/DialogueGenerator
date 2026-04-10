@@ -1,8 +1,12 @@
 [
   {
     "Nom": "Prompts pour IA",
+    "values": {},
     "sections": {
-      "_general": "# Ops Center \n\n## Méthode de nettoyage de call-out Notion\n\nDans Notepad ++ (expression régulière), chercher : \n\n</?aside[^>]*>|<img[^>]*>|(\\r?\\n){3,}\n\nRemplacer : \n\n\\r\\n\\r\\n"
+      "me_thode_de_nettoyage_de_call-out_notion": "Dans Notepad ++ (expression régulière), chercher : \n\n</?aside[^>]*>|<img[^>]*>|(\\r?\\n){3,}\n\nRemplacer : \n\n\\r\\n\\r\\n"
+    },
+    "section_titles": {
+      "me_thode_de_nettoyage_de_call-out_notion": "Méthode de nettoyage de call-out Notion"
     },
     "notion_page_id": "1b26e4d2-1b45-8040-9064-c235ef268a3d"
   }

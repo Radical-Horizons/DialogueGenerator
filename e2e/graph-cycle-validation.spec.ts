@@ -19,9 +19,24 @@ test.describe('Graph Cycle Validation (Story 0.6)', () => {
     return {
       nodes: [
         { id: 'START', type: 'startNode', position: { x: 0, y: 0 }, data: { label: 'Start' } },
-        { id: 'A', type: 'dialogueNode', position: { x: 100, y: 100 }, data: { label: 'Node A', line: 'Hello' } },
-        { id: 'B', type: 'dialogueNode', position: { x: 200, y: 100 }, data: { label: 'Node B', line: 'World' } },
-        { id: 'C', type: 'dialogueNode', position: { x: 300, y: 100 }, data: { label: 'Node C', line: 'Test' } },
+        {
+          id: 'A',
+          type: 'dialogueNode',
+          position: { x: 100, y: 100 },
+          data: { id: 'A', label: 'Node A', line: 'Hello' },
+        },
+        {
+          id: 'B',
+          type: 'dialogueNode',
+          position: { x: 200, y: 100 },
+          data: { id: 'B', label: 'Node B', line: 'World' },
+        },
+        {
+          id: 'C',
+          type: 'dialogueNode',
+          position: { x: 300, y: 100 },
+          data: { id: 'C', label: 'Node C', line: 'Test' },
+        },
       ],
       edges: [
         { id: 'e0', source: 'START', target: 'A' },
@@ -39,10 +54,30 @@ test.describe('Graph Cycle Validation (Story 0.6)', () => {
     return {
       nodes: [
         { id: 'START', type: 'startNode', position: { x: 0, y: 0 }, data: { label: 'Start' } },
-        { id: 'A', type: 'dialogueNode', position: { x: 100, y: 100 }, data: { label: 'Node A', line: 'Hello' } },
-        { id: 'B', type: 'dialogueNode', position: { x: 200, y: 100 }, data: { label: 'Node B', line: 'World' } },
-        { id: 'C', type: 'dialogueNode', position: { x: 100, y: 200 }, data: { label: 'Node C', line: 'Test1' } },
-        { id: 'D', type: 'dialogueNode', position: { x: 200, y: 200 }, data: { label: 'Node D', line: 'Test2' } },
+        {
+          id: 'A',
+          type: 'dialogueNode',
+          position: { x: 100, y: 100 },
+          data: { id: 'A', label: 'Node A', line: 'Hello' },
+        },
+        {
+          id: 'B',
+          type: 'dialogueNode',
+          position: { x: 200, y: 100 },
+          data: { id: 'B', label: 'Node B', line: 'World' },
+        },
+        {
+          id: 'C',
+          type: 'dialogueNode',
+          position: { x: 100, y: 200 },
+          data: { id: 'C', label: 'Node C', line: 'Test1' },
+        },
+        {
+          id: 'D',
+          type: 'dialogueNode',
+          position: { x: 200, y: 200 },
+          data: { id: 'D', label: 'Node D', line: 'Test2' },
+        },
       ],
       edges: [
         { id: 'e0', source: 'START', target: 'A' },
@@ -61,9 +96,24 @@ test.describe('Graph Cycle Validation (Story 0.6)', () => {
     return {
       nodes: [
         { id: 'START', type: 'startNode', position: { x: 0, y: 0 }, data: { label: 'Start' } },
-        { id: 'A', type: 'dialogueNode', position: { x: 100, y: 100 }, data: { label: 'Node A', line: 'Hello' } },
-        { id: 'B', type: 'dialogueNode', position: { x: 200, y: 100 }, data: { label: 'Node B', line: 'World' } },
-        { id: 'C', type: 'dialogueNode', position: { x: 300, y: 100 }, data: { label: 'Node C', line: 'Test' } },
+        {
+          id: 'A',
+          type: 'dialogueNode',
+          position: { x: 100, y: 100 },
+          data: { id: 'A', label: 'Node A', line: 'Hello' },
+        },
+        {
+          id: 'B',
+          type: 'dialogueNode',
+          position: { x: 200, y: 100 },
+          data: { id: 'B', label: 'Node B', line: 'World' },
+        },
+        {
+          id: 'C',
+          type: 'dialogueNode',
+          position: { x: 300, y: 100 },
+          data: { id: 'C', label: 'Node C', line: 'Test' },
+        },
       ],
       edges: [
         { id: 'e0', source: 'START', target: 'A' },

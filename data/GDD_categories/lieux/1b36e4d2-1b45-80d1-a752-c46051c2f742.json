@@ -1,7 +1,30 @@
 {
   "Nom": "Cellules",
+  "values": {
+    "Assets": "57c27401-1876-48f2-9d1f-71603e95c183",
+    "Contenu par": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+    "Date de création": "2025-03-11T13:21:00.000Z",
+    "Dernière modification": "2026-04-03T18:01:00.000Z",
+    "Niveau d’IA": "co-écrit",
+    "Personnages présents": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+    "Qualité": "0",
+    "Résumé": "Les cellules sont des lieux de repos pour les membres du culte, où les plus hauts gradés occupent les cellules les plus éloignées. Les membres dorment généralement à même le sol. Des sections abordent l'histoire, l'apparence, les éléments de jeu, ainsi que la géographie et les voies d'accès du site.",
+    "Taille": "Site",
+    "Type": "Lieu principal",
+    "Zones limitrophes": "1b36e4d2-1b45-80da-b06a-f97b2a08b7c6",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nLieux de repos des membres du culte, les plus hauts gradés ont les cellules les plus lointaines. Les cellules sont littéralement des cellules nerveuses. Les membres du cultes y dorment généralement à même le sol.\n\n# Identité & Vue d'ensemble\n\n**Histoire du lieu**\n\n**Apparence**\n\n# Eléments de jeu\n\n**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**\n\n# Géographie & Environnement\n\n**Géographie**\n\n**Voies d’accès**"
+    "preamble": "**Résumé de la fiche**\nLieux de repos des membres du culte, les plus hauts gradés ont les cellules les plus lointaines. Les cellules sont littéralement des cellules nerveuses. Les membres du cultes y dorment généralement à même le sol.",
+    "identite____vue_d_ensemble": "**Histoire du lieu**\n\n**Apparence**",
+    "ele_ments_de_jeu": "**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**",
+    "ge_ographie___environnement": "**Géographie**\n\n**Voies d’accès**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "identite____vue_d_ensemble": "Identité & Vue d'ensemble",
+    "ele_ments_de_jeu": "Eléments de jeu",
+    "ge_ographie___environnement": "Géographie & Environnement"
   },
   "notion_page_id": "1b36e4d2-1b45-80d1-a752-c46051c2f742"
 }

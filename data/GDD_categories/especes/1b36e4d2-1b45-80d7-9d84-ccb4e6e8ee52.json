@@ -1,7 +1,22 @@
 {
   "Nom": "Rouleurs éternels de Marul",
+  "values": {
+    "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b36e4d2-1b45-80da-b06a-f97b2a08b7c6",
+    "Présence dans Escelion": "Rare",
+    "Règne (ou classe)": "484cd421-db84-425a-84eb-2414d5f042c5",
+    "Résumé IA": "Les rouleurs éternels, ou koroks, sont des créatures artificielles en forme de roue, immortelles mais fragiles. Leur reproduction se fait par la création d'œufs après une analyse de l'environnement. Ils symbolisent la permanence et la vulnérabilité, et leurs poils métalliques sont prisés dans l'artisanat. Les propriétés des koroks varient selon leur lieu de naissance, influençant superstitions et commerce.",
+    "Type": "Faune",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1b36e4d2-1b45-80d7-9d84-ccb4e6e8ee52"
 }

@@ -1,499 +1,1311 @@
 [
   {
     "Nom": "RÉUSSIE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Convergence Rituelle réussie",
+      "Flag parent": "f67d3167-be48-42fe-8b47-8a8c6f174813",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "0a4db701-0d58-4c05-9c2d-5d2ab9411029"
   },
   {
     "Nom": "INDICES_TROUVÉS",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Cartes en sang localisées dans les Plis (déclencheur recrutement Option B)",
+      "Flag parent": "a9a42804-927a-4e63-9bcf-56dd679f8b63",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "1e14bac6-9aad-4db4-aa67-df36f808db81"
   },
   {
     "Nom": "ANTAGONISTE_IDENTIFIÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Antagoniste clairement identifié",
+      "Flag parent": "1ad2a39f-bdff-452b-95a2-5dcdcb4e5657",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "0d1ae5e1-a405-42bf-b5ac-9662ae43d300"
   },
   {
     "Nom": "ÉTOUFFÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Enquête neutralisée par Khair-gul",
+      "Flag parent": "ad2f87e6-b85b-4617-b810-db00a97e6492",
+      "Ordre": "4",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "144755f5-fb4e-44bc-ad78-6cb7f1d88923"
   },
   {
     "Nom": "RUMEUR_NOMADE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Besoin empiré",
+      "Flag parent": "1c4ff6e4-9605-412d-ad32-02d77532c184",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "17df8158-3a13-4a1c-9230-fd41476cdf36"
   },
   {
     "Nom": "RECONSTITUÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Manuscrit de Synthèse entièrement reconstitué",
+      "Flag parent": "f7c9a095-1f01-462c-8456-a3e0ba3e1239",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "1a99108e-37a8-4264-b9b8-68faa4ec26b9"
   },
   {
     "Nom": "CONFIRMÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Après la quête L'Écho de Thyra (quelle que soit l'issue)",
+      "Flag parent": "9828b90e-aa5c-4ff4-a49d-9ab29c1e2843",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "7f393c6d-c04e-458d-8090-f03bdba2505e"
   },
   {
     "Nom": "PASSAGE_LOCALISÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Passage dérobé derrière la salle de préparation localisé",
+      "Flag parent": "2bcbef60-0e9b-427a-ac76-f2e8b0f1a69f",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "1f341e45-b5d0-4cb7-8f51-76b55ffe7ee9"
   },
   {
     "Nom": "CHAMBRE_DÉCOUVERTE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Chambre des Possibles localisée en Strate III+",
+      "Flag parent": "a9a42804-927a-4e63-9bcf-56dd679f8b63",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "5980b337-b3d0-4e05-a4b2-c7bf7fb4695e"
   },
   {
     "Nom": "BESOIN_NON_RÉSOLU",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Arc non résolu, Khair-gul continue ses activités",
+      "Flag parent": "80c53aad-2a65-47bd-8f78-f60f1732a51a",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "62b4d085-6775-4552-8cec-a1cb9236b1a3"
   },
   {
     "Nom": "PERDU_DÉFINITIVEMENT",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Option C (dénonciation aux Parfaits) ou catastrophe réputationnelle irréversible",
+      "Flag parent": "7f0ac51d-13a4-4d9d-a33d-08a983cc6b09",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "3144afb7-7434-400b-8439-89502a57033e"
   },
   {
     "Nom": "DÉTAILS_CONNUS",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Connaît la nature de la fusion collective avec le Léviathan",
+      "Flag parent": "dcae3ed9-4c0f-4f54-9d96-ab2e9cbcb180",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "270135be-f6b4-44f6-afb5-be0122c986fc"
   },
   {
     "Nom": "MURMURANTE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Ralliement aux dissidents (écho à Rhylos la Questionneuse)",
+      "Flag parent": "812e85ac-4786-4831-8a8b-152955240361",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "2e70655f-ee64-413d-a899-37d53ca6c2a4"
   },
   {
     "Nom": "BESOIN_RÉSOLU",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Abandonne le Dernier Rituel, adopte la doctrine du Mouvement Stable, accepte le vieillissement naturel",
+      "Flag parent": "c98123a7-8502-41c5-aa9b-a7136630fc5b",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "fc92279f-d3be-40cd-98c6-9c7d555e409f"
   },
   {
     "Nom": "EN_COURS",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Duq'Sha enquête activement sur les incohérences dans les registres de soins",
+      "Flag parent": "ad2f87e6-b85b-4617-b810-db00a97e6492",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "851a078e-cf9e-4c1c-b1ed-ee2d376fbf7e"
   },
   {
     "Nom": "SUSPECT",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Les protagonistes soupçonnent Khair-gul",
+      "Flag parent": "1ad2a39f-bdff-452b-95a2-5dcdcb4e5657",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "33aafaf6-41b1-452c-a7dd-ae4a6e106526"
   },
   {
     "Nom": "ACCORDÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Autorisation médicale accordée",
+      "Flag parent": "94d5c969-0b69-4929-a239-21c2694a7a70",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "3c80a4c2-546c-4eaa-bf03-1f336e09bb0d"
   },
   {
     "Nom": "COLLECTION_COMPLÈTE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Collection complète de flacons découverte",
+      "Flag parent": "7f03333a-60f0-4045-818c-f318bcb639d1",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "40681f9b-74d8-4f4a-8c55-b534a2456a1c"
   },
   {
     "Nom": "INCONNU",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "L'étude secrète n'est pas connue des protagonistes",
+      "Flag parent": "2bcbef60-0e9b-427a-ac76-f2e8b0f1a69f",
+      "Ordre": "1",
+      "Par défaut": "oui"
     },
+    "sections": {},
     "notion_page_id": "490c146f-f31a-4333-a598-002d3b83517d"
   },
   {
     "Nom": "AUCUN",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Position par défaut (refus implicite du titre)",
+      "Flag parent": "812e85ac-4786-4831-8a8b-152955240361",
+      "Ordre": "1",
+      "Par défaut": "oui"
     },
+    "sections": {},
     "notion_page_id": "4aa77ab2-6b14-4da4-9823-ee7f0743826c"
   },
   {
     "Nom": "INDICES",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Premiers indices de la collection secrète de flacons d'Influence",
+      "Flag parent": "7f03333a-60f0-4045-818c-f318bcb639d1",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "5796579c-846c-4edf-bb8f-8d76f00caf42"
   },
   {
     "Nom": "DIALOGUE_APPROFONDI",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Échange substantiel révélant ses motivations et méthodes cartographiques",
+      "Flag parent": "fdbb4056-ab88-4b26-8c93-1184d86182f9",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "dafa2c9b-2271-471b-82b7-a24a6059f1d1"
   },
   {
     "Nom": "DÉCLIN_RÉVÉLÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Akthar-Neth informé que son temps est compté (fissure +1)",
+      "Flag parent": "b891bd34-d391-4839-825f-7d022de6b236",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "5eb3f79e-6f1b-488b-b6c3-f84cbfa63356"
   },
   {
     "Nom": "PARTAGÉ_URESAIR",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Journal secret révélé à Uresaïr (ébranle son rapport au Culte)",
+      "Flag parent": "78d75c47-46ce-4f99-947c-b69d63dd34ea",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "68217fc8-f7ea-41cb-9498-ac9b4f74ff43"
   },
   {
     "Nom": "RÉVÉLÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Après le dialogue d'approfondissement du bras droit (confiance seuil 3)",
+      "Flag parent": "dd9c6a88-d65e-4af0-89ed-6c20e34be549",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "6ad2b9b7-6c8f-4441-ba00-888f475cc26a"
   },
   {
     "Nom": "LIMITES_COMPRISES",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Sait que le don atteint ses limites et que le déclin physique n'est pas une transformation sainte",
+      "Flag parent": "3e82eaaa-dcc1-4067-ac1c-71d647cfb015",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "6fbf4af1-8e8e-40df-8816-010f7c9bbb49"
   },
   {
     "Nom": "ENGAGÉ_YUL",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Option B : engagement sur Yul",
+      "Flag parent": "960f3328-69e6-493a-b5f2-8d707f7fe4cb",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "70e2f8e7-6f9d-4d68-be4e-7e55ab387931"
   },
   {
     "Nom": "CONTACT_REÇU",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Message du Cercle arrivé au campement",
+      "Flag parent": "99a0e253-bdd0-4ef7-aa13-5622b56087e2",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "7275f4e6-57c3-4dbf-bdc5-32934271ae25"
   },
   {
     "Nom": "VÉRITÉ_RÉVÉLÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Sait que les Sept Témoins sont morts depuis des décennies et qu'Akthar-Neth leur parle comme s'ils vivaient",
+      "Flag parent": "80bcc3f2-30a1-49fb-b7b9-c69a88b4aa13",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "b9ff657f-ee61-46e3-aa07-9edebd7d3506"
   },
   {
     "Nom": "LONGÉVITÉ_CONNUE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Sait qu'il vit depuis 250 ans grâce à un pacte",
+      "Flag parent": "3e82eaaa-dcc1-4067-ac1c-71d647cfb015",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "7e10c82e-5498-452d-bf13-d9a9be9acda0"
   },
   {
     "Nom": "PROSCRITE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Rejet actif par le Culte, branche antagoniste",
+      "Flag parent": "812e85ac-4786-4831-8a8b-152955240361",
+      "Ordre": "4",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "87e3784d-8ea0-4e95-97c0-ca7dc893a2f3"
   },
   {
     "Nom": "BIENVEILLANT",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Ressource bienveillante (perception initiale)",
+      "Flag parent": "1ad2a39f-bdff-452b-95a2-5dcdcb4e5657",
+      "Ordre": "1",
+      "Par défaut": "oui"
     },
+    "sections": {},
     "notion_page_id": "89fb977f-d7e1-4b19-aa7c-9d7c9283c1bd"
   },
   {
     "Nom": "RÉSOLUE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Les 7 formules ont été récupérées. Révèle l'implication d'Avili dans Eonundé.",
+      "Flag parent": "1117930a-e366-4c9f-8e96-107442d4a5b6",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
-    "notion_page_id": "8a10ebbb-0322-4a78-bb6e-9e3e777a0aaf"
+    "sections": {},
+    "notion_page_id": "9715236f-4ae7-497a-80b9-a6d7350e5c19"
   },
   {
     "Nom": "BESOIN_AGGRAVÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Arc empiré, conséquences aggravées pour les protagonistes",
+      "Flag parent": "80c53aad-2a65-47bd-8f78-f60f1732a51a",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "ba5b56d1-55d7-46cc-9db6-4c50619a16ff"
   },
   {
     "Nom": "PIÈGE_DÉCOUVERT",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Vraie intention du Cercle révélée",
+      "Flag parent": "99a0e253-bdd0-4ef7-aa13-5622b56087e2",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "90b6d43c-1314-485b-ad93-91d965fa8988"
   },
   {
     "Nom": "INACTIVE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "La quête n'a pas encore été déclenchée.",
+      "Flag parent": "1117930a-e366-4c9f-8e96-107442d4a5b6",
+      "Ordre": "1",
+      "Par défaut": "oui"
     },
-    "notion_page_id": "93c5621d-9214-452c-91e3-44cc4c7a6f91"
+    "sections": {},
+    "notion_page_id": "e93ec0ce-3511-4a0c-8b98-8479f340f640"
   },
   {
     "Nom": "CONFIÉ_GARDIEN",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Transmis au Gardien-Calligraphe (réforme théologique graduelle)",
+      "Flag parent": "78d75c47-46ce-4f99-947c-b69d63dd34ea",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "9610ed84-240c-4c1e-a23c-483681ff0e5b"
   },
   {
     "Nom": "PARTIELLEMENT_DÉCOUVERTS",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Partie de la collection identifiée",
+      "Flag parent": "7f03333a-60f0-4045-818c-f318bcb639d1",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "98f37058-d204-427b-81a1-4760bd17546e"
   },
   {
     "Nom": "COLLECTIONNEUR_DE_SOLITUDES",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Besoin non résolu",
+      "Flag parent": "1c4ff6e4-9605-412d-ad32-02d77532c184",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "9d30f41a-ec9b-4820-a408-a9f2e2ff9b29"
   },
   {
     "Nom": "LOCALISATION_CONNUE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Sait où se trouve la Krypte",
+      "Flag parent": "80bcc3f2-30a1-49fb-b7b9-c69a88b4aa13",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "a458d069-edee-4689-9420-70432dd413e8"
   },
   {
     "Nom": "FAIBLESSE_EXPLOITÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Déclin utilisé comme levier pour abandonner le Rituel",
+      "Flag parent": "b891bd34-d391-4839-825f-7d022de6b236",
+      "Ordre": "4",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "a6488b21-3bd8-4a15-9565-f66cf352f0e8"
   },
   {
     "Nom": "TEMOIN_DE_L_INACHEVE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Besoin résolu",
+      "Flag parent": "1c4ff6e4-9605-412d-ad32-02d77532c184",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "aab856ca-f236-469e-a2d2-55fe4a0c8c23"
   },
   {
     "Nom": "RENCONTRÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Premier dialogue complété dans les Plis d'ossements",
+      "Flag parent": "fdbb4056-ab88-4b26-8c93-1184d86182f9",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "d7454bf0-8c37-4dc6-96e9-5b1d4a4183d7"
   },
   {
     "Nom": "OBSESSION",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Enfonce dans l'obsession, communication forcée avec l'Ensevelie",
+      "Flag parent": "c2876548-31ab-40a2-bc1c-bcebd731494a",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "ab577a92-7d20-4711-b434-be3a2a1403b7"
   },
   {
     "Nom": "CONSÉQUENCES_COMPRISES",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "A vu ou déduit les conséquences catastrophiques (consciences fusionnées hurlant, effondrement structurel)",
+      "Flag parent": "dcae3ed9-4c0f-4f54-9d96-ab2e9cbcb180",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "af152906-96c1-4ffe-b249-ec6701391eae"
   },
   {
     "Nom": "SUSPECTÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Après exposition à un événement ambient Van'Doei hostile",
+      "Flag parent": "dd9c6a88-d65e-4af0-89ed-6c20e34be549",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "b46a431a-f012-4011-a11f-f3b20985d3f6"
   },
   {
     "Nom": "ACCÈS_OBTENU",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Accès à l'étude secrète obtenu",
+      "Flag parent": "2bcbef60-0e9b-427a-ac76-f2e8b0f1a69f",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "b5f4fc75-b973-4e4d-a1d9-6fbb8e2dce80"
   },
   {
     "Nom": "REFUSÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Autorisation médicale refusée",
+      "Flag parent": "94d5c969-0b69-4929-a239-21c2694a7a70",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "bc9d6d68-e32b-4678-a467-e3563e77bd0f"
   },
   {
     "Nom": "PARASITAIRE_SUSPECTÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Suspecte que l'Ensevelie le consume",
+      "Flag parent": "3e82eaaa-dcc1-4067-ac1c-71d647cfb015",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "c6acb9c8-ee75-41d1-afde-94686b680ba4"
   },
   {
     "Nom": "PACTE_ÉTENDU",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Tentative d'étendre le pacte avec l'Ensevelie",
+      "Flag parent": "b891bd34-d391-4839-825f-7d022de6b236",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "c6c6142e-3d6c-4b31-af5a-ee77cea192e0"
   },
   {
     "Nom": "SUSPECTÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Des indices indirects font soupçonner une implication, mais rien de confirmé.",
+      "Flag parent": "35bd58f5-4c01-49b9-aa0e-fb880766990d",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
-    "notion_page_id": "ed4bdcc8-e54b-4698-9407-9d2976e39291"
+    "sections": {},
+    "notion_page_id": "f6a6357f-5096-49a5-b724-dd73eb904931"
   },
   {
     "Nom": "TROUVÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Relique de la Tentative découverte en Strate III des Plis d'ossements",
+      "Flag parent": "c6db9ee8-0368-4a97-8353-99c627b19728",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "c7faff9a-aa12-439c-9519-9e0acbf05b88"
   },
   {
     "Nom": "EXISTENCE_APPRISE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Sait qu'Akthar-Neth prépare un grand rituel",
+      "Flag parent": "dcae3ed9-4c0f-4f54-9d96-ab2e9cbcb180",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "c9b782a5-0e0c-4f0d-b3e9-9997b57be68f"
   },
   {
     "Nom": "EN_ATTENTE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Demande d'accès médical à Kal'Resh en attente",
+      "Flag parent": "94d5c969-0b69-4929-a239-21c2694a7a70",
+      "Ordre": "1",
+      "Par défaut": "oui"
     },
+    "sections": {},
     "notion_page_id": "cc4d875a-9d96-47b7-9e3e-b7f7b80a6c87"
   },
   {
     "Nom": "REFUS",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Option C : refus (recrutement différé possible si relique_tentative = TROUVÉE)",
+      "Flag parent": "960f3328-69e6-493a-b5f2-8d707f7fe4cb",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "ce340491-51cb-4ead-a83a-5aa8ff2939c9"
   },
   {
     "Nom": "REFUSÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Proposition déclinée",
+      "Flag parent": "99a0e253-bdd0-4ef7-aa13-5622b56087e2",
+      "Ordre": "4",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "cf5407ff-9559-44c2-b236-f01658e0b5fc"
   },
   {
     "Nom": "JOURNAL_LU",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Entrées déchiffrées révélant doutes théologiques et théorie de la Convergence Rétrocausale",
+      "Flag parent": "60eae806-d19b-4fae-881c-041563e55ba7",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "d1f1e0c8-29fc-436c-8efe-14167a2d32ae"
   },
   {
     "Nom": "EFFONDREMENT",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Nihilisme cartographique, cartes intentionnellement erronées, perte définitive",
+      "Flag parent": "c2876548-31ab-40a2-bc1c-bcebd731494a",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "d3899144-c8f8-4567-ad87-9836e979c18b"
   },
   {
     "Nom": "CONFRONTATION_DIRECTE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Akthar-Neth confronté avec ses propres doutes (crise de confiance majeure, fissure +1)",
+      "Flag parent": "78d75c47-46ce-4f99-947c-b69d63dd34ea",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "d674fd75-50dc-442b-9bad-9a5a81734fa4"
   },
   {
     "Nom": "THÉOMAQUE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Acceptation du titre que le Culte lui donne depuis 3238 AG",
+      "Flag parent": "812e85ac-4786-4831-8a8b-152955240361",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "d96f5a6c-89f3-4700-894e-dde0b0a5dc18"
   },
   {
     "Nom": "IGNORÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Manuscrit de Synthèse non poursuivi",
+      "Flag parent": "f7c9a095-1f01-462c-8456-a3e0ba3e1239",
+      "Ordre": "1",
+      "Par défaut": "oui"
     },
+    "sections": {},
     "notion_page_id": "dccb6602-99cd-4f7a-bab5-1fd526275f87"
   },
   {
     "Nom": "COMMUNICATION_ENSEVELIE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Contact direct établi avec l'Ensevelie",
+      "Flag parent": "b891bd34-d391-4839-825f-7d022de6b236",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "e5f390f8-b014-4cfb-898b-150e0226c49a"
   },
   {
     "Nom": "QUESTIONNÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "A remarqué l'anomalie ou posé une question",
+      "Flag parent": "3ecac4fd-259f-448c-97dd-df314032734d",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "eaf4c22e-2efa-40fa-abcc-018653e30d59"
   },
   {
     "Nom": "ÉCHOUÉE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Convergence Rituelle échouée",
+      "Flag parent": "f67d3167-be48-42fe-8b47-8a8c6f174813",
+      "Ordre": "4",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "ef4ec57f-0f2e-47e8-8254-3d34eac219c4"
   },
   {
     "Nom": "FRAGMENTS_TROUVÉS",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Fragments du Manuscrit de Synthèse récupérés",
+      "Flag parent": "f7c9a095-1f01-462c-8456-a3e0ba3e1239",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "f24d7373-54fc-40b4-ab8c-3eaff1525beb"
   },
   {
     "Nom": "RÉSOLU_CROISSANCE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Cartographie honnête intégrant l'incertitude",
+      "Flag parent": "c2876548-31ab-40a2-bc1c-bcebd731494a",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "f4ba56aa-4ccf-4174-954e-f92e9dc21650"
   },
   {
     "Nom": "SIGNIFICATION_COMPRISE",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Sait que le masque est une capitulation psychologique transformée en liturgie",
+      "Flag parent": "3ecac4fd-259f-448c-97dd-df314032734d",
+      "Ordre": "2",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "f5d60547-1ef7-4a8c-8818-353ad9923fdd"
   },
   {
     "Nom": "RUMEUR",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "A entendu parler d'un lieu interdit sous les Chambres Absolues",
+      "Flag parent": "80bcc3f2-30a1-49fb-b7b9-c69a88b4aa13",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "f78501fb-3534-4b7c-975a-c2b6ceb7a0d2"
   },
   {
     "Nom": "PRÉPARATION",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Convergence Rituelle en cours de préparation",
+      "Flag parent": "f67d3167-be48-42fe-8b47-8a8c6f174813",
+      "Ordre": "1",
+      "Par défaut": "oui"
     },
+    "sections": {},
     "notion_page_id": "fcb935c5-3394-4f70-8829-2a3055fdba64"
   },
   {
     "Nom": "ENGAGÉ_THYRA",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Option A : engagement sur Thyra",
+      "Flag parent": "960f3328-69e6-493a-b5f2-8d707f7fe4cb",
+      "Ordre": "1",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "fd206db9-d92c-4a51-a5e5-2c89e88290d0"
   },
   {
     "Nom": "PIÈGE_ACCEPTÉ",
-    "sections": {
-      "_general": ""
+    "values": {
+      "Description": "Sonde sacrificielle acceptée",
+      "Flag parent": "99a0e253-bdd0-4ef7-aa13-5622b56087e2",
+      "Ordre": "3",
+      "Par défaut": "non"
     },
+    "sections": {},
     "notion_page_id": "ffcbaaea-c0cd-4e49-9a35-f76c663d9f09"
+  },
+  {
+    "Nom": "MENACÉE",
+    "values": {
+      "Description": "Khair-gul a sollicité un accès médical à Kal’Resh — risque identifié par les protagonistes.",
+      "Flag parent": "85117304-325e-46b7-9425-45988f4479a0",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "040403d2-9b5a-483f-8f90-d2d234e5159d"
+  },
+  {
+    "Nom": "REVELE",
+    "values": {
+      "Description": "L'histoire complète des 56 expériences est connue : les échecs du Culte, l'instabilité programmée, les raisons de la 57e tentative.",
+      "Flag parent": "9eb747d6-bf55-4426-8d76-c495d1e07ed9",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "4c6f73e6-345c-4364-9fc8-50a9811396fc"
+  },
+  {
+    "Nom": "RÉSOLUE_PUBLIQUE",
+    "values": {
+      "Description": "La quête est résolue publiquement, avec impact sur la réputation du Culte de l’Anentropie.",
+      "Flag parent": "d90aefd8-d008-4559-949d-d9b05193b470",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "0926f960-3472-4cb1-9041-bafc2eca94ee"
+  },
+  {
+    "Nom": "NON_RÉSOLU",
+    "values": {
+      "Description": "Arc incomplet. Avili reste l'interprète distordu d'Uresaïr.",
+      "Flag parent": "98e15cb4-d9ee-4d44-8e6d-d9155b519ef6",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "14dd8979-584e-421f-9aaa-00991c3ac37e"
+  },
+  {
+    "Nom": "IGNORÉE",
+    "values": {
+      "Description": "L'Éthérée ne sait rien de l'implication d'Avili dans la création d'Eonundé.",
+      "Flag parent": "35bd58f5-4c01-49b9-aa0e-fb880766990d",
+      "Ordre": "1",
+      "Par défaut": "oui"
+    },
+    "sections": {},
+    "notion_page_id": "901f8ad7-b52d-44ca-a253-1c209367193e"
+  },
+  {
+    "Nom": "ACCEPTE",
+    "values": {
+      "Description": "Ori-Bikar et Uresaïr ont intégré ce lien dans leur relation, avec toutes ses implications.",
+      "Flag parent": "01ef7ce4-0e71-4a6e-9486-362d4a64ebca",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "1c51fb51-cd21-4d84-ad8c-0bffd9fa9db7"
+  },
+  {
+    "Nom": "GUERISSEUR",
+    "values": {
+      "Description": "Ori-Bikar intègre sa dualité déstruction/création de manière harmonieuse. Stabilisation.",
+      "Flag parent": "90603d2e-10c4-4e08-ba74-6317cc9b983e",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "2272b532-f1b0-4cfd-a2ca-d2379b8b694e"
+  },
+  {
+    "Nom": "NON_DECLENCHE",
+    "values": {
+      "Description": "Ori-Bikar n'est pas recruté ou l'arc n'a pas été initié.",
+      "Flag parent": "90603d2e-10c4-4e08-ba74-6317cc9b983e",
+      "Ordre": "1",
+      "Par défaut": "oui"
+    },
+    "sections": {},
+    "notion_page_id": "2366edc9-dd75-42c8-8270-7c82e1dbce88"
+  },
+  {
+    "Nom": "RECRUTÉ_B",
+    "values": {
+      "Description": "Recruté sans confrontation (Option B). Arc personnel bloqué jusqu'à révélation extérieure.",
+      "Flag parent": "174b8734-9f33-46e3-a062-786495b18b35",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "2597157a-6023-478d-8aa4-a08e565964cd"
+  },
+  {
+    "Nom": "ENQUÊTE_ACTIVE",
+    "values": {
+      "Description": "Duq’Sha mène son enquête sur Khair-gul en parallèle des protagonistes.",
+      "Flag parent": "b9aeed05-bebc-43e8-a934-4079c5692702",
+      "Ordre": "1",
+      "Par défaut": "oui"
+    },
+    "sections": {},
+    "notion_page_id": "26876636-c2bf-4b8f-9bbd-d2b3838a96b0"
+  },
+  {
+    "Nom": "DISPARU",
+    "values": {
+      "Description": "Khair-gul a fui ou disparu avant la résolution — arc non conclu, menace latente.",
+      "Flag parent": "5d368d73-e730-40de-ad27-df02b486cdc4",
+      "Ordre": "5",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "4c00bb9a-4bad-443b-bf58-677e40b43af7"
+  },
+  {
+    "Nom": "BRISE",
+    "values": {
+      "Description": "L'oracle a été détruit ou est définitivement hors état de fonctionner.",
+      "Flag parent": "99760fea-27d3-4386-ad83-126b1b08df8d",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "2a9de035-b784-4ee8-b9ea-77a86f4ef75a"
+  },
+  {
+    "Nom": "ALLIÉ",
+    "values": {
+      "Description": "Duq’Sha a été contacté par les protagonistes et coopère à l’exposition de Khair-gul.",
+      "Flag parent": "b9aeed05-bebc-43e8-a934-4079c5692702",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "31b99699-ec44-4844-b90c-48479979d8a1"
+  },
+  {
+    "Nom": "CHAOTIQUE",
+    "values": {
+      "Description": "Ori-Bikar bascule vers la destruction pure. Arc sombre, risque pour le campement.",
+      "Flag parent": "90603d2e-10c4-4e08-ba74-6317cc9b983e",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "33597ff4-5b46-4ee9-a89e-ffe4a1dfbed9"
+  },
+  {
+    "Nom": "ATTEINTE",
+    "values": {
+      "Description": "Khair-gul a réussi à accéder à Kal’Resh malgré les protagonistes.",
+      "Flag parent": "85117304-325e-46b7-9425-45988f4479a0",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "3a0f547b-518e-49fd-b90c-cafdf96a00f4"
+  },
+  {
+    "Nom": "IDENTIFIÉE",
+    "values": {
+      "Description": "Les protagonistes connaissent la Confrérie du Souffle Suspendu et son lien avec Khair-gul.",
+      "Flag parent": "84bb4982-2290-4228-8408-f88f9864a1e6",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "3f4a02a1-c922-4a58-ad08-56464867c7eb"
+  },
+  {
+    "Nom": "FUSIONNE",
+    "values": {
+      "Description": "Ori-Bikar réconcilie destruction et création en une identité propre. Fin optimale de l'arc.",
+      "Flag parent": "90603d2e-10c4-4e08-ba74-6317cc9b983e",
+      "Ordre": "5",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "41dcb440-7076-4825-8a79-014b67098e73"
+  },
+  {
+    "Nom": "DÉNONCÉ",
+    "values": {
+      "Description": "Duq’Sha a été dénoncé à Khair-gul ou au Culte par les protagonistes.",
+      "Flag parent": "b9aeed05-bebc-43e8-a934-4079c5692702",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "422a6173-d99e-486a-b49c-247ce8bd9d3a"
+  },
+  {
+    "Nom": "NEUTRE",
+    "values": {
+      "Description": "Arc non déclenché ou en cours sans orientation.",
+      "Flag parent": "98e15cb4-d9ee-4d44-8e6d-d9155b519ef6",
+      "Ordre": "1",
+      "Par défaut": "oui"
+    },
+    "sections": {},
+    "notion_page_id": "50f1da8c-c379-4513-82cd-ebf52384e379"
+  },
+  {
+    "Nom": "ACTIF",
+    "values": {
+      "Description": "L'oracle fonctionne et génère des prédictions incontrôlées, créant des perturbations.",
+      "Flag parent": "99760fea-27d3-4386-ad83-126b1b08df8d",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "fc652245-7124-4223-b25b-889cc8f70ef2"
+  },
+  {
+    "Nom": "CONFIRMÉ",
+    "values": {
+      "Description": "Les protagonistes ont des preuves directes de la nature prédatrice de Khair-gul (flacons, témoignages, aveux).",
+      "Flag parent": "64e0e360-fe4c-4300-8004-6de1da9ded17",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "5e0685bd-102a-465e-88f9-de5e79a9f40e"
+  },
+  {
+    "Nom": "EXPOSÉE",
+    "values": {
+      "Description": "La collection a été révélée à des tiers (Culte, victimes, Murmurateurs, autorités).",
+      "Flag parent": "669c5d17-e82c-44a3-a084-2eddfd04e2ad",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "9029733c-b135-4da2-b452-c876bc42b2f3"
+  },
+  {
+    "Nom": "IGNORE",
+    "values": {
+      "Description": "Le prototype est totalement inconnu du groupe.",
+      "Flag parent": "8e7f811e-2c59-4e19-9ebc-32e421d82d12",
+      "Ordre": "1",
+      "Par défaut": "oui"
+    },
+    "sections": {},
+    "notion_page_id": "9783b50b-53f0-4b06-91e9-c9c36b108513"
+  },
+  {
+    "Nom": "LOCALISÉE",
+    "values": {
+      "Description": "Les protagonistes ont repéré l’étude secrète mais ne l’ont pas encore examinée.",
+      "Flag parent": "669c5d17-e82c-44a3-a084-2eddfd04e2ad",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "60f9bba6-890b-48c2-ad12-f07faf445caa"
+  },
+  {
+    "Nom": "CAPTURÉ",
+    "values": {
+      "Description": "Khair-gul a été capturé ou mis hors d’état de nuire avant de quitter le Léviathan.",
+      "Flag parent": "5d368d73-e730-40de-ad27-df02b486cdc4",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "61a08797-4551-4a3f-b3ef-5c214648ab0b"
+  },
+  {
+    "Nom": "PROTÉGÉE",
+    "values": {
+      "Description": "Les protagonistes ont bloqué l’accès de Khair-gul à Kal’Resh.",
+      "Flag parent": "85117304-325e-46b7-9425-45988f4479a0",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "73785511-a3c2-4f0d-b05f-8fce26e83d6f"
+  },
+  {
+    "Nom": "RÉSOLUE_DISCRÈTE",
+    "values": {
+      "Description": "La quête est résolue sans scandale public — secret contenu entre les parties.",
+      "Flag parent": "d90aefd8-d008-4559-949d-d9b05193b470",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "769fece7-4409-4316-b929-47c5332c23d0"
+  },
+  {
+    "Nom": "SUSPECTE",
+    "values": {
+      "Description": "Le groupe perçoit une activité étrange liée à Ori-Bikar mais n'a pas confirmé l'existence du prototype.",
+      "Flag parent": "8e7f811e-2c59-4e19-9ebc-32e421d82d12",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "7bac7fbd-15e4-4a24-bc61-35d8c99f9aba"
+  },
+  {
+    "Nom": "EXPOSE",
+    "values": {
+      "Description": "La situation d'Ori-Bikar a été dévoilée au Culte. Recrutement impossible, conséquences narratives majeurs.",
+      "Flag parent": "6d38eee4-86ab-47eb-9840-d2151f17c54d",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "863bc7cb-a7d6-49bb-8989-630413d5200c"
+  },
+  {
+    "Nom": "MENTIONNE",
+    "values": {
+      "Description": "Ori-Bikar ou un PNJ du Culte fait allusion aux 56 sans en détailler le contenu.",
+      "Flag parent": "9eb747d6-bf55-4426-8d76-c495d1e07ed9",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "8e16281c-32a9-46b3-95b6-0d93e2dc051b"
+  },
+  {
+    "Nom": "MAITRISE",
+    "values": {
+      "Description": "Ori-Bikar ou le groupe a appris à guider l'oracle de manière utile.",
+      "Flag parent": "99760fea-27d3-4386-ad83-126b1b08df8d",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "9080c323-1025-47ed-b871-8049306229ff"
+  },
+  {
+    "Nom": "DÉCLENCHÉE",
+    "values": {
+      "Description": "Avili a proposé la Dérivation Fondamentale. La collecte des composants est en cours.",
+      "Flag parent": "cd3def49-c598-4938-b3d6-2518af852c4f",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "9826cb85-bf37-4b84-b2d2-7c73551b3dae"
+  },
+  {
+    "Nom": "RÉSOLUTION_CROISSANCE",
+    "values": {
+      "Description": "Avili intègre l'intuition à ses formulations. Devient un véritable interprète entre mondes.",
+      "Flag parent": "98e15cb4-d9ee-4d44-8e6d-d9155b519ef6",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "9b8ae807-6802-4487-b36c-1d19e1e87ce5"
+  },
+  {
+    "Nom": "DECOUVERT",
+    "values": {
+      "Description": "Le prototype est identifié et sa nature comprise par le groupe.",
+      "Flag parent": "8e7f811e-2c59-4e19-9ebc-32e421d82d12",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "ae99f87c-953e-41a5-b2f7-e8f99e6cf5bf"
+  },
+  {
+    "Nom": "LIBERE",
+    "values": {
+      "Description": "Uresaïr a aidé Ori-Bikar à maîtriser sa crise. Recrutement plein, arc personnel débloqué.",
+      "Flag parent": "6d38eee4-86ab-47eb-9840-d2151f17c54d",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b504ab0b-ae5e-4ce1-98d3-419a791f3bc0"
+  },
+  {
+    "Nom": "EXPOSÉ_DISCRET",
+    "values": {
+      "Description": "Khair-gul sait que les protagonistes savent, mais le secret reste contenu entre les parties directement impliquées.",
+      "Flag parent": "5d368d73-e730-40de-ad27-df02b486cdc4",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b708bf14-6e34-47d1-9fc4-dc6b72dc8a59"
+  },
+  {
+    "Nom": "RENVOYÉ_C",
+    "values": {
+      "Description": "Renvoyé définitivement (Option C, 2 preuves requises). Débloque version alternative de L'Équation Interdite.",
+      "Flag parent": "174b8734-9f33-46e3-a062-786495b18b35",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b80284f9-7717-4b50-8415-a9daf7539ccd"
+  },
+  {
+    "Nom": "EXPOSÉ_PUBLIC",
+    "values": {
+      "Description": "L’exposition est publique — le Culte de l’Anentropie est contraint de réagir officiellement.",
+      "Flag parent": "5d368d73-e730-40de-ad27-df02b486cdc4",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "c1d234eb-75f4-4219-8dde-0824b2208d08"
+  },
+  {
+    "Nom": "NON_RECRUTÉ",
+    "values": {
+      "Description": "Avili n'a pas encore été recruté.",
+      "Flag parent": "174b8734-9f33-46e3-a062-786495b18b35",
+      "Ordre": "1",
+      "Par défaut": "oui"
+    },
+    "sections": {},
+    "notion_page_id": "ce3c8772-b61f-4450-85a4-0cc7f388909b"
+  },
+  {
+    "Nom": "PRESSENTI",
+    "values": {
+      "Description": "Ori-Bikar réagit étrangement à la présence d'Uresaïr ; signes ambigus mais inexpliques.",
+      "Flag parent": "01ef7ce4-0e71-4a6e-9486-362d4a64ebca",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "d56343a5-c9c7-48ba-8b68-e0921d9b37dd"
+  },
+  {
+    "Nom": "RÉSOLUTION_EFFONDREMENT",
+    "values": {
+      "Description": "Lexique autonome et hostile. Avili disparaît dans une poche dérivée de sa propre création.",
+      "Flag parent": "98e15cb4-d9ee-4d44-8e6d-d9155b519ef6",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "d9945caa-2066-437f-88b2-a1ee654c709c"
+  },
+  {
+    "Nom": "INVESTIGÉE",
+    "values": {
+      "Description": "Les protagonistes ont examiné la collection et comprennent ce qu’elle représente.",
+      "Flag parent": "669c5d17-e82c-44a3-a084-2eddfd04e2ad",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "dcd9f453-647e-42bb-9927-ed22461b5b58"
+  },
+  {
+    "Nom": "ARRETE",
+    "values": {
+      "Description": "Le prototype a été neutralisé, détruit ou repris par le groupe ou le Culte.",
+      "Flag parent": "8e7f811e-2c59-4e19-9ebc-32e421d82d12",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "e02712fd-a627-4d47-b03b-59924010761a"
+  },
+  {
+    "Nom": "RECRUTÉ_A",
+    "values": {
+      "Description": "Recruté après confrontation (Option A). Déclenche immédiatement Dérivations Instables.",
+      "Flag parent": "174b8734-9f33-46e3-a062-786495b18b35",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "e1a75c84-7aa3-42c8-9335-2d34da0edb5d"
+  },
+  {
+    "Nom": "COUVERT",
+    "values": {
+      "Description": "Uresaïr a protégé Ori-Bikar du Culte sans l'aider à matriser sa crise. Recrutement instable possible.",
+      "Flag parent": "6d38eee4-86ab-47eb-9840-d2151f17c54d",
+      "Ordre": "2",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "e36d28bc-acca-44a1-93b8-0ef94c26207a"
+  },
+  {
+    "Nom": "ALTERNATIVE",
+    "values": {
+      "Description": "Version solo déclenchée après le renvoi d'Avili (Option C). L'Éthérée effectue la dérivation seule.",
+      "Flag parent": "cd3def49-c598-4938-b3d6-2518af852c4f",
+      "Ordre": "4",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "ee61cd22-9e54-49c9-85b2-cf780f0428ee"
+  },
+  {
+    "Nom": "INEXISTANT",
+    "values": {
+      "Description": "L'oracle autonome n'a pas encore été créé par Ori-Bikar.",
+      "Flag parent": "99760fea-27d3-4386-ad83-126b1b08df8d",
+      "Ordre": "1",
+      "Par défaut": "oui"
+    },
+    "sections": {},
+    "notion_page_id": "ee6acfce-a3ac-4cc1-a641-e638e2a3b8b1"
+  },
+  {
+    "Nom": "RÉVÉLÉE",
+    "values": {
+      "Description": "L'implication d'Avili dans la création d'Eonundé a été directement confirmée à l'Éthérée.",
+      "Flag parent": "35bd58f5-4c01-49b9-aa0e-fb880766990d",
+      "Ordre": "3",
+      "Par défaut": "non"
+    },
+    "sections": {},
+    "notion_page_id": "f1e64e53-e0ef-496a-8efd-2a9cbd3fbdea"
   }
 ]

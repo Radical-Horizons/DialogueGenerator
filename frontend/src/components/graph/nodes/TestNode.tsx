@@ -6,6 +6,11 @@ import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
+import {
+  getGraphTopologyWarningKind,
+  getValidationHighlightKind,
+  GRAPH_TOPOLOGY_WARNING_STYLES,
+} from '../../../utils/graphStructuralValidation'
 
 interface ValidationError {
   type: string
@@ -71,22 +76,38 @@ export const TestNode = memo(function TestNode({
   const hasWarnings = warnings.length > 0
   const isHighlighted = data.isHighlighted || false
   
-  // Déterminer la couleur de la bordure selon les erreurs
+  const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
+  const topologyKind = getGraphTopologyWarningKind(warnings.map((w) => w.type))
+  const topologyStyle = topologyKind ? GRAPH_TOPOLOGY_WARNING_STYLES[topologyKind] : null
+
   let borderColor = selected ? '#27AE60' : '#F5A623'
-  if (hasErrors) {
+  if (validationHighlightKind === 'structural') {
+    borderColor = theme.state.error.border
+  } else if (validationHighlightKind === 'content') {
+    borderColor = theme.state.warning.border
+  } else if (validationHighlightKind === 'lore') {
+    borderColor = theme.state.lore.border
+  } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
-    borderColor = theme.state.warning.color
+    borderColor = topologyStyle?.border ?? theme.state.warning.color
   }
-  
-  // Couleur de fond appropriée pour mode sombre (harmonisée avec bordure orange)
-  const backgroundColor = isHighlighted 
-    ? theme.state.selected.background 
-    : hasErrors
-    ? theme.state.error.background // '#3a1a1a'
-    : hasWarnings
-    ? theme.state.warning.background // '#3a3a1a'
-    : '#16a085' 
+
+  const backgroundColor = isHighlighted
+    ? theme.state.selected.background
+    : validationHighlightKind === 'structural'
+      ? theme.state.error.background
+      : validationHighlightKind === 'content'
+        ? theme.state.warning.background
+        : validationHighlightKind === 'lore'
+          ? theme.state.lore.background
+          : hasErrors
+            ? theme.state.error.background
+            : hasWarnings && topologyStyle && !validationHighlightKind
+              ? topologyStyle.background
+              : hasWarnings
+                ? theme.state.warning.background
+                : '#16a085'
   
   // Barre compacte avec 4 handles
   return (
@@ -122,7 +143,12 @@ export const TestNode = memo(function TestNode({
             position: 'absolute',
             top: 4,
             right: 4,
-            backgroundColor: theme.state.error.border,
+            backgroundColor:
+              validationHighlightKind === 'content'
+                ? theme.state.warning.border
+                : validationHighlightKind === 'lore'
+                  ? theme.state.lore.border
+                  : theme.state.error.border,
             color: 'white',
             borderRadius: '50%',
             width: 20,
@@ -136,7 +162,20 @@ export const TestNode = memo(function TestNode({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
           title={errors.map((e, idx) => {
-            const icon = e.type === 'orphan_node' ? '🔗' : e.type === 'broken_reference' ? '🔴' : e.type === 'empty_node' ? '⚪' : e.type === 'missing_test' ? '❓' : '⚠️'
+            const icon =
+              e.type === 'orphan_node'
+                ? '🔗'
+                : e.type === 'broken_reference'
+                  ? '🔴'
+                  : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
+                    ? '⚪'
+                    : e.type === 'missing_display_name'
+                      ? '📝'
+                      : e.type === 'missing_stable_id'
+                        ? '🆔'
+                        : e.type === 'missing_test'
+                          ? '❓'
+                          : '⚠️'
             return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
           }).join('')}
         >

@@ -268,3 +268,13 @@ export async function getGddNotionSyncProgress(): Promise<GddNotionSyncProgressR
   )
   return data
 }
+
+/** Télécharge le ZIP Markdown NotebookLM (sources Notion sync + Vision.json, max 10 fichiers). */
+export async function getGddNotebooklmExportZip(maxFiles = 9): Promise<Blob> {
+  const { data } = await apiClient.get<Blob>('/api/v1/gdd-notion-sync/notebooklm-export', {
+    params: { max_files: maxFiles },
+    responseType: 'blob',
+    timeout: API_TIMEOUTS.GDD_NOTEBOOKLM_EXPORT,
+  })
+  return data
+}

@@ -31,6 +31,7 @@ from services.vocabulary_service import VocabularyService
 from services.narrative_guides_service import NarrativeGuidesService
 from services.notion_import_service import NotionImportService
 from services.context_rule_service import ContextRuleService
+from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
@@ -287,6 +288,13 @@ def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
     return container.get_graph_node_orchestrator()
 
 
+def get_llm_quality_judge_service() -> "LLMQualityJudgeService":
+    """Retourne le service juge qualité dialogue (stateless, FR42)."""
+    from services.llm_quality_judge_service import LLMQualityJudgeService
+
+    return LLMQualityJudgeService()
+
+
 def get_token_estimation_service(request: Request) -> TokenEstimationService:
     """Retourne le service d'estimation de tokens (prompt + completion sans appel LLM).
 
@@ -363,6 +371,19 @@ def get_notion_import_service(request: Request) -> NotionImportService:
     """
     container = get_service_container(request)
     return container.get_notion_import_service()
+
+
+def get_cd_rules_service(request: Request) -> ContextDroppingRulesService:
+    """Retourne le service de règles anti-context-dropping (Story 4.10).
+
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+
+    Returns:
+        Instance partagée de ContextDroppingRulesService depuis le ServiceContainer.
+    """
+    container = get_service_container(request)
+    return container.get_cd_rules_service()
 
 
 def get_context_rule_service(request: Request) -> ContextRuleService:

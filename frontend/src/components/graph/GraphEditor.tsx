@@ -15,6 +15,11 @@ import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { GraphValidationPanel } from './GraphValidationPanel'
+import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
+import { GraphAiSlopPanel } from './GraphAiSlopPanel'
+import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
+import { FlowSimulationPanel } from './FlowSimulationPanel'
+import { SchemaValidationPanel } from './SchemaValidationPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
@@ -64,13 +69,28 @@ export function GraphEditor({
     selectedNodeId,
     selectedNodeIds,
     validationErrors: graphValidationErrors,
+    loreExplicitValidationSummary,
     isLoading: isGraphLoading,
+    documentId: graphDocumentId,
   } = useGraphStore()
+
+  const loreDialogueScopeKey = activeDialogueFilename ?? graphDocumentId ?? 'untitled'
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
 
   const {
     showValidationPanel,
+    showQualityLlmPanel,
+    showAiSlopPanel,
+    showContextDroppingPanel,
+    showFlowSimulationPanel,
+    showSchemaValidationPanel,
+    schemaValidationLoading,
+    schemaValidationIsValid,
+    schemaValidationErrors,
+    schemaValidationErrorCount,
+    handleToggleSchemaValidation,
+    handleSchemaErrorClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showAIGenerationPanel,
@@ -83,7 +103,6 @@ export function GraphEditor({
     showFiltersPanel,
     setShowFiltersPanel,
     actionsDropdownBtnRef,
-    reactFlowInstance,
     handleExportPNG,
     handleExportSVG,
   } = toolbar
@@ -100,6 +119,11 @@ export function GraphEditor({
   } = useBatchOperations(toast)
 
   const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
+
+  /** Lore explicite peut n’ajouter aucune entrée dans validationErrors (graphe OK) : afficher quand même le résumé. */
+  const showValidationOverlay =
+    showValidationPanel &&
+    (graphValidationErrors.length > 0 || Boolean(loreExplicitValidationSummary))
 
   const handleSelectDialogue = useCallback(
     (dialogue: UnityDialogueMetadata | null) => {
@@ -236,12 +260,41 @@ export function GraphEditor({
                 </ReactFlowProvider>
               </div>
             )}
-            {showValidationPanel && graphValidationErrors.length > 0 && (
+            {showValidationOverlay && (
               <GraphValidationPanel
                 validationErrors={graphValidationErrors}
-                reactFlowInstance={reactFlowInstance}
+                loreExplicitSummary={loreExplicitValidationSummary}
+                loreDialogueScopeKey={loreDialogueScopeKey}
+                onClose={() => toolbar.setShowValidationPanel(false)}
               />
             )}
+            {showQualityLlmPanel && (
+              <GraphQualityLlmPanel
+                onClose={() => toolbar.setShowQualityLlmPanel(false)}
+              />
+            )}
+            {showAiSlopPanel && (
+              <GraphAiSlopPanel onClose={() => toolbar.setShowAiSlopPanel(false)} />
+            )}
+            {showContextDroppingPanel && (
+              <GraphContextDroppingPanel
+                onClose={() => toolbar.setShowContextDroppingPanel(false)}
+              />
+            )}
+            {showFlowSimulationPanel && (
+              <FlowSimulationPanel
+                onClose={() => toolbar.setShowFlowSimulationPanel(false)}
+              />
+            )}
+            <SchemaValidationPanel
+              isOpen={showSchemaValidationPanel}
+              isLoading={schemaValidationLoading}
+              isValid={schemaValidationIsValid}
+              errors={schemaValidationErrors}
+              errorCount={schemaValidationErrorCount}
+              onClose={handleToggleSchemaValidation}
+              onErrorClick={handleSchemaErrorClick}
+            />
             {showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal
                 filename={activeDialogueFilename}

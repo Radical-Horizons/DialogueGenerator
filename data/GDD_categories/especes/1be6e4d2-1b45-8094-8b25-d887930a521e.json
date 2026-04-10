@@ -1,7 +1,30 @@
 {
   "Nom": "Kephrasites",
+  "values": {
+    "Biologie": "Moyenne",
+    "Culture": "Avancée",
+    "Espérance de vie": "5",
+    "Evénements liés": "45293dff-0afa-4713-a628-b95fec9344bb",
+    "Lieux de vie": "1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
+    "Présence dans Escelion": "Peu courant",
+    "Règne (ou classe)": "484cd421-db84-425a-84eb-2414d5f042c5",
+    "Résumé IA": "Les Khephrasites sont des super-organismes économiques créés pour stabiliser les marchés, avec des individus ayant des fonctions spécifiques. Ils se reproduisent par fission lors de périodes de prospérité, se nourrissent d'énergie transactionnelle, et ont une culture organisée autour de cycles économiques. Leur société est hiérarchique mais fluide, et ils entretiennent des relations symbiotiques avec d'autres espèces tout en étant vulnérables aux fluctuations économiques.",
+    "Surnaturel": "Nulle",
+    "Technologie": "Avancée",
+    "Type": "Espèce civilisée",
+    "État": "A implémenter"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Biologie\n\n**Physiologie**\n\n**Reproduction et croissance**\n\n**Mode d'alimentation**\n\n**Sous-espèces**\n\n# Société et culture\n\n**Histoire de l'Espèce**\n\n**Culture et traditions**\n\n**Costumes et ornements**\n\n**Organisation sociale**\n\n**Relations extra-spécifiques**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Distribution géographique**\n\n**Relations avec l'écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "biologie": "**Physiologie**\n\n**Reproduction et croissance**\n\n**Mode d'alimentation**\n\n**Sous-espèces**",
+    "socie_te__et_culture": "**Histoire de l'Espèce**\n\n**Culture et traditions**\n\n**Costumes et ornements**\n\n**Organisation sociale**\n\n**Relations extra-spécifiques**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Distribution géographique**\n\n**Relations avec l'écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "biologie": "Biologie",
+    "socie_te__et_culture": "Société et culture",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "1be6e4d2-1b45-8094-8b25-d887930a521e"
 }

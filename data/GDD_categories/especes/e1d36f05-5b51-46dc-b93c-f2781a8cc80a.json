@@ -1,7 +1,20 @@
 {
   "Nom": "Améthides",
+  "values": {
+    "Règne (ou classe)": "3026e4d2-1b45-8030-9b54-d3fb1b86d7cb",
+    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème.",
+    "Type": "Faune",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.\n\n# Besoin de l'intrigue\n\n**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.",
+    "besoin_de_l_intrigue": "**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "e1d36f05-5b51-46dc-b93c-f2781a8cc80a"
 }

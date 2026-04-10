@@ -466,29 +466,23 @@ export function useDialogueLoader(
       }
       useGraphViewStore.getState().resetFlush()
       const saveResponse = await saveDialogue()
-      try {
-        await validateGraph()
-        const state = useGraphStore.getState()
-        const errors = state.validationErrors.filter((e) => e.severity === 'error')
-        const warnings = state.validationErrors.filter((e) => e.severity === 'warning')
-        if (errors.length === 0 && warnings.length === 0) {
-          toast(`Dialogue sauvegardé: ${saveResponse.filename} - Graphe valide`, 'success', 3000)
-        } else if (errors.length > 0) {
-          toast(
-            `Dialogue sauvegardé: ${saveResponse.filename} - ${errors.length} erreur(s) et ${warnings.length} avertissement(s)`,
-            'warning',
-            4000
-          )
-        } else {
-          toast(
-            `Dialogue sauvegardé: ${saveResponse.filename} - ${warnings.length} avertissement(s)`,
-            'warning',
-            4000
-          )
-        }
-      } catch (validationErr) {
-        console.error('Erreur lors de la validation automatique:', validationErr)
-        toast(`Dialogue sauvegardé: ${saveResponse.filename}`, 'success', 3000)
+      const state = useGraphStore.getState()
+      const errors = state.validationErrors.filter((e) => e.severity === 'error')
+      const warnings = state.validationErrors.filter((e) => e.severity === 'warning')
+      if (errors.length === 0 && warnings.length === 0) {
+        toast(`Dialogue sauvegardé: ${saveResponse.filename} - Graphe valide`, 'success', 3000)
+      } else if (errors.length > 0) {
+        toast(
+          `Dialogue sauvegardé: ${saveResponse.filename} - ${errors.length} erreur(s) et ${warnings.length} avertissement(s)`,
+          'warning',
+          4000
+        )
+      } else {
+        toast(
+          `Dialogue sauvegardé: ${saveResponse.filename} - ${warnings.length} avertissement(s)`,
+          'warning',
+          4000
+        )
       }
       dialogueListRef.current?.refresh()
     } catch (err) {
@@ -497,7 +491,7 @@ export function useDialogueLoader(
     } finally {
       setIsLoadingDialogue(false)
     }
-  }, [activeDialogueFilename, saveDialogue, validateGraph, toast])
+  }, [activeDialogueFilename, saveDialogue, toast])
 
   const saveRequested = useGraphViewStore((s) => s.saveRequested)
   useEffect(() => {

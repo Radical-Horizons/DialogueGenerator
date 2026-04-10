@@ -1,7 +1,26 @@
 {
   "Nom": "Autres communautés",
+  "values": {
+    "Date de création": "2025-04-22T12:44:00.000Z",
+    "Dernière modification": "2026-04-03T17:43:00.000Z",
+    "Lieux de vie": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
+    "Niveau d’IA": "humain",
+    "Qualité": "0",
+    "Résumé": "Le monde contient de nombreuses communautés à inventer, incluant des groupes politiques, religieux, et militaires. Chaque communauté a son histoire, son héritage culturel, sa gestion, ses valeurs, et ses traditions, ainsi que des relations extérieures avec d'autres communautés. Des éléments comme le système économique, le niveau technologique, et les créations artisanales et artistiques sont également essentiels à leur spécificité.",
+    "Type": "Faction mineure",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nLe contient-monde contient des centaines de communautés qui ne demandent qu’à être inventées, qu’il s’agisse de groupes politiques, d’entreprises, de collectifs, de groupes religieux ou militaires, etc.\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de la communauté, héritage culturel**\n\n**Rôle dans l'intrigue**\n\n# Gestion de la communauté\n\n**Leader ou groupe décisionnaire et structuration des pouvoirs**\n• - Leader ou groupe décisionnaire et structuration des pouvoirs\n\n**Slogan/dicton de la communauté**\n• - Slogan/dicton de la communauté\n\n**Système économique**\n• - Système économique\n\n**Relations extérieures avec les autres communautés**\n• - Relations extérieures avec les autres communautés\n\n# Spécificité\n\n**Culture, valeurs, éthique**\n\n**Tabous**\n• - Tabous\n\n**Traditions ou coutumes particulières**\n• - Traditions ou coutumes particulières\n\n**Niveau technologique, scientifique et/ou magique**\n• - Niveau technologique, scientifique et/ou magique\n\n**Alimentation et manières de produire ou d'importer**\n• - Alimentation et manières de produire ou d’importer\n\n**Créations artisanales et/ou industrielles majeures**\n• - Créations artisanales et/ou industrielles majeures\n\n**Créations artistiques et architecturales majeures**\n• - Créations artistiques et architecturales majeures"
+    "preamble": "**Résumé de la fiche**\nLe contient-monde contient des centaines de communautés qui ne demandent qu’à être inventées, qu’il s’agisse de groupes politiques, d’entreprises, de collectifs, de groupes religieux ou militaires, etc.\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de la communauté, héritage culturel**\n\n**Rôle dans l'intrigue**",
+    "gestion_de_la_communaute": "**Leader ou groupe décisionnaire et structuration des pouvoirs**\n• - Leader ou groupe décisionnaire et structuration des pouvoirs\n\n**Slogan/dicton de la communauté**\n• - Slogan/dicton de la communauté\n\n**Système économique**\n• - Système économique\n\n**Relations extérieures avec les autres communautés**\n• - Relations extérieures avec les autres communautés",
+    "spe_cificite": "**Culture, valeurs, éthique**\n\n**Tabous**\n• - Tabous\n\n**Traditions ou coutumes particulières**\n• - Traditions ou coutumes particulières\n\n**Niveau technologique, scientifique et/ou magique**\n• - Niveau technologique, scientifique et/ou magique\n\n**Alimentation et manières de produire ou d'importer**\n• - Alimentation et manières de produire ou d’importer\n\n**Créations artisanales et/ou industrielles majeures**\n• - Créations artisanales et/ou industrielles majeures\n\n**Créations artistiques et architecturales majeures**\n• - Créations artistiques et architecturales majeures"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "gestion_de_la_communaute": "Gestion de la communauté",
+    "spe_cificite": "Spécificité"
   },
   "notion_page_id": "1dd6e4d2-1b45-80c1-bbab-f8d323d86aff"
 }

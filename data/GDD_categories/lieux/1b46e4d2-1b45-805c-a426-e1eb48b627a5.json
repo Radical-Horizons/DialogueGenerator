@@ -1,7 +1,34 @@
 {
   "Nom": "Fosse aux Idoles déchues",
+  "values": {
+    "Communautés présentes": "1996e4d2-1b45-804c-89d5-c935e604f865, 3106e4d2-1b45-8060-a5dc-d901a3e80959",
+    "Contenu par": "1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
+    "Date de création": "2025-03-12T15:38:00.000Z",
+    "Dernière modification": "2026-04-03T18:02:00.000Z",
+    "Faunes & Flores présentes": "1a16e4d2-1b45-805e-841e-d699f81d67a9, 1a16e4d2-1b45-80e9-8a7a-d5c626184d83, 1a16e4d2-1b45-80d7-a920-c3f40e49246b",
+    "Niveau d’IA": "co-écrit",
+    "Qualité": "5",
+    "Résumé": "Un cratère titanesque rempli de statues brisées, vestiges de dieux oubliés, où le sol est fait de chair putréfiée. Les statues semblent changer de position et murmurent à ceux qui osent les toucher. Le lieu est encore à explorer en termes d'histoire, de rôle dans l'intrigue, d'écosystème, de structure politique, et de dynamiques sociales et économiques.",
+    "Taille": "Région",
+    "Type": "Région principale",
+    "Zones limitrophes": "1b46e4d2-1b45-8069-b24d-c263445f6a8e, 1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 1b46e4d2-1b45-8028-a2e5-f06744044aa4",
+    "État": "Pas commencé"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\nUn cratère titanesque empli de statues brisées, vestiges de dieux oubliés ou d'ambitions avortées. Le sol y est fait de chair putréfiée, et les statues semblent parfois changer de position lorsque personne ne regarde. Certaines murmurent à ceux qui osent les toucher.\n\n# Identité & Vue d'ensemble\n\n**Histoire du lieu**\n\n**Rôle dans l'intrigue**\n\n# Géographie & Environnement\n\n**Écosystème**\n\n**Astrobiologie**\n\n**Voies d’accès**\n\n# Organisation humaine\n\n**Structure politique**\n\n**Centres urbains & Habitats**\n\n# Culture & Société\n\n**Population**\n\n**Économie**\n\n**Fêtes/moments importants**\n\n**Alimentation spécifique**\n\n# Dynamiques\n\n**Enjeux actuels**\n\n**Points d'intérêt**\n\n**Système de jeu**"
+    "preamble": "**Résumé de la fiche**\nUn cratère titanesque empli de statues brisées, vestiges de dieux oubliés ou d'ambitions avortées. Le sol y est fait de chair putréfiée, et les statues semblent parfois changer de position lorsque personne ne regarde. Certaines murmurent à ceux qui osent les toucher.",
+    "identite____vue_d_ensemble": "**Histoire du lieu**\n\n**Rôle dans l'intrigue**",
+    "ge_ographie___environnement": "**Écosystème**\n\n**Astrobiologie**\n\n**Voies d’accès**",
+    "organisation_humaine": "**Structure politique**\n\n**Centres urbains & Habitats**",
+    "culture___socie_te": "**Population**\n\n**Économie**\n\n**Fêtes/moments importants**\n\n**Alimentation spécifique**",
+    "dynamiques": "**Enjeux actuels**\n\n**Points d'intérêt**\n\n**Système de jeu**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "identite____vue_d_ensemble": "Identité & Vue d'ensemble",
+    "ge_ographie___environnement": "Géographie & Environnement",
+    "organisation_humaine": "Organisation humaine",
+    "culture___socie_te": "Culture & Société",
+    "dynamiques": "Dynamiques"
   },
   "notion_page_id": "1b46e4d2-1b45-805c-a426-e1eb48b627a5"
 }

@@ -1,8 +1,18 @@
 [
   {
     "Nom": "Voie unique de cause à effet",
+    "values": {},
     "sections": {
-      "_general": "### 1. L’Ethérée — Contrôler les autres pour (sur)vivre\n\n- Cause à effet : L’Ethérée déclenche des conflits avec ceux qui veulent préserver leur liberté.\n\n### 2. Uresaïr — Trouver la paix, loin du monde\n\n- Cause à effet : Ses efforts pour s'isoler la forcent à se confronter d’abord aux vestiges de son passé.\n\n### 3. Eonundé — Défier les tyrans\n\n- Cause à effet : Eonundé attire des ripostes violentes des systèmes qui sous-tendent ses adversaires (backlash).\n\n### 4. Vethraak — Vivre hors du système\n\n- Cause à effet : Sa vie à l’écart du système (de genre et de race) le met en conflit avec ceux qui cherchent à l’y réduire."
+      "1__l_ethe_re_e___contro_ler_les_autres_pour__sur_vivre": "- Cause à effet : L’Ethérée déclenche des conflits avec ceux qui veulent préserver leur liberté.",
+      "2__uresai_r___trouver_la_paix__loin_du_monde": "- Cause à effet : Ses efforts pour s'isoler la forcent à se confronter d’abord aux vestiges de son passé.",
+      "3__eonunde____de_fier_les_tyrans": "- Cause à effet : Eonundé attire des ripostes violentes des systèmes qui sous-tendent ses adversaires (backlash).",
+      "4__vethraak___vivre_hors_du_syste_me": "- Cause à effet : Sa vie à l’écart du système (de genre et de race) le met en conflit avec ceux qui cherchent à l’y réduire."
+    },
+    "section_titles": {
+      "1__l_ethe_re_e___contro_ler_les_autres_pour__sur_vivre": "1. L’Ethérée — Contrôler les autres pour (sur)vivre",
+      "2__uresai_r___trouver_la_paix__loin_du_monde": "2. Uresaïr — Trouver la paix, loin du monde",
+      "3__eonunde____de_fier_les_tyrans": "3. Eonundé — Défier les tyrans",
+      "4__vethraak___vivre_hors_du_syste_me": "4. Vethraak — Vivre hors du système"
     },
     "notion_page_id": "11f6e4d2-1b45-8086-b514-e51b1e04c051"
   }

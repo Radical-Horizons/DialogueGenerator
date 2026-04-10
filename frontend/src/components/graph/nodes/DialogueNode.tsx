@@ -12,6 +12,11 @@ import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
+import {
+  getGraphTopologyWarningKind,
+  getValidationHighlightKind,
+  GRAPH_TOPOLOGY_WARNING_STYLES,
+} from '../../../utils/graphStructuralValidation'
 
 interface ValidationError {
   type: string
@@ -203,10 +208,20 @@ export const DialogueNode = memo(function DialogueNode({
   let borderColor = selected ? '#27AE60' : '#4A90E2'
   let borderStyle: 'solid' | 'dashed' = 'solid'
   
-  if (hasErrors) {
+  const validationHighlightKind = getValidationHighlightKind(errors.map((e) => e.type))
+  const topologyKind = getGraphTopologyWarningKind(warnings.map((w) => w.type))
+  const topologyStyle = topologyKind ? GRAPH_TOPOLOGY_WARNING_STYLES[topologyKind] : null
+
+  if (validationHighlightKind === 'structural') {
+    borderColor = theme.state.error.border
+  } else if (validationHighlightKind === 'content') {
+    borderColor = theme.state.warning.border
+  } else if (validationHighlightKind === 'lore') {
+    borderColor = theme.state.lore.border
+  } else if (hasErrors) {
     borderColor = theme.state.error.border
   } else if (hasWarnings) {
-    borderColor = theme.state.warning.color
+    borderColor = topologyStyle?.border ?? theme.state.warning.color
   } else if (isPending) {
     borderColor = theme.state.pending.border
     borderStyle = 'dashed'
@@ -214,6 +229,11 @@ export const DialogueNode = memo(function DialogueNode({
     borderColor = theme.state.accepted.border
     borderStyle = 'solid'
   }
+
+  const canvasBackground =
+    !hasErrors && hasWarnings && topologyStyle && !validationHighlightKind
+      ? topologyStyle.background
+      : undefined
 
   const getChoiceHandleLeftPercent = (index: number): number => {
     // Répartition uniforme sur la largeur du node, sans coller aux bords
@@ -241,7 +261,10 @@ export const DialogueNode = memo(function DialogueNode({
         maxHeight: 500,
         border: `2px ${borderStyle} ${borderColor}`,
         borderRadius: 8,
-        backgroundColor: isHighlighted ? theme.state.selected.background : theme.background.tertiary,
+        backgroundColor:
+          isHighlighted
+            ? theme.state.selected.background
+            : (canvasBackground ?? theme.background.tertiary),
         boxShadow: selected
           ? '0 4px 12px rgba(0, 0, 0, 0.3)'
           : isHighlighted
@@ -289,7 +312,12 @@ export const DialogueNode = memo(function DialogueNode({
             position: 'absolute',
             top: 4,
             right: 4,
-            backgroundColor: theme.state.error.border,
+            backgroundColor:
+              validationHighlightKind === 'content'
+                ? theme.state.warning.border
+                : validationHighlightKind === 'lore'
+                  ? theme.state.lore.border
+                  : theme.state.error.border,
             color: 'white',
             borderRadius: '50%',
             width: 20,
@@ -303,7 +331,22 @@ export const DialogueNode = memo(function DialogueNode({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
           title={errors.map((e, idx) => {
-            const icon = e.type === 'orphan_node' ? '🔗' : e.type === 'broken_reference' ? '🔴' : e.type === 'empty_node' ? '⚪' : '⚠️'
+            const icon =
+              e.type === 'orphan_node'
+                ? '🔗'
+                : e.type === 'broken_reference'
+                  ? '🔴'
+                  : e.type === 'lore_contradiction_explicit' ||
+                    e.type === 'lore_contradiction_potential' ||
+                    e.type === 'lore_potential_ambiguity'
+                    ? '📜'
+                    : e.type === 'empty_node' || e.type === 'missing_dialogue_text'
+                      ? '⚪'
+                      : e.type === 'missing_display_name'
+                        ? '📝'
+                        : e.type === 'missing_stable_id'
+                          ? '🆔'
+                          : '⚠️'
             return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
           }).join('')}
         >
@@ -344,7 +387,7 @@ export const DialogueNode = memo(function DialogueNode({
             position: 'absolute',
             top: 4,
             right: 4,
-            backgroundColor: theme.state.warning.color,
+            backgroundColor: topologyStyle?.border ?? theme.state.warning.color,
             color: 'black',
             borderRadius: '50%',
             width: 20,
@@ -358,7 +401,14 @@ export const DialogueNode = memo(function DialogueNode({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
           }}
           title={warnings.map((w, idx) => {
-            const icon = w.type === 'unreachable_node' ? '📍' : w.type === 'cycle_detected' ? '🔄' : '⚠️'
+            const icon =
+              w.type === 'orphan_node'
+                ? '🔗'
+                : w.type === 'unreachable_node'
+                  ? '📍'
+                  : w.type === 'cycle_detected'
+                    ? '🔄'
+                    : '⚠️'
             return `${icon} ${w.message}${idx < warnings.length - 1 ? '\n' : ''}`
           }).join('')}
         >

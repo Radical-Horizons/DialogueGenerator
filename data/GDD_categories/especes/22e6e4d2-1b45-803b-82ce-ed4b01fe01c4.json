@@ -1,7 +1,28 @@
 {
   "Nom": "Rêveurs Émergents",
+  "values": {
+    "Biologie": "Avancée",
+    "Culture": "Faible",
+    "Espérance de vie": "9999",
+    "Lieux de vie": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+    "Présence dans Escelion": "Rarissime",
+    "Représentants": "1b76e4d2-1b45-8076-8f2c-dc910ac92b7a, 2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
+    "Règne (ou classe)": "1556e4d2-1b45-8058-aec8-d6cb02caa57c",
+    "Résumé IA": "Les Rêveurs Émergents sont des entités nées des cicatrices laissées par l'effondrement d'anciens domaines, révélant la capacité d'Escelion à créer de nouvelles formes de conscience. Leur histoire inclut des événements marquants comme la première émergence en 888 AG et une accélération des émergences contemporaines. Ils colonisent des vacuum métaphysiques et se nourrissent d'éléments organiques en décomposition. Les sous-espèces, telles que le Léviathan Pétrifié et la Muse Inaudible, illustrent leur diversité et leur rôle dans l'écosystème fragile d'Escelion.",
+    "Surnaturel": "Avancée",
+    "Technologie": "Faible",
+    "Type": "Autre",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle dans l’intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle dans l’intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\nAncien Archiviste-Sonde frémissant fossilisé ; domaine du Désert des Échos Perdus (~8 800 km²). Métabolise échos mémoriels et nostalgie pétrifiée. Les Jumeaux dissonants : Polaricus technologicus - Rêveurs jumeaux nés de la surcharge du Réseau Psychique (2847 AG) dans la Steppe des Éteignoirs.  - Cycle court : Phase A (amplification technologique), Phase B (cimetière électronique).  - Domaine : 340 kilomètres carrés de steppes métallisées. Pylônes de 240 mètres alternant transparence/opacité. Génèrent perturbations électromagnétiques localisées. La Muse Inaudible : Silentius creativus - Rêveuse de l'Hermogène, née de l'Implosion Expérimentale (2343 AG).  - Domaine : vide structuré de 80 mètres dans l'aile ouest effondrée. Métabolise inspirations avortées et créativité réprimée.  - Cycle court : Germination/Éclosion/Dissolution. Matérialise pensées inexprimées en sculptures temporaires. Toute verbalisation de l'inspiration reçue provoque dissolution immédiate de l'œuvre. Refuge secret des artistes incompris.\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "22e6e4d2-1b45-803b-82ce-ed4b01fe01c4"
 }

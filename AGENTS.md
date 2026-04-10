@@ -32,7 +32,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 
 - Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run commands that **prove** the change (pytest/Vitest ciblé, lint). « Plus petit test utile » = preuve, pas excuse pour éviter une étape de processus requise.
 - **UI / flux utilisateur** : une preuve complète exige aussi **`npm run dev` + vérification dans le navigateur** (pas seulement les tests). Voir `.cursor/rules/workflow.mdc` (section **Preuve UI**).
-- **Run tests, do not only suggest them**: in Agent mode, **execute** the relevant pytest/Vitest/lint commands and report outcomes; do not claim “done” or “green” without command output. Full policy: `.cursor/rules/workflow.mdc` (obligation agents — exécution réelle des tests).
+- **Run tests, do not only suggest them**: in Agent mode, **execute** the relevant pytest/Vitest/lint commands and report outcomes; do not claim “done” or “green” without command output. Full policy: `.cursor/rules/workflow.mdc` (obligation agents — exécution réelle des tests). **Which command (T0–T3)** : `.cursor/commands/test-tiers.md` and `.cursor/skills/test-runbook.md`.
 - **Real environment**: you can execute shell commands and network fetches; use them instead of dumping long “you should run…” lists when the task is to verify or fix.
 
 ### Non-obvious caveats
@@ -47,6 +47,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 - **Windows-first codebase**: Many npm scripts use PowerShell (`scripts/*.ps1`). On Linux, use the Node.js equivalents directly (e.g., `node scripts/dev.js`, `node scripts/getPythonPath.js -m pytest tests/`).
 - **mistralai SDK version**: The codebase uses `from mistralai import Mistral` which requires mistralai v1.x (tested with 1.12.4). The v2.x SDK reorganizes exports and breaks this import. Pin to `mistralai>=1.10.0,<2.0.0` until the codebase is updated.
 - **Vitest full suite is slow**: Running the entire Vitest suite can take 10+ minutes on constrained VMs. Prefer targeted runs (`npx vitest run src/__tests__/specific.test.ts`) or `npm run test:frontend:quick` for changed files only.
+- **Git — commit** : sauf périmètre explicite (« uniquement ces fichiers », liste de chemins), **`git add .`** puis commit (push si demandé). Ne pas déduire un staging partiel depuis l’UI Cursor. Détail : `.cursor/rules/git_commit.mdc`.
 
 ### Subagents (`.cursor/agents/`)
 
@@ -74,11 +75,14 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 
 ### Commands reference
 
-See `.cursor/rules/workflow.mdc` for the full command reference (including **Vitest agent protocol**). Quick reminders:
+**Niveaux T0–T3** (pytest, Vitest, Playwright, scripts npm) : **`.cursor/commands/test-tiers.md`**. Obligations agents et protocole Vitest : **`.cursor/rules/workflow.mdc`**.
 
-- **Backend tests**: `.venv/bin/python -m pytest tests/ -x --tb=short`
-- **Frontend lint**: `cd frontend && npx eslint . --ext ts,tsx`
-- **Frontend tests**: follow `workflow.mdc` (ciblage, `test:quick`, fichier de sortie sous PowerShell, CI summary)
+- **Backend T0 / T2 / T3** : `npm run test:backend:smoke` · `npm run test:backend:fast` · `npm run test:backend:full` (ou `npm test`)
+- **Agrégat T0** : `npm run test:smoke` (pytest smoke + Vitest `--bail=1`)
+- **Pré-merge T2** : `npm run test:premerge`
+- **E2E fumée** : `npm run test:e2e:smoke` ; **E2E complet** : `npm run test:e2e:verify` ou suite entière
+- **Frontend lint** : `npm --prefix frontend run lint`
+- **Frontend tests (T1)** : `cd frontend && npx vitest run src/chemin/Fichier.test.ts --reporter=dot` ou `npm run test:quick` ; **T3** : `VITEST_FULL=1` + `npm run test:full` / `test:ci` selon `workflow.mdc`
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
 
 ## Learned User Preferences

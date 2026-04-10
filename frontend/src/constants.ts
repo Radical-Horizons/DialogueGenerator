@@ -73,6 +73,8 @@ export const API_TIMEOUTS = {
    * couper avant le serveur. 6 h — aligner le proxy dev (`vite.config.ts`) sur cette valeur.
    */
   GDD_NOTION_SYNC: 6 * 60 * 60 * 1000,
+  /** Export ZIP Markdown (NotebookLM) : lecture disque + sérialisation, peut être volumineux */
+  GDD_NOTEBOOKLM_EXPORT: 300000,
   /** Timeout pour les requêtes LLM longues (5 minutes) - génération de dialogues */
   LLM_GENERATION: 300000,
   /** Timeout pour l'annulation d'un job de génération (10 secondes) - Story 0.8 */

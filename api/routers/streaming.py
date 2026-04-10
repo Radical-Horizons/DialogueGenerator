@@ -418,7 +418,7 @@ async def stream_job(
     """
     job_manager = get_job_manager()
     job = job_manager.get_job(job_id)
-    
+
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 

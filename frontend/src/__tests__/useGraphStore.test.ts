@@ -525,6 +525,7 @@ describe('useGraphStore - Pending save state', () => {
   describe('generateFromNode - Batch generation support', () => {
     beforeEach(() => {
       useGraphStore.getState().resetGraph()
+      vi.mocked(graphAPI.generateNode).mockClear()
     })
 
     it('should pass target_choice_index to API when provided', async () => {
@@ -572,13 +573,14 @@ describe('useGraphStore - Pending save state', () => {
         generate_all_choices: false,
       })
       
-      // Vérifier que l'API a été appelée avec target_choice_index
+      // Vérifier que l'API a été appelée avec target_choice_index (2e arg = en-têtes coût)
       expect(mockGenerateNode).toHaveBeenCalledWith(
         expect.objectContaining({
           parent_node_id: 'parent-1',
           target_choice_index: 0,
           generate_all_choices: false,
-        })
+        }),
+        expect.any(Object),
       )
     })
 
@@ -666,7 +668,8 @@ describe('useGraphStore - Pending save state', () => {
       expect(mockGenerateNode).toHaveBeenCalledWith(
         expect.objectContaining({
           generate_all_choices: true,
-        })
+        }),
+        expect.any(Object),
       )
     })
 
@@ -1168,6 +1171,46 @@ describe('useGraphStore - Pending save state', () => {
       expect(choice0?.testFailureNode).toBe('NODE_F')
       expect(choice0?.testSuccessNode).toBe('NODE_S')
       expect(choice0?.testCriticalSuccessNode).toBe('NODE_CS')
+    })
+  })
+
+  describe('saveDialogue FR37 post-validation', () => {
+    it('appelle validateGraph après sauvegarde legacy réussie', async () => {
+      vi.mocked(graphAPI.saveGraphAndWrite).mockResolvedValue({
+        success: true,
+        filename: 'd.json',
+        json_content: '{}',
+        last_seq: 1,
+        ack_seq: 1,
+      })
+      vi.mocked(graphAPI.validateGraph).mockResolvedValue({
+        valid: true,
+        errors: [],
+        warnings: [],
+      })
+      useGraphStore.setState({
+        document: null,
+        documentId: 'doc',
+        dialogueMetadata: {
+          title: 't',
+          filename: 'doc.json',
+          node_count: 1,
+          edge_count: 0,
+        },
+        nodes: [
+          {
+            id: 'START',
+            type: 'dialogueNode',
+            position: { x: 0, y: 0 },
+            data: { id: 'START', displayName: 'S', line: 'hi' },
+          },
+        ],
+        edges: [],
+        clientSeq: 1,
+        isSaving: false,
+      })
+      await useGraphStore.getState().saveDialogue()
+      expect(graphAPI.validateGraph).toHaveBeenCalled()
     })
   })
 })

@@ -1,7 +1,27 @@
 {
   "Nom": "Rêveurs secondaires",
+  "values": {
+    "Biologie": "Avancée",
+    "Culture": "Faible",
+    "Espérance de vie": "9999",
+    "Lieux de vie": "1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
+    "Représentants": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+    "Règne (ou classe)": "1556e4d2-1b45-8058-aec8-d6cb02caa57c",
+    "Résumé IA": "Les Rêveurs Secondaires sont des entités nées de symbiogenèses entre domaines antagonistes, agissant comme médiateurs pour maintenir l'harmonie entre réalités contradictoires. Leur histoire se divise en trois époques, de la première symbiogenèse à leur rôle actuel de gardiens des équilibres cosmiques. Ils se nourrissent de dissonances résolues et vivent dans des zones de superposition active, où ils régulent les tensions entre leurs domaines géniteurs, influençant ainsi l'écosystème d'Escelion.",
+    "Surnaturel": "Avancée",
+    "Technologie": "Faible",
+    "Type": "Autre",
+    "État": "En cours"
+  },
   "sections": {
-    "_general": "**Résumé de la fiche**\n\nGuides\n\n# Besoin de l'intrigue\n\n**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle dans l’intrigue**\n\n# Ecosystème\n\n**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "**Résumé de la fiche**\n\nGuides",
+    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle dans l’intrigue**",
+    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l’écosystème**"
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "besoin_de_l_intrigue": "Besoin de l'intrigue",
+    "ecosyste_me": "Ecosystème"
   },
   "notion_page_id": "22e6e4d2-1b45-803e-aa21-c54ea00e2c27"
 }

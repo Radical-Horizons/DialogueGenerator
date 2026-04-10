@@ -1,7 +1,11 @@
 {
   "Nom": "Bible narrative",
+  "values": {},
   "sections": {
-    "_general": "**Comment faire si j’ai besoin d’une section en plus pour mon jeu ?**\nLe template reprend les briques les plus utilisées dans la création d’un univers. N’hésitez pas à créer les briques manquantes pour le votre. \nVous pouvez aussi m’envoyer un mail me précisant quel template supplémentaire vous aimeriez que je crée dans le futur !"
+    "preamble": "**Comment faire si j’ai besoin d’une section en plus pour mon jeu ?**\nLe template reprend les briques les plus utilisées dans la création d’un univers. N’hésitez pas à créer les briques manquantes pour le votre. \nVous pouvez aussi m’envoyer un mail me précisant quel template supplémentaire vous aimeriez que je crée dans le futur !"
+  },
+  "section_titles": {
+    "preamble": "Préambule"
   },
   "notion_page_id": "1886e4d2-1b45-81c7-ab3e-ef277b272b1a"
 }

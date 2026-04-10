@@ -83,6 +83,12 @@ export const theme = {
       color: '#ffd43b',
       border: '#ffc107',
     },
+    /** Contradictions lore explicites (FR38) — distinct structure / complétude */
+    lore: {
+      background: '#2a1f38',
+      color: '#e9d5ff',
+      border: '#c084fc',
+    },
     selected: {
       background: '#1a3a5a',
       color: '#74c0fc',

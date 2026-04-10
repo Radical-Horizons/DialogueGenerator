@@ -1,8 +1,14 @@
 [
   {
     "Nom": "Tutos",
+    "values": {},
     "sections": {
-      "_general": "N’hésitez pas à alimenter cette liste avec les tutoriels et formations qui vous ont été utiles.\n\n## Tutos Unity\n\n- [FR] Tuto pour faire comme Hollowknight : Hollow Knight - Recréer l’Environnement"
+      "preamble": "N’hésitez pas à alimenter cette liste avec les tutoriels et formations qui vous ont été utiles.",
+      "tutos_unity": "- [FR] Tuto pour faire comme Hollowknight : Hollow Knight - Recréer l’Environnement"
+    },
+    "section_titles": {
+      "preamble": "Préambule",
+      "tutos_unity": "Tutos Unity"
     },
     "notion_page_id": "2816e4d2-1b45-80ae-8d68-ff077b9807eb"
   }

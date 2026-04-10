@@ -70,22 +70,24 @@ def sample_graph_nodes_edges():
                 "id": "START",
                 "type": "dialogue",
                 "data": {
+                    "id": "START",
                     "label": "Bonjour !",
                     "speaker": "PNJ",
-                    "line": "Bonjour !"
+                    "line": "Bonjour !",
                 },
-                "position": {"x": 0, "y": 0}
+                "position": {"x": 0, "y": 0},
             },
             {
                 "id": "NODE_1",
                 "type": "dialogue",
                 "data": {
+                    "id": "NODE_1",
                     "label": "Suite du dialogue",
                     "speaker": "PNJ",
-                    "line": "Suite du dialogue"
+                    "line": "Suite du dialogue",
                 },
-                "position": {"x": 200, "y": 0}
-            }
+                "position": {"x": 200, "y": 0},
+            },
         ],
         [
             {
@@ -93,9 +95,9 @@ def sample_graph_nodes_edges():
                 "source": "START",
                 "target": "NODE_1",
                 "sourceHandle": "choice-0",
-                "targetHandle": None
+                "targetHandle": None,
             }
-        ]
+        ],
     )
 
 
@@ -472,15 +474,23 @@ class TestGraphValidate:
             {
                 "id": "START",
                 "type": "dialogue",
-                "data": {"label": "Start"},
-                "position": {"x": 0, "y": 0}
+                "data": {
+                    "id": "START",
+                    "label": "Start",
+                    "line": "Start line",
+                },
+                "position": {"x": 0, "y": 0},
             },
             {
                 "id": "ORPHAN",
                 "type": "dialogue",
-                "data": {"label": "Orphan"},
-                "position": {"x": 100, "y": 100}
-            }
+                "data": {
+                    "id": "ORPHAN",
+                    "label": "Orphan",
+                    "line": "Orphan line",
+                },
+                "position": {"x": 100, "y": 100},
+            },
         ]
         edges = []  # ORPHAN n'a pas de connexion
         
@@ -495,8 +505,9 @@ class TestGraphValidate:
         # THEN
         assert response.status_code == 200
         data = response.json()
-        # Devrait détecter le nœud orphelin
-        assert len(data["warnings"]) > 0 or len(data["errors"]) > 0
+        orphan_warnings = [w for w in data.get("warnings", []) if w.get("type") == "orphan_node"]
+        assert any(w.get("node_id") == "ORPHAN" for w in orphan_warnings)
+        assert not any(w.get("node_id") == "START" for w in orphan_warnings)
     
     def test_validate_graph_cycle(
         self, client: TestClient
@@ -506,9 +517,24 @@ class TestGraphValidate:
         THEN la validation retourne un warning cycle"""
         # GIVEN
         nodes = [
-            {"id": "A", "type": "dialogue", "data": {"label": "A"}, "position": {"x": 0, "y": 0}},
-            {"id": "B", "type": "dialogue", "data": {"label": "B"}, "position": {"x": 100, "y": 0}},
-            {"id": "C", "type": "dialogue", "data": {"label": "C"}, "position": {"x": 200, "y": 0}}
+            {
+                "id": "A",
+                "type": "dialogue",
+                "data": {"id": "A", "label": "A", "line": "A"},
+                "position": {"x": 0, "y": 0},
+            },
+            {
+                "id": "B",
+                "type": "dialogue",
+                "data": {"id": "B", "label": "B", "line": "B"},
+                "position": {"x": 100, "y": 0},
+            },
+            {
+                "id": "C",
+                "type": "dialogue",
+                "data": {"id": "C", "label": "C", "line": "C"},
+                "position": {"x": 200, "y": 0},
+            },
         ]
         edges = [
             {"id": "e1", "source": "A", "target": "B"},
@@ -533,7 +559,7 @@ class TestGraphValidate:
     def test_validate_graph_start_found_when_id_in_data_only(self, client: TestClient):
         """GIVEN un graphe où le nœud d'entrée a id uniquement dans data (pas à la racine)
         WHEN je valide le graphe
-        THEN pas d'erreur 'Aucun nœud START trouvé' (id résolu via data.id)."""
+        THEN pas d'erreur missing_start (entrée résolue via data.id)."""
         nodes = [
             {
                 "type": "dialogueNode",
@@ -548,6 +574,103 @@ class TestGraphValidate:
         errors = data.get("errors", [])
         missing_start = [e for e in errors if e.get("type") == "missing_start"]
         assert not missing_start, f"Ne doit pas avoir d'erreur missing_start quand id est dans data: {errors}"
+
+    def test_validate_graph_fr36_structural_error_types(self, client: TestClient):
+        """POST validate retourne les types FR36 (missing_display_name, missing_stable_id, missing_dialogue_text)."""
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogue",
+                "data": {"id": "D1", "line": "texte seul"},
+            },
+            {
+                "id": "D2",
+                "type": "dialogue",
+                "data": {"id": "D2", "label": "Nom", "speaker": "PNJ"},
+            },
+        ]
+        edges = []
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate",
+            json={"nodes": nodes, "edges": edges},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        types = {e["type"] for e in data["errors"]}
+        assert "missing_display_name" in types
+        assert "missing_dialogue_text" in types
+
+        bad_id = {
+            "id": "ROOT",
+            "type": "dialogue",
+            "data": {"id": "WRONG", "label": "L", "line": "x"},
+        }
+        r2 = client.post(
+            "/api/v1/unity-dialogues/graph/validate",
+            json={"nodes": [bad_id], "edges": []},
+        )
+        assert r2.status_code == 200
+        t2 = {e["type"] for e in r2.json()["errors"]}
+        assert "missing_stable_id" in t2
+
+    def test_validate_graph_fr37_empty_dialogue_message(self, client: TestClient):
+        """POST validate : message FR37 pour dialogue sans line ni choix texte (AC 4.2)."""
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogue",
+                "data": {
+                    "id": "D1",
+                    "label": "Scène",
+                    "speaker": "PNJ",
+                    "choices": [],
+                },
+                "position": {"x": 0, "y": 0},
+            },
+        ]
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate",
+            json={"nodes": nodes, "edges": []},
+        )
+        assert response.status_code == 200
+        errors = response.json()["errors"]
+        err = next(e for e in errors if e.get("type") == "missing_dialogue_text")
+        msg = err.get("message", "")
+        assert "contenu vide" in msg
+        assert "ni dialogue ni choix" in msg
+
+    def test_validate_graph_fr37_missing_test_message(self, client: TestClient):
+        """POST validate : message FR37 pour testNode sans attribut test."""
+        nodes = [
+            {
+                "id": "START",
+                "type": "dialogue",
+                "data": {
+                    "id": "START",
+                    "label": "Début",
+                    "line": "Hello",
+                },
+                "position": {"x": 0, "y": 0},
+            },
+            {
+                "id": "T1",
+                "type": "testNode",
+                "data": {"id": "T1"},
+                "position": {"x": 100, "y": 0},
+            },
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "T1"}]
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate",
+            json={"nodes": nodes, "edges": edges},
+        )
+        assert response.status_code == 200
+        errors = response.json()["errors"]
+        err = next(e for e in errors if e.get("type") == "missing_test")
+        assert err.get("node_id") == "T1"
+        msg = err.get("message", "")
+        assert "Nœud test [T1]" in msg
+        assert "test d'attribut manquant" in msg
 
 
 @pytest.mark.api

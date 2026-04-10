@@ -1314,3 +1314,30 @@ class GddNotionSyncService:
         return await client.query_database(
             notion_id, data_source_ids=data_source_ids
         )
+
+    def build_notebooklm_export_zip(self, *, max_files: int = 10) -> bytes:
+        """Assemble un ZIP Markdown (NotebookLM) depuis le GDD local et la config sync.
+
+        Utilise ``included_categories`` comme filtre de périmètre (même sémantique que la sync).
+
+        Args:
+            max_files: Nombre maximal de fichiers dans l’archive (1–10).
+
+        Returns:
+            Contenu binaire du fichier ZIP.
+
+        Raises:
+            ValueError: Si ``max_files`` est hors bornes.
+        """
+        from services.gdd_notebooklm_export import build_gdd_notebooklm_zip_bytes
+
+        if max_files < 1 or max_files > 10:
+            raise ValueError("max_files doit être entre 1 et 10")
+        settings = self._store.load_settings()
+        project_root = self._gdd_categories_path.resolve().parent.parent
+        return build_gdd_notebooklm_zip_bytes(
+            gdd_root=self._gdd_categories_path,
+            project_root=project_root,
+            settings=settings,
+            max_files=max_files,
+        )

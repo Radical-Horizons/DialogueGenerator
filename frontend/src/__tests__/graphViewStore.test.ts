@@ -11,6 +11,7 @@ function reset() {
     reactFlowInstance: null,
     focusQueue: [],
     pendingFitView: false,
+    pendingFitViewNodeIds: null,
     edgeLabelEditRequest: null,
     contextMenuRequest: null,
     promptViewerNodeId: null,
@@ -45,6 +46,15 @@ describe('graphViewStore', () => {
       expect(useGraphViewStore.getState().pendingFitView).toBe(true)
       useGraphViewStore.getState().clearFitView()
       expect(useGraphViewStore.getState().pendingFitView).toBe(false)
+    })
+  })
+
+  describe('requestFitViewOnNodeIds (FR41)', () => {
+    it('déduplique et ignore les ids vides', () => {
+      useGraphViewStore.getState().requestFitViewOnNodeIds(['a', 'a', '', 'b'])
+      expect(useGraphViewStore.getState().pendingFitViewNodeIds).toEqual(['a', 'b'])
+      useGraphViewStore.getState().clearFitViewNodeIdsRequest()
+      expect(useGraphViewStore.getState().pendingFitViewNodeIds).toBeNull()
     })
   })
 

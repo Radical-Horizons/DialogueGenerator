@@ -1,4 +1,4 @@
-﻿## Epic 4: Validation et assurance qualité
+## Epic 4: Validation et assurance qualité
 
 Les utilisateurs peuvent valider la qualité, cohérence et conformité structurelle des dialogues avant export. Le système détecte orphans, cycles, nœuds vides, contradictions lore, "AI slop", context dropping, et fournit LLM judge scoring + simulation flow.
 
@@ -19,31 +19,27 @@ Les utilisateurs peuvent valider la qualité, cohérence et conformité structur
 ### Checklist de Vérification
 
 1. **Fichiers mentionnés dans les stories :**
-   - [ ] Vérifier existence avec `glob_file_search` ou `grep`
-   - [ ] Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
-   - [ ] Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
-
+  - Vérifier existence avec `glob_file_search` ou `grep`
+  - Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
+  - Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
 2. **Composants/Services similaires :**
-   - [ ] Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
-   - [ ] Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
-   - [ ] Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
-   - [ ] Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
-
+  - Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
+  - Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
+  - Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
+  - Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
 3. **Endpoints API :**
-   - [ ] Vérifier namespace cohérent (`/api/v1/dialogues/*` vs autres)
-   - [ ] Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
-   - [ ] Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
-
+  - Vérifier namespace cohérent (`/api/v1/dialogues/`* vs autres)
+  - Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
+  - Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
 4. **Patterns existants :**
-   - [ ] Vérifier patterns Zustand (immutable updates, structure stores)
-   - [ ] Vérifier patterns FastAPI (routers, dependencies, schemas)
-   - [ ] Vérifier patterns React (composants, hooks, modals)
-   - [ ] Respecter conventions de nommage et structure dossiers
-
+  - Vérifier patterns Zustand (immutable updates, structure stores)
+  - Vérifier patterns FastAPI (routers, dependencies, schemas)
+  - Vérifier patterns React (composants, hooks, modals)
+  - Respecter conventions de nommage et structure dossiers
 5. **Documentation des décisions :**
-   - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
-   - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
-   - Si nouveau : Documenter **POURQUOI** pas de réutilisation
+  - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
+  - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
+  - Si nouveau : Documenter **POURQUOI** pas de réutilisation
 
 ---
 
@@ -82,6 +78,7 @@ So that **je peux détecter les erreurs structurelles avant export et garantir l
 **And** la validation se termine en <200ms (NFR-P3)
 
 **Technical Requirements:**
+
 - Backend : Service `GraphValidationService.validate_graph()` (existant) avec validation champs requis
 - Validation : Vérifier DisplayName, stableID, text pour chaque nœud dialogue
 - API : Endpoint `/api/v1/graph/validate` (POST) retourne erreurs structurelles (existant)
@@ -128,6 +125,7 @@ So that **je peux identifier et corriger les nœuds incomplets avant export**.
 **And** l'erreur "nœud vide" disparaît si le nœud est maintenant valide
 
 **Technical Requirements:**
+
 - Backend : `GraphValidationService._validate_node_content()` (existant) détecte nœuds vides
 - Validation : Vérifier `line` ou `choices` pour dialogueNode, `test` pour testNode
 - Frontend : `ValidationPanel.tsx` affiche nœuds vides avec action "Éditer nœud"
@@ -173,6 +171,7 @@ So that **je peux garantir la cohérence narrative et corriger les incohérences
 **And** elle apparaît dans la section "Incohérences potentielles" (voir Story 4.4)
 
 **Technical Requirements:**
+
 - Backend : Service `LoreContradictionValidator` avec méthode `detect_contradictions(dialogue, gdd_data)`
 - Analyse : Comparaison texte dialogue vs faits GDD (extraction entités + vérification faits)
 - GDD : Utiliser `ContextBuilder` pour accéder données GDD (personnages, lieux, événements)
@@ -219,6 +218,7 @@ So that **je peux les examiner manuellement et décider si correction nécessair
 **And** je peux filtrer les warnings par type (ambiguïté, référence implicite, etc.)
 
 **Technical Requirements:**
+
 - Backend : Service `LoreInconsistencyDetector` avec méthode `detect_potential_issues(dialogue, gdd_data)`
 - Heuristiques : Détection ambiguïtés (références vagues), références implicites (pronoms sans contexte)
 - Stockage : Préférences utilisateur pour warnings ignorés (localStorage + backend)
@@ -266,6 +266,7 @@ So that **je peux identifier les nœuds inaccessibles et les connecter ou les su
 **And** je peux sélectionner plusieurs nœuds orphelins et les supprimer en batch
 
 **Technical Requirements:**
+
 - Backend : `GraphValidationService._validate_orphan_nodes()` (existant) détecte nœuds orphelins
 - Algorithme : DFS depuis START pour trouver nœuds accessibles, nœuds non accessibles = orphelins
 - API : Endpoint `/api/v1/graph/validate` (POST) retourne nœuds orphelins dans erreurs (existant)
@@ -313,6 +314,7 @@ So that **je peux identifier les boucles intentionnelles (dialogues récursifs) 
 **And** la validation est automatiquement relancée après suppression
 
 **Technical Requirements:**
+
 - Backend : `GraphValidationService._validate_cycles()` (existant) détecte cycles avec DFS
 - Algorithme : DFS pour détecter cycles dans graphe orienté
 - API : Endpoint `/api/v1/graph/validate` (POST) retourne cycles dans warnings (existant)
@@ -358,6 +360,7 @@ So that **je peux obtenir un feedback objectif sur la qualité narrative et ité
 **And** un graphique montre l'évolution des scores si plusieurs évaluations
 
 **Technical Requirements:**
+
 - Backend : Service `LLMQualityJudgeService` avec méthode `evaluate_quality(dialogue, criteria)` retournant score + commentaires
 - LLM : Utiliser provider sélectionné (OpenAI/Mistral) avec prompt spécialisé "quality judge"
 - Critères : Rubrique d'évaluation (cohérence, caractérisation, agentivité, style) avec scores individuels
@@ -404,6 +407,7 @@ So that **je peux identifier et corriger les dialogues qui sonnent trop artifici
 **And** je peux ajouter des patterns personnalisés (regex ou mots-clés)
 
 **Technical Requirements:**
+
 - Backend : Service `AISlopDetector` avec méthode `detect_slop(dialogue, patterns)` retournant occurrences
 - Patterns : Base de données patterns "AI slop" (GPT-isms, répétitions, génériques) avec regex/mots-clés
 - Détection : Scan texte dialogue pour patterns avec scoring (nombre occurrences, sévérité)
@@ -451,6 +455,7 @@ So that **je peux garantir que le contexte GDD sélectionné est effectivement u
 **And** un résumé s'affiche "X cas de context dropping détectés"
 
 **Technical Requirements:**
+
 - Backend : Service `ContextDroppingDetector` avec méthode `detect_dropping(dialogue, context_used)` retournant cas détectés
 - Analyse : Comparaison texte dialogue vs contexte GDD (extraction informations clés + vérification présence)
 - Subtilité : Détection références implicites vs explicites (analyse sémantique ou keywords)
@@ -496,6 +501,7 @@ So that **je peux personnaliser la détection selon mes préférences (subtilit�
 **And** les règles globales restent valides pour autres types
 
 **Technical Requirements:**
+
 - Backend : Endpoints `/api/v1/validation/rules/context-dropping` (GET/PUT) pour règles
 - Service : `ContextDroppingRulesService` pour évaluation règles + application détection
 - Stockage : Fichiers JSON `data/validation-rules/context-dropping.json` + API backend
@@ -543,6 +549,7 @@ So that **je peux garantir que tous les chemins narratifs sont accessibles au jo
 **And** la simulation se termine en <1 seconde (performance)
 
 **Technical Requirements:**
+
 - Backend : Service `DialogueFlowSimulator` avec méthode `simulate_flow(nodes, edges)` retournant dead ends
 - Algorithme : BFS depuis START pour trouver tous les nœuds accessibles, nœuds non accessibles = dead ends
 - Cul-de-sac : Détection nœuds avec uniquement connexions vers END (warning, pas erreur)
@@ -589,6 +596,7 @@ So that **je peux évaluer la complétude du dialogue et identifier les zones à
 **And** je peux identifier les dialogues avec meilleure/pire couverture
 
 **Technical Requirements:**
+
 - Backend : Service `CoverageReportService` avec méthode `generate_report(simulation_result)` retournant rapport
 - Calcul : Pourcentage nœuds accessibles = (nœuds accessibles / total nœuds) × 100
 - API : Endpoint `/api/v1/dialogues/{id}/coverage-report` (GET) retourne rapport couverture
@@ -636,6 +644,7 @@ So that **je peux garantir que les exports Unity sont valides et ne causent pas 
 **And** l'export est bloqué si erreurs détectées (voir Epic 5)
 
 **Technical Requirements:**
+
 - Backend : Service `UnitySchemaValidator` avec méthode `validate_unity_json(json_data)` retournant erreurs (existant)
 - Schéma : Schéma JSON Unity strict (Pydantic models ou JSON Schema) pour validation
 - Validation : Vérification champs requis, types, valeurs, structure hiérarchique
@@ -648,3 +657,34 @@ So that **je peux garantir que les exports Unity sont valides et ne causent pas 
 
 ---
 
+### Story 4.14: Refactorer `api/routers/graph.py` — découpage en modules cohérents (dette technique)
+
+As a **développeur maintenant la codebase**,
+I want **éclater `api/routers/graph.py` (1 650+ lignes) en modules router cohérents par domaine**,
+So that **chaque module reste lisible, testable indépendamment, et que les futures stories d'epic 4+ ne continuent pas d'alimenter un god-file**.
+
+**Acceptance Criteria:**
+
+**Given** `api/routers/graph.py` contient les domaines suivants : génération de nœuds, estimation de coût, validation lore/structure, détection AI slop, context dropping, simulation de flux, layout, gestion des prompts/accept/reject
+**When** le refactor est terminé
+**Then** chaque module router ne dépasse pas ~400 lignes, chaque module adresse un seul domaine fonctionnel, et tous les endpoints existants répondent identiquement (zéro régression API).
+
+**Given** des helpers privés (`_load_unity_nodes_from_dialogue`, `_reconstruct_prompt_for_node`, etc.) sont actuellement inlined dans `graph.py`
+**When** le refactor est terminé
+**Then** ces helpers sont soit dans le service approprié, soit dans un module `graph_router_helpers.py` si vraiment transverses.
+
+**Given** le singleton `_cd_rules_service` introduit hors `ServiceContainer`
+**When** le refactor est terminé
+**Then** il est remplacé par une injection propre via `ServiceContainer` / `api/dependencies.py`.
+
+**Technical Requirements:**
+
+- Pas de nouveau comportement — refactor pur, zéro feature ajoutée
+- Taille cible par module : ≤ 400 lignes (idéalement ≤ 300)
+- Candidats de découpage : `graph_generation.py`, `graph_validation.py`, `graph_flow_simulation.py`, `graph_cost.py`, `graph_prompt_history.py` (à affiner à l'analyse)
+- `api/main.py` inclut les nouveaux routers avec les mêmes prefixes — contrat URL inchangé
+- Tests : full backend suite verte (1 550+ tests), lint ✅ — preuve de non-régression obligatoire
+
+**References:** Dette accumulée sur epic 4 (stories 4.7 → 4.13), `api/routers/graph.py` commit history
+
+---

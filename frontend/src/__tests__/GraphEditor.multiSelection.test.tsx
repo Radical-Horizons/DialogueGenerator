@@ -159,7 +159,7 @@ describe('GraphEditor multi-selection toolbar (Story 2.10)', () => {
             node_id: 'n1',
             severity: 'warning',
             message: 'Warn',
-            type: 'empty_node',
+            type: 'missing_dialogue_text',
           },
         ] as GraphState['validationErrors'],
       })

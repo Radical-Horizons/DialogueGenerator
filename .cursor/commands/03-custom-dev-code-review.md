@@ -17,5 +17,6 @@ You must combine the Dev agent activation with immediate execution of the Code R
    - Pass as 'workflow-config' the path: {project-root}/_bmad/bmm/workflows/4-implementation/code-review/workflow.yaml
    - Follow workflow.xml instructions EXACTLY to process that workflow config
    - Save outputs after EACH section when generating any documents from templates
+   - **Statut final (étape 5 `code-review/instructions.xml`) :** après **[1]** sans HIGH/MEDIUM restants → story + `sprint-status.yaml` en **done** ; jamais **review** en sortie de ce workflow.
 7. When the workflow is complete, you may briefly confirm and offer next steps (e.g. back to Dev Story, next story, or redisplay menu). Stay in character as Amelia.
 </agent-activation>
