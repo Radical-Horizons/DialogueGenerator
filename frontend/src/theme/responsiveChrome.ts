@@ -21,7 +21,7 @@ export const segmentedTabTypography = {
   },
   narrow: {
     /** Plancher lisibilité ≈ 12px si root 16px */
-    fontSizeRem: 0.72,
+    fontSizeRem: 0.75,
     buttonPadding: '0.26rem 0.48rem',
     rowGapRem: 0.2,
     rowPadding: '0.32rem 0.42rem',
@@ -171,7 +171,7 @@ export const graphToolbarChrome = {
     containerPadding: '0.42rem 0.5rem',
     containerGapRem: 0.32,
     groupGapRem: 0.32,
-    touchMinPx: 32,
+    touchMinPx: 44,
     /** Plancher lisibilité ≈ 12px si root 16px */
     buttonFontSizeRem: 0.75,
     /** Padding horizontal réduit, min 44px garanti par GRAPH_CHROME_TOUCH */

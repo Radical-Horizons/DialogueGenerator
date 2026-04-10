@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import { API_TIMEOUTS } from './src/constants'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -16,9 +17,34 @@ const appVersion =
     ? rootPackageVersion.version
     : '0.0.0'
 
+const pwaManifestPath = resolve(__dirname, 'public', 'manifest.webmanifest')
+const pwaManifest = JSON.parse(readFileSync(pwaManifestPath, 'utf-8')) as Record<string, unknown>
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      // Story 17.5: installabilité PWA (sans offline-first).
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      devOptions: {
+        // Evite les pièges de cache en dev (Epic 17: flux ergonomie).
+        enabled: false,
+      },
+      // Source-of-truth: `public/manifest.webmanifest` (évite la duplication).
+      manifest: pwaManifest,
+      // Ne pas mettre `/api` en cache: le backend est dynamique.
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly',
+          },
+        ],
+      },
+    }),
+  ],
   define: {
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
     __APP_VERSION__: JSON.stringify(appVersion),

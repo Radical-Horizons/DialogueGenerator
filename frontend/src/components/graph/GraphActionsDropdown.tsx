@@ -41,6 +41,9 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
         ref={actionsDropdownBtnRef}
         data-testid="btn-actions-dropdown"
         type="button"
+        aria-label="Actions"
+        aria-haspopup="menu"
+        aria-expanded={showActionsDropdown}
         onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
         disabled={!canEditGraph}
         style={{
