@@ -223,7 +223,7 @@
       <note>This is the SM's job to catch BEFORE dev — the agent cannot retroactively fix a 1600-line file if the story never mentioned it.</note>
     </check>
     <check if="no pre-existing file to be modified exceeds 500 lines">
-      <action>Set "Fichiers chauds" in Dev Notes to "Aucun fichier chaud concerné (tous les fichiers touchés sont sous 500 lignes)."</action>
+      <action>Set "Fichiers chauds" in Dev Notes to "Aucun fichier chaud concerné (tous les fichiers créés ET modifiés sont sous 500 lignes)."</action>
     </check>
   </step>
 

@@ -114,7 +114,7 @@ development_status:
   17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: backlog
   17-5-pwa-install-manifest-option-fr121: backlog
   epic-17-retrospective: optional
-  epic-4: in-progress
+  epic-4: done
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: done
   4-3-détecter-contradictions-lore-explicites-faits-gdd-conflictuels-fr38: done
@@ -129,7 +129,7 @@ development_status:
   4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: done
   4-13-valider-conformité-schéma-json-unity-100-fr48: done
   4-14-refactorer-api-routers-graph-dette-technique: done
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
   epic-9: backlog
   9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog
   9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: backlog
