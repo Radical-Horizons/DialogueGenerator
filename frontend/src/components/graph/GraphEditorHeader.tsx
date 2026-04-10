@@ -120,6 +120,7 @@ export function GraphEditorHeader({
     actionsDropdownRef,
     actionsDropdownBtnRef,
     reactFlowInstance,
+    handleAutoLayout,
     handleOpenExportDialog,
     undo,
     redo,
@@ -560,49 +561,53 @@ export function GraphEditorHeader({
               </button>
             </>
           )}
-          <button
-            type="button"
-            data-testid="btn-search-graph-top"
-            onClick={() =>
-              setShowSearchBar((v) => {
-                if (v) setHighlightedNodes([])
-                return !v
-              })
-            }
-            disabled={!hasActiveDialogue}
-            style={{
-              ...graphChromeTouch,
-              padding: chrome.buttonPadding,
-              border: `1px solid ${
-                showSearchBar ? theme.button.primary.background : theme.border.primary
-              }`,
-              borderRadius: '6px',
-              backgroundColor: showSearchBar
-                ? theme.button.primary.background
-                : theme.button.default.background,
-              color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
-              cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-              opacity: !hasActiveDialogue ? 0.6 : 1,
-              fontSize: `${chrome.buttonFontSizeRem}rem`,
-            }}
-            title="Rechercher dans le graphe (Ctrl+F)"
-            aria-label="Rechercher"
-          >
-            🔍
-          </button>
-          <GraphActionsDropdown
-            canEditGraph={canEditGraph}
-            isNarrow={true}
-            graphChromeTouch={graphChromeTouch}
-            buttonPadding={chrome.buttonPadding}
-            buttonFontSizeRem={chrome.buttonFontSizeRem}
-            groupGapRem={chrome.groupGapRem}
-            actionsDropdownRef={actionsDropdownRef}
-            actionsDropdownBtnRef={actionsDropdownBtnRef}
-            showActionsDropdown={showActionsDropdown}
-            setShowActionsDropdown={setShowActionsDropdown}
-            renderMenuItems={renderActionsMenuItems}
-          />
+          {(!isNarrowToolbar || !showSearchBar) && (
+            <button
+              type="button"
+              data-testid="btn-search-graph"
+              onClick={() =>
+                setShowSearchBar((v) => {
+                  if (v) setHighlightedNodes([])
+                  return !v
+                })
+              }
+              disabled={!hasActiveDialogue}
+              style={{
+                ...graphChromeTouch,
+                padding: chrome.buttonPadding,
+                border: `1px solid ${
+                  showSearchBar ? theme.button.primary.background : theme.border.primary
+                }`,
+                borderRadius: '6px',
+                backgroundColor: showSearchBar
+                  ? theme.button.primary.background
+                  : theme.button.default.background,
+                color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
+                cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+                opacity: !hasActiveDialogue ? 0.6 : 1,
+                fontSize: `${chrome.buttonFontSizeRem}rem`,
+              }}
+              title="Rechercher dans le graphe (Ctrl+F)"
+              aria-label="Rechercher"
+            >
+              🔍
+            </button>
+          )}
+          {isNarrowToolbar && (
+            <GraphActionsDropdown
+              canEditGraph={canEditGraph}
+              isNarrow={true}
+              graphChromeTouch={graphChromeTouch}
+              buttonPadding={chrome.buttonPadding}
+              buttonFontSizeRem={chrome.buttonFontSizeRem}
+              groupGapRem={chrome.groupGapRem}
+              actionsDropdownRef={actionsDropdownRef}
+              actionsDropdownBtnRef={actionsDropdownBtnRef}
+              showActionsDropdown={showActionsDropdown}
+              setShowActionsDropdown={setShowActionsDropdown}
+              renderMenuItems={renderActionsMenuItems}
+            />
+          )}
         </div>
       </div>
       <div
@@ -939,19 +944,21 @@ export function GraphEditorHeader({
             </div>
           )}
         </div>
-        <GraphActionsDropdown
-          canEditGraph={canEditGraph}
-          isNarrow={isNarrowToolbar}
-          graphChromeTouch={graphChromeTouch}
-          buttonPadding={chrome.buttonPadding}
-          buttonFontSizeRem={chrome.buttonFontSizeRem}
-          groupGapRem={chrome.groupGapRem}
-          actionsDropdownRef={actionsDropdownRef}
-          actionsDropdownBtnRef={actionsDropdownBtnRef}
-          showActionsDropdown={showActionsDropdown}
-          setShowActionsDropdown={setShowActionsDropdown}
-          renderMenuItems={renderActionsMenuItems}
-        />
+        {!isNarrowToolbar && (
+          <GraphActionsDropdown
+            canEditGraph={canEditGraph}
+            isNarrow={false}
+            graphChromeTouch={graphChromeTouch}
+            buttonPadding={chrome.buttonPadding}
+            buttonFontSizeRem={chrome.buttonFontSizeRem}
+            groupGapRem={chrome.groupGapRem}
+            actionsDropdownRef={actionsDropdownRef}
+            actionsDropdownBtnRef={actionsDropdownBtnRef}
+            showActionsDropdown={showActionsDropdown}
+            setShowActionsDropdown={setShowActionsDropdown}
+            renderMenuItems={renderActionsMenuItems}
+          />
+        )}
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}
           disabled={!hasActiveDialogue}

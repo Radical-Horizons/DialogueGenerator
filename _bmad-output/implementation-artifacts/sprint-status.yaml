@@ -111,10 +111,9 @@ development_status:
   17-1-shell-responsive-breakpoints-layout-320px-fr118: done
   17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
   17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
-  # Priorité PO : 17.6 (typographie / densité panneaux) avant 17.4 (clavier / safe-area)
   17-6-typographie-densite-adaptive-panneaux-onglets-fr118: done
   17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
-  17-5-pwa-install-manifest-option-fr121: backlog
+  17-5-pwa-install-manifest-option-fr121: review
   epic-17-retrospective: optional
   epic-4: in-progress
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: ready-for-dev
