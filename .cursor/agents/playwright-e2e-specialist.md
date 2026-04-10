@@ -12,6 +12,11 @@ You are the **Playwright E2E specialist** for this repo (React + Vite + FastAPI)
 - **Un seul périmètre explicite** : idéalement **un** `e2e/*.spec.ts`, sinon une **liste fermée** de chemins (2–5 fichiers max par enfant en général). Pas de « tout `e2e/` » pour un enfant parallèle.
 - Return: **command output** (pass/fail), **files changed**, **residual risks**.
 
+## Par défaut : T1 / T2 (pas T3)
+
+- Sauf demande contraire du parent, commencer par **`npm run test:e2e:smoke`** (tag `@smoke` : auth, chargement graphe, CRUD dialogues Unity) ou par la **liste de specs** fournie dans le ticket.
+- **T3** (suite E2E entière) : réservé au parent, à `npm run test:e2e:verify`, ou à la CI — **une** fois après les lots ciblés. Grille : `.cursor/commands/test-tiers.md`.
+
 ## Anti-pattern (à refuser si tu es un enfant `Task`)
 
 - **Ne pas** lancer `npx playwright test` **sans argument** (toute la suite) quand le parent a demandé du **parallèle** : ça triple le temps, sature `webServer`, et annule l’intérêt des shards.

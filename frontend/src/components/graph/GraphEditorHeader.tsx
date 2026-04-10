@@ -7,6 +7,7 @@ import type React from 'react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useGraphStore } from '../../store/graphStore'
+import { useContextStore } from '../../store/contextStore'
 import { SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
@@ -80,6 +81,9 @@ export function GraphEditorHeader({
   } = useGraphStore()
   const canUndoNow = useGraphStore((s) => s.undoStack.length > 0)
   const canRedoNow = useGraphStore((s) => s.redoStack.length > 0)
+  const validateLoreExplicit = useGraphStore((s) => s.validateLoreExplicit)
+  const loreExplicitLoading = useGraphStore((s) => s.loreExplicitValidationLoading)
+  const contextSelections = useContextStore((s) => s.selections)
 
   const handleExportUnity = () => {
     const json = exportToUnity()
@@ -102,6 +106,16 @@ export function GraphEditorHeader({
     setShowAIGenerationPanel,
     showValidationPanel,
     setShowValidationPanel,
+    showQualityLlmPanel,
+    setShowQualityLlmPanel,
+    showAiSlopPanel,
+    setShowAiSlopPanel,
+    showContextDroppingPanel,
+    setShowContextDroppingPanel,
+    showFlowSimulationPanel,
+    setShowFlowSimulationPanel,
+    showSchemaValidationPanel,
+    handleToggleSchemaValidation,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -340,7 +354,7 @@ export function GraphEditorHeader({
             ...(canToggle && { cursor: 'pointer' }),
           } as React.CSSProperties
           const title = isValid
-            ? 'Graphe valide (validation automatique à chaque sauvegarde)'
+            ? 'Structure : 0 erreurs (validation automatique à chaque sauvegarde)'
             : canToggle
             ? showValidationPanel
               ? 'Cliquer pour masquer les détails'
@@ -355,7 +369,7 @@ export function GraphEditorHeader({
               <span>{isValid ? '✓' : hasErrors ? '✗' : '⚠'}</span>
               <span>
                 {isValid
-                  ? 'Graphe valide'
+                  ? 'Structure : 0 erreurs'
                   : hasErrors
                   ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
                   : warningLabel}
@@ -436,18 +450,6 @@ export function GraphEditorHeader({
             aria-label="Auto-layout (Dagre) — choisir la direction"
           >
             📐 Auto-layout
-            <span
-              style={{
-                padding: '0.1rem 0.35rem',
-                borderRadius: '999px',
-                backgroundColor: theme.background.panel,
-                color: theme.text.secondary,
-                fontSize: '0.72rem',
-                textTransform: 'capitalize',
-              }}
-            >
-              {layoutSpacingMode}
-            </span>
             <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
           </button>
           {showAutoLayoutDropdown && (
@@ -686,6 +688,52 @@ export function GraphEditorHeader({
               <button
                 type="button"
                 role="menuitem"
+                data-testid="btn-validate-lore-explicit"
+                disabled={!hasActiveDialogue || loreExplicitLoading}
+                onClick={() => {
+                  void (async () => {
+                    setShowActionsDropdown(false)
+                    setShowValidationPanel(true)
+                    try {
+                      await validateLoreExplicit(
+                        contextSelections as Record<string, unknown>
+                      )
+                    } catch {
+                      window.alert(
+                        'La validation lore n’a pas pu s’exécuter. Vérifiez la connexion au serveur ou réessayez plus tard.'
+                      )
+                    }
+                  })()
+                }}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '0.5rem 1rem',
+                  border: 'none',
+                  background: 'transparent',
+                  color:
+                    !hasActiveDialogue || loreExplicitLoading
+                      ? theme.text.secondary
+                      : theme.text.primary,
+                  textAlign: 'left',
+                  fontSize: '0.9rem',
+                  cursor:
+                    hasActiveDialogue && !loreExplicitLoading ? 'pointer' : 'not-allowed',
+                  opacity: hasActiveDialogue && !loreExplicitLoading ? 1 : 0.6,
+                }}
+                onMouseEnter={(e) => {
+                  if (hasActiveDialogue && !loreExplicitLoading)
+                    e.currentTarget.style.backgroundColor = theme.state.hover.background
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                {loreExplicitLoading ? '⏳ Lore…' : '📜 Valider lore'}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
                 onClick={() => {
                   setShowActionsDropdown(false)
                   setShowJumpToNodeModal(true)
@@ -708,7 +756,7 @@ export function GraphEditorHeader({
                   e.currentTarget.style.backgroundColor = 'transparent'
                 }}
               >
-                🎯 Aller à un nœud (Ctrl+J)
+                🎯 Aller à un nœud
               </button>
               <button
                 type="button"
@@ -739,7 +787,7 @@ export function GraphEditorHeader({
                 }}
                 title="Exporter le graphe en image (PNG ou SVG)"
               >
-                📤 Exporter en image (PNG/SVG)
+                📤 Exporter en image
               </button>
               <button
                 type="button"
@@ -812,6 +860,121 @@ export function GraphEditorHeader({
             </div>
           )}
         </div>
+        <button
+          type="button"
+          data-testid="btn-quality-llm-panel"
+          onClick={() => setShowQualityLlmPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showQualityLlmPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showQualityLlmPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showQualityLlmPanel ? theme.button.primary.color : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Évaluer la qualité narrative du dialogue (juge LLM, FR42)"
+        >
+          ✨ Qualité LLM
+        </button>
+        <button
+          type="button"
+          data-testid="btn-ai-slop-panel"
+          onClick={() => setShowAiSlopPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showAiSlopPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showAiSlopPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showAiSlopPanel ? theme.button.primary.color : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Détecter les formulations type GPT-ism, répétitions et phrases génériques (FR43)"
+        >
+          🤖 AI slop
+        </button>
+        <button
+          type="button"
+          data-testid="btn-context-dropping-panel"
+          onClick={() => setShowContextDroppingPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showContextDroppingPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showContextDroppingPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showContextDroppingPanel
+              ? theme.button.primary.color
+              : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Détecter si le contexte GDD sélectionné est absent ou trop indirect dans le dialogue (FR44)"
+        >
+          📎 Contexte
+        </button>
+        <button
+          type="button"
+          data-testid="btn-flow-simulation-panel"
+          onClick={() => setShowFlowSimulationPanel((v) => !v)}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showFlowSimulationPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showFlowSimulationPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showFlowSimulationPanel
+              ? theme.button.primary.color
+              : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Simuler le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46)"
+        >
+          🔀 Flux
+        </button>
+        <button
+          type="button"
+          data-testid="btn-schema-validation-panel"
+          onClick={() => { void handleToggleSchemaValidation() }}
+          disabled={!hasActiveDialogue}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${showSchemaValidationPanel ? theme.button.primary.background : theme.border.primary}`,
+            borderRadius: '6px',
+            backgroundColor: showSchemaValidationPanel ? theme.button.primary.background : theme.button.default.background,
+            color: showSchemaValidationPanel ? theme.button.primary.color : theme.button.default.color,
+            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Valider la conformité du schéma JSON Unity (FR48)"
+        >
+          🧩 Schéma
+        </button>
         <button
           onClick={() => setShowCostBreakdown((v) => !v)}
           disabled={!hasActiveDialogue}

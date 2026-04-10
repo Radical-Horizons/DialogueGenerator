@@ -258,3 +258,27 @@ def test_llm_factory_uses_dummy_for_gpt_5_2_when_api_key_missing():
     
     assert isinstance(client, DummyLLMClient), "DummyLLMClient devrait être utilisé quand la clé API est absente"
 
+
+def test_llm_factory_uses_dummy_for_gpt_5_2_when_api_key_is_ci_placeholder():
+    """CI définit OPENAI_API_KEY=sk-dummy : doit forcer DummyLLMClient (pas d'appel OpenAI 401)."""
+    from factories.llm_factory import LLMClientFactory
+
+    config = {"api_key_env_var": "OPENAI_API_KEY"}
+    available_models = [
+        {
+            "display_name": "GPT-5.2 (Recommandé)",
+            "api_identifier": "gpt-5.2",
+            "client_type": "openai",
+            "notes": "Modèle le plus récent et le plus capable, bon équilibre performance/coût.",
+        }
+    ]
+
+    with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-dummy"}):
+        client = LLMClientFactory.create_client(
+            model_id="gpt-5.2",
+            config=config,
+            available_models=available_models,
+        )
+
+    assert isinstance(client, DummyLLMClient)
+

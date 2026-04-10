@@ -36,10 +36,11 @@ description: Structure et bonnes pratiques pour les tests pytest
 - **Docstrings** : Chaque test doit avoir une docstring expliquant ce qu'il teste
 - **Isolation** : Chaque test est indépendant. Pas de dépendances entre tests
 - **Mock réseau/IO** : Toujours mocker OpenAI, fichiers GDD, variables d'env (sauf `tmp_path`)
-- **Markers** : 
+- **Markers** : voir `pytest.ini` (`unit`, `integration`, `slow`, `api`, `p0`, etc.).
   - `@pytest.mark.asyncio` : Pour les tests async (obligatoire)
   - `@pytest.mark.skip(reason="...")` : Pour désactiver temporairement (toujours documenter)
   - `@pytest.mark.parametrize` : Pour tester plusieurs valeurs
+  - Tests **lents** ou **intégration lourde** : `@pytest.mark.slow` et/ou `@pytest.mark.integration` — obligatoire pour tout nouveau test qui allonge la CI (grille T0–T3 : `.cursor/commands/test-tiers.md`).
 - **tmp_path** : Fixture pytest pour fichiers temporaires (auto-nettoyage)
 - **Nommage** : `test_<scenario>` pour les fonctions, `Test<Classe>` pour les classes
 
@@ -58,20 +59,27 @@ description: Structure et bonnes pratiques pour les tests pytest
 
 ## Commandes de test
 
-- **Tous les tests** : `pytest tests/` ou `python -m pytest tests/`
-- **Tests API uniquement** : `pytest tests/api/`
+- **Tous les tests (T3)** : `pytest tests/` ou `npm test` / `npm run test:backend:full`
+- **Tiers rapides (repo)** : `npm run test:backend:smoke` (T0, `p0 and not integration`), `npm run test:backend:fast` (T2, `not slow`) — implémentation [`scripts/pytest-tier.cjs`](scripts/pytest-tier.cjs)
+- **Tests API uniquement** : `pytest tests/api/` ou `npm run test:api`
 - **Tests unitaires (hors API)** : `pytest tests/ -k "not api"`
 - **Test spécifique** : `pytest tests/path/to/test_file.py::TestClass::test_method`
 - **Avec couverture** : `pytest tests/ --cov=api --cov=services --cov-report=html`
 - **Mode verbose** : `pytest tests/ -v`
 - **Arrêt au premier échec** : `pytest tests/ -x`
+- **Filtres par marqueur** (exemples) : `pytest tests/ -m p0`, `pytest tests/ -m "not slow"` — préférer les scripts npm ci-dessus sous Windows pour éviter les problèmes de quoting avec `node scripts/getPythonPath.js`.
+
+## Vitesse et CI
+
+- **PR (GitHub Actions)** : backend et frontend en **T2** (`not slow`, Vitest sans `VITEST_FULL`). **Push sur `main`** : **T3** (pytest complet, `VITEST_FULL=1`). Détail : `.github/workflows/ci.yml`.
+- **Orchestration agent / humain** : tableau unique **T0–T3** — `.cursor/commands/test-tiers.md` + `.cursor/rules/workflow.mdc`.
 
 ## Quand tester
 
-- **Après modification backend** : `pytest tests/` (tous)
-- **Après modification API** : `pytest tests/api/` (rapide)
+- **Après modification backend** : ciblé T1 → fichier ou `-k` ; large → `npm run test:backend:fast` ; complet → `pytest tests/` (T3)
+- **Après modification API** : `pytest tests/api/` ou sous-ensemble touché
 - **Après modification service** : `pytest tests/services/` ou `pytest tests/ -k "<nom_service>"`
-- **Avant commit** : `pytest tests/` (tous)
+- **Avant commit** : **T2** `npm run test:premerge` ; **T3** avant merge release / alignement CI complète
 - **Nouveau code** : Créer les tests en même temps que le code
 
 ## Workflow "teste X"
@@ -92,6 +100,7 @@ description: Structure et bonnes pratiques pour les tests pytest
 
 ## Références
 
+- **Tiers T0–T3 (vitesse, scripts npm)** : `.cursor/commands/test-tiers.md`
 - **Patterns de mock** : Voir `.cursor/rules/tests_patterns.mdc`
 - **Tests d'intégration** : Voir `.cursor/rules/tests_integration.mdc`
 - **Fixtures communes** : `tests/conftest.py`

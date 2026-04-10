@@ -1,4 +1,4 @@
-# CI minimal : tests backend + frontend sur les PR.
+# CI : PR = tiers T2 (pytest hors slow, Vitest sans VITEST_FULL) ; push main = T3 complet.
 # Déclenché sur pull_request vers main (et push sur main pour le statut).
 name: CI
 
@@ -31,7 +31,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Run tests (PR — hors slow, tier T2)
+        if: github.event_name == 'pull_request'
+        env:
+          ENVIRONMENT: development
+          JWT_SECRET_KEY: ci-dummy-secret
+          OPENAI_API_KEY: sk-dummy
+        run: python -m pytest tests/ -m "not slow" -v --tb=short
+
+      - name: Run tests (push main — suite complète, tier T3)
+        if: github.event_name == 'push'
         env:
           ENVIRONMENT: development
           JWT_SECRET_KEY: ci-dummy-secret
@@ -56,7 +65,13 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run tests (full Vitest suite)
+      - name: Run Vitest (PR — suite rapide, tier T2)
+        if: github.event_name == 'pull_request'
+        run: npx vitest run --max-workers=2
+        working-directory: frontend
+
+      - name: Run Vitest (push main — suite complète, tier T3)
+        if: github.event_name == 'push'
         env:
           VITEST_FULL: "1"
         run: npx vitest run --max-workers=2

@@ -26,6 +26,7 @@ from services.unity_dialogue_generation_service import UnityDialogueGenerationSe
 from services.linked_selector import LinkedSelectorService
 from services.notion_import_service import NotionImportService
 from services.context_rule_service import ContextRuleService
+from services.context_dropping_rules_service import ContextDroppingRulesService
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,7 @@ class ServiceContainer:
         self._linked_selector_service: Optional[LinkedSelectorService] = None
         self._notion_import_service: Optional[NotionImportService] = None
         self._context_rule_service: Optional[ContextRuleService] = None
+        self._cd_rules_service: Optional[ContextDroppingRulesService] = None
         self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
@@ -277,6 +279,22 @@ class ServiceContainer:
             logger.info("NotionImportService initialisé dans le container.")
         return self._notion_import_service
 
+    def get_cd_rules_service(self) -> ContextDroppingRulesService:
+        """Retourne le service de règles anti-context-dropping (Story 4.10).
+
+        Returns:
+            Instance partagée de ``ContextDroppingRulesService`` (singleton container).
+        """
+        if self._cd_rules_service is None:
+            from constants import FilePaths
+
+            root = Path(__file__).resolve().parent.parent
+            self._cd_rules_service = ContextDroppingRulesService(
+                storage_file=root / FilePaths.CONTEXT_DROPPING_RULES_FILE
+            )
+            logger.info("ContextDroppingRulesService initialisé dans le container.")
+        return self._cd_rules_service
+
     def get_context_rule_service(self) -> ContextRuleService:
         """Retourne le service de règles de sélection de contexte GDD.
 
@@ -376,5 +394,6 @@ class ServiceContainer:
         self._linked_selector_service = None
         self._notion_import_service = None
         self._context_rule_service = None
+        self._cd_rules_service = None
         self._gdd_notion_sync_service = None
         logger.info("ServiceContainer réinitialisé (reload détecté).")

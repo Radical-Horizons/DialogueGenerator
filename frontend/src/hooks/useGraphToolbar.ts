@@ -12,6 +12,7 @@ import { useKeyboardShortcuts } from './useKeyboardShortcuts'
 import { getErrorMessage } from '../types/errors'
 import type { UseToastFn } from '../components/shared'
 import type { GraphLayoutSpacingMode } from '../store/types/graphState'
+import * as graphAPI from '../api/graph'
 
 export interface UseGraphToolbarReturn {
   showAutoLayoutDropdown: boolean
@@ -24,6 +25,21 @@ export interface UseGraphToolbarReturn {
   setShowExportFormatDialog: (v: boolean) => void
   showValidationPanel: boolean
   setShowValidationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showQualityLlmPanel: boolean
+  setShowQualityLlmPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showAiSlopPanel: boolean
+  setShowAiSlopPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showContextDroppingPanel: boolean
+  setShowContextDroppingPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showFlowSimulationPanel: boolean
+  setShowFlowSimulationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showSchemaValidationPanel: boolean
+  schemaValidationLoading: boolean
+  schemaValidationIsValid: boolean
+  schemaValidationErrors: string[]
+  schemaValidationErrorCount: number
+  handleToggleSchemaValidation: () => void
+  handleSchemaErrorClick: (error: string) => void
   showCostBreakdown: boolean
   setShowCostBreakdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showShortcutsTooltip: boolean
@@ -63,6 +79,15 @@ export function useGraphToolbar(
   const [showAIGenerationPanel, setShowAIGenerationPanel] = useState(false)
   const [showExportFormatDialog, setShowExportFormatDialog] = useState(false)
   const [showValidationPanel, setShowValidationPanel] = useState(false)
+  const [showQualityLlmPanel, setShowQualityLlmPanel] = useState(false)
+  const [showAiSlopPanel, setShowAiSlopPanel] = useState(false)
+  const [showContextDroppingPanel, setShowContextDroppingPanel] = useState(false)
+  const [showFlowSimulationPanel, setShowFlowSimulationPanel] = useState(false)
+  const [showSchemaValidationPanel, setShowSchemaValidationPanel] = useState(false)
+  const [schemaValidationLoading, setSchemaValidationLoading] = useState(false)
+  const [schemaValidationIsValid, setSchemaValidationIsValid] = useState(false)
+  const [schemaValidationErrors, setSchemaValidationErrors] = useState<string[]>([])
+  const [schemaValidationErrorCount, setSchemaValidationErrorCount] = useState(0)
   const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
   const [showSearchBar, setShowSearchBar] = useState(false)
@@ -386,6 +411,44 @@ export function useGraphToolbar(
     ]
   )
 
+  const handleToggleSchemaValidation = useCallback(async () => {
+    if (showSchemaValidationPanel) {
+      setShowSchemaValidationPanel(false)
+      return
+    }
+    setShowSchemaValidationPanel(true)
+    setSchemaValidationLoading(true)
+    try {
+      const { nodes, edges } = useGraphStore.getState()
+      const payload = {
+        nodes: nodes.map((n) => ({ id: n.id, type: n.type ?? 'dialogueNode', position: n.position, data: n.data })),
+        edges: edges.map((e) => ({ id: e.id, source: e.source, target: e.target, type: e.type, data: e.data as Record<string, unknown> | undefined })),
+      }
+      const res = await graphAPI.validateSchema(payload)
+      setSchemaValidationIsValid(res.is_valid)
+      setSchemaValidationErrors(res.errors)
+      setSchemaValidationErrorCount(res.error_count)
+    } catch (err) {
+      setSchemaValidationErrors([getErrorMessage(err)])
+      setSchemaValidationErrorCount(1)
+      setSchemaValidationIsValid(false)
+    } finally {
+      setSchemaValidationLoading(false)
+    }
+  }, [showSchemaValidationPanel])
+
+  // Tente d'extraire l'index de nœud depuis "[nodes.N...]" et de focaliser le nœud correspondant.
+  const handleSchemaErrorClick = useCallback((error: string) => {
+    const match = /\[nodes\.(\d+)/.exec(error)
+    if (!match) return
+    const nodeIndex = parseInt(match[1], 10)
+    const { nodes } = useGraphStore.getState()
+    const node = nodes[nodeIndex]
+    if (node) {
+      useGraphViewStore.getState().focusNode(node.id)
+    }
+  }, [])
+
   const canUndoNow = canUndo()
   const canRedoNow = canRedo()
 
@@ -400,6 +463,21 @@ export function useGraphToolbar(
     setShowExportFormatDialog,
     showValidationPanel,
     setShowValidationPanel,
+    showQualityLlmPanel,
+    setShowQualityLlmPanel,
+    showAiSlopPanel,
+    setShowAiSlopPanel,
+    showContextDroppingPanel,
+    setShowContextDroppingPanel,
+    showFlowSimulationPanel,
+    setShowFlowSimulationPanel,
+    showSchemaValidationPanel,
+    schemaValidationLoading,
+    schemaValidationIsValid,
+    schemaValidationErrors,
+    schemaValidationErrorCount,
+    handleToggleSchemaValidation,
+    handleSchemaErrorClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,

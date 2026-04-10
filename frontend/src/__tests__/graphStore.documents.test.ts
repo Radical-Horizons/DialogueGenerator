@@ -58,6 +58,20 @@ describe('graphStore - document SoT load/save', () => {
       expect(state.edges.some((e) => e.source === 'START' && e.target === 'END')).toBe(true)
     })
 
+    it('restaure intentionalCycleIds depuis le layout au chargement (FR41)', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({
+        layout: { ...sampleLayout, intentionalCycleIds: ['persisted_cycle'] },
+        revision: 1,
+      })
+      await useGraphStore.getState().loadDialogueByDocumentId('test-doc-cycle')
+      expect(useGraphStore.getState().intentionalCycles).toEqual(['persisted_cycle'])
+    })
+
     it('handles 404 layout as empty layout', async () => {
       vi.mocked(documentsAPI.getDocument).mockResolvedValue({
         document: sampleDocument,
@@ -264,6 +278,29 @@ describe('graphStore - document SoT load/save', () => {
       expect(state.lastSaveError).toBeNull()
       expect(state.syncStatus).toBe('synced')
       expect(typeof state.lastSavedAt).toBe('number')
+    })
+
+    it('persiste intentionalCycleIds dans le layout sidecar (FR41)', async () => {
+      vi.mocked(documentsAPI.getDocument).mockResolvedValue({
+        document: sampleDocument,
+        schemaVersion: '1.1.0',
+        revision: 1,
+      })
+      vi.mocked(documentsAPI.getLayout).mockResolvedValue({ layout: sampleLayout, revision: 1 })
+      vi.mocked(documentsAPI.putDocument).mockResolvedValue({ revision: 2 })
+      vi.mocked(documentsAPI.putLayout).mockResolvedValue({ revision: 2 })
+      const { loadDialogueByDocumentId, saveDialogue } = useGraphStore.getState()
+      await loadDialogueByDocumentId('test-doc')
+      useGraphStore.setState({ intentionalCycles: ['cycle_a', 'cycle_b'] })
+      await saveDialogue()
+      expect(documentsAPI.putLayout).toHaveBeenCalledWith(
+        'test-doc',
+        expect.objectContaining({
+          layout: expect.objectContaining({
+            intentionalCycleIds: ['cycle_a', 'cycle_b'],
+          }),
+        })
+      )
     })
   })
 

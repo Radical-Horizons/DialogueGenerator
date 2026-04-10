@@ -39,6 +39,7 @@ so that {{benefit}}.
 - What to reuse : existing components, actions, or endpoints (brief; key references only, not an exhaustive list)
 - Quality bar : what behaviors must be covered by tests (outcomes), not how to write them
 - Refactor bar (defaults) : dev-story REFACTOR QUALITY CRITERIA — e.g. max ~300 lines per source file touched in a task, ~60 lines per function, no non-trivial duplication, domain naming, single responsibility of exported units; override here if the story needs different numeric limits
+- Fichiers chauds : [fichiers pré-existants > 500 lignes qui seront touchés — indiquer la taille actuelle et la contrainte explicite, ex: "`api/routers/graph.py` (1653 L) — handler ≤ 30 lignes, toute logique dans le service". Laisser vide si aucun fichier chaud concerné.]
 - Conventions : naming, where similar code lives, constraints (e.g. persist via existing save)
 
 ### Project Structure Notes

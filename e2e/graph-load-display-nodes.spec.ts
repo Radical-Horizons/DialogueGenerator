@@ -33,7 +33,7 @@ const FIXTURE_DOC = {
   ],
 }
 
-test.describe('Graph load – affichage des nœuds', () => {
+test.describe('Graph load – affichage des nœuds', { tag: '@smoke' }, () => {
   test.setTimeout(E2E_TEST_TIMEOUT_MS.apiMedium)
 
   const login = async (page: Page) => {

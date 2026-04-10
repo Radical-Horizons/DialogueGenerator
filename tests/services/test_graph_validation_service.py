@@ -1,6 +1,12 @@
 """Tests pour GraphValidationService."""
+import time
+
 import pytest
-from services.graph_validation_service import GraphValidationService, ValidationResult
+
+from services.graph_validation_service import (
+    GraphValidationService,
+    ValidationResult,
+)
 
 
 class TestValidateCycles:
@@ -99,3 +105,504 @@ class TestValidateCycles:
         GraphValidationService._validate_cycles(nodes, edges, result2)
         
         assert result1.warnings[0].cycle_id == result2.warnings[0].cycle_id
+
+
+class TestUnityDialogueStructureFr36:
+    """Validation structurelle DisplayName, stableID (data.id), texte dialogue."""
+
+    def test_missing_display_name_dialogue_node(self):
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogueNode",
+                "data": {
+                    "id": "D1",
+                    "line": "Hello",
+                },
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        types = [e.type for e in result.errors]
+        assert "missing_display_name" in types
+        assert any(e.node_id == "D1" for e in result.errors if e.type == "missing_display_name")
+
+    def test_missing_dialogue_text(self):
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogueNode",
+                "data": {
+                    "id": "D1",
+                    "title": "Titre",
+                },
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        types = [e.type for e in result.errors]
+        assert "missing_dialogue_text" in types
+
+    def test_choices_without_text_not_exploitable(self):
+        """Liste choices non vide mais sans texte utile → même règle que sans choices (FR36)."""
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogueNode",
+                "data": {
+                    "id": "D1",
+                    "displayName": "X",
+                    "choices": [{}, {"text": "  "}, {"text": None}],
+                },
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        assert any(e.type == "missing_dialogue_text" for e in result.errors)
+
+    def test_missing_stable_id_index(self):
+        nodes = [
+            {
+                "type": "dialogueNode",
+                "data": {"title": "X", "line": "y"},
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        assert any(e.type == "missing_stable_id" and e.node_id is None for e in result.errors)
+
+    def test_data_id_mismatch(self):
+        nodes = [
+            {
+                "id": "ROOT",
+                "type": "dialogueNode",
+                "data": {
+                    "id": "OTHER",
+                    "title": "OK",
+                    "line": "text",
+                },
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        assert any(
+            e.type == "missing_stable_id" and "incohérent" in e.message for e in result.errors
+        )
+
+    def test_valid_dialogue_node_no_structural_errors(self):
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogueNode",
+                "data": {
+                    "id": "D1",
+                    "displayName": "Scene",
+                    "line": "Hello",
+                },
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        structural = {
+            "missing_display_name",
+            "missing_dialogue_text",
+        }
+        bad = [e for e in result.errors if e.type in structural]
+        assert bad == []
+
+    def test_start_skips_display_and_text_rules(self):
+        nodes = [
+            {
+                "id": "START",
+                "type": "dialogueNode",
+                "data": {"id": "START"},
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        assert not any(e.type == "missing_display_name" for e in result.errors)
+        assert not any(e.type == "missing_dialogue_text" for e in result.errors)
+
+
+class TestFr37ContentCompleteness:
+    """Messages FR37 et exemptions END (story 4.2)."""
+
+    def test_empty_dialogue_content_message(self):
+        nodes = [
+            {
+                "id": "D1",
+                "type": "dialogueNode",
+                "data": {
+                    "id": "D1",
+                    "displayName": "Scène",
+                    "choices": [],
+                },
+            }
+        ]
+        result = GraphValidationService.validate_graph(nodes, [])
+        err = next(e for e in result.errors if e.type == "missing_dialogue_text")
+        assert "contenu vide" in err.message
+        assert "ni dialogue ni choix" in err.message
+
+    def test_missing_test_message(self):
+        nodes = [{"id": "T1", "type": "testNode", "data": {"id": "T1"}}]
+        result = ValidationResult()
+        GraphValidationService._validate_test_node_content(nodes, result)
+        assert len(result.errors) == 1
+        err = result.errors[0]
+        assert err.type == "missing_test"
+        assert err.node_id == "T1"
+        assert "Nœud test [T1]" in err.message
+        assert "test d'attribut manquant" in err.message
+
+    def test_end_node_empty_no_dialogue_text_error(self):
+        nodes = [{"id": "END", "type": "endNode", "data": {"id": "END"}}]
+        result = ValidationResult()
+        GraphValidationService._validate_unity_dialogue_structure(nodes, result)
+        assert not any(e.type == "missing_dialogue_text" for e in result.errors)
+
+
+class TestFindOrphanNodesNodeId:
+    """Régression : find_orphan_nodes aligné sur _node_id (id racine ou data.id)."""
+
+    def test_orphan_when_id_only_in_data(self):
+        """Le premier nœud dialogue est l'entrée ; un second sans arête entrante est orphelin."""
+        nodes = [
+            {"data": {"id": "onlyInData", "type": "dialogueNode"}},
+            {"data": {"id": "second", "type": "dialogueNode"}},
+        ]
+        edges: list[dict] = []
+        orphans = GraphValidationService.find_orphan_nodes(nodes, edges)
+        assert "second" in orphans
+        assert "onlyInData" not in orphans
+
+
+class TestOrphanNodesFr40:
+    """FR40 : orphelin = sans arête entrante ; entrée = START ou premier nœud dialogue."""
+
+    def test_start_plus_orphan_emits_orphan_warning_with_node_id(self):
+        nodes = [
+            {
+                "id": "START",
+                "type": "dialogueNode",
+                "data": {"id": "START", "displayName": "Entrée", "line": "Go"},
+            },
+            {
+                "id": "ORPHAN",
+                "type": "dialogueNode",
+                "data": {"id": "ORPHAN", "displayName": "Seul", "line": "Hi"},
+            },
+        ]
+        edges: list[dict] = []
+        result = ValidationResult()
+        GraphValidationService._validate_orphan_nodes(nodes, edges, result)
+        types = [w.type for w in result.warnings]
+        assert "orphan_node" in types
+        orphan = next(w for w in result.warnings if w.type == "orphan_node")
+        assert orphan.node_id == "ORPHAN"
+        assert "orphelin" in orphan.message.lower()
+        assert "entrée" in orphan.message.lower() or "inatteignable" in orphan.message.lower()
+
+    def test_start_never_orphan_even_without_incoming_edge(self):
+        nodes = [
+            {
+                "id": "START",
+                "type": "dialogueNode",
+                "data": {"id": "START", "displayName": "Entrée", "line": "Go"},
+            },
+        ]
+        edges: list[dict] = []
+        result = ValidationResult()
+        GraphValidationService._validate_orphan_nodes(nodes, edges, result)
+        assert not any(w.node_id == "START" for w in result.warnings)
+
+    def test_without_start_first_dialogue_is_entry_second_is_orphan(self):
+        """Sans START, le premier nœud dialogue est l'entrée — le suivant sans cible entrante est orphelin."""
+        nodes = [
+            {
+                "id": "A",
+                "type": "dialogueNode",
+                "data": {"id": "A", "displayName": "A", "line": "a"},
+            },
+            {
+                "id": "B",
+                "type": "dialogueNode",
+                "data": {"id": "B", "displayName": "B", "line": "b"},
+            },
+        ]
+        edges: list[dict] = []
+        result = ValidationResult()
+        GraphValidationService._validate_orphan_nodes(nodes, edges, result)
+        orphan_ids = {w.node_id for w in result.warnings if w.type == "orphan_node"}
+        assert "B" in orphan_ids
+        assert "A" not in orphan_ids
+
+    def test_find_orphan_nodes_excludes_implicit_entry_without_start(self):
+        nodes = [
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A", "displayName": "A", "line": "x"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B", "displayName": "B", "line": "y"}},
+        ]
+        assert GraphValidationService.find_orphan_nodes(nodes, []) == ["B"]
+
+
+class TestSimulateFlow:
+    """Tests pour _validate_dead_ends et _validate_cul_de_sacs (FR46 / Story 4.11)."""
+
+    # --- dead ends ---
+
+    def test_unreachable_node_is_dead_end(self):
+        """Nœud inatteignable depuis START → dead_end_node error."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B"}},
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            # B is unreachable
+        ]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+
+        dead_end_ids = {e.node_id for e in result.errors if e.type == "dead_end_node"}
+        assert "B" in dead_end_ids
+        assert "A" not in dead_end_ids
+        assert "START" not in dead_end_ids
+        assert all(e.severity == "error" for e in result.errors if e.type == "dead_end_node")
+
+    def test_valid_graph_produces_no_dead_ends(self):
+        """Graphe entièrement atteignable → aucun dead_end_node."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+
+        assert all(e.type != "dead_end_node" for e in result.errors)
+
+    def test_multiple_unreachable_nodes_all_reported_as_dead_ends(self):
+        """Plusieurs nœuds inatteignables → tous remontés comme dead_end_node."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B"}},
+            {"id": "C", "type": "dialogueNode", "data": {"id": "C"}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+
+        dead_end_ids = {e.node_id for e in result.errors if e.type == "dead_end_node"}
+        assert {"B", "C"} == dead_end_ids
+
+    # --- cul-de-sacs ---
+
+    def test_reachable_node_with_all_edges_to_end_is_cul_de_sac(self):
+        """Nœud atteignable dont toutes les sorties pointent vers END → cul_de_sac_node warning."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "END"},
+        ]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "A" in cul_de_sac_ids
+        assert all(w.severity == "warning" for w in result.warnings if w.type == "cul_de_sac_node")
+
+    def test_reachable_node_with_no_outgoing_edges_non_end_is_cul_de_sac(self):
+        """Nœud atteignable sans aucune arête sortante (non-END) → cul_de_sac_node warning."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "A"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "A" in cul_de_sac_ids
+
+    def test_end_node_is_not_cul_de_sac(self):
+        """Le nœud END lui-même n'est jamais marqué cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "END", "type": "endNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "END"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "END" not in cul_de_sac_ids
+        assert "START" not in cul_de_sac_ids
+
+    def test_entry_node_is_not_cul_de_sac_when_only_edge_goes_to_end(self):
+        """Régression H2 : graphe trivial START → END ne doit pas signaler START comme cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "END", "type": "endNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "END"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert cul_de_sac_ids == set(), (
+            f"Faux positif : le nœud d'entrée ne doit pas être cul-de-sac, mais {cul_de_sac_ids!r} remontés"
+        )
+
+    def test_first_dialogue_entry_node_not_cul_de_sac_when_only_edge_goes_to_end(self):
+        """Régression H2 : graphe sans START nommé — le premier nœud dialogue est l'entrée."""
+        nodes = [
+            {"id": "FIRST", "type": "dialogueNode", "data": {"id": "FIRST"}},
+            {"id": "END", "type": "endNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "FIRST", "target": "END"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("FIRST", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "FIRST" not in cul_de_sac_ids
+
+    def test_test_node_is_not_cul_de_sac(self):
+        """Les nœuds testNode ne sont pas marqués cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "T1", "type": "testNode", "data": {}},
+        ]
+        edges = [{"id": "e1", "source": "START", "target": "T1"}]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "T1" not in cul_de_sac_ids
+
+    def test_node_with_outgoing_edge_to_non_end_is_not_cul_de_sac(self):
+        """Nœud avec arête sortante vers un nœud non-END → pas cul-de-sac."""
+        nodes = [
+            {"id": "START", "type": "startNode", "data": {}},
+            {"id": "A", "type": "dialogueNode", "data": {"id": "A"}},
+            {"id": "B", "type": "dialogueNode", "data": {"id": "B"}},
+        ]
+        edges = [
+            {"id": "e1", "source": "START", "target": "A"},
+            {"id": "e2", "source": "A", "target": "B"},
+        ]
+        result = ValidationResult()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        cul_de_sac_ids = {w.node_id for w in result.warnings if w.type == "cul_de_sac_node"}
+        assert "A" not in cul_de_sac_ids
+
+    @pytest.mark.slow
+    def test_simulate_flow_on_500_nodes_under_1s(self):
+        """Performance AC#3 : simulation sur 500+ nœuds < 1 s."""
+        nodes = [{"id": "START", "type": "startNode", "data": {}}]
+        edges = []
+        prev = "START"
+        for i in range(499):
+            nid = f"n{i:03d}"
+            nodes.append({"id": nid, "type": "dialogueNode", "data": {"id": nid}})
+            edges.append({"id": f"e{i}", "source": prev, "target": nid})
+            prev = nid
+        # 50 unreachable nodes for dead end detection
+        for j in range(50):
+            nid = f"iso{j:02d}"
+            nodes.append({"id": nid, "type": "dialogueNode", "data": {"id": nid}})
+
+        t0 = time.perf_counter()
+        reachable = GraphValidationService._find_reachable_nodes("START", edges)
+        result = ValidationResult()
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+        elapsed = time.perf_counter() - t0
+        assert elapsed < 1.0, f"simulate_flow {len(nodes)} nœuds : {elapsed:.3f}s, cible < 1s"
+
+
+class TestComputeCoverageStats:
+    """Tests unitaires pour GraphValidationService.compute_coverage_stats (FR47)."""
+
+    @staticmethod
+    def _node(nid: str, ntype: str = "dialogueNode") -> dict:
+        return {"id": nid, "type": ntype, "data": {"id": nid}}
+
+    def test_coverage_excludes_end_and_test_nodes(self):
+        """END et testNode exclus de total_nodes — seuls dialogueNode comptent."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [
+            self._node("A"),
+            self._node("B"),
+            self._node("END", "endNode"),
+            self._node("T1", "testNode"),
+        ]
+        # dead end IDs: only A is a content-node dead end (T1 is testNode, ignored)
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
+        assert isinstance(stats, FlowCoverageStats)
+        assert stats.total_nodes == 2  # A et B seulement
+        assert stats.dead_end_count == 1
+        assert stats.cul_de_sac_count == 0
+
+    def test_full_coverage_when_all_reachable(self):
+        """accessible_count == total_nodes → coverage_percentage == 100.0."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [self._node("A"), self._node("B"), self._node("C")]
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
+        assert stats.total_nodes == 3
+        assert stats.accessible_count == 3
+        assert stats.coverage_percentage == 100.0
+
+    def test_partial_coverage_rounds_to_one_decimal(self):
+        """1 dead end sur 3 nœuds → accessible=2, percentage=66.7."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [self._node("A"), self._node("B"), self._node("C")]
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=["A"], cul_de_sac_count=0)
+        assert stats.total_nodes == 3
+        assert stats.accessible_count == 2
+        assert stats.coverage_percentage == 66.7
+
+    def test_coverage_no_division_by_zero_when_total_nodes_zero(self):
+        """Zéro nœud contenu → total_nodes==0, coverage_percentage==100.0 (pas de ZeroDivisionError)."""
+        from api.schemas.graph import FlowCoverageStats
+        nodes = [self._node("END", "endNode"), self._node("T1", "testNode")]
+        stats = GraphValidationService.compute_coverage_stats(nodes, dead_end_ids=[], cul_de_sac_count=0)
+        assert stats.total_nodes == 0
+        assert stats.coverage_percentage == 100.0
+
+
+@pytest.mark.slow
+class TestGraphValidationPerformance:
+    """NFR-P3 : budget temps sur graphe de référence (exécuté en T3 / hors `not slow`)."""
+
+    def test_validate_graph_linear_200_nodes_under_200ms(self):
+        nodes = [
+            {"id": "START", "type": "dialogueNode", "data": {"id": "START"}},
+        ]
+        edges = []
+        prev = "START"
+        for i in range(200):
+            nid = f"n{i:03d}"
+            nodes.append(
+                {
+                    "id": nid,
+                    "type": "dialogueNode",
+                    "data": {"id": nid, "displayName": f"D{i}", "line": "L"},
+                }
+            )
+            edges.append({"id": f"e{i}", "source": prev, "target": nid})
+            prev = nid
+        t0 = time.perf_counter()
+        GraphValidationService.validate_graph(nodes, edges)
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        assert elapsed_ms < 200.0, (
+            f"validate_graph({len(nodes)} nœuds) a pris {elapsed_ms:.1f} ms, cible NFR-P3 < 200 ms"
+        )

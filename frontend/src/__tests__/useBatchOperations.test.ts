@@ -148,7 +148,7 @@ describe('useBatchOperations', () => {
     const validateGraphMock = vi.fn().mockImplementation(async () => {
       useGraphStore.setState({
         validationErrors: [
-          { node_id: 'n1', severity: 'warning', message: 'Empty', type: 'empty_node' },
+          { node_id: 'n1', severity: 'warning', message: 'Empty', type: 'missing_dialogue_text' },
         ],
       })
     })

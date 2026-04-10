@@ -1,7 +1,14 @@
 """Schémas Pydantic pour l'API de gestion de graphes."""
+import re
 from datetime import datetime
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, ConfigDict, Field
+from typing import List, Dict, Any, Optional, Literal
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from services.ai_slop_detector import (
+    MAX_CUSTOM_REGEX_PATTERN_CHARS,
+    MAX_CUSTOM_REGEX_PATTERN_COUNT,
+    custom_regex_pattern_policy_violation,
+)
 
 
 class LoadGraphRequest(BaseModel):
@@ -147,6 +154,14 @@ class ValidateGraphRequest(BaseModel):
     edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
 
 
+class LoreAmbiguityCandidatePayload(BaseModel):
+    """Candidat GDD pour une ambiguïté de mention vague (FR39)."""
+
+    name: str = Field(..., description="Nom affichable de l'entité")
+    category: str = Field(..., description="Catégorie GDD (ex. locations)")
+    gdd_path: str = Field(..., description="Chemin stable affichable (ex. Lieux › Nom)")
+
+
 class ValidationErrorDetail(BaseModel):
     """Détail d'une erreur de validation."""
     type: str = Field(..., description="Type d'erreur")
@@ -157,6 +172,93 @@ class ValidationErrorDetail(BaseModel):
     cycle_path: Optional[str] = Field(None, description="Chemin complet du cycle (format: 'A → B → C → A')")
     cycle_nodes: Optional[List[str]] = Field(None, description="Liste des nœuds dans le cycle")
     cycle_id: Optional[str] = Field(None, description="ID stable du cycle (pour marquage intentionnel)")
+    gdd_reference: Optional[str] = Field(
+        None,
+        description="Référence entrée GDD (ex. catégorie › nom) pour erreurs lore (FR38)",
+    )
+    lore_subtype: Optional[str] = Field(
+        None,
+        description="Sous-type heuristique pour avertissements lore (FR39)",
+    )
+    lore_warning_key: Optional[str] = Field(
+        None,
+        description="Clé stable pour persistance état warning (FR39, ex. localStorage)",
+    )
+    ambiguity_candidates: Optional[List[LoreAmbiguityCandidatePayload]] = Field(
+        None,
+        description="Candidats GDD lorsque type=lore_potential_ambiguity (FR39)",
+    )
+
+
+class GddLoreFactPayload(BaseModel):
+    """Fait GDD injecté (tests / client) pour validation lore explicite."""
+
+    entity_name: str = Field(..., description="Nom canonique de l'entité")
+    category: str = Field(..., description="Catégorie GDD (ex. characters)")
+    gdd_path: str = Field(..., description="Chemin stable affichable (ex. Personnages › Nom)")
+    vitality: Literal["alive", "dead"] = Field(..., description="Vitalité selon le GDD")
+
+
+class ValidateLoreExplicitRequest(BaseModel):
+    """Requête validation contradictions lore explicites (FR38)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
+    context_selections: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Sélections contexte (même forme que génération) pour extraction via ContextBuilder",
+    )
+    scene_instruction: str = Field(
+        default="",
+        description="Instruction de scène (optionnelle, passée au ContextBuilder)",
+    )
+    gdd_lore_facts: List[GddLoreFactPayload] = Field(
+        default_factory=list,
+        description="Faits explicites (prioritaires, fusionnés avec l'extraction contexte)",
+    )
+
+
+class ValidateLoreExplicitResponse(BaseModel):
+    """Réponse validation lore explicite."""
+
+    valid: bool = Field(..., description="True si aucune contradiction explicite")
+    errors: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description="Erreurs lore (type lore_contradiction_explicit)",
+    )
+    warnings: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description=(
+            "Avertissements lore révisables : lore_contradiction_potential (AC 4.3), "
+            "lore_potential_ambiguity (FR39), sans erreurs explicites"
+        ),
+    )
+    contradiction_count: int = Field(..., description="Nombre de contradictions explicites")
+    nodes_with_contradictions_count: int = Field(..., description="Nombre de nœuds distincts concernés (explicite)")
+    potential_warnings_count: int = Field(
+        0,
+        description="Nombre d'avertissements lore_contradiction_potential",
+    )
+    nodes_with_potential_warnings_count: int = Field(
+        0,
+        description="Nombre de nœuds distincts avec avertissement potentiel",
+    )
+    ambiguity_warnings_count: int = Field(
+        0,
+        description="Nombre d'avertissements lore_potential_ambiguity (FR39)",
+    )
+    nodes_with_ambiguity_warnings_count: int = Field(
+        0,
+        description="Nombre de nœuds distincts avec ambiguïté référentielle vague",
+    )
+    summary: str = Field(
+        ...,
+        description="Résumé agrégé : explicite + avertissements potentiels + ambiguïtés + nœuds analysés",
+    )
+    summary_explicit_only: str = Field(
+        ...,
+        description="Résumé contradictions explicites seul (bandeau UI ; aligné filtres client FR39 AC #5)",
+    )
 
 
 class ValidateGraphResponse(BaseModel):
@@ -164,6 +266,69 @@ class ValidateGraphResponse(BaseModel):
     valid: bool = Field(..., description="True si aucune erreur")
     errors: List[ValidationErrorDetail] = Field(..., description="Liste des erreurs")
     warnings: List[ValidationErrorDetail] = Field(..., description="Liste des warnings")
+
+
+class SimulateFlowRequest(BaseModel):
+    """Requête de simulation de flux pour détecter dead ends et cul-de-sacs (FR46)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Arêtes ReactFlow")
+
+
+class FlowCoverageStats(BaseModel):
+    """Statistiques de couverture après simulation de flux (FR47).
+
+    Exclut ``endNode``/``testNode``/``startNode`` de ``total_nodes``.
+    ``coverage_percentage`` vaut 100.0 quand ``total_nodes == 0``.
+    """
+
+    total_nodes: int = Field(..., description="Nœuds contenu (hors END, testNode)")
+    accessible_count: int = Field(..., description="Nœuds contenu atteignables")
+    dead_end_count: int = Field(..., description="Nœuds inatteignables (dead ends)")
+    cul_de_sac_count: int = Field(..., description="Nœuds cul-de-sacs")
+    coverage_percentage: float = Field(..., description="Pourcentage de couverture (0–100, 1 décimale)")
+
+
+class SimulateFlowResponse(BaseModel):
+    """Réponse de simulation de flux (FR46 + FR47).
+
+    ``dead_ends`` : nœuds inatteignables depuis l'entrée (sévérité ``error``).
+    ``cul_de_sacs`` : nœuds atteignables sans sortie vers un nœud non-END (sévérité ``warning``).
+    ``coverage`` : statistiques de couverture (FR47).
+    """
+
+    dead_ends: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description="Nœuds inatteignables depuis l'entrée (dead ends, severity=error)",
+    )
+    cul_de_sacs: List[ValidationErrorDetail] = Field(
+        default_factory=list,
+        description="Nœuds sans sortie non-END (cul-de-sacs, severity=warning)",
+    )
+    coverage: Optional[FlowCoverageStats] = Field(
+        default=None,
+        description="Statistiques de couverture (FR47) ; None si non calculé",
+    )
+
+
+class ValidateSchemaRequest(BaseModel):
+    """Requête de validation conformité schéma JSON Unity (FR48 / Story 4.13)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Arêtes ReactFlow")
+
+
+class ValidateSchemaResponse(BaseModel):
+    """Réponse de validation conformité schéma JSON Unity (FR48 / Story 4.13).
+
+    ``is_valid`` : True si le document Unity produit est 100% conforme au schéma.
+    ``errors`` : liste des messages d'erreur (vide si conforme).
+    ``error_count`` : raccourci ``len(errors)`` pour faciliter l'affichage UI.
+    """
+
+    is_valid: bool = Field(..., description="True si le schéma Unity est conforme à 100%")
+    errors: List[str] = Field(..., description="Messages d'erreur détectés")
+    error_count: int = Field(..., description="Nombre d'erreurs (== len(errors))")
 
 
 class CalculateLayoutRequest(BaseModel):
@@ -220,3 +385,176 @@ class NodePromptResponse(BaseModel):
     timestamp: Optional[datetime] = Field(None, description="Horodatage de la génération (si stocké)")
     is_historical: bool = Field(..., description="True si prompt stocké à l'époque, False si reconstruit")
     message: Optional[str] = Field(None, description="Message informatif (ex: prompt reconstruit, contexte modifié)")
+
+
+class AiSlopDetectionOptions(BaseModel):
+    """Options de détection AI slop (FR43) — corps optionnel de la requête."""
+
+    include_gpt_isms: bool = Field(True, description="Activer la détection de formulations type GPT-ism")
+    include_repetitions: bool = Field(True, description="Activer la détection de répétitions textuelles")
+    include_generic_phrases: bool = Field(True, description="Activer les phrases génériques du catalogue")
+    custom_keywords: List[str] = Field(default_factory=list, description="Mots ou sous-chaînes supplémentaires")
+    custom_regex_patterns: List[str] = Field(
+        default_factory=list,
+        max_length=MAX_CUSTOM_REGEX_PATTERN_COUNT,
+        description=(
+            "Motifs regex Python (IGNORECASE côté service) — "
+            f"max {MAX_CUSTOM_REGEX_PATTERN_COUNT} motifs, "
+            f"{MAX_CUSTOM_REGEX_PATTERN_CHARS} caractères chacun ; motifs à risque ReDoS refusés."
+        ),
+    )
+
+    @field_validator("custom_regex_patterns", mode="after")
+    @classmethod
+    def validate_regex_patterns(cls, patterns: List[str]) -> List[str]:
+        """Valide limites, politique anti-ReDoS heuristique et syntaxe des regex."""
+        for p in patterns:
+            s = str(p).strip()
+            if not s:
+                continue
+            violation = custom_regex_pattern_policy_violation(s)
+            if violation:
+                raise ValueError(violation) from None
+            try:
+                re.compile(s)
+            except re.error as exc:
+                raise ValueError(f"Regex invalide : {p!r} ({exc})") from exc
+        return patterns
+
+
+class DetectAiSlopRequest(BaseModel):
+    """Requête détection « AI slop » — même charge utile que validate (nodes + edges)."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
+    options: Optional[AiSlopDetectionOptions] = Field(
+        None,
+        description="Options de détection (familles, motifs personnalisés)",
+    )
+
+
+class AiSlopOccurrenceItem(BaseModel):
+    """Une occurrence détectée (avertissement non bloquant)."""
+
+    kind: Literal["gpt_ism", "repetition", "generic_phrase"] = Field(
+        ...,
+        description="Famille : gpt_ism, repetition ou generic_phrase",
+    )
+    node_id: str = Field(..., description="ID ReactFlow du nœud")
+    node_display_id: Optional[str] = Field(None, description="stableId / id document affichable")
+    field: str = Field(..., description="Champ source (line, choice_N, …)")
+    excerpt: str = Field(..., description="Texte du segment (tronqué pour l’UI)")
+    matched_span: str = Field(..., description="Portion correspondant au motif")
+    suggestion: str = Field(..., description="Piste de remplacement heuristique")
+    severity: Literal["warning"] = Field("warning", description="Sévérité (toujours warning pour FR43)")
+
+
+class AiSlopRepetitionGroup(BaseModel):
+    """Groupe de répétitions d’une même phrase normalisée."""
+
+    normalized_phrase: str = Field(..., description="Phrase normalisée (casse / espaces)")
+    occurrence_count: int = Field(..., description="Nombre d’occurrences du segment")
+    node_ids: List[str] = Field(..., description="Nœuds distincts concernés")
+    sample_excerpt: str = Field(..., description="Exemple de texte brut")
+
+
+class DetectAiSlopResponse(BaseModel):
+    """Réponse détection AI slop."""
+
+    summary_gpt_isms: str = Field(..., description="Résumé lisible pour GPT-isms")
+    summary_repetitions: str = Field(..., description="Résumé lisible pour répétitions")
+    summary_generic_phrases: str = Field(..., description="Résumé lisible pour phrases génériques")
+    gpt_ism_occurrence_count: int = Field(0, description="Nombre d’occurrences GPT-ism (hors regex seule)")
+    gpt_ism_distinct_node_count: int = Field(0, description="Nombre de nœuds distincts touchés (GPT-ism)")
+    generic_phrase_occurrence_count: int = Field(0, description="Nombre d’occurrences génériques")
+    repetition_group_count: int = Field(0, description="Nombre de phrases répétées (groupes)")
+    occurrences: List[AiSlopOccurrenceItem] = Field(default_factory=list)
+    repetition_groups: List[AiSlopRepetitionGroup] = Field(default_factory=list)
+    message: Optional[str] = Field(
+        None,
+        description="Contexte (graphe vide, tout désactivé, etc.) — ne pas confondre avec succès silencieux",
+    )
+
+
+class DetectContextDroppingOptions(BaseModel):
+    """Options détection context dropping (FR44 / Story 4.10)."""
+
+    rules_profile: Optional[Literal["strict", "light"]] = Field(
+        None,
+        description="Profil : 'strict' (défaut) ou 'light' (tolérance élevée).",
+    )
+    tolerance: Optional[float] = Field(
+        None,
+        ge=0.0,
+        le=1.0,
+        description="Seuil souple [0, 1] — None = comportement par défaut du profil.",
+    )
+    mandatory_info: Optional[List[str]] = Field(
+        None,
+        description="Labels d'informations dont la présence est obligatoire dans le graphe (AC #4).",
+    )
+    dialogue_type: Optional[str] = Field(
+        None,
+        description="Type de dialogue (ex. 'combat') pour appliquer les surcharges de règles (AC #5).",
+    )
+    dialogue_type_overrides: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Surcharges par type (ex. {'combat': {'rules_profile': 'strict'}}) (AC #5).",
+    )
+
+
+class DetectContextDroppingRequest(BaseModel):
+    """Requête détection context dropping — alignée validate-lore-explicit + graphe."""
+
+    nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
+    edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
+    context_selections: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Sélections contexte GDD (même famille que validate_graph / génération)",
+    )
+    scene_instruction: str = Field(
+        default="",
+        description="Consigne de scène optionnelle (lignes analysées comme faits candidats)",
+    )
+    context_text: Optional[str] = Field(
+        None,
+        description="Texte libre optionnel (tests ou client) complémentaire aux sélections",
+    )
+    options: Optional[DetectContextDroppingOptions] = Field(
+        None,
+        description="Profil strict/léger ; champs futurs sans casser les clients",
+    )
+
+
+class ContextDroppingCaseItem(BaseModel):
+    """Un cas détecté (absence, usage trop indirect, ou information obligatoire manquante)."""
+
+    kind: Literal["context_dropping", "too_subtle", "mandatory_missing"] = Field(
+        ...,
+        description="Absence détectable ou signal trop faible (subtilité)",
+    )
+    node_id: Optional[str] = Field(
+        None,
+        description="Nœud cible pour focus (premier dialogue) ou portée globale",
+    )
+    node_display_id: Optional[str] = Field(None, description="stableId / id document affichable")
+    context_label: str = Field(..., description="Fragment du contexte concerné")
+    message: str = Field(..., description="Message actionnable affiché")
+    suggestion: str = Field(..., description="Piste pour renforcer l'explicitation")
+    severity: Literal["warning", "info"] = Field(..., description="warning = absence ; info = subtilité")
+
+
+class DetectContextDroppingResponse(BaseModel):
+    """Réponse détection context dropping (FR44)."""
+
+    summary: str = Field(..., description="Résumé du type « X cas de context dropping détectés »")
+    case_count: int = Field(..., description="Nombre d'entrées dans cases (cohérent avec summary)")
+    cases: List[ContextDroppingCaseItem] = Field(default_factory=list)
+    message: Optional[str] = Field(
+        None,
+        description="Contexte (graphe vide, contexte vide, RAS heuristique) — explicite pour ne pas confondre avec succès silencieux",
+    )
+    rules_profile_effective: str = Field(
+        ...,
+        description="Profil réellement appliqué (strict ou light)",
+    )

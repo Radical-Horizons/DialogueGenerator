@@ -1,10 +1,13 @@
 """Service de validation de graphes de dialogues."""
 import logging
 import hashlib
-from typing import List, Dict, Any, Set, Optional
-from collections import defaultdict
+from collections import defaultdict, deque
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
+
+# Nœuds structurels exclus du décompte de couverture (total_nodes, FR47)
+_NON_CONTENT_NODE_TYPES: frozenset = frozenset({"endNode", "testNode", "startNode"})
 
 
 class ValidationError:
@@ -125,6 +128,57 @@ def _node_type(node: Dict[str, Any]) -> Optional[str]:
     return None
 
 
+def _node_data(node: Dict[str, Any]) -> Dict[str, Any]:
+    """Retourne le dict `data` du nœud (React Flow / document), ou {}."""
+    data = node.get("data")
+    return data if isinstance(data, dict) else {}
+
+
+def _is_dialogue_like(node_type: Optional[str]) -> bool:
+    """True si le nœud est un nœud de dialogue au sens Unity / éditeur."""
+    if not node_type:
+        return False
+    return node_type in ("dialogueNode", "dialogue")
+
+
+def _resolve_graph_entry_node_id(nodes: List[Dict[str, Any]]) -> Optional[str]:
+    """Résout l'identifiant du nœud d'entrée (FR40) : ``START`` si présent, sinon premier nœud hors ``END``/``testNode``.
+
+    Args:
+        nodes: Nœuds React Flow ou format document.
+
+    Returns:
+        Identifiant d'entrée ou ``None`` si aucun candidat.
+    """
+    for node in nodes:
+        nid = _node_id(node)
+        if nid == "START":
+            return nid
+    for node in nodes:
+        nid = _node_id(node)
+        ntype = _node_type(node)
+        if nid and nid != "END" and ntype != "testNode":
+            return nid
+    return None
+
+
+def _choices_have_exploitable_text(choices: Any) -> bool:
+    """True si la liste contient au moins un choix avec texte non vide (UnityDialogueChoice.text).
+
+    Partagé entre FR36 (champs requis / cohérence) et FR37 (complétude du contenu) : la même
+    définition de « texte exploitable » évite des divergences tests / prod.
+    """
+    if not isinstance(choices, list):
+        return False
+    for item in choices:
+        if not isinstance(item, dict):
+            continue
+        text = item.get("text")
+        if text is not None and str(text).strip():
+            return True
+    return False
+
+
 class GraphValidationService:
     """Service pour valider des graphes de dialogues."""
     
@@ -135,6 +189,9 @@ class GraphValidationService:
     ) -> ValidationResult:
         """Valide un graphe complet.
         
+        Chaque étape parcourt au plus une fois la liste des nœuds ou des arêtes
+        (pas de scan répété inutile) — cible NFR perf sur graphes typiques.
+        
         Args:
             nodes: Liste de nœuds ReactFlow.
             edges: Liste d'edges ReactFlow.
@@ -144,8 +201,8 @@ class GraphValidationService:
         """
         result = ValidationResult()
         
-        # Validation 1: Nœuds sans ID
-        GraphValidationService._validate_node_ids(nodes, result)
+        # Validation 1: Nœuds sans identifiant technique utilisable (stableID)
+        GraphValidationService._validate_stable_ids(nodes, result)
         
         # Validation 2: Références cassées (edges vers nœuds inexistants)
         GraphValidationService._validate_broken_references(nodes, edges, result)
@@ -156,10 +213,13 @@ class GraphValidationService:
         # Validation 4: Nœuds inatteignables depuis START
         GraphValidationService._validate_unreachable_nodes(nodes, edges, result)
         
-        # Validation 5: Nœuds de dialogue sans contenu
-        GraphValidationService._validate_node_content(nodes, result)
+        # Validation 5: Structure Unity FR36 (DisplayName, data.id, texte dialogue)
+        GraphValidationService._validate_unity_dialogue_structure(nodes, result)
         
-        # Validation 6: Cycles (optionnel, warning seulement)
+        # Validation 6: Nœuds de test sans attribut test
+        GraphValidationService._validate_test_node_content(nodes, result)
+        
+        # Validation 7: Cycles (optionnel, warning seulement)
         GraphValidationService._validate_cycles(nodes, edges, result)
         
         logger.info(
@@ -170,15 +230,98 @@ class GraphValidationService:
         return result
     
     @staticmethod
-    def _validate_node_ids(nodes: List[Dict[str, Any]], result: ValidationResult):
-        """Valide que tous les nœuds ont un ID (racine ou data.id)."""
+    def _validate_stable_ids(nodes: List[Dict[str, Any]], result: ValidationResult):
+        """Valide que chaque nœud a un identifiant technique (racine ou data.id)."""
         for i, node in enumerate(nodes):
             if not _node_id(node):
                 result.add_error(
-                    "missing_id",
+                    "missing_stable_id",
                     None,
-                    f"Nœud à l'index {i} n'a pas d'ID"
+                    f"Nœud à l'index {i} : stableID manquant",
                 )
+
+    @staticmethod
+    def _validate_unity_dialogue_structure(
+        nodes: List[Dict[str, Any]], result: ValidationResult
+    ) -> None:
+        """Vérifie DisplayName, cohérence data.id et texte pour les nœuds dialogue.
+
+        - **FR36 (structure)** : DisplayName, alignement ``data.id`` / racine, champs requis.
+        - **FR37 (complétude contenu)** : absence de ``line`` et de choix au texte exploitable ;
+          message et surlignage côté client distincts des seules erreurs « structure ».
+
+        ``endNode`` / ``START`` / ``END`` : pas de règle texte dialogue (END vide exclu, AC 4.2).
+
+        Complexité O(n) sur le nombre de nœuds (une passe, sans re-parcours).
+        """
+        for node in nodes:
+            node_id = _node_id(node)
+            node_type = _node_type(node)
+            data = _node_data(node)
+
+            if not node_id:
+                continue
+            if node_id in ("START", "END") or node_type in ("testNode", "endNode"):
+                continue
+            if not _is_dialogue_like(node_type):
+                continue
+
+            root_id = node.get("id")
+            if root_id:
+                data_id = data.get("id")
+                if data_id is None or str(data_id).strip() == "":
+                    result.add_error(
+                        "missing_stable_id",
+                        str(root_id),
+                        f"Nœud [{root_id}] : identifiant document (data.id) manquant",
+                    )
+                elif str(data_id) != str(root_id):
+                    result.add_error(
+                        "missing_stable_id",
+                        str(root_id),
+                        f"Nœud [{root_id}] : data.id incohérent avec l'identifiant du nœud",
+                    )
+
+            raw_display = (
+                data.get("displayName") or data.get("title") or data.get("label") or ""
+            )
+            display = str(raw_display).strip() if raw_display is not None else ""
+            if not display:
+                result.add_error(
+                    "missing_display_name",
+                    node_id,
+                    f"Nœud [{node_id}] : DisplayName manquant",
+                )
+
+            line_val = data.get("line")
+            has_line = bool(line_val and str(line_val).strip())
+            choices = data.get("choices")
+            has_choices = _choices_have_exploitable_text(choices)
+            if not has_line and not has_choices:
+                result.add_error(
+                    "missing_dialogue_text",
+                    node_id,
+                    f"Nœud [{node_id}] : contenu vide (ni dialogue ni choix)",
+                )
+
+    @staticmethod
+    def _validate_test_node_content(nodes: List[Dict[str, Any]], result: ValidationResult):
+        """Valide que les nœuds de test ont un attribut ``test`` (FR37 complétude, type ``missing_test``)."""
+        for node in nodes:
+            node_id = _node_id(node)
+            node_type = _node_type(node) or "dialogueNode"
+            node_data = _node_data(node)
+
+            if node_id == "END":
+                continue
+
+            if node_type == "testNode":
+                if not node_data.get("test"):
+                    result.add_error(
+                        "missing_test",
+                        node_id,
+                        f"Nœud test [{node_id}] : test d'attribut manquant",
+                    )
     
     @staticmethod
     def _validate_broken_references(
@@ -222,19 +365,7 @@ class GraphValidationService:
         """Détecte les nœuds orphelins (pas de connexion entrante).
         Le nœud d'entrée (START ou premier nœud dialogue) est exclu.
         """
-        entry_id = None
-        for node in nodes:
-            nid = _node_id(node)
-            if nid == "START":
-                entry_id = nid
-                break
-        if not entry_id:
-            for node in nodes:
-                nid = _node_id(node)
-                ntype = _node_type(node)
-                if nid and nid != "END" and ntype != "testNode":
-                    entry_id = nid
-                    break
+        entry_id = _resolve_graph_entry_node_id(nodes)
 
         node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         targets = {edge.get("target") for edge in edges if edge.get("target")}
@@ -246,7 +377,11 @@ class GraphValidationService:
                 result.add_warning(
                     "orphan_node",
                     node_id,
-                    f"Nœud '{node_id}' n'a pas de connexion entrante (orphelin)"
+                    (
+                        f"Nœud « {node_id} » : aucune connexion entrante (orphelin). "
+                        "À ne pas confondre avec un nœud relié mais sur une branche "
+                        "inaccessible depuis l'entrée (voir « inatteignable »)."
+                    ),
                 )
     
     @staticmethod
@@ -258,24 +393,12 @@ class GraphValidationService:
         """Détecte les nœuds inatteignables depuis le nœud d'entrée (START ou premier nœud dialogue).
         L'id est résolu via _node_id (racine ou data.id) pour accepter ReactFlow et format document.
         """
-        start_node_id = None
-        for node in nodes:
-            nid = _node_id(node)
-            if nid == "START":
-                start_node_id = nid
-                break
-        if not start_node_id:
-            for node in nodes:
-                nid = _node_id(node)
-                ntype = _node_type(node)
-                if nid and nid != "END" and ntype != "testNode":
-                    start_node_id = nid
-                    break
+        start_node_id = _resolve_graph_entry_node_id(nodes)
         if not start_node_id:
             result.add_error(
                 "missing_start",
                 None,
-                "Aucun nœud START trouvé"
+                "Aucun nœud d'entrée résolu (START ou premier nœud dialogue hors test/END)",
             )
             return
 
@@ -294,7 +417,10 @@ class GraphValidationService:
                 result.add_warning(
                     "unreachable_node",
                     node_id,
-                    f"Nœud '{node_id}' est inatteignable depuis le nœud d'entrée"
+                    (
+                        f"Nœud « {node_id} » : inatteignable depuis l'entrée du dialogue "
+                        "(peut toutefois avoir des connexions entrantes ; îlot séparé)."
+                    ),
                 )
     
     @staticmethod
@@ -316,53 +442,18 @@ class GraphValidationService:
             if source and target:
                 adjacency[source].append(target)
         
-        # BFS
+        # BFS — deque.popleft() O(1) vs list.pop(0) O(n)
         reachable: Set[str] = {start_id}
-        queue: List[str] = [start_id]
-        
+        queue: deque[str] = deque([start_id])
+
         while queue:
-            current = queue.pop(0)
-            neighbors = adjacency.get(current, [])
-            
-            for neighbor in neighbors:
+            current = queue.popleft()
+            for neighbor in adjacency.get(current, []):
                 if neighbor not in reachable:
                     reachable.add(neighbor)
                     queue.append(neighbor)
-        
+
         return reachable
-    
-    @staticmethod
-    def _validate_node_content(nodes: List[Dict[str, Any]], result: ValidationResult):
-        """Valide que les nœuds de dialogue ont du contenu (id/type via _node_id/_node_type)."""
-        for node in nodes:
-            node_id = _node_id(node)
-            node_data = node.get("data") if isinstance(node.get("data"), dict) else {}
-            node_type = _node_type(node) or "dialogueNode"
-
-            # Skip validation pour END
-            if node_id == "END":
-                continue
-
-            # Nœuds de dialogue doivent avoir line ou choices
-            if node_type == "dialogueNode":
-                has_line = bool(node_data.get("line"))
-                has_choices = bool(node_data.get("choices"))
-                
-                if not has_line and not has_choices:
-                    result.add_error(
-                        "empty_node",
-                        node_id,
-                        f"Nœud '{node_id}' n'a ni dialogue ni choix"
-                    )
-            
-            # Nœuds de test doivent avoir un test
-            if node_type == "testNode":
-                if not node_data.get("test"):
-                    result.add_error(
-                        "missing_test",
-                        node_id,
-                        f"Nœud de test '{node_id}' n'a pas de test d'attribut défini"
-                    )
     
     @staticmethod
     def _validate_cycles(
@@ -425,9 +516,9 @@ class GraphValidationService:
             rec_stack.remove(node_id)
             path_stack.pop()
         
-        # Tester depuis tous les nœuds non visités
+        # Tester depuis tous les nœuds non visités (id racine ou data.id)
         for node in nodes:
-            node_id = node.get("id")
+            node_id = _node_id(node)
             if node_id and node_id not in visited:
                 dfs_cycle_detection(node_id)
         
@@ -445,8 +536,145 @@ class GraphValidationService:
             )
     
     @staticmethod
+    def simulate_flow(
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+    ) -> "ValidationResult":
+        """Simule le flux pour détecter dead ends et cul-de-sacs (FR46). O(V+E) BFS.
+
+        Args:
+            nodes: Nœuds React Flow.
+            edges: Arêtes React Flow.
+
+        Returns:
+            :class:`ValidationResult` avec ``errors`` (dead ends) et ``warnings`` (cul-de-sacs).
+        """
+        result = ValidationResult()
+        start_id = _resolve_graph_entry_node_id(nodes)
+        if not start_id:
+            result.add_error(
+                "missing_start",
+                None,
+                "Aucun nœud d'entrée résolu (START ou premier nœud dialogue hors test/END)",
+            )
+            return result
+
+        reachable = GraphValidationService._find_reachable_nodes(start_id, edges)
+        GraphValidationService._validate_dead_ends(nodes, reachable, result)
+        GraphValidationService._validate_cul_de_sacs(nodes, edges, reachable, result)
+
+        logger.info(
+            "simulate_flow terminé: %d dead ends, %d cul-de-sacs",
+            len(result.errors),
+            len(result.warnings),
+        )
+        return result
+
+    @staticmethod
+    def _validate_dead_ends(
+        nodes: List[Dict[str, Any]],
+        reachable: Set[str],
+        result: "ValidationResult",
+    ) -> None:
+        """Signale les nœuds inatteignables comme dead ends (``dead_end_node``, erreur).
+
+        Args:
+            nodes: Nœuds du graphe.
+            reachable: Set d'IDs atteignables (pré-calculé par l'appelant).
+            result: Résultat de validation à compléter.
+        """
+        for node in nodes:
+            nid = _node_id(node)
+            if not nid or nid == "END":
+                continue
+            if nid not in reachable:
+                result.add_error(
+                    "dead_end_node",
+                    nid,
+                    f"Nœud « {nid} » : inatteignable depuis l'entrée du dialogue (dead end).",
+                )
+
+    @staticmethod
+    def _validate_cul_de_sacs(
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        reachable: Set[str],
+        result: "ValidationResult",
+    ) -> None:
+        """Signale les cul-de-sacs parmi les nœuds atteignables (``cul_de_sac_node``, warning).
+
+        Args:
+            nodes: Nœuds du graphe.
+            edges: Arêtes du graphe.
+            reachable: Set d'IDs atteignables depuis l'entrée.
+            result: Résultat de validation à compléter.
+        """
+        entry_id = _resolve_graph_entry_node_id(nodes)
+
+        # Index arêtes sortantes par source
+        outgoing: Dict[str, List[str]] = defaultdict(list)
+        for edge in edges:
+            src = edge.get("source")
+            tgt = edge.get("target")
+            if src and tgt:
+                outgoing[src].append(tgt)
+
+        for node in nodes:
+            nid = _node_id(node)
+            ntype = _node_type(node)
+            if not nid or nid == "END" or ntype == "testNode" or nid == entry_id:
+                continue
+            if nid not in reachable:
+                continue  # dead end — déjà couvert
+            targets = outgoing.get(nid, [])
+            non_end_targets = [t for t in targets if t != "END"]
+            if not non_end_targets:
+                result.add_warning(
+                    "cul_de_sac_node",
+                    nid,
+                    (
+                        f"Nœud « {nid} » : cul-de-sac — toutes les sorties aboutissent à END "
+                        "ou aucune sortie (non-END) n'est définie."
+                    ),
+                )
+
+    @staticmethod
+    def compute_coverage_stats(
+        nodes: List[Dict[str, Any]],
+        dead_end_ids: List[str],
+        cul_de_sac_count: int,
+    ) -> "FlowCoverageStats":
+        """Calcule les statistiques de couverture (FR47). Exclut endNode/testNode/startNode.
+
+        Args:
+            nodes: Nœuds du graphe.
+            dead_end_ids: IDs inatteignables à compter parmi les nœuds contenu.
+            cul_de_sac_count: Nombre de cul-de-sacs.
+
+        Returns:
+            :class:`FlowCoverageStats` avec les métriques de couverture.
+        """
+        from api.schemas.graph import FlowCoverageStats
+
+        content_ids = {
+            _node_id(n) for n in nodes
+            if _node_type(n) not in _NON_CONTENT_NODE_TYPES and _node_id(n) not in (None, "END")
+        }
+        total = len(content_ids)
+        dead_end_content_count = sum(1 for nid in dead_end_ids if nid in content_ids)
+        accessible = total - dead_end_content_count
+        percentage = round(accessible / total * 100, 1) if total > 0 else 100.0
+        return FlowCoverageStats(
+            total_nodes=total,
+            accessible_count=accessible,
+            dead_end_count=dead_end_content_count,
+            cul_de_sac_count=cul_de_sac_count,
+            coverage_percentage=percentage,
+        )
+
+    @staticmethod
     def find_orphan_nodes(
-        nodes: List[Dict[str, Any]], 
+        nodes: List[Dict[str, Any]],
         edges: List[Dict[str, Any]]
     ) -> List[str]:
         """Trouve les nœuds orphelins (pas de connexion entrante sauf START).
@@ -458,16 +686,17 @@ class GraphValidationService:
         Returns:
             Liste d'IDs de nœuds orphelins.
         """
-        node_ids = {node.get("id") for node in nodes if node.get("id")}
+        node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         targets = {edge.get("target") for edge in edges if edge.get("target")}
-        
+        entry_id = _resolve_graph_entry_node_id(nodes)
+
         orphans = []
         for node_id in node_ids:
-            if node_id == "START" or node_id == "END":
+            if node_id == entry_id or node_id == "END":
                 continue
             if node_id not in targets:
                 orphans.append(node_id)
-        
+
         return orphans
     
     @staticmethod
@@ -480,12 +709,12 @@ class GraphValidationService:
         Returns:
             Liste de dictionnaires avec les références cassées.
         """
-        node_ids = {node.get("id") for node in nodes if node.get("id")}
+        node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         broken_refs: List[Dict[str, Any]] = []
         
         for node in nodes:
-            node_id = node.get("id")
-            node_data = node.get("data", {})
+            node_id = _node_id(node)
+            node_data = _node_data(node)
             
             # Vérifier nextNode
             next_node = node_data.get("nextNode")
@@ -532,18 +761,23 @@ class GraphValidationService:
         edges: List[Dict[str, Any]], 
         start_id: str = "START"
     ) -> List[str]:
-        """Trouve les nœuds inatteignables depuis START.
-        
+        """Trouve les nœuds inatteignables depuis un nœud de départ donné.
+
+        Pour le même critère que ``validate_graph`` (entrée START ou premier dialogue),
+        préférer l’id retourné par la fonction module ``_resolve_graph_entry_node_id(nodes)``
+        puis appeler avec cet id explicite ;
+        la valeur par défaut ``START`` ne couvre pas les graphes sans nœud nommé START.
+
         Args:
             nodes: Liste de nœuds.
             edges: Liste d'edges.
-            start_id: ID du nœud de départ.
-            
+            start_id: ID du nœud de départ pour le BFS.
+
         Returns:
             Liste d'IDs de nœuds inatteignables.
         """
         reachable = GraphValidationService._find_reachable_nodes(start_id, edges)
-        all_node_ids = {node.get("id") for node in nodes if node.get("id")}
+        all_node_ids = {nid for node in nodes for nid in (_node_id(node),) if nid}
         
         unreachable = []
         for node_id in all_node_ids:

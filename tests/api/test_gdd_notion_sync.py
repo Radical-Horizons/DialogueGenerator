@@ -287,7 +287,17 @@ def test_put_config_invalid_source(client: TestClient, tmp_path: Path) -> None:
 
 def test_post_sync_mirror_rebuild_without_full_is_ignored(client: TestClient, tmp_path: Path) -> None:
     """mirror_rebuild est déprécié : sans full=true, sync incrémentale (pas 400)."""
-    svc = _build_service(tmp_path)
+    # Token fichier requis : sans lui, CI (sans NOTION_API_KEY) échoue avant le corps sync.
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    gdd = tmp_path / "gdd"
+    gdd.mkdir(parents=True, exist_ok=True)
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd,
+        status_path=tmp_path / "status.json",
+    )
     app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
     try:
         r = client.post("/api/v1/gdd-notion-sync/sync?mirror_rebuild=true")

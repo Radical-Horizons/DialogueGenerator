@@ -17,10 +17,12 @@ alwaysApply: false
   - **Preuve attendue** : démarrer l’app (`npm run dev`), ouvrir le navigateur sur l’UI (ex. `http://localhost:3000`), et **vérifier** le comportement ou l’affichage concerné ; de préférence via le MCP navigateur Cursor (`cursor-ide-browser`) lorsqu’il est disponible.
   - Ne pas présenter « preuve complète » sur une feature UI sans cette étape (sauf impossibilité technique explicite, à mentionner).
 
+- **Niveaux de test T0–T3** (détail + tableau : **`.cursor/commands/test-tiers.md`**). Résumé : **T0** fumée (`npm run test:backend:smoke`, Vitest `--bail=1`, `npm run test:e2e:smoke`) ; **T1** fichiers / `-k` / liste de specs Playwright ; **T2** `npm run test:premerge` ou équivalent (backend `not slow`, lint, Vitest défaut) ; **T3** `npm test`, `VITEST_FULL=1`, suite E2E complète — sur **demande explicite** ou équivalent CI sur `main`. Les agents privilégient **T0/T1** après un petit diff ; **T3** si l’utilisateur impose la suite complète (voir `.cursor/rules/agentivity.mdc`).
+
 - **Obligation agents (mode Agent — exécution réelle des tests)** :
   - Après toute modification de code, correctif ou fin de tâche d’implémentation, l’agent **exécute** les tests pertinents dans le terminal intégré (pytest ciblé, Vitest ciblé, lint si TS/TSX), et **ne conclut pas** « terminé », « vert », « OK » ou « prêt à merger » **sans** sortie de commande montrant le passage (résumé pass/fail ou extrait d’échec à corriger).
   - **Interdit** : se limiter à « vous pouvez lancer `pytest`… » à la place de l’exécution, sauf blocage technique avéré (sandbox, pas d’accès shell) — dans ce cas le signaler explicitement.
-  - Backend : racine repo → `node scripts/getPythonPath.js -m pytest <fichiers ou -k marqueur>` ou `npm test`.
+  - Backend : T0/T2/T3 → `npm run test:backend:smoke` / `test:backend:fast` / `test:backend:full` ([`scripts/pytest-tier.cjs`](scripts/pytest-tier.cjs)) ; T1 ou complet → `node scripts/getPythonPath.js -m pytest <fichiers ou -k>` ou `npm test`.
   - Frontend : **`cd frontend`** puis `npx vitest run src/chemin/Fichier.test.ts --reporter=dot` (alias `@/`). La suite Vitest complète sans filtre reste interdite pour l’agent sauf demande explicite (voir section Vitest ci-dessous).
 
 - **Commandes essentielles (donner en une ligne)** :
@@ -36,14 +38,14 @@ alwaysApply: false
   - Vérification déploiement : `npm run deploy:check`
 
 - **Quand du code a changé** :
-  - **Backend Python** : `npm test` ou `pytest tests/` (utilise automatiquement le venv)
+  - **Backend Python** : itération → `npm run test:backend:fast` ou ciblé ; fumée → `npm run test:backend:smoke` ; complet → `npm test` / `npm run test:backend:full`
     - Tests API : `npm run test:api` ou `pytest tests/api/` (utilise TestClient FastAPI, pas besoin de serveur)
     - Tests unitaires : `pytest tests/ -k "not api"`
-  - **Frontend React** : `npm run test:frontend` (build + lint + tests unitaires)
+  - **Frontend React** : pré-merge léger (T2) → `npm run test:premerge` ou `npm --prefix frontend run lint` + `npm --prefix frontend test` ; exigeant (build) → `npm run test:frontend` (build + lint + Vitest via [`scripts/test-frontend.ps1`](scripts/test-frontend.ps1))
     - Build check détecte erreurs TypeScript
     - Lint check détecte erreurs de code
     - Tests Vitest vérifient les composants
-    - Suite Vitest **rapide** (agents, itérations) : `npm run test:frontend:vitest` → `tmp/vitest-report.json` ; suite **complète** (CI) : `frontend` `npm run test:full` ou `npm run test:frontend:vitest:full`. Éviter `| Select-Object` sur la sortie Vitest ; en arrière-plan si besoin, lire le JSON de rapport une fois généré
+    - Suite Vitest **rapide** (agents, itérations) : `npm run test:frontend:vitest` → `tmp/vitest-report.json` ; suite **complète** (CI / T3) : `frontend` `npm run test:full` ou `npm run test:frontend:vitest:full`. Éviter `| Select-Object` sur la sortie Vitest ; en arrière-plan si besoin, lire le JSON de rapport une fois généré
   - **Interface web (PRINCIPALE)** : `npm run dev` (démarre tout sur localhost:3000, utilise venv automatiquement)
 
 - **Tests** :
@@ -52,7 +54,7 @@ alwaysApply: false
   - Tests API : utiliser `TestClient` de FastAPI, pas de serveur réel
   - Mocks : `pytest-mock` pour services externes (LLM, fichiers GDD)
   - Configuration : `pytest.ini` définit les options (asyncio_mode, testpaths, etc.)
-  - **E2E (Playwright)** : `npm run test:e2e`. L'environnement nécessaire pour les E2E est disponible (`.env` avec `OPENAI_API_KEY`, budget, modèle gpt-5-mini). Tous les tests E2E sont censés passer avec cet environnement. Voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
+  - **E2E (Playwright)** : fumée → `npm run test:e2e:smoke` (`@smoke` sur les specs listées dans `.cursor/commands/test-tiers.md`) ; complet → `npm run test:e2e` ou `npm run test:e2e:verify`. L'environnement nécessaire pour les E2E est disponible (`.env` avec `OPENAI_API_KEY`, budget, modèle gpt-5-mini). Voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
 
 - **Vitest — protocole agents Cursor (source de vérité)** : détail unique ici ; `AGENTS.md` ne fait que résumer. `frontend_testing.mdc` couvre RTL, Playwright et anti-patterns — pas une deuxième copie du protocole d’exécution.
   - **Ne pas** lancer la suite Vitest complète depuis l’agent (workers ouverts). La CI ou une demande explicite utilisateur.
@@ -71,7 +73,7 @@ alwaysApply: false
 
 - **Version produit (semver)** : Source de vérité = champ `version` du `package.json` racine. Synchroniser `frontend/package.json` et `api/app_version.py` avec `npm run version:sync`. Bump fin d’epic / release : `npm run version:bump:patch` (ou `version:bump:minor` / `version:bump:major`). Vérification : `npm run verify:app-version` (inclus dans `npm run test:all` et `npm run build:check`). Ne pas confondre avec `schemaVersion` des documents dialogue (contrat de données).
 
-- **Avant commit** : `npm test` (backend, utilise venv) + `npm run test:frontend` (frontend). Si vert : commit + push.
+- **Avant commit** : **T2** recommandé — `npm run test:premerge` +, si changements critiques ou release, **`npm run test:frontend`** (build inclus) et/ou **`npm test`** (pytest complet). **T3** avant merge vers `main` si la CI complète n’a pas encore tourné sur la branche.
 
 - **Déploiement** : prod de référence = **VPS OVH** (`docs/deployment/PRODUCTION.md`, URL publique `demo.auto-diffusion.net`). `npm run deploy:build` / `npm run deploy:check` ; déploiement typique `npm run deploy`. Sur le serveur : `ENVIRONMENT=production`, `PUBLIC_ORIGIN` (ou `CORS_ORIGINS`), secrets JWT/OpenAI, etc. **Détail et pièges** : `.cursor/rules/deployment.mdc`.
 

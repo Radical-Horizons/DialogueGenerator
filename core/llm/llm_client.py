@@ -58,7 +58,41 @@ class DummyLLMClient(ILLMClient):
             
             if response_model:
                 # Cas spécial pour UnityDialogueGenerationResponse
-                if response_model.__name__ == "UnityDialogueGenerationResponse":
+                if response_model.__name__ == "DialogueQualityJudgeStructuredResult":
+                    from models.dialogue_quality_judge import (
+                        DialogueQualityCriterionJudgeItem,
+                    )
+
+                    dummy_criteria = [
+                        DialogueQualityCriterionJudgeItem(
+                            criterion_id="narrative_coherence",
+                            score=7,
+                            comment="Cohérence factice (DummyLLMClient).",
+                        ),
+                        DialogueQualityCriterionJudgeItem(
+                            criterion_id="characterization",
+                            score=7,
+                            comment="Caractérisation factice.",
+                        ),
+                        DialogueQualityCriterionJudgeItem(
+                            criterion_id="agency",
+                            score=6,
+                            comment="Agentivité factice.",
+                        ),
+                        DialogueQualityCriterionJudgeItem(
+                            criterion_id="style",
+                            score=7,
+                            comment="Style factice.",
+                        ),
+                    ]
+                    dummy_data = {
+                        "overall_score": 7,
+                        "criteria": [c.model_dump() for c in dummy_criteria],
+                        "global_comment": "Évaluation simulée (DummyLLMClient, sans clé API).",
+                        "improvement_suggestions": [],
+                        "strengths": ["Structure de dialogue lisible (dummy)."],
+                    }
+                elif response_model.__name__ == "UnityDialogueGenerationResponse":
                     dummy_data = {
                         "title": "Dialogue de test généré par DummyLLMClient",
                         "node": {
