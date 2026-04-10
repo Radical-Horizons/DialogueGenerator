@@ -8,9 +8,11 @@ Pour des raisons de déploiement en production, les dossiers suivants ne sont **
 - `data/UnityData/` : Contient les catalogues de référence Unity (TraitCatalog.csv, SkillCatalog.csv, FlagCatalog.csv)
 - `Assets/Dialogue/` : Contient les dialogues Unity JSON exportés (dossier réel, plus de lien symbolique)
 
-## ⚠️ Important : Maintenance Manuelle Requise
+## ⚠️ Important : comment le GDD est alimenté
 
-Le dossier `data/GDD_categories/` n'est **plus alimenté automatiquement** par les scripts Notion Scrapper. Il doit être **mis à jour manuellement** lors des changements du GDD.
+**Option A — Sync intégrée (Notion → disque)** : l’application peut synchroniser le GDD depuis Notion via l’API **`/api/v1/gdd-notion-sync`** (configuration dans `data/gdd_notion_sync/settings.json`, token fichier ou `NOTION_API_KEY`). Guide : [`docs/guides/GDD_NOTION_SYNC.md`](../guides/GDD_NOTION_SYNC.md).
+
+**Option B — Chaîne externe** : sans utiliser la sync intégrée, le dossier `data/GDD_categories/` peut être mis à jour **manuellement** (ex. export depuis le projet Notion Scrapper, copie des JSON).
 
 Le dossier `data/UnityData/` contient les catalogues CSV de référence Unity. Ces fichiers doivent être **mis à jour manuellement** si le système Unity change (nouveaux traits, compétences, drapeaux).
 
@@ -18,7 +20,7 @@ Le dossier `data/UnityData/` contient les catalogues CSV de référence Unity. C
 
 ## Processus de Mise à Jour
 
-### Pour `data/GDD_categories/`
+### Pour `data/GDD_categories/` (sans sync intégrée)
 
 1. **Exporter les données depuis Notion** :
    - Exécuter les scripts du projet `Notion_Scrapper` :
@@ -124,7 +126,7 @@ Pour vérifier que les données sont correctement chargées :
 
 ## Notes pour le Développement Futur
 
-- **Automatisation GDD** : Un script de synchronisation pourrait être créé pour automatiser la copie depuis `Notion_Scrapper`
+- **Automatisation GDD** : la sync Notion intégrée couvre le flux API/UI ; la copie depuis `Notion_Scrapper` reste une alternative hors application
 - **Export Unity** : Le système d'export automatique vers Unity doit être revu pour fonctionner avec le dossier réel `Assets/Dialogue/` (voir Epic 1 pour les améliorations prévues)
 - **CI/CD** : Intégrer la mise à jour des données GDD dans le pipeline de déploiement
 - **Monitoring** : Ajouter des alertes si les données GDD sont obsolètes ou manquantes
@@ -133,7 +135,8 @@ Pour vérifier que les données sont correctement chargées :
 
 ### GDD
 - Code de chargement : `services/gdd_loader.py`
-- Configuration des chemins : `services/config_manager.py`
+- Sync Notion → `data/GDD_categories/` : `services/gdd_notion_sync_service.py`, `api/routers/gdd_notion_sync.py`, guide [`docs/guides/GDD_NOTION_SYNC.md`](../guides/GDD_NOTION_SYNC.md)
+- Configuration des chemins : `services/gdd_paths.py`, `services/configuration_service.py`
 - Documentation des chemins : `.cursor/rules/gdd_paths.mdc`
 
 ### Unity
@@ -145,4 +148,4 @@ Pour vérifier que les données sont correctement chargées :
 
 ---
 
-**Dernière mise à jour** : 2026-01-25 (correction chemin schéma JSON Unity)
+**Dernière mise à jour** : 2026-04-06 (sync GDD Notion intégrée documentée ; chemins config)
