@@ -1,6 +1,7 @@
 # Retrospective - Epic Completion Review Workflow
 name: "retrospective"
 description: 'Post-epic review to extract lessons and assess success. Use when the user says "run a retrospective" or "lets retro the epic [epic]"'
+# Step 1.5 in instructions.md: mandatory manual UI test checklist — cannot be skipped even in YOLO (see workflow.xml execution-modes).
 
 config_source: "{project-root}/_bmad/bmm/config.yaml"
 user_name: "{config_source}:user_name"

@@ -105,8 +105,9 @@
 
   <execution-modes>
     <mode name="normal">Full user interaction and confirmation of EVERY step at EVERY template output - NO EXCEPTIONS except yolo MODE</mode>
-    <mode name="yolo">Skip all confirmations and elicitation, minimize prompts and try to produce all of the workflow automatically by
-      simulating the remaining discussions with an simulated expert user</mode>
+    <mode name="yolo">Skip confirmations and elicitation except where the active workflow instructions declare a mandatory user checkpoint
+      (explicit tag or step text stating YOLO cannot bypass it — e.g. retrospective Epic manual UI validation). Otherwise minimize prompts and
+      simulate the remaining discussions with a simulated expert user.</mode>
   </execution-modes>
 
   <supported-tags desc="Instructions can use these tags">

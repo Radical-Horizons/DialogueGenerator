@@ -6,6 +6,8 @@
 <critical>Generate all documents in {document_output_language}</critical>
 <critical>⚠️ ABSOLUTELY NO TIME ESTIMATES - NEVER mention hours, days, weeks, months, or ANY time-based predictions. AI has fundamentally changed development speed - what once took teams weeks/months can now be done by one person in hours. DO NOT give ANY time estimates whatsoever.</critical>
 
+<critical>MANDATORY USER CHECKPOINT (Step 1.5): Even when #yolo / YOLO mode is active for this retrospective, Step 1.5 is NEVER skippable. Do not simulate {user_name}'s test results; do not proceed to Step 0.5 or Step 2 until {user_name} sends a real reply confirming manual tests or an explicit waived/skip with reason.</critical>
+
 <critical>
   DOCUMENT OUTPUT: Retrospective analysis. Concise insights, lessons learned, action items. User skill level ({user_skill_level}) affects conversation style ONLY, not retrospective content.
 
@@ -155,6 +157,32 @@ Alice (Product Owner): "Excellent! All {{done_stories}} stories are marked done.
 Bob (Scrum Master): "Perfect. Epic {{epic_number}} is complete and ready for retrospective, {user_name}."
 </output>
 </check>
+
+</step>
+
+<step n="1.5" goal="Validation utilisateur obligatoire de l'Epic — checkpoint manuel UI (non contournable, YOLO inclus)">
+
+<critical yolo-bypass="false">This step overrides YOLO. Forbidden: inventing that tests were run; fabricating {user_name} confirmation; continuing in the same turn after printing the checklist. Required: STOP and wait for the next user message.</critical>
+
+<action>Prérequis pour la personne qui teste : application en cours d'exécution (ex. `npm run dev` selon AGENTS.md), compte / dialogue de test si l'epic touche l'éditeur.</action>
+
+<action>À partir de {{epic_number}}, des fiches `{implementation_artifacts}/{{epic_number}}-*-*.md` et du document d'epic planifié (`epic-{{epic_number}}.md`, `epic-0{{epic_number}}.md`, ou équivalent sous {planning_artifacts}), construire une **checklist de tests utilisateur** en français ({document_output_language}) : pour chaque capacité **manuellement vérifiable** (UI, export, parcours), indiquer (a) quoi vérifier, (b) **où** dans le produit (écran, route, zone de l'interface, libellé de bouton ou menu si connu), (c) un scénario minimal en une phrase si utile.</action>
+
+<action>Si l'epic dépasse ~12 items testables, prioriser par valeur utilisateur (règle 80/20) : **au plus 15** entrées détaillées en « à faire en priorité », puis une ligne « Autres parcours (si temps) » listant le reste sans détail.</action>
+
+<action>Si le dépôt contient des indices d'UI (ex. `GraphEditorHeader`, routes React), les utiliser pour préciser les emplacements ; sinon rester honnête (« à localiser dans … ») plutôt que d'inventer.</action>
+
+<output>
+Bob (Scrum Master) : « {user_name}, on pose une base réelle avant la suite : j'ai besoin que **toi** valides le produit pour cet epic, pas seulement les notes de stories. Voici ce que je te propose de parcourir. »
+
+### Checklist de validation utilisateur — Epic {{epic_number}}
+
+{{user_test_checklist_markdown}}
+
+Bob (Scrum Master) : « Quand tu as fini (ou si tu coupes volontairement certains points), réponds dans le fil : par exemple **OK tests faits** + remarques, ou **SKIP** : *raison*. Je ne poursuis pas la rétrospective (chargement documents, analyse stories, document final) **avant** ton message. »
+</output>
+
+<ask>Mandatory: wait for {user_name} to confirm manual testing or explicitly waive with reason. Do not execute Step 0.5 or later until then.</ask>
 
 </step>
 
