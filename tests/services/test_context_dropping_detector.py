@@ -41,14 +41,14 @@ def test_empty_context_returns_explicit_message_not_success_confused():
     assert "exploitable" in raw.message.lower() or "contexte" in raw.message.lower()
 
 
-def test_too_subtle_partial_word_match_stable():
-    """Comportement documenté : signal partiel sur une mention multi-mots → too_subtle."""
+def test_multi_word_single_significant_word_is_enough():
+    """Une seule unité significative d'une mention multi-mots suffit (pas la phrase entière)."""
     nodes = [_dialogue_node("n1", "Nous parlons seulement de Unitaire sans le reste.")]
     edges: list = []
     sel = {"characters_full": ["Unitaire Codex Ref"]}
     raw = ContextDroppingDetector.detect(nodes, edges, sel)
-    kinds = [c.kind for c in raw.cases]
-    assert "too_subtle" in kinds
+    assert raw.case_count == 0
+    assert raw.message is not None
 
 
 def test_full_phrase_present_no_case():

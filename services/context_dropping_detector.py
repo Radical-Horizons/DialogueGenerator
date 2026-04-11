@@ -43,6 +43,10 @@ class ContextDroppingOptionsData:
     """Options de détection (Story 4.10 : mandatory_info, type de dialogue, overrides).
 
     Priorité lors de la fusion : champs requête > règles persistées > constantes.
+
+    Note:
+        ``tolerance`` est conservé pour compatibilité API ; la correspondance des mentions
+        multi-mots repose sur « au moins un mot significatif » et n'utilise plus ce champ.
     """
 
     rules_profile: RulesProfile = "strict"
@@ -86,54 +90,54 @@ def _word_in_text(word: str, haystack: str) -> bool:
 def _classify_phrase(
     phrase: ContextKeyPhrase,
     combined_norm: str,
-    tolerance: Optional[float] = None,
 ) -> Tuple[Optional[CaseKind], Optional[str]]:
     """Retourne (kind, suggestion) ou (None, None) si la mention est jugée utilisée.
 
     Args:
-        phrase: Mention extraite du contexte GDD.
-        combined_norm: Texte agrégé normalisé de tous les nœuds.
-        tolerance: Ratio minimal [0, 1] de mots-clés trouvés pour accepter une
-            mention partielle sans la signaler ``too_subtle``.  ``None`` = seuil
-            strict (tout ou rien pour les mentions multi-mots).
+        phrase: Mention extraite des sélections contexte (GDD) envoyées avec la requête.
+        combined_norm: Texte agrégé normalisé (lignes + textes des choix des nœuds dialogue).
+
+    Règle MVP (mentions multi-mots) : au moins **un** mot significatif (len ≥ 3) présent
+    comme mot entier suffit — on n'exige plus la phrase complète ni tous les mots.
+    Les alias, titres et champs hors ligne/choix ne sont pas pris en compte (voir
+    ``graph_dialogue_text.collect_node_text_for_lore_scan``).
     """
     full = phrase.normalized
     if not full:
         return None, None
-    # Même normalisation accent-insensible que pour les faits lore (évite faux « subtil »).
+    # Même normalisation accent-insensible que pour les faits lore (évite faux négatifs).
     if full in combined_norm:
         return None, None
 
     words = significant_words(full)
     if len(words) >= MIN_WORDS_FOR_SUBTLETY:
         hits = sum(1 for w in words if _word_in_text(w, combined_norm))
-        if hits == 0:
-            return (
-                "context_dropping",
-                (
-                    f"Context dropping : « {phrase.label} » (contexte) n'apparaît pas de façon "
-                    f"détectable dans les lignes et choix analysés."
-                ),
-            )
-        if 0 < hits < len(words):
-            # Avec tolérance : accepter si le ratio de mots trouvés >= seuil.
-            if tolerance is not None and hits / len(words) >= tolerance:
-                return None, None
-            return (
-                "too_subtle",
-                (
-                    f"Renforcez l'explicitation : la mention « {phrase.label} » du contexte "
-                    f"n'est reflétée que partiellement dans le dialogue (signal trop indirect pour le MVP)."
-                ),
-            )
-        return None, None
+        if hits >= 1:
+            return None, None
+        return (
+            "context_dropping",
+            (
+                f"Context dropping : « {phrase.label} » (issu de vos sélections contexte) "
+                f"n'apparaît pas de façon détectable dans les lignes et choix analysés."
+            ),
+        )
 
-    # Mot unique ou deux mots courts : absence stricte
+    if len(words) == 1:
+        if _word_in_text(words[0], combined_norm):
+            return None, None
+        return (
+            "context_dropping",
+            (
+                f"Context dropping : « {phrase.label} » (issu de vos sélections contexte) "
+                f"n'apparaît pas dans les lignes et choix analysés."
+            ),
+        )
+
     return (
         "context_dropping",
         (
-            f"Context dropping : « {phrase.label} » du contexte n'est pas utilisé dans le dialogue "
-            f"avec un signal détectable."
+            f"Context dropping : « {phrase.label} » (issu de vos sélections contexte) "
+            f"n'apparaît pas dans les lignes et choix analysés (mention sans mot assez long pour la détection)."
         ),
     )
 
@@ -146,21 +150,6 @@ def _resolve_effective_profile(opts: ContextDroppingOptionsData) -> RulesProfile
         if candidate in ("strict", "light"):
             return candidate
     return opts.rules_profile if opts.rules_profile in ("strict", "light") else "strict"
-
-
-def _resolve_effective_tolerance(opts: ContextDroppingOptionsData) -> Optional[float]:
-    """Retourne la tolérance effective selon les overrides par type (fallback : globale).
-
-    La tolérance est le ratio minimal de mots-clés trouvés pour qu'une mention
-    partielle soit jugée acceptable (pas ``too_subtle``).  ``None`` = comportement
-    par défaut du profil (inchangé par rapport à FR44).
-    """
-    override = opts.dialogue_type_overrides.get(opts.dialogue_type or "")
-    if override:
-        t = override.get("tolerance")
-        if t is not None and isinstance(t, (int, float)):
-            return float(t)
-    return opts.tolerance
 
 
 def _check_mandatory_info(
@@ -213,7 +202,6 @@ class ContextDroppingDetector:
         """Analyse le graphe ; ``edges`` réservé pour cohérence d'API avec les autres détecteurs."""
         opts = options or ContextDroppingOptionsData()
         profile: RulesProfile = _resolve_effective_profile(opts)
-        effective_tolerance: Optional[float] = _resolve_effective_tolerance(opts)
         result = ContextDroppingDetectionResult(rules_profile_effective=profile)
 
         if not nodes:
@@ -243,9 +231,9 @@ class ContextDroppingDetector:
 
         if not phrases:
             result.message = (
-                "Aucune information clé exploitable dans le contexte "
-                "(sélections vides, texte absent ou trop court). "
-                "Ajoutez des entités en contexte ou un texte de contexte."
+                "Aucune mention exploitable dans les sélections contexte envoyées "
+                "(listes vides, entrées trop courtes, ou texte libre absent). "
+                "Cochez des éléments dans le sélecteur de contexte ou complétez la consigne."
             )
             if not mandatory_cases:
                 result.summary = "0 cas de context dropping détectés"
@@ -262,7 +250,7 @@ class ContextDroppingDetector:
             return result
 
         for phrase in phrases:
-            kind, user_hint = _classify_phrase(phrase, combined_norm, tolerance=effective_tolerance)
+            kind, user_hint = _classify_phrase(phrase, combined_norm)
             if kind is None:
                 continue
             assert user_hint is not None
@@ -298,7 +286,8 @@ class ContextDroppingDetector:
             result.summary = f"{n} cas détectés ({', '.join(parts)})" if parts else f"{n} cas détectés"
         if n == 0:
             result.message = (
-                "Les informations clés du contexte sont présentes dans le dialogue "
-                "(heuristique MVP ; faux négatifs possibles)."
+                "Chaque mention extraite de vos sélections contexte trouve au moins un signal "
+                "dans les lignes et textes de choix analysés (heuristique MVP ; faux négatifs "
+                "possibles ; champs locuteur / titres de nœuds non pris en compte)."
             )
         return result

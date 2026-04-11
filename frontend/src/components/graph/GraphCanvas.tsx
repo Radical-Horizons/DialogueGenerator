@@ -263,6 +263,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
   } = useReactFlowHandlers(fitViewRequestedAfterDimensionsRef, {
     getFlowPosition,
     onChoiceDropOnPane: handleChoiceDropOnPane,
+    flowContainerRef: ref,
   })
 
   const choiceIndexFromDrop = dropChoiceMenu
@@ -545,6 +546,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         defaultViewport={DEFAULT_VIEWPORT}
         minZoom={0.1}
         maxZoom={2}
+        connectionRadius={48}
         panActivationKeyCode="Space"
         onlyRenderVisibleElements={true}
         onMove={onMove}

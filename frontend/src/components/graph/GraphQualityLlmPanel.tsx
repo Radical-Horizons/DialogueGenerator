@@ -15,6 +15,7 @@ import {
 } from '../../utils/qualityLlmUi'
 import { GraphQualityLlmHistorySparkline } from './GraphQualityLlmHistorySparkline'
 import { GraphQualityLlmCriteriaList } from './GraphQualityLlmCriteriaList'
+import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 
 interface GraphQualityLlmPanelProps {
   onClose: () => void
@@ -77,51 +78,16 @@ export function GraphQualityLlmPanel({ onClose }: GraphQualityLlmPanelProps) {
       : []
 
   return (
-    <div
-      data-testid="graph-quality-llm-panel"
-      style={{
-        position: 'absolute',
-        top: 16,
-        right: 16,
-        width: 'min(380px, calc(100% - 32px))',
-        maxHeight: 'min(520px, 70vh)',
-        overflowY: 'auto',
-        backgroundColor: theme.background.panel,
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: 8,
-        padding: '0.75rem',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
-        zIndex: 1001,
-        color: theme.text.primary,
-        fontSize: '0.9rem',
-      }}
+    <GraphToolFloatingShell
+      title={<strong>Qualité LLM</strong>}
+      onClose={onClose}
+      dataTestId="graph-quality-llm-panel"
+      storageKey="quality-llm"
+      initialOffset={{ top: 56, left: 24 }}
+      width="min(420px, calc(100vw - 24px))"
+      maxHeight="min(72vh, 580px)"
+      closeButtonTestId="graph-quality-llm-close"
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-          marginBottom: 8,
-        }}
-      >
-        <strong>Qualité LLM</strong>
-        <button
-          type="button"
-          data-testid="graph-quality-llm-close"
-          onClick={onClose}
-          style={{
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: 6,
-            background: theme.button.default.background,
-            color: theme.text.primary,
-            cursor: 'pointer',
-            padding: '0.25rem 0.5rem',
-          }}
-        >
-          Fermer
-        </button>
-      </div>
       <p style={{ margin: '0 0 0.5rem', color: theme.text.secondary, fontSize: '0.8rem' }}>
         {SCORE_VARIANCE_SESSION_REMINDER}
       </p>
@@ -231,6 +197,6 @@ export function GraphQualityLlmPanel({ onClose }: GraphQualityLlmPanelProps) {
           </p>
         </div>
       ) : null}
-    </div>
+    </GraphToolFloatingShell>
   )
 }

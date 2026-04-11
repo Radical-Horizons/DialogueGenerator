@@ -17,6 +17,10 @@ import {
   formatGraphWarningBadgeLabel,
   summarizeGraphValidationWarnings,
 } from '../../utils/graphValidationSummary'
+import {
+  GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+  GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+} from './graphToolbarConstants'
 
 /** Offsets pour positionner les nœuds créés manuellement sans chevauchement (Story 1.6). */
 const MANUAL_NODE_OFFSET_X = 150
@@ -103,6 +107,8 @@ export function GraphEditorHeader({
     setShowAutoLayoutDropdown,
     showActionsDropdown,
     setShowActionsDropdown,
+    showValidationToolsDropdown,
+    setShowValidationToolsDropdown,
     setShowAIGenerationPanel,
     showValidationPanel,
     setShowValidationPanel,
@@ -130,6 +136,7 @@ export function GraphEditorHeader({
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,
+    validationToolsDropdownRef,
     reactFlowInstance,
     handleAutoLayout,
     handleOpenExportDialog,
@@ -462,13 +469,16 @@ export function GraphEditorHeader({
                 left: 0,
                 marginTop: '4px',
                 minWidth: '100%',
+                maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+                overflowY: 'auto',
+                overflowX: 'hidden',
                 padding: '4px 0',
                 border: `1px solid ${theme.input.border}`,
                 borderRadius: '6px',
                 backgroundColor: theme.input.background,
                 color: theme.input.color,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                zIndex: 1000,
+                zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
               }}
             >
               <div
@@ -604,12 +614,15 @@ export function GraphEditorHeader({
                 left: 0,
                 marginTop: '4px',
                 minWidth: '200px',
+                maxWidth: 'min(320px, 92vw)',
+                maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+                overflowY: 'auto',
+                overflowX: 'hidden',
                 backgroundColor: theme.background.tertiary,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '8px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-                zIndex: 50,
-                overflow: 'hidden',
+                zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
               }}
             >
               <button
@@ -860,142 +873,212 @@ export function GraphEditorHeader({
             </div>
           )}
         </div>
-        <button
-          type="button"
-          data-testid="btn-quality-llm-panel"
-          onClick={() => setShowQualityLlmPanel((v) => !v)}
-          disabled={!hasActiveDialogue}
-          style={{
+        {(() => {
+          const validationToolsActive =
+            showQualityLlmPanel ||
+            showAiSlopPanel ||
+            showContextDroppingPanel ||
+            showFlowSimulationPanel ||
+            showSchemaValidationPanel ||
+            showCostBreakdown
+          const menuItemStyle = {
+            display: 'block',
+            width: '100%',
             padding: '0.5rem 1rem',
-            border: `1px solid ${
-              showQualityLlmPanel ? theme.button.primary.background : theme.border.primary
-            }`,
-            borderRadius: '6px',
-            backgroundColor: showQualityLlmPanel
-              ? theme.button.primary.background
-              : theme.button.default.background,
-            color: showQualityLlmPanel ? theme.button.primary.color : theme.button.default.color,
-            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-            opacity: !hasActiveDialogue ? 0.6 : 1,
+            border: 'none',
+            background: 'transparent',
+            color: theme.text.primary,
+            textAlign: 'left' as const,
             fontSize: '0.9rem',
-          }}
-          title="Évaluer la qualité narrative du dialogue (juge LLM, FR42)"
-        >
-          ✨ Qualité LLM
-        </button>
-        <button
-          type="button"
-          data-testid="btn-ai-slop-panel"
-          onClick={() => setShowAiSlopPanel((v) => !v)}
-          disabled={!hasActiveDialogue}
-          style={{
-            padding: '0.5rem 1rem',
-            border: `1px solid ${
-              showAiSlopPanel ? theme.button.primary.background : theme.border.primary
-            }`,
-            borderRadius: '6px',
-            backgroundColor: showAiSlopPanel
-              ? theme.button.primary.background
-              : theme.button.default.background,
-            color: showAiSlopPanel ? theme.button.primary.color : theme.button.default.color,
-            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-            opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: '0.9rem',
-          }}
-          title="Détecter les formulations type GPT-ism, répétitions et phrases génériques (FR43)"
-        >
-          🤖 AI slop
-        </button>
-        <button
-          type="button"
-          data-testid="btn-context-dropping-panel"
-          onClick={() => setShowContextDroppingPanel((v) => !v)}
-          disabled={!hasActiveDialogue}
-          style={{
-            padding: '0.5rem 1rem',
-            border: `1px solid ${
-              showContextDroppingPanel ? theme.button.primary.background : theme.border.primary
-            }`,
-            borderRadius: '6px',
-            backgroundColor: showContextDroppingPanel
-              ? theme.button.primary.background
-              : theme.button.default.background,
-            color: showContextDroppingPanel
-              ? theme.button.primary.color
-              : theme.button.default.color,
-            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-            opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: '0.9rem',
-          }}
-          title="Détecter si le contexte GDD sélectionné est absent ou trop indirect dans le dialogue (FR44)"
-        >
-          📎 Contexte
-        </button>
-        <button
-          type="button"
-          data-testid="btn-flow-simulation-panel"
-          onClick={() => setShowFlowSimulationPanel((v) => !v)}
-          disabled={!hasActiveDialogue}
-          style={{
-            padding: '0.5rem 1rem',
-            border: `1px solid ${
-              showFlowSimulationPanel ? theme.button.primary.background : theme.border.primary
-            }`,
-            borderRadius: '6px',
-            backgroundColor: showFlowSimulationPanel
-              ? theme.button.primary.background
-              : theme.button.default.background,
-            color: showFlowSimulationPanel
-              ? theme.button.primary.color
-              : theme.button.default.color,
-            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-            opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: '0.9rem',
-          }}
-          title="Simuler le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46)"
-        >
-          🔀 Flux
-        </button>
-        <button
-          type="button"
-          data-testid="btn-schema-validation-panel"
-          onClick={() => { void handleToggleSchemaValidation() }}
-          disabled={!hasActiveDialogue}
-          style={{
-            padding: '0.5rem 1rem',
-            border: `1px solid ${showSchemaValidationPanel ? theme.button.primary.background : theme.border.primary}`,
-            borderRadius: '6px',
-            backgroundColor: showSchemaValidationPanel ? theme.button.primary.background : theme.button.default.background,
-            color: showSchemaValidationPanel ? theme.button.primary.color : theme.button.default.color,
-            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-            opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: '0.9rem',
-          }}
-          title="Valider la conformité du schéma JSON Unity (FR48)"
-        >
-          🧩 Schéma
-        </button>
-        <button
-          onClick={() => setShowCostBreakdown((v) => !v)}
-          disabled={!hasActiveDialogue}
-          style={{
-            padding: '0.5rem 1rem',
-            border: `1px solid ${
-              showCostBreakdown ? theme.button.primary.background : theme.border.primary
-            }`,
-            borderRadius: '6px',
-            backgroundColor: showCostBreakdown
-              ? theme.button.primary.background
-              : theme.button.default.background,
-            color: showCostBreakdown ? theme.button.primary.color : theme.button.default.color,
-            cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-            opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: '0.9rem',
-          }}
-          title="Afficher le breakdown des coûts LLM pour ce dialogue"
-        >
-          💰 Coûts
-        </button>
+            cursor: 'pointer' as const,
+          }
+          return (
+            <div ref={validationToolsDropdownRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                data-testid="btn-validation-tools-dropdown"
+                onClick={() =>
+                  hasActiveDialogue &&
+                  setShowValidationToolsDropdown((v) => !v)
+                }
+                disabled={!hasActiveDialogue}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: `1px solid ${
+                    showValidationToolsDropdown || validationToolsActive
+                      ? theme.button.primary.background
+                      : theme.border.primary
+                  }`,
+                  borderRadius: '6px',
+                  backgroundColor:
+                    showValidationToolsDropdown || validationToolsActive
+                      ? theme.button.primary.background
+                      : theme.button.default.background,
+                  color:
+                    showValidationToolsDropdown || validationToolsActive
+                      ? theme.button.primary.color
+                      : theme.button.default.color,
+                  cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+                  opacity: !hasActiveDialogue ? 0.6 : 1,
+                  fontSize: '0.9rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+                title="Qualité narrative, détections, simulation de flux, schéma Unity et coûts LLM"
+              >
+                Qualité
+                {validationToolsActive ? (
+                  <span style={{ fontSize: '0.75rem' }}>•</span>
+                ) : null}
+                <span style={{ fontSize: '0.7rem' }}>▼</span>
+              </button>
+              {showValidationToolsDropdown && (
+                <div
+                  role="menu"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    marginTop: '4px',
+                    minWidth: '280px',
+                    maxWidth: 'min(360px, 92vw)',
+                    maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    backgroundColor: theme.background.tertiary,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                    zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+                  }}
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    data-testid="btn-quality-llm-panel"
+                    onClick={() => {
+                      setShowValidationToolsDropdown(false)
+                      setShowQualityLlmPanel((v) => !v)
+                    }}
+                    style={menuItemStyle}
+                    title="Évaluer la qualité narrative du dialogue (juge LLM, FR42)"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    ✨ Qualité LLM
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    data-testid="btn-ai-slop-panel"
+                    onClick={() => {
+                      setShowValidationToolsDropdown(false)
+                      setShowAiSlopPanel((v) => !v)
+                    }}
+                    style={menuItemStyle}
+                    title="Détecter les formulations type GPT-ism, répétitions et phrases génériques (FR43)"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    🤖 Détection AI slop
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    data-testid="btn-context-dropping-panel"
+                    onClick={() => {
+                      setShowValidationToolsDropdown(false)
+                      setShowContextDroppingPanel((v) => !v)
+                    }}
+                    style={menuItemStyle}
+                    title="Détecter si le contexte GDD sélectionné est absent ou trop indirect dans le dialogue (FR44)"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    📎 Context dropping
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    data-testid="btn-flow-simulation-panel"
+                    onClick={() => {
+                      setShowValidationToolsDropdown(false)
+                      setShowFlowSimulationPanel((v) => !v)
+                    }}
+                    style={menuItemStyle}
+                    title="Simuler le flux de dialogue pour détecter dead ends et cul-de-sacs (FR46)"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    🔀 Simulation de flux
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    data-testid="btn-schema-validation-panel"
+                    onClick={() => {
+                      setShowValidationToolsDropdown(false)
+                      void handleToggleSchemaValidation()
+                    }}
+                    style={menuItemStyle}
+                    title="Valider la conformité du schéma JSON Unity (FR48)"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    🧩 Schéma Unity
+                  </button>
+                  <div
+                    style={{
+                      height: 1,
+                      margin: '0.15rem 0',
+                      backgroundColor: theme.border.primary,
+                    }}
+                  />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    data-testid="btn-cost-breakdown-panel"
+                    onClick={() => {
+                      setShowValidationToolsDropdown(false)
+                      setShowCostBreakdown((v) => !v)
+                    }}
+                    style={menuItemStyle}
+                    title="Afficher le breakdown des coûts LLM pour ce dialogue"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    💰 Coûts LLM
+                  </button>
+                </div>
+              )}
+            </div>
+          )
+        })()}
         <button
           type="button"
           data-testid="btn-search-graph"

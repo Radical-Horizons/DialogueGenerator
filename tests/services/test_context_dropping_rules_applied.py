@@ -127,37 +127,14 @@ def test_unknown_dialogue_type_falls_back_to_global():
     assert result.rules_profile_effective == "light"
 
 
-# ── Tolérance sur mentions partielles ────────────────────────────────────────
+# ── Tolérance API (champ conservé, sans effet sur la correspondance multi-mots) ──
 
-def test_tolerance_reduces_too_subtle_cases():
-    """Tolérance haute → mention partielle acceptée (hits/total >= tolerance)."""
-    # "Entite Fictive Kappa Omega" → 4 mots significatifs ; nœud contient "kappa" seul.
-    # Sans tolérance : 1/4 hits → too_subtle.
-    # Avec tolerance=0.2 : 0.25 >= 0.2 → accepted.
+def test_tolerance_field_does_not_block_partial_multi_word_match():
+    """Un seul mot significatif suffit ; le champ ``tolerance`` ne change pas ce comportement."""
     nodes = [_dialogue_node("n1", "kappa etait present dans la scene.")]
     context = {"characters_full": ["Entite Fictive Kappa Omega"]}
 
-    opts_no_tol = ContextDroppingOptionsData(rules_profile="strict")
-    opts_with_tol = ContextDroppingOptionsData(rules_profile="strict", tolerance=0.2)
-
-    result_no = ContextDroppingDetector.detect(nodes, [], context, options=opts_no_tol)
-    result_with = ContextDroppingDetector.detect(nodes, [], context, options=opts_with_tol)
-
-    subtle_no = sum(1 for c in result_no.cases if c.kind == "too_subtle")
-    subtle_with = sum(1 for c in result_with.cases if c.kind == "too_subtle")
-
-    assert subtle_no >= 1, "Sans tolérance, mention partielle (1/4 mots) doit être too_subtle"
-    assert subtle_with == 0, "Avec tolerance=0.2, ratio 0.25 >= 0.2 doit être accepté"
-
-
-def test_tolerance_too_low_still_flags_too_subtle():
-    """Tolérance insuffisante → mention partielle reste too_subtle."""
-    nodes = [_dialogue_node("n1", "kappa etait present dans la scene.")]
-    context = {"characters_full": ["Entite Fictive Kappa Omega"]}
-
-    # tolerance=0.5 : 1/4 = 0.25 < 0.5 → toujours too_subtle
-    opts = ContextDroppingOptionsData(rules_profile="strict", tolerance=0.5)
-    result = ContextDroppingDetector.detect(nodes, [], context, options=opts)
-
-    subtle = sum(1 for c in result.cases if c.kind == "too_subtle")
-    assert subtle >= 1, "Avec tolerance=0.5 et ratio 0.25, le cas doit rester too_subtle"
+    for tol in (None, 0.99):
+        opts = ContextDroppingOptionsData(rules_profile="strict", tolerance=tol)
+        result = ContextDroppingDetector.detect(nodes, [], context, options=opts)
+        assert result.case_count == 0, f"tolérance {tol!r} : un mot (kappa) doit suffire"

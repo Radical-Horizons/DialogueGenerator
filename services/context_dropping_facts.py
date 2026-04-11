@@ -115,7 +115,9 @@ def extract_key_phrases_from_context(
         rules_profile: ``strict`` (min 3 car.) ou ``light`` (min 4 car. sur listes).
 
     Returns:
-        Liste dédupliquée par ``normalized``.
+        Liste dédupliquée par ``normalized``.  Côté détecteur, une mention multi-mots est
+        satisfaite dès qu'**un** mot significatif (longueur ≥ 3) apparaît dans les lignes
+        et choix du graphe (voir ``context_dropping_detector._classify_phrase``).
     """
     sel = context_selections if isinstance(context_selections, dict) else {}
     min_len = MIN_LABEL_LEN_STRICT if rules_profile != "light" else MIN_LABEL_LEN_LIGHT

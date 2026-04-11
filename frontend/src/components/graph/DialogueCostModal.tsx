@@ -4,6 +4,7 @@
  */
 import { DialogueCostBreakdown } from '../usage/DialogueCostBreakdown'
 import { theme } from '../../theme'
+import { GRAPH_TOOL_FLOATING_PANEL_Z_INDEX } from './graphToolbarConstants'
 
 interface DialogueCostModalProps {
   filename: string
@@ -24,7 +25,7 @@ export function DialogueCostModal({ filename, onClose }: DialogueCostModalProps)
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        zIndex: GRAPH_TOOL_FLOATING_PANEL_Z_INDEX + 500,
         padding: '1rem',
       }}
       onClick={(e) => {

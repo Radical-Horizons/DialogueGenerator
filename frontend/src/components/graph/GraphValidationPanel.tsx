@@ -21,6 +21,7 @@ import {
   ValidationWarningsByType,
 } from './GraphValidationPanelLists'
 import { GraphStructuralWarningsSummary } from './GraphStructuralWarningsSummary'
+import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 
 interface GraphValidationPanelProps {
   validationErrors: ValidationErrorDetail[]
@@ -168,64 +169,46 @@ export function GraphValidationPanel({
       : `${warnings.length} avertissement${warnings.length > 1 ? 's' : ''}`
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: 16,
-        left: 16,
-        right: 16,
-        maxHeight: '350px',
-        overflowY: 'auto',
-        backgroundColor: panelBg,
-        border: `1px solid ${panelBorder}`,
-        borderRadius: '6px',
-        padding: '0.75rem',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          fontSize: '0.85rem',
-          fontWeight: 'bold',
-          color: headerColor,
-          marginBottom: '0.75rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.5rem',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
+    <GraphToolFloatingShell
+      title={
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
           <span aria-hidden>{headerIcon}</span>
           <span>{headerText}</span>
-        </div>
-        <button
-          type="button"
-          aria-label="Fermer le panneau de validation"
-          data-testid="validation-panel-close"
-          onClick={onClose}
-          style={{
-            flexShrink: 0,
-            width: 28,
-            height: 28,
-            padding: 0,
-            lineHeight: 1,
-            border: `1px solid ${panelBorder}`,
-            borderRadius: 6,
-            backgroundColor: 'rgba(0, 0, 0, 0.2)',
-            color: headerColor,
-            cursor: 'pointer',
-            fontSize: '1rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          ×
-        </button>
-      </div>
-
+        </span>
+      }
+      onClose={onClose}
+      dataTestId="graph-validation-panel"
+      storageKey="graph-validation-errors"
+      initialOffset={{ top: 120, left: 40 }}
+      width="min(720px, calc(100vw - 24px))"
+      maxHeight="min(65vh, 520px)"
+      closeButtonTestId="validation-panel-close"
+      closeAriaLabel="Fermer le panneau de validation"
+      closeButtonChildren="×"
+      closeButtonStyle={{
+        width: 28,
+        height: 28,
+        padding: 0,
+        lineHeight: 1,
+        border: `1px solid ${panelBorder}`,
+        borderRadius: 6,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        color: headerColor,
+        fontSize: '1rem',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      containerStyle={{
+        backgroundColor: panelBg,
+        border: `1px solid ${panelBorder}`,
+      }}
+      headerBarStyle={{
+        backgroundColor: panelBg,
+        color: headerColor,
+        borderBottom: `1px solid ${panelBorder}`,
+      }}
+    >
       {((warningSummary.countsByType.orphan_node ?? 0) > 0 ||
         (warningSummary.countsByType.unreachable_node ?? 0) > 0 ||
         warningSummary.cycleCount > 0) && (
@@ -304,6 +287,6 @@ export function GraphValidationPanel({
           }}
         />
       ) : null}
-    </div>
+    </GraphToolFloatingShell>
   )
 }

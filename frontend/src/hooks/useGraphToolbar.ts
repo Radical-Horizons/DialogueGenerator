@@ -19,6 +19,8 @@ export interface UseGraphToolbarReturn {
   setShowAutoLayoutDropdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showActionsDropdown: boolean
   setShowActionsDropdown: (v: boolean | ((prev: boolean) => boolean)) => void
+  showValidationToolsDropdown: boolean
+  setShowValidationToolsDropdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showAIGenerationPanel: boolean
   setShowAIGenerationPanel: (v: boolean) => void
   showExportFormatDialog: boolean
@@ -56,6 +58,7 @@ export interface UseGraphToolbarReturn {
   autoLayoutDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownBtnRef: RefObject<HTMLButtonElement>
+  validationToolsDropdownRef: RefObject<HTMLDivElement>
   canvasWrapperRef: RefObject<HTMLDivElement>
   reactFlowInstance: ReactFlowInstance | null
   handleAutoLayout: (direction?: 'TB' | 'LR' | 'BT' | 'RL') => Promise<void>
@@ -76,6 +79,7 @@ export function useGraphToolbar(
 ): UseGraphToolbarReturn {
   const [showAutoLayoutDropdown, setShowAutoLayoutDropdown] = useState(false)
   const [showActionsDropdown, setShowActionsDropdown] = useState(false)
+  const [showValidationToolsDropdown, setShowValidationToolsDropdown] = useState(false)
   const [showAIGenerationPanel, setShowAIGenerationPanel] = useState(false)
   const [showExportFormatDialog, setShowExportFormatDialog] = useState(false)
   const [showValidationPanel, setShowValidationPanel] = useState(false)
@@ -97,6 +101,7 @@ export function useGraphToolbar(
   const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownBtnRef = useRef<HTMLButtonElement>(null)
+  const validationToolsDropdownRef = useRef<HTMLDivElement>(null)
   const canvasWrapperRef = useRef<HTMLDivElement>(null)
 
   const reactFlowInstance = useGraphViewStore((s) => s.reactFlowInstance)
@@ -144,6 +149,16 @@ export function useGraphToolbar(
     document.addEventListener('mousedown', onOutside)
     return () => document.removeEventListener('mousedown', onOutside)
   }, [showActionsDropdown])
+
+  useEffect(() => {
+    if (!showValidationToolsDropdown) return
+    const el = validationToolsDropdownRef.current
+    const onOutside = (e: MouseEvent) => {
+      if (el && !el.contains(e.target as Node)) setShowValidationToolsDropdown(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [showValidationToolsDropdown])
 
   const handleAutoLayout = useCallback(
     async (direction?: 'TB' | 'LR' | 'BT' | 'RL') => {
@@ -457,6 +472,8 @@ export function useGraphToolbar(
     setShowAutoLayoutDropdown,
     showActionsDropdown,
     setShowActionsDropdown,
+    showValidationToolsDropdown,
+    setShowValidationToolsDropdown,
     showAIGenerationPanel,
     setShowAIGenerationPanel,
     showExportFormatDialog,
@@ -494,6 +511,7 @@ export function useGraphToolbar(
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,
+    validationToolsDropdownRef,
     canvasWrapperRef,
     reactFlowInstance,
     handleAutoLayout,

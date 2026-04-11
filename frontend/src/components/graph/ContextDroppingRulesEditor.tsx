@@ -203,6 +203,10 @@ export function ContextDroppingRulesEditor({ onClose }: ContextDroppingRulesEdit
             borderRadius: 4,
           }}
         />
+        <p style={{ fontSize: 11, color: theme.text.tertiary, margin: '6px 0 0' }}>
+          La détection compare chaque mention multi-mots aux lignes et choix : un seul mot assez long
+          suffit. Ce champ reste enregistré pour compatibilité mais ne modifie plus ce comportement.
+        </p>
       </div>
 
       {/* ── Informations obligatoires ──────────────────────────────────────── */}

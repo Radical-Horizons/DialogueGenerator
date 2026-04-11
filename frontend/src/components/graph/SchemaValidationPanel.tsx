@@ -2,6 +2,7 @@
  * Panneau de validation conformité schéma JSON Unity (FR48 / Story 4.13).
  */
 import { theme } from '../../theme'
+import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 
 interface SchemaValidationPanelProps {
   isOpen: boolean
@@ -36,53 +37,25 @@ export function SchemaValidationPanel({
   if (!isOpen) return null
 
   return (
-    <div
-      data-testid="schema-validation-panel"
-      style={{
-        position: 'absolute',
-        top: 80,
-        right: 16,
-        width: 'min(360px, calc(100% - 32px))',
-        maxHeight: 'min(500px, 65vh)',
-        overflowY: 'auto',
-        backgroundColor: theme.background.panel,
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: 8,
-        padding: '0.75rem',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
-        zIndex: 1001,
-        color: theme.text.primary,
-        fontSize: '0.88rem',
+    <GraphToolFloatingShell
+      title={<strong>Validation schéma Unity</strong>}
+      onClose={onClose}
+      dataTestId="schema-validation-panel"
+      storageKey="schema-unity"
+      initialOffset={{ top: 56, left: 320 }}
+      width="min(400px, calc(100vw - 24px))"
+      maxHeight="min(70vh, 540px)"
+      closeButtonTestId="schema-close-btn"
+      closeAriaLabel="Fermer"
+      closeButtonChildren="✕"
+      closeButtonStyle={{
+        background: 'transparent',
+        border: 'none',
+        color: theme.text.secondary,
+        fontSize: '1rem',
+        padding: '0 4px',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-          marginBottom: 8,
-        }}
-      >
-        <strong>Validation schéma Unity</strong>
-        <button
-          type="button"
-          data-testid="schema-close-btn"
-          onClick={onClose}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: theme.text.secondary,
-            cursor: 'pointer',
-            fontSize: '1rem',
-            padding: '0 4px',
-          }}
-          title="Fermer"
-        >
-          ✕
-        </button>
-      </div>
-
       {isLoading && (
         <div
           data-testid="schema-loading-indicator"
@@ -139,6 +112,6 @@ export function SchemaValidationPanel({
           )}
         </>
       )}
-    </div>
+    </GraphToolFloatingShell>
   )
 }

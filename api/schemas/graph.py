@@ -487,7 +487,7 @@ class DetectContextDroppingOptions(BaseModel):
         None,
         ge=0.0,
         le=1.0,
-        description="Seuil souple [0, 1] — None = comportement par défaut du profil.",
+        description="Réservé compatibilité ; la détection multi-mots utilise « au moins un mot significatif ».",
     )
     mandatory_info: Optional[List[str]] = Field(
         None,

@@ -4,6 +4,10 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { theme } from '../../theme'
+import {
+  GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+  GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+} from './graphToolbarConstants'
 
 const PRESET_TAGS = ['À réviser', 'Validé', 'Brouillon', 'À relire'] as const
 
@@ -90,13 +94,16 @@ export function BatchOperationsMenu({
                 left: 0,
                 marginTop: '4px',
                 minWidth: '140px',
+                maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+                overflowY: 'auto',
+                overflowX: 'hidden',
                 padding: '4px 0',
                 border: `1px solid ${theme.input.border}`,
                 borderRadius: '6px',
                 backgroundColor: theme.input.background,
                 color: theme.input.color,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                zIndex: 1000,
+                zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
               }}
             >
               {PRESET_TAGS.map((tag) => (

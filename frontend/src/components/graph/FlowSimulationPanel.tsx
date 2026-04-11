@@ -9,6 +9,7 @@ import * as graphAPI from '../../api/graph'
 import { getErrorMessage } from '../../types/errors'
 import type { SimulateFlowResponse, ValidationErrorDetail } from '../../types/graph'
 import { CoverageSection } from './CoverageSection'
+import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 
 interface FlowSimulationPanelProps {
   onClose: () => void
@@ -108,51 +109,16 @@ export function FlowSimulationPanel({ onClose }: FlowSimulationPanelProps) {
   const isEmpty = hasResults && last.dead_ends.length === 0 && last.cul_de_sacs.length === 0
 
   return (
-    <div
-      data-testid="flow-simulation-panel"
-      style={{
-        position: 'absolute',
-        top: 80,
-        left: 800,
-        width: 'min(380px, calc(100% - 32px))',
-        maxHeight: 'min(520px, 70vh)',
-        overflowY: 'auto',
-        backgroundColor: theme.background.panel,
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: 8,
-        padding: '0.75rem',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
-        zIndex: 1001,
-        color: theme.text.primary,
-        fontSize: '0.88rem',
-      }}
+    <GraphToolFloatingShell
+      title={<strong>Simulation de flux</strong>}
+      onClose={onClose}
+      dataTestId="flow-simulation-panel"
+      storageKey="flow-simulation"
+      initialOffset={{ top: 56, left: 200 }}
+      width="min(420px, calc(100vw - 24px))"
+      maxHeight="min(72vh, 580px)"
+      closeButtonTestId="flow-simulation-close"
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-          marginBottom: 8,
-        }}
-      >
-        <strong>Simulation de flux</strong>
-        <button
-          type="button"
-          data-testid="flow-simulation-close"
-          onClick={onClose}
-          style={{
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: 6,
-            background: theme.button.default.background,
-            color: theme.text.primary,
-            cursor: 'pointer',
-            padding: '0.25rem 0.5rem',
-          }}
-        >
-          Fermer
-        </button>
-      </div>
 
       <p style={{ fontSize: '0.8rem', color: theme.text.secondary, marginBottom: '0.5rem' }}>
         Détecte les nœuds inatteignables (dead ends) et les cul-de-sacs (nœuds sans sortie
@@ -235,6 +201,6 @@ export function FlowSimulationPanel({ onClose }: FlowSimulationPanelProps) {
           )}
         </div>
       ) : null}
-    </div>
+    </GraphToolFloatingShell>
   )
 }

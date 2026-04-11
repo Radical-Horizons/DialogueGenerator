@@ -46,6 +46,154 @@ def _normalize_phrase(text: str) -> str:
     return t
 
 
+def _parse_test_node_parent_choice(test_node_id: str) -> Optional[Tuple[str, int]]:
+    """Décode ``test-node-{dialogueId}-choice-{index}`` (suffixe ``-choice-`` unique à droite)."""
+    prefix = "test-node-"
+    if not test_node_id.startswith(prefix):
+        return None
+    rest = test_node_id[len(prefix) :]
+    if "-choice-" not in rest:
+        return None
+    parent_part, idx_str = rest.rsplit("-choice-", 1)
+    if not parent_part or not idx_str.isdigit():
+        return None
+    return (parent_part, int(idx_str))
+
+
+def _resolve_choice_index_from_stable_handle(choices: List[Any], stable: str) -> Optional[int]:
+    """Retrouve l'index du choix pour un ``sourceHandle`` ``choice:{stableId}``."""
+    for idx, ch in enumerate(choices):
+        if not isinstance(ch, dict):
+            continue
+        cid = ch.get("choiceId")
+        if cid == stable:
+            return idx
+        idx_m = re.match(r"^__idx_(\d+)$", stable)
+        if idx_m and int(idx_m.group(1)) == idx:
+            return idx
+    return None
+
+
+def _build_test_node_parent_choice_map(
+    nodes: Sequence[Dict[str, Any]],
+    edges: Sequence[Dict[str, Any]],
+) -> Dict[str, Tuple[str, int]]:
+    """Pour chaque TestNode : (id du dialogue parent, index du choix).
+
+    Utilise les arêtes de type choix vers barre de test, puis repli sur le motif d'id
+    ``test-node-…-choice-N`` si besoin (graphes sans ``choiceIndex`` sur l'arête).
+    """
+    nodes_by_id: Dict[str, Dict[str, Any]] = {}
+    for n in nodes:
+        if isinstance(n, dict) and n.get("id") is not None:
+            nodes_by_id[str(n["id"])] = n
+
+    mapping: Dict[str, Tuple[str, int]] = {}
+
+    for e in edges or ():
+        if not isinstance(e, dict):
+            continue
+        raw_src, raw_tgt = e.get("source"), e.get("target")
+        if not raw_src or not raw_tgt:
+            continue
+        src_s, tgt_s = str(raw_src), str(raw_tgt)
+        tgt_node = nodes_by_id.get(tgt_s)
+        if not tgt_node or str(tgt_node.get("type") or "") != "testNode":
+            continue
+        ed = e.get("data") if isinstance(e.get("data"), dict) else {}
+        edge_type = ed.get("edgeType")
+        sh = e.get("sourceHandle")
+        is_choice_edge = edge_type == "choice" or (
+            isinstance(sh, str) and sh.startswith("choice:")
+        )
+        if not is_choice_edge:
+            continue
+
+        idx_val: Optional[int] = None
+        if isinstance(ed.get("choiceIndex"), (int, float)):
+            idx_val = int(ed["choiceIndex"])
+        if idx_val is None and tgt_s.startswith("test-node-"):
+            parsed = _parse_test_node_parent_choice(tgt_s)
+            if parsed and parsed[0] == src_s:
+                idx_val = parsed[1]
+        if idx_val is None and isinstance(sh, str) and sh.startswith("choice:"):
+            stable = sh[7:]
+            parent = nodes_by_id.get(src_s)
+            if parent:
+                pdata = parent.get("data")
+                if isinstance(pdata, dict):
+                    chs = pdata.get("choices")
+                    if isinstance(chs, list):
+                        idx_val = _resolve_choice_index_from_stable_handle(chs, stable)
+        if idx_val is not None:
+            mapping[tgt_s] = (src_s, idx_val)
+
+    for n in nodes:
+        if not isinstance(n, dict):
+            continue
+        nid = str(n.get("id") or "")
+        if not nid or nid in mapping:
+            continue
+        if str(n.get("type") or "") != "testNode":
+            continue
+        parsed = _parse_test_node_parent_choice(nid)
+        if parsed:
+            mapping[nid] = parsed
+
+    return mapping
+
+
+def _segments_without_test_bar_choice_line_mirrors(
+    segments: List[TextSegment],
+    nodes_by_id: Dict[str, Dict[str, Any]],
+    test_parent_map: Dict[str, Tuple[str, int]],
+) -> List[TextSegment]:
+    """Retire les ``line`` des TestNodes qui recopient exactement le libellé du choix parent.
+
+    La barre de test est un nœud physique distinct dans React Flow / JSON, mais ce texte
+    n'est pas une « répétition » narrative au sens AI slop.
+    """
+    out: List[TextSegment] = []
+    for seg in segments:
+        if seg.field != "line":
+            out.append(seg)
+            continue
+        node = nodes_by_id.get(seg.node_id)
+        if not node or str(node.get("type") or "") != "testNode":
+            out.append(seg)
+            continue
+        parent_info = test_parent_map.get(seg.node_id)
+        if not parent_info:
+            out.append(seg)
+            continue
+        parent_id, ch_idx = parent_info
+        parent = nodes_by_id.get(parent_id)
+        if not parent:
+            out.append(seg)
+            continue
+        pdata = parent.get("data")
+        if not isinstance(pdata, dict):
+            out.append(seg)
+            continue
+        choices = pdata.get("choices")
+        if not isinstance(choices, list) or ch_idx < 0 or ch_idx >= len(choices):
+            out.append(seg)
+            continue
+        ch = choices[ch_idx]
+        if not isinstance(ch, dict):
+            out.append(seg)
+            continue
+        chtext = ch.get("text")
+        if (
+            isinstance(chtext, str)
+            and chtext.strip()
+            and _normalize_phrase(seg.text) == _normalize_phrase(chtext.strip())
+        ):
+            continue
+        out.append(seg)
+    return out
+
+
 def _display_id(node: Dict[str, Any], data: Dict[str, Any], fallback: str) -> str:
     sid = data.get("stableId")
     if isinstance(sid, str) and sid.strip():
@@ -166,10 +314,14 @@ class AISlopDetector:
     def detect(
         cls,
         nodes: Sequence[Dict[str, Any]],
-        _edges: Sequence[Dict[str, Any]],
+        edges: Sequence[Dict[str, Any]],
         options: Optional[AiSlopDetectionOptionsData] = None,
     ) -> AiSlopDetectionResult:
-        """Analyse le graphe ; ``edges`` réservé pour cohérence d’API."""
+        """Analyse le graphe.
+
+        Les ``edges`` servent à relier les TestNodes au choix dialogue parent pour ne pas
+        traiter comme « répétition » la recopie du libellé de choix sur la barre de test.
+        """
         opts = options or AiSlopDetectionOptionsData()
         result = AiSlopDetectionResult()
 
@@ -185,9 +337,19 @@ class AISlopDetector:
             )
             return result
 
+        nodes_by_id: Dict[str, Dict[str, Any]] = {
+            str(n["id"]): n
+            for n in nodes
+            if isinstance(n, dict) and n.get("id") is not None
+        }
+        test_parent_map = _build_test_node_parent_choice_map(nodes, edges)
+        segments_for_repetition = _segments_without_test_bar_choice_line_mirrors(
+            segments, nodes_by_id, test_parent_map
+        )
+
         # Répétitions (phrase normalisée -> listes de segments)
         phrase_locations: Dict[str, List[TextSegment]] = {}
-        for seg in segments:
+        for seg in segments_for_repetition:
             key = _normalize_phrase(seg.text)
             if len(key) < cls._MIN_REPETITION_LEN:
                 continue

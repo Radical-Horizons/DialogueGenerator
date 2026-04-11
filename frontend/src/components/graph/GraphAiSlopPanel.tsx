@@ -13,6 +13,7 @@ import {
   saveSlopDetectionOptions,
   type AiSlopDetectionOptionsState,
 } from '../../utils/slopDetectionSettings'
+import { GraphToolFloatingShell } from './GraphToolFloatingShell'
 
 interface GraphAiSlopPanelProps {
   onClose: () => void
@@ -90,51 +91,16 @@ export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
     : []
 
   return (
-    <div
-      data-testid="graph-ai-slop-panel"
-      style={{
-        position: 'absolute',
-        top: 80,
-        left: 16,
-        width: 'min(380px, calc(100% - 32px))',
-        maxHeight: 'min(520px, 70vh)',
-        overflowY: 'auto',
-        backgroundColor: theme.background.panel,
-        border: `1px solid ${theme.border.primary}`,
-        borderRadius: 8,
-        padding: '0.75rem',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
-        zIndex: 1001,
-        color: theme.text.primary,
-        fontSize: '0.88rem',
-      }}
+    <GraphToolFloatingShell
+      title={<strong>AI slop</strong>}
+      onClose={onClose}
+      dataTestId="graph-ai-slop-panel"
+      storageKey="ai-slop"
+      initialOffset={{ top: 56, left: 460 }}
+      width="min(420px, calc(100vw - 24px))"
+      maxHeight="min(72vh, 580px)"
+      closeButtonTestId="graph-ai-slop-close"
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-          marginBottom: 8,
-        }}
-      >
-        <strong>AI slop</strong>
-        <button
-          type="button"
-          data-testid="graph-ai-slop-close"
-          onClick={onClose}
-          style={{
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: 6,
-            background: theme.button.default.background,
-            color: theme.text.primary,
-            cursor: 'pointer',
-            padding: '0.25rem 0.5rem',
-          }}
-        >
-          Fermer
-        </button>
-      </div>
 
       <section style={{ marginBottom: '0.65rem' }} aria-labelledby="slop-settings-title">
         <div id="slop-settings-title" style={{ fontWeight: 600, marginBottom: 6 }}>
@@ -282,6 +248,6 @@ export function GraphAiSlopPanel({ onClose }: GraphAiSlopPanelProps) {
           ) : null}
         </div>
       ) : null}
-    </div>
+    </GraphToolFloatingShell>
   )
 }

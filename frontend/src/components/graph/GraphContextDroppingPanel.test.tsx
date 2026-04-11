@@ -73,7 +73,7 @@ describe('GraphContextDroppingPanel', () => {
     useGraphStore.setState({ nodes: [], edges: [] })
   })
 
-  it('affiche loading puis résumé et au moins une ligne de détail après succès API', async () => {
+  it('affiche l’encadré entrant (sélections contexte) et le rapport après succès API', async () => {
     seedStoreOneDialogueNode()
     vi.mocked(graphAPI.detectContextDropping).mockImplementation(
       () =>
@@ -83,6 +83,8 @@ describe('GraphContextDroppingPanel', () => {
     )
     const user = userEvent.setup()
     render(<GraphContextDroppingPanel onClose={() => undefined} />)
+    expect(screen.getByTestId('graph-context-dropping-input')).toHaveTextContent('Entrant analysé')
+    expect(screen.getByTestId('graph-context-dropping-input')).toHaveTextContent('Personnages')
     await user.click(screen.getByTestId('graph-context-dropping-detect'))
     expect(screen.getByRole('button', { name: /Analyse/i })).toBeDisabled()
     expect(await screen.findByTestId('graph-context-dropping-summary')).toBeInTheDocument()
