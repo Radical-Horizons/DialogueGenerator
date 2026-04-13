@@ -234,6 +234,13 @@ Option B : Depuis l'URL
   - `NodeEditorPanel.tsx` : Panel d'édition
 - **Page** : `GraphEditorPage.tsx`
 
+## API REST (graphe et validation)
+
+L’éditeur consomme l’API sous le préfixe **`/api/v1/unity-dialogues/graph`** (chargement, sauvegarde, validation structurelle, schéma Unity, lore explicite, simulation de flux, détection AI slop / **context dropping**, juge qualité LLM, génération de nœud, etc.). JWT obligatoire sur ces routes.
+
+- **Contrat détaillé** : [`docs/api/api-contracts-api.md`](../api/api-contracts-api.md) (section *Graph Editor Endpoints* et *Validation rules — context dropping*).
+- **Règles anti-context-dropping persistées** : `GET` / `PUT` **`/api/v1/validation/rules/context-dropping`** → fichier `data/validation-rules/context-dropping.json` (voir `ContextDroppingRulesService`).
+
 ## Support
 
 Pour signaler un bug ou demander une feature :

@@ -531,7 +531,7 @@ Le firewall (UFW) est configuré pour autoriser uniquement :
 - **Guide de déploiement complet** : `docs/guides/DEPLOYMENT.md`
 - **Script de déploiement** : `scripts/deploy-production.sh`
 - **Configuration Nginx** : `docs/deployment/nginx.conf.example`
-- **Configuration Gunicorn** : `docs/deployment/gunicorn.conf.example`
+- **Configuration Gunicorn** : `docs/deployment/gunicorn.conf.example` ; fichier **versionné** à la racine `gunicorn.conf.py` (ex. **`workers = 1`** : jobs de génération + SSE en mémoire — plusieurs workers sans sticky sessions → 404 sur le stream)
 - **Maintenance des données GDD** : `docs/deployment/DATA_MAINTENANCE.md`
 
 ## 📝 Notes Importantes
