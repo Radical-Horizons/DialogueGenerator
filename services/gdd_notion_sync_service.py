@@ -856,10 +856,10 @@ class GddNotionSyncService:
     ) -> Tuple[Dict[str, str], bool]:
         """Échantillonne les premières lignes d'une base pour détecter l'absence de corps de page.
 
-        Si les ``NOTION_DATABASE_BODY_PROBE_ROW_COUNT`` premières lignes n'ont aucun texte
-        de page (markdown/blocs vides), on évite ``get_page_content`` sur le reste : les
-        colonnes et le titre restent pris via ``get_page`` + mapper (comportement attendu
-        pour des tables « techniques » sans contenu libre).
+        Les ``n`` premières lignes sont lues une fois et mises en cache (souvent vides pour
+        des stubs). Si l'échantillon est entièrement vide, un événement de log est émis ;
+        les lignes dont l'identifiant n'est **pas** dans le cache sont quand même lues via
+        ``get_page_content`` (les lignes suivantes peuvent avoir un corps non vide).
 
         Returns:
             Tuple ``(cache page_id -> corps déjà lu, probed_sample_all_empty)``.
