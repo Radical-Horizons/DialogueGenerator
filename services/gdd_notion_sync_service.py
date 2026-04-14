@@ -57,6 +57,7 @@ from services.gdd_notion_sync_mirror import (
     partial_errors_should_preserve_mirror_staging,
     promote_staging_to_live,
     prune_archives,
+    remove_excluded_database_sources_from_live,
     resolve_archive_dir,
     restore_gdd_from_archive,
 )
@@ -123,6 +124,9 @@ _SYNC_RECOVERABLE: Tuple[Type[BaseException], ...] = (
     TypeError,
     KeyError,
 )
+
+# Lignes (ordre retour API ``query_database``) pour détecter une base sans corps de page.
+NOTION_DATABASE_BODY_PROBE_ROW_COUNT = 3
 
 
 def _format_partial_error_detail(exc: BaseException) -> str:
@@ -841,6 +845,67 @@ class GddNotionSyncService:
             is_transient=is_transient_notion_http_error,
         )
 
+    async def _probe_database_body_sample(
+        self,
+        client: NotionAPIClient,
+        pages: List[Mapping[str, Any]],
+        *,
+        category_file: str,
+        retry_policy: SyncBackoffPolicy,
+        request_id: Optional[str],
+    ) -> Tuple[Dict[str, str], bool]:
+        """Échantillonne les premières lignes d'une base pour détecter l'absence de corps de page.
+
+        Si les ``NOTION_DATABASE_BODY_PROBE_ROW_COUNT`` premières lignes n'ont aucun texte
+        de page (markdown/blocs vides), on évite ``get_page_content`` sur le reste : les
+        colonnes et le titre restent pris via ``get_page`` + mapper (comportement attendu
+        pour des tables « techniques » sans contenu libre).
+
+        Returns:
+            Tuple ``(cache page_id -> corps déjà lu, probed_sample_all_empty)``.
+
+            ``probed_sample_all_empty`` signale que les ``n`` premières lignes n'ont aucun
+            corps : utile pour les logs uniquement. **Ne doit pas** empêcher
+            ``get_page_content`` pour les IDs absents du cache (lignes non échantillonnées
+            peuvent avoir un corps non vide).
+        """
+        cache: Dict[str, str] = {}
+        n = NOTION_DATABASE_BODY_PROBE_ROW_COUNT
+        if len(pages) < n:
+            return cache, False
+        ordered_ids: List[str] = []
+        for p in pages[:n]:
+            await self._cooperative_sync_point()
+            pid = p.get("id")
+            if not pid:
+                return cache, False
+            pid_key = str(pid).strip()
+            if not pid_key:
+                return cache, False
+
+            async def _read_body() -> str:
+                return await client.get_page_content(pid_key)
+
+            body = await self._notion_read_with_retries(
+                _read_body, retry_policy=retry_policy
+            )
+            text = body if isinstance(body, str) else ""
+            cache[pid_key] = text
+            ordered_ids.append(pid_key)
+        if len(ordered_ids) < n:
+            return cache, False
+        if any(cache[k].strip() for k in ordered_ids):
+            return cache, False
+        log_sync_event(
+            (
+                f"{category_file} : les {n} premières lignes n'ont pas de corps de page "
+                f"(normal pour certaines bases) — lecture du corps conservée pour les lignes "
+                f"hors échantillon ; titre et colonnes inchangés."
+            ),
+            request_id=request_id,
+        )
+        return cache, True
+
     async def _sync_body(
         self,
         token: str,
@@ -1107,6 +1172,28 @@ class GddNotionSyncService:
                 and database_id_is_compact_table_export(norm_source_id)
             )
 
+            body_cache: Dict[str, str] = {}
+            probe_sample_all_empty = False
+            if (
+                not compact_table
+                and str(kind or "").strip().lower() == "database"
+                and stale_pages
+            ):
+                body_cache, probe_sample_all_empty = await self._probe_database_body_sample(
+                    client,
+                    list(pages),
+                    category_file=cat_file,
+                    retry_policy=retry_policy,
+                    request_id=request_id,
+                )
+                if probe_sample_all_empty:
+                    logger.debug(
+                        "%s : échantillon Notion (%s premières lignes) sans corps ; "
+                        "les autres lignes sont quand même lues si absentes du cache.",
+                        cat_file,
+                        NOTION_DATABASE_BODY_PROBE_ROW_COUNT,
+                    )
+
             written_page_records: List[Tuple[str, Dict[str, Any]]] = []
             manifest_touched = False
             for page_num, p in enumerate(stale_pages, start=1):
@@ -1127,13 +1214,17 @@ class GddNotionSyncService:
                     if compact_table:
                         rec = notion_page_to_compact_row_record(full_page)
                     else:
+                        pid_key = str(pid or "").strip()
 
                         async def _read_body() -> str:
-                            return await client.get_page_content(pid)
+                            return await client.get_page_content(pid_key)
 
-                        body = await self._notion_read_with_retries(
-                            _read_body, retry_policy=retry_policy
-                        )
+                        if pid_key in body_cache:
+                            body = body_cache[pid_key]
+                        else:
+                            body = await self._notion_read_with_retries(
+                                _read_body, retry_policy=retry_policy
+                            )
                         rec = notion_page_to_gdd_record_merge_body_and_properties(
                             full_page, body
                         )
@@ -1272,6 +1363,16 @@ class GddNotionSyncService:
             promote_staging_to_live(
                 self._gdd_categories_path, staging_run, sync_targets
             )
+            removed_live = remove_excluded_database_sources_from_live(
+                self._gdd_categories_path,
+                sources,
+                included_list,
+            )
+            for rel in removed_live:
+                log_sync_event(
+                    f"Périmètre restreint : supprimé du disque local — {rel}",
+                    request_id=request_id,
+                )
             clear_checkpoint_files(self._sync_checkpoint_dir)
             staging_run = None
             self._active_mirror_staging = None

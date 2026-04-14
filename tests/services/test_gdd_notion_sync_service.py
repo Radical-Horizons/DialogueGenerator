@@ -448,6 +448,151 @@ async def test_run_sync_database_non_compact_splits_body_columns_in_values(
 
 
 @pytest.mark.asyncio
+async def test_database_body_probe_skips_remaining_content_fetches(tmp_path: Path) -> None:
+    """3 premières lignes sans corps : sonde ×3 + 1 appel par ligne hors cache (4e ligne)."""
+    db_id = "aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee"
+    rows = [
+        {
+            "id": f"aaaaaaaa-aaaa-4aaa-8aaa-{i:012d}",
+            "last_edited_time": "2025-06-01T00:00:00.000Z",
+        }
+        for i in range(4)
+    ]
+
+    class FakeClient:
+        content_calls = 0
+
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": f"Entité-{page_id[-4:]}"}],
+                    },
+                    "Flag": {
+                        "type": "rich_text",
+                        "rich_text": [{"plain_text": "oui"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            FakeClient.content_calls += 1
+            return ""
+
+        async def query_database(self, database_id: str, **_kw) -> list:
+            return list(rows)
+
+    FakeClient.content_calls = 0
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": db_id,
+                    "category_file": "flags_probe_test.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="probe-skip")
+    assert res.updated_entities == 4
+    assert FakeClient.content_calls == 4
+    out = json.loads((gdd_dir / "flags_probe_test.json").read_text(encoding="utf-8"))
+    assert len(out) == 4
+    assert all("flag" in (r.get("sections") or {}) for r in out)
+
+
+@pytest.mark.asyncio
+async def test_database_body_probe_disabled_when_sample_has_body(tmp_path: Path) -> None:
+    """Dès qu'une ligne échantillon a un corps, chaque ligne non cachée appelle get_page_content."""
+    db_id = "bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb"
+    rows = [
+        {
+            "id": f"bbbbbbbb-bbbb-4bbb-bbbb-{i:012d}",
+            "last_edited_time": "2025-06-01T00:00:00.000Z",
+        }
+        for i in range(4)
+    ]
+
+    class FakeClient:
+        content_calls = 0
+
+        async def verify_credentials(self) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "X"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            FakeClient.content_calls += 1
+            if page_id.startswith("bbbbbbbb-bbbb-4bbb-bbbb-000000000000"):
+                return "corps"
+            return ""
+
+        async def query_database(self, database_id: str, **_kw) -> list:
+            return list(rows)
+
+    FakeClient.content_calls = 0
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": db_id,
+                    "category_file": "probe_nonempty_test.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="probe-nonempty")
+    assert res.updated_entities == 4
+    assert FakeClient.content_calls == 4
+
+
+@pytest.mark.asyncio
 async def test_included_categories_skips_non_matching_sources(tmp_path: Path) -> None:
     """Filtre included_categories : uniquement les bases ; une base exclue n'est pas interrogée."""
     db_keep = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
@@ -1020,6 +1165,105 @@ async def test_full_sync_resume_skips_completed_source(tmp_path: Path) -> None:
     assert (gdd_dir / "b.json").is_file()
     ck_after = (sync_dir / "full_sync_checkpoint.json")
     assert not ck_after.exists()
+
+
+@pytest.mark.asyncio
+async def test_database_sync_fetches_page_body_when_not_in_probe_cache(
+    tmp_path: Path,
+) -> None:
+    """Les 3 premières lignes sans corps n'imposent pas body='' aux lignes suivantes."""
+    db_id = "11111111-1111-4111-8111-111111111111"
+    p_empty_a = "22222222-2222-4222-8222-222222222221"
+    p_empty_b = "22222222-2222-4222-8222-222222222222"
+    p_empty_c = "22222222-2222-4222-8222-222222222223"
+    p_rich = "22222222-2222-4222-8222-222222222224"
+    rich_markdown = "## Ecosysteme\n\nCorps riche pour la ligne 4."
+    content_calls: list[str] = []
+
+    class FakeClient:
+        async def verify_credentials(self) -> dict:
+            return {"id": "bot", "type": "bot"}
+
+        async def _retrieve_database_for_data_sources(self, _nid: str) -> dict:
+            return {}
+
+        async def query_database(self, database_id: str, **_kw: object) -> list:
+            assert database_id == db_id
+            return [
+                {
+                    "id": p_empty_a,
+                    "last_edited_time": "2025-03-03T00:00:00.000Z",
+                    "properties": {},
+                },
+                {
+                    "id": p_empty_b,
+                    "last_edited_time": "2025-03-03T00:00:00.000Z",
+                    "properties": {},
+                },
+                {
+                    "id": p_empty_c,
+                    "last_edited_time": "2025-03-03T00:00:00.000Z",
+                    "properties": {},
+                },
+                {
+                    "id": p_rich,
+                    "last_edited_time": "2025-03-03T00:00:00.000Z",
+                    "properties": {},
+                },
+            ]
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-03-03T00:00:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": f"Row-{page_id[:8]}"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            content_calls.append(page_id)
+            if page_id == p_rich:
+                return rich_markdown
+            return ""
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": db_id,
+                    "category_file": "Espèces.json",
+                }
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(force_full=True, request_id="probe-body-regression")
+    assert res.success
+    assert p_rich in content_calls
+    shard = gdd_dir / "especes" / f"{p_rich}.json"
+    assert shard.is_file()
+    out = json.loads(shard.read_text(encoding="utf-8"))
+    dumped = json.dumps(out, ensure_ascii=False)
+    assert "Corps riche pour la ligne 4." in dumped
 
 
 def test_clear_gdd_file_cache_and_notify_context_invokes_hook(tmp_path: Path) -> None:
