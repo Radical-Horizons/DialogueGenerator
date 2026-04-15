@@ -16,16 +16,34 @@
     "État": "En cours"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\n\nGuides",
-    "biologie": "**Physiologie**\n\n**Reproduction et croissance**\n\n**Mode d'alimentation**",
-    "socie_te__et_culture": "**Histoire de l'Espèce**\n\n**Culture et traditions**\n\n**Costumes et ornements**\n\n**Organisation sociale**\n\n**Relations extra-spécifiques**",
-    "ecosyste_me": "**Habitat naturel**\n\n**Distribution géographique**\n\n**Relations avec l'écosystème**"
+    "re_sume__de_la_fiche": "Créatures immortelles qui furent jadis les dieux de <mention-page url=\"https://www.notion.so/1b36e4d21b4580699c90fc298e905409\"/>, les Seigneurs Originels sont aujourd'hui des êtres déchus vivant en exil sur Escelion, ayant perdu la majorité de leurs pouvoirs suite à la destruction de leur monde d'origine. Créés artificiellement comme \"antivirus\" contre les Paradoxes, ils développèrent leur propre conscience et devinrent les divinités toutes-puissantes de Merid, capables d'altérer la réalité à volonté. Organisés en panthéon informel, chacun gérait ses propres domaines d'influence, entretenant des relations complexes avec les civilisations mortelles. Suite à un cataclysme, ils perdirent leurs pouvoirs divins et durent s'adapter à une nouvelle vie sur Escelion, où ils conservent leur immortalité mais doivent désormais composer avec les limites du monde naturel.\n**Guides**",
+    "physiologie": "Sur Merid, les Seigneurs Originels étaient des êtres omnipotents capables de définir leur propre apparence sans aucune limite. Aujourd'hui, bien que toujours immortels, leurs pouvoirs sont grandement diminués.",
+    "reproduction_et_croissance": "Créés artificiellement en 183 avant Déclaration, les Seigneurs Originels sont nés adultes et ne peuvent se reproduire. Il n'en a jamais existé qu'une dizaine, dont certains ont péri au fil des millénaires.",
+    "mode_d_alimentation": "L'alimentation n'a jamais été nécessaire pour leur survie, même sur Merid. Elle était et reste uniquement pratiquée par divertissement.",
+    "histoire_de_l_espe_ce": "### Origines (183 av. Déclaration)\n\tEn réponse aux ravages du premier Paradoxe, **Landtak**, qui sema la destruction pendant des décennies, l'entité extérieure R.U.N Inc créa dix \"antivirus\" : des êtres dotés du contrôle total de la Matrice, capables de changer de forme et de manipuler les lois physiques pour traquer et éliminer les Paradoxes. Dépourvus de personnalité à l'origine, ils développèrent de manière imprévue un fort caractère au fil des siècles.\n\t### Rébellion (5 av. Déclaration)\n\tSuite à la mort de l'un des leurs, **Vocim**, les Seigneurs Originels s'infiltrèrent dans les **Archives stellaires**, un référentiel cosmique de connaissances sur leurs origines et la création de Loraï. Se sentant manipulés, ils se révoltèrent, détruisirent les commandes de la Matrice et poursuivirent leurs propres objectifs. Seul **Siém**, le plus énigmatique d'entre eux, conserva son nom de naissance.\n\t### Merid : toute-puissance et Conseil de Justice\n\tSur Merid, leur puissance était absolue. Chaque Seigneur s'attribuait des domaines d'influence négociés entre pairs :\n\t- **Cardagan** : feu purificateur, terres brûlées, volcans, déserts, mémoire, oubli, Histoire, étoiles, noms, végétaux\n\t- **Liang l'Impavide** : temps, cieux, mort, maladies, sciences formelles, justice, vengeance, philosophie\n\t- **Saheyus aux cent visages** : relations sociales, mensonges, trahison, alliances, guerre et paix, littérature, théâtre\n\tEn 319 CR, sept d'entre eux firent de **Fornwall** leur quartier général, modifiant le continent pour lui conférer une conscience autonome. En 75 CR, Cardagan, Liang et Saheyus fondèrent le **Conseil de Justice de l'Aroia**, tribunal supranational qui émettait des édits via des Porte-Sceaux. Le premier édit, la **Triple Injonction**, interdisait le ril aux mortels, imposait l'inscription du nom de chaque mort sur une stèle et déclarait les éclipses domaine exclusif des dieux.\n\t### Chute et exil\n\tSuite à la destruction de la Matrice par Errazel, les Seigneurs Originels perdirent la majorité de leurs pouvoirs divins et durent fuir vers Escelion. Le Conseil de Justice, Fornwall et l'ensemble de leur infrastructure de pouvoir cessèrent d'exister. Sur Escelion, ils conservent leur immortalité mais doivent composer avec les limites d'un monde qu'ils ne contrôlent pas. La quasi-totalité des habitants d'Escelion ignorent jusqu'à leur existence.",
+    "culture_et_traditions": "Sur Merid, ils formaient un panthéon informel où chacun gérait ses domaines d'attribution. Certains, comme le Conseil de Justice de l'Aroia, s'impliquaient activement dans les affaires des mortels, tandis que d'autres vivaient en ermites.",
+    "costumes_et_ornements": "Capables de changer de forme à volonté, ils pouvaient adopter n'importe quelle apparence pour se fondre parmi les mortels ou au contraire affirmer leur nature divine.",
+    "organisation_sociale": "Sur Merid, leur société reposait sur un système de **domaines d'influence** négociés entre pairs. Un Seigneur pouvait étendre ses attributions avec l'accord (ou en échappant à la vigilance) de ses semblables. Les plus impliqués dans les affaires des mortels élisaient des **Seigneurs de la Terre**, des mortels à qui ils déléguaient certains domaines. Les conflits entre Seigneurs étaient rares mais dévastateurs, car seul un Seigneur pouvait s'opposer à un autre.\n\tSur Escelion, cette organisation a volé en éclats. Dispersés, diminués, les survivants n'entretiennent plus de structure formelle. Certains tentent de reconstituer des sphères d'influence à petite échelle ; d'autres vivent en ermites, encore marqués par la chute de leur monde.",
+    "relations_extra-spe_cifiques": "Initialement créés pour protéger les mortels des Paradoxes, ils développèrent des relations complexes avec les civilisations de Merid, certains devenant des divinités vénérées, d'autres préférant l'isolement ou l'observation discrète.",
+    "habitat_naturel": "Sur Merid, ils pouvaient exister n'importe où. Certains, comme Cardagan, s'associaient à des environnements spécifiques (déserts, volcans). Leur arrivée sur Escelion a considérablement limité leurs options.",
+    "distribution_ge_ographique": "Autrefois présents principalement à Fornwall et dans l'Aroia sur Merid, ils sont maintenant dispersés sur Escelion, leur nouveau monde d'exil.",
+    "relations_avec_l_e_cosyste_me": "Sur Merid, leur pouvoir leur permettait de modifier l'environnement à volonté. Aujourd'hui, ils doivent s'adapter aux contraintes naturelles d'Escelion comme n'importe quelle autre créature.",
+    "re_sume__ia": "Les Seigneurs Originels sont des créatures immortelles, autrefois des dieux, maintenant exilées sur Escelion après avoir perdu leurs pouvoirs suite à la destruction de leur monde. Créés comme \"antivirus\" contre les Paradoxes, ils ont développé leur propre conscience et ont formé un panthéon sur Merid. Bien qu'immortels, leurs capacités sont désormais limitées, et ils doivent s'adapter à leur nouvel environnement tout en conservant des relations complexes avec les civilisations mortelles."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "biologie": "Biologie",
-    "socie_te__et_culture": "Société et culture",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "physiologie": "Physiologie",
+    "reproduction_et_croissance": "Reproduction et croissance",
+    "mode_d_alimentation": "Mode d'alimentation",
+    "histoire_de_l_espe_ce": "Histoire de l'Espèce",
+    "culture_et_traditions": "Culture et traditions",
+    "costumes_et_ornements": "Costumes et ornements",
+    "organisation_sociale": "Organisation sociale",
+    "relations_extra-spe_cifiques": "Relations extra-spécifiques",
+    "habitat_naturel": "Habitat naturel",
+    "distribution_ge_ographique": "Distribution géographique",
+    "relations_avec_l_e_cosyste_me": "Relations avec l'écosystème",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "1a16e4d2-1b45-8064-b82f-f2369406c52d"
 }

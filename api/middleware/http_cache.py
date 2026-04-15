@@ -173,7 +173,7 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
         
         if cache is not None and cache_key in cache:
             cached_response = cache[cache_key]
-            
+
             # Vérifier ETag si présent
             if_none_match = request.headers.get("If-None-Match")
             if if_none_match and cached_response.get("etag") == if_none_match:
@@ -222,7 +222,7 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
                 "etag": etag,
                 "media_type": media_type
             }
-            
+
             # Créer une nouvelle réponse avec les headers de cache
             ttl = self.ttl_gdd if request.url.path.startswith("/api/v1/context/") else self.ttl_static
             headers = dict(response.headers)

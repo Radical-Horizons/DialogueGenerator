@@ -12,14 +12,28 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\n\nGuides",
-    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
-    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "re_sume__de_la_fiche": "Rapace qui se nourrit sur les insectes bioluminescents géants du ciel de roche.\n**Guides**",
+    "histoire_de_l_espe_ce": "-",
+    "apparence": "Les pilleurs des cieux évoquent des sortes de chauves-souris avec une poche ventrale dont tout le corps serait couvert d'immenses plumes blanches. Leur tête est tellement couverte de plumes et de duvets, qu'on n'en voit presque rien à l’exception de leurs yeux ronds et vitreux.",
+    "ro_le_culturel": "Les immenses plumes blanches des Pilleurs des cieux sont recherchées comme matériau d'écriture, d'empennage de flèches et d'ornement cérémoniel. Leur capacité à monter au-delà du ciel de brume (là où nul humain ne peut se rendre durablement) en fait des figures mystiques, messagers supposés entre le monde d'en bas et les hauteurs inaccessibles. Certaines communautés les considèrent comme les « yeux du ciel », observant le monde depuis leurs perchoirs. Leur poche ventrale remplie de sécrétions de deimos est parfois récupérée par les chasseurs pour ses propriétés supposées curatives ou hallucinogènes.",
+    "ro_le_dans_l_intrigue": "-",
+    "habitat_naturel": "-",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Les pilleurs passent la majeure partie de leur temps posés en hauteur, dans des lieux qu'ils considèrent comme sûrs, et montent périodiquement au-delà du ciel de brume pour prélever leur nourriture directement sur les deimos, dont ils mangent les peaux mortes et certaines sécrétions. Ils remplissent une poche située sur leur ventre, et redescendent aussitôt, pour ne remonter que bien plus tard, une fois leurs réserves achevées.",
+    "mode_de_reproduction": "-",
+    "fonctionnement_avec_l_e_cosyste_me": "-\n<empty-block/>",
+    "re_sume__ia": "Rapace se nourrissant d'insectes bioluminescents, les Pilleurs des cieux possèdent de grandes plumes blanches et sont considérés comme des figures mystiques. Leur rôle culturel inclut l'utilisation de leurs plumes pour l'écriture et les cérémonies. Ils se nourrissent en montant au-delà du ciel de brume pour récolter des peaux mortes et sécrétions de deimos, qu'ils stockent dans une poche ventrale."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "besoin_de_l_intrigue": "Besoin de l'intrigue",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_de_l_espe_ce": "Histoire de l’espèce",
+    "apparence": "Apparence",
+    "ro_le_culturel": "Rôle culturel",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "habitat_naturel": "Habitat naturel",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Mode d’alimentation ou d’obtention de nutriments",
+    "mode_de_reproduction": "Mode de reproduction",
+    "fonctionnement_avec_l_e_cosyste_me": "Fonctionnement avec l’écosystème",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "1b36e4d2-1b45-8091-bba3-ffdeeaa50b6c"
 }

@@ -1168,6 +1168,83 @@ async def test_full_sync_resume_skips_completed_source(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_run_scope_full_sync_preserves_other_database_files(tmp_path: Path) -> None:
+    """Sync complète ciblée (run_scope) : n'efface pas les JSON des autres bases."""
+    db_keep = "11111111-1111-4111-8111-111111111111"
+    db_other = "22222222-2222-4222-8222-222222222222"
+    row_keep = "aaaaaaaa-aaaa-4aaa-8aaa-000000000001"
+    row_other = "bbbbbbbb-bbbb-4bbb-bbbb-000000000002"
+
+    class FakeClient:
+        async def verify_credentials(self) -> dict:
+            return {"id": "bot", "type": "bot"}
+
+        async def _retrieve_database_for_data_sources(self, _nid: str) -> dict:
+            return {}
+
+        async def get_page(self, page_id: str) -> dict:
+            return {
+                "id": page_id,
+                "last_edited_time": "2025-05-05T00:00:00.000Z",
+                "properties": {
+                    "Name": {"type": "title", "title": [{"plain_text": "Row"}]},
+                },
+            }
+
+        async def get_page_content(self, page_id: str) -> str:
+            return "## A\n\nscoped-body"
+
+        async def query_database(self, database_id: str, **_kw) -> list:
+            if database_id == db_keep:
+                return [{"id": row_keep, "last_edited_time": "2025-05-05T00:00:00.000Z"}]
+            if database_id == db_other:
+                return [{"id": row_other, "last_edited_time": "2025-05-05T00:00:00.000Z"}]
+            return []
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": db_keep,
+                    "category_file": "keep_scope.json",
+                },
+                {
+                    "kind": "database",
+                    "notion_id": db_other,
+                    "category_file": "other_scope.json",
+                },
+            ],
+            "included_categories": [],
+        }
+    )
+    gdd_dir = tmp_path / "gdd"
+    gdd_dir.mkdir()
+    other_path = gdd_dir / "other_scope.json"
+    other_path.write_text('{"Nom":"Autre","SENTINEL_OTHER":true}', encoding="utf-8")
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd_dir,
+        status_path=tmp_path / "status.json",
+        client_factory=lambda _k: FakeClient(),
+    )
+    res = await svc.run_sync(
+        force_full=True,
+        request_id="scope-full-preserve",
+        run_scope_category_files=("keep_scope.json",),
+    )
+    assert res.success
+    assert (gdd_dir / "keep_scope.json").is_file()
+    assert "SENTINEL_OTHER" in other_path.read_text(encoding="utf-8")
+
+
+@pytest.mark.asyncio
 async def test_database_sync_fetches_page_body_when_not_in_probe_cache(
     tmp_path: Path,
 ) -> None:

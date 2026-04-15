@@ -13,6 +13,68 @@ from typing import Any, Dict, List, Optional, Tuple
 # Espace après les # optionnel (exports parfois ``##Titre`` sans espace).
 _HEADING_RE = re.compile(r"^(#{1,3})\s*(.+?)\s*$")
 
+# Markdown enrichi Notion (``GET /v1/pages/{id}/markdown``) : callouts en pseudo-XML,
+# titres de callout en ``<span>`` + gras — pas des lignes ``##`` exploitables telles quelles.
+_CALLOUT_TAG_OPEN = re.compile(r"<callout\b[^>]*>\s*", re.IGNORECASE)
+_CALLOUT_TAG_CLOSE = re.compile(r"\s*</callout>\s*", re.IGNORECASE)
+_SPAN_BOLD_CALLOUT_TITLE = re.compile(
+    r"^\s*<span\b[^>]*>\*\*(.+?)\*\*</span>\s*$",
+    re.MULTILINE,
+)
+# Attributs Notion en fin (ou milieu) de ligne de titre : ``## Titre {color="yellow"}``.
+_NOTION_BRACE_ATTR = re.compile(
+    r'\{[a-zA-Z_][a-zA-Z0-9_]*\s*=\s*"(?:[^"\\]|\\.)*"\}',
+)
+_NOTION_BRACE_ATTR_SQ = re.compile(
+    r"\{[a-zA-Z_][a-zA-Z0-9_]*\s*=\s*'(?:[^'\\]|\\.)*'\}",
+)
+
+
+def _clean_heading_display_title(title: str) -> str:
+    """Retire le bruit markdown Notion sur une ligne de titre (affichage + base du slug).
+
+    Ex. ``## Foo {color="yellow"}`` → ``Foo`` ; balises HTML résiduelles ; gras englobant ``**…**``.
+    """
+    t = (title or "").strip()
+    if not t:
+        return ""
+    prev = None
+    while prev != t:
+        prev = t
+        t = _NOTION_BRACE_ATTR.sub("", t)
+        t = _NOTION_BRACE_ATTR_SQ.sub("", t)
+        t = t.strip()
+    t = re.sub(r"<[^>]+>", "", t)
+    m = re.fullmatch(r"\*\*(.+?)\*\*", t.strip(), flags=re.DOTALL)
+    if m:
+        t = m.group(1).strip()
+    return " ".join(t.split())
+
+
+def normalize_notion_enhanced_markdown_for_section_split(text: str) -> str:
+    """Réécrit le markdown Notion enrichi pour des titres ``##`` détectables par le découpeur.
+
+    Sans cette étape, tout le narratif sous ``# Besoin de l'intrigue`` reste monolithique
+    alors que l'API markdown expose des titres dans des ``<span>…</span>``.
+
+    Args:
+        text: Corps retourné par ``GET /v1/pages/{id}/markdown`` (ou équivalent).
+
+    Returns:
+        Texte normalisé ; chaîne vide si entrée vide.
+    """
+    if not text or not isinstance(text, str):
+        return text
+    out = _CALLOUT_TAG_OPEN.sub("\n", text)
+    out = _CALLOUT_TAG_CLOSE.sub("\n", out)
+
+    def _span_to_heading(match: re.Match[str]) -> str:
+        title = _clean_heading_display_title(match.group(1)) or "Sans titre"
+        return f"\n## {title}\n"
+
+    out = _SPAN_BOLD_CALLOUT_TITLE.sub(_span_to_heading, out)
+    return out
+
 
 def _slugify_title(title: str, reserved: set[str]) -> str:
     """Produit un segment de chemin stable et unique parmi ``reserved``."""
@@ -40,7 +102,8 @@ def split_sections_general_text(text: str) -> List[Tuple[str, str, str]]:
         text: Contenu typiquement issu de ``data["sections"]["_general"]``.
 
     Returns:
-        Liste ``(slug, titre_ligne, corps)`` ; liste vide si ``text`` vide.
+        Liste ``(slug, titre_affichable_nettoyé, corps)`` ; liste vide si ``text`` vide.
+        Titres et slugs ignorent les suffixes Notion du type ``{color="…"}``.
     """
     if not text or not isinstance(text, str):
         return []
@@ -61,7 +124,7 @@ def split_sections_general_text(text: str) -> List[Tuple[str, str, str]]:
         m = _HEADING_RE.match(line)
         if m and len(m.group(1)) <= 3:
             flush()
-            current_title = m.group(2).strip()
+            current_title = _clean_heading_display_title(m.group(2)) or "Sans titre"
             current_slug = _slugify_title(current_title, used_slugs)
             continue
         buf.append(line)

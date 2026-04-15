@@ -743,7 +743,7 @@ async def get_species(
             resource_id=name,
             request_id=request_id
         )
-    
+
     return SpeciesResponse(name=name, data=species_data)
 
 

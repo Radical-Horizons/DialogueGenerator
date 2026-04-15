@@ -1,4 +1,9 @@
-"""Script de test pour vérifier l'extraction Notion."""
+"""Script de test pour vérifier l'extraction Notion.
+
+Référence pour un corps de page complet : ``NotionAPIClient.get_page_content``
+(markdown API puis repli blocs). L'appel à ``_get_all_blocks`` ci-dessous sert au
+débogage (comptage / types de blocs), pas comme stratégie d'export plein texte.
+"""
 import asyncio
 import sys
 from pathlib import Path

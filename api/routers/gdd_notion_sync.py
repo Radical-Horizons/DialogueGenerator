@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Annotated
+from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
@@ -120,6 +120,16 @@ async def run_gdd_notion_sync(
             description="Abandonner le checkpoint et lancer une sync complète neuve (full=true requis).",
         ),
     ] = False,
+    category_file: Annotated[
+        Optional[List[str]],
+        Query(
+            description=(
+                "Limiter ce run aux bases listées (noms exacts category_file, ex. Espèces.json). "
+                "N'efface pas les autres bases du disque (contrairement au filtre "
+                "included_categories sur une sync complète). Incompatible avec resume=true."
+            ),
+        ),
+    ] = None,
 ) -> GddNotionSyncRunResponse:
     """Déclenche une synchronisation immédiate."""
     if resume and not full:
@@ -137,12 +147,25 @@ async def run_gdd_notion_sync(
             status_code=400,
             detail="resume et fresh sont mutuellement exclusifs.",
         )
+    if resume and category_file:
+        raise HTTPException(
+            status_code=400,
+            detail="category_file avec resume=true n'est pas supporté.",
+        )
+    scope_files: Optional[tuple[str, ...]] = None
+    if category_file:
+        scope_norm = tuple(
+            sorted({str(x).strip() for x in category_file if str(x).strip()})
+        )
+        if scope_norm:
+            scope_files = scope_norm
     result = await svc.run_sync(
         force_full=full,
         mirror_rebuild=mirror_rebuild,
         request_id=request_id,
         resume=resume,
         fresh=fresh,
+        run_scope_category_files=scope_files,
     )
     return GddNotionSyncRunResponse(
         success=result.success,

@@ -203,6 +203,22 @@ def test_post_sync_and_get_status(client: TestClient, tmp_path: Path) -> None:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
 
 
+def test_post_sync_scope_category_file_rejects_resume(client: TestClient, tmp_path: Path) -> None:
+    """category_file + resume=true → 400 (périmètre checkpoint incompatible)."""
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync?full=true&resume=true&category_file=Esp%C3%A8ces.json",
+        )
+        assert r.status_code == 400
+        payload = r.json()
+        msg = str(payload.get("detail") or payload.get("error", {}).get("message") or "").lower()
+        assert "category_file" in msg
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
 def test_post_sync_full_query_param(client: TestClient, tmp_path: Path) -> None:
     pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
 

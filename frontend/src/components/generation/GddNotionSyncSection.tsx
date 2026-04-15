@@ -31,6 +31,10 @@ import { GddNotionSyncProgressModal } from './GddNotionSyncProgressModal'
 import { useGddNotionSyncUi } from '../../hooks/useGddNotionSyncUi'
 import { useContextStore } from '../../store/contextStore'
 import { theme } from '../../theme'
+import {
+  GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES,
+  isGddNotionSyncSecondaryDatabase,
+} from '../../constants/gddNotionSyncSecondaryDatabases'
 
 function categoryFileMatchesIncluded(categoryFile: string, includedCategories: string[]): boolean {
   const normalized = new Set(
@@ -225,6 +229,14 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
   const uncheckAllDatabaseSources = useCallback(() => {
     setIncludedDbFiles([])
   }, [])
+
+  /** Bases listées comme secondaires dans le dépôt : non cochées par ce raccourci. */
+  const checkEssentialDatabaseSources = useCallback(() => {
+    const secondary = new Set(GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES)
+    setIncludedDbFiles(
+      databaseSources.map((s) => s.category_file).filter((f) => !secondary.has(f)),
+    )
+  }, [databaseSources])
 
   const computeIncludedCategoriesPayload = useCallback((): string[] => {
     const dbs = (config?.sources ?? []).filter((s) => s.kind === 'database')
@@ -603,6 +615,12 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 <strong style={{ color: theme.text.primary }}>que</strong> ces bases — les fiches (sources page) sont
                 alors ignorées sur ce run (évite de parcourir tout le hub). Retirez le filtre pour tout resynchroniser.
                 <br />
+                <strong style={{ color: theme.text.primary }}>Sync complète (bouton global) avec filtre :</strong> les
+                fichiers (ou dossiers shards) des bases <em>non</em> cochées sont <strong>retirés</strong> du dossier GDD
+                local après promotion du miroir (les fiches page déjà sur disque ne sont pas effacées). Utilisez le
+                bouton <strong>Sync cette base</strong> sur une ligne pour une sync complète <em>uniquement</em> sur cette
+                base sans toucher aux autres.
+                <br />
                 <strong style={{ color: theme.text.primary }}>Sync normale ou complète :</strong> les cases sont
                 enregistrées automatiquement sur le serveur au lancement (inutile de cliquer « Enregistrer » avant).
               </p>
@@ -628,6 +646,15 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                       style={buttonStyle(saving || busy)}
                     >
                       Tout décocher
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!config || saving || busy}
+                      onClick={checkEssentialDatabaseSources}
+                      style={buttonStyle(saving || busy)}
+                      title="Coche toutes les bases sauf la liste « secondaires » du dépôt (voir constante gddNotionSyncSecondaryDatabases)"
+                    >
+                      Cocher essentiels
                     </button>
                   </div>
                   <div
@@ -681,21 +708,38 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                             />
                             <span style={{ wordBreak: 'break-word' }}>
                               <span style={{ fontWeight: 600 }}>{s.category_file}</span>
+                              {isGddNotionSyncSecondaryDatabase(s.category_file) ? (
+                                <span style={{ color: theme.text.secondary, fontSize: '0.78rem' }}>
+                                  {' '}
+                                  (secondaire)
+                                </span>
+                              ) : null}
                               <span style={{ color: theme.text.secondary, fontSize: '0.8rem' }}>
                                 {' '}
                                 · {s.notion_id}
                               </span>
                             </span>
                           </label>
-                          <button
-                            type="button"
-                            disabled={!config || saving || busy || previewLoading}
-                            onClick={() => void runPreviewOneRow(s.category_file)}
-                            style={buttonStyle(saving || busy || previewLoading)}
-                            title="Récupère la première ligne Notion et le JSON mappé (comme la sync)"
-                          >
-                            Tester 1 ligne
-                          </button>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                            <button
+                              type="button"
+                              disabled={!config || saving || busy || previewLoading}
+                              onClick={() => void runPreviewOneRow(s.category_file)}
+                              style={buttonStyle(saving || busy || previewLoading)}
+                              title="Récupère la première ligne Notion et le JSON mappé (comme la sync)"
+                            >
+                              Tester 1 ligne
+                            </button>
+                            <button
+                              type="button"
+                              disabled={!config || saving || busy}
+                              onClick={() => runGddSync(true, { categoryFiles: [s.category_file] })}
+                              style={buttonStyle(saving || busy)}
+                              title="Sync complète miroir pour cette base seule ; n’efface pas les autres bases du disque"
+                            >
+                              Sync cette base
+                            </button>
+                          </div>
                         </div>
                       )
                     })}

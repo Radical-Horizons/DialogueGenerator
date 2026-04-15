@@ -436,6 +436,8 @@ class GddNotionSyncService:
         included_list: List[str],
         partial_out: List[str],
         request_id: Optional[str],
+        *,
+        scope_category_files: Optional[Set[str]] = None,
     ) -> List[Tuple[Any, str, str, Optional[List[str]]]]:
         """Liste les sources à traiter (kind, notion_id, category_file, data_source_ids).
 
@@ -443,9 +445,12 @@ class GddNotionSyncService:
         (``page``). Sinon : **uniquement** les bases qui matchent le filtre — les
         fiches sont ignorées sur ce run (sync ciblée rapide, sans parcourir toutes
         les pages du hub).
+
+        Si ``scope_category_files`` est fourni (noms exacts ``category_file``) :
+        uniquement ces bases pour **ce run** ; les fiches ``page`` sont ignorées.
         """
         eligible: List[Tuple[Any, str, str, Optional[List[str]]]] = []
-        restrict_to_databases_only = bool(included_list)
+        restrict_to_databases_only = bool(included_list) or bool(scope_category_files)
         for src in sources:
             if not isinstance(src, dict):
                 continue
@@ -461,14 +466,22 @@ class GddNotionSyncService:
             kind_str = str(kind or "").strip().lower()
             if kind_str == "page":
                 if restrict_to_databases_only:
+                    reason = (
+                        "sync ciblée (category_file=…)"
+                        if scope_category_files
+                        else "périmètre restreint aux bases listées"
+                    )
                     log_sync_event(
-                        f"{cat_file} ignoré (périmètre restreint aux bases listées)",
+                        f"{cat_file} ignoré ({reason})",
                         request_id=request_id,
                     )
                     continue
                 eligible.append((kind, nid, cat_file, None))
                 continue
-            if not category_file_matches_included(cat_file, included_list):
+            if scope_category_files is not None:
+                if cat_file not in scope_category_files:
+                    continue
+            elif not category_file_matches_included(cat_file, included_list):
                 log_sync_event(
                     f"{cat_file} exclu du périmètre (included_categories)",
                     request_id=request_id,
@@ -721,6 +734,7 @@ class GddNotionSyncService:
         request_id: Optional[str] = None,
         resume: bool = False,
         fresh: bool = False,
+        run_scope_category_files: Optional[Tuple[str, ...]] = None,
     ) -> GddNotionSyncResult:
         """Exécute une synchronisation (manuelle ou planifiée)."""
         async with self._run_lock:
@@ -730,6 +744,7 @@ class GddNotionSyncService:
                 request_id=request_id,
                 resume=resume,
                 fresh=fresh,
+                run_scope_category_files=run_scope_category_files,
             )
 
     async def _run_sync_locked(
@@ -740,6 +755,7 @@ class GddNotionSyncService:
         request_id: Optional[str],
         resume: bool,
         fresh: bool,
+        run_scope_category_files: Optional[Tuple[str, ...]] = None,
     ) -> GddNotionSyncResult:
         started = datetime.now(timezone.utc).isoformat()
         self._write_status(
@@ -776,6 +792,7 @@ class GddNotionSyncService:
                 retry_policy=policy,
                 resume=resume,
                 fresh=fresh,
+                run_scope_category_files=run_scope_category_files,
             )
 
         result = GddNotionSyncResult(success=False, message="")
@@ -916,6 +933,7 @@ class GddNotionSyncService:
         retry_policy: SyncBackoffPolicy,
         resume: bool = False,
         fresh: bool = False,
+        run_scope_category_files: Optional[Tuple[str, ...]] = None,
     ) -> GddNotionSyncResult:
         settings = self._store.load_settings()
         sources = settings.get("sources") or []
@@ -939,7 +957,31 @@ class GddNotionSyncService:
             kind_str = str(src.get("kind", "")).strip().lower()
             if nid and cat_file and kind_str == "database":
                 database_category_files.append(cat_file)
-        if included_list and database_category_files:
+        scope_set: Optional[Set[str]] = None
+        if run_scope_category_files:
+            scope_set = {
+                str(x).strip()
+                for x in run_scope_category_files
+                if isinstance(x, str) and str(x).strip()
+            }
+            if not scope_set:
+                scope_set = None
+            else:
+                known_db = set(database_category_files)
+                unknown = sorted(scope_set - known_db)
+                if unknown:
+                    return GddNotionSyncResult(
+                        success=False,
+                        message=(
+                            "category_file inconnu ou absent des sources database : "
+                            + ", ".join(unknown)
+                        ),
+                    )
+        if (
+            scope_set is None
+            and included_list
+            and database_category_files
+        ):
             if not any(
                 category_file_matches_included(cf, included_list)
                 for cf in database_category_files
@@ -955,9 +997,26 @@ class GddNotionSyncService:
         fingerprint = compute_sources_fingerprint(sources, included_list)
         partial: List[str] = []
         eligible = self._collect_eligible_sources(
-            sources, included_list, partial, request_id
+            sources,
+            included_list,
+            partial,
+            request_id,
+            scope_category_files=scope_set,
         )
         eligible_cf = [e[2] for e in eligible]
+        if not eligible:
+            return GddNotionSyncResult(
+                success=False,
+                message=(
+                    "Aucune source Notion éligible pour ce run "
+                    "(category_file / included_categories / sources)."
+                ),
+            )
+        if scope_set:
+            log_sync_event(
+                f"Périmètre run restreint aux bases : {', '.join(sorted(scope_set))}",
+                request_id=request_id,
+            )
 
         mirror_ok = bool(force_full) and len(eligible) > 0
         want_resume = bool(resume) and mirror_ok
@@ -1363,10 +1422,11 @@ class GddNotionSyncService:
             promote_staging_to_live(
                 self._gdd_categories_path, staging_run, sync_targets
             )
+            prune_included: List[str] = [] if scope_set else list(included_list)
             removed_live = remove_excluded_database_sources_from_live(
                 self._gdd_categories_path,
                 sources,
-                included_list,
+                prune_included,
             )
             for rel in removed_live:
                 log_sync_event(

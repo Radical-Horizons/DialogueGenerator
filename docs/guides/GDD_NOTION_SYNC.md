@@ -24,12 +24,16 @@ Le backend peut **télécharger le GDD depuis Notion** et l’écrire sous `data
 ## Configuration (aperçu)
 
 - **`sources`** : liste d’objets `{ notion_id, kind: "database" \| "page", category_file, notion_data_source_ids? }`. Chaque source mappe une page ou une base Notion vers un nom de fichier cible (ex. `personnages.json`).
-- **`included_categories`** : si **non vide**, seules les sources **database** dont `category_file` est listé sont synchronisées ; les sources **page** sont exclues pour ce run (comportement documenté dans `GddNotionSyncConfigPublic`).
+- **`included_categories`** : si **non vide**, seules les sources **database** dont `category_file` est listé sont synchronisées ; les sources **page** sont exclues pour ce run (comportement documenté dans `GddNotionSyncConfigPublic`). Après une **sync complète** réussie (promotion miroir), les fichiers ou dossiers shards correspondant aux bases **non cochées** sont **supprimés** du disque sous `GDD_categories/` (les JSON issus des fiches `page` déjà présents ne sont pas effacés).
 - **`auto_sync_enabled` / `sync_interval_minutes`** : planification côté serveur (voir `api/main.py` / tâches de fond).
 - **`archive_retention_count`** : nombre max de dossiers sous `.archive/` (les plus anciens sont supprimés).
 - **`mirror_rebuild_on_full_sync`** : **déprécié**, ignoré ; une sync complète applique toujours le miroir disque.
 
 Schémas Pydantic : `api/schemas/gdd_notion_sync.py`.
+
+## Bases « sans corps de page » (optimisation)
+
+Certaines bases Notion n’ont que des **colonnes** (flags, inventaires, skills…) : les lignes existent comme pages mais le **corps** (markdown / blocs) est vide. Pour éviter un `get_page_content` par ligne, le service échantillonne les **3 premières lignes** (ordre du `query_database`). Si aucune n’a de corps, il **omet** `get_page_content` sur le reste des lignes de cette source pour le run en cours. Ce n’est **pas** une erreur : un message **info** est écrit dans `data/logs/gdd_notion_sync.log`. Le titre et les colonnes restent synchronisés via `get_page`. Les bases listées en export **compact** dans le mapper continuent de court-circuiter encore plus tôt (sans sonde).
 
 ## Sync incrémentale vs complète
 

@@ -14,16 +14,32 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\nLes Railleurs sont des créatures artificielles créées puis rejetées par Culucain, le roi des monstres. Leur apparence est une caricature déformée d'autres races, caractérisée par des membres supplémentaires non fonctionnels, un sourire tordu permanent et un mélange de chair, muscles, écailles et métal. Leur taille et poids varient de 50% par rapport à leur race d'origine. Immunisés aux maladies naturelles, ils parlent la langue de leur race d'origine et le Créatique. Vivant principalement en solitaire ou en petites communautés, ils entretiennent des relations complexes avec les autres espèces, particulièrement avec leur race d'origine qu'ils admirent mais dont ils sont souvent rejetés. On les trouve principalement dans la Vieille Ville, l'Antichambre des Impossibles et d'autres lieux d'Escelion, où ils portent des vêtements à l'opposé des codes vestimentaires de leur race d'origine.",
-    "biologie": "**Physiologie**\n• Corps présentant des déformations et membres supplémentaires souvent non fonctionnels\n• Apparence mélangeant chair, muscles visibles, écailles, fourrure et éléments métalliques\n• Sourire tordu permanent, indépendant de l'humeur\n• Taille : 50% plus grande ou plus petite que la race d'origine\n• Poids : 50% plus lourd ou plus léger que la race d'origine\n\n**Reproduction et croissance**\nInformation non disponible dans les données fournies.\n\n**Mode d'alimentation**\nInformation non disponible dans les données fournies.",
-    "socie_te__et_culture": "**Histoire de l'Espèce**\nCréés par Culucain, le roi des monstres, dans des circonstances mystérieuses. Initialement destinés à une vie heureuse sur ses terres, ils ont été chassés par leur créateur qui n'a pu tenir sa promesse de bonheur parfait.\n\n**Culture et traditions**\n• Langues parlées : Langue de la race d'origine et Créatique\n• Immunité naturelle aux maladies\n• Fascination particulière pour leur race d'origine\n• Tendance à éviter de nuire aux \"originaux\" sans raison valable\n\n**Costumes et ornements**\n• - Porte des vêtements et parures inverses de celles populaires chez l’espèce de base\n\n**Organisation sociale**\nMode de vie principalement solitaire, parfois en famille ou en petites tribus. Leur intégration sociale est compliquée par la perception négative des autres races, certains les considérant comme des abominations.\n\n**Relations extra-spécifiques**\nRelations complexes avec les autres espèces, oscillant entre rejet total et pitié. Particulièrement attirés par les individus de leur race d'origine, bien que cette attraction ne soit généralement pas réciproque.",
-    "ecosyste_me": "**Habitat naturel**\nInformation non disponible dans les données fournies.\n\n**Distribution géographique**\nInformation non disponible dans les données fournies.\n\n**Relations avec l'écosystème**\n• Capacité de déplacement réduite par rapport à leur race d'origine\n• Immunité aux maladies naturelles"
+    "re_sume__de_la_fiche": "Les Railleurs sont des créatures artificielles créées puis rejetées par Culucain, le roi des monstres. Leur apparence est une caricature déformée d'autres races, caractérisée par des membres supplémentaires non fonctionnels, un sourire tordu permanent et un mélange de chair, muscles, écailles et métal. Leur taille et poids varient de 50% par rapport à leur race d'origine. Immunisés aux maladies naturelles, ils parlent la langue de leur race d'origine et le Créatique. Vivant principalement en solitaire ou en petites communautés, ils entretiennent des relations complexes avec les autres espèces, particulièrement avec leur race d'origine qu'ils admirent mais dont ils sont souvent rejetés. On les trouve principalement dans la Vieille Ville, l'Antichambre des Impossibles et d'autres lieux d'Escelion, où ils portent des vêtements à l'opposé des codes vestimentaires de leur race d'origine.",
+    "physiologie": "• Corps présentant des déformations et membres supplémentaires souvent non fonctionnels<br>• Apparence mélangeant chair, muscles visibles, écailles, fourrure et éléments métalliques<br>• Sourire tordu permanent, indépendant de l'humeur<br>• Taille : 50% plus grande ou plus petite que la race d'origine<br>• Poids : 50% plus lourd ou plus léger que la race d'origine",
+    "reproduction_et_croissance": "Information non disponible dans les données fournies.",
+    "mode_d_alimentation": "Information non disponible dans les données fournies.",
+    "histoire_de_l_espe_ce": "Créés par Culucain, le roi des monstres, dans des circonstances mystérieuses. Initialement destinés à une vie heureuse sur ses terres, ils ont été chassés par leur créateur qui n'a pu tenir sa promesse de bonheur parfait.",
+    "culture_et_traditions": "• Langues parlées : Langue de la race d'origine et Créatique<br>• Immunité naturelle aux maladies<br>• Fascination particulière pour leur race d'origine<br>• Tendance à éviter de nuire aux \"originaux\" sans raison valable",
+    "costumes_et_ornements": "- Porte des vêtements et parures inverses de celles populaires chez l’espèce de base",
+    "organisation_sociale": "Mode de vie principalement solitaire, parfois en famille ou en petites tribus. Leur intégration sociale est compliquée par la perception négative des autres races, certains les considérant comme des abominations.",
+    "relations_extra-spe_cifiques": "Relations complexes avec les autres espèces, oscillant entre rejet total et pitié. Particulièrement attirés par les individus de leur race d'origine, bien que cette attraction ne soit généralement pas réciproque.",
+    "habitat_naturel": "Information non disponible dans les données fournies.",
+    "distribution_ge_ographique": "Information non disponible dans les données fournies.\n<span color=\"blue\">**Relations avec l'écosystème**</span><br>• Capacité de déplacement réduite par rapport à leur race d'origine<br>• Immunité aux maladies naturelles",
+    "re_sume__ia": "Les Railleurs sont des créatures artificielles, déformées et rejetées par leur créateur, Culucain. Ils possèdent des caractéristiques physiques uniques, comme des membres supplémentaires non fonctionnels et un sourire tordu. Bien qu'immunisés aux maladies, ils vivent souvent en solitaire ou en petites communautés, avec des relations complexes envers leur race d'origine. Leur culture inclut la langue de leur race et le Créatique, et ils portent des vêtements inversés par rapport à leur espèce d'origine. Leur intégration sociale est compliquée par la perception négative des autres races."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "biologie": "Biologie",
-    "socie_te__et_culture": "Société et culture",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "physiologie": "Physiologie",
+    "reproduction_et_croissance": "Reproduction et croissance",
+    "mode_d_alimentation": "Mode d'alimentation",
+    "histoire_de_l_espe_ce": "Histoire de l'Espèce",
+    "culture_et_traditions": "Culture et traditions",
+    "costumes_et_ornements": "Costumes et ornements",
+    "organisation_sociale": "Organisation sociale",
+    "relations_extra-spe_cifiques": "Relations extra-spécifiques",
+    "habitat_naturel": "Habitat naturel",
+    "distribution_ge_ographique": "Distribution géographique",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "1a16e4d2-1b45-80bc-af1d-ceab1be781b4"
 }

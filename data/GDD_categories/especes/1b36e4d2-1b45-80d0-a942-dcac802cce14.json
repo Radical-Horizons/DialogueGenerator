@@ -9,14 +9,30 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\n\nGuides",
-    "besoin_de_l_intrigue": "**Histoire de l’espèce**\n\n**Apparence**\n\n**Rôle culturel**\n\n**Rôle dans l'intrigue**",
-    "ecosyste_me": "**Habitat naturel**\n\n**Mode d’alimentation ou d’obtention de nutriments**\n\n**Mode de reproduction**\n\n**Fonctionnement avec l’écosystème**"
+    "preamble": "<empty-block/>",
+    "re_sume__de_la_fiche": "Le duron est un petit prédateur, chasseur de vermine, habitant des terriers et aimant l'obscurité.\n**Guides**",
+    "histoire_de_l_espe_ce": "-",
+    "apparence": "Son corps plat rase le sol, et il ne possède que deux pattes avant, son corps s'appuyant sur sa longue queue. Le duron du désert a le poil ras et brun et sa queue est la plus imposante de celles de son espèce.",
+    "ro_le_culturel": "Petit chasseur de vermine apprécié des nomades du Désert des Échos pour son efficacité à nettoyer les campements. Sa discrétion et son goût pour l'obscurité en font un voisin habituel des abris de nuit, toléré voire encouragé. Pas de domestication à proprement parler, mais une cohabitation tacite qui lui vaut une réputation de porte-bonheur chez certaines tribus.",
+    "ro_le_dans_l_intrigue": "-",
+    "habitat_naturel": "-",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "-",
+    "mode_de_reproduction": "-",
+    "fonctionnement_avec_l_e_cosyste_me": "-\n<empty-block/>",
+    "re_sume__ia": "Le duron du désert est un petit prédateur vivant dans des terriers, apprécié pour sa capacité à chasser les vermines. Il a un corps plat, deux pattes avant et une longue queue, avec un pelage ras et brun. Sa discrétion en fait un compagnon toléré par les nomades du Désert des Échos, où il est considéré comme un porte-bonheur. Des informations sur son habitat, son alimentation et sa reproduction sont encore à définir."
   },
   "section_titles": {
     "preamble": "Préambule",
-    "besoin_de_l_intrigue": "Besoin de l'intrigue",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_de_l_espe_ce": "Histoire de l’espèce",
+    "apparence": "Apparence",
+    "ro_le_culturel": "Rôle culturel",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "habitat_naturel": "Habitat naturel",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Mode d’alimentation ou d’obtention de nutriments",
+    "mode_de_reproduction": "Mode de reproduction",
+    "fonctionnement_avec_l_e_cosyste_me": "Fonctionnement avec l’écosystème",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "1b36e4d2-1b45-80d0-a942-dcac802cce14"
 }

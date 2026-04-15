@@ -7,14 +7,30 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.",
-    "besoin_de_l_intrigue": "**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**",
-    "ecosyste_me": "**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "histoire_de_l_espe_ce": "-",
+    "apparence": "<empty-block/>\n\t<empty-block/>",
+    "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
+    "ro_le_dans_l_intrigue": "-",
+    "habitat_naturel": "-",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "-",
+    "mode_de_reproduction": "-",
+    "sous-espe_ces": "-",
+    "fonctionnement_avec_l_e_cosyste_me": "-",
+    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "besoin_de_l_intrigue": "Besoin de l'intrigue",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_de_l_espe_ce": "Histoire de l'espèce",
+    "apparence": "Apparence",
+    "ro_le_culturel": "Rôle culturel",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "habitat_naturel": "Habitat naturel",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Mode d'alimentation ou d'obtention de nutriments",
+    "mode_de_reproduction": "Mode de reproduction",
+    "sous-espe_ces": "Sous-espèces",
+    "fonctionnement_avec_l_e_cosyste_me": "Fonctionnement avec l'écosystème",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "e1a6e434-6fe9-4ddd-98ae-94a5ed418d02"
 }

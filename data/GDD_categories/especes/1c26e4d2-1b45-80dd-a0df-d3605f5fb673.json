@@ -10,14 +10,30 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\nColonies bactériennes macroscopiques visibles à l'œil nu, dérivant lentement. Elles absorbent passivement les échos mémoriels ambiants.\n\nGuides",
-    "besoin_de_l_intrigue": "**Histoire de l'espèce**\nDescendantes du microbiome originel du Léviathan, ayant muté après la stase pour \"phagocyter\" les résidus mémoriels plutôt que la matière organique. Lignée ancienne adaptée à un régime psychique.\n\n**Apparence**\nMasses gélatineuses, translucides, de taille variable (10cm à 2m de diamètre). Dérive lente dans l'air ou les fluides stagnants. Surface parfois iridescente.\n\n**Rôle culturel**\nMalgré leur dangerosité, les Amibes Mémorielles exercent une fascination morbide sur certains Croyants du Léviathan, qui recherchent leur proximité pour \"oublier\" des souvenirs traumatiques — pratique risquée et non-officielle. Les sous-espèces Pathos, aux inclusions colorées vives, sont considérées comme d'étranges beautés mélancoliques. Aucun usage alimentaire ou artisanal — leur nature gélatineuse et psychiquement chargée les rend inutilisables.\n\n**Rôle dans l'intrigue**\n• - Danger potentiel : contact prolongé peut entraîner une confusion mémorielle temporaire chez le personnage ; une \"absorption\" accidentelle par une Amibe pourrait effacer un souvenir récent crucial.\n• - Leur présence en nombre signale des zones où des événements intenses, notamment traumatiques, ont eu lieu récemment.",
-    "ecosyste_me": "**Habitat naturel**\nZones calmes, souvent humides ou stagnantes du Léviathan, où les \"poussières\" de mémoire ont tendance à s'accumuler : recoins des Bibliothèques Veineuses, certains Plis d'Ossements, peut-être près des Organoïdes endommagés.\n\n**Mode d'alimentation ou d'obtention de nutriments**\nAbsorption passive et non-sélective des fragments de mémoire et de l'énergie psychique résiduelle flottant dans leur environnement immédiat.\n\n**Mode de reproduction**\nFission binaire simple lorsque la masse ou la saturation mémorielle atteint un seuil critique. La fission peut être accélérée par des afflux soudains d'énergie psychique.\n\n**Sous-espèces**\n• - Amoeba Chronica: Tentent d'absorber préférentiellement les fragments temporels. Inclusions plus scintillantes, provoquent des micro-ralentissements/accélérations.\n• - Amoeba Pathos: Attirées par les résidus émotionnels intenses. Inclusions de couleurs vives.\n• - Amoeba Logos: Absorbent plutôt les bribes d'informations factuelles, logiques, ou structurelles. Inclusions plus pâles et ordonnées.\n\n**Fonctionnement avec l'écosystème**\nAgissent comme des \"nettoyeurs\" passifs de résidus psychiques. Peuvent concentrer certains types de mémoires dans des zones spécifiques."
+    "re_sume__de_la_fiche": "Colonies bactériennes macroscopiques visibles à l'œil nu, dérivant lentement. Elles absorbent passivement les échos mémoriels ambiants.\n**Guides**",
+    "histoire_de_l_espe_ce": "Descendantes du microbiome originel du Léviathan, ayant muté après la stase pour \"phagocyter\" les résidus mémoriels plutôt que la matière organique. Lignée ancienne adaptée à un régime psychique.",
+    "apparence": "Masses gélatineuses, translucides, de taille variable (10cm à 2m de diamètre). Dérive lente dans l'air ou les fluides stagnants. Surface parfois iridescente.",
+    "ro_le_culturel": "Malgré leur dangerosité, les Amibes Mémorielles exercent une fascination morbide sur certains Croyants du Léviathan, qui recherchent leur proximité pour \"oublier\" des souvenirs traumatiques — pratique risquée et non-officielle. Les sous-espèces *Pathos*, aux inclusions colorées vives, sont considérées comme d'étranges beautés mélancoliques. Aucun usage alimentaire ou artisanal — leur nature gélatineuse et psychiquement chargée les rend inutilisables.",
+    "ro_le_dans_l_intrigue": "- Danger potentiel : contact prolongé peut entraîner une confusion mémorielle temporaire chez le personnage ; une \"absorption\" accidentelle par une Amibe pourrait effacer un souvenir récent crucial.\n\t- Leur présence en nombre signale des zones où des événements intenses, notamment traumatiques, ont eu lieu récemment.",
+    "habitat_naturel": "Zones calmes, souvent humides ou stagnantes du Léviathan, où les \"poussières\" de mémoire ont tendance à s'accumuler : recoins des Bibliothèques Veineuses, certains Plis d'Ossements, peut-être près des Organoïdes endommagés.",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Absorption passive et non-sélective des fragments de mémoire et de l'énergie psychique résiduelle flottant dans leur environnement immédiat.",
+    "mode_de_reproduction": "Fission binaire simple lorsque la masse ou la saturation mémorielle atteint un seuil critique. La fission peut être accélérée par des afflux soudains d'énergie psychique.",
+    "sous-espe_ces": "- *Amoeba Chronica:* Tentent d'absorber préférentiellement les fragments temporels. Inclusions plus scintillantes, provoquent des micro-ralentissements/accélérations.\n\t- *Amoeba Pathos:* Attirées par les résidus émotionnels intenses. Inclusions de couleurs vives.\n\t- *Amoeba Logos:* Absorbent plutôt les bribes d'informations factuelles, logiques, ou structurelles. Inclusions plus pâles et ordonnées.",
+    "fonctionnement_avec_l_e_cosyste_me": "Agissent comme des \"nettoyeurs\" passifs de résidus psychiques. Peuvent concentrer certains types de mémoires dans des zones spécifiques.",
+    "re_sume__ia": "Les Amibes Mémorielles sont des colonies bactériennes macroscopiques qui absorbent passivement des échos mémoriels. Elles descendent du microbiome du Léviathan et se nourrissent de résidus mémoriels. Leur présence signale des événements traumatiques récents, et un contact prolongé peut causer une confusion mémorielle. Elles se reproduisent par fission binaire et existent en plusieurs sous-espèces, chacune attirée par différents types de mémoires. Malgré leur danger, elles fascinent certains Croyants du Léviathan qui cherchent à oublier des souvenirs traumatiques."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "besoin_de_l_intrigue": "Besoin de l'intrigue",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_de_l_espe_ce": "Histoire de l'espèce",
+    "apparence": "Apparence",
+    "ro_le_culturel": "Rôle culturel",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "habitat_naturel": "Habitat naturel",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Mode d'alimentation ou d'obtention de nutriments",
+    "mode_de_reproduction": "Mode de reproduction",
+    "sous-espe_ces": "Sous-espèces",
+    "fonctionnement_avec_l_e_cosyste_me": "Fonctionnement avec l'écosystème",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "1c26e4d2-1b45-80dd-a0df-d3605f5fb673"
 }
