@@ -114,6 +114,8 @@ class FullSyncCheckpointState:
     updated_entities: int = 0
     created_at: str = ""
     updated_at: str = ""
+    #: True après une sync complète dont la promotion miroir a été refusée (erreurs partielles).
+    mirror_promotion_pending: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -126,6 +128,7 @@ class FullSyncCheckpointState:
             "updated_entities": self.updated_entities,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "mirror_promotion_pending": self.mirror_promotion_pending,
         }
 
     @classmethod
@@ -144,6 +147,7 @@ class FullSyncCheckpointState:
             updated_entities=int(data.get("updated_entities") or 0),
             created_at=str(data.get("created_at") or ""),
             updated_at=str(data.get("updated_at") or ""),
+            mirror_promotion_pending=bool(data.get("mirror_promotion_pending", False)),
         )
 
 

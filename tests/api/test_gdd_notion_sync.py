@@ -96,7 +96,7 @@ def test_preview_database_row_ok(client: TestClient, tmp_path: Path) -> None:
             "sources": [
                 {
                     "kind": "database",
-                    "notion_id": "2766e4d2-1b45-8073-b9e3-fa39ae137938",
+                    "notion_id": "1886e4d2-1b45-81df-8b05-fcdd43604be5",
                     "category_file": "Dialogues.json",
                 },
             ],
@@ -434,6 +434,32 @@ def test_sync_resume_requires_full(client: TestClient, tmp_path: Path) -> None:
     app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
     try:
         r = client.post("/api/v1/gdd-notion-sync/sync", params={"resume": True})
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_apply_staging_despite_errors_requires_full(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync",
+            params={"apply_staging_despite_errors": True},
+        )
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_apply_staging_despite_errors_conflicts_resume(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync",
+            params={"full": True, "resume": True, "apply_staging_despite_errors": True},
+        )
         assert r.status_code == 400
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

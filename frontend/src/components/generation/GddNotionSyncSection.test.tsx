@@ -146,7 +146,13 @@ describe('GddNotionSyncSection', () => {
     await screen.findByRole('button', { name: /Synchroniser \(incrémental\)/i })
     await user.click(screen.getByRole('button', { name: /Synchroniser \(incrémental\)/i }))
     await waitFor(() => {
+      expect(screen.getByText(/Synchronisation réussie/i)).toBeInTheDocument()
       expect(screen.getByText(/1 entité/i)).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /Fermer ce message/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Fermer ce message/i }))
+    await waitFor(() => {
+      expect(screen.queryByText(/Synchronisation réussie/i)).not.toBeInTheDocument()
     })
     expect(mockPutConfig).toHaveBeenCalledWith(
       expect.objectContaining({ included_categories: [] }),
@@ -210,6 +216,33 @@ describe('GddNotionSyncSection', () => {
     const byFile = (name: string) => boxes.find((cb) => cb.closest('label')?.textContent?.includes(name))
     expect(byFile('Alpha.json')?.checked).toBe(true)
     expect(byFile('Notebook.json')?.checked).toBe(false)
+  })
+
+  it('Cocher essentiels décoche Caractéristiques FP (secondaire)', async () => {
+    const user = userEvent.setup()
+    const fp = 'Caractéristiques_—_Uresaïr_(FP).json'
+    mockGetConfig.mockResolvedValue({
+      config: {
+        schema_version: 1,
+        sync_interval_minutes: 60,
+        auto_sync_enabled: false,
+        sources: [
+          { notion_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', kind: 'database', category_file: 'Alpha.json' },
+          { notion_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc', kind: 'database', category_file: fp },
+        ],
+        included_categories: [],
+        mirror_rebuild_on_full_sync: false,
+        archive_retention_count: 10,
+        token_configured: true,
+      },
+    })
+    render(<GddNotionSyncSection />)
+    const group = await screen.findByRole('group', { name: /Bases de données Notion/i })
+    await user.click(screen.getByRole('button', { name: /Cocher essentiels/i }))
+    const boxes = within(group).getAllByRole('checkbox') as HTMLInputElement[]
+    const byFile = (name: string) => boxes.find((cb) => cb.closest('label')?.textContent?.includes(name))
+    expect(byFile('Alpha.json')?.checked).toBe(true)
+    expect(byFile(fp)?.checked).toBe(false)
   })
 
   it('Tout décocher puis enregistrer envoie included_categories vide (toutes les bases)', async () => {

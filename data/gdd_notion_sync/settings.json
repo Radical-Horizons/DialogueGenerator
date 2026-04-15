@@ -55,8 +55,11 @@
     },
     {
       "kind": "database",
-      "notion_id": "2766e4d2-1b45-8073-b9e3-fa39ae137938",
-      "category_file": "Dialogues.json"
+      "notion_id": "1886e4d2-1b45-81df-8b05-fcdd43604be5",
+      "category_file": "Dialogues.json",
+      "notion_data_source_ids": [
+        "1886e4d2-1b45-815b-b768-000bd34750ab"
+      ]
     },
     {
       "kind": "database",
@@ -682,7 +685,6 @@
   "included_categories": [
     "Actes.json",
     "Bible_narrative.json",
-    "Caractéristiques_—_Uresaïr_(FP).json",
     "Chapitres.json",
     "Chronologie_d'Escelion.json",
     "Communautés.json",

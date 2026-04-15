@@ -3,22 +3,27 @@
   "values": {
     "Catégorie": "Infrastructure",
     "Complexité": "Moyen",
+    "Lieux": "1b36e4d2-1b45-807e-8342-d1b4cd0cdade, 1b36e4d2-1b45-80da-b06a-f97b2a08b7c6, 1b36e4d2-1b45-80d1-a752-c46051c2f742, 1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b36e4d2-1b45-800f-9bbf-c54642122b32, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53, 1b36e4d2-1b45-802c-910a-fb74729b22f8, 2356e4d2-1b45-80b8-854c-fd70ad9bfc4e, 2356e4d2-1b45-8098-93c3-df4a68697585, 2356e4d2-1b45-80ba-a910-eb0a62825dde, 1b36e4d2-1b45-80ec-93bd-da8514c1c784",
     "Résumé IA": "Couche de persistance d'état transversale. Les flags sont des variables globales qui mémorisent des événements discrets survenus en jeu. 5 portées : Système (universel), Personnage, Faction, Lieu, Quête. 3 types de valeur : bool, enum, compteur. Convention d'identifiant : Flag_[portee]_[id_snake_case]. Distincts de la Réputation (jauges continues) et de l'Influence/Respect (jauges relationnelles). Consommés par tous les systèmes pour gater du contenu ou conditionner des comportements. Dédiés à la base Flags.",
     "Statut": "En design",
     "Systèmes liés": "2ef6e4d2-1b45-8073-a456-d45d695154b9, 4d860678-49ac-4702-aa66-8f29abf53db9, 7d4905b5-1967-4488-b28f-6c69f6abc262, 2cc6e4d2-1b45-8071-9c17-d98ba64fcbfc, ed986ac3-3600-4d29-b4fb-8fac7d61857c, 2ff6e4d2-1b45-8048-bf39-c3cf437d0e04, 2be6e4d2-1b45-800d-b7df-c3af800db40b, 9ad386e6-c74d-4f8d-8509-d295f19cdd01, dda13b50-2e96-491e-8e21-008865221005",
     "Type": "Système"
   },
   "sections": {
-    "flags_du_syste_me": "Ce système est l’infrastructure des flags — il définit leur convention et leur base de données, mais ne produit pas de flags sur son propre état. Pas de flags. Ajouter une base inline ici serait circulaire.",
-    "ro_le_du_syste_me": "Les flags sont la mémoire discrète du jeu. Ils mémorisent qu'un événement a eu lieu, qu'un choix a été fait, ou qu'un état particulier du monde est atteint.\n\nDistinction clé : Un flag n'est PAS une jauge. Ne pas utiliser un flag pour modéliser quelque chose de continu ou de graduel (utiliser la Réputation, l'Influence ou le Respect à la place). Un flag mémorise un événement ponctuel et irréversible, ou un état à valeurs discrrètes fini.",
-    "convention_de_nommage": "- Toujours commencer par Flag_\n\n- snake_case, pas de majuscules après Flag_\n\n- Éviter les noms de personnages comme préfixe (utiliser un identifiant court)\n\n- Pour les flags de questête : Flag_quete_[id]_[phase|resolution]",
-    "catalogue": "La base dédiée : Flags"
+    "flags_du_syste_me": "Ce système *est* l’infrastructure des flags — il définit leur convention et leur base de données, mais ne produit pas de flags sur son propre état. **Pas de flags.** Ajouter une base inline ici serait circulaire. {color=\"gray\"}",
+    "ro_le_du_syste_me": "Les flags sont la **mémoire discrète** du jeu. Ils mémorisent qu'un événement a eu lieu, qu'un choix a été fait, ou qu'un état particulier du monde est atteint.\n\n**Distinction clé :** Un flag n'est PAS une jauge. Ne pas utiliser un flag pour modéliser quelque chose de continu ou de graduel (utiliser la Réputation, l'Influence ou le Respect à la place). Un flag mémorise un événement ponctuel et irréversible, ou un état à valeurs discrrètes fini.",
+    "porte_es": "<table header-row=\"true\">\n<tr>\n<td>Portée</td>\n<td>Définition</td>\n<td>Exemples</td>\n</tr>\n<tr>\n<td>**Système**</td>\n<td>Global, universel — défini par la progression principale</td>\n<td>`Flag_acte_1_fin`, `Flag_citadelle_debloquee`</td>\n</tr>\n<tr>\n<td>**Personnage**</td>\n<td>Propre à un PNJ ou héroïne</td>\n<td>`Flag_khair_revelation_nom`, `Flag_uresair_trahison_avouee`</td>\n</tr>\n<tr>\n<td>**Faction**</td>\n<td>État d'une communauté</td>\n<td>`Flag_culte_anentropie_dissous`</td>\n</tr>\n<tr>\n<td>**Lieu**</td>\n<td>État d'une zone ou d'un POI</td>\n<td>`Flag_conduits_infondes_accessibles`</td>\n</tr>\n<tr>\n<td>**Quête**</td>\n<td>Progression d'une quête spécifique</td>\n<td>`Flag_quete_gardienne_phase_2`</td>\n</tr>\n</table>",
+    "convention_de_nommage": "- Toujours commencer par `Flag_`\n- snake_case, pas de majuscules après `Flag_`\n- Éviter les noms de personnages comme préfixe (utiliser un identifiant court)\n- Pour les flags de questête : `Flag_quete_[id]_[phase|resolution]`",
+    "catalogue": "La base dédiée : <mention-page url=\"https://www.notion.so/5a3b2abf221b40c19b2a98c91e13dfd9\"/>",
+    "re_sume__ia": "Couche de persistance d'état transversale. Les flags sont des variables globales qui mémorisent des événements discrets survenus en jeu. 5 portées : Système (universel), Personnage, Faction, Lieu, Quête. 3 types de valeur : bool, enum, compteur. Convention d'identifiant : Flag_[portee]_[id_snake_case]. Distincts de la Réputation (jauges continues) et de l'Influence/Respect (jauges relationnelles). Consommés par tous les systèmes pour gater du contenu ou conditionner des comportements. Dédiés à la base Flags."
   },
   "section_titles": {
     "flags_du_syste_me": "Flags du système",
     "ro_le_du_syste_me": "Rôle du système",
+    "porte_es": "Portées",
     "convention_de_nommage": "Convention de nommage",
-    "catalogue": "Catalogue"
+    "catalogue": "Catalogue",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "50b3b923-0349-4180-87f6-821d69893949"
 }

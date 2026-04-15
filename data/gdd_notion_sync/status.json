@@ -1,10 +1,11 @@
 {
-  "last_started_at": "2026-04-14T22:59:32.835527+00:00",
-  "last_finished_at": "2026-04-14T23:02:27.106300+00:00",
+  "last_started_at": "2026-04-15T20:32:21.621783+00:00",
+  "last_finished_at": "2026-04-15T21:44:03.151828+00:00",
   "last_success": true,
-  "message": "80 entité(s) mise(s) à jour — miroir appliqué (archive : .archive/20260413T200743Z_81cda1f5)",
-  "updated_entities": 80,
+  "message": "2806 entité(s) mise(s) à jour — miroir appliqué (archive : .archive/20260415T153736Z_43bfbab2)",
+  "updated_entities": 2806,
   "partial_errors": [],
-  "last_archive_relative": ".archive/20260413T200743Z_81cda1f5",
-  "last_mirror_rebuild_used": true
+  "last_archive_relative": ".archive/20260415T153736Z_43bfbab2",
+  "last_mirror_rebuild_used": true,
+  "mirror_promotion_pending": false
 }

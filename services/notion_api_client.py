@@ -325,6 +325,29 @@ class NotionAPIClient:
                         break
             if chosen:
                 return chosen
+            if not ids_in_meta:
+                # GET ``data_sources`` peut être vide alors que la config porte déjà
+                # des UUID copiés depuis Notion (ex. « Copy data source ID »).
+                fallback: List[str] = []
+                seen_fb: set[str] = set()
+                for raw in explicit:
+                    if not isinstance(raw, str) or not str(raw).strip():
+                        continue
+                    try:
+                        norm = normalize_notion_id(raw.strip())
+                    except ValueError:
+                        continue
+                    if norm not in seen_fb:
+                        fallback.append(norm)
+                        seen_fb.add(norm)
+                if fallback:
+                    logger.warning(
+                        "GET database %s : data_sources vide mais "
+                        "notion_data_source_ids=%s — interrogation directe des UUID",
+                        db_meta.get("id"),
+                        explicit,
+                    )
+                    return fallback
             logger.warning(
                 "notion_data_source_ids %s ne correspond à aucun data_source connu "
                 "(base %s) — repli heuristique",
@@ -393,7 +416,10 @@ class NotionAPIClient:
         if not ds_ids:
             logger.warning(
                 "GET database %s (API %s) : aucun data_source_id exploitable "
-                "(data_sources=%r, clés=%s)",
+                "(data_sources=%r, clés=%s). Si la liste est vide alors que la base "
+                "est au modèle multi-sources, vérifier que l'intégration a accès aux "
+                "sources (sinon POST .../databases/.../query peut répondre 400 : "
+                "« does not contain any data sources accessible by this API bot »).",
                 database_id,
                 NOTION_VERSION_DATA_SOURCES,
                 raw_sources,

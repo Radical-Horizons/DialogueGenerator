@@ -11,16 +11,38 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\nLe contient-monde contient des centaines de communautés qui ne demandent qu’à être inventées, qu’il s’agisse de groupes politiques, d’entreprises, de collectifs, de groupes religieux ou militaires, etc.\n\nGuides",
-    "besoin_de_l_intrigue": "**Histoire de la communauté, héritage culturel**\n\n**Rôle dans l'intrigue**",
-    "gestion_de_la_communaute": "**Leader ou groupe décisionnaire et structuration des pouvoirs**\n• - Leader ou groupe décisionnaire et structuration des pouvoirs\n\n**Slogan/dicton de la communauté**\n• - Slogan/dicton de la communauté\n\n**Système économique**\n• - Système économique\n\n**Relations extérieures avec les autres communautés**\n• - Relations extérieures avec les autres communautés",
-    "spe_cificite": "**Culture, valeurs, éthique**\n\n**Tabous**\n• - Tabous\n\n**Traditions ou coutumes particulières**\n• - Traditions ou coutumes particulières\n\n**Niveau technologique, scientifique et/ou magique**\n• - Niveau technologique, scientifique et/ou magique\n\n**Alimentation et manières de produire ou d'importer**\n• - Alimentation et manières de produire ou d’importer\n\n**Créations artisanales et/ou industrielles majeures**\n• - Créations artisanales et/ou industrielles majeures\n\n**Créations artistiques et architecturales majeures**\n• - Créations artistiques et architecturales majeures"
+    "re_sume__de_la_fiche": "Le contient-monde contient des centaines de communautés qui ne demandent qu’à être inventées, qu’il s’agisse de groupes politiques, d’entreprises, de collectifs, de groupes religieux ou militaires, etc.\n**Guides**",
+    "histoire_de_la_communaute___he_ritage_culturel": "<empty-block/>",
+    "ro_le_dans_l_intrigue": "<empty-block/>",
+    "leader_ou_groupe_de_cisionnaire_et_structuration_des_pouvoirs": "- <span color=\"yellow\">**Leader ou groupe décisionnaire et structuration des pouvoirs**</span>",
+    "slogan_dicton_de_la_communaute": "- <span color=\"yellow\">**Slogan/dicton de la communauté**</span>",
+    "syste_me_e_conomique": "- <span color=\"yellow\">**Système économique**</span>",
+    "relations_exte_rieures_avec_les_autres_communaute_s": "- <span color=\"yellow\">**Relations extérieures avec les autres communautés**</span>",
+    "culture__valeurs__e_thique": "<empty-block/>",
+    "tabous": "- <span color=\"purple\">**Tabous**</span>",
+    "traditions_ou_coutumes_particulie_res": "- <span color=\"purple\">**Traditions ou coutumes particulières**</span>",
+    "niveau_technologique__scientifique_et_ou_magique": "- <span color=\"purple\">**Niveau technologique, scientifique et/ou magique**</span>",
+    "alimentation_et_manie_res_de_produire_ou_d_importer": "- <span color=\"purple\">**Alimentation et manières de produire ou d’importer**</span>",
+    "cre_ations_artisanales_et_ou_industrielles_majeures": "- <span color=\"purple\">**Créations artisanales et/ou industrielles majeures**</span>",
+    "cre_ations_artistiques_et_architecturales_majeures": "- <span color=\"purple\">**Créations artistiques et architecturales majeures**</span>\n<empty-block/>",
+    "re_sume": "Le monde contient de nombreuses communautés à inventer, incluant des groupes politiques, religieux, et militaires. Chaque communauté a son histoire, son héritage culturel, sa gestion, ses valeurs, et ses traditions, ainsi que des relations extérieures avec d'autres communautés. Des éléments comme le système économique, le niveau technologique, et les créations artisanales et artistiques sont également essentiels à leur spécificité."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "besoin_de_l_intrigue": "Besoin de l'intrigue",
-    "gestion_de_la_communaute": "Gestion de la communauté",
-    "spe_cificite": "Spécificité"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_de_la_communaute___he_ritage_culturel": "Histoire de la communauté, héritage culturel",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "leader_ou_groupe_de_cisionnaire_et_structuration_des_pouvoirs": "Leader ou groupe décisionnaire et structuration des pouvoirs",
+    "slogan_dicton_de_la_communaute": "Slogan/dicton de la communauté",
+    "syste_me_e_conomique": "Système économique",
+    "relations_exte_rieures_avec_les_autres_communaute_s": "Relations extérieures avec les autres communautés",
+    "culture__valeurs__e_thique": "Culture, valeurs, éthique",
+    "tabous": "Tabous",
+    "traditions_ou_coutumes_particulie_res": "Traditions ou coutumes particulières",
+    "niveau_technologique__scientifique_et_ou_magique": "Niveau technologique, scientifique et/ou magique",
+    "alimentation_et_manie_res_de_produire_ou_d_importer": "Alimentation et manières de produire ou d'importer",
+    "cre_ations_artisanales_et_ou_industrielles_majeures": "Créations artisanales et/ou industrielles majeures",
+    "cre_ations_artistiques_et_architecturales_majeures": "Créations artistiques et architecturales majeures",
+    "re_sume": "Résumé"
   },
   "notion_page_id": "1dd6e4d2-1b45-80c1-bbab-f8d323d86aff"
 }

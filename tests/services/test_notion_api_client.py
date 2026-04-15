@@ -188,7 +188,41 @@ class TestNotionAPIClient:
             )
             called_url = mock_client.post.call_args[0][0]
             assert "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" in called_url
-    
+
+    @pytest.mark.asyncio
+    async def test_query_database_explicit_data_source_when_get_returns_empty(
+        self, notion_client
+    ) -> None:
+        """GET ``data_sources`` vide : les UUID explicites sont quand même interrogés."""
+        database_id = "dddddddd-dddd-dddd-dddd-dddddddddddd"
+        mock_get_response = MagicMock()
+        mock_get_response.json.return_value = {
+            "object": "database",
+            "id": database_id,
+            "data_sources": [],
+        }
+        mock_get_response.raise_for_status = MagicMock()
+        mock_post_response = MagicMock()
+        mock_post_response.json.return_value = {
+            "results": [{"id": "page-from-ds"}],
+            "has_more": False,
+        }
+        mock_post_response.raise_for_status = MagicMock()
+        ds_id = "cccccccc-cccc-cccc-cccc-cccccccccccc"
+        with patch("httpx.AsyncClient") as mock_client_class:
+            mock_client = AsyncMock()
+            mock_client.get = AsyncMock(return_value=mock_get_response)
+            mock_client.post = AsyncMock(return_value=mock_post_response)
+            mock_client_class.return_value.__aenter__.return_value = mock_client
+            result = await notion_client.query_database(
+                database_id,
+                data_source_ids=[ds_id],
+            )
+            assert len(result) == 1
+            assert result[0]["id"] == "page-from-ds"
+            called_url = mock_client.post.call_args[0][0]
+            assert f"data_sources/{ds_id}/query" in called_url
+
     @pytest.mark.asyncio
     async def test_query_database_http_error(self, notion_client):
         """Test de requête de base de données avec erreur HTTP (fallback legacy)."""

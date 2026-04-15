@@ -1,7 +1,14 @@
 {
   "Nom": "Dialogue avec la Gardienne Vertébrale",
-  "sections": {
-    "_general": ""
+  "values": {
+    "Chapitre": "1ee6e4d2-1b45-8042-896e-c3bacf823a9b",
+    "ENStatus": "To write",
+    "FRStatus": "To write",
+    "Lieux": "1b36e4d2-1b45-802c-910a-fb74729b22f8, 2356e4d2-1b45-80b8-854c-fd70ad9bfc4e",
+    "Personnages": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd, 1c36e4d2-1b45-8095-8449-d7d1749e69ad",
+    "Scène": "1ff6e4d2-1b45-80da-98a1-cb5a803e6a0b",
+    "Version": "V1"
   },
+  "sections": {},
   "notion_page_id": "2576e4d2-1b45-808e-a442-f09df3a8c242"
 }

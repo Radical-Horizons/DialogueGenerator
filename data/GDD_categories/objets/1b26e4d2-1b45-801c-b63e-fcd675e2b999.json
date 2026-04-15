@@ -2,23 +2,36 @@
   "Nom": "Codex des Dettes Karmiques",
   "values": {
     "Date de création": "2025-03-10T22:25:00.000Z",
-    "Dernière modification": "2026-03-30T09:41:00.000Z",
+    "Dernière modification": "2026-04-14T21:29:00.000Z",
+    "Détenu par": "1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
+    "Inventaires PNJ": "6562c05d-16fc-4450-9d9a-8b2d269382c4",
+    "Lieux de présence": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
+    "Poids": "Léger",
+    "Qualité": "4",
     "Rareté": "Unique",
+    "Résumé": "Le Codex des Dettes Karmiques est un livre rédigé par Uresaïr, consignant ses crimes sur Meridach. Il est considéré comme un savoir unique, léger et de qualité 4, et est en cours d'utilisation.",
     "Stackable": "non",
+    "Taille": "Moyen",
     "Type": "Savoir",
-    "État": "En cours"
+    "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\nLivre des dettes karmiques d'Uresaïr, rédigée par elle-même, contient ses crimes commis sur Meridach.",
-    "identite____origine": "**Apparence physique**\n\n**Histoire & Création**\n\n**Lien avec personnages**",
-    "fonction___usage": "**Fonctionnement**\n\n**Conditions & Limites**",
-    "circulation___porte_e": "**Distribution géographique**\n\n**Valeur & Échange**\n• - Valeur en Dc :"
+    "re_sume__de_la_fiche": "Livre des dettes karmiques d'Uresaïr, rédigée par elle-même, contient ses crimes commis sur Meridach.",
+    "lien_avec_personnages": "-\n\t-",
+    "fonctionnement": "-\n\t-",
+    "conditions___limites": "-\n\t-",
+    "distribution_ge_ographique": "-\n\t-",
+    "valeur___e_change": "- **Valeur en Dc :**\n\t-",
+    "re_sume": "Le Codex des Dettes Karmiques est un livre rédigé par Uresaïr, consignant ses crimes sur Meridach. Il est considéré comme un savoir unique, léger et de qualité 4, et est en cours d'utilisation."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "identite____origine": "Identité & Origine",
-    "fonction___usage": "Fonction & Usage",
-    "circulation___porte_e": "Circulation & Portée"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "lien_avec_personnages": "Lien avec personnages",
+    "fonctionnement": "Fonctionnement",
+    "conditions___limites": "Conditions & Limites",
+    "distribution_ge_ographique": "Distribution géographique",
+    "valeur___e_change": "Valeur & Échange",
+    "re_sume": "Résumé"
   },
   "notion_page_id": "1b26e4d2-1b45-801c-b63e-fcd675e2b999"
 }

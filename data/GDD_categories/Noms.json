@@ -1,15 +1,115 @@
 [
   {
-    "Nom": "Maradel",
+    "Nom": "Chantier-Doux",
     "values": {
-      "Catégorie": "Marque de foyer",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
-      "Signification": "Brasier de la Nef Centrale"
+      "Catégorie": "Surnom d'usage",
+      "Porteurs attestés": "2286e4d2-1b45-80cd-bf22-d2fadf218fb2"
     },
     "sections": {},
-    "notion_page_id": "003fa37c-2ddb-4ca7-979f-2a1760e24da4"
+    "notion_page_id": "517e8cec-680b-4799-bf29-878cf784c510"
+  },
+  {
+    "Nom": "Murmure-Éteint",
+    "values": {
+      "Catégorie": "Surnom d'usage",
+      "Porteurs attestés": "1b76e4d2-1b45-801e-bccb-d44c219b951c"
+    },
+    "sections": {},
+    "notion_page_id": "a5983489-d7b3-42f8-9c51-d9787d3909cd"
+  },
+  {
+    "Nom": "Yrthas",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Porteurs attestés": "3236e4d2-1b45-808b-9b5c-e761e396c416"
+    },
+    "sections": {},
+    "notion_page_id": "e2164aa3-75b9-41d2-958c-b8ec8a06d474"
+  },
+  {
+    "Nom": "Lien",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Porteurs attestés": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31"
+    },
+    "sections": {},
+    "notion_page_id": "f58d3da2-da16-4747-8984-ba89b29d39ae"
+  },
+  {
+    "Nom": "Genka",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Porteurs attestés": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31"
+    },
+    "sections": {},
+    "notion_page_id": "376ec169-a30a-4f01-b142-1ce832b57125"
+  },
+  {
+    "Nom": "57",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Numéro de lignée ou paradigme. Convention propre aux Van'Doei à nomenclature numérotée (cf. Ori-Bikar 57, Raki-Biro 58).",
+      "Porteurs attestés": "1886e4d2-1b45-80bb-b913-d5392af85620"
+    },
+    "sections": {},
+    "notion_page_id": "0ce23d2e-63aa-4c78-a956-7ee8f7812743"
+  },
+  {
+    "Nom": "Raki",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Porteurs attestés": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8"
+    },
+    "sections": {},
+    "notion_page_id": "e16538aa-a2a8-481d-9b2d-c17b5a8edd93"
+  },
+  {
+    "Nom": "58",
+    "values": {
+      "Catégorie": "Autre",
+      "Notes": "Numéro de lignée ou paradigme. Convention propre aux Van'Doei à nomenclature numérotée (cf. Ori-Bikar 57, Raki-Biro 58).",
+      "Porteurs attestés": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8"
+    },
+    "sections": {},
+    "notion_page_id": "3be6060e-ffba-4c4b-a6b6-93c69ff853c3"
+  },
+  {
+    "Nom": "Biro",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Porteurs attestés": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8"
+    },
+    "sections": {},
+    "notion_page_id": "db1cce94-3869-494a-9758-f4ee3b13811f"
+  },
+  {
+    "Nom": "Bikar",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Porteurs attestés": "1886e4d2-1b45-80bb-b913-d5392af85620"
+    },
+    "sections": {},
+    "notion_page_id": "11e7923d-e6ea-4101-a485-8f205a2a563b"
+  },
+  {
+    "Nom": "Ven",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "Seule marque de foyer du corpus qui désigne un feu reproductible plutôt qu'un lieu précis. La réputation de polyvalence du nom — utilisable n'importe où — en fait la marque la plus courante chez les Van'Doei des Cendres Nomades.",
+      "Signification": "Feu itinérant des Cendres Nomades, rebâti rituellement à chaque campement selon des gestes transmis de génération en génération. Contrairement aux foyers fixes, Ven n'est pas un lieu mais un acte : le feu de Ven est le même à chaque fois qu'il est allumé selon le rite, quel que soit l'endroit. C'est pourquoi la marque est répandue parmi les nomades."
+    },
+    "sections": {},
+    "notion_page_id": "cafe7302-dc84-4c9e-82f2-4b125b1aba32"
+  },
+  {
+    "Nom": "Ori",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Porteurs attestés": "1886e4d2-1b45-80bb-b913-d5392af85620"
+    },
+    "sections": {},
+    "notion_page_id": "2339f1da-1154-43d1-9354-6c6679864a9f"
   },
   {
     "Nom": "Tarrivka",
@@ -22,50 +122,75 @@
     "notion_page_id": "00b37310-763a-4230-acc7-49b46dd69bcb"
   },
   {
-    "Nom": "Taleth",
+    "Nom": "Wigbar",
     "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
-      "Signification": "Grande forge industrielle du Quartier, réputée pour la qualité de ses matériaux."
+      "Catégorie": "Nom de clan",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Nom de famille. Porté par Sayahula Wigbar (~80-155 AG)."
     },
     "sections": {},
-    "notion_page_id": "03293ad2-7672-44b7-80b3-acea8788b0ff"
+    "notion_page_id": "42314240-efe8-4241-96ce-0b929f53621c"
   },
   {
-    "Nom": "Dravesh",
+    "Nom": "Jarynah",
     "values": {
       "Catégorie": "Nom personnel",
-      "Notes": "Porteur connu : Dravesh-Kol (Sept Témoins).",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Dravesh-Kol."
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre lunaire."
     },
     "sections": {},
-    "notion_page_id": "0374253a-8103-4257-b4dd-43a497f5718c"
+    "notion_page_id": "9293c71e-e1d8-457a-95a4-7f9356d449ec"
   },
   {
-    "Nom": "Neamhar",
+    "Nom": "Reitar",
     "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Neamh (racine conservée ; suffixe -ar, marqueur de mouvement actif en Principit). État patron associé : Neamh",
-      "Porteurs attestés": "31d6e4d2-1b45-80c7-a993-c76e1bdfbbca",
-      "Signification": "Harmonie — état de perfection transitoire avant dissolution (16e Transformation)"
+      "Catégorie": "Nom de clan",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Nom de famille.",
+      "Porteurs attestés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe"
     },
     "sections": {},
-    "notion_page_id": "0a473703-db7c-496f-bb94-c147d7c30f0f"
+    "notion_page_id": "9ae0661c-222a-4022-81ff-2571a6335a11"
   },
   {
-    "Nom": "Kresh",
+    "Nom": "Gazan",
     "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Crann (C/K = correspondance consonantique initiale ; -rann/-resh = structure consonantique r+n partagée). Deuxième nom d'état connu pour Crann, forme évocatrice courte.\nÉtat patron associé : Crann",
-      "Porteurs attestés": "2cc6e4d2-1b45-8062-9d49-f252d825bc90",
-      "Signification": "Interconnexion — reliance de toutes les consciences en réseau (15ᵉ Transformation)"
+      "Catégorie": "Nom de clan",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Nom de famille. Porté par Cheris Gazan (~200 AG)."
     },
     "sections": {},
-    "notion_page_id": "0aef203e-464f-449e-80e6-5d32193f5136"
+    "notion_page_id": "a1206fcb-bd94-4332-bca5-67f7be78a0e8"
+  },
+  {
+    "Nom": "Itersha",
+    "values": {
+      "Catégorie": "Nom de clan",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Nom de famille. Porté par Nahdene Itersha (~2800 AG)."
+    },
+    "sections": {},
+    "notion_page_id": "a37fd2db-16a8-4202-a9be-bd947e72f3a5"
+  },
+  {
+    "Nom": "Ximír",
+    "values": {
+      "Catégorie": "Nom de clan",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Nom de famille."
+    },
+    "sections": {},
+    "notion_page_id": "a43f90ce-e3ea-4e1d-a27f-3452eac74ecb"
+  },
+  {
+    "Nom": "Mhaj-Yoat",
+    "values": {
+      "Catégorie": "Nom de clan",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Nom de famille."
+    },
+    "sections": {},
+    "notion_page_id": "a979bf06-1485-4655-ae82-5fa44b2eae8d"
   },
   {
     "Nom": "Sayahula",
@@ -78,84 +203,6 @@
     "notion_page_id": "0d915522-55d3-4037-aaa6-76296df9c298"
   },
   {
-    "Nom": "Voknir",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Terme forgeron Van'Doï des Chaudières Démiurgiques : désigne le refroidissement progressif d'un alliage en une structure rigide définitive — métaphore directe de Cairn (Fossilisation), la matière qui se cristallise en système cohérent et immuable. Sans dérivation phonétique.\nÉtat patron associé : Cairn",
-      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
-      "Signification": "Fossilisation — formation de systèmes cohérents de pensée (10ᵉ Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "12e51402-730a-4cd4-aaca-b54903b04179"
-  },
-  {
-    "Nom": "Am",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Signification": "Marque très courte — possible foyer éphémère ou nom érodé. Porteur connu : Quireth-Am."
-    },
-    "sections": {},
-    "notion_page_id": "16ba1a99-d193-4d64-b945-27a8eca9ef58"
-  },
-  {
-    "Nom": "Keresh",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
-      "Signification": "Forge historique spécialisée dans l'armement, aujourd'hui éteinte."
-    },
-    "sections": {},
-    "notion_page_id": "16cc82db-2fed-4752-9f55-e0b7f850b7a5"
-  },
-  {
-    "Nom": "Koriel",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Caoil (C/K = correspondance consonantique initiale ; -oil/-iel = terminaison vocalique partagée).\nÉtat patron associé : Caoil",
-      "Porteurs attestés": "21ce11c5-e354-4ff9-b504-5acf991b0b6b",
-      "Signification": "Circulation — flux vital animant la matière (6ᵉ Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "175b5363-2c25-4fe7-9c79-3e5bebf2741d"
-  },
-  {
-    "Nom": "Dort",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Signification": "Brasier de campement devenu nom de lignée. Porteur connu : Khava-Dort."
-    },
-    "sections": {},
-    "notion_page_id": "1b1f84b3-0334-4a0d-9a2d-26e4f9f9846d"
-  },
-  {
-    "Nom": "Dhorra",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Ghorr (Gh/Dh = correspondance fricative ; -orr → -orra, allongement personnel). État patron associé : Ghorr",
-      "Porteurs attestés": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
-      "Signification": "Séparation — établissement des distinctions fondamentales (2e Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "1ef8a2b9-ad15-4df4-9ead-77ebb709ada2"
-  },
-  {
-    "Nom": "Ghira",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Porteurs attestés": "2286e4d2-1b45-80f8-a703-dce94ea5a27b",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Ghira-Vorthul."
-    },
-    "sections": {},
-    "notion_page_id": "1fa0bfce-ff7b-42ae-b6fc-19526cff661b"
-  },
-  {
     "Nom": "Valkazer",
     "values": {
       "Catégorie": "Nom personnel",
@@ -166,39 +213,108 @@
     "notion_page_id": "22507395-69b2-4950-bea0-5b5d90654811"
   },
   {
-    "Nom": "Ensi",
+    "Nom": "Nahdene",
     "values": {
       "Catégorie": "Nom personnel",
-      "Notes": "Porteur connu : Ensi-Pral.",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Ensi-Pral."
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre lunaire. Porté par Nahdene Itersha (~2800 AG), Meridhali ayant codifié la Fête des Routes."
     },
     "sections": {},
-    "notion_page_id": "235fcdb8-625f-4697-99f4-d158380d09bd"
+    "notion_page_id": "3f33c7a3-4816-4d23-a685-64d934d826e4"
   },
   {
-    "Nom": "Thalassa",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Emprunt cosmopolite (grec : mer, étendue fluide), précision sémantique pour Caoil.\nÉtat patron associé : Caoil",
-      "Porteurs attestés": "8fefb411-8033-4e06-afdd-9d186937ee2a",
-      "Signification": "Circulation — flux vital animant la matière (6ᵉ Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "2a465fb3-f1c7-40e0-bf86-eb3fb9a4d539"
-  },
-  {
-    "Nom": "Kha",
+    "Nom": "Sharusmal",
     "values": {
       "Catégorie": "Nom personnel",
-      "Notes": "L'apostrophe ici est une liaison entre voyelle finale du prénom et initiale de la marque (variante graphique du trait d'union).",
-      "Porteurs attestés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel bref. Placé avant la marque de foyer : Kha'Vareth."
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre solaire."
     },
     "sections": {},
-    "notion_page_id": "2ad50d90-6d93-4233-9f64-3030ef59caf3"
+    "notion_page_id": "52af16ab-5ac4-4a67-b0b5-6e201d67618c"
+  },
+  {
+    "Nom": "Alissuryan",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre solaire."
+    },
+    "sections": {},
+    "notion_page_id": "55dfc38d-66e7-4978-8c72-0946bccb52fd"
+  },
+  {
+    "Nom": "Avissel",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre solaire."
+    },
+    "sections": {},
+    "notion_page_id": "84ebbcbc-fde2-440a-be46-7dc2064c8be8"
+  },
+  {
+    "Nom": "Ammazan",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre solaire."
+    },
+    "sections": {},
+    "notion_page_id": "9a3e9247-ec05-445d-8cfc-94eeff794282"
+  },
+  {
+    "Nom": "Merletyal",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre lunaire."
+    },
+    "sections": {},
+    "notion_page_id": "ad1d5869-c524-4a1c-9903-59dff1de77ed"
+  },
+  {
+    "Nom": "Cheris",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre solaire. Porté par Cheris Gazan (~200 AG), négociateur des premiers accords de passage."
+    },
+    "sections": {},
+    "notion_page_id": "af5b350f-ccc9-4bbf-b78e-44c92158d129"
+  },
+  {
+    "Nom": "Vol",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
+      "Notes": "Registre solaire.",
+      "Porteurs attestés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 21ce11c5-e354-4ff9-b504-5acf991b0b6b"
+    },
+    "sections": {},
+    "notion_page_id": "e3f05cd3-e965-4d2d-990a-232264d36a0d"
+  },
+  {
+    "Nom": "Maradel",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Signification": "Brasier de la Nef Centrale"
+    },
+    "sections": {},
+    "notion_page_id": "003fa37c-2ddb-4ca7-979f-2a1760e24da4"
+  },
+  {
+    "Nom": "Esh",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e"
+    },
+    "sections": {},
+    "notion_page_id": "99e7a48b-c70a-43c6-b285-cdf8b06f37e6"
   },
   {
     "Nom": "Ghet",
@@ -213,25 +329,159 @@
     "notion_page_id": "2c19650d-f2ce-4fb4-b9aa-409621191caf"
   },
   {
-    "Nom": "Gharn",
+    "Nom": "Talvir",
     "values": {
       "Catégorie": "Marque de foyer",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Signification": "Feu de charbon lent et durable. Associé aux bas-quartiers ; produit des Van'Doei à peau particulièrement sombre, stigmatisés par le colorisme."
+      "Porteurs attestés": "2cc6e4d2-1b45-8062-9d49-f252d825bc90",
+      "Signification": "Brasier de l'atelier de Kel'Thara dans le Quartier des Ossements Travaillés, foyer d'origine de Kresh. Combustion génératrice composée de copeaux d'os travaillé, résidus métalliques (cuivre, argent) et bois d'ossements anciens."
     },
     "sections": {},
-    "notion_page_id": "2d67d874-07d5-40da-a609-3f593aaccf0d"
+    "notion_page_id": "62d10f48-6c14-423d-906d-08a081e3e356"
   },
   {
-    "Nom": "Kol",
+    "Nom": "Akhor",
     "values": {
       "Catégorie": "Marque de foyer",
+      "Communauté d'usage": "1a56e4d2-1b45-8044-a472-d674f194c57a",
       "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "Nom transmis comme marque d'origine aux descendants des Van'Doï nés du feu de Kol pendant la march. À ne pas confondre avec Thul, marque d'un autre foyer de l'exode.",
-      "Signification": "Gouffre volcanique ouvert dans les plaines de cendre lors de la marche de l'exode vers le Léviathan (3155 AG). Plusieurs Van'Doï en émergèrent simultanément et furent comptés parmi les Sept Témoins de l'exode."
+      "Notes": "La couleur particulière de la flamme d'Akhor — bleu-vert, due aux résidus chimiques du Deimos en décomposition — faisait écho aux pulsations bioluminescentes de l'Exuvia elle-même, renforçant la conviction de la communauté que le feu et la créature ne faisaient qu'un. C'est cette symétrie (feu de chitine = lumiere du dieu) qui est au cœur du regard critique de Rhylos sur le Léviathan : elle a grandi dans un système qui fabriquait ses propres preuves.",
+      "Porteurs attestés": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Signification": "Brasier rituel entretenu dans les cavités de l'Exuvia de Yeth-Moran (Plaines de l'Exuvie), alimenté par les gaz de décomposition du Deimos et la chitine des parois intérieures. La communauté Barvasinkul qui y vivait maintenait ce feu en permanence comme foyer générateur, interprétant sa flamme bleu-vert (colorée par les émanations du Deimos) comme signe d'élection divine. Foyer d'origine de Rhylos."
     },
     "sections": {},
-    "notion_page_id": "2e93f98a-9e8a-408d-a1d0-d65102996abf"
+    "notion_page_id": "96420f37-dc3a-448f-a8a6-556b465125db"
+  },
+  {
+    "Nom": "Vesh",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Porteurs attestés": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Signification": "Nom personnel de Rhylos, fondatrice des Murmurateurs."
+    },
+    "sections": {},
+    "notion_page_id": "c225cbe8-9861-4d7b-8e92-97a4d65b12c0"
+  },
+  {
+    "Nom": "Veth",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Porteurs attestés": "1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
+      "Signification": "Nom personnel de la première incarnation de Qalamtû, scribe des Forges de la Vieille Ville."
+    },
+    "sections": {},
+    "notion_page_id": "e20c66fa-de51-4c09-9c05-4659e2bf3ffb"
+  },
+  {
+    "Nom": "Solan",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Porteurs attestés": "1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
+      "Signification": "Petite forge du quartier des Forges de la Vieille Ville, foyer d'origine de Qalamtû."
+    },
+    "sections": {},
+    "notion_page_id": "f3d71f77-0e80-4b7b-b39e-c19d1710d03a"
+  },
+  {
+    "Nom": "Neamhar",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Neamh (racine conservée ; suffixe -ar, marqueur de mouvement actif en Principit). État patron associé : Neamh",
+      "Porteurs attestés": "31d6e4d2-1b45-80c7-a993-c76e1bdfbbca",
+      "Signification": "Harmonie — état de perfection transitoire avant dissolution (16e Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "0a473703-db7c-496f-bb94-c147d7c30f0f"
+  },
+  {
+    "Nom": "Dhorra",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Ghorr (Gh/Dh = correspondance fricative ; -orr → -orra, allongement personnel). État patron associé : Ghorr",
+      "Porteurs attestés": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
+      "Signification": "Séparation — établissement des distinctions fondamentales (2e Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "1ef8a2b9-ad15-4df4-9ead-77ebb709ada2"
+  },
+  {
+    "Nom": "Kethur",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Keth (racine conservée ; suffixe -ur à résonance médicale archaïque, en usage au Léviathan). État patron associé : Keth",
+      "Porteurs attestés": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Signification": "Émergence — jaillissement de la forme depuis le néant indifférencié (1re Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "7e1c522f-9ce0-47d9-8aae-5210aee87c60"
+  },
+  {
+    "Nom": "Slennokh",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Slenn (racine conservée ; suffixe -okh, résonance architecturale Van'Doei, écho des conduits osseux — et du nom de foyer Taleth). État patron associé : Slenn",
+      "Porteurs attestés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Signification": "Concordance — vibration créant des motifs stables (4e Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "98d29d47-ff23-4248-9241-9600bbf69019"
+  },
+  {
+    "Nom": "Ardakh",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Ordag (O/A = ouverture vocalique ; -dag → -dakh, aspiration finale). État patron associé : Ordag",
+      "Porteurs attestés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Signification": "Manipulation — capacité d'action intentionnelle sur l'environnement (11e Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "9ff82ca0-6d2e-4c11-85e8-4c0c4d7217fa"
+  },
+  {
+    "Nom": "K",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Notes": "L'apostrophe dans K'ssh sert de liaison entre ce prénom monosyllabique et la marque de foyer ssh.",
+      "Porteurs attestés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel réduit à une consonne initiale, composant de K'ssh."
+    },
+    "sections": {},
+    "notion_page_id": "f417df62-1d67-498e-b742-9edb166785c3"
+  },
+  {
+    "Nom": "Dravesh",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Notes": "Porteur connu : Dravesh-Kol (Sept Témoins).",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Dravesh-Kol."
+    },
+    "sections": {},
+    "notion_page_id": "0374253a-8103-4257-b4dd-43a497f5718c"
+  },
+  {
+    "Nom": "Ensi",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Notes": "Porteur connu : Ensi-Pral.",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Ensi-Pral."
+    },
+    "sections": {},
+    "notion_page_id": "235fcdb8-625f-4697-99f4-d158380d09bd"
   },
   {
     "Nom": "Tavri",
@@ -267,78 +517,71 @@
     "notion_page_id": "3a5458ff-e2a8-402d-87c8-aefea34f2dc3"
   },
   {
-    "Nom": "Pral",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Signification": "Forge communale de l'exode. Porteur connu : Ensi-Pral."
-    },
-    "sections": {},
-    "notion_page_id": "3e1350c6-016a-498b-8a5c-20063a9f1b50"
-  },
-  {
-    "Nom": "Talaith",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Deuxième nom d'état connu pour Talamh, coexistant avec Zaehria. Porté par Talaith l'Échancrée, interprète du District des Épidermes Réactifs, fondatrice de l'hérésie Multisubstantialiste (Controverse d'Oscillation, 1892-1908). Pas de fiche personnage disponible.\nÉtat patron associé : Talamh",
-      "Signification": "Territorialisation — création d'espaces sanctifiés intérieurs et extérieurs (12ᵉ Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "3e2e681a-91d4-41f5-8389-277fb74df55b"
-  },
-  {
-    "Nom": "Shiv",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Signification": "Feu de lisière (frontière Vivarcade). Produit des Van'Doei 'de lisière', souvent marginisés des deux communautés riveraines."
-    },
-    "sections": {},
-    "notion_page_id": "3e7f261f-de55-4666-a2dd-8eb248cc34e3"
-  },
-  {
-    "Nom": "ssh",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
-      "Signification": "Marque inhabituelle, possiblement un foyer sauvage au nom érodé par l'usage. Graphie en minuscules, consonne initiale sans voyelle."
-    },
-    "sections": {},
-    "notion_page_id": "3ea81ecd-c706-4a43-ab35-ad0591518859"
-  },
-  {
-    "Nom": "Nahdene",
+    "Nom": "Khava",
     "values": {
       "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre lunaire. Porté par Nahdene Itersha (~2800 AG), Meridhali ayant codifié la Fête des Routes."
+      "Notes": "Porteur connu : Khava-Dort.",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Khava-Dort."
     },
     "sections": {},
-    "notion_page_id": "3f33c7a3-4816-4d23-a685-64d934d826e4"
+    "notion_page_id": "50cd10d7-85b8-4bcf-a8db-17a1bdaa9f58"
   },
   {
-    "Nom": "Wigbar",
+    "Nom": "Toven",
     "values": {
-      "Catégorie": "Nom de clan",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Nom de famille. Porté par Sayahula Wigbar (~80-155 AG)."
+      "Catégorie": "Nom personnel",
+      "Notes": "Porteur connu : Toven-Nash (Sept Témoins).",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Toven-Nash."
     },
     "sections": {},
-    "notion_page_id": "42314240-efe8-4241-96ce-0b929f53621c"
+    "notion_page_id": "61658fc9-5e26-429b-9ae3-9fad94d89a33"
   },
   {
-    "Nom": "Rhylos",
+    "Nom": "Quireth",
     "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Terme forgeron Van'Doei des Chaudières Démiurgiques : désigne la première lueur d'incandescence d'un métal montant en température, avant même qu'il soit malléable — première manifestation visible de la vie intérieure de la matière. Métaphore directe de Murn (Éveil), sans dérivation phonétique.\nÉtat patron associé : Murn",
-      "Porteurs attestés": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
-      "Signification": "Éveil — naissance de la conscience réflexive (5ᵉ Transformation)"
+      "Catégorie": "Nom personnel",
+      "Notes": "Porteur connu : Quireth-Am.",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Quireth-Am."
     },
     "sections": {},
-    "notion_page_id": "42ec9998-d30c-4206-85f4-95e125db5d83"
+    "notion_page_id": "90f6e5ab-d817-48c5-a4f7-3e9503e44e64"
+  },
+  {
+    "Nom": "Marath",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Notes": "Porteur connu : Marath-Ven (Cendres Nomades).",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Marath-Ven."
+    },
+    "sections": {},
+    "notion_page_id": "b29936c0-d0ef-4387-87f7-968c3ae2370c"
+  },
+  {
+    "Nom": "Ghira",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Porteurs attestés": "2286e4d2-1b45-80f8-a703-dce94ea5a27b",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Ghira-Vorthul."
+    },
+    "sections": {},
+    "notion_page_id": "1fa0bfce-ff7b-42ae-b6fc-19526cff661b"
+  },
+  {
+    "Nom": "Kha",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Notes": "L'apostrophe ici est une liaison entre voyelle finale du prénom et initiale de la marque (variante graphique du trait d'union).",
+      "Porteurs attestés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel bref. Placé avant la marque de foyer : Kha'Vareth."
+    },
+    "sections": {},
+    "notion_page_id": "2ad50d90-6d93-4233-9f64-3030ef59caf3"
   },
   {
     "Nom": "Tlian",
@@ -353,58 +596,175 @@
     "notion_page_id": "48b06310-ac80-45cd-a70c-64900c6e3b88"
   },
   {
-    "Nom": "Khava",
+    "Nom": "Neth",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Notes": "Aussi utilisé comme prénom personnel (Neth'Varu, Neth-Vorthul, Neth-Arun), ce qui crée des ambiguïtés. Les Van'Doei partageant cette marque ne sont pas nécessairement frères de foyer.",
+      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Signification": "Nom de forge — l'un des plus répandus du Quartier des Forges. Plusieurs forges distinctes ont porté ce nom au fil des siècles."
+    },
+    "sections": {},
+    "notion_page_id": "b95836c4-43ee-42b1-acab-1f6029befeb6"
+  },
+  {
+    "Nom": "Akthar",
     "values": {
       "Catégorie": "Nom personnel",
-      "Notes": "Porteur connu : Khava-Dort.",
+      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
       "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Khava-Dort."
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Akthar-Neth."
     },
     "sections": {},
-    "notion_page_id": "50cd10d7-85b8-4bcf-a8db-17a1bdaa9f58"
+    "notion_page_id": "6d8d8b26-4650-417d-8540-8600dbee0440"
   },
   {
-    "Nom": "Sharusmal",
+    "Nom": "Duq",
     "values": {
       "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre solaire."
+      "Porteurs attestés": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel bref. Placé avant la marque de foyer : Duq'Sha."
     },
     "sections": {},
-    "notion_page_id": "52af16ab-5ac4-4a67-b0b5-6e201d67618c"
+    "notion_page_id": "78564595-4451-4c16-a261-5fa06089db33"
   },
   {
-    "Nom": "Navarre",
+    "Nom": "Vrek",
     "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Nom donné directement par Akthar-Neth Amatru lors de la conversion (3388 AG). Cas sans précédent : le ceann-staid n'est pas issu d'un rite Khat-staid conventionnel mais d'une désignation de l'Exégète, reflétant l'arc de conversion plutôt qu'un état patron identifié. L'absence d'état patron est constitutive du nom : il nomme la rupture elle-même.",
+      "Catégorie": "Nom personnel",
+      "Porteurs attestés": "31d6e4d2-1b45-80c7-a993-c76e1bdfbbca",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Vrek-Yolan."
+    },
+    "sections": {},
+    "notion_page_id": "c4e8f7d6-9c09-4959-aa43-adf9cf8528a7"
+  },
+  {
+    "Nom": "Vokh",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Porteurs attestés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Signification": "Prénom personnel. Placé avant la marque de foyer : Vokh-Taleth."
+    },
+    "sections": {},
+    "notion_page_id": "db81ce00-739f-4814-98ef-f1269ea6fae1"
+  },
+  {
+    "Nom": "Am",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Signification": "Marque très courte — possible foyer éphémère ou nom érodé. Porteur connu : Quireth-Am."
+    },
+    "sections": {},
+    "notion_page_id": "16ba1a99-d193-4d64-b945-27a8eca9ef58"
+  },
+  {
+    "Nom": "Keresh",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Porteurs attestés": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
+      "Signification": "Forge historique spécialisée dans l'armement, aujourd'hui éteinte."
+    },
+    "sections": {},
+    "notion_page_id": "16cc82db-2fed-4752-9f55-e0b7f850b7a5"
+  },
+  {
+    "Nom": "Dort",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Signification": "Brasier de campement devenu nom de lignée. Porteur connu : Khava-Dort."
+    },
+    "sections": {},
+    "notion_page_id": "1b1f84b3-0334-4a0d-9a2d-26e4f9f9846d"
+  },
+  {
+    "Nom": "Kol",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "Nom transmis comme marque d'origine aux descendants des Van'Doï nés du feu de Kol pendant la march. À ne pas confondre avec Thul, marque d'un autre foyer de l'exode.",
+      "Signification": "Gouffre volcanique ouvert dans les plaines de cendre lors de la marche de l'exode vers le Léviathan (3155 AG). Plusieurs Van'Doï en émergèrent simultanément et furent comptés parmi les Sept Témoins de l'exode."
+    },
+    "sections": {},
+    "notion_page_id": "2e93f98a-9e8a-408d-a1d0-d65102996abf"
+  },
+  {
+    "Nom": "Pral",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Signification": "Forge communale de l'exode. Porteur connu : Ensi-Pral."
+    },
+    "sections": {},
+    "notion_page_id": "3e1350c6-016a-498b-8a5c-20063a9f1b50"
+  },
+  {
+    "Nom": "ssh",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
       "Porteurs attestés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
-      "Signification": "Cas indéterminé — état patron non identifié ou non conventionnel"
+      "Signification": "Marque inhabituelle, possiblement un foyer sauvage au nom érodé par l'usage. Graphie en minuscules, consonne initiale sans voyelle."
     },
     "sections": {},
-    "notion_page_id": "53ab92a5-da59-4f4a-9e0c-3abd31e4d613"
+    "notion_page_id": "3ea81ecd-c706-4a43-ab35-ad0591518859"
   },
   {
-    "Nom": "Alissuryan",
+    "Nom": "Nir",
     "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre solaire."
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "Marque portée avec fierté ou dissimulée selon le contexte social.",
+      "Signification": "Forge clandestine, hors contrôle des Maîtres-Forgeurs."
     },
     "sections": {},
-    "notion_page_id": "55dfc38d-66e7-4978-8c72-0946bccb52fd"
+    "notion_page_id": "7580a73c-d4d5-4b40-bbca-71075b3db9df"
   },
   {
-    "Nom": "Raki-Biro",
+    "Nom": "Thul",
     "values": {
-      "Catégorie": "Paradigme",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Format : NomDeParadigme + Numéro (ex : Raki-Biro 58). Utilisé pour les individus dont l'origine, la morphologie ou le contexte est inclassable dans les conventions ordinaires. Mentionné dans la page Van'Doei.",
-      "Signification": "Identifiant de paradigme Van'Doei pour cas exceptionnels (individu hors catégories de naissance standard)"
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "Marque d'exode distincte de Kol : là où Kol désigne un foyer volcanique naturel rencontré en route, Thul désigne un feu volontaire allumé par les hommes. Les porteurs de Thul (dont Ossivane-Thul) comptent aussi parmi les Sept Témoins.",
+      "Signification": "Bûcher de clôture allumé par l'arrière-garde des fuyards lors de l'exode vers le Léviathan (3155 AG), sur le lieu d'abandon d'un campement de fortune. Les Van'Doï qui en émergèrent en portent la marque comme témoin des derniers instants de la fuite."
     },
     "sections": {},
-    "notion_page_id": "55ed5a06-4342-4be7-a127-180135a47002"
+    "notion_page_id": "a8bf0aff-c0ac-4b9b-ae6e-f55c7b721abd"
+  },
+  {
+    "Nom": "Idh",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "Van'Doei portant cette marque sont stigmatisés comme 'naissances non désirées'. Connotation très négative dans la culture du Quartier des Forges.",
+      "Signification": "Feu accidentel (incendie domestique non intentionnel)."
+    },
+    "sections": {},
+    "notion_page_id": "ec7c3867-35a1-4392-8a7e-a1ec0bf0dcf5"
+  },
+  {
+    "Nom": "Gharn",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Signification": "Feu de charbon lent et durable. Associé aux bas-quartiers ; produit des Van'Doei à peau particulièrement sombre, stigmatisés par le colorisme."
+    },
+    "sections": {},
+    "notion_page_id": "2d67d874-07d5-40da-a609-3f593aaccf0d"
+  },
+  {
+    "Nom": "Shiv",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Signification": "Feu de lisière (frontière Vivarcade). Produit des Van'Doei 'de lisière', souvent marginisés des deux communautés riveraines."
+    },
+    "sections": {},
+    "notion_page_id": "3e7f261f-de55-4666-a2dd-8eb248cc34e3"
   },
   {
     "Nom": "Drakh",
@@ -427,38 +787,59 @@
     "notion_page_id": "5a6121e3-68f5-4b2b-8f8b-824b9534079f"
   },
   {
-    "Nom": "Toven",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Notes": "Porteur connu : Toven-Nash (Sept Témoins).",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Toven-Nash."
-    },
-    "sections": {},
-    "notion_page_id": "61658fc9-5e26-429b-9ae3-9fad94d89a33"
-  },
-  {
-    "Nom": "Talvir",
+    "Nom": "Vorthul",
     "values": {
       "Catégorie": "Marque de foyer",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "2cc6e4d2-1b45-8062-9d49-f252d825bc90",
-      "Signification": "Brasier de l'atelier de Kel'Thara dans le Quartier des Ossements Travaillés, foyer d'origine de Kresh. Combustion génératrice composée de copeaux d'os travaillé, résidus métalliques (cuivre, argent) et bois d'ossements anciens."
+      "Porteurs attestés": "2286e4d2-1b45-80f8-a703-dce94ea5a27b",
+      "Signification": "Évent volcanique, probablement en périphérie du désert."
     },
     "sections": {},
-    "notion_page_id": "62d10f48-6c14-423d-906d-08a081e3e356"
+    "notion_page_id": "71fa6583-e6ee-437f-9f9e-3708e71cabcf"
   },
   {
-    "Nom": "Neth",
+    "Nom": "Arun",
     "values": {
       "Catégorie": "Marque de foyer",
-      "Notes": "Aussi utilisé comme prénom personnel (Neth'Varu, Neth-Vorthul, Neth-Arun), ce qui crée des ambiguïtés. Les Van'Doei partageant cette marque ne sont pas nécessairement frères de foyer.",
-      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Signification": "Nom de forge — l'un des plus répandus du Quartier des Forges. Plusieurs forges distinctes ont porté ce nom au fil des siècles."
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "Porteur connu : Tavri-Arun (Chantier-Doux). Aussi utilisé comme composant de prénom (Neth-Arun).",
+      "Signification": "Incendie de forêt, nomé rétroactivement après découverte d'un enfant Van'Doei émergé."
     },
     "sections": {},
-    "notion_page_id": "b95836c4-43ee-42b1-acab-1f6029befeb6"
+    "notion_page_id": "95c2e030-7cd4-4e37-90ae-d4fe86f0f576"
+  },
+  {
+    "Nom": "Rakh",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Signification": "Bûcher cérémoniel ou feu votif. Connotation spirituelle forte."
+    },
+    "sections": {},
+    "notion_page_id": "b52b5718-c06b-40b4-9e08-7dec609c7f70"
+  },
+  {
+    "Nom": "gul",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "La minuscule initiale est une convention pour les foyers éphémères non-durables.",
+      "Porteurs attestés": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1, 21ce11c5-e354-4ff9-b504-5acf991b0b6b",
+      "Signification": "Brasier de veillée ou feu rituel éphémère."
+    },
+    "sections": {},
+    "notion_page_id": "ba34db72-4558-4b3a-8779-29be83155ec1"
+  },
+  {
+    "Nom": "Taleth",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Porteurs attestés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Signification": "Grande forge industrielle du Quartier, réputée pour la qualité de ses matériaux."
+    },
+    "sections": {},
+    "notion_page_id": "03293ad2-7672-44b7-80b3-acea8788b0ff"
   },
   {
     "Nom": "Nash",
@@ -472,74 +853,6 @@
     "notion_page_id": "68ccba79-a037-474e-bf4f-137581d9313f"
   },
   {
-    "Nom": "Amatru",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Anam.\nÉtat patron associé : Anam",
-      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Signification": "Fusion — dissolution des frontières entre soi et l'environnement (14ᵉ Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "6b2ebc1b-987a-4702-b810-0fc91c9a3019"
-  },
-  {
-    "Nom": "Akthar",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Akthar-Neth."
-    },
-    "sections": {},
-    "notion_page_id": "6d8d8b26-4650-417d-8540-8600dbee0440"
-  },
-  {
-    "Nom": "Ôrmüd",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Emprunt cosmopolite : terme issu du registre forgeron Van'Doei des Chaudières Démiurgiques, désignant un métal qui dépasse son point de fusion structurelle sans se désintégrer — précision sémantique directe pour Buaigh (Transcendance), sans dérivation phonétique. Placé en tête du nom civil : Ôrmüd T'lian-Keresh (état + personnel - foyer). La fiche personnage est titrée T'lian-Keresh par convention.\nÉtat patron associé : Buaigh",
-      "Porteurs attestés": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
-      "Signification": "Transcendance — dépassement temporaire des limitations (8ᵉ Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "6e2b5c9c-99e5-478d-a8ed-bb1635b612fd"
-  },
-  {
-    "Nom": "Vorthul",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "2286e4d2-1b45-80f8-a703-dce94ea5a27b",
-      "Signification": "Évent volcanique, probablement en périphérie du désert."
-    },
-    "sections": {},
-    "notion_page_id": "71fa6583-e6ee-437f-9f9e-3708e71cabcf"
-  },
-  {
-    "Nom": "Nir",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "Marque portée avec fierté ou dissimulée selon le contexte social.",
-      "Signification": "Forge clandestine, hors contrôle des Maîtres-Forgeurs."
-    },
-    "sections": {},
-    "notion_page_id": "7580a73c-d4d5-4b40-bbca-71075b3db9df"
-  },
-  {
-    "Nom": "Duq",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Porteurs attestés": "1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel bref. Placé avant la marque de foyer : Duq'Sha."
-    },
-    "sections": {},
-    "notion_page_id": "78564595-4451-4c16-a261-5fa06089db33"
-  },
-  {
     "Nom": "Yolan",
     "values": {
       "Catégorie": "Marque de foyer",
@@ -549,40 +862,6 @@
     },
     "sections": {},
     "notion_page_id": "7b98842c-f840-402f-871a-545dbac3a92a"
-  },
-  {
-    "Nom": "Kethur",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Keth (racine conservée ; suffixe -ur à résonance médicale archaïque, en usage au Léviathan). État patron associé : Keth",
-      "Porteurs attestés": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
-      "Signification": "Émergence — jaillissement de la forme depuis le néant indifférencié (1re Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "7e1c522f-9ce0-47d9-8aae-5210aee87c60"
-  },
-  {
-    "Nom": "Qalamtû",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Talamh (T-alam-h → Qa-lam-tû), avec suffixe -û propre au dialecte liturgique du Léviathan. Au sein du Culte de l'Anentropie, le suffixe -û marque une désignation d'office ou une solennité rituelle (distinct du ceann-staid barvasinkulien ordinaire).\nÉtat patron associé : Talamh",
-      "Porteurs attestés": "1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
-      "Signification": "Territorialisation — création d'espaces sanctifiés intérieurs et extérieurs (12ᵉ Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "80e7d698-7791-49fe-901e-0e402c384261"
-  },
-  {
-    "Nom": "Avissel",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre solaire."
-    },
-    "sections": {},
-    "notion_page_id": "84ebbcbc-fde2-440a-be46-7dc2064c8be8"
   },
   {
     "Nom": "Varu",
@@ -601,7 +880,7 @@
     "values": {
       "Catégorie": "Marque de foyer",
       "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Porteurs attestés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 3236e4d2-1b45-808b-9b5c-e761e396c416",
       "Signification": "Forge ancienne et respectée du Quartier des Forges."
     },
     "sections": {},
@@ -619,117 +898,6 @@
     "notion_page_id": "8e3745ff-67a6-4f52-9ebf-572621edf0bb"
   },
   {
-    "Nom": "Quireth",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Notes": "Porteur connu : Quireth-Am.",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Quireth-Am."
-    },
-    "sections": {},
-    "notion_page_id": "90f6e5ab-d817-48c5-a4f7-3e9503e44e64"
-  },
-  {
-    "Nom": "Jarynah",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre lunaire."
-    },
-    "sections": {},
-    "notion_page_id": "9293c71e-e1d8-457a-95a4-7f9356d449ec"
-  },
-  {
-    "Nom": "Arun",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "Porteur connu : Tavri-Arun (Chantier-Doux). Aussi utilisé comme composant de prénom (Neth-Arun).",
-      "Signification": "Incendie de forêt, nomé rétroactivement après découverte d'un enfant Van'Doei émergé."
-    },
-    "sections": {},
-    "notion_page_id": "95c2e030-7cd4-4e37-90ae-d4fe86f0f576"
-  },
-  {
-    "Nom": "Akhor",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Communauté d'usage": "1a56e4d2-1b45-8044-a472-d674f194c57a",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "La couleur particulière de la flamme d'Akhor — bleu-vert, due aux résidus chimiques du Deimos en décomposition — faisait écho aux pulsations bioluminescentes de l'Exuvia elle-même, renforçant la conviction de la communauté que le feu et la créature ne faisaient qu'un. C'est cette symétrie (feu de chitine = lumiere du dieu) qui est au cœur du regard critique de Rhylos sur le Léviathan : elle a grandi dans un système qui fabriquait ses propres preuves.",
-      "Porteurs attestés": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
-      "Signification": "Brasier rituel entretenu dans les cavités de l'Exuvia de Yeth-Moran (Plaines de l'Exuvie), alimenté par les gaz de décomposition du Deimos et la chitine des parois intérieures. La communauté Barvasinkul qui y vivait maintenait ce feu en permanence comme foyer générateur, interprétant sa flamme bleu-vert (colorée par les émanations du Deimos) comme signe d'élection divine. Foyer d'origine de Rhylos."
-    },
-    "sections": {},
-    "notion_page_id": "96420f37-dc3a-448f-a8a6-556b465125db"
-  },
-  {
-    "Nom": "Slennokh",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Slenn (racine conservée ; suffixe -okh, résonance architecturale Van'Doei, écho des conduits osseux — et du nom de foyer Taleth). État patron associé : Slenn",
-      "Porteurs attestés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
-      "Signification": "Concordance — vibration créant des motifs stables (4e Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "98d29d47-ff23-4248-9241-9600bbf69019"
-  },
-  {
-    "Nom": "Esh",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e"
-    },
-    "sections": {},
-    "notion_page_id": "99e7a48b-c70a-43c6-b285-cdf8b06f37e6"
-  },
-  {
-    "Nom": "Ammazan",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre solaire."
-    },
-    "sections": {},
-    "notion_page_id": "9a3e9247-ec05-445d-8cfc-94eeff794282"
-  },
-  {
-    "Nom": "Reitar",
-    "values": {
-      "Catégorie": "Nom de clan",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Nom de famille.",
-      "Porteurs attestés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe"
-    },
-    "sections": {},
-    "notion_page_id": "9ae0661c-222a-4022-81ff-2571a6335a11"
-  },
-  {
-    "Nom": "Ardakh",
-    "values": {
-      "Catégorie": "Nom d'état",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Dérivée phonétique de Ordag (O/A = ouverture vocalique ; -dag → -dakh, aspiration finale). État patron associé : Ordag",
-      "Porteurs attestés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
-      "Signification": "Manipulation — capacité d'action intentionnelle sur l'environnement (11e Transformation)"
-    },
-    "sections": {},
-    "notion_page_id": "9ff82ca0-6d2e-4c11-85e8-4c0c4d7217fa"
-  },
-  {
-    "Nom": "Gazan",
-    "values": {
-      "Catégorie": "Nom de clan",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Nom de famille. Porté par Cheris Gazan (~200 AG)."
-    },
-    "sections": {},
-    "notion_page_id": "a1206fcb-bd94-4332-bca5-67f7be78a0e8"
-  },
-  {
     "Nom": "Sarr",
     "values": {
       "Catégorie": "Marque de foyer",
@@ -738,67 +906,6 @@
     },
     "sections": {},
     "notion_page_id": "a191fb49-9d69-4b0d-9b99-b12b00038bc8"
-  },
-  {
-    "Nom": "Itersha",
-    "values": {
-      "Catégorie": "Nom de clan",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Nom de famille. Porté par Nahdene Itersha (~2800 AG)."
-    },
-    "sections": {},
-    "notion_page_id": "a37fd2db-16a8-4202-a9be-bd947e72f3a5"
-  },
-  {
-    "Nom": "Ximír",
-    "values": {
-      "Catégorie": "Nom de clan",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Nom de famille."
-    },
-    "sections": {},
-    "notion_page_id": "a43f90ce-e3ea-4e1d-a27f-3452eac74ecb"
-  },
-  {
-    "Nom": "Thul",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "Marque d'exode distincte de Kol : là où Kol désigne un foyer volcanique naturel rencontré en route, Thul désigne un feu volontaire allumé par les hommes. Les porteurs de Thul (dont Ossivane-Thul) comptent aussi parmi les Sept Témoins.",
-      "Signification": "Bûcher de clôture allumé par l'arrière-garde des fuyards lors de l'exode vers le Léviathan (3155 AG), sur le lieu d'abandon d'un campement de fortune. Les Van'Doï qui en émergèrent en portent la marque comme témoin des derniers instants de la fuite."
-    },
-    "sections": {},
-    "notion_page_id": "a8bf0aff-c0ac-4b9b-ae6e-f55c7b721abd"
-  },
-  {
-    "Nom": "Mhaj-Yoat",
-    "values": {
-      "Catégorie": "Nom de clan",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Nom de famille."
-    },
-    "sections": {},
-    "notion_page_id": "a979bf06-1485-4655-ae82-5fa44b2eae8d"
-  },
-  {
-    "Nom": "Merletyal",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre lunaire."
-    },
-    "sections": {},
-    "notion_page_id": "ad1d5869-c524-4a1c-9903-59dff1de77ed"
-  },
-  {
-    "Nom": "Cheris",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre solaire. Porté par Cheris Gazan (~200 AG), négociateur des premiers accords de passage."
-    },
-    "sections": {},
-    "notion_page_id": "af5b350f-ccc9-4bbf-b78e-44c92158d129"
   },
   {
     "Nom": "Tesh",
@@ -810,37 +917,47 @@
     "notion_page_id": "b0e41c65-35f3-42de-88bf-aaf2935f86f9"
   },
   {
-    "Nom": "Marath",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Notes": "Porteur connu : Marath-Ven (Cendres Nomades).",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Marath-Ven."
-    },
-    "sections": {},
-    "notion_page_id": "b29936c0-d0ef-4387-87f7-968c3ae2370c"
-  },
-  {
-    "Nom": "Rakh",
+    "Nom": "Kharr",
     "values": {
       "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Signification": "Bûcher cérémoniel ou feu votif. Connotation spirituelle forte."
+      "Signification": "Forge dynastique spécialisée dans les alliages sacrés des Chaudières Démiurgiques. Active depuis le 24ᵉ siècle."
     },
     "sections": {},
-    "notion_page_id": "b52b5718-c06b-40b4-9e08-7dec609c7f70"
+    "notion_page_id": "edfbd99e-16c9-4269-b48c-1bb828e7ac55"
   },
   {
-    "Nom": "gul",
+    "Nom": "Talaith",
     "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "La minuscule initiale est une convention pour les foyers éphémères non-durables.",
-      "Porteurs attestés": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
-      "Signification": "Brasier de veillée ou feu rituel éphémère."
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Deuxième nom d'état connu pour Talamh, coexistant avec Zaehria. Porté par Talaith l'Échancrée, interprète du District des Épidermes Réactifs, fondatrice de l'hérésie Multisubstantialiste (Controverse d'Oscillation, 1892-1908). Pas de fiche personnage disponible.\nÉtat patron associé : Talamh",
+      "Signification": "Territorialisation — création d'espaces sanctifiés intérieurs et extérieurs (12ᵉ Transformation)"
     },
     "sections": {},
-    "notion_page_id": "ba34db72-4558-4b3a-8779-29be83155ec1"
+    "notion_page_id": "3e2e681a-91d4-41f5-8389-277fb74df55b"
+  },
+  {
+    "Nom": "Navarre",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Nom donné directement par Akthar-Neth Amatru lors de la conversion (3388 AG). Cas sans précédent : le ceann-staid n'est pas issu d'un rite Khat-staid conventionnel mais d'une désignation de l'Exégète, reflétant l'arc de conversion plutôt qu'un état patron identifié. L'absence d'état patron est constitutive du nom : il nomme la rupture elle-même.",
+      "Porteurs attestés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
+      "Signification": "Cas indéterminé — état patron non identifié ou non conventionnel"
+    },
+    "sections": {},
+    "notion_page_id": "53ab92a5-da59-4f4a-9e0c-3abd31e4d613"
+  },
+  {
+    "Nom": "Raki-Biro",
+    "values": {
+      "Catégorie": "Paradigme",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Format : NomDeParadigme + Numéro (ex : Raki-Biro 58). Utilisé pour les individus dont l'origine, la morphologie ou le contexte est inclassable dans les conventions ordinaires. Mentionné dans la page Van'Doei.",
+      "Signification": "Identifiant de paradigme Van'Doei pour cas exceptionnels (individu hors catégories de naissance standard)"
+    },
+    "sections": {},
+    "notion_page_id": "55ed5a06-4342-4be7-a127-180135a47002"
   },
   {
     "Nom": "Siol",
@@ -865,38 +982,100 @@
     "notion_page_id": "bf916870-d03a-4c2f-af33-2d0a0ff56281"
   },
   {
-    "Nom": "Vesh",
+    "Nom": "Kresh",
     "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1a56e4d2-1b45-8044-a472-d674f194c57a",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Crann (C/K = correspondance consonantique initiale ; -rann/-resh = structure consonantique r+n partagée). Deuxième nom d'état connu pour Crann, forme évocatrice courte.\nÉtat patron associé : Crann",
+      "Porteurs attestés": "2cc6e4d2-1b45-8062-9d49-f252d825bc90",
+      "Signification": "Interconnexion — reliance de toutes les consciences en réseau (15ᵉ Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "0aef203e-464f-449e-80e6-5d32193f5136"
+  },
+  {
+    "Nom": "Voknir",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Terme forgeron Van'Doï des Chaudières Démiurgiques : désigne le refroidissement progressif d'un alliage en une structure rigide définitive — métaphore directe de Cairn (Fossilisation), la matière qui se cristallise en système cohérent et immuable. Sans dérivation phonétique.\nÉtat patron associé : Cairn",
+      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Signification": "Fossilisation — formation de systèmes cohérents de pensée (10ᵉ Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "12e51402-730a-4cd4-aaca-b54903b04179"
+  },
+  {
+    "Nom": "Koriel",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Caoil (C/K = correspondance consonantique initiale ; -oil/-iel = terminaison vocalique partagée).\nÉtat patron associé : Caoil",
+      "Porteurs attestés": "21ce11c5-e354-4ff9-b504-5acf991b0b6b",
+      "Signification": "Circulation — flux vital animant la matière (6ᵉ Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "175b5363-2c25-4fe7-9c79-3e5bebf2741d"
+  },
+  {
+    "Nom": "Thalassa",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Emprunt cosmopolite (grec : mer, étendue fluide), précision sémantique pour Caoil.\nÉtat patron associé : Caoil",
+      "Porteurs attestés": "8fefb411-8033-4e06-afdd-9d186937ee2a",
+      "Signification": "Circulation — flux vital animant la matière (6ᵉ Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "2a465fb3-f1c7-40e0-bf86-eb3fb9a4d539"
+  },
+  {
+    "Nom": "Rhylos",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Terme forgeron Van'Doei des Chaudières Démiurgiques : désigne la première lueur d'incandescence d'un métal montant en température, avant même qu'il soit malléable — première manifestation visible de la vie intérieure de la matière. Métaphore directe de Murn (Éveil), sans dérivation phonétique.\nÉtat patron associé : Murn",
       "Porteurs attestés": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
-      "Signification": "Nom personnel de Rhylos, fondatrice des Murmurateurs."
+      "Signification": "Éveil — naissance de la conscience réflexive (5ᵉ Transformation)"
     },
     "sections": {},
-    "notion_page_id": "c225cbe8-9861-4d7b-8e92-97a4d65b12c0"
+    "notion_page_id": "42ec9998-d30c-4206-85f4-95e125db5d83"
   },
   {
-    "Nom": "Vrek",
+    "Nom": "Amatru",
     "values": {
-      "Catégorie": "Nom personnel",
-      "Porteurs attestés": "31d6e4d2-1b45-80c7-a993-c76e1bdfbbca",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Vrek-Yolan."
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Anam.\nÉtat patron associé : Anam",
+      "Porteurs attestés": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Signification": "Fusion — dissolution des frontières entre soi et l'environnement (14ᵉ Transformation)"
     },
     "sections": {},
-    "notion_page_id": "c4e8f7d6-9c09-4959-aa43-adf9cf8528a7"
+    "notion_page_id": "6b2ebc1b-987a-4702-b810-0fc91c9a3019"
   },
   {
-    "Nom": "Ven",
+    "Nom": "Ôrmüd",
     "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "Seule marque de foyer du corpus qui désigne un feu reproductible plutôt qu'un lieu précis. La réputation de polyvalence du nom — utilisable n'importe où — en fait la marque la plus courante chez les Van'Doei des Cendres Nomades.",
-      "Signification": "Feu itinérant des Cendres Nomades, rebâti rituellement à chaque campement selon des gestes transmis de génération en génération. Contrairement aux foyers fixes, Ven n'est pas un lieu mais un acte : le feu de Ven est le même à chaque fois qu'il est allumé selon le rite, quel que soit l'endroit. C'est pourquoi la marque est répandue parmi les nomades."
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Emprunt cosmopolite : terme issu du registre forgeron Van'Doei des Chaudières Démiurgiques, désignant un métal qui dépasse son point de fusion structurelle sans se désintégrer — précision sémantique directe pour Buaigh (Transcendance), sans dérivation phonétique. Placé en tête du nom civil : Ôrmüd T'lian-Keresh (état + personnel - foyer). La fiche personnage est titrée T'lian-Keresh par convention.\nÉtat patron associé : Buaigh",
+      "Porteurs attestés": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
+      "Signification": "Transcendance — dépassement temporaire des limitations (8ᵉ Transformation)"
     },
     "sections": {},
-    "notion_page_id": "cafe7302-dc84-4c9e-82f2-4b125b1aba32"
+    "notion_page_id": "6e2b5c9c-99e5-478d-a8ed-bb1635b612fd"
+  },
+  {
+    "Nom": "Qalamtû",
+    "values": {
+      "Catégorie": "Nom d'état",
+      "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Notes": "Dérivée phonétique de Talamh (T-alam-h → Qa-lam-tû), avec suffixe -û propre au dialecte liturgique du Léviathan. Au sein du Culte de l'Anentropie, le suffixe -û marque une désignation d'office ou une solennité rituelle (distinct du ceann-staid barvasinkulien ordinaire).\nÉtat patron associé : Talamh",
+      "Porteurs attestés": "1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
+      "Signification": "Territorialisation — création d'espaces sanctifiés intérieurs et extérieurs (12ᵉ Transformation)"
+    },
+    "sections": {},
+    "notion_page_id": "80e7d698-7791-49fe-901e-0e402c384261"
   },
   {
     "Nom": "Korga",
@@ -909,84 +1088,6 @@
     },
     "sections": {},
     "notion_page_id": "d614792f-59c5-4f39-973b-a36e9a655e7e"
-  },
-  {
-    "Nom": "Vokh",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Porteurs attestés": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel. Placé avant la marque de foyer : Vokh-Taleth."
-    },
-    "sections": {},
-    "notion_page_id": "db81ce00-739f-4814-98ef-f1269ea6fae1"
-  },
-  {
-    "Nom": "Veth",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
-      "Signification": "Nom personnel de la première incarnation de Qalamtû, scribe des Forges de la Vieille Ville."
-    },
-    "sections": {},
-    "notion_page_id": "e20c66fa-de51-4c09-9c05-4659e2bf3ffb"
-  },
-  {
-    "Nom": "Vol",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre solaire.",
-      "Porteurs attestés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe"
-    },
-    "sections": {},
-    "notion_page_id": "e3f05cd3-e965-4d2d-990a-232264d36a0d"
-  },
-  {
-    "Nom": "Idh",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "Van'Doei portant cette marque sont stigmatisés comme 'naissances non désirées'. Connotation très négative dans la culture du Quartier des Forges.",
-      "Signification": "Feu accidentel (incendie domestique non intentionnel)."
-    },
-    "sections": {},
-    "notion_page_id": "ec7c3867-35a1-4392-8a7e-a1ec0bf0dcf5"
-  },
-  {
-    "Nom": "Kharr",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Signification": "Forge dynastique spécialisée dans les alliages sacrés des Chaudières Démiurgiques. Active depuis le 24ᵉ siècle."
-    },
-    "sections": {},
-    "notion_page_id": "edfbd99e-16c9-4269-b48c-1bb828e7ac55"
-  },
-  {
-    "Nom": "Solan",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
-      "Signification": "Petite forge du quartier des Forges de la Vieille Ville, foyer d'origine de Qalamtû."
-    },
-    "sections": {},
-    "notion_page_id": "f3d71f77-0e80-4b7b-b39e-c19d1710d03a"
-  },
-  {
-    "Nom": "K",
-    "values": {
-      "Catégorie": "Nom personnel",
-      "Notes": "L'apostrophe dans K'ssh sert de liaison entre ce prénom monosyllabique et la marque de foyer ssh.",
-      "Porteurs attestés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
-      "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-      "Signification": "Prénom personnel réduit à une consonne initiale, composant de K'ssh."
-    },
-    "sections": {},
-    "notion_page_id": "f417df62-1d67-498e-b742-9edb166785c3"
   },
   {
     "Nom": "Zaehria",

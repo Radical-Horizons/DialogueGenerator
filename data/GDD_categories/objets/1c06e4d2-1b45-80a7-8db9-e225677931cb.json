@@ -1,29 +1,43 @@
 {
   "Nom": "Les Cendres parlantes",
   "values": {
-    "Créé par": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+    "Créé par (communauté)": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
     "Date de création": "2025-03-24T13:14:00.000Z",
-    "Dernière modification": "2026-03-30T09:41:00.000Z",
+    "Dernière modification": "2026-04-14T21:34:00.000Z",
+    "Détenu par": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
+    "Inventaires PNJ": "e7cdf8df-04b4-4605-bafb-f67de99ce90e",
     "Lieux de présence": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53",
     "Poids": "Léger",
+    "Qualité": "4",
     "Rareté": "Rare",
     "Référence visuelle": "2446e4d2-1b45-81c2-92b8-f494463aea8e",
+    "Résumé": "Les Cendres parlantes sont des résidus gris-iridescents issus de l'immolation rituelle des hérétiques, conservés dans des fioles d'obsidienne. Elles émettent des vibrations phoniques, murmurant les dernières pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse offre une expérience spirituelle intense, permettant d'accéder aux connaissances de l'hérétique tout en ressentant son agonie morale.",
     "Stackable": "non",
     "Taille": "Petit",
     "Type": "Témoignage",
     "État": "En cours"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\nRésidus gris-iridescents obtenus après l'immolation rituelle des hérétiques sur l'Autel des Vérités Brûlantes de la Nef Centrale. Conservées dans des fioles d'obsidienne gravées des confessions du supplicié, ces cendres émettent d'imperceptibles vibrations phoniques lorsqu'on les approche de l'oreille, murmurant les dernières paroles et pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse permet au consommateur d'accéder temporairement aux connaissances de l'hérétique tout en ressentant son agonie morale, expérience considérée comme la \"plus pure forme d'empathie anti-entropique\" par le Maître-Flagellant. Leur consommation est une forme d'épreuve spirituelle.",
-    "identite____origine": "**Apparence physique**\n\n**Histoire & Création**\n\n**Lien avec personnages**",
-    "fonction___usage": "**Fonctionnement**\n\n**Conditions & Limites**",
-    "circulation___porte_e": "**Distribution géographique**\n\n**Valeur & Échange**\n• - Valeur en Dc : \n\nPour les multimédias"
+    "re_sume": "Résidus gris-iridescents obtenus après l'immolation rituelle des hérétiques sur l'Autel des Vérités Brûlantes de la Nef Centrale. Conservées dans des fioles d'obsidienne gravées des confessions du supplicié, ces cendres émettent d'imperceptibles vibrations phoniques lorsqu'on les approche de l'oreille, murmurant les dernières paroles et pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse permet au consommateur d'accéder temporairement aux connaissances de l'hérétique tout en ressentant son agonie morale, expérience considérée comme la \"plus pure forme d'empathie anti-entropique\" par le Maître-Flagellant. Leur consommation est une forme d'épreuve spirituelle.",
+    "apparence___statut_symbolique": "- **Description visuelle :** *Sceau, lettre, trophée, insigne, artefact relationnel...*\n\t- **Statut :** *Preuve, cadeau, gage, symbole de dette, marque d'alliance...*\n\t- **Rareté / unicité :** *Copiable, unique, falsifiable ?*",
+    "provenance___re_seau_social": "- **Source :** *Qui l'a remis ou produit ?*\n\t- **Cibles principales :** *Qui peut le reconnaître, le recevoir ou y réagir ?*\n\t- **Contexte narratif :** *Dans quelle situation l'obtient-on ?*",
+    "montrer___offrir": "- **Montrer :** *Effet sur dialogue, test social ou option contextuelle.*\n\t- **Offrir :** *Effet sur Respect, Réputation, relation, flag...*\n\t- **Confirmation requise :** *Oui si l'offrande est irréversible.*",
+    "conditions___limites": "- **Perte :** *Quitte-t-il l'inventaire si offert ?*\n\t- **Vente / abandon :** *En principe non ; préciser les exceptions.*\n\t- **Restrictions :** *Lieu, personnage, étape narrative, seuil de relation...*",
+    "inventaires_pnj": "*Créer une ligne si un PNJ possède, montre, offre ou remet ce témoignage. Remplir surtout Personnage, Type d'accès, Quantité et Contexte narratif.*\n\t<database url=\"https://www.notion.so/3426e4d21b4580828658ed8cb5955e60\" inline=\"true\">Données liées</database>",
+    "re_compenses_lie_es": "*Créer une ligne si le témoignage est obtenu comme récompense ou preuve. Remplir surtout Situation, Chapitre, Récompenses, Quantité et 🏁Flags si besoin.*\n\t<database url=\"https://www.notion.so/3426e4d21b45800783b6d744e867758b\" inline=\"true\">Récompenses liées</database>",
+    "flags_lie_s": "*Créer une ligne si le témoignage est offert, perdu, validé ou reconnu par un état système. Remplir surtout Identifiant, Type de valeur, Portée = **`Objet`** et Objets liés.*\n\t<database url=\"https://www.notion.so/3426e4d21b4580d98fabcc3a58728a4b\" inline=\"true\">Flags liés</database>",
+    "re_sume_2": "Les Cendres parlantes sont des résidus gris-iridescents issus de l'immolation rituelle des hérétiques, conservés dans des fioles d'obsidienne. Elles émettent des vibrations phoniques, murmurant les dernières pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse offre une expérience spirituelle intense, permettant d'accéder aux connaissances de l'hérétique tout en ressentant son agonie morale."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "identite____origine": "Identité & Origine",
-    "fonction___usage": "Fonction & Usage",
-    "circulation___porte_e": "Circulation & Portée"
+    "re_sume": "Résumé",
+    "apparence___statut_symbolique": "Apparence & statut symbolique",
+    "provenance___re_seau_social": "Provenance & réseau social",
+    "montrer___offrir": "Montrer / Offrir",
+    "conditions___limites": "Conditions & limites",
+    "inventaires_pnj": "Inventaires PNJ",
+    "re_compenses_lie_es": "Récompenses liées",
+    "flags_lie_s": "Flags liés",
+    "re_sume_2": "Résumé"
   },
   "notion_page_id": "1c06e4d2-1b45-80a7-8db9-e225677931cb"
 }

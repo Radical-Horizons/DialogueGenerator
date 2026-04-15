@@ -5,6 +5,7 @@
  * Aligné sur ``settings.json`` / sources ``kind: database``.
  */
 export const GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES: readonly string[] = [
+  'Caractéristiques_—_Uresaïr_(FP).json',
   'Assets_visuels.json',
   'Références_visuelles_des_éléments_originaux.json',
   'Musiques.json',

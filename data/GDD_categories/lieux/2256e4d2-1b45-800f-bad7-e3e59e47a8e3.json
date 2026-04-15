@@ -2,7 +2,7 @@
   "Nom": "Océan mécanique",
   "values": {
     "Date de création": "2025-07-03T18:51:00.000Z",
-    "Dernière modification": "2026-04-03T18:06:00.000Z",
+    "Dernière modification": "2026-04-07T16:06:00.000Z",
     "Faunes & Flores présentes": "2256e4d2-1b45-8048-8d1c-dc817100f567",
     "Niveau d’IA": "co-écrit",
     "Qualité": "5",
@@ -13,20 +13,38 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**",
-    "identite____vue_d_ensemble": "**Histoire du lieu**\n\n**Rôle dans l'intrigue**",
-    "ge_ographie___environnement": "**Écosystème**\n\n**Voies d’accès**",
-    "organisation_humaine": "**Structure politique**\n\n**Centres urbains & Habitats**",
-    "culture___socie_te": "**Population**\n\n**Économie**\n\n**Fêtes/moments importants**\n\n**Alimentation spécifique**",
-    "dynamiques": "**Enjeux actuels**\n\n**Points d'intérêt**\n\n**Système de jeu**"
+    "preamble": "<span color=\"yellow\">**Résumé de la fiche**</span>**<br>**",
+    "histoire_du_lieu": "<empty-block/>",
+    "ro_le_dans_l_intrigue": "<empty-block/>",
+    "e_cosyste_me": "<empty-block/>",
+    "voies_d_acce_s": "<empty-block/>",
+    "structure_politique": "<empty-block/>",
+    "centres_urbains___habitats": "<empty-block/>",
+    "population": "<empty-block/>",
+    "e_conomie": "<empty-block/>",
+    "fe_tes_moments_importants": "<empty-block/>",
+    "alimentation_spe_cifique": "<empty-block/>",
+    "enjeux_actuels": "<empty-block/>",
+    "points_d_inte_re_t": "<empty-block/>",
+    "syste_me_de_jeu": "<empty-block/>",
+    "re_sume": "Présentation d'un lieu fictif avec des sections sur l'identité, l'histoire, la géographie, l'organisation humaine, la culture et les dynamiques, incluant des éléments comme l'écosystème, la structure politique, la population et les enjeux actuels."
   },
   "section_titles": {
     "preamble": "Préambule",
-    "identite____vue_d_ensemble": "Identité & Vue d'ensemble",
-    "ge_ographie___environnement": "Géographie & Environnement",
-    "organisation_humaine": "Organisation humaine",
-    "culture___socie_te": "Culture & Société",
-    "dynamiques": "Dynamiques"
+    "histoire_du_lieu": "Histoire du lieu",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "e_cosyste_me": "Écosystème",
+    "voies_d_acce_s": "Voies d’accès",
+    "structure_politique": "Structure politique",
+    "centres_urbains___habitats": "Centres urbains & Habitats",
+    "population": "Population",
+    "e_conomie": "Économie",
+    "fe_tes_moments_importants": "Fêtes/moments importants",
+    "alimentation_spe_cifique": "Alimentation spécifique",
+    "enjeux_actuels": "Enjeux actuels",
+    "points_d_inte_re_t": "Points d'intérêt",
+    "syste_me_de_jeu": "Système de jeu",
+    "re_sume": "Résumé"
   },
   "notion_page_id": "2256e4d2-1b45-800f-bad7-e3e59e47a8e3"
 }

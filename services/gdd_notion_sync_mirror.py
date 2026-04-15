@@ -596,6 +596,8 @@ def promote_staging_to_live(
     gdd_root: Path,
     staging_run: Path,
     targets: Set[Path],
+    *,
+    allow_missing_staged: bool = False,
 ) -> None:
     """Pour chaque cible : supprime le live, déplace depuis le staging si présent.
 
@@ -603,6 +605,9 @@ def promote_staging_to_live(
         gdd_root: Racine ``GDD_categories``.
         staging_run: Répertoire racine de ce run (contient ``personnages/``, ``*.json``, etc.).
         targets: Chemins absolus attendus sous ``gdd_root``.
+        allow_missing_staged: Si True, une cible sans artefact dans le staging est ignorée
+            (le fichier ou dossier live est conservé). Utile après une sync complète avec erreurs
+            partielles lorsque l'utilisateur confirme l'application du miroir.
 
     Raises:
         OSError: Échec suppression / déplacement.
@@ -616,14 +621,25 @@ def promote_staging_to_live(
             continue
         rel = live.relative_to(gdd)
         staged = stage_base / rel
-        if live.exists():
-            if live.is_dir():
-                shutil.rmtree(live)
-            else:
-                live.unlink()
         if staged.exists():
+            if live.exists():
+                if live.is_dir():
+                    shutil.rmtree(live)
+                else:
+                    live.unlink()
             live.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(staged), str(live))
+        elif allow_missing_staged:
+            logger.info(
+                "Promotion miroir (reliquats): %s absent du staging — live inchangé.",
+                rel,
+            )
+        else:
+            if live.exists():
+                if live.is_dir():
+                    shutil.rmtree(live)
+                else:
+                    live.unlink()
     remove_staging_run_dir(staging_run)
 
 

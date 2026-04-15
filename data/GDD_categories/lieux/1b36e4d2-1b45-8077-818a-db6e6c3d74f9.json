@@ -13,16 +13,26 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\nParfois nommée Mailirasak, les racines de l'effroi, cette zone atemporelle est longtemps restée en sommeil dans les étages supérieurs du pilier d'Amath'ka. Pourtant, ce lieu, caractérisé par l'agressivité toujours intacte des créatures primordiales qui l'habite, n'a cessé de croître depuis la disparition des raephon. Elle représente un danger potentiel pour les écosystèmes déjà en place, et plus encore pour ceux qui voudraient progresser vers les sommets du pilieu. Le nom de racines de l'effroi, quant à lui, vient d'une plante rouge particulièrement envahissante parfois nommée racine sanguine.",
-    "identite____vue_d_ensemble": "**Histoire du lieu**\n\n**Apparence**",
-    "ele_ments_de_jeu": "**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**",
-    "ge_ographie___environnement": "**Géographie**\n\n**Voies d’accès**"
+    "preamble": "<span color=\"yellow\">**Résumé de la fiche**</span>**<br>**Parfois nommée Mailirasak, les racines de l'effroi, cette zone atemporelle est longtemps restée en sommeil dans les étages supérieurs du pilier d'Amath'ka. Pourtant, ce lieu, caractérisé par l'agressivité toujours intacte des créatures primordiales qui l'habite, n'a cessé de croître depuis la disparition des raephon. Elle représente un danger potentiel pour les écosystèmes déjà en place, et plus encore pour ceux qui voudraient progresser vers les sommets du pilieu. Le nom de racines de l'effroi, quant à lui, vient d'une plante rouge particulièrement envahissante parfois nommée racine sanguine.",
+    "histoire_du_lieu": "<empty-block/>",
+    "apparence": "<empty-block/>",
+    "npc_notables": "<empty-block/>",
+    "e_le_ments_interactifs": "<empty-block/>",
+    "que_tes___e_ve_nements": "<empty-block/>",
+    "ge_ographie": "<empty-block/>",
+    "voies_d_acce_s": "<empty-block/>\n<empty-block/>",
+    "re_sume": "Zone atemporelle, aussi appelée Mailirasak, est un lieu dangereux avec des créatures primordiales agressives, représentant une menace pour les écosystèmes environnants. Son nom provient d'une plante envahissante, la racine sanguine. Des sections sur l'histoire, l'apparence, les éléments de jeu, la géographie et les voies d'accès sont également mentionnées."
   },
   "section_titles": {
     "preamble": "Préambule",
-    "identite____vue_d_ensemble": "Identité & Vue d'ensemble",
-    "ele_ments_de_jeu": "Eléments de jeu",
-    "ge_ographie___environnement": "Géographie & Environnement"
+    "histoire_du_lieu": "Histoire du lieu",
+    "apparence": "Apparence",
+    "npc_notables": "NPC notables",
+    "e_le_ments_interactifs": "Éléments interactifs",
+    "que_tes___e_ve_nements": "Quêtes & évènements",
+    "ge_ographie": "Géographie",
+    "voies_d_acce_s": "Voies d’accès",
+    "re_sume": "Résumé"
   },
   "notion_page_id": "1b36e4d2-1b45-8077-818a-db6e6c3d74f9"
 }

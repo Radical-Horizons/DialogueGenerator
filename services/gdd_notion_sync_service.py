@@ -128,10 +128,42 @@ _SYNC_RECOVERABLE: Tuple[Type[BaseException], ...] = (
 NOTION_DATABASE_BODY_PROBE_ROW_COUNT = 3
 
 
+def _notion_api_error_message_for_partial_errors(response: httpx.Response) -> str:
+    """Extrait ``message`` (et éventuellement ``code``) du corps JSON d'erreur Notion.
+
+    Args:
+        response: Réponse HTTP Notion (4xx typiquement).
+
+    Returns:
+        Chaîne courte pour affichage opérateur, ou vide si parsing impossible.
+    """
+    try:
+        data = response.json()
+    except (ValueError, TypeError):
+        return ""
+    if not isinstance(data, dict) or data.get("object") != "error":
+        return ""
+    msg = data.get("message")
+    code = data.get("code")
+    parts: List[str] = []
+    if isinstance(code, str) and code.strip():
+        parts.append(code.strip())
+    if isinstance(msg, str) and msg.strip():
+        parts.append(msg.strip())
+    if not parts:
+        return ""
+    return redact_notion_token_from_text(" — ".join(parts))
+
+
 def _format_partial_error_detail(exc: BaseException) -> str:
     """Détail d'erreur pour ``partial_errors`` (code HTTP explicite si applicable)."""
     base = redact_notion_token_from_text(str(exc))
     if isinstance(exc, httpx.HTTPStatusError):
+        notion_detail = _notion_api_error_message_for_partial_errors(exc.response)
+        if notion_detail:
+            return (
+                f"HTTP {exc.response.status_code} — Notion API: {notion_detail} — {base}"
+            )
         return f"HTTP {exc.response.status_code} — {base}"
     return base
 

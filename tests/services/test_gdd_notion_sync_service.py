@@ -7,13 +7,38 @@ import pytest
 
 from services.gdd_notion_full_sync_checkpoint import checkpoint_json_path
 from services.gdd_notion_sync_config_store import GddNotionSyncConfigStore
-from services.gdd_notion_sync_service import GddNotionSyncService
+from services.gdd_notion_sync_service import (
+    GddNotionSyncService,
+    _format_partial_error_detail,
+)
 
 
 def _http_status_error(status: int) -> httpx.HTTPStatusError:
     req = httpx.Request("GET", "https://api.notion.com/v1/x")
     resp = httpx.Response(status, request=req)
     return httpx.HTTPStatusError("err", request=req, response=resp)
+
+
+def test_format_partial_error_detail_includes_notion_json_message() -> None:
+    """Les erreurs HTTP Notion doivent exposer le ``message`` JSON (pas seulement httpx)."""
+    req = httpx.Request(
+        "POST", "https://api.notion.com/v1/databases/db-id/query"
+    )
+    payload = {
+        "object": "error",
+        "status": 400,
+        "code": "validation_error",
+        "message": (
+            "Database with ID db-id does not contain any data sources "
+            "accessible by this API bot."
+        ),
+    }
+    resp = httpx.Response(400, request=req, content=json.dumps(payload).encode())
+    exc = httpx.HTTPStatusError("Client error 400", request=req, response=resp)
+    detail = _format_partial_error_detail(exc)
+    assert "HTTP 400" in detail
+    assert "validation_error" in detail
+    assert "data sources accessible" in detail
 
 
 async def _instant_backoff_sleep(_self: object, _attempt_index: int) -> None:
@@ -904,9 +929,21 @@ async def test_run_sync_mirror_rebuild_rollback_on_fetch_error(tmp_path: Path) -
     )
     assert res.success is False
     assert res.mirror_rebuild_used
+    assert res.mirror_promotion_pending is True
     assert orphan_path.is_file()
     staging_root = gdd_dir / ".staging"
-    assert not staging_root.is_dir() or next(staging_root.iterdir(), None) is None
+    assert staging_root.is_dir()
+    assert any(staging_root.iterdir())
+    assert checkpoint_json_path(tmp_path).is_file()
+
+    res_apply = await svc.run_sync(
+        force_full=True,
+        apply_staging_despite_errors=True,
+        request_id="mirror-apply",
+    )
+    assert res_apply.success is True
+    assert "reliquats" in res_apply.message.lower()
+    assert not checkpoint_json_path(tmp_path).is_file()
 
 
 @pytest.mark.asyncio
@@ -1045,7 +1082,7 @@ async def test_run_sync_mirror_preserves_staging_on_persistent_502(
     )
     res = await svc.run_sync(force_full=True, request_id="mirror-preserve-502")
     assert res.success is False
-    assert "Reprise possible" in res.message
+    assert "retenter" in res.message.lower() or "miroir" in res.message.lower()
     assert res.partial_errors
     staging_root = gdd_dir / ".staging"
     assert staging_root.is_dir()

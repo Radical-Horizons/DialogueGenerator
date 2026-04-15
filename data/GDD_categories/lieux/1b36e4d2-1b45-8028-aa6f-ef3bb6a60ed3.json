@@ -15,16 +15,26 @@
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\nGalerie des oeuvres d’art vivantes de  L’Enlumineur , fameuse dans toute Escelion. Les corps de ceux qu’il a “consolidés dans l’art” sont à moitié fondus dans les parois. Le Vernissage est situé sur une route essentielle menant du  Désert des Echos Perdus  aux  Couronnes intermédiaires  et l’Enlumineur se fait un plaisir de recevoir les visiteurs.",
-    "identite____vue_d_ensemble": "**Histoire du lieu**\n\n**Apparence**\nLes galeries s'étendent sur plusieurs salles aux murs de pierre brute dans lesquels ont été incorporées, à moitié fondues, pétrifiées, des créatures vivantes. Chaque \"œuvre\" de l'Enlumineur exhale une odeur distinctive qui raconte son histoire : la peur cristallisée sent le fer et le vinaigre aigre, la douleur prolongée dégage des effluves pharmaceutiques âcres, la résignation finale produit une senteur de cire froide et de poussière.\nLes Qadul'Doei visiteurs, avec leur syncrétisme sensoriel, perçoivent ces odeurs comme des textures visibles et des harmonies sonores, transformant la galerie en une expérience multisensorielle épuisante mais hypnotique. L'Enlumineur lui-même, un Qadul'Doei renégat, orchestre délibérément ces signatures olfactives comme partie intégrante de son art transgressif.",
-    "ele_ments_de_jeu": "**NPC notables**\n\n**Éléments interactifs**\n\n**Quêtes & évènements**",
-    "ge_ographie___environnement": "**Géographie**\n\n**Voies d’accès**"
+    "preamble": "<span color=\"yellow\">**Résumé de la fiche**</span>**<br>**Galerie des oeuvres d’art vivantes de <mention-page url=\"https://www.notion.so/1a96e4d21b458077b534dae9777c6a12\"/>, fameuse dans toute Escelion. Les corps de ceux qu’il a “consolidés dans l’art” sont à moitié fondus dans les parois. Le Vernissage est situé sur une route essentielle menant du <mention-page url=\"https://www.notion.so/1a96e4d21b458049b21bee91c108b551\"/> aux <mention-page url=\"https://www.notion.so/1b46e4d21b45802a8cc1d19eea05d87d\"/> et l’Enlumineur se fait un plaisir de recevoir les visiteurs.",
+    "histoire_du_lieu": "<empty-block/>",
+    "apparence": "Les galeries s'étendent sur plusieurs salles aux murs de pierre brute dans lesquels ont été incorporées, à moitié fondues, pétrifiées, des créatures vivantes. Chaque \"œuvre\" de l'Enlumineur exhale une odeur distinctive qui raconte son histoire : la **peur cristallisée** sent le fer et le vinaigre aigre, la **douleur prolongée** dégage des effluves pharmaceutiques âcres, la **résignation finale** produit une senteur de cire froide et de poussière.\n\tLes Qadul'Doei visiteurs, avec leur syncrétisme sensoriel, perçoivent ces odeurs comme des textures visibles et des harmonies sonores, transformant la galerie en une expérience multisensorielle épuisante mais hypnotique. L'Enlumineur lui-même, un Qadul'Doei renégat, orchestre délibérément ces signatures olfactives comme partie intégrante de son art transgressif.",
+    "npc_notables": "<empty-block/>",
+    "e_le_ments_interactifs": "<empty-block/>",
+    "que_tes___e_ve_nements": "<empty-block/>",
+    "ge_ographie": "<empty-block/>",
+    "voies_d_acce_s": "<empty-block/>\n<empty-block/>",
+    "re_sume": "Le Vernissage de l’Enlumineur présente une galerie d'œuvres d'art vivantes où des créatures sont partiellement intégrées aux murs, créant une expérience multisensorielle unique. Chaque œuvre dégage des odeurs distinctes qui racontent des histoires de peur, douleur et résignation, orchestrées par l'Enlumineur, un artiste renégat. La galerie est située sur une route essentielle et attire les visiteurs avec son ambiance hypnotique."
   },
   "section_titles": {
     "preamble": "Préambule",
-    "identite____vue_d_ensemble": "Identité & Vue d'ensemble",
-    "ele_ments_de_jeu": "Eléments de jeu",
-    "ge_ographie___environnement": "Géographie & Environnement"
+    "histoire_du_lieu": "Histoire du lieu",
+    "apparence": "Apparence",
+    "npc_notables": "NPC notables",
+    "e_le_ments_interactifs": "Éléments interactifs",
+    "que_tes___e_ve_nements": "Quêtes & évènements",
+    "ge_ographie": "Géographie",
+    "voies_d_acce_s": "Voies d’accès",
+    "re_sume": "Résumé"
   },
   "notion_page_id": "1b36e4d2-1b45-8028-aa6f-ef3bb6a60ed3"
 }

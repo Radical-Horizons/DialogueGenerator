@@ -28,7 +28,7 @@ import {
   type PostGddNotionSyncOptions,
 } from '../../api/gddNotionSync'
 import { GddNotionSyncProgressModal } from './GddNotionSyncProgressModal'
-import { useGddNotionSyncUi } from '../../hooks/useGddNotionSyncUi'
+import { useGddNotionSyncUi, type GddNotionSyncOutcomeTone } from '../../hooks/useGddNotionSyncUi'
 import { useContextStore } from '../../store/contextStore'
 import { theme } from '../../theme'
 import {
@@ -71,13 +71,43 @@ function refreshContextAfterGddDiskChange(): void {
   st.bumpGddDataRevision()
 }
 
+function gddSyncOutcomeBannerPalette(tone: GddNotionSyncOutcomeTone): {
+  border: string
+  background: string
+  accent: string
+  title: string
+} {
+  if (tone === 'error') {
+    return {
+      border: theme.state.error.border,
+      background: theme.state.error.background,
+      accent: theme.state.error.color,
+      title: 'Synchronisation échouée',
+    }
+  }
+  if (tone === 'warning') {
+    return {
+      border: theme.state.warning.border ?? '#ffc107',
+      background: theme.state.warning.background,
+      accent: theme.state.warning.color,
+      title: 'Synchronisation terminée — action requise',
+    }
+  }
+  return {
+    border: theme.state.success.color,
+    background: theme.state.success.background,
+    accent: theme.state.success.color,
+    title: 'Synchronisation réussie',
+  }
+}
+
 export interface GddNotionSyncSectionProps {
   /** Après mise à jour locale du checkpoint (sync / abandon), rafraîchir l’UI parent (ex. onglet Options). */
   onCheckpointDiskChanged?: () => void
 }
 
 export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncSectionProps) {
-  const { phase, userMessage, run, resetMessage } = useGddNotionSyncUi()
+  const { phase, userMessage, outcomeTone, run, resetMessage } = useGddNotionSyncUi()
   const [serverStatus, setServerStatus] = useState<GddNotionSyncStatusResponse | null>(null)
   const [statusLoadError, setStatusLoadError] = useState<string | null>(null)
 
@@ -405,6 +435,71 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
         <h3 style={{ margin: '0 0 0.75rem 0', color: theme.text.primary }}>
           Synchronisation GDD (Notion)
         </h3>
+        {(() => {
+          if (!userMessage || phase === 'loading' || !outcomeTone) {
+            return null
+          }
+          const pal = gddSyncOutcomeBannerPalette(outcomeTone)
+          return (
+            <div
+              role="status"
+              aria-live="polite"
+              style={{
+                margin: '0 0 1rem 0',
+                padding: '1rem 1rem 0.9rem',
+                borderRadius: '8px',
+                border: `2px solid ${pal.border}`,
+                backgroundColor: pal.background,
+                boxShadow: theme.shadow.card,
+              }}
+            >
+              <div
+                style={{
+                  color: theme.text.primary,
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  marginBottom: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <span aria-hidden style={{ color: pal.accent, fontSize: '1.15rem' }}>
+                  {outcomeTone === 'error' ? '✕' : outcomeTone === 'warning' ? '!' : '✓'}
+                </span>
+                {pal.title}
+              </div>
+              <p
+                style={{
+                  margin: '0 0 1rem 0',
+                  color: theme.text.primary,
+                  fontSize: '0.92rem',
+                  lineHeight: 1.5,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {userMessage}
+              </p>
+              <button
+                type="button"
+                onClick={resetMessage}
+                style={{
+                  padding: '0.55rem 1.25rem',
+                  borderRadius: '6px',
+                  border: `1px solid ${theme.button.primary.background}`,
+                  backgroundColor: theme.button.primary.background,
+                  color: theme.button.primary.color,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                }}
+              >
+                Fermer ce message
+              </button>
+            </div>
+          )
+        })()}
         <p
           style={{
             margin: '0 0 1rem 0',
@@ -619,6 +714,12 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 (toutes les bases + toutes les fiches page). Si vous restreignez les bases, chaque sync ne traite{' '}
                 <strong style={{ color: theme.text.primary }}>que</strong> ces bases — les fiches (sources page) sont
                 alors ignorées sur ce run (évite de parcourir tout le hub). Retirez le filtre pour tout resynchroniser.
+                <br />
+                <strong style={{ color: theme.text.primary }}>Cocher essentiels</strong> : coche toutes les bases sauf
+                celles marquées « secondaire » (liste dans le dépôt, ex. assets, prompts,{' '}
+                <code style={{ fontSize: '0.85em' }}>Caractéristiques_—_Uresaïr_(FP).json</code>) — ce n’est pas un
+                périmètre « jeu minimal », seulement un raccourci pour décocher les tables plutôt outil / hors cœur
+                narratif.
                 <br />
                 <strong style={{ color: theme.text.primary }}>Sync complète (bouton global) avec filtre :</strong> les
                 fichiers (ou dossiers shards) des bases <em>non</em> cochées sont <strong>retirés</strong> du dossier GDD
@@ -1202,33 +1303,6 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
             </div>
           )}
         </div>
-        {userMessage && (
-          <p
-            style={{
-              margin: '0 0 0.5rem 0',
-              color: phase === 'error' ? theme.state.error.color : theme.text.secondary,
-              fontSize: '0.9rem',
-            }}
-          >
-            {userMessage}
-            {phase !== 'idle' && phase !== 'loading' && (
-              <button
-                type="button"
-                onClick={resetMessage}
-                style={{
-                  marginLeft: '0.5rem',
-                  border: 'none',
-                  background: 'transparent',
-                  color: theme.text.secondary,
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
-              >
-                Fermer
-              </button>
-            )}
-          </p>
-        )}
         {statusLoadError && (
           <p
             style={{
