@@ -1,0 +1,32 @@
+{
+  "Nom": "Labrys de Préhension",
+  "values": {
+    "Créé par (personne)": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
+    "Date de création": "2026-04-10T10:35:00.000Z",
+    "Dernière modification": "2026-04-10T10:35:00.000Z",
+    "Niveau d’IA": "co-écrit",
+    "Poids": "Moyen",
+    "Qualité": "2",
+    "Rareté": "Unique",
+    "Résumé": "Double hache cérémonielle aux lames émoussées. Emblème de la Violence Préservatrice de Navarre K'ssh : conçue pour frapper sans trancher, briser sans tuer.",
+    "Stackable": "non",
+    "Taille": "Grand",
+    "Type": "Équipement",
+    "État": "Pas commencé"
+  },
+  "sections": {
+    "preamble": "> *\"Ses lames ne tranchent pas — elles frappent l'architecture intérieure, là où la volonté se fracture avant les os.\"*",
+    "description": "Double hache cérémonielle personnelle de Navarre K'ssh. Les deux lames, rituellement émoussées, sont gravées des géométries du Khetra-Morth : spirales de retenue, angles d'impact non-lésionnels, fractales de préservation. Le manche est en os de Qudratheen blanchi, identique à celui de son prosôpon.\nL'arme n'est pas conçue pour tuer. Chaque impact vise les nœuds structurels du corps adverse — articulations, ganglions nerveux, points de pression osseux — pour neutraliser sans détruire.",
+    "me_canique": "*À définir selon le système Équipement.*\n- **Dégâts :** non-létaux uniquement\n- **Effort lié :** à définir\n- **Effet spécial :** cible neutralisée (et non blessée) sur réussite critique",
+    "acce_s": "- Objet personnel de Navarre K'ssh — non lootable avant recrutement\n- Récompense possible (réplique bénie) à l'arc résolu de *La Troisième Voie*",
+    "re_sume": "Double hache cérémonielle aux lames émoussées. Emblème de la Violence Préservatrice de Navarre K'ssh : conçue pour frapper sans trancher, briser sans tuer."
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "description": "Description",
+    "me_canique": "Mécanique",
+    "acce_s": "Accès",
+    "re_sume": "Résumé"
+  },
+  "notion_page_id": "a02e0d4e-4ae1-4e38-a28c-491da5b9f461"
+}

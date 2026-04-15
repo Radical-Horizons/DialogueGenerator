@@ -1,0 +1,52 @@
+{
+  "Nom": "Caïs Ur'then",
+  "values": {
+    "Archétype littéraire": "Artiste / Cynique",
+    "Axe idéologique": "Connexion",
+    "Communautés": "46d868f6-f4d1-49da-83c3-c30e44d01358",
+    "Date de création": "2026-04-10T14:25:00.000Z",
+    "Date de naissance": "3377",
+    "Dernière modification": "2026-04-10T17:54:00.000Z",
+    "Défauts": "Instable, Obstinée",
+    "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+    "Genre": "Non Binaire",
+    "Langage": "Principit",
+    "Lieux de vie": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+    "Niveau d’IA": "auto",
+    "Occupation": "Apprenti-Entailleur",
+    "Pronoms (pour dialogues)": "iel/ellui",
+    "Qualité": "2",
+    "Qualités": "Rigoureuse, Lucide, Loyale",
+    "Réponse au problème moral": "On préserve ce qu'on peut. Le reste, on le compte.",
+    "Résumé": "Apprenti-Entailleur de la Garde Sanguine, Van'Doei de ~13 nuées (jeune adulte récent·e). Trait mémorable : tient son Livre des Entailles en écriture microscopique, convaincu qu'un Livre plein signifie qu'on a trop nui. Expression récurrente : \"Ça comptera.\"",
+    "Type": "PNJ tertiaire",
+    "Âge": "13",
+    "Épithète": "Le garde",
+    "État": "Brouillon IA"
+  },
+  "sections": {
+    "re_sume__de_la_fiche": "Apprentis-Entailleur de la Garde Sanguine, Van'Doei de \\~13 nuées qui compte tout (les passages, les interventions, les marges encore disponibles dans son Livre) parce que tant qu'il reste des pages vides, on peut encore se dire qu'on n'a pas trop nui.",
+    "apparence": "Le bras gauche est démesuré : avant-bras surdéveloppé, main massive aux griffes épaisses, épaule compensatoire qui tire légèrement le torse vers ce côté. Marque de naissance Van'Doei, signature de combustion. Dans les prises du Khetra-Morth, ce bras il sert d'ancre pendant que la main droite cherche les points de rupture. Ça a pris dix-huit mois. La robe martiale blanche et rouge est encore nette, trop nette.\n\tL'objet le plus distinctif : un petit carnet glissé dans la poche intérieure du manteau, sorti entre chaque ronde. L'écriture y est si serrée, si minuscule, qu'il faut approcher une lueur de Deimos pour distinguer les lettres.",
+    "contexte": "- **Situation actuelle :** Apprenti-Entailleur depuis \\~2 nuées, pas encore autorisé·e à agir seul·e en intervention. Issu·e d'une famille de Novices du Culte, a grandi à entendre les rondes nocturnes avant de rejoindre la Garde.\n\t- **Rôle / archétype :** Artiste / Cynique — quelqu'un qui a transformé une compulsion en système, et qui traite la morale comme une comptabilité.\n\t- **Éléments de background :** A rejoint la Garde par conviction sincère, sans vocation martiale particulière. La Violence Préservatrice lui semblait la seule doctrine cohérente avec le problème posé par le Kosmokrate. Tient son Livre des Entailles en écriture microscopique depuis 2 nuées et demie — le même Livre. Remplir un Livre, c'est l'admettre plein, et l'admettre plein c'est admettre qu'on y a causé suffisamment de dommages. Tant que les pages ont encore de l'espace, on peut continuer.",
+    "style": "Registre appliqué, légèrement guindé pour l'âge. Tendance à quantifier : les fréquences, les durées, les patterns. Pas de la froideur — une façon de rendre les choses gérables.\n\t- **Expression récurrente :** *\"Ça comptera.\"* — pour une promesse, une menace douce, ou simplement pour clore une conversation qu'on ne sait pas comment finir autrement.\n\t- **Réponse au problème moral :** *\"On préserve ce qu'on peut. Le reste, on le compte.\"*",
+    "rencontre_initiale": "- **Où :** Narthex abyssal ou couloir vertébral du Léviathan pétrifié\n\t- **Quand :** Disponible dès l'Acte 1, pendant les rondes de la Garde\n\t- **Déclencheur :** L'Éthérée s'approche ou traverse la zone ; Caïs l'interpelle sans hostilité\n\t- **Activité :** En faction, carnet ouvert entre deux rondes. À l'approche : *\"Deuxième passage aujourd'hui. Je l'ai noté. Ça ne pose pas de problème — mais ça comptera.\"* Pas une menace. Une comptabilité ouverte, adressée à voix haute pour qu'elle figure quelque part.",
+    "e_volution_selon_e_ve_nements": "- **Avant tout incident majeur :** Poli·e, légèrement maladroit·e dans les échanges informels, curieux·se sans le montrer.\n\t- **Après une Récapitulation d'Erreur (si l'Éthérée y assiste) :** Plus silencieux·se pendant plusieurs veilles ; relit son Livre en mouvement entre les rondes, comme on révise une liste de courses qu'on ne veut pas oublier.\n\t- **Si Prestige Culte ≥ Faveur :** Montre son Livre à l'Éthérée — non par fierté, mais parce que personne d'autre ne comprend pourquoi l'écriture est si petite. C'est l'objet le plus personnel qu'iel possède.",
+    "occupation": "Apprenti-Entailleur",
+    "re_ponse_au_proble_me_moral": "On préserve ce qu'on peut. Le reste, on le compte.",
+    "re_sume": "Apprenti-Entailleur de la Garde Sanguine, Van'Doei de ~13 nuées (jeune adulte récent·e). Trait mémorable : tient son Livre des Entailles en écriture microscopique, convaincu qu'un Livre plein signifie qu'on a trop nui. Expression récurrente : \"Ça comptera.\"",
+    "e_pithe_te": "Le garde"
+  },
+  "section_titles": {
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "apparence": "Apparence",
+    "contexte": "Contexte",
+    "style": "Style",
+    "rencontre_initiale": "Rencontre initiale",
+    "e_volution_selon_e_ve_nements": "Évolution selon événements",
+    "occupation": "Occupation",
+    "re_ponse_au_proble_me_moral": "Réponse au problème moral",
+    "re_sume": "Résumé",
+    "e_pithe_te": "Épithète"
+  },
+  "notion_page_id": "d79db510-a670-43d6-96aa-f8b600f3b356"
+}

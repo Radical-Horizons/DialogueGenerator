@@ -1,0 +1,41 @@
+{
+  "Nom": "Bannière suspendue du sanctuaire",
+  "values": {
+    "Créé par (communauté)": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+    "Date de création": "2026-04-05T21:07:00.000Z",
+    "Dernière modification": "2026-04-09T18:22:00.000Z",
+    "Lieux de présence": "2356e4d2-1b45-8015-a428-cd71c19309dd",
+    "Maps": "729ae711-5a32-4bf5-b304-a886f6f75774",
+    "Niveau d’IA": "co-écrit",
+    "Poids": "Léger",
+    "Qualité": "5",
+    "Rareté": "Unique",
+    "Résumé": "Bannière décorative suspendue au sanctuaire d’Uresaïr, servant de support d’information pour un message laissé par Avili, qui a veillé sur une personne inconsciente. Elle est ornée de motifs cultuels et permet une interaction narrative lorsqu'elle est examinée, révélant des informations sur l'absence d'Avili et le besoin de rechercher de l'aide.",
+    "Stackable": "non",
+    "Taille": "Grand",
+    "Type": "Élément de décor",
+    "Valeur en Dc": "0",
+    "État": "A implémenter"
+  },
+  "sections": {
+    "re_sume__de_la_fiche": "Grand linge décoratif suspendu à une colonne du sanctuaire d’Uresaïr, dans les <mention-page url=\"https://www.notion.so/1b36e4d21b45802c910afb74729b22f8\"/>. Objet d’ambiance devenu **support d’information diégétique** : au réveil, l’Éthérée et Uresaïr y lisent le message laissé par <mention-page url=\"https://www.notion.so/1bc6e4d21b458013831be5a42c40dd2f\"/>, qui annonce être parti chercher <mention-page url=\"https://www.notion.so/1ae6e4d21b45805b9dc2e851e5fc3be1\"/> après avoir veillé plusieurs Veilles sans réussir à la réveiller.",
+    "apparence___nature": "- **Description visuelle :** large bannière de tissu pâle suspendue à une colonne, ornée de motifs cultuels sobres. Le textile est assez lisse pour qu’une écriture rapide y reste lisible sans transformer l’objet en énigme artificielle.\n\t- **Type exact :** élément de décor fixe, servant ponctuellement de support d’examen narratif.\n\t- **Échelle :** grand ; fixé à l’architecture du sanctuaire, non ramassable.",
+    "origine___ancrage": "- **Origine :** ornement rituel du sanctuaire, probablement installé par le <mention-page url=\"https://www.notion.so/1886e4d21b4581b8ad16dcfa990112f1\"/> avant l’isolement d’Uresaïr.\n\t- **Créé par / communauté liée :** le Culte ; Avili n’a pas créé l’objet, il l’utilise seulement comme support visible pour laisser un message.\n\t- **Lieu(x) de présence :** sanctuaire personnel d’Uresaïr, sous-partie d’ouverture de <mention-page url=\"https://www.notion.so/1ee6e4d21b458042896ec3bacf823a9b\"/>.",
+    "interaction_principale": "- **Niveau d'interaction :** N1 examen dans la logique de <mention-page url=\"https://www.notion.so/ed986ac336004d29b4fb8fac7d61857c\"/>.\n\t- **Action joueuse :** examiner / lire l’inscription laissée sur le linge au réveil.\n\t- **Effet produit :** Dialogue narratif où Uresaïr lit le message (Avili l’a trouvée inconsciente, a veillé longtemps sur elle, est parti chercher le médecin <mention-page url=\"https://www.notion.so/1ae6e4d21b45805b9dc2e851e5fc3be1\"/> pour demander de l’aide).\n\t\t- Si Respect ≥ 5, Uresaïr mentionnera son passé avec Avili et le fait qu’il pourrait vouloir les accompagner dans leur voyage.\n\t\t- Transmettre une information immédiate sur l’absence d’Avili, introduire Khair-gul hors-champ, et confirmer qu’Avili ignore tout de la possession ; au besoin, peut poser un flag de type `avili_message_lu`.",
+    "conditions___limites": "- **Signal de discoverabilité :** écriture fraîche et visible sur la bannière, placée dans le champ de vision du réveil ; pas de code, pas de dissimulation, pas de gadget d’espionnage.\n\t- **Compétence / coût :** aucun test, aucun coût d’Effort.\n\t- **État persistant :** bannière intacte → bannière porteuse du message d’Avili → bannière relue / ignorée ; l’objet reste en place après lecture.",
+    "inventaires_pnj": "Aucun. L’objet appartient au décor et ne relève pas d’un port ou d’un stockage par personnage.\n\t<database url=\"https://www.notion.so/f412f5bf040f49f38672c99d0da35cff\" inline=\"true\" data-source-url=\"collection://67330c50-a35e-4c76-a01d-a788feb3610b\">View of Inventaires PNJ</database>",
+    "flags_lie_s": "Lecture à suivre ? Peut-on arracher la bannière ? A trancher\n\t<database url=\"https://www.notion.so/84d8dfb573274e16b1ad0f3349d190ae\" inline=\"true\" data-source-url=\"collection://33399725-e3e1-4c98-8060-d92a89c0efe0\">View of Flags</database>",
+    "re_sume": "Bannière décorative suspendue au sanctuaire d’Uresaïr, servant de support d’information pour un message laissé par Avili, qui a veillé sur une personne inconsciente. Elle est ornée de motifs cultuels et permet une interaction narrative lorsqu'elle est examinée, révélant des informations sur l'absence d'Avili et le besoin de rechercher de l'aide."
+  },
+  "section_titles": {
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "apparence___nature": "Apparence & nature",
+    "origine___ancrage": "Origine & ancrage",
+    "interaction_principale": "Interaction principale",
+    "conditions___limites": "Conditions & limites",
+    "inventaires_pnj": "Inventaires PNJ",
+    "flags_lie_s": "Flags liés",
+    "re_sume": "Résumé"
+  },
+  "notion_page_id": "58fcf6e8-c7ee-4ffc-9ceb-c0692d5cf8ee"
+}
