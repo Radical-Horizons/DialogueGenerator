@@ -58,11 +58,11 @@ Après restauration, le manifeste Notion est réinitialisé pour éviter un déc
 
 ## Export NotebookLM (ZIP Markdown)
 
-**GET** `/api/v1/gdd-notion-sync/notebooklm-export?max_files=10` (entier 1–10, défaut 10).
+**GET** `/api/v1/gdd-notion-sync/notebooklm-export?max_files=64` (entier 1–128, défaut 64).
 
 - Réponse : `application/zip`, fichier suggéré `gdd-notebooklm-export.zip`.
-- Contenu : regroupe le JSON **déjà présent sur disque** (périmètre `sources` + `included_categories`) en quelques fichiers Markdown thématiques, plus `Vision.json` si trouvé (résolution identique à `GDDLoader` / `GDD_IMPORT_PATH`).
-- Limite : troncature par fichier si le texte dépasse ~1,8M caractères (`_MAX_EXPORT_CHARS_PER_PART` dans `services/gdd_notebooklm_export.py`).
+- Contenu : regroupe le JSON **déjà présent sur disque** (périmètre `sources` + `included_categories`) en fichiers Markdown thématiques, plus `Vision.json` si trouvé (résolution identique à `GDDLoader` / `GDD_IMPORT_PATH`).
+- Taille : chaque fichier Markdown reste sous ~1,8M caractères (`_MAX_EXPORT_CHARS_PER_PART` dans `services/gdd_notebooklm_export.py`) ; un thème trop volumineux est **découpé** en `…-part02.md`, `…-part03.md`, etc., sans tronquer le texte. Si le nombre de fichiers dépassait `max_files`, l’API renvoie une erreur explicite (augmenter le paramètre).
 
 Implémentation : `services/gdd_notebooklm_export.py`, `GddNotionSyncService.build_notebooklm_export_zip()`.
 

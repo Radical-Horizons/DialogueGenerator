@@ -306,7 +306,11 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
           if (r.success) {
             refreshContextAfterGddDiskChange()
           }
-          return { success: r.success, message: r.message }
+          return {
+            success: r.success,
+            message: r.message,
+            softFailure: !r.success && Boolean(r.mirror_promotion_pending),
+          }
         } finally {
           window.clearInterval(poll)
           setProgressOpen(false)
@@ -362,7 +366,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
     setNotebooklmExportError(null)
     setNotebooklmExporting(true)
     try {
-      const blob = await getGddNotebooklmExportZip(9)
+      const blob = await getGddNotebooklmExportZip()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -447,10 +451,11 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
               lineHeight: 1.45,
             }}
           >
-            Télécharge un ZIP avec jusqu’à <strong style={{ color: theme.text.primary }}>9 fichiers</strong>{' '}
-            Markdown : le GDD local (bases/pages du périmètre Notion ci-dessous, comme une sync) regroupé par
-            thèmes, plus <code style={{ fontSize: '0.85em' }}>Vision.json</code> en tête du volet univers. Les
-            très gros blocs peuvent être tronqués pour rester exploitables dans NotebookLM.
+            Télécharge un ZIP Markdown : le GDD local (bases/pages du périmètre Notion ci-dessous, comme une
+            sync) regroupé par thèmes, plus <code style={{ fontSize: '0.85em' }}>Vision.json</code> en tête du
+            volet univers. Chaque thème reste sous une limite de taille NotebookLM : les gros regroupements sont
+            découpés en plusieurs fichiers (<code style={{ fontSize: '0.85em' }}>-part02.md</code>, etc.) sans
+            tronquer le texte.
           </p>
           <button
             type="button"
@@ -926,43 +931,98 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
             </p>
           ) : null}
           {!checkpointBannerError && checkpoint?.resumable && !busy ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => runGddSync(true, { resume: true })}
-                style={buttonStyle(busy, true)}
-              >
-                Reprendre la sync
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => runGddSync(true, { fresh: true })}
-                style={buttonStyle(busy)}
-              >
-                Tout recommencer
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  void (async () => {
-                    try {
-                      await deleteGddFullSyncCheckpoint()
-                      await refreshCheckpoint()
-                      onCheckpointDiskChanged?.()
-                    } catch (e) {
-                      setCheckpointBannerError(
-                        e instanceof Error ? e.message : 'Abandon du checkpoint impossible',
-                      )
-                    }
-                  })()
-                }
-                style={buttonStyle(busy)}
-              >
-                Abandonner (checkpoint + staging)
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {checkpoint.mirror_promotion_pending ? (
+                <div
+                  style={{
+                    padding: '0.55rem 0.65rem',
+                    borderRadius: '6px',
+                    border: `1px solid ${theme.state.warning.color}`,
+                    backgroundColor: theme.background.secondary,
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: '0 0 0.45rem 0',
+                      color: theme.state.warning.color,
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Miroir prêt mais non appliqué (erreurs Notion sur certaines bases)
+                  </p>
+                  <p style={{ margin: '0 0 0.45rem 0', color: theme.text.secondary, fontSize: '0.82rem' }}>
+                    Vous pouvez appliquer le contenu déjà récupéré : les bases absentes du staging restent
+                    inchangées sur disque. Ou reprendre pour retenter les appels Notion.
+                  </p>
+                  {serverStatus?.partial_errors?.length ? (
+                    <ul
+                      style={{
+                        margin: '0 0 0.5rem 1rem',
+                        padding: 0,
+                        color: theme.text.primary,
+                        fontSize: '0.78rem',
+                        maxHeight: '8rem',
+                        overflowY: 'auto',
+                      }}
+                    >
+                      {serverStatus.partial_errors.map((line) => (
+                        <li key={line} style={{ marginBottom: '0.25rem' }}>
+                          {line}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => runGddSync(true, { applyStagingDespiteErrors: true })}
+                      style={buttonStyle(busy, true)}
+                    >
+                      Appliquer le miroir malgré tout
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => runGddSync(true, { resume: true })}
+                  style={buttonStyle(busy, true)}
+                >
+                  Reprendre la sync
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => runGddSync(true, { fresh: true })}
+                  style={buttonStyle(busy)}
+                >
+                  Tout recommencer
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() =>
+                    void (async () => {
+                      try {
+                        await deleteGddFullSyncCheckpoint()
+                        await refreshCheckpoint()
+                        onCheckpointDiskChanged?.()
+                      } catch (e) {
+                        setCheckpointBannerError(
+                          e instanceof Error ? e.message : 'Abandon du checkpoint impossible',
+                        )
+                      }
+                    })()
+                  }
+                  style={buttonStyle(busy)}
+                >
+                  Abandonner (checkpoint + staging)
+                </button>
+              </div>
             </div>
           ) : null}
           {!checkpointBannerError &&

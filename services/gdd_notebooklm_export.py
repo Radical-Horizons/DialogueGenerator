@@ -6,6 +6,7 @@ lisibles (plutôt que des centaines de shards bruts).
 from __future__ import annotations
 
 import json
+import re
 import unicodedata
 import zipfile
 from dataclasses import dataclass
@@ -18,8 +19,13 @@ from services.gdd_notion_sync_mirror import GDD_RESERVED_TOP_LEVEL
 from services.gdd_notion_sync_utils import category_file_matches_included, category_stem_to_list_category_key
 from services.gdd_paths import resolve_gdd_categories_path
 
-_MAX_FILES_DEFAULT = 10
+_MAX_FILES_DEFAULT = 64
 _MAX_EXPORT_CHARS_PER_PART = 1_800_000
+# Garde-fou : fichiers de suite (part02…) ; doit rester < ``_MAX_FILES_DEFAULT``.
+_MAX_PARTS_PER_BUCKET = 48
+
+_RE_SPLIT_FICHIER = re.compile(r"(?=\n## Fichier : )")
+_RE_SPLIT_RECORD = re.compile(r"(?=\n## \d+\.\s)")
 
 
 def _fold_stem(stem: str) -> str:
@@ -288,14 +294,130 @@ _BUCKETS: Tuple[_Bucket, ...] = (
 )
 
 
-def _maybe_truncate(text: str, limit: int) -> str:
-    if len(text) <= limit:
-        return text
-    return (
-        text[:limit]
-        + "\n\n---\n\n**[Export tronqué]** Le contenu dépasse la limite de caractères "
-        f"({limit}). Réduisez le périmètre (filtre bases Notion) ou exportez une base précise via l’API.\n"
-    )
+def _hard_split_at_newlines(text: str, max_len: int) -> List[str]:
+    """Découpe ``text`` en morceaux d'au plus ``max_len`` caractères, de préférence sur des sauts de ligne."""
+    if max_len < 512:
+        max_len = 512
+    text = text.rstrip("\n")
+    if not text:
+        return []
+    out: List[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        end = min(i + max_len, n)
+        if end < n:
+            cut = text.rfind("\n", i + max_len // 2, end)
+            if cut <= i:
+                cut = end
+            end = cut + 1 if cut > i else end
+        chunk = text[i:end]
+        out.append(chunk if chunk.endswith("\n") else chunk + "\n")
+        i = end
+    return out
+
+
+def _split_segment_under_limit(segment: str, max_len: int) -> List[str]:
+    """Morcelle un bloc Markdown (typiquement une source ``# Base :``) pour respecter ``max_len``."""
+    segment = segment.strip("\n")
+    if not segment:
+        return []
+    if len(segment) <= max_len:
+        return [segment if segment.endswith("\n") else segment + "\n"]
+    hunks = _RE_SPLIT_FICHIER.split(segment)
+    if len(hunks) > 1:
+        merged: List[str] = []
+        for h in hunks:
+            h = h.strip("\n")
+            if not h:
+                continue
+            merged.extend(_split_segment_under_limit(h + "\n", max_len))
+        return merged
+    hunks_r = _RE_SPLIT_RECORD.split(segment)
+    if len(hunks_r) > 1:
+        merged_r: List[str] = []
+        for h in hunks_r:
+            h = h.strip("\n")
+            if not h:
+                continue
+            merged_r.extend(_split_segment_under_limit(h + "\n", max_len))
+        return merged_r
+    return _hard_split_at_newlines(segment, max_len)
+
+
+def _bucket_part_filename(slug: str, part_index: int) -> str:
+    """Nom de fichier pour la partie ``part_index`` (1-based) d'un bucket."""
+    if part_index <= 1:
+        return f"{slug}.md"
+    return f"{slug}-part{part_index:02d}.md"
+
+
+def _pack_bucket_markdown_files(
+    *,
+    slug: str,
+    first_header: str,
+    continuation_header: str,
+    segments: List[str],
+    max_chars: int,
+) -> List[Tuple[str, str]]:
+    """Découpe un bucket en un ou plusieurs fichiers Markdown sans dépasser ``max_chars``."""
+    hdr_budget = max(len(first_header), len(continuation_header))
+    if len(first_header) >= max_chars:
+        raise ValueError(
+            f"L'en-tête du bucket {slug!r} (titre + Vision.json éventuel) dépasse la limite "
+            f"max_chars={max_chars}. Réduisez Vision.json ou augmentez max_chars_per_part."
+        )
+    if max_chars <= hdr_budget + 512:
+        raise ValueError("max_chars_per_part trop petit pour les en-têtes de bucket")
+    max_piece = max(16_384, max_chars - hdr_budget - 128)
+
+    flat: List[str] = []
+    for seg in segments:
+        flat.extend(_split_segment_under_limit(seg, max_piece))
+
+    fixed: List[str] = []
+    for p in flat:
+        if len(p) <= max_piece:
+            fixed.append(p)
+        else:
+            fixed.extend(_hard_split_at_newlines(p.rstrip("\n"), max_piece))
+
+    files: List[Tuple[str, str]] = []
+    part_index = 0
+    current = first_header
+
+    def flush_current() -> None:
+        nonlocal part_index, current, files
+        part_index += 1
+        if part_index > _MAX_PARTS_PER_BUCKET:
+            raise ValueError(
+                f"Bucket {slug!r} dépasse {_MAX_PARTS_PER_BUCKET} fichiers découpés ; "
+                "réduisez le périmètre sync ou augmentez la limite côté outil."
+            )
+        files.append((_bucket_part_filename(slug, part_index), current))
+        current = continuation_header
+
+    for piece in fixed:
+        while piece:
+            room = max_chars - len(current)
+            if room <= 0:
+                flush_current()
+                continue
+            take = min(room, len(piece))
+            if take <= 0:
+                flush_current()
+                continue
+            current += piece[:take]
+            piece = piece[take:]
+            if piece:
+                flush_current()
+
+    # Au moins un fichier si on n'a flush qu'avec du contenu ; bucket vide géré par l'appelant.
+    if part_index == 0:
+        flush_current()
+    elif len(current) > len(continuation_header):
+        flush_current()
+    return files
 
 
 def build_notebooklm_markdown_parts(
@@ -306,20 +428,23 @@ def build_notebooklm_markdown_parts(
     max_files: int = _MAX_FILES_DEFAULT,
     max_chars_per_part: int = _MAX_EXPORT_CHARS_PER_PART,
 ) -> List[Tuple[str, str]]:
-    """Construit jusqu’à ``max_files`` documents Markdown (nom, contenu).
+    """Construit des documents Markdown (nom, contenu) pour export NotebookLM.
+
+    Les buckets thématiques dépassant ``max_chars_per_part`` sont découpés en
+    ``{slug}-part02.md``, ``part03``, etc., sans tronquer le texte.
 
     Args:
         gdd_root: Répertoire ``GDD_categories``.
         project_root: Racine du dépôt (pour ``Vision.json``).
         settings: Paramètres sync (``sources``, ``included_categories``).
-        max_files: Nombre max de fichiers (défaut 10).
-        max_chars_per_part: Troncature par fichier si dépassé.
+        max_files: Nombre max de fichiers ``.md`` dans le ZIP (README + parties).
+        max_chars_per_part: Taille max d'un fichier Markdown avant découpage.
 
     Returns:
         Liste de ``(filename.md, texte)`` triée par nom de fichier.
 
     Raises:
-        ValueError: Si ``max_files`` < 1.
+        ValueError: Si ``max_files`` < 1 ou si le découpage dépasserait ``max_files``.
     """
     if max_files < 1:
         raise ValueError("max_files doit être >= 1")
@@ -331,20 +456,6 @@ def build_notebooklm_markdown_parts(
         by_bucket[_bucket_index_for_stem(folded)].append(cf)
 
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    readme = (
-        "# Export GDD (NotebookLM)\n\n"
-        f"Généré le **{now}** à partir des fichiers locaux sous `data/GDD_categories/` "
-        "(synchronisés depuis Notion).\n\n"
-        "## Périmètre\n\n"
-        f"- Bases / pages incluses selon la config : **{len(eligible)}** source(s).\n"
-        f"- Fichiers livrés : **{max_files}** maximum (regroupements thématiques).\n\n"
-        "## Fichiers\n\n"
-    )
-    for b in _BUCKETS:
-        readme += f"- `{b.slug}.md` — {b.title}\n"
-    readme += "\n---\n\n*(Les sections suivantes sont vides si aucune source ne correspond.)*\n"
-
-    parts: Dict[str, str] = {"00-README.md": readme}
 
     vision = _find_vision_json(project_root)
     vision_md = ""
@@ -359,44 +470,84 @@ def build_notebooklm_markdown_parts(
         except (OSError, json.JSONDecodeError):
             vision_md = "## Vision (Vision.json)\n\n*(Fichier présent mais illisible.)*\n\n"
 
+    out: List[Tuple[str, str]] = []
     for bi, bucket in enumerate(_BUCKETS):
-        chunk_lines: List[str] = [
+        first_lines: List[str] = [
             f"# {bucket.title}\n",
             f"*{bucket.description}*\n\n",
         ]
         if bi == 0 and vision_md:
-            chunk_lines.append(vision_md)
+            first_lines.append(vision_md)
+        first_header = "".join(first_lines)
+        continuation_header = (
+            f"# {bucket.title} (suite)\n"
+            f"*Même regroupement que `{bucket.slug}.md` ; fichier découpé pour la taille "
+            f"(limite ~{max_chars_per_part:,} caractères par source NotebookLM).*\n\n"
+        )
         cats = sorted(set(by_bucket[bi]))
         if not cats:
-            chunk_lines.append("*(Aucune source dans cette catégorie pour le périmètre actuel.)*\n")
-            parts[f"{bucket.slug}.md"] = _maybe_truncate("".join(chunk_lines), max_chars_per_part)
+            body = first_header + "*(Aucune source dans cette catégorie pour le périmètre actuel.)*\n"
+            out.extend(
+                _pack_bucket_markdown_files(
+                    slug=bucket.slug,
+                    first_header=body,
+                    continuation_header=continuation_header,
+                    segments=[],
+                    max_chars=max_chars_per_part,
+                )
+            )
             continue
 
+        segments: List[str] = []
         for cf in cats:
+            seg_lines: List[str] = [f"---\n\n# Base : {Path(cf).stem}\n\n"]
             target = _resolve_category_path(gdd_root, cf)
             json_files = _iter_json_files(target)
-            stem = Path(cf).stem
-            chunk_lines.append(f"---\n\n# Base : {stem}\n\n")
             if not json_files:
-                chunk_lines.append("*(Aucun fichier JSON sur disque pour cette source.)*\n\n")
+                seg_lines.append("*(Aucun fichier JSON sur disque pour cette source.)*\n\n")
+                segments.append("".join(seg_lines))
                 continue
             for jf in json_files:
                 rel = jf.relative_to(gdd_root).as_posix()
-                chunk_lines.append(f"## Fichier : `{rel}`\n\n")
+                seg_lines.append(f"## Fichier : `{rel}`\n\n")
                 recs = _load_json_records(jf)
                 if not recs:
-                    chunk_lines.append("*(JSON vide ou invalide.)*\n\n")
+                    seg_lines.append("*(JSON vide ou invalide.)*\n\n")
                     continue
                 for idx, rec in enumerate(recs, start=1):
-                    chunk_lines.append(_record_to_markdown(rec, idx))
+                    seg_lines.append(_record_to_markdown(rec, idx))
+            segments.append("".join(seg_lines))
 
-        parts[f"{bucket.slug}.md"] = _maybe_truncate("".join(chunk_lines), max_chars_per_part)
+        out.extend(
+            _pack_bucket_markdown_files(
+                slug=bucket.slug,
+                first_header=first_header,
+                continuation_header=continuation_header,
+                segments=segments,
+                max_chars=max_chars_per_part,
+            )
+        )
 
-    ordered_names = ["00-README.md"] + [b.slug + ".md" for b in _BUCKETS]
-    out: List[Tuple[str, str]] = [(n, parts[n]) for n in ordered_names if n in parts]
-    if len(out) > max_files:
-        out = out[:max_files]
-    return out
+    file_lines = "\n".join(f"- `{name}` — {len(text):,} caractères" for name, text in out)
+    readme = (
+        "# Export GDD (NotebookLM)\n\n"
+        f"Généré le **{now}** à partir des fichiers locaux sous `data/GDD_categories/` "
+        "(synchronisés depuis Notion).\n\n"
+        "## Périmètre\n\n"
+        f"- Bases / pages incluses selon la config : **{len(eligible)}** source(s).\n"
+        f"- Fichiers Markdown livrés : **{len(out) + 1}** (dont README ; un thème volumineux "
+        f"est découpé en `{_BUCKETS[0].slug}-part02.md`, etc.).\n"
+        f"- Taille max par fichier : **~{max_chars_per_part:,}** caractères (découpage automatique).\n\n"
+        "## Fichiers\n\n"
+        f"{file_lines}\n"
+    )
+    final_out: List[Tuple[str, str]] = [("00-README.md", readme)] + out
+    if len(final_out) > max_files:
+        raise ValueError(
+            f"L'export nécessiterait {len(final_out)} fichiers Markdown (> max_files={max_files}). "
+            "Augmentez le paramètre max_files de la requête."
+        )
+    return final_out
 
 
 def build_gdd_notebooklm_zip_bytes(

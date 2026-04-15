@@ -54,7 +54,6 @@ from services.gdd_notion_sync_mirror import (
     create_staging_run_dir,
     list_gdd_archives,
     partial_errors_block_mirror_promote,
-    partial_errors_should_preserve_mirror_staging,
     promote_staging_to_live,
     prune_archives,
     remove_excluded_database_sources_from_live,
@@ -147,6 +146,8 @@ class GddNotionSyncResult:
     partial_errors: List[str] = field(default_factory=list)
     last_archive_relative: Optional[str] = None
     mirror_rebuild_used: bool = False
+    #: True si le staging complet est prêt mais la promotion a été reportée (erreurs partielles).
+    mirror_promotion_pending: bool = False
 
 
 class GddNotionSyncService:
@@ -250,6 +251,7 @@ class GddNotionSyncService:
             "partial_errors": [],
             "last_archive_relative": None,
             "last_mirror_rebuild_used": None,
+            "mirror_promotion_pending": False,
         }
         data = read_json_file(self._status_path, default=default)
         return data if isinstance(data, dict) else default
@@ -346,6 +348,7 @@ class GddNotionSyncService:
             "sources_completed": len(st.completed_category_files) if st else 0,
             "completed_category_files": list(st.completed_category_files) if st else [],
             "eligible_category_files": eligible_cf,
+            "mirror_promotion_pending": bool(st.mirror_promotion_pending) if st else False,
         }
         if st is None:
             if ck_file_exists:
@@ -378,7 +381,15 @@ class GddNotionSyncService:
             return base
         base["resumable"] = True
         base["checkpoint_status"] = "resumable"
-        base["message"] = "Reprise possible — utilisez le bouton Reprendre ou Sync complète ci-dessous."
+        if st.mirror_promotion_pending:
+            base["message"] = (
+                "Promotion miroir en attente (erreurs partielles sur le dernier run). "
+                "Appliquez le staging confirmé, reprenez pour retenter Notion, ou abandonnez."
+            )
+        else:
+            base["message"] = (
+                "Reprise possible — utilisez le bouton Reprendre ou Sync complète ci-dessous."
+            )
         base["sources_completed"] = len(st.completed_category_files)
         return base
 
@@ -735,6 +746,7 @@ class GddNotionSyncService:
         resume: bool = False,
         fresh: bool = False,
         run_scope_category_files: Optional[Tuple[str, ...]] = None,
+        apply_staging_despite_errors: bool = False,
     ) -> GddNotionSyncResult:
         """Exécute une synchronisation (manuelle ou planifiée)."""
         async with self._run_lock:
@@ -745,6 +757,7 @@ class GddNotionSyncService:
                 resume=resume,
                 fresh=fresh,
                 run_scope_category_files=run_scope_category_files,
+                apply_staging_despite_errors=apply_staging_despite_errors,
             )
 
     async def _run_sync_locked(
@@ -756,6 +769,7 @@ class GddNotionSyncService:
         resume: bool,
         fresh: bool,
         run_scope_category_files: Optional[Tuple[str, ...]] = None,
+        apply_staging_despite_errors: bool = False,
     ) -> GddNotionSyncResult:
         started = datetime.now(timezone.utc).isoformat()
         self._write_status(
@@ -766,6 +780,7 @@ class GddNotionSyncService:
                 "message": "Synchronisation en cours…",
                 "updated_entities": 0,
                 "partial_errors": [],
+                "mirror_promotion_pending": False,
             }
         )
         token = self._store.read_token()
@@ -793,6 +808,7 @@ class GddNotionSyncService:
                 resume=resume,
                 fresh=fresh,
                 run_scope_category_files=run_scope_category_files,
+                apply_staging_despite_errors=apply_staging_despite_errors,
             )
 
         result = GddNotionSyncResult(success=False, message="")
@@ -844,6 +860,7 @@ class GddNotionSyncService:
                 "partial_errors": result.partial_errors[:50],
                 "last_archive_relative": result.last_archive_relative,
                 "last_mirror_rebuild_used": result.mirror_rebuild_used,
+                "mirror_promotion_pending": result.mirror_promotion_pending,
             }
         )
 
@@ -923,6 +940,135 @@ class GddNotionSyncService:
         )
         return cache, True
 
+    async def _apply_staging_despite_errors(
+        self,
+        *,
+        sources: List[Any],
+        included_list: List[str],
+        eligible_cf: List[str],
+        fingerprint: str,
+        force_full: bool,
+        run_scope_category_files: Optional[Tuple[str, ...]],
+        resume: bool,
+        fresh: bool,
+        request_id: Optional[str],
+    ) -> GddNotionSyncResult:
+        """Applique le staging conservé après erreurs partielles (confirmation utilisateur)."""
+        if not force_full:
+            return GddNotionSyncResult(
+                success=False,
+                message="apply_staging_despite_errors=true nécessite full=true (sync complète).",
+            )
+        if run_scope_category_files:
+            return GddNotionSyncResult(
+                success=False,
+                message=(
+                    "apply_staging_despite_errors est incompatible avec le paramètre "
+                    "category_file (périmètre restreint)."
+                ),
+            )
+        if resume or fresh:
+            return GddNotionSyncResult(
+                success=False,
+                message=(
+                    "apply_staging_despite_errors est incompatible avec resume et fresh."
+                ),
+            )
+        ok_resume, vmsg = validate_checkpoint_for_resume(
+            self._gdd_categories_path,
+            self._sync_checkpoint_dir,
+            eligible_category_files=eligible_cf,
+            sources_fingerprint=fingerprint,
+        )
+        if not ok_resume:
+            return GddNotionSyncResult(
+                success=False,
+                message=f"Application du miroir impossible — {vmsg}",
+            )
+        st_chk = load_checkpoint_state(self._sync_checkpoint_dir)
+        if st_chk is None or not st_chk.mirror_promotion_pending:
+            return GddNotionSyncResult(
+                success=False,
+                message=(
+                    "Aucune promotion miroir en attente. Si une sync complète s'est arrêtée "
+                    "sur des erreurs, son checkpoint doit encore être valide ; sinon relancez "
+                    "une sync complète ou utilisez « Reprendre » pour une sync inachevée."
+                ),
+            )
+        staging_apply = staging_run_path(
+            self._gdd_categories_path, st_chk.staging_run_name
+        )
+        if not staging_apply.is_dir():
+            return GddNotionSyncResult(
+                success=False,
+                message="Application du miroir impossible — dossier staging introuvable.",
+            )
+        _, manifest_sidecar = checkpoint_paths(self._sync_checkpoint_dir)
+        manifest_run = load_run_manifest(manifest_sidecar)
+        sync_targets_apply = collect_sync_targets(
+            self._gdd_categories_path, eligible_cf
+        )
+        self._sync_progress_update(
+            active=True,
+            started_at=datetime.now(timezone.utc).isoformat(),
+            force_full=True,
+            mirror_rebuild=True,
+            phase="promoting",
+            sources_total=len(eligible_cf),
+            sources_completed=len(eligible_cf),
+            current_source_index=len(eligible_cf),
+            current_category_file="",
+            pages_total_known=0,
+            pages_processed=0,
+            pages_in_current_source=0,
+            current_page_in_source=0,
+            current_page_id_short="",
+            message="Promotion du staging (confirmation erreurs partielles)…",
+            paused=False,
+        )
+        manifest_run.last_full_sync_at = datetime.now(timezone.utc).isoformat()
+        save_manifest(self._manifest_path, manifest_run)
+        promote_staging_to_live(
+            self._gdd_categories_path,
+            staging_apply,
+            sync_targets_apply,
+            allow_missing_staged=True,
+        )
+        prune_included: List[str] = list(included_list)
+        removed_live = remove_excluded_database_sources_from_live(
+            self._gdd_categories_path,
+            sources,
+            prune_included,
+        )
+        for rel in removed_live:
+            log_sync_event(
+                f"Périmètre restreint : supprimé du disque local — {rel}",
+                request_id=request_id,
+            )
+        clear_checkpoint_files(self._sync_checkpoint_dir)
+        prune_staging_runs_keep_only(self._gdd_categories_path, None)
+        log_sync_event(
+            "Miroir appliqué après confirmation utilisateur (reliquats ignorés).",
+            request_id=request_id,
+        )
+        self._clear_gdd_file_cache_and_notify_context()
+        if self._after_gdd_disk_mutation is not None:
+            self._after_gdd_disk_mutation()
+        self._sync_progress_clear()
+        return GddNotionSyncResult(
+            success=True,
+            message=(
+                "Miroir appliqué avec reliquats : les bases sans artefact dans le staging "
+                "n'ont pas été modifiées sur disque. Vérifiez les erreurs du dernier run "
+                "dans le statut ou les logs."
+            ),
+            updated_entities=int(st_chk.updated_entities),
+            partial_errors=[],
+            last_archive_relative=st_chk.archive_rel or None,
+            mirror_rebuild_used=True,
+            mirror_promotion_pending=False,
+        )
+
     async def _sync_body(
         self,
         token: str,
@@ -934,6 +1080,7 @@ class GddNotionSyncService:
         resume: bool = False,
         fresh: bool = False,
         run_scope_category_files: Optional[Tuple[str, ...]] = None,
+        apply_staging_despite_errors: bool = False,
     ) -> GddNotionSyncResult:
         settings = self._store.load_settings()
         sources = settings.get("sources") or []
@@ -1015,6 +1162,19 @@ class GddNotionSyncService:
         if scope_set:
             log_sync_event(
                 f"Périmètre run restreint aux bases : {', '.join(sorted(scope_set))}",
+                request_id=request_id,
+            )
+
+        if apply_staging_despite_errors:
+            return await self._apply_staging_despite_errors(
+                sources=sources,
+                included_list=included_list,
+                eligible_cf=eligible_cf,
+                fingerprint=fingerprint,
+                force_full=force_full,
+                run_scope_category_files=run_scope_category_files,
+                resume=resume,
+                fresh=fresh,
                 request_id=request_id,
             )
 
@@ -1117,6 +1277,7 @@ class GddNotionSyncService:
                     completed_category_files=[],
                     sources_fingerprint=fingerprint,
                     updated_entities=0,
+                    mirror_promotion_pending=False,
                 )
                 save_checkpoint(self._sync_checkpoint_dir, cp_state, manifest)
         else:
@@ -1371,36 +1532,22 @@ class GddNotionSyncService:
 
         if mirror_ok and staging_run is not None:
             if partial_errors_block_mirror_promote(partial):
-                preserve = partial_errors_should_preserve_mirror_staging(partial)
-                if preserve and cp_state is not None:
-                    save_checkpoint(
-                        self._sync_checkpoint_dir, cp_state, manifest
-                    )
-                    log_sync_event(
-                        "Miroir non promu (erreurs transitoires) — "
-                        "staging et checkpoint conservés pour reprise.",
-                        request_id=request_id,
-                    )
-                    msg = (
-                        f"Miroir non appliqué : erreurs bloquantes ({len(partial)}). "
-                        f"État GDD inchangé. Snapshot : {archive_rel or '?'}. "
-                        "Reprise possible — relancez une sync complète avec Reprendre."
-                    )
-                    self._clear_gdd_file_cache_and_notify_context()
-                    self._active_mirror_staging = None
-                    return GddNotionSyncResult(
-                        success=False,
-                        message=msg,
-                        updated_entities=updated,
-                        partial_errors=partial,
-                        last_archive_relative=archive_rel,
-                        mirror_rebuild_used=True,
-                    )
-                cleanup_staging_only(staging_run)
-                clear_checkpoint_files(self._sync_checkpoint_dir)
+                if cp_state is not None:
+                    cp_state.mirror_promotion_pending = True
+                    save_checkpoint(self._sync_checkpoint_dir, cp_state, manifest)
+                log_sync_event(
+                    "Miroir non promu (erreurs partielles bloquantes) — staging et "
+                    "checkpoint conservés. Relancez avec apply_staging_despite_errors=true "
+                    "pour appliquer le staging (reliquats ignorés), ou resume=true pour "
+                    "retenter les sources Notion en échec.",
+                    request_id=request_id,
+                )
                 msg = (
-                    f"Miroir non appliqué : erreurs bloquantes ({len(partial)}). "
-                    f"État GDD inchangé. Snapshot : {archive_rel or '?'}"
+                    f"Miroir non appliqué automatiquement : {len(partial)} erreur(s) "
+                    f"partielle(s). Le disque live GDD n'a pas été modifié. "
+                    f"Snapshot : {archive_rel or '?'}. "
+                    "Vous pouvez appliquer le miroir malgré tout (bases absentes du staging "
+                    "restent inchangées), ou reprendre pour retenter Notion."
                 )
                 self._clear_gdd_file_cache_and_notify_context()
                 self._active_mirror_staging = None
@@ -1411,6 +1558,7 @@ class GddNotionSyncService:
                     partial_errors=partial,
                     last_archive_relative=archive_rel,
                     mirror_rebuild_used=True,
+                    mirror_promotion_pending=True,
                 )
             self._sync_progress_update(
                 phase="promoting",
@@ -1420,7 +1568,10 @@ class GddNotionSyncService:
                 manifest.last_full_sync_at = datetime.now(timezone.utc).isoformat()
             save_manifest(self._manifest_path, manifest)
             promote_staging_to_live(
-                self._gdd_categories_path, staging_run, sync_targets
+                self._gdd_categories_path,
+                staging_run,
+                sync_targets,
+                allow_missing_staged=False,
             )
             prune_included: List[str] = [] if scope_set else list(included_list)
             removed_live = remove_excluded_database_sources_from_live(
@@ -1460,6 +1611,7 @@ class GddNotionSyncService:
             partial_errors=partial,
             last_archive_relative=archive_rel if mirror_ok else None,
             mirror_rebuild_used=mirror_ok,
+            mirror_promotion_pending=False,
         )
 
     async def _fetch_pages(
@@ -1476,13 +1628,13 @@ class GddNotionSyncService:
             notion_id, data_source_ids=data_source_ids
         )
 
-    def build_notebooklm_export_zip(self, *, max_files: int = 10) -> bytes:
+    def build_notebooklm_export_zip(self, *, max_files: int = 64) -> bytes:
         """Assemble un ZIP Markdown (NotebookLM) depuis le GDD local et la config sync.
 
         Utilise ``included_categories`` comme filtre de périmètre (même sémantique que la sync).
 
         Args:
-            max_files: Nombre maximal de fichiers dans l’archive (1–10).
+            max_files: Nombre maximal de fichiers dans l’archive (1–128), README inclus.
 
         Returns:
             Contenu binaire du fichier ZIP.
@@ -1492,8 +1644,8 @@ class GddNotionSyncService:
         """
         from services.gdd_notebooklm_export import build_gdd_notebooklm_zip_bytes
 
-        if max_files < 1 or max_files > 10:
-            raise ValueError("max_files doit être entre 1 et 10")
+        if max_files < 1 or max_files > 128:
+            raise ValueError("max_files doit être entre 1 et 128")
         settings = self._store.load_settings()
         project_root = self._gdd_categories_path.resolve().parent.parent
         return build_gdd_notebooklm_zip_bytes(

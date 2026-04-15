@@ -497,7 +497,7 @@ All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schema
 
 ### GET `/gdd-notion-sync/notebooklm-export`
 
-**Query Parameters:** `max_files` (int, 1–10, default 10) — nombre max de fichiers Markdown dans le ZIP.
+**Query Parameters:** `max_files` (int, 1–128, default 64) — nombre max de fichiers Markdown dans le ZIP (README + thèmes et suites `-partNN`).
 
 **Response:** `application/zip` ; en-tête `Content-Disposition: attachment; filename="gdd-notebooklm-export.zip"`. Erreurs : `400` si validation métier (`ValueError`), `500` si lecture disque (`OSError`).
 

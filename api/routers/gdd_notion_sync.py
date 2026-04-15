@@ -130,6 +130,15 @@ async def run_gdd_notion_sync(
             ),
         ),
     ] = None,
+    apply_staging_despite_errors: Annotated[
+        bool,
+        Query(
+            description=(
+                "Appliquer le staging conservé après erreurs partielles (full=true requis). "
+                "Incompatible avec resume, fresh et category_file."
+            ),
+        ),
+    ] = False,
 ) -> GddNotionSyncRunResponse:
     """Déclenche une synchronisation immédiate."""
     if resume and not full:
@@ -152,6 +161,26 @@ async def run_gdd_notion_sync(
             status_code=400,
             detail="category_file avec resume=true n'est pas supporté.",
         )
+    if apply_staging_despite_errors and not full:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors=true nécessite full=true (sync complète).",
+        )
+    if apply_staging_despite_errors and resume:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors est incompatible avec resume=true.",
+        )
+    if apply_staging_despite_errors and fresh:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors est incompatible avec fresh=true.",
+        )
+    if apply_staging_despite_errors and category_file:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors est incompatible avec category_file.",
+        )
     scope_files: Optional[tuple[str, ...]] = None
     if category_file:
         scope_norm = tuple(
@@ -166,12 +195,14 @@ async def run_gdd_notion_sync(
         resume=resume,
         fresh=fresh,
         run_scope_category_files=scope_files,
+        apply_staging_despite_errors=apply_staging_despite_errors,
     )
     return GddNotionSyncRunResponse(
         success=result.success,
         message=result.message,
         updated_entities=result.updated_entities,
         partial_errors=result.partial_errors,
+        mirror_promotion_pending=result.mirror_promotion_pending,
     )
 
 
@@ -263,10 +294,10 @@ async def download_gdd_notebooklm_export(
         int,
         Query(
             ge=1,
-            le=10,
-            description="Nombre max de fichiers Markdown dans le ZIP (défaut 10).",
+            le=128,
+            description="Nombre max de fichiers Markdown dans le ZIP (README + thèmes et suites -partNN).",
         ),
-    ] = 10,
+    ] = 64,
 ) -> Response:
     """ZIP : GDD local (Notion sync) regroupé en Markdown pour NotebookLM / présentations."""
     try:
