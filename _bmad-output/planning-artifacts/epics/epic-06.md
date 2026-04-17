@@ -12,6 +12,36 @@ Les utilisateurs peuvent créer, sauvegarder et réutiliser des configurations d
 
 ---
 
+## Contexte GDD Alteir — Ce que les templates doivent couvrir
+
+Source : `gdd-systems-reference.md`. Les templates de DialogueGenerator ne sont pas neutres : ils embarquent implicitement la connaissance des systèmes Alteir. Un template "Confrontation" doit savoir que les choix peuvent tester `Sociabilité` ou `Puissance`, qu'ils peuvent modifier la réputation (axe Crainte), et qu'un flag `Flag_perso_X_confrontation` sera probablement affecté.
+
+### Templates pré-built Alteir à prévoir (Story 6.4)
+
+| Template | Système GDD principal | Effets typiques |
+|----------|----------------------|-----------------|
+| **Salutation / Première rencontre** | Réputation (initialisation), Flags bool | `Flag_perso_X_rencontre_initiale = true`, delta Admiration +2 |
+| **Confrontation** | Skill check (Puissance/Sociabilité), Réputation Crainte | Test DD variable, delta Crainte ±N |
+| **Révélation narrative** | Flags enum/compteur, souvenir | `Flag_systeme_memoire_*`, progression Connaissance |
+| **Négociation / Marchandage** | Réputation Prestige, Effort pool | Conditions `Prestige >= 30`, delta Prestige ±5 |
+| **Recrutement compagnon** | Influence & Respect, flags Faction | `influence_delta`, `Flag_faction_*_recrutement` |
+| **Cut-scene déclenchée** | Cut-scene (pas de choix), flags système | `nodeType: "cutscene"`, `trigger_animation` |
+| **Test de caractéristique pur** | Core System (8 caractéristiques, Effort pool) | `skillCheckConfig` avec caractéristique + DD |
+
+### Contexte GDD dans un template
+
+Un template peut pré-sélectionner un **type de scène** qui oriente automatiquement le ContextSelector (Epic 15) vers les fiches GDD pertinentes. Exemples :
+- Template "Confrontation" → hint `type_scene: "confrontation"` → RLM favorise fiches avec champ `Valeurs`, `Défauts`, `Contradictions`
+- Template "Première rencontre" → hint `type_scene: "rencontre_initiale"` → RLM favorise `Rencontre initiale` dans fiches personnages
+
+### Instructions anti-context-dropping (Story 6.5)
+
+Les règles anti-context-dropping dépendent du système GDD actif :
+- **Mode Explicite** (Réputation, Flags) : Les valeurs numériques (DD, delta réputation) doivent être explicitement dans le JSON généré
+- **Mode Subtil** (Lore, Souvenir) : Les références implicites à la cosmologie ou au passé du PNJ sont acceptées
+
+---
+
 ## ⚠️ GARDE-FOUS - Vérification de l'Existant (Scrum Master)
 
 **OBLIGATOIRE avant création de chaque story de cet epic :**
@@ -197,13 +227,14 @@ So that **je peux démarrer rapidement avec des configurations optimisées sans 
 
 **Given** je suis sur l'écran de génération
 **When** j'ouvre le sélecteur de templates
-**Then** une section "Templates pré-built" s'affiche avec templates : Salutation, Confrontation, Révélation, etc.
-**And** chaque template pré-built affiche : nom, description, aperçu (instructions type)
+**Then** une section "Templates pré-built" s'affiche avec templates Alteir : Salutation/Première rencontre, Confrontation, Révélation narrative, Négociation, Recrutement compagnon, Cut-scene, Test de caractéristique
+**And** chaque template pré-built affiche : nom, description, système GDD associé, aperçu (instructions type)
 
-**Given** je sélectionne un template pré-built "Salutation"
+**Given** je sélectionne un template pré-built "Confrontation"
 **When** le template est chargé
-**Then** les instructions sont pré-remplies avec configuration optimisée pour salutations
-**And** le template inclut : ton adaptatif, répliques mesurées, établissement relation
+**Then** les instructions sont pré-remplies avec configuration optimisée pour confrontations Alteir
+**And** le template inclut : test de caractéristique (Puissance ou Sociabilité), condition/effet réputation axe Crainte, flag bool de confrontation
+**And** le hint `type_scene: "confrontation"` est pré-rempli (utilisé par Epic 15 RLM si activé)
 **And** je peux lancer une génération immédiatement
 
 **Given** je consulte les détails d'un template pré-built
@@ -224,10 +255,10 @@ So that **je peux démarrer rapidement avec des configurations optimisées sans 
 **Technical Requirements:**
 - Backend : Fichiers JSON `config/scene_instruction_templates.json` (existant) avec templates pré-built
 - Service : `TemplateService` avec méthode `get_prebuilt_templates()` retournant templates système
-- Structure : Templates pré-built incluent : id, name, description, instructions, catégorie
+- Structure : Templates pré-built incluent : id, name, description, instructions, catégorie, `gdd_system` (système GDD principal), `scene_type_hint` (hint pour RLM Epic 15), effets et conditions typiques (optionnel, pour aperçu)
+- Templates Alteir à créer : Salutation/Première rencontre, Confrontation, Révélation narrative, Négociation, Recrutement compagnon, Cut-scene, Test de caractéristique (voir table GDD ci-dessus)
 - Frontend : Composant `TemplateSelector.tsx` avec section "Pré-built" + "Mes templates"
 - Stockage : Templates pré-built en lecture seule (pas modifiables), copie pour personnalisation
-- Mise à jour : Templates pré-built versionnés, notification nouvelles versions (optionnel)
 - Tests : Unit (chargement pré-built), Integration (API templates), E2E (workflow pré-built)
 
 **References:** FR58 (templates pré-built), Story 6.3 (appliquer templates), Story 6.1 (créer templates custom)
@@ -435,6 +466,7 @@ So that **je peux découvrir rapidement les templates les plus pertinents pour m
 **Given** je sélectionne un personnage "Akthar" et un lieu "Port de Valdris"
 **When** je consulte les suggestions de templates
 **Then** les templates pertinents pour "première rencontre" ou "conversation portuaire" sont suggérés
+**And** si le GDD indique que `Flag_perso_akthar_rencontre_initiale` n'est pas encore posé, le template "Salutation/Première rencontre" est prioritaire
 **And** un indicateur "Suggéré pour votre contexte" s'affiche
 
 **Given** je configure des instructions avec mots-clés (ex: "confrontation", "révélation")

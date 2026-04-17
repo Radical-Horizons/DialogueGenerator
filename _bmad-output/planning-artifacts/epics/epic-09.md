@@ -12,6 +12,50 @@ Les utilisateurs peuvent définir des variables et flags dans les dialogues pour
 
 ---
 
+## 📖 Contexte GDD Alteir (source Notion — à jour au 17/04/2026)
+
+> Référence complète de tous les systèmes de jeu : [`gdd-systems-reference.md`](../gdd-systems-reference.md)
+
+> **Obligatoire** : toute story de cet epic doit respecter ces contraintes extraites du GDD de référence.
+
+### Catalogue de flags (DB Notion `Flags`)
+
+- **343 flags** définis dans la base Notion `Flags` (ID unique FLAG001–FLAG389, 283 `Défini`, 29 `À définir`).
+- **3 types de valeur** (champ `Type de valeur`) :
+  - `bool` — 22 flags · Valeurs : `true` / `false` · ex: `Flag_perso_raki_recrutement`, `Flag_tutoriel_complete`
+  - `compteur` — 30 flags · Champs `Min` et `Max` (ex: Min=0, Max=4) · ex: `Flag_lieu_miroirs_forcage_compteur [0–4]`, `Flag_perso_ensevelie_echanges [0–4]`
+  - `enum` — 270 flags · Valeurs prédéfinies ordonnées dans la table `Valeurs de Flag` (chaque valeur a un `Ordre` et un flag `Par défaut`) · ex: `INTACT (défaut, ordre 0) → CONSULTE_SURFACE (ordre 2) → IMMERSION_PROFONDE (ordre 3)`
+- **Convention de nommage** : `Flag_[portée]_[entité]_[description]` (ex: `Flag_perso_akthar_neth_confiance`, `Flag_lieu_nexus_decouverte`, `Flag_faction_rep_synaptic_prestige_max`)
+- **Portées** (champ `Portée`) : `Personnage` (185), `Lieu` (74), `Faction` (33), `Système` (14), `Quête` (13), `Objet` (9)
+- **Relations** : chaque flag liste ses `Systèmes consommateurs` et `Systèmes producteurs` (relations vers les fiches système)
+- **Valeurs de Flag** (table liée) : 616 valeurs · chaque entrée a `Nom`, `Ordre`, `Par défaut (oui/non)`, `Description narrative`, `Flag parent`
+
+### Système Dialogues (GDD validé)
+
+Extrait de la fiche système **Dialogues** (Notion page `2ef6e4d2`) :
+- Chaque nœud contient : ID unique, texte (≤ 300 mots), locuteur, 2–10 choix, **conditions** (flags, compteurs, stats), **actions** (modifier flags/compteurs/relations), nœud suivant
+- **Repères de design** (non hardcodés — alertes uniquement) : au-delà de ~1 000 nœuds/arbre, ~10 flags conversationnels/PNJ ou ~3 compteurs/PNJ, la maintenabilité humaine dégrade. Ces seuils servent d'alertes UX, pas de blocages.
+- **Options grisées** = verrouillées par conditions narratives (flag manquant, réputation insuffisante, progression) — distincts des tests de caractéristiques qui restent toujours tentables
+- **Tests de caractéristiques** : `[Sociabilité + Tromperie vs DD 7]` — Score personnage ≥ seuil (5–150) → succès ; séparés des conditions de flag
+- **Formule flag concret** : `voknir_demande_aide = true` (flag bool posé après sélection d'un choix)
+- **Tooltip condition** : `« Requiert : Réputation Prestige ≥ 30 (actuel : 15) »`
+- **Intégrations** : consomme Caractéristiques & Compétences (Score social), Gestion de l'Effort (1–3 pts), Réputation (niveaux Admiration/Prestige/Crainte) ; produit vers Réputation, Quêtes, Progression, Recrutement
+
+### Système Réputation (GDD validé — pour Story 9.6)
+
+- **3 axes indépendants par faction/communauté** : Admiration (cœur/affection), Prestige (hiérarchie sociale), Crainte
+- **Paliers** : Sympathie → Faveur → Dévotion (la jauge peut retomber)
+- **Flags one-way produits** : `Palier max historique` (Enum, portée Faction — ne peut pas redescendre) + `Titre officiel` (Enum, portée Faction — décerné par moment narratif, pas par accumulation)
+- **Principe** : la valeur agrégée est la Source of Truth ; le palier se calcule à la volée — **ne pas stocker le palier courant dans un flag**
+
+### Système Core (no-dice, GDD validé)
+
+- 8 caractéristiques : Puissance, Agilité, Perception, Intelligence, Créativité, Sociabilité, Technique, Volonté
+- Pool Effort : 10 pts · dépense pour forcer réussite · échec critique volontaire = +5 pts
+- Succès critique : Score dépasse DD de ≥ 5 · Échec critique : Score inférieur DD de ≥ 5
+
+---
+
 ## ⚠️ GARDE-FOUS - Vérification de l'Existant (Scrum Master)
 
 **OBLIGATOIRE avant création de chaque story de cet epic :**
@@ -19,31 +63,27 @@ Les utilisateurs peuvent définir des variables et flags dans les dialogues pour
 ### Checklist de Vérification
 
 1. **Fichiers mentionnés dans les stories :**
-   - [ ] Vérifier existence avec `glob_file_search` ou `grep`
-   - [ ] Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
-   - [ ] Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
-
+  - Vérifier existence avec `glob_file_search` ou `grep`
+  - Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
+  - Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
 2. **Composants/Services similaires :**
-   - [ ] Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
-   - [ ] Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
-   - [ ] Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
-   - [ ] Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
-
+  - Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
+  - Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
+  - Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
+  - Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
 3. **Endpoints API :**
-   - [ ] Vérifier namespace cohérent (`/api/v1/dialogues/*` vs autres)
-   - [ ] Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
-   - [ ] Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
-
+  - Vérifier namespace cohérent (`/api/v1/dialogues/`* vs autres)
+  - Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
+  - Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
 4. **Patterns existants :**
-   - [ ] Vérifier patterns Zustand (immutable updates, structure stores)
-   - [ ] Vérifier patterns FastAPI (routers, dependencies, schemas)
-   - [ ] Vérifier patterns React (composants, hooks, modals)
-   - [ ] Respecter conventions de nommage et structure dossiers
-
+  - Vérifier patterns Zustand (immutable updates, structure stores)
+  - Vérifier patterns FastAPI (routers, dependencies, schemas)
+  - Vérifier patterns React (composants, hooks, modals)
+  - Respecter conventions de nommage et structure dossiers
 5. **Documentation des décisions :**
-   - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
-   - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
-   - Si nouveau : Documenter **POURQUOI** pas de réutilisation
+  - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
+  - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
+  - Si nouveau : Documenter **POURQUOI** pas de réutilisation
 
 ---
 
@@ -53,50 +93,57 @@ As a **utilisateur créant des dialogues**,
 I want **définir des variables et flags dans mes dialogues**,
 So that **je peux créer des branches conditionnelles qui réagissent à l'état du jeu et aux choix du joueur**.
 
+> **Contraintes GDD** : 3 types de flags (`bool`, `compteur` avec Min/Max, `enum` avec valeurs prédéfinies ordonnées). Pas de type `string` libre — les textes dynamiques passent par des flags `enum`. Convention de nommage : `Flag_[portée]_[entité]_[description]`. Les seuils GDD (~10 flags conversationnels, ~3 compteurs/PNJ) sont des repères de maintenabilité — à signaler par alerte, jamais à bloquer.
+
 **Acceptance Criteria:**
 
 **Given** j'ai un dialogue ouvert dans l'éditeur
 **When** j'ouvre "Variables et flags" dans le panneau de configuration
-**Then** je peux voir la liste des flags disponibles depuis le catalogue (existant `InGameFlagsModal`)
-**And** je peux sélectionner des flags booléens, numériques, ou string
+**Then** je peux voir la liste des flags disponibles depuis le catalogue Notion (343 flags, `InGameFlagsModal` existant)
+**And** je peux filtrer par type (`bool`, `compteur`, `enum`) et par portée (`Personnage`, `Lieu`, `Faction`, `Système`, `Quête`, `Objet`)
 **And** les flags sélectionnés sont associés au dialogue
 
-**Given** je sélectionne un flag booléen (ex: "hasMetAkthar")
+**Given** je sélectionne un flag `bool` (ex: `Flag_perso_voknir_rencontre_initiale`)
 **When** le flag est sélectionné
 **Then** le flag apparaît dans la liste "Flags utilisés dans ce dialogue"
-**And** je peux définir sa valeur initiale (true/false)
+**And** je peux définir sa valeur initiale (`true` / `false`)
 **And** le flag est sauvegardé avec le dialogue
 
-**Given** je sélectionne un flag numérique (ex: "reputationAkthar")
+**Given** je sélectionne un flag `compteur` (ex: `Flag_lieu_miroirs_forcage_compteur [Min:0, Max:4]`)
 **When** le flag est sélectionné
-**Then** je peux définir sa valeur initiale (ex: 50)
-**And** je peux définir des plages de valeurs (min/max) pour validation
+**Then** je peux voir les bornes Min/Max issues du catalogue (lecture seule — définies dans le GDD)
+**And** je peux définir la valeur initiale dans les bornes
+**And** le flag et sa valeur initiale sont sauvegardés avec le dialogue
 
-**Given** je sélectionne un flag string (ex: "playerName")
+**Given** je sélectionne un flag `enum` (ex: `Flag_lieu_nexus_decouverte` avec valeurs `INCONNU → REPERE → VISITE → EXPLORE`)
 **When** le flag est sélectionné
-**Then** je peux définir sa valeur initiale (ex: "Joueur")
+**Then** je vois la liste des valeurs ordonnées avec leur valeur par défaut mise en évidence (ex: `INCONNU (défaut)`)
+**And** je peux choisir la valeur initiale parmi les valeurs prédéfinies
 **And** le flag est sauvegardé avec le dialogue
 
 **Given** je définis plusieurs flags pour un dialogue
 **When** je sauvegarde le dialogue
 **Then** tous les flags sont persistés dans les métadonnées du dialogue
+**And** une alerte non-bloquante s'affiche si le nombre de compteurs dépasse ~3 ou les flags conversationnels ~10 (repères de maintenabilité GDD — le dialogue reste sauvegardable)
 **And** les flags sont disponibles pour conditions et effets (voir Stories 9.2-9.3)
 
 **Given** je consulte un dialogue existant
 **When** j'ouvre "Variables et flags"
-**Then** les flags déjà définis sont affichés avec leurs valeurs
-**And** je peux modifier les valeurs ou ajouter/supprimer des flags
+**Then** les flags déjà définis sont affichés avec type, portée, et valeur initiale
+**And** je peux modifier la valeur initiale ou supprimer des flags
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/{id}/flags` (GET liste, POST ajouter, PUT modifier, DELETE supprimer)
 - Service : `DialogueFlagsService` avec méthodes CRUD flags pour dialogues
-- Catalogue : Réutiliser `FlagCatalogService` (existant) pour liste flags disponibles
-- Base de données : Table `dialogue_flags` (dialogue_id, flag_id, value, type) ou JSON dans métadonnées dialogue
-- Frontend : Composant `DialogueFlagsPanel.tsx` avec intégration `InGameFlagsModal` (existant) pour sélection flags
-- Types : Support bool, number, string flags (déjà implémenté dans `InGameFlag` type)
-- Tests : Unit (gestion flags), Integration (API flags), E2E (workflow flags)
+- Catalogue : Réutiliser `FlagCatalogService` (existant) — source de vérité : DB Notion `Flags` (343 entrées, ID FLAG001–FLAG389)
+- Types supportés : `bool`, `compteur` (avec `min`/`max` issus du catalogue), `enum` (valeurs depuis table `Valeurs de Flag` ordonnées par `Ordre`)
+- Alerte UX non-bloquante : si le dialogue dépasse ~10 flags conversationnels ou ~3 compteurs, afficher un avertissement de maintenabilité (ne pas bloquer la sauvegarde)
+- Base de données : JSON dans métadonnées dialogue (`dialogue_flags: [{flag_id, initial_value, type}]`)
+- Frontend : Composant `DialogueFlagsPanel.tsx` avec intégration `InGameFlagsModal` (existant) pour sélection flags ; affichage groupé par type
+- Tests : Unit (gestion flags, validation limites), Integration (API flags), E2E (workflow flags)
 
-**References:** FR89 (variables/flags V1.0+), Story 9.2 (conditions), Story 9.3 (effets), Epic 1 (dialogues)
+**References:** FR89 (variables/flags V1.0+), Story 9.2 (conditions), Story 9.3 (effets), Epic 1 (dialogues), [GDD Dialogues système — repères de maintenabilité: ~10 flags/~3 compteurs par PNJ, alertes non-bloquantes]
 
 ---
 
@@ -106,53 +153,58 @@ As a **utilisateur créant des dialogues**,
 I want **définir des conditions de visibilité sur les nœuds (si variable X = Y, afficher nœud)**,
 So that **je peux créer des branches de dialogue qui ne s'affichent que si certaines conditions sont remplies**.
 
+> **Contraintes GDD** : 3 catégories de conditions dans le système Dialogues d'Alteir : (1) conditions sur **flags** (bool/compteur/enum), (2) conditions sur **Réputation** (Prestige/Admiration/Crainte par faction avec seuil numérique), (3) **tests de caractéristiques** (`[Sociabilité + Tromperie vs DD 7]`) — les tests ne grisent pas l'option, ils ont une issue succès/échec. Seules les conditions (1) et (2) grisent ou masquent des options. L'UI affiche un tooltip formaté : `« Requiert : Réputation Prestige ≥ 30 (actuel : 15) »`.
+
 **Acceptance Criteria:**
 
 **Given** j'ai un nœud dans le graphe
 **When** je sélectionne le nœud et ouvre "Conditions"
-**Then** un panneau s'affiche avec champ "Condition de visibilité"
-**And** je peux saisir une condition (ex: "hasMetAkthar", "reputationAkthar >= 50", "playerName == 'Marc'")
+**Then** un panneau s'affiche permettant d'ajouter des conditions par type : Flag / Réputation
 
-**Given** je définis une condition booléenne (ex: "hasMetAkthar")
+**Given** j'ajoute une condition sur un flag `bool` (ex: `Flag_perso_voknir_rencontre_initiale = true`)
 **When** la condition est sauvegardée
-**Then** le nœud n'est visible que si le flag `hasMetAkthar` est true
-**And** la condition est affichée visuellement sur le nœud (badge "Condition: hasMetAkthar")
+**Then** le nœud n'est visible que si le flag a la valeur attendue
+**And** la condition est affichée visuellement sur le nœud (badge "Condition: Flag_perso_voknir...")
 
-**Given** je définis une condition numérique (ex: "reputationAkthar >= 50")
+**Given** j'ajoute une condition sur un flag `compteur` (ex: `Flag_lieu_miroirs_forcage_compteur >= 2`)
 **When** la condition est sauvegardée
-**Then** le nœud n'est visible que si `reputationAkthar` est >= 50
-**And** la condition est validée syntaxiquement (voir Story 9.5)
+**Then** le nœud n'est visible que si le compteur atteint le seuil
+**And** les opérateurs disponibles sont : `=`, `!=`, `>=`, `<=`, `>`, `<`
 
-**Given** je définis une condition sur un choix joueur
-**When** je sélectionne un choix et définis sa condition
-**Then** le choix n'est visible que si la condition est remplie
-**And** la condition est affichée sur le choix (ex: "[Si reputationAkthar >= 50] Accepter l'alliance")
+**Given** j'ajoute une condition sur un flag `enum` (ex: `Flag_lieu_nexus_decouverte = VISITE`)
+**When** la condition est sauvegardée
+**Then** le nœud n'est visible que si le flag a exactement la valeur enum sélectionnée
+**And** le sélecteur affiche les valeurs enum dans leur ordre défini (depuis le catalogue)
 
-**Given** un nœud a une condition non remplie
-**When** je preview le dialogue (voir Story 9.4)
-**Then** le nœud est grisé ou masqué dans le preview
-**And** un indicateur affiche "Condition non remplie: hasMetAkthar = false"
+**Given** j'ajoute une condition sur la Réputation d'une faction (ex: `Réputation Prestige [Culte de l'Anentropie] ≥ 30`)
+**When** la condition est sauvegardée
+**Then** le nœud n'est visible que si ce seuil de réputation est atteint
+**And** le tooltip en jeu affiche le format standard : `« Requiert : Réputation Prestige ≥ 30 (actuel : X) »`
 
-**Given** je définis plusieurs conditions (AND/OR)
-**When** je saisie "hasMetAkthar AND reputationAkthar >= 50"
-**Then** le nœud n'est visible que si TOUTES les conditions sont remplies (AND)
-**And** je peux utiliser OR pour conditions alternatives
+**Given** je définis plusieurs conditions sur un même nœud
+**When** je les combine
+**Then** je peux choisir l'opérateur logique AND ou OR entre conditions
+**And** la combinaison est affichée lisiblement sur le nœud
+
+**Given** un nœud a une condition non remplie dans le preview (voir Story 9.4)
+**When** le preview est actif
+**Then** le nœud est grisé avec indication de la condition non remplie (ex: `Flag_perso_voknir_rencontre_initiale = false`)
 
 **Given** je consulte un dialogue avec conditions
 **When** j'ouvre le graphe
 **Then** les nœuds avec conditions sont marqués visuellement (icône condition, couleur différente)
-**And** je peux survoler pour voir la condition complète
+**And** je peux survoler pour voir le détail complet de la condition
 
 **Technical Requirements:**
-- Backend : Champ `condition` dans `UnityDialogueNode` (existant) pour conditions nœuds
-- Champ `condition` dans `UnityDialogueChoice` (existant) pour conditions choix
-- Service : `ConditionParserService` pour parsing et validation conditions (format: "FLAG_NAME", "NOT FLAG_NAME", "flag >= value")
-- Frontend : Composant `ConditionEditor.tsx` avec input condition + validation syntaxique
-- Validation : Vérifier références flags existent (voir Story 9.5)
-- Preview : Intégration avec preview scénarios (voir Story 9.4) pour tester conditions
-- Tests : Unit (parsing conditions), Integration (API conditions), E2E (workflow conditions)
 
-**References:** FR90 (conditions visibilité), Story 9.1 (variables/flags), Story 9.4 (preview), Story 9.5 (validation), Epic 2 (éditeur graphe)
+- Backend : Champ `condition` dans `UnityDialogueNode` (existant) pour conditions nœuds ; champ `condition` dans `UnityDialogueChoice` (existant) pour conditions choix
+- Service : `ConditionParserService` — grammaire : `{FLAG_ID} {op} {valeur}` (bool: `= true/false` ; compteur: `>= N` ; enum: `= VALEUR_ENUM`) + conditions Réputation : `reputation.{axe}.{faction_id} {op} {seuil}`
+- Frontend : Composant `ConditionEditor.tsx` — sélecteur flag depuis catalogue (auto-complete), sélecteur valeur typé (bool toggle / compteur slider / enum dropdown), sélecteur Réputation par axe et faction
+- Validation : Vérifier références flags existent dans catalogue (voir Story 9.5)
+- Preview : Intégration avec preview scénarios (voir Story 9.4) pour tester conditions
+- Tests : Unit (parsing conditions, chaque type), Integration (API conditions), E2E (workflow conditions)
+
+**References:** FR90 (conditions visibilité), Story 9.1 (variables/flags), Story 9.4 (preview), Story 9.5 (validation), Epic 2 (éditeur graphe), [GDD Dialogues système — options grisées, tooltip Réputation]
 
 ---
 
@@ -162,53 +214,55 @@ As a **utilisateur créant des dialogues**,
 I want **définir des effets déclenchés quand le joueur sélectionne un choix**,
 So that **je peux modifier l'état du jeu (variables, flags) en fonction des choix du joueur**.
 
+> **Contraintes GDD** : les effets du système Dialogues d'Alteir produisent vers Réputation (`+5 à +20` Respect, `+5 à +15` Prestige selon les choix), Quêtes (flags de déclenchement/complétion), Progression (XP narrative), Recrutement (état "allié recruté"). Les effets sur compteur sont bornés (Min/Max définis dans le catalogue). Les flags `enum` progressent vers une valeur cible — pas d'opérateur arithmétique sur enum.
+
 **Acceptance Criteria:**
 
 **Given** j'ai un choix joueur dans un nœud
 **When** je sélectionne le choix et ouvre "Effets"
 **Then** un panneau s'affiche avec liste "Effets déclenchés"
-**And** je peux ajouter des effets : "Set flag", "Modify variable", "Unlock flag"
+**And** je peux ajouter des effets par catégorie : "Modifier flag" / "Modifier Réputation"
 
-**Given** j'ajoute un effet "Set flag" (ex: "hasMetAkthar = true")
+**Given** j'ajoute un effet sur un flag `bool` (ex: `Flag_perso_voknir_rencontre_initiale = true`)
 **When** l'effet est sauvegardé
-**Then** quand le joueur sélectionne ce choix, le flag `hasMetAkthar` est défini à true
-**And** l'effet est affiché sur le choix (ex: "[+ hasMetAkthar] Accepter l'alliance")
+**Then** quand le joueur sélectionne ce choix, le flag booléen est positionné à la valeur définie
+**And** l'effet est affiché sur le choix (ex: `[→ Flag_perso_voknir_rencontre_initiale = true]`)
 
-**Given** j'ajoute un effet "Modify variable" (ex: "reputationAkthar += 10")
+**Given** j'ajoute un effet sur un flag `compteur` (ex: `Flag_lieu_miroirs_forcage_compteur += 1`)
 **When** l'effet est sauvegardé
-**Then** quand le joueur sélectionne ce choix, `reputationAkthar` est augmenté de 10
-**And** je peux définir des modifications positives ou négatives (+=, -=, *=, /=)
+**Then** quand le joueur sélectionne ce choix, le compteur est incrémenté de 1 (clamped entre Min et Max)
+**And** les opérateurs disponibles pour compteur sont : `= N`, `+= N`, `-= N` (N entier)
 
-**Given** j'ajoute un effet "Unlock flag" (ex: "unlockQuestAkthar")
+**Given** j'ajoute un effet sur un flag `enum` (ex: `Flag_lieu_nexus_decouverte → VISITE`)
 **When** l'effet est sauvegardé
-**Then** quand le joueur sélectionne ce choix, le flag `unlockQuestAkthar` est défini à true
-**And** l'effet est persistant (flag reste true après le dialogue)
+**Then** quand le joueur sélectionne ce choix, le flag enum prend la valeur cible sélectionnée
+**And** le sélecteur affiche uniquement les valeurs valides dans leur ordre défini (depuis le catalogue)
+
+**Given** j'ajoute un effet sur la Réputation (ex: `Réputation Prestige [Culte de l'Anentropie] += 10`)
+**When** l'effet est sauvegardé
+**Then** cet effet est enregistré comme modification de réputation (distinct d'un flag — géré par le Système Réputation)
+**And** les plages attendues respectent le GDD : Respect `±5 à ±20`, Prestige `±5 à ±15`
 
 **Given** je définis plusieurs effets sur un même choix
-**When** le choix est sélectionné
+**When** le choix est sélectionné dans le preview
 **Then** tous les effets sont exécutés dans l'ordre défini
-**And** un résumé s'affiche "Effets appliqués: hasMetAkthar=true, reputationAkthar+=10"
+**And** un résumé s'affiche : `Effets appliqués: Flag_perso_voknir... = true, Prestige Culte +10`
 
 **Given** je consulte un dialogue avec effets
 **When** j'ouvre le graphe
 **Then** les choix avec effets sont marqués visuellement (icône effet, couleur différente)
-**And** je peux survoler pour voir tous les effets du choix
-
-**Given** je preview un dialogue avec effets (voir Story 9.4)
-**When** je sélectionne un choix avec effets
-**Then** les effets sont simulés dans le preview
-**And** l'état des flags est mis à jour pour les nœuds suivants
+**And** je peux survoler pour voir le résumé de tous les effets du choix
 
 **Technical Requirements:**
-- Backend : Champ `consequences` dans `UnityDialogueNode` (existant) pour effets nœuds
-- Champ `actions` dans `UnityDialogueChoice` (existant partiellement) pour effets choix
-- Service : `EffectParserService` pour parsing effets (format: "flag=value", "flag+=delta", "flag-=delta")
-- Frontend : Composant `EffectEditor.tsx` avec liste effets + ajout/suppression/modification
-- Exécution : Service `EffectExecutionService` pour appliquer effets lors sélection choix (runtime Unity)
-- Preview : Intégration avec preview scénarios (voir Story 9.4) pour simuler effets
-- Tests : Unit (parsing effets), Integration (API effets), E2E (workflow effets)
 
-**References:** FR91 (effets choix joueur), Story 9.1 (variables/flags), Story 9.4 (preview), Epic 1 (génération dialogues)
+- Backend : Champ `consequences` dans `UnityDialogueNode` (existant) ; champ `actions` dans `UnityDialogueChoice` (existant partiellement)
+- Service : `EffectParserService` — grammaire par type : bool (`{FLAG_ID} = true/false`), compteur (`{FLAG_ID} += N | -= N | = N`), enum (`{FLAG_ID} -> {ENUM_VALUE}`), réputation (`reputation.{axe}.{faction_id} += N`)
+- Validation : bornes Min/Max respectées pour compteurs (issues du catalogue) ; valeurs enum valides uniquement
+- Frontend : Composant `EffectEditor.tsx` avec liste effets ordonnée + ajout/suppression/réorganisation (drag) ; sélecteur d'opérateur typé selon le type de flag
+- Preview : Intégration avec preview scénarios (voir Story 9.4) pour simuler effets et voir état flags mis à jour
+- Tests : Unit (parsing effets, validation bornes), Integration (API effets), E2E (workflow effets)
+
+**References:** FR91 (effets choix joueur), Story 9.1 (variables/flags), Story 9.4 (preview), Epic 1 (génération dialogues), [GDD Dialogues système — production vers Réputation/Quêtes/Progression/Recrutement]
 
 ---
 
@@ -259,6 +313,7 @@ So that **je peux tester comment le dialogue se comporte selon les valeurs des f
 **And** les modifications de flags dans le preview ne sont pas sauvegardées
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/{id}/preview` (POST) avec état flags initial retourne graphe avec visibilité nœuds
 - Service : `DialoguePreviewService` avec méthode `preview_dialogue(dialogue_id, flag_states)` pour simulation
 - Évaluation conditions : `ConditionEvaluatorService` pour évaluer conditions selon état flags
@@ -317,6 +372,7 @@ So that **je peux détecter les erreurs avant export et éviter des bugs runtime
 **And** l'erreur disparaît si la référence est maintenant valide
 
 **Technical Requirements:**
+
 - Backend : Service `FlagValidationService` avec méthode `validate_flag_references(dialogue)` pour détection références invalides
 - Parsing : Extraire toutes les références flags depuis conditions et effets (regex ou parser)
 - Catalogue : Vérifier références contre flags définis dans dialogue + flags disponibles dans catalogue global
@@ -336,52 +392,56 @@ As a **utilisateur créant des dialogues**,
 I want **intégrer les stats des systèmes de jeu (attributs personnage, réputation) dans les conditions et effets**,
 So that **je peux créer des dialogues qui réagissent aux capacités et réputation du personnage joueur**.
 
+> **Contexte GDD (V3.0+)** : Alteir dispose de 11 systèmes de jeu validés. Les deux principaux à intégrer dans les dialogues sont : (1) **Caractéristiques & Compétences** (8 stats : Puissance, Agilité, Perception, Intelligence, Créativité, Sociabilité, Technique, Volonté — core system no-dice : Score vs DD) et (2) **Réputation** (3 axes indépendants par faction : Admiration, Prestige, Crainte — paliers : Sympathie → Faveur → Dévotion). La Réputation est **déjà partiellement couverte en V1** dans Story 9.2 (condition de visibilité) et Story 9.3 (effets). Cette story V3.0+ étend à l'API complète Unity et aux tests de caractéristiques déclenchés depuis les dialogues.
+> **Garde-fou** : ne pas stocker le palier de Réputation courant comme flag — il se calcule à la volée depuis la valeur agrégée (principe Source of Truth de la jauge).
+
 **Acceptance Criteria:**
 
 **Given** le système d'intégration stats est disponible (V3.0+)
 **When** j'ouvre "Intégration systèmes de jeu"
-**Then** un panneau s'affiche avec liste des systèmes disponibles : Attributs personnage, Réputation, Compétences, Inventaire
-**And** je peux configurer la connexion avec le système de jeu Unity
+**Then** un panneau s'affiche avec les systèmes disponibles : Caractéristiques (8 stats), Réputation (3 axes × factions), Gestion de l'Effort
+**And** je peux configurer la connexion avec Unity (API ou fichier de config)
 
-**Given** je configure l'intégration avec "Attributs personnage"
+**Given** je configure l'intégration avec "Caractéristiques"
 **When** la connexion est établie
-**Then** je peux utiliser les attributs dans les conditions (ex: "strength >= 15", "intelligence < 10")
-**And** les attributs sont synchronisés depuis Unity (API ou fichier de configuration)
+**Then** je peux utiliser les 8 caractéristiques dans les conditions de nœud (ex: `Sociabilité >= 8`, `Intelligence < 6`)
+**And** les valeurs sont synchronisées depuis Unity (feuilles de perso)
 
 **Given** je configure l'intégration avec "Réputation"
 **When** la connexion est établie
-**Then** je peux utiliser la réputation dans les conditions (ex: "reputationAkthar >= 50")
-**And** je peux modifier la réputation via effets (ex: "reputationAkthar += 10")
+**Then** je peux utiliser les 3 axes de réputation par faction dans les conditions (ex: `Réputation Prestige [Culte de l'Anentropie] >= 30`)
+**And** je peux définir des effets modifiant la réputation via les plages GDD (Respect `±5–20`, Prestige `±5–15`)
+**And** le système calcule le palier courant à la volée — aucun flag de palier courant n'est créé
 
-**Given** je définis une condition basée sur attribut personnage (ex: "strength >= 15")
+**Given** je définis un test de caractéristique sur un choix (ex: `[Sociabilité + Tromperie vs DD 7]`)
 **When** la condition est sauvegardée
-**Then** le nœud n'est visible que si l'attribut `strength` du personnage est >= 15
-**And** la condition est validée syntaxiquement (voir Story 9.5)
+**Then** le choix est visible et tentable (non grisé), avec indicateur de score visible
+**And** l'issue succès/échec détermine le nœud suivant (distincts — pas d'option disparaissant sur échec sauf design explicite)
 
-**Given** je définis un effet modifiant réputation (ex: "reputationAkthar += 10")
-**When** l'effet est sauvegardé
-**Then** quand le joueur sélectionne ce choix, la réputation est modifiée dans Unity
-**And** l'effet est synchronisé avec le système de jeu
+**Given** je configure l'intégration "Gestion de l'Effort"
+**When** la connexion est établie
+**Then** je peux définir un coût en Effort sur un choix (ex: `Dépenser 2 pts d'Effort`)
+**And** le choix est grisé si le joueur n'a plus assez d'Effort disponible (pool = 10 pts)
 
-**Given** je preview un dialogue avec intégration stats
+**Given** je preview un dialogue avec stats (voir Story 9.4)
 **When** je lance le preview
-**Then** je peux définir les valeurs des stats pour le preview (ex: strength=18, reputationAkthar=60)
-**And** le preview simule correctement les conditions basées sur stats
+**Then** je peux définir les valeurs des stats pour simuler (ex: `Sociabilité=8`, `Prestige Culte=25`, `Effort=7`)
+**And** le preview simule correctement les conditions et tests basés sur stats
 
-**Given** le système de jeu Unity n'est pas disponible
-**When** j'essaie d'utiliser des stats dans conditions/effets
-**Then** un warning s'affiche "Système de jeu non connecté - conditions/effets stats ne fonctionneront pas en runtime"
-**And** je peux quand même définir les conditions/effets (validation syntaxique uniquement)
+**Given** Unity n'est pas disponible
+**When** j'utilise des stats dans conditions/effets
+**Then** un warning s'affiche : `"Système de jeu non connecté — conditions stats ne fonctionneront pas en runtime"`
+**And** la validation syntaxique reste opérationnelle
 
 **Technical Requirements:**
-- Backend : Service `GameSystemIntegrationService` pour connexion avec systèmes de jeu Unity
-- API Unity : Endpoint ou fichier de configuration pour récupérer stats personnage (attributs, réputation, compétences)
-- Synchronisation : Polling ou webhook pour synchroniser stats depuis Unity vers DialogueGenerator
-- Conditions : Extension `ConditionEvaluatorService` pour évaluer conditions basées sur stats (ex: "strength >= 15")
-- Effets : Extension `EffectExecutionService` pour appliquer effets modifiant stats (ex: "reputation += 10")
-- Frontend : Composant `GameSystemIntegrationPanel.tsx` avec configuration connexion + liste stats disponibles
-- Preview : Intégration avec preview scénarios (voir Story 9.4) pour tester conditions/effets stats
-- Tests : Unit (intégration stats), Integration (API Unity), E2E (workflow intégration stats)
 
-**References:** FR94 (intégration stats V3.0+), Story 9.2 (conditions), Story 9.3 (effets), Story 9.4 (preview), NFR-I3 (Game System Integration V3.0+)
+- Backend : Service `GameSystemIntegrationService` — connexion Unity (API REST ou fichier config) pour Caractéristiques, Réputation, Effort
+- Synchronisation : Polling ou webhook pour synchroniser stats depuis Unity
+- Conditions : Extension `ConditionEvaluatorService` — types : `stat.{carac} >= N`, `reputation.{axe}.{faction_id} >= N`, `effort.pool >= N`
+- Tests de carac : `SkillCheckService` — formule `Score(carac + competence) vs DD` — résultat : `succès` (Score ≥ DD) / `succès_critique` (Score ≥ DD+5) / `échec` / `échec_critique` (Score ≤ DD-5)
+- Effets Réputation : `ReputationEffectService` — deltas : Admiration `±5–20`, Prestige `±5–15`, Crainte variable — **ne jamais stocker le palier courant dans un flag** (calculé à la volée)
+- Frontend : Composant `GameSystemIntegrationPanel.tsx` — sélecteur système + stat + opérateur ; affichage palier Réputation calculé dynamiquement
+- Preview : Extension `DialoguePreviewService` pour inclure état stats dans la simulation
+- Tests : Unit (intégration stats, no-flag-palier), Integration (API Unity), E2E (workflow intégration stats)
 
+**References:** FR94 (intégration stats V3.0+), Story 9.2 (conditions Réputation déjà en V1), Story 9.3 (effets Réputation déjà en V1), Story 9.4 (preview), NFR-I3 (Game System Integration V3.0+), [GDD Réputation — principe jauge Source of Truth, paliers calculés à la volée], [GDD Core System — 8 caractéristiques, no-dice, pool Effort 10 pts]
