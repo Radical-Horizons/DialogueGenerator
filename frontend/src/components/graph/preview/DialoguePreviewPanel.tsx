@@ -1,7 +1,7 @@
 /**
  * Panneau preview scénario — état initial + stats + historique (Story 9.4).
  */
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useGraphStore } from '../../../store/graphStore'
 import {
   useGraphViewStore,
@@ -41,6 +41,8 @@ export function DialoguePreviewPanel({ onClose }: DialoguePreviewPanelProps) {
   const setVisibilityEvalReputation = useGraphViewStore((s) => s.setVisibilityEvalReputation)
   const clearPreviewEffectHistory = useGraphViewStore((s) => s.clearPreviewEffectHistory)
 
+  const [flagsCatalogError, setFlagsCatalogError] = useState<string | null>(null)
+
   useEffect(() => {
     let cancelled = false
     void (async () => {
@@ -52,8 +54,14 @@ export function DialoguePreviewPanel({ onClose }: DialoguePreviewPanelProps) {
           map[f.id] = f
         }
         setPreviewCatalogById(map)
-      } catch {
+        setFlagsCatalogError(null)
+      } catch (err) {
+        if (cancelled) return
+        console.warn('[DialoguePreviewPanel] listFlags failed', err)
         setPreviewCatalogById(undefined)
+        setFlagsCatalogError(
+          'Catalogue des flags indisponible — bornes des compteurs et métadonnées peuvent être incorrectes.',
+        )
       }
     })()
     return () => {
@@ -122,6 +130,22 @@ export function DialoguePreviewPanel({ onClose }: DialoguePreviewPanelProps) {
       </div>
 
       <div style={{ padding: '10px 12px', overflowY: 'auto', flex: 1 }}>
+        {flagsCatalogError ? (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 12,
+              padding: '8px 10px',
+              borderRadius: 6,
+              fontSize: '0.82rem',
+              backgroundColor: theme.state.warning?.background ?? 'rgba(241, 196, 15, 0.15)',
+              border: `1px solid ${theme.border.primary}`,
+              color: theme.text.primary,
+            }}
+          >
+            {flagsCatalogError}
+          </div>
+        ) : null}
         <section style={{ marginBottom: 14 }}>
           <div style={{ fontWeight: 600, marginBottom: 6 }}>Synthèse visibilité</div>
           <div style={{ fontSize: '0.88rem', color: theme.text.secondary }}>
@@ -245,9 +269,12 @@ export function DialoguePreviewPanel({ onClose }: DialoguePreviewPanelProps) {
                 <input
                   type="number"
                   value={cur}
-                  onChange={(e) =>
-                    setVisibilityEvalReputation(axisId, factionId, Number(e.target.value))
-                  }
+                  onChange={(e) => {
+                    const raw = Number(e.target.value)
+                    const fallback = visibilityEvalState.reputation[key] ?? 0
+                    const next = Number.isFinite(raw) ? raw : fallback
+                    setVisibilityEvalReputation(axisId, factionId, next)
+                  }}
                   style={{ width: '100%', marginTop: 4 }}
                 />
               </label>

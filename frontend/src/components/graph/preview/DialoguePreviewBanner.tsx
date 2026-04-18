@@ -17,7 +17,8 @@ function lightStateFingerprint(st: VisibilityEvalState): string {
   return (h >>> 0).toString(16).padStart(8, '0')
 }
 
-function countNonDefaultPreviewEntries(st: VisibilityEvalState): number {
+/** Nombre de clés d'état suivies (flags + réputation) pour le résumé bannière (AC3). */
+function countPreviewStateEntries(st: VisibilityEvalState): number {
   return Object.keys(st.flags).length + Object.keys(st.reputation).length
 }
 
@@ -26,7 +27,7 @@ interface DialoguePreviewBannerProps {
 }
 
 export function DialoguePreviewBanner({ visibilityEvalState }: DialoguePreviewBannerProps) {
-  const n = countNonDefaultPreviewEntries(visibilityEvalState)
+  const n = countPreviewStateEntries(visibilityEvalState)
   const fp = lightStateFingerprint(visibilityEvalState)
   return (
     <div

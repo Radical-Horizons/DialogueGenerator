@@ -1,6 +1,6 @@
 # Story 9.4: Preview scénarios avec différents états de variables
 
-Status: review
+Status: done
 
 
 
@@ -117,7 +117,41 @@ So that **je peux tester comment le dialogue se comporte selon les valeurs des f
 
 ## Story Completion Status
 
-- **review** — Implémentation + tests ; prête pour code-review.
+- **done** — Code review adversariale passée ; correctifs MEDIUM appliqués (voir Senior Developer Review).
+
+## Senior Developer Review (AI)
+
+**Date :** 2026-04-18 · **Revu par :** Amelia (Dev Agent) · **Git :** arbre de travail propre ; périmètre = File List story.
+
+### Synthèse
+
+| Sévérité | Avant correctifs | Après |
+|----------|------------------|--------|
+| HIGH | 0 | 0 |
+| MEDIUM | 2 | 0 (corrigés) |
+| LOW | 3 | 3 (acceptés — ne bloquent pas la livraison) |
+
+### Validation AC (1–7)
+
+- **AC1–2, 5–7** : `graphViewStore`, `DialoguePreviewPanel`, `DialogueNode`, `evaluateVisibilityConditions`, `computeDialoguePreviewCounts`, entrée/sortie sans persistance — **conformes**.
+- **AC3** : `DialoguePreviewBanner` — libellé simulation + empreinte + résumé ; renommage interne du compteur pour clarifier la sémantique (entrées d’état).
+- **AC4** : `applyChoiceEffectsSimulation` + `linesForAppliedChoiceEffects` / ordre effets aligné `applyChoiceEffectsToEvalState`.
+- **AC8** : explicitement hors MVP — documenté.
+
+### MEDIUM — corrigés ([1] automatique)
+
+1. **`DialoguePreviewPanel`** : échec `listFlags()` avalé sans feedback → `console.warn`, message `role="alert"` utilisateur, état `flagsCatalogError`.
+2. **Réputation simulée** : `Number('')` → NaN possible → garde `Number.isFinite` avec repli sur la valeur courante.
+
+### LOW — suivis / dette acceptable
+
+1. Activation des effets en preview uniquement via `onPointerDown` sur les handles — navigation clavier non priorisée dans cette story.
+2. `parse_visibility_block` (Python) — `except Exception` large ; acceptable pour tolérance schéma mais pourrait journaliser en DEBUG plus tard.
+3. Endpoint `POST …/preview` principalement pour vérité serveur / tests ; le client s’appuie sur les utilitaires locaux (conforme aux Dev Notes).
+
+### Décision
+
+**Approuvé pour done** après corrections MEDIUM. Statut sprint synchronisé `done`.
 
 ---
 
@@ -171,3 +205,4 @@ Aucun incident bloquant ; pytest / Vitest / ESLint exécutés avec succès sur p
 ### Change Log
 
 - 2026-04-18 : Story 9.4 — mode Preview scénario (UI + store + API documents preview), tests pytest/vitest.
+- 2026-04-18 : Code review — alerte catalogue flags + garde NaN réputation (`DialoguePreviewPanel`) ; renommage helper bannière (`DialoguePreviewBanner`).
