@@ -8,6 +8,7 @@ import { useGraphStore } from '../../store/graphStore'
 import type { DialogueNodeData } from '../../schemas/nodeEditorSchema'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { ConditionEditor } from './conditions/ConditionEditor'
+import { EffectEditor } from './effects/EffectEditor'
 
 export interface ChoiceEditorProps {
   dialogueNodeId: string
@@ -393,6 +394,8 @@ export const ChoiceEditor = memo(function ChoiceEditor({
       </div>
 
       <ConditionEditor variant="choice" choiceIndex={choiceIndex} />
+
+      <EffectEditor choiceIndex={choiceIndex} />
     </div>
   )
 })

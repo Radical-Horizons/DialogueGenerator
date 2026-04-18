@@ -3,6 +3,7 @@
  */
 import { z } from 'zod'
 
+import { choiceEffectsListSchema } from './choiceEffectsSchema'
 import { visibilityConditionsBlockSchema } from './visibilityConditionsSchema'
 
 /**
@@ -22,6 +23,7 @@ export const choiceSchema = z.object({
   targetNode: z.string().optional(),
   condition: z.string().optional(),
   visibilityConditions: visibilityConditionsBlockSchema.optional(),
+  choiceEffects: choiceEffectsListSchema.optional(),
   traitRequirements: z.array(traitRequirementSchema).optional(),
   test: z.string().optional(),
   testCriticalFailureNode: z.string().optional(),

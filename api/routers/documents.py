@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, Header, status
 from fastapi.responses import JSONResponse
 
 from api.dependencies import (
+    get_choice_effect_validation_service,
     get_config_service,
     get_dialogue_flags_service,
     get_request_id,
@@ -38,6 +39,7 @@ from api.schemas.documents import (
 from api.utils.unity_schema_validator import validate_unity_json_structured
 from services.configuration_service import ConfigurationService
 from services.dialogue_flags_service import DialogueFlagsService
+from services.choice_effect_validation import ChoiceEffectValidationService
 from services.visibility_condition_validation import VisibilityConditionValidationService
 
 logger = logging.getLogger(__name__)
@@ -477,6 +479,10 @@ async def put_document(
         VisibilityConditionValidationService,
         Depends(get_visibility_condition_validation_service),
     ],
+    choice_effect_validation_service: Annotated[
+        ChoiceEffectValidationService,
+        Depends(get_choice_effect_validation_service),
+    ],
     request_id: Annotated[str, Depends(get_request_id)],
     x_validation_mode: Annotated[str | None, Header(alias="X-Validation-Mode")] = None,
 ) -> PutDocumentResponse | JSONResponse:
@@ -555,6 +561,16 @@ async def put_document(
                 raise ValidationException(
                     message=str(exc),
                     details={"field": "visibilityConditions"},
+                    request_id=request_id,
+                )
+
+        if isinstance(doc, dict):
+            try:
+                choice_effect_validation_service.validate_document(doc)
+            except ValueError as exc:
+                raise ValidationException(
+                    message=str(exc),
+                    details={"field": "choiceEffects"},
                     request_id=request_id,
                 )
 

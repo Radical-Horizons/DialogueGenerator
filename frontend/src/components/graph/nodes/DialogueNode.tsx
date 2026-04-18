@@ -5,7 +5,6 @@ import { memo, useState, useCallback, useEffect } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
-import { useGraphViewStore } from '../../../store/graphViewStore'
 import { getNodePrompt } from '../../../api/graph'
 import type { NodePromptResponse } from '../../../types/graph'
 import { RegenerateNodeModal } from '../RegenerateNodeModal'
@@ -13,10 +12,12 @@ import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
 import { useGraphViewStore } from '../../../store/graphViewStore'
+import { formatChoiceEffectsSummary } from '../../../utils/choiceEffects'
 import {
   evaluateVisibilityConditions,
   formatVisibilityConditionsSummary,
 } from '../../../utils/visibilityConditions'
+import type { ChoiceEffect } from '../../../types/choiceEffects'
 import type { VisibilityConditionsBlock } from '../../../types/visibilityConditions'
 import {
   getGraphTopologyWarningKind,
@@ -581,10 +582,16 @@ export const DialogueNode = memo(function DialogueNode({
             const ch = choices[hoveredChoiceIndex] as {
               visibilityConditions?: VisibilityConditionsBlock
               condition?: string
+              choiceEffects?: ChoiceEffect[]
             }
             const cs = formatVisibilityConditionsSummary(ch.visibilityConditions)
+            const fx = formatChoiceEffectsSummary(ch.choiceEffects)
             const legacy = ch.condition?.trim()
-            const bits = [cs, legacy ? `legacy: ${legacy}` : ''].filter(Boolean)
+            const bits = [
+              cs,
+              fx ? `effets: ${fx}` : '',
+              legacy ? `legacy: ${legacy}` : '',
+            ].filter(Boolean)
             if (bits.length === 0) return null
             return (
               <div style={{ marginTop: 6, fontSize: '0.68rem', color: theme.text.secondary }}>
@@ -602,6 +609,19 @@ export const DialogueNode = memo(function DialogueNode({
           const label = choice.text || `Choix ${index + 1}`
           const stableId = (choice as { choiceId?: string }).choiceId ?? `__idx_${index}`
           const handleId = `choice:${stableId}`
+          const choiceVisibility = (
+            choice as { visibilityConditions?: VisibilityConditionsBlock }
+          ).visibilityConditions
+          const choiceEffectsLen = (
+            choice as { choiceEffects?: unknown[] }
+          ).choiceEffects?.length ?? 0
+          const hasChoiceEffects = choiceEffectsLen > 0
+          const choiceVisOk =
+            !simActive || !choiceVisibility?.items?.length
+              ? true
+              : evaluateVisibilityConditions(choiceVisibility, visibilityEvalState).satisfied
+          const dimChoice =
+            simActive && Boolean(choiceVisibility?.items?.length) && !choiceVisOk
           return (
             <Handle
               key={stableId}
@@ -620,7 +640,17 @@ export const DialogueNode = memo(function DialogueNode({
                 left: `${leftPercent}%`,
                 bottom: 10,
                 transform: 'translateX(-50%)',
+                opacity: dimChoice ? 0.48 : 1,
+                filter: dimChoice ? 'grayscale(45%)' : undefined,
+                boxShadow: hasChoiceEffects
+                  ? '0 0 0 2px #9B59B6'
+                  : undefined,
               }}
+              aria-label={
+                hasChoiceEffects
+                  ? `${label} — ${choiceEffectsLen} effet(s)`
+                  : label
+              }
             />
           )
         })}

@@ -8,9 +8,11 @@ import type { VisibilityConditionsBlock } from '../types/visibilityConditions'
 
 describe('visibilityConditions utils', () => {
   it('formats reputation line (AC5)', () => {
-    expect(formatReputationRequirement('Prestige', '>=', 30, 12)).toContain('Prestige')
-    expect(formatReputationRequirement('Prestige', '>=', 30, 12)).toContain('30')
-    expect(formatReputationRequirement('Prestige', '>=', 30, 12)).toContain('12')
+    const line = formatReputationRequirement('Prestige', 'Guild', '>=', 30, 12)
+    expect(line).toContain('Prestige')
+    expect(line).toContain('Guild')
+    expect(line).toContain('30')
+    expect(line).toContain('12')
   })
 
   it('evaluates AND block', () => {

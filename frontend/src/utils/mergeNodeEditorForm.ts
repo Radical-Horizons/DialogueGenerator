@@ -155,6 +155,7 @@ export function connectionFingerprintFromNodeData(
       ts: c.testSuccessNode ?? '',
       tcs: c.testCriticalSuccessNode ?? '',
       vc: c.visibilityConditions,
+      fx: c.choiceEffects,
     }))
     const next = (nodeData as { nextNode?: string }).nextNode ?? ''
     const nv = (nodeData as { visibilityConditions?: unknown }).visibilityConditions
@@ -190,6 +191,7 @@ export function applyStoreConnectionFieldsToDialogueFormChoices(
       testSuccessNode: sc.testSuccessNode ?? fc.testSuccessNode,
       testCriticalSuccessNode: sc.testCriticalSuccessNode ?? fc.testCriticalSuccessNode,
       visibilityConditions: fc.visibilityConditions ?? sc.visibilityConditions,
+      choiceEffects: fc.choiceEffects ?? sc.choiceEffects,
     }
   })
 }

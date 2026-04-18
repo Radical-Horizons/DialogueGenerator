@@ -1,6 +1,6 @@
 # Story 9.2: Définir conditions de visibilité sur nœuds (si variable X = Y, afficher nœud)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -113,7 +113,26 @@ So that **je peux créer des branches de dialogue qui ne s’affichent que si ce
 
 ## Story Completion Status
 
-- **review** — Implémentation + tests ; prête pour code-review.
+- **done** — Code-review adversarial (2026-04-18) : corrections HIGH/MEDIUM appliquées ; sprint synchronisé.
+
+---
+
+## Senior Developer Review (AI)
+
+_Revue adversariale du scope File List + AC (hors `_bmad/`)._
+
+### Findings traités ([1] corrections code)
+
+| Sev | Finding | Résolution |
+|-----|-----------|------------|
+| HIGH | AC7 : simulateur — grisage uniquement au niveau nœud ; pas de distinction visuelle sur les **choix** avec `visibilityConditions` non satisfaites | `DialogueNode.tsx` : opacité / grayscale par handle de choix quand simulation active et évaluation false |
+| MEDIUM | AC5 : chaîne réputation centralisée sans **faction** dans le libellé (axe × faction × seuil) | `formatReputationRequirement(axisId, factionId, …)` + `formatConditionAtomSummary` mis à jour ; test AC5 ajusté |
+| MEDIUM | `listFlags()` échouait en silence (`.catch(() => {})`) | `console.warn` contextualisé dans `ConditionEditor.tsx` |
+| LOW | Import doublon `useGraphViewStore` dans `DialogueNode.tsx` | Import unique conservé |
+
+### Issues restantes
+
+- Aucun HIGH/MEDIUM ouvert après corrections. LOW résiduels acceptables (ex. legacy `choices[].condition` non évalué par le simulateur structuré — hors scope story, documenté en dev notes).
 
 ---
 
@@ -164,7 +183,9 @@ N/A
 - `frontend/src/components/graph/nodes/DialogueNode.tsx`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 - `_bmad-output/implementation-artifacts/9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90.md`
+- (post-review) `frontend/src/components/graph/nodes/DialogueNode.tsx`, `frontend/src/utils/visibilityConditions.ts`, `frontend/src/utils/visibilityConditions.test.ts`, `frontend/src/components/graph/conditions/ConditionEditor.tsx`
 
 ### Change Log
 
 - 2026-04-18 : Story 9.2 — conditions structurées `visibilityConditions`, validation catalogue au PUT, UI Conditions + simulation + badges graphe (voir File List).
+- 2026-04-18 : Code-review — grisage choix + format réputation faction + warning `listFlags` ; imports `DialogueNode` ; fichiers : `DialogueNode.tsx`, `visibilityConditions.ts`, `visibilityConditions.test.ts`, `ConditionEditor.tsx`.

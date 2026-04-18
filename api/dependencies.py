@@ -492,3 +492,11 @@ def get_visibility_condition_validation_service():
 
     return VisibilityConditionValidationService(FlagCatalogService())
 
+
+def get_choice_effect_validation_service():
+    """Fabrique la validation Story 9.3 (choiceEffects vs catalogue)."""
+    from services.choice_effect_validation import ChoiceEffectValidationService
+    from services.flag_catalog_service import FlagCatalogService
+
+    return ChoiceEffectValidationService(FlagCatalogService())
+

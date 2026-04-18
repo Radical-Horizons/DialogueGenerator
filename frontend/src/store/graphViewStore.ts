@@ -15,7 +15,9 @@
 import { create } from 'zustand'
 import type { ReactFlowInstance } from 'reactflow'
 
+import type { ChoiceEffect } from '../types/choiceEffects'
 import type { VisibilityEvalState } from '../types/visibilityConditions'
+import { applyChoiceEffectsToEvalState } from '../utils/choiceEffects'
 
 export interface GraphViewState {
   // --- Instance React Flow ---
@@ -94,6 +96,8 @@ export interface GraphViewState {
   setVisibilityEvalFlag: (flagId: string, value: boolean | number | string) => void
   setVisibilityEvalReputation: (axisId: string, factionId: string, value: number) => void
   clearVisibilityEvalState: () => void
+  /** Story 9.3 : applique les effets d'un choix sur l'état de simulation (ordre respecté). */
+  applyChoiceEffectsSimulation: (effects: ChoiceEffect[]) => void
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
@@ -173,6 +177,14 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
     }),
   clearVisibilityEvalState: () =>
     set({ visibilityEvalState: { flags: {}, reputation: {} } }),
+
+  applyChoiceEffectsSimulation: (effects) =>
+    set((s) => ({
+      visibilityEvalState: applyChoiceEffectsToEvalState(
+        s.visibilityEvalState,
+        effects
+      ),
+    })),
 }))
 
 /** Exposé uniquement en dev pour E2E Playwright (`requestSave` aligné sur la toolbar / Ctrl+S). */

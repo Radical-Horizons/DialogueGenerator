@@ -2,6 +2,7 @@
  * Types TypeScript pour l'API.
  */
 
+import type { ChoiceEffect } from './choiceEffects'
 import type { VisibilityConditionsBlock } from './visibilityConditions'
 
 // WARNING: Types distincts pour éviter les faux amis
@@ -437,6 +438,7 @@ export interface UnityDialogueChoice {
   testCriticalSuccessNode?: string
   condition?: string
   visibilityConditions?: VisibilityConditionsBlock
+  choiceEffects?: ChoiceEffect[]
   [key: string]: unknown
 }
 

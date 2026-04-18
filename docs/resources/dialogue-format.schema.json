@@ -81,6 +81,61 @@
         "threshold": { "type": "number" }
       },
       "additionalProperties": false
+    },
+    "CounterAdjustOperator": {
+      "type": "string",
+      "enum": ["=", "+=", "-="],
+      "description": "Opérateurs d'effet sur compteur catalogue (Story 9.3)."
+    },
+    "ChoiceEffectAtom": {
+      "oneOf": [
+        { "$ref": "#/definitions/SetBoolEffect" },
+        { "$ref": "#/definitions/AdjustCounterEffect" },
+        { "$ref": "#/definitions/SetEnumEffect" },
+        { "$ref": "#/definitions/ReputationDeltaEffect" }
+      ]
+    },
+    "SetBoolEffect": {
+      "type": "object",
+      "required": ["kind", "flagId", "value"],
+      "properties": {
+        "kind": { "const": "set_bool" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "value": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "AdjustCounterEffect": {
+      "type": "object",
+      "required": ["kind", "flagId", "operator", "value"],
+      "properties": {
+        "kind": { "const": "adjust_counter" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "operator": { "$ref": "#/definitions/CounterAdjustOperator" },
+        "value": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "SetEnumEffect": {
+      "type": "object",
+      "required": ["kind", "flagId", "value"],
+      "properties": {
+        "kind": { "const": "set_enum" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "ReputationDeltaEffect": {
+      "type": "object",
+      "required": ["kind", "axisId", "factionId", "delta"],
+      "properties": {
+        "kind": { "const": "reputation_delta" },
+        "axisId": { "type": "string", "minLength": 1 },
+        "factionId": { "type": "string", "minLength": 1 },
+        "delta": { "type": "number" }
+      },
+      "additionalProperties": false
     }
   },
   "properties": {
@@ -206,6 +261,11 @@
                 "visibilityConditions": {
                   "$ref": "#/definitions/VisibilityConditions",
                   "description": "Story 9.2 — conditions structurées sur ce choix."
+                },
+                "choiceEffects": {
+                  "type": "array",
+                  "description": "Story 9.3 — effets catalogue (flags + réputation) déclenchés à la sélection ; l'ordre dans le tableau est persisté.",
+                  "items": { "$ref": "#/definitions/ChoiceEffectAtom" }
                 }
               }
             }

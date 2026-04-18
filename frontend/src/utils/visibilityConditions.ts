@@ -36,16 +36,18 @@ function numFromFlag(v: boolean | number | string | undefined): number | null {
 }
 
 /**
- * Chaîne tooltip réputation (standard GDD — Story 9.2 AC5).
+ * Chaîne tooltip réputation (standard GDD — Story 9.2 AC5, axe × faction × seuil).
  */
 export function formatReputationRequirement(
   axisId: string,
+  factionId: string,
   operator: ComparisonOperator,
   threshold: number,
   current?: number,
 ): string {
   const cur = current !== undefined ? String(current) : 'X'
-  return `Requiert : Réputation ${axisId} ${operator} ${threshold} (actuel : ${cur})`
+  const faction = factionId.trim() ? factionId : '—'
+  return `Requiert : Réputation ${axisId} × ${faction} ${operator} ${threshold} (actuel : ${cur})`
 }
 
 /**
@@ -60,7 +62,12 @@ export function formatConditionAtomSummary(atom: ConditionAtom): string {
     case 'flag_enum':
       return `${atom.flagId} ${atom.operator} ${atom.value}`
     case 'reputation':
-      return formatReputationRequirement(atom.axisId, atom.operator, atom.threshold)
+      return formatReputationRequirement(
+        atom.axisId,
+        atom.factionId,
+        atom.operator,
+        atom.threshold,
+      )
     default:
       return '?'
   }

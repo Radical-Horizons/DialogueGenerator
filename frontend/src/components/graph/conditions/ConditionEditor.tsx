@@ -87,7 +87,9 @@ export const ConditionEditor = memo(function ConditionEditor({
         })
         setCatalogById(idx)
       })
-      .catch(() => {})
+      .catch((err: unknown) => {
+        console.warn('[ConditionEditor] listFlags failed', err)
+      })
     return () => {
       c = true
     }

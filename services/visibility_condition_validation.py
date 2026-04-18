@@ -15,20 +15,11 @@ from api.schemas.visibility_conditions import (
     VisibilityConditionsBlock,
 )
 from services.dialogue_flag_validation import default_counter_bounds
+from services.flag_catalog_index import definitions_by_id_from_catalog
 from services.flag_catalog_service import FlagCatalogService
 
 _COUNT_OPS: frozenset[str] = frozenset({"=", "!=", ">=", "<=", ">", "<"})
 _ENUM_OPS: frozenset[str] = frozenset({"=", "!="})
-
-
-def _definitions_index(catalog: FlagCatalogService) -> Dict[str, Dict[str, Any]]:
-    """Construit un index ``flag_id -> définition enrichie`` (comme Story 9.1)."""
-    out: Dict[str, Dict[str, Any]] = {}
-    for row in catalog.load_definitions():
-        fid = str(row.get("id") or "").strip()
-        if fid:
-            out[fid] = row
-    return out
 
 
 def validate_atom_against_catalog(
@@ -170,5 +161,5 @@ class VisibilityConditionValidationService:
 
     def validate_document(self, document: MutableMapping[str, Any]) -> None:
         """Valide tous les blocs du document ; lève ``ValueError`` si erreur bloquante."""
-        definitions_by_id = _definitions_index(self._catalog)
+        definitions_by_id = definitions_by_id_from_catalog(self._catalog)
         validate_document_visibility_conditions(document, definitions_by_id)
