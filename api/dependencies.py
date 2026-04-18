@@ -468,3 +468,15 @@ def get_gdd_notion_sync_service(request: Request):
     svc: GddNotionSyncService = container.get_gdd_notion_sync_service()
     return svc
 
+
+def get_dialogue_flags_service():
+    """Fabrique un service validation des liaisons flags ↔ document (Story 9.1).
+
+    Returns:
+        Instance ``DialogueFlagsService`` avec catalogue CSV injecté.
+    """
+    from services.dialogue_flags_service import DialogueFlagsService
+    from services.flag_catalog_service import FlagCatalogService
+
+    return DialogueFlagsService(FlagCatalogService())
+

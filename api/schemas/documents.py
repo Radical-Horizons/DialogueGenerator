@@ -44,6 +44,10 @@ class PutDocumentResponse(BaseModel):
         default_factory=list,
         description="Erreurs de validation structurées (code, message, path)",
     )
+    flagThresholdWarnings: List[str] = Field(
+        default_factory=list,
+        description="Alertes non bloquantes seuils flags dialogue (Story 9.1)",
+    )
 
 
 # --- Layout (Story 16.3) ---

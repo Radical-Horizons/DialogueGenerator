@@ -18,6 +18,7 @@ export interface PutDocumentRequest {
 export interface PutDocumentResponse {
   revision: number
   validationReport?: Array<{ code: string; message: string; path: string }>
+  flagThresholdWarnings?: string[]
 }
 
 export interface LayoutGetResponse {

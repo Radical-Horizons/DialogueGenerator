@@ -131,7 +131,7 @@ development_status:
   4-14-refactorer-api-routers-graph-dette-technique: done
   epic-4-retrospective: done
   epic-9: in-progress
-  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: in-progress
+  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: review
   9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: backlog
   9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: backlog
   9-4-preview-scénarios-avec-différents-états-de-variables-fr92: backlog

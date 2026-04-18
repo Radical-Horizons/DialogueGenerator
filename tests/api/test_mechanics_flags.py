@@ -112,7 +112,9 @@ def test_list_flags_with_query(client, mock_flag_service):
     mock_flag_service.search.assert_called_once_with(
         query="boss",
         category=None,
-        favorites_only=False
+        favorites_only=False,
+        semantic_type=None,
+        scope=None,
     )
 
 
@@ -140,7 +142,9 @@ def test_list_flags_with_category(client, mock_flag_service):
     mock_flag_service.search.assert_called_once_with(
         query=None,
         category="Stat",
-        favorites_only=False
+        favorites_only=False,
+        semantic_type=None,
+        scope=None,
     )
 
 
@@ -178,7 +182,9 @@ def test_list_flags_favorites_only(client, mock_flag_service):
     mock_flag_service.search.assert_called_once_with(
         query=None,
         category=None,
-        favorites_only=True
+        favorites_only=True,
+        semantic_type=None,
+        scope=None,
     )
 
 

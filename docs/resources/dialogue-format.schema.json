@@ -12,6 +12,20 @@
       "enum": ["1.1.0", "1.2.0"],
       "description": "Version du schéma du document. 1.1.0 (legacy) ou 1.2.0 (id stable + title)."
     },
+    "dialogueFlags": {
+      "type": "array",
+      "description": "Story 9.1 — liaisons catalogue flags et valeurs initiales pour ce fichier dialogue.",
+      "items": {
+        "type": "object",
+        "required": ["flagId", "type", "initialValue"],
+        "properties": {
+          "flagId": { "type": "string" },
+          "type": { "type": "string", "enum": ["bool", "compteur", "enum"] },
+          "initialValue": {}
+        },
+        "additionalProperties": false
+      }
+    },
     "nodes": {
       "type": "array",
       "description": "Liste des nœuds du dialogue. Chaque nœud a un id unique et stable (non éditable). Le pseudo-nœud END peut être référencé sans être présent dans la liste.",

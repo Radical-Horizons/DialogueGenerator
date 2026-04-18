@@ -16,6 +16,7 @@ import type { LLMModelResponse } from '../../types/api'
 import { DialogueStructureWidget } from './DialogueStructureWidget'
 import { SystemPromptEditor } from './SystemPromptEditor'
 import { SceneSelectionWidget } from './SceneSelectionWidget'
+import { DialogueFlagsPanel } from './DialogueFlagsPanel'
 import { InGameFlagsSummary } from './InGameFlagsSummary'
 import { GenerationProgressModal } from './GenerationProgressModal'
 import { ModelSelector } from './ModelSelector'
@@ -406,6 +407,8 @@ export function GenerationPanel() {
           draft.markDirty()
         }}
       />
+
+      <DialogueFlagsPanel />
 
       <InGameFlagsSummary />
 

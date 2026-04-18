@@ -25,6 +25,10 @@ import {
   mergeIntentionalCycleIdsIntoLayout,
   readIntentionalCycleIdsFromLayout,
 } from '../../utils/layoutIntentionalCycles'
+import {
+  applyBindingsToDocument,
+  parseBindingsFromDocument,
+} from '../../utils/dialogueFlagBindings'
 
 export type PersistenceSlice = Pick<
   GraphState,
@@ -274,6 +278,9 @@ export const createPersistenceSlice: StateCreator<
       documentId: rest.documentId,
       documentRevision: rest.documentRevision,
       layoutRevision: rest.layoutRevision,
+      dialogueFlagBindings: parseBindingsFromDocument(
+        rest.document as Record<string, unknown>
+      ),
       isLoading: false,
       validationErrors: [],
       loreExplicitValidationSummary: null,
@@ -329,6 +336,7 @@ export const createPersistenceSlice: StateCreator<
       if (state.document != null && documentId) {
         const snap = get()
         const doc = graphToDocument(snap.nodes, snap.edges) as unknown as Record<string, unknown>
+        applyBindingsToDocument(doc, snap.dialogueFlagBindings ?? [])
         const layoutPayload = mergeIntentionalCycleIdsIntoLayout(
           mergeLayoutWithNodePositions(
             snap.layout ?? buildLayoutFromNodes(snap.nodes),

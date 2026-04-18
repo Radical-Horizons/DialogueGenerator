@@ -7,6 +7,7 @@ Note production : le body des PUT (document, layout) n'est pas borné par défau
 En déploiement, imposer une limite (ex. middleware ou reverse proxy) pour éviter
 un DoS par envoi de très gros JSON (layout = objet libre, non validé en taille).
 """
+from copy import deepcopy
 import json
 import logging
 from datetime import datetime, timezone
@@ -16,7 +17,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header, status
 from fastapi.responses import JSONResponse
 
-from api.dependencies import get_config_service, get_request_id
+from api.dependencies import get_config_service, get_dialogue_flags_service, get_request_id
 from api.routers.auth import get_current_user
 from api.exceptions import APIException, NotFoundException, ValidationException, InternalServerException
 from api.schemas.documents import (
@@ -31,6 +32,7 @@ from api.schemas.documents import (
 )
 from api.utils.unity_schema_validator import validate_unity_json_structured
 from services.configuration_service import ConfigurationService
+from services.dialogue_flags_service import DialogueFlagsService
 
 logger = logging.getLogger(__name__)
 
@@ -464,6 +466,7 @@ async def put_document(
     document_id: str,
     body: PutDocumentRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    dialogue_flags_service: Annotated[DialogueFlagsService, Depends(get_dialogue_flags_service)],
     request_id: Annotated[str, Depends(get_request_id)],
     x_validation_mode: Annotated[str | None, Header(alias="X-Validation-Mode")] = None,
 ) -> PutDocumentResponse | JSONResponse:
@@ -472,7 +475,7 @@ async def put_document(
         base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
         base_dir.mkdir(parents=True, exist_ok=True)
 
-        doc = body.document
+        doc = deepcopy(body.document) if isinstance(body.document, dict) else body.document
         client_revision = body.revision
 
         # AC3 : refuser payload type nodes/edges (ancien contrat graphe)
@@ -521,6 +524,20 @@ async def put_document(
         if validation_mode not in ("draft", "export"):
             validation_mode = "draft"
 
+        flag_warnings: list[str] = []
+        if isinstance(doc, dict) and "dialogueFlags" in doc:
+            try:
+                normalized_flags, flag_warnings = dialogue_flags_service.normalize_and_warnings(
+                    doc.get("dialogueFlags")
+                )
+                doc["dialogueFlags"] = normalized_flags
+            except ValueError as exc:
+                raise ValidationException(
+                    message=str(exc),
+                    details={"field": "dialogueFlags"},
+                    request_id=request_id,
+                )
+
         # Validation (validate_unity_json_structured sans modifier choiceId, ordre choices[], node.id)
         is_valid, errors_structured = validate_unity_json_structured(doc)
         validation_report = [{"code": e.get("code", "validation_error"), "message": e.get("message", ""), "path": e.get("path", "")} for e in errors_structured]
@@ -555,7 +572,11 @@ async def put_document(
         _write_meta(base_dir, doc_id, new_revision)
 
         logger.info(f"PUT document {doc_id} revision={new_revision} mode={validation_mode} (request_id: {request_id})")
-        return PutDocumentResponse(revision=new_revision, validationReport=validation_report)
+        return PutDocumentResponse(
+            revision=new_revision,
+            validationReport=validation_report,
+            flagThresholdWarnings=flag_warnings,
+        )
     except (APIException, ValidationException, NotFoundException):
         raise
     except Exception as e:
