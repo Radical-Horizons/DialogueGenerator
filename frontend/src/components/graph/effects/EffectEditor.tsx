@@ -299,7 +299,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
           <button
             type="button"
             onClick={() => {
-              if (watchEffects?.length) applySimulation(watchEffects)
+              if (watchEffects?.length) applySimulation(watchEffects, catalogById)
             }}
             style={{
               marginTop: 6,

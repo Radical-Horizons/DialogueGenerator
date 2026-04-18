@@ -1,6 +1,6 @@
 # Story 9.3: Définir effets déclenchés par choix joueur (set variable, unlock flag)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -117,9 +117,34 @@ So that **je peux modifier l'état du jeu (variables, flags) en fonction des cho
 
 - `_bmad-output/project-context.md` — règles critiques (documents vs graphe, injection, tests).
 
+## Senior Developer Review (AI)
+
+_Date : 2026-04-18 — Revue adversariale (workflow code-review)._
+
+### Synthèse
+
+- **Git vs File List** : aligné (working tree propre au moment de la revue).
+- **AC** : couverts après correctifs ci-dessous (validation PUT, UI, ordre, résumés, marqueur graphe, round-trip).
+
+### Findings traités (post-revue)
+
+| Sev | Sujet | Action |
+|-----|--------|--------|
+| MEDIUM | Simulation store : `applyChoiceEffectsSimulation` n’injectait pas le catalogue → clamp compteur pouvait diverger du backend | `graphViewStore` + `EffectEditor` passent `catalogById` à `applyChoiceEffectsToEvalState` |
+| MEDIUM | Task 3 : tests RTL `EffectEditor` manquants (seuls utils) | Ajout `frontend/src/components/graph/effects/EffectEditor.test.tsx` |
+| LOW | Delta « Crainte » : littéral `±25` dupliqué | Constante `CRAINTE_DELTA_ABS_MAX` dans `choiceEffects.ts` (aligné Python) |
+
+### Reste (LOW, non bloquant)
+
+- Pas de résolution catalogue des paires axe×faction réputation (AC5 exige bornes delta, pas d’exhaustivité d’IDs).
+
+### Verdict
+
+**Approuvé** — statut final **done** (pas d’HIGH/MEDIUM ouverts).
+
 ## Story Completion Status
 
-- **review** — Implémentation 9.3 terminée : schéma `choiceEffects`, validation PUT, UI `EffectEditor`, graphe, simulation store.
+- **done** — Code review 2026-04-18 : correctifs simulation + RTL ; story 9.3 close.
 
 ---
 
@@ -139,6 +164,7 @@ _(Aucun incident bloquant — CSV enum `EnumValues` : vérifier le nombre de sé
 - **Validation** : `ChoiceEffectValidationService` + `PUT /documents` (après visibility + dialogueFlags) ; bornes réputation `services/reputation_effect_bounds.py` ; compteur simulé vs `dialogueFlags` + bornes catalogue.
 - **Legacy** : `respectDelta` / `influenceDelta` inchangés ; effets catalogue sont un canal distinct (Story / AC5).
 - **🔵 Refactor** : index catalogue partagé `services/flag_catalog_index.py` (Story 9.2 + 9.3) ; résumés/formatage dans `frontend/src/utils/choiceEffects.ts` avec Vitest ; `applyChoiceEffectsSimulation` dans `graphViewStore`.
+- **Code review** : passage catalogue → simulation ; tests RTL `EffectEditor.test.tsx` ; constante Crainte nommée côté TS.
 
 ### File List
 
@@ -161,6 +187,7 @@ _(Aucun incident bloquant — CSV enum `EnumValues` : vérifier le nombre de sé
 - `frontend/src/types/api.ts`
 - `frontend/src/store/graphViewStore.ts`
 - `frontend/src/components/graph/effects/EffectEditor.tsx`
+- `frontend/src/components/graph/effects/EffectEditor.test.tsx`
 - `frontend/src/components/graph/ChoiceEditor.tsx`
 - `frontend/src/components/graph/nodes/DialogueNode.tsx`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`

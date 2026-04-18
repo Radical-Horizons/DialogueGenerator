@@ -7,6 +7,8 @@ import type { ChoiceEffect } from '../types/choiceEffects'
 
 const PRESTIGE_DELTA_ABS_MAX = 15
 const DEFAULT_REP_DELTA_ABS_MAX = 20
+/** Aligné sur `services/reputation_effect_bounds.py` (Crainte). */
+const CRAINTE_DELTA_ABS_MAX = 25
 
 /** Bornes delta réputation (aligné GDD / services/reputation_effect_bounds.py). */
 export function reputationDeltaBounds(axisId: string): { min: number; max: number } {
@@ -15,7 +17,7 @@ export function reputationDeltaBounds(axisId: string): { min: number; max: numbe
     return { min: -PRESTIGE_DELTA_ABS_MAX, max: PRESTIGE_DELTA_ABS_MAX }
   }
   if (a.includes('crainte') || a.includes('fear')) {
-    return { min: -25, max: 25 }
+    return { min: -CRAINTE_DELTA_ABS_MAX, max: CRAINTE_DELTA_ABS_MAX }
   }
   return { min: -DEFAULT_REP_DELTA_ABS_MAX, max: DEFAULT_REP_DELTA_ABS_MAX }
 }

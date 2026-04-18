@@ -15,6 +15,7 @@
 import { create } from 'zustand'
 import type { ReactFlowInstance } from 'reactflow'
 
+import type { FlagDefinition } from '../types/flags'
 import type { ChoiceEffect } from '../types/choiceEffects'
 import type { VisibilityEvalState } from '../types/visibilityConditions'
 import { applyChoiceEffectsToEvalState } from '../utils/choiceEffects'
@@ -96,8 +97,11 @@ export interface GraphViewState {
   setVisibilityEvalFlag: (flagId: string, value: boolean | number | string) => void
   setVisibilityEvalReputation: (axisId: string, factionId: string, value: number) => void
   clearVisibilityEvalState: () => void
-  /** Story 9.3 : applique les effets d'un choix sur l'état de simulation (ordre respecté). */
-  applyChoiceEffectsSimulation: (effects: ChoiceEffect[]) => void
+  /** Story 9.3 : applique les effets d'un choix sur l'état de simulation (ordre respecté). Passer le catalogue pour clamp compteur aligné backend. */
+  applyChoiceEffectsSimulation: (
+    effects: ChoiceEffect[],
+    catalogById?: Record<string, FlagDefinition>,
+  ) => void
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
@@ -178,11 +182,12 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   clearVisibilityEvalState: () =>
     set({ visibilityEvalState: { flags: {}, reputation: {} } }),
 
-  applyChoiceEffectsSimulation: (effects) =>
+  applyChoiceEffectsSimulation: (effects, catalogById) =>
     set((s) => ({
       visibilityEvalState: applyChoiceEffectsToEvalState(
         s.visibilityEvalState,
-        effects
+        effects,
+        catalogById,
       ),
     })),
 }))
