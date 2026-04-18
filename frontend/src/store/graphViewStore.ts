@@ -15,6 +15,8 @@
 import { create } from 'zustand'
 import type { ReactFlowInstance } from 'reactflow'
 
+import type { VisibilityEvalState } from '../types/visibilityConditions'
+
 export interface GraphViewState {
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
@@ -44,6 +46,9 @@ export interface GraphViewState {
 
   // --- Dialogue deleted notification ---
   dialogueDeleted: string | null
+
+  /** Story 9.2 — valeurs simulées pour prévisualiser visibilité (flags / réputation). */
+  visibilityEvalState: VisibilityEvalState
 
   // --- Actions : instance ---
   registerReactFlowInstance: (instance: ReactFlowInstance) => void
@@ -85,6 +90,10 @@ export interface GraphViewState {
   // --- Actions : dialogue deleted ---
   notifyDialogueDeleted: (filename: string) => void
   clearDialogueDeleted: () => void
+
+  setVisibilityEvalFlag: (flagId: string, value: boolean | number | string) => void
+  setVisibilityEvalReputation: (axisId: string, factionId: string, value: number) => void
+  clearVisibilityEvalState: () => void
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
@@ -100,6 +109,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   flushCompleted: false,
   saveRequested: false,
   dialogueDeleted: null,
+  visibilityEvalState: { flags: {}, reputation: {} },
 
   registerReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
 
@@ -143,6 +153,26 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
 
   notifyDialogueDeleted: (filename) => set({ dialogueDeleted: filename }),
   clearDialogueDeleted: () => set({ dialogueDeleted: null }),
+
+  setVisibilityEvalFlag: (flagId, value) =>
+    set((s) => ({
+      visibilityEvalState: {
+        ...s.visibilityEvalState,
+        flags: { ...s.visibilityEvalState.flags, [flagId]: value },
+      },
+    })),
+  setVisibilityEvalReputation: (axisId, factionId, value) =>
+    set((s) => {
+      const key = `${axisId}::${factionId}`
+      return {
+        visibilityEvalState: {
+          ...s.visibilityEvalState,
+          reputation: { ...s.visibilityEvalState.reputation, [key]: value },
+        },
+      }
+    }),
+  clearVisibilityEvalState: () =>
+    set({ visibilityEvalState: { flags: {}, reputation: {} } }),
 }))
 
 /** Exposé uniquement en dev pour E2E Playwright (`requestSave` aligné sur la toolbar / Ctrl+S). */

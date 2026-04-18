@@ -17,17 +17,19 @@ so that {{benefit}}.
 ## Tasks / Subtasks
 
 <!-- Each task = one independently testable behavior (SM territory: WHAT, not HOW).
-     Dev Notes contains WHERE/HOW context. Implementation details are the dev's job. -->
+     Dev Notes contains WHERE/HOW context. Implementation details are the dev's job.
+     Per task: exactly three Markdown checkboxes — RED → GREEN → REFACTOR — no emoji bullets.
+     Dev marks ONE sub-checkbox at a time after completing that phase (never batch three [x] at once). -->
 
 - [ ] Task 1 : [Behavior description] (AC: #)
-  - [ ] 🔴 Test échoue : [behavioral assertion — observable outcome, not implementation detail]
-  - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
-  - [ ] 🔵 Refactor : [chantier principal — visible uniquement sur code complet, pas pendant le GREEN. Ex: renommer X→Y pour aligner vocabulaire métier, éliminer duplication entre A et B, clarifier nommage des cas de test]. Si applicable : [chantiers secondaires].
+  - [ ] **RED — Tests seuls** : [behavioral assertion — observable outcome, not implementation detail — failing test required before any feature code]
+  - [ ] **GREEN — Implémentation minimale** : [component/area to satisfy RED — pas de refactor qualité ici ; voir Dev Notes]
+  - [ ] **REFACTOR** : [chantier principal — uniquement après GREEN terminé pour cette tâche ; pas pendant GREEN. Ex: renommer X→Y pour aligner vocabulaire métier, éliminer duplication entre A et B, clarifier nommage des cas de test]. Si applicable : [chantiers secondaires].
 
 - [ ] Task 2 : [Behavior description] (AC: #)
-  - [ ] 🔴 Test échoue : [behavioral assertion]
-  - [ ] 🟢 Implémenter [component/area] pour passer 🔴 (voir Dev Notes)
-  - [ ] 🔵 Refactor : [chantier principal — visible uniquement sur code complet, pas pendant le GREEN. Ex: renommer X→Y pour aligner vocabulaire métier, éliminer duplication entre A et B, clarifier nommage des cas de test]. Si applicable : [chantiers secondaires].
+  - [ ] **RED — Tests seuls** : [behavioral assertion]
+  - [ ] **GREEN — Implémentation minimale** : [component/area — pas de refactor qualité ici ; voir Dev Notes]
+  - [ ] **REFACTOR** : [chantier principal — après GREEN uniquement ; pas pendant GREEN]. Si applicable : [chantiers secondaires].
 
 ## Dev Notes
 

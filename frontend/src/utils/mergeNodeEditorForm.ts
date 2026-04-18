@@ -154,9 +154,11 @@ export function connectionFingerprintFromNodeData(
       tf: c.testFailureNode ?? '',
       ts: c.testSuccessNode ?? '',
       tcs: c.testCriticalSuccessNode ?? '',
+      vc: c.visibilityConditions,
     }))
     const next = (nodeData as { nextNode?: string }).nextNode ?? ''
-    return JSON.stringify({ next, choices: slice })
+    const nv = (nodeData as { visibilityConditions?: unknown }).visibilityConditions
+    return JSON.stringify({ next, choices: slice, nv })
   }
   return ''
 }
@@ -187,6 +189,7 @@ export function applyStoreConnectionFieldsToDialogueFormChoices(
       testFailureNode: sc.testFailureNode ?? fc.testFailureNode,
       testSuccessNode: sc.testSuccessNode ?? fc.testSuccessNode,
       testCriticalSuccessNode: sc.testCriticalSuccessNode ?? fc.testCriticalSuccessNode,
+      visibilityConditions: fc.visibilityConditions ?? sc.visibilityConditions,
     }
   })
 }

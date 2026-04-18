@@ -12,6 +12,12 @@ import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
+import { useGraphViewStore } from '../../../store/graphViewStore'
+import {
+  evaluateVisibilityConditions,
+  formatVisibilityConditionsSummary,
+} from '../../../utils/visibilityConditions'
+import type { VisibilityConditionsBlock } from '../../../types/visibilityConditions'
 import {
   getGraphTopologyWarningKind,
   getValidationHighlightKind,
@@ -85,6 +91,19 @@ export const DialogueNode = memo(function DialogueNode({
   const tag = (data.tag as string) || undefined
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
+
+  const visibilityEvalState = useGraphViewStore((s) => s.visibilityEvalState)
+  const nodeVisibility = (data as { visibilityConditions?: VisibilityConditionsBlock })
+    .visibilityConditions
+  const simActive =
+    Object.keys(visibilityEvalState.flags).length > 0 ||
+    Object.keys(visibilityEvalState.reputation).length > 0
+  const nodeVisOk = !simActive || !nodeVisibility?.items?.length
+    ? true
+    : evaluateVisibilityConditions(nodeVisibility, visibilityEvalState).satisfied
+  const showNodeDim = simActive && Boolean(nodeVisibility?.items?.length) && !nodeVisOk
+  const nodeCondSummary = formatVisibilityConditionsSummary(nodeVisibility)
+  const hasNodeCond = Boolean(nodeVisibility?.items?.length)
   
   // Store pour accept/reject et régénération (Story 1.10)
   const acceptNode = useGraphStore((state) => state.acceptNode)
@@ -275,11 +294,38 @@ export const DialogueNode = memo(function DialogueNode({
         transition: 'all 0.2s ease',
         display: 'flex',
         flexDirection: 'column',
+        opacity: showNodeDim ? 0.52 : 1,
+        filter: showNodeDim ? 'grayscale(35%)' : undefined,
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
+      {/* Story 9.2 — indicateur conditions sur le nœud */}
+      {hasNodeCond && (
+        <div
+          role="img"
+          aria-label="Ce nœud a des conditions de visibilité"
+          title={nodeCondSummary || 'Conditions de visibilité'}
+          style={{
+            position: 'absolute',
+            top: tag ? 26 : 4,
+            left: tag ? 4 : undefined,
+            right: tag ? undefined : hasErrors || hasWarnings ? 56 : 28,
+            padding: '2px 5px',
+            borderRadius: 4,
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            backgroundColor: theme.background.secondary,
+            color: theme.text.secondary,
+            border: `1px solid ${theme.border.primary}`,
+            zIndex: 11,
+          }}
+        >
+          ◆
+        </div>
+      )}
+
       {/* Badge tag (Story 2.11 FR32) */}
       {tag && (
         <div
@@ -530,7 +576,22 @@ export const DialogueNode = memo(function DialogueNode({
             whiteSpace: 'normal',
           }}
         >
-          {choices[hoveredChoiceIndex].text || `Choix ${hoveredChoiceIndex + 1}`}
+          <div>{choices[hoveredChoiceIndex].text || `Choix ${hoveredChoiceIndex + 1}`}</div>
+          {(() => {
+            const ch = choices[hoveredChoiceIndex] as {
+              visibilityConditions?: VisibilityConditionsBlock
+              condition?: string
+            }
+            const cs = formatVisibilityConditionsSummary(ch.visibilityConditions)
+            const legacy = ch.condition?.trim()
+            const bits = [cs, legacy ? `legacy: ${legacy}` : ''].filter(Boolean)
+            if (bits.length === 0) return null
+            return (
+              <div style={{ marginTop: 6, fontSize: '0.68rem', color: theme.text.secondary }}>
+                {bits.join(' · ')}
+              </div>
+            )
+          })()}
         </div>
       )}
 

@@ -2,6 +2,8 @@
  * Types TypeScript pour l'API.
  */
 
+import type { VisibilityConditionsBlock } from './visibilityConditions'
+
 // WARNING: Types distincts pour éviter les faux amis
 // RawPrompt = Le prompt brut réellement utilisé pour la génération
 // Ces deux prompts peuvent différer et NE DOIVENT JAMAIS être confondus dans l'UI.
@@ -434,6 +436,7 @@ export interface UnityDialogueChoice {
   testSuccessNode?: string
   testCriticalSuccessNode?: string
   condition?: string
+  visibilityConditions?: VisibilityConditionsBlock
   [key: string]: unknown
 }
 
@@ -442,6 +445,7 @@ export interface UnityDialogueNode {
   speaker?: string
   line?: string
   nextNode?: string
+  visibilityConditions?: VisibilityConditionsBlock
   choices?: UnityDialogueChoice[]
   test?: string
   successNode?: string

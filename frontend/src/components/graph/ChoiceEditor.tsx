@@ -7,6 +7,7 @@ import { theme } from '../../theme'
 import { useGraphStore } from '../../store/graphStore'
 import type { DialogueNodeData } from '../../schemas/nodeEditorSchema'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
+import { ConditionEditor } from './conditions/ConditionEditor'
 
 export interface ChoiceEditorProps {
   dialogueNodeId: string
@@ -390,6 +391,8 @@ export const ChoiceEditor = memo(function ChoiceEditor({
           Format JSON: {'[{"trait": "NomTrait", "minValue": 5}]'}
         </div>
       </div>
+
+      <ConditionEditor variant="choice" choiceIndex={choiceIndex} />
     </div>
   )
 })

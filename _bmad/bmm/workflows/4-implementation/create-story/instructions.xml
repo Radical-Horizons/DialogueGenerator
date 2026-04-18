@@ -277,25 +277,28 @@
       GRANULARITY RULE (apply first): Define tasks at BEHAVIOR level, not implementation-step level.
       A "behavior" = one independently testable user-observable outcome (e.g. "menu appears at cursor", "menu closes on Escape").
       Multiple implementation steps that are ONLY testable together belong in a single GREEN. Never create a subtask per implementation file/line — that produces implementation-step lists, not TDD cycles.
-      If a task has more than ~4 implementation steps that are independently testable, SPLIT it into 2 tasks, each with its own 🔴/🟢/🔵.
+      If a task has more than ~4 implementation steps that are independently testable, SPLIT it into 2 tasks, each with its own RED / GREEN / REFACTOR lines.
 
-      FORMAT: Every task gets exactly 3 ordered subtasks — dev agent MUST check in order, cannot batch tests at end:
-      🔴 RED: Failing test — one behavioral assertion from the user's perspective (observable outcome, not implementation detail). Must cover all behaviors this task delivers. Example: "🔴 Test échoue : clic droit sur le pane → PaneContextMenu s'affiche ; 'Nouveau nœud' → createEmptyNode() appelé avec la position du clic"
-      🟢 GREEN: Name the component/area to implement — NOT the how. The dev reads Dev Notes for implementation details. Example: "🟢 Implémenter PaneContextMenu + intégration dans GraphCanvas (voir Dev Notes)"
-      🔵 REFACTOR: Améliorer la qualité du code produit au 🟢 sans casser les tests. Le dev applique d'abord les critères explicites du workflow dev-story (REFACTOR QUALITY CRITERIA) : taille des fichiers (défaut 300 lignes max par fichier source touché dans la tâche), taille des fonctions (~60 lignes), absence de duplication non triviale, nommage domaine, responsabilité unique des unités exportées, commentaires utiles uniquement, respect des couches/patterns, qualité du code de test. KISS, DRY, SOLID restent l'intention ; ces critères la rendent vérifiable.
+      FORMAT (Markdown checkboxes ONLY — no 🔴🟢🔵 emoji): Every task gets exactly 3 ordered sub-lines, each starting with `- [ ]`. Labels use bold **RED —**, **GREEN —**, **REFACTOR** so phases stay plain text and checkbox-driven. Dev MUST mark `[x]` one phase at a time after that phase is done — never three `[x]` in one edit without executing RED then GREEN then REFACTOR in between.
 
-      Le chantier 🔵 = axe prioritaire (quoi améliorer en premier une fois le code complet visible) ; il ne remplace pas la barre qualité : le dev doit satisfaire critères + chantier.
+      RED — Tests seuls: Failing test(s) — behavioral assertion(s) from the user's perspective (observable outcome, not implementation detail). Must cover all behaviors this task delivers. Example label body: "clic droit sur le pane → PaneContextMenu s'affiche ; 'Nouveau nœud' → createEmptyNode() appelé avec la position du clic"
 
-      RÈGLE CRITIQUE — le chantier principal DOIT être découvrable uniquement APRÈS avoir écrit le GREEN :
-      Ne pas écrire "extraire X" si X est la chose évidente à faire pendant l'implémentation — le dev le fera dans GREEN et dira "déjà fait". Le refactor doit cibler ce qui n'est visible que sur le code complet : duplication émergente entre méthodes, nommage qui révèle un détail d'implémentation plutôt qu'une intention métier, composant qui fait deux choses, test peu lisible, abstraction prématurée à simplifier.
+      GREEN — Implémentation minimale: Name the component/area to implement — NOT the how. Quality refactors belong in REFACTOR, not here. Example: "PaneContextMenu + intégration dans GraphCanvas (voir Dev Notes)"
 
-      FORMAT OBLIGATOIRE : "Refactor : [chantier principal concret — ex: renommer X en Y pour aligner sur le vocabulaire métier, extraire la logique de Z dans un hook/helper séparé du rendu, éliminer la duplication entre A et B]. Si applicable : [chantiers secondaires optionnels]."
+      REFACTOR: Improve quality of GREEN output without breaking tests. Dev applies dev-story REFACTOR QUALITY CRITERIA: file size (default max ~300 lines per source file touched in the task), function size (~60 lines), no non-trivial duplication, domain naming, single responsibility of exported units, comments for intent only, layers/patterns, test readability. KISS, DRY, SOLID remain intent; criteria make it verifiable.
 
-      INTERDIT : chantier principal vague ("améliorer la lisibilité"), chantier identique au travail GREEN ("créer le composant"), absence de chantier principal. Si le SM ne voit pas de refactor évident, écrire quand même un chantier concret sur la qualité des tests (nommage des cas, lisibilité des assertions) — les tests sont du code.
+      Le chantier REFACTOR = priority axis once full GREEN code exists; it does not replace the quality bar — dev satisfies criteria + chantier.
+
+      RÈGLE CRITIQUE — le chantier principal DOIT être découvrable uniquement APRÈS GREEN terminé pour la tâche :
+      Ne pas écrire "extraire X" si X est la chose évidente pendant l'implémentation minimale — le dev le verra en GREEN. REFACTOR cible l'émergent sur code complet : duplication entre méthodes, nommage implementation-leak, composant double rôle, test peu lisible, abstraction à simplifier.
+
+      FORMAT OBLIGATOIRE ligne REFACTOR : "[chantier principal concret — ex: renommer X en Y pour vocabulaire métier, extraire la logique de Z dans un hook/helper séparé du rendu, éliminer la duplication entre A et B]. Si applicable : [chantiers secondaires optionnels]."
+
+      INTERDIT : chantier principal vague ("améliorer la lisibilité"), chantier identique au travail GREEN ("créer le composant"), absence de chantier principal. Si le SM ne voit pas de refactor évident, écrire un chantier concret sur la qualité des tests (nommage des cas, lisibilité des assertions) — les tests sont du code.
       Le SM peut relever dans Dev Notes des seuils différents (ex. plafond de lignes autre que 300) ou une exception nommée ; sinon les défauts dev-story s'appliquent.
 
       SEPARATION OF CONCERNS: Tasks/Subtasks = WHAT (behavior, SM territory). Dev Notes = WHERE/HOW hints (files, patterns, constraints — SM shares architecture knowledge). Implementation details = HOW exactly (dev's job, not prescribed in subtasks).
-      NEVER add a testing-phase task at the end of the story. NEVER merge 🔴+🟢. REFACTOR is mandatory — agents skip it when absent.</critical>
+      NEVER add a testing-phase task at the end of the story. NEVER merge RED+GREEN into one checkbox. REFACTOR is mandatory — agents skip it when absent.</critical>
 
     <critical>📋 DEV NOTES — CONSTRAINTS AND CONTEXT ONLY (no implementation prescription):
 

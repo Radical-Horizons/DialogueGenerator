@@ -17,7 +17,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header, status
 from fastapi.responses import JSONResponse
 
-from api.dependencies import get_config_service, get_dialogue_flags_service, get_request_id
+from api.dependencies import (
+    get_config_service,
+    get_dialogue_flags_service,
+    get_request_id,
+    get_visibility_condition_validation_service,
+)
 from api.routers.auth import get_current_user
 from api.exceptions import APIException, NotFoundException, ValidationException, InternalServerException
 from api.schemas.documents import (
@@ -33,6 +38,7 @@ from api.schemas.documents import (
 from api.utils.unity_schema_validator import validate_unity_json_structured
 from services.configuration_service import ConfigurationService
 from services.dialogue_flags_service import DialogueFlagsService
+from services.visibility_condition_validation import VisibilityConditionValidationService
 
 logger = logging.getLogger(__name__)
 
@@ -467,6 +473,10 @@ async def put_document(
     body: PutDocumentRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
     dialogue_flags_service: Annotated[DialogueFlagsService, Depends(get_dialogue_flags_service)],
+    visibility_condition_validation_service: Annotated[
+        VisibilityConditionValidationService,
+        Depends(get_visibility_condition_validation_service),
+    ],
     request_id: Annotated[str, Depends(get_request_id)],
     x_validation_mode: Annotated[str | None, Header(alias="X-Validation-Mode")] = None,
 ) -> PutDocumentResponse | JSONResponse:
@@ -535,6 +545,16 @@ async def put_document(
                 raise ValidationException(
                     message=str(exc),
                     details={"field": "dialogueFlags"},
+                    request_id=request_id,
+                )
+
+        if isinstance(doc, dict):
+            try:
+                visibility_condition_validation_service.validate_document(doc)
+            except ValueError as exc:
+                raise ValidationException(
+                    message=str(exc),
+                    details={"field": "visibilityConditions"},
                     request_id=request_id,
                 )
 

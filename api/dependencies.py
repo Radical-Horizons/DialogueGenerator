@@ -480,3 +480,15 @@ def get_dialogue_flags_service():
 
     return DialogueFlagsService(FlagCatalogService())
 
+
+def get_visibility_condition_validation_service():
+    """Fabrique la validation Story 9.2 (visibilityConditions vs catalogue).
+
+    Returns:
+        Instance ``VisibilityConditionValidationService`` avec catalogue CSV injecté.
+    """
+    from services.flag_catalog_service import FlagCatalogService
+    from services.visibility_condition_validation import VisibilityConditionValidationService
+
+    return VisibilityConditionValidationService(FlagCatalogService())
+

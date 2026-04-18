@@ -43,6 +43,7 @@ import {
   applyLinearNextNodeFromGraphEdges,
 } from '../../utils/mergeNodeEditorForm'
 import { ChoiceEditor } from './ChoiceEditor'
+import { ConditionEditor } from './conditions/ConditionEditor'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
@@ -201,6 +202,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           title: (selectedNode.data.title as string) ?? '',
           speaker: selectedNode.data.speaker || '',
           line: selectedNode.data.line || '',
+          visibilityConditions: selectedNode.data.visibilityConditions as
+            | DialogueNodeData['visibilityConditions']
+            | undefined,
           choices,
           nextNode: selectedNode.data.nextNode || '',
         })
@@ -255,6 +259,12 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const merged = applyStoreConnectionFieldsToDialogueFormChoices(storeChoices, formChoices)
       setValue('choices', merged, { shouldDirty: false })
       setValue('nextNode', (selectedNode.data.nextNode as string) || '', { shouldDirty: false })
+      setValue(
+        'visibilityConditions',
+        (selectedNode.data.visibilityConditions as DialogueNodeData['visibilityConditions']) ??
+          undefined,
+        { shouldDirty: false },
+      )
     }
   }, [selectedNodeId, selectedNode, nodeType, form, setValue])
 
@@ -711,6 +721,11 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             />
           </div>
         )}
+
+        {/* Story 9.2 — conditions de visibilité (nœud) */}
+        {nodeType === 'dialogueNode' && selectedNodeId && (
+          <ConditionEditor variant="node" />
+        )}
         
         {/* Test (pour test nodes) */}
         {nodeType === 'testNode' && (
@@ -1130,6 +1145,8 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
           testCriticalSuccessNode: sc.testCriticalSuccessNode,
           // Préserver choiceId si présent
           choiceId: (sc as Choice & { choiceId?: string })?.choiceId ?? formChoice?.choiceId,
+          visibilityConditions:
+            (sc as Choice).visibilityConditions ?? formChoice?.visibilityConditions,
         }
       }),
     }
