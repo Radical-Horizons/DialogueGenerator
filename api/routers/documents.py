@@ -20,6 +20,7 @@ from fastapi.responses import JSONResponse
 from api.dependencies import (
     get_choice_effect_validation_service,
     get_config_service,
+    get_dialogue_flag_reference_validation_service,
     get_dialogue_flags_service,
     get_dialogue_preview_service,
     get_request_id,
@@ -37,12 +38,18 @@ from api.schemas.documents import (
     PutDocumentResponse,
     PutLayoutRequest,
     PutLayoutResponse,
+    ValidateFlagReferencesRequest,
+    ValidateFlagReferencesResponse,
 )
 from api.utils.unity_schema_validator import validate_unity_json_structured
 from services.configuration_service import ConfigurationService
 from services.dialogue_flags_service import DialogueFlagsService
 from services.choice_effect_validation import ChoiceEffectValidationService
 from services.visibility_condition_validation import VisibilityConditionValidationService
+from services.dialogue_flag_reference_validation_service import (
+    DialogueFlagReferenceValidationService,
+    analysis_to_validation_api_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -380,6 +387,62 @@ async def post_document_preview(
         logger.exception(f"Erreur POST preview document {document_id} (request_id: {request_id})")
         raise InternalServerException(
             message="Erreur lors du preview document",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/{document_id}/validate-flag-references",
+    response_model=ValidateFlagReferencesResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def post_validate_flag_references(
+    document_id: str,
+    body: ValidateFlagReferencesRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    flag_ref_svc: Annotated[
+        DialogueFlagReferenceValidationService,
+        Depends(get_dialogue_flag_reference_validation_service),
+    ],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ValidateFlagReferencesResponse:
+    """Valide les références flags vs ``dialogueFlags`` (Story 9.5 / FR93).
+
+    Corps optionnel : si ``document`` est absent, lecture du fichier persisté.
+    """
+    try:
+        base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
+        if body.document is not None:
+            payload = body.document
+        else:
+            payload, _ = _read_document_blob(base_dir, doc_id)
+
+        analysis = flag_ref_svc.analyze_document(payload)
+        err_details, warn_details = analysis_to_validation_api_payload(analysis)
+        return ValidateFlagReferencesResponse(
+            valid=len(err_details) == 0,
+            summary=analysis.summary,
+            used_flag_count=analysis.used_flag_count,
+            errors=err_details,
+            warnings=warn_details,
+        )
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except (ValidationException, NotFoundException):
+        raise
+    except Exception as e:
+        logger.exception(
+            "Erreur POST validate-flag-references %s (request_id: %s)",
+            document_id,
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la validation des références flags",
             details={"error": str(e)},
             request_id=request_id,
         )

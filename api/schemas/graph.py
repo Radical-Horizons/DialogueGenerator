@@ -150,8 +150,13 @@ class GenerateNodeResponse(BaseModel):
 
 class ValidateGraphRequest(BaseModel):
     """Requête pour valider un graphe."""
+
     nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
     edges: List[Dict[str, Any]] = Field(..., description="Edges ReactFlow")
+    document: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Document canonique (schemaVersion, dialogueFlags, nodes) pour FR93.",
+    )
 
 
 class LoreAmbiguityCandidatePayload(BaseModel):
@@ -187,6 +192,14 @@ class ValidationErrorDetail(BaseModel):
     ambiguity_candidates: Optional[List[LoreAmbiguityCandidatePayload]] = Field(
         None,
         description="Candidats GDD lorsque type=lore_potential_ambiguity (FR39)",
+    )
+    referenced_flag_id: Optional[str] = Field(
+        None,
+        description="Identifiant flag catalogue concerné (Story 9.5)",
+    )
+    suggested_flag_id: Optional[str] = Field(
+        None,
+        description="Suggestion de correction typo (Story 9.5)",
     )
 
 

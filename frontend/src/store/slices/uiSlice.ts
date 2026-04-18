@@ -65,6 +65,7 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
           label: e.label,
           data: e.data,
         })),
+        document: state.document ?? undefined,
       })
 
       const loreKept = get().validationErrors.filter((e) => LORE_VALIDATION_TYPES.has(e.type))

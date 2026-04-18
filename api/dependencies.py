@@ -501,6 +501,16 @@ def get_choice_effect_validation_service():
     return ChoiceEffectValidationService(FlagCatalogService())
 
 
+def get_dialogue_flag_reference_validation_service():
+    """Fabrique la validation Story 9.5 (références flags vs dialogueFlags)."""
+    from services.dialogue_flag_reference_validation_service import (
+        DialogueFlagReferenceValidationService,
+    )
+    from services.flag_catalog_service import FlagCatalogService
+
+    return DialogueFlagReferenceValidationService(FlagCatalogService())
+
+
 def get_dialogue_preview_service(request: Request):
     """Retourne DialoguePreviewService (Story 9.4, preview état masque visibilité)."""
     from services.dialogue_preview_service import DialoguePreviewService

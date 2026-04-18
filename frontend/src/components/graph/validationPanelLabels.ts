@@ -16,6 +16,8 @@ export const ICON_FOR_TYPE: Record<string, string> = {
   lore_potential_ambiguity: '❓',
   dead_end_node: '🚫',
   cul_de_sac_node: '⚠️',
+  dialogue_flag_undeclared: '🏁',
+  dialogue_flag_unused: '📎',
 }
 
 export const LABEL_FOR_TYPE: Record<string, string> = {
@@ -33,6 +35,8 @@ export const LABEL_FOR_TYPE: Record<string, string> = {
   lore_potential_ambiguity: 'Lore — ambiguïté référentielle (FR39)',
   dead_end_node: 'Dead ends (nœuds inatteignables)',
   cul_de_sac_node: 'Cul-de-sacs (nœuds sans sortie non-END)',
+  dialogue_flag_undeclared: 'Flags — référencé mais non déclaré pour ce dialogue (FR93)',
+  dialogue_flag_unused: 'Flags — déclaré mais non utilisé (avertissement)',
 }
 
 export function isDocumentIdRepairable(err: ValidationErrorDetail): boolean {

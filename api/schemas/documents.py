@@ -2,9 +2,11 @@
 
 Story 16.2 : document canonique, schemaVersion, revision ; pas de nodes/edges au top level.
 """
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
+
+from api.schemas.graph import ValidationErrorDetail
 
 ValidationMode = Literal["draft", "export"]
 
@@ -70,7 +72,29 @@ class PutLayoutRequest(BaseModel):
 class PutLayoutResponse(BaseModel):
     """Réponse PUT /documents/{id}/layout en succès : revision."""
 
-    revision: int = Field(..., ge=1, description="Nouvelle révision après persistance")
+    revision: int = Field(..., ge=1, description="Numéro de révision après persistance")
+
+
+# --- Validation références flags (Story 9.5 / FR93) ---
+
+
+class ValidateFlagReferencesRequest(BaseModel):
+    """Corps optionnel : document en mémoire ; sinon lecture du fichier persisté."""
+
+    document: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Document canonique à analyser ; si absent, lecture depuis le stockage.",
+    )
+
+
+class ValidateFlagReferencesResponse(BaseModel):
+    """Réponse POST validate-flag-references."""
+
+    valid: bool = Field(..., description="True si aucune erreur bloquante (références manquantes)")
+    summary: str = Field(..., description="Résumé lisible (erreurs, warnings, compteurs)")
+    used_flag_count: int = Field(..., ge=0, description="Nombre de flags distincts référencés")
+    errors: List[ValidationErrorDetail] = Field(default_factory=list)
+    warnings: List[ValidationErrorDetail] = Field(default_factory=list)
 
 
 # --- Migration choiceId (Story 16.5, CI / pre-commit) ---
