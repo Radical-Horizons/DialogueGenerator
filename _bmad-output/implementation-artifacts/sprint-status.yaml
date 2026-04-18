@@ -134,7 +134,7 @@ development_status:
   9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: done
   9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: done
   9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: done
-  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: backlog
+  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: review
   9-5-valider-références-variables-détecter-variables-non-définies-fr93: backlog
   9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: backlog
   epic-9-retrospective: optional

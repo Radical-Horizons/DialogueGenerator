@@ -29,6 +29,8 @@ function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGra
     setShowContextDroppingPanel: () => {},
     showFlowSimulationPanel: false,
     setShowFlowSimulationPanel: () => {},
+    showDialoguePreviewPanel: false,
+    setShowDialoguePreviewPanel: () => {},
     showSchemaValidationPanel: false,
     schemaValidationLoading: false,
     schemaValidationIsValid: true,

@@ -4,6 +4,8 @@
  */
 import apiClient from './client'
 import type {
+  DialoguePreviewRequest,
+  DialoguePreviewResponse,
   DocumentGetResponse,
   PutDocumentRequest,
   PutDocumentResponse,
@@ -60,6 +62,21 @@ export async function putLayout(
 ): Promise<PutLayoutResponse> {
   const response = await apiClient.put<PutLayoutResponse>(
     `/api/v1/documents/${encodeURIComponent(documentId)}/layout`,
+    body
+  )
+  return response.data
+}
+
+/**
+ * Preview visibilité pour un état simulé (Story 9.4).
+ * POST /api/v1/documents/{id}/preview
+ */
+export async function postDocumentPreview(
+  documentId: string,
+  body: DialoguePreviewRequest
+): Promise<DialoguePreviewResponse> {
+  const response = await apiClient.post<DialoguePreviewResponse>(
+    `/api/v1/documents/${encodeURIComponent(documentId)}/preview`,
     body
   )
   return response.data

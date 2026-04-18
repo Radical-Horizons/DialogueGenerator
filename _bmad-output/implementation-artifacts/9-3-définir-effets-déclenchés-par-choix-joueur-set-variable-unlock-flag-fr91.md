@@ -2,7 +2,7 @@
 
 Status: done
 
-<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+
 
 ## Story
 
@@ -23,30 +23,26 @@ So that **je peux modifier l'état du jeu (variables, flags) en fonction des cho
 
 ## Tasks / Subtasks
 
-- [x] Task 1 : Modèle canon + schéma JSON — effets structurés sur **choix** (réutiliser patterns 9.2) (AC: #1–#4, #8)
-  - [x] 🔴 Test échoue : document avec effets sur au moins un choix ; round-trip GET/PUT ; rejet si opérateur incompatible avec type de flag ; enum hors liste ; compteur qui violerait Min/Max après opération ; pas de perte silencieuse au reload.
-  - [x] 🟢 Étendre `docs/resources/dialogue-format.schema.json`, types Pydantic (`api/schemas/`), types frontend (`UnityDialogueChoice` / schémas Zod) avec un bloc structuré dédié (nom final au dev : ex. `choiceEffects` ou alignement epic « actions » — une seule source de vérité dans le schéma). Conserver les champs legacy pertinents pour Unity/export ; documenter la stratégie legacy vs structuré dans Dev Notes.
-  - [x] 🔵 Refactor : isoler le « shape » effet (union discriminée par kind/type) dans un module unique schéma JSON + types TS alignés Pydantic, comme pour `visibilityConditions`, pour éviter divergence à trois dialectes.
-
-- [x] Task 2 : Validation / « parsing » métier — catalogue flags + réputation (AC: #3–#5, #8)
-  - [x] 🔴 Test échoue : pour chaque type (bool assign, compteur +=/-/=, enum assign, réputation delta), entrées valides acceptées ; entrées hors bornes ou ID inconnus rejetées avec message contextualisé ; cohérence avec `FlagCatalogService` et règles déjà utilisées par `dialogue_flag_validation` / Story 9.2.
-  - [x] 🟢 Implémenter un service dans `services/` (ex. `EffectValidationService` ou extension du pattern `VisibilityConditionValidationService`) branché sur `PUT /documents` après les validations existantes ; router mince via `api/container.py`.
-  - [x] 🔵 Refactor : factoriser avec Story 9.2 les primitives « ID flag dans catalogue », « valeur enum ∈ liste », « compteur dans bornes » pour éviter duplication ; garder handlers API ≤ ~30 lignes.
-
-- [x] Task 3 : UI « Effets » — liste ordonnée + éditeurs typés (AC: #1, #2, #6)
-  - [x] 🔴 Test échoue : depuis un choix sélectionné, ajout d’un effet bool + sauvegarde déclenche PUT document ; réordonnancement (drag ou boutons haut/bas) reflété dans le JSON ; tests RTL sans dépendre du pixel-perfect.
-  - [x] 🟢 Implémenter `EffectEditor.tsx` (ou équivalent) branché sur `ChoiceEditor` / flux document ; réutiliser listes/catalogue comme `ConditionEditor` / API flags ; ne pas fusionner avec `InGameFlagsModal`.
-  - [x] 🔵 Refactor : **ne pas** faire grossir `NodeEditorPanel.tsx` (~1227 L) — composer depuis enfants/hooks ; si logique commune avec `ConditionEditor`, extraire uniquement ce qui est réellement partagé (sélecteurs catalogue, formatage résumé).
-
-- [x] Task 4 : Graphe — marqueurs choix porteurs d’effets (AC: #2, #7)
-  - [x] 🔴 Test échoue : choix avec effets affiche un indicateur distinct du badge « condition » ; tooltip ou libellé accessible résume au moins un effet ou « N effets ».
-  - [x] 🟢 Étendre `DialogueNode.tsx` (handles de choix) pour icône/style « effets » cohérent avec accessibilité (title/aria).
-  - [x] 🔵 Refactor : centraliser `formatEffectSummary` / liste dans `frontend/src/utils/` avec tests unitaires légers — même principe que `formatConditionSummary` en 9.2.
-
-- [x] Task 5 : Simulation minimale — appliquer effets à l’état « jeu » simulé dans l’éditeur (AC: #6, préparation 9.4)
-  - [x] 🔴 Test échoue : avec état simulé initial (flags/réputation fictifs), application d’un choix avec effets met à jour l’état de simulation de façon prévisible ; ordre des effets respecté ; compteur clampé.
-  - [x] 🟢 Implémenter une fonction pure `applyChoiceEffects(state, effects)` testée + branchement léger dans le store vue (`graphViewStore` ou équivalent) sans implémenter `POST /preview` complet (Story 9.4).
-  - [x] 🔵 Refactor : un seul moteur d’application d’effets pour panneau + graphe ; éviter de dupliquer la sémantique clamp / enum assign entre fichiers.
+- Task 1 : Modèle canon + schéma JSON — effets structurés sur **choix** (réutiliser patterns 9.2) (AC: #1–#4, #8)
+  - 🔴 Test échoue : document avec effets sur au moins un choix ; round-trip GET/PUT ; rejet si opérateur incompatible avec type de flag ; enum hors liste ; compteur qui violerait Min/Max après opération ; pas de perte silencieuse au reload.
+  - 🟢 Étendre `docs/resources/dialogue-format.schema.json`, types Pydantic (`api/schemas/`), types frontend (`UnityDialogueChoice` / schémas Zod) avec un bloc structuré dédié (nom final au dev : ex. `choiceEffects` ou alignement epic « actions » — une seule source de vérité dans le schéma). Conserver les champs legacy pertinents pour Unity/export ; documenter la stratégie legacy vs structuré dans Dev Notes.
+  - 🔵 Refactor : isoler le « shape » effet (union discriminée par kind/type) dans un module unique schéma JSON + types TS alignés Pydantic, comme pour `visibilityConditions`, pour éviter divergence à trois dialectes.
+- Task 2 : Validation / « parsing » métier — catalogue flags + réputation (AC: #3–#5, #8)
+  - 🔴 Test échoue : pour chaque type (bool assign, compteur +=/-/=, enum assign, réputation delta), entrées valides acceptées ; entrées hors bornes ou ID inconnus rejetées avec message contextualisé ; cohérence avec `FlagCatalogService` et règles déjà utilisées par `dialogue_flag_validation` / Story 9.2.
+  - 🟢 Implémenter un service dans `services/` (ex. `EffectValidationService` ou extension du pattern `VisibilityConditionValidationService`) branché sur `PUT /documents` après les validations existantes ; router mince via `api/container.py`.
+  - 🔵 Refactor : factoriser avec Story 9.2 les primitives « ID flag dans catalogue », « valeur enum ∈ liste », « compteur dans bornes » pour éviter duplication ; garder handlers API ≤ ~30 lignes.
+- Task 3 : UI « Effets » — liste ordonnée + éditeurs typés (AC: #1, #2, #6)
+  - 🔴 Test échoue : depuis un choix sélectionné, ajout d’un effet bool + sauvegarde déclenche PUT document ; réordonnancement (drag ou boutons haut/bas) reflété dans le JSON ; tests RTL sans dépendre du pixel-perfect.
+  - 🟢 Implémenter `EffectEditor.tsx` (ou équivalent) branché sur `ChoiceEditor` / flux document ; réutiliser listes/catalogue comme `ConditionEditor` / API flags ; ne pas fusionner avec `InGameFlagsModal`.
+  - 🔵 Refactor : **ne pas** faire grossir `NodeEditorPanel.tsx` (~1227 L) — composer depuis enfants/hooks ; si logique commune avec `ConditionEditor`, extraire uniquement ce qui est réellement partagé (sélecteurs catalogue, formatage résumé).
+- Task 4 : Graphe — marqueurs choix porteurs d’effets (AC: #2, #7)
+  - 🔴 Test échoue : choix avec effets affiche un indicateur distinct du badge « condition » ; tooltip ou libellé accessible résume au moins un effet ou « N effets ».
+  - 🟢 Étendre `DialogueNode.tsx` (handles de choix) pour icône/style « effets » cohérent avec accessibilité (title/aria).
+  - 🔵 Refactor : centraliser `formatEffectSummary` / liste dans `frontend/src/utils/` avec tests unitaires légers — même principe que `formatConditionSummary` en 9.2.
+- Task 5 : Simulation minimale — appliquer effets à l’état « jeu » simulé dans l’éditeur (AC: #6, préparation 9.4)
+  - 🔴 Test échoue : avec état simulé initial (flags/réputation fictifs), application d’un choix avec effets met à jour l’état de simulation de façon prévisible ; ordre des effets respecté ; compteur clampé.
+  - 🟢 Implémenter une fonction pure `applyChoiceEffects(state, effects)` testée + branchement léger dans le store vue (`graphViewStore` ou équivalent) sans implémenter `POST /preview` complet (Story 9.4).
+  - 🔵 Refactor : un seul moteur d’application d’effets pour panneau + graphe ; éviter de dupliquer la sémantique clamp / enum assign entre fichiers.
 
 ## Dev Notes
 
@@ -119,7 +115,7 @@ So that **je peux modifier l'état du jeu (variables, flags) en fonction des cho
 
 ## Senior Developer Review (AI)
 
-_Date : 2026-04-18 — Revue adversariale (workflow code-review)._
+*Date : 2026-04-18 — Revue adversariale (workflow code-review).*
 
 ### Synthèse
 
@@ -128,11 +124,13 @@ _Date : 2026-04-18 — Revue adversariale (workflow code-review)._
 
 ### Findings traités (post-revue)
 
-| Sev | Sujet | Action |
-|-----|--------|--------|
+
+| Sev    | Sujet                                                                                                                       | Action                                                                                    |
+| ------ | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | MEDIUM | Simulation store : `applyChoiceEffectsSimulation` n’injectait pas le catalogue → clamp compteur pouvait diverger du backend | `graphViewStore` + `EffectEditor` passent `catalogById` à `applyChoiceEffectsToEvalState` |
-| MEDIUM | Task 3 : tests RTL `EffectEditor` manquants (seuls utils) | Ajout `frontend/src/components/graph/effects/EffectEditor.test.tsx` |
-| LOW | Delta « Crainte » : littéral `±25` dupliqué | Constante `CRAINTE_DELTA_ABS_MAX` dans `choiceEffects.ts` (aligné Python) |
+| MEDIUM | Task 3 : tests RTL `EffectEditor` manquants (seuls utils)                                                                   | Ajout `frontend/src/components/graph/effects/EffectEditor.test.tsx`                       |
+| LOW    | Delta « Crainte » : littéral `±25` dupliqué                                                                                 | Constante `CRAINTE_DELTA_ABS_MAX` dans `choiceEffects.ts` (aligné Python)                 |
+
 
 ### Reste (LOW, non bloquant)
 
@@ -156,7 +154,7 @@ Composer (Cursor) — session dev-story 2026-04-18
 
 ### Debug Log References
 
-_(Aucun incident bloquant — CSV enum `EnumValues` : vérifier le nombre de séparateurs pour éviter colonne décalée.)_
+*(Aucun incident bloquant — CSV enum `EnumValues` : vérifier le nombre de séparateurs pour éviter colonne décalée.)*
 
 ### Completion Notes List
 

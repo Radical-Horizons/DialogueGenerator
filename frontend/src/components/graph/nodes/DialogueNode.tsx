@@ -17,6 +17,7 @@ import {
   evaluateVisibilityConditions,
   formatVisibilityConditionsSummary,
 } from '../../../utils/visibilityConditions'
+import { linesForAppliedChoiceEffects } from '../../../utils/previewEffectHistory'
 import type { ChoiceEffect } from '../../../types/choiceEffects'
 import type { VisibilityConditionsBlock } from '../../../types/visibilityConditions'
 import {
@@ -94,15 +95,21 @@ export const DialogueNode = memo(function DialogueNode({
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
 
   const visibilityEvalState = useGraphViewStore((s) => s.visibilityEvalState)
+  const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const applyChoiceEffectsSimulation = useGraphViewStore((s) => s.applyChoiceEffectsSimulation)
+  const appendPreviewEffectHistory = useGraphViewStore((s) => s.appendPreviewEffectHistory)
+  const previewCatalogById = useGraphViewStore((s) => s.previewCatalogById)
   const nodeVisibility = (data as { visibilityConditions?: VisibilityConditionsBlock })
     .visibilityConditions
   const simActive =
     Object.keys(visibilityEvalState.flags).length > 0 ||
     Object.keys(visibilityEvalState.reputation).length > 0
-  const nodeVisOk = !simActive || !nodeVisibility?.items?.length
+  const visibilityEvalMode = dialoguePreviewActive || simActive
+  const nodeVisOk = !visibilityEvalMode || !nodeVisibility?.items?.length
     ? true
     : evaluateVisibilityConditions(nodeVisibility, visibilityEvalState).satisfied
-  const showNodeDim = simActive && Boolean(nodeVisibility?.items?.length) && !nodeVisOk
+  const showNodeDim =
+    visibilityEvalMode && Boolean(nodeVisibility?.items?.length) && !nodeVisOk
   const nodeCondSummary = formatVisibilityConditionsSummary(nodeVisibility)
   const hasNodeCond = Boolean(nodeVisibility?.items?.length)
   
@@ -617,18 +624,30 @@ export const DialogueNode = memo(function DialogueNode({
           ).choiceEffects?.length ?? 0
           const hasChoiceEffects = choiceEffectsLen > 0
           const choiceVisOk =
-            !simActive || !choiceVisibility?.items?.length
+            !visibilityEvalMode || !choiceVisibility?.items?.length
               ? true
               : evaluateVisibilityConditions(choiceVisibility, visibilityEvalState).satisfied
           const dimChoice =
-            simActive && Boolean(choiceVisibility?.items?.length) && !choiceVisOk
+            visibilityEvalMode && Boolean(choiceVisibility?.items?.length) && !choiceVisOk
+          const choiceFx = (choice as { choiceEffects?: ChoiceEffect[] }).choiceEffects
           return (
             <Handle
               key={stableId}
               type="source"
               position={Position.Bottom}
               id={handleId}
+              isConnectable={!dialoguePreviewActive}
               title={label}
+              onPointerDown={(e) => {
+                if (!dialoguePreviewActive) return
+                e.stopPropagation()
+                e.preventDefault()
+                const prev = useGraphViewStore.getState().visibilityEvalState
+                const catalog = previewCatalogById ?? undefined
+                applyChoiceEffectsSimulation(choiceFx ?? [], catalog)
+                const lines = linesForAppliedChoiceEffects(prev, choiceFx, catalog)
+                appendPreviewEffectHistory(lines)
+              }}
               onMouseEnter={() => setHoveredChoiceIndex(index)}
               onMouseLeave={() => setHoveredChoiceIndex((prev) => (prev === index ? null : prev))}
               style={{
@@ -660,6 +679,7 @@ export const DialogueNode = memo(function DialogueNode({
         <Handle
           type="source"
           position={Position.Bottom}
+          isConnectable={!dialoguePreviewActive}
           style={{
             background: '#4A90E2',
             width: 12,

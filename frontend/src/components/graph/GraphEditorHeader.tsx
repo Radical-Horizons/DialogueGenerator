@@ -48,6 +48,9 @@ interface GraphEditorHeaderProps {
   canEditGraph: boolean
   isStandalone: boolean
   onBack?: () => void
+  /** Story 9.4 — preview scénario variables / effets. */
+  showDialoguePreviewPanel?: boolean
+  onToggleDialoguePreview?: () => void
 }
 
 export function GraphEditorHeader({
@@ -61,6 +64,8 @@ export function GraphEditorHeader({
   canEditGraph,
   isStandalone,
   onBack,
+  showDialoguePreviewPanel = false,
+  onToggleDialoguePreview,
 }: GraphEditorHeaderProps) {
   const {
     nodes,
@@ -880,7 +885,8 @@ export function GraphEditorHeader({
             showContextDroppingPanel ||
             showFlowSimulationPanel ||
             showSchemaValidationPanel ||
-            showCostBreakdown
+            showCostBreakdown ||
+            showDialoguePreviewPanel
           const menuItemStyle = {
             display: 'block',
             width: '100%',
@@ -1079,6 +1085,33 @@ export function GraphEditorHeader({
             </div>
           )
         })()}
+        <button
+          type="button"
+          data-testid="btn-dialogue-preview"
+          onClick={() => onToggleDialoguePreview?.()}
+          disabled={!hasActiveDialogue || !onToggleDialoguePreview}
+          style={{
+            padding: '0.5rem 1rem',
+            border: `1px solid ${
+              showDialoguePreviewPanel ? theme.button.primary.background : theme.border.primary
+            }`,
+            borderRadius: '6px',
+            backgroundColor: showDialoguePreviewPanel
+              ? theme.button.primary.background
+              : theme.button.default.background,
+            color: showDialoguePreviewPanel
+              ? theme.button.primary.color
+              : theme.button.default.color,
+            cursor:
+              !hasActiveDialogue || !onToggleDialoguePreview ? 'not-allowed' : 'pointer',
+            opacity: !hasActiveDialogue ? 0.6 : 1,
+            fontSize: '0.9rem',
+          }}
+          title="Preview scénario — simuler variables et effets sans sauvegarder"
+          aria-pressed={showDialoguePreviewPanel}
+        >
+          👁 Preview
+        </button>
         <button
           type="button"
           data-testid="btn-search-graph"

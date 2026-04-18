@@ -35,6 +35,9 @@ export interface UseGraphToolbarReturn {
   setShowContextDroppingPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showFlowSimulationPanel: boolean
   setShowFlowSimulationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  /** Story 9.4 — panneau preview scénario (variables / historique). */
+  showDialoguePreviewPanel: boolean
+  setShowDialoguePreviewPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showSchemaValidationPanel: boolean
   schemaValidationLoading: boolean
   schemaValidationIsValid: boolean
@@ -87,6 +90,7 @@ export function useGraphToolbar(
   const [showAiSlopPanel, setShowAiSlopPanel] = useState(false)
   const [showContextDroppingPanel, setShowContextDroppingPanel] = useState(false)
   const [showFlowSimulationPanel, setShowFlowSimulationPanel] = useState(false)
+  const [showDialoguePreviewPanel, setShowDialoguePreviewPanel] = useState(false)
   const [showSchemaValidationPanel, setShowSchemaValidationPanel] = useState(false)
   const [schemaValidationLoading, setSchemaValidationLoading] = useState(false)
   const [schemaValidationIsValid, setSchemaValidationIsValid] = useState(false)
@@ -488,6 +492,8 @@ export function useGraphToolbar(
     setShowContextDroppingPanel,
     showFlowSimulationPanel,
     setShowFlowSimulationPanel,
+    showDialoguePreviewPanel,
+    setShowDialoguePreviewPanel,
     showSchemaValidationPanel,
     schemaValidationLoading,
     schemaValidationIsValid,

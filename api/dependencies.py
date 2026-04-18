@@ -500,3 +500,12 @@ def get_choice_effect_validation_service():
 
     return ChoiceEffectValidationService(FlagCatalogService())
 
+
+def get_dialogue_preview_service(request: Request):
+    """Retourne DialoguePreviewService (Story 9.4, preview état masque visibilité)."""
+    from services.dialogue_preview_service import DialoguePreviewService
+
+    container = get_service_container(request)
+    svc: DialoguePreviewService = container.get_dialogue_preview_service()
+    return svc
+

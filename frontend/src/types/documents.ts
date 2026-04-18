@@ -34,3 +34,25 @@ export interface PutLayoutRequest {
 export interface PutLayoutResponse {
   revision: number
 }
+
+/** POST /documents/{id}/preview (Story 9.4). */
+export interface DialoguePreviewRequest {
+  revision?: number | null
+  flag_states: Record<string, unknown>
+  reputation_states?: Record<string, number>
+}
+
+export interface MaskedChoiceRef {
+  node_id: string
+  choice_id: string
+}
+
+export interface DialoguePreviewResponse {
+  revision: number
+  nodes_total: number
+  nodes_masked: number
+  choices_total: number
+  choices_masked: number
+  masked_node_ids: string[]
+  masked_choice_refs: MaskedChoiceRef[]
+}

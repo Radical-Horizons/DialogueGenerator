@@ -20,6 +20,9 @@ import type { ChoiceEffect } from '../types/choiceEffects'
 import type { VisibilityEvalState } from '../types/visibilityConditions'
 import { applyChoiceEffectsToEvalState } from '../utils/choiceEffects'
 
+/** Catalogue flags pour clamp preview (Story 9.4) — réglé par DialoguePreviewPanel. */
+export type PreviewCatalogMap = Record<string, FlagDefinition>
+
 export interface GraphViewState {
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
@@ -52,6 +55,13 @@ export interface GraphViewState {
 
   /** Story 9.2 — valeurs simulées pour prévisualiser visibilité (flags / réputation). */
   visibilityEvalState: VisibilityEvalState
+
+  /** Story 9.4 — mode preview scénario (simulation, pas de persistance document). */
+  dialoguePreviewActive: boolean
+  /** Lignes d'historique des effets appliqués en navigation preview. */
+  previewEffectHistory: string[]
+  /** Catalogue pour clamp effets (aligné EffectEditor). */
+  previewCatalogById: PreviewCatalogMap | undefined
 
   // --- Actions : instance ---
   registerReactFlowInstance: (instance: ReactFlowInstance) => void
@@ -102,6 +112,14 @@ export interface GraphViewState {
     effects: ChoiceEffect[],
     catalogById?: Record<string, FlagDefinition>,
   ) => void
+
+  /** Story 9.4 : entre en preview avec état initial (isolé du document). */
+  enterDialoguePreview: (initial: VisibilityEvalState) => void
+  /** Story 9.4 : quitte le preview et efface simulation + historique. */
+  exitDialoguePreview: () => void
+  appendPreviewEffectHistory: (lines: string[]) => void
+  clearPreviewEffectHistory: () => void
+  setPreviewCatalogById: (catalog: PreviewCatalogMap | undefined) => void
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
@@ -118,6 +136,9 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   saveRequested: false,
   dialogueDeleted: null,
   visibilityEvalState: { flags: {}, reputation: {} },
+  dialoguePreviewActive: false,
+  previewEffectHistory: [],
+  previewCatalogById: undefined,
 
   registerReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
 
@@ -190,6 +211,33 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
         catalogById,
       ),
     })),
+
+  enterDialoguePreview: (initial) =>
+    set({
+      dialoguePreviewActive: true,
+      previewEffectHistory: [],
+      visibilityEvalState: {
+        flags: { ...initial.flags },
+        reputation: { ...initial.reputation },
+      },
+    }),
+
+  exitDialoguePreview: () =>
+    set({
+      dialoguePreviewActive: false,
+      previewEffectHistory: [],
+      previewCatalogById: undefined,
+      visibilityEvalState: { flags: {}, reputation: {} },
+    }),
+
+  appendPreviewEffectHistory: (lines) =>
+    set((s) => ({
+      previewEffectHistory: [...s.previewEffectHistory, ...lines],
+    })),
+
+  clearPreviewEffectHistory: () => set({ previewEffectHistory: [] }),
+
+  setPreviewCatalogById: (catalog) => set({ previewCatalogById: catalog }),
 }))
 
 /** Exposé uniquement en dev pour E2E Playwright (`requestSave` aligné sur la toolbar / Ctrl+S). */

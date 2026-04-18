@@ -67,6 +67,8 @@ const mockToolbar = vi.hoisted((): UseGraphToolbarReturn => {
     setShowContextDroppingPanel: () => {},
     showFlowSimulationPanel: false,
     setShowFlowSimulationPanel: () => {},
+    showDialoguePreviewPanel: false,
+    setShowDialoguePreviewPanel: () => {},
     showSchemaValidationPanel: false,
     schemaValidationLoading: false,
     schemaValidationIsValid: true,

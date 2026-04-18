@@ -19,16 +19,20 @@ import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
 import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
 import { FlowSimulationPanel } from './FlowSimulationPanel'
+import { DialoguePreviewPanel } from './preview/DialoguePreviewPanel'
+import { DialoguePreviewBanner } from './preview/DialoguePreviewBanner'
 import { SchemaValidationPanel } from './SchemaValidationPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useToast, ConfirmDialog } from '../shared'
 import { theme } from '../../theme'
 import { resolveGraphRouteTarget } from './graphEditorStandalone'
 import { useDialogueLoader } from '../../hooks/useDialogueLoader'
 import { useGraphToolbar } from '../../hooks/useGraphToolbar'
+import { useDialoguePreview } from '../../hooks/useDialoguePreview'
 import { useBatchOperations } from '../../hooks/useBatchOperations'
 import type { UnityDialogueMetadata } from '../../types/api'
 
@@ -78,12 +82,18 @@ export function GraphEditor({
 
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
 
+  const { enterDialoguePreview, exitDialoguePreview } = useDialoguePreview()
+  const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const visibilityEvalStateBanner = useGraphViewStore((s) => s.visibilityEvalState)
+
   const {
     showValidationPanel,
     showQualityLlmPanel,
     showAiSlopPanel,
     showContextDroppingPanel,
     showFlowSimulationPanel,
+    showDialoguePreviewPanel,
+    setShowDialoguePreviewPanel,
     showSchemaValidationPanel,
     schemaValidationLoading,
     schemaValidationIsValid,
@@ -106,6 +116,26 @@ export function GraphEditor({
     handleExportPNG,
     handleExportSVG,
   } = toolbar
+
+  const handleToggleDialoguePreview = useCallback(() => {
+    if (showDialoguePreviewPanel) {
+      exitDialoguePreview()
+      setShowDialoguePreviewPanel(false)
+    } else {
+      enterDialoguePreview()
+      setShowDialoguePreviewPanel(true)
+    }
+  }, [
+    showDialoguePreviewPanel,
+    exitDialoguePreview,
+    enterDialoguePreview,
+    setShowDialoguePreviewPanel,
+  ])
+
+  const handleCloseDialoguePreviewPanel = useCallback(() => {
+    exitDialoguePreview()
+    setShowDialoguePreviewPanel(false)
+  }, [exitDialoguePreview, setShowDialoguePreviewPanel])
 
   const {
     selectedNodeIdsToDelete,
@@ -191,6 +221,8 @@ export function GraphEditor({
           canEditGraph={canEditGraph}
           isStandalone={isStandalone}
           onBack={onBack}
+          showDialoguePreviewPanel={showDialoguePreviewPanel}
+          onToggleDialoguePreview={handleToggleDialoguePreview}
         />
 
         {/* Contenu graphe */}
@@ -245,19 +277,50 @@ export function GraphEditor({
               </div>
             ) : (
               <div
-                data-testid="graph-canvas"
-                style={{ flex: 1, minHeight: 400, overflow: 'hidden', position: 'relative' }}
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                }}
               >
-                {showSearchBar && (
-                  <GraphSearchBar
-                    onClose={() => {
-                      toolbar.setShowSearchBar(false)
+                {dialoguePreviewActive ? (
+                  <DialoguePreviewBanner visibilityEvalState={visibilityEvalStateBanner} />
+                ) : null}
+                <div
+                  style={{
+                    flex: 1,
+                    minHeight: 0,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    data-testid="graph-canvas"
+                    style={{
+                      flex: 1,
+                      minHeight: 400,
+                      overflow: 'hidden',
+                      position: 'relative',
                     }}
-                  />
-                )}
-                <ReactFlowProvider>
-                  <GraphCanvas />
-                </ReactFlowProvider>
+                  >
+                    {showSearchBar && (
+                      <GraphSearchBar
+                        onClose={() => {
+                          toolbar.setShowSearchBar(false)
+                        }}
+                      />
+                    )}
+                    <ReactFlowProvider>
+                      <GraphCanvas />
+                    </ReactFlowProvider>
+                  </div>
+                  {showDialoguePreviewPanel ? (
+                    <DialoguePreviewPanel onClose={handleCloseDialoguePreviewPanel} />
+                  ) : null}
+                </div>
               </div>
             )}
             {showValidationOverlay && (

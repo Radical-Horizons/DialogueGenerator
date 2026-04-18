@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from services.dialogue_preview_service import DialoguePreviewService
     from services.gdd_notion_sync_service import GddNotionSyncService
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
@@ -67,6 +68,7 @@ class ServiceContainer:
         self._context_rule_service: Optional[ContextRuleService] = None
         self._cd_rules_service: Optional[ContextDroppingRulesService] = None
         self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
+        self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
     def get_config_service(self) -> ConfigurationService:
@@ -346,6 +348,19 @@ class ServiceContainer:
 
         root = Path(__file__).resolve().parent.parent
         return resolve_gdd_categories_path(root)
+
+    def get_dialogue_preview_service(self) -> "DialoguePreviewService":
+        """Retourne le service preview document (Story 9.4).
+
+        Returns:
+            Instance singleton de DialoguePreviewService.
+        """
+        if self._dialogue_preview_service is None:
+            from services.dialogue_preview_service import DialoguePreviewService
+
+            self._dialogue_preview_service = DialoguePreviewService()
+            logger.info("DialoguePreviewService initialisé dans le container.")
+        return self._dialogue_preview_service
     
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.
@@ -396,4 +411,5 @@ class ServiceContainer:
         self._context_rule_service = None
         self._cd_rules_service = None
         self._gdd_notion_sync_service = None
+        self._dialogue_preview_service = None
         logger.info("ServiceContainer réinitialisé (reload détecté).")

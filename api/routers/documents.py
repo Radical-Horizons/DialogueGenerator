@@ -12,20 +12,22 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from api.dependencies import (
     get_choice_effect_validation_service,
     get_config_service,
     get_dialogue_flags_service,
+    get_dialogue_preview_service,
     get_request_id,
     get_visibility_condition_validation_service,
 )
 from api.routers.auth import get_current_user
 from api.exceptions import APIException, NotFoundException, ValidationException, InternalServerException
+from api.schemas.dialogue_preview import DialoguePreviewRequest, DialoguePreviewResponse
 from api.schemas.documents import (
     CheckMigrationResponse,
     DocumentGetResponse,
@@ -328,6 +330,56 @@ async def get_document(
         logger.exception(f"Erreur GET document {document_id} (request_id: {request_id})")
         raise InternalServerException(
             message="Erreur lors de la lecture du document",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/{document_id}/preview",
+    response_model=DialoguePreviewResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def post_document_preview(
+    document_id: str,
+    body: DialoguePreviewRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+    preview_service: Annotated[Any, Depends(get_dialogue_preview_service)],
+) -> DialoguePreviewResponse:
+    """Évalue la visibilité nœuds/choix pour un état simulé (Story 9.4).
+
+    409 si ``revision`` dans le corps ne correspond pas à la révision persistée.
+    """
+    try:
+        base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
+        document, _ = _read_document_blob(base_dir, doc_id)
+        revision = _read_meta(base_dir, doc_id)
+        try:
+            return preview_service.preview_document(document, body, stored_revision=revision)
+        except ValueError as exc:
+            if str(exc) == "revision_stale":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "code": "revision_stale",
+                        "expected_revision": revision,
+                        "request_id": request_id,
+                    },
+                ) from exc
+            raise
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except (ValidationException, NotFoundException, HTTPException):
+        raise
+    except Exception as e:
+        logger.exception(f"Erreur POST preview document {document_id} (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors du preview document",
             details={"error": str(e)},
             request_id=request_id,
         )
