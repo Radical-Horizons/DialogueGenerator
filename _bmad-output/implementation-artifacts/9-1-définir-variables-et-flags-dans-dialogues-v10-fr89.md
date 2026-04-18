@@ -1,6 +1,6 @@
 # Story 9.1: Définir variables et flags dans dialogues (V1.0+) (FR89)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -105,7 +105,7 @@ So that **je peux créer des branches conditionnelles qui réagissent à l'état
 
 ## Story Completion Status
 
-- **review** — Implémentation complète ; tests exécutés (voir Dev Agent Record).
+- **done** — Code review adversariale : correctifs UI enum/compteur + versionnement `FlagCatalog.csv` ; pytest/Vitest verts.
 
 ---
 
@@ -122,6 +122,7 @@ Composer / Amelia (Dev Story workflow)
 
 ### Completion Notes List
 
+- **Code review (2026-04-18)** : HIGH — `data/UnityData/FlagCatalog.csv` non versionné malgré la File List → `.gitignore` assoupli pour `*.csv` + ajout du CSV ; MEDIUM — AC4 lisibilité défaut catalogue enum + garde NaN saisie compteur (`DialogueFlagsPanel.tsx`). LOW — filtres catalogue entièrement côté client (API `semantic_type`/`scope` disponibles mais chargement unique pour garder l’index complet des définitions → seuils `conversationnel` fiables).
 - Champ document `dialogueFlags` validé au PUT ; réponse `flagThresholdWarnings` ; CSV `FlagCatalog.csv` colonnes Scope, MinValue, MaxValue, EnumValues ; ligne exemple enum `MISSION_BRANCH`.
 - 🔵 Refactor Task 1 : validation extraite dans `services/dialogue_flag_validation.py` (aucune logique dupliquée dans le router).
 - 🔵 Refactor Task 2 : constantes filtres FR89 dans `frontend/src/constants/flagCatalogSemantics.ts` (types/portées alignées API).

@@ -299,12 +299,20 @@ export function DialogueFlagsPanel() {
                       value={typeof binding.initialValue === 'number' ? binding.initialValue : 0}
                       min={def?.minValue != null ? Number(def.minValue) : undefined}
                       max={def?.maxValue != null ? Number(def.maxValue) : undefined}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const parsed = Number(e.target.value)
+                        const fallback =
+                          typeof binding.initialValue === 'number' && Number.isFinite(binding.initialValue)
+                            ? binding.initialValue
+                            : def?.minValue != null
+                              ? Number(def.minValue)
+                              : 0
+                        const next = Number.isFinite(parsed) ? parsed : fallback
                         upsertDialogueFlagBinding({
                           ...binding,
-                          initialValue: Number(e.target.value),
+                          initialValue: next,
                         })
-                      }
+                      }}
                       aria-label={`Valeur initiale compteur pour ${binding.flagId}`}
                     />
                   </label>
@@ -316,8 +324,15 @@ export function DialogueFlagsPanel() {
                       alignItems: 'center',
                       gap: '0.35rem',
                       marginTop: '0.35rem',
+                      flexWrap: 'wrap',
                     }}
                   >
+                    <span style={{ fontSize: '0.75rem', color: theme.text.secondary }}>
+                      Défaut catalogue :{' '}
+                      <strong>{String(def.defaultValueParsed ?? def.defaultValue ?? '')}</strong>
+                      {' · '}
+                      Valeurs : {def.enumValues.join(' → ')}
+                    </span>
                     <span>Valeur initiale</span>
                     <select
                       value={String(binding.initialValue)}

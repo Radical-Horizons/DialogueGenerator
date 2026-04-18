@@ -1,0 +1,9 @@
+Id,Type,Category,Label,Description,DefaultValue,Tags,IsFavorite,Scope,MinValue,MaxValue,EnumValues
+PLAYER_KILLED_BOSS,bool,Event,Player killed boss,Player has defeated the final boss,false,quest;main,true,,,,
+PLAYER_KILLED_VOL_REITAR,bool,Event,Player killed Vol Reitar,Player has killed Vol Reitar,false,quest;character,true,,,,
+ALLIED_WITH_CULTE_ANENTROPIE,bool,Choice,Allied with Culte Anentropie,Player has allied with the Culte de l'Anentropie,false,alliance;faction,true,,,,
+CADRAN_EMPORTE,bool,Item,Cadran emporté,Le joueur a emporté le cadran,false,item;dialogue,false,,,,
+CURRENT_EFFORT,int,Stat,Current Effort,Current Effort stat of the player,5,stat;effort,true,,0,10,
+PLAYER_REPUTATION_NOBLES,int,Stat,Reputation with Nobles,Player's reputation with noble faction,0,reputation;faction,false,,0,100,
+PLAYER_INFLUENCE,int,Stat,Player Influence,Player's current Influence points,0,stat;influence,false,,,,
+MISSION_BRANCH,string,Choice,Mission branch state,Branch taken for mission,path_a,quest;branch,false,conversationnel,,,path_a;path_b
