@@ -541,6 +541,50 @@ Create or update Unity dialogue file.
 
 **Response:** Created/updated file info
 
+### Graph quality (`/api/v1/unity-dialogues/graph`)
+
+Ces routes vivent dans `api/routers/graph_quality.py` et sont montées sous le **même préfixe** que les autres routes graphe (`/api/v1/unity-dialogues/graph`), avec **JWT** obligatoire (`Depends(get_current_user)` dans `api/main.py`).
+
+#### POST `/unity-dialogues/graph/detect-ai-slop`
+
+**But (FR43)** : heuristiques locales sur le graphe (GPT-isms, répétitions, phrases génériques, mots-clés / regex personnalisés).
+
+**Request body** : `DetectAiSlopRequest` — `nodes`, `edges` (ReactFlow), `options` optionnel (`include_gpt_isms`, `include_repetitions`, `include_generic_phrases`, `custom_keywords`, `custom_regex_patterns`).
+
+**Response** : `DetectAiSlopResponse` — résumés + listes d’occurrences / groupes de répétition.
+
+#### POST `/unity-dialogues/graph/detect-context-dropping`
+
+**But (FR44)** : signale l’absence ou l’usage trop faible du contexte GDD dans le texte du graphe, aligné sur le flux « lore explicite vs subtil » (voir `services/context_dropping_detector.py`).
+
+**Request body** : `DetectContextDroppingRequest` — `nodes`, `edges`, `context_selections` (même famille que validation / génération), `scene_instruction`, `context_text` optionnel, `options` optionnel (`rules_profile`, `tolerance`, `mandatory_info`, `dialogue_type`, `dialogue_type_overrides`).
+
+**Response** : `DetectContextDroppingResponse` — `summary`, `cases` (`kind` : `context_dropping` \| `too_subtle` \| `mandatory_missing`), `rules_profile_effective`, `message` optionnel si graphe ou contexte vide / RAS.
+
+**Fusion avec règles persistées (Story 4.10)** : pour chaque champ d’option absent dans la requête, le handler fusionne avec les règles lues depuis le disque (voir ci-dessous). La requête **prime** sur le fichier quand un champ est fourni (`_context_dropping_options_to_data` dans `graph_quality.py`).
+
+#### POST `/unity-dialogues/graph/evaluate-dialogue-quality`
+
+**But** : juge qualité dialogue via LLM (coût / usage tracés comme les autres appels LLM du routeur).
+
+---
+
+### Règles validation context-dropping (`/api/v1/validation/rules`)
+
+Router `api/routers/validation_rules.py`, monté sous `/api/v1` avec **JWT** obligatoire.
+
+#### GET `/validation/rules/context-dropping`
+
+Retourne `ContextDroppingRulesSchema` — règles persistées ou défauts si fichier absent. JSON invalide sur disque → **422** avec message explicite (pas de 500 opaque).
+
+#### PUT `/validation/rules/context-dropping`
+
+Remplace le fichier de règles par le corps validé `ContextDroppingRulesSchema`. Schéma : `rules_profile` (`strict` \| `light`), `tolerance` optionnelle \[0, 1\], `mandatory_info` (liste de labels), `dialogue_type_overrides`, `schema_version`.
+
+**Stockage** : `data/validation-rules/context-dropping.json` (chemin `FilePaths.CONTEXT_DROPPING_RULES_FILE` dans `constants.py`). Service : `services/context_dropping_rules_service.py`.
+
+**Note opérationnelle** : lors d’un `POST .../detect-context-dropping`, si le fichier est **illisible**, le routeur graphe journalise un avertissement et retombe sur les défauts (comportement différent du GET dédié qui renvoie 422).
+
 ---
 
 ## LLM Usage Endpoints (`/api/v1/llm-usage`)

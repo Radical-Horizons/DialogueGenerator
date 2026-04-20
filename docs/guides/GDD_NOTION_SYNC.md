@@ -31,9 +31,17 @@ Le backend peut **télécharger le GDD depuis Notion** et l’écrire sous `data
 
 Schémas Pydantic : `api/schemas/gdd_notion_sync.py`.
 
-## Bases « sans corps de page » (optimisation)
+## Bases « sans corps de page » (sonde + lecture complète)
 
-Certaines bases Notion n’ont que des **colonnes** (flags, inventaires, skills…) : les lignes existent comme pages mais le **corps** (markdown / blocs) est vide. Pour éviter un `get_page_content` par ligne, le service échantillonne les **3 premières lignes** (ordre du `query_database`). Si aucune n’a de corps, il **omet** `get_page_content` sur le reste des lignes de cette source pour le run en cours. Ce n’est **pas** une erreur : un message **info** est écrit dans `data/logs/gdd_notion_sync.log`. Le titre et les colonnes restent synchronisés via `get_page`. Les bases listées en export **compact** dans le mapper continuent de court-circuiter encore plus tôt (sans sonde).
+Certaines bases Notion n’ont que des **colonnes** (flags, inventaires, skills…) : les lignes existent comme pages mais le **corps** (markdown / blocs) est souvent vide. Comportement réel dans `services/gdd_notion_sync_service.py` :
+
+1. **Sonde** : les **3 premières lignes** du `query_database` passent par `get_page_content` (constante `NOTION_DATABASE_BODY_PROBE_ROW_COUNT`).
+2. Si ces trois corps sont **tous vides** (après trim), un message **info** est émis (`data/logs/gdd_notion_sync.log` / événement de sync) — ce n’est **pas** une erreur.
+3. **Lignes suivantes** : pour chaque autre page de la source, `get_page_content` est **toujours** appelé (sauf réutilisation du corps déjà en cache pour une ligne de l’échantillon). Une ligne au-delà des trois premières peut donc avoir un corps non vide même si l’échantillon était entièrement vide.
+
+Le titre et les colonnes restent synchronisés via `get_page` sur toutes les lignes. Les bases en export **compact** dans le mapper court-circuitent ce flux (pas de fusion corps comme une fiche narrative complète).
+
+**Contrainte** : l’ordre des lignes suit celui retourné par Notion pour la base ; la sonde ne garantit pas un échantillon représentatif statistique, seulement un signal « base probablement sans corps » + lecture complète des corps hors échantillon.
 
 ## Sync incrémentale vs complète
 

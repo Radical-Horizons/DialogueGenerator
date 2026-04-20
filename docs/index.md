@@ -57,7 +57,7 @@ Located in `[architecture/](./architecture/)`
 
 Located in `[api/](./api/)`
 
-- [Backend API Contracts](./api/api-contracts-api.md) - Complete REST API endpoint documentation
+- [Backend API Contracts](./api/api-contracts-api.md) - Complete REST API endpoint documentation (inclut qualité graphe : AI slop, context dropping, règles persistées `validation/rules`)
 - [Frontend API Client](./api/api-contracts-frontend.md) - Frontend API client modules
 - [Backend Data Models](./api/data-models-api.md) - Pydantic schemas and models
 - [Frontend Data Models](./api/data-models-frontend.md) - TypeScript types and interfaces
@@ -180,7 +180,7 @@ When creating a brownfield PRD:
 
 ## Documentation Status
 
-**Last Updated**: 2026-04-06
+**Last Updated**: 2026-04-20
 **Structure**: Reorganized into logical categories
 **Parts Documented**: 2 (frontend, api)
 

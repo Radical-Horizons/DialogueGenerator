@@ -178,6 +178,15 @@ Option B : Depuis l'URL
 
 ## Validation
 
+### Qualité narrative (toolbar)
+
+Depuis l’en-tête du graphe (dashboard) :
+
+- **Détection AI slop (FR43)** : motifs répétitifs / génériques sur les textes des nœuds ; appelle `POST /api/v1/unity-dialogues/graph/detect-ai-slop` (`api/routers/graph_quality.py`, client `frontend/src/api/graph.ts`).
+- **Context dropping (FR44 + FR45)** : panneau dédié ; détection via `POST /api/v1/unity-dialogues/graph/detect-context-dropping`. Les **règles persistées** (profil strict/léger, tolérance, infos obligatoires, surcharges par type de dialogue) se configurent dans le même panneau et passent par **`GET` / `PUT` `/api/v1/validation/rules/context-dropping`** (`ContextDroppingRulesEditor`, fichier `data/validation-rules/context-dropping.json`). Les champs fournis dans le **body** de détection priment sur le fichier pour ce run.
+
+JWT requis pour ces routes (même session que le reste de l’API graphe).
+
 ### Types d'Erreurs
 
 - **missing_id** : Nœud sans ID
@@ -193,9 +202,8 @@ Option B : Depuis l'URL
 
 ## Limitations Actuelles (MVP)
 
-### Non implémenté
+### Non implémenté / obsolète dans ce guide
 
-- ❌ Génération de nœuds avec IA (depuis le graphe)
 - ❌ Édition avancée des choix (conditions, mécaniques RPG)
 - ❌ Auto-layout Dagre (avec animation)
 - ❌ Validation visuelle (badges, outline)
@@ -204,7 +212,7 @@ Option B : Depuis l'URL
 
 ### Workarounds
 
-- **Génération IA** : Utiliser l'interface principale puis ouvrir dans l'éditeur
+- **Génération IA** : génération de nœuds depuis le graphe via `POST /api/v1/unity-dialogues/graph/generate-node` (`graph_generation.py`) ; ce guide utilisateur ne détaille pas le flux (voir code / tests API).
 - **Édition choix** : Modifier le JSON exporté manuellement
 - **Auto-layout** : Layout basique en cascade (non Dagre)
 - **Recherche** : Utiliser Ctrl+F du navigateur dans le JSON exporté
@@ -216,12 +224,9 @@ Option B : Depuis l'URL
 - **Services** :
   - `graph_conversion_service.py` : Conversion Unity JSON ↔ ReactFlow
   - `graph_validation_service.py` : Validation de graphe
-- **API** : `/api/v1/unity-dialogues/graph/*`
-  - `POST /load` : Charger un graphe
-  - `POST /save` : Sauvegarder un graphe
-  - `POST /validate` : Valider un graphe
-  - `POST /generate-node` : Générer un nœud (futur)
-  - `POST /calculate-layout` : Calculer un layout
+- **API** : `/api/v1/unity-dialogues/graph/*` (routers `graph_io`, `graph_generation`, `graph_cost`, `graph_validation`, `graph_quality`, `graph_flow`, `graph_node_history` — voir `api/main.py`)
+  - Exemples : `POST /load`, `POST /save`, `POST /validate`, `POST /generate-node`, `POST /detect-ai-slop`, `POST /detect-context-dropping`, layout / flux selon modules
+- **Règles context-dropping persistées** : `GET`/`PUT` `/api/v1/validation/rules/context-dropping` (`validation_rules.py`)
 
 ### Frontend
 
