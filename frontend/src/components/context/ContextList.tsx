@@ -9,6 +9,7 @@ import { remSize } from '../../theme/uiTypography'
 import { highlightText } from '../../utils/textHighlight'
 import { getGddEntitySummary } from '../../utils/gddSummary'
 import { useDebounce } from '../../hooks/useDebounce'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export type ContextListItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse | { name: string; data?: Record<string, unknown> }
 
@@ -178,7 +179,7 @@ export function ContextList({
               color: theme.input.color,
             }}
           />
-          <select
+          <StyledSelect
             value={sortType}
             onChange={(e) => setSortType(e.target.value as SortType)}
             style={{
@@ -189,12 +190,13 @@ export function ContextList({
               color: theme.input.color,
               fontSize: remSize('accent'),
             }}
+            wrapperStyle={{ width: 'auto' }}
             title="Trier les résultats"
           >
             <option value="name-asc">Nom (A-Z)</option>
             <option value="name-desc">Nom (Z-A)</option>
             <option value="selected-first">Sélectionnés en premier</option>
-          </select>
+          </StyledSelect>
         </div>
       </div>
       <div

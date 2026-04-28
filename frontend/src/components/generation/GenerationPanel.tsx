@@ -21,6 +21,7 @@ import { GenerationProgressModal } from './GenerationProgressModal'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
 import { useToast } from '../shared'
+import { StyledSelect } from '../shared/StyledSelect'
 import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS, DEFAULT_MODEL, API_TIMEOUTS } from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import type { DialogueStructure } from '../../types/generation'
@@ -512,7 +513,7 @@ export function GenerationPanel() {
                   </button>
                 </div>
               </div>
-              <select
+              <StyledSelect
                 id="reasoning-effort-select"
                 value={reasoningEffort || (llmModel === "gpt-5-mini" || llmModel === "gpt-5-nano" ? 'minimal' : 'none')}
                 onChange={(e) => {
@@ -548,7 +549,7 @@ export function GenerationPanel() {
                     <option value="high">Élevé (raisonnement approfondi)</option>
                   </>
                 )}
-              </select>
+              </StyledSelect>
             </div>
           )}
           

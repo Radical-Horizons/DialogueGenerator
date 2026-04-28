@@ -9,6 +9,7 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 import { buildOptimizeContextRequest } from '../../utils/buildContextOptimizeRequest'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { StyledSelect } from '../shared/StyledSelect'
 import { remSize } from '../../theme/uiTypography'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { modalTypography } from '../../theme/responsiveChrome'
@@ -143,7 +144,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
             <label style={{ display: 'block', marginBottom: 4, color: theme.text.secondary }}>
               Stratégie
             </label>
-            <select
+            <StyledSelect
               value={strategy}
               onChange={(e) =>
                 setStrategy(e.target.value === 'aggressive' ? 'aggressive' : 'conservative')
@@ -159,7 +160,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
             >
               <option value="conservative">Conservatrice (réduit d’abord types périphériques)</option>
               <option value="aggressive">Agressive (réduit d’abord personnages / lieux)</option>
-            </select>
+            </StyledSelect>
           </div>
           <div style={{ marginBottom: 6 }}>
             <label style={{ display: 'block', marginBottom: 4, color: theme.text.secondary }}>

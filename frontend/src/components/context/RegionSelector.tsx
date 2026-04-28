@@ -7,6 +7,7 @@ import { useContextStore } from '../../store/contextStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export function RegionSelector() {
   const [regions, setRegions] = useState<string[]>([])
@@ -73,7 +74,7 @@ export function RegionSelector() {
         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent') }}>
           Région:
         </label>
-        <select
+        <StyledSelect
           value={selectedRegion || ''}
           onChange={(e) => setRegion(e.target.value || null)}
           disabled={isLoading}
@@ -93,7 +94,7 @@ export function RegionSelector() {
               {region}
             </option>
           ))}
-        </select>
+        </StyledSelect>
       </div>
 
       {selectedRegion && (

@@ -12,6 +12,7 @@ import { ConfirmDialog } from '../shared'
 import { CostEstimationBadge } from './CostEstimationBadge'
 import { theme } from '../../theme'
 import { getErrorMessage } from '../../types/errors'
+import { StyledSelect } from '../shared/StyledSelect'
 import { DEFAULT_MODEL } from '../../constants'
 import * as configAPI from '../../api/config'
 import type { LLMModelResponse } from '../../types/api'
@@ -596,7 +597,7 @@ export function AIGenerationPanel({
         }}>
           Modèle LLM
         </label>
-        <select
+        <StyledSelect
           data-testid="llm-model-select"
           value={llmModel}
           onChange={(e) => setLlmModel(e.target.value)}
@@ -615,7 +616,7 @@ export function AIGenerationPanel({
               {model.display_name || model.model_identifier}
             </option>
           ))}
-        </select>
+        </StyledSelect>
       </div>
       
       {/* Max choices */}

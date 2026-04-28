@@ -11,6 +11,7 @@ import { theme } from '../../theme'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import * as configAPI from '../../api/config'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
@@ -225,7 +226,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 >
                   Templates de scène:
                 </label>
-                <select
+                <StyledSelect
                   id="scene-template-select"
                   value={selectedSceneTemplateId || ''}
                   onChange={(e) => {
@@ -234,7 +235,6 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                       const template = sceneTemplates.find(t => t.id === templateId)
                       if (template) {
                         setSelectedSceneTemplateId(template.id)
-                        // Remplacer les instructions par le contenu du template
                         onUserInstructionsChange(template.instructions)
                       }
                     } else {
@@ -254,7 +254,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                     fontSize: `${genChrome.selectTextFontRem}rem`,
                     cursor: 'pointer',
                   }}
-                  title={selectedSceneTemplateId 
+                  title={selectedSceneTemplateId
                     ? sceneTemplates.find(t => t.id === selectedSceneTemplateId)?.description
                     : 'Sélectionner un template de scène'}
                 >
@@ -264,7 +264,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                       {template.name}
                     </option>
                   ))}
-                </select>
+                </StyledSelect>
                 {selectedSceneTemplateId && (
                   <button
                     onClick={() => setShowTemplatePreview(selectedSceneTemplateId)}

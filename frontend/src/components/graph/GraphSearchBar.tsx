@@ -8,6 +8,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { StyledSelect } from '../shared/StyledSelect'
 
 const SEARCH_DEBOUNCE_MS = 200
 
@@ -147,7 +148,7 @@ export function GraphSearchBar({ onClose, embedded = false }: GraphSearchBarProp
         }}
       />
       {speakers.length > 0 && (
-        <select
+        <StyledSelect
           aria-label="Filtrer par speaker"
           value={speaker}
           onChange={(e) => setSpeaker(e.target.value)}
@@ -160,9 +161,9 @@ export function GraphSearchBar({ onClose, embedded = false }: GraphSearchBarProp
             fontSize: remSize('body'),
             minWidth: 80,
             maxWidth: 160,
-            flex: '0 1 auto',
             boxSizing: 'border-box',
           }}
+          wrapperStyle={{ flex: '0 1 auto', minWidth: 80, maxWidth: 160 }}
         >
           <option value="">Tous les speakers</option>
           {speakers.map((s) => (
@@ -170,7 +171,7 @@ export function GraphSearchBar({ onClose, embedded = false }: GraphSearchBarProp
               {s}
             </option>
           ))}
-        </select>
+        </StyledSelect>
       )}
       <span style={{ fontSize: remSize('small'), color: theme.text.secondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
         {count === 0 && !query.trim() && !speaker

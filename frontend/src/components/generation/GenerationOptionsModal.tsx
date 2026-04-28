@@ -14,6 +14,7 @@ import { BudgetSettings } from '../settings/BudgetSettings'
 import { UsageDashboard } from '../usage/UsageDashboard'
 import { GenerationLogsPanel } from '../usage/GenerationLogsPanel'
 import { theme } from '../../theme'
+import { StyledSelect } from '../shared/StyledSelect'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import * as configAPI from '../../api/config'
@@ -523,7 +524,7 @@ function ContextTab({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <select
+        <StyledSelect
           value={selectedElementType}
           onChange={(e) => setSelectedElementType(e.target.value)}
           style={{
@@ -533,13 +534,14 @@ function ContextTab({
             backgroundColor: theme.input.background,
             color: theme.input.color,
           }}
+          wrapperStyle={{ width: 'auto' }}
         >
           {elementTypes.map((et) => (
             <option key={et.id} value={et.id}>
               {et.label}
             </option>
           ))}
-        </select>
+        </StyledSelect>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button
             onClick={onDetectAll}
@@ -688,7 +690,7 @@ function GeneralTab({
               position="right"
             />
           </div>
-          <select
+          <StyledSelect
             value={organization}
             onChange={(e) => setOrganization(e.target.value as 'default' | 'narrative' | 'minimal')}
             style={{
@@ -703,7 +705,7 @@ function GeneralTab({
             <option value="default">Par défaut (ordre de la config)</option>
             <option value="narrative">Narratif (groupé par pertinence)</option>
             <option value="minimal">Minimal (seulement l'essentiel)</option>
-          </select>
+          </StyledSelect>
         </div>
 
         <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -874,7 +876,7 @@ function LogsTab() {
         <label htmlFor="logs-dialogue-select" style={{ color: theme.text.secondary, fontSize: remSize('accent') }}>
           Dialogue :
         </label>
-        <select
+        <StyledSelect
           id="logs-dialogue-select"
           value={selectedDialogueId}
           onChange={(e) => setSelectedDialogueId(e.target.value)}
@@ -894,7 +896,7 @@ function LogsTab() {
               {d.title ?? d.filename}
             </option>
           ))}
-        </select>
+        </StyledSelect>
       </div>
       {selectedDialogueId ? (
         <ErrorBoundary

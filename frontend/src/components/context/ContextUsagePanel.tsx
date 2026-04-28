@@ -9,6 +9,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { StyledSelect } from '../shared/StyledSelect'
 import { labelForEntityType } from '../../utils/contextUsageLabels'
 import { ContextSectionUsageModal } from './ContextSectionUsageModal'
 import { ContextComparisonView } from './ContextComparisonView'
@@ -251,7 +252,7 @@ export function ContextUsagePanel() {
               <label htmlFor="context-usage-compare-select" style={{ display: 'block', marginBottom: '0.25rem' }}>
                 Second nœud
               </label>
-              <select
+              <StyledSelect
                 id="context-usage-compare-select"
                 data-testid="context-usage-compare-select"
                 value={compareNodeId}
@@ -269,7 +270,7 @@ export function ContextUsagePanel() {
                     {id}
                   </option>
                 ))}
-              </select>
+              </StyledSelect>
               {compareNodeId ? (
                 <ContextComparisonView
                   dialogueId={dialogueId}
