@@ -8,6 +8,7 @@ import { useContextRulesStore } from '../../store/contextRulesStore'
 import type { ContextRule, EntityTypeStr } from '../../types/api'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { StyledSelect } from '../shared/StyledSelect'
 
 const ENTITY_TYPE_OPTIONS: { value: EntityTypeStr; label: string }[] = [
   { value: 'character', label: 'Personnage' },
@@ -268,16 +269,17 @@ export function ContextRulesEditor() {
         }}
       >
         <span style={{ fontWeight: 600, color: theme.text.primary }}>⚙ Règles de sélection</span>
-        <select
+        <StyledSelect
           aria-label="Type de dialogue"
           value={selectedDialogueType}
           onChange={(e) => void loadRulesByDialogueType(e.target.value)}
           style={{ ...inputStyle, width: 'auto', padding: '2px 6px', marginRight: '0.35rem' }}
+          wrapperStyle={{ width: 'auto' }}
         >
           {DIALOGUE_TYPE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
-        </select>
+        </StyledSelect>
         <button
           aria-label="Ajouter règle"
           onClick={() => setShowForm(v => !v)}
@@ -364,29 +366,31 @@ export function ContextRulesEditor() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
               <span style={{ color: theme.text.secondary }}>Conditions déclencheuses</span>
               {form.conditions.length > 1 && (
-                <select
+                <StyledSelect
                   aria-label="Opérateur de conditions"
                   value={form.conditionOperator}
                   onChange={e => setForm(prev => ({ ...prev, conditionOperator: e.target.value as 'AND' | 'OR' }))}
                   style={{ ...inputStyle, width: 'auto', padding: '1px 4px', fontSize: remSize('caption') }}
+                  wrapperStyle={{ width: 'auto' }}
                 >
                   <option value="OR">AU MOINS UNE (OU)</option>
                   <option value="AND">TOUTES (ET)</option>
-                </select>
+                </StyledSelect>
               )}
             </div>
             {form.conditions.map((cond, i) => (
               <div key={i} style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', marginBottom: '0.25rem' }}>
-                <select
+                <StyledSelect
                   aria-label={`Type déclencheur ${i + 1}`}
                   value={cond.entityType}
                   onChange={e => updateCondition(i, { entityType: e.target.value as EntityTypeStr })}
                   style={{ ...inputStyle, flex: '0 0 auto', width: '6rem' }}
+                  wrapperStyle={{ flex: '0 0 auto', width: '6rem' }}
                 >
                   {ENTITY_TYPE_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
-                </select>
+                </StyledSelect>
                 <input
                   type="text"
                   aria-label={`Nom entité ${i + 1} (optionnel)`}

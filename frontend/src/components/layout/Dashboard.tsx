@@ -1,7 +1,16 @@
 /**
  * Composant Dashboard avec layout 3 panneaux redimensionnables.
  */
-import { useState, useEffect, useRef, useMemo, useCallback, type CSSProperties, type ReactNode } from 'react'
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import { ContextSelector } from '../context/ContextSelector'
 import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
 import { GenerationPanel } from '../generation/GenerationPanel'
@@ -30,7 +39,6 @@ import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
   PANEL_COMFORT_MIN_WIDTH_PX,
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
-  panelExpandRailCaptionTypography,
   panelHeaderTitleTypography,
 } from '../../theme/responsiveChrome'
 import { remSize } from '../../theme/uiTypography'
@@ -156,30 +164,53 @@ function PanelCollapseButton({
 /**
  * Bouton flottant sur le bord du panneau central pour ré-ouvrir un panneau replié.
  * Pill vertical avec une ligne de texte rotée et halo coloré au hover.
+ *
+ * `anchor`:
+ *  - `'center'` (défaut) : centré verticalement — mode comfortable (bureau).
+ *  - `'bottom'` : ancré en bas à `bottomOffset`px du bord — mode narrow, évite de
+ *    couvrir les onglets internes qui occupent le centre du panneau.
  */
 function PanelExpandButton({
   side,
   label,
   onClick,
   ariaLabel,
-  railCaptionFontRem,
+  anchor = 'center',
+  bottomOffset = 24,
 }: {
   side: 'left' | 'right'
   label: string
   onClick: () => void
   ariaLabel: string
-  /** Variante caption verticale (tokens `panelExpandRailCaptionTypography`, FR118 AC1). */
-  railCaptionFontRem: number
+  /** Ancrage vertical du pill — 'center' (bureau) ou 'bottom' (narrow). */
+  anchor?: 'center' | 'bottom'
+  /** Distance du bas en px quand `anchor='bottom'`. */
+  bottomOffset?: number
 }) {
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
 
   const accentColor = theme.button.primary.background
-  const scale = pressed ? 0.94 : hovered ? 1.08 : 1
-  const bg = hovered ? `rgba(0,123,255,0.18)` : 'rgba(45, 45, 45, 0.9)'
-  const borderColor = hovered ? accentColor : 'rgba(255,255,255,0.12)'
-  const glow = hovered ? `0 0 18px ${accentColor}55, 0 6px 18px rgba(0,0,0,0.5)` : '0 4px 14px rgba(0,0,0,0.45)'
+  const isActive = hovered || pressed
+  const scale = pressed ? 0.94 : hovered ? 1.05 : 1
   const translateX = hovered ? (side === 'left' ? 2 : -2) : 0
+
+  /* Transparence "très auto" :
+   *   repos  → quasi invisible (15% opacité globale)
+   *   hover/focus → pleinement visible (100%) avec halo accentué */
+  const globalOpacity = isActive ? 1 : 0.38
+  /* Fond opaque même au repos pour éviter que les éléments derrière (ex: flèche native du <select>)
+   * transparaissent à travers le rail — seuls les textes/bords/ombres varient avec l'opacité globale. */
+  const bg = isActive ? `rgba(0,123,255,0.22)` : 'rgba(18, 18, 22, 1)'
+  const borderColor = isActive ? accentColor : 'rgba(255,255,255,0.15)'
+  const glow = isActive
+    ? `0 0 18px ${accentColor}55, 0 6px 18px rgba(0,0,0,0.5)`
+    : '0 2px 8px rgba(0,0,0,0.3)'
+
+  const verticalStyle =
+    anchor === 'bottom'
+      ? { bottom: bottomOffset, transform: `scale(${scale}) translateX(${translateX}px)` }
+      : { top: '50%', transform: `translateY(-50%) scale(${scale}) translateX(${translateX}px)` }
 
   return (
     <button
@@ -192,56 +223,55 @@ function PanelExpandButton({
       aria-label={ariaLabel}
       style={{
         position: 'absolute',
-        [side]: 6,
-        top: '50%',
-        transform: `translateY(-50%) scale(${scale}) translateX(${translateX}px)`,
+        [side]: 4,
+        ...verticalStyle,
         zIndex: 50,
-        minWidth: TOUCH_TARGET_MIN_PX,
-        width: TOUCH_TARGET_MIN_PX,
-        minHeight: TOUCH_TARGET_MIN_PX,
+        width: 24,
+        minWidth: 24,
         height: 56,
-        borderRadius: 11,
+        minHeight: 56,
+        borderRadius: 7,
         border: `1px solid ${borderColor}`,
         backgroundColor: bg,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        color: hovered ? '#fff' : theme.text.secondary,
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        color: isActive ? '#fff' : theme.text.secondary,
         cursor: 'pointer',
         boxShadow: glow,
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        opacity: globalOpacity,
+        transition: 'opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 3,
-        padding: '4px 0',
+        gap: 2,
+        padding: '2px 0',
         overflow: 'hidden',
       }}
     >
-      <ChevronIcon direction={side === 'left' ? 'right' : 'left'} size={12} />
+      {/* ‹ › typographiques : rendu fiable, clairement distinct du ▼ des selects */}
+      <span style={{ fontSize: 14, fontWeight: 900, lineHeight: 1, color: 'inherit', userSelect: 'none' }}>
+        {side === 'left' ? '›' : '‹'}
+      </span>
       <span
         style={{
-          fontSize: `${railCaptionFontRem}rem`,
+          fontSize: '0.65rem',
           fontWeight: 700,
-          letterSpacing: '0.06em',
+          letterSpacing: '0.04em',
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
-          transform: side === 'left' ? 'rotate(180deg)' : 'none',
           lineHeight: 1,
-          maxHeight: 34,
           overflow: 'hidden',
           whiteSpace: 'nowrap',
           color: 'inherit',
-          opacity: hovered ? 1 : 0.6,
-          transition: 'opacity 0.18s ease',
-          textTransform: 'uppercase',
         }}
       >
-        {label}
+        {label.slice(0, 3).toUpperCase()}
       </span>
     </button>
   )
 }
+
 
 export function Dashboard() {
   const [selectedContextItem, setSelectedContextItem] = useState<ContextItem | null>(null)
@@ -302,9 +332,8 @@ export function Dashboard() {
   const panelTitleFontRem = isNarrowCenterColumn
     ? panelHeaderTitleTypography.narrowFontRem
     : panelHeaderTitleTypography.comfortableFontRem
-  const panelRailCaptionFontRem = isNarrowCenterColumn
-    ? panelExpandRailCaptionTypography.narrowFontRem
-    : panelExpandRailCaptionTypography.comfortableFontRem
+  const showCollapsedLeftAffordance = isLeftPanelCollapsed
+  const showCollapsedRightAffordance = isRightPanelCollapsed
   const lastViewportModeRef = useRef(viewportMode)
   const didApplyInitialViewportRef = useRef(false)
   
@@ -975,7 +1004,7 @@ export function Dashboard() {
 
       {/* Panneau central: Génération / Édition avec onglets */}
       <div
-        ref={centerColumnRef}
+        ref={centerColumnRef as unknown as RefObject<HTMLDivElement>}
         style={{
           overflow: 'hidden',
           display: 'flex',
@@ -987,23 +1016,23 @@ export function Dashboard() {
           ...centerColumnKeyboardStyle,
         }}
       >
-        {/* Rails (boutons) visibles quand un panneau latéral est replié */}
-        {isLeftPanelCollapsed && (
+        {/* Rails latéraux — visibles quand un panneau est replié.
+            Transparence "très auto" : quasi invisible au repos (17%), pleinement
+            visible au hover/focus. Centrés verticalement dans les deux modes. */}
+        {showCollapsedLeftAffordance && (
           <PanelExpandButton
             side="left"
             label="GDD"
             onClick={toggleLeftPanel}
             ariaLabel="Déplier le panneau gauche"
-            railCaptionFontRem={panelRailCaptionFontRem}
           />
         )}
-        {isRightPanelCollapsed && (
+        {showCollapsedRightAffordance && (
           <PanelExpandButton
             side="right"
             label="Détails"
             onClick={toggleRightPanel}
             ariaLabel="Déplier le panneau droit"
-            railCaptionFontRem={panelRailCaptionFontRem}
           />
         )}
           <Tabs
@@ -1038,7 +1067,10 @@ export function Dashboard() {
                       selectedFilename={selectedDialogue?.filename || null}
                     />
                   </div>
-                  <div ref={dialogueEditionWorkspaceRef} style={unityDialogueWorkspaceColumnStyle}>
+                  <div
+                    ref={dialogueEditionWorkspaceRef as unknown as RefObject<HTMLDivElement>}
+                    style={unityDialogueWorkspaceColumnStyle}
+                  >
                     <DialogueEditionNarrowProvider value={isDialogueEditionNarrow}>
                       {selectedDialogue ? (
                         <UnityDialogueDetails

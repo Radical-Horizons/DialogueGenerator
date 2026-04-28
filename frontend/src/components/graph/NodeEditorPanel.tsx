@@ -18,6 +18,7 @@ import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
+import { StyledSelect } from '../shared/StyledSelect'
 import * as configAPI from '../../api/config'
 import type { LLMModelResponse } from '../../types/api'
 import {
@@ -917,7 +918,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent'), fontWeight: 'bold', color: theme.text.primary }}>
                     Modèle LLM
                   </label>
-                  <select
+                  <StyledSelect
                     value={llmModel}
                     onChange={(e) => setLlmModel(e.target.value)}
                     style={{
@@ -935,7 +936,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                         {model.display_name || model.model_identifier}
                       </option>
                     ))}
-                  </select>
+                  </StyledSelect>
                 </div>
                 
                 {/* Estimation unifiée (même composant que panneau Générer nœud) */}

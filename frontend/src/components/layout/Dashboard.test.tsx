@@ -44,6 +44,20 @@ const mockUseGenerationStore = vi.mocked(useGenerationStore)
 const mockUseGenerationActionsStore = vi.mocked(useGenerationActionsStore)
 const mockUseContextStore = vi.mocked(useContextStore)
 
+function getOpenLeftPanelButton() {
+  return (
+    screen.queryByRole('button', { name: /ouvrir (le panneau )?gdd/i }) ??
+    screen.getByRole('button', { name: /déplier le panneau gauche/i })
+  )
+}
+
+function getOpenRightPanelButton() {
+  return (
+    screen.queryByRole('button', { name: /ouvrir (le panneau )?détails/i }) ??
+    screen.getByRole('button', { name: /déplier le panneau droit/i })
+  )
+}
+
 /** Même listener que `MainLayout` (tests sans layout parent). */
 function TestShellKeyboardFocus({ children }: { children: ReactNode }) {
   useShellKeyboardFocusScroller(true)
@@ -379,8 +393,8 @@ describe('Dashboard', () => {
     })
 
     // Et des contrôles explicites permettent de ré-ouvrir les panneaux
-    const expandLeft = screen.getByRole('button', { name: /déplier le panneau gauche/i })
-    const expandRight = screen.getByRole('button', { name: /déplier le panneau droit/i })
+    const expandLeft = getOpenLeftPanelButton()
+    const expandRight = getOpenRightPanelButton()
     expect(expandLeft).toBeInTheDocument()
     expect(expandRight).toBeInTheDocument()
 
@@ -403,10 +417,10 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /déplier le panneau droit/i })).toBeInTheDocument()
+    expect(getOpenLeftPanelButton()).toBeInTheDocument()
+    expect(getOpenRightPanelButton()).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await user.click(getOpenLeftPanelButton())
     await waitFor(() => {
       const dlg = screen.getByRole('dialog', { name: /contexte gdd/i })
       expect(dlg).toHaveAttribute('aria-modal', 'true')
@@ -419,7 +433,7 @@ describe('Dashboard', () => {
       expect(screen.queryByRole('dialog', { name: /contexte gdd/i })).not.toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+    await user.click(getOpenRightPanelButton())
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: /^détails$/i })).toHaveAttribute('aria-modal', 'true')
       expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
@@ -439,7 +453,7 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
-    expect(screen.getByRole('button', { name: /déplier le panneau gauche/i })).toBeInTheDocument()
+    expect(getOpenLeftPanelButton()).toBeInTheDocument()
   })
 
   it('desktop 1024px: panneaux latéraux visibles par défaut (non-régression layout 3 colonnes)', async () => {
@@ -455,7 +469,10 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(screen.getByTestId('context-selector')).toBeInTheDocument()
     })
-    expect(screen.queryByRole('button', { name: /déplier le panneau gauche/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /ouvrir (le panneau )?gdd/i }) ??
+        screen.queryByRole('button', { name: /déplier le panneau gauche/i })
+    ).not.toBeInTheDocument()
   })
 
   it('FR118 17.6: titre panneau GDD plus compact quand la colonne centrale est étroite (desktop)', async () => {
@@ -556,7 +573,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await user.click(getOpenLeftPanelButton())
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toHaveAttribute('aria-modal', 'true')
       expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
@@ -579,7 +596,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await user.click(getOpenLeftPanelButton())
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toBeInTheDocument()
     })
@@ -607,7 +624,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /déplier le panneau gauche/i }))
+    await user.click(getOpenLeftPanelButton())
     await waitFor(() => {
       expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
     })
@@ -663,7 +680,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+    await user.click(getOpenRightPanelButton())
     await waitFor(() => {
       expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
     })
@@ -738,7 +755,7 @@ describe('Dashboard', () => {
         expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
       })
 
-      await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+      await user.click(getOpenRightPanelButton())
       await waitFor(() => {
         expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
       })
@@ -801,7 +818,7 @@ describe('Dashboard', () => {
       expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /déplier le panneau droit/i }))
+    await user.click(getOpenRightPanelButton())
     const slot = await screen.findByTestId('narrow-drawer-scroll-slot')
     await waitFor(() => {
       expect(slot).toHaveStyle({ paddingBottom: '400px' })
