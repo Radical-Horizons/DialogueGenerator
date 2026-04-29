@@ -3,10 +3,11 @@
  * Orchestrateur léger : délègue la logique aux hooks et les blocs JSX aux composants dédiés.
  * Structure : Liste de dialogues à gauche, graphe à droite.
  */
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, type RefObject } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
 import { UnityDialogueList } from '../unityDialogues/UnityDialogueList'
+import { DialogueCombobox } from '../unityDialogues/DialogueCombobox'
 import { GraphCanvas } from './GraphCanvas'
 import { JumpToNodeModal } from './JumpToNodeModal'
 import { GraphFiltersPanel } from './GraphFiltersPanel'
@@ -35,7 +36,10 @@ import { useDialogueLoader } from '../../hooks/useDialogueLoader'
 import { useGraphToolbar } from '../../hooks/useGraphToolbar'
 import { useBatchOperations } from '../../hooks/useBatchOperations'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
-import { GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
+import {
+  GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+  PANEL_COMFORT_MIN_WIDTH_PX,
+} from '../../theme/responsiveChrome'
 import type { UnityDialogueMetadata } from '../../types/api'
 
 interface GraphEditorProps {
@@ -87,6 +91,10 @@ export function GraphEditor({
     GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
   )
+  const {
+    ref: graphEditorContainerRef,
+    isNarrow: isGraphEditorNarrow,
+  } = useNarrowInlineSize(PANEL_COMFORT_MIN_WIDTH_PX)
 
   const {
     showValidationPanel,
@@ -147,6 +155,7 @@ export function GraphEditor({
   return (
     <div
       data-testid="graph-editor"
+      ref={graphEditorContainerRef as unknown as RefObject<HTMLDivElement>}
       style={{
         display: 'flex',
         height: '100%',
@@ -157,14 +166,16 @@ export function GraphEditor({
         flex: 1,
       }}
     >
-      {/* Panneau gauche : Liste des dialogues (≤25 % ; droit prioritaire ~75 %) */}
-      <div style={{ ...unityDialogueListColumnStyle, height: '100%' }}>
-        <UnityDialogueList
-          ref={dialogueListRef}
-          onSelectDialogue={handleSelectDialogue}
-          selectedFilename={activeDialogueFilename || null}
-        />
-      </div>
+      {/* Panneau gauche : Liste des dialogues (≤25 % ; droit prioritaire ~75 %) — caché en narrow (Story 17.7) */}
+      {!isGraphEditorNarrow && (
+        <div style={{ ...unityDialogueListColumnStyle, height: '100%' }}>
+          <UnityDialogueList
+            ref={dialogueListRef}
+            onSelectDialogue={handleSelectDialogue}
+            selectedFilename={activeDialogueFilename || null}
+          />
+        </div>
+      )}
 
       {/* Panneau droit : Graphe */}
       <div
@@ -188,6 +199,15 @@ export function GraphEditor({
           canEditGraph={canEditGraph}
           isStandalone={isStandalone}
           onBack={onBack}
+          headerSelector={
+            isGraphEditorNarrow ? (
+              <DialogueCombobox
+                ref={dialogueListRef}
+                selectedFilename={activeDialogueFilename || null}
+                onSelect={handleSelectDialogue}
+              />
+            ) : undefined
+          }
         />
 
         {/* Contenu graphe */}

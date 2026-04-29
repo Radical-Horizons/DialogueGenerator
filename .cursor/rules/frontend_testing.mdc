@@ -72,3 +72,73 @@ const fn = useCallback(() => {
   doSomethingWith(selectionsRef.current)  // toujours frais
 }, [])
 ```
+
+### Hooks de mesure DOM (`useNarrowInlineSize`, `useViewportMode`) en RTL/jsdom
+
+`useNarrowInlineSize` mesure un nœud via `ResizeObserver` + `readLayoutWidthPx` (parent walker `style.width`). En jsdom, **ce hook est piégeux** :
+
+1. **`offsetWidth` / `clientWidth` valent toujours 0** — jsdom ne fait pas de layout. Le hook tombe en fallback sur `style.width` parent walker.
+2. **Si la `ref` est attachée à un nœud rendu conditionnellement** (sous un onglet inactif, dans un drawer fermé), `ref.current === null` au mount initial du parent → le `ResizeObserver` n'est **jamais** attaché. `isNarrow` reste figé à `false`. Cf. dette technique **Story 17.8** (`_bmad-output/implementation-artifacts/17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique.md`).
+3. **`waitFor` boucle 1+ minute** sur un élément qui dépend de `isNarrow=true` mais ne sera jamais rendu — symptôme principal du bug (vu Story 17.7).
+
+**Pattern recommandé en test** : mocker le hook au lieu de simuler des largeurs DOM. Découple le test du calcul de mesure (lui-même couvert par d'autres tests existants Story 17.6).
+
+```typescript
+// ✅ Test ciblé d'un comportement narrow vs desktop
+import { PANEL_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
+
+let mockIsNarrow = false
+
+vi.mock('../../hooks/useNarrowInlineSize', () => ({
+  useNarrowInlineSize: vi.fn((threshold: number) => {
+    const ref: { current: HTMLDivElement | null } = { current: null }
+    if (threshold === PANEL_COMFORT_MIN_WIDTH_PX) {
+      return { ref, isNarrow: mockIsNarrow }
+    }
+    return { ref, isNarrow: false }
+  }),
+}))
+
+it('narrow: combobox affiché', async () => {
+  mockIsNarrow = true
+  // render + assertions
+})
+
+it('desktop: liste affichée', async () => {
+  mockIsNarrow = false
+  // render + assertions
+})
+```
+
+**Alternative quand on contrôle un Provider** : `<DialogueEditionNarrowProvider value={true}>` dans `UnityDialogueEditor.narrow.test.tsx` court-circuite la mesure côté `UnityDialogueEditor`. À privilégier quand le composant teste consomme déjà un contexte typé.
+
+**Anti-pattern à proscrire** :
+```typescript
+// ❌ Simulation de largeur via wrapper outer + window.innerWidth
+render(
+  <BrowserRouter>
+    <div style={{ width: 480, height: 700 }}>
+      <Dashboard />
+    </div>
+  </BrowserRouter>
+)
+// → Combine `useViewportMode` (innerWidth) + `useNarrowInlineSize` (parent walker)
+// → Comportement imprévisible si la ref interne est conditionnelle
+// → Risque waitFor infini si l'assertion dépend d'un state qui ne se met jamais à jour
+```
+
+**Évolution prévue** : une fois Story 17.8 mergée, le hook sera sûr pour les refs tardives (callback ref). Le mock deviendra une optimisation de **temps de test** (toujours plus rapide que monter le DOM complet) plutôt qu'une nécessité fonctionnelle. Mettre à jour cette section quand 17.8 est mergée.
+
+## Diagnostic d'un test Vitest qui semble "bloqué"
+
+Symptôme : `npx vitest run` tourne plusieurs minutes sans output ni progression. Méthode de tri rapide :
+
+1. **Vérifier le coût de startup** — sur Windows, le pipeline Vitest (Vite + esbuild + jsdom + setupFiles) prend **20–40 s** sur un fichier moyen au 1er run (cache froid). En dessous, c'est probablement le démarrage. **Ne pas tuer** avant 60 s sur un fichier non-lourd, 2 min sur un fichier de Dashboard complet.
+2. **Cibler un fichier minimal** — au lieu de `vitest run -t "pattern"` qui transforme **tous** les fichiers du projet pour matcher, lancer `vitest run path/to/specific.test.tsx --reporter=dot`. Diff de temps typique : 1–5 s vs 30–120 s.
+3. **Vérifier la cause d'un `waitFor` long** — si le test attend un élément qui dépend d'un state piloté par un hook DOM (mesure, ResizeObserver, IntersectionObserver, viewport), c'est probablement la cause. Voir section précédente sur `useNarrowInlineSize`.
+4. **`Out-String -Width 200`** sur Windows PowerShell — sans ça, la sortie de `node.exe` peut être tronquée ou bufférisée et donner l'impression d'un blocage muet.
+
+Outils :
+- `npx vitest run <file> --reporter=dot` : reporter compact, idéal en agent.
+- `npx vitest run <file> --reporter=verbose --testTimeout=10000` : timeout par test à 10 s pour forcer un échec rapide.
+- `npx vitest list <pattern>` : lister les tests sans les exécuter (utile pour vérifier qu'un nom matche bien).

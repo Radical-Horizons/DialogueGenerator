@@ -1,14 +1,17 @@
 /**
  * Composant pour afficher la liste des dialogues Unity avec recherche.
+ *
+ * Consomme le hook partagé `useDialogueListData` (Story 17.7) ; conserve
+ * la gestion locale du raccourci `/` (focus champ recherche) et de
+ * l'exposition du `refresh()` via ref impérative.
  */
-import { useState, useEffect, useMemo, useImperativeHandle, forwardRef, useCallback, useRef } from 'react'
-import * as unityDialoguesAPI from '../../api/unityDialogues'
-import { getErrorMessage } from '../../types/errors'
+import { useEffect, useImperativeHandle, forwardRef, useRef } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { UnityDialogueItem } from './UnityDialogueItem'
 import { StyledSelect } from '../shared/StyledSelect'
+import { useDialogueListData } from '../../hooks/useDialogueListData'
 
 interface UnityDialogueListProps {
   onSelectDialogue: (dialogue: UnityDialogueMetadata | null) => void
@@ -21,41 +24,26 @@ export interface UnityDialogueListRef {
 
 export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueListProps>(
   function UnityDialogueList({ onSelectDialogue, selectedFilename }, ref) {
-  const [dialogues, setDialogues] = useState<UnityDialogueMetadata[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const {
+    filteredDialogues,
+    total,
+    filteredCount,
+    searchQuery,
+    setSearchQuery,
+    sortType,
+    setSortType,
+    isLoading,
+    error,
+    refresh,
+  } = useDialogueListData()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const loadDialogues = useCallback(async () => {
-    console.log('[UnityDialogueList] Chargement de la liste des dialogues')
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await unityDialoguesAPI.listUnityDialogues()
-      console.log(`[UnityDialogueList] ${response.dialogues.length} dialogue(s) chargé(s)`)
-      setDialogues(response.dialogues)
-    } catch (err) {
-      console.error('[UnityDialogueList] Erreur lors du chargement:', err)
-      setError(getErrorMessage(err))
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadDialogues()
-  }, [loadDialogues])
-
-  // Raccourci clavier pour focus sur la recherche (/)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ne pas intercepter si on est déjà dans un input/textarea ou si c'est la command palette
       const target = e.target as HTMLElement
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return
       }
-      
       if (e.key === '/') {
         e.preventDefault()
         searchInputRef.current?.focus()
@@ -67,44 +55,9 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const [sortType, setSortType] = useState<'name-asc' | 'name-desc' | 'date-desc' | 'date-asc'>('date-desc')
-
-  // Filtrer et trier les dialogues
-  const filteredDialogues = useMemo(() => {
-    let result = dialogues
-    
-    // Filtrer
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (dialogue) =>
-          dialogue.filename.toLowerCase().includes(query) ||
-          (dialogue.title && dialogue.title.toLowerCase().includes(query))
-      )
-    }
-    
-    // Trier
-    result = [...result].sort((a, b) => {
-      switch (sortType) {
-        case 'name-asc':
-          return (a.title || a.filename).localeCompare(b.title || b.filename, 'fr', { sensitivity: 'base' })
-        case 'name-desc':
-          return (b.title || b.filename).localeCompare(a.title || a.filename, 'fr', { sensitivity: 'base' })
-        case 'date-asc':
-          return new Date(a.modified_time).getTime() - new Date(b.modified_time).getTime()
-        case 'date-desc':
-        default:
-          return new Date(b.modified_time).getTime() - new Date(a.modified_time).getTime()
-      }
-    })
-    
-    return result
-  }, [dialogues, searchQuery, sortType])
-
-  // Exposer la fonction de rafraîchissement via ref
   useImperativeHandle(ref, () => ({
-    refresh: loadDialogues,
-  }), [loadDialogues])
+    refresh,
+  }), [refresh])
 
   const handleItemClick = (dialogue: UnityDialogueMetadata) => {
     if (selectedFilename === dialogue.filename) {
@@ -134,7 +87,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       >
         {error}
         <button
-          onClick={loadDialogues}
+          onClick={() => void refresh()}
           style={{
             marginTop: '0.5rem',
             padding: '0.5rem 1rem',
@@ -210,8 +163,8 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
         </div>
 
         <div style={{ fontSize: remSize('small'), color: theme.text.secondary }}>
-          {filteredDialogues.length} dialogue{filteredDialogues.length !== 1 ? 's' : ''}
-          {searchQuery && ` (sur ${dialogues.length} total)`}
+          {filteredCount} dialogue{filteredCount !== 1 ? 's' : ''}
+          {searchQuery && ` (sur ${total} total)`}
         </div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '0.5rem', minHeight: 0 }}>

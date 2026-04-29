@@ -1,6 +1,6 @@
 # Story 17.5: PWA — installabilité et manifest (option V1.5+) (FR121)
 
-Status: review
+Status: done
 
 <!-- Note: Validation optionnelle — validate-create-story avant dev-story si besoin. -->
 
@@ -61,6 +61,7 @@ so that **le lancement est rapide et familier**.
   - Lint strict : `npm --prefix frontend run lint` doit rester à 0 warning.  
   - Vitest : au moins un test automatisé qui valide la présence et la validité du manifest (lecture fichier + assertions de champs + icons).  
   - Playwright (si stable dans le repo) : un smoke test “PWA artifacts served” (manifest accessible + SW register en production build/preview). Garder le test minimal (pas de “prompt d’installation”).  
+  - **Important :** ce spec **ne doit pas** tourner contre `vite dev` (`devOptions.enabled=false` du plugin PWA → pas de SW). Utiliser **`npm run test:e2e:pwa`** (`playwright.pwa.config.ts`, build + `preview` :4173). La config principale `playwright.config.ts` **ignore** `pwa-installability.spec.ts` pour que `npm run test:e2e` / `test:e2e:verify` restent verts.
 
 - **Conventions / contenu**  
   - Nom, short_name, couleurs : rester cohérent avec le branding existant “DialogueGenerator”.  
@@ -91,6 +92,7 @@ Amelia (Dev) — dev-story
   - Après : `const pwaManifest = JSON.parse(readFileSync(...manifest.webmanifest...))` puis `manifest: pwaManifest`
  - Fix HIGH : compat “install icons” via **PNG** (générés automatiquement) + `purpose: maskable` dans le manifest.
  - Fix MEDIUM : `prebuild` génère les PNG requis avant `vite build` (pas de binaires committés) ; `npm --prefix frontend run test:ci` vert.
+- **2026-04-29** : alignement Playwright PWA / `vite dev` — `testIgnore` + `npm run test:e2e:pwa` ; garde-fou `page.evaluate` dans le spec.
 
 ### File List
 
@@ -109,8 +111,10 @@ Amelia (Dev) — dev-story
 - `frontend/src/__tests__/pwa.indexHtml.test.ts`
 - `frontend/src/__tests__/pwa.vitePwaConfig.test.ts`
 - `frontend/src/utils/pwaIcons.ts`
-- `e2e/pwa-installability.spec.ts`
+- `e2e/pwa-installability.spec.ts` — smoke SW + manifest ; `evaluate` défensif si aucune registration
+- `playwright.config.ts` — `testIgnore` inclut `pwa-installability.spec.ts` (ne pas exécuter ce spec sur `vite dev` :3000)
 - `playwright.pwa.config.ts`
+- `package.json` (racine) — script `npm run test:e2e:pwa`
 
 ### Review Follow-ups (AI)
 
@@ -125,4 +129,27 @@ Amelia (Dev) — dev-story
 ## Change Log
 
 - 2026-04-10 : Ajout manifest + wiring `index.html`, ajout icônes, intégration `vite-plugin-pwa` (SW en build, pas d’offline-first), tests Vitest + lint.
+- **2026-04-29 (code-review PWA)** : le spec `pwa-installability` ne doit pas tourner sur `vite dev` (pas de SW) — `testIgnore` dans `playwright.config.ts` ; script racine `test:e2e:pwa` ; défense dans `page.evaluate` ; `Dev Notes` Quality bar ; section **Senior Developer Review** ci-dessous.
+- **2026-04-29 (clôture)** : statut story et `sprint-status.yaml` → **`done`** (acceptation PO / équipe).
+
+## Senior Developer Review (AI) — repasse 2026-04-29
+
+**Reviewer:** Amelia · **Destinataire:** Véronique · **Statut story:** `done` (clôture 2026-04-29)
+
+### Synthèse AC
+
+| AC | Verdict | Preuve |
+|----|-----------|--------|
+| AC #1 | **IMPLEMENTED** | `manifest.webmanifest`, `index.html`, tests `pwa.*.test.ts`, PNG `prebuild` |
+| AC #2 | **IMPLEMENTED** | `vite-plugin-pwa` + `npm run test:e2e:pwa` → SW enregistré après build+preview |
+| AC #3 | **IMPLEMENTED** | Hors offline-first ; `NetworkOnly` `/api/` |
+
+### Findings
+
+**🔴 CRITICAL (corrigé) :** exécution du smoke PWA via **`playwright.config.ts` + `vite dev`** → pas de SW → échec. **Fix :** ignorer le spec dans la config « dev » ; route dédiée `test:e2e:pwa`.  
+**🟡 MEDIUM :** 0 après fix.  
+**🟢 LOW :** ajouter `test:e2e:pwa` au pipeline CI si on veut une preuve SW à chaque PR ; vulnérabilités audit `--force` déjà tracées.
+
+**Décision :** **Approuvé (réserves LOW)**.  
+**Clôture 2026-04-29 :** statut story **`done`** + `sprint-status.yaml` synchronisé.
 

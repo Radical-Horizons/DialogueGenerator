@@ -40,6 +40,13 @@ vi.mock('../context/ContextSelector', () => ({
   ContextSelector: () => <div data-testid="context-selector">Context Selector</div>,
 }))
 
+vi.mock('../../api/unityDialogues', () => ({
+  listUnityDialogues: vi.fn().mockResolvedValue({ dialogues: [], total: 0 }),
+  getUnityDialogue: vi.fn(),
+  deleteUnityDialogue: vi.fn(),
+  previewUnityDialogue: vi.fn(),
+}))
+
 const mockUseGenerationStore = vi.mocked(useGenerationStore)
 const mockUseGenerationActionsStore = vi.mocked(useGenerationActionsStore)
 const mockUseContextStore = vi.mocked(useContextStore)
