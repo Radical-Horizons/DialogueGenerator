@@ -76,7 +76,7 @@ export function DialogueEditionTabContent({
         </div>
       )}
       <div
-        ref={dialogueEditionWorkspaceRef as unknown as RefObject<HTMLDivElement>}
+        ref={dialogueEditionWorkspaceRef}
         style={unityDialogueWorkspaceColumnStyle}
       >
         <DialogueEditionNarrowProvider value={isDialogueEditionNarrow}>

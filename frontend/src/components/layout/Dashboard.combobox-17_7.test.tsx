@@ -6,25 +6,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
-import {
-  PANEL_COMFORT_MIN_WIDTH_PX,
-  SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
-} from '../../theme/responsiveChrome'
-
-let mockDialogueEditionNarrow = false
-
-vi.mock('../../hooks/useNarrowInlineSize', () => ({
-  useNarrowInlineSize: vi.fn((threshold: number) => {
-    const ref: { current: HTMLDivElement | null } = { current: null }
-    if (threshold === PANEL_COMFORT_MIN_WIDTH_PX) {
-      return { ref, isNarrow: mockDialogueEditionNarrow }
-    }
-    if (threshold === SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX) {
-      return { ref, isNarrow: false }
-    }
-    return { ref, isNarrow: false }
-  }),
-}))
 
 vi.mock('../../store/generationStore')
 vi.mock('../../store/generationActionsStore')
@@ -71,7 +52,6 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    mockDialogueEditionNarrow = false
     Dashboard = (await import('./Dashboard')).Dashboard
 
     mockUseGenerationStore.mockReturnValue({
@@ -130,12 +110,13 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
   })
 
   it('narrow: onglet Édition de Dialogues — colonne liste absente, combobox présent', async () => {
-    mockDialogueEditionNarrow = true
     const user = userEvent.setup()
 
     render(
       <Wrapper>
-        <Dashboard />
+        <div style={{ width: 480, height: 900, overflow: 'hidden' }}>
+          <Dashboard />
+        </div>
       </Wrapper>
     )
 
@@ -149,12 +130,13 @@ describe('Dashboard — 17.7 sélecteur de dialogue dans toolbar', () => {
   })
 
   it('desktop: onglet Édition de Dialogues — colonne liste présente, combobox absent', async () => {
-    mockDialogueEditionNarrow = false
     const user = userEvent.setup()
 
     render(
       <Wrapper>
-        <Dashboard />
+        <div style={{ width: 1440, height: 900, overflow: 'hidden' }}>
+          <Dashboard />
+        </div>
       </Wrapper>
     )
 

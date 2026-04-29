@@ -3,7 +3,7 @@
  * Orchestrateur léger : délègue la logique aux hooks et les blocs JSX aux composants dédiés.
  * Structure : Liste de dialogues à gauche, graphe à droite.
  */
-import { useCallback, useMemo, type RefObject } from 'react'
+import { useCallback, useMemo } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
 import { UnityDialogueList } from '../unityDialogues/UnityDialogueList'
@@ -131,7 +131,7 @@ export function GraphEditor({
   return (
     <div
       data-testid="graph-editor"
-      ref={graphEditorContainerRef as unknown as RefObject<HTMLDivElement>}
+      ref={graphEditorContainerRef}
       style={{
         display: 'flex',
         height: '100%',

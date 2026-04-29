@@ -75,59 +75,19 @@ const fn = useCallback(() => {
 
 ### Hooks de mesure DOM (`useNarrowInlineSize`, `useViewportMode`) en RTL/jsdom
 
-`useNarrowInlineSize` mesure un nœud via `ResizeObserver` + `readLayoutWidthPx` (parent walker `style.width`). En jsdom, **ce hook est piégeux** :
+`useNarrowInlineSize` mesure un nœud via `ResizeObserver` + `readLayoutWidthPx` (parent walker `style.width`). En jsdom :
 
-1. **`offsetWidth` / `clientWidth` valent toujours 0** — jsdom ne fait pas de layout. Le hook tombe en fallback sur `style.width` parent walker.
-2. **Si la `ref` est attachée à un nœud rendu conditionnellement** (sous un onglet inactif, dans un drawer fermé), `ref.current === null` au mount initial du parent → le `ResizeObserver` n'est **jamais** attaché. `isNarrow` reste figé à `false`. Cf. dette technique **Story 17.8** (`_bmad-output/implementation-artifacts/17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique.md`).
-3. **`waitFor` boucle 1+ minute** sur un élément qui dépend de `isNarrow=true` mais ne sera jamais rendu — symptôme principal du bug (vu Story 17.7).
+1. **`offsetWidth` / `clientWidth` valent souvent 0** — le hook retombe sur `style.width` en px (ou % remontée aux parents).
+2. **Depuis Story 17.8** : la ref exposée est une **callback ref** — le `ResizeObserver` se rattache dès que le nœud existe, y compris après un **montage tardif** (onglet, drawer). Le bug « `isNarrow` figé à `false` » (ref `null` au 1er `useEffect`) est corrigé ; cf. `frontend/src/hooks/useNarrowInlineSize.test.tsx`.
+3. **`waitFor` long** : si un test attend encore un élément narrow sans que le nœud mesuré ne soit jamais monté ou sans largeur explicite en `style`, vérifier le wiring du test avant de suspecter le hook.
 
-**Pattern recommandé en test** : mocker le hook au lieu de simuler des largeurs DOM. Découple le test du calcul de mesure (lui-même couvert par d'autres tests existants Story 17.6).
+**Patterns de test** :
 
-```typescript
-// ✅ Test ciblé d'un comportement narrow vs desktop
-import { PANEL_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
+- **Vrai hook + wrapper dimensionné** : utile pour intégration (ex. `Dashboard.combobox-17_7.test.tsx` — conteneur `width: 480` / `1440` après clic sur l’onglet, le workspace se monte et la callback ref mesure).
+- **Mock du hook** : reste valide pour **accélérer** les suites lourdes ou isoler un composant qui n’a pas besoin de la chaîne Dashboard complète ; utiliser `vi.mock('../../hooks/useNarrowInlineSize', …)` avec des seuils cohérents (`PANEL_COMFORT_MIN_WIDTH_PX`, etc.).
+- **Provider** : `<DialogueEditionNarrowProvider value={true}>` dans `UnityDialogueEditor.narrow.test.tsx` quand le composant sous test consomme déjà ce contexte.
 
-let mockIsNarrow = false
-
-vi.mock('../../hooks/useNarrowInlineSize', () => ({
-  useNarrowInlineSize: vi.fn((threshold: number) => {
-    const ref: { current: HTMLDivElement | null } = { current: null }
-    if (threshold === PANEL_COMFORT_MIN_WIDTH_PX) {
-      return { ref, isNarrow: mockIsNarrow }
-    }
-    return { ref, isNarrow: false }
-  }),
-}))
-
-it('narrow: combobox affiché', async () => {
-  mockIsNarrow = true
-  // render + assertions
-})
-
-it('desktop: liste affichée', async () => {
-  mockIsNarrow = false
-  // render + assertions
-})
-```
-
-**Alternative quand on contrôle un Provider** : `<DialogueEditionNarrowProvider value={true}>` dans `UnityDialogueEditor.narrow.test.tsx` court-circuite la mesure côté `UnityDialogueEditor`. À privilégier quand le composant teste consomme déjà un contexte typé.
-
-**Anti-pattern à proscrire** :
-```typescript
-// ❌ Simulation de largeur via wrapper outer + window.innerWidth
-render(
-  <BrowserRouter>
-    <div style={{ width: 480, height: 700 }}>
-      <Dashboard />
-    </div>
-  </BrowserRouter>
-)
-// → Combine `useViewportMode` (innerWidth) + `useNarrowInlineSize` (parent walker)
-// → Comportement imprévisible si la ref interne est conditionnelle
-// → Risque waitFor infini si l'assertion dépend d'un state qui ne se met jamais à jour
-```
-
-**Évolution prévue** : une fois Story 17.8 mergée, le hook sera sûr pour les refs tardives (callback ref). Le mock deviendra une optimisation de **temps de test** (toujours plus rapide que monter le DOM complet) plutôt qu'une nécessité fonctionnelle. Mettre à jour cette section quand 17.8 est mergée.
+**Attention** : combiner `useViewportMode` (`window.innerWidth`) et `useNarrowInlineSize` sans fixer **à la fois** le viewport jsdom et les `style.width` pertinents peut rester fragile — préférer un mock ciblé si le test n’a pas vocation à couvrir la mesure.
 
 ## Diagnostic d'un test Vitest qui semble "bloqué"
 

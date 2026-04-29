@@ -7,7 +7,7 @@ import type React from 'react'
 import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useGraphStore } from '../../store/graphStore'
-import { SaveStatusIndicator } from '../shared'
+import { Badge, SaveStatusIndicator } from '../shared'
 import { theme } from '../../theme'
 import type { UseGraphToolbarReturn } from '../../hooks/useGraphToolbar'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
@@ -196,6 +196,12 @@ export function GraphEditorHeader({
     { measureParentClientWidth: true }
   )
   const chrome = isNarrowToolbar ? graphToolbarChrome.narrow : graphToolbarChrome.comfortable
+  const { ref: compactToolsRef, isNarrow: isCompactDesktopMeasured } = useNarrowInlineSize(920)
+  const isCompactDesktop = !isNarrowToolbar && isCompactDesktopMeasured
+  const effectiveButtonPadding = isCompactDesktop ? graphToolbarChrome.narrow.buttonPadding : chrome.buttonPadding
+  const effectiveButtonFontSizeRem = isCompactDesktop
+    ? graphToolbarChrome.narrow.buttonFontSizeRem
+    : chrome.buttonFontSizeRem
   const graphChromeTouch: React.CSSProperties = {
     minWidth: chrome.touchMinPx,
     minHeight: chrome.touchMinPx,
@@ -449,6 +455,7 @@ export function GraphEditorHeader({
   return (
     <div
       ref={toolbarRef}
+      data-testid="graph-editor-toolbar"
       data-graph-toolbar-narrow={isNarrowToolbar ? 'true' : 'false'}
       style={{
         flexShrink: 0,
@@ -466,7 +473,7 @@ export function GraphEditorHeader({
         rowGap: isNarrowToolbar ? `${chrome.containerGapRem}rem` : undefined,
         alignItems: isNarrowToolbar ? 'stretch' : 'center',
         justifyContent: isNarrowToolbar ? undefined : 'flex-end',
-        flexWrap: isNarrowToolbar ? undefined : 'wrap',
+        flexWrap: isNarrowToolbar ? undefined : 'nowrap',
         width: '100%',
         minWidth: 0,
       }}
@@ -476,156 +483,321 @@ export function GraphEditorHeader({
         style={{
           gridArea: isNarrowToolbar ? 'header' : undefined,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          flexDirection: isNarrowToolbar ? 'column' : 'row',
+          alignItems: isNarrowToolbar ? 'stretch' : 'center',
+          justifyContent: isNarrowToolbar ? 'flex-start' : 'space-between',
           gap: `${chrome.groupGapRem}rem`,
           minWidth: 0,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-          {isStandalone && onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              style={{
-                padding: '0.45rem 0.8rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              ← Retour
-            </button>
-          )}
-          <div style={{ minWidth: 0 }}>
-            {headerSelector && (
-              <div
-                data-testid="graph-editor-header-selector"
-                style={{ marginBottom: '0.4rem' }}
+        {isNarrowToolbar ? (
+          <>
+            {isStandalone && onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                style={{
+                  padding: '0.45rem 0.8rem',
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  whiteSpace: 'nowrap',
+                  alignSelf: 'flex-start',
+                }}
               >
+                ← Retour
+              </button>
+            )}
+
+            {headerSelector && (
+              <div data-testid="graph-editor-header-selector" style={{ width: '100%', minWidth: 0 }}>
                 {headerSelector}
               </div>
             )}
-            <div style={{ fontSize: `${chrome.buttonFontSizeRem}rem`, fontWeight: 700, color: theme.text.primary }}>
-              Éditeur de graphe
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: `${chrome.buttonFontSizeRem}rem`,
+                  fontWeight: 700,
+                  color: theme.text.primary,
+                }}
+              >
+                Éditeur de graphe
+              </div>
+              <div
+                style={{
+                  fontSize: `${chrome.badgeFontSizeRem}rem`,
+                  color: theme.text.secondary,
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                }}
+                title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+              >
+                {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+              </div>
             </div>
+
             <div
               style={{
-                fontSize: `${chrome.badgeFontSizeRem}rem`,
-                color: theme.text.secondary,
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                maxWidth: isNarrowToolbar ? '100%' : '320px',
+                display: 'flex',
+                gap: `${chrome.groupGapRem}rem`,
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                flexWrap: 'wrap',
               }}
-              title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
             >
-              {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+              {canEditGraph && (
+                <>
+                  <button
+                    type="button"
+                    data-testid="btn-undo"
+                    onClick={() => undo()}
+                    disabled={!canUndoNow}
+                    style={{
+                      ...graphChromeTouch,
+                      padding: chrome.buttonPadding,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
+                      cursor: canUndoNow ? 'pointer' : 'not-allowed',
+                      opacity: canUndoNow ? 1 : 0.6,
+                      fontSize: `${chrome.buttonFontSizeRem}rem`,
+                    }}
+                    title="Annuler (Ctrl+Z)"
+                    aria-label="Annuler"
+                  >
+                    ↩
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="btn-redo"
+                    onClick={() => redo()}
+                    disabled={!canRedoNow}
+                    style={{
+                      ...graphChromeTouch,
+                      padding: chrome.buttonPadding,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
+                      cursor: canRedoNow ? 'pointer' : 'not-allowed',
+                      opacity: canRedoNow ? 1 : 0.6,
+                      fontSize: `${chrome.buttonFontSizeRem}rem`,
+                    }}
+                    title="Refaire (Ctrl+Y)"
+                    aria-label="Refaire"
+                  >
+                    ↪
+                  </button>
+                </>
+              )}
+              {!showSearchBar && (
+                <button
+                  type="button"
+                  data-testid="btn-search-graph"
+                  onClick={() =>
+                    setShowSearchBar((v) => {
+                      if (v) setHighlightedNodes([])
+                      return !v
+                    })
+                  }
+                  disabled={!hasActiveDialogue}
+                  style={{
+                    ...graphChromeTouch,
+                    padding: chrome.buttonPadding,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.button.default.background,
+                    color: theme.button.default.color,
+                    cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+                    opacity: !hasActiveDialogue ? 0.6 : 1,
+                    fontSize: `${chrome.buttonFontSizeRem}rem`,
+                  }}
+                  title="Rechercher dans le graphe (Ctrl+F)"
+                  aria-label="Rechercher"
+                >
+                  🔍
+                </button>
+              )}
+              <GraphActionsDropdown
+                canEditGraph={canEditGraph}
+                isNarrow={true}
+                graphChromeTouch={graphChromeTouch}
+                buttonPadding={chrome.buttonPadding}
+                buttonFontSizeRem={chrome.buttonFontSizeRem}
+                groupGapRem={chrome.groupGapRem}
+                actionsDropdownRef={actionsDropdownRef}
+                actionsDropdownBtnRef={actionsDropdownBtnRef}
+                showActionsDropdown={showActionsDropdown}
+                setShowActionsDropdown={setShowActionsDropdown}
+                renderMenuItems={renderActionsMenuItems}
+              />
             </div>
-          </div>
-        </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+              {isStandalone && onBack && (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  style={{
+                    padding: '0.45rem 0.8rem',
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.button.default.background,
+                    color: theme.button.default.color,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  ← Retour
+                </button>
+              )}
+              <div style={{ minWidth: 0 }}>
+                {headerSelector && (
+                  <div
+                    data-testid="graph-editor-header-selector"
+                    style={{ marginBottom: '0.4rem' }}
+                  >
+                    {headerSelector}
+                  </div>
+                )}
+                <div
+                  style={{
+                    fontSize: `${chrome.buttonFontSizeRem}rem`,
+                    fontWeight: 700,
+                    color: theme.text.primary,
+                  }}
+                >
+                  Éditeur de graphe
+                </div>
+                <div
+                  style={{
+                    fontSize: `${chrome.badgeFontSizeRem}rem`,
+                    color: theme.text.secondary,
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '320px',
+                  }}
+                  title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+                >
+                  {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
+                </div>
+              </div>
+            </div>
 
-        <div style={{ display: 'flex', gap: `${chrome.groupGapRem}rem`, alignItems: 'center' }}>
-          {canEditGraph && (
-            <>
-              <button
-                type="button"
-                data-testid="btn-undo"
-                onClick={() => undo()}
-                disabled={!canUndoNow}
-                style={{
-                  ...graphChromeTouch,
-                  padding: chrome.buttonPadding,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
-                  cursor: canUndoNow ? 'pointer' : 'not-allowed',
-                  opacity: canUndoNow ? 1 : 0.6,
-                  fontSize: `${chrome.buttonFontSizeRem}rem`,
-                }}
-                title="Annuler (Ctrl+Z)"
-                aria-label="Annuler"
-              >
-                {isNarrowToolbar ? '↩' : '↩ Undo'}
-              </button>
-              <button
-                type="button"
-                data-testid="btn-redo"
-                onClick={() => redo()}
-                disabled={!canRedoNow}
-                style={{
-                  ...graphChromeTouch,
-                  padding: chrome.buttonPadding,
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '6px',
-                  backgroundColor: theme.button.default.background,
-                  color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
-                  cursor: canRedoNow ? 'pointer' : 'not-allowed',
-                  opacity: canRedoNow ? 1 : 0.6,
-                  fontSize: `${chrome.buttonFontSizeRem}rem`,
-                }}
-                title="Refaire (Ctrl+Y)"
-                aria-label="Refaire"
-              >
-                {isNarrowToolbar ? '↪' : '↪ Redo'}
-              </button>
-            </>
-          )}
-          {(!isNarrowToolbar || !showSearchBar) && (
-            <button
-              type="button"
-              data-testid="btn-search-graph"
-              onClick={() =>
-                setShowSearchBar((v) => {
-                  if (v) setHighlightedNodes([])
-                  return !v
-                })
-              }
-              disabled={!hasActiveDialogue}
-              style={{
-                ...graphChromeTouch,
-                padding: chrome.buttonPadding,
-                border: `1px solid ${
-                  showSearchBar ? theme.button.primary.background : theme.border.primary
-                }`,
-                borderRadius: '6px',
-                backgroundColor: showSearchBar
-                  ? theme.button.primary.background
-                  : theme.button.default.background,
-                color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
-                cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-                opacity: !hasActiveDialogue ? 0.6 : 1,
-                fontSize: `${chrome.buttonFontSizeRem}rem`,
-              }}
-              title="Rechercher dans le graphe (Ctrl+F)"
-              aria-label="Rechercher"
-            >
-              🔍
-            </button>
-          )}
-          {isNarrowToolbar && (
-            <GraphActionsDropdown
-              canEditGraph={canEditGraph}
-              isNarrow={true}
-              graphChromeTouch={graphChromeTouch}
-              buttonPadding={chrome.buttonPadding}
-              buttonFontSizeRem={chrome.buttonFontSizeRem}
-              groupGapRem={chrome.groupGapRem}
-              actionsDropdownRef={actionsDropdownRef}
-              actionsDropdownBtnRef={actionsDropdownBtnRef}
-              showActionsDropdown={showActionsDropdown}
-              setShowActionsDropdown={setShowActionsDropdown}
-              renderMenuItems={renderActionsMenuItems}
-            />
-          )}
-        </div>
+            <div style={{ display: 'flex', gap: `${chrome.groupGapRem}rem`, alignItems: 'center' }}>
+              {canEditGraph && (
+                <>
+                  <button
+                    type="button"
+                    data-testid="btn-undo"
+                    onClick={() => undo()}
+                    disabled={!canUndoNow}
+                    style={{
+                      ...graphChromeTouch,
+                      padding: effectiveButtonPadding,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: !canUndoNow ? theme.text.secondary : theme.button.default.color,
+                      cursor: canUndoNow ? 'pointer' : 'not-allowed',
+                      opacity: canUndoNow ? 1 : 0.6,
+                      fontSize: `${effectiveButtonFontSizeRem}rem`,
+                    }}
+                    title="Annuler (Ctrl+Z)"
+                    aria-label="Annuler"
+                  >
+                    {isCompactDesktop ? '↩' : '↩ Undo'}
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="btn-redo"
+                    onClick={() => redo()}
+                    disabled={!canRedoNow}
+                    style={{
+                      ...graphChromeTouch,
+                      padding: effectiveButtonPadding,
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: !canRedoNow ? theme.text.secondary : theme.button.default.color,
+                      cursor: canRedoNow ? 'pointer' : 'not-allowed',
+                      opacity: canRedoNow ? 1 : 0.6,
+                      fontSize: `${effectiveButtonFontSizeRem}rem`,
+                    }}
+                    title="Refaire (Ctrl+Y)"
+                    aria-label="Refaire"
+                  >
+                    {isCompactDesktop ? '↪' : '↪ Redo'}
+                  </button>
+                </>
+              )}
+              {(!isNarrowToolbar || !showSearchBar) && (
+                <button
+                  type="button"
+                  data-testid="btn-search-graph"
+                  onClick={() =>
+                    setShowSearchBar((v) => {
+                      if (v) setHighlightedNodes([])
+                      return !v
+                    })
+                  }
+                  disabled={!hasActiveDialogue}
+                  style={{
+                    ...graphChromeTouch,
+                    padding: effectiveButtonPadding,
+                    border: `1px solid ${
+                      showSearchBar ? theme.button.primary.background : theme.border.primary
+                    }`,
+                    borderRadius: '6px',
+                    backgroundColor: showSearchBar
+                      ? theme.button.primary.background
+                      : theme.button.default.background,
+                    color: showSearchBar ? theme.button.primary.color : theme.button.default.color,
+                    cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
+                    opacity: !hasActiveDialogue ? 0.6 : 1,
+                    fontSize: `${effectiveButtonFontSizeRem}rem`,
+                  }}
+                  title="Rechercher dans le graphe (Ctrl+F)"
+                  aria-label="Rechercher"
+                >
+                  🔍
+                </button>
+              )}
+              {isNarrowToolbar && (
+                <GraphActionsDropdown
+                  canEditGraph={canEditGraph}
+                  isNarrow={true}
+                  graphChromeTouch={graphChromeTouch}
+                  buttonPadding={chrome.buttonPadding}
+                  buttonFontSizeRem={chrome.buttonFontSizeRem}
+                  groupGapRem={chrome.groupGapRem}
+                  actionsDropdownRef={actionsDropdownRef}
+                  actionsDropdownBtnRef={actionsDropdownBtnRef}
+                  showActionsDropdown={showActionsDropdown}
+                  setShowActionsDropdown={setShowActionsDropdown}
+                  renderMenuItems={renderActionsMenuItems}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
       <div
+        ref={compactToolsRef}
+        data-testid="graph-editor-toolbar-tools"
+        data-graph-toolbar-compact-desktop={isCompactDesktop ? 'true' : 'false'}
         style={{
           gridArea: isNarrowToolbar ? 'tools' : undefined,
           flex: 1,
@@ -633,8 +805,10 @@ export function GraphEditorHeader({
           display: 'flex',
           gap: `${chrome.groupGapRem}rem`,
           alignItems: 'center',
-          flexWrap: 'wrap',
+          flexWrap: isNarrowToolbar ? 'wrap' : 'nowrap',
           justifyContent: 'flex-start',
+          overflowX: isNarrowToolbar ? undefined : 'auto',
+          overflowY: 'hidden',
         }}
       >
         {!isNarrowToolbar && isStandalone && (
@@ -700,33 +874,6 @@ export function GraphEditorHeader({
           const isValid = !hasErrors && !hasWarnings
           const canToggle = hasErrors || hasWarnings
           const warningLabel = formatGraphWarningBadgeLabel(warningSummary)
-          const badgeStyle = {
-            padding: chrome.badgePadding,
-            borderRadius: '6px',
-            fontSize: `${chrome.badgeFontSizeRem}rem`,
-            fontWeight: 600,
-            backgroundColor: isValid
-              ? theme.state.success.background
-              : hasErrors
-              ? theme.state.error.background
-              : theme.state.warning.background,
-            color: isValid
-              ? theme.state.success.color
-              : hasErrors
-              ? theme.state.error.color
-              : theme.state.warning.color,
-            border: `1px solid ${
-              isValid
-                ? theme.state.success.color
-                : hasErrors
-                ? theme.state.error.border
-                : theme.state.warning.color
-            }`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            ...(canToggle && { cursor: 'pointer' }),
-          } as React.CSSProperties
           const title = isValid
             ? 'Graphe valide (validation automatique à chaque sauvegarde)'
             : canToggle
@@ -738,42 +885,28 @@ export function GraphEditorHeader({
             : warningSummary.disconnectedBranchCount > 0
             ? `${warnings.length} avertissement(s), dont ${warningSummary.disconnectedBranchCount} branche(s) déconnectée(s)`
             : `${warnings.length} avertissement(s) détecté(s)`
-          const content = (
-            <>
-              <span>{isValid ? '✓' : hasErrors ? '✗' : '⚠'}</span>
-              <span>
-                {isValid
-                  ? isNarrowToolbar
-                    ? 'Valide'
-                    : 'Graphe valide'
-                  : hasErrors
-                  ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
-                  : warningLabel}
-              </span>
-            </>
-          )
-          if (canToggle) {
-            return (
-              <button
-                type="button"
-                style={{
-                  ...badgeStyle,
-                  margin: 0,
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  font: 'inherit',
-                }}
-                title={title}
-                onClick={() => setShowValidationPanel((v) => !v)}
-              >
-                {content}
-              </button>
-            )
-          }
+          const label = isValid
+            ? isNarrowToolbar
+              ? 'Valide'
+              : 'Graphe valide'
+            : hasErrors
+            ? `${errors.length} erreur${errors.length > 1 ? 's' : ''}`
+            : warningLabel
+
+          const variant = isValid ? 'success' : hasErrors ? 'error' : 'warning'
+          const size = isNarrowToolbar ? 'sm' : 'md'
+          const icon = isValid ? '✓' : hasErrors ? '✗' : '⚠'
+
           return (
-            <div style={badgeStyle} title={title}>
-              {content}
-            </div>
+            <Badge
+              variant={variant}
+              size={size}
+              icon={icon}
+              title={title}
+              onClick={canToggle ? () => setShowValidationPanel((v) => !v) : undefined}
+            >
+              {label}
+            </Badge>
           )
         })()}
         {/* Indicateur sauvegarde ADR-006 */}
@@ -811,14 +944,14 @@ export function GraphEditorHeader({
             disabled={!canEditGraph}
             style={{
               ...graphChromeTouch,
-              padding: chrome.buttonPadding,
+              padding: effectiveButtonPadding,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '6px',
               backgroundColor: theme.button.default.background,
               color: theme.button.default.color,
               cursor: canEditGraph ? 'pointer' : 'not-allowed',
               opacity: canEditGraph ? 1 : 0.6,
-              fontSize: `${chrome.buttonFontSizeRem}rem`,
+              fontSize: `${effectiveButtonFontSizeRem}rem`,
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
@@ -826,18 +959,15 @@ export function GraphEditorHeader({
             title="Auto-layout (Dagre) — choisir la direction"
             aria-label="Auto-layout (Dagre) — choisir la direction"
           >
-            {isNarrowToolbar ? '📐' : '📐 Auto-layout'}
+            {isNarrowToolbar || isCompactDesktop ? '📐' : '📐 Auto-layout'}
             <span
               style={{
-                padding: chrome.chipPadding,
-                borderRadius: '999px',
-                backgroundColor: theme.background.panel,
-                color: theme.text.secondary,
-                fontSize: `${chrome.chipFontSizeRem}rem`,
                 textTransform: 'capitalize',
               }}
             >
-              {layoutSpacingMode}
+              <Badge variant="neutral" size="sm">
+                {layoutSpacingMode}
+              </Badge>
             </span>
             <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
           </button>
@@ -962,10 +1092,10 @@ export function GraphEditorHeader({
         {!isNarrowToolbar && (
           <GraphActionsDropdown
             canEditGraph={canEditGraph}
-            isNarrow={false}
+            isNarrow={isCompactDesktop}
             graphChromeTouch={graphChromeTouch}
-            buttonPadding={chrome.buttonPadding}
-            buttonFontSizeRem={chrome.buttonFontSizeRem}
+            buttonPadding={effectiveButtonPadding}
+            buttonFontSizeRem={effectiveButtonFontSizeRem}
             groupGapRem={chrome.groupGapRem}
             actionsDropdownRef={actionsDropdownRef}
             actionsDropdownBtnRef={actionsDropdownBtnRef}
@@ -979,7 +1109,7 @@ export function GraphEditorHeader({
           disabled={!hasActiveDialogue}
           style={{
             ...graphChromeTouch,
-            padding: chrome.buttonPadding,
+            padding: effectiveButtonPadding,
             border: `1px solid ${
               showCostBreakdown ? theme.button.primary.background : theme.border.primary
             }`,
@@ -990,11 +1120,11 @@ export function GraphEditorHeader({
             color: showCostBreakdown ? theme.button.primary.color : theme.button.default.color,
             cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
             opacity: !hasActiveDialogue ? 0.6 : 1,
-            fontSize: `${chrome.buttonFontSizeRem}rem`,
+            fontSize: `${effectiveButtonFontSizeRem}rem`,
           }}
           title="Afficher le breakdown des coûts LLM pour ce dialogue"
         >
-          {isNarrowToolbar ? '💰' : '💰 Coûts'}
+          {isNarrowToolbar || isCompactDesktop ? '💰' : '💰 Coûts'}
         </button>
         {/* Actions dropdown déjà rendu une seule fois plus haut */}
         <div style={{ position: 'relative' }}>

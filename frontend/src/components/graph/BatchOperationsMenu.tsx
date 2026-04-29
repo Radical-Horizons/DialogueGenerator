@@ -4,6 +4,7 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { theme } from '../../theme'
+import { Badge } from '../shared'
 
 const PRESET_TAGS = ['À réviser', 'Validé', 'Brouillon', 'À relire'] as const
 
@@ -45,19 +46,14 @@ export function BatchOperationsMenu({
 
   return (
     <>
-      <span
-        style={{
-          padding: '0.35rem 0.6rem',
-          borderRadius: '6px',
-          fontSize: '0.85rem',
-          color: theme.text.primary,
-          backgroundColor: theme.background.tertiary,
-          border: `1px solid ${theme.border.primary}`,
-        }}
+      <Badge
+        variant="neutral"
+        size="md"
         title="Sélection multiple (shift-clic ou lasso)"
+        style={{ backgroundColor: theme.background.tertiary, color: theme.text.primary }}
       >
         {selectedNodeIds.length} nœuds sélectionnés
-      </span>
+      </Badge>
       <div
         style={{
           display: 'flex',

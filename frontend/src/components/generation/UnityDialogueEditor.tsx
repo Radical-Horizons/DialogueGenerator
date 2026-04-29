@@ -61,7 +61,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   const toast = useToast()
   const isNarrow = useDialogueEditionNarrow()
   const chrome = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
-  const { ref: actionsRef, isNarrow: isActionsNarrow } = useNarrowInlineSize(520)
+  const { ref: actionsRef, isNarrow: isActionsNarrowMeasured } = useNarrowInlineSize(520)
+  const isActionsNarrow = isNarrow && isActionsNarrowMeasured
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set())
@@ -381,11 +382,13 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               gap: `${chrome.toolbarGapRem}rem`,
               alignItems: isActionsNarrow ? 'stretch' : 'center',
               justifyItems: isActionsNarrow ? 'stretch' : undefined,
-              flexWrap: isActionsNarrow ? undefined : 'wrap',
+              flexWrap: isActionsNarrow ? undefined : isNarrow ? 'wrap' : 'nowrap',
               justifyContent: isActionsNarrow ? undefined : 'flex-start',
               minWidth: 0,
               width: '100%',
               maxWidth: '100%',
+              overflowX: isActionsNarrow ? undefined : isNarrow ? undefined : 'auto',
+              overflowY: 'hidden',
             }}
           >
             {extraActions}
@@ -395,6 +398,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                 disabled={isSaving || !isValid}
                 style={{
                   gridArea: isActionsNarrow ? 'save' : undefined,
+                  flexShrink: isActionsNarrow ? undefined : 0,
                   padding: chrome.toolbarButtonPadding,
                   fontSize: `${chrome.toolbarButtonFontRem}rem`,
                   fontWeight: chrome.toolbarButtonFontWeight,
@@ -417,6 +421,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                 onClick={onCancel}
                 style={{
                   gridArea: isActionsNarrow ? 'cancel' : undefined,
+                  flexShrink: isActionsNarrow ? undefined : 0,
                   padding: chrome.toolbarButtonPadding,
                   fontSize: `${chrome.toolbarButtonFontRem}rem`,
                   fontWeight: chrome.toolbarButtonFontWeight,

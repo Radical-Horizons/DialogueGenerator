@@ -12,6 +12,7 @@ import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
+import { Badge } from '../../shared'
 
 interface ValidationError {
   type: string
@@ -259,28 +260,24 @@ export const DialogueNode = memo(function DialogueNode({
     >
       {/* Badge tag (Story 2.11 FR32) */}
       {tag && (
-        <div
+        <Badge
+          variant="neutral"
+          size="sm"
+          title={tag}
           style={{
             position: 'absolute',
             top: 4,
             left: 4,
-            padding: '2px 6px',
-            borderRadius: 4,
-            fontSize: '0.7rem',
-            fontWeight: 600,
-            backgroundColor: theme.background.primary,
-            color: theme.text.secondary,
-            border: `1px solid ${theme.border.primary}`,
             zIndex: 10,
             maxWidth: NODE_WIDTH - 32,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            backgroundColor: theme.background.primary,
           }}
-          title={tag}
         >
           {tag}
-        </div>
+        </Badge>
       )}
       {/* Badge d'erreur */}
       {hasErrors && (
