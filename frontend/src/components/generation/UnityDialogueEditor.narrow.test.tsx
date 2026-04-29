@@ -90,4 +90,28 @@ describe('UnityDialogueEditor — responsive narrow', () => {
     )
     expect(deltaLeft).toBeLessThanOrEqual(2)
   })
+
+  it('desktop: ne bascule pas les actions en grille même si la mesure actions est étroite', () => {
+    render(
+      <DialogueEditionNarrowProvider value={false}>
+        <UnityDialogueEditor
+          json_content={minimalJson}
+          title="Lexique distance de sept enjambées et vérité qu’on n’écrit pas"
+          extraActions={
+            <>
+              <button>Générer la suite</button>
+              <button>Supprimer</button>
+            </>
+          }
+          onCancel={() => {}}
+        />
+      </DialogueEditionNarrowProvider>
+    )
+
+    const toolbar = screen.getByTestId('unity-dialogue-editor-toolbar')
+    const actions = toolbar.querySelector('.unity-dialogue-toolbar-actions')
+    expect(actions).not.toBeNull()
+    expect(actions!).toHaveAttribute('data-actions-narrow', 'false')
+    expect((actions as HTMLElement).style.flexWrap).toBe('nowrap')
+  })
 })

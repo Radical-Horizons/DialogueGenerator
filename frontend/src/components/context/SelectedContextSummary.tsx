@@ -11,6 +11,7 @@ import * as contextAPI from '../../api/context'
 import { useContextStore } from '../../store/contextStore'
 import { useGenerationStore } from '../../store/generationStore'
 import { getErrorMessage } from '../../types/errors'
+import { Badge } from '../shared'
 
 export type EntityType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -71,37 +72,26 @@ const EntityCategoryList = memo(function EntityCategoryList({
               {name}
             </span>
             {onModeChange && (
-              <button
-                type="button"
+              <Badge
+                variant={mode === 'excerpt' ? 'warning' : 'neutral'}
+                size="sm"
+                icon={mode === 'full' ? '📄' : '✂️'}
                 data-testid={`mode-toggle-${entityType}-${name}`}
                 onClick={() => onModeChange(entityType, name, mode === 'full' ? 'excerpt' : 'full')}
-                title={mode === 'full' ? 'Complet — cliquer pour passer en Extrait' : 'Extrait — cliquer pour passer en Complet'}
+                title={
+                  mode === 'full'
+                    ? 'Complet — cliquer pour passer en Extrait'
+                    : 'Extrait — cliquer pour passer en Complet'
+                }
                 style={{
                   flexShrink: 0,
-                  padding: '0.25rem 0.5rem',
-                  fontSize: remSize('small'),
-                  fontWeight: 'bold',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  backgroundColor: mode === 'excerpt'
-                    ? theme.state.warning.background || theme.background.secondary
-                    : theme.background.secondary,
-                  color: mode === 'excerpt'
-                    ? theme.state.warning.color || theme.text.secondary
-                    : theme.text.secondary,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
                   minWidth: '60px',
                   justifyContent: 'center',
+                  gap: '0.25rem',
                 }}
               >
-                {mode === 'full' ? '📄' : '✂️'}
-                <span style={{ fontSize: remSize('caption') }}>
-                  {mode === 'full' ? 'Complet' : 'Extrait'}
-                </span>
-              </button>
+                {mode === 'full' ? 'Complet' : 'Extrait'}
+              </Badge>
             )}
             {onRemoveEntity && (
               <button

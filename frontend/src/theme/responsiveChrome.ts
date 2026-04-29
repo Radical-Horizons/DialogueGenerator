@@ -164,12 +164,14 @@ export const modalTypography = {
 
 export const graphToolbarChrome = {
   comfortable: {
-    containerPadding: '0.65rem 0.85rem',
-    containerGapRem: 0.42,
-    groupGapRem: 0.42,
-    touchMinPx: 44,
+    containerPadding: '0.55rem 0.7rem',
+    containerGapRem: 0.32,
+    groupGapRem: 0.32,
+    // Desktop: cible souris, compacter la toolbar (évite overflow + scrollbar).
+    touchMinPx: 38,
     buttonFontSizeRem: 0.84,
-    buttonPadding: '0.42rem 0.85rem',
+    // Desktop: padding moins “gonflé” pour éviter overflow + scrollbar horizontal.
+    buttonPadding: '0.35rem 0.65rem',
     badgeFontSizeRem: 0.8,
     badgePadding: '0.35rem 0.65rem',
     chipFontSizeRem: 0.68,

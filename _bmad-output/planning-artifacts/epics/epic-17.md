@@ -160,6 +160,18 @@ So that **le lancement est rapide et familier**.
 
 ---
 
+### Story 17.7: Sélecteur de dialogue intégré à la toolbar en mode narrow (FR120)
+
+**Artifact :** `_bmad-output/implementation-artifacts/17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120.md` — `DialogueCombobox`, `useDialogueListData`, intégration `Dashboard` + `GraphEditor`, alignement toolbar narrow.
+
+---
+
+### Story 17.8: Fix `useNarrowInlineSize` — ref montée tardivement (dette 17.7)
+
+**Artifact :** `_bmad-output/implementation-artifacts/17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique.md` — callback ref sur le hook, tests `useNarrowInlineSize.test.tsx`, retrait du mock dans `Dashboard.combobox-17_7.test.tsx`.
+
+---
+
 ## Synthèse dépendances stories
 
 | Story | Dépend de |
@@ -170,3 +182,5 @@ So that **le lancement est rapide et familier**.
 | 17.4 | 17.1–17.3 (renfort) |
 | 17.5 | 17.1 (indépendant logiquement, peut suivre) |
 | 17.6 | 17.1 (breakpoints / shell) ; **recommandé** après 17.2–17.3 pour ne pas contredire drawers + touch |
+| 17.7 | 17.1, 17.3, 17.6 (narrow / densité / drawers) |
+| 17.8 | 17.7 (diagnostic ref tardive) ; corrige le hook pour **tous** les consommateurs |

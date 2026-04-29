@@ -9,7 +9,6 @@ import {
   useCallback,
   type CSSProperties,
   type ReactNode,
-  type RefObject,
 } from 'react'
 import { ContextSelector } from '../context/ContextSelector'
 import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
@@ -995,7 +994,7 @@ export function Dashboard() {
 
       {/* Panneau central: Génération / Édition avec onglets */}
       <div
-        ref={centerColumnRef as unknown as RefObject<HTMLDivElement>}
+        ref={centerColumnRef}
         style={{
           overflow: 'hidden',
           display: 'flex',

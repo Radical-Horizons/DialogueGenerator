@@ -115,7 +115,7 @@ development_status:
   17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
   17-5-pwa-install-manifest-option-fr121: done
   17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
-  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: ready-for-dev
+  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: review
 epic-17-retrospective: optional
   epic-4: done
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done

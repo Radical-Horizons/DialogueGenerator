@@ -4,7 +4,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type RefObject,
+  type RefCallback,
 } from 'react'
 
 export type UseNarrowInlineSizeOptions = {
@@ -38,41 +38,80 @@ function readLayoutWidthPx(el: HTMLElement | null): number {
 /**
  * Détecte si l’élément référencé est plus étroit qu’un seuil (largeur utile colonne / rail).
  * Utilisé pour le chrome segmenté et les titres de panneau (story 17.6).
+ *
+ * **Ref callback (Story 17.8)** : la ref retournée est une *callback ref* pour que
+ * `ResizeObserver` s’attache dès que le nœud DOM existe — y compris s’il est rendu
+ * conditionnellement après le premier paint (onglet inactif, drawer, modale). Un
+ * `useRef` + `useEffect` seul ne se ré-exécute pas quand `ref.current` passe de `null`
+ * à un élément sans changement de dépendances du hook.
  */
 export function useNarrowInlineSize(
   thresholdPx: number,
   options?: UseNarrowInlineSizeOptions
 ): {
-  ref: RefObject<HTMLDivElement | null>
+  ref: RefCallback<HTMLDivElement>
   isNarrow: boolean
 } {
   const measureParent = options?.measureParentClientWidth === true
-  const ref = useRef<HTMLDivElement | null>(null)
+  const observedNodeRef = useRef<HTMLDivElement | null>(null)
+  const observedMeasureTargetRef = useRef<HTMLElement | null>(null)
+  const resizeObserverRef = useRef<ResizeObserver | null>(null)
   const [isNarrow, setIsNarrow] = useState(false)
 
   const measure = useCallback(() => {
-    const el = ref.current
-    if (!el) return
-    const target = measureParent ? el.parentElement : el
-    const w = readLayoutWidthPx(target ?? el)
+    const target = observedMeasureTargetRef.current ?? observedNodeRef.current
+    if (!target) return
+    const w = readLayoutWidthPx(target)
     setIsNarrow(w < thresholdPx)
-  }, [thresholdPx, measureParent])
+  }, [thresholdPx])
+
+  const attachToNode = useCallback(
+    (node: HTMLDivElement | null) => {
+      resizeObserverRef.current?.disconnect()
+      resizeObserverRef.current = null
+
+      if (!node) {
+        observedNodeRef.current = null
+        observedMeasureTargetRef.current = null
+        return
+      }
+
+      observedNodeRef.current = node
+      const measureTarget = (measureParent ? node.parentElement : node) as HTMLElement | null
+      observedMeasureTargetRef.current = measureTarget ?? node
+
+      measure()
+      // ~2 frames : laisser le layout se stabiliser après attache ref (AC Story 17.8).
+      requestAnimationFrame(() => {
+        measure()
+        requestAnimationFrame(() => {
+          measure()
+        })
+      })
+
+      const ro = new ResizeObserver(() => {
+        measure()
+      })
+      // IMPORTANT: si on mesure le parent, on doit observer le parent (sinon un resize du parent
+      // peut ne pas redimensionner le nœud immédiatement, et on rate la transition narrow → desktop).
+      ro.observe(observedMeasureTargetRef.current ?? node)
+      resizeObserverRef.current = ro
+    },
+    [measure, measureParent]
+  )
 
   useLayoutEffect(() => {
     measure()
   }, [measure])
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const ro = new ResizeObserver(() => {
-      measure()
-    })
-    ro.observe(el)
     return () => {
-      ro.disconnect()
+      resizeObserverRef.current?.disconnect()
+      resizeObserverRef.current = null
+      observedNodeRef.current = null
+      observedMeasureTargetRef.current = null
     }
-  }, [measure])
+  }, [])
 
-  return { ref, isNarrow }
+  return { ref: attachToNode, isNarrow }
 }
