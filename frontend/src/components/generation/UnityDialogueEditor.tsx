@@ -27,6 +27,12 @@ export interface UnityDialogueEditorProps {
   onCancel?: () => void
   extraActions?: ReactNode
   hideHeaderSaveButton?: boolean
+  /**
+   * Slot optionnel placé dans la zone titre du header (Story 17.7).
+   * Utilisé en mode narrow pour héberger un sélecteur de dialogue (`DialogueCombobox`)
+   * — le mode desktop conserve la liste latérale et n'utilise pas ce slot.
+   */
+  headerSelector?: ReactNode
 }
 
 export interface UnityDialogueEditorHandle {
@@ -50,6 +56,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   onCancel,
   extraActions,
   hideHeaderSaveButton = false,
+  headerSelector,
 }, ref) {
   const toast = useToast()
   const isNarrow = useDialogueEditionNarrow()
@@ -312,11 +319,19 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
           flexDirection: isNarrow ? 'column' : 'row',
           gap: `${chrome.headerLayoutGapRem}rem`,
           alignItems: isNarrow ? 'stretch' : 'center',
-          justifyContent: isNarrow ? 'flex-start' : 'space-between',
+          justifyContent: 'flex-start',
           flexWrap: isNarrow ? 'nowrap' : 'wrap',
         }}
       >
-        <div style={{ minWidth: 0, flex: isNarrow ? undefined : '1 1 12rem' }}>
+        <div style={{ minWidth: 0, flex: isNarrow ? undefined : '0 1 auto' }}>
+          {headerSelector && (
+            <div
+              data-testid="unity-dialogue-editor-header-selector"
+              style={{ marginBottom: '0.4rem' }}
+            >
+              {headerSelector}
+            </div>
+          )}
           <div
             style={{
               margin: 0,
@@ -344,10 +359,11 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
 
         <div
           style={{
-            // IMPORTANT: le wrapper force l'étirement en largeur.
-            // Sans ça, certains contextes de flex/grid peuvent "shrink-wrap" sur le contenu,
-            // ce qui donne exactement le symptôme vu (≈222px de large).
-            width: '100%',
+            // flex: 1 remplace le width:100% initial : le wrapper remplit l'espace restant
+            // après le titre (qui est flex: 0 1 auto), ce qui évite le shrink-wrap (≈222px)
+            // tout en laissant les boutons s'aligner à gauche via justifyContent: flex-start.
+            flex: isNarrow ? undefined : '1 1 auto',
+            width: isNarrow ? '100%' : undefined,
             maxWidth: '100%',
             minWidth: 0,
             alignSelf: 'stretch',
@@ -366,7 +382,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               alignItems: isActionsNarrow ? 'stretch' : 'center',
               justifyItems: isActionsNarrow ? 'stretch' : undefined,
               flexWrap: isActionsNarrow ? undefined : 'wrap',
-              justifyContent: isActionsNarrow ? undefined : 'flex-end',
+              justifyContent: isActionsNarrow ? undefined : 'flex-start',
               minWidth: 0,
               width: '100%',
               maxWidth: '100%',
@@ -422,8 +438,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
       </div>
 
       {/* Contenu scrollable */}
-      <div 
-        style={{ 
+      <div
+        data-testid="unity-dialogue-editor-content"
+        style={{
           flex: '1 1 0%',
           minHeight: 0,
           minWidth: 0,

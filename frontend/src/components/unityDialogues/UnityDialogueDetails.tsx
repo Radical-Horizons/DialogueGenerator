@@ -1,7 +1,7 @@
 /**
  * Composant pour afficher et éditer un dialogue Unity.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { getErrorMessage } from '../../types/errors'
@@ -9,12 +9,18 @@ import { theme } from '../../theme'
 import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
 import { useDialogueEditionNarrow } from './DialogueEditionNarrowContext'
+import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
 
 interface UnityDialogueDetailsProps {
   filename: string
   onClose: () => void
   onDeleted?: () => void | Promise<void>
   onGenerateContinuation?: (dialogueJson: string, dialogueTitle: string) => void
+  /**
+   * Slot optionnel placé dans le header de l'éditeur (Story 17.7).
+   * Forwardé vers `UnityDialogueEditor.headerSelector`.
+   */
+  headerSelector?: ReactNode
 }
 
 export function UnityDialogueDetails({
@@ -22,6 +28,7 @@ export function UnityDialogueDetails({
   onClose,
   onDeleted,
   onGenerateContinuation,
+  headerSelector,
 }: UnityDialogueDetailsProps) {
   const isNarrow = useDialogueEditionNarrow()
   const tb = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
@@ -31,20 +38,13 @@ export function UnityDialogueDetails({
   const [error, setError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const formatFilename = (filename: string): string => {
-    // Enlever l'extension .json et remplacer les underscores par des espaces
-    const formatted = filename.replace(/\.json$/, '').replace(/_/g, ' ')
-    // Ajouter une majuscule au premier mot
-    return formatted.charAt(0).toUpperCase() + formatted.slice(1)
-  }
-
   const loadDialogue = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
       const response = await unityDialoguesAPI.getUnityDialogue(filename)
       setJsonContent(response.json_content)
-      setTitle(formatFilename(filename))
+      setTitle(formatDialogueTitle(filename))
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {
@@ -139,6 +139,7 @@ export function UnityDialogueDetails({
         filename={filename.replace('.json', '')}
         onSave={handleSave}
         onCancel={onClose}
+        headerSelector={headerSelector}
         extraActions={
           <>
             {onGenerateContinuation && (

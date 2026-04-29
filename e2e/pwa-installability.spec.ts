@@ -28,6 +28,7 @@ test.describe('PWA installability (prod build smoke)', () => {
     const swScriptUrl = await page.evaluate(async () => {
       const regs = await navigator.serviceWorker.getRegistrations()
       const r = regs[0]
+      if (!r) return null
       const sw = r.active ?? r.waiting ?? r.installing
       return sw?.scriptURL ?? null
     })

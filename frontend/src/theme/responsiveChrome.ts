@@ -95,10 +95,20 @@ export const generationPanelChrome = {
 /**
  * En-tête et zone scroll de l’éditeur Unity (onglet Édition de dialogues, page dédiée).
  * Même seuil conteneur que {@link PANEL_COMFORT_MIN_WIDTH_PX} via `useNarrowInlineSize` sur la colonne workspace.
+ *
+ * Story 17.7 (AC #4) : `headerPadding` et `contentPadding` partagent désormais
+ * la **même valeur de padding horizontal** afin d'aligner le bord gauche du
+ * header (toolbar) avec celui de la première carte du contenu (`ID: START`)
+ * à 0 px d'écart (≪ tolérance ±2 px).
  */
+const unityDialogueEditorPaddingHorizontal = {
+  comfortable: '0.85rem',
+  narrow: '0.58rem',
+} as const
+
 export const unityDialogueEditorChrome = {
   comfortable: {
-    headerPadding: '0.48rem 0.65rem',
+    headerPadding: `0.48rem ${unityDialogueEditorPaddingHorizontal.comfortable}`,
     headerLayoutGapRem: 0.42,
     titleFontRem: 0.85,
     subtitleFontRem: 0.75,
@@ -107,14 +117,14 @@ export const unityDialogueEditorChrome = {
     toolbarButtonPadding: '0.35rem 0.62rem',
     toolbarButtonFontRem: 0.78,
     toolbarButtonFontWeight: 700,
-    contentPadding: '0.85rem',
+    contentPadding: unityDialogueEditorPaddingHorizontal.comfortable,
     nodeSectionGapRem: 1.25,
     nodeCardPadding: '0.85rem',
     labelFontRem: 0.82,
     inputPadding: '0.45rem 0.55rem',
   },
   narrow: {
-    headerPadding: '0.35rem 0.48rem',
+    headerPadding: `0.35rem ${unityDialogueEditorPaddingHorizontal.narrow}`,
     headerLayoutGapRem: 0.32,
     titleFontRem: 0.78,
     subtitleFontRem: 0.68,
@@ -123,7 +133,7 @@ export const unityDialogueEditorChrome = {
     toolbarButtonPadding: '0.26rem 0.42rem',
     toolbarButtonFontRem: 0.7,
     toolbarButtonFontWeight: 600,
-    contentPadding: '0.58rem',
+    contentPadding: unityDialogueEditorPaddingHorizontal.narrow,
     nodeSectionGapRem: 0.9,
     nodeCardPadding: '0.58rem',
     labelFontRem: 0.75,

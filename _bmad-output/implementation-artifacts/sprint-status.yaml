@@ -113,8 +113,10 @@ development_status:
   17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
   17-6-typographie-densite-adaptive-panneaux-onglets-fr118: done
   17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
-  17-5-pwa-install-manifest-option-fr121: review
-  epic-17-retrospective: optional
+  17-5-pwa-install-manifest-option-fr121: done
+  17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
+  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: ready-for-dev
+epic-17-retrospective: optional
   epic-4: in-progress
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: ready-for-dev
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: backlog

@@ -4,7 +4,7 @@
  * Appelle useGraphStore() en interne pour éviter le prop drilling sur les données du store.
  */
 import type React from 'react'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useGraphStore } from '../../store/graphStore'
 import { SaveStatusIndicator } from '../shared'
@@ -47,6 +47,12 @@ interface GraphEditorHeaderProps {
   canEditGraph: boolean
   isStandalone: boolean
   onBack?: () => void
+  /**
+   * Slot facultatif rendu dans la zone titre du header (Story 17.7).
+   * Utilisé en mode narrow pour injecter le sélecteur de dialogue
+   * (combobox) à la place de la colonne liste retirée.
+   */
+  headerSelector?: ReactNode
 }
 
 export function GraphEditorHeader({
@@ -60,6 +66,7 @@ export function GraphEditorHeader({
   canEditGraph,
   isStandalone,
   onBack,
+  headerSelector,
 }: GraphEditorHeaderProps) {
   const {
     nodes,
@@ -495,6 +502,14 @@ export function GraphEditorHeader({
             </button>
           )}
           <div style={{ minWidth: 0 }}>
+            {headerSelector && (
+              <div
+                data-testid="graph-editor-header-selector"
+                style={{ marginBottom: '0.4rem' }}
+              >
+                {headerSelector}
+              </div>
+            )}
             <div style={{ fontSize: `${chrome.buttonFontSizeRem}rem`, fontWeight: 700, color: theme.text.primary }}>
               Éditeur de graphe
             </div>

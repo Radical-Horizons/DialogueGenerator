@@ -64,7 +64,7 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 
 **Playwright + `Task` (important)** : l’enum **`subagent_type`** **ne liste pas** `playwright-e2e-specialist`. Pour paralléliser : **plusieurs `Task`** en `generalPurpose`, prompt avec **commande Playwright incluant des chemins explicites** (`npx playwright test e2e/foo.spec.ts …`). **Ne pas** donner à chaque enfant la suite entière sans arguments — chaque enfant = 1 spec ou un petit lot ; la **full liste** reste une passe **unique** du parent ou de la CI après les lots. Voir `.cursor/commands/playwright-e2e-parallel.md`.
 
-**Preuve suite E2E complète (agents / CI locale)** : `npm run test:e2e:verify` (`CI=true` + `reuseExistingServer: false`) évite les `ERR_CONNECTION_REFUSED` si un Vite externe sur `:3000` a été réutilisé puis s’est arrêté pendant la suite.
+**Preuve suite E2E complète (agents / CI locale)** : `npm run test:e2e:verify` (`CI=true` + `reuseExistingServer: false`) évite les `ERR_CONNECTION_REFUSED` si un Vite externe sur `:3000` a été réutilisé puis s’est arrêté pendant la suite. **PWA (Story 17.5)** : le smoke manifest + SW utilise `vite build` + `preview` — commande dédiée **`npm run test:e2e:pwa`** (non incluse dans `test:e2e:verify`).
 
 **Full-repo review (no separate orchestrator agent)** : run **Composer** with seven specialist reviewers in parallel, or the parent sends **seven `Task` calls in one turn** (`api-contracts-reviewer`, `graph-editor-reviewer`, `llm-pipeline-reviewer`, `context-gdd-reviewer`, `security-reviewer`, `backend-services-reviewer`, `test-coverage-reviewer`). Then synthesize. A single `Task` that “does all seven” in one child run is **not** equivalent to seven isolates.
 
