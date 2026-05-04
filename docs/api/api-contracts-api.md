@@ -543,6 +543,85 @@ Create or update Unity dialogue file.
 
 ---
 
+## Validation rules — context dropping (`/api/v1/validation/rules`)
+
+JWT required (same as other protected routes). Rules are persisted on disk as UTF-8 JSON at `data/validation-rules/context-dropping.json` (see `ContextDroppingRulesService`, `constants.FilePaths.CONTEXT_DROPPING_RULES_FILE`).
+
+### GET `/validation/rules/context-dropping`
+
+**Response:** `ContextDroppingRulesSchema` — `rules_profile` (`strict` \| `light`), optional `tolerance` \[0, 1\], `mandatory_info` (labels), `dialogue_type_overrides`, `schema_version`.
+
+**Errors:** `422` if the on-disk file exists but is not valid JSON or fails schema validation (explicit `detail` message).
+
+### PUT `/validation/rules/context-dropping`
+
+**Request Body:** `ContextDroppingRulesSchema` (replaces the entire persisted document).
+
+**Response:** Saved rules (echo).
+
+**Errors:** `422` on validation failure or write error (`ValueError` / `OSError`).
+
+**Usage:** `POST .../unity-dialogues/graph/detect-context-dropping` merges **request `options`** with these persisted values when a field is omitted — priority: non-null request field **>** persisted **>** defaults (`rules_profile` default `strict`, etc.). Implementation: `api/routers/graph_quality.py` (`_context_dropping_options_to_data`).
+
+---
+
+## Graph editor API (`/api/v1/unity-dialogues/graph`)
+
+All routes below require **JWT** (`Depends(get_current_user)` in `api/main.py`). They're split across `api/routers/graph_io.py`, `graph_generation.py`, `graph_cost.py`, `graph_validation.py`, `graph_quality.py`, `graph_flow.py`, `graph_node_history.py`.
+
+**Typical client:** `frontend/src/api/graph.ts` (timeouts vary per call).
+
+### I/O
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/load` | Load graph into editor session |
+| POST | `/save` | Save graph |
+| POST | `/save-and-write` | Save and write Unity file |
+
+### Generation & cost
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/generate-node` | Generate a new node (LLM) |
+| POST | `/estimate-cost` | Cost estimate for generation |
+
+### Structural & schema validation
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/validate` | Orphans, broken refs, cycles (`GraphValidationService.validate_graph`) |
+| POST | `/validate-schema` | Unity JSON schema conformance (`validate_unity_json` on serialized graph). **Empty `nodes` list → `is_valid: true`** (no-op). |
+| POST | `/validate-lore-explicit` | Explicit lore vs GDD facts (`ContextBuilder` + `validate_explicit_lore_contradictions`) |
+
+### Flow & layout
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/simulate-flow` | Dead ends, cul-de-sacs, **coverage** stats (`GraphValidationService.simulate_flow` + `compute_coverage_stats`) |
+| POST | `/calculate-layout` | Auto-layout (`GraphConversionService.calculate_layout`) |
+
+### Quality (static + LLM)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/detect-ai-slop` | GPT-isms, repetitions, generic phrases (`AISlopDetector`) |
+| POST | `/detect-context-dropping` | GDD context usage vs selections (`ContextDroppingDetector`; rules from request + persisted GET `/validation/rules/context-dropping`) |
+| POST | `/evaluate-dialogue-quality` | LLM judge (`LLMQualityJudgeService`; requires working LLM provider) |
+
+### Node lifecycle (generated nodes)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/prompt` | Prompt payload for node generation context |
+| POST | `/nodes/{node_id}/accept` | Accept pending generated node |
+| POST | `/nodes/{node_id}/reject` | Reject / remove |
+| POST | `/nodes/{node_id}/regenerate` | Regenerate node |
+
+**OpenAPI:** `/api/docs` and `/api/redoc` list full request/response models (`api/schemas/graph.py`, `api/schemas/dialogue_quality.py`).
+
+---
+
 ## LLM Usage Endpoints (`/api/v1/llm-usage`)
 
 ### GET `/llm-usage`
