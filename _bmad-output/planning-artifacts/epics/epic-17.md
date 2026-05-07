@@ -172,6 +172,42 @@ So that **le lancement est rapide et familier**.
 
 ---
 
+### Story 17.9: Refactor `GraphEditorHeader` (maintenabilité) — tri-state toolbar (dette technique)
+
+As a **développeur**,
+I want **découper `GraphEditorHeader.tsx` en sous-composants et isoler la logique tri‑state (narrow/compact/full)**,
+So that **les évolutions responsive/tactiles (Epic 17) restent sûres, testables, et sans réintroduire des bugs de double-mount / overflow**.
+
+**Scope :** refactor interne uniquement (comportement utilisateur inchangé).
+
+**Acceptance Criteria:**
+
+- **Given** un desktop large / compact / narrow  
+  **When** je redimensionne et j’utilise les actions toolbar (batch ops, auto-layout, actions, coûts, undo/redo, badge santé + save status)  
+  **Then** le comportement et l’UI restent équivalents (tolérance CSS minime acceptée)
+
+- **Given** le mode compact desktop (entre seuils “comfortable” et “compact max”)  
+  **When** la toolbar bascule  
+  **Then** les rangées sont explicites et testables (status puis tools), et les composants sensibles ne sont montés **qu’une seule fois**
+
+- **Given** la base de code  
+  **When** je lis/modifie la toolbar  
+  **Then** `GraphEditorHeader.tsx` est significativement réduit (orchestration/wiring), et l’essentiel du JSX est dans des sous-composants dédiés
+
+**Découpage recommandé (si besoin en plusieurs PRs/stories) :**
+
+- **Story 17.9.A (UI extraction)** : extraire les sous-composants “presentation” (ex. `GraphToolbarStatusRow`, `GraphToolbarToolsRow`, `GraphToolbarTitleBlock`) sans changer la logique.
+- **Story 17.9.B (logic extraction)** : extraire un hook/helper `useGraphToolbarTriState()` (ou équivalent) et stabiliser le contrat via tests.
+- **Story 17.9.C (tests/mocks hardening)** : harmoniser les mocks partiels (`../components/shared`) et ajouter un test “anti double-mount” (SaveStatusIndicator unique).
+
+**Test Plan (preuve minimale) :**
+
+- `npm --prefix frontend test -- src/__tests__/GraphEditorHeader.desktopToolbar.test.tsx src/__tests__/GraphEditorHeader.searchRow.test.tsx src/__tests__/GraphEditorHeader.undoRedo.test.tsx src/__tests__/GraphEditor.multiSelection.test.tsx`
+- `npm --prefix frontend run lint`
+- **Preuve UI** : `npm run dev` puis redimensionnements full → compact → narrow → full sans scroll horizontal indésirable ni écran noir.
+
+---
+
 ## Synthèse dépendances stories
 
 | Story | Dépend de |
@@ -184,3 +220,4 @@ So that **le lancement est rapide et familier**.
 | 17.6 | 17.1 (breakpoints / shell) ; **recommandé** après 17.2–17.3 pour ne pas contredire drawers + touch |
 | 17.7 | 17.1, 17.3, 17.6 (narrow / densité / drawers) |
 | 17.8 | 17.7 (diagnostic ref tardive) ; corrige le hook pour **tous** les consommateurs |
+| 17.9 | 17.7–17.8 (toolbar tri‑state stable) |

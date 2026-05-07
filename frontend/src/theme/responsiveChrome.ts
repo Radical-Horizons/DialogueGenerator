@@ -48,6 +48,14 @@ export const panelExpandRailCaptionTypography = {
  */
 export const GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX = 640
 
+/**
+ * Seuil sous lequel le toolbar desktop bascule en mode compact 2 rangées
+ * (status au-dessus, outils en dessous), tout en restant au-dessus de la
+ * bascule narrow. Calibré sur les tokens `comfortable` actuels du toolbar
+ * pour éviter tout overflow horizontal en mode plein écran.
+ */
+export const GRAPH_TOOLBAR_DESKTOP_COMPACT_MAX_WIDTH_PX = 1100
+
 /** Même seuil conteneur pour panneau Génération, graphe, etc. */
 export const PANEL_COMFORT_MIN_WIDTH_PX = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX
 
@@ -167,10 +175,9 @@ export const graphToolbarChrome = {
     containerPadding: '0.55rem 0.7rem',
     containerGapRem: 0.32,
     groupGapRem: 0.32,
-    // Desktop: cible souris, compacter la toolbar (évite overflow + scrollbar).
-    touchMinPx: 38,
+    /** Conformité accessibilité (WCAG 2.5.5 / FR119) : 44 px en confortable. */
+    touchMinPx: 44,
     buttonFontSizeRem: 0.84,
-    // Desktop: padding moins “gonflé” pour éviter overflow + scrollbar horizontal.
     buttonPadding: '0.35rem 0.65rem',
     badgeFontSizeRem: 0.8,
     badgePadding: '0.35rem 0.65rem',
@@ -180,18 +187,18 @@ export const graphToolbarChrome = {
     dropdownItemPadding: '0.45rem 0.85rem',
   },
   narrow: {
-    containerPadding: '0.42rem 0.5rem',
-    containerGapRem: 0.32,
-    groupGapRem: 0.32,
+    containerPadding: '0.28rem 0.38rem',
+    containerGapRem: 0.18,
+    groupGapRem: 0.18,
     touchMinPx: 44,
     /** Plancher lisibilité ≈ 12px si root 16px */
     buttonFontSizeRem: 0.75,
     /** Padding horizontal réduit, min 44px garanti par GRAPH_CHROME_TOUCH */
-    buttonPadding: '0.35rem 0.55rem',
+    buttonPadding: '0.08rem 0.22rem',
     badgeFontSizeRem: 0.75,
-    badgePadding: '0.28rem 0.5rem',
+    badgePadding: '0.18rem 0.38rem',
     chipFontSizeRem: 0.65,
-    chipPadding: '0.06rem 0.25rem',
+    chipPadding: '0.02rem 0.18rem',
     dropdownItemFontSizeRem: 0.78,
     dropdownItemPadding: '0.38rem 0.68rem',
   },

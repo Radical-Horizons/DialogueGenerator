@@ -59,7 +59,6 @@ export const Badge = forwardRef<HTMLDivElement | HTMLButtonElement, BadgeProps>(
   if (clickable) {
     return (
       <button
-        // eslint-disable-next-line react/no-unknown-property -- forwarded ref type depends on onClick
         ref={ref as unknown as React.Ref<HTMLButtonElement>}
         type="button"
         onClick={onClick}
@@ -80,7 +79,6 @@ export const Badge = forwardRef<HTMLDivElement | HTMLButtonElement, BadgeProps>(
 
   return (
     <div
-      // eslint-disable-next-line react/no-unknown-property -- forwarded ref type depends on onClick
       ref={ref as unknown as React.Ref<HTMLDivElement>}
       title={title}
       data-testid={dataTestId}

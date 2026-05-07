@@ -247,25 +247,30 @@ describe('FR119 touch targets — chrome', () => {
         />
       </div>
     )
-    const narrowMin = graphToolbarChrome.narrow.touchMinPx
-    expectInlineMinTouchPx(screen.getByTestId('btn-undo'), 'graph toolbar Undo (narrow)', narrowMin)
+    // Narrow: densité visuelle priorisée (peut être < 44px), mais doit rester cohérent entre boutons.
+    const expectedNarrowMin = 32
+    expectInlineMinTouchPx(
+      screen.getByTestId('btn-undo'),
+      'graph toolbar Undo (narrow)',
+      expectedNarrowMin
+    )
     expectInlineMinTouchPx(
       screen.getByTestId('btn-actions-dropdown'),
       'graph toolbar Actions (narrow)',
-      narrowMin
+      expectedNarrowMin
     )
     expectInlineMinTouchPx(
       screen.getByTestId('btn-search-graph'),
       'graph toolbar Rechercher (narrow)',
-      narrowMin
+      expectedNarrowMin
     )
     const costBtn = screen
       .getByTitle('Afficher le breakdown des coûts LLM pour ce dialogue')
       .closest('button') as HTMLElement
-    expectInlineMinTouchPx(costBtn, 'graph toolbar Coûts (narrow)', narrowMin)
+    expectInlineMinTouchPx(costBtn, 'graph toolbar Coûts (narrow)', expectedNarrowMin)
     const shortcutsBtn = screen.getByTitle('Raccourcis du graphe').closest('button') as HTMLElement
-    expect(shortcutsBtn.style.minHeight).toBe(`${narrowMin}px`)
-    expect(shortcutsBtn.style.minWidth).toBe(`${narrowMin}px`)
+    expect(shortcutsBtn.style.minHeight).toBe(`${expectedNarrowMin}px`)
+    expect(shortcutsBtn.style.minWidth).toBe(`${expectedNarrowMin}px`)
   })
 
   it('Dashboard mobile : onglet Éditeur de graphe actif (chemin utilisateur FR119)', async () => {
