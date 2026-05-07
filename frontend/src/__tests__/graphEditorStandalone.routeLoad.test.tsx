@@ -24,11 +24,16 @@ vi.mock('../components/usage/DialogueCostBreakdown', () => ({
   DialogueCostBreakdown: () => null,
 }))
 
-vi.mock('../components/shared', () => ({
-  useToast: () => toastMock,
-  SaveStatusIndicator: () => React.createElement('div', { 'data-testid': 'save-status-indicator' }),
-  ConfirmDialog: () => null,
-}))
+vi.mock('../components/shared', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return {
+    ...actual,
+    useToast: () => toastMock,
+    SaveStatusIndicator: () =>
+      React.createElement('div', { 'data-testid': 'save-status-indicator' }),
+    ConfirmDialog: () => null,
+  }
+})
 
 vi.mock('../utils/graphExport', () => ({
   exportGraphToPNG: vi.fn(),

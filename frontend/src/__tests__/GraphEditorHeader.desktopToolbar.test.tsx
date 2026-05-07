@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
@@ -48,13 +48,24 @@ function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGra
   }
 }
 
-describe('GraphEditorHeader - Desktop toolbar one-line + compact mode', () => {
-  it('desktop: root/tools are nowrap and tools scroll horizontally instead of wrapping', () => {
-    vi.spyOn(narrowHook, 'useNarrowInlineSize')
-      // 1) toolbarRef: desktop (not narrow)
-      .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: false }) as NarrowHookReturn)
-      // 2) compactToolsRef: not compact
-      .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: false }) as NarrowHookReturn)
+/**
+ * Mocks `useNarrowInlineSize` for the tri-state toolbar (called twice):
+ *  1) toolbar narrow (threshold 640 px) — `narrowToolbar`.
+ *  2) compact desktop (threshold 1100 px) — `narrowCompact`.
+ */
+function mockNarrowSequence(narrowToolbar: boolean, narrowCompact: boolean): void {
+  vi.spyOn(narrowHook, 'useNarrowInlineSize')
+    .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: narrowToolbar }) as NarrowHookReturn)
+    .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: narrowCompact }) as NarrowHookReturn)
+}
+
+describe('GraphEditorHeader - Desktop toolbar tri-state mode', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('desktop full: 1 ligne, flex-wrap nowrap, overflow visible, pas de structure 2 rangées', () => {
+    mockNarrowSequence(false, false)
 
     render(
       <GraphEditorHeader
@@ -74,17 +85,19 @@ describe('GraphEditorHeader - Desktop toolbar one-line + compact mode', () => {
 
     const root = screen.getByTestId('graph-editor-toolbar')
     expect(root.style.flexWrap).toBe('nowrap')
+
     const tools = screen.getByTestId('graph-editor-toolbar-tools')
     expect(tools.style.flexWrap).toBe('nowrap')
-    expect(tools.style.overflowX).toBe('auto')
+    expect(tools.style.overflowX).toBe('visible')
+    expect(tools.style.flexDirection).toBe('row')
+    expect(tools.dataset.graphToolbarCompactDesktop).toBe('false')
+
+    expect(screen.queryByTestId('graph-toolbar-row-status')).toBeNull()
+    expect(screen.queryByTestId('graph-toolbar-row-tools')).toBeNull()
   })
 
-  it('desktop compact: uses short labels for Undo/Redo and icon-only Actions/Coûts/Auto-layout', () => {
-    vi.spyOn(narrowHook, 'useNarrowInlineSize')
-      // 1) toolbarRef: desktop (not narrow)
-      .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: false }) as NarrowHookReturn)
-      // 2) compactToolsRef: compact
-      .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: true }) as NarrowHookReturn)
+  it('desktop compact: 2 rangées explicites (status au-dessus de tools), labels courts pour Undo/Redo et icones', () => {
+    mockNarrowSequence(false, true)
 
     render(
       <GraphEditorHeader
@@ -102,21 +115,61 @@ describe('GraphEditorHeader - Desktop toolbar one-line + compact mode', () => {
       />
     )
 
-    // Undo/Redo buttons still exist but text labels are shortened.
+    const tools = screen.getByTestId('graph-editor-toolbar-tools')
+    expect(tools.style.flexDirection).toBe('column')
+    expect(tools.dataset.graphToolbarCompactDesktop).toBe('true')
+
+    const rowStatus = screen.getByTestId('graph-toolbar-row-status')
+    const rowTools = screen.getByTestId('graph-toolbar-row-tools')
+    expect(rowStatus).toBeInTheDocument()
+    expect(rowTools).toBeInTheDocument()
+
+    // Status doit apparaitre AVANT tools dans le DOM (DOCUMENT_POSITION_FOLLOWING = 0x04).
+    const FOLLOWING = Node.DOCUMENT_POSITION_FOLLOWING
+    expect(rowStatus.compareDocumentPosition(rowTools) & FOLLOWING).toBeTruthy()
+
     expect(screen.getByTestId('btn-undo')).toHaveTextContent('↩')
     expect(screen.getByTestId('btn-undo')).not.toHaveTextContent('Undo')
     expect(screen.getByTestId('btn-redo')).toHaveTextContent('↪')
     expect(screen.getByTestId('btn-redo')).not.toHaveTextContent('Redo')
 
-    // Auto-layout: icon-only in compact desktop (label absent).
     const autoLayout = screen.getByRole('button', { name: /auto-layout/i })
     expect(autoLayout).toHaveTextContent('📐')
 
-    // Actions: icon-only when GraphActionsDropdown isNarrow=true.
     expect(screen.getByTestId('btn-actions-dropdown')).toHaveTextContent('⋯')
 
-    // Coûts: icon-only.
     expect(screen.getByTitle(/breakdown des coûts/i)).toHaveTextContent('💰')
   })
-})
 
+  it('narrow: layout grid (existant), pas de bascule compact desktop', () => {
+    mockNarrowSequence(true, true)
+
+    render(
+      <GraphEditorHeader
+        toolbar={makeMockToolbar()}
+        isLoadingDialogue={false}
+        hasActiveDialogue={true}
+        activeDialogueTitle="Test"
+        activeDialogueFilename="test.json"
+        handleSave={async () => {}}
+        onBatchTagApply={() => {}}
+        handleBatchValidateSelection={() => {}}
+        handleBatchDeleteSelection={() => {}}
+        canEditGraph={true}
+        isStandalone={false}
+      />
+    )
+
+    const root = screen.getByTestId('graph-editor-toolbar')
+    expect(root.dataset.graphToolbarNarrow).toBe('true')
+
+    const tools = screen.getByTestId('graph-editor-toolbar-tools')
+    // En narrow, on n'active pas le mode compact desktop.
+    expect(tools.dataset.graphToolbarCompactDesktop).toBe('false')
+    // En narrow, on rend 2 rangées (actions puis status/options) dans la zone tools.
+    expect(screen.getByTestId('graph-toolbar-row-actions')).toBeInTheDocument()
+    expect(screen.getByTestId('graph-toolbar-row-status')).toBeInTheDocument()
+    // Les rangées desktop compact ne doivent pas apparaitre en narrow.
+    expect(screen.queryByTestId('graph-toolbar-row-tools')).toBeNull()
+  })
+})
