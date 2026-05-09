@@ -13,6 +13,12 @@ import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
 import { useGraphViewStore } from '../../../store/graphViewStore'
 import { formatChoiceEffectsSummary } from '../../../utils/choiceEffects'
+import { evaluateChoiceEffortAccess } from '../../../utils/effortPreview'
+import {
+  formatSkillCheckSummary,
+  getChoiceSkillCheckPreview,
+  type SkillCheckDefinition,
+} from '../../../utils/skillChecks'
 import {
   evaluateVisibilityConditions,
   formatVisibilityConditionsSummary,
@@ -49,7 +55,10 @@ interface DialogueNodeData {
   line?: string
   choices?: Array<{
     text: string
+    choiceId?: string
     targetNode?: string
+    skillCheck?: SkillCheckDefinition
+    effortCost?: number
   }>
   nextNode?: string
   validationErrors?: ValidationError[]
@@ -96,6 +105,7 @@ export const DialogueNode = memo(function DialogueNode({
 
   const visibilityEvalState = useGraphViewStore((s) => s.visibilityEvalState)
   const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const previewGameSystemsState = useGraphViewStore((s) => s.previewGameSystemsState)
   const applyChoiceEffectsSimulation = useGraphViewStore((s) => s.applyChoiceEffectsSimulation)
   const appendPreviewEffectHistory = useGraphViewStore((s) => s.appendPreviewEffectHistory)
   const previewCatalogById = useGraphViewStore((s) => s.previewCatalogById)
@@ -103,7 +113,10 @@ export const DialogueNode = memo(function DialogueNode({
     .visibilityConditions
   const simActive =
     Object.keys(visibilityEvalState.flags).length > 0 ||
-    Object.keys(visibilityEvalState.reputation).length > 0
+    Object.keys(visibilityEvalState.reputation).length > 0 ||
+    Object.keys(previewGameSystemsState.attributes).length > 0 ||
+    Object.keys(previewGameSystemsState.skills).length > 0 ||
+    previewGameSystemsState.effortPool !== 10
   const visibilityEvalMode = dialoguePreviewActive || simActive
   const nodeVisOk = !visibilityEvalMode || !nodeVisibility?.items?.length
     ? true
@@ -400,7 +413,9 @@ export const DialogueNode = memo(function DialogueNode({
                         ? '📝'
                         : e.type === 'missing_stable_id'
                           ? '🆔'
-                          : '⚠️'
+                          : e.type === 'dialogue_flag_undeclared'
+                            ? '🏁'
+                            : '⚠️'
             return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
           }).join('')}
         >
@@ -590,12 +605,36 @@ export const DialogueNode = memo(function DialogueNode({
               visibilityConditions?: VisibilityConditionsBlock
               condition?: string
               choiceEffects?: ChoiceEffect[]
+              skillCheck?: SkillCheckDefinition
+              effortCost?: number
             }
             const cs = formatVisibilityConditionsSummary(ch.visibilityConditions)
             const fx = formatChoiceEffectsSummary(ch.choiceEffects)
+            const skillPreview = getChoiceSkillCheckPreview(ch, {
+              attributes: previewGameSystemsState.attributes,
+              skills: previewGameSystemsState.skills,
+            })
+            const skill = ch.skillCheck && skillPreview
+              ? formatSkillCheckSummary(ch.skillCheck, skillPreview)
+              : ''
+            const skillTarget = skillPreview?.targetNode
+              ? `branche: ${skillPreview.targetNode}`
+              : ''
+            const effort = evaluateChoiceEffortAccess(
+              { effortCost: ch.effortCost },
+              { availablePool: previewGameSystemsState.effortPool },
+            )
+            const effortSummary = effort.cost > 0
+              ? effort.accessible
+                ? `Effort: ${effort.cost} PE / ${effort.availablePool} PE disponibles`
+                : effort.disabledReason ?? ''
+              : ''
             const legacy = ch.condition?.trim()
             const bits = [
               cs,
+              skill,
+              skillTarget,
+              effortSummary,
               fx ? `effets: ${fx}` : '',
               legacy ? `legacy: ${legacy}` : '',
             ].filter(Boolean)
@@ -630,6 +669,31 @@ export const DialogueNode = memo(function DialogueNode({
           const dimChoice =
             visibilityEvalMode && Boolean(choiceVisibility?.items?.length) && !choiceVisOk
           const choiceFx = (choice as { choiceEffects?: ChoiceEffect[] }).choiceEffects
+          const choiceSkillPreview = getChoiceSkillCheckPreview(
+            choice as { skillCheck?: SkillCheckDefinition },
+            {
+              attributes: previewGameSystemsState.attributes,
+              skills: previewGameSystemsState.skills,
+            },
+          )
+          const choiceSkill = (choice as { skillCheck?: SkillCheckDefinition }).skillCheck
+          const choiceSkillSummary = choiceSkill && choiceSkillPreview
+            ? formatSkillCheckSummary(choiceSkill, choiceSkillPreview)
+            : ''
+          const effortAccess = evaluateChoiceEffortAccess(
+            choice as { effortCost?: number },
+            { availablePool: previewGameSystemsState.effortPool },
+          )
+          const dimByEffort = dialoguePreviewActive && !effortAccess.accessible
+          const choiceAriaParts = [
+            label,
+            choiceSkillSummary,
+            choiceSkillPreview?.targetNode ? `branche ${choiceSkillPreview.targetNode}` : '',
+            effortAccess.cost > 0
+              ? effortAccess.disabledReason ?? `Effort ${effortAccess.cost} PE`
+              : '',
+            hasChoiceEffects ? `${choiceEffectsLen} effet(s)` : '',
+          ].filter(Boolean)
           return (
             <Handle
               key={stableId}
@@ -642,6 +706,12 @@ export const DialogueNode = memo(function DialogueNode({
                 if (!dialoguePreviewActive) return
                 e.stopPropagation()
                 e.preventDefault()
+                if (!effortAccess.accessible) {
+                  appendPreviewEffectHistory(
+                    effortAccess.disabledReason ? [effortAccess.disabledReason] : [],
+                  )
+                  return
+                }
                 const prev = useGraphViewStore.getState().visibilityEvalState
                 const catalog = previewCatalogById ?? undefined
                 applyChoiceEffectsSimulation(choiceFx ?? [], catalog)
@@ -659,17 +729,13 @@ export const DialogueNode = memo(function DialogueNode({
                 left: `${leftPercent}%`,
                 bottom: 10,
                 transform: 'translateX(-50%)',
-                opacity: dimChoice ? 0.48 : 1,
-                filter: dimChoice ? 'grayscale(45%)' : undefined,
+                opacity: dimChoice || dimByEffort ? 0.48 : 1,
+                filter: dimChoice || dimByEffort ? 'grayscale(45%)' : undefined,
                 boxShadow: hasChoiceEffects
                   ? '0 0 0 2px #9B59B6'
                   : undefined,
               }}
-              aria-label={
-                hasChoiceEffects
-                  ? `${label} — ${choiceEffectsLen} effet(s)`
-                  : label
-              }
+              aria-label={choiceAriaParts.join(' — ')}
             />
           )
         })}

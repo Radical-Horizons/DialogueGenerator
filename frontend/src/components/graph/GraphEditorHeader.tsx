@@ -125,6 +125,8 @@ export function GraphEditorHeader({
     setShowContextDroppingPanel,
     showFlowSimulationPanel,
     setShowFlowSimulationPanel,
+    showGameSystemsIntegrationPanel,
+    setShowGameSystemsIntegrationPanel,
     showSchemaValidationPanel,
     handleToggleSchemaValidation,
     showCostBreakdown,
@@ -884,6 +886,7 @@ export function GraphEditorHeader({
             showAiSlopPanel ||
             showContextDroppingPanel ||
             showFlowSimulationPanel ||
+            showGameSystemsIntegrationPanel ||
             showSchemaValidationPanel ||
             showCostBreakdown ||
             showDialoguePreviewPanel
@@ -1038,6 +1041,25 @@ export function GraphEditorHeader({
                   <button
                     type="button"
                     role="menuitem"
+                    data-testid="btn-game-systems-integration-panel"
+                    onClick={() => {
+                      setShowValidationToolsDropdown(false)
+                      setShowGameSystemsIntegrationPanel((v) => !v)
+                    }}
+                    style={menuItemStyle}
+                    title="Afficher les systèmes de jeu utilisables dans les dialogues (FR94)"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.state.hover.background
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    Systèmes de jeu
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
                     data-testid="btn-schema-validation-panel"
                     onClick={() => {
                       setShowValidationToolsDropdown(false)
@@ -1136,7 +1158,7 @@ export function GraphEditorHeader({
             opacity: !hasActiveDialogue ? 0.6 : 1,
             fontSize: '0.9rem',
           }}
-          title="Rechercher dans le graphe (Ctrl+F)"
+          title="Rechercher dans le graphe (Ctrl+Maj+F)"
           aria-label="Rechercher"
         >
           🔍 Rechercher

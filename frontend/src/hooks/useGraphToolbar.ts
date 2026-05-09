@@ -38,6 +38,8 @@ export interface UseGraphToolbarReturn {
   /** Story 9.4 — panneau preview scénario (variables / historique). */
   showDialoguePreviewPanel: boolean
   setShowDialoguePreviewPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showGameSystemsIntegrationPanel: boolean
+  setShowGameSystemsIntegrationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
   showSchemaValidationPanel: boolean
   schemaValidationLoading: boolean
   schemaValidationIsValid: boolean
@@ -91,6 +93,7 @@ export function useGraphToolbar(
   const [showContextDroppingPanel, setShowContextDroppingPanel] = useState(false)
   const [showFlowSimulationPanel, setShowFlowSimulationPanel] = useState(false)
   const [showDialoguePreviewPanel, setShowDialoguePreviewPanel] = useState(false)
+  const [showGameSystemsIntegrationPanel, setShowGameSystemsIntegrationPanel] = useState(false)
   const [showSchemaValidationPanel, setShowSchemaValidationPanel] = useState(false)
   const [schemaValidationLoading, setSchemaValidationLoading] = useState(false)
   const [schemaValidationIsValid, setSchemaValidationIsValid] = useState(false)
@@ -264,7 +267,7 @@ export function useGraphToolbar(
         enabled: () => !!useGraphStore.getState().selectedNodeId,
       },
       {
-        key: 'ctrl+f',
+        key: 'ctrl+shift+f',
         handler: (e) => {
           e.preventDefault()
           setShowSearchBar((v) => {
@@ -276,7 +279,7 @@ export function useGraphToolbar(
         enabled: true,
       },
       {
-        key: 'ctrl+shift+f',
+        key: 'ctrl+alt+f',
         handler: (e) => {
           e.preventDefault()
           setShowFiltersPanel((v) => !v)
@@ -494,6 +497,8 @@ export function useGraphToolbar(
     setShowFlowSimulationPanel,
     showDialoguePreviewPanel,
     setShowDialoguePreviewPanel,
+    showGameSystemsIntegrationPanel,
+    setShowGameSystemsIntegrationPanel,
     showSchemaValidationPanel,
     schemaValidationLoading,
     schemaValidationIsValid,

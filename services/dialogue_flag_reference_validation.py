@@ -6,6 +6,7 @@ déclarés pour le dialogue.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any, FrozenSet, Iterator, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
@@ -26,6 +27,8 @@ from api.schemas.visibility_conditions import (
     VisibilityConditionsBlock,
 )
 from services.edit_distance import levenshtein_bounded
+
+logger = logging.getLogger(__name__)
 
 _visibility_block_adapter = TypeAdapter(VisibilityConditionsBlock)
 _effect_atom_adapter = TypeAdapter(ChoiceEffectAtom)
@@ -123,6 +126,11 @@ def _parse_visibility_block(raw: Any, path: str) -> Optional[VisibilityCondition
     try:
         return _visibility_block_adapter.validate_python(raw)
     except Exception:
+        logger.debug(
+            "Bloc visibilityConditions ignoré pour agrégation FR93 (parse PyDantic): %s",
+            path,
+            exc_info=True,
+        )
         return None
 
 
@@ -153,6 +161,12 @@ def _parse_choice_effects_list(
         try:
             items.append(_effect_atom_adapter.validate_python(entry))
         except Exception:
+            logger.debug(
+                "Atome choiceEffects[%s] ignoré pour agrégation FR93 (parse PyDantic): %s",
+                i,
+                path,
+                exc_info=True,
+            )
             continue
     return items
 

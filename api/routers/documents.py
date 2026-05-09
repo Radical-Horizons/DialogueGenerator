@@ -50,6 +50,7 @@ from services.dialogue_flag_reference_validation_service import (
     DialogueFlagReferenceValidationService,
     analysis_to_validation_api_payload,
 )
+from services.game_systems_social_diagnostics import validate_document_social_systems
 
 logger = logging.getLogger(__name__)
 
@@ -692,6 +693,8 @@ async def put_document(
         # Validation (validate_unity_json_structured sans modifier choiceId, ordre choices[], node.id)
         is_valid, errors_structured = validate_unity_json_structured(doc)
         validation_report = [{"code": e.get("code", "validation_error"), "message": e.get("message", ""), "path": e.get("path", "")} for e in errors_structured]
+        if isinstance(doc, dict):
+            validation_report.extend(validate_document_social_systems(doc))
 
         # AC4 export : si validation échoue, refuser persistance et retourner 400 + validationReport
         if validation_mode == "export" and not is_valid:

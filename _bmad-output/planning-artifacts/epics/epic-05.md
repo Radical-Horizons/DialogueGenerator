@@ -1,4 +1,4 @@
-﻿## Epic 5: Export et intégration Unity
+## Epic 5: Export et intégration Unity
 
 Les utilisateurs peuvent exporter les dialogues vers Unity JSON format avec validation 100% schema conformity. Le système valide avant export, génère logs metadata, permet preview et batch export.
 
@@ -32,11 +32,13 @@ UnityDialogueNode {
 
 ### Flags — 3 types distincts à sérialiser
 
-| Type | Opérateurs conditions | Opérateurs actions |
-|------|----------------------|-------------------|
-| `bool` | `is_true`, `is_false` | `set_true`, `set_false` |
-| `compteur` (int, min/max GDD) | `>=`, `<=`, `==`, `>`, `<` | `increment`, `decrement`, `set_value` |
-| `enum` (valeurs ordonnées avec défaut) | `==`, `!=`, `in_list` | `set_value` |
+
+| Type                                   | Opérateurs conditions      | Opérateurs actions                    |
+| -------------------------------------- | -------------------------- | ------------------------------------- |
+| `bool`                                 | `is_true`, `is_false`      | `set_true`, `set_false`               |
+| `compteur` (int, min/max GDD)          | `>=`, `<=`, `==`, `>`, `<` | `increment`, `decrement`, `set_value` |
+| `enum` (valeurs ordonnées avec défaut) | `==`, `!=`, `in_list`      | `set_value`                           |
+
 
 Convention de nommage : `Flag_[scope]_[entité]_[description]`
 Scopes : `perso`, `lieu`, `faction`, `systeme`, `quete`, `objet`
@@ -46,10 +48,13 @@ Scopes : `perso`, `lieu`, `faction`, `systeme`, `quete`, `objet`
 Les 3 axes (Admiration, Prestige, Crainte) sont exportés comme **valeur agrégée entière** — le tier dynamique (Sympathie/Faveur/Dévotion) n'est **jamais** stocké dans un champ séparé du JSON Unity (Source of Truth = agrégat).
 
 Condition de réputation dans choices :
+
 ```json
 { "type": "reputation", "faction": "Gardiens", "axis": "Prestige", "operator": ">=", "value": 30 }
 ```
+
 Action de réputation :
+
 ```json
 { "type": "reputation_delta", "faction": "Gardiens", "axis": "Admiration", "delta": +5 }
 ```
@@ -57,6 +62,7 @@ Action de réputation :
 ### Tests de caractéristiques (Core System)
 
 Les 8 caractéristiques (Puissance, Agilité, Perception, Intelligence, Créativité, Sociabilité, Technique, Volonté) peuvent conditionner des choix ou déclencher un skill check :
+
 ```json
 {
   "type": "skill_check",
@@ -70,7 +76,7 @@ Les 8 caractéristiques (Puissance, Agilité, Perception, Intelligence, Créativ
 ### Types de nœuds spéciaux
 
 - **Cut-scene** (`nodeType: "cutscene"`) : pas de choix interactifs, déclenche séquence animatique. Actions possibles : `trigger_animation`, `camera_movement`, `unlock_memory`.
-- **Exploration de souvenir** (`nodeType: "memory_exploration"`) : exploration de fragments de mémoire, flags `Flag_systeme_memoire_*` modifiés en fin de séquence.
+- **Exploration de souvenir** (`nodeType: "memory_exploration"`) : exploration de fragments de mémoire, flags `Flag_systeme_memoire_`* modifiés en fin de séquence.
 - **Nœud Influence/Respect** : action `influence_delta` / `respect_delta` avec `{ npcId, delta }`.
 
 ### Repères de maintenabilité (alertes non-bloquantes)
@@ -90,31 +96,27 @@ Les 8 caractéristiques (Puissance, Agilité, Perception, Intelligence, Créativ
 ### Checklist de Vérification
 
 1. **Fichiers mentionnés dans les stories :**
-   - [ ] Vérifier existence avec `glob_file_search` ou `grep`
-   - [ ] Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
-   - [ ] Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
-
+  - Vérifier existence avec `glob_file_search` ou `grep`
+  - Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
+  - Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
 2. **Composants/Services similaires :**
-   - [ ] Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
-   - [ ] Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
-   - [ ] Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
-   - [ ] Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
-
+  - Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
+  - Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
+  - Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
+  - Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
 3. **Endpoints API :**
-   - [ ] Vérifier namespace cohérent (`/api/v1/dialogues/*` vs autres)
-   - [ ] Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
-   - [ ] Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
-
+  - Vérifier namespace cohérent (`/api/v1/dialogues/`* vs autres)
+  - Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
+  - Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
 4. **Patterns existants :**
-   - [ ] Vérifier patterns Zustand (immutable updates, structure stores)
-   - [ ] Vérifier patterns FastAPI (routers, dependencies, schemas)
-   - [ ] Vérifier patterns React (composants, hooks, modals)
-   - [ ] Respecter conventions de nommage et structure dossiers
-
+  - Vérifier patterns Zustand (immutable updates, structure stores)
+  - Vérifier patterns FastAPI (routers, dependencies, schemas)
+  - Vérifier patterns React (composants, hooks, modals)
+  - Respecter conventions de nommage et structure dossiers
 5. **Documentation des décisions :**
-   - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
-   - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
-   - Si nouveau : Documenter **POURQUOI** pas de réutilisation
+  - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
+  - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
+  - Si nouveau : Documenter **POURQUOI** pas de réutilisation
 
 ---
 
@@ -156,6 +158,7 @@ So that **je peux intégrer le dialogue dans Unity sans erreurs de format**.
 **And** les nœuds cut-scene (`nodeType: "cutscene"`) et exploration de souvenir (`nodeType: "memory_exploration"`) sont exportés avec leur structure spécifique
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/unity/export` (POST) avec conversion graphe → Unity JSON (existant)
 - Service : `GraphConversionService.graph_to_unity_json()` (existant) convertit ReactFlow → Unity
 - Validation : Intégration avec Story 4.13 (validation schéma) avant export
@@ -209,6 +212,7 @@ So that **je peux intégrer toute ma bibliothèque de dialogues en une seule op�
 **And** les dialogues déjà exportés restent sauvegardés (pas de rollback)
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/batch-export` (POST) avec liste dialogue IDs
 - Service : `BatchExportService` avec boucle export + gestion erreurs individuelles
 - Validation : Validation schéma pour chaque dialogue avant export (optionnel selon config)
@@ -257,10 +261,11 @@ So that **je peux garantir 100% de conformité avant intégration Unity**.
 **And** je peux comparer mon JSON avec le schéma pour comprendre les erreurs
 
 **Technical Requirements:**
+
 - Backend : Service `UnitySchemaValidator.validate_unity_json()` (existant) avec validation stricte
 - Schéma : Modèles Pydantic `UnityDialogueNode` couvrant : `conditions[]` (types bool/compteur/enum/reputation/skill_check), `actions[]` (types correspondants), `nodeType` (enum: dialogue/cutscene/memory_exploration), `skillCheckConfig` optionnel (characteristic parmi les 8 GDD, DD entier, successNodeId, failNodeId)
 - Règle réputation : Validation que les tiers dynamiques ne sont pas stockés comme flag (erreur bloquante si violation)
-- Validation seuils GDD : Warnings non-bloquants si >~1000 nœuds ou >~10 flags/PNJ ou >~3 compteurs/PNJ
+- Validation seuils GDD : Warnings non-bloquants si >~~1000 nœuds ou >~~10 flags/PNJ ou >~3 compteurs/PNJ
 - API : Endpoint `/api/v1/dialogues/{id}/validate-schema` (POST) retourne erreurs schéma (existant)
 - Frontend : Composant `SchemaValidationPanel.tsx` affiche erreurs avec navigation nœuds + schéma référence
 - Auto-validation : Intégration avec Story 5.1 (export) pour validation automatique avant export
@@ -306,6 +311,7 @@ So that **je peux transférer les dialogues vers Unity ou les archiver**.
 **And** le téléchargement se fait sans timeout (gestion fichiers volumineux)
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/{id}/download` (GET) retourne fichier JSON avec headers download
 - Batch : Endpoint `/api/v1/dialogues/batch-download` (POST) retourne archive ZIP avec tous les fichiers
 - Frontend : Fonction `downloadJSON(filename, content)` avec création blob + trigger download
@@ -352,6 +358,7 @@ So that **je peux vérifier le contenu et la taille avant de télécharger**.
 **And** le modal se ferme après export réussi
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/{id}/preview-export` (GET) retourne JSON + métadonnées (taille, nœuds)
 - Format : JSON formaté avec indent 2 espaces pour prévisualisation
 - Taille : Calcul taille fichier estimée (JSON stringifié) avant export réel
@@ -402,6 +409,7 @@ So that **je peux tracer l'historique des exports et identifier les problèmes**
 **And** les logs incluent : timestamp, dialogue, fichier, statut, coût, validation, erreurs
 
 **Technical Requirements:**
+
 - Backend : Service `ExportLogService` avec méthode `log_export(dialogue_id, filename, metadata)` pour stockage logs
 - Stockage : Fichiers JSON `data/logs/exports/YYYY-MM-DD.json` avec logs journaliers
 - Métadonnées : Timestamp, dialogue_id, filename, validation_status, cost, errors, file_size, warnings_gdd (seuils maintenabilité dépassés : nœuds/flags/compteurs)

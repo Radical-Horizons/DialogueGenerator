@@ -83,6 +83,21 @@ export function applyChoiceEffectsToEvalState(
       const d = clamp(eff.delta, min, max)
       const prevR = reputation[key] ?? 0
       reputation[key] = prevR + d
+      continue
+    }
+    if (eff.kind === 'reputation_delta_fr94') {
+      const key = [
+        'fr94',
+        eff.heroineId,
+        eff.target.kind,
+        eff.target.id,
+        eff.axis,
+        'final_npc',
+      ].join('::')
+      const { min, max } = reputationDeltaBounds(eff.axis)
+      const d = clamp(eff.delta, min, max)
+      const prevR = reputation[key] ?? 0
+      reputation[key] = prevR + d
     }
   }
 
@@ -100,6 +115,8 @@ export function formatChoiceEffectLine(effect: ChoiceEffect): string {
       return `${effect.flagId} → ${effect.value}`
     case 'reputation_delta':
       return `${effect.axisId} / ${effect.factionId} ${effect.delta >= 0 ? '+' : ''}${effect.delta}`
+    case 'reputation_delta_fr94':
+      return `${effect.axis} / ${effect.heroineId} / ${effect.target.kind}:${effect.target.id} ${effect.delta >= 0 ? '+' : ''}${effect.delta}`
     default:
       return ''
   }

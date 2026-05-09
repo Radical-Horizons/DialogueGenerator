@@ -33,11 +33,36 @@ export interface ReputationCondition {
   threshold: number
 }
 
+export type ReputationAxisFr94 = 'Admiration' | 'Prestige' | 'Crainte'
+export type ReputationTargetKindFr94 = 'heroine' | 'npc' | 'community'
+export type ReputationReadModeFr94 = 'raw_npc' | 'final_npc' | 'community_calculated'
+
+export interface ReputationConditionFr94 {
+  kind: 'reputation_fr94'
+  heroineId: string
+  target: {
+    kind: ReputationTargetKindFr94
+    id: string
+  }
+  axis: ReputationAxisFr94
+  readMode: ReputationReadModeFr94
+  operator: ComparisonOperator
+  threshold: number
+}
+
+export interface FactionTitleCondition {
+  kind: 'faction_title'
+  flagId?: string
+  titleId?: string
+}
+
 export type ConditionAtom =
   | FlagBoolCondition
   | FlagCounterCondition
   | FlagEnumCondition
   | ReputationCondition
+  | ReputationConditionFr94
+  | FactionTitleCondition
 
 export interface VisibilityConditionsBlock {
   combinator: VisibilityCombinator

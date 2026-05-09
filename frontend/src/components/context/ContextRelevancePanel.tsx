@@ -25,6 +25,10 @@ function labelForType(key: string): string {
   return TYPE_LABELS[key] ?? key
 }
 
+function historyRowKey(row: ContextRelevanceHistoryEntry, index: number): string {
+  return `${row.request_id}-${row.timestamp}-${row.node_id ?? 'unknown'}-${index}`
+}
+
 export type ContextRelevancePanelProps = {
   /**
    * Sans bordure haute : le panneau est regroupé dans un conteneur parent (ex. accordéon).
@@ -251,9 +255,9 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
               color: theme.text.secondary,
             }}
           >
-            {history.map((row) => (
+            {history.map((row, index) => (
               <li
-                key={`${row.request_id}-${row.timestamp}`}
+                key={historyRowKey(row, index)}
                 title={`request_id: ${row.request_id}`}
               >
                 {row.timestamp.slice(0, 19)} — nœud {row.node_id ?? '?'} — req {row.request_id} —{' '}

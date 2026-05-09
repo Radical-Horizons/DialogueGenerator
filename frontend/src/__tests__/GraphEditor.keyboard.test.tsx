@@ -209,14 +209,14 @@ describe('GraphEditor search bar (Story 2.7)', () => {
     useGraphStore.getState().resetGraph()
   })
 
-  it('Ctrl+F opens search bar, Escape closes it and clears highlights (Task 3.1)', async () => {
+  it('Ctrl+Shift+F opens search bar, Ctrl+F stays available for the browser', async () => {
     const setHighlightedNodes = useGraphStore.getState().setHighlightedNodes
     const MockEditor = () => {
       const [show, setShow] = React.useState(false)
       useKeyboardShortcuts(
         [
           {
-            key: 'ctrl+f',
+            key: 'ctrl+shift+f',
             handler: (e) => {
               e.preventDefault()
               setShow((v) => {
@@ -240,6 +240,12 @@ describe('GraphEditor search bar (Story 2.7)', () => {
     expect(screen.queryByPlaceholderText(/Rechercher/)).not.toBeInTheDocument()
     act(() => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true }))
+    })
+    expect(screen.queryByPlaceholderText(/Rechercher/)).not.toBeInTheDocument()
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'F', ctrlKey: true, shiftKey: true, bubbles: true })
+      )
     })
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/Rechercher/)).toBeInTheDocument()
@@ -310,13 +316,13 @@ describe('GraphEditor Filters panel (Story 2.9)', () => {
     useGraphStore.getState().resetGraph()
   })
 
-  it('Ctrl+Shift+F opens filters panel, Escape closes it (Task 4.1)', async () => {
+  it('Ctrl+Alt+F opens filters panel, Escape closes it (Task 4.1)', async () => {
     const MockEditor = () => {
       const [show, setShow] = React.useState(false)
       useKeyboardShortcuts(
         [
           {
-            key: 'ctrl+shift+f',
+            key: 'ctrl+alt+f',
             handler: (e) => {
               e.preventDefault()
               setShow((v) => !v)
@@ -340,7 +346,7 @@ describe('GraphEditor Filters panel (Story 2.9)', () => {
     expect(screen.queryByRole('dialog', { name: /Filtres du graphe/i })).not.toBeInTheDocument()
     act(() => {
       window.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'F', ctrlKey: true, shiftKey: true, bubbles: true })
+        new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, altKey: true, bubbles: true })
       )
     })
     await waitFor(() => {

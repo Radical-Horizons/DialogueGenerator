@@ -1,14 +1,20 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import * as flagsAPI from '../../../api/flags'
+import * as contextAPI from '../../../api/context'
 import { dialogueNodeDataSchema, type DialogueNodeData } from '../../../schemas/nodeEditorSchema'
 import { EffectEditor } from './EffectEditor'
 
 vi.mock('../../../api/flags', () => ({
   listFlags: vi.fn(),
+}))
+
+vi.mock('../../../api/context', () => ({
+  listCommunities: vi.fn(),
 }))
 
 function Wrap({ choiceEffects }: { choiceEffects?: DialogueNodeData['choices'] }) {
@@ -28,6 +34,13 @@ function Wrap({ choiceEffects }: { choiceEffects?: DialogueNodeData['choices'] }
 }
 
 describe('EffectEditor', () => {
+  beforeEach(() => {
+    vi.mocked(contextAPI.listCommunities).mockResolvedValue({
+      communities: [{ name: 'Guilde des Cartographes', data: {} }],
+      total: 1,
+    })
+  })
+
   it('affiche la zone effets et charge le catalogue flags', async () => {
     vi.mocked(flagsAPI.listFlags).mockResolvedValue({
       flags: [
@@ -68,5 +81,18 @@ describe('EffectEditor', () => {
 
     expect(await screen.findByText(/Aperçu/i)).toBeTruthy()
     expect(screen.getByText(/FLAG_X = true/)).toBeTruthy()
+  })
+
+  it('utilise des selects pour les effets de réputation', async () => {
+    const user = userEvent.setup()
+    vi.mocked(flagsAPI.listFlags).mockResolvedValue({ flags: [] })
+
+    render(<Wrap />)
+
+    await user.selectOptions(await screen.findByLabelText('Ajouter un effet'), 'reputation_delta')
+
+    expect(screen.getByLabelText('Axe réputation effet')).toHaveValue('Prestige')
+    expect(screen.getByLabelText('Communauté réputation effet')).toHaveDisplayValue('— communauté —')
+    expect(await screen.findByRole('option', { name: 'Guilde des Cartographes' })).toBeInTheDocument()
   })
 })

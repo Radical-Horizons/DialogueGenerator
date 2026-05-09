@@ -19,9 +19,28 @@ import type { FlagDefinition } from '../types/flags'
 import type { ChoiceEffect } from '../types/choiceEffects'
 import type { VisibilityEvalState } from '../types/visibilityConditions'
 import { applyChoiceEffectsToEvalState } from '../utils/choiceEffects'
+import { DEFAULT_EFFORT_POOL } from '../utils/effortPreview'
 
 /** Catalogue flags pour clamp preview (Story 9.4) — réglé par DialoguePreviewPanel. */
 export type PreviewCatalogMap = Record<string, FlagDefinition>
+
+export interface PreviewGameSystemsState {
+  attributes: Record<string, number>
+  skills: Record<string, number>
+  effortPool: number
+  reputationValues: Record<string, number>
+  factionTitles: Record<string, string>
+  simulationLimits: string[]
+}
+
+const DEFAULT_GAME_SYSTEMS_PREVIEW_STATE: PreviewGameSystemsState = {
+  attributes: {},
+  skills: {},
+  effortPool: DEFAULT_EFFORT_POOL,
+  reputationValues: {},
+  factionTitles: {},
+  simulationLimits: [],
+}
 
 export interface GraphViewState {
   // --- Instance React Flow ---
@@ -62,6 +81,8 @@ export interface GraphViewState {
   previewEffectHistory: string[]
   /** Catalogue pour clamp effets (aligné EffectEditor). */
   previewCatalogById: PreviewCatalogMap | undefined
+  /** Story 9.6 — état simulé stats FR94 pour rendu preview local. */
+  previewGameSystemsState: PreviewGameSystemsState
 
   // --- Actions : instance ---
   registerReactFlowInstance: (instance: ReactFlowInstance) => void
@@ -120,6 +141,10 @@ export interface GraphViewState {
   appendPreviewEffectHistory: (lines: string[]) => void
   clearPreviewEffectHistory: () => void
   setPreviewCatalogById: (catalog: PreviewCatalogMap | undefined) => void
+  setPreviewAttribute: (attributeId: string, value: number) => void
+  setPreviewSkill: (skillId: string, value: number) => void
+  setPreviewEffortPool: (value: number) => void
+  setPreviewSimulationLimits: (limits: string[]) => void
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
@@ -139,6 +164,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   dialoguePreviewActive: false,
   previewEffectHistory: [],
   previewCatalogById: undefined,
+  previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
 
   registerReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
 
@@ -227,6 +253,7 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
       dialoguePreviewActive: false,
       previewEffectHistory: [],
       previewCatalogById: undefined,
+      previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
       visibilityEvalState: { flags: {}, reputation: {} },
     }),
 
@@ -238,6 +265,38 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   clearPreviewEffectHistory: () => set({ previewEffectHistory: [] }),
 
   setPreviewCatalogById: (catalog) => set({ previewCatalogById: catalog }),
+
+  setPreviewAttribute: (attributeId, value) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        attributes: { ...s.previewGameSystemsState.attributes, [attributeId]: value },
+      },
+    })),
+
+  setPreviewSkill: (skillId, value) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        skills: { ...s.previewGameSystemsState.skills, [skillId]: value },
+      },
+    })),
+
+  setPreviewEffortPool: (value) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        effortPool: Number.isFinite(value) ? value : DEFAULT_EFFORT_POOL,
+      },
+    })),
+
+  setPreviewSimulationLimits: (limits) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        simulationLimits: [...limits],
+      },
+    })),
 }))
 
 /** Exposé uniquement en dev pour E2E Playwright (`requestSave` aligné sur la toolbar / Ctrl+S). */

@@ -29,6 +29,7 @@ import {
   applyBindingsToDocument,
   parseBindingsFromDocument,
 } from '../../utils/dialogueFlagBindings'
+import { getErrorMessage } from '../../types/errors'
 
 export type PersistenceSlice = Pick<
   GraphState,
@@ -389,8 +390,7 @@ export const createPersistenceSlice: StateCreator<
               throw new Error(msg)
             } else {
               console.warn(
-                'Erreur sauvegarde via API documents, tentative legacy:',
-                docErr
+                `Erreur sauvegarde via API documents, tentative legacy: ${getErrorMessage(docErr)}`
               )
               // Continuer avec le chemin legacy
             }
@@ -401,8 +401,7 @@ export const createPersistenceSlice: StateCreator<
       }
     } catch (docErr: unknown) {
       console.warn(
-        'Erreur préparation sauvegarde via API documents, utilisation du chemin legacy:',
-        docErr
+        `Erreur préparation sauvegarde via API documents, utilisation du chemin legacy: ${getErrorMessage(docErr)}`
       )
     }
 

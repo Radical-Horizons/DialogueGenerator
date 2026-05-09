@@ -4,10 +4,12 @@
 import { memo, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import * as flagsAPI from '../../../api/flags'
+import * as contextAPI from '../../../api/context'
 import { theme } from '../../../theme'
 import type { DialogueNodeData } from '../../../schemas/nodeEditorSchema'
 import type { ChoiceEffect } from '../../../types/choiceEffects'
 import type { FlagDefinition } from '../../../types/flags'
+import type { CommunityResponse } from '../../../types/api'
 import {
   applyChoiceEffectsToEvalState,
   formatChoiceEffectsSummary,
@@ -17,6 +19,8 @@ import { useGraphViewStore } from '../../../store/graphViewStore'
 export interface EffectEditorProps {
   choiceIndex: number
 }
+
+const REPUTATION_AXES = ['Admiration', 'Prestige', 'Crainte'] as const
 
 function defaultEffect(kind: ChoiceEffect['kind']): ChoiceEffect {
   switch (kind) {
@@ -46,6 +50,7 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
   const summary = useMemo(() => formatChoiceEffectsSummary(watchEffects), [watchEffects])
 
   const [catalogById, setCatalogById] = useState<Record<string, FlagDefinition>>({})
+  const [communities, setCommunities] = useState<CommunityResponse[]>([])
   useEffect(() => {
     let c = false
     flagsAPI
@@ -60,6 +65,21 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
       })
       .catch((err: unknown) => {
         console.warn('[EffectEditor] listFlags failed', err)
+      })
+    return () => {
+      c = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let c = false
+    contextAPI
+      .listCommunities({ page_size: 500 })
+      .then((res) => {
+        if (!c) setCommunities(res.communities)
+      })
+      .catch((err: unknown) => {
+        console.warn('[EffectEditor] listCommunities failed', err)
       })
     return () => {
       c = true
@@ -268,19 +288,33 @@ export const EffectEditor = memo(function EffectEditor({ choiceIndex }: EffectEd
               )}
               {kind === 'reputation_delta' && eff.kind === 'reputation_delta' && (
                 <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  <input
-                    placeholder="axe"
+                  <select
+                    aria-label="Axe réputation effet"
                     value={eff.axisId}
                     onChange={(e) => update(idx, { ...eff, axisId: e.target.value })}
-                    style={{ flex: '1 1 80px' }}
-                  />
-                  <input
-                    placeholder="faction"
+                    style={{ flex: '1 1 110px' }}
+                  >
+                    {REPUTATION_AXES.map((axis) => (
+                      <option key={axis} value={axis}>
+                        {axis}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Communauté réputation effet"
                     value={eff.factionId}
                     onChange={(e) => update(idx, { ...eff, factionId: e.target.value })}
-                    style={{ flex: '1 1 80px' }}
-                  />
+                    style={{ flex: '1 1 140px' }}
+                  >
+                    <option value="">— communauté —</option>
+                    {communities.map((community) => (
+                      <option key={community.name} value={community.name}>
+                        {community.name}
+                      </option>
+                    ))}
+                  </select>
                   <input
+                    aria-label="Delta réputation"
                     type="number"
                     value={eff.delta}
                     onChange={(e) =>

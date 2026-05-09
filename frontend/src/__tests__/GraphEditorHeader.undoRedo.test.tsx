@@ -6,6 +6,10 @@ import { render, screen, act } from '@testing-library/react'
 import { useGraphStore } from '../store/graphStore'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
 import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
+import {
+  GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+  GRAPH_TOOL_FLOATING_PANEL_Z_INDEX,
+} from '../components/graph/graphToolbarConstants'
 
 function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGraphToolbarReturn {
   return {
@@ -181,6 +185,39 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
 
     expect(setLayoutSpacingMode).toHaveBeenCalledWith('large')
     expect(handleAutoLayout).toHaveBeenCalledWith('TB')
+  })
+
+  it('keeps toolbar dropdowns above graph side and floating panels', () => {
+    const toolbar = makeMockToolbar({
+      showActionsDropdown: true,
+      showDialoguePreviewPanel: true,
+      showGameSystemsIntegrationPanel: true,
+      showQualityLlmPanel: true,
+    })
+
+    render(
+      <GraphEditorHeader
+        toolbar={toolbar}
+        isLoadingDialogue={false}
+        hasActiveDialogue={true}
+        activeDialogueTitle="Test"
+        activeDialogueFilename="test.json"
+        handleSave={async () => {}}
+        onBatchTagApply={() => {}}
+        handleBatchValidateSelection={() => {}}
+        handleBatchDeleteSelection={() => {}}
+        canEditGraph={true}
+        isStandalone={false}
+      />
+    )
+
+    const actionsMenu = screen.getByRole('menu')
+    expect(GRAPH_TOOLBAR_DROPDOWN_Z_INDEX).toBeGreaterThan(
+      GRAPH_TOOL_FLOATING_PANEL_Z_INDEX
+    )
+    expect(actionsMenu).toHaveStyle({
+      zIndex: String(GRAPH_TOOLBAR_DROPDOWN_Z_INDEX),
+    })
   })
 
   it('compresses disconnected warning noise into disconnected branches in the badge', () => {

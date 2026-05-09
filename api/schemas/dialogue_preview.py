@@ -1,4 +1,4 @@
-"""Schémas POST preview document (Story 9.4)."""
+"""Schémas POST preview document (Stories 9.4 / 9.6)."""
 
 from __future__ import annotations
 
@@ -6,15 +6,18 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel, Field
 
+from api.schemas.game_systems import PreviewGameSystemsState
+
 
 class DialoguePreviewRequest(BaseModel):
-    """État simulé pour évaluation visibilité côté serveur."""
+    """État simulé pour évaluation visibilité et stats FR94 côté serveur."""
 
     model_config = {"extra": "forbid"}
 
     revision: int | None = None
     flag_states: Dict[str, Any] = Field(default_factory=dict)
     reputation_states: Dict[str, float] = Field(default_factory=dict)
+    game_systems_state: PreviewGameSystemsState = Field(default_factory=PreviewGameSystemsState)
 
 
 class MaskedChoiceRef(BaseModel):
@@ -38,3 +41,5 @@ class DialoguePreviewResponse(BaseModel):
     choices_masked: int
     masked_node_ids: List[str]
     masked_choice_refs: List[MaskedChoiceRef]
+    game_systems_state: PreviewGameSystemsState = Field(default_factory=PreviewGameSystemsState)
+    simulation_limits: List[str] = Field(default_factory=list)

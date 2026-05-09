@@ -1,6 +1,6 @@
 # Story 9.5: Valider références variables (détecter variables non définies)
 
-Status: review
+Status: done
 
 
 
@@ -108,7 +108,7 @@ So that **je corrige les oublis avant export/runtime et j’évite des états im
 
 ## Story Completion Status
 
-- **review** — Implémentation et tests terminés ; prêt pour code-review (`code-review` workflow).
+- **done** — Code-review adversariale passée ; corrections mineures doc/logging/badge ; sprint synchronisé.
 
 ## Dev Agent Record
 
@@ -124,6 +124,7 @@ Composer (session agent Cursor)
 
 ### Completion Notes List
 
+- **Code review (2026-04-18)** : findings MEDIUM corrigés — `README_API.md` (endpoint `validate-flag-references` + lien `graph/validate` + `document`) ; journalisation `debug` sur parse PyDantic ignoré (traçabilité sans bruit INFO) ; badge survol nœud `dialogue_flag_undeclared` → 🏁. Restent des **LOW** optionnels : bouton « appliquer suggestion » (AC4 *peut*), test perf NFR-P3, focus choix précis depuis le panneau.
 - Logique pure `services/dialogue_flag_reference_validation.py` + distance bornée `services/edit_distance.py` ; service injectable `DialogueFlagReferenceValidationService` + conversion `analysis_to_validation_api_payload`.
 - API : `POST /api/v1/documents/{id}/validate-flag-references` ; extension `ValidateGraphRequest.document` → merge erreurs FR93 dans `POST .../graph/validate` ; champs `referenced_flag_id` / `suggested_flag_id` sur `ValidationErrorDetail`.
 - Frontend : `validateGraph` envoie `document` du store ; libellés/icônes `dialogue_flag_*` ; surlignage structural via `dialogue_flag_undeclared`.
@@ -152,7 +153,9 @@ Composer (session agent Cursor)
 - `frontend/src/__tests__/validateGraph.documentPayload.test.ts`
 - `frontend/src/__tests__/graphStructuralValidation.test.ts`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `README_API.md`
 
 ### Change Log
 
+- 2026-04-18 — Code-review : doc API FR93, logging parse FR93, icône badge DialogueNode.
 - 2026-04-18 — Story 9.5 FR93 : validation références flags vs `dialogueFlags`, endpoint dédié, merge dans validation graphe, UI panneau + suggestions typo.

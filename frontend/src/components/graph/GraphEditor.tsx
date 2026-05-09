@@ -21,6 +21,7 @@ import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
 import { FlowSimulationPanel } from './FlowSimulationPanel'
 import { DialoguePreviewPanel } from './preview/DialoguePreviewPanel'
 import { DialoguePreviewBanner } from './preview/DialoguePreviewBanner'
+import { GameSystemsIntegrationPanel } from './systems/GameSystemsIntegrationPanel'
 import { SchemaValidationPanel } from './SchemaValidationPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
@@ -94,6 +95,8 @@ export function GraphEditor({
     showFlowSimulationPanel,
     showDialoguePreviewPanel,
     setShowDialoguePreviewPanel,
+    showGameSystemsIntegrationPanel,
+    setShowGameSystemsIntegrationPanel,
     showSchemaValidationPanel,
     schemaValidationLoading,
     schemaValidationIsValid,
@@ -319,6 +322,11 @@ export function GraphEditor({
                   </div>
                   {showDialoguePreviewPanel ? (
                     <DialoguePreviewPanel onClose={handleCloseDialoguePreviewPanel} />
+                  ) : null}
+                  {showGameSystemsIntegrationPanel ? (
+                    <GameSystemsIntegrationPanel
+                      onClose={() => setShowGameSystemsIntegrationPanel(false)}
+                    />
                   ) : null}
                 </div>
               </div>

@@ -193,4 +193,3 @@
 **FR117:** System can support screen readers with ARIA labels (V2.0+)  
 
 ---
-

@@ -1,4 +1,4 @@
-"""Service preview document : visibilité pour un état simulé donné (Story 9.4)."""
+"""Service preview document : visibilité et limites stats pour un état simulé."""
 
 from __future__ import annotations
 
@@ -13,6 +13,23 @@ from api.schemas.dialogue_preview import (
 from services.dialogue_preview_eval import evaluate_visibility_conditions_block, parse_visibility_block
 
 logger = logging.getLogger(__name__)
+
+COMMUNITY_AGGREGATE_SIMULATION_LIMIT = (
+    "Agrégat communautaire simulé localement : témoins, propagation et poids PNJ "
+    "restent responsabilité runtime."
+)
+
+
+def collect_preview_simulation_limits(game_systems_state: Mapping[str, Any]) -> list[str]:
+    """Retourne les limites connues de la simulation locale stats FR94."""
+    reputation_values = game_systems_state.get("reputation_values")
+    if not isinstance(reputation_values, Mapping):
+        return []
+    has_community_aggregate = any(
+        "::community::" in str(key) or str(key).endswith("::community_calculated")
+        for key in reputation_values
+    )
+    return [COMMUNITY_AGGREGATE_SIMULATION_LIMIT] if has_community_aggregate else []
 
 
 class DialoguePreviewService:
@@ -89,4 +106,8 @@ class DialoguePreviewService:
             choices_masked=choices_masked,
             masked_node_ids=masked_node_ids,
             masked_choice_refs=masked_choice_refs,
+            game_systems_state=body.game_systems_state,
+            simulation_limits=collect_preview_simulation_limits(
+                body.game_systems_state.model_dump()
+            ),
         )

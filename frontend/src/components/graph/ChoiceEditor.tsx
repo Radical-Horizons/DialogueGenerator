@@ -163,39 +163,6 @@ export const ChoiceEditor = memo(function ChoiceEditor({
         />
       )}
       
-      {/* Condition */}
-      <div style={{ marginBottom: '0.75rem' }}>
-        <label
-          style={{
-            display: 'block',
-            marginBottom: '0.5rem',
-            fontSize: '0.85rem',
-            fontWeight: 'bold',
-            color: theme.text.secondary,
-          }}
-        >
-          Condition d'affichage
-        </label>
-        <input
-          type="text"
-          {...register(`choices.${choiceIndex}.condition` as const)}
-          placeholder="Ex: FLAG_NAME, NOT FLAG_NAME, startState == 1"
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: 4,
-            backgroundColor: theme.background.tertiary,
-            color: theme.text.primary,
-            fontSize: '0.85rem',
-            fontFamily: 'monospace',
-          }}
-        />
-        <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.text.secondary, fontStyle: 'italic' }}>
-          Format: FLAG_NAME, NOT FLAG_NAME, ou expression (ex: startState == 1)
-        </div>
-      </div>
-      
       {/* Test d'attribut */}
       <div style={{ marginBottom: '0.75rem' }}>
         <label

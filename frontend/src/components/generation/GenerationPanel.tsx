@@ -17,7 +17,6 @@ import { DialogueStructureWidget } from './DialogueStructureWidget'
 import { SystemPromptEditor } from './SystemPromptEditor'
 import { SceneSelectionWidget } from './SceneSelectionWidget'
 import { DialogueFlagsPanel } from './DialogueFlagsPanel'
-import { InGameFlagsSummary } from './InGameFlagsSummary'
 import { GenerationProgressModal } from './GenerationProgressModal'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
@@ -409,8 +408,6 @@ export function GenerationPanel() {
       />
 
       <DialogueFlagsPanel />
-
-      <InGameFlagsSummary />
 
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>

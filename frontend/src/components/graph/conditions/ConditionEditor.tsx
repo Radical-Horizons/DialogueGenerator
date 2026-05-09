@@ -4,10 +4,12 @@
 import { memo, useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useFormContext, Controller } from 'react-hook-form'
 import * as flagsAPI from '../../../api/flags'
+import * as contextAPI from '../../../api/context'
 import { theme } from '../../../theme'
 import type { DialogueNodeData } from '../../../schemas/nodeEditorSchema'
 import type { ConditionAtom } from '../../../types/visibilityConditions'
 import type { FlagDefinition } from '../../../types/flags'
+import type { CommunityResponse } from '../../../types/api'
 import {
   formatVisibilityConditionsSummary,
   evaluateVisibilityConditions,
@@ -15,6 +17,7 @@ import {
 import { useGraphViewStore } from '../../../store/graphViewStore'
 
 type Variant = 'node' | 'choice'
+const REPUTATION_AXES = ['Admiration', 'Prestige', 'Crainte'] as const
 
 export interface ConditionEditorProps {
   variant: Variant
@@ -75,6 +78,7 @@ export const ConditionEditor = memo(function ConditionEditor({
   )
 
   const [catalogById, setCatalogById] = useState<Record<string, FlagDefinition>>({})
+  const [communities, setCommunities] = useState<CommunityResponse[]>([])
   useEffect(() => {
     let c = false
     flagsAPI
@@ -89,6 +93,21 @@ export const ConditionEditor = memo(function ConditionEditor({
       })
       .catch((err: unknown) => {
         console.warn('[ConditionEditor] listFlags failed', err)
+      })
+    return () => {
+      c = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let c = false
+    contextAPI
+      .listCommunities({ page_size: 500 })
+      .then((res) => {
+        if (!c) setCommunities(res.communities)
+      })
+      .catch((err: unknown) => {
+        console.warn('[ConditionEditor] listCommunities failed', err)
       })
     return () => {
       c = true
@@ -144,19 +163,37 @@ export const ConditionEditor = memo(function ConditionEditor({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
         <h4 style={{ margin: 0, fontSize: '0.85rem', color: theme.text.primary }}>
           Conditions {variant === 'choice' ? `(choix #${choiceIndex + 1})` : '(nœud)'}
+          <span
+            aria-label="Aide conditions"
+            title="Ces conditions structurées pilotent la visibilité du nœud ou du choix. Les variables globales du dialogue se déclarent dans « Variables et flags »."
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 16,
+              height: 16,
+              marginLeft: 6,
+              borderRadius: '50%',
+              border: `1px solid ${theme.border.primary}`,
+              color: theme.text.secondary,
+              fontSize: '0.7rem',
+              cursor: 'help',
+            }}
+          >
+            ?
+          </span>
         </h4>
         <button
           type="button"
           onClick={() => {
             const cur = getValues(blockPath as 'visibilityConditions')
-            if (!cur?.items?.length) {
+            if (!cur?.combinator) {
               setValue(blockPath as 'visibilityConditions', {
                 combinator: 'AND',
-                items: [defaultAtom('flag_bool')],
+                items: cur?.items ?? [],
               })
-            } else {
-              append(defaultAtom('flag_bool'))
             }
+            append(defaultAtom('flag_bool'))
           }}
           style={{
             padding: '0.25rem 0.5rem',
@@ -171,53 +208,53 @@ export const ConditionEditor = memo(function ConditionEditor({
           + Condition
         </button>
       </div>
-      <p style={{ margin: '0.35rem 0', fontSize: '0.72rem', color: theme.text.secondary }}>
-        Distinct du panneau « Variables et flags » dialogue : portée sur la visibilité de ce nœud ou choix.
-      </p>
-
       {!watchBlock?.items?.length ? (
         <div style={{ fontSize: '0.8rem', color: theme.text.secondary, marginTop: 8 }}>
           Aucune condition structurée. Ajoutez-en pour contraindre l’affichage en jeu.
         </div>
       ) : (
         <>
-          <div style={{ marginBottom: 8 }}>
-            <label style={{ fontSize: '0.75rem', color: theme.text.secondary }}>Combiner avec</label>
-            <Controller
-              name={combinatorPath as 'visibilityConditions.combinator'}
-              control={control}
-              render={({ field }) => (
-                <select
-                  {...field}
-                  style={{
-                    marginLeft: 8,
-                    padding: '0.25rem',
-                    backgroundColor: theme.background.tertiary,
-                    color: theme.text.primary,
-                    borderRadius: 4,
-                  }}
-                >
-                  <option value="AND">ET (AND)</option>
-                  <option value="OR">OU (OR)</option>
-                </select>
-              )}
-            />
-          </div>
-
           {fields.map((field, index) => (
-            <ConditionRow
-              key={field.id}
-              index={index}
-              fieldName={fieldName}
-              catalogById={catalogById}
-              onRemove={() => {
-                remove(index)
-                const b = getValues(blockPath as 'visibilityConditions')
-                if (b?.items?.length === 0) {
-                  setValue(blockPath as 'visibilityConditions', undefined)
-                }
-              }}
-            />
+            <div key={field.id}>
+              {index > 0 ? (
+                <div style={{ display: 'flex', justifyContent: 'center', margin: '0 0 8px' }}>
+                  <Controller
+                    name={combinatorPath as 'visibilityConditions.combinator'}
+                    control={control}
+                    render={({ field: combinatorField }) => (
+                      <select
+                        {...combinatorField}
+                        aria-label={`Combinateur avant condition ${index + 1}`}
+                        style={{
+                          padding: '0.25rem 0.4rem',
+                          backgroundColor: theme.background.tertiary,
+                          color: theme.text.primary,
+                          borderRadius: 4,
+                          border: `1px solid ${theme.border.primary}`,
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        <option value="AND">ET (AND)</option>
+                        <option value="OR">OU (OR)</option>
+                      </select>
+                    )}
+                  />
+                </div>
+              ) : null}
+              <ConditionRow
+                index={index}
+                fieldName={fieldName}
+                catalogById={catalogById}
+                communities={communities}
+                onRemove={() => {
+                  remove(index)
+                  const b = getValues(blockPath as 'visibilityConditions')
+                  if ((b?.items?.length ?? 1) <= 1) {
+                    setValue(blockPath as 'visibilityConditions', undefined)
+                  }
+                }}
+              />
+            </div>
           ))}
 
           {summary ? (
@@ -324,11 +361,13 @@ const ConditionRow = memo(function ConditionRow({
   index,
   fieldName,
   catalogById,
+  communities,
   onRemove,
 }: {
   index: number
   fieldName: string
   catalogById: Record<string, FlagDefinition>
+  communities: CommunityResponse[]
   onRemove: () => void
 }) {
   const { watch, setValue } = useFormContext<DialogueNodeData>()
@@ -348,6 +387,7 @@ const ConditionRow = memo(function ConditionRow({
     >
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
         <select
+          aria-label={`Type condition ${index + 1}`}
           value={kind}
           onChange={(e) => {
             const k = e.target.value as ConditionAtom['kind']
@@ -461,18 +501,32 @@ const ConditionRow = memo(function ConditionRow({
 
       {kind === 'reputation' && (
         <div style={{ display: 'grid', gap: 4, fontSize: '0.75rem' }}>
-          <input
-            placeholder="axisId (ex. Prestige)"
+          <select
+            aria-label="Axe réputation"
             value={(atom as { axisId?: string })?.axisId ?? ''}
             onChange={(e) => setValue(`${base}.axisId` as never, e.target.value as never)}
-          />
-          <input
-            placeholder="factionId"
+          >
+            {REPUTATION_AXES.map((axis) => (
+              <option key={axis} value={axis}>
+                {axis}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Communauté réputation"
             value={(atom as { factionId?: string })?.factionId ?? ''}
             onChange={(e) => setValue(`${base}.factionId` as never, e.target.value as never)}
-          />
+          >
+            <option value="">— communauté —</option>
+            {communities.map((community) => (
+              <option key={community.name} value={community.name}>
+                {community.name}
+              </option>
+            ))}
+          </select>
           <div style={{ display: 'flex', gap: 4 }}>
             <select
+              aria-label="Comparaison réputation"
               value={(atom as { operator?: string })?.operator ?? '>='}
               onChange={(e) => setValue(`${base}.operator` as never, e.target.value as never)}
             >
@@ -483,6 +537,7 @@ const ConditionRow = memo(function ConditionRow({
               ))}
             </select>
             <input
+              aria-label="Seuil réputation"
               type="number"
               value={(atom as { threshold?: number })?.threshold ?? 0}
               onChange={(e) => setValue(`${base}.threshold` as never, Number(e.target.value) as never)}

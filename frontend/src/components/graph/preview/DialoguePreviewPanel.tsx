@@ -12,6 +12,7 @@ import { listFlags } from '../../../api/flags'
 import type { FlagDefinition } from '../../../types/flags'
 import { computeDialoguePreviewCounts } from '../../../utils/dialoguePreviewStats'
 import { collectKeysFromGraphNodes } from '../../../utils/collectPreviewKeys'
+import { collectPreviewSimulationLimits } from '../../../utils/previewSimulationLimits'
 
 interface DialoguePreviewPanelProps {
   onClose: () => void
@@ -36,10 +37,15 @@ export function DialoguePreviewPanel({ onClose }: DialoguePreviewPanelProps) {
   const visibilityEvalState = useGraphViewStore((s) => s.visibilityEvalState)
   const previewEffectHistory = useGraphViewStore((s) => s.previewEffectHistory)
   const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const previewGameSystemsState = useGraphViewStore((s) => s.previewGameSystemsState)
   const setPreviewCatalogById = useGraphViewStore((s) => s.setPreviewCatalogById)
   const setVisibilityEvalFlag = useGraphViewStore((s) => s.setVisibilityEvalFlag)
   const setVisibilityEvalReputation = useGraphViewStore((s) => s.setVisibilityEvalReputation)
   const clearPreviewEffectHistory = useGraphViewStore((s) => s.clearPreviewEffectHistory)
+  const setPreviewAttribute = useGraphViewStore((s) => s.setPreviewAttribute)
+  const setPreviewSkill = useGraphViewStore((s) => s.setPreviewSkill)
+  const setPreviewEffortPool = useGraphViewStore((s) => s.setPreviewEffortPool)
+  const setPreviewSimulationLimits = useGraphViewStore((s) => s.setPreviewSimulationLimits)
 
   const [flagsCatalogError, setFlagsCatalogError] = useState<string | null>(null)
 
@@ -71,7 +77,25 @@ export function DialoguePreviewPanel({ onClose }: DialoguePreviewPanelProps) {
 
   const catalog = useGraphViewStore((s) => s.previewCatalogById)
 
-  const { flagIds, reputationKeys } = useMemo(() => collectKeysFromGraphNodes(nodes), [nodes])
+  const {
+    flagIds,
+    reputationKeys,
+    skillAttributeIds,
+    skillIds,
+    usesEffort,
+  } = useMemo(() => collectKeysFromGraphNodes(nodes), [nodes])
+
+  const simulationLimits = useMemo(
+    () =>
+      collectPreviewSimulationLimits({
+        reputation_values: previewGameSystemsState.reputationValues,
+      }),
+    [previewGameSystemsState.reputationValues],
+  )
+
+  useEffect(() => {
+    setPreviewSimulationLimits(simulationLimits)
+  }, [setPreviewSimulationLimits, simulationLimits])
 
   const bindingIds = useMemo(
     () => dialogueFlagBindings.map((b) => b.flagId),
@@ -280,6 +304,67 @@ export function DialoguePreviewPanel({ onClose }: DialoguePreviewPanelProps) {
               </label>
             )
           })}
+        </section>
+
+        <section style={{ marginBottom: 14 }}>
+          <div style={{ fontWeight: 600, marginBottom: 6 }}>Stats systèmes simulées</div>
+          {usesEffort ? (
+            <label style={{ display: 'block', marginBottom: 8, fontSize: '0.88rem' }}>
+              <div>Pool Effort disponible (PE)</div>
+              <input
+                type="number"
+                value={previewGameSystemsState.effortPool}
+                onChange={(e) => setPreviewEffortPool(Number(e.target.value))}
+                style={{ width: '100%', marginTop: 4 }}
+              />
+            </label>
+          ) : null}
+          {skillAttributeIds.map((attributeId) => (
+            <label
+              key={attributeId}
+              style={{ display: 'block', marginBottom: 8, fontSize: '0.88rem' }}
+            >
+              <div>Caractéristique {attributeId}</div>
+              <input
+                type="number"
+                value={previewGameSystemsState.attributes[attributeId] ?? 0}
+                onChange={(e) => setPreviewAttribute(attributeId, Number(e.target.value))}
+                style={{ width: '100%', marginTop: 4 }}
+              />
+            </label>
+          ))}
+          {skillIds.map((skillId) => (
+            <label key={skillId} style={{ display: 'block', marginBottom: 8, fontSize: '0.88rem' }}>
+              <div>Compétence {skillId}</div>
+              <input
+                type="number"
+                value={previewGameSystemsState.skills[skillId] ?? 0}
+                onChange={(e) => setPreviewSkill(skillId, Number(e.target.value))}
+                style={{ width: '100%', marginTop: 4 }}
+              />
+            </label>
+          ))}
+          {!usesEffort && skillAttributeIds.length === 0 && skillIds.length === 0 ? (
+            <div style={{ fontSize: '0.85rem', color: theme.text.secondary }}>
+              Aucun test de caractéristique ou coût d'Effort détecté.
+            </div>
+          ) : null}
+          {simulationLimits.length > 0 ? (
+            <div
+              role="status"
+              style={{
+                marginTop: 10,
+                padding: '8px 10px',
+                borderRadius: 6,
+                fontSize: '0.82rem',
+                backgroundColor: theme.state.warning?.background ?? 'rgba(241, 196, 15, 0.15)',
+                border: `1px solid ${theme.border.primary}`,
+                color: theme.text.primary,
+              }}
+            >
+              {simulationLimits.join(' ')}
+            </div>
+          ) : null}
         </section>
 
         <section>

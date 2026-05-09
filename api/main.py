@@ -609,6 +609,7 @@ from api.routers import (
     llm_usage,
     logs,
     mechanics_flags,
+    mechanics_systems,
     presets,
     streaming,
     unity_dialogues,
@@ -633,6 +634,7 @@ app.include_router(narrative_guides.router)
 
 # Router pour les mechanics (flags in-game)
 app.include_router(mechanics_flags.router)
+app.include_router(mechanics_systems.router)
 
 # Routers éditeur de graphe (Story 4.14 — split api/routers/graph.py)
 _GRAPH_ROUTER_MODULES = (

@@ -40,6 +40,15 @@ export interface DialoguePreviewRequest {
   revision?: number | null
   flag_states: Record<string, unknown>
   reputation_states?: Record<string, number>
+  game_systems_state?: PreviewGameSystemsState
+}
+
+export interface PreviewGameSystemsState {
+  attributes: Record<string, number>
+  skills: Record<string, number>
+  effort_pool: number
+  reputation_values: Record<string, number>
+  faction_titles: Record<string, string>
 }
 
 export interface MaskedChoiceRef {
@@ -55,4 +64,6 @@ export interface DialoguePreviewResponse {
   choices_masked: number
   masked_node_ids: string[]
   masked_choice_refs: MaskedChoiceRef[]
+  game_systems_state: PreviewGameSystemsState
+  simulation_limits: string[]
 }

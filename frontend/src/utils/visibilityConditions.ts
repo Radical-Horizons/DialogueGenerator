@@ -68,6 +68,12 @@ export function formatConditionAtomSummary(atom: ConditionAtom): string {
         atom.operator,
         atom.threshold,
       )
+    case 'reputation_fr94':
+      return `Réputation ${atom.axis} × ${atom.heroineId} × ${atom.target.kind}:${atom.target.id} (${atom.readMode}) ${atom.operator} ${atom.threshold}`
+    case 'faction_title':
+      return atom.flagId
+        ? `Titre acquis via ${atom.flagId}`
+        : `Titre acquis ${atom.titleId ?? 'non renseigné'}`
     default:
       return '?'
   }
@@ -111,6 +117,25 @@ function evalAtom(atom: ConditionAtom, state: VisibilityEvalState): boolean {
       const cur = state.reputation[key]
       if (typeof cur !== 'number' || Number.isNaN(cur)) return false
       return compareNums(cur, atom.operator, atom.threshold)
+    }
+    case 'reputation_fr94': {
+      const key = [
+        'fr94',
+        atom.heroineId,
+        atom.target.kind,
+        atom.target.id,
+        atom.axis,
+        atom.readMode,
+      ].join('::')
+      const cur = state.reputation[key]
+      if (typeof cur !== 'number' || Number.isNaN(cur)) return false
+      return compareNums(cur, atom.operator, atom.threshold)
+    }
+    case 'faction_title': {
+      if (atom.flagId) {
+        return Boolean(state.flags[atom.flagId])
+      }
+      return false
     }
     default:
       return false

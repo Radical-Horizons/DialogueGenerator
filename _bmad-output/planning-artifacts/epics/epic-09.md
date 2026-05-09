@@ -14,7 +14,7 @@ Les utilisateurs peuvent définir des variables et flags dans les dialogues pour
 
 ## 📖 Contexte GDD Alteir (source Notion — à jour au 17/04/2026)
 
-> Référence complète de tous les systèmes de jeu : [`gdd-systems-reference.md`](../gdd-systems-reference.md)
+> Référence complète de tous les systèmes de jeu : `[gdd-systems-reference.md](../gdd-systems-reference.md)`
 
 > **Obligatoire** : toute story de cet epic doit respecter ces contraintes extraites du GDD de référence.
 
@@ -33,6 +33,7 @@ Les utilisateurs peuvent définir des variables et flags dans les dialogues pour
 ### Système Dialogues (GDD validé)
 
 Extrait de la fiche système **Dialogues** (Notion page `2ef6e4d2`) :
+
 - Chaque nœud contient : ID unique, texte (≤ 300 mots), locuteur, 2–10 choix, **conditions** (flags, compteurs, stats), **actions** (modifier flags/compteurs/relations), nœud suivant
 - **Repères de design** (non hardcodés — alertes uniquement) : au-delà de ~1 000 nœuds/arbre, ~10 flags conversationnels/PNJ ou ~3 compteurs/PNJ, la maintenabilité humaine dégrade. Ces seuils servent d'alertes UX, pas de blocages.
 - **Options grisées** = verrouillées par conditions narratives (flag manquant, réputation insuffisante, progression) — distincts des tests de caractéristiques qui restent toujours tentables
@@ -43,10 +44,11 @@ Extrait de la fiche système **Dialogues** (Notion page `2ef6e4d2`) :
 
 ### Système Réputation (GDD validé — pour Story 9.6)
 
-- **3 axes indépendants par faction/communauté** : Admiration (cœur/affection), Prestige (hiérarchie sociale), Crainte
-- **Paliers** : Sympathie → Faveur → Dévotion (la jauge peut retomber)
-- **Flags one-way produits** : `Palier max historique` (Enum, portée Faction — ne peut pas redescendre) + `Titre officiel` (Enum, portée Faction — décerné par moment narratif, pas par accumulation)
-- **Principe** : la valeur agrégée est la Source of Truth ; le palier se calcule à la volée — **ne pas stocker le palier courant dans un flag**
+- **3 axes indépendants** : Admiration (cœur/affection), Prestige (hiérarchie sociale), Crainte
+- **Modèle de stockage** : jauges par héroïne possédée × PNJ × axe ; la réputation communautaire est une résultante calculée par agrégat pondéré des PNJ membres (`Croupion ×1`, `Membre ×2`, `Notable ×3`, `Chef ×5`).
+- **Paliers complets** : Hostilité, Rejet, Méfiance, Distance, Neutre, Sympathie, Faveur, Dévotion, Icône — calculés depuis la valeur numérique, jamais persistés comme état courant.
+- **Flags one-way produits** : `Palier max historique` (Enum, portée Faction — ne peut pas redescendre) + `Titre officiel` (Enum, portée Faction — décerné par moment narratif, pas par accumulation).
+- **Sous-systèmes enfants** : `Paliers de Réputation` (seuils et maintien) + `Titres de faction` (statuts narratifs persistants).
 
 ### Système Core (no-dice, GDD validé)
 
@@ -143,7 +145,7 @@ So that **je peux créer des branches conditionnelles qui réagissent à l'état
 - Frontend : Composant `DialogueFlagsPanel.tsx` avec intégration `InGameFlagsModal` (existant) pour sélection flags ; affichage groupé par type
 - Tests : Unit (gestion flags, validation limites), Integration (API flags), E2E (workflow flags)
 
-**References:** FR89 (variables/flags V1.0+), Story 9.2 (conditions), Story 9.3 (effets), Epic 1 (dialogues), [GDD Dialogues système — repères de maintenabilité: ~10 flags/~3 compteurs par PNJ, alertes non-bloquantes]
+**References:** FR89 (variables/flags V1.0+), Story 9.2 (conditions), Story 9.3 (effets), Epic 1 (dialogues), [GDD Dialogues système — repères de maintenabilité: ~~10 flags/~~3 compteurs par PNJ, alertes non-bloquantes]
 
 ---
 
@@ -214,7 +216,7 @@ As a **utilisateur créant des dialogues**,
 I want **définir des effets déclenchés quand le joueur sélectionne un choix**,
 So that **je peux modifier l'état du jeu (variables, flags) en fonction des choix du joueur**.
 
-> **Contraintes GDD** : les effets du système Dialogues d'Alteir produisent vers Réputation (`+5 à +20` Respect, `+5 à +15` Prestige selon les choix), Quêtes (flags de déclenchement/complétion), Progression (XP narrative), Recrutement (état "allié recruté"). Les effets sur compteur sont bornés (Min/Max définis dans le catalogue). Les flags `enum` progressent vers une valeur cible — pas d'opérateur arithmétique sur enum.
+> **Contraintes GDD** : les effets du système Dialogues d'Alteir produisent vers Réputation (axes `Admiration`, `Prestige`, `Crainte` — impacts typiques mineur `1-3`, majeur `4-9`, critique `10+`), Quêtes (flags de déclenchement/complétion), Progression (XP narrative), Recrutement (état "allié recruté"). Les effets sur compteur sont bornés (Min/Max définis dans le catalogue). Les flags `enum` progressent vers une valeur cible — pas d'opérateur arithmétique sur enum. `Respect` relève du système séparé `Influence & Respect (PJ possédés)`.
 
 **Acceptance Criteria:**
 
@@ -241,7 +243,7 @@ So that **je peux modifier l'état du jeu (variables, flags) en fonction des cho
 **Given** j'ajoute un effet sur la Réputation (ex: `Réputation Prestige [Culte de l'Anentropie] += 10`)
 **When** l'effet est sauvegardé
 **Then** cet effet est enregistré comme modification de réputation (distinct d'un flag — géré par le Système Réputation)
-**And** les plages attendues respectent le GDD : Respect `±5 à ±20`, Prestige `±5 à ±15`
+**And** les valeurs d'impact respectent les repères GDD : mineur `1-3`, majeur `4-9`, critique `10+`, sur un axe `Admiration`, `Prestige` ou `Crainte`
 
 **Given** je définis plusieurs effets sur un même choix
 **When** le choix est sélectionné dans le preview
@@ -386,62 +388,84 @@ So that **je peux détecter les erreurs avant export et éviter des bugs runtime
 
 ---
 
-### Story 9.6: Intégrer stats systèmes de jeu (attributs personnage, réputation) (V3.0+) (FR94)
+### Story 9.6: Intégrer stats systèmes de jeu (caractéristiques, effort, réputation) (V3.0+) (FR94)
 
 As a **utilisateur créant des dialogues**,
-I want **intégrer les stats des systèmes de jeu (attributs personnage, réputation) dans les conditions et effets**,
-So that **je peux créer des dialogues qui réagissent aux capacités et réputation du personnage joueur**.
+I want **référencer les caractéristiques, l'effort et la réputation réelle du jeu dans les conditions, tests et effets de dialogue**,
+So that **les dialogues réagissent aux capacités du personnage possédé et à son état social calculé sans dupliquer les règles des systèmes de jeu**.
 
-> **Contexte GDD (V3.0+)** : Alteir dispose de 11 systèmes de jeu validés. Les deux principaux à intégrer dans les dialogues sont : (1) **Caractéristiques & Compétences** (8 stats : Puissance, Agilité, Perception, Intelligence, Créativité, Sociabilité, Technique, Volonté — core system no-dice : Score vs DD) et (2) **Réputation** (3 axes indépendants par faction : Admiration, Prestige, Crainte — paliers : Sympathie → Faveur → Dévotion). La Réputation est **déjà partiellement couverte en V1** dans Story 9.2 (condition de visibilité) et Story 9.3 (effets). Cette story V3.0+ étend à l'API complète Unity et aux tests de caractéristiques déclenchés depuis les dialogues.
-> **Garde-fou** : ne pas stocker le palier de Réputation courant comme flag — il se calcule à la volée depuis la valeur agrégée (principe Source of Truth de la jauge).
+> **Contexte GDD / Notion (V3.0+)** : cette story connecte DialogueGenerator aux systèmes validés **Caractéristiques & Compétences**, **Gestion de l'Effort** et **Réputation**. La Réputation n'est pas une simple jauge par faction : elle est stockée **par héroïne possédée × PNJ × axe** (`Admiration`, `Prestige`, `Crainte`), puis la réputation communautaire est calculée par agrégat pondéré des PNJ membres (`Croupion ×1`, `Membre ×2`, `Notable ×3`, `Chef ×5`). Les sous-systèmes enfants de Réputation sont **Paliers de Réputation** et **Titres de faction**.
+> **Garde-fous critiques** : le palier courant (`RepPalier`) est toujours calculé à la volée depuis la valeur numérique ; il n'est jamais stocké en flag. Les titres sont des événements narratifs persistés via flags one-way, distincts des paliers. `Influence & Respect (PJ possédés)` est un système séparé : ne pas mélanger ses jauges avec la Réputation faction/communauté.
 
 **Acceptance Criteria:**
 
-**Given** le système d'intégration stats est disponible (V3.0+)
-**When** j'ouvre "Intégration systèmes de jeu"
-**Then** un panneau s'affiche avec les systèmes disponibles : Caractéristiques (8 stats), Réputation (3 axes × factions), Gestion de l'Effort
-**And** je peux configurer la connexion avec Unity (API ou fichier de config)
-
-**Given** je configure l'intégration avec "Caractéristiques"
-**When** la connexion est établie
-**Then** je peux utiliser les 8 caractéristiques dans les conditions de nœud (ex: `Sociabilité >= 8`, `Intelligence < 6`)
-**And** les valeurs sont synchronisées depuis Unity (feuilles de perso)
-
-**Given** je configure l'intégration avec "Réputation"
-**When** la connexion est établie
-**Then** je peux utiliser les 3 axes de réputation par faction dans les conditions (ex: `Réputation Prestige [Culte de l'Anentropie] >= 30`)
-**And** je peux définir des effets modifiant la réputation via les plages GDD (Respect `±5–20`, Prestige `±5–15`)
-**And** le système calcule le palier courant à la volée — aucun flag de palier courant n'est créé
-
-**Given** je définis un test de caractéristique sur un choix (ex: `[Sociabilité + Tromperie vs DD 7]`)
-**When** la condition est sauvegardée
-**Then** le choix est visible et tentable (non grisé), avec indicateur de score visible
-**And** l'issue succès/échec détermine le nœud suivant (distincts — pas d'option disparaissant sur échec sauf design explicite)
-
-**Given** je configure l'intégration "Gestion de l'Effort"
-**When** la connexion est établie
-**Then** je peux définir un coût en Effort sur un choix (ex: `Dépenser 2 pts d'Effort`)
-**And** le choix est grisé si le joueur n'a plus assez d'Effort disponible (pool = 10 pts)
-
-**Given** je preview un dialogue avec stats (voir Story 9.4)
-**When** je lance le preview
-**Then** je peux définir les valeurs des stats pour simuler (ex: `Sociabilité=8`, `Prestige Culte=25`, `Effort=7`)
-**And** le preview simule correctement les conditions et tests basés sur stats
-
-**Given** Unity n'est pas disponible
-**When** j'utilise des stats dans conditions/effets
-**Then** un warning s'affiche : `"Système de jeu non connecté — conditions stats ne fonctionneront pas en runtime"`
-**And** la validation syntaxique reste opérationnelle
+1. **Catalogue systèmes disponible**
+  - **Given** le système d'intégration stats est disponible
+  - **When** j'ouvre "Intégration systèmes de jeu"
+  - **Then** le panneau affiche les familles utilisables dans les dialogues : Caractéristiques & Compétences, Gestion de l'Effort, Réputation
+  - **And** l'état de connexion runtime Unity/API/fichier config est visible sans bloquer l'édition locale
+2. **Caractéristiques et tests tentables**
+  - **Given** je définis un test de caractéristique sur un choix (ex: `[Sociabilité + Tromperie vs DD 7]`)
+  - **When** le choix est affiché en jeu ou en preview
+  - **Then** le choix reste visible et tentable, avec le score et le DD lisibles
+  - **And** l'issue `succès`, `succès_critique`, `échec` ou `échec_critique` détermine la branche suivante
+  - **And** le test ne doit pas être traité comme une condition de visibilité qui masque l'option
+3. **Effort intégré aux choix**
+  - **Given** un choix peut consommer de l'Effort
+  - **When** je configure un coût (ex: `Dépenser 2 PE`)
+  - **Then** le choix est grisé si le pool disponible est insuffisant
+  - **And** le pool par défaut utilisé en preview est `10 PE`, configurable pour refléter les variantes runtime
+4. **Réputation : référence au modèle réel**
+  - **Given** je configure une condition ou un effet de Réputation
+  - **When** je sélectionne la cible
+  - **Then** je choisis une héroïne possédée, une cible PNJ ou communauté, et un axe parmi `Admiration`, `Prestige`, `Crainte`
+  - **And** l'UI indique clairement si la valeur utilisée est une jauge PNJ brute, une réputation PNJ finale ou une réputation communautaire calculée
+  - **And** aucune donnée de Réputation n'est stockée dans `dialogueFlags`
+5. **Conditions de réputation et paliers**
+  - **Given** j'ajoute une condition de Réputation (ex: `Prestige Culte >= 30`)
+  - **When** la condition est évaluée
+  - **Then** elle utilise la valeur numérique appropriée et calcule le `RepPalier` à la volée si le design référence un palier
+  - **And** les paliers disponibles sont complets : `Hostilité`, `Rejet`, `Méfiance`, `Distance`, `Neutre`, `Sympathie`, `Faveur`, `Dévotion`, `Icône`
+  - **And** les seuils proviennent du sous-système **Paliers de Réputation** (`<= -100`, `-99..-60`, `-59..-30`, `-29..-10`, `-9..+9`, `+10..+29`, `+30..+59`, `+60..+99`, `>= +100`)
+6. **Effets de réputation**
+  - **Given** un choix modifie la Réputation
+  - **When** je configure l'effet
+  - **Then** l'effet cible un axe (`Admiration`, `Prestige`, `Crainte`) et une cible sociale explicite
+  - **And** les valeurs d'impact suivent les repères Notion : mineur `1-3`, majeur `4-9`, critique `10+`
+  - **And** la présence de témoins, la propagation alliés/rivaux et l'agrégat communautaire sont signalés comme responsabilité runtime Unity si DialogueGenerator ne possède pas ces données
+7. **Titres de faction séparés des paliers**
+  - **Given** une option de dialogue dépend d'un titre de faction
+  - **When** je configure cette condition
+  - **Then** elle référence un flag one-way de titre (`Flag_faction_titre_{faction}`) ou une valeur issue du catalogue Titres
+  - **And** l'UI distingue explicitement "Titre acquis" de "Palier courant"
+  - **And** aucun titre n'est accordé automatiquement par simple franchissement de jauge sans événement narratif
+8. **Preview avec stats**
+  - **Given** je preview un dialogue avec stats
+  - **When** je lance la simulation
+  - **Then** je peux définir des valeurs simulées pour caractéristiques, compétences, Effort, Réputation PNJ/communauté et titres
+  - **And** le preview explique les limites si les données runtime (témoins, poids PNJ, propagation communautaire) ne sont pas disponibles localement
+9. **Déconnexion runtime**
+  - **Given** Unity ou la source runtime n'est pas connectée
+  - **When** un dialogue utilise caractéristiques, effort ou réputation
+  - **Then** un warning non bloquant indique que l'évaluation runtime dépendra de l'intégration externe
+  - **And** la validation syntaxique et la preview simulée restent disponibles
+10. **Séparation stricte des systèmes sociaux**
+  - **Given** un dialogue référence `Influence` ou `Respect`
+  - **When** la validation système s'exécute
+  - **Then** ces jauges sont traitées comme `Influence & Respect (PJ possédés)`, pas comme Réputation
+  - **And** les messages d'erreur préviennent toute confusion entre `Respect` et `Admiration/Prestige/Crainte`
 
 **Technical Requirements:**
 
-- Backend : Service `GameSystemIntegrationService` — connexion Unity (API REST ou fichier config) pour Caractéristiques, Réputation, Effort
-- Synchronisation : Polling ou webhook pour synchroniser stats depuis Unity
-- Conditions : Extension `ConditionEvaluatorService` — types : `stat.{carac} >= N`, `reputation.{axe}.{faction_id} >= N`, `effort.pool >= N`
-- Tests de carac : `SkillCheckService` — formule `Score(carac + competence) vs DD` — résultat : `succès` (Score ≥ DD) / `succès_critique` (Score ≥ DD+5) / `échec` / `échec_critique` (Score ≤ DD-5)
-- Effets Réputation : `ReputationEffectService` — deltas : Admiration `±5–20`, Prestige `±5–15`, Crainte variable — **ne jamais stocker le palier courant dans un flag** (calculé à la volée)
-- Frontend : Composant `GameSystemIntegrationPanel.tsx` — sélecteur système + stat + opérateur ; affichage palier Réputation calculé dynamiquement
-- Preview : Extension `DialoguePreviewService` pour inclure état stats dans la simulation
-- Tests : Unit (intégration stats, no-flag-palier), Integration (API Unity), E2E (workflow intégration stats)
+- Backend : `GameSystemIntegrationService` ou service équivalent injecté via `api/container.py` pour lire l'état disponible depuis Unity/API/fichier config sans coupler les règles métier au router.
+- Réputation : modèles dédiés pour `reputation.axis`, cible (`heroineId`, `npcId`, `communityId`), mode de lecture (`raw_npc`, `final_npc`, `community_aggregate`) et conditions par seuil/palier.
+- Paliers : helper pur `RepPalier` calculé depuis une valeur numérique, avec seuils alignés sur le sous-système Notion **Paliers de Réputation** ; ne jamais persister le palier courant.
+- Titres : conditions de titre basées sur flags one-way ou catalogue titres, séparées des conditions de jauge/palier.
+- Caractéristiques : `SkillCheckService` — formule `Score(caractéristique + compétence + modificateurs) vs DD`, résultats `succès_critique`, `succès`, `échec`, `échec_critique`.
+- Effort : support d'un pool simulé par défaut `10 PE`, coûts par choix, et état grisé si insuffisant.
+- Frontend : `GameSystemIntegrationPanel.tsx` ou panneaux dédiés sous `components/graph/` ; ne pas gonfler `NodeEditorPanel.tsx`.
+- Preview : extension de `DialoguePreviewService` pour état simulé stats/réputation/titres, avec avertissements explicites quand l'agrégat communautaire complet n'est pas calculable localement.
+- Validation : erreurs typées pour confusion `Respect` vs Réputation, palier stocké en flag, titre confondu avec palier, ou cible de réputation ambiguë.
+- Tests : unitaires backend pour calcul `RepPalier`, conditions réputation, titres et skill checks ; Vitest pour UI/preview ; E2E ciblé pour un dialogue combinant test de caractéristique, Effort, condition Réputation et titre.
 
-**References:** FR94 (intégration stats V3.0+), Story 9.2 (conditions Réputation déjà en V1), Story 9.3 (effets Réputation déjà en V1), Story 9.4 (preview), NFR-I3 (Game System Integration V3.0+), [GDD Réputation — principe jauge Source of Truth, paliers calculés à la volée], [GDD Core System — 8 caractéristiques, no-dice, pool Effort 10 pts]
+**References:** FR94 (intégration stats V3.0+), Story 9.2 (conditions Réputation V1), Story 9.3 (effets Réputation V1), Story 9.4 (preview), Story 9.5 (références flags vs `dialogueFlags`), NFR-I3 (Game System Integration V3.0+), Notion `Réputation`, Notion `Paliers de Réputation`, Notion `Titres de faction`, Notion `Influence & Respect (PJ possédés)`, Notion `Caractéristiques et Compétences`, Notion `Gestion de l'Effort`.

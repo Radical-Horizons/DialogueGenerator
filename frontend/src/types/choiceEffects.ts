@@ -30,8 +30,20 @@ export interface ReputationDeltaEffect {
   delta: number
 }
 
+export interface ReputationDeltaEffectFr94 {
+  kind: 'reputation_delta_fr94'
+  heroineId: string
+  target: {
+    kind: 'heroine' | 'npc' | 'community'
+    id: string
+  }
+  axis: 'Admiration' | 'Prestige' | 'Crainte'
+  delta: number
+}
+
 export type ChoiceEffect =
   | SetBoolEffect
   | AdjustCounterEffect
   | SetEnumEffect
   | ReputationDeltaEffect
+  | ReputationDeltaEffectFr94
