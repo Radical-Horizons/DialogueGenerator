@@ -58,6 +58,9 @@ export interface ContextSelection {
   communities_full: string[]
   communities_excerpt: string[]
   dialogues_examples: string[]
+  narrative_structures: string[]
+  chapters: string[]
+  scenes: string[]
   scene_protagonists?: Record<string, unknown>
   scene_location?: Record<string, unknown>
   generation_settings?: Record<string, unknown>
@@ -73,6 +76,7 @@ export interface BasePromptRequest {
   max_context_tokens: number
   system_prompt_override?: string
   author_profile?: string
+  game_rules?: string
   max_choices?: number | null
   choices_mode: 'free' | 'capped'
   narrative_tags?: string[]
@@ -82,6 +86,8 @@ export interface BasePromptRequest {
   in_game_flags?: InGameFlag[]
   /** Aligné backend ``BasePromptRequest.llm_model_identifier`` (estimate / preview). */
   llm_model_identifier?: string
+  /** Plafond utilisé aussi pour estimer le coût avant génération. */
+  max_completion_tokens?: number | null
 }
 
 export interface EstimateTokensRequest extends BasePromptRequest {
@@ -141,6 +147,8 @@ export interface EstimateTokensResponse {
   raw_prompt: RawPrompt
   prompt_hash: string
   structured_prompt?: import('./prompt').PromptStructure
+  completion_tokens?: number
+  estimated_cost_eur?: number | null
 }
 
 export interface PreviewPromptRequest extends BasePromptRequest {
@@ -219,6 +227,18 @@ export interface CommunityListResponse {
   page?: number
   page_size?: number
   total_pages?: number
+}
+
+export interface NarrativeContextResponse {
+  name: string
+  category: 'narrative_structures' | 'chapters' | 'scenes'
+  label: string
+  data: Record<string, unknown>
+}
+
+export interface NarrativeContextListResponse {
+  items: NarrativeContextResponse[]
+  total: number
 }
 
 export interface RegionListResponse {

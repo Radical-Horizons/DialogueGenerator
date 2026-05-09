@@ -10,6 +10,7 @@ import type {
   ItemResponse,
   SpeciesResponse,
   CommunityResponse,
+  NarrativeContextResponse,
 } from '../../types/api'
 import { ContextList } from './ContextList'
 import type { ContextListItem } from './ContextList'
@@ -53,6 +54,7 @@ const HISTORY_CATEGORY_BY_TAB: Record<TabType, string> = {
 }
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
+type NarrativeCategory = 'narrative_structures' | 'chapters' | 'scenes'
 
 const PAGE_SIZE = 50
 
@@ -151,6 +153,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   const [items, setItems] = useState<ItemResponse[]>([])
   const [species, setSpecies] = useState<SpeciesResponse[]>([])
   const [communities, setCommunities] = useState<CommunityResponse[]>([])
+  const [narrativeContexts, setNarrativeContexts] = useState<NarrativeContextResponse[]>([])
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -175,6 +178,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     toggleItem, 
     toggleSpecies,
     toggleCommunity,
+    toggleNarrativeContext,
     clearSelections,
     setElementLists,
     getElementMode,
@@ -202,12 +206,13 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     setIsLoading(true)
     setError(null)
     try {
-      const [charsRes, locsRes, itemsRes, speciesRes, communitiesRes] = await Promise.all([
+      const [charsRes, locsRes, itemsRes, speciesRes, communitiesRes, narrativeRes] = await Promise.all([
         contextAPI.listCharacters({ page: 1, page_size: PAGE_SIZE }),
         contextAPI.listLocations({ page: 1, page_size: PAGE_SIZE }),
         contextAPI.listItems({ page: 1, page_size: PAGE_SIZE }),
         contextAPI.listSpecies(),
         contextAPI.listCommunities({ page: 1, page_size: PAGE_SIZE }),
+        contextAPI.listNarrativeContexts(),
       ])
       setCharacters(charsRes.characters)
       setCharactersPage(1)
@@ -220,6 +225,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
       setItemsTotalPages(itemsRes.total_pages ?? 1)
       setSpecies(speciesRes.species)
       setCommunities(communitiesRes.communities)
+      setNarrativeContexts(narrativeRes.items)
       setCommunitiesPage(1)
       setCommunitiesTotalPages(communitiesRes.total_pages ?? 1)
 
@@ -229,6 +235,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         items: itemsRes.items,
         species: speciesRes.species,
         communities: communitiesRes.communities,
+        narrativeContexts: narrativeRes.items,
       })
     } catch (err) {
       setError(getErrorMessage(err))
@@ -438,6 +445,18 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     setElementMode(entityType, name, mode)
   }, [setElementMode])
 
+  const isNarrativeSelected = (category: NarrativeCategory, name: string): boolean => {
+    return (selections[category] ?? []).includes(name)
+  }
+
+  const narrativeGroups = narrativeContexts.reduce<Record<NarrativeCategory, NarrativeContextResponse[]>>(
+    (acc, item) => {
+      acc[item.category].push(item)
+      return acc
+    },
+    { narrative_structures: [], chapters: [], scenes: [] },
+  )
+
   const getElementModeForList = (name: string): 'full' | 'excerpt' | null => {
     if (activeTab === 'characters') return getElementMode('characters', name)
     if (activeTab === 'locations') return getElementMode('locations', name)
@@ -619,6 +638,58 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
       )}
 
       <ContextSuggestionsPanel />
+
+      <details
+        data-testid="narrative-context-selector"
+        style={{
+          flexShrink: 0,
+          borderBottom: `1px solid ${theme.border.primary}`,
+          backgroundColor: theme.background.secondary,
+        }}
+      >
+        <summary
+          style={{
+            padding: '0.45rem 0.75rem',
+            cursor: 'pointer',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            color: theme.text.primary,
+          }}
+        >
+          Ajouter contexte narratif
+        </summary>
+        <div style={{ padding: '0.5rem 0.75rem', display: 'grid', gap: '0.4rem' }}>
+          {([
+            ['narrative_structures', 'Structure narrative'],
+            ['chapters', 'Chapitres'],
+            ['scenes', 'Scènes'],
+          ] as const).map(([category, label]) => (
+            <div key={category}>
+              <div style={{ color: theme.text.secondary, fontSize: '0.75rem', marginBottom: '0.2rem' }}>
+                {label}
+              </div>
+              <div style={{ display: 'grid', gap: '0.2rem', maxHeight: '7rem', overflowY: 'auto' }}>
+                {narrativeGroups[category].map((item) => (
+                  <label
+                    key={`${category}:${item.name}`}
+                    style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', color: theme.text.primary, fontSize: '0.78rem' }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isNarrativeSelected(category, item.name)}
+                      onChange={() => toggleNarrativeContext(category, item.name)}
+                    />
+                    <span>{item.name}</span>
+                  </label>
+                ))}
+                {narrativeGroups[category].length === 0 && (
+                  <span style={{ color: theme.text.tertiary, fontSize: '0.75rem' }}>Aucune source disponible.</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </details>
 
       <div style={{ flex: '1 1 0', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <ContextList

@@ -13,18 +13,22 @@ import * as configAPI from '../../api/config'
 export interface SystemPromptEditorProps {
   userInstructions: string
   authorProfile: string
+  gameRules: string
   systemPromptOverride: string | null
   onUserInstructionsChange: (instructions: string) => void
   onAuthorProfileChange: (profile: string) => void
+  onGameRulesChange: (rules: string) => void
   onSystemPromptChange: (prompt: string | null) => void
 }
 
 export const SystemPromptEditor = memo(function SystemPromptEditor({
   userInstructions,
   authorProfile,
+  gameRules,
   systemPromptOverride,
   onUserInstructionsChange,
   onAuthorProfileChange,
+  onGameRulesChange,
   onSystemPromptChange,
 }: SystemPromptEditorProps) {
   const {
@@ -587,6 +591,41 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               }}
             />
           </FormField>
+        </div>
+      ),
+    },
+    {
+      id: 'game-rules',
+      label: 'Règles du jeu',
+      content: (
+        <div style={{ padding: '1rem' }}>
+          <details>
+            <summary style={{ cursor: 'pointer', color: theme.text.primary, fontWeight: 600 }}>
+              Règles systémiques appliquées au dialogue
+            </summary>
+            <div style={{ marginTop: '0.75rem' }}>
+              <textarea
+                id="game-rules-textarea"
+                value={gameRules}
+                onChange={(e) => onGameRulesChange(e.target.value)}
+                rows={8}
+                placeholder="Ex: Influence/Respect uniquement quand la relation PNJ le justifie. Axes de réputation: Admiration, Prestige, Crainte. Inclure des options liées aux traits requis et aux gains systémiques quand pertinent."
+                style={{
+                  width: '100%',
+                  padding: '0.65rem 0.75rem',
+                  boxSizing: 'border-box',
+                  backgroundColor: theme.input.background,
+                  border: `1px solid ${theme.input.border}`,
+                  color: theme.input.color,
+                  borderRadius: '6px',
+                  fontFamily: 'inherit',
+                  fontSize: '0.9rem',
+                  resize: 'vertical',
+                  lineHeight: 1.55,
+                }}
+              />
+            </div>
+          </details>
         </div>
       ),
     },

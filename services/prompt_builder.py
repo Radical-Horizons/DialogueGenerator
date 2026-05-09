@@ -105,6 +105,11 @@ class PromptBuilder:
             author_elem = ET.SubElement(contract_elem, "author_directives")
             author_elem.text = escape_xml_text(input.author_profile)
             has_content = True
+
+        if input.game_rules and input.game_rules.strip():
+            rules_elem = ET.SubElement(contract_elem, "game_rules")
+            rules_elem.text = escape_xml_text(input.game_rules)
+            has_content = True
         
         # TON NARRATIF
         if input.narrative_tags and len(input.narrative_tags) > 0:

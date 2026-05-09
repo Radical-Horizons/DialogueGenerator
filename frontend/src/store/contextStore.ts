@@ -11,6 +11,7 @@ import type {
   ItemResponse,
   SpeciesResponse,
   CommunityResponse,
+  NarrativeContextResponse,
   SuggestionItem,
   SuggestionEntityType,
 } from '../types/api'
@@ -33,6 +34,7 @@ interface ContextState {
   items: ItemResponse[]
   species: SpeciesResponse[]
   communities: CommunityResponse[]
+  narrativeContexts: NarrativeContextResponse[]
   // Suggestions automatiques (Story 3.3)
   suggestions: SuggestionItem[]
   ignoredSuggestions: string[]  // clés session: "${type}:${name}"
@@ -43,6 +45,7 @@ interface ContextState {
   cachedSceneRegions: CachedData | null
   cachedSubLocations: Map<string, CachedData>
   cachedSceneSubLocations: Map<string, CachedData>
+  cachedNarrativeContexts: CachedData | null
   setSelections: (selections: ContextSelection) => void
   setElementLists: (lists: {
     characters: CharacterResponse[]
@@ -50,12 +53,14 @@ interface ContextState {
     items: ItemResponse[]
     species: SpeciesResponse[]
     communities: CommunityResponse[]
+    narrativeContexts?: NarrativeContextResponse[]
   }) => void
   toggleCharacter: (name: string, mode?: ElementMode) => void
   toggleLocation: (name: string, mode?: ElementMode) => void
   toggleItem: (name: string, mode?: ElementMode) => void
   toggleSpecies: (name: string, mode?: ElementMode) => void
   toggleCommunity: (name: string, mode?: ElementMode) => void
+  toggleNarrativeContext: (category: 'narrative_structures' | 'chapters' | 'scenes', name: string) => void
   setElementMode: (elementType: 'characters' | 'locations' | 'items' | 'species' | 'communities', name: string, mode: ElementMode) => void
   getElementMode: (elementType: 'characters' | 'locations' | 'items' | 'species' | 'communities', name: string) => ElementMode | null
   isElementSelected: (elementType: 'characters' | 'locations' | 'items' | 'species' | 'communities', name: string) => boolean
@@ -98,6 +103,9 @@ const defaultSelections: ContextSelection = {
   communities_full: [],
   communities_excerpt: [],
   dialogues_examples: [],
+  narrative_structures: [],
+  chapters: [],
+  scenes: [],
 }
 
 function normalizeSelections(selections: ContextSelection): ContextSelection {
@@ -115,6 +123,9 @@ function normalizeSelections(selections: ContextSelection): ContextSelection {
     communities_full: Array.isArray(selections.communities_full) ? selections.communities_full : [],
     communities_excerpt: Array.isArray(selections.communities_excerpt) ? selections.communities_excerpt : [],
     dialogues_examples: Array.isArray(selections.dialogues_examples) ? selections.dialogues_examples : [],
+    narrative_structures: Array.isArray(selections.narrative_structures) ? selections.narrative_structures : [],
+    chapters: Array.isArray(selections.chapters) ? selections.chapters : [],
+    scenes: Array.isArray(selections.scenes) ? selections.scenes : [],
   }
 }
 
@@ -127,6 +138,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
   items: [],
   species: [],
   communities: [],
+  narrativeContexts: [],
   // Suggestions state initial (Story 3.3)
   suggestions: [],
   ignoredSuggestions: [],
@@ -136,6 +148,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
   cachedSceneRegions: null,
   cachedSubLocations: new Map<string, CachedData>(),
   cachedSceneSubLocations: new Map<string, CachedData>(),
+  cachedNarrativeContexts: null,
   gddDataRevision: 0,
 
   setSelections: (selections: ContextSelection) => {
@@ -149,6 +162,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
       items: lists.items,
       species: lists.species,
       communities: lists.communities,
+      narrativeContexts: lists.narrativeContexts ?? [],
     })
   },
 
@@ -320,6 +334,21 @@ export const useContextStore = create<ContextState>((set, get) => ({
             },
           }
         }
+      }
+    })
+  },
+
+  toggleNarrativeContext: (category, name) => {
+    set((state) => {
+      const current = state.selections[category] || []
+      const next = current.includes(name)
+        ? current.filter((n) => n !== name)
+        : [...current, name]
+      return {
+        selections: {
+          ...state.selections,
+          [category]: next,
+        },
       }
     })
   },
@@ -611,6 +640,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
       cachedSceneRegions: null,
       cachedSubLocations: new Map<string, CachedData>(),
       cachedSceneSubLocations: new Map<string, CachedData>(),
+      cachedNarrativeContexts: null,
     })
   },
 

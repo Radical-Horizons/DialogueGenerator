@@ -43,8 +43,8 @@ function mapGraphResponse(res: EstimateCostResponse): EstimationResult {
 function mapDialogueResponse(res: EstimateTokensResponse): EstimationResult {
   return {
     prompt_tokens: res.token_count,
-    completion_tokens: 0,
-    estimated_cost_eur: null,
+    completion_tokens: res.completion_tokens ?? 0,
+    estimated_cost_eur: res.estimated_cost_eur ?? null,
   }
 }
 

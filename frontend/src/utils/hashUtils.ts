@@ -16,8 +16,10 @@ export interface PromptStateParams {
   context_selections: ContextSelection
   npc_speaker_id?: string
   max_context_tokens: number
+  max_completion_tokens?: number | null
   system_prompt_override?: string
   author_profile?: string
+  game_rules?: string
   max_choices?: number
   choices_mode: 'free' | 'capped'
   narrative_tags?: string[]

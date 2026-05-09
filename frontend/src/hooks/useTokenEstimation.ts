@@ -42,6 +42,8 @@ export interface UseTokenEstimationReturn {
   isEstimating: boolean
   /** Nombre de tokens estimé */
   tokenCount: number | null
+  completionTokens: number | null
+  estimatedCostEur: number | null
   /** Erreur d'estimation */
   estimationError: string | null
 }
@@ -59,6 +61,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   const {
     userInstructions,
     maxContextTokens,
+    maxCompletionTokens,
     maxChoices,
     choicesMode,
     narrativeTags,
@@ -68,9 +71,11 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
 
   const [isEstimating, setIsEstimating] = useState(false)
   const [estimationError, setEstimationError] = useState<string | null>(null)
+  const [completionTokens, setCompletionTokens] = useState<number | null>(null)
+  const [estimatedCostEur, setEstimatedCostEur] = useState<number | null>(null)
 
   const { selections } = useContextStore()
-  const { sceneSelection, dialogueStructure, systemPromptOverride, tokenCount, setRawPrompt } = useGenerationStore()
+  const { sceneSelection, dialogueStructure, systemPromptOverride, gameRules, tokenCount, setRawPrompt } = useGenerationStore()
   const { vocabularyConfig } = useVocabularyStore()
   const { includeNarrativeGuides } = useNarrativeGuidesStore()
   const { authorProfile } = useAuthorProfile()
@@ -88,7 +93,10 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.species_excerpt.length > 0 ||
       selections.communities_full.length > 0 ||
       selections.communities_excerpt.length > 0 ||
-      selections.dialogues_examples.length > 0
+      selections.dialogues_examples.length > 0 ||
+      selections.narrative_structures.length > 0 ||
+      selections.chapters.length > 0 ||
+      selections.scenes.length > 0
     )
   }, [selections])
 
@@ -96,6 +104,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     // Permettre l'estimation si on a au moins : instructions, sélections, ou un system prompt
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
     if (!userInstructions.trim() && !hasSelections() && !hasSystemPrompt) {
+      setCompletionTokens(null)
+      setEstimatedCostEur(null)
       setRawPrompt(null, null, null, false, null)
       return
     }
@@ -126,7 +136,9 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       context_selections: contextSelections,
       npc_speaker_id: sceneSelection.characterB || undefined,
       max_context_tokens: maxContextTokens,
+      max_completion_tokens: maxCompletionTokens,
       system_prompt_override: systemPromptOverride || undefined,
+      game_rules: gameRules || undefined,
       author_profile: authorProfile || undefined,
       max_choices: maxChoices ?? undefined,
       choices_mode: choicesMode,
@@ -162,20 +174,16 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     )
 
     try {
-      // Appel API seulement si le hash a changé
-      const response = await dialoguesAPI.previewPrompt(promptParams)
-      
-      // Utiliser token_count du backend (source de vérité, utilise le vrai PromptEngine)
-      // Note: previewPrompt ne retourne pas token_count dans PreviewPromptResponse
-      // Pour avoir le vrai token_count, utiliser estimate-tokens à la place
-      // Estimation approximative basée sur la longueur pour l'affichage (le backend sera la source de vérité lors de la génération)
-      const estimatedTokenCount = Math.ceil(response.raw_prompt.length / 4)
+      // Utiliser le même endpoint que le budget contexte afin d'éviter les estimations len/4 divergentes.
+      const response = await dialoguesAPI.estimateTokens(promptParams)
+      setCompletionTokens(response.completion_tokens ?? null)
+      setEstimatedCostEur(response.estimated_cost_eur ?? null)
       
       const priorBackendHash = useGenerationStore.getState().promptHash
       if (priorBackendHash !== response.prompt_hash || priorBackendHash === null) {
         setRawPrompt(
           response.raw_prompt,
-          estimatedTokenCount,
+          response.token_count,
           response.prompt_hash,
           false,
           response.structured_prompt || null,
@@ -207,6 +215,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       // Ne pas effacer le prompt existant si l'estimation échoue
       // Le prompt précédent reste visible pour l'utilisateur
       const currentState = useGenerationStore.getState()
+      setCompletionTokens(null)
+      setEstimatedCostEur(null)
       setRawPrompt(
         currentState.rawPrompt,
         currentState.tokenCount,
@@ -222,6 +232,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     userInstructions,
     authorProfile,
     maxChoices,
+    maxCompletionTokens,
     narrativeTags,
     previousDialoguePreview,
     hasSelections,
@@ -229,6 +240,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     buildContextSelections,
     setRawPrompt,
     systemPromptOverride,
+    gameRules,
     vocabularyConfig,
     includeNarrativeGuides,
     sceneSelection.characterB,
@@ -249,7 +261,10 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.species_excerpt.length > 0 ||
       selections.communities_full.length > 0 ||
       selections.communities_excerpt.length > 0 ||
-      selections.dialogues_examples.length > 0
+      selections.dialogues_examples.length > 0 ||
+      selections.narrative_structures.length > 0 ||
+      selections.chapters.length > 0 ||
+      selections.scenes.length > 0
 
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
     const hasCriteria = Boolean(userInstructions.trim() || hasAnySelections || hasSystemPrompt)
@@ -260,6 +275,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       if (hasCriteria) {
         void estimateTokens()
       } else {
+        setCompletionTokens(null)
+        setEstimatedCostEur(null)
         setRawPrompt(null, null, null, false, null)
       }
     }, debounceMs)
@@ -277,6 +294,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     sceneSelection,
     dialogueStructure,
     systemPromptOverride,
+    gameRules,
     setRawPrompt,
     vocabularyConfig,
     includeNarrativeGuides,
@@ -286,6 +304,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     estimateTokens,
     isEstimating,
     tokenCount,
+    completionTokens,
+    estimatedCostEur,
     estimationError,
   }
 }

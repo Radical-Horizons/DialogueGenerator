@@ -31,6 +31,7 @@ import {
   getValidationHighlightKind,
   GRAPH_TOPOLOGY_WARNING_STYLES,
 } from '../../../utils/graphStructuralValidation'
+import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
 
 interface ValidationError {
   type: string
@@ -130,6 +131,7 @@ export const DialogueNode = memo(function DialogueNode({
   const acceptNode = useGraphStore((state) => state.acceptNode)
   const rejectNode = useGraphStore((state) => state.rejectNode)
   const regenerateNode = useGraphStore((state) => state.regenerateNode)
+  const graphNodes = useGraphStore((state) => state.nodes)
   const [showRegenerateModal, setShowRegenerateModal] = useState(false)
   const [showPromptModal, setShowPromptModal] = useState(false)
   const [promptData, setPromptData] = useState<NodePromptResponse | null>(null)
@@ -204,13 +206,18 @@ export const DialogueNode = memo(function DialogueNode({
       const res = await getNodePrompt(dialogueId, data.id)
       setPromptData(res)
     } catch (err) {
-      setPromptError(
-        err instanceof Error ? err.message : 'Impossible de charger le prompt'
-      )
+      const fallback = reconstructNodePromptFromGraph(data.id, graphNodes)
+      if (fallback) {
+        setPromptData(fallback)
+      } else {
+        setPromptError(
+          err instanceof Error ? err.message : 'Impossible de charger le prompt'
+        )
+      }
     } finally {
       setPromptLoading(false)
     }
-  }, [dialogueId, data.id])
+  }, [dialogueId, data.id, graphNodes])
 
   const handleOpenPromptModal = useCallback(
     (e: React.MouseEvent) => {

@@ -56,13 +56,13 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
       })
   }, [raw_prompt, toast])
   
-  // Calculer le total comme la somme des tokens de chaque section
+  // Calculer le total structuré uniquement comme fallback d'affichage.
   const calculatedTotal = sections.reduce((sum, section) => {
     return sum + (section.tokenCount || 0)
   }, 0)
   
-  // Utiliser le total calculé à partir des sections si on a des sections, sinon utiliser tokenCount du backend
-  const displayTotal = sections.length > 0 ? calculatedTotal : (tokenCount ?? null)
+  // Le total backend est la source canonique. Les sections peuvent être tronquées ou estimées côté UI.
+  const displayTotal = tokenCount ?? (sections.length > 0 ? calculatedTotal : null)
 
   return (
     <>

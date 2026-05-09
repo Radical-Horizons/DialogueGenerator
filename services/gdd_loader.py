@@ -19,6 +19,8 @@ class GDDData:
     communities: List[Dict[str, Any]] = field(default_factory=list)
     dialogues_examples: List[Dict[str, Any]] = field(default_factory=list)
     narrative_structures: List[Dict[str, Any]] = field(default_factory=list)
+    chapters: List[Dict[str, Any]] = field(default_factory=list)
+    scenes: List[Dict[str, Any]] = field(default_factory=list)
     macro_structure: Optional[Dict[str, Any]] = None
     micro_structure: Optional[Dict[str, Any]] = None
     quests: List[Dict[str, Any]] = field(default_factory=list)
@@ -40,6 +42,8 @@ class GDDLoader:
         "communautes": {"attr": "communities", "key": "communautes", "type": list},
         "dialogues": {"attr": "dialogues_examples", "key": "dialogues", "type": list},
         "structure_narrative": {"attr": "narrative_structures", "key": "structure_narrative", "type": list},
+        "chapitres": {"attr": "chapters", "key": "chapitres", "type": list},
+        "scènes": {"attr": "scenes", "key": "scènes", "type": list},
         "structure_macro": {"attr": "macro_structure", "key": "structure_macro", "type": dict},
         "structure_micro": {"attr": "micro_structure", "key": "structure_micro", "type": dict},
         "quetes": {"attr": "quests", "key": "quetes", "type": list}

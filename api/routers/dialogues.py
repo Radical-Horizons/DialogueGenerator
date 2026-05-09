@@ -25,6 +25,7 @@ from api.dependencies import (
     get_request_id,
     get_prompt_engine,
     get_config_service,
+    get_llm_pricing_service,
     get_skill_catalog_service,
     get_trait_catalog_service,
     get_unity_dialogue_orchestrator
@@ -36,6 +37,8 @@ from services.configuration_service import ConfigurationService
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.unity_dialogue_export_service import write_unity_dialogue_to_file
+from services.llm_pricing_service import LLMPricingService
+from services.token_estimation_service import DEFAULT_COMPLETION_TOKENS_PER_NODE
 from constants import Defaults
 from services.context_token_budget import compute_context_selection_token_metrics
 from services.context_truncator import cap_context_text_to_budget
@@ -43,6 +46,8 @@ from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from core.llm.llm_client import ILLMClient
 
 logger = logging.getLogger(__name__)
+
+_USD_TO_EUR_RATE: float = 0.92
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
@@ -178,6 +183,7 @@ def _build_prompt_from_request(
         choices_mode=request_data.choices_mode,
         narrative_tags=request_data.narrative_tags,
         author_profile=request_data.author_profile,
+        game_rules=request_data.game_rules,
         vocabulary_config=request_data.vocabulary_config,
         include_narrative_guides=request_data.include_narrative_guides,
         in_game_flags=request_data.in_game_flags,
@@ -226,6 +232,7 @@ async def preview_prompt(
             max_context_tokens=request_data.max_context_tokens,
             system_prompt_override=request_data.system_prompt_override,
             author_profile=request_data.author_profile,
+            game_rules=request_data.game_rules,
             max_choices=request_data.max_choices,
             choices_mode=request_data.choices_mode,
             narrative_tags=request_data.narrative_tags,
@@ -301,6 +308,7 @@ async def estimate_tokens(
     request: Request,
     dialogue_service: Annotated[DialogueGenerationService, Depends(get_dialogue_generation_service)],
     prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
+    pricing_service: Annotated[LLMPricingService, Depends(get_llm_pricing_service)],
     skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
     trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
     request_id: Annotated[str, Depends(get_request_id)]
@@ -376,6 +384,14 @@ async def estimate_tokens(
             except Exception as e:
                 logger.warning(f"Erreur lors de la conversion du structured_prompt en dict: {e}")
 
+        completion_tokens = request_data.max_completion_tokens or DEFAULT_COMPLETION_TOKENS_PER_NODE
+        cost_usd = pricing_service.calculate_cost(
+            request_data.llm_model_identifier,
+            built.token_count,
+            completion_tokens,
+        )
+        estimated_cost_eur = round(cost_usd * _USD_TO_EUR_RATE, 6)
+
         return EstimateTokensResponse(
             context_tokens=context_tokens,
             selection_tokens=metrics.selection_tokens,
@@ -384,7 +400,9 @@ async def estimate_tokens(
             token_count=built.token_count,
             raw_prompt=built.raw_prompt,
             prompt_hash=built.prompt_hash,
-            structured_prompt=structured_prompt_dict
+            structured_prompt=structured_prompt_dict,
+            completion_tokens=completion_tokens,
+            estimated_cost_eur=estimated_cost_eur,
         )
         
     except ValidationException:
@@ -588,6 +606,7 @@ async def get_raw_json_context(
             choices_mode=request_data.choices_mode,
             narrative_tags=request_data.narrative_tags,
             author_profile=request_data.author_profile,
+            game_rules=request_data.game_rules,
             vocabulary_config=request_data.vocabulary_config,
             include_narrative_guides=request_data.include_narrative_guides,
             max_context_tokens=request_data.max_context_tokens,

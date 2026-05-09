@@ -44,6 +44,7 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
   const generationUserInstructions = useGenerationStore((s) => s.generationUserInstructions)
   const sceneSelection = useGenerationStore((s) => s.sceneSelection)
   const systemPromptOverride = useGenerationStore((s) => s.systemPromptOverride)
+  const gameRules = useGenerationStore((s) => s.gameRules)
   const vocabularyConfig = useVocabularyStore((s) => s.vocabularyConfig)
   const includeNarrativeGuides = useNarrativeGuidesStore((s) => s.includeNarrativeGuides)
   const { authorProfile } = useAuthorProfile()
@@ -60,6 +61,7 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
     generationUserInstructions,
     sceneSelection,
     systemPromptOverride,
+    gameRules,
     vocabularyConfig,
     includeNarrativeGuides,
     authorProfile,
@@ -72,6 +74,7 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
     generationUserInstructions,
     sceneSelection,
     systemPromptOverride,
+    gameRules,
     vocabularyConfig,
     includeNarrativeGuides,
     authorProfile,
@@ -90,6 +93,7 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
       npc_speaker_id: ctx.sceneSelection.characterB || undefined,
       max_context_tokens: ctx.contextTokenBudgetMax,
       system_prompt_override: ctx.systemPromptOverride || undefined,
+      game_rules: ctx.gameRules || undefined,
       author_profile: ctx.authorProfile || undefined,
       max_choices: null,
       choices_mode: 'free',
@@ -122,7 +126,7 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
       void run()
     }, DEBOUNCE_MS)
     return () => window.clearTimeout(id)
-  }, [selections, organization, fieldConfigs, essentialFields, contextTokenBudgetMax, generationUserInstructions, sceneSelection, systemPromptOverride, vocabularyConfig, includeNarrativeGuides, authorProfile, run])
+  }, [selections, organization, fieldConfigs, essentialFields, contextTokenBudgetMax, generationUserInstructions, sceneSelection, systemPromptOverride, gameRules, vocabularyConfig, includeNarrativeGuides, authorProfile, run])
 
   return { data, loading, error, refresh: run }
 }

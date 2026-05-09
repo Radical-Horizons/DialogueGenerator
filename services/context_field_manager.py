@@ -48,22 +48,33 @@ class ContextFieldManager:
             # Mode full (normal): suivre field_configs si fourni, sinon utiliser tous les champs
             return custom_fields
         
-        # Mode excerpt: IGNORER field_configs et extraire TOUS les champs avec "(extrait)"
-        # Peu importe ce que l'utilisateur a configuré, on extrait tous les champs en version "extrait"
+        # Mode excerpt: utiliser les champs explicitement marqués, puis les anciens labels,
+        # puis un extrait minimal basé sur la priorité 1 si aucune config dédiée n'existe.
         config_for_type = self.context_config.get(element_type.lower(), {})
-        excerpt_fields = []
+        excerpt_fields: List[str] = []
+        priority_one_fields: List[str] = []
         
-        # Parcourir toutes les priorités (1, 2, 3) pour trouver TOUS les champs avec "(extrait)"
+        # Parcourir toutes les priorités (1, 2, 3) pour trouver les champs d'extrait.
         for priority_level, fields in config_for_type.items():
             for field_config in fields:
                 label = field_config.get("label", "")
                 path = field_config.get("path", "")
+                if priority_level == "1" and path:
+                    priority_one_fields.append(path)
                 
-                # Si le label contient "(extrait)", inclure ce champ
-                if "(extrait)" in label and path:
+                if field_config.get("is_excerpt") is True and path:
+                    excerpt_fields.append(path)
+                    continue
+
+                # Compatibilité avec l'ancienne convention de libellé.
+                if "(extrait)" in label.lower() and path:
                     excerpt_fields.append(path)
         
-        return excerpt_fields if excerpt_fields else None
+        if excerpt_fields:
+            return list(dict.fromkeys(excerpt_fields))
+        if priority_one_fields:
+            return list(dict.fromkeys(priority_one_fields))
+        return custom_fields
     
     def filter_fields_by_condition_flags(
         self,

@@ -31,6 +31,7 @@ class PromptInput:
         structured_context: Contexte structuré (PromptStructure) optionnel.
         scene_location: Informations sur le lieu de la scène (optionnel).
         author_profile: Profil d'auteur pour guider le style (optionnel).
+        game_rules: Règles du jeu dédiées (optionnel).
         narrative_tags: Tags narratifs pour influencer le ton (optionnel).
         choices_mode: Mode de choix ("free" ou "capped").
         max_choices: Nombre maximum de choix si mode "capped" (optionnel).
@@ -47,6 +48,7 @@ class PromptInput:
     structured_context: Optional[Any] = None
     scene_location: Optional[Dict[str, str]] = None
     author_profile: Optional[str] = None
+    game_rules: Optional[str] = None
     narrative_tags: Optional[List[str]] = None
     choices_mode: Literal["free", "capped"] = "free"
     max_choices: Optional[int] = None
