@@ -90,6 +90,7 @@ const defaultGameRules = [
   'Influence et Respect ne doivent être utilisés que si la relation avec le PNJ le justifie.',
   'Axes de réputation disponibles: Admiration, Prestige, Crainte.',
   'Quand c’est pertinent, proposer des choix liés aux traits requis et aux gains systémiques plutôt que de les injecter artificiellement.',
+  'Viser un équilibre raisonnable entre options sociales (Influence/Respect), à effets de réputation et neutres selon la scène.',
 ].join('\n')
 
 export const useGenerationStore = create<GenerationState>((set) => ({

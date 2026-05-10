@@ -99,6 +99,19 @@ export function ContextTokenBudgetSection() {
         )}
       </div>
 
+      <p
+        style={{
+          margin: '0 0 0.35rem',
+          fontSize: '0.72rem',
+          color: theme.text.secondary,
+          lineHeight: 1.4,
+        }}
+      >
+        Le décompte ci-dessus concerne uniquement le bloc contexte GDD (après troncature). Le{' '}
+        <strong style={{ color: theme.text.primary }}>total du prompt</strong> (système, instructions,
+        brief, contexte) est affiché dans l’onglet <strong>Prompt</strong> du panneau de droite.
+      </p>
+
       <div
         style={{
           height: 6,

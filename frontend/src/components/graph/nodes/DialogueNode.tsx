@@ -137,9 +137,10 @@ export const DialogueNode = memo(function DialogueNode({
   const [promptData, setPromptData] = useState<NodePromptResponse | null>(null)
   const [promptError, setPromptError] = useState<string | null>(null)
   const [promptLoading, setPromptLoading] = useState(false)
-  const dialogueId = useGraphStore(
-    (s) => s.documentId ?? s.dialogueMetadata.filename ?? 'current'
-  )
+  /** Identifiant document persisté (API documents) — utilisé pour GET prompt serveur. */
+  const persistedDocumentId = useGraphStore((s) => s.documentId)
+  /** Nom de fichier métadonnée (peut exister sans documentId si non sauvegardé). */
+  const dialogueFilename = useGraphStore((s) => s.dialogueMetadata.filename)
 
   const { stale: gddContextStale, checking: gddStaleChecking } = useGddStaleIndicator({
     id: data.id,
@@ -202,13 +203,42 @@ export const DialogueNode = memo(function DialogueNode({
     setPromptData(null)
     setPromptError(null)
     setPromptLoading(true)
+
+    const fallback = reconstructNodePromptFromGraph(data.id, graphNodes)
+    const rawDialogueKey =
+      (persistedDocumentId?.trim() || dialogueFilename?.trim() || '')
+    const skipServerPrompt =
+      rawDialogueKey === '' || rawDialogueKey.toLowerCase() === 'current'
+
+    const normalizeUnityDialogueFileId = (raw: string): string => {
+      const base = raw.replace(/\\/g, '/').split('/').pop() ?? raw
+      return base.replace(/\.json$/i, '').trim()
+    }
+
+    if (skipServerPrompt) {
+      if (fallback) {
+        setPromptData({
+          ...fallback,
+          message: `${fallback.message ?? 'Prompt reconstruit depuis le graphe'} — Aucun dialogue enregistré côté serveur : uniquement reconstruction locale.`,
+        })
+      } else {
+        setPromptError(
+          'Impossible de reconstruire le prompt pour ce nœud (aucun parent ni ligne dans le graphe).'
+        )
+      }
+      setPromptLoading(false)
+      return
+    }
+
     try {
-      const res = await getNodePrompt(dialogueId, data.id)
+      const res = await getNodePrompt(normalizeUnityDialogueFileId(rawDialogueKey), data.id)
       setPromptData(res)
     } catch (err) {
-      const fallback = reconstructNodePromptFromGraph(data.id, graphNodes)
       if (fallback) {
-        setPromptData(fallback)
+        setPromptData({
+          ...fallback,
+          message: `${fallback.message ?? 'Prompt reconstruit depuis le graphe'} — Le fichier Unity ou l’API n’a pas pu être utilisé (erreur réseau ou dialogue absent du dossier export).`,
+        })
       } else {
         setPromptError(
           err instanceof Error ? err.message : 'Impossible de charger le prompt'
@@ -217,7 +247,7 @@ export const DialogueNode = memo(function DialogueNode({
     } finally {
       setPromptLoading(false)
     }
-  }, [dialogueId, data.id, graphNodes])
+  }, [persistedDocumentId, dialogueFilename, data.id, graphNodes])
 
   const handleOpenPromptModal = useCallback(
     (e: React.MouseEvent) => {

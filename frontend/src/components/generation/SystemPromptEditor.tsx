@@ -9,6 +9,15 @@ import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
 import * as configAPI from '../../api/config'
+import {
+  deleteLocalAuthorTemplate,
+  deleteLocalSceneTemplate,
+  listLocalAuthorTemplates,
+  listLocalSceneTemplates,
+  upsertLocalAuthorTemplate,
+  upsertLocalSceneTemplate,
+  type LocalNamedTemplate,
+} from '../../utils/localNamedTemplates'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
@@ -74,6 +83,19 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   const [selectedSceneTemplateId, setSelectedSceneTemplateId] = useState<string | null>(null)
   const [selectedAuthorTemplateId, setSelectedAuthorTemplateId] = useState<string | null>(null)
   const [showTemplatePreview, setShowTemplatePreview] = useState<string | null>(null)
+
+  const [localAuthorTemplates, setLocalAuthorTemplates] = useState<LocalNamedTemplate[]>(() =>
+    listLocalAuthorTemplates()
+  )
+  const [localSceneTemplates, setLocalSceneTemplates] = useState<LocalNamedTemplate[]>(() =>
+    listLocalSceneTemplates()
+  )
+  const [selectedLocalAuthorId, setSelectedLocalAuthorId] = useState('')
+  const [selectedLocalSceneId, setSelectedLocalSceneId] = useState('')
+  const [authorSaveAsOpen, setAuthorSaveAsOpen] = useState(false)
+  const [authorSaveAsName, setAuthorSaveAsName] = useState('')
+  const [sceneSaveAsOpen, setSceneSaveAsOpen] = useState(false)
+  const [sceneSaveAsName, setSceneSaveAsName] = useState('')
 
   useEffect(() => {
     loadTemplates()
@@ -191,6 +213,38 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       console.warn('Impossible de restaurer le brief de scène:', err)
     }
   }, [onUserInstructionsChange])
+
+  const refreshLocalAuthorTemplates = useCallback(() => {
+    setLocalAuthorTemplates(listLocalAuthorTemplates())
+  }, [])
+
+  const refreshLocalSceneTemplates = useCallback(() => {
+    setLocalSceneTemplates(listLocalSceneTemplates())
+  }, [])
+
+  const handleConfirmAuthorSaveAs = useCallback(() => {
+    try {
+      upsertLocalAuthorTemplate(authorSaveAsName, authorProfile)
+      refreshLocalAuthorTemplates()
+      setAuthorSaveAsOpen(false)
+      setAuthorSaveAsName('')
+      toast('Modèle d\'auteur local enregistré', 'success')
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement', 'error')
+    }
+  }, [authorSaveAsName, authorProfile, refreshLocalAuthorTemplates, toast])
+
+  const handleConfirmSceneSaveAs = useCallback(() => {
+    try {
+      upsertLocalSceneTemplate(sceneSaveAsName, userInstructions)
+      refreshLocalSceneTemplates()
+      setSceneSaveAsOpen(false)
+      setSceneSaveAsName('')
+      toast('Brief de scène enregistré comme modèle local', 'success')
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement', 'error')
+    }
+  }, [sceneSaveAsName, userInstructions, refreshLocalSceneTemplates, toast])
 
   const tabs: Tab[] = [
     {
@@ -322,6 +376,103 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           )}
 
+          <div style={{ marginBottom: '1rem' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: theme.text.primary,
+                fontSize: '0.9rem',
+                fontWeight: 500,
+              }}
+            >
+              Mes briefs (ce navigateur)
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                alignItems: 'center',
+                marginBottom: '0.35rem',
+              }}
+            >
+              <select
+                aria-label="Charger un brief de scène local"
+                value={selectedLocalSceneId}
+                onChange={(e) => {
+                  const id = e.target.value
+                  setSelectedLocalSceneId(id)
+                  if (!id) return
+                  const t = localSceneTemplates.find((x) => x.id === id)
+                  if (t) {
+                    onUserInstructionsChange(t.body)
+                  }
+                }}
+                style={{
+                  padding: '0.45rem 0.6rem',
+                  borderRadius: 6,
+                  border: `1px solid ${theme.border.primary}`,
+                  backgroundColor: theme.input.background,
+                  color: theme.input.color,
+                  fontSize: '0.85rem',
+                  minWidth: 200,
+                }}
+              >
+                <option value="">— Charger —</option>
+                {localSceneTemplates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  setSceneSaveAsOpen(true)
+                  setSceneSaveAsName('')
+                }}
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
+              >
+                Enregistrer sous…
+              </button>
+              {selectedLocalSceneId ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteLocalSceneTemplate(selectedLocalSceneId)
+                    refreshLocalSceneTemplates()
+                    setSelectedLocalSceneId('')
+                    toast('Brief local supprimé', 'success')
+                  }}
+                  style={{
+                    padding: '0.45rem 0.85rem',
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.background.secondary,
+                    color: theme.state.error.color,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Supprimer
+                </button>
+              ) : null}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: theme.text.secondary }}>
+              Stockage local ; même nom = remplacement.
+            </div>
+          </div>
+
           <div
             style={{
               display: 'flex',
@@ -415,6 +566,86 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               </div>
             </div>
           </FormField>
+          {sceneSaveAsOpen && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="scene-save-as-title"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10050,
+              }}
+              onClick={() => setSceneSaveAsOpen(false)}
+            >
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  backgroundColor: theme.background.panel,
+                  padding: '1.25rem',
+                  borderRadius: 8,
+                  border: `1px solid ${theme.border.primary}`,
+                  minWidth: 320,
+                  maxWidth: '90vw',
+                }}
+              >
+                <h4 id="scene-save-as-title" style={{ marginTop: 0, color: theme.text.primary }}>
+                  Enregistrer le brief sous…
+                </h4>
+                <input
+                  type="text"
+                  value={sceneSaveAsName}
+                  onChange={(e) => setSceneSaveAsName(e.target.value)}
+                  placeholder="Nom du modèle"
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    marginBottom: '1rem',
+                    boxSizing: 'border-box',
+                    borderRadius: 6,
+                    border: `1px solid ${theme.input.border}`,
+                    backgroundColor: theme.input.background,
+                    color: theme.input.color,
+                  }}
+                  autoFocus
+                />
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSceneSaveAsOpen(false)}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.border.primary}`,
+                      backgroundColor: theme.background.secondary,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSceneSaveAs}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.button.primary.background}`,
+                      backgroundColor: theme.button.primary.background,
+                      color: theme.button.primary.color,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ),
     },
@@ -468,6 +699,107 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 ))}
               </div>
             )}
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: theme.text.primary,
+                fontSize: '0.9rem',
+                fontWeight: 500,
+              }}
+            >
+              Mes modèles (ce navigateur)
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                alignItems: 'center',
+                marginBottom: '0.35rem',
+              }}
+            >
+              <select
+                aria-label="Charger un modèle d'auteur local"
+                value={selectedLocalAuthorId}
+                onChange={(e) => {
+                  const id = e.target.value
+                  setSelectedLocalAuthorId(id)
+                  if (!id) return
+                  const t = localAuthorTemplates.find((x) => x.id === id)
+                  if (t) {
+                    updateProfile(t.body)
+                    onAuthorProfileChange(t.body)
+                    saveProfile(t.body)
+                    setSelectedAuthorTemplateId(null)
+                  }
+                }}
+                style={{
+                  padding: '0.45rem 0.6rem',
+                  borderRadius: 6,
+                  border: `1px solid ${theme.border.primary}`,
+                  backgroundColor: theme.input.background,
+                  color: theme.input.color,
+                  fontSize: '0.85rem',
+                  minWidth: 200,
+                }}
+              >
+                <option value="">— Charger —</option>
+                {localAuthorTemplates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthorSaveAsOpen(true)
+                  setAuthorSaveAsName('')
+                }}
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
+                title="Crée ou remplace un modèle nommé dans ce navigateur"
+              >
+                Enregistrer sous…
+              </button>
+              {selectedLocalAuthorId ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteLocalAuthorTemplate(selectedLocalAuthorId)
+                    refreshLocalAuthorTemplates()
+                    setSelectedLocalAuthorId('')
+                    toast('Modèle local supprimé', 'success')
+                  }}
+                  style={{
+                    padding: '0.45rem 0.85rem',
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.background.secondary,
+                    color: theme.state.error.color,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Supprimer
+                </button>
+              ) : null}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: theme.text.secondary }}>
+              Stockage local uniquement ; nom identique = remplacement du modèle.
+            </div>
           </div>
 
           {/* Prévisualisation du template */}
@@ -591,6 +923,86 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               }}
             />
           </FormField>
+          {authorSaveAsOpen && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="author-save-as-title"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10050,
+              }}
+              onClick={() => setAuthorSaveAsOpen(false)}
+            >
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  backgroundColor: theme.background.panel,
+                  padding: '1.25rem',
+                  borderRadius: 8,
+                  border: `1px solid ${theme.border.primary}`,
+                  minWidth: 320,
+                  maxWidth: '90vw',
+                }}
+              >
+                <h4 id="author-save-as-title" style={{ marginTop: 0, color: theme.text.primary }}>
+                  Enregistrer le profil sous…
+                </h4>
+                <input
+                  type="text"
+                  value={authorSaveAsName}
+                  onChange={(e) => setAuthorSaveAsName(e.target.value)}
+                  placeholder="Nom du modèle"
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    marginBottom: '1rem',
+                    boxSizing: 'border-box',
+                    borderRadius: 6,
+                    border: `1px solid ${theme.input.border}`,
+                    backgroundColor: theme.input.background,
+                    color: theme.input.color,
+                  }}
+                  autoFocus
+                />
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => setAuthorSaveAsOpen(false)}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.border.primary}`,
+                      backgroundColor: theme.background.secondary,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmAuthorSaveAs}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.button.primary.background}`,
+                      backgroundColor: theme.button.primary.background,
+                      color: theme.button.primary.color,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ),
     },

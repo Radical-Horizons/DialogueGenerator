@@ -41,7 +41,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
   // Récupérer structuredPrompt depuis le store si non fourni en prop
   const structuredPromptFromStore = useGenerationStore((state) => state.structuredPrompt)
   const structuredPrompt = structuredPromptProp ?? structuredPromptFromStore
-  
+
   const { sections } = usePromptPreview(raw_prompt, structuredPrompt)
   
   const handleCopyPrompt = useCallback(() => {
@@ -85,6 +85,19 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
         flexDirection: 'column',
         gap: '0.75rem',
       }}>
+        <div
+          style={{
+            fontSize: '0.78rem',
+            color: theme.text.secondary,
+            lineHeight: 1.45,
+            marginBottom: 2,
+          }}
+        >
+          <span style={{ fontWeight: 600, color: theme.text.primary }}>Total prompt</span> — compte
+          le XML complet envoyé au LLM (prompt système, règles, instructions, contexte GDD, etc.). Ce
+          total diffère du décompte « contexte GDD seul » du panneau de gauche, qui applique uniquement
+          la           limite de tokens du contexte narratif.
+        </div>
         {/* Barre de budget de tokens */}
         <TokenBudgetBar
           structuredPrompt={structuredPrompt}
