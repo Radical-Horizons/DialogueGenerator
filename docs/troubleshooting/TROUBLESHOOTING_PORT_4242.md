@@ -1,21 +1,30 @@
-# Analyse du problème de libération du port 4242
+# Dépannage : port API déjà utilisé (dev / prod)
 
-## Problème observé
+> **Nom de fichier historique** : ce guide reste à `TROUBLESHOOTING_PORT_4242.md` pour ne pas casser les liens. Le contenu couvre **4243 (dev via `npm run dev`)** et **4242 (défaut `api/main.py` sans `API_PORT`, déploiement typique)**.
 
-Lors du démarrage avec `npm run dev`, le script détecte plusieurs processus Python utilisant le port 4242, mais certains ne peuvent pas être arrêtés :
+## Ports : source de vérité dans le code
+
+| Contexte | Port backend | Où c’est défini |
+|----------|--------------|-----------------|
+| `npm run dev` (stack Node + API) | **4243** par défaut | `scripts/dev.js`, `scripts/dev-services.js` (`API_PORT` passé au process Python) |
+| Proxy Vite `/api` → backend | **4243** | `frontend/vite.config.ts` (`server.proxy['/api'].target`) |
+| `python -m api.main` sans `API_PORT` | **4242** | `api/main.py` (`os.getenv("API_PORT", "4242")`) |
+| Production (ex. OVH / Nginx) | **4242** interne courant | `docs/deployment/PRODUCTION.md`, scripts de déploiement |
+
+Si le frontend appelle une URL absolue sur le mauvais port, symptômes classiques : `ERR_CONNECTION_REFUSED`, E2E instables — voir aussi `docs/troubleshooting/e2e-llm.md` et `docs/troubleshooting/post-mortem-e2e-llm.md`.
+
+## Problème observé (`npm run dev`)
+
+Au démarrage, le script peut signaler que le **port du backend (4243 en dev)** est déjà pris et tenter de libérer des processus, parfois sans succès pour certains PID :
 
 ```
-⚠️  Le port 4242 (Backend API) est déjà utilisé.
+⚠️  Le port 4243 (Backend API) est déjà utilisé.
    Tentative de libération du port (4 processus trouvés)...
-   - PID 1547624 (PID: 1547624)
-   - PID 1572052 (PID: 1572052)
-   - PID 1555312 (PID: 1555312)
-   - python.exe (PID: 1570780)
-   ⚠️  Impossible d'arrêter le processus PID 1547624 (PID: 1547624).
-   ⚠️  Impossible d'arrêter le processus PID 1572052 (PID: 1572052).
-   ⚠️  Impossible d'arrêter le processus PID 1555312 (PID: 1555312).
-   ✅ Processus python.exe (PID: 1570780) arrêté.
+   ...
+   ⚠️  Impossible d'arrêter le processus PID …
 ```
+
+(Les libellés exacts peuvent varier selon la version du script.)
 
 ## Causes identifiées
 
@@ -23,94 +32,61 @@ Lors du démarrage avec `npm run dev`, le script détecte plusieurs processus Py
 
 **Symptôme** : `netstat` montre des connexions LISTENING avec des PIDs, mais `tasklist` ne trouve pas ces processus.
 
-**Explication** : Sur Windows, il peut y avoir un délai entre :
-- La fin d'un processus
-- La libération effective du port TCP
+**Explication** : Sur Windows, délai entre la fin d'un processus et la libération effective du port TCP (TIME_WAIT, fermeture).
 
-Pendant ce délai (état TIME_WAIT ou fermeture de connexion), `netstat` peut encore montrer le port comme utilisé, mais le processus n'existe plus.
+### 2. Parsing de `netstat` trop permissif (anciennes versions)
 
-### 2. Parsing de `netstat` trop permissif
+`netstat -ano` peut mélanger lignes obsolètes ou formats différents ; le script peut alors tenter d'arrêter des PID invalides.
 
-**Problème** : Le script original utilisait `netstat -ano` qui peut retourner :
-- Des lignes avec des formats différents
-- Des connexions en cours de fermeture
-- Des connexions obsolètes en cache
+### 3. Vérification d'existence manquante (anciennes versions)
 
-**Impact** : Le script tentait de tuer des processus qui n'existaient plus, générant des messages d'erreur inutiles.
-
-### 3. Vérification d'existence manquante
-
-**Problème** : Le script tentait de tuer des processus sans vérifier s'ils existaient réellement.
-
-**Impact** : Messages d'erreur confus et tentatives inutiles d'arrêt.
+Tuer un PID sans vérifier qu'il existe encore produit des messages d'erreur confus.
 
 ### 4. Délai d'attente insuffisant
 
-**Problème** : Le script attendait 2 secondes après l'arrêt des processus, ce qui peut être insuffisant si :
-- Plusieurs processus étaient déjà terminés
-- Windows met plus de temps à libérer le port
+Après `taskkill`, Windows peut nécessiter plus d'une seconde avant que `listen()` réussisse à nouveau sur le port.
 
-## Solution implémentée
+## Solution implémentée (état actuel du repo)
 
-### Améliorations apportées au script `scripts/dev.js`
+La libération de port pour le dev est dans **`scripts/dev-services.js`** (appelée depuis `scripts/dev.js`), pas dans un fichier séparé « one-off » :
 
-1. **Utilisation de PowerShell `Get-NetTCPConnection`** (plus fiable que `netstat`)
-   - Retourne uniquement les processus actifs
-   - Moins de faux positifs
+1. **Ports autorisés pour kill automatique** : **3000** (Vite) et **4243** (API dev) — pas d'arrêt forcé d'autres ports.
+2. **Windows** : `netstat -ano` + filtre LISTENING, extraction des PID, puis `taskkill /F /T /PID` uniquement si `processExists(pid)`.
+3. **Unix** : `lsof -ti:<port>` puis `kill`.
+4. **Attente courte** après kill avant de relancer l'écoute.
 
-2. **Vérification d'existence avant arrêt**
-   - Nouvelle fonction `processExists()` qui vérifie si un PID existe vraiment
-   - Filtrage des processus morts avant tentative d'arrêt
+## Comportement attendu
 
-3. **Gestion des processus déjà terminés**
-   - Détection et séparation des processus actifs vs morts
-   - Message informatif pour les processus déjà terminés
-   - Attente plus longue si des processus étaient déjà morts (4s au lieu de 2s)
-
-4. **Attente adaptative**
-   - 2s si processus arrêtés normalement
-   - 4s si processus étaient déjà morts
-   - 5s supplémentaires si aucun processus actif trouvé mais port utilisé
-
-5. **Messages d'erreur améliorés**
-   - Distinction claire entre processus actifs et morts
-   - Messages plus informatifs sur l'état de libération du port
-
-## Comportement attendu après correction
-
-1. **Détection** : Le script détecte les processus utilisant le port via PowerShell
-2. **Filtrage** : Seuls les processus existants sont listés et tentés d'être arrêtés
-3. **Information** : Les processus déjà terminés sont signalés comme "en cours de libération"
-4. **Attente** : Délai adaptatif selon la situation
-5. **Vérification** : Vérification finale que le port est bien libéré
+1. Détection des PID en écoute sur le port cible.
+2. Filtrage des PID réellement vivants avant `taskkill` / `kill`.
+3. Attente puis redémarrage du backend par `npm run dev`.
 
 ## Cas limites restants
 
-Si le port est toujours occupé après toutes les tentatives :
+1. **Processus protégé** : privilèges administrateur requis.
+2. **Antivirus / pare-feu** : peut bloquer l'arrêt ou la liaison au port.
+3. **Port bloqué longtemps** : attendre ou redémarrer la machine en dernier recours.
 
-1. **Processus système protégé** : Certains processus Windows peuvent nécessiter des privilèges administrateur
-2. **Antivirus/Firewall** : Peut bloquer l'arrêt de certains processus
-3. **Port verrouillé** : Dans de rares cas, Windows peut mettre plusieurs minutes à libérer un port
+**Diagnostic manuel (adapter le numéro de port : 4243 = dev, 4242 = prod / `api.main` par défaut)** :
 
-**Solution manuelle** :
 ```powershell
-# Identifier le processus
-Get-NetTCPConnection -LocalPort 4242 | Select-Object OwningProcess
+# Windows PowerShell — remplacer 4243 par 4242 si vous déboguez l'API sans npm run dev
+Get-NetTCPConnection -LocalPort 4243 -ErrorAction SilentlyContinue | Select-Object OwningProcess, State
+```
 
-# Arrêter manuellement (remplacer PID)
-taskkill /F /PID <PID>
+```bash
+# Linux / macOS
+lsof -i :4243
+```
+
+Arrêt ciblé (remplacer `<PID>`) :
+
+```powershell
+taskkill /F /T /PID <PID>
 ```
 
 ## Prévention
 
-Pour éviter ce problème à l'avenir :
-
-1. **Arrêt propre** : Toujours utiliser Ctrl+C pour arrêter `npm run dev`
-2. **Vérification** : Vérifier que les ports sont libres avant de relancer
-3. **Scripts de nettoyage** : Utiliser `npm run dev` qui gère automatiquement la libération
-
-
-
-
-
-
+1. Arrêter le stack avec **Ctrl+C** dans le terminal qui exécute `npm run dev`.
+2. En cas de zombie : `npm run dev:stop` si disponible dans `package.json`, ou tuer les PID listés ci-dessus.
+3. Éviter de lancer en parallèle deux backends sur le **même** `API_PORT`.

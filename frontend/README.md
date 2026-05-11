@@ -12,6 +12,10 @@ npm install
 
 ## Développement
 
+**Plein stack (recommandé)** : depuis la **racine du dépôt**, `npm run dev` (backend 4243 + Vite 3000).
+
+**Frontend seul** (`cd frontend && npm run dev`) : Vite seul sur le port 3000 ; le proxy `/api` attend toujours une API sur **4243** — lancez le backend séparément (`npm run dev -- --backend` à la racine, ou `API_PORT=4243` + `python -m api.main`).
+
 ```bash
 npm run dev
 ```
@@ -28,11 +32,16 @@ Les fichiers de production seront dans le dossier `dist/`.
 
 ## Configuration
 
-Créer un fichier `.env` à la racine du projet frontend :
+En développement avec `npm run dev` à la **racine du dépôt**, le proxy Vite (`frontend/vite.config.ts`) envoie `/api` vers `http://localhost:4243`. **Recommandé** : ne pas définir `VITE_API_BASE_URL` (URLs relatives `/api`).
+
+Pour un build ou un outil qui doit appeler l’API par URL absolue en local, utilisez le port **dev** aligné sur les scripts :
 
 ```
-VITE_API_BASE_URL=http://localhost:4242
+# Exemple uniquement si vous avez besoin d’une base absolue (sinon laisser vide)
+VITE_API_BASE_URL=http://localhost:4243
 ```
+
+**Note** : `python -m api.main` sans variable d’environnement écoute sur **4242** par défaut (`api/main.py`) ; le stack `npm run dev` force **4243** pour correspondre au proxy. La production derrière Nginx utilise en général **4242** (voir `docs/deployment/PRODUCTION.md`).
 
 ## Structure
 

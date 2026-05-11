@@ -78,7 +78,7 @@ Located in `[guides/](./guides/)`
 
 Located in `[troubleshooting/](./troubleshooting/)`
 
-- [Port 4242 Troubleshooting](./troubleshooting/TROUBLESHOOTING_PORT_4242.md) - Port troubleshooting
+- [Conflits de port API (dev 4243 / prod 4242)](./troubleshooting/TROUBLESHOOTING_PORT_4242.md) - Dépannage libération de port (`npm run dev`, backend direct)
 - [Scrollbar Fix](./troubleshooting/SCROLLBAR_FIX.md) - Scrollbar issue resolution
 - [Diagnostic Extraction Fiches](./troubleshooting/DIAGNOSTIC_EXTRACTION_FICHES.md) - Diagnostic extraction
 - [Prompt Parsing Issue](./troubleshooting/PROMPT_PARSING_ISSUE.md) - Prompt parsing troubleshooting

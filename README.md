@@ -25,7 +25,7 @@ L’instance de référence est sur un **VPS OVH** (Ubuntu) ; déploiement typiq
 4.  Faciliter l'écriture, l'évaluation et la validation de ces dialogues.
 5.  S'intégrer avec une pipeline de production de jeu (export JSON Unity, commit Git).
 
-## État Actuel du Projet (Mai 2024)
+## État actuel du projet
 
 L'application est en cours de développement actif. Les fonctionnalités suivantes sont implémentées :
 
@@ -74,12 +74,12 @@ La documentation organisée se trouve dans [`docs/`](docs/) avec un index dans [
 
 ## Structure du Projet
 
-Le code est organisé dans le dossier `DialogueGenerator/` avec les principaux modules suivants :
+Le dépôt à la racine contient notamment :
 
 *   `api/`: API REST FastAPI (backend).
     *   `routers/`: Routes API pour dialogues, contexte, configuration, etc.
     *   `schemas/`: Schémas Pydantic pour validation des requêtes/réponses.
-    *   `services/`: Services API (authentification, etc.).
+    *   `services/`: Services étroitement liés au cycle de vie HTTP (ex. jobs de génération, auth côté route).
     *   `container.py`: ServiceContainer pour la gestion du cycle de vie des services.
     *   `dependencies.py`: Helpers d'injection de dépendances FastAPI.
 *   `frontend/`: Interface web React (frontend).
@@ -168,17 +168,17 @@ Ce script vérifie que le venv et toutes les dépendances sont correctement inst
 
 1.  **Positionnement des Données du GDD** :
     *   Les fichiers JSON du Game Design Document (GDD) doivent être accessibles via un lien symbolique.
-    *   **Fichiers de catégories** : L'application utilise le chemin `DialogueGenerator/data/GDD_categories/` qui doit être un lien symbolique pointant vers le répertoire réel contenant les fichiers JSON (personnages.json, lieux.json, etc.).
-    *   **Vision.json** : Depuis `DialogueGenerator/data/Vision.json` (dans le même dossier que GDD_categories).
+    *   **Fichiers de catégories** : l'application lit `data/GDD_categories/` (souvent un lien symbolique vers les JSON exportés ; voir `.cursor/rules/gdd_paths.mdc`).
+    *   **Vision.json** : résolu via le chargeur GDD (défaut : `data/Vision.json` ; répertoire d'import surchargeable avec `GDD_IMPORT_PATH`, voir `services/gdd_loader.py`).
     *   Exemple de structure attendue :
         ```
-        DialogueGenerator/  <-- Racine du projet de l'application
+        <racine-du-dépôt>/
         ├── data/
-        │   ├── GDD_categories/  <-- Dossier réel (maintenance manuelle)
+        │   ├── GDD_categories/  <-- JSON du GDD (maintenance / sync Notion)
         │   │   ├── personnages.json
         │   │   ├── lieux.json
         │   │   └── ... (autres fichiers JSON du GDD)
-        │   └── Vision.json  <-- Fichier Vision.json
+        │   └── Vision.json
         ├── api/
         ├── core/
         └── ... (autres fichiers et dossiers du projet)
@@ -190,7 +190,7 @@ Ce script vérifie que le venv et toutes les dépendances sont correctement inst
         ```bash
         npm run dev
         ```
-        L'application sera accessible sur http://localhost:3000
+        L'application sera accessible sur http://localhost:3000. Le backend démarre sur le port **4243** par défaut (variable `API_PORT` ; aligné avec le proxy Vite dans `frontend/vite.config.ts`). Un `python -m api.main` lancé **sans** `npm run dev` utilise **4242** par défaut (`api/main.py`).
 
 ## Prochaines Étapes Prévues
 

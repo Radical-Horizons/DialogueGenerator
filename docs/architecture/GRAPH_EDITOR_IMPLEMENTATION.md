@@ -206,10 +206,17 @@ Unity JSON (tableau) - Reconstructed
 ### 1. Backend
 
 ```bash
-# Lancer l'API
+# Stack complet (recommandé) : backend 4243 + frontend 3000
 npm run dev
-# ou
-python -m uvicorn api.main:app --reload --port 4242
+
+# Ou API seule, même port que le proxy Vite en dev
+npm run dev -- --backend
+
+# Équivalent manuel (API_PORT lu par api.main ; bash / WSL)
+API_PORT=4243 .venv/bin/python -m api.main
+
+# Windows PowerShell
+# $env:API_PORT="4243"; .\.venv\Scripts\python.exe -m api.main
 ```
 
 ### 2. Frontend
@@ -223,7 +230,7 @@ cd frontend && npm run build
 
 - **Dashboard** : http://localhost:3000
 - **Éditeur de Graphe** : http://localhost:3000/graph-editor
-- **API Docs** : http://localhost:4242/api/docs
+- **API Docs** : http://localhost:4243/api/docs en dev (`npm run dev`, port par défaut **4243**) ; **4242** si vous lancez `python -m api.main` sans `API_PORT`
 
 ### 4. Test Workflow
 
