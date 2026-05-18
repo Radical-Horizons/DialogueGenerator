@@ -25,7 +25,7 @@ L’instance de référence est sur un **VPS OVH** (Ubuntu) ; déploiement typiq
 4.  Faciliter l'écriture, l'évaluation et la validation de ces dialogues.
 5.  S'intégrer avec une pipeline de production de jeu (export JSON Unity, commit Git).
 
-## État Actuel du Projet (Mai 2024)
+## État Actuel du Projet (Mai 2026)
 
 L'application est en cours de développement actif. Les fonctionnalités suivantes sont implémentées :
 
@@ -38,6 +38,7 @@ L'application est en cours de développement actif. Les fonctionnalités suivant
     *   Sélection de contexte (personnages, lieux, objets, etc.).
     *   Génération de dialogues avec variantes multiples.
     *   Gestion des interactions et export Unity.
+    *   Éditeur de graphe : validation (structure, schéma Unity, lore), simulation de flux, analyses qualité statiques (context dropping, AI slop) et règles persistées — voir `docs/api/api-contracts-api.md` (Unity Dialogues / validation).
 *   **Moteur de Prompt (`PromptEngine`)** :
     *   Classe `PromptEngine` capable de combiner un *system prompt*, un résumé de contexte (incluant les détails JSON des éléments sélectionnés/cochés), et l'instruction utilisateur pour former un prompt complet.
     *   *System prompt* par défaut basique inclus, avec une brève introduction au format JSON Unity.

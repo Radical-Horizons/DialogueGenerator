@@ -31,9 +31,15 @@ Le backend peut **télécharger le GDD depuis Notion** et l’écrire sous `data
 
 Schémas Pydantic : `api/schemas/gdd_notion_sync.py`.
 
-## Bases « sans corps de page » (optimisation)
+## Bases « sans corps de page » (sonde + lecture complète)
 
-Certaines bases Notion n’ont que des **colonnes** (flags, inventaires, skills…) : les lignes existent comme pages mais le **corps** (markdown / blocs) est vide. Pour éviter un `get_page_content` par ligne, le service échantillonne les **3 premières lignes** (ordre du `query_database`). Si aucune n’a de corps, il **omet** `get_page_content` sur le reste des lignes de cette source pour le run en cours. Ce n’est **pas** une erreur : un message **info** est écrit dans `data/logs/gdd_notion_sync.log`. Le titre et les colonnes restent synchronisés via `get_page`. Les bases listées en export **compact** dans le mapper continuent de court-circuiter encore plus tôt (sans sonde).
+Certaines bases Notion n’ont que des **colonnes** (flags, inventaires, skills…) : les lignes existent comme pages mais le **corps** (markdown / blocs) est souvent vide sur les premières lignes. Le service **sonde** les **3 premières lignes** (ordre du `query_database`, constante `NOTION_DATABASE_BODY_PROBE_ROW_COUNT` dans `services/gdd_notion_sync_service.py`) : leurs corps sont lus une fois via `get_page_content` et mis en **cache** pour la boucle courante.
+
+- Si **au moins une** ligne de l’échantillon a un corps non vide : comportement inchangé par rapport à une lecture directe (les lignes suivantes appellent `get_page_content` normalement).
+- Si **les trois** premières lignes ont un corps vide : un message **info** est émis (sync + `data/logs/gdd_notion_sync.log`) — ce n’est **pas** une erreur. **Les lignes hors échantillon sont quand même lues** via `get_page_content` : une ligne plus bas dans la base peut avoir un corps alors que les trois premières sont vides. Seules les pages déjà présentes dans le cache de sonde réutilisent le corps déjà lu (souvent chaîne vide).
+- **Tables compactes** (mapper `database_id_is_compact_table_export`) : pas de sonde ni de corps fusionné comme ci-dessus ; parcours dédié sans `notion_page_to_gdd_record_merge_body_and_properties` complet sur le même modèle.
+
+Implémentation : `_probe_database_body_sample` et la boucle `stale_pages` qui réutilise `body_cache` puis appelle `get_page_content` pour tout `page_id` absent du cache.
 
 ## Sync incrémentale vs complète
 
