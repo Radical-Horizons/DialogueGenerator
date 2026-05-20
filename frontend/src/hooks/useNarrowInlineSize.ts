@@ -73,6 +73,7 @@ export function useNarrowInlineSize(
       if (!node) {
         observedNodeRef.current = null
         observedMeasureTargetRef.current = null
+        setIsNarrow(false)
         return
       }
 
