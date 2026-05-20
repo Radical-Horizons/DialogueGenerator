@@ -1,6 +1,6 @@
 # Story 17.8: Fix `useNarrowInlineSize` — réattacher le `ResizeObserver` quand la ref est montée tardivement (dette technique)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -89,7 +89,7 @@ Workaround appliqué dans 17.7 : mock de `useNarrowInlineSize` dans le test (`Da
 
 - [x] **Task 6 : Non-régression complète**
   - [x] `npm run test:ci` → **898** tests verts ; `npm run lint` → 0 warning.
-  - [x] Preuve UI navigateur (tab switch / drawer) : **hors session agent** — recommandé avant merge selon `AGENTS.md` ; non bloquant pour statut `review`.
+  - [x] Preuve UI navigateur (tab switch / drawer) : **validée par PO** (Véronique, 2026-05-20) — switch onglets, drawers narrow, chrome narrow/desktop cohérent sans `window.resize`.
 
 ## Dev Agent Record
 
@@ -105,6 +105,7 @@ Amelia (Dev) — dev-story / workflow 17.8
 - **Task 5** : `frontend_testing.mdc` réécrit post-17.8.
 - **M4** : `epic-17.md` — sections 17.7 / 17.8 + lignes tableau dépendances.
 - **Casts** : suppression `as unknown as RefObject` sur `Dashboard.tsx`, `GraphEditor.tsx`, `DialogueEditionTabContent.tsx`.
+- **UI (2026-05-20)** : validation manuelle PO — onglets, drawers, mesure narrow après switch sans resize fenêtre.
 
 ### File List
 
@@ -118,6 +119,12 @@ Amelia (Dev) — dev-story / workflow 17.8
 - `_bmad-output/planning-artifacts/epics/epic-17.md`
 - `_bmad-output/implementation-artifacts/17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+### Review fixes (2026-05-20)
+
+- `frontend/src/hooks/useNarrowInlineSize.ts` — reset `isNarrow` sur `attachToNode(null)`
+- `frontend/src/hooks/useNarrowInlineSize.test.tsx` — Cas D RO disconnect, test parent, test démontage
+- `frontend/src/components/layout/DialogueEditionTabContent.tsx` — JSDoc post-17.8
 
 ## Dev Notes
 
@@ -182,8 +189,26 @@ Amelia (Dev) — dev-story / workflow 17.8
 
 - [x] [AI-Review][LOW — traçabilité epic] **M4** : Mettre à jour `_bmad-output/planning-artifacts/epics/epic-17.md` — y insérer la **Story 17.7** (référence + lien vers l’artifact `17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120.md`) et la **Story 17.8** si absentes ; aligner le tableau « Synthèse dépendances stories » pour refléter 17.7 / 17.8.
 
+## Senior Developer Review (AI)
+
+**Reviewer :** Amelia (Code Review) — 2026-05-20  
+**Outcome :** Approuvé après correctifs M1–M4
+
+| ID | Sévérité | Finding | Résolution |
+|----|----------|---------|------------|
+| M1 | MEDIUM | `measureParentClientWidth` non testé | Test « mesure le parent… » dans `useNarrowInlineSize.test.tsx` |
+| M2 | MEDIUM | Cas D sans preuve `disconnect` | Spy RO local dans Cas D |
+| M3 | MEDIUM | `isNarrow` périmé au détachement | `setIsNarrow(false)` dans `attachToNode(null)` + test démontage |
+| M4 | MEDIUM | Commentaire `DialogueEditionTabContent` obsolète | JSDoc alignée post-17.8 |
+
+**Issues corrigées :** 4 MEDIUM, 0 HIGH restant.  
+**Preuve UI PO :** validée 2026-05-20 (switch onglets / drawers narrow).
+
 ## Change Log
 
+- **2026-05-20** : Validation UI PO ; epic 17 clôturé côté sprint (toutes stories done).
+- **2026-05-20** : Code review — correctifs M1–M4 ; statut **done** ; sprint sync.
 - **2026-04-29** : Story créée par Scrum Master suite à diagnostic blocage test 17.7 (44 min de waitFor sur un combobox jamais rendu à cause de `useNarrowInlineSize` avec `ref.current === null` au mount initial du parent).
 - **2026-04-29** : Ajout section « Review follow-up » — action item **M4** (aligner `epic-17.md` avec les stories 17.7 et 17.8) à traiter lors de l’implémentation 17.8.
 - **2026-04-29 (implémentation)** : callback ref + `useNarrowInlineSize.test.tsx` (Cas A–D) ; suppression mock `Dashboard.combobox-17_7.test.tsx` ; casts `RefObject` retirés (`Dashboard.tsx`, `GraphEditor.tsx`, `DialogueEditionTabContent.tsx`) ; `frontend_testing.mdc` + `epic-17.md` ; Vitest **898** tests + lint verts (`npm run test:ci`).
+- **2026-05-20 (review fixes)** : `setIsNarrow(false)` au détachement ; tests parent + démontage + RO disconnect ; JSDoc `DialogueEditionTabContent.tsx`.

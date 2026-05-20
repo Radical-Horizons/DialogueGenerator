@@ -107,7 +107,7 @@ development_status:
   3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
   3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
   epic-3-retrospective: done
-  epic-17: in-progress
+  epic-17: done
   17-1-shell-responsive-breakpoints-layout-320px-fr118: done
   17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
   17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
@@ -115,7 +115,7 @@ development_status:
   17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
   17-5-pwa-install-manifest-option-fr121: done
   17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
-  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: review
+  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
 epic-17-retrospective: optional
   epic-4: done
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done

@@ -1,20 +1,11 @@
 /**
- * Contenu de l'onglet "Édition de Dialogues" (Story 17.7 + correction du bug
- * de mesure narrow lié à la dette technique 17.8).
+ * Contenu de l'onglet « Édition de Dialogues » (Story 17.7).
  *
- * Pourquoi un sous-composant dédié :
- * - `useNarrowInlineSize` doit être instancié **dans** le composant qui monte
- *   réellement avec l'onglet pour que `ref.current` soit attaché dès la
- *   première exécution du `useLayoutEffect`. Quand le hook est instancié au
- *   niveau `Dashboard`, il s'exécute une seule fois au mount initial — moment
- *   où l'onglet "edition" n'est pas encore actif et la ref vaut `null` →
- *   `ResizeObserver` jamais attaché → `isNarrow` figé à `false`.
- * - Un sous-composant rendu dans le slot `content` de l'onglet ne se monte
- *   qu'une fois l'onglet actif (ou dès le mount si tous les contenus sont
- *   pré-rendus, mais alors la ref est attachée immédiatement).
- *
- * Une fois la dette technique 17.8 résolue (callback ref), ce wrapper restera
- * comme bonne pratique de séparation des responsabilités.
+ * Sous-composant dédié : le hook `useNarrowInlineSize` vit ici (pas dans
+ * `Dashboard`) pour colocaliser la mesure narrow avec le workspace édition
+ * et éviter de coupler le shell global au layout liste + détails Unity.
+ * Story 17.8 (callback ref) rend ce découpage optionnel côté mesure, mais
+ * la séparation reste la bonne frontière de responsabilité.
  */
 import type { Dispatch, ReactNode, RefObject, SetStateAction } from 'react'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
