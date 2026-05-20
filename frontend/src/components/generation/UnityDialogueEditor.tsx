@@ -910,18 +910,24 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                           </div>
 
                           {/* Target Node */}
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-                            <div style={{ flex: 1 }}>
-                              <label
-                                style={{
-                                  display: 'block',
-                                  marginBottom: '0.25rem',
-                                  color: theme.text.primary,
-                                  fontSize: '0.85rem',
-                                }}
-                              >
-                                Target Node (ID):
-                              </label>
+                          <div>
+                            <label
+                              style={{
+                                display: 'block',
+                                marginBottom: '0.25rem',
+                                color: theme.text.primary,
+                                fontSize: `${chrome.labelFontRem}rem`,
+                              }}
+                            >
+                              Target Node (ID):
+                            </label>
+                            <div
+                              style={{
+                                display: 'flex',
+                                gap: '0.35rem',
+                                alignItems: 'stretch',
+                              }}
+                            >
                               <input
                                 type="text"
                                 value={choice.targetNode}
@@ -933,8 +939,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                 placeholder="ex: NEXT_NODE, END (termine le dialogue)"
                                 list={`node-ids-${node.id}`}
                                 style={{
-                                  width: '100%',
-                                  padding: '0.5rem',
+                                  flex: 1,
+                                  minWidth: 0,
+                                  padding: chrome.inputPadding,
                                   boxSizing: 'border-box',
                                   backgroundColor: theme.input.background,
                                   border: `1px solid ${
@@ -947,27 +954,37 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   fontFamily: 'monospace',
                                 }}
                               />
-                              <datalist id={`node-ids-${node.id}`}>
-                                {Array.from(nodeIds).map((id) => (
-                                  <option key={id} value={id} />
-                                ))}
-                              </datalist>
+                              <button
+                                type="button"
+                                onClick={() => removeChoice(node.id, choiceIndex)}
+                                aria-label="Supprimer ce choix"
+                                title="Supprimer ce choix"
+                                style={{
+                                  flexShrink: 0,
+                                  alignSelf: 'stretch',
+                                  aspectRatio: 1,
+                                  minWidth: '2.25rem',
+                                  padding: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: `1px solid ${theme.border.primary}`,
+                                  borderRadius: '6px',
+                                  backgroundColor: theme.button.default.background,
+                                  color: theme.button.default.color,
+                                  cursor: 'pointer',
+                                  fontSize: '1rem',
+                                  lineHeight: 1,
+                                }}
+                              >
+                                🗑️
+                              </button>
                             </div>
-                            <button
-                              onClick={() => removeChoice(node.id, choiceIndex)}
-                              style={{
-                                padding: '0.5rem',
-                                border: `1px solid ${theme.border.primary}`,
-                                borderRadius: '6px',
-                                backgroundColor: theme.button.default.background,
-                                color: theme.button.default.color,
-                                cursor: 'pointer',
-                                fontSize: '1.2rem',
-                              }}
-                              title="Supprimer ce choix"
-                            >
-                              🗑️
-                            </button>
+                            <datalist id={`node-ids-${node.id}`}>
+                              {Array.from(nodeIds).map((id) => (
+                                <option key={id} value={id} />
+                              ))}
+                            </datalist>
                           </div>
                           
                           {choiceErrors.length > 0 && (

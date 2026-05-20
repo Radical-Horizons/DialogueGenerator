@@ -187,6 +187,31 @@ describe('ContextSelector', () => {
     })
   })
 
+  it('affiche les 5 onglets GDD sur une ligne sans menu overflow ▾', async () => {
+    render(<ContextSelector />)
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /^personnages$/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^lieux$/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^objets$/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^espèces$/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^communautés$/i })).toBeInTheDocument()
+    })
+
+    expect(screen.queryByTestId('btn-overflow-tabs')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /règles de sélection/i })).toHaveLength(1)
+  })
+
+  it('expose la densité balanced ou tight sur la barre d’onglets', async () => {
+    render(<ContextSelector />)
+
+    await waitFor(() => {
+      const tabBar = document.querySelector('[data-context-gdd-tab-density]')
+      expect(tabBar).toBeInTheDocument()
+      expect(['balanced', 'tight']).toContain(tabBar?.getAttribute('data-context-gdd-tab-density'))
+    })
+  })
+
   it('charge les données au montage (première page paginée)', async () => {
     render(<ContextSelector />)
 
