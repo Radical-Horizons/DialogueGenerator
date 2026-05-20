@@ -1387,6 +1387,7 @@ export function GraphEditorHeader({
                 minWidth: 0,
               }}
             >
+              {renderBatchOperationsMenu()}
               {renderStatusGroup()}
               <div style={{ display: 'flex', alignItems: 'center', gap: `${chrome.groupGapRem}rem` }}>
                 {renderToolsGroup()}

@@ -114,6 +114,49 @@ const unityDialogueEditorPaddingHorizontal = {
   narrow: '0.58rem',
 } as const
 
+/**
+ * Barre d’onglets du panneau Contexte GDD (`ContextSelector`).
+ * Deux densités : `balanced` (harmonie avec recherche / segmented narrow) puis `tight`
+ * si `scrollWidth > clientWidth` (drawer ~420px).
+ */
+export const contextGddTabChrome = {
+  balanced: {
+    tabPadding: '0.24rem 0.1rem',
+    gearPadding: '0.24rem 0.14rem',
+    barPadding: '0.32rem 0.42rem 0',
+    barGap: '0.18rem',
+    borderRadiusPx: 6,
+    /** Compromis harmonie vs onglets segmentés Détails (44px) tout en gardant 5 libellés sur une ligne. */
+    tabMinHeightPx: 37,
+    tabFontKey: 'accent',
+  },
+  tight: {
+    tabPadding: '0.12rem 0.08rem',
+    gearPadding: '0.12rem 0.14rem',
+    barPadding: '2px 4px 0',
+    barGap: '0.06rem',
+    borderRadiusPx: 4,
+    tabMinHeightPx: 30,
+    tabFontKey: 'caption',
+  },
+  /** Repasse en `balanced` lorsque la barre est assez large (sidebar desktop). */
+  relaxToBalancedMinWidthPx: 480,
+} as const
+
+export type ContextGddTabDensity = keyof Pick<typeof contextGddTabChrome, 'balanced' | 'tight'>
+
+/**
+ * Onglets segmentés des drawers narrow (ex. panneau Détails) — alignés sur {@link contextGddTabChrome.balanced}.
+ */
+export const drawerPanelTabChrome = {
+  tabPadding: contextGddTabChrome.balanced.tabPadding,
+  barPadding: contextGddTabChrome.balanced.barPadding,
+  barGap: contextGddTabChrome.balanced.barGap,
+  borderRadiusPx: contextGddTabChrome.balanced.borderRadiusPx,
+  tabMinHeightPx: contextGddTabChrome.balanced.tabMinHeightPx,
+  tabFontKey: contextGddTabChrome.balanced.tabFontKey,
+} as const
+
 export const unityDialogueEditorChrome = {
   comfortable: {
     headerPadding: `0.48rem ${unityDialogueEditorPaddingHorizontal.comfortable}`,

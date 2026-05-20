@@ -12,8 +12,10 @@ import { ReactNode, useState, useEffect } from 'react'
 import { theme } from '../../theme'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { remSize } from '../../theme/uiTypography'
 import {
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
+  drawerPanelTabChrome,
   segmentedTabTypography,
 } from '../../theme/responsiveChrome'
 
@@ -26,12 +28,20 @@ export interface Tab {
 
 export type TabsVariant = 'underline' | 'segmented'
 
+/**
+ * `touch` : FR119 (min 44px) — rail segmenté par défaut.
+ * `drawer-aligned` : même gabarit que les onglets Contexte GDD (drawer ~420px).
+ */
+export type TabsSegmentedSize = 'touch' | 'drawer-aligned'
+
 export interface TabsProps {
   tabs: Tab[]
   activeTabId: string
   onTabChange: (tabId: string) => void
   /** underline = barre sous l’onglet actif ; segmented = pilules dans un rail (style app moderne). */
   variant?: TabsVariant
+  /** Taille des boutons segmentés (`touch` par défaut). */
+  segmentedSize?: TabsSegmentedSize
   style?: React.CSSProperties
   /**
    * Styles appliqués au conteneur de contenu (zone sous les onglets).
@@ -68,18 +78,21 @@ export function Tabs({
   activeTabId,
   onTabChange,
   variant = 'underline',
+  segmentedSize = 'touch',
   style,
   contentStyle,
   keepAliveTabIds,
 }: TabsProps) {
   const activeTab = tabs.find((tab) => tab.id === activeTabId)
   const keepAliveSet = new Set(keepAliveTabIds ?? [])
+  const useDrawerAlignedSegmented = variant === 'segmented' && segmentedSize === 'drawer-aligned'
   const { ref: segmentedBarRef, isNarrow: isSegmentedBarNarrow } = useNarrowInlineSize(
     SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX
   )
   const segTypography = isSegmentedBarNarrow
     ? segmentedTabTypography.narrow
     : segmentedTabTypography.comfortable
+  const drawerTab = drawerPanelTabChrome
 
   // Lazy keepAlive : ne monter un onglet keepAlive qu'après sa première activation.
   // Empêche React Flow (et d'autres composants) de se rendre dans un conteneur display:none
@@ -116,15 +129,25 @@ export function Tabs({
           minWidth: 0,
           boxSizing: 'border-box',
           ...(variant === 'segmented'
-            ? {
-                gap: `${segTypography.rowGapRem}rem`,
-                padding: segTypography.rowPadding,
-                backgroundColor: theme.background.tertiary,
-                borderBottom: `1px solid ${theme.border.primary}`,
-                flexWrap: 'nowrap',
-                overflowX: 'auto',
-                containerType: 'inline-size',
-              }
+            ? useDrawerAlignedSegmented
+              ? {
+                  gap: drawerTab.barGap,
+                  padding: drawerTab.barPadding,
+                  backgroundColor: theme.background.tertiary,
+                  borderBottom: `1px solid ${theme.border.primary}`,
+                  flexWrap: 'nowrap',
+                  overflowX: 'hidden',
+                  containerType: 'inline-size',
+                }
+              : {
+                  gap: `${segTypography.rowGapRem}rem`,
+                  padding: segTypography.rowPadding,
+                  backgroundColor: theme.background.tertiary,
+                  borderBottom: `1px solid ${theme.border.primary}`,
+                  flexWrap: 'nowrap',
+                  overflowX: 'auto',
+                  containerType: 'inline-size',
+                }
             : {
                 borderBottom: `2px solid ${theme.border.primary}`,
                 backgroundColor: theme.background.secondary,
@@ -140,31 +163,57 @@ export function Tabs({
             title={tab.label}
             style={{
               ...(variant === 'segmented'
-                ? {
-                    minHeight: TOUCH_TARGET_MIN_PX,
-                    minWidth: TOUCH_TARGET_MIN_PX,
-                    boxSizing: 'border-box',
-                    padding: segTypography.buttonPadding,
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor:
-                      tab.id === activeTabId ? theme.background.panel : 'transparent',
-                    color:
-                      tab.id === activeTabId
-                        ? theme.text.primary
-                        : theme.text.secondary,
-                    boxShadow:
-                      tab.id === activeTabId
-                        ? `${theme.shadow.card}, 0 0 0 1px ${theme.border.primary}`
-                        : 'none',
-                    fontWeight: tab.id === activeTabId ? 600 : 500,
-                    fontSize: `${segTypography.fontSizeRem}rem`,
-                    flex: '1 1 0',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }
+                ? useDrawerAlignedSegmented
+                  ? {
+                      minHeight: drawerTab.tabMinHeightPx,
+                      minWidth: 0,
+                      boxSizing: 'border-box',
+                      padding: drawerTab.tabPadding,
+                      borderRadius: drawerTab.borderRadiusPx,
+                      border: 'none',
+                      backgroundColor:
+                        tab.id === activeTabId ? theme.background.panel : 'transparent',
+                      color:
+                        tab.id === activeTabId
+                          ? theme.text.primary
+                          : theme.text.secondary,
+                      boxShadow:
+                        tab.id === activeTabId
+                          ? `${theme.shadow.card}, 0 0 0 1px ${theme.border.primary}`
+                          : 'none',
+                      fontWeight: tab.id === activeTabId ? 600 : 500,
+                      fontSize: remSize(drawerTab.tabFontKey),
+                      flex: '1 1 0',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }
+                  : {
+                      minHeight: TOUCH_TARGET_MIN_PX,
+                      minWidth: TOUCH_TARGET_MIN_PX,
+                      boxSizing: 'border-box',
+                      padding: segTypography.buttonPadding,
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor:
+                        tab.id === activeTabId ? theme.background.panel : 'transparent',
+                      color:
+                        tab.id === activeTabId
+                          ? theme.text.primary
+                          : theme.text.secondary,
+                      boxShadow:
+                        tab.id === activeTabId
+                          ? `${theme.shadow.card}, 0 0 0 1px ${theme.border.primary}`
+                          : 'none',
+                      fontWeight: tab.id === activeTabId ? 600 : 500,
+                      fontSize: `${segTypography.fontSizeRem}rem`,
+                      flex: '1 1 0',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }
                 : {
                     minHeight: TOUCH_TARGET_MIN_PX,
                     minWidth: TOUCH_TARGET_MIN_PX,

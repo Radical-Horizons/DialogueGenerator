@@ -50,6 +50,7 @@ import {
   REACT_FLOW_MINIMAP_DEFAULT_HEIGHT,
   REACT_FLOW_MINIMAP_DEFAULT_WIDTH,
 } from './graphMinimapLayout'
+import { GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX } from '../../theme/responsiveChrome'
 import { getValidationHighlightKind } from '../../utils/graphStructuralValidation'
 
 /** Module-level so React keeps the same component identity across GraphCanvas re-renders. */
@@ -228,6 +229,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
   const toast = useToast()
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const ref = useRef<HTMLDivElement>(null)
+  const [isNarrowCanvas, setIsNarrowCanvas] = useState(false)
   const [minimapSize, setMinimapSize] = useState({
     width: REACT_FLOW_MINIMAP_DEFAULT_WIDTH,
     height: REACT_FLOW_MINIMAP_DEFAULT_HEIGHT,
@@ -251,6 +253,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
     const el = ref.current
     if (!el) return
     const measure = () => {
+      setIsNarrowCanvas(el.clientWidth < GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX)
       const next = computeGraphMinimapSizePx(el.clientWidth, el.clientHeight)
       if (next) setMinimapSize(next)
     }
@@ -638,7 +641,7 @@ export const GraphCanvas = memo(function GraphCanvas() {
         style={reactFlowStyle}
       >
         <Background color={theme.text.secondary} gap={15} size={1} style={{ opacity: 0.2 }} />
-        <Controls />
+        {!isNarrowCanvas && <Controls />}
         <div
           aria-label="Zoom level"
           style={{
