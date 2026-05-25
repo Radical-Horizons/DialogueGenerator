@@ -38,7 +38,8 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 - **Auto-layout** : Organise automatiquement les nœuds (Ctrl+L)
 - **Valider** : Vérifie le graphe (Ctrl+K)
 - **Sauvegarder** : Sauvegarde en Unity JSON (Ctrl+S)
-- **Exporter Unity** : Export vers Unity (futur)
+- **Exporter Unity** : Télécharge le JSON Unity courant (voir `exportToUnity` côté store)
+- **Qualité** : Actions « AI slop », **Context dropping** (analyse statique vs sélections GDD), éditeur de **règles** anti-context-dropping (persistées côté API). Nécessitent une session **JWT** valide (même contrat que le reste du graphe).
 
 ### Canvas
 
@@ -191,23 +192,34 @@ Option B : Depuis l'URL
 - **unreachable_node** : Nœud inaccessible depuis START
 - **cycle_detected** : Cycle dans le graphe (peut être intentionnel)
 
-## Limitations Actuelles (MVP)
+## Qualité narrative (hors validateur structurel)
 
-### Non implémenté
+Analyses complémentaires (backend `api/routers/graph_quality.py`, client `frontend/src/api/graph.ts`) :
 
-- ❌ Génération de nœuds avec IA (depuis le graphe)
-- ❌ Édition avancée des choix (conditions, mécaniques RPG)
-- ❌ Auto-layout Dagre (avec animation)
-- ❌ Validation visuelle (badges, outline)
-- ❌ Recherche & filtrage
-- ❌ Export PNG/SVG
+| Besoin | Action UI (toolbar) | API (JWT) | Notes |
+|--------|---------------------|-----------|--------|
+| Détecter du « context dropping » (références GDD incohérentes avec la sélection de contexte) | Panneau **Context dropping** → détecter | `POST .../graph/detect-context-dropping` | Les options de requête **fusionnent** avec les règles persistées `GET /api/v1/validation/rules/context-dropping` (priorité : corps de requête non nul → fichier → défauts). |
+| Règles (profil strict/léger, tolérance, infos obligatoires, overrides par type de dialogue) | **Règles** context-dropping | `GET` / `PUT /api/v1/validation/rules/context-dropping` | Fichier disque : `data/validation-rules/context-dropping.json` (`ContextDroppingRulesService`). |
+| Heuristiques « AI slop » (tics de phrasé, répétitions) | Action dédiée dans la barre | `POST .../graph/detect-ai-slop` | Analyse statique ; pas d’appel LLM. |
+| Juge qualité dialogue (LLM) | Selon intégration UI | `POST .../graph/evaluate-dialogue-quality` | Nécessite un fournisseur LLM réellement configuré. |
+
+Schémas détaillés : [Backend API Contracts — Graph editor API](../api/api-contracts-api.md#graph-editor-api-apiv1unity-dialoguesgraph).
+
+## Limitations actuelles (MVP)
+
+### Non implémenté ou partiel
+
+- ❌ Édition avancée des choix (conditions, mécaniques RPG) dans l’UI
+- ❌ Auto-layout Dagre (avec animation) — le layout serveur reste une stratégie dédiée (`calculate-layout`), pas Dagre animé côté client
+- ❌ Validation visuelle systématique (badges, outline sur le canvas)
+- ❌ Recherche & filtrage intégrés dans le graphe
+- ❌ Export PNG/SVG du canvas
 
 ### Workarounds
 
-- **Génération IA** : Utiliser l'interface principale puis ouvrir dans l'éditeur
-- **Édition choix** : Modifier le JSON exporté manuellement
-- **Auto-layout** : Layout basique en cascade (non Dagre)
-- **Recherche** : Utiliser Ctrl+F du navigateur dans le JSON exporté
+- **Édition choix** : Modifier le JSON exporté ou les champs disponibles dans le panneau
+- **Auto-layout** : Bouton auto-layout / `Ctrl+L` (positionnement calculé côté API)
+- **Recherche** : Utiliser Ctrl+F du navigateur ou filtrer dans la liste des dialogues
 
 ## Architecture Technique
 
@@ -237,7 +249,7 @@ Option B : Depuis l'URL
 ## Support
 
 Pour signaler un bug ou demander une feature :
-1. Vérifier la section "Limitations Actuelles"
+1. Vérifier la section « Limitations actuelles (MVP) »
 2. Consulter les logs de validation
 3. Exporter le JSON et partager si nécessaire
 
@@ -245,7 +257,7 @@ Pour signaler un bug ou demander une feature :
 
 ### Phase 2 (Futures Features)
 
-1. **AI Generation Panel** : Générer des nœuds en contexte
+1. **Génération IA** : enrichissements UX (file d’attente, prévisualisation) autour du flux existant `generate-node` / accept-reject
 2. **Auto-layout Dagre** : Layout avec animation
 3. **Validation Visuelle** : Badges et outlines colorés
 4. **Recherche** : Barre de recherche avec highlight

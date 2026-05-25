@@ -70,7 +70,7 @@ This will:
    ```
 
 2. **Configure required variables in `.env`:**
-   - `OPENAI_API_KEY`: OpenAI API key (required for dialogue generation)
+   - `OPENAI_API_KEY`: OpenAI API key for real provider calls. If unset, empty, or exactly `sk-dummy` (CI placeholder), the factory selects `DummyLLMClient` — see `factories/llm_factory.py` and `docs/deployment/CI.md`.
    - `JWT_SECRET_KEY`: Secret key for JWT tokens (change in production!)
    - `ENVIRONMENT`: `development` or `production`
    - See `README_API.md` and `docs/SECURITY.md` for full list
@@ -91,8 +91,9 @@ The application requires Game Design Document (GDD) JSON files:
    - `communautes.json` (optional)
    - Other category files as needed
 
-3. **Vision.json location:**
-   - Must be at: `../import/Bible_Narrative/Vision.json` (parent directory)
+3. **Vision.json resolution (matches `GDDLoader` in `services/gdd_loader.py`):**
+   - Default import root is `data/` at the repo root, so **`data/Vision.json`** is used when present.
+   - Override with **`GDD_IMPORT_PATH`**: path to a directory containing `Vision.json`, to `Bible_Narrative/` (special-cased), or directly to a `Vision.json` file.
 
 ### Verify Installation
 

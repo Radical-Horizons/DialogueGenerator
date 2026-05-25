@@ -25,13 +25,13 @@ L’instance de référence est sur un **VPS OVH** (Ubuntu) ; déploiement typiq
 4.  Faciliter l'écriture, l'évaluation et la validation de ces dialogues.
 5.  S'intégrer avec une pipeline de production de jeu (export JSON Unity, commit Git).
 
-## État Actuel du Projet (Mai 2024)
+## État actuel du projet (2026)
 
-L'application est en cours de développement actif. Les fonctionnalités suivantes sont implémentées :
+L'application est en développement actif. Les briques suivantes sont en place :
 
 *   **Chargement des Données du GDD (`ContextBuilder`)** :
-    *   Lecture des fichiers JSON depuis `data/GDD_categories/` (maintenance manuelle requise - voir `docs/deployment/DATA_MAINTENANCE.md`).
-    *   Chargement de `Vision.json` depuis `data/Vision.json`.
+    *   Lecture des fichiers JSON depuis `data/GDD_categories/` (maintenance manuelle requise — voir `docs/deployment/DATA_MAINTENANCE.md`).
+    *   `Vision.json` : par défaut `data/Vision.json` ; le chemin d’import peut être surchargé avec la variable d’environnement `GDD_IMPORT_PATH` (voir `services/gdd_loader.py`).
     *   Les données (personnages, lieux, objets, espèces, communautés, dialogues exemples, structures narratives/macro/micro) sont stockées en mémoire.
 *   **Interface Web (React + FastAPI)** :
     *   Interface moderne et réactive pour la génération de dialogues.
@@ -42,9 +42,9 @@ L'application est en cours de développement actif. Les fonctionnalités suivant
     *   Classe `PromptEngine` capable de combiner un *system prompt*, un résumé de contexte (incluant les détails JSON des éléments sélectionnés/cochés), et l'instruction utilisateur pour former un prompt complet.
     *   *System prompt* par défaut basique inclus, avec une brève introduction au format JSON Unity.
 *   **Client LLM (`LLMClient`)** :
-    *   Interface `IGenerator` définissant la méthode `async generate_variants(prompt, k)`.
-    *   `OpenAIClient` : Implémentation utilisant l'API OpenAI (modèle par défaut actuel : `gpt-5-mini`). Nécessite la variable d'environnement `OPENAI_API_KEY`.
-    *   `DummyLLMClient` : Implémentation factice utilisée en fallback si `OpenAIClient` ne peut s'initialiser (ex: clé API manquante) ou pour des tests rapides. Simule la génération de `k` variantes au format JSON Unity.
+    *   Interface `ILLMClient` définissant notamment `async generate_variants(...)`.
+    *   `OpenAIClient` : Implémentation utilisant l'API OpenAI (modèle par défaut actuel : `gpt-5-mini`). Nécessite une variable d'environnement `OPENAI_API_KEY` valide (non vide et différente du jeton factice CI).
+    *   `DummyLLMClient` : Implémentation factice utilisée en fallback si `OpenAIClient` ne peut s'initialiser (clé absente, clé réservée `sk-dummy` comme en CI — voir `factories/llm_factory.py`) ou pour des tests rapides. Simule la génération de `k` variantes au format JSON Unity.
 *   **Flux de Génération** :
     *   Sélection du contexte via l'interface web.
     *   Configuration des paramètres de génération (personnages, lieu, instructions).
@@ -72,14 +72,14 @@ L'application est en cours de développement actif. Les fonctionnalités suivant
 
 La documentation organisée se trouve dans [`docs/`](docs/) avec un index dans [`docs/index.md`](docs/index.md).
 
-## Structure du Projet
+## Structure du projet
 
-Le code est organisé dans le dossier `DialogueGenerator/` avec les principaux modules suivants :
+À la racine du dépôt, les répertoires principaux sont :
 
 *   `api/`: API REST FastAPI (backend).
-    *   `routers/`: Routes API pour dialogues, contexte, configuration, etc.
+    *   `routers/`: Routes API pour dialogues, contexte, configuration, graphe Unity, règles de validation, etc.
     *   `schemas/`: Schémas Pydantic pour validation des requêtes/réponses.
-    *   `services/`: Services API (authentification, etc.).
+    *   *(Les services métier partagés vivent dans `services/` à la racine, pas sous `api/`.)*
     *   `container.py`: ServiceContainer pour la gestion du cycle de vie des services.
     *   `dependencies.py`: Helpers d'injection de dépendances FastAPI.
 *   `frontend/`: Interface web React (frontend).
@@ -151,7 +151,7 @@ cd ..
         cp .env.example .env
         ```
     *   Modifier `.env` et définir les variables nécessaires :
-        *   `OPENAI_API_KEY` : Clé API OpenAI (requis pour la génération de dialogues)
+        *   `OPENAI_API_KEY` : Clé API OpenAI (requis pour les appels réels au fournisseur ; absent ou valeur factice `sk-dummy` → client factice `DummyLLMClient`, utile en CI — voir `factories/llm_factory.py` et `docs/deployment/CI.md`)
         *   `JWT_SECRET_KEY` : Clé secrète pour JWT (valeur par défaut acceptée en dev, **doit être changée en production**)
         *   `ENVIRONMENT` : Environnement (`development` ou `production`)
     *   Pour plus de détails, voir [README_API.md](README_API.md) et [docs/SECURITY.md](docs/SECURITY.md).
@@ -167,23 +167,19 @@ Ce script vérifie que le venv et toutes les dépendances sont correctement inst
 ## Comment Lancer l'Application
 
 1.  **Positionnement des Données du GDD** :
-    *   Les fichiers JSON du Game Design Document (GDD) doivent être accessibles via un lien symbolique.
-    *   **Fichiers de catégories** : L'application utilise le chemin `DialogueGenerator/data/GDD_categories/` qui doit être un lien symbolique pointant vers le répertoire réel contenant les fichiers JSON (personnages.json, lieux.json, etc.).
-    *   **Vision.json** : Depuis `DialogueGenerator/data/Vision.json` (dans le même dossier que GDD_categories).
-    *   Exemple de structure attendue :
+    *   Les fichiers JSON du Game Design Document (GDD) doivent être accessibles (copie ou lien symbolique selon l’OS).
+    *   **Fichiers de catégories** : chemin par défaut `data/GDD_categories/` (surcharge possible avec `GDD_CATEGORIES_PATH`).
+    *   **Vision.json** : par défaut `data/Vision.json` ; sinon répertoire ou fichier indiqué par `GDD_IMPORT_PATH` (voir `services/gdd_loader.py`).
+    *   Exemple de structure attendue à la racine du dépôt :
         ```
-        DialogueGenerator/  <-- Racine du projet de l'application
         ├── data/
-        │   ├── GDD_categories/  <-- Dossier réel (maintenance manuelle)
-        │   │   ├── personnages.json
-        │   │   ├── lieux.json
-        │   │   └── ... (autres fichiers JSON du GDD)
-        │   └── Vision.json  <-- Fichier Vision.json
+        │   ├── GDD_categories/   # personnages.json, lieux.json, … (ou shards *.json)
+        │   └── Vision.json
         ├── api/
         ├── core/
-        └── ... (autres fichiers et dossiers du projet)
+        └── …
         ```
-    *   **Note** : Les fichiers GDD doivent être copiés manuellement dans `data/GDD_categories/` et `Vision.json` dans `data/`.
+    *   **Note** : en prod, les chemins peuvent différer ; voir `docs/deployment/PRODUCTION.md` et `docs/deployment/DATA_MAINTENANCE.md`.
 
 2.  **Lancement** :
     *   **Interface Web** :
