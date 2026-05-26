@@ -1,8 +1,9 @@
 {
   "Nom": "Velins",
   "values": {
+    "Espérance de vie": "15",
     "Règne (ou classe)": "73ec9bcb-c306-4b1b-be6e-e4702813dc6f",
-    "Résumé IA": "Le document présente une structure pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème. L'utilisation de mise en forme avancée est encouragée pour organiser ces informations.",
+    "Résumé IA": "Fiche de Velins présentant le nom, l'espérance de vie, le type et l’état, avec sections pour l’histoire, l’apparence, le rôle culturel et dans l’intrigue, ainsi que le habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions avec l’écosystème.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Le document présente une structure pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème. L'utilisation de mise en forme avancée est encouragée pour organiser ces informations."
+    "re_sume__ia": "Fiche de Velins présentant le nom, l'espérance de vie, le type et l’état, avec sections pour l’histoire, l’apparence, le rôle culturel et dans l’intrigue, ainsi que le habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions avec l’écosystème."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

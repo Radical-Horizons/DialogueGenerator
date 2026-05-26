@@ -2,12 +2,11 @@
   "Nom": "Géodeur de Vent",
   "values": {
     "Biologie": "Moyenne",
-    "Culture": "Nulle",
+    "Espérance de vie": "35",
     "Présence dans Escelion": "Peu courant",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "Le Géodeur de Vent est une espèce peu courante dans Escelion, avec une biologie moyenne et sans aspects surnaturels ou technologiques. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat naturel et ses modes de reproduction, mais elles restent à développer.",
+    "Résumé IA": "Pas de contenu",
     "Surnaturel": "Nulle",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -22,7 +21,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Le Géodeur de Vent est une espèce peu courante dans Escelion, avec une biologie moyenne et sans aspects surnaturels ou technologiques. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat naturel et ses modes de reproduction, mais elles restent à développer."
+    "re_sume__ia": "Pas de contenu"
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

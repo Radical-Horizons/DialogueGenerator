@@ -1,18 +1,21 @@
 {
   "Nom": "Clans Sraden",
   "values": {
+    "Actes prévus": "69d4bd00-1234-4ec3-b0ae-e405d3b26ccd, 31a6e4d2-1b45-8066-ba09-e36a4c05b78a, 31a6e4d2-1b45-80ca-adcd-e7088d726397",
     "Classe sociale": "L'Armée",
     "Condition de vie": "Mauvaise",
+    "Culture": "Faible",
     "Date de création": "2026-03-19T20:16:00.000Z",
-    "Dernière modification": "2026-04-03T17:44:00.000Z",
+    "Dernière modification": "2026-04-16T11:12:00.000Z",
     "Démographie": "101 à 1 000 personnes",
     "Lieux de vie": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
     "Niveau d'éducation": "Faible",
     "Niveau d’IA": "humain",
-    "Personnages présents": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
     "Qualité": "2.5",
-    "Résumé": "Les Clans Sraden, tribus guerrières de Merid, ont envahi la Citadelle de Daïlon en 3100 AG, mais ont été piégés par un bouclier des Gardiens. Jamais soumis, ils ont vécu séparément dans les jardins, lançant des attaques sporadiques contre Vol Reitar, qui les contenait et utilisait cette menace pour légitimer son pouvoir. Leur culture martiale perdure malgré des siècles d'isolement, et ils aspirent à briser le bouclier pour retrouver Merid ou s'établir sur Escelion. La gouvernance est clanique, sans autorité centrale, et les rivalités internes sont fortes.",
+    "Résumé IA": "Les Clans Sraden sont trois tribus guerrières d’origine Merid, prisonnières depuis l’invasion de la Citadelle de Daïlon en 3100 AG, vivantes dans ses jardins sous un bouclier protecteur qui les isole mais les empêche d’être atteints. Leur structure triclanique, dirigée par des Sars, repose sur la force, le refus de compromis et la survie collective, avec pour objectif principal de briser le bouclier et de quitter la Citadelle, soit vers Merid, soit vers Escelion, tout en gérant les rivalités internes, la chasse aux kheydarrs et la rareté des ressources.",
+    "Technologie": "Nulle",
     "Type": "Population",
+    "Vocabulaire": "c9664bc8-c459-4fae-8509-eb3f130c4d21",
     "État": "Brouillon IA"
   },
   "sections": {
@@ -40,7 +43,7 @@
     "hooks_concrets__5_7": "1. **Le Triumvirat impossible** : un danger imminent (effondrement du bouclier, incursion massive de kheydarrs, apparition de Vol sous forme spectrale) pourrait forcer les trois Sars à convoquer un Triumvirat de Fer, premier en plus de neuf siècles. Le joueur pourrait servir de médiateur ou de catalyseur.\n\t2. **Le fils du Sar** : Drazger'Illicht tente de réactiver le portail. Ses expériences attirent l'attention de l'esprit de Vol Reitar, qui perçoit une opportunité. Le joueur doit décider : aider Drazger (risquant de libérer des forces de Merid), l'en empêcher (le condamnant à l'isolement perpétuel), ou négocier une ouverture contrôlée.\n\t3. **La honte des Kravash** : un ancien Kravash mourant révèle que sa lignée avait secrètement négocié une trêve avec Vol Reitar, échangeant des informations sur les positions Illicht contre un accès sûr aux points d'eau. La révélation pourrait unir les clans dans la rage ou les détruire dans la guerre civile.\n\t4. **La chasse au Grand Kheydarr** : un kheydarr exceptionnellement intelligent et massif menace les zones de cueillette vitales. Les trois clans doivent coopérer pour le tuer ; épreuve qui pourrait ressouder les alliances ou exposer les traîtrises.\n\t5. **L'étranger dans les jardins** : un intrus (PJ ou PNJ) franchit le bouclier pour la première fois depuis des décennies. Les Sraden doivent décider : le capturer comme ressource d'information, le tuer pour préserver le secret de leur existence, ou l'utiliser comme émissaire vers le monde extérieur.\n\t6. **Le Folio des Origines** : un fragment de manuscrit méridien est découvert dans les Mains d'Aesher, contenant des informations sur la véritable raison de la fuite des Sraden depuis Errazel ; une vérité qui contredit leur mythologie de conquérants et pourrait détruire le fondement identitaire des clans.",
     "indices_du_monde__traces": "- Gravures géométriques profondes sur les murs des jardins extérieurs de la Citadelle, visibles pour quiconque s'aventure assez loin\n\t- Cors d'infrasons audibles depuis l'extérieur du bouclier par les nuits calmes, sons que les habitants de la Vieille Ville attribuent à tort au vent ou aux esprits\n\t- Os de kheydarrs travaillés retrouvés par les rares explorateurs qui pénètrent les marges de la Citadelle\n\t- Mention dans les archives de Vol Reitar de « barbares des jardins » comme menace persistante justifiant le maintien de sa garde armée\n\t- Le vocabulaire d'Alteir liste « Sraden » comme « clan guerrier ayant envahi la Citadelle de Daïlon en 3100 AG », une définition qui ne rend pas justice à leur complexité actuelle",
     "lexique__ne_ologismes": "- **Sar** : chef de clan, titre gagné par combat rituel entre prétendants du même sang\n\t- **Triumvirat de Fer** : conseil d'urgence réunissant les trois Sars, chacun disposant d'un veto absolu\n\t- **Kravashim** : insulte générique signifiant « ceux qui veulent parlementer », référence à la réputation des Kravash d'avoir cherché des trêves avec Vol Reitar plutôt que de combattre\n\t- **Drazhkhorn** : cor d'os de kheydarr, instrument de communication et de marquage territorial\n\t- **Le Sceau** (*Thar-Brekh*) : nom Sraden pour le bouclier des Gardiens, littéralement « la mâchoire qui ne s'ouvre pas »\n\t- **Folio des Origines** : fragment mythique de manuscrit méridien censé contenir les raisons du départ depuis Errazel",
-    "re_sume": "Les Clans Sraden, tribus guerrières de Merid, ont envahi la Citadelle de Daïlon en 3100 AG, mais ont été piégés par un bouclier des Gardiens. Jamais soumis, ils ont vécu séparément dans les jardins, lançant des attaques sporadiques contre Vol Reitar, qui les contenait et utilisait cette menace pour légitimer son pouvoir. Leur culture martiale perdure malgré des siècles d'isolement, et ils aspirent à briser le bouclier pour retrouver Merid ou s'établir sur Escelion. La gouvernance est clanique, sans autorité centrale, et les rivalités internes sont fortes."
+    "re_sume__ia": "Les Clans Sraden sont trois tribus guerrières d’origine Merid, prisonnières depuis l’invasion de la Citadelle de Daïlon en 3100 AG, vivantes dans ses jardins sous un bouclier protecteur qui les isole mais les empêche d’être atteints. Leur structure triclanique, dirigée par des Sars, repose sur la force, le refus de compromis et la survie collective, avec pour objectif principal de briser le bouclier et de quitter la Citadelle, soit vers Merid, soit vers Escelion, tout en gérant les rivalités internes, la chasse aux kheydarrs et la rareté des ressources."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",
@@ -67,7 +70,7 @@
     "hooks_concrets__5_7": "Hooks concrets (5–7)",
     "indices_du_monde__traces": "Indices du monde (traces)",
     "lexique__ne_ologismes": "Lexique (néologismes)",
-    "re_sume": "Résumé"
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "378ce7af-b23e-4ada-aac1-040dfcedb61f"
 }

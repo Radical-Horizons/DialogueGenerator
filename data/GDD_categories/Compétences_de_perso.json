@@ -1,5 +1,381 @@
 [
   {
+    "Nom": "GH — Endurance",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "bdc8d2ce-9d5f-48a4-8f81-5f2205873477",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI87",
+      "Score": "1",
+      "Source": "Base",
+      "Valeur": "1",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "35691ca3-34c4-4ac8-89b9-2ce97c9e2026"
+  },
+  {
+    "Nom": "GH — Combat sans Armure",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "b87589bb-bec4-4bb0-a187-0c1cf9addace",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI86",
+      "Score": "1",
+      "Source": "Base",
+      "Valeur": "1",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "6c4f04fc-d77d-4acf-a779-c67126067d13"
+  },
+  {
+    "Nom": "GH — Survie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "77149fde-3bd1-47ac-9ef9-28adddd37be7",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI84",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "e84b4f68-e1ce-4ae9-902e-2f84bab0edd9"
+  },
+  {
+    "Nom": "GH — Étude des Créatures",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "2b1e7566-8ff8-46b9-be17-0800be15ed52",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI82",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b55ab8e1-e47f-4b05-a759-9877e5110f4c"
+  },
+  {
+    "Nom": "GH — Perception visuelle",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "ad8a8d6c-d771-4aab-be13-c92b1e6d1f3e",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI88",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "91cfa460-ed15-4ce3-9474-75867a820b0b"
+  },
+  {
+    "Nom": "GH — Escalade",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "0d7270f5-617b-4ad5-ac1b-689b22e64f0f",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI83",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "d0594073-9069-4391-ab69-4ffcc0fcb4bd"
+  },
+  {
+    "Nom": "GH — Pistage",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "ac33ee59-a8de-4d7d-b8d3-538602a35507",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI81",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "95a6709e-1874-4689-9ec6-4e9db8cd8b18"
+  },
+  {
+    "Nom": "GH — Vigilance",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "71fc1e98-b72f-467c-90bc-d2003996a741",
+      "Feuilles de perso": "2ab9d87e-fb6f-41b3-a262-7009391f0b83",
+      "Identifiant": "STSKI85",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "60a2ad9a-1498-485d-8fca-3c05c94a1449"
+  },
+  {
+    "Nom": "comp_ori_bikar_artisanat",
+    "values": {
+      "Cadre": "Technologique",
+      "Compétence": "c57f3de1-9180-4e5b-83d2-430e53b75d13",
+      "Feuilles de perso": "1dad0555-e5ee-4434-95e6-680a9c1aab9a",
+      "Identifiant": "STSKI80",
+      "Notes": "Spécialité PNJ — bonus passif +1 Artisanat au campement",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "1cfe5af2-e3ee-474c-b6e6-0c9e366f8ff3"
+  },
+  {
+    "Nom": "comp_ori_bikar_dessin",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "6f5c9e52-105a-430d-97db-5d196809c91f",
+      "Feuilles de perso": "1dad0555-e5ee-4434-95e6-680a9c1aab9a",
+      "Identifiant": "STSKI78",
+      "Notes": "Spécialité PNJ — bonus passif +1 Dessin au campement",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "af2028b2-cb63-4969-950a-c1851551fc9a"
+  },
+  {
+    "Nom": "comp_ori_bikar_architecture",
+    "values": {
+      "Cadre": "Technologique",
+      "Compétence": "420f1e19-164c-4711-8dea-d8002d1af5ca",
+      "Feuilles de perso": "1dad0555-e5ee-4434-95e6-680a9c1aab9a",
+      "Identifiant": "STSKI79",
+      "Notes": "Spécialité PNJ — bonus passif +1 Architecture au campement",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "a8fc5feb-9c02-4939-a559-4cc56a30c73f"
+  },
+  {
+    "Nom": "avili_fouille",
+    "values": {
+      "Cadre": "Biologique",
+      "Compétence": "b3f8a937-3360-417a-aca7-1a71b5e366ed",
+      "Feuilles de perso": "dfb9d00f-282a-41d8-8603-823643aac619",
+      "Identifiant": "STSKI75",
+      "Notes": "Recherche d'informations dans des environnements complexes. Complète la Perception pour détecter des anomalies physiques ou textuelles. Alimente le bonus passif +1 Perception anomalies.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "565aaa24-951d-46e1-b5ba-466fe19ef066"
+  },
+  {
+    "Nom": "avili_infrastructures",
+    "values": {
+      "Cadre": "Technologique",
+      "Compétence": "d5223f0f-9ad6-4246-b052-124c186ae13a",
+      "Feuilles de perso": "dfb9d00f-282a-41d8-8603-823643aac619",
+      "Identifiant": "STSKI77",
+      "Notes": "Connaissance et stabilisation d'infrastructures. Porte les missions déléguées de stabilisation cités/relais mentionnées dans le profil d'Avili.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "8e15a0cc-c89c-4280-b9f8-ed6afcd8690a"
+  },
+  {
+    "Nom": "avili_falsification",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "718c4af4-918a-468c-9838-65b350ae0251",
+      "Feuilles de perso": "dfb9d00f-282a-41d8-8603-823643aac619",
+      "Identifiant": "STSKI76",
+      "Notes": "Capacité à distordre subtilement le sens d'une traduction ou d'un document pour maintenir son indispensabilité. Core de l'arc de manipulation narrative.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "76139a6d-ac1c-4cfa-9043-f695be3ff0b3"
+  },
+  {
+    "Nom": "avili_connaissances_generales",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "e47e2b9e-1c98-47e8-a037-8f508880ec7d",
+      "Feuilles de perso": "dfb9d00f-282a-41d8-8603-823643aac619",
+      "Identifiant": "STSKI74",
+      "Notes": "Mémoire photographique et base encyclopédique couvrant les lois physiques, la cosmologie vohar et les cultures d'Escelion. Alimente le bonus passif +1 Connaissance.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "225231b5-684a-4f38-ad41-e393dd646c03"
+  },
+  {
+    "Nom": "avili_bibliotheque",
+    "values": {
+      "Cadre": "Technologique",
+      "Compétence": "d9818b73-f985-4219-ae66-f5dbe263117b",
+      "Feuilles de perso": "dfb9d00f-282a-41d8-8603-823643aac619",
+      "Identifiant": "STSKI73",
+      "Notes": "Maîtrise des corpus textuels, archives et référentiels de traductions. Permet l'accès à des connaissances rares sur les lois physiques et les langues disparues.",
+      "Score": "5",
+      "Source": "Base",
+      "Valeur": "5",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "5e341639-cf04-45b0-b031-5d5f4c3e70bd"
+  },
+  {
+    "Nom": "avili_langages",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "1fd3d82e-b257-4201-8e59-fb2202f7b76b",
+      "Feuilles de perso": "dfb9d00f-282a-41d8-8603-823643aac619",
+      "Identifiant": "STSKI72",
+      "Notes": "Compétence principale de lexicorphe. Maîtrise avancée de l'interprétation, traduction et manipulation des langues dont celle d'Uresaïr. Permet les distorsions subtiles narratives.",
+      "Score": "6",
+      "Source": "Base",
+      "Valeur": "6",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "05675f8d-2b04-49bc-a7b0-92c4d402f38e"
+  },
+  {
+    "Nom": "Qalamtû — Renseignement",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "5a967f53-b2b1-48ef-8e11-85e1d0ceb818",
+      "Feuilles de perso": "6297e7d0-7210-4b20-9985-5ab4a901aea3",
+      "Identifiant": "STSKI69",
+      "Notes": "Collecte d'informations via réseaux informels. PER 8 : il observe avant d'agir. Levier systémique du Codex.",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "67871a99-e9c4-4724-acc7-d623a9a47b5c"
+  },
+  {
+    "Nom": "Qalamtû — Duperie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "930e5adf-2050-482a-b441-c1afaf798818",
+      "Feuilles de perso": "6297e7d0-7210-4b20-9985-5ab4a901aea3",
+      "Identifiant": "STSKI68",
+      "Notes": "Manipulation froide par calcul, non par charisme. Compense directement SOC 5 : il ment via l'intelligence, pas la séduction.",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "aecaa2fb-8c4e-4546-8edf-8ef7d163fb30"
+  },
+  {
+    "Nom": "Qalamtû — Connaissances Générales",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "e47e2b9e-1c98-47e8-a037-8f508880ec7d",
+      "Feuilles de perso": "6297e7d0-7210-4b20-9985-5ab4a901aea3",
+      "Identifiant": "STSKI66",
+      "Notes": "Savant confirmé, maîtrise académique large (mathématiques, géographie, sciences). Cohérent RAI 9.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "fad52cc4-d106-4cba-be8c-90ff560b831b"
+  },
+  {
+    "Nom": "Qalamtû — Croyances",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "038a5d66-40c5-4c40-8c10-bd50dca9b180",
+      "Feuilles de perso": "6297e7d0-7210-4b20-9985-5ab4a901aea3",
+      "Identifiant": "STSKI71",
+      "Notes": "Connaissance des systèmes Van'Doei et des valeurs communautaires qu'il instrumentalise. Tension intentionnelle : pragmatisme vs adhésion sincère.",
+      "Score": "2",
+      "Source": "Base",
+      "Valeur": "2",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "b17e1ce7-f32f-4112-94f8-0e83c957748e"
+  },
+  {
+    "Nom": "Qalamtû — Stratégie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "64614723-5dd6-480d-85a0-c8666c04ec52",
+      "Feuilles de perso": "6297e7d0-7210-4b20-9985-5ab4a901aea3",
+      "Identifiant": "STSKI67",
+      "Notes": "Planificateur à long terme, profil Utilitaire. Compense l'absence de force brute (PUI 4) par la préparation.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "7bc567f4-0dba-4741-a18b-1a6c6dbc74d5"
+  },
+  {
+    "Nom": "Qalamtû — Psychologie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "99438183-d591-4c7a-b3f0-edf0fbc918ea",
+      "Feuilles de perso": "6297e7d0-7210-4b20-9985-5ab4a901aea3",
+      "Identifiant": "STSKI70",
+      "Notes": "Outil de manipulation intellectuelle : analyser motivations et mensonges. SOC 5 compensé par RAI 9 — il comprend les gens sans les charmer.",
+      "Score": "3",
+      "Source": "Base",
+      "Valeur": "3",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "6dab8588-3f23-4152-a3c3-1bee1fc8067a"
+  },
+  {
+    "Nom": "Qalamtû — Archéologie",
+    "values": {
+      "Cadre": "Culturel",
+      "Compétence": "fb264847-76ff-4be6-9399-5c7a4f600dfd",
+      "Feuilles de perso": "6297e7d0-7210-4b20-9985-5ab4a901aea3",
+      "Identifiant": "STSKI65",
+      "Notes": "Spécialité centrale : fouille des vestiges pre-Fracture, déchiffrement du Codex Akhtan. PER 8 + RAI 9.",
+      "Score": "4",
+      "Source": "Base",
+      "Valeur": "4",
+      "Verrouillée ?": "non"
+    },
+    "sections": {},
+    "notion_page_id": "cad57adc-63fd-409e-b8d7-4f3f897dbd17"
+  },
+  {
     "Nom": "Voknir — FP — Vigilance",
     "values": {
       "Cadre": "Biologique",

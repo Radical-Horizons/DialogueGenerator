@@ -1,8 +1,9 @@
 {
   "Nom": "Rouillards",
   "values": {
+    "Espérance de vie": "35",
     "Règne (ou classe)": "534e5829-6e46-4d38-84d8-b2d37344d711",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle culturel, son habitat naturel, son mode d'alimentation, sa reproduction, et son interaction avec l'écosystème. Les sections sont à compléter selon les spécificités de l'espèce.",
+    "Résumé IA": "Pas de contenu",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle culturel, son habitat naturel, son mode d'alimentation, sa reproduction, et son interaction avec l'écosystème. Les sections sont à compléter selon les spécificités de l'espèce."
+    "re_sume__ia": "Pas de contenu"
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

@@ -1,0 +1,41 @@
+{
+  "Nom": "Fragment caudal du Testament Vertébral",
+  "values": {
+    "Connaissances Alteir": "967f87fb-90c6-47ab-961e-f232673f1264",
+    "Date de création": "2026-05-06T14:07:00.000Z",
+    "Dernière modification": "2026-05-06T14:40:00.000Z",
+    "Lieux de présence": "1b36e4d2-1b45-802c-910a-fb74729b22f8",
+    "Maps": "72eba94c-c97a-456f-b7f4-4b3d897f7655",
+    "Niveau d’IA": "co-écrit",
+    "Poids": "Léger",
+    "Qualité": "6",
+    "Rareté": "Unique",
+    "Stackable": "non",
+    "Taille": "Petit",
+    "Type": "Savoir",
+    "État": "Pas commencé"
+  },
+  "sections": {
+    "re_sume": "Premier des trois fragments dispersés du Testament Vertébral, dissimulé par <mention-page url=\"https://www.notion.so/1c36e4d21b4580958449d7d1749e69ad\"/> vers \\~3225 AG dans une cavité de la Périphérie Caudale. Texte technique, presque clinique, qui décrit l'entropie au sens thermodynamique, en l'illustrant sur la dégradation des corps vivants comme cas paradigmatique. Couche « source » du corpus : transcription d'un discours pointu, mais visiblement inégale — plusieurs formules apparaissent inexactes ou maladroitement reformées.",
+    "support___lisibilite": "- **Description visuelle :** Liasse de sept feuillets en parchemin osseux blanchi, reliés par un nerf calcifié à fibre torsadée. Encre brune (suc d'os fermenté), tracé en Kesh-Varash courant teinté d'archaïsmes pré-schisme. Bords inférieurs corrodés par les exsudats acides de la paroi.\n\t- **Domaine :** Théologique apparent / scientifique réel (entropie au sens thermodynamique, exemplifiée sur la dégradation organique ; retranscription approximative avec des formules inexactes).\n\t- **Niveau de lisibilité :** Clair pour qui maîtrise le Kesh-Varash. Le matériau se rétracte au contact d'une encre étrangère ; toute tentative de copie échoue.",
+    "origine___fiabilite": "- **Auteur / source :** Rhylos Vesh-Akhor (\\~3217-18 AG), transcrivant de mémoire une observation issue de sa rencontre unique avec L'Ensevelie. Transmis à Zaehria avec sa lettre d'adieu \\~3219 AG, fragmenté et dissimulé par Zaehria \\~3225 AG.\n\t- **Contexte :** Pseudépigraphie en construction. Présenté implicitement comme parole de L'Ensevelie ; en réalité transcription humaine d'un discours technique entendu une seule fois, dont certaines formules portent visiblement la marque d'une retransmission imparfaite.\n\t- **Fiabilité :** Apparente solide (descriptif cohérent). Réelle intermédiaire : la matière thermodynamique est largement vraie, mais les approximations de transcription rendent toute exploitation littérale risquée ; le cadrage théologique apparent oriente en outre la lecture vers une révélation, alors qu'aucune intention de ce type n'est attachée à la source.",
+    "e_tude___effet_produit": "- **Action principale :** Étudier (au campement).\n\t- **Connaissance produite :** Concept <mention-page url=\"https://www.notion.so/967f87fb90c647ab961ef232673f1264\"/>. **Étude isolée :** pose le niveau **Perçu** (si l'état est en dessous, sinon laisse inchangé). **Règle de cumul du concept :** le palier sur le concept est fonction du nombre de fragments distincts étudiés par le personnage — 1 = Perçu, 2 = Identifié, 3 = Compris, dans n'importe quel ordre. Le caudal apporte sa pierre à l'addition mais ne peut, seul, faire dépasser Perçu.\n\t- **Temps ou contexte d'étude :** 1 action de campement. Réutilisable (la relecture sert de rappel mais ne fait pas progresser le niveau).",
+    "conditions___limites": "- **Consommation :** Non. Le fragment reste après lecture.\n\t- **Prérequis :** Linguistique ≥ 4 OU dialogue précédent avec Zaehria portant sur le Testament. À défaut, l'étude échoue et le temps de campement est consommé pour rien (feedback : « les caractères refusent de se laisser lire »).\n\t- **Usage secondaire :** Peut être *montré* en dialogue à un PNJ déjà au niveau Identifié sur le concept, pour ouvrir des lignes exégétiques — sans poser de flag social. Aucun usage de cadeau (Offrir) : ce n'est pas un Témoignage.",
+    "inventaires_pnj": "Aucun PNJ détenteur à l'ouverture du jeu. Zaehria connaît son emplacement mais ne le possède pas physiquement (cas « sans détenteur » : Lieux de présence uniquement).",
+    "re_compenses_lie_es": "À créer : récompense de découverte exploratoire dans la Périphérie Caudale (Chapitre II), OU récompense de don conditionnel par Zaehria (tribut mémoriel).",
+    "flags_lie_s": "À créer : `flag_savoir_testament_caudal_etudie` (booléen, portée = Objet, Objets liés = ce fragment), `flag_savoir_testament_caudal_possede` (booléen, gating de la révélation du fragment cataphilique).",
+    "remarques_de_conception": "- Premier des trois ; conçu pour pouvoir être trouvé sans guidance (exploration libre Périphérie Caudale). Sa lecture seule ne révèle rien de la pseudépigraphie : c'est un texte « plat » qui semble cohérent avec un commentaire scientifique ancien. Le mensonge tient parce que la couche basse est largement vraie — les formules inexactes peuvent être attribuées à l'étrangeté du locuteur, pas à une fabrication.\n\t- Coût narratif d'obtention : modéré. Doit rester accessible pour amorcer la quête.\n\t- Effet sur Connaissances : pose Perçu en isolation, plafonne là. La montée vers Identifié puis Compris demande l'étude des autres fragments ; le caudal compte pour un palier dans l'addition, quel que soit l'ordre dans lequel il est étudié."
+  },
+  "section_titles": {
+    "re_sume": "Résumé",
+    "support___lisibilite": "Support & lisibilité",
+    "origine___fiabilite": "Origine & fiabilité",
+    "e_tude___effet_produit": "Étude & effet produit",
+    "conditions___limites": "Conditions & limites",
+    "inventaires_pnj": "Inventaires PNJ",
+    "re_compenses_lie_es": "Récompenses liées",
+    "flags_lie_s": "Flags liés",
+    "remarques_de_conception": "Remarques de conception"
+  },
+  "notion_page_id": "b62db800-1b18-4dcb-8985-50de31a88b16"
+}

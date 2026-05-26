@@ -1,0 +1,39 @@
+{
+  "Nom": "Pierre de Jugement",
+  "values": {
+    "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+    "Connaissances Alteir": "5783b141-055e-41e3-9dde-63892123e633",
+    "Créé par (communauté)": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+    "Date de création": "2026-05-04T13:30:00.000Z",
+    "Dernière modification": "2026-05-04T13:57:00.000Z",
+    "Lieux de présence": "1b36e4d2-1b45-807e-8342-d1b4cd0cdade",
+    "Niveau d’IA": "auto",
+    "Qualité": "7",
+    "Rareté": "Unique",
+    "Stackable": "non",
+    "Taille": "Grand",
+    "Type": "Élément de décor",
+    "État": "Pas commencé"
+  },
+  "sections": {
+    "re_sume": "Monolithe d’obsidienne pétrifiée d’environ 1m60, placé au centre du Vestibule des Accointances. La Pierre de Jugement déforme les traits de quiconque s’y reflète — pas assez pour effrayer, assez pour qu’on ne soit plus certain d’être ce que l’on croyait être. Le Culte l’utilise comme filtre rituel d’entrée et comme marqueur psychique passif : chaque conscience qui la touche y laisse une Empreinte maculaire imperceptible. En jeu, c’est l’interaction N2 centrale du Narthex — premier miroir posé devant les hôtes avant qu’iels comprennent les questions du lieu.",
+    "apparence___nature": "- **Description visuelle :** Ellipsoïde irrégulier taillé dans un bloc d’obsidienne issue des coulées vitrifiées du Désert des Échos Perdus, fondu à du sable noir compact. Surface principale polie, soumise à une distorsion subtile qui étire ou comprime les contours du visage selon un axe imprévisible. Des veines d’or pâle courent dans la masse (sable vitrifié piégé dans l’obsidienne), visibles uniquement sous lumière rasante ou bioluminescence gedroth. Froide au toucher même en période de chaleur résiduelle du titan. Les arêtes latérales gardent une légère rugosité — traces des outils de taille, jamais policées.\n\t- **Type exact :** Élément de décor / Monument rituel d’admission.\n\t- **Échelle :** Grand (environ 1m60 de haut, 0m80 de large) ; fixe, scellé dans le sol par un mortier de Pneuma condensé. Non déplaçable sans démantèlement.",
+    "origine___ancrage": "- **Origine :** Artisanale et rituelle. Érigée entre 3380 et 3390 AG en réponse au flux croissant de visiteurs non-cultistes. La Dragovitsa a demandé un filtre matériel visible à l’entrée du Vestibule.\n\t- **Créé par / communauté liée :** Culte de l’Anentropie. Kha’Vareth Ardakh, Artisan d’Éternité, a supervisé la taille et la mise en place selon les principes de Fixation géométrique. Le bloc d’obsidienne a été extrait dans les formations du Vash-Sûl.\n\t- **Lieu(x) de présence :** Narthex abyssal, Vestibule des Accointances — centre du hall d’entrée, sur l’axe de la Grande Porte Osseuse.",
+    "interaction_principale": "- **Niveau d’interaction :** N1 intégré (observation gratuite) + N2 optionnel (toucher, test à 4 branches). Cf. <mention-page url=\"https://www.notion.so/ed986ac336004d29b4fb8fac7d61857c\"/> pour les volumes et la structure de nœuds.\n\t- **Action joueuse :** Observer le reflet (N1, gratuit, toujours accessible) → option de toucher la surface (N2, Perception + Volonté vs DD 8).\n\t- **Effet produit :**\n\t\t- *Observation seule (N1)* : texte descriptif — le reflet déforme légèrement, Uresaïr remarque qu’elle ne se reconnaît pas tout à fait. Aucun flag, aucun coût.\n\t\t- *Réussite critique (≥ DD+5)* : Uresaïr perçoit une strate de consciences passées dans l’obsidienne — impression floue d’autres jugements rendus. Flag `Flag_narthex_pierre_touchee` = CRITIQUE. Connaissance **Pierre de Jugement** au niveau Compris. Dialogue optionnel débloqué avec Kha’Vareth Ardakh.\n\t\t- *Réussite* : le reflet se stabilise un instant — Uresaïr se voit telle qu’elle est (ou croit l’être). Flag = STANDARD. Connaissance au niveau Identifié.\n\t\t- *Échec* : la déformation s’intensifie, vertige bref. Flag = STANDARD. Connaissance au niveau Perçu seulement.\n\t\t- *Échec critique (≤ DD-5)* : l’Empreinte de l’Éthérée se superpose au reflet d’Uresaïr, visible un instant pour les Croyant·es proches. Flag = ÉCLATEMENT. Déclencheur de dialogue avec les Gardien·nes du Seuil.",
+    "conditions___limites": "- **Signal de discoverabilité :** Visuel (objet central, éclairé par les Gedroths, reflets permanents visibles depuis l’entrée) + sonore (légère résonance grave perceptible à moins de deux mètres). Règle des 2 canaux respectée.\n\t- **Compétence / coût :** Perception + Volonté vs DD 8. Coût : 0 PE. L’observation seule est toujours accessible sans coût.\n\t- **État persistant :** Intact (aucune transformation physique de l’objet). Le flag `Flag_narthex_pierre_touchee` enregistre le résultat. Après l’Acte 1, des Empreintes maculaires cumulées modifient imperceptiblement la surface — détail N0 ambient au retour éventuel.",
+    "inventaires_pnj": "Les Gardien·nes du Seuil (trio de Van’Doei) sont les gardien·nes rituels de la Pierre — iels en contrôlent l’accès et observent les réactions des visiteur·ses. Créer une ligne Inventaires PNJ lorsque leurs fiches individuelles seront disponibles (Type d’accès : Entretenu / Gardé).\n\t<database url=\"https://www.notion.so/33867766ea694ff4a576cfdf096d641c\" inline=\"true\" data-source-url=\"collection://67330c50-a35e-4c76-a01d-a788feb3610b\"></database>",
+    "flags_lie_s": "Flag principal à créer : `Flag_narthex_pierre_touchee` (Type de valeur : énumération — NON_TOUCHEE / STANDARD / CRITIQUE / ÉCLATEMENT ; Portée : Objet). Déclencheur de dialogues avec Kha’Vareth et les Gardien·nes du Seuil selon la valeur.\n\t<database url=\"https://www.notion.so/4cc30fd7cc8a4036ac096a893105f237\" inline=\"true\" data-source-url=\"collection://33399725-e3e1-4c98-8060-d92a89c0efe0\"></database>",
+    "remarques_de_conception": "- La Pierre ne « juge » pas objectivement : elle déforme. Le Culte interprète la déformation. Cohérent avec la logique générale du Narthex (Léviathanie ↔ joints, entomologie ↔ effet des cycles).\n\t- L’Empreinte maculaire est délibérément non-narrativisée en N1/N2 : effet de fond accumulatif, pas mécanisme actif. Évite le pattern « Transmission de mémoire non conventionnelle ».\n\t- L’échec critique (Empreinte de l’Éthérée visible) est un crochet à fort impact social : les Croyant·es témoin·nes peuvent changer leur rapport à Uresaïr. À relier à la fiche Miroir-Encré si elle note l’incident."
+  },
+  "section_titles": {
+    "re_sume": "Résumé",
+    "apparence___nature": "Apparence & nature",
+    "origine___ancrage": "Origine & ancrage",
+    "interaction_principale": "Interaction principale",
+    "conditions___limites": "Conditions & limites",
+    "inventaires_pnj": "Inventaires PNJ",
+    "flags_lie_s": "Flags liés",
+    "remarques_de_conception": "Remarques de conception"
+  },
+  "notion_page_id": "5406c6fd-ac93-44ed-967e-7f0cf82fa04f"
+}

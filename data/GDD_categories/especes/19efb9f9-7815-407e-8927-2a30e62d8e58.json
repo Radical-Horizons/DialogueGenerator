@@ -2,12 +2,11 @@
   "Nom": "Archiviste du Cairn",
   "values": {
     "Biologie": "Avancée",
-    "Culture": "Nulle",
+    "Espérance de vie": "90",
     "Présence dans Escelion": "Rarissime",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "L'espèce est rare dans Escelion, avec une biologie avancée et un état de brouillon IA. Des sections sont dédiées à son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi qu'à son écosystème, incluant son habitat naturel, mode d'alimentation, reproduction et interaction avec l'écosystème.",
+    "Résumé IA": "Pas de contenu",
     "Surnaturel": "Moyenne",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Brouillon IA"
   },
@@ -22,7 +21,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'espèce est rare dans Escelion, avec une biologie avancée et un état de brouillon IA. Des sections sont dédiées à son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi qu'à son écosystème, incluant son habitat naturel, mode d'alimentation, reproduction et interaction avec l'écosystème."
+    "re_sume__ia": "Pas de contenu"
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

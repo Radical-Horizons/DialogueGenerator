@@ -1,8 +1,9 @@
 {
   "Nom": "Pilares",
   "values": {
+    "Espérance de vie": "40",
     "Règne (ou classe)": "a489466f-098f-4b19-b83f-6c417a8fe421",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème.",
+    "Résumé IA": "Pas de contenu",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème."
+    "re_sume__ia": "Pas de contenu"
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

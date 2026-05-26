@@ -1,10 +1,12 @@
 {
   "Nom": "Rouleurs éternels de Marul",
   "values": {
+    "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6, d4f4728f-0bbe-447d-a307-83ad1eec7418",
+    "Espérance de vie": "9999",
     "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1b36e4d2-1b45-80da-b06a-f97b2a08b7c6",
     "Présence dans Escelion": "Rare",
     "Règne (ou classe)": "484cd421-db84-425a-84eb-2414d5f042c5",
-    "Résumé IA": "Les rouleurs éternels, ou koroks, sont des créatures artificielles en forme de roue, immortelles mais fragiles. Leur reproduction se fait par la création d'œufs après une analyse de l'environnement. Ils symbolisent la permanence et la vulnérabilité, et leurs poils métalliques sont prisés dans l'artisanat. Les propriétés des koroks varient selon leur lieu de naissance, influençant superstitions et commerce.",
+    "Résumé IA": "Les rouleurs éternels de Marul, appelés koroks, sont des créatures artificielles immortelles qui ne meurent pas de vieillesse mais s’éteignent instantanément lorsqu’elles sont endommagées. Elles ressemblent à des roues recouvertes de poils métalliques, avec de grands yeux latéraux. Leur reproduction consiste à s’arrêter, analyser l’environnement et déposer un œuf qui se développe. Elles symbolisent le paradoxe entre permanence biologique et fragilité mécanique, leurs poils étant prisés comme matériau artisanal rare.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -12,13 +14,13 @@
     "re_sume__de_la_fiche": "Plus communément nommés koroks, leur nom d'éternels vient du fait qu'ils ne peuvent mourir de vieillesse, même si un korok endommagé cesse immédiatement tout mouvement, comme s'il mourrait d'une crise cardiaque. Pour se reproduire les rouleurs éternels arrêtent soudain leur course effrénée, se laissent tomber sur le côté, entament une analyse de leur environnement et lâchent une sorte d'oeuf qui se développera par la suite. Le korok aura diverses propriétés dépendant du lieu de sa naissance.\n**Guides**",
     "histoire_de_l_espe_ce": "-",
     "apparence": "Ces créatures artificielles ont généralement la forme d'une roue, et se déplacent en se faisant rouler. Ils sont recouverts de poils métalliques et ont, sur le côté droit et gauche de grands yeux qui ne s'ouvrent que rarement.",
-    "ro_le_culturel": "L'immortalité biologique des koroks fascine les cultures d'Escelion — leur incapacité à mourir de vieillesse, contrastant avec leur fragilité mécanique (mort instantanée au moindre dommage), en fait un **symbole paradoxal** de permanence et de vulnérabilité. Leurs poils métalliques, récupérés après la mort d'un spécimen, sont prisés comme matériau artisanal rare. Les propriétés variables des koroks selon leur lieu de naissance alimentent superstitions et commerce spéculatif.",
+    "ro_le_culturel": "L'immortalité biologique des koroks fascine les cultures d'Escelion : leur incapacité à mourir de vieillesse, contrastant avec leur fragilité mécanique (mort instantanée au moindre dommage), en fait un **symbole paradoxal** de permanence et de vulnérabilité. Leurs poils métalliques, récupérés après la mort d'un spécimen, sont prisés comme matériau artisanal rare. Les propriétés variables des koroks selon leur lieu de naissance alimentent superstitions et commerce spéculatif.",
     "ro_le_dans_l_intrigue": "-",
     "habitat_naturel": "-",
     "mode_d_alimentation_ou_d_obtention_de_nutriments": "-",
     "mode_de_reproduction": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-\n<empty-block/>",
-    "re_sume__ia": "Les rouleurs éternels, ou koroks, sont des créatures artificielles en forme de roue, immortelles mais fragiles. Leur reproduction se fait par la création d'œufs après une analyse de l'environnement. Ils symbolisent la permanence et la vulnérabilité, et leurs poils métalliques sont prisés dans l'artisanat. Les propriétés des koroks varient selon leur lieu de naissance, influençant superstitions et commerce."
+    "re_sume__ia": "Les rouleurs éternels de Marul, appelés koroks, sont des créatures artificielles immortelles qui ne meurent pas de vieillesse mais s’éteignent instantanément lorsqu’elles sont endommagées. Elles ressemblent à des roues recouvertes de poils métalliques, avec de grands yeux latéraux. Leur reproduction consiste à s’arrêter, analyser l’environnement et déposer un œuf qui se développe. Elles symbolisent le paradoxe entre permanence biologique et fragilité mécanique, leurs poils étant prisés comme matériau artisanal rare."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

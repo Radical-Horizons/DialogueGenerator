@@ -1,32 +1,41 @@
 {
   "Nom": "Labrys de Préhension",
   "values": {
+    "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6",
     "Créé par (personne)": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
     "Date de création": "2026-04-10T10:35:00.000Z",
-    "Dernière modification": "2026-04-10T10:35:00.000Z",
+    "Dernière modification": "2026-05-04T10:25:00.000Z",
+    "Détenu par": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
+    "Effort lié": "1",
+    "Equipable par": "Uresaïr, Vethraak, Eonundé",
+    "Inventaires PNJ": "1987a5ae-4a50-4242-8e44-1120e8bef9c9",
     "Niveau d’IA": "co-écrit",
     "Poids": "Moyen",
-    "Qualité": "2",
+    "Qualité": "7",
     "Rareté": "Unique",
-    "Résumé": "Double hache cérémonielle aux lames émoussées. Emblème de la Violence Préservatrice de Navarre K'ssh : conçue pour frapper sans trancher, briser sans tuer.",
+    "Résumé IA": "Double hache cérémonielle personnelle de Navarre K'ssh, emblème de la Violence Préservatrice. L'original reste non lootable et sert ses démonstrations de Khetra-Morth ; la réplique bénie de fin d'arc fonctionne comme Catalyseur universel, donnant +2 aux tests de neutralisation non-létale et une Entaille Révérente à 1 PE, avec désactivation doctrinale en cas d'usage létal.",
     "Stackable": "non",
     "Taille": "Grand",
     "Type": "Équipement",
-    "État": "Pas commencé"
+    "État": "A implémenter"
   },
   "sections": {
-    "preamble": "> *\"Ses lames ne tranchent pas — elles frappent l'architecture intérieure, là où la volonté se fracture avant les os.\"*",
-    "description": "Double hache cérémonielle personnelle de Navarre K'ssh. Les deux lames, rituellement émoussées, sont gravées des géométries du Khetra-Morth : spirales de retenue, angles d'impact non-lésionnels, fractales de préservation. Le manche est en os de Qudratheen blanchi, identique à celui de son prosôpon.\nL'arme n'est pas conçue pour tuer. Chaque impact vise les nœuds structurels du corps adverse — articulations, ganglions nerveux, points de pression osseux — pour neutraliser sans détruire.",
-    "me_canique": "*À définir selon le système Équipement.*\n- **Dégâts :** non-létaux uniquement\n- **Effort lié :** à définir\n- **Effet spécial :** cible neutralisée (et non blessée) sur réussite critique",
-    "acce_s": "- Objet personnel de Navarre K'ssh — non lootable avant recrutement\n- Récompense possible (réplique bénie) à l'arc résolu de *La Troisième Voie*",
-    "re_sume": "Double hache cérémonielle aux lames émoussées. Emblème de la Violence Préservatrice de Navarre K'ssh : conçue pour frapper sans trancher, briser sans tuer."
+    "preamble": "> *\"Ses lames ne tranchent pas — elles forcent le combat à avouer l'endroit exact où il peut encore s'arrêter.\"*",
+    "description": "La Labrys de Préhension est la double hache cérémonielle personnelle de Navarre K'ssh, forgée après son élévation au rang de Parfaite. Ses deux lames sont volontairement épaisses, polies et émoussées : elles ne cherchent ni l'ouverture de chair ni la section nette, mais l'impact contrôlé sur les charnières du corps. Les tranchants portent des géométries du Khetra-Morth — spirales de retenue, angles d'impact non-lésionnels, fractales de préservation — gravées assez profondément pour accrocher la cendre et le sang sans devenir coupantes.\nLe manche est en os de Qudratheen blanchi, apparenté au matériau de son prosôpon. Navarre l'a équilibré pour son bras hypertrophié : dans ses mains, l'arme décrit des arcs trop larges pour une escrime ordinaire, puis s'arrête à quelques millimètres d'une articulation ou d'un plexus. La violence se concentre dans l'arrêt, pas dans la coupe. Quand la Labrys frappe vraiment, elle comprime, dévie, verrouille ou désorganise le système nerveux ; elle laisse des corps vivants, humiliés par la précision de leur propre survie.\nL'objet porte une contradiction fondatrice : il ressemble à une arme d'exécution et refuse l'exécution. C'est pour cela que Navarre le traite comme un texte doctrinal. Chaque marque sur l'os du manche correspond à une erreur de calibration, une neutralisation trop brutale, une retenue arrivée trop tard. La Labrys n'est pas seulement l'emblème de la Violence Préservatrice ; elle est le registre matériel de ses échecs et la preuve qu'une doctrine martiale peut se corriger sans se renier.",
+    "original___arme_personnelle_de_navarre": "- **Statut :** objet personnel de Navarre K'ssh, non lootable et non transférable avant résolution de son arc.\n- **Fonction narrative :** support de ses démonstrations de Khetra-Morth, de ses Joutes Théologiques et de son bonus passif au campement.\n- **Usage PNJ :** quand Navarre combat ou enseigne avec l'original, la Labrys justifie les effets de neutralisation non-létale déjà associés à son kit : réduction du coût de maîtrise, lecture des points de contrainte et refus de l'exécution comme solution par défaut.\n- **Limite doctrinale :** l'original ne sert jamais à tuer volontairement. Si Navarre en venait à l'utiliser pour une mise à mort, ce serait un événement de rupture morale, pas un usage normal de l'objet.",
+    "re_plique_be_nie___re_compense_d_arc": "La récompense de fin d'arc n'est pas une meilleure hache. C'est une **réplique doctrinale** : une version portable, allégée et bénie, conçue pour transmettre au groupe une géométrie de retenue. Elle peut être traitée comme un **Équipement — Catalyseur universel** si le système d'Équipement accepte un slot compatible pour les héroïnes.\n**Effet passif — Géométrie de retenue**\n- Tant que la réplique est équipée, la porteuse gagne **+2 au Score** sur les tests visant explicitement une **neutralisation non-létale** : désarmer, immobiliser, assommer sans dommage durable, contenir une cible ou interrompre une violence.\n- Tests typiques : **Agilité + Combat rapproché**, **Puissance + Combat sans armure**, ou **Intelligence + Stratégie** si l'action prépare une neutralisation non-létale avant l'affrontement.\n- Le bonus ne s'applique jamais à une attaque létale, à une exécution, à une intimidation fondée sur la mutilation, ni à une action dont l'objectif principal est de blesser.\n**Option active — Entaille Révérente**\n- Avant un test éligible, la joueuse peut dépenser **1 PE** pour déclarer une Entaille Révérente.\n- Sur succès, la cible est neutralisée avec un minimum de séquelles : le résultat privilégie l'immobilisation, le désarmement, la perte d'équilibre ou l'interruption de posture.\n- Sur succès critique, la scène peut produire un effet narratif supplémentaire : témoin impressionné, cible laissée consciente mais incapable de reprendre l'attaque, ou ouverture d'une option de dialogue liée à la retenue.\n- L'Entaille Révérente ne transforme pas un meurtre en neutralisation après coup : l'intention non-létale doit être déclarée avant le test.\n**Contrainte doctrinale — Arme fermée**\n- Si la porteuse utilise la réplique dans une action explicitement létale ou contraire à la Violence Préservatrice, la Labrys devient **fermée** jusqu'au prochain repos de campement ou jusqu'à une action réparatrice validée par la scène.\n- Tant qu'elle est fermée, elle ne fournit plus son bonus de +2 et ne permet plus l'Entaille Révérente.\n- Cette contrainte doit être lisible en fiction : la réplique devient lourde, ses gravures se remplissent d'une cendre froide, et l'angle de prise cesse de \"tomber juste\" dans la main.\n**Équilibrage**\n- Bonus net : +2 situationnel, dans la fourchette standard d'un Catalyseur.\n- Coût actif : 1 PE, cohérent avec les dilemmes du système d'Effort.\n- Garde-fou : bonus conditionnel strict + désactivation doctrinale en cas d'usage létal.\n- Non-cumul recommandé : ne pas cumuler l'Entaille Révérente avec un autre effet réduisant déjà le coût d'une neutralisation sur le même test ; si Navarre est au campement et que son bonus passif s'applique, choisir l'effet le plus favorable ou réserver la réplique à l'effet narratif.",
+    "acce_s": "- **Original :** porté par Navarre K'ssh, enregistré dans son inventaire PNJ comme objet équipé.\n- **Réplique bénie :** récompense possible lorsque l'arc de Navarre atteint une résolution haute : confiance maximale, loyauté suffisante et adhésion du personnage à la Troisième Voie.\n- **Différence claire :** l'original appartient à Navarre et concentre son histoire personnelle ; la réplique appartient au groupe et transmet une méthode. L'original dit *ce que Navarre est devenue*. La réplique dit *ce que le groupe accepte d'apprendre d'elle*.",
+    "hooks_de_jeu": "- **Dilemme tactique :** réussir plus facilement une neutralisation sans tuer, au prix d'un PE et d'une contrainte morale explicite.\n- **Dilemme relationnel :** utiliser la réplique contre sa doctrine peut fermer temporairement son pouvoir et provoquer une réaction de Navarre si elle l'apprend.\n- **Dilemme de build :** en tant que Catalyseur, la réplique occupe un slot qui pourrait servir à une optimisation plus large ; elle pousse donc la joueuse à choisir un style de résolution pacifiante plutôt qu'un simple bonus polyvalent.",
+    "re_sume__ia": "Double hache cérémonielle personnelle de Navarre K'ssh, emblème de la Violence Préservatrice. L'original reste non lootable et sert ses démonstrations de Khetra-Morth ; la réplique bénie de fin d'arc fonctionne comme Catalyseur universel, donnant +2 aux tests de neutralisation non-létale et une Entaille Révérente à 1 PE, avec désactivation doctrinale en cas d'usage létal."
   },
   "section_titles": {
     "preamble": "Préambule",
     "description": "Description",
-    "me_canique": "Mécanique",
+    "original___arme_personnelle_de_navarre": "Original — arme personnelle de Navarre",
+    "re_plique_be_nie___re_compense_d_arc": "Réplique bénie — récompense d'arc",
     "acce_s": "Accès",
-    "re_sume": "Résumé"
+    "hooks_de_jeu": "Hooks de jeu",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "a02e0d4e-4ae1-4e38-a28c-491da5b9f461"
 }

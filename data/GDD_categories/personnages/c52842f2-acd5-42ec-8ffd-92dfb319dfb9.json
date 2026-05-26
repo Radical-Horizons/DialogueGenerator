@@ -1,0 +1,44 @@
+{
+  "Nom": "Fionnuala Temüülen",
+  "values": {
+    "Actes effectifs": "31a6e4d2-1b45-8026-bf52-e0bdd107d332",
+    "Actes prévus": "31a6e4d2-1b45-8026-bf52-e0bdd107d332",
+    "Alias": "Fionnuala · la Coordinatrice du Nœud cambial",
+    "Archétype littéraire": "Rebelle / Destructeur",
+    "Axe idéologique": "Subversion",
+    "Communautés": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
+    "Concepts liés": "0e336866-8757-4e28-a381-a87389dca388",
+    "Date de création": "2026-04-30T10:05:00.000Z",
+    "Date de naissance": "3390",
+    "Dernière modification": "2026-05-02T17:20:00.000Z",
+    "Genre": "Féminin",
+    "Lieux de vie": "1cb6e4d2-1b45-80d5-9374-d87f759801be",
+    "Niveau d’IA": "auto",
+    "Occupation": "Coordinatrice officieuse du Nœud cambial, relais des Contemplations pour les Aedres en voie de Grande Lignification",
+    "Pronoms (pour dialogues)": "elle/la",
+    "Présence dans les chapitres": "a2e4dc25-fe56-4f17-9da4-e0acbc05b879",
+    "Réponse au problème moral": "Elle ne conteste pas le système depuis l'extérieur mais depuis l'intérieur de sa logique même : si la Treizième Transformation est l'ancrage dans une mémoire qui dépasse l'individu, alors l'enracinement forcé par le Conseil n'est pas la lignification — c'est son détournement.",
+    "Résumé IA": "Fionnuala Temüülen, coordinatrice officieuse du Nœud cambial, relie discrètement le réseau barvasinkulien aux Aedres en Grande Lignification, transmet les Contemplations et conteste l’immobilisme du Conseil en proposant une interprétation dynamique de l’enracinement, tout en restant non officielle au sein du Cercle des Seize.",
+    "Slug": "fionnuala_temuulen",
+    "Type": "PNJ secondaire",
+    "Épithète": "La Coordinatrice du Nœud cambial",
+    "État": "Pas commencé"
+  },
+  "sections": {
+    "re_sume__de_la_fiche": "Fionnuala Temüülen est une Aedre Moadon des terrasses médianes de la <mention-page url=\"https://www.notion.so/1cb6e4d21b4580d59374d87f759801be\"/>, coordinatrice officieuse du **Nœud cambial**. Relais discret du réseau barvasinkulien au sein de Vivarcade, elle transmet les Contemplations aux Aedres en voie de Grande Lignification et conteste subtilement l'immobilisme du Conseil en proposant une interprétation dynamique de l'enracinement. Sa position dans le Cercle des Seize est réelle mais non officielle : elle n'a jamais accepté de titre formel, ce qui la protège des purges tout en limitant son autorité publique.",
+    "alias": "Fionnuala · la Coordinatrice du Nœud cambial",
+    "occupation": "Coordinatrice officieuse du Nœud cambial, relais des Contemplations pour les Aedres en voie de Grande Lignification",
+    "re_ponse_au_proble_me_moral": "Elle ne conteste pas le système depuis l'extérieur mais depuis l'intérieur de sa logique même : si la Treizième Transformation est l'ancrage dans une mémoire qui dépasse l'individu, alors l'enracinement forcé par le Conseil n'est pas la lignification — c'est son détournement.",
+    "re_sume__ia": "Fionnuala Temüülen, coordinatrice officieuse du Nœud cambial, relie discrètement le réseau barvasinkulien aux Aedres en Grande Lignification, transmet les Contemplations et conteste l’immobilisme du Conseil en proposant une interprétation dynamique de l’enracinement, tout en restant non officielle au sein du Cercle des Seize.",
+    "e_pithe_te": "La Coordinatrice du Nœud cambial"
+  },
+  "section_titles": {
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "alias": "Alias",
+    "occupation": "Occupation",
+    "re_ponse_au_proble_me_moral": "Réponse au problème moral",
+    "re_sume__ia": "Résumé IA",
+    "e_pithe_te": "Épithète"
+  },
+  "notion_page_id": "c52842f2-acd5-42ec-8ffd-92dfb319dfb9"
+}

@@ -1,8 +1,10 @@
 {
   "Nom": "Juruno",
   "values": {
+    "Actes prévus": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+    "Espérance de vie": "1",
     "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-    "Résumé IA": "Les juruno, ou bulles éphémères, sont des plantes rondes qui deviennent transparentes en grandissant, révélant des graines multicolores. Elles sont appréciées pour leur beauté et leur explosion violente à la mort, perçue comme un présage. Leur mode de reproduction se fait par éclatement, dispersant les graines, qui peuvent germer dans des milieux favorables. Plus l'environnement est riche, plus elles peuvent atteindre des dimensions impressionnantes.",
+    "Résumé IA": "Les juruno sont des plantes éphémères translucides aux graines multicolores, dont l’apparence passe du blanc blanchâtre à une transparence révélant leurs graines. Elles se disputent les zones, s’agrègent, et à la mort explosent violemment, dispersant leurs graines qui peuvent germer si les conditions sont favorables. Leur durée de vie dépend de la richesse de l’environnement, pouvant atteindre plusieurs mètres. Elles sont appréciées pour leur beauté naturelle et sont perçues comme un présage lorsqu’elles explosent, les enfants collectionnant leurs graines colorées.",
     "Type": "Flore",
     "État": "Pas commencé"
   },
@@ -10,13 +12,13 @@
     "re_sume__de_la_fiche": "Les juruno, ou bulles éphémères, sont des plantes rondes blanchâtre quand elles sont encore petites, puis de plus en plus transparentes quand elles grandissent, laissant voir les innombrables graines multicolores qu'elles portent en leur sein. Il n'est pas rare de voir plusieurs jurunos se disputer une même zone et s'agglutiner les uns aux autres.\n**Guides**",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>",
-    "ro_le_culturel": "Spectacle naturel apprécié pour leur beauté translucide et leurs graines colorées visibles à travers l'enveloppe. L'explosion violente à leur mort est perçue comme **présage** par les nomades — une détonation soudaine près d'un campement est diversement interprétée selon les traditions locales. Les enfants collectionnent parfois les graines multicolores dispersées après éclatement, et les plus gros spécimens suscitent l'émerveillement.",
+    "ro_le_culturel": "Spectacle naturel apprécié pour leur beauté translucide et leurs graines colorées visibles à travers l'enveloppe. L'explosion violente à leur mort est perçue comme **présage** par les nomades, une détonation soudaine près d'un campement est diversement interprétée selon les traditions locales. Les enfants collectionnent parfois les graines multicolores dispersées après éclatement, et les plus gros spécimens suscitent l'émerveillement.",
     "ro_le_dans_l_intrigue": "-",
     "habitat_naturel": "-",
     "mode_d_alimentation_ou_d_obtention_de_nutriments": "-",
     "mode_de_reproduction": "Ces plantes, quand elles meurent, éclatent violemment, expulsant leurs graines aux alentours. Si celles-ci tombent, par pur hasard, dans un milieu assez favorable, elles grandiront alors à leur tour.",
     "fonctionnement_avec_l_e_cosyste_me": "Plus l'environnement est riche, plus elles dureront longtemps en grossiront, parfois jusqu'à prendre des dimensions fort impressionnantes, de plusieurs mètres.\n<empty-block/>",
-    "re_sume__ia": "Les juruno, ou bulles éphémères, sont des plantes rondes qui deviennent transparentes en grandissant, révélant des graines multicolores. Elles sont appréciées pour leur beauté et leur explosion violente à la mort, perçue comme un présage. Leur mode de reproduction se fait par éclatement, dispersant les graines, qui peuvent germer dans des milieux favorables. Plus l'environnement est riche, plus elles peuvent atteindre des dimensions impressionnantes."
+    "re_sume__ia": "Les juruno sont des plantes éphémères translucides aux graines multicolores, dont l’apparence passe du blanc blanchâtre à une transparence révélant leurs graines. Elles se disputent les zones, s’agrègent, et à la mort explosent violemment, dispersant leurs graines qui peuvent germer si les conditions sont favorables. Leur durée de vie dépend de la richesse de l’environnement, pouvant atteindre plusieurs mètres. Elles sont appréciées pour leur beauté naturelle et sont perçues comme un présage lorsqu’elles explosent, les enfants collectionnant leurs graines colorées."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

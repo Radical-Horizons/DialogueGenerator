@@ -1,5 +1,820 @@
 [
   {
+    "Nom": "Vehn'Oss Selthar — Acte 1",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PNJ tertiaire de maintenance. Technique élevée (15+ ans de travail spécialisé canal cérébrospinal). Perception haute (vision thermique). Sociabilité basse (registre bref, pratique). Non combattant.",
+      "Perception": "5",
+      "Personnage": "0dd7fd03-023b-450a-ab2f-8ea9eac8c11d",
+      "Puissance": "4",
+      "Raison": "3",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "2",
+      "Technique": "6",
+      "Total Caracs": "29",
+      "Volonté": "3",
+      "id": "STAT58"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ tertiaire de maintenance. Technique élevée (15+ ans de travail spécialisé canal cérébrospinal). Perception haute (vision thermique). Sociabilité basse (registre bref, pratique). Non combattant."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "fc4704a2-715c-43f1-9d2a-64b9dcb9f9e8"
+  },
+  {
+    "Nom": "Zhira — Acte 1",
+    "values": {
+      "Agilité": "4",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PNJ tertiaire apprentie. Perception 7 = spécialité absolue (lecture tactile des micro-tensions). Technique 6 = maçonne de précision confirmée pour son âge. Sociabilité 2 = parle peu, formules techniques. Profil délibérément déséquilibré vers la détection sensorielle.",
+      "Perception": "7",
+      "Personnage": "3cea202e-d477-4326-bd0d-dcbd65e9bedb",
+      "Puissance": "3",
+      "Raison": "4",
+      "Sociabilité": "2",
+      "Technique": "6",
+      "Total Caracs": "33",
+      "Volonté": "4",
+      "id": "STAT57"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ tertiaire apprentie. Perception 7 = spécialité absolue (lecture tactile des micro-tensions). Technique 6 = maçonne de précision confirmée pour son âge. Sociabilité 2 = parle peu, formules techniques. Profil délibérément déséquilibré vers la détection sensorielle."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "a8424514-ee2d-401e-88f0-9d153b785241"
+  },
+  {
+    "Nom": "Murmure-Éteint — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PNJ tertiaire de tonalité. Corps en auto-momification progressive : Puissance et Agilité minimales. Volonté maximale (ascèse volontaire extrême, résistance mentale hors du commun). Sociabilité quasi-nulle — communication par images sèches, rare et délibérée.",
+      "Perception": "5",
+      "Personnage": "1b76e4d2-1b45-801e-bccb-d44c219b951c",
+      "Puissance": "2",
+      "Raison": "6",
+      "Rôle / Archétype": "Support",
+      "Sociabilité": "2",
+      "Technique": "2",
+      "Total Caracs": "30",
+      "Volonté": "8",
+      "id": "STAT56"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ tertiaire de tonalité. Corps en auto-momification progressive : Puissance et Agilité minimales. Volonté maximale (ascèse volontaire extrême, résistance mentale hors du commun). Sociabilité quasi-nulle — communication par images sèches, rare et délibérée."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "7446896e-eec3-4fb6-81ca-84aabcd84e74"
+  },
+  {
+    "Nom": "Veth-Kadur — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Perception": "5",
+      "Personnage": "5bade1fc-762e-4b57-92ef-3ab0ef05bfea",
+      "Puissance": "2",
+      "Raison": "5",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "5",
+      "Total Caracs": "28",
+      "Volonté": "4",
+      "id": "STAT55"
+    },
+    "sections": {},
+    "notion_page_id": "64ddfebd-b90e-47d5-a113-114aa75a7668"
+  },
+  {
+    "Nom": "feuille_cinquante_sixieme_acte1",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "4",
+      "Notes d’équilibrage": "PNJ secondaire Acte 1 — Léviathan. Profil : technicienne de maintenance, discrète, stable. Haute Perception (sensible aux vibrations du Léviathan), haute Technique (maintenance Van'Doei depuis 7 Nuées), Sociabilité très basse (stratégie d'invisibilité active). Aucune compétence martiale. Total 28.",
+      "Perception": "5",
+      "Personnage": "77656046-f125-43f4-8167-7a69dae08cf7",
+      "Puissance": "2",
+      "Raison": "3",
+      "Sociabilité": "2",
+      "Technique": "5",
+      "Total Caracs": "28",
+      "Volonté": "4",
+      "id": "STAT54"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire Acte 1 — Léviathan. Profil : technicienne de maintenance, discrète, stable. Haute Perception (sensible aux vibrations du Léviathan), haute Technique (maintenance Van'Doei depuis 7 Nuées), Sociabilité très basse (stratégie d'invisibilité active). Aucune compétence martiale. Total 28."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "22759272-4b42-4441-aa3c-e68de0eb79e3"
+  },
+  {
+    "Nom": "L'Éthérée — Acte 1",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "4",
+      "Notes d’équilibrage": "L'Éthérée n'a pas de stats physiques propres ; répartition centrée sur Sociabilité (cœur relationnel) et Perception (lecture émotionnelle et mémorielle). Puissance, Agilité et Technique volontairement minimaux — elle n'agit pas dans le monde physique, elle agit à travers ses vaisseaux.",
+      "Perception": "7",
+      "Personnage": "1996e4d2-1b45-8043-9847-ef675478f485",
+      "Puissance": "1",
+      "Raison": "5",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "8",
+      "Technique": "2",
+      "Total Caracs": "33",
+      "Volonté": "5",
+      "id": "STAT53"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "L'Éthérée n'a pas de stats physiques propres ; répartition centrée sur Sociabilité (cœur relationnel) et Perception (lecture émotionnelle et mémorielle). Puissance, Agilité et Technique volontairement minimaux — elle n'agit pas dans le monde physique, elle agit à travers ses vaisseaux."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "34be70c6-e2d8-46cb-909c-bc861be0d883"
+  },
+  {
+    "Nom": "Tek-Syana-09 — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Perception": "6",
+      "Personnage": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Puissance": "6",
+      "Raison": "5",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "8",
+      "Technique": "4",
+      "Total Caracs": "38",
+      "Volonté": "5",
+      "id": "STAT52"
+    },
+    "sections": {},
+    "notion_page_id": "b649c3f7-c0eb-411f-8710-5cea4b66311e"
+  },
+  {
+    "Nom": "Machine Pérégrine — Rêveur / Acte 1",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Perception": "7",
+      "Personnage": "f0105182-324b-4626-86c3-a78edbb3d2b6",
+      "Puissance": "12",
+      "Raison": "5",
+      "Sociabilité": "1",
+      "Technique": "12",
+      "Total Caracs": "54",
+      "Volonté": "14",
+      "id": "STAT51"
+    },
+    "sections": {},
+    "notion_page_id": "c6dfef62-bbae-4463-8c72-b12aff4bc7e1"
+  },
+  {
+    "Nom": "Rêveur du Puits Céleste — Acte 1",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "8",
+      "Notes d’équilibrage": "Entité primordiale — stateless, ne participe pas aux tests. Perception maximale (chimiosynthèse totale du Pilier), Créativité haute (rêves matérialisés en spores), Volonté maximale (résistance millénaire). Puissance/Agilité/Sociabilité/Technique au minimum (cocon immobile, non-communicant). Raison faible (conscience diffuse, non-logique).",
+      "Perception": "9",
+      "Personnage": "1c76e4d2-1b45-805a-b457-e64ae338d6f9",
+      "Puissance": "1",
+      "Raison": "3",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "1",
+      "Technique": "1",
+      "Total Caracs": "34",
+      "Volonté": "10",
+      "id": "STAT50"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Entité primordiale — stateless, ne participe pas aux tests. Perception maximale (chimiosynthèse totale du Pilier), Créativité haute (rêves matérialisés en spores), Volonté maximale (résistance millénaire). Puissance/Agilité/Sociabilité/Technique au minimum (cocon immobile, non-communicant). Raison faible (conscience diffuse, non-logique)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "49b04cbb-39ea-47ca-a74a-4dfd29de5b99"
+  },
+  {
+    "Nom": "Léviathan — Rêveur / Acte 1",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Perception": "14",
+      "Personnage": "2448c3aa-ecab-4afd-9b4e-36d86c0abfef",
+      "Puissance": "1",
+      "Raison": "10",
+      "Sociabilité": "1",
+      "Technique": "4",
+      "Total Caracs": "48",
+      "Volonté": "15",
+      "id": "STAT49"
+    },
+    "sections": {},
+    "notion_page_id": "ba286d37-f62c-464b-85cf-6d9ae220ae92"
+  },
+  {
+    "Nom": "Barvas le Juge-Mendiant — Entité supérieure",
+    "values": {
+      "Agilité": "5",
+      "Build": "Acte 1",
+      "Créativité": "9",
+      "Notes d’équilibrage": "Entité supérieure dissoute en 1700 fragments. Profil arbitre-philosophe : Perception maximale (7 yeux, voit le 3ème terme caché), Sociabilité et Raison très hautes (imposition empathique, compréhension cosmique), Volonté extrême (17 transformations traversées). Puissance et Technique faibles (existence fragmentaire, hors-combat).",
+      "Perception": "12",
+      "Personnage": "22e6e4d2-1b45-8077-a1a6-dea94ef159a4",
+      "Puissance": "6",
+      "Raison": "11",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "12",
+      "Technique": "4",
+      "Total Caracs": "72",
+      "Volonté": "13",
+      "id": "STAT48"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Entité supérieure dissoute en 1700 fragments. Profil arbitre-philosophe : Perception maximale (7 yeux, voit le 3ème terme caché), Sociabilité et Raison très hautes (imposition empathique, compréhension cosmique), Volonté extrême (17 transformations traversées). Puissance et Technique faibles (existence fragmentaire, hors-combat)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "1d404084-4804-435e-81d2-33ceb0d5a070"
+  },
+  {
+    "Nom": "Vokh-Taleth Slennokh — Historique",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "6",
+      "Notes d’équilibrage": "PNJ historique (disparu 3305 AG). Perception haute = vision infrarouge Van'Doei centrale à l'Ossiphanie. Technique max = maître artisan inégalé. Sociabilité/Puissance basses = isolement progressif documenté. Budget 38 pts (personnage exceptionnel).",
+      "Perception": "7",
+      "Personnage": "f38a4a8a-2a9b-4349-9d9a-3669e7863321",
+      "Puissance": "2",
+      "Raison": "5",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "2",
+      "Technique": "9",
+      "Total Caracs": "38",
+      "Volonté": "4",
+      "id": "STAT47"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ historique (disparu 3305 AG). Perception haute = vision infrarouge Van'Doei centrale à l'Ossiphanie. Technique max = maître artisan inégalé. Sociabilité/Puissance basses = isolement progressif documenté. Budget 38 pts (personnage exceptionnel)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "f963e622-6e8b-461a-8c93-0d99542f5808"
+  },
+  {
+    "Nom": "Rhylos Vesh-Akhor — Acte 1",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "5",
+      "Notes d’équilibrage": "PNJ historique (décédée ~3219 AG). Profil intellectuel : philologue, exégète, organisatrice. Puissance faible (pas de combat), Raison et Volonté maximales (survie à l'ossification, conviction absolue). Sociabilité et Créativité élevées (fondatrice charismatique, doctrine de l'Entrelacs). Total 34 pts (budget exceptionnel justifié : figure historique majeure).",
+      "Perception": "4",
+      "Personnage": "1b36e4d2-1b45-8081-ab37-c4b33c4f51b1",
+      "Puissance": "2",
+      "Raison": "6",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "5",
+      "Technique": "3",
+      "Total Caracs": "34",
+      "Volonté": "6",
+      "id": "STAT46"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ historique (décédée ~3219 AG). Profil intellectuel : philologue, exégète, organisatrice. Puissance faible (pas de combat), Raison et Volonté maximales (survie à l'ossification, conviction absolue). Sociabilité et Créativité élevées (fondatrice charismatique, doctrine de l'Entrelacs). Total 34 pts (budget exceptionnel justifié : figure historique majeure)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "fa25ed39-1164-4360-a3a7-c4286f663277"
+  },
+  {
+    "Nom": "Ysellor Eonundé du Ressac — Historique",
+    "values": {
+      "Agilité": "7",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Notes d’équilibrage": "PNJ historique (décédée ~3390 AG, 395 Nuées). Stats de référence calibration, non jouables en combat. Vaideccane Littorale des profondeurs — guerrière et exploratrice. Volonté 9 : trait central, 400 Nuées d'obstination face à un dieu-monde, survie de la confrontation avec Errazel. Agilité 7 : navigatrice expert des courants profonds, fugue à travers la moitié d'un continent. Perception 7 : Traverse-Mondes, cartographie des strates souterraines de Merid. Créativité 7 : guerre écologique, tactiques de guérilla innovantes, Fluidisme transformé en arme. Technique 6 : cartographie de précision, manipulation des écosystèmes sous-marins. Sociabilité 4 : charisma suffisant pour fédérer un réseau de résistance sur trois siècles, mais méfiante structurelle post-Vol. Puissance 6 : guerrière formée, corps Vaideccan dense, diminuée en fin de vie par l'autophagie. Budget 51 pts justifié pour une figure légendaire fondatrice (comparable à Vokh-Taleth Slennokh à 43 pts).",
+      "Perception": "7",
+      "Personnage": "1d56e4d2-1b45-80e1-a1a9-e96243eb1712",
+      "Puissance": "6",
+      "Raison": "5",
+      "Rôle / Archétype": "DPS",
+      "Sociabilité": "4",
+      "Technique": "6",
+      "Total Caracs": "51",
+      "Volonté": "9",
+      "id": "STAT45"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ historique (décédée ~3390 AG, 395 Nuées). Stats de référence calibration, non jouables en combat. Vaideccane Littorale des profondeurs — guerrière et exploratrice. Volonté 9 : trait central, 400 Nuées d'obstination face à un dieu-monde, survie de la confrontation avec Errazel. Agilité 7 : navigatrice expert des courants profonds, fugue à travers la moitié d'un continent. Perception 7 : Traverse-Mondes, cartographie des strates souterraines de Merid. Créativité 7 : guerre écologique, tactiques de guérilla innovantes, Fluidisme transformé en arme. Technique 6 : cartographie de précision, manipulation des écosystèmes sous-marins. Sociabilité 4 : charisma suffisant pour fédérer un réseau de résistance sur trois siècles, mais méfiante structurelle post-Vol. Puissance 6 : guerrière formée, corps Vaideccan dense, diminuée en fin de vie par l'autophagie. Budget 51 pts justifié pour une figure légendaire fondatrice (comparable à Vokh-Taleth Slennokh à 43 pts)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "d4763e8a-0aef-472b-8033-dedf594f0897"
+  },
+  {
+    "Nom": "Vol Reitar — Spectre / Acte 3",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Perception": "8",
+      "Personnage": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe",
+      "Puissance": "1",
+      "Raison": "10",
+      "Sociabilité": "5",
+      "Technique": "9",
+      "Total Caracs": "51",
+      "Volonté": "10",
+      "id": "STAT44"
+    },
+    "sections": {},
+    "notion_page_id": "2364785d-6a48-41ed-ba86-0d2daacdc6ef"
+  },
+  {
+    "Nom": "Eonundé Alinen-Egan — Acte 1",
+    "values": {
+      "Agilité": "6",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PJ Vaideccane. Combattante de mêlée (deux épées dentelées) et déstabilisatrice anti-autorité. Puissance et Agilité élevées (corps forgé au combat autodidacte, chasses à Daïlon). Volonté haute (résistance au conditionnement, 25 Nuées de survie — passif Mémoire des Cuves). Raison modérée : éducation aristocratique réelle mais tronquée par Vol. Sociabilité et Technique basses (directe, provocatrice, pas de spécialisation). Budget exceptionnel 38 pts (PJ).",
+      "Perception": "5",
+      "Personnage": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Puissance": "7",
+      "Raison": "4",
+      "Rôle / Archétype": "DPS",
+      "Sociabilité": "3",
+      "Technique": "3",
+      "Total Caracs": "38",
+      "Volonté": "7",
+      "id": "STAT43"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PJ Vaideccane. Combattante de mêlée (deux épées dentelées) et déstabilisatrice anti-autorité. Puissance et Agilité élevées (corps forgé au combat autodidacte, chasses à Daïlon). Volonté haute (résistance au conditionnement, 25 Nuées de survie — passif Mémoire des Cuves). Raison modérée : éducation aristocratique réelle mais tronquée par Vol. Sociabilité et Technique basses (directe, provocatrice, pas de spécialisation). Budget exceptionnel 38 pts (PJ)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "f7fe15c1-eadd-4f6b-b357-80686a4ec000"
+  },
+  {
+    "Nom": "L'Enlumineur — Acte 1",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Notes d’équilibrage": "PNJ Antagoniste Acte 2. Qadul'Doei Transmué, artiste de la chair. Perception 7 : lecture des résidus émotionnels et des états sacrificiels (Syncrétisme Sensoriel). Créativité 7 : génie lumimantique, compositions d'êtres vivants. Sociabilité 6 : manipulation rhétorique, structuration des conditions du 'oui'. Raison 5 : système philosophique articulé (Transvalorifaction). Technique 4 : praticien lumimantique de niveau maîtrise. Volonté 4 : conviction esthétique absolue mais fragile face à une résistance réelle non anticipée. Puissance 2 / Agilité 3 : non-combattant, Extension Manifestée lente. Budget : 38 pts (exceptionnel, justifié pour antagoniste Acte 2 dont la dangerosité est rhétorique et environnementale).",
+      "Perception": "7",
+      "Personnage": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+      "Puissance": "2",
+      "Raison": "5",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "6",
+      "Technique": "4",
+      "Total Caracs": "38",
+      "Volonté": "4",
+      "id": "STAT42"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ Antagoniste Acte 2. Qadul'Doei Transmué, artiste de la chair. Perception 7 : lecture des résidus émotionnels et des états sacrificiels (Syncrétisme Sensoriel). Créativité 7 : génie lumimantique, compositions d'êtres vivants. Sociabilité 6 : manipulation rhétorique, structuration des conditions du 'oui'. Raison 5 : système philosophique articulé (Transvalorifaction). Technique 4 : praticien lumimantique de niveau maîtrise. Volonté 4 : conviction esthétique absolue mais fragile face à une résistance réelle non anticipée. Puissance 2 / Agilité 3 : non-combattant, Extension Manifestée lente. Budget : 38 pts (exceptionnel, justifié pour antagoniste Acte 2 dont la dangerosité est rhétorique et environnementale)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "39004683-aaee-418a-b7c7-cd02ae5af9d2"
+  },
+  {
+    "Nom": "Ossian-des-Angles — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "Artisan d'Éternité non-combattant. Technique 6 (spécialiste gravure ossifiée, hyperperception intégrée). Perception 5 (fusion partielle outils→phalanges). Raison 4, Créativité 3 (analyse avant imagination). Sociabilité 3 (posé, réservé). Puissance/Agilité 2 (dos voûté, pas de combat). Volonté 3. Total 28, zone PNJ secondaire confirmé.",
+      "Perception": "5",
+      "Personnage": "6e0e1e82-f6af-4065-8025-fcd1b99318fe",
+      "Puissance": "2",
+      "Raison": "4",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "6",
+      "Total Caracs": "28",
+      "Volonté": "3",
+      "id": "STAT41"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Artisan d'Éternité non-combattant. Technique 6 (spécialiste gravure ossifiée, hyperperception intégrée). Perception 5 (fusion partielle outils→phalanges). Raison 4, Créativité 3 (analyse avant imagination). Sociabilité 3 (posé, réservé). Puissance/Agilité 2 (dos voûté, pas de combat). Volonté 3. Total 28, zone PNJ secondaire confirmé."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "5ce93892-18e0-45c3-ab72-bd18718fd2f6"
+  },
+  {
+    "Nom": "Yul Esh'Maradel — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PNJ historique — 9 ans, Van'Doei, apprenti·e cartographe. Faibles stats sociales et physiques (enfant isolé·e sans réseau). Perception et Volonté élevées (a navigué seul·e 5 Nuées dans le Léviathan puis tenté le Portail Médullaire sans formation). Stats figées à l'état connu avant disparition (3378 AG).",
+      "Perception": "4",
+      "Personnage": "dfe78783-9d63-424a-ad5c-aa7726bf6394",
+      "Puissance": "1",
+      "Raison": "3",
+      "Sociabilité": "1",
+      "Technique": "3",
+      "Total Caracs": "21",
+      "Volonté": "4",
+      "id": "STAT40"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ historique — 9 ans, Van'Doei, apprenti·e cartographe. Faibles stats sociales et physiques (enfant isolé·e sans réseau). Perception et Volonté élevées (a navigué seul·e 5 Nuées dans le Léviathan puis tenté le Portail Médullaire sans formation). Stats figées à l'état connu avant disparition (3378 AG)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "7eadf4fd-1ef8-4304-8bc6-42678ce53b58"
+  },
+  {
+    "Nom": "Vetharn-Siol l'Apaiseur — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "5",
+      "Notes d’équilibrage": "PNJ tertiaire, 150 ans, maître-diplomate Van'Doei. Sociabilité et Raison élevées (expertise doctrinale centenaire, 95 Nuées d'arbitrage). Budget exceptionnel (+50%) justifié par son statut de vétéran politique au Cercle des Seize.",
+      "Perception": "6",
+      "Personnage": "571d7129-d962-446f-a3d8-303f19256366",
+      "Puissance": "2",
+      "Raison": "7",
+      "Rôle / Archétype": "Support",
+      "Sociabilité": "8",
+      "Technique": "2",
+      "Total Caracs": "37",
+      "Volonté": "5",
+      "id": "STAT39"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ tertiaire, 150 ans, maître-diplomate Van'Doei. Sociabilité et Raison élevées (expertise doctrinale centenaire, 95 Nuées d'arbitrage). Budget exceptionnel (+50%) justifié par son statut de vétéran politique au Cercle des Seize."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "28bc8d50-13c2-4458-8497-8e0aebf7413c"
+  },
+  {
+    "Nom": "Vemrash Karv-Talvir — Acte 1",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Notes d’équilibrage": "PNJ tertiaire — profil surveillance cultiste orthodoxe. Technique 4 (entretien précis des sodoirs et du bandage) + Volonté 5 (ancrage idéologique fort). Perception 5 calibrée pour que DD 8 tombe en zone Sacrifice (écart +3) sans Effort, justifiant que la micro-interruption du bandage soit difficile à percevoir.",
+      "Perception": "5",
+      "Personnage": "4b63c5dc-af29-4cbc-83b9-f8630f54db32",
+      "Puissance": "3",
+      "Raison": "4",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "3",
+      "Technique": "4",
+      "Total Caracs": "29",
+      "Volonté": "5",
+      "id": "STAT38"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ tertiaire — profil surveillance cultiste orthodoxe. Technique 4 (entretien précis des sodoirs et du bandage) + Volonté 5 (ancrage idéologique fort). Perception 5 calibrée pour que DD 8 tombe en zone Sacrifice (écart +3) sans Effort, justifiant que la micro-interruption du bandage soit difficile à percevoir."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "c9c743d1-cc44-4e22-9529-ceeb54dc0c47"
+  },
+  {
+    "Nom": "L'Incarnée",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "4",
+      "Notes d’équilibrage": "PNJ hostile non recrutable. Corps en mutation permanente (3 m). Budget exceptionnel (38/38). Distribution tank : Puissance et Volonté dominantes, Raison et Agilité faibles (intelligence chaotique du collectif, masse corporelle lente). Acte 4 — Vieille Ville.",
+      "Perception": "5",
+      "Personnage": "1c76e4d2-1b45-80af-8225-ecdd35b8e367",
+      "Puissance": "8",
+      "Raison": "3",
+      "Rôle / Archétype": "Tank",
+      "Sociabilité": "4",
+      "Technique": "4",
+      "Total Caracs": "38",
+      "Volonté": "7",
+      "id": "STAT37"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ hostile non recrutable. Corps en mutation permanente (3 m). Budget exceptionnel (38/38). Distribution tank : Puissance et Volonté dominantes, Raison et Agilité faibles (intelligence chaotique du collectif, masse corporelle lente). Acte 4 — Vieille Ville."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "16910674-3b17-4c7b-9a57-6754c8e2a8e1"
+  },
+  {
+    "Nom": "Nahastra — Acte 1",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Notes d’équilibrage": "PNJ secondaire. Spécialiste technique/analytique. Perception et Raison élevées reflètent l'archiviste méticuleuse ; Technique maximale pour les incisions rituelles et la gestion des Urnes. Sociabilité et Créativité basses : registre factuel, pas de fioritures.",
+      "Perception": "4",
+      "Personnage": "ec7da632-19b5-4d59-bd18-20a5bd5805d9",
+      "Puissance": "2",
+      "Raison": "5",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "2",
+      "Technique": "5",
+      "Total Caracs": "27",
+      "Volonté": "4",
+      "id": "STAT36"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire. Spécialiste technique/analytique. Perception et Raison élevées reflètent l'archiviste méticuleuse ; Technique maximale pour les incisions rituelles et la gestion des Urnes. Sociabilité et Créativité basses : registre factuel, pas de fioritures."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "bf8316c9-e1ae-4767-9c96-b7cfcc4ebb2b"
+  },
+  {
+    "Nom": "Vokh-Taleth Slennokh",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Notes d’équilibrage": "PNJ historique (décédé ~3305 AG, 85 ans avant Acte 1). Stats de référence calibration, non jouables. Perception 8 : vision infrarouge Van'Doei exceptionnelle. Technique 9 : pair de Kha'Vareth. Créativité 7 : innovateur fondateur de l'Ossiphanie. Sociabilité 2 : isolement progressif. Total 43 pts justifié pour fondateur légendaire.",
+      "Perception": "8",
+      "Puissance": "3",
+      "Raison": "5",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "2",
+      "Technique": "9",
+      "Total Caracs": "43",
+      "Volonté": "6",
+      "id": "STAT35"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ historique (décédé ~3305 AG, 85 ans avant Acte 1). Stats de référence calibration, non jouables. Perception 8 : vision infrarouge Van'Doei exceptionnelle. Technique 9 : pair de Kha'Vareth. Créativité 7 : innovateur fondateur de l'Ossiphanie. Sociabilité 2 : isolement progressif. Total 43 pts justifié pour fondateur légendaire."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "cabf1384-0829-41af-8385-be3120ac60ef"
+  },
+  {
+    "Nom": "Drav-Ossivane — Acte 1",
+    "values": {
+      "Agilité": "4",
+      "Build": "Acte 1",
+      "Créativité": "4",
+      "Notes d’équilibrage": "Enfant de 3 nuées (PNJ secondaire). Perception 5 = connaissance fine des conduits et détection via Ossek. Technique 4 + Créativité 4 = réparations pratiques et inventivité. Agilité 4 = navigation dans les espaces étroits. Puissance 2 = corpulence enfantine. Sociabilité 3 + Raison 3 + Volonté 3 = profil neutre/fonctionnel, pas un orateur ou un stratège.",
+      "Perception": "5",
+      "Personnage": "aab147fa-ca93-45eb-8462-9747f3601298",
+      "Puissance": "2",
+      "Raison": "3",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "4",
+      "Total Caracs": "28",
+      "Volonté": "3",
+      "id": "STAT34"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Enfant de 3 nuées (PNJ secondaire). Perception 5 = connaissance fine des conduits et détection via Ossek. Technique 4 + Créativité 4 = réparations pratiques et inventivité. Agilité 4 = navigation dans les espaces étroits. Puissance 2 = corpulence enfantine. Sociabilité 3 + Raison 3 + Volonté 3 = profil neutre/fonctionnel, pas un orateur ou un stratège."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "b6b55c8a-9350-4657-a28c-9114af476474"
+  },
+  {
+    "Nom": "Varek l'Écorché — Acte 4",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PNJ secondaire. Ancien Navigateur-Cartographe reconverti. Force principale: Volonté 8 (auto-mutilation rituelle) et Perception 6 (cartographe des abysses). Corps très diminué post-démembrements (Puissance 1). Profil défensif/support spirituel. Sociabilité 5 reflète son rôle de guide mais son isolationnisme limite l'éloquence sociale.",
+      "Perception": "6",
+      "Personnage": "22e6e4d2-1b45-80ee-875e-d9f219970f06",
+      "Puissance": "1",
+      "Raison": "5",
+      "Rôle / Archétype": "Support",
+      "Sociabilité": "5",
+      "Technique": "3",
+      "Total Caracs": "33",
+      "Volonté": "8",
+      "id": "STAT33"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire. Ancien Navigateur-Cartographe reconverti. Force principale: Volonté 8 (auto-mutilation rituelle) et Perception 6 (cartographe des abysses). Corps très diminué post-démembrements (Puissance 1). Profil défensif/support spirituel. Sociabilité 5 reflète son rôle de guide mais son isolationnisme limite l'éloquence sociale."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "56e582a1-eb22-4920-b401-9dfdef525857"
+  },
+  {
+    "Nom": "Koriel Vol-gul — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Notes d’équilibrage": "PNJ tertiaire ambient. Bras droit paralysé (Puissance/Agilité très faibles). Perception élevée résiduelle — sens hypertrophié par l'exposition aux veines. Raison brisée. Non-combatif, aucun rôle mécanique actif.",
+      "Perception": "4",
+      "Personnage": "21ce11c5-e354-4ff9-b504-5acf991b0b6b",
+      "Puissance": "2",
+      "Raison": "1",
+      "Sociabilité": "2",
+      "Technique": "1",
+      "Total Caracs": "17",
+      "Volonté": "3",
+      "id": "STAT32"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ tertiaire ambient. Bras droit paralysé (Puissance/Agilité très faibles). Perception élevée résiduelle — sens hypertrophié par l'exposition aux veines. Raison brisée. Non-combatif, aucun rôle mécanique actif."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "3f904e4f-1071-4d94-8c27-6276ac309001"
+  },
+  {
+    "Nom": "Ilyena Eonundé du Ressac — Acte 4",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PNJ secondaire Acte 4. Force : Raison + Volonté (archiviste, ritualisme, survie solitaire 30 Nuées). Sociabilité volontairement contenue : elle commande par le silence, pas le nombre.",
+      "Perception": "4",
+      "Personnage": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Puissance": "2",
+      "Raison": "6",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "4",
+      "Technique": "4",
+      "Total Caracs": "32",
+      "Volonté": "6",
+      "id": "STAT31"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire Acte 4. Force : Raison + Volonté (archiviste, ritualisme, survie solitaire 30 Nuées). Sociabilité volontairement contenue : elle commande par le silence, pas le nombre."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "72b692d9-c8fe-4962-94c1-ef4d5c3fd0c9"
+  },
+  {
+    "Nom": "Akthar-Neth Amatru — VS",
+    "values": {
+      "Agilité": "3",
+      "Build": "VS",
+      "Créativité": "6",
+      "Notes d’équilibrage": "PNJ antagoniste, Acte 1. Stats calibrées pour un sage vénérable de 250 ans : très haute Raison/Volonté/Sociabilité (théologien-manipulateur), très basse Puissance/Agilité (corps ossifié, moignon). Rôle Contrôle : n'agit jamais directement au combat ; conditionne les options du joueur via dialogues et doctrine.",
+      "Perception": "7",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Puissance": "2",
+      "Raison": "9",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "8",
+      "Technique": "6",
+      "Total Caracs": "50",
+      "Volonté": "9",
+      "id": "STAT30"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ antagoniste, Acte 1. Stats calibrées pour un sage vénérable de 250 ans : très haute Raison/Volonté/Sociabilité (théologien-manipulateur), très basse Puissance/Agilité (corps ossifié, moignon). Rôle Contrôle : n'agit jamais directement au combat ; conditionne les options du joueur via dialogues et doctrine."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "c1d6f20e-50ee-430e-94d5-8cd965e39c4a"
+  },
+  {
+    "Nom": "feuille_ori_bikar_57_acte1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "5",
+      "Perception": "3",
+      "Personnage": "1886e4d2-1b45-80bb-b913-d5392af85620",
+      "Puissance": "5",
+      "Raison": "3",
+      "Rôle / Archétype": "DPS",
+      "Sociabilité": "2",
+      "Technique": "4",
+      "Total Caracs": "25",
+      "Volonté": "1",
+      "id": "STAT29",
+      "🧩 Compétences de perso": "af2028b2-cb63-4969-950a-c1851551fc9a, a8fc5feb-9c02-4939-a559-4cc56a30c73f, 1cfe5af2-e3ee-474c-b6e6-0c9e366f8ff3"
+    },
+    "sections": {},
+    "notion_page_id": "1dad0555-e5ee-4434-95e6-680a9c1aab9a"
+  },
+  {
+    "Nom": "Caïs Ur'then — Acte 1",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Notes d’équilibrage": "PNJ tertiaire, 13 ans, Van'Doei. Perception dominante (observe et note tout — trait central). Volonté élevée (obstiné, système de comptabilité tenu coûte que coûte). Technique modeste (apprenti Khetra-Morth, ~18 mois). Sociabilité faible (légèrement guindé, maladroit en échange informel).",
+      "Perception": "5",
+      "Personnage": "d79db510-a670-43d6-96aa-f8b600f3b356",
+      "Puissance": "3",
+      "Raison": "4",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "3",
+      "Total Caracs": "28",
+      "Volonté": "5",
+      "id": "STAT28"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ tertiaire, 13 ans, Van'Doei. Perception dominante (observe et note tout — trait central). Volonté élevée (obstiné, système de comptabilité tenu coûte que coûte). Technique modeste (apprenti Khetra-Morth, ~18 mois). Sociabilité faible (légèrement guindé, maladroit en échange informel)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "64ee9485-8aee-4935-b497-4e18d1a35886"
+  },
+  {
+    "Nom": "Glossaire — Rêveur / Acte 1",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "2",
+      "Notes d’équilibrage": "Rêveur secondaire — entité cosmologique non-combat. Scores reflètent ses capacités ontologiques (prescription sémantique, omniscience lexicale, persistance bimillénaire). À utiliser pour calibrer les DDs des interactions avec son domaine (Seuils Lexicaux, Marge, Correction sémantique). Pas de profil de combat direct.",
+      "Perception": "9",
+      "Personnage": "3276e4d2-1b45-80f1-a87e-ffb93f4a7212",
+      "Puissance": "1",
+      "Raison": "10",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "5",
+      "Technique": "1",
+      "Total Caracs": "38",
+      "Volonté": "9",
+      "id": "STAT27"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Rêveur secondaire — entité cosmologique non-combat. Scores reflètent ses capacités ontologiques (prescription sémantique, omniscience lexicale, persistance bimillénaire). À utiliser pour calibrer les DDs des interactions avec son domaine (Seuils Lexicaux, Marge, Correction sémantique). Pas de profil de combat direct."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "9c051aa2-0826-447d-8105-dc37228cc2af"
+  },
+  {
+    "Nom": "Ossian Khäl — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "PNJ secondaire. Spécialités : Perception (guide des passages du Léviathan) et Volonté (conviction non-anxieuse, trait distinctif central). Agilité faible : jambe droite hypertrophiée. Technique solide : cartographe expert, récolte dans les Jardins thoraciques.",
+      "Perception": "6",
+      "Personnage": "1d95df62-504c-4349-b8ec-63893118af51",
+      "Puissance": "3",
+      "Raison": "4",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "4",
+      "Technique": "5",
+      "Total Caracs": "35",
+      "Volonté": "8",
+      "id": "STAT26"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire. Spécialités : Perception (guide des passages du Léviathan) et Volonté (conviction non-anxieuse, trait distinctif central). Agilité faible : jambe droite hypertrophiée. Technique solide : cartographe expert, récolte dans les Jardins thoraciques."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "4e3f8dc9-ea31-4aea-a474-6abb0bfcbcb4"
+  },
+  {
     "Nom": "Grish T'vok — Acte 1",
     "values": {
       "Agilité": "2",
@@ -81,6 +896,7 @@
     "Nom": "Thalas Tarrivka-Ven — Acte 1",
     "values": {
       "Agilité": "2",
+      "Build": "Acte 1",
       "Créativité": "3",
       "Perception": "4",
       "Personnage": "8fefb411-8033-4e06-afdd-9d186937ee2a",
@@ -296,11 +1112,13 @@
       "Personnage": "2286e4d2-1b45-8094-94b7-c021f47fc005",
       "Puissance": "3",
       "Raison": "3",
+      "Rôle / Archétype": "Contrôle",
       "Sociabilité": "2",
       "Technique": "3",
       "Total Caracs": "33",
       "Volonté": "5",
-      "id": "STAT14"
+      "id": "STAT14",
+      "🧩 Compétences de perso": "b55ab8e1-e47f-4b05-a759-9877e5110f4c, e84b4f68-e1ce-4ae9-902e-2f84bab0edd9, 60a2ad9a-1498-485d-8fca-3c05c94a1449, 95a6709e-1874-4689-9ec6-4e9db8cd8b18, d0594073-9069-4391-ab69-4ffcc0fcb4bd, 6c4f04fc-d77d-4acf-a779-c67126067d13, 91cfa460-ed15-4ce3-9474-75867a820b0b, 35691ca3-34c4-4ac8-89b9-2ce97c9e2026"
     },
     "sections": {},
     "notion_page_id": "2ab9d87e-fb6f-41b3-a262-7009391f0b83"
@@ -516,7 +1334,8 @@
       "Technique": "9",
       "Total Caracs": "56",
       "Volonté": "8",
-      "id": "STAT5"
+      "id": "STAT5",
+      "🧩 Compétences de perso": "cad57adc-63fd-409e-b8d7-4f3f897dbd17, fad52cc4-d106-4cba-be8c-90ff560b831b, 7bc567f4-0dba-4741-a18b-1a6c6dbc74d5, aecaa2fb-8c4e-4546-8edf-8ef7d163fb30, 67871a99-e9c4-4724-acc7-d623a9a47b5c, 6dab8588-3f23-4152-a3c3-1bee1fc8067a, b17e1ce7-f32f-4112-94f8-0e83c957748e"
     },
     "sections": {},
     "notion_page_id": "6297e7d0-7210-4b20-9985-5ab4a901aea3"
@@ -537,7 +1356,8 @@
       "Technique": "7",
       "Total Caracs": "42",
       "Volonté": "5",
-      "id": "STAT4"
+      "id": "STAT4",
+      "🧩 Compétences de perso": "05675f8d-2b04-49bc-a7b0-92c4d402f38e, 5e341639-cf04-45b0-b031-5d5f4c3e70bd, 225231b5-684a-4f38-ad41-e393dd646c03, 565aaa24-951d-46e1-b5ba-466fe19ef066, 76139a6d-ac1c-4cfa-9043-f695be3ff0b3, 8e15a0cc-c89c-4280-b9f8-ed6afcd8690a"
     },
     "sections": {
       "notes_d_e_quilibrage": "Lexicorphe analytique : Raison et Technique élevées (manipulation des lois physiques, mémoire photographique). Créativité haute (dérivations). Perception haute (yeux multiples, détection d'anomalies). Sociabilité basse (présence calculée, extraversion basse). Puissance très basse (pas un combattant). Agilité modérée (vohar mais polymorphisme inhibé par discipline). Volonté moyenne (discipline formelle mais anxiété de fond)."

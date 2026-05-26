@@ -1,8 +1,9 @@
 {
   "Nom": "Khystriles",
   "values": {
+    "Espérance de vie": "80",
     "Règne (ou classe)": "3026e4d2-1b45-8030-9b54-d3fb1b86d7cb",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème.",
+    "Résumé IA": "Fiche de Khystriles comprenant des sections pour l’histoire, l’apparence, les rôles culturels et dans l’intrigue, ainsi que l’habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions avec l’écosystème, mais aucune information détaillée n’est encore remplie.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème."
+    "re_sume__ia": "Fiche de Khystriles comprenant des sections pour l’histoire, l’apparence, les rôles culturels et dans l’intrigue, ainsi que l’habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions avec l’écosystème, mais aucune information détaillée n’est encore remplie."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

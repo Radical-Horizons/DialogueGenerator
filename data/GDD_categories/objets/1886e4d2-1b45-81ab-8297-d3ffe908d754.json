@@ -1,6 +1,8 @@
 {
   "Nom": "Métafor ondulatoire",
   "values": {
+    "Actes prévus": "31a6e4d2-1b45-8000-9248-d0b7535ac586",
+    "Connaissances Alteir": "209d4858-3d93-4a3f-8964-02f56ed35303",
     "Date de création": "2025-01-27T13:26:00.000Z",
     "Dernière modification": "2026-04-14T21:35:00.000Z",
     "Lieux de présence": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
@@ -8,7 +10,7 @@
     "Poids": "Léger",
     "Qualité": "4",
     "Rareté": "Rare",
-    "Résumé": "Dispositif vocal intégré à la Grande Radiale, la Métafor ondulatoire transforme les conversations dissidentes en propos banals ou loyalistes lorsqu'elles sont entendues par des tiers.",
+    "Résumé IA": "Dispositif vocal intégré à la Grande Radiale, la Métafor ondulatoire transforme les conversations dissidentes en propos banals ou loyalistes lorsqu'elles sont entendues par des tiers.",
     "Stackable": "non",
     "Taille": "Moyen",
     "Type": "Élément de décor",
@@ -22,7 +24,7 @@
     "conditions___limites": "- **Signal de discoverabilité :** *Reflet, pulsation, son, commentaire d'hôte...*\n\t- **Compétence / coût :** *Null si aucun ; sinon test et Effort lié.*\n\t- **État persistant :** *Intact, activé, vidé, détruit, déplacé...*",
     "inventaires_pnj": "*Créer une ligne si un PNJ possède, équipe, stocke ou peut donner cet objet. Remplir surtout Personnage, Type d'accès, Quantité et Contexte narratif.*\n\t<database url=\"https://www.notion.so/3426e4d21b4580a7b12cd2f3ba0904a1\" inline=\"true\">Données liées</database>",
     "flags_lie_s": "*Créer une ligne si l'objet a un état suivi par le jeu. Remplir surtout Identifiant, Type de valeur, Portée = **`Objet`** et Objets liés.*\n\t<database url=\"https://www.notion.so/3426e4d21b4580a590c3fcb6469eff02\" inline=\"true\">Flags liés</database>",
-    "re_sume_2": "Dispositif vocal intégré à la Grande Radiale, la Métafor ondulatoire transforme les conversations dissidentes en propos banals ou loyalistes lorsqu'elles sont entendues par des tiers."
+    "re_sume__ia": "Dispositif vocal intégré à la Grande Radiale, la Métafor ondulatoire transforme les conversations dissidentes en propos banals ou loyalistes lorsqu'elles sont entendues par des tiers."
   },
   "section_titles": {
     "re_sume": "Résumé",
@@ -32,7 +34,7 @@
     "conditions___limites": "Conditions & limites",
     "inventaires_pnj": "Inventaires PNJ",
     "flags_lie_s": "Flags liés",
-    "re_sume_2": "Résumé"
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "1886e4d2-1b45-81ab-8297-d3ffe908d754"
 }

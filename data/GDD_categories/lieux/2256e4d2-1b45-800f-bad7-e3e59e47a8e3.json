@@ -1,12 +1,15 @@
 {
   "Nom": "Océan mécanique",
   "values": {
-    "Date de création": "2025-07-03T18:51:00.000Z",
-    "Dernière modification": "2026-04-07T16:06:00.000Z",
+    "Actes prévus": "31a6e4d2-1b45-8026-bf52-e0bdd107d332",
+    "Concepts liés": "5b7b4f3f-9dca-4717-a5c5-7df2b17cc7bf, 73742164-8619-499b-bd87-b25cd6f468e4",
+    "Date de création de la fiche": "2025-07-03T18:51:00.000Z",
+    "Dernière modification": "2026-04-26T12:10:00.000Z",
     "Faunes & Flores présentes": "2256e4d2-1b45-8048-8d1c-dc817100f567",
     "Niveau d’IA": "co-écrit",
     "Qualité": "5",
-    "Résumé": "Présentation d'un lieu fictif avec des sections sur l'identité, l'histoire, la géographie, l'organisation humaine, la culture et les dynamiques, incluant des éléments comme l'écosystème, la structure politique, la population et les enjeux actuels.",
+    "Résumé IA": "Océan mécanique est une macro‑entité de type zone naturelle continentale, créée le 3 juillet 2025 et co‑écrite par IA, avec une qualité 5 et un état « Pas commencé ». Elle comprend des sections détaillant son identité, son histoire et son rôle dans l’intrigue, ainsi que sa géographie, son écosystème et ses voies d’accès. Le document décrit également l’organisation humaine, la structure politique, les centres urbains et habitats, la culture, la population, l’économie, les fêtes, l’alimentation spécifique, les enjeux actuels, les points d’intérêt et le système de jeu associé.",
+    "Rôle": "Zone naturelle",
     "Taille": "Continent",
     "Type": "Macro-entité",
     "Zones limitrophes": "1b46e4d2-1b45-8081-854b-e222c4c6aaaf",
@@ -27,7 +30,7 @@
     "enjeux_actuels": "<empty-block/>",
     "points_d_inte_re_t": "<empty-block/>",
     "syste_me_de_jeu": "<empty-block/>",
-    "re_sume": "Présentation d'un lieu fictif avec des sections sur l'identité, l'histoire, la géographie, l'organisation humaine, la culture et les dynamiques, incluant des éléments comme l'écosystème, la structure politique, la population et les enjeux actuels."
+    "re_sume__ia": "Océan mécanique est une macro‑entité de type zone naturelle continentale, créée le 3 juillet 2025 et co‑écrite par IA, avec une qualité 5 et un état « Pas commencé ». Elle comprend des sections détaillant son identité, son histoire et son rôle dans l’intrigue, ainsi que sa géographie, son écosystème et ses voies d’accès. Le document décrit également l’organisation humaine, la structure politique, les centres urbains et habitats, la culture, la population, l’économie, les fêtes, l’alimentation spécifique, les enjeux actuels, les points d’intérêt et le système de jeu associé."
   },
   "section_titles": {
     "preamble": "Préambule",
@@ -44,7 +47,7 @@
     "enjeux_actuels": "Enjeux actuels",
     "points_d_inte_re_t": "Points d'intérêt",
     "syste_me_de_jeu": "Système de jeu",
-    "re_sume": "Résumé"
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "2256e4d2-1b45-800f-bad7-e3e59e47a8e3"
 }

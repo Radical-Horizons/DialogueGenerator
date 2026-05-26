@@ -2,12 +2,11 @@
   "Nom": "Mue-Miroir (Sécrétolaque)",
   "values": {
     "Biologie": "Moyenne",
-    "Culture": "Nulle",
+    "Espérance de vie": "60",
     "Présence dans Escelion": "Rare",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "L'espèce Mue-Miroir est rare dans Escelion, avec une biologie moyenne et aucun impact culturel, surnaturel ou technologique. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son écosystème, y compris son habitat, son mode d'alimentation, sa reproduction et ses interactions écologiques.",
+    "Résumé IA": "Fiche d'espèce contenant des sections vides détaillant le besoin de l'intrigue, l'apparence, les rôles culturel et narratif, ainsi que l'habitat, l'alimentation, la reproduction, les sous‑espèces et les interactions avec l'écosystème.",
     "Surnaturel": "Nulle",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -22,7 +21,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'espèce Mue-Miroir est rare dans Escelion, avec une biologie moyenne et aucun impact culturel, surnaturel ou technologique. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son écosystème, y compris son habitat, son mode d'alimentation, sa reproduction et ses interactions écologiques."
+    "re_sume__ia": "Fiche d'espèce contenant des sections vides détaillant le besoin de l'intrigue, l'apparence, les rôles culturel et narratif, ainsi que l'habitat, l'alimentation, la reproduction, les sous‑espèces et les interactions avec l'écosystème."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

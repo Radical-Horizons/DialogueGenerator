@@ -1,9 +1,10 @@
 {
   "Nom": "Les Cendres parlantes",
   "values": {
+    "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6",
     "Créé par (communauté)": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
     "Date de création": "2025-03-24T13:14:00.000Z",
-    "Dernière modification": "2026-04-14T21:34:00.000Z",
+    "Dernière modification": "2026-04-20T19:42:00.000Z",
     "Détenu par": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
     "Inventaires PNJ": "e7cdf8df-04b4-4605-bafb-f67de99ce90e",
     "Lieux de présence": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53",
@@ -11,11 +12,11 @@
     "Qualité": "4",
     "Rareté": "Rare",
     "Référence visuelle": "2446e4d2-1b45-81c2-92b8-f494463aea8e",
-    "Résumé": "Les Cendres parlantes sont des résidus gris-iridescents issus de l'immolation rituelle des hérétiques, conservés dans des fioles d'obsidienne. Elles émettent des vibrations phoniques, murmurant les dernières pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse offre une expérience spirituelle intense, permettant d'accéder aux connaissances de l'hérétique tout en ressentant son agonie morale.",
+    "Résumé IA": "Les Cendres parlantes sont des résidus gris-iridescents issus de l'immolation rituelle des hérétiques, conservés dans des fioles d'obsidienne. Elles émettent des vibrations phoniques, murmurant les dernières pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse offre une expérience spirituelle intense, permettant d'accéder aux connaissances de l'hérétique tout en ressentant son agonie morale.",
     "Stackable": "non",
     "Taille": "Petit",
     "Type": "Témoignage",
-    "État": "En cours"
+    "État": "Pas commencé"
   },
   "sections": {
     "re_sume": "Résidus gris-iridescents obtenus après l'immolation rituelle des hérétiques sur l'Autel des Vérités Brûlantes de la Nef Centrale. Conservées dans des fioles d'obsidienne gravées des confessions du supplicié, ces cendres émettent d'imperceptibles vibrations phoniques lorsqu'on les approche de l'oreille, murmurant les dernières paroles et pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse permet au consommateur d'accéder temporairement aux connaissances de l'hérétique tout en ressentant son agonie morale, expérience considérée comme la \"plus pure forme d'empathie anti-entropique\" par le Maître-Flagellant. Leur consommation est une forme d'épreuve spirituelle.",
@@ -26,7 +27,7 @@
     "inventaires_pnj": "*Créer une ligne si un PNJ possède, montre, offre ou remet ce témoignage. Remplir surtout Personnage, Type d'accès, Quantité et Contexte narratif.*\n\t<database url=\"https://www.notion.so/3426e4d21b4580828658ed8cb5955e60\" inline=\"true\">Données liées</database>",
     "re_compenses_lie_es": "*Créer une ligne si le témoignage est obtenu comme récompense ou preuve. Remplir surtout Situation, Chapitre, Récompenses, Quantité et 🏁Flags si besoin.*\n\t<database url=\"https://www.notion.so/3426e4d21b45800783b6d744e867758b\" inline=\"true\">Récompenses liées</database>",
     "flags_lie_s": "*Créer une ligne si le témoignage est offert, perdu, validé ou reconnu par un état système. Remplir surtout Identifiant, Type de valeur, Portée = **`Objet`** et Objets liés.*\n\t<database url=\"https://www.notion.so/3426e4d21b4580d98fabcc3a58728a4b\" inline=\"true\">Flags liés</database>",
-    "re_sume_2": "Les Cendres parlantes sont des résidus gris-iridescents issus de l'immolation rituelle des hérétiques, conservés dans des fioles d'obsidienne. Elles émettent des vibrations phoniques, murmurant les dernières pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse offre une expérience spirituelle intense, permettant d'accéder aux connaissances de l'hérétique tout en ressentant son agonie morale."
+    "re_sume__ia": "Les Cendres parlantes sont des résidus gris-iridescents issus de l'immolation rituelle des hérétiques, conservés dans des fioles d'obsidienne. Elles émettent des vibrations phoniques, murmurant les dernières pensées du condamné. Leur ingestion lors du Rituel de Communion Cendreuse offre une expérience spirituelle intense, permettant d'accéder aux connaissances de l'hérétique tout en ressentant son agonie morale."
   },
   "section_titles": {
     "re_sume": "Résumé",
@@ -37,7 +38,7 @@
     "inventaires_pnj": "Inventaires PNJ",
     "re_compenses_lie_es": "Récompenses liées",
     "flags_lie_s": "Flags liés",
-    "re_sume_2": "Résumé"
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "1c06e4d2-1b45-80a7-8db9-e225677931cb"
 }

@@ -1,8 +1,9 @@
 {
   "Nom": "Caverniers",
   "values": {
+    "Espérance de vie": "18",
     "Règne (ou classe)": "a489466f-098f-4b19-b83f-6c417a8fe421",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème.",
+    "Résumé IA": "Fiche de l'espèce Caverniers : nom, espérance de vie de 18 ans, type faune et état « pas commencé », avec sections prévues mais actuellement vides pour l’histoire, l’apparence, le rôle culturel et narratif, l’habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions écologiques.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème."
+    "re_sume__ia": "Fiche de l'espèce Caverniers : nom, espérance de vie de 18 ans, type faune et état « pas commencé », avec sections prévues mais actuellement vides pour l’histoire, l’apparence, le rôle culturel et narratif, l’habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions écologiques."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

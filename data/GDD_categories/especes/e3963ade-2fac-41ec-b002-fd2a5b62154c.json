@@ -2,12 +2,11 @@
   "Nom": "Liseuse de Strates",
   "values": {
     "Biologie": "Avancée",
-    "Culture": "Nulle",
+    "Espérance de vie": "75",
     "Présence dans Escelion": "Rare",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "L'espèce est rare dans Escelion, avec une biologie avancée et un faible aspect surnaturel. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat, mode d'alimentation, reproduction et interaction avec l'écosystème, bien que beaucoup de détails restent à remplir.",
+    "Résumé IA": "Créature nommée Liseuse de Strates, dotée d’une biologie avancée, d’une longue espérance de vie (75) et d’une faible composante surnaturelle, appartenant à la faune; son état actuel est « Pas commencé » et elle est rare dans l’univers d’Escelion.",
     "Surnaturel": "Faible",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -22,7 +21,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'espèce est rare dans Escelion, avec une biologie avancée et un faible aspect surnaturel. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat, mode d'alimentation, reproduction et interaction avec l'écosystème, bien que beaucoup de détails restent à remplir."
+    "re_sume__ia": "Créature nommée Liseuse de Strates, dotée d’une biologie avancée, d’une longue espérance de vie (75) et d’une faible composante surnaturelle, appartenant à la faune; son état actuel est « Pas commencé » et elle est rare dans l’univers d’Escelion."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

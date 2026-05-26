@@ -1,15 +1,16 @@
 {
   "Nom": "Railleurs",
   "values": {
+    "Actes prévus": "31a6e4d2-1b45-8050-ae28-e0515e103d8e",
     "Biologie": "Moyenne",
-    "Culture": "Moyenne",
+    "Concepts liés": "c0d1a4a5-5fd2-4366-a244-c3631ddfced3, be69cd9b-3722-4f94-a4a0-1387aac79ee7, a6c51798-237d-415b-a125-35a196130ea1, 386f3c3b-265f-4145-9cab-8330847becf5",
+    "Espérance de vie": "80",
     "Lieux de vie": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b, 1b46e4d2-1b45-8069-b24d-c263445f6a8e, 1b46e4d2-1b45-80c6-ba2c-e2512a9a56da, 1b46e4d2-1b45-809b-b6ba-ea6dffbf49b5, 1b46e4d2-1b45-8028-a2e5-f06744044aa4, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832, 1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
     "Présence dans Escelion": "Courant",
     "Relation assets": "9dfd8e40-1a20-4a44-b1c6-15834156acc5",
     "Règne (ou classe)": "484cd421-db84-425a-84eb-2414d5f042c5",
-    "Résumé IA": "Les Railleurs sont des créatures artificielles, déformées et rejetées par leur créateur, Culucain. Ils possèdent des caractéristiques physiques uniques, comme des membres supplémentaires non fonctionnels et un sourire tordu. Bien qu'immunisés aux maladies, ils vivent souvent en solitaire ou en petites communautés, avec des relations complexes envers leur race d'origine. Leur culture inclut la langue de leur race et le Créatique, et ils portent des vêtements inversés par rapport à leur espèce d'origine. Leur intégration sociale est compliquée par la perception négative des autres races.",
+    "Résumé IA": "Les Railleurs sont des créatures artificielles créées par Culucain, le roi des monstres, avec une apparence déformée et des membres supplémentaires non fonctionnels. Ils vivent principalement en solitaire ou en petites communautés, parlent la langue de leur race d'origine et le Créatique, et entretiennent des relations complexes avec d'autres espèces, souvent rejetés par leur race d'origine. Ils sont immunisés aux maladies naturelles et se distinguent par leurs vêtements inversés par rapport à leur race d'origine.",
     "Surnaturel": "Moyenne",
-    "Technologie": "Moyenne",
     "Type": "Espèce civilisée",
     "État": "Pas commencé"
   },
@@ -25,7 +26,7 @@
     "relations_extra-spe_cifiques": "Relations complexes avec les autres espèces, oscillant entre rejet total et pitié. Particulièrement attirés par les individus de leur race d'origine, bien que cette attraction ne soit généralement pas réciproque.",
     "habitat_naturel": "Information non disponible dans les données fournies.",
     "distribution_ge_ographique": "Information non disponible dans les données fournies.\n<span color=\"blue\">**Relations avec l'écosystème**</span><br>• Capacité de déplacement réduite par rapport à leur race d'origine<br>• Immunité aux maladies naturelles",
-    "re_sume__ia": "Les Railleurs sont des créatures artificielles, déformées et rejetées par leur créateur, Culucain. Ils possèdent des caractéristiques physiques uniques, comme des membres supplémentaires non fonctionnels et un sourire tordu. Bien qu'immunisés aux maladies, ils vivent souvent en solitaire ou en petites communautés, avec des relations complexes envers leur race d'origine. Leur culture inclut la langue de leur race et le Créatique, et ils portent des vêtements inversés par rapport à leur espèce d'origine. Leur intégration sociale est compliquée par la perception négative des autres races."
+    "re_sume__ia": "Les Railleurs sont des créatures artificielles créées par Culucain, le roi des monstres, avec une apparence déformée et des membres supplémentaires non fonctionnels. Ils vivent principalement en solitaire ou en petites communautés, parlent la langue de leur race d'origine et le Créatique, et entretiennent des relations complexes avec d'autres espèces, souvent rejetés par leur race d'origine. Ils sont immunisés aux maladies naturelles et se distinguent par leurs vêtements inversés par rapport à leur race d'origine."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

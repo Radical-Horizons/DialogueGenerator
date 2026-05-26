@@ -1,5 +1,54 @@
 [
   {
+    "Nom": "Vethraak",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Espèce liée": "1a16e4d2-1b45-8083-9e41-c12db0ba67d8",
+      "Notes": "Convention Umcut : nom individuel unique, sans nom de famille ni marque de foyer. Le registre phonétique reflète l'émergence d'origine (Fractals).",
+      "Porteurs attestés": "dfe78783-9d63-424a-ad5c-aa7726bf6394",
+      "Signification": "Nom Umcut du registre Fractals : noms courts, abstraits, parfois alphanumériques. Phonétique typique des émergences Fractales du Xyriad Achromatique."
+    },
+    "sections": {},
+    "notion_page_id": "4c10c498-a5e1-4546-ba1f-02995afb4a50"
+  },
+  {
+    "Nom": "Uresaïr",
+    "values": {
+      "Catégorie": "Autre",
+      "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Espèce liée": "1a16e4d2-1b45-8064-b82f-f2369406c52d",
+      "Notes": "Alias attestés : Seigneuresse, La Rebelle Immortelle, la Théomaque, Maîtresse des Intervalles, L'Exilée d'An-Zahur, Maîtresse des Formes Immuables, La Gloire Éternelle. Épithète actuelle : L'Effigie de Jade. Considérée comme la Théomaque par le Culte de l'Anentropie.",
+      "Porteurs attestés": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Signification": "Nom propre unique d'une Seigneuresse Originelle de Mérid. Pas de convention de formation : chaque Seigneur Originel choisissait librement son nom et son apparence. Souvent précédé du titre « Seigneuresse » dans le registre formel."
+    },
+    "sections": {},
+    "notion_page_id": "3d7c6fec-ee0b-4097-9402-e992bb2c7866"
+  },
+  {
+    "Nom": "Eonundé",
+    "values": {
+      "Catégorie": "Nom personnel",
+      "Espèce liée": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
+      "Notes": "Cette entrée concerne l'usage en tant que prénom Vaideccan. Le terme « Eonundé » sert également de nom de famille distinct chez la lignée du Ressac (Ysellor, Ilyena) — homonyme à enregistrer séparément si besoin.",
+      "Porteurs attestés": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Signification": "Prénom Vaideccan emprunté par Eonundé Alinen-Egan au milieu du nom d'Ysellor Eonundé du Ressac, dont elle est la copie artificielle. Tient une tension : ni rejet total de son origine, ni appropriation pleine."
+    },
+    "sections": {},
+    "notion_page_id": "9694ada0-03d8-410e-a8f8-8272a8b6fea0"
+  },
+  {
+    "Nom": "Alinen-Egan",
+    "values": {
+      "Catégorie": "Nom de clan",
+      "Espèce liée": "1a16e4d2-1b45-8089-bfc0-c5e513847d8b",
+      "Notes": "Nom unique à ce jour ; pourrait s'étendre à d'autres créations libérées des Bassins Fendus si elles adoptent la même logique de nomination.",
+      "Porteurs attestés": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Signification": "En Abyssal, signifie approximativement « issue du bassin d'une autre, divergée ». Nom auto-attribué par Eonundé Alinen-Egan après son évasion, reconnaissant sa filiation artificielle à Ysellor Eonundé du Ressac sans s'y réduire."
+    },
+    "sections": {},
+    "notion_page_id": "436d3881-c64f-4da7-893e-3406527415c6"
+  },
+  {
     "Nom": "Chantier-Doux",
     "values": {
       "Catégorie": "Surnom d'usage",
@@ -92,17 +141,6 @@
     "notion_page_id": "11e7923d-e6ea-4101-a485-8f205a2a563b"
   },
   {
-    "Nom": "Ven",
-    "values": {
-      "Catégorie": "Marque de foyer",
-      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Notes": "Seule marque de foyer du corpus qui désigne un feu reproductible plutôt qu'un lieu précis. La réputation de polyvalence du nom — utilisable n'importe où — en fait la marque la plus courante chez les Van'Doei des Cendres Nomades.",
-      "Signification": "Feu itinérant des Cendres Nomades, rebâti rituellement à chaque campement selon des gestes transmis de génération en génération. Contrairement aux foyers fixes, Ven n'est pas un lieu mais un acte : le feu de Ven est le même à chaque fois qu'il est allumé selon le rite, quel que soit l'endroit. C'est pourquoi la marque est répandue parmi les nomades."
-    },
-    "sections": {},
-    "notion_page_id": "cafe7302-dc84-4c9e-82f2-4b125b1aba32"
-  },
-  {
     "Nom": "Ori",
     "values": {
       "Catégorie": "Nom d'état",
@@ -147,7 +185,7 @@
       "Catégorie": "Nom de clan",
       "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
       "Notes": "Nom de famille.",
-      "Porteurs attestés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe"
+      "Porteurs attestés": "1a16e4d2-1b45-8098-99d3-c90b26b2ebfe, 892f2fd2-fbe3-4878-a05d-8d608b01e6bf"
     },
     "sections": {},
     "notion_page_id": "9ae0661c-222a-4022-81ff-2571a6335a11"
@@ -207,7 +245,8 @@
     "values": {
       "Catégorie": "Nom personnel",
       "Communauté d'usage": "1996e4d2-1b45-804c-89d5-c935e604f865",
-      "Notes": "Registre solaire."
+      "Notes": "Registre solaire.",
+      "Porteurs attestés": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf"
     },
     "sections": {},
     "notion_page_id": "22507395-69b2-4950-bea0-5b5d90654811"
@@ -299,7 +338,7 @@
       "Catégorie": "Marque de foyer",
       "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, dfe78783-9d63-424a-ad5c-aa7726bf6394",
       "Signification": "Brasier de la Nef Centrale"
     },
     "sections": {},
@@ -311,7 +350,7 @@
       "Catégorie": "Nom personnel",
       "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e"
+      "Porteurs attestés": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, dfe78783-9d63-424a-ad5c-aa7726bf6394"
     },
     "sections": {},
     "notion_page_id": "99e7a48b-c70a-43c6-b285-cdf8b06f37e6"
@@ -334,7 +373,7 @@
       "Catégorie": "Marque de foyer",
       "Communauté d'usage": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
       "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
-      "Porteurs attestés": "2cc6e4d2-1b45-8062-9d49-f252d825bc90",
+      "Porteurs attestés": "2cc6e4d2-1b45-8062-9d49-f252d825bc90, 4b63c5dc-af29-4cbc-83b9-f8630f54db32",
       "Signification": "Brasier de l'atelier de Kel'Thara dans le Quartier des Ossements Travaillés, foyer d'origine de Kresh. Combustion génératrice composée de copeaux d'os travaillé, résidus métalliques (cuivre, argent) et bois d'ossements anciens."
     },
     "sections": {},
@@ -510,6 +549,7 @@
     "values": {
       "Catégorie": "Nom personnel",
       "Notes": "Porteur connu : Ossivane-Thul (Sept Témoins).",
+      "Porteurs attestés": "aab147fa-ca93-45eb-8462-9747f3601298",
       "Région d'usage": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
       "Signification": "Prénom personnel. Placé avant la marque de foyer : Ossivane-Thul."
     },
@@ -734,6 +774,18 @@
     },
     "sections": {},
     "notion_page_id": "a8bf0aff-c0ac-4b9b-ae6e-f55c7b721abd"
+  },
+  {
+    "Nom": "Ven",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Notes": "Seule marque de foyer du corpus qui désigne un feu reproductible plutôt qu'un lieu précis. La réputation de polyvalence du nom — utilisable n'importe où — en fait la marque la plus courante chez les Van'Doei des Cendres Nomades.",
+      "Porteurs attestés": "8fefb411-8033-4e06-afdd-9d186937ee2a",
+      "Signification": "Feu itinérant des Cendres Nomades, rebâti rituellement à chaque campement selon des gestes transmis de génération en génération. Contrairement aux foyers fixes, Ven n'est pas un lieu mais un acte : le feu de Ven est le même à chaque fois qu'il est allumé selon le rite, quel que soit l'endroit. C'est pourquoi la marque est répandue parmi les nomades."
+    },
+    "sections": {},
+    "notion_page_id": "cafe7302-dc84-4c9e-82f2-4b125b1aba32"
   },
   {
     "Nom": "Idh",

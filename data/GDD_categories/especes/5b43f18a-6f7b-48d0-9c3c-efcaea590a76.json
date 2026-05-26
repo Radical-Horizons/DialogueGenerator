@@ -1,8 +1,9 @@
 {
   "Nom": "Tertrins",
   "values": {
+    "Espérance de vie": "16",
     "Règne (ou classe)": "2fd0f8f6-d104-4357-ae15-4b4eb2212ddc",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle dans l'intrigue, son habitat, son mode d'alimentation, sa reproduction, ses sous-espèces et son interaction avec l'écosystème.",
+    "Résumé IA": "Fiche Tertrins présentant les informations de base (nom, espérance de vie, type, état) ainsi que des sections prévues pour l’histoire, l’apparence, le rôle culturel, le rôle dans l’intrigue, l’habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions écologiques, mais sans contenu détaillé.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle dans l'intrigue, son habitat, son mode d'alimentation, sa reproduction, ses sous-espèces et son interaction avec l'écosystème."
+    "re_sume__ia": "Fiche Tertrins présentant les informations de base (nom, espérance de vie, type, état) ainsi que des sections prévues pour l’histoire, l’apparence, le rôle culturel, le rôle dans l’intrigue, l’habitat, l’alimentation, la reproduction, les sous‑espèces et les interactions écologiques, mais sans contenu détaillé."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

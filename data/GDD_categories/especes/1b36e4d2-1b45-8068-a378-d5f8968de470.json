@@ -1,9 +1,11 @@
 {
   "Nom": "Mange-sable",
   "values": {
+    "Actes prévus": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+    "Espérance de vie": "60",
     "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
     "Présence dans Escelion": "Endémique",
-    "Résumé IA": "Plante endémique à grande tige capable de dissoudre des minerais, avec des feuilles bleu foncé. Elle possède des organes en forme de récipients remplis d'un liquide noir acide, utilisé par les nomades pour le travail artisanal. Elle se nourrit en convertissant le sable et les roches en nutriments pour sa croissance.",
+    "Résumé IA": "Plante à grande tige bleue foncée qui dissout sable et roches grâce à des organes-récipients remplis d’un liquide noir acide, produisant des feuilles imperméables utilisées comme abri ou emballage et dont le liquide sert de corrosif artisanal aux nomades.",
     "Type": "Flore",
     "État": "Pas commencé"
   },
@@ -17,7 +19,7 @@
     "mode_d_alimentation_ou_d_obtention_de_nutriments": "Capables de convertir le sable et les roches en éléments suffisants à leur croissance.  Le sable et les petits cailloux, soufflés par le vent, tombent dans ces organes et sont dissous puis digérés.",
     "mode_de_reproduction": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-\n<empty-block/>",
-    "re_sume__ia": "Plante endémique à grande tige capable de dissoudre des minerais, avec des feuilles bleu foncé. Elle possède des organes en forme de récipients remplis d'un liquide noir acide, utilisé par les nomades pour le travail artisanal. Elle se nourrit en convertissant le sable et les roches en nutriments pour sa croissance."
+    "re_sume__ia": "Plante à grande tige bleue foncée qui dissout sable et roches grâce à des organes-récipients remplis d’un liquide noir acide, produisant des feuilles imperméables utilisées comme abri ou emballage et dont le liquide sert de corrosif artisanal aux nomades."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

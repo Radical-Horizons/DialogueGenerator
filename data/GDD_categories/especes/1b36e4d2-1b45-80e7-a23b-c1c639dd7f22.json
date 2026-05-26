@@ -1,9 +1,11 @@
 {
   "Nom": "Pamasier",
   "values": {
+    "Actes prévus": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+    "Espérance de vie": "150",
     "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
     "Présence dans Escelion": "Endémique",
-    "Résumé IA": "Le pamasier est un arbre endémique au fruit imposant, dont le tronc collant attire et digère les insectes du désert. Ce fruit, protégé par des voiles, est une source alimentaire précieuse dans le Désert des Échos. Le bois de l'arbre est utilisé pour fabriquer des outils, et la substance collante sert de répulsif naturel autour des campements.",
+    "Résumé IA": "Le pamasier, arbre vert‑rouge endémique d'Escelion, possède un tronc collant qui piège les insectes du désert pour les digérer, tandis que ses fruits verts‑jaunes, les pamasies, sont protégés par des voiles. Le fruit est prisé comme aliment dans le Désert des Échos, la résine du tronc sert de répulsif naturel, et le bois dense est utilisé pour fabriquer des outils et des manches.",
     "Type": "Flore",
     "État": "Pas commencé"
   },
@@ -11,13 +13,13 @@
     "re_sume__de_la_fiche": "Ainsi nommé d'après son fruit, la pamasie (étrange et imposant fruit vert-jaune), le pamasier est un arbre vert-rouge et noueux, dont le tronc est recouvert d'une substance collante. Celle-ci attire et englue les insectes du désert qui sont alors engloutis puis digérés par l'arbre. Le système est d'autant plus ingénieux que les pamasies, elles, sont à l'abri de presque toutes les espèces insectoïdes, en raison des sortes de voiles qui le recouvrent.\n**Guides**",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>",
-    "ro_le_culturel": "La **pamasie**, fruit imposant protégé par ses voiles naturels, constitue un aliment prisé dans le Désert des Échos — l'un des rares fruits accessibles en quantité dans cet environnement aride. La substance collante du tronc, qui piège les insectes, est utilisée comme **répulsif naturel** autour des campements. Le bois noueux vert-rouge, dense et résistant, sert à la fabrication d'outils et de manches.",
+    "ro_le_culturel": "La **pamasie**, fruit imposant protégé par ses voiles naturels, constitue un aliment prisé dans le Désert des Échos, l'un des rares fruits accessibles en quantité dans cet environnement aride. La substance collante du tronc, qui piège les insectes, est utilisée comme **répulsif naturel** autour des campements. Le bois noueux vert-rouge, dense et résistant, sert à la fabrication d'outils et de manches.",
     "ro_le_dans_l_intrigue": "-",
     "habitat_naturel": "-",
     "mode_d_alimentation_ou_d_obtention_de_nutriments": "-",
     "mode_de_reproduction": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-\n<empty-block/>",
-    "re_sume__ia": "Le pamasier est un arbre endémique au fruit imposant, dont le tronc collant attire et digère les insectes du désert. Ce fruit, protégé par des voiles, est une source alimentaire précieuse dans le Désert des Échos. Le bois de l'arbre est utilisé pour fabriquer des outils, et la substance collante sert de répulsif naturel autour des campements."
+    "re_sume__ia": "Le pamasier, arbre vert‑rouge endémique d'Escelion, possède un tronc collant qui piège les insectes du désert pour les digérer, tandis que ses fruits verts‑jaunes, les pamasies, sont protégés par des voiles. Le fruit est prisé comme aliment dans le Désert des Échos, la résine du tronc sert de répulsif naturel, et le bois dense est utilisé pour fabriquer des outils et des manches."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

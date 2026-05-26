@@ -1,8 +1,10 @@
 {
   "Nom": "Iclot",
   "values": {
+    "Actes prévus": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
+    "Espérance de vie": "90",
     "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
-    "Résumé IA": "L'iclot est une plante de grande taille avec une forme cylindrique, colorée en bleu sombre avec des veines argentées. Elle utilise des graines multicolores pour des teintures rituelles. Son habitat et son mode d'alimentation sont liés à une symbiose avec des bactéries, permettant l'échange de ressources et d'informations entre les plantes. Les iclots sont également perçus comme un signe de vitalité souterraine, attirant l'attention des voyageurs du désert.",
+    "Résumé IA": "L'iclot est une grande plante cylindrique bleu sombre à veines argentées, qui utilise des graines multicolores pour fabriquer des teintures rituelles. Elle respire lentement grâce à ses racines qui extraient des gaz souterrains, échange des ressources via des orifices, et se reproduit par des fleurs de diverses couleurs. Son apparence hypnotique et ses veines scintillantes en font un symbole culturel important pour les voyageurs du désert et le Culte de l'Anentropie.",
     "Type": "Flore",
     "État": "Pas commencé"
   },
@@ -10,13 +12,13 @@
     "re_sume__de_la_fiche": "<empty-block/>\n**Guides**",
     "histoire_de_l_espe_ce": "- Le <mention-page url=\"https://www.notion.so/1886e4d21b4581b8ad16dcfa990112f1\"/> utilise des graines multicolores pour ses teintures",
     "apparence": "L'iclot est une plante de grande taille, prenant la forme d'un large cylindre avec un bout arrondi. Ils sont de couleur bleu sombre, parcourus de veines argentées qui scintillent et se gonflent au rythme de la lente respiration de la plante. À la surface des iclots, on peut observer des orifices ronds ayant plusieurs fonctions : évacuation de gaz indésirable, épanouissement des fleurs qui poussent dedans avant de s'ouvrir à l'extérieur, et participation à la symbiose entre les iclots. Les différentes sortes d'iclots, visibles à travers la couleur de leurs fleurs (rouges, jaunes ou oranges), tentent de se connecter par ces orifices pour échanger des ressources et des informations.",
-    "ro_le_culturel": "Les graines multicolores des iclots sont récoltées par le Culte de l'Anentropie pour la fabrication de **teintures rituelles** — rouges, jaunes et oranges selon la variété de fleur. Les veines argentées scintillantes de la plante et sa \"respiration\" lente en font un spectacle hypnotique pour les voyageurs du désert, parfois interprété comme signe de vitalité souterraine.",
+    "ro_le_culturel": "Les graines multicolores des iclots sont récoltées par le Culte de l'Anentropie pour la fabrication de **teintures rituelles** : rouges, jaunes et oranges selon la variété de fleur. Les veines argentées scintillantes de la plante et sa \"respiration\" lente en font un spectacle hypnotique pour les voyageurs du désert, parfois interprété comme signe de vitalité souterraine.",
     "ro_le_dans_l_intrigue": "-",
     "habitat_naturel": "-",
     "mode_d_alimentation_ou_d_obtention_de_nutriments": "La respiration de l'iclot est rendue possible par ses racines, rarement visibles en surface. Ces racines fouillent le sol à la recherche des poches de gaz créées par différentes bactéries. Les cylindres des iclots, en s'insérant par leurs orifices, permettent aux plantes d'échanger des ressources et des informations sur la composition des sous-sols, favorisant ainsi leur survie en symbiose.",
     "mode_de_reproduction": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-\n<empty-block/>",
-    "re_sume__ia": "L'iclot est une plante de grande taille avec une forme cylindrique, colorée en bleu sombre avec des veines argentées. Elle utilise des graines multicolores pour des teintures rituelles. Son habitat et son mode d'alimentation sont liés à une symbiose avec des bactéries, permettant l'échange de ressources et d'informations entre les plantes. Les iclots sont également perçus comme un signe de vitalité souterraine, attirant l'attention des voyageurs du désert."
+    "re_sume__ia": "L'iclot est une grande plante cylindrique bleu sombre à veines argentées, qui utilise des graines multicolores pour fabriquer des teintures rituelles. Elle respire lentement grâce à ses racines qui extraient des gaz souterrains, échange des ressources via des orifices, et se reproduit par des fleurs de diverses couleurs. Son apparence hypnotique et ses veines scintillantes en font un symbole culturel important pour les voyageurs du désert et le Culte de l'Anentropie."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

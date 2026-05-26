@@ -1,0 +1,36 @@
+{
+  "Nom": "Urnes rituelles de Kheridhen",
+  "values": {
+    "Actes effectifs": "2e0acee9-5107-4256-9e41-3c36344d59b6; 2e0acee9-5107-4256-9e41-3c36344d59b6",
+    "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+    "Date de création": "2026-04-25T21:13:00.000Z",
+    "Dernière modification": "2026-04-25T21:13:00.000Z",
+    "Détenu par": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+    "Inventaires PNJ": "0967b5ff-1297-42ca-a12f-aa51bb37a589",
+    "Niveau d’IA": "co-écrit",
+    "Poids": "Moyen",
+    "Présence dans les chapitres": "3796db61-63f6-4908-9140-8a82f613f197, 6901258e-727b-4f8a-bc81-fe57dbd1f769",
+    "Rareté": "Unique",
+    "Stackable": "non",
+    "Taille": "Moyen",
+    "Type": "Objet de quête",
+    "État": "Brouillon IA"
+  },
+  "sections": {
+    "re_sume": "Trois urnes rituelles de combustion froide, de fabrication Kheridhen (Barvasinkul de la combustion froide). Suie noire compactée, parois métalliques fines, cliquetis caractéristique au moindre déplacement. Empruntées par <mention-page url=\"https://www.notion.so/1a16e4d21b45809389adeae2e28f9b31\"/> en 16 Nuées lors de l'**Affaire des Cendriers** et jamais restituées. Pour les proches d'une victime de l'Affaire, l'odeur métallique et le son suffisent à les reconnaître sans même les voir.",
+    "description": "Urnes funéraires de la tradition Kheridhen, utilisées dans le rite de la combustion froide pour conserver les cendres des défunts. Trois exemplaires, de tailles légèrement différentes, marqués d'inscriptions liturgiques effacées par l'usage. Genka les conserve au fond de son paquetage, présentées en performance comme « objets d'origine commerciale » — un mensonge entretenu depuis 16 Nuées.",
+    "statut___re_gles": "- **Statut juridique :** volées (les Cendriers de Kheridhen sont les propriétaires légitimes).\n- **Non vendable, non jetable** (objet-fardeau au sens du système <mention-page url=\"https://www.notion.so/abcf64c87fc14b50992ffd11459b0295\"/>).\n- **Détenteur unique :** <mention-page url=\"https://www.notion.so/1a16e4d21b45809389adeae2e28f9b31\"/>.",
+    "de_clencheur_narratif": "Leur présence dans l'inventaire de Genka déclenche obligatoirement la **scène du Payoff Kheridhen** lors de la quête de recrutement *Le Carnaval des Correspondances* (Acte 1) : un·e survivant·e ou proche d'une victime reconnaît les urnes au cliquetis et au parfum de suie froide, et exige soit la restitution soit un mensonge officiel pour clore la querelle.",
+    "origine": "- **Communauté créatrice :** Cendriers de Kheridhen (sectes Barvasinkul de la combustion froide).\n- **Date d'« emprunt » :** 16 Nuées, performance improvisée dans un relais caravanier.\n- **Conséquence historique :** raid punitif des Cendriers contre les Flagellants de Vex-Thul, trois morts côté Flagellants.",
+    "notes_de_production": "- Lier à la quête *Le Carnaval des Correspondances* dès qu'elle est encodée.\n- Prévoir flag : `Flag_perso_genka_urnes_restituees` (Bool, posé après le Payoff Kheridhen, branche Restituer)."
+  },
+  "section_titles": {
+    "re_sume": "Résumé",
+    "description": "Description",
+    "statut___re_gles": "Statut & règles",
+    "de_clencheur_narratif": "Déclencheur narratif",
+    "origine": "Origine",
+    "notes_de_production": "Notes de production"
+  },
+  "notion_page_id": "c18c90ee-f0e2-4b7c-96b0-4a2461864e75"
+}

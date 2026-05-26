@@ -1,20 +1,23 @@
 {
   "Nom": "Frémissants",
   "values": {
+    "Actes prévus": "d4f4728f-0bbe-447d-a307-83ad1eec7418",
     "Biologie": "Moyenne",
-    "Culture": "Avancée",
+    "Concepts liés": "bffcf497-4929-4c70-9711-5892bc0379eb, 0e003e2b-e803-462b-bc24-ea61543c1782, fc1d72fa-f388-4e12-8fda-cfebc49974bc, ec3aa5db-1ffb-48d2-a7a2-10bc9e6e216a",
+    "Espérance de vie": "700",
+    "Evénements liés": "2306e4d2-1b45-80b0-84ba-dc5d2cc7245b, 22c6e4d2-1b45-8080-8cf1-da05fc3f5dbd",
     "Lieux de vie": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
     "Présence dans Escelion": "Éteinte",
     "Relation assets": "03240764-0ddb-413f-acd8-80c8c45766c5",
     "Règne (ou classe)": "3026e4d2-1b45-8030-9b54-d3fb1b86d7cb",
-    "Résumé IA": "Les Frémissants sont des entités bio-cristallines évoluées, disparues en 888, originaires du Désert des échos perdus. Leur physiologie unique inclut un exosquelette crânien abritant un cerveau quantique et des capacités de téléportation. Leur histoire se divise en quatre ères majeures, marquées par des avancées en communication quantique et manipulation du temps. Leur société était centrée sur la science et le partage de connaissances via un réseau neuronal quantique, et leur habitat naturel servait de laboratoire pour des calculs complexes. Leur disparition a laissé des anomalies quantiques et des restes appelés Fragments Frémissants, considérés comme des mémoires quantiques fossilisées.",
+    "Résumé IA": "Les Frémissants sont des entités bio-cristallines évoluées, disparues en 888, qui possédaient une technologie avancée leur permettant de manipuler la matière, l'espace et le temps. Leur société était centrée sur l'avancement scientifique et la compréhension des lois de l'univers, utilisant un réseau neuronal quantique pour partager des connaissances. Ils habitaient le Désert des échos perdus, où ils avaient développé une capacité unique à manipuler leur environnement au niveau atomique, laissant des anomalies quantiques après leur disparition.",
     "Surnaturel": "Nulle",
-    "Technologie": "Avancée",
     "Type": "Espèce civilisée",
-    "État": "Pas commencé"
+    "État": "Brouillon IA"
   },
   "sections": {
     "re_sume__de_la_fiche": "Les Frémissants sont des entités bio-cristallines hautement évoluées, originaires du Désert des échos perdus. Ces êtres d'une intelligence remarquable possèdent une forme similaire à des céphalopodes translucides avec un exosquelette crânien abritant un cerveau quantique. Leur technologie avancée leur permet de manipuler la matière, l'espace et le temps. Leur disparition (en 888) reste inexpliquée à ce jour.",
+    "guides": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3Aaa08d28a-54d4-45c3-848d-74422b082ba9%3AFremissants_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223666e4d2-1b45-8112-b50f-d376fb60c508%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
     "physiologie": "Les Frémissants possèdent un corps bio-cristallin translucide avec des appendices formant des réseaux neuronaux visibles. Leur exosquelette crânien fonctionne comme un supercalculateur organique abritant un cerveau quantique. Leurs yeux multifacettes agissent comme des spectromètres naturels. Leur taille est ajustable grâce à la manipulation de leur structure moléculaire, pouvant aller de l'échelle microscopique à plusieurs mètres. Ils se déplacent par téléportation quantique à courte portée. Un frémissant moyen mesurait environ 80cm de long.",
     "reproduction_et_croissance": "Informations non disponibles sur leur mode de reproduction et développement.",
     "mode_d_alimentation": "Leur nature bio-cristalline suggère qu'ils tirent leur énergie directement des fluctuations quantiques et des vibrations fondamentales de l'univers.",
@@ -23,14 +26,15 @@
     "culture_et_traditions": "Leur société était centrée sur l'avancement scientifique et la compréhension des lois fondamentales de l'univers. Ils partageaient leurs connaissances via un réseau neuronal quantique intriqué.",
     "costumes_et_ornements": "<empty-block/>",
     "organisation_sociale": "Les Frémissants formaient une civilisation unifiée par leur réseau de connaissance partagée, utilisant la résonance cognitive pour un partage instantané d'informations.",
-    "relations_extra-spe_cifiques": "Peu d'informations sont disponibles sur leurs interactions avec d'autres espèces.",
+    "relations_extra-spe_cifiques": "Peu d'informations sont disponibles sur leurs interactions avec d'autres espèces. Une exception notable : des inscriptions en écriture quantique gravées sur les gaines des nerfs optiques du Léviathan pétrifié attestent que les Frémissants ont entretenu une relation active avec ce titan de son vivant ou peu après sa pétrification. Le peu que les Murmurateurs du Culte de l'Anentropie ont décodé de ces inscriptions décrit des protocoles : fréquences de percussion des nerfs, zones à surveiller, seuils d'alerte. Que cette relation soit de la maintenance, de la communication rituelle, ou les deux, reste ouvert. Ce qui est établi : ces inscriptions continuent de fonctionner comme code actif pour toute entité portant une architecture cognitive frémissante, 2500 Nuées après la disparition de leurs auteurs.",
     "habitat_naturel": "Le Désert des échos perdus servait de laboratoire naturel aux Frémissants. Ils utilisaient les dunes de sable noir pour leurs calculs complexes et les pierres d'ébène comme noyaux de stockage de données quantiques.",
     "distribution_ge_ographique": "Principalement concentrés dans le Désert des échos perdus, avec des traces de leur présence dans les crevasses profondes où ils avaient construit des accélérateurs de particules naturels.",
     "relations_avec_l_e_cosyste_me": "Les Frémissants avaient développé une capacité unique à manipuler leur environnement au niveau atomique. Leur disparition a laissé des anomalies quantiques persistantes dans le Désert des échos perdus. Leurs restes ont formé les Fragments Frémissants, qui servent aujourd'hui de monnaie. Conformément au postulat matérialiste d'Alteir, ces fragments ne sont que des traces matérielles inertes (des mémoires quantiques fossilisées), totalement dépourvues de conscience propre ou d'immortalité.",
-    "re_sume__ia": "Les Frémissants sont des entités bio-cristallines évoluées, disparues en 888, originaires du Désert des échos perdus. Leur physiologie unique inclut un exosquelette crânien abritant un cerveau quantique et des capacités de téléportation. Leur histoire se divise en quatre ères majeures, marquées par des avancées en communication quantique et manipulation du temps. Leur société était centrée sur la science et le partage de connaissances via un réseau neuronal quantique, et leur habitat naturel servait de laboratoire pour des calculs complexes. Leur disparition a laissé des anomalies quantiques et des restes appelés Fragments Frémissants, considérés comme des mémoires quantiques fossilisées."
+    "re_sume__ia": "Les Frémissants sont des entités bio-cristallines évoluées, disparues en 888, qui possédaient une technologie avancée leur permettant de manipuler la matière, l'espace et le temps. Leur société était centrée sur l'avancement scientifique et la compréhension des lois de l'univers, utilisant un réseau neuronal quantique pour partager des connaissances. Ils habitaient le Désert des échos perdus, où ils avaient développé une capacité unique à manipuler leur environnement au niveau atomique, laissant des anomalies quantiques après leur disparition."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",
+    "guides": "Guides",
     "physiologie": "Physiologie",
     "reproduction_et_croissance": "Reproduction et croissance",
     "mode_d_alimentation": "Mode d'alimentation",
