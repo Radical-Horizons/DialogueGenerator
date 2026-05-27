@@ -1,6 +1,9 @@
 ---
-description: Déploiement production — VPS, scripts npm/PowerShell, nginx, pièges connus
-globs: ["scripts/deploy*.ps1", "scripts/deploy*.sh", "docs/deployment/**", "docs/guides/deployment-guide.md"]
+description: >-
+  Déploiement production VPS (demo.auto-diffusion.net) — npm run deploy / deploy-production.ps1,
+  deploy-from-wsl.sh, nginx, systemd, .env prod (ENVIRONMENT, JWT, CORS), 403 frontend/dist
+  permissions, SSE proxy_buffering. Apply when deploying, configuring prod, or debugging
+  production, nginx, or health checks — même sans ouvrir les scripts deploy.
 alwaysApply: false
 ---
 

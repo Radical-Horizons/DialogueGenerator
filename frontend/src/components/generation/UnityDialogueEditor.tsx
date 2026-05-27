@@ -8,6 +8,7 @@ import * as dialoguesAPI from '../../api/dialogues'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { useToast } from '../shared'
+import { TraitRequirementsEditor } from '../shared/TraitRequirementsEditor'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import type {
   UnityDialogueNode,
@@ -785,45 +786,13 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                               >
                                 Traits requis
                               </label>
-                              <textarea
-                                value={
-                                  choice.traitRequirements && choice.traitRequirements.length > 0
-                                    ? JSON.stringify(choice.traitRequirements, null, 2)
-                                    : ''
+                              <TraitRequirementsEditor
+                                idPrefix={`unity-${node.id}-${choiceIndex}-trait-requirements`}
+                                value={choice.traitRequirements}
+                                onChange={(traitRequirements) =>
+                                  updateChoice(node.id, choiceIndex, { traitRequirements })
                                 }
-                                onChange={(e) => {
-                                  const value = e.target.value.trim()
-                                  if (!value) {
-                                    updateChoice(node.id, choiceIndex, { traitRequirements: undefined })
-                                    return
-                                  }
-                                  try {
-                                    const parsed = JSON.parse(value)
-                                    if (Array.isArray(parsed)) {
-                                      updateChoice(node.id, choiceIndex, { traitRequirements: parsed })
-                                    }
-                                  } catch {
-                                    // Garder la valeur pour permettre la saisie progressive
-                                  }
-                                }}
-                                placeholder='[{"trait": "Autoritaire", "minValue": 5}]'
-                                rows={2}
-                                style={{
-                                  width: '100%',
-                                  padding: '0.5rem',
-                                  boxSizing: 'border-box',
-                                  backgroundColor: theme.input.background,
-                                  border: `1px solid ${theme.input.border}`,
-                                  color: theme.input.color,
-                                  borderRadius: '4px',
-                                  fontSize: '0.8rem',
-                                  fontFamily: 'monospace',
-                                  resize: 'vertical',
-                                }}
                               />
-                              <div style={{ marginTop: '0.25rem', fontSize: '0.7rem', color: theme.text.secondary, fontStyle: 'italic' }}>
-                                Format JSON: {'[{"trait": "NomTrait", "minValue": 5}]'}
-                              </div>
                             </div>
                           </div>
 

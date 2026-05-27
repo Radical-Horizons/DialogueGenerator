@@ -9,6 +9,10 @@ globs:
   - services/gdd_sections_split.py
   - api/routers/gdd_notion_sync.py
   - api/schemas/gdd_notion_sync.py
+  - tests/services/test_notion*.py
+  - tests/services/test_gdd_notion*.py
+  - tests/api/test_gdd_notion*.py
+  - scripts/test_notion_extraction.py
 ---
 
 - **Corps de page (besoin central)** : utiliser uniquement `NotionAPIClient.get_page_content` pour obtenir tout le texte du corps (markdown enrichi `GET /v1/pages/{id}/markdown`, `Notion-Version: 2026-03-11`, puis repli arbre blocs). Ne pas ajouter de parcours « racine = seulement `blocks/.../children` » pour un export complet de page.

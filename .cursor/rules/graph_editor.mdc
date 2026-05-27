@@ -2,6 +2,7 @@
 description: Règles spécifiques pour l'éditeur de graphe (GraphEditor/GraphCanvas/graphStore + API /graph).
 globs:
   - "frontend/src/components/graph/**"
+  - "frontend/src/utils/mergeNodeEditorForm.ts"
   - "frontend/src/store/graphStore.ts"
   - "frontend/src/store/slices/*Slice.ts"
   - "frontend/src/store/graphViewStore.ts"

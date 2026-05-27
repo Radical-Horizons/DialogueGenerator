@@ -444,12 +444,12 @@ export function Dashboard() {
     },
   ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
 
-  // En mode éditeur de graphe : masquer "Prompt". En mode Génération : masquer "Édition de nœud"
+  // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
     if (centerPanelTab === 'graph') {
       return rightPanelTabs.filter((t) => t.id !== 'prompt')
     }
-    if (centerPanelTab === 'generation') {
+    if (centerPanelTab === 'generation' || centerPanelTab === 'edition') {
       return rightPanelTabs.filter((t) => t.id !== 'node')
     }
     return rightPanelTabs
@@ -459,7 +459,7 @@ export function Dashboard() {
   const effectiveRightPanelTab =
     centerPanelTab === 'graph' && rightPanelTab === 'prompt'
       ? 'node'
-      : centerPanelTab === 'generation' && rightPanelTab === 'node'
+      : (centerPanelTab === 'generation' || centerPanelTab === 'edition') && rightPanelTab === 'node'
         ? 'prompt'
         : rightPanelTab
 
@@ -484,7 +484,7 @@ export function Dashboard() {
   useEffect(() => {
     if (centerPanelTab === 'graph' && rightPanelTab === 'prompt') {
       setRightPanelTab('node')
-    } else if (centerPanelTab === 'generation' && rightPanelTab === 'node') {
+    } else if ((centerPanelTab === 'generation' || centerPanelTab === 'edition') && rightPanelTab === 'node') {
       setRightPanelTab('prompt')
     }
   }, [centerPanelTab, rightPanelTab])

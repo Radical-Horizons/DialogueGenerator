@@ -1,6 +1,9 @@
 ---
 description: Parsing et affichage du prompt structuré — sections imbriquées, hiérarchie, tests
-globs: ["frontend/src/hooks/usePromptPreview.ts", "frontend/src/components/generation/StructuredPromptView.tsx"]
+globs:
+  - "frontend/src/hooks/usePromptPreview.ts"
+  - "frontend/src/hooks/usePromptPreview.test.ts"
+  - "frontend/src/components/generation/StructuredPromptView.tsx"
 alwaysApply: false
 ---
 

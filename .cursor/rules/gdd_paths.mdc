@@ -1,8 +1,9 @@
 ---
-description: Configuration des chemins GDD et données du projet
-globs:
-  - "**/context_builder.py"
-  - "**/api/utils/health_check.py"
+description: >-
+  Chemins et données GDD (GDD_categories, shards, Vision.json, cache .gdd_snapshot,
+  gdd_loader, gdd_paths, gdd_disk_cache, context_builder, split_gdd_category_to_shards,
+  sync Notion .archive/.staging). Apply when changing GDD layout on disk, loaders,
+  fingerprints, or DATA_MAINTENANCE.
 alwaysApply: false
 ---
 
