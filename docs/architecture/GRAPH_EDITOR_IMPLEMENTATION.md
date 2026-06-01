@@ -263,7 +263,7 @@ cd frontend && npm run build
 1. `services/graph_conversion_service.py` (344 lignes)
 2. `services/graph_validation_service.py` (378 lignes)
 3. `api/schemas/graph.py` (112 lignes)
-4. `api/routers/graph.py` (348 lignes)
+4. `api/routers/graph_*.py` (modules I/O, génération, validation, qualité, flux)
 
 #### Frontend (10 fichiers)
 5. `frontend/src/store/graphStore.ts` (511 lignes)
