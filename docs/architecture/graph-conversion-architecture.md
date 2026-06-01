@@ -166,7 +166,7 @@ Les `TestNode` (barre avec 4 handles) sont **uniquement** des artefacts de visua
 
 - Schéma Unity officiel : `docs/resources/dialogue-format.schema.json`
 - Service de conversion backend : `services/graph_conversion_service.py`
-- API Graph : `api/routers/graph.py`
+- API Graph : `api/routers/graph_*.py` (I/O, validation, qualité, flux — voir `api/main.py`)
 - Store frontend : `frontend/src/store/graphStore.ts`
 - Documentation Story 0-10 (4 résultats de test) : `_bmad-output/implementation-artifacts/0-10-tests-4-resultats-critiques.md`
 - Stratégie autosave / seq / résilience : ADR-006 dans `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`
@@ -174,4 +174,4 @@ Les `TestNode` (barre avec 4 handles) sont **uniquement** des artefacts de visua
 
 ---
 
-**Dernière mise à jour** : 2026-01-29 (ADR-007 React Flow controlled ; référence viewport local)
+**Dernière mise à jour** : 2026-06-01 (routers graph modulaires ; référence ADR-007 inchangée)

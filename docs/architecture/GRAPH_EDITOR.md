@@ -67,6 +67,21 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 - **Erreurs** : Clic pour afficher les détails
 - **Raccourcis** : Aide-mémoire
 
+### Panneaux flottants (outils qualité / validation)
+
+Plusieurs outils s’ouvrent dans des **fenêtres déplaçables** (portail `document.body`, position `fixed`), pas en colonne fixe :
+
+| Panneau | `storageKey` (position session) | Rôle |
+|---------|-------------------------------|------|
+| Erreurs de validation | `graph-validation-errors` | Liste issues `POST /graph/validate` |
+| Schéma Unity | `schema-unity` | `validate-schema` |
+| Simulation de flux | `flow-simulation` | Dead ends, couverture |
+| Context dropping | `context-dropping` | Détection + lien vers règles persistées |
+| AI slop | `ai-slop` | Détection GPT-isms / répétitions |
+| Qualité LLM | `quality-llm` | Juge dialogue (`evaluate-dialogue-quality`) |
+
+Enveloppe commune : `GraphToolFloatingShell.tsx` — titre draggable, fermeture, mémorisation de position dans `sessionStorage` (`graph-tool-float-pos:<storageKey>`). Déclencheurs : barre d’outils `GraphEditorHeader` (boutons avec `data-testid` dédiés).
+
 ## Types de Nœuds
 
 ### DialogueNode (Bleu)
@@ -191,23 +206,21 @@ Option B : Depuis l'URL
 - **unreachable_node** : Nœud inaccessible depuis START
 - **cycle_detected** : Cycle dans le graphe (peut être intentionnel)
 
-## Limitations Actuelles (MVP)
+## Limitations et périmètre (2026-06)
 
-### Non implémenté
+### Disponible dans l’éditeur
 
-- ❌ Génération de nœuds avec IA (depuis le graphe)
-- ❌ Édition avancée des choix (conditions, mécaniques RPG)
-- ❌ Auto-layout Dagre (avec animation)
-- ❌ Validation visuelle (badges, outline)
-- ❌ Recherche & filtrage
-- ❌ Export PNG/SVG
+- Génération de nœud IA (`POST /graph/generate-node`, accept/reject/regenerate)
+- Auto-layout **dagre** côté client (`layoutSlice`, raccourci Auto-layout) ; autres algorithmes via API `calculate-layout`
+- Recherche / jump-to / filtres 100 % client (`GraphSearchBar`, `JumpToNodeModal`)
+- Validation structurelle, schéma Unity, simulation de flux, context dropping, AI slop (panneaux flottants ci-dessus)
 
-### Workarounds
+### Encore limité ou absent
 
-- **Génération IA** : Utiliser l'interface principale puis ouvrir dans l'éditeur
-- **Édition choix** : Modifier le JSON exporté manuellement
-- **Auto-layout** : Layout basique en cascade (non Dagre)
-- **Recherche** : Utiliser Ctrl+F du navigateur dans le JSON exporté
+- Édition avancée des choix (conditions RPG complètes, mécaniques) — partiellement via formulaire nœud
+- Validation **visuelle** sur le canvas (badges / outline par issue) — les résultats sont surtout dans les panneaux
+- Export **PNG/SVG** du graphe
+- Animation fluide lors du re-layout dagre
 
 ## Architecture Technique
 
@@ -225,14 +238,14 @@ Option B : Depuis l'URL
 
 ### Frontend
 
-- **Store** : `graphStore.ts` (Zustand + temporal pour undo/redo)
+- **Store** : `graphStore.ts` (Zustand + temporal pour undo/redo) ; commandes inter-composants via `graphViewStore.ts`
 - **Components** :
-  - `GraphCanvas.tsx` : Canvas ReactFlow
-  - `nodes/DialogueNode.tsx` : Nœud de dialogue
-  - `nodes/TestNode.tsx` : Nœud de test
-  - `nodes/EndNode.tsx` : Nœud de fin
-  - `NodeEditorPanel.tsx` : Panel d'édition
-- **Page** : `GraphEditorPage.tsx`
+  - `GraphCanvas.tsx` : Canvas ReactFlow (mode controlled, ADR-007)
+  - `GraphEditorHeader.tsx` : barre d’outils, export Unity, ouverture panneaux flottants
+  - `GraphToolFloatingShell.tsx` + panneaux `GraphValidationPanel`, `GraphContextDroppingPanel`, `GraphAiSlopPanel`, etc.
+  - `nodes/*` : cartes Dialogue / Test / End
+  - `NodeEditorPanel.tsx` : édition nœud (Dashboard)
+- **Pages** : `GraphEditorPage.tsx` (standalone), onglet graphe du Dashboard
 
 ## Support
 

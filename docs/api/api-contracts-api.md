@@ -462,7 +462,7 @@ All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schema
 
 **Request Body:** `GddNotionPreviewDatabaseRequest` — `{ "category_file": "..." }` (doit correspondre à une source `database`).
 
-**Response:** `GddNotionPreviewDatabaseResponse` — première ligne mappée comme en sync (debug / UI).
+**Response:** `GddNotionPreviewDatabaseResponse` — première ligne mappée comme en sync (debug / UI). Champs utiles au diagnostic Notion multi-vues : `data_sources_count`, `data_source_entries` (`{ id, name }`), `query_total_rows`, `property_keys_from_query_row`, `property_keys_from_get_page`, `compact_table`.
 
 ### POST `/gdd-notion-sync/sync`
 
@@ -472,8 +472,9 @@ All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schema
 - `mirror_rebuild` (bool) — **déprécié, sans effet**.
 - `resume` (bool) — reprendre une sync complète (`full=true` obligatoire ; mutuellement exclusif avec `fresh`).
 - `fresh` (bool) — abandon checkpoint + nouveau run complet (`full=true` obligatoire).
+- `apply_staging_despite_errors` (bool, default `false`) — avec `full=true` seulement ; promeut le staging malgré `partial_errors` quand `mirror_promotion_pending` est true. **Incompatible** avec `resume` et `fresh`.
 
-**Response:** `GddNotionSyncRunResponse` (`success`, `message`, `updated_entities`, `partial_errors`).
+**Response:** `GddNotionSyncRunResponse` (`success`, `message`, `updated_entities`, `partial_errors`, `mirror_promotion_pending`).
 
 ### GET `/gdd-notion-sync/full-sync-checkpoint`
 
@@ -605,7 +606,7 @@ All routes below require **JWT** (`Depends(get_current_user)` in `api/main.py`).
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| POST | `/detect-ai-slop` | GPT-isms, repetitions, generic phrases (`AISlopDetector`) |
+| POST | `/detect-ai-slop` | GPT-isms, repetitions, generic phrases (`AISlopDetector`). Regex personnalisées : max **32** motifs, **512** caractères chacun ; motifs à quantificateurs imbriqués typiques ReDoS refusés (`MAX_CUSTOM_REGEX_*` dans `services/ai_slop_detector.py`). |
 | POST | `/detect-context-dropping` | GDD context usage vs selections (`ContextDroppingDetector`; rules from request + persisted GET `/validation/rules/context-dropping`) |
 | POST | `/evaluate-dialogue-quality` | LLM judge (`LLMQualityJudgeService`; requires working LLM provider) |
 

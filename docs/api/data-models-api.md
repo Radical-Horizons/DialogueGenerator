@@ -49,10 +49,7 @@ Game mechanics flags models:
 - Flag combination models
 
 ### `graph.py`
-Graph editor models:
-- Graph structure models
-- Node and edge models
-- Layout models
+Graph editor request/response models (Pydantic). Les routes HTTP sont réparties dans `api/routers/graph_*.py` ; ce fichier reste la source OpenAPI des payloads graphe.
 
 ### `config.py`
 Configuration models:

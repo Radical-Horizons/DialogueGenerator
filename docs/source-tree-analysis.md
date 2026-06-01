@@ -86,7 +86,8 @@ DialogueGenerator/
 - `auth.py`: Authentication endpoints (login, refresh, logout)
 - `context.py`: GDD context endpoints (characters, locations, items, etc.)
 - `dialogues.py`: Dialogue generation endpoints
-- `graph.py`: Graph editor endpoints
+- `graph_*.py`: Graph editor endpoints (split: `graph_io`, `graph_generation`, `graph_cost`, `graph_validation`, `graph_quality`, `graph_flow`, `graph_node_history`)
+- `gdd_notion_sync.py`: GDD sync from Notion (config, sync, archives, NotebookLM export)
 - `config.py`: Configuration endpoints
 - `vocabulary.py`: Vocabulary endpoints
 - `narrative_guides.py`: Narrative guides endpoints

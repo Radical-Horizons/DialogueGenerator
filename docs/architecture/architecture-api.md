@@ -81,8 +81,15 @@ The backend follows a **layered architecture** with clear separation of concerns
 - Unity dialogue generation
 - Dialogue export
 
-**Graph** (`api/routers/graph.py`):
-- Graph validation, layout, export/import, save
+**Graph** (préfixe `/api/v1/unity-dialogues/graph`, monté depuis `api/main.py`) :
+- `graph_io.py` — load / save / save-and-write
+- `graph_generation.py` — generate-node, accept/reject/regenerate
+- `graph_cost.py` — estimate-cost
+- `graph_validation.py` — validate, validate-schema, validate-lore-explicit
+- `graph_quality.py` — detect-ai-slop, detect-context-dropping, evaluate-dialogue-quality
+- `graph_flow.py` — simulate-flow, calculate-layout
+- `graph_node_history.py` — prompt payload
+- Schémas partagés : `api/schemas/graph.py` — voir [Graph editor API](../api/api-contracts-api.md#graph-editor-api-apiv1unity-dialoguesgraph)
 
 **Configuration** (`api/routers/config.py`):
 - System prompts, scene instructions, author profiles

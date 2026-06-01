@@ -23,7 +23,7 @@ Implémentation réussie d'un éditeur de graphe narratif inspiré d'Articy:Draf
   - Détection des cycles
   - Validation du contenu des nœuds
 
-#### API REST (`api/routers/graph.py`)
+#### API REST (`api/routers/graph_*.py` — voir `api/main.py`)
 - ✅ `POST /api/v1/unity-dialogues/graph/load` - Charger un graphe
 - ✅ `POST /api/v1/unity-dialogues/graph/save` - Sauvegarder un graphe
 - ✅ `POST /api/v1/unity-dialogues/graph/validate` - Valider un graphe
