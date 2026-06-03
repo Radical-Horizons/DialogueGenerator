@@ -59,7 +59,7 @@ describe('useNarrowInlineSize', () => {
     let resizeObserverInstanceCount = 0
     const PreviousResizeObserver = global.ResizeObserver
     global.ResizeObserver = class ResizeObserver {
-      constructor(_callback: ResizeObserverCallback) {
+      constructor() {
         resizeObserverInstanceCount += 1
       }
       observe() {}
