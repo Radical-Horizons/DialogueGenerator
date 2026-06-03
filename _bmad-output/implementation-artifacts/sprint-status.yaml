@@ -116,7 +116,10 @@ development_status:
   17-5-pwa-install-manifest-option-fr121: done
   17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
   17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
-epic-17-retrospective: optional
+  epic-17-retrospective: optional
+  epic-dette-technique: backlog
+  dette-1-refactor-grapheditorheader-tri-state-toolbar: backlog
+  epic-dette-technique-retrospective: optional
   epic-4: in-progress
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: ready-for-dev
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: backlog

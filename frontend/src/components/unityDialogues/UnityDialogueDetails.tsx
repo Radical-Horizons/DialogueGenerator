@@ -148,6 +148,7 @@ export function UnityDialogueDetails({
                   onClick={() => onGenerateContinuation(jsonContent, title)}
                   style={{
                     padding: tb.toolbarButtonPadding,
+                    minHeight: `${tb.toolbarButtonMinHeightPx}px`,
                     border: `1px solid ${theme.border.primary}`,
                     borderRadius: '6px',
                     backgroundColor: theme.button.primary.background,
@@ -155,6 +156,10 @@ export function UnityDialogueDetails({
                     cursor: 'pointer',
                     fontSize: `${tb.toolbarButtonFontRem}rem`,
                     fontWeight: tb.toolbarButtonFontWeight,
+                    lineHeight: 1.25,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     boxSizing: 'border-box',
                     width: isNarrow ? '100%' : undefined,
                     minWidth: isNarrow ? 0 : undefined,
@@ -171,6 +176,7 @@ export function UnityDialogueDetails({
                 disabled={isDeleting}
                 style={{
                   padding: tb.toolbarButtonPadding,
+                  minHeight: `${tb.toolbarButtonMinHeightPx}px`,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: '#dc3545',
@@ -179,6 +185,10 @@ export function UnityDialogueDetails({
                   opacity: isDeleting ? 0.6 : 1,
                   fontSize: `${tb.toolbarButtonFontRem}rem`,
                   fontWeight: tb.toolbarButtonFontWeight,
+                  lineHeight: 1.25,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   boxSizing: 'border-box',
                   width: isNarrow ? '100%' : undefined,
                   minWidth: isNarrow ? 0 : undefined,

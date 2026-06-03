@@ -72,7 +72,6 @@ describe('GraphEditorHeader - Desktop toolbar tri-state mode', () => {
         toolbar={makeMockToolbar()}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}
@@ -104,7 +103,6 @@ describe('GraphEditorHeader - Desktop toolbar tri-state mode', () => {
         toolbar={makeMockToolbar()}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}
@@ -149,7 +147,6 @@ describe('GraphEditorHeader - Desktop toolbar tri-state mode', () => {
         toolbar={makeMockToolbar()}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}

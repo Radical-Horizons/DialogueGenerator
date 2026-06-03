@@ -61,7 +61,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
         toolbar={toolbar}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}
@@ -82,7 +81,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
         toolbar={toolbar}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}
@@ -102,7 +100,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
       toolbar,
       isLoadingDialogue: false,
       hasActiveDialogue: true,
-      activeDialogueTitle: 'Test',
       activeDialogueFilename: 'test.json',
       handleSave: async () => {},
       onBatchTagApply: () => {},
@@ -145,7 +142,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
         toolbar={toolbar}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}
@@ -217,7 +213,6 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
         toolbar={toolbar}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}

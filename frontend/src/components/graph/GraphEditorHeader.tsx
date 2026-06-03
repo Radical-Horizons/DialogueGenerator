@@ -42,7 +42,6 @@ interface GraphEditorHeaderProps {
   toolbar: UseGraphToolbarReturn
   isLoadingDialogue: boolean
   hasActiveDialogue: boolean
-  activeDialogueTitle: string | null
   activeDialogueFilename: string | null
   handleSave: () => Promise<void>
   onBatchTagApply: (tag: string) => void
@@ -62,7 +61,6 @@ interface GraphEditorHeaderProps {
 export function GraphEditorHeader({
   toolbar,
   hasActiveDialogue,
-  activeDialogueTitle,
   activeDialogueFilename,
   onBatchTagApply,
   handleBatchValidateSelection,
@@ -548,46 +546,25 @@ export function GraphEditorHeader({
     )
   }
 
-  const renderTitleBlock = (): ReactNode => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-      {onBack && (
-        <button
-          type="button"
-          onClick={onBack}
-          style={{
-            padding: '0.45rem 0.8rem',
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: '6px',
-            backgroundColor: theme.button.default.background,
-            color: theme.button.default.color,
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          ← Retour
-        </button>
-      )}
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: theme.text.primary }}>
-          Éditeur de graphe
-        </div>
-        <div
-          style={{
-            fontSize: '0.8rem',
-            color: theme.text.secondary,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            maxWidth: '320px',
-          }}
-          title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
-        >
-          {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
-        </div>
-      </div>
-    </div>
-  )
+  const renderTitleBlock = (): ReactNode =>
+    onBack ? (
+      <button
+        type="button"
+        onClick={onBack}
+        style={{
+          padding: '0.45rem 0.8rem',
+          border: `1px solid ${theme.border.primary}`,
+          borderRadius: '6px',
+          backgroundColor: theme.button.default.background,
+          color: theme.button.default.color,
+          cursor: 'pointer',
+          fontSize: '0.85rem',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        ← Retour
+      </button>
+    ) : null
 
   const renderBatchOperationsMenu = (): ReactNode => (
     <BatchOperationsMenu
@@ -1043,86 +1020,36 @@ export function GraphEditorHeader({
                 {headerSelector}
               </div>
             )}
-
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: `${chrome.buttonFontSizeRem}rem`,
-                  fontWeight: 700,
-                  color: theme.text.primary,
-                }}
-              >
-                Éditeur de graphe
-              </div>
-              <div
-                style={{
-                  fontSize: `${chrome.badgeFontSizeRem}rem`,
-                  color: theme.text.secondary,
-                  textOverflow: 'ellipsis',
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%',
-                }}
-                title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
-              >
-                {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
-              </div>
-            </div>
           </>
         ) : (
           <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-              {isStandalone && onBack && (
-                <button
-                  type="button"
-                  onClick={onBack}
-                  style={{
-                    padding: '0.45rem 0.8rem',
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '6px',
-                    backgroundColor: theme.button.default.background,
-                    color: theme.button.default.color,
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  ← Retour
-                </button>
-              )}
-              <div style={{ minWidth: 0 }}>
-                {headerSelector && (
-                  <div
-                    data-testid="graph-editor-header-selector"
-                    style={{ marginBottom: '0.4rem' }}
+            {((isStandalone && onBack) || headerSelector) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                {isStandalone && onBack && (
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    style={{
+                      padding: '0.45rem 0.8rem',
+                      border: `1px solid ${theme.border.primary}`,
+                      borderRadius: '6px',
+                      backgroundColor: theme.button.default.background,
+                      color: theme.button.default.color,
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      whiteSpace: 'nowrap',
+                    }}
                   >
+                    ← Retour
+                  </button>
+                )}
+                {headerSelector && (
+                  <div data-testid="graph-editor-header-selector" style={{ minWidth: 0 }}>
                     {headerSelector}
                   </div>
                 )}
-                <div
-                  style={{
-                    fontSize: `${chrome.buttonFontSizeRem}rem`,
-                    fontWeight: 700,
-                    color: theme.text.primary,
-                  }}
-                >
-                  Éditeur de graphe
-                </div>
-                <div
-                  style={{
-                    fontSize: `${chrome.badgeFontSizeRem}rem`,
-                    color: theme.text.secondary,
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '320px',
-                  }}
-                  title={activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
-                >
-                  {activeDialogueTitle || activeDialogueFilename || 'Aucun dialogue chargé'}
-                </div>
               </div>
-            </div>
+            )}
 
             <div style={{ display: 'flex', gap: `${chrome.groupGapRem}rem`, alignItems: 'center' }}>
               {canEditGraph && (
