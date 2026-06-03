@@ -116,6 +116,15 @@ development_status:
   17-5-pwa-install-manifest-option-fr121: done
   17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
   17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
+  epic-17: done
+  17-1-shell-responsive-breakpoints-layout-320px-fr118: done
+  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
+  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
+  17-6-typographie-densite-adaptive-panneaux-onglets-fr118: done
+  17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
+  17-5-pwa-install-manifest-option-fr121: done
+  17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
+  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
   epic-17-retrospective: optional
   epic-dette-technique: backlog
   dette-1-refactor-grapheditorheader-tri-state-toolbar: backlog
