@@ -144,11 +144,13 @@ button:focus-visible {
 
 .unity-dialogue-toolbar-actions[data-actions-narrow="true"] button {
   width: 100% !important;
+  min-height: 33px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
   box-sizing: border-box !important;
+  line-height: 1.25 !important;
 }
 
 /**

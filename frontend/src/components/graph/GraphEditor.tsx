@@ -68,7 +68,6 @@ export function GraphEditor({
     setSelectedDialogue,
     isLoadingDialogue,
     activeDialogueFilename,
-    activeDialogueTitle,
     hasActiveDialogue,
     handleSave,
     dialogueListRef,
@@ -190,7 +189,6 @@ export function GraphEditor({
           toolbar={toolbar}
           isLoadingDialogue={isLoadingDialogue}
           hasActiveDialogue={hasActiveDialogue}
-          activeDialogueTitle={activeDialogueTitle ?? null}
           activeDialogueFilename={activeDialogueFilename}
           handleSave={handleSave}
           onBatchTagApply={handleBatchTagSelection}

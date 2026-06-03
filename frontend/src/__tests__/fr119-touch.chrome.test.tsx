@@ -205,7 +205,6 @@ describe('FR119 touch targets — chrome', () => {
           toolbar={toolbar}
           isLoadingDialogue={false}
           hasActiveDialogue={true}
-          activeDialogueTitle="T"
           activeDialogueFilename="f.json"
           handleSave={async () => {}}
           onBatchTagApply={() => {}}
@@ -236,7 +235,6 @@ describe('FR119 touch targets — chrome', () => {
           toolbar={toolbar}
           isLoadingDialogue={false}
           hasActiveDialogue={true}
-          activeDialogueTitle="T"
           activeDialogueFilename="f.json"
           handleSave={async () => {}}
           onBatchTagApply={() => {}}

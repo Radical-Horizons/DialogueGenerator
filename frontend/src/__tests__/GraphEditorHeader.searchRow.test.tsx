@@ -62,7 +62,6 @@ describe('GraphEditorHeader - SearchRow', () => {
         toolbar={toolbar}
         isLoadingDialogue={false}
         hasActiveDialogue={true}
-        activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
         onBatchTagApply={() => {}}
