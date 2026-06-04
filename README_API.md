@@ -84,14 +84,16 @@ python -m api.main
 
 **Méthode 3: Via uvicorn directement**
 ```bash
-# Avec le venv activé
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+# Avec le venv activé — port aligné dev (proxy Vite / E2E utilisent 4243 par défaut)
+API_PORT=4243 uvicorn api.main:app --reload --host 0.0.0.0 --port 4243
 ```
 
-L'API sera accessible sur :
-- API: http://localhost:8000
-- Documentation Swagger: http://localhost:8000/api/docs
-- Documentation ReDoc: http://localhost:8000/api/redoc
+Sans `API_PORT`, `python -m api.main` utilise le défaut **`4242`** (`api/main.py`). `npm run dev` fixe **`API_PORT=4243`** via `scripts/dev.js`.
+
+L'API sera accessible sur (exemple port **4243**) :
+- API: http://localhost:4243
+- Documentation Swagger: http://localhost:4243/api/docs
+- Documentation ReDoc: http://localhost:4243/api/redoc
 
 ## Endpoints principaux
 

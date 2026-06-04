@@ -341,7 +341,7 @@ async def endpoint(
 
 - **ASGI Server**: Uvicorn
 - **Workers**: Configured for production
-- **Port**: 4242 (production), 4243 (development)
+- **Port**: `API_PORT` (défaut **`4242`** dans `api/main.py` si absent) ; **`npm run dev`** définit **`4243`** (`scripts/dev.js`, aligné proxy Vite / E2E). Gunicorn en prod : `bind` typiquement **`127.0.0.1:4242`** dans `gunicorn.conf.py` (Nginx reverse-proxy vers ce socket).
 
 ### Environment Configuration
 

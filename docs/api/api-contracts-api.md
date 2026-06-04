@@ -217,42 +217,68 @@ Export Unity dialogue to YARN file format.
 
 ---
 
-## Graph Editor Endpoints (`/api/v1/graph`)
+## Graph Editor Endpoints (`/api/v1/unity-dialogues/graph`)
 
-### POST `/graph/validate`
-Validate graph structure.
+Tous les routes ci-dessous exigent un **JWT** (`Authorization: Bearer …`), comme les autres routes graphe (`Depends(get_current_user)` dans `api/main.py`). Les schémas détaillés sont dans `api/schemas/graph.py`.
 
-**Request Body:** Graph validation request
+### Persistance et I/O
 
-**Response:** Validation result
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/load` | Charger un graphe depuis le stockage |
+| `POST` | `/unity-dialogues/graph/save` | Sauvegarder le graphe |
+| `POST` | `/unity-dialogues/graph/save-and-write` | Sauvegarde + écriture disque (flux principal client) |
 
-### POST `/graph/layout`
-Calculate graph layout.
+### Validation et flux
 
-**Request Body:** Graph layout request
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/validate` | Structure (orphelins, références, cycles) |
+| `POST` | `/unity-dialogues/graph/validate-schema` | Conformité schéma JSON Unity (FR48) |
+| `POST` | `/unity-dialogues/graph/validate-lore-explicit` | Contradictions lore explicites (texte vs GDD) |
+| `POST` | `/unity-dialogues/graph/simulate-flow` | Simulation de parcours / couverture |
+| `POST` | `/unity-dialogues/graph/calculate-layout` | Recalcul de layout côté serveur |
 
-**Response:** Layout data
+### Qualité graphe (heuristiques + LLM)
 
-### POST `/graph/export`
-Export graph to various formats.
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/detect-ai-slop` | Détection motifs « AI slop » (FR43) |
+| `POST` | `/unity-dialogues/graph/detect-context-dropping` | Détection context dropping vs contexte GDD (FR44) ; fusionne options requête + règles persistées (`ContextDroppingRulesService`) |
+| `POST` | `/unity-dialogues/graph/evaluate-dialogue-quality` | Juge qualité narrative via LLM (FR42) |
 
-**Request Body:** Export request
+### Coût et génération
 
-**Response:** Export data
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/estimate-cost` | Estimation coût/tokens |
+| `POST` | `/unity-dialogues/graph/generate-node` | Génération de nœud |
 
-### POST `/graph/import`
-Import graph from format.
+### Historique nœud / prompts
 
-**Request Body:** Import request
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `GET` | `/unity-dialogues/graph/prompt` | Récupération prompt associé au nœud (paramètres query selon schéma) |
+| `POST` | `/unity-dialogues/graph/nodes/{node_id}/accept` | Accepter proposition générée |
+| `POST` | `/unity-dialogues/graph/nodes/{node_id}/reject` | Rejeter |
+| `POST` | `/unity-dialogues/graph/nodes/{node_id}/regenerate` | Régénérer |
 
-**Response:** Imported graph data
+**Schémas** : corps et réponses typés dans `api/schemas/graph.py` (ex. `DetectContextDroppingRequest` / `DetectContextDroppingResponse` avec `kind` : `context_dropping` \| `too_subtle` \| `mandatory_missing`).
 
-### POST `/graph/save`
-Save graph to storage.
+---
 
-**Request Body:** Graph save request
+## Validation rules — context dropping (`/api/v1/validation/rules`)
 
-**Response:** Save confirmation
+Persistance des **règles** utilisées par défaut lors d’un `POST .../detect-context-dropping` (priorité : champs fournis dans la requête > fichier persisté > défauts). Implémentation : `services/context_dropping_rules_service.py` → fichier `data/validation-rules/context-dropping.json` (UTF-8, créé au besoin).
+
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `GET` | `/validation/rules/context-dropping` | Lire les règles (défauts si fichier absent). JSON corrompu → `422` avec message explicite |
+| `PUT` | `/validation/rules/context-dropping` | Remplacer les règles (`ContextDroppingRulesSchema` dans `api/schemas/validation_rules.py`) |
+
+**Corps `PUT` (champs principaux)** : `rules_profile` (`strict` \| `light`), `tolerance` optionnelle `[0,1]`, `mandatory_info` (liste de labels obligatoires dans le graphe), `dialogue_type_overrides`, `schema_version`.
+
+**Auth** : JWT requis (`api/main.py`, router `validation_rules`).
 
 ---
 
