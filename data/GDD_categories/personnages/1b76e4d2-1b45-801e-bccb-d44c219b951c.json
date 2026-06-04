@@ -9,7 +9,7 @@
     "Date de création": "2025-03-15T13:08:00.000Z",
     "Date de naissance": "3353",
     "Date vérification": "2026-05-04",
-    "Dernière modification": "2026-05-19T16:40:00.000Z",
+    "Dernière modification": "2026-05-27T14:39:00.000Z",
     "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
     "Feuilles de perso": "7446896e-eec3-4fb6-81ca-84aabcd84e74",
     "Genre": "Masculin",
@@ -23,14 +23,15 @@
     "Relations principales": "2286e4d2-1b45-80cd-bf22-d2fadf218fb2",
     "Relations secondaires": "2286e4d2-1b45-80cd-bf22-d2fadf218fb2",
     "Réponse au problème moral": "Assécher ce qu'on est avant que ça serve à quoi que ce soit d'autre. Ce qui sèche complètement n'a plus de prise.",
-    "Résumé IA": "Murmure‑Éteint est un sage Van'Doei de 37 nuées, masculin, de qualité 9, engagé dans une auto‑momification volontaire où il ne consomme que des cendres de graines et de racines pour assécher son corps, vivant dans une alcôve sèche du Léviathan; il agit comme PNJ tertiaire, offrant des conseils rares et secs, et son rôle s’articule autour de la limite entre ascèse, déclin et doctrine anentropique, avec une présence discrète mais symbolique pour le Culte.",
+    "Résumé IA": "Murmure‑Éteint est un sage Van'Doei de 37 nuées, masculin, attaché à un rituel d’auto‑momification où il ne consomme que des cendres de graines et de racines pour assécher son corps, vivant dans une alcôve sèche du Léviathan et offrant parfois des cendres à Chantier‑Doux; il parle peu, utilise des images matérielles et incarne la tension entre ascèse, déclin et la doctrine du Culte.",
     "Slug": "murmure_eteint",
     "Type": "PNJ tertiaire",
     "Âge ou Nuées depuis la naissance": "37",
-    "Épithète": "Sage",
+    "Épithète": "Le sage",
     "État": "Eléments liés à gérer"
   },
   "sections": {
+    "guides": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3Acec7f8b8-e2dc-41dd-8900-affe44ac7260%3AGorge_Murmurante_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223676e4d2-1b45-8109-8e70-ce7ff4c01da7%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
     "re_sume__de_la_fiche": "Murmure-Éteint est un vieux sage Van'Doei engagé dans un rituel d'auto-momification : il ne consomme plus que des cendres de graines et de racines pour assécher son corps avant que le Culte ait besoin de décider ce qu'il reste de lui.",
     "apparence_et_voix": "L'apparence est l'élément central : prosôpon de cendre vitrifiée gris profond, craquelé comme une poterie trop cuite, bouche scellée par une bande horizontale. Deux fentes d'yeux étroites donnent un regard de statue ; la peau sous le masque a pris une teinte poussiéreuse, déjà presque funéraire.\n\tSon bras hypertrophié — le gauche, dont les Van'Doei du Culte portent l'asymétrie comme une grammaire du corps — est la partie la plus avancée dans la dessication. La peau y est beige cendré, sèche comme les parois du Tunnel vertébral en été de Somme, les phalanges saillantes sous une membrane presque transparente. Il le pose à plat sur ses genoux pendant les cérémonies, horizontal, sans chercher à le dissimuler. C'est la première chose que les novices regardent en s'approchant.\n\tSa voix est basse, sèche, comme si elle sortait de la coupe de cendres plutôt que de sa gorge.",
     "contexte": "- **Situation actuelle (3390 AG) :** installé dans une alcôve sèche du Léviathan, près des zones d'auto-momification, où il trie et consomme des cendres de graines et de racines.\n\t- **Rôle / archétype :** témoin volontaire de la limite entre ascèse, déclin et propagande anentropique.\n\t- **Relation discrète :** laisse parfois à Chantier-Doux une poignée de cendre de graines, offrande ambivalente qui ressemble autant à un soin qu'à une préparation au retrait.",
@@ -43,10 +44,11 @@
     "alias": "Le Sage de Cendre, L'Ascète des Puits, Le Visage de Pierre, Le Mourant Volontaire",
     "occupation": "Sage",
     "re_ponse_au_proble_me_moral": "Assécher ce qu'on est avant que ça serve à quoi que ce soit d'autre. Ce qui sèche complètement n'a plus de prise.",
-    "re_sume__ia": "Murmure‑Éteint est un sage Van'Doei de 37 nuées, masculin, de qualité 9, engagé dans une auto‑momification volontaire où il ne consomme que des cendres de graines et de racines pour assécher son corps, vivant dans une alcôve sèche du Léviathan; il agit comme PNJ tertiaire, offrant des conseils rares et secs, et son rôle s’articule autour de la limite entre ascèse, déclin et doctrine anentropique, avec une présence discrète mais symbolique pour le Culte.",
-    "e_pithe_te": "Sage"
+    "re_sume__ia": "Murmure‑Éteint est un sage Van'Doei de 37 nuées, masculin, attaché à un rituel d’auto‑momification où il ne consomme que des cendres de graines et de racines pour assécher son corps, vivant dans une alcôve sèche du Léviathan et offrant parfois des cendres à Chantier‑Doux; il parle peu, utilise des images matérielles et incarne la tension entre ascèse, déclin et la doctrine du Culte.",
+    "e_pithe_te": "Le sage"
   },
   "section_titles": {
+    "guides": "Guides",
     "re_sume__de_la_fiche": "Résumé de la fiche",
     "apparence_et_voix": "Apparence et voix",
     "contexte": "Contexte",

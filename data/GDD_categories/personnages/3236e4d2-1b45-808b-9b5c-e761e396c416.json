@@ -14,7 +14,7 @@
     "Date de naissance": "3359",
     "Date vérification": "2026-05-19",
     "Dates majeures": "2306e4d2-1b45-80a2-82ab-cd961d082cfe",
-    "Dernière modification": "2026-05-19T16:51:00.000Z",
+    "Dernière modification": "2026-05-25T12:31:00.000Z",
     "Défauts liés": "b28fe580-24df-4f37-8ab9-f7936ac57706, d54ed3d3-3aeb-4df1-b396-b68c92523a23",
     "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
     "Feuilles de perso": "80f44ddc-c91d-44af-b047-40a20dfed8fe",
@@ -42,6 +42,7 @@
   },
   "sections": {
     "re_sume__de_la_fiche": "Officiant murmurateur spécialisé dans les rites d'implantation sonique, Yrthas structure tout son pouvoir autour d'un principe : n'opère jamais gratuitement. Chaque initiation contracte une dette dont les termes sont fixés par Yrthas seul, et dont la valeur n'est révélée que lorsque cela devient utile. Iel revendique l'héritage de Rhylos Vesh-Akhor et la mission inachevée de neutraliser le Codex des Dettes Karmiques, mais entend en exploiter le contenu avant de le détruire, là où la fondatrice exigeait une destruction pure.",
+    "guides": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3Ac9cc5d28-6b0f-4e56-95ff-101ee01dcb49%3AYrthas_Keth-Vareth_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223686e4d2-1b45-8152-a762-d66e6e74dc9b%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
     "corps_et_morphologie": "- Silhouette difficile à mémoriser hors de la Krypte : on retient surtout la voix.\n\t- Taille 2,25-2,30m, dans la limite inférieure pour un·e Van'Doei adulte. Peau gris médian, texture poreuse avec des craquelures fines aux articulations — teinte de combustion contrôlée qui ne déclenche aucune hiérarchisation sociale immédiate. Les yeux sont de type réflectif, surface légèrement brillante qui restitue les gradients thermiques de l'espace sans trahir la direction du regard.\n\t- Dans les conduits lymphatiques ou les couloirs osseux, la présence de Yrthas se signale par une légère modification de la résonance ambiante avant même de prendre la parole.\n\t- Bras de marque peu développé pour un·e Van'Doei de 31 Nuées — l'asymétrie est présente mais discrète, presque dissimulable sous la robe de cérémonie. Dans une espèce où l'hypertrophie du bras de marque signale la vitalité, son atrophie relative passe pour un signe de fragilité constitutive. Yrthas ne corrige pas cette impression.",
     "signes_d_appartenance": "- **Prosôpon** : barre d'os fixée sur le front depuis laquelle pendent plusieurs cordes colorées de longueurs inégales, nouées à intervalles précis selon un code khipu de la Forge Vareth. Le bas du visage est fragmenté derrière les cordes ; elles frémissent au moindre mouvement.\n\t- Pendant les cérémonies d'implantation, Yrthas reste immobile à un point qui finit par gêner les témoins.\n\t- Officiant des rites d'implantation des résonateurs tympaniques dans la Krypte des Distorsions.",
     "voix_et_pre_sence": "Grave, mesurée, calibrée pour les espaces à résonance différentielle. Parle peu. Formule les obligations comme des constats neutres plutôt que comme des injonctions : l'effet contraignant vient de la précision, pas du ton.",
@@ -72,6 +73,7 @@
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",
+    "guides": "Guides",
     "corps_et_morphologie": "Corps et morphologie",
     "signes_d_appartenance": "Signes d'appartenance",
     "voix_et_pre_sence": "Voix et présence",

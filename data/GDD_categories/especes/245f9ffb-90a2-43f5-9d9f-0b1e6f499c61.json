@@ -3,12 +3,12 @@
   "values": {
     "Espérance de vie": "110",
     "Règne (ou classe)": "3026e4d2-1b45-8030-9b54-d3fb1b86d7cb",
-    "Résumé IA": "Fiche de l'espèce Nashkodons présentant des sections sur l’histoire, l’apparence, le rôle culturel et narratif, ainsi que sur l’écosystème (habitat, alimentation, reproduction, sous‑espèces et interactions), toutes encore à compléter.",
+    "Résumé IA": "Neurocristallin herbivore grégaire (1,2–1,8 m au garrot, hexapode massif) à plaques cristallines hexagonales translucides couvrant 70 % du corps. Les plaques servent d'armure modulaire sacrifiable (fracture contrôlée lors d'attaque, régénération guidée en 3–6 semaines) et de thermorégulation passive (arêtes radiatives orientables). Troupeaux migrateurs de 50–300 individus suivant les veines minérales. Symbiose avec microbiomes lithophiles facilitant la cristallogenèse continue. Longévité : ~110 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Neurocristallin** (Vifs-Formes, Lithotissés) herbivore grégaire (1,2–1,8 m au garrot, hexapode massif) à **plaques hexagonales translucides** couvrant 70 % du corps. Les plaques servent d'**armure modulaire sacrifiable** (fracture contrôlée lors d'attaque, régénération guidée en 3–6 semaines) et de thermorégulation passive (arêtes radiatives orientables). Troupeaux migrateurs de 50–300 individus suivant les veines minérales. Symbiose avec microbiomes lithophiles. Longévité : \\~110 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -18,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Fiche de l'espèce Nashkodons présentant des sections sur l’histoire, l’apparence, le rôle culturel et narratif, ainsi que sur l’écosystème (habitat, alimentation, reproduction, sous‑espèces et interactions), toutes encore à compléter."
+    "re_sume__ia": "Neurocristallin herbivore grégaire (1,2–1,8 m au garrot, hexapode massif) à plaques cristallines hexagonales translucides couvrant 70 % du corps. Les plaques servent d'armure modulaire sacrifiable (fracture contrôlée lors d'attaque, régénération guidée en 3–6 semaines) et de thermorégulation passive (arêtes radiatives orientables). Troupeaux migrateurs de 50–300 individus suivant les veines minérales. Symbiose avec microbiomes lithophiles facilitant la cristallogenèse continue. Longévité : ~110 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

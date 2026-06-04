@@ -13,7 +13,7 @@
     "Date de naissance": "3372",
     "Date vérification": "2026-05-04",
     "Dates majeures": "2306e4d2-1b45-8077-a5a3-fdfae6d3d483",
-    "Dernière modification": "2026-05-20T00:01:00.000Z",
+    "Dernière modification": "2026-05-21T20:31:00.000Z",
     "Défauts liés": "9726af3e-8924-45b8-8d3e-80e52c21f378, 900c5b21-775f-49f3-aa27-e466a64b805e",
     "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
     "Feuilles de perso": "6c9eeb87-4229-4ce6-9900-47d3240d6d55",
@@ -32,12 +32,12 @@
     "Rangs de communauté": "1eb0bc86-ecdf-4376-97bb-1987ce3497d0",
     "Relations principales": "1ae6e4d2-1b45-8032-b738-f27c2d471393, ec7da632-19b5-4d59-bd18-20a5bd5805d9",
     "Réponse au problème moral": "En attendant la victoire finale, je vise la perfection personnelle.",
-    "Résumé IA": "Neamhar Vrek‑Yolan, surnommé le Suspendu Vénérable, est un PNJ secondaire de 18 nuées, guide des Bains parkourétiques et pédagogue de l’Endurement, qui vit exclusivement en suspension grâce à des ventouses microscopiques et refuse de toucher le sol, considérant cet état comme une anti‑entropie parfaite. Il possède une morphologie allongée, un masque d’or, et consacre son temps à inspecter méticuleusement l’Échafaudage, à enseigner aux initiés tout en gardant secret son besoin de pauses secrètes où il s’assied dans un bassin d’acide dilué pour consommer des beignets de cendre compressée. Son désir est de rester dans cet équilibre indéfini, tandis que son besoin est de reconnaître que cet entre‑deux masque une peur de la déception.",
+    "Résumé IA": "Neamhar Vrek‑Yolan, 18 nuées, PNJ secondaire : guide des Bains parkourétiques et pédagogue de l’Endurement, il vit entièrement suspendu, ne touche plus le sol et n’a jamais achevé l’Épreuvation, refusant ainsi la clôture. Son idéologie de retrait prône l’anti‑entropie du mouvement parfait, tout en observant secrètement un rituel où il s’assied dans un bassin d’acide dilué et consomme des beignets de cendre compressée. Il possède le titre informel de « Suspendu Vénérable », reste à relire et possède les qualités : Qualité 7, Occupation de guide, Archétype artiste/cynique, Axe retrait.",
     "Slug": "neamhar_vrek_yolan",
     "Type": "PNJ secondaire",
     "Âge ou Nuées depuis la naissance": "18",
     "Épithète": "Le Suspendu",
-    "État": "Eléments liés à gérer"
+    "État": "A relire"
   },
   "sections": {
     "guides": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3A68ab8560-a273-41ec-b773-64576bcc0f0f%3AVrek-Yolan_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223666e4d2-1b45-813f-87b5-c795d6346a0c%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
@@ -67,7 +67,7 @@
     "alias": "Celui qui n’a jamais touché le sol, Le moine guerrier de l’Anentropie",
     "occupation": "Guide des Bains parkourétiques; pédagogue de l’Endurement",
     "re_ponse_au_proble_me_moral": "En attendant la victoire finale, je vise la perfection personnelle.",
-    "re_sume__ia": "Neamhar Vrek‑Yolan, surnommé le Suspendu Vénérable, est un PNJ secondaire de 18 nuées, guide des Bains parkourétiques et pédagogue de l’Endurement, qui vit exclusivement en suspension grâce à des ventouses microscopiques et refuse de toucher le sol, considérant cet état comme une anti‑entropie parfaite. Il possède une morphologie allongée, un masque d’or, et consacre son temps à inspecter méticuleusement l’Échafaudage, à enseigner aux initiés tout en gardant secret son besoin de pauses secrètes où il s’assied dans un bassin d’acide dilué pour consommer des beignets de cendre compressée. Son désir est de rester dans cet équilibre indéfini, tandis que son besoin est de reconnaître que cet entre‑deux masque une peur de la déception.",
+    "re_sume__ia": "Neamhar Vrek‑Yolan, 18 nuées, PNJ secondaire : guide des Bains parkourétiques et pédagogue de l’Endurement, il vit entièrement suspendu, ne touche plus le sol et n’a jamais achevé l’Épreuvation, refusant ainsi la clôture. Son idéologie de retrait prône l’anti‑entropie du mouvement parfait, tout en observant secrètement un rituel où il s’assied dans un bassin d’acide dilué et consomme des beignets de cendre compressée. Il possède le titre informel de « Suspendu Vénérable », reste à relire et possède les qualités : Qualité 7, Occupation de guide, Archétype artiste/cynique, Axe retrait.",
     "e_pithe_te": "Le Suspendu"
   },
   "section_titles": {

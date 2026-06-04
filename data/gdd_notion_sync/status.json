@@ -1,11 +1,11 @@
 {
-  "last_started_at": "2026-05-20T19:17:17.999642+00:00",
-  "last_finished_at": "2026-05-20T19:17:21.769857+00:00",
+  "last_started_at": "2026-06-02T14:41:57.519509+00:00",
+  "last_finished_at": "2026-06-02T14:42:02.010755+00:00",
   "last_success": true,
   "message": "Miroir appliqué avec reliquats : les bases sans artefact dans le staging n'ont pas été modifiées sur disque. Vérifiez les erreurs du dernier run dans le statut ou les logs.",
-  "updated_entities": 2606,
+  "updated_entities": 2852,
   "partial_errors": [],
-  "last_archive_relative": ".archive/20260520T160632Z_e65c9e05",
+  "last_archive_relative": ".archive/20260602T105053Z_0dad6577",
   "last_mirror_rebuild_used": true,
   "mirror_promotion_pending": false
 }

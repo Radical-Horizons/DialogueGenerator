@@ -1,5 +1,132 @@
 [
   {
+    "Nom": "inventory_fragment_os_lexique",
+    "values": {
+      "Contexte narratif": "Fragment d'os de Lexique appartenant à un·e aîné·e de la communauté lexicorphique, récupéré lors de la dispersion de 3314 AG. Dissimulé dans la doublure d'une ceinture. Aucune utilité mécanique identifiée — Ivelhn ne sait pas pourquoi iel le garde. Objet de quête potentiel si la relation atteint Flag_perso_ivelhn_rencontre = ETABLI et que la quête de transmission est initiée.",
+      "ID": "INV123",
+      "Personnage": "be0d841a-6d8a-46d9-8bd1-eb3d8614a9be",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Fragment d'os de Lexique appartenant à un·e aîné·e de la communauté lexicorphique, récupéré lors de la dispersion de 3314 AG. Dissimulé dans la doublure d'une ceinture. Aucune utilité mécanique identifiée — Ivelhn ne sait pas pourquoi iel le garde. Objet de quête potentiel si la relation atteint Flag_perso_ivelhn_rencontre = ETABLI et que la quête de transmission est initiée."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "8e5e2f72-3f5a-405b-b179-474387ce7bb5"
+  },
+  {
+    "Nom": "inventory_cendres_parlantes_ormud",
+    "values": {
+      "Contexte narratif": "Ôrmüd Tlian-Keresh préside à l'Appareillement et supervise la collecte des cendres. Il conserve plusieurs fioles dans les archives liturgiques de la Nef Centrale — officiellement à des fins de vérification doctrinale. Officieusement, il sait ce que les résonances contiennent vraiment, et cette connaissance alimente son compte à rebours. Non transmissibles sans décision active de sa part.",
+      "ID": "INV122",
+      "Objet": "1c06e4d2-1b45-80a7-8db9-e225677931cb",
+      "Personnage": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
+      "Quantité": "3",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Ôrmüd Tlian-Keresh préside à l'Appareillement et supervise la collecte des cendres. Il conserve plusieurs fioles dans les archives liturgiques de la Nef Centrale — officiellement à des fins de vérification doctrinale. Officieusement, il sait ce que les résonances contiennent vraiment, et cette connaissance alimente son compte à rebours. Non transmissibles sans décision active de sa part."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "b7bb51e7-4458-4aed-98e6-1894adc57408"
+  },
+  {
+    "Nom": "inventory_vorkh_barvasinkulien_ferme",
+    "values": {
+      "Contexte narratif": "Vorkh barvasinkulien fermé glissé dans le repli d'un vêtement de fibres nervales. Fionnuala ne l'utilise jamais devant témoins — symbole de son appartenance discrète au Barvasinkul qu'elle refuse d'afficher institutionnellement. Peut être obtenu par le joueur comme Témoignage si Fionnuala accepte un lien de confiance profond (Flag_perso_fionnuala_contacts_cambiaux = 3).",
+      "ID": "INV121",
+      "Personnage": "c52842f2-acd5-42ec-8ffd-92dfb319dfb9",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Vorkh barvasinkulien fermé glissé dans le repli d'un vêtement de fibres nervales. Fionnuala ne l'utilise jamais devant témoins — symbole de son appartenance discrète au Barvasinkul qu'elle refuse d'afficher institutionnellement. Peut être obtenu par le joueur comme Témoignage si Fionnuala accepte un lien de confiance profond (Flag_perso_fionnuala_contacts_cambiaux = 3)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "e22a5bbc-240e-4e58-88fb-1942b581298b"
+  },
+  {
+    "Nom": "inventory_paquets_pheromonaux_cartographes",
+    "values": {
+      "Contexte narratif": "Archives biologiques contenant la cartographie complète des nœuds profonds du Réseau Rhizomorphique, encodée sous forme phéromonale. Non déchiffrables hors du réseau. Potentiellement transmissibles aux hôtes après connexion (Flag_perso_architecte_rhizome_connexion_reseau = ACCORDEE).",
+      "ID": "INV120",
+      "Personnage": "e50cc14d-c6aa-4333-82d8-8bdcefa9c62d",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Archives biologiques contenant la cartographie complète des nœuds profonds du Réseau Rhizomorphique, encodée sous forme phéromonale. Non déchiffrables hors du réseau. Potentiellement transmissibles aux hôtes après connexion (Flag_perso_architecte_rhizome_connexion_reseau = ACCORDEE)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "2db1094d-09fe-4c1c-9f14-254c8c2b8e29"
+  },
+  {
+    "Nom": "inventory_nectar_tellurique",
+    "values": {
+      "Contexte narratif": "Substance vitale extraite des nexus mantiques par capillarité hyphale. L'Architecte-Rhizome en consomme en continu pour maintenir la cohérence de ses nœuds dispersés. Non récoltable directement par les hôtes sans autorisation d'accès au nexus.",
+      "ID": "INV119",
+      "Personnage": "e50cc14d-c6aa-4333-82d8-8bdcefa9c62d",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Substance vitale extraite des nexus mantiques par capillarité hyphale. L'Architecte-Rhizome en consomme en continu pour maintenir la cohérence de ses nœuds dispersés. Non récoltable directement par les hôtes sans autorisation d'accès au nexus."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "41e95cdb-9ec8-48f1-a06d-2a95ef94e5ec"
+  },
+  {
+    "Nom": "inventory_masque_croyant_use",
+    "values": {
+      "Contexte narratif": "Masque de Croyant·e très usé, souvent déplacé sur le côté pendant les soins aux Gedroths. Les lentilles portent des traces de résidu phosphorescent. Port discret, fonctionnel, presque distrait : l'appartenance au Culte de l'Anentropie est assumée mais non revendiquée.",
+      "ID": "INV118",
+      "Personnage": "764c2dbb-47f9-4ddd-a286-a20e53eb1a31",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Masque de Croyant·e très usé, souvent déplacé sur le côté pendant les soins aux Gedroths. Les lentilles portent des traces de résidu phosphorescent. Port discret, fonctionnel, presque distrait : l'appartenance au Culte de l'Anentropie est assumée mais non revendiquée."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "588bb0e4-1c2b-4eb9-bd90-8b9c476e5f00"
+  },
+  {
+    "Nom": "inventory_tablier_maintenance_renforce",
+    "values": {
+      "Contexte narratif": "Tablier de maintenance renforcé par des morceaux de carapaces mortes de Gedroths. Poches remplies de fil, joints, fragments de membrane et petites rations de cendres. Outil de travail et de soin autant que vêtement : tout ce qu'il faut pour maintenir un Gedroth en vie et un conduit habitable.",
+      "ID": "INV117",
+      "Personnage": "764c2dbb-47f9-4ddd-a286-a20e53eb1a31",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Tablier de maintenance renforcé par des morceaux de carapaces mortes de Gedroths. Poches remplies de fil, joints, fragments de membrane et petites rations de cendres. Outil de travail et de soin autant que vêtement : tout ce qu'il faut pour maintenir un Gedroth en vie et un conduit habitable."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "7989b8fb-9b57-4fcf-856b-8e600a0e70da"
+  },
+  {
     "Nom": "inventory_masque_os_sculpte",
     "values": {
       "Contexte narratif": "Masque rudimentaire taillé par Voknir dans un fragment d'os du Léviathan, remplaçant son masque d'origine confisqué lors du bannissement. Signe d'appartenance aux Van'Doï exilés. Voknir refuse de s'en séparer — ne peut pas être obtenu par le joueur directement.",
@@ -925,7 +1052,7 @@
   {
     "Nom": "inventory_noeud_de_convergence",
     "values": {
-      "Contexte narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 174 AG, en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ palier Sympathie) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 8).",
+      "Contexte narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 374 AG (date corrigée — cf. Notes de conception), en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ Émergence, +10) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 9, second essai possible après échange approfondi, DD 11).",
       "ID": "INV65",
       "Objet": "26f6e4d2-1b45-809a-b346-d20068dae6bd",
       "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
@@ -934,7 +1061,7 @@
       "État": "Terminé"
     },
     "sections": {
-      "contexte_narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 174 AG, en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ palier Sympathie) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 8)."
+      "contexte_narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 374 AG (date corrigée — cf. Notes de conception), en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ Émergence, +10) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 9, second essai possible après échange approfondi, DD 11)."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -1054,7 +1181,6 @@
     "values": {
       "Contexte narratif": "Journal de poche dont chaque page est remplie d'une écriture mathématique personnelle, illisible sans clé. Contient des observations sur les structures de pouvoir de la Vieille Ville, des fragments d'Équation de Préservation, et peut-être la mémoire externalisée d'Esthir. Objet de quête potentiel pour l'arc mémoriel.",
       "ID": "INV57",
-      "Objet": "a2514e20-f04e-4a10-b800-670f110d4fd8",
       "Personnage": "1996e4d2-1b45-80a5-a7ae-e9d43372323f",
       "Quantité": "1",
       "Type d'accès": "Possédé",
@@ -1067,44 +1193,6 @@
       "contexte_narratif": "Contexte narratif"
     },
     "notion_page_id": "36cc954e-7587-456d-8d89-3e229c5830ce"
-  },
-  {
-    "Nom": "inventory_veste_poches_multiples",
-    "values": {
-      "Contexte narratif": "Veste ajustée à nombreuses poches intérieures et extérieures. Vethraak y loge outils de manipulation, faux laissez-passer et petits instruments de calcul. Sélectionnée pour sa fonctionnalité discrète plutôt que pour l'apparence.",
-      "ID": "INV58",
-      "Objet": "bb6e8c90-d656-4de8-9919-5a5e50419f16",
-      "Personnage": "1996e4d2-1b45-80a5-a7ae-e9d43372323f",
-      "Quantité": "1",
-      "Type d'accès": "Équipé",
-      "État": "Pas commencé"
-    },
-    "sections": {
-      "contexte_narratif": "Veste ajustée à nombreuses poches intérieures et extérieures. Vethraak y loge outils de manipulation, faux laissez-passer et petits instruments de calcul. Sélectionnée pour sa fonctionnalité discrète plutôt que pour l'apparence."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "7c3be5b5-9fea-4f9b-bac1-59fa2a754845"
-  },
-  {
-    "Nom": "inventory_medallion_iridescent",
-    "values": {
-      "Contexte narratif": "Médaillon de métal iridescent qui change de couleur selon l'angle de vision. Souvenir d'Esthir, son bien-aimé. Seul objet que Vethraak n'a jamais misé dans une négociation. Son rôle mécanique (cle dé vers arc mémoriel) est à définir.",
-      "ID": "INV56",
-      "Objet": "3dcac8d4-bcc1-4b06-a17d-66caede5303a",
-      "Personnage": "1996e4d2-1b45-80a5-a7ae-e9d43372323f",
-      "Quantité": "1",
-      "Type d'accès": "Possédé",
-      "État": "Pas commencé"
-    },
-    "sections": {
-      "contexte_narratif": "Médaillon de métal iridescent qui change de couleur selon l'angle de vision. Souvenir d'Esthir, son bien-aimé. Seul objet que Vethraak n'a jamais misé dans une négociation. Son rôle mécanique (cle dé vers arc mémoriel) est à définir."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "4401d975-d0b9-47c4-86d0-e22bc7addca8"
   },
   {
     "Nom": "inventory_proteges_articulations_os",
@@ -1258,7 +1346,6 @@
     "values": {
       "Contexte narratif": "Harnais renforcés aux fibres de Gedroth couvrant les six bras et les trois torses fusionnés. Conçus sur mesure pour une entité à la morphologie unique, ils permettent la coordination des six membres lors des ports de charges lourdes. Symbole de leur rôle de porte-faix au sein du Culte. Difficile à retirer volontairement.",
       "ID": "INV47",
-      "Objet": "12bdf106-1579-46a7-91af-518d7d77b2a3",
       "Personnage": "2286e4d2-1b45-80db-b5ea-c9a4c9ba305b",
       "Quantité": "1",
       "Type d'accès": "Équipé",
@@ -1958,24 +2045,6 @@
       "contexte_narratif": "Contexte narratif"
     },
     "notion_page_id": "7c6e4383-5a4e-4be8-a78b-ecc299d61e1d"
-  },
-  {
-    "Nom": "inventory_masque_pyramidal_rituel",
-    "values": {
-      "Contexte narratif": "Porté en permanence par Akthar-Neth depuis plus de deux siècles, ce masque pyramidal en os fossilisé est une capitulation psychologique transformée en liturgie. Le retirer constitue un acte rituel d'une portée symbolique extrême — nul ne l'a vu se découvrir depuis des décennies. Inaccessible au joueur sauf dans la résolution BESOIN_RÉSOLU.",
-      "ID": "INV6",
-      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Quantité": "1",
-      "Type d'accès": "Équipé",
-      "État": "Pas commencé"
-    },
-    "sections": {
-      "contexte_narratif": "Porté en permanence par Akthar-Neth depuis plus de deux siècles, ce masque pyramidal en os fossilisé est une capitulation psychologique transformée en liturgie. Le retirer constitue un acte rituel d'une portée symbolique extrême — nul ne l'a vu se découvrir depuis des décennies. Inaccessible au joueur sauf dans la résolution BESOIN_RÉSOLU."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "3be5d578-ffe9-42f6-bfa1-9d0ae5b652a8"
   },
   {
     "Nom": "inventory_collection_flacons_influence",

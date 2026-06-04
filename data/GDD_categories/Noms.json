@@ -1,5 +1,19 @@
 [
   {
+    "Nom": "Borath",
+    "values": {
+      "Catégorie": "Marque de foyer",
+      "Communauté d'usage": "1a56e4d2-1b45-8044-a472-d674f194c57a",
+      "Espèce liée": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Langue": "2a75c5d0-a824-4edf-b86a-12a5bb493269",
+      "Notes": "Cas particulier de marque de foyer murmureuse : résout la contradiction apparente entre la règle Van'Doei du brasier immuable (cf. Guide des Noms) et la doctrine murmuratrice du nomadisme (« s'installer, c'est se pétrifier »). Voisine conceptuelle de Ven (feu reproductible par rite chez les Cendres Nomades), mais distincte : Ven se rebâtit par les gestes seulement, Borath voyage par sa cendre. Chaque cellule murmuratrice porte en principe son propre brasier-porteur ; Borath désigne spécifiquement celui dont Ossian Khäl-Borath a émergé.",
+      "Porteurs attestés": "1d95df62-504c-4349-b8ec-63893118af51",
+      "Signification": "Brasier-porteur d'une cellule murmuratrice du Léviathan pétrifié, attesté au moins depuis 3374 AG. Foyer dont la cendre originelle est conservée dans une urne osseuse, puis mêlée à chaque feu rallumé au campement suivant : le brasier reste 'le même' par continuité matérielle de sa cendre, et non par fixité de lieu. Brasier d'origine d'Ossian Khäl-Borath."
+    },
+    "sections": {},
+    "notion_page_id": "02ebeccd-ccd8-40bf-b1a6-f0acefc5d47b"
+  },
+  {
     "Nom": "Vethraak",
     "values": {
       "Catégorie": "Nom personnel",
@@ -982,7 +996,7 @@
     "values": {
       "Catégorie": "Nom d'état",
       "Communauté d'usage": "1b56e4d2-1b45-8067-989c-d4d2917770f7, 1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Notes": "Deuxième nom d'état connu pour Talamh, coexistant avec Zaehria. Porté par Talaith l'Échancrée, interprète du District des Épidermes Réactifs, fondatrice de l'hérésie Multisubstantialiste (Controverse d'Oscillation, 1892-1908). Pas de fiche personnage disponible.\nÉtat patron associé : Talamh",
+      "Notes": "Deuxième nom d'état connu pour Talamh, coexistant avec Zaehria. Porté par Talaith l'Échancrée, interprète du District des Quartiers de la Lanterne, fondatrice de l'hérésie Multisubstantialiste (Controverse d'Oscillation, 1892-1908). Pas de fiche personnage disponible.\nÉtat patron associé : Talamh",
       "Signification": "Territorialisation — création d'espaces sanctifiés intérieurs et extérieurs (12ᵉ Transformation)"
     },
     "sections": {},

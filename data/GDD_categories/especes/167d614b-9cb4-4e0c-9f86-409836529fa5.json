@@ -3,12 +3,12 @@
   "values": {
     "Espérance de vie": "60",
     "Règne (ou classe)": "534e5829-6e46-4d38-84d8-b2d37344d711",
-    "Résumé IA": "Résumé IA: Cuprades est une espèce de faune dont l'espérance de vie est de 60 ans, actuellement à l'état \"Pas commencé\". Le document propose des sections détaillées pour développer son intrigue, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat, son alimentation, sa reproduction, ses sous‑espèces et son interaction avec l'écosystème, mais aucun contenu n’est encore renseigné.",
+    "Résumé IA": "Ferrotissé prédateur bipède crépusculaire (1,4–1,8 m, silhouette effilée) chassant en meutes coordonnées de 3–8 individus. Lames cutanées d'oxydes de cuivre à patine toxique paralysante. Camouflage chromatique : modulation rapide de l'oxydation (vert-de-gris ↔ rouge cuivré ↔ noir) efficace au crépuscule. Communication par percussions rythmiques codées (lames contre substrat ou congénères). Intelligence sociale élevée. Gisements cupriques des Couronnes intermédiaires. Longévité : ~60 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Ferrotissé** (Vifs-Formes, Lithotissés) prédateur bipède crépusculaire (1,4–1,8 m, silhouette effilée) chassant en **meutes coordonnées** de 3–8 individus. Lames cutanées cuivrées à **patine toxique paralysante**. **Camouflage chromatique** : modulation rapide de l'oxydation (vert-de-gris ↔ rouge cuivré ↔ noir) efficace au crépuscule. Communication par **percussions rythmiques codées**. Intelligence sociale élevée. Gisements cupriques des Couronnes intermédiaires. Longévité : \\~60 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -18,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Résumé IA: Cuprades est une espèce de faune dont l'espérance de vie est de 60 ans, actuellement à l'état \"Pas commencé\". Le document propose des sections détaillées pour développer son intrigue, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat, son alimentation, sa reproduction, ses sous‑espèces et son interaction avec l'écosystème, mais aucun contenu n’est encore renseigné."
+    "re_sume__ia": "Ferrotissé prédateur bipède crépusculaire (1,4–1,8 m, silhouette effilée) chassant en meutes coordonnées de 3–8 individus. Lames cutanées d'oxydes de cuivre à patine toxique paralysante. Camouflage chromatique : modulation rapide de l'oxydation (vert-de-gris ↔ rouge cuivré ↔ noir) efficace au crépuscule. Communication par percussions rythmiques codées (lames contre substrat ou congénères). Intelligence sociale élevée. Gisements cupriques des Couronnes intermédiaires. Longévité : ~60 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

@@ -3,12 +3,12 @@
   "values": {
     "Espérance de vie": "40",
     "Règne (ou classe)": "a489466f-098f-4b19-b83f-6c417a8fe421",
-    "Résumé IA": "Pas de contenu",
+    "Résumé IA": "Cyclomorphe matriciel (Polyforme, Vifs-Formes) herbivore massif des plaines tempérées et lisières de la Steppe des Éteignoirs. Phase sessile en termitière organique (5–10 m) ancrée dans les sols meubles enrichis par les retombées du Cycle Sixing. Phase mobile quadrupède robuste broutant les végétations basses. Cycle de 3–5 ans. Cognition rudimentaire, pas de société structurée. Longévité : ~40 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Cyclomorphe matriciel** (Polyforme, Vifs-Formes) herbivore massif des **plaines tempérées** et lisières de la Steppe des Éteignoirs. Phase sessile en **termitière organique** (5–10 m) ancrée dans les sols meubles enrichis par les retombées du Cycle Sixing. Phase mobile quadrupède robuste broutant les végétations basses. Cycle de 3–5 ans. Cognition rudimentaire. Longévité : \\~40 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -18,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Pas de contenu"
+    "re_sume__ia": "Cyclomorphe matriciel (Polyforme, Vifs-Formes) herbivore massif des plaines tempérées et lisières de la Steppe des Éteignoirs. Phase sessile en termitière organique (5–10 m) ancrée dans les sols meubles enrichis par les retombées du Cycle Sixing. Phase mobile quadrupède robuste broutant les végétations basses. Cycle de 3–5 ans. Cognition rudimentaire, pas de société structurée. Longévité : ~40 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

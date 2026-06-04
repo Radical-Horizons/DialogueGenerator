@@ -12,7 +12,7 @@
     "Date de création": "2026-04-29T21:28:00.000Z",
     "Date de naissance": "3372",
     "Date vérification": "2026-05-19",
-    "Dernière modification": "2026-05-19T15:44:00.000Z",
+    "Dernière modification": "2026-05-25T12:30:00.000Z",
     "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
     "Feuilles de perso": "22759272-4b42-4441-aa3c-e68de0eb79e3",
     "Genre": "Non défini",
@@ -26,16 +26,16 @@
     "Relations principales": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
     "Relations secondaires": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
     "Réponse au problème moral": "On ne résiste pas à ce qu’on n’a pas eu le temps de nommer.",
-    "Résumé IA": "La Cinquante‑Sixième est une PNJ secondaire du Paradigme Ésothrope, jeune adulte de 18 ans, de qualité 8, classée comme mentor/gourou avec une idéologie de retrait. Elle travaille comme sujet de maintenance dans les galeries périphériques du Léviathan, effectuant des tâches de réparation et de relevé thermique, vivant modestement dans les Cellules. Malgré sa stabilité inhabituelle, elle reste marginale, observée mais peu comprise, et ignore les implications des vibrations anormales qu’elle détecte dans les galeries.",
+    "Résumé IA": "La Cinquante‑Sixième est une PNJ secondaire de type mentor/gourou, âgée de 18 ans, en cours de création depuis le 29 avril 2026 et classée « En cours ». Elle travaille dans les galeries périphériques du Léviathan comme technicienne de maintenance, effectuant des tâches telles que le remplacement de membranes de Gedroth et la relève thermique, tout en restant discrète et marginale au sein du Culte. Son apparence comprend un masque Van'Doei artisanal, un tablier à deux couches et une callosité sur la paume droite. Elle possède une personnalité calme, évitant l’attention, et observe silencieusement les comportements des autres, notamment Raki‑Biro, tout en remarquant des vibrations inhabituelles dans les galeries. Son état actuel est « En cours », avec une qualité de 8, un axe idéologique de retrait et une réponse morale « On ne résiste pas à ce qu’on n’a pas eu le temps de nommer. ».",
     "Slug": "la_cinquante_sixieme",
     "Type": "PNJ secondaire",
     "Âge ou Nuées depuis la naissance": "18",
     "Épithète": "L'Avant-Dernière",
-    "État": "Revue de cohérence"
+    "État": "En cours"
   },
   "sections": {
     "re_sume__de_la_fiche": "Van'Doei d'une dix-huitième Nuée née du Paradigme Ésothrope, la Cinquante-Sixième est la preuve la plus discrète que le programme n'a pas seulement produit des catastrophes. Elle vit. Elle travaille. Elle occupe dans les galeries tièdes des Cellules une place périphérique que personne n'a jamais tout à fait su nommer : trop altérée pour être une Croyante ordinaire, trop fonctionnelle pour être confinée dans la Krypte. Son existence gêne le récit du Culte — et c'est précisément pour cette raison qu'on l'oublie.",
-    "guides": "<span color=\"gray\">Pour les multimédias.</span>",
+    "guides": "<span color=\"gray\">Pour les multimédias.</span>\n<pdf src=\"file://%7B%22source%22%3A%22attachment%3Aa4d6058f-6c9b-4fcf-9420-967063791fb1%3ALa_Cinquante-sixime_Guide.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223686e4d2-1b45-81b2-a774-e2d43c523e56%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
     "corps_et_morphologie": "- **Bras asymétrique légèrement surdéveloppé**, marque des protocoles d'incubation sur sa respiration cutanée : les pores de son flanc gauche sont visiblement plus larges sous lumière rasante, comme si l'Insufflation avait voulu s'y loger et n'y était qu'à moitié parvenue.\n\t- **Silhouette ordinaire** pour une Van'Doei de son âge — ni la corpulence d'une Forgette, ni la sécheresse d'une novice ascétique. Elle a la santé d'une personne qui mange régulièrement et travaille sans excès. C'est rare ici.\n\t- **Migraines périodiques** lors des phases de Souffle du Léviathan : elle les gère sans plainte, avec des compressions sur les points de croisement de ses veines temporales. Sa relation à la douleur Van'Doei est légèrement déréglée — elle ressent parfois le plaisir là où d'autres de son espèce ressentiraient douleur, et vice versa, sans cohérence prévisible.",
     "signes_d_appartenance": "- **Masque Van'Doei artisanal de remplacement** : le sien d'origine a été cassé lors d'une crise de fièvre à douze Nuées. Elle l'a refait elle-même avec des matériaux récupérés dans le Léviathan — il n'est ni beau ni rituel, mais il tient. Sa facture maladroite la distingue immédiatement d'un Croyant formé.\n\t- **Tablier de travail à deux couches** : tissu standard des Croyants de rang bas, avec une surpièce en membrane de Gedroth qu'elle a ajoutée après une brûlure aux acides des Bains. Ajout non réglementaire, toléré parce que personne ne s'en préoccupe vraiment.\n\t- **Callosité sur la paume droite**, résidu de la sonde d'Insufflation. Elle la palpe parfois sans s'en apercevoir, geste absent, comme on touche une cicatrice qui ne fait plus mal mais qu'on n'a pas décidé de regarder.",
     "voix_et_pre_sence": "Voix plate, sans inflexion doctrinale — ni le registre cérémoniel des Accomplis ni le murmure stratégique des dissidents. Elle parle comme quelqu'un qui a appris que ne pas attirer l'attention demande une forme de constance, et qui s'y est appliqué assez longtemps pour ne plus y penser.",
@@ -61,7 +61,7 @@
     "alias": "La Seuil, Celle-Qui-Presque",
     "occupation": "Cinquante-sixième sujet du Paradigme Ésothrope",
     "re_ponse_au_proble_me_moral": "On ne résiste pas à ce qu’on n’a pas eu le temps de nommer.",
-    "re_sume__ia": "La Cinquante‑Sixième est une PNJ secondaire du Paradigme Ésothrope, jeune adulte de 18 ans, de qualité 8, classée comme mentor/gourou avec une idéologie de retrait. Elle travaille comme sujet de maintenance dans les galeries périphériques du Léviathan, effectuant des tâches de réparation et de relevé thermique, vivant modestement dans les Cellules. Malgré sa stabilité inhabituelle, elle reste marginale, observée mais peu comprise, et ignore les implications des vibrations anormales qu’elle détecte dans les galeries.",
+    "re_sume__ia": "La Cinquante‑Sixième est une PNJ secondaire de type mentor/gourou, âgée de 18 ans, en cours de création depuis le 29 avril 2026 et classée « En cours ». Elle travaille dans les galeries périphériques du Léviathan comme technicienne de maintenance, effectuant des tâches telles que le remplacement de membranes de Gedroth et la relève thermique, tout en restant discrète et marginale au sein du Culte. Son apparence comprend un masque Van'Doei artisanal, un tablier à deux couches et une callosité sur la paume droite. Elle possède une personnalité calme, évitant l’attention, et observe silencieusement les comportements des autres, notamment Raki‑Biro, tout en remarquant des vibrations inhabituelles dans les galeries. Son état actuel est « En cours », avec une qualité de 8, un axe idéologique de retrait et une réponse morale « On ne résiste pas à ce qu’on n’a pas eu le temps de nommer. ».",
     "e_pithe_te": "L'Avant-Dernière"
   },
   "section_titles": {

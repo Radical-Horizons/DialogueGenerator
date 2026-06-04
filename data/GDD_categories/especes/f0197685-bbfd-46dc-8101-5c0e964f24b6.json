@@ -3,12 +3,12 @@
   "values": {
     "Espérance de vie": "22",
     "Règne (ou classe)": "2fd0f8f6-d104-4357-ae15-4b4eb2212ddc",
-    "Résumé IA": "Pas de contenu",
+    "Résumé IA": "Métamorphe radical de la canopée et du sous-sol de la Jungle Vivarcade. Phase mobile : insectoïde ailé éphémère (10 cm), vivant 20–30 jours dans la canopée, se nourrissant de pollen et de spores d'Aedres. Phase sessile : réseau racinaire souterrain ramifié (3–5 m), connecté aux réseaux fongiques des Voies d'Auðumla. Métamorphose la plus rapide de la classe : chrysalide chitineuse enfouie dans le sol forestier (3–5 jours). Espérance de vie ~22 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Métamorphe radical** (Vifs-Formes) de la **Jungle Vivarcade**. Phase mobile : insectoïde ailé éphémère (10 cm), vivant 20–30 jours dans la canopée, se nourrissant de pollen et de spores d'Aedres. Phase sessile : réseau racinaire souterrain ramifié (3–5 m), connecté aux réseaux fongiques des Voies d'Auðumla. **Transition la plus rapide de la classe** : chrysalide chitineuse enfouie dans le sol forestier (3–5 jours). Essaimage prolifique depuis la racine sessile.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -18,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Pas de contenu"
+    "re_sume__ia": "Métamorphe radical de la canopée et du sous-sol de la Jungle Vivarcade. Phase mobile : insectoïde ailé éphémère (10 cm), vivant 20–30 jours dans la canopée, se nourrissant de pollen et de spores d'Aedres. Phase sessile : réseau racinaire souterrain ramifié (3–5 m), connecté aux réseaux fongiques des Voies d'Auðumla. Métamorphose la plus rapide de la classe : chrysalide chitineuse enfouie dans le sol forestier (3–5 jours). Espérance de vie ~22 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

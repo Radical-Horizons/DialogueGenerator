@@ -2,6 +2,7 @@
   "Nom": "Nexion",
   "values": {
     "Actes prévus": "31a6e4d2-1b45-8083-b448-d3bbe78d25d3",
+    "Chapitres": "26b23fe5-6c31-4ff5-8354-1eebc8426fde",
     "Communautés présentes": "1b56e4d2-1b45-8067-989c-d4d2917770f7",
     "Concepts liés": "cf962b09-b630-4342-a0b7-c327f8011f7e, 27733e6b-23c2-4256-a38f-fe881c11073a, 7fea6e7d-a419-45cb-9add-a5fb32d981c7, 325649ba-5d30-41d9-9a68-3e086db23279, 666b1b24-3e1a-492f-9951-84455abf42a4",
     "Contenu par": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
@@ -10,9 +11,10 @@
     "Dernière modification": "2026-05-20T00:33:00.000Z",
     "Niveau de danger": "Hostile",
     "Niveau d’IA": "co-écrit",
+    "Personnages liés": "6d0a3bb0-7b32-44bc-88d6-f101fc6e1826",
     "Personnages vivant ici": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
     "Qualité": "8",
-    "Résumé IA": "Le Nexion est une entité complexe et instable, décrite comme un lieu où la logique et la réalité se déforment. Il abrite des Perpétuants, des entités issues de convictions philosophiques, qui interagissent dans un environnement où les axiomes se disputent, provoquant des transformations architecturales et ontologiques. Le Nexion pulse avec des crises qui affectent le monde extérieur, et ses effets sur les visiteurs peuvent être dévastateurs, entraînant des changements d'identité et des dissolutions. Les Candaces-Qen, seules capables d'accéder régulièrement au Nexion, jouent un rôle crucial dans la gestion de cet espace énigmatique.",
+    "Résumé IA": "Nexion est une région principale hostile de type district, notée 8 et à relire, décrite comme un lieu unique qui dévore et se transforme constamment : une absence mouvante où lumière inversée, couloirs de cuivre et temps brûlé se mêlent à des Perpétuants aux convictions violentes, des pulsations qui restructurent la ville et des phénomènes dangereux comme les Piliers de Jugement et les Coutures d’impossibilité, le tout sous la surveillance de Candaces‑Qen et de gardiens Peseto.",
     "Rêveur local": "1a96e4d2-1b45-80a2-9bf7-e6a28d83ce41",
     "Rôle": "Lieu unique",
     "Taille": "District",
@@ -43,7 +45,7 @@
     "syste_mes_de_jeu_actifs": "<database url=\"https://www.notion.so/cabb3ff0f1504235ba1525558901bd87\" inline=\"true\">Systèmes de jeu actifs</database>",
     "me_moire_syste_me": "<database url=\"https://www.notion.so/8bfecf11d0fe438281b6c7d34e60ee53\" inline=\"true\">Flags de ce lieu</database>",
     "remarques_de_conception": "- Le Nexion est un lieu volontairement absurde, caricatural, plein de magie sans queue ni tête avec des semi-dieux aliens qui manipulent la matière à volonté. Ce qui permet de dépasser les clichés, ici, c’est justement l’absurdité assumée, le Nexion est un aperçu de l’esprit d’un dieu autoproclamé et malade de ses propres certitudes incohérentes.",
-    "re_sume__ia": "Le Nexion est une entité complexe et instable, décrite comme un lieu où la logique et la réalité se déforment. Il abrite des Perpétuants, des entités issues de convictions philosophiques, qui interagissent dans un environnement où les axiomes se disputent, provoquant des transformations architecturales et ontologiques. Le Nexion pulse avec des crises qui affectent le monde extérieur, et ses effets sur les visiteurs peuvent être dévastateurs, entraînant des changements d'identité et des dissolutions. Les Candaces-Qen, seules capables d'accéder régulièrement au Nexion, jouent un rôle crucial dans la gestion de cet espace énigmatique."
+    "re_sume__ia": "Nexion est une région principale hostile de type district, notée 8 et à relire, décrite comme un lieu unique qui dévore et se transforme constamment : une absence mouvante où lumière inversée, couloirs de cuivre et temps brûlé se mêlent à des Perpétuants aux convictions violentes, des pulsations qui restructurent la ville et des phénomènes dangereux comme les Piliers de Jugement et les Coutures d’impossibilité, le tout sous la surveillance de Candaces‑Qen et de gardiens Peseto."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

@@ -1,5 +1,93 @@
 [
   {
+    "Nom": "Confluence Finale",
+    "values": {
+      "Ambiance": "Intérieur sombre",
+      "Couches de profondeur": "4",
+      "Dimensions": "7680×2160",
+      "Lieu parent": "2356e4d2-1b45-8098-93c3-df4a68697585",
+      "Maps limitrophes": "23683960-df5c-4f78-b83d-c5abd5753929",
+      "Palette dominante": "Neutre",
+      "Props clés": "Nervures iridescentes du Testament Vertébral (Fragment II, conditionnelles), entailles de Voknir élargies, sol poncé (trace de Zaehria)",
+      "Type": "Standard",
+      "État": "En design"
+    },
+    "sections": {
+      "preamble": "<span color=\"yellow\">**Résumé de la map**</span><br><br>Carrefour au fond du Dédale Médullaire, juste avant la sortie vers la Périphérie Caudale. En apparence un croisement osseux ordinaire, la Confluence Finale est le lieu de la visite secrète d'Akthar-Neth en 3155 AG et la cachette du Fragment II du Testament Vertébral, dissimulé par Zaehria dans ses nervures depuis \\~3225 AG. Ce que le joueur croit lire dans ce lieu dit autant sur ses projections que sur l'espace lui-même.",
+      "apparence_visuelle": "### Description générale\n\tCarrefour osseux profond à quatre bras, plus resserré que le Carrefour Trichotomique. Les parois portent des nervures d'os anormalement denses, convergeant vers le centre du plafond comme les côtes d'un dôme. À l'œil nu, rien ne distingue cet endroit d'un simple nœud de circulation. Ce n'est qu'en phase cyclique spécifique, ou avec les entailles de Voknir comme guide, que les nervures révèlent une iridescence résiduelle : une lueur très faible, bleutée, comme si quelque chose avait été enfoui dans la structure même de l'os.\n\t### Palette & ambiance\n\tPalette neutre à légèrement froide. Dominante ivoire-gris, pas de source de lumière bioluminescente forte ici — l'éclairage provient principalement des flux diffus des couloirs adjacents. La lueur iridescente des nervures (si visible) crée un accent bleu très discret, difficile à distinguer au premier passage. Ambiance : intérieur sombre, profond, sans ostentation.\n\t### Profondeur & couches\n\t4 couches parallaxe. L1 (fond osseux lointain) : parois du carrefour, dôme de nervures convergeant. L2 (voûte nervurée) : nervures denses, lueur résiduelle conditionnelle. L3 (plan joueur) : sol osseux, zone de croisement. L4 (premier plan) : fragments et reliefs osseux, entailles de Voknir élargies.",
+      "narration_environnementale": "- **Nervures iridescentes** : visibles uniquement si `Flag_lieu_dedale_entailles_voknir` ≥ LU (les sillons de Voknir attirent le regard sur les nervures anormalement denses). Sans cette clé de lecture, le lieu est invisible narrativement.\n\t- **Entailles de Voknir élargies** : les sillons autour de la Confluence sont notablement plus larges et plus récents que dans la Galerie. Signe que Voknir a consacré plus de temps à cette zone — sans en comprendre pourquoi.\n\t- **Absence de traces humaines** : pas de marque Murmurateur, pas de graffiti — la Confluence est un lieu de passage, pas de vie. L'absence elle-même est un signal pour un joueur attentif.\n\t- **Sol poncé en un endroit** : une petite surface au centre porte des traces d'usure différente, comme si quelqu'un s'y était agenouillé à plusieurs reprises au fil des décennies. \\[Référence silencieuse aux visites répétées de Zaehria.\\]",
+      "navigation___obstacles": "### Géométrie jouable\n\tCarrefour à 4 bras, zone centrale de 2 largeurs de personnage. Passages en couloir étroit (1,5 largeur) vers les quatre directions. Pas d'obstacle bloquant permanent — la Confluence est une zone de passage.\n\t### Obstacles bloquants\n\t- Aucun obstacle physique permanent\n\t- Zone d'interaction des nervures (POI invisible jusqu'à la condition de découverte)\n\t### Zones de transition\n\t- Ouest → Carrefour Trichotomique\n\t- Est → Sortie vers Strate I (Périphérie Caudale)\n\t- Nord → Galerie des Entailles de Voknir (couloir secondaire)\n\t- Sud → Alcôve de Refuge (couloir secondaire)",
+      "position_des_pnj": "### PNJ présents\n\tAucun PNJ permanent. Aucun PNJ en transit. Zaehria Neth'Varu est fusionnée au Seuil caudal (Strate I) — elle n'atteint pas la Confluence. Son influence est environnementale uniquement (sol poncé, nervures).\n\t<database url=\"https://www.notion.so/0904c71c7d5845b1b8cdbd291eb2838e\" inline=\"true\">PNJ de cette map</database>",
+      "objets___props_interactifs": "### Props clés interactifs\n\t- **Nervures du Testament Vertébral** (POI N2 — invisible au premier passage) : interaction disponible si `Flag_lieu_dedale_entailles_voknir` ≥ LU. Résultat : découverte du Fragment II → `Flag_lieu_dedale_testament_vertebral` = DECOUVERT. Prérequis de lecture : Langages ≥ 6 OU Théologie ≥ 5. Test de déchiffrement : Intelligence + Linguistique vs DD 11 → DECHIFFRE. Uresaïr sans Linguistique = score 10 → 1 PE minimum requis. Aide de Voknir si `Flag_lieu_dedale_voknir_etat` = ALLIE → réussite sans test ni coût PE. Test de double main (lecture) : Raison + Langages DD 15 → sous-flag `flag_savoir_testament_double_main_percue`.\n\t- **\\[TODO - créer fiche Objet : Fragment II du Testament Vertébral\\]** — Type : Savoir. Support : onze feuillets en cartilage tanné, rubrications vermillon illisibles hors luminescence osseuse. À créer dans la base Objets.\n\t<database url=\"https://www.notion.so/48c2c80228c041cf972db41d02b4aad5\" inline=\"true\">Objets & Props interactifs</database>",
+      "e_ve_nements_de_clenche_s": "- **Premier passage** : aucun événement scripté. La Confluence doit passer inaperçue à la première traversée.\n\t- **Découverte des nervures** (condition : `Flag_lieu_dedale_entailles_voknir` ≥ LU) : bark contextuel d'Uresaïr sur l'iridescence anormale. Activation du POI Testament. `Flag_lieu_dedale_exploration` → FAMILIER (exploration des Rivières et de la Galerie accomplie en amont).\n\t- **Déchiffrement du Fragment II** (test DD 11 réussi) : `Flag_lieu_dedale_testament_vertebral` → DECHIFFRE. La compréhension comme pseudépigraphie (*Concepts du Testament Vertébral* niveau **Compris**) nécessite les 3 fragments + Linguistique DD 12.\n\t- **Post-visite Amphithéâtre** (`Flag_lieu_dedale_murmurateurs` = CONTACTE) : bark contextuel supplémentaire à la redécouverte des nervures — Uresaïr fait le lien avec ce qu'elle a appris des Murmurateurs sur les fragments de Zaehria.\n\t\t<database url=\"https://www.notion.so/39c0847e52b44a6cbdf68c4879dda06f\" inline=\"true\">Scènes de cette map</database>",
+      "spe_cifications_techniques": "### Dimensions du panneau\n\t7680×2160 (2× écran) — largeur nécessaire pour l'impression de carrefour réel, même si moins dense en POI que le Carrefour Trichotomique.\n\t### Couches de profondeur\n\t4 couches parallaxe.\n\t- Layer 1 : fond osseux profond, dôme de nervures (défilement 0.2×)\n\t- Layer 2 : voûte nervurée avec lueur conditionnelle (0.5×)\n\t- Layer 3 : plan joueur, sol osseux (1×)\n\t- Layer 4 : entailles élargies et reliefs osseux avant (1.5×)",
+      "assets___re_fe_rences": "### Assets liés\n\t*\\[TODO - lier les références visuelles de la fiche Lieux parent, notamment les planches d'os pétrifiés et de structures profondes.\\]*\n\t### Dépendances\n\t- Panneau de base : illustration handpainted 4K, carrefour osseux neutre\n\t- Props additionnels : nervures iridescentes (layer conditionnel, visible uniquement si flag actif)\n\t- Animations : iridescence conditionnelle des nervures (shimmer très discret)\n\t- VFX : révélation progressive des nervures (fondu d'opacité depuis transparent vers visible)",
+      "remarques_de_conception": "- Panneau intentionnellement discret — ne pas surdécorer. Sa force narrative repose sur le contraste entre son apparence banale et son importance diégétique.\n\t- Le coût PE pour déchiffrer sans Voknir (DD 11, score Uresaïr 10 sans Linguistique) est intentionnel : zone de tension légère qui valorise l'alliance Voknir sans la rendre obligatoire.",
+      "dimensions": "7680×2160",
+      "props_cle_s": "Nervures iridescentes du Testament Vertébral (Fragment II, conditionnelles), entailles de Voknir élargies, sol poncé (trace de Zaehria)"
+    },
+    "section_titles": {
+      "preamble": "Préambule",
+      "apparence_visuelle": "Apparence visuelle",
+      "narration_environnementale": "Narration environnementale",
+      "navigation___obstacles": "Navigation & obstacles",
+      "position_des_pnj": "Position des PNJ",
+      "objets___props_interactifs": "Objets & Props interactifs",
+      "e_ve_nements_de_clenche_s": "Événements déclenchés",
+      "spe_cifications_techniques": "Spécifications techniques",
+      "assets___re_fe_rences": "Assets & références",
+      "remarques_de_conception": "Remarques de conception",
+      "dimensions": "Dimensions",
+      "props_cle_s": "Props clés"
+    },
+    "notion_page_id": "de09cf88-38ee-468d-994b-b49e039cfcef"
+  },
+  {
+    "Nom": "Carrefour Trichotomique",
+    "values": {
+      "Ambiance": "Intérieur sombre",
+      "Couches de profondeur": "5",
+      "Dimensions": "7680×2160",
+      "Lieu parent": "2356e4d2-1b45-8098-93c3-df4a68697585",
+      "Maps limitrophes": "de09cf88-38ee-468d-994b-b49e039cfcef",
+      "Palette dominante": "Froide",
+      "Props clés": "Piliers osseux équations de Voknir, Rivières Vertébrales convergentes, cul-de-sacs vivants (entrées latérales), accès Amphithéâtre/Alcôve/Galerie/Confluence",
+      "Type": "Standard",
+      "État": "En design"
+    },
+    "sections": {
+      "preamble": "<span color=\"yellow\">**Résumé de la map**</span><br><br>Hub structural central du Dédale Médullaire, là où les Rivières Vertébrales convergent et se redistribuent vers toutes les zones spécialisées de la Strate II. Les voûtes se contractent et se dilatent au rythme des quatre phases cycliques du Léviathan, faisant du Carrefour un baromètre spatial en temps réel. Les piliers osseux centraux portent les couches les plus denses des équations de Voknir, lisibles comme une météorologie du substrat.",
+      "apparence_visuelle": "### Description générale\n\tVaste chambre de convergence aux voûtes osseuses monumentales striant l'espace en nervures convergentes. Les piliers centraux portent les équations de Voknir en strates concentriques, chaque strate correspondant à un Souffle d'observation. Trois à quatre rivières de moelle argentée entrent par des ouvertures hautes, se croisent au plafond, et repartent vers les couloirs latéraux en défiant la gravité. La chambre est le point de départ de toutes les routes du Dédale — ses proportions le rendent paradoxalement plus lisible que les couloirs étroits qui l'alimentent.\n\t### Palette & ambiance\n\tPalette froide dominante : blanc ivoire jaunâtre des os, éclat argenté iridescent de la moelle, reflets bleu-vert des Champignosquelettes en périphérie basse. La lumière est entièrement bioluminescente, portée par les flux des Rivières Vertébrales. Pendant la Cacophonie, les sillons de Voknir s'élargissent et vibrent : une lueur plus chaude en sort, faisant vaciller l'ambiance froide habituelle.\n\t### Profondeur & couches\n\t5 couches parallaxe. L1 (arrière-plan osseux lointain) : parois profondes avec nervures géantes. L2 (voûtes et piliers) : arches convergentes, Rivières Vertébrales au plafond. L3 (plan joueur) : sol osseux, dalles et craquelures, zone de déplacement. L4 (premier plan) : piliers avant, équations gravées visibles de près. L5 (très premier plan) : suintements et mousses fongiques, particules de moelle flottantes.",
+      "narration_environnementale": "- **Équations de Voknir** : strates concentriques sur les piliers osseux centraux. Chaque strate correspond à un Souffle d'observation ; les plus récentes sont plus nettes, les plus anciennes partiellement effacées par les contractions du substrat. Certains sillons s'élargissent visiblement au rythme des phases — premier indice in-game que l'espace « réagit » à quelque chose.\n\t- **Marques de passage Murmurateur** : sur un pilier latéral discret, graffitis en Kesh-Varash effacés incomplètement par la Garde (« L'immobilité est la mort de l'âme »). Pointent vers un couloir latéral.\n\t- **Traces de purification** : sur le sol entre deux entrées de couloir, une large zone de paroi a été poncée proprement — signe d'une Purification par Transparence récente. La surface lisse tranche avec la texture naturelle du reste.\n\t- **Flux asymétriques** : selon la phase active, une ou deux Rivières Vertébrales coulent à rebours ou s'arrêtent complètement. Le joueur peut observer l'état des flux pour lire la phase en cours.",
+      "navigation___obstacles": "### Géométrie jouable\n\tZone centrale ouverte (hub de 3 à 4 largeurs de personnage), entourée de 5 à 6 ouvertures de couloirs menant aux zones spécialisées. Les piliers créent des angles morts exploitables pour la furtivité. Sol osseux globalement plat, quelques dénivellations basses liées aux suintements de moelle.\n\t### Obstacles bloquants\n\t- Piliers osseux centraux (colliders permanents)\n\t- Cul-de-sacs vivants sur 1 à 2 des ouvertures de couloir : fermés en Mutisme, ouverts en Inspiration (colliders conditionnels)\n\t- Patrouille de la Garde Sanguine selon la phase active : obstacle PNJ mobile\n\t### Zones de transition\n\t- Ouverture nord-est → Galerie des Entailles de Voknir\n\t- Ouverture nord-ouest → Amphithéâtre des Échos (phase Inspiration uniquement)\n\t- Ouverture sud → Alcôve de Refuge\n\t- Ouverture est → Confluence Finale\n\t- Entrée ouest → Couloir d'Ivoire (Catacombes Temporelles)",
+      "position_des_pnj": "### PNJ présents\n\t*Vue liée filtrée : positions, personnages visibles et rôle de présence sur cette map. Créer une ligne par PNJ si sa position ou son apparition doit être suivie précisément en production.*",
+      "objets___props_interactifs": "### Props clés interactifs\n\t- **Piliers équations de Voknir** : interactifs si `Flag_lieu_dedale_entailles_voknir` ≥ REMARQUE. Barks contextuels sur la cartographie dissidente (REMARQUE), options de dialogue sur la grammaire du Dédale (LU), navigation optimisée des Tunnels Lymphatiques (MAITRISE).\n\t- **Cul-de-sacs vivants** (sur entrées latérales) : interactifs selon phase active et capacités d'Uresaïr.\n\t- **Rivières Vertébrales** : indice de lecture de la phase active par comportement du flux (inverse, arrêté, normal, accéléré).",
+      "e_ve_nements_de_clenche_s": "- **Arrivée (première visite)** : bark contextuel d'Uresaïr sur les « battements » de l'architecture. `Flag_lieu_dedale_exploration` → TRAVERSE si c'est le premier passage.\n\t- **Cacophonie active** : les sillons de Voknir s'illuminent. Si `Flag_lieu_dedale_entailles_voknir` ≥ LU → révèle le passage vers les Tunnels Lymphatiques. `Flag_lieu_dedale_entailles_voknir` → MAITRISE.\n\t- **Rencontre Garde Sanguine** : patrouille présente hors phase Expiration. Conditionne les options de furtivité ou confrontation.\n\t- **Graffiti Murmurateur découvert** : inspection du pilier latéral → `Flag_lieu_dedale_amphitheatre` → REPERE.",
+      "spe_cifications_techniques": "### Dimensions du panneau\n\t7680×2160 (2× écran) — densité POI maximale justifie la largeur étendue.\n\t### Couches de profondeur\n\t5 couches parallaxe.\n\t- Layer 1 : parois profondes (défilement 0.2×)\n\t- Layer 2 : voûtes et Rivières Vertébrales plafond (0.5×)\n\t- Layer 3 : plan joueur — sol osseux et piliers médians (1×)\n\t- Layer 4 : piliers avant avec équations (1.5×)\n\t- Layer 5 : suintements fongiques et particules de moelle (2×)",
+      "assets___re_fe_rences": "### Assets liés\n\t*\\[TODO - lier les références visuelles de la fiche Lieux parent, notamment les planches d'ambiance bioluminescente et osseuse.\\]*\n\t### Dépendances\n\t- Panneau de base : illustration handpainted 4K, os pétrifiés monumentaux + flux moelle inversés\n\t- Props additionnels : piliers osseux avec sillons animés (réaction aux phases), particules de moelle\n\t- Animations : dilatation/contraction des ouvertures de couloir (phases cycliques), flux Rivières Vertébrales (direct/inversé/arrêté)\n\t- VFX : lueur amplifiée des sillons en Cacophonie, particules froides de moelle argentée\n---",
+      "notes_de_production": "Hub central critique : le Carrefour est le pivot de navigation de toute la Strate II. Priorité de production élevée. L'animation des phases cycliques (dilatation des voûtes, flux des Rivières) est le défi technique principal de ce panneau.",
+      "remarques_de_conception": "- Hub le plus dense narrativement et mécaniquement. Les équations de Voknir sont le seul élément lisible par couches (REMARQUE → LU → MAITRISE) ; leur placement ici garantit que le joueur les rencontre obligatoirement.\n\t- La Garde Sanguine doit être visible depuis ce panneau dès l'entrée — signal de danger clair, pas à cacher.",
+      "dimensions": "7680×2160",
+      "props_cle_s": "Piliers osseux équations de Voknir, Rivières Vertébrales convergentes, cul-de-sacs vivants (entrées latérales), accès Amphithéâtre/Alcôve/Galerie/Confluence"
+    },
+    "section_titles": {
+      "preamble": "Préambule",
+      "apparence_visuelle": "Apparence visuelle",
+      "narration_environnementale": "Narration environnementale",
+      "navigation___obstacles": "Navigation & obstacles",
+      "position_des_pnj": "Position des PNJ",
+      "objets___props_interactifs": "Objets & Props interactifs",
+      "e_ve_nements_de_clenche_s": "Événements déclenchés",
+      "spe_cifications_techniques": "Spécifications techniques",
+      "assets___re_fe_rences": "Assets & références",
+      "notes_de_production": "Notes de production",
+      "remarques_de_conception": "Remarques de conception",
+      "dimensions": "Dimensions",
+      "props_cle_s": "Props clés"
+    },
+    "notion_page_id": "23683960-df5c-4f78-b83d-c5abd5753929"
+  },
+  {
     "Nom": "Chambres Absolues",
     "values": {
       "Ambiance": "Intérieur sombre",

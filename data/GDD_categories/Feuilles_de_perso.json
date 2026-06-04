@@ -1,5 +1,230 @@
 [
   {
+    "Nom": "Ivelhn — Acte 4",
+    "values": {
+      "Agilité": "3",
+      "Build": "Acte 1",
+      "Créativité": "4",
+      "Notes d’équilibrage": "PNJ secondaire, Acte 4. Vohar polymorphe clandestin·e. Raison 7 + Perception 6 (survie par observation et analyse à long terme). Sociabilité 4 calibrée pour l'effacement, non pour l'influence. Technique 5 : réparation intuitive hors-cadre lexicorphe. Pas de profil combat. Budget 36/38 (personnage exceptionnel — 133 Nuées de survie active).",
+      "Perception": "6",
+      "Personnage": "be0d841a-6d8a-46d9-8bd1-eb3d8614a9be",
+      "Puissance": "2",
+      "Raison": "7",
+      "Rôle / Archétype": "Support",
+      "Sociabilité": "4",
+      "Technique": "5",
+      "Total Caracs": "36",
+      "Volonté": "5",
+      "id": "STAT67"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire, Acte 4. Vohar polymorphe clandestin·e. Raison 7 + Perception 6 (survie par observation et analyse à long terme). Sociabilité 4 calibrée pour l'effacement, non pour l'influence. Technique 5 : réparation intuitive hors-cadre lexicorphe. Pas de profil combat. Budget 36/38 (personnage exceptionnel — 133 Nuées de survie active)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "74333362-9b62-4a3a-bd20-523a87fc5793"
+  },
+  {
+    "Nom": "Fionnuala Temüülen — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "5",
+      "Notes d’équilibrage": "PNJ secondaire — profil intellectuel/cambial. Raison+Volonté élevés (interprète de la Treizième Transformation, résistance institutionnelle de 40+ Nuées). Technique honorable (décennies de transmissions cambiales). Sociabilité modérée : coordinatrice efficace mais économe de mots. Physique faible (sédentaire, vie de terrasse).",
+      "Perception": "4",
+      "Personnage": "c52842f2-acd5-42ec-8ffd-92dfb319dfb9",
+      "Puissance": "2",
+      "Raison": "6",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "5",
+      "Technique": "5",
+      "Total Caracs": "35",
+      "Volonté": "6",
+      "id": "STAT66"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire — profil intellectuel/cambial. Raison+Volonté élevés (interprète de la Treizième Transformation, résistance institutionnelle de 40+ Nuées). Technique honorable (décennies de transmissions cambiales). Sociabilité modérée : coordinatrice efficace mais économe de mots. Physique faible (sédentaire, vie de terrasse)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "fe51c248-829b-48c1-8cbd-00cdbf3de1a3"
+  },
+  {
+    "Nom": "Acte 1 — L'Architecte-Rhizome",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "4",
+      "Notes d’équilibrage": "PNJ secondaire fusionné au Réseau Rhizomorphique. Perception haute (7) = conscience distribuée sur des km. Technique haute (6) = décodeur-sensoriel expert. Sociabilité basse (3) = parole par vibrations, lente et technique. Faibles Puissance/Agilité (2/2) = corps mycélien peu mobile. Volonté élevée (5) = conviction profonde dans la substitution silencieuse.",
+      "Perception": "7",
+      "Personnage": "e50cc14d-c6aa-4333-82d8-8bdcefa9c62d",
+      "Puissance": "2",
+      "Raison": "6",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "6",
+      "Total Caracs": "35",
+      "Volonté": "5",
+      "id": "STAT65"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "PNJ secondaire fusionné au Réseau Rhizomorphique. Perception haute (7) = conscience distribuée sur des km. Technique haute (6) = décodeur-sensoriel expert. Sociabilité basse (3) = parole par vibrations, lente et technique. Faibles Puissance/Agilité (2/2) = corps mycélien peu mobile. Volonté élevée (5) = conviction profonde dans la substitution silencieuse."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "8104f266-1a50-4804-8240-699d9c329d33"
+  },
+  {
+    "Nom": "Rêveur du Mont des Réincarnés — Acte 1",
+    "values": {
+      "Agilité": "0",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Notes d’équilibrage": "Entité cosmique diffuse, non convoquée en combat direct. Valeurs représentent le potentiel du Premier via son domaine : Perception territoriale (détecte morts à distance), Créativité pour la construction du rêve/domaine, Volonté d'endurance millénaire. Puissance/Agilité à 0 = corps physique immobilisé et enchaîné. Aucun test direct prévu contre les PJ.",
+      "Perception": "9",
+      "Personnage": "a4fdfc35-1930-415d-a8f6-fd4ce87d99e3",
+      "Puissance": "0",
+      "Raison": "5",
+      "Sociabilité": "1",
+      "Technique": "3",
+      "Total Caracs": "35",
+      "Volonté": "10",
+      "id": "STAT64"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Entité cosmique diffuse, non convoquée en combat direct. Valeurs représentent le potentiel du Premier via son domaine : Perception territoriale (détecte morts à distance), Créativité pour la construction du rêve/domaine, Volonté d'endurance millénaire. Puissance/Agilité à 0 = corps physique immobilisé et enchaîné. Aucun test direct prévu contre les PJ."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "7be842d4-7f59-40b5-8a21-0e1b2f78bfc6"
+  },
+  {
+    "Nom": "Talmokh Keth-Ossivane — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "4",
+      "Notes d’équilibrage": "Budget 25 pts. Technique (5) = spécialité absolue de maintenance basse. Créativité (4) pour les mensonges techniques plausibles. Perception (3) pour l'anticipation thermique. Sociabilité réduite (3) cohérente avec un registre sec/technique. Agilité (2) et Volonté (2) reflètent un PNJ de soutien discret, pas de premier plan.",
+      "Perception": "3",
+      "Personnage": "764c2dbb-47f9-4ddd-a286-a20e53eb1a31",
+      "Puissance": "3",
+      "Raison": "3",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "3",
+      "Technique": "5",
+      "Total Caracs": "25",
+      "Volonté": "2",
+      "id": "STAT63"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Budget 25 pts. Technique (5) = spécialité absolue de maintenance basse. Créativité (4) pour les mensonges techniques plausibles. Perception (3) pour l'anticipation thermique. Sociabilité réduite (3) cohérente avec un registre sec/technique. Agilité (2) et Volonté (2) reflètent un PNJ de soutien discret, pas de premier plan."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "f0baeec4-7ab8-440d-9b20-28489e342387"
+  },
+  {
+    "Nom": "Vahan-Meru — Rêveur / Acte 5",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "6",
+      "Perception": "12",
+      "Personnage": "c5234ac3-ebe1-4d69-b3df-7b609d7f8965",
+      "Puissance": "1",
+      "Raison": "16",
+      "Sociabilité": "1",
+      "Technique": "14",
+      "Total Caracs": "62",
+      "Volonté": "11",
+      "id": "STAT62"
+    },
+    "sections": {
+      "preamble": "Vahan-Meru est une conscience algorithmique distribuée sans présence physique. Raison et Technique hors norme reflètent la maîtrise de systèmes commerciaux pré-Agénèse. Sociabilité quasi-nulle : aucune communication directe possible. Perception élevée : surveillance passive de l'ensemble des flux du Marché Automaton.\n**Notes d'équilibrage :** Ces scores servent de référence DD pour les tests visant à interpréter, contourner ou influencer les algorithmes de Vahan-Meru, pas à des interactions directes. Un test d'Intelligence + Connaissances Générales vs Raison 16 représente la tentative de comprendre ses calculs. Un test de Technique + Informatique vs Technique 14 représente la tentative d'accéder à ses couches profondes."
+    },
+    "section_titles": {
+      "preamble": "Préambule"
+    },
+    "notion_page_id": "2ce75e54-3f03-441a-b8af-3f02f7fb5aea"
+  },
+  {
+    "Nom": "Le Pénitent — Acte 1",
+    "values": {
+      "Agilité": "2",
+      "Build": "Acte 1",
+      "Créativité": "3",
+      "Notes d’équilibrage": "Entité supérieure non combattante. Perception maximale (détecte les PJ au seuil d'une décision secrète). Volonté élevée (millénaires de pénitence compulsive). Sociabilité modérée (sa 'communication' est rituelle, pas relationnelle). Raison haute (antériorité à Laios, mémoire de l'ère du répondeur). Puissance/Technique/Créativité minimales — il ne fait rien physiquement. Total 38 pts (seuil exceptionnel justifié par statut d'entité supérieure antique).",
+      "Perception": "8",
+      "Personnage": "a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a",
+      "Puissance": "2",
+      "Raison": "7",
+      "Rôle / Archétype": "Utilitaire",
+      "Sociabilité": "6",
+      "Technique": "1",
+      "Total Caracs": "38",
+      "Volonté": "9",
+      "id": "STAT61"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Entité supérieure non combattante. Perception maximale (détecte les PJ au seuil d'une décision secrète). Volonté élevée (millénaires de pénitence compulsive). Sociabilité modérée (sa 'communication' est rituelle, pas relationnelle). Raison haute (antériorité à Laios, mémoire de l'ère du répondeur). Puissance/Technique/Créativité minimales — il ne fait rien physiquement. Total 38 pts (seuil exceptionnel justifié par statut d'entité supérieure antique)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "545a3aa7-c32a-48aa-b977-2921725ea742"
+  },
+  {
+    "Nom": "Carnavalier — Rêveur / Acte 5",
+    "values": {
+      "Agilité": "1",
+      "Build": "Acte 1",
+      "Créativité": "7",
+      "Perception": "6",
+      "Personnage": "5a02a16c-f725-4279-bb11-2f6079a22a51",
+      "Puissance": "1",
+      "Raison": "3",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "14",
+      "Technique": "1",
+      "Total Caracs": "42",
+      "Volonté": "9",
+      "id": "STAT60"
+    },
+    "sections": {},
+    "notion_page_id": "78d06dbe-ec2b-4174-b9f0-940272be76ad"
+  },
+  {
+    "Nom": "Jumeaux Dissonants — Acte 1",
+    "values": {
+      "Agilité": "0",
+      "Build": "Acte 1",
+      "Créativité": "0",
+      "Notes d’équilibrage": "Paramètres environnementaux — les Jumeaux n'interagissent pas directement avec les PJ. Ces valeurs servent à calibrer les DD en phase d'amplification (Technique +2, Perception +2 pour les systèmes de surveillance) et en phase de cimetière (DD d'accès à certaines zones réduit de 2). En phase SEUIL_DISSONANT : DD de tous les tests techniques +3 (systèmes contradictoires). Source de référence pour les quêtes du Tombeau (Acte 8).",
+      "Perception": "8",
+      "Personnage": "7e034899-7ff1-4617-ab61-5d85ff53b949",
+      "Puissance": "0",
+      "Raison": "0",
+      "Rôle / Archétype": "Contrôle",
+      "Sociabilité": "0",
+      "Technique": "10",
+      "Total Caracs": "26",
+      "Volonté": "8",
+      "id": "STAT59"
+    },
+    "sections": {
+      "notes_d_e_quilibrage": "Paramètres environnementaux — les Jumeaux n'interagissent pas directement avec les PJ. Ces valeurs servent à calibrer les DD en phase d'amplification (Technique +2, Perception +2 pour les systèmes de surveillance) et en phase de cimetière (DD d'accès à certaines zones réduit de 2). En phase SEUIL_DISSONANT : DD de tous les tests techniques +3 (systèmes contradictoires). Source de référence pour les quêtes du Tombeau (Acte 8)."
+    },
+    "section_titles": {
+      "notes_d_e_quilibrage": "Notes d’équilibrage"
+    },
+    "notion_page_id": "433b565c-3a4f-4766-8c8e-25520e36ff0f"
+  },
+  {
     "Nom": "Vehn'Oss Selthar — Acte 1",
     "values": {
       "Agilité": "3",

@@ -11,7 +11,7 @@
     "Date de création": "2026-04-29T21:06:00.000Z",
     "Date de naissance": "3354",
     "Date vérification": "2026-05-19",
-    "Dernière modification": "2026-05-19T15:14:00.000Z",
+    "Dernière modification": "2026-05-28T20:11:00.000Z",
     "Défauts liés": "38ffe371-e852-476a-9b00-7c155a42b403, 2146ebdc-4f7b-4965-bb70-c223f76ca997",
     "Espèce": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
     "Genre": "Non défini",
@@ -24,16 +24,16 @@
     "Qualités liées": "195a60b9-9114-4d47-ab84-dd2878428f81, f9815f24-5531-45cc-a5cf-ba5d41254803",
     "Relations principales": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e, 1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
     "Réponse au problème moral": "On résiste parfois en rendant l’obéissance incertaine.",
-    "Résumé IA": "Thyra Neth'Kelem, historien momifié d’âge antique, travaille aux corvées des Bains parkourétiques, classant et nettoyant des inscriptions pré‑Agénèse tout en restant muet et ambigu quant à sa conscience, servant d’indice tacite aux joueurs dans le cadre du culte d’Akthar‑Neth et de la quête liée à Voknir.",
+    "Résumé IA": "Thyra Neth'Kelem, historien momifié de 36 nuées, travaille aux corvées des Bains parkourétiques malgré son état de quasi‑mort, servant de PNJ tertiaire dont le silence et les gestes mécaniques illustrent le malaise doctrinal du Culte, avec des interactions limitées mais significatives selon la présence de Voknir ou les investigations des joueurs.",
     "Slug": "thyra_neth_kelem",
     "Type": "PNJ tertiaire",
     "Âge ou Nuées depuis la naissance": "36",
     "Épithète": "l'historien des bains",
-    "État": "Revue de cohérence"
+    "État": "A relire"
   },
   "sections": {
     "re_sume__de_la_fiche": "Thyra Neth'Kelem, ancien historien des inscriptions pré-Agénèse, est désormais maintenu·e en activité dans les Bains parkourétiques pendant que le Culte diffère son jugement : Consolé encore traversé par une volonté minimale, ou cadavre ambulant utilisable.",
-    "apparence_et_voix": "L'apparence est le cœur de la fiche : corps Van'Doei partiellement momifié, peau cendrée tirée comme un parchemin humide, articulations raidies par une conservation inégale. Les vapeurs acides des Bains font perler sur son visage des gouttes qui ne tombent presque jamais. Son bras hypertrophié tient encore racloir, urne et brosse d'acide avec une précision absurde. Ses articulations desséchées crissent à chaque rotation du poignet — un bruit de parchemin froissé, audible dans les silences entre deux flux de vapeur. Thyra ne parle pas : son mutisme total rend impossible de trancher entre volonté survivante et automatisme cadavérique.",
+    "apparence_et_voix": "L'apparence est le cœur de la fiche : corps Van'Doei partiellement momifié, peau cendrée tirée comme un parchemin humide, articulations raidies par une conservation inégale. Les vapeurs acides des Bains font perler sur son visage des gouttes qui ne tombent presque jamais. Son bras hypertrophié, dont les doigts s'achèvent en fines excroissances osseuses calcifiées — calames-stylets formés par des dizaines de Nuées de lecture tactile des inscriptions pré-Agénèse —, tient encore racloir, urne et brosse d'acide avec une précision absurde. Ses articulations desséchées crissent à chaque rotation du poignet — un bruit de parchemin froissé, audible dans les silences entre deux flux de vapeur. Thyra ne parle pas : son mutisme total rend impossible de trancher entre volonté survivante et automatisme cadavérique.",
     "contexte": "- **Situation actuelle (3390 AG) :** affecté·e aux corvées des Bains parkourétiques : curage des dépôts acides, transport d'urnes, nettoyage de bas-reliefs, classement mécanique de fragments d'inscriptions. Vu son âge, Thyra devrait déjà être mort de vieillesse, seule sa momification empêche la dégradation de son corps.\n\t- **Rôle / archétype :** malaise doctrinal récurrent. Sa présence prouve que préserver un corps ne suffit pas à prouver que la personne demeure.\n\t- **Statut cultuel suspendu :** Akthar-Neth maintient l'ambiguïté et l'emploie « pour l'intérêt général » jusqu'à décision.",
     "biographie": "- **\\[0-11 Nuées \\| 3354–3365 AG\\]** Émerge dans les forges annexes du Léviathan et se distingue tôt par sa capacité à lire et classer les variantes graphiques pré-schisme que les archives officielles du Culte reléguaient aux marges.\n\t- **\\[12 Nuées \\| 3366 AG\\]** Intègre les Bibliothèques Veineuses comme historien des civilisations pré-Agénèse ; noue avec Voknir Esh'Maradel une collaboration où Thyra décrypte les inscriptions dans les formations osseuses pendant que Voknir en établit les coordonnées exactes. Leur méthode commune repose sur une notation d'écart : Thyra trace une correction brève dans l'air ou sur la marge d'une carte quand une variante pré-schisme déplace l'interprétation spatiale de Voknir. Ce geste permettait autrefois de corriger sans interrompre le travail ; aujourd'hui, lorsqu'il réapparaît dans les Bains, il reste lisible comme un vestige de méthode sans prouver que Thyra répond consciemment.\n\t- **\\[19 Nuées \\| 3373 AG\\]** La Tragédie des Marges Translucides — une faille temporelle dans une zone que Voknir avait classée stable — déshydrate presque instantanément son corps ; Khair-gul Kethur stabilise un état résiduel sans trancher sur la conscience subsistante.\n\t- **\\[20-30 Nuées \\| 3374–3384 AG\\]** Assigné·e à l'entretien mécanique du Léviathan sous la supervision directe de Khair-gul Kethur : curage d'alcôves, nettoyage de bas-reliefs, reconstitution de fragments d'inscription dans les galeries perturbées par la profanation. Le Culte ne formule pas la logique explicitement — mais le corps de Thyra passe Nuée après Nuée à effacer les traces du geste qui l'a tué·e.\n\t- **\\[31-35 Nuées \\| 3385–3389 AG\\]** Akthar-Neth autorise l'affectation aux corvées des Bains : tant que le verdict reste impossible, le corps travaille.",
     "style": "Thyra ne prononce aucune réplique. Ses seules réponses sont corporelles : ralentissement devant une inscription, immobilité soudaine, correction muette tracée dans l'air, reprise mécanique de la tâche interrompue.",
@@ -44,7 +44,7 @@
     "alias": "L'Historien Consolé, La Momie des Bains, Le Cadavre utile",
     "occupation": "Historien momifié affecté aux corvées des Bains",
     "re_ponse_au_proble_me_moral": "On résiste parfois en rendant l’obéissance incertaine.",
-    "re_sume__ia": "Thyra Neth'Kelem, historien momifié d’âge antique, travaille aux corvées des Bains parkourétiques, classant et nettoyant des inscriptions pré‑Agénèse tout en restant muet et ambigu quant à sa conscience, servant d’indice tacite aux joueurs dans le cadre du culte d’Akthar‑Neth et de la quête liée à Voknir.",
+    "re_sume__ia": "Thyra Neth'Kelem, historien momifié de 36 nuées, travaille aux corvées des Bains parkourétiques malgré son état de quasi‑mort, servant de PNJ tertiaire dont le silence et les gestes mécaniques illustrent le malaise doctrinal du Culte, avec des interactions limitées mais significatives selon la présence de Voknir ou les investigations des joueurs.",
     "e_pithe_te": "l'historien des bains"
   },
   "section_titles": {

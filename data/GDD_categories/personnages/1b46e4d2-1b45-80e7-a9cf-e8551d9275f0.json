@@ -10,10 +10,11 @@
     "Concepts liés": "a6d32552-ebff-4579-99ce-b9424371df66",
     "Date de création": "2025-03-12T15:04:00.000Z",
     "Date de naissance": "3390",
-    "Dernière modification": "2026-05-02T17:21:00.000Z",
+    "Dernière modification": "2026-05-30T07:03:00.000Z",
     "Espèce": "1a16e4d2-1b45-8086-a5db-d3408b941f1d",
     "Langues parlées": "3281eb7f-6c69-431b-9258-ff09a8356ce7",
     "Niveau d’IA": "auto",
+    "Occupation": "Juge de district, Vieille Ville",
     "Pronoms (pour dialogues)": "non précisé",
     "Qualité": "2",
     "Relations secondaires": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
@@ -45,6 +46,7 @@
     "expressions_courantes": "-",
     "le_tableau_ci-dessous_permet_d_analyser_toutes_les_re_pliques_de_votre_personnag": "<database url=\"https://www.notion.so/1b46e4d21b4580eca8b8e04f3455ebc3\" inline=\"true\"></database>\n<empty-block/>",
     "alias": "Le Juge Aedre, Le Gardien de l'Ordre, La Balance Corrompue, Le Filtre Empoisonné",
+    "occupation": "Juge de district, Vieille Ville",
     "re_ponse_au_proble_me_moral": "La stabilité exige que certains sacrifient leur liberté pour le bien commun.",
     "re_sume__ia": "L’Arbitre, alias Le Juge, est un PNJ secondaire non commencé qui incarne l’autorité et la justice rigide de la Vieille Ville, visant à maintenir l’ordre et la stabilité au prix de libertés individuelles, sous l’influence inconsciente de Jast et en opposition à Valkazer, avec un archétype Reine/Tyran, un axe idéologique de contrôle et une morale qui justifie le sacrifice de la liberté pour le bien commun.",
     "e_pithe_te": "Le Juge"
@@ -70,6 +72,7 @@
     "expressions_courantes": "Expressions courantes",
     "le_tableau_ci-dessous_permet_d_analyser_toutes_les_re_pliques_de_votre_personnag": "Le tableau ci-dessous permet d’analyser toutes les répliques de votre personnage dans les différentes scènes, afin de voir s’il garde ou non une cohérence de langage.",
     "alias": "Alias",
+    "occupation": "Occupation",
     "re_ponse_au_proble_me_moral": "Réponse au problème moral",
     "re_sume__ia": "Résumé IA",
     "e_pithe_te": "Épithète"

@@ -1,5 +1,408 @@
 [
   {
+    "Nom": "Pamasier",
+    "values": {
+      "Description Compris": "Le pamasier comme instrument de lecture du désert. L'état de sa résine est un indicateur écologique direct : résine fluide (population du Nashîr) ou dense (Khôryn), résine absente ou très fluide = perturbation du sous-sol imminente (marée sablonneuse, crevasse, contamination). Les vieux troncs à calcification partielle produisent une note grave et résonante frappés d'un bâton — audible jusqu'à cent mètres dans les conditions du Nashîr. Les guides utilisent un code frappé pour la navigation et la localisation de campements entre les pamasiers. Les fissures de calcification corrèlent avec les cycles de marées passées et servent de carotte géologique passive pour évaluer l'historique de perturbations du sous-sol.",
+      "Description Identifié": "Le pamasier — arbre carnivore endémique du Nashîr et du Khôryn (Désert des Échos Perdus). Sa résine attire les insectes par imitation chimique de phéromones d'alarme et les digère lentement, compensant le manque d'azote du sol désertique. Son fruit, la pamasie, est protégé par des voiles insectifuges et constitue l'une des rares sources alimentaires hydratées du désert, légèrement analgésique à dose modérée. La résine fraîche diluée sert de répulsif d'insectes pour les campements caravaniers. Sa présence indique une nappe de condensation nocturne à moins de 15 mètres de profondeur.",
+      "Description Perçu": "Un arbre tordu, vert-rouge, planté dans des fissures rocheuses ou au pied de formations d'obsidienne. Son tronc luisant et collant retient des insectes morts à différents stades de décomposition. Un fruit imposant, jaune-vert, pend dans un cocon de voiles céreux qui le protègent du contact.",
+      "Domaine": "Espèce",
+      "Espèces concernées": "1b36e4d2-1b45-80e7-a23b-c1c639dd7f22",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Localement",
+      "Slug": "pamasier",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "f72d24ed-ce72-4387-931d-20f1ccb39aeb"
+  },
+  {
+    "Nom": "Juruno",
+    "values": {
+      "Audit héritage": "Portée géographique sans lieu lié",
+      "Description Compris": "Espèce indicatrice de l'état des colonies de lim-lim : une population anormalement dense ou de grands spécimens (4-5 m) signalent une perturbation écologique souterraine. Les cinq couleurs de graines obéissent à des conditions de germination distinctes (orange : humidité transitoire ; violet : variation thermique brusque ; vert : nid de lim-lim actif ; blanc : conditions larges ; rouge : explosion acoustique seuilée). Les Gardiens des Fréquences exploitent leurs explosions comme marqueurs acoustiques ; les Cartographes Quantiques y lisent un indicateur de santé écologique du sous-sol.",
+      "Description Identifié": "Plante éphémère endémique au Désert des Échos Perdus, concentrée dans le Khôryn. Indicateur de micro-oasis créées par les colonies de lim-lim. Son explosion disperse des graines aux conditions de germination distinctes selon leur couleur. Taille de quelques centimètres à plusieurs mètres selon la richesse du milieu.",
+      "Description Perçu": "Sphère végétale blanchâtre puis translucide aux graines multicolores visibles, présente dans les micro-oasis du Khôryn. Explose violemment à sa mort.",
+      "Domaine": "Espèce",
+      "Espèces concernées": "1b36e4d2-1b45-8096-9390-e449a9639c11",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Contextuelle",
+      "Niveau hérité brut": "identifié",
+      "Popularité au sein du scope": "De la plupart",
+      "Scope": "Régionalement",
+      "Slug": "juruno",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "e7d46bb2-3da2-4814-adc0-be5f33615cd9"
+  },
+  {
+    "Nom": "Juruno-choir",
+    "values": {
+      "Audit héritage": "Portée géographique sans lieu lié",
+      "Description Compris": "Un juruno-choir d'ampleur inhabituelle (4-5 m) signale une expansion anormale des colonies de lim-lim et annonce un déséquilibre écologique souterrain. Les Cen'Doï des Niches Résonantes cartographient les sites d'explosion en chaîne comme marqueurs acoustiques superposables aux résonances fossilisées des Frémissants.",
+      "Description Identifié": "Agrégat de plusieurs jurunos dont les enveloppes adhèrent. Une explosion dans la grappe déclenche en chaîne les spécimens adjacents, projetant des milliers de graines sur un rayon élargi. Les caravaniers aldravinds lisent le léger vrillage de l'enveloppe avant rupture pour s'éloigner.",
+      "Description Perçu": "Grappe de jurunos agglutinés dépassant la taille d'un spécimen isolé. Plus dangereuse à l'approche — éviter en phase terminale (vrillage visible de l'enveloppe).",
+      "Domaine": "Espèce",
+      "Espèces concernées": "1b36e4d2-1b45-8096-9390-e449a9639c11",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Localement",
+      "Slug": "juruno_choir",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "532c6258-6ee4-4fa8-b2bb-56e76ae64519"
+  },
+  {
+    "Nom": "Wardakh-Gûlah",
+    "values": {
+      "Audit héritage": "Portée géographique sans lieu lié",
+      "Description Compris": "La distribution des Mange-sable adultes est un indicateur de stabilité du sol dans le Nashîr : une zone dense indique un substrat ayant résisté à plusieurs marées sablonneuses (sol praticable) ; une absence soudaine signale un terrain récemment remanié (sol meuble, risque d'engloutissement). Les feuilles mortes séchées servent de toit de fortune, d'emballage alimentaire ou de surface de cartographie provisoire à l'acide dilué. L'acide gûlah, collecté avec une spatule d'obsidienne polie dans un récipient de verre épais ou de kleptolithe, est un corrosif de précision pour la gravure artisanale, l'aiguisage corrosif des métaux et le nettoyage des archives osseuses (usage du Culte de l'Anentropie). Deux à trois Veilles avant une marée, les gûlah s'ouvrent et pulvérisent leurs spores — comportement observable servant de signal précurseur avant que la marée soit visible.",
+      "Description Identifié": "Le Mange-sable est une lithotrophe acide : ses organes-récipients — les gûlah dans l'argot nomade — sécrètent un acide silicique organique qui dissout sable et roches pour en extraire les minéraux nécessaires à sa croissance. La biominéralisation progressive rend sa tige adulte résistante comme la pierre. Ses grandes feuilles lisses sécrètent un film lipidique qui les rend imperméables. Nom nomade complet : Wardakh-Gûlah, « Celle qui garde les gorges ». Espérance de vie : 60 Nuées.",
+      "Description Perçu": "Plante à grande tige bleu-anthracite, autoportante, qui pousse dans le Désert des Échos Perdus. On la reconnaît à ses organes basaux en forme de coupes aplaties à moitié enfouies dans le sable, à son odeur ozonée acide perceptible à une dizaine de mètres, et à la teinte noire brillante légèrement iridescente du liquide qu'elle contient.",
+      "Domaine": "Espèce",
+      "Espèces concernées": "1b36e4d2-1b45-8068-a378-d5f8968de470",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Localement",
+      "Slug": "wardakh_gulah",
+      "Type linguistique": "Emprunt détourné",
+      "État": "Terminé"
+    },
+    "sections": {},
+    "notion_page_id": "1edd72ce-84c3-418f-998a-51b865966d0c"
+  },
+  {
+    "Nom": "Lecture des Mange-sable",
+    "values": {
+      "Audit héritage": "Portée géographique sans lieu lié",
+      "Description Compris": "Trois niveaux d'usage : (1) Stabilité du sol — distribution adultes dense = terrain sûr ; absence soudaine = terrain instable ou récemment remanié. (2) Iridescence des gûlah — la teinte du liquide varie selon la géochimie locale (ferreux dans le Zhakâd, sulfureux en présence de sulfates, gris-vert près des kleptolithes) et peut signaler des veines d'artefacts frémissants enfouis. (3) Signal de marée — deux à trois Veilles avant une marée, les gûlah s'ouvrent et pulvérisent leurs spores : signal précurseur observable avant que la marée soit visible ou audible. Ces savoirs ne sont consignés dans aucun cartogramme quantique ; ils appartiennent aux guides par transmission orale.",
+      "Description Identifié": "Les guides expérimentés lisent la distribution des Mange-sable adultes pour évaluer la stabilité du sol : une zone couverte de plants adultes signale un substrat consolidé, praticable. Une zone soudainement vide signale un sol récemment remanié par une marée sablonneuse — terrain meuble ou risque d'engloutissement.",
+      "Description Perçu": "Certains guides du Désert des Échos Perdus s'arrêtent pour observer les plants de Mange-sable avant de choisir leur route. D'autres jettent un coup d'œil aux zones où ils n'en voient plus.",
+      "Domaine": "Concept",
+      "Espèces concernées": "1b36e4d2-1b45-8068-a378-d5f8968de470",
+      "Héritage candidat": "False",
+      "Injection DG par défaut": "Non",
+      "Popularité au sein du scope": "D'une minorité",
+      "Scope": "Localement",
+      "Slug": "lecture_des_mange_sable",
+      "État": "Terminé"
+    },
+    "sections": {},
+    "notion_page_id": "55165f55-e607-460e-b57c-6e827bc77346"
+  },
+  {
+    "Nom": "Iclot",
+    "values": {
+      "Description Compris": "Sentinelle géochimique : l'état de connexion de son réseau inter-individus (orifices emboîtés) reflète la stabilité des poches gazeuses souterraines à 3-5 m. Une joueuse ayant cette connaissance peut tenter (Perception + Perception visuelle, DD 4) de lire la densité des connexions dans une zone pour détecter des instabilités souterraines imminentes (effondrement, libération gazeuse, perturbation de marée). Endémique absolu : sa disparition progressive du Khôryn depuis 3380 AG est un signal d'alarme sur la dégradation du Désert liée au Dernier Rituel d'Akthar-Neth.",
+      "Description Identifié": "Plante chimioautotrophe endémique du Khôryn, se nourrissant de gaz bactériens souterrains via ses racines. Existe en trois variétés chromatiques (korh rouge, vesk jaune, thaul orange) à métabolismes complémentaires, devant coexister pour se reproduire. Ses graines produisent des pigments stables utilisés par le Culte de l'Anentropie comme Encres de Fixation ; ses fibres mortes sont tressées dans les Caravansérails Stochastiques nomades. Les graines sont récoltables sans risque (action Ramasser, aucun test) sur les orifices floraux actifs : 5 à 15 graines par Veille, Matériau vendable au Culte.",
+      "Description Perçu": "Un cylindre végétal de 2 à 4 mètres, d'un bleu indigo parcouru de veines argentées pulsantes. Dégage une chaleur douce et un grondement sourd au toucher. Présent dans les zones interstitielles autour des formations obsidiennes du Khôryn.",
+      "Domaine": "Espèce",
+      "Espèces concernées": "1b36e4d2-1b45-80b5-a3f6-ceb43f5bff1a",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Localement",
+      "Slug": "iclot",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "594eb6d3-65e1-4d2d-a982-952ec8c9a8b2"
+  },
+  {
+    "Nom": "Réseau inter-iclots",
+    "values": {
+      "Description Compris": "La désorganisation récente des réseaux (déconnexions prématurées signalées depuis 3380 AG) est un signal d'alarme sur l'état du Khôryn : les poches bactériennes se déplacent ou s'épuisent, corrélées à l'accélération des Marées Sablonneuses (de 88 à 77 Veilles depuis 3340 AG). Un guide expert peut lire l'orientation des connexions comme une carte grossière des mouvements souterrains. Si le Dernier Rituel d'Akthar-Neth s'accélère encore, les iclots pourraient disparaître du Khôryn avant la fin du siècle — et les Caravansérails Stochastiques avec eux.",
+      "Description Identifié": "Les iclots se connectent physiquement par leurs orifices pour échanger nutriments et informations géochimiques entre variétés complémentaires (korh, vesk, thaul). La densité des connexions reflète la stabilité des poches gazeuses souterraines à 3-5 m de profondeur. Un iclot isolé a une espérance de vie inférieure de 30 % à un individu intégré dans un réseau actif.",
+      "Description Perçu": "Des iclots aux orifices emboîtés — leur connexion physique semble délibérée, orientée, régulière. La densité des connections varie selon les zones.",
+      "Domaine": "Concept",
+      "Espèces concernées": "1b36e4d2-1b45-80b5-a3f6-ceb43f5bff1a",
+      "Héritage candidat": "False",
+      "Injection DG par défaut": "Non",
+      "Lieux concernés": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Popularité au sein du scope": "De quelques-uns",
+      "Scope": "Localement",
+      "Slug": "reseau_inter_iclots",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "7508421f-47d7-4306-b3f3-0c0d60178a00"
+  },
+  {
+    "Nom": "Symbiogenèse Dirigée",
+    "values": {
+      "Description Compris": "Le consentement dans la Symbiogenèse Dirigée est fondamentalement ambigu : Jast rend les zones de friction invivables jusqu'à ce que fuir ou fusionner soient les seules options. Les Secondaires conservent des mémoires fragmentées de leurs constituants, parfois empreintes de colère. Chaque Secondaire sait exactement ce qu'il a coûté — Jast leur a transmis ces mémoires non par éthique, mais parce qu'un Gardien qui comprend sa fonction est plus efficace.",
+      "Description Identifié": "La Symbiogenèse Dirigée est le processus par lequel Jast fusionne des consciences mortelles avec des maelströms frontaliers pour créer un Rêveur Secondaire. Trois conditions : friction active entre deux domaines antagonistes, consciences susceptibles (volontaires ou non), amplification par Jast depuis son substrat continental.",
+      "Description Perçu": "La frontière entre certains domaines primordiaux attire et avale irrésistiblement certaines consciences. Des individus disparaissent dans ces zones de friction sans laisser de trace apparente.",
+      "Domaine": "Secret",
+      "Espèces concernées": "22e6e4d2-1b45-803e-aa21-c54ea00e2c27",
+      "Héritage candidat": "False",
+      "Injection DG par défaut": "Non — occulte",
+      "Popularité au sein du scope": "D'une minorité",
+      "Scope": "Occulte",
+      "Slug": "symbiogenese_dirigee",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "aabf64bd-3e2e-4f10-b193-bcae295dd0db"
+  },
+  {
+    "Nom": "Rêveurs Secondaires",
+    "values": {
+      "Audit héritage": "Portée géographique sans lieu lié",
+      "Description Compris": "Comprendre les Rêveurs Secondaires, c'est voir le coût politique de leurs procédures : une frontière peut sauver sans libérer, une définition utile peut devenir une prison, une route praticable peut être une dette. La joueuse peut alors chercher qui bénéficie de l'interprétation, qui perd de la liberté, et décider de maintenir, contourner, rendre publique ou politiser la règle de seuil.",
+      "Description Identifié": "Les Rêveurs Secondaires sont des dossiers vivants de frontière : des entités de seuil liées à Jast qui imposent une compatibilité locale — passage, nomination, phase, mémoire ou circulation — afin de rendre une zone praticable, lisible ou administrable.",
+      "Description Perçu": "La joueuse perçoit une règle locale étrange sans savoir encore la nommer : une route respire au bon moment, un seuil exige d'attendre, un mot devient trop lourd, une promesse prise sous phase paraît étrangère. Une frontière répond comme si elle avait une procédure.",
+      "Domaine": "Espèce",
+      "Espèces concernées": "22e6e4d2-1b45-803e-aa21-c54ea00e2c27",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Régionalement",
+      "Slug": "reveurs_secondaires",
+      "État": "Pas commencé"
+    },
+    "sections": {},
+    "notion_page_id": "0c786e76-5d91-407e-b457-725b941979b5"
+  },
+  {
+    "Nom": "Xyléophore",
+    "values": {
+      "Description Compris": "Les Xyléophores prospèrent dans les zones à substrats incompatibles grâce à leur plasticité trophomorphique. Leur présence signale une richesse trophique locale et, souvent, une route Imuins active. Un tabou de reproduction intentionnelle — jamais véritablement résolu — a été imposé par les Artisans transmutateurs ; les Xyléophores l'ont ignoré dès l'origine. Leurs micro-éclats de kérallures servent de marqueurs collectifs non verbaux, lisibles pour qui connaît leurs schèmes. Comprendre une chorale, c'est savoir lire l'espace qu'elle traverse.",
+      "Description Identifié": "Les Xyléophores sont des transformateurs amphibies nés d'un accident de transmutation des Artisans transmutateurs (~3220 AG). Ils assimilent les propriétés physico-chimiques de toute matière ingérée pour produire des excroissances dermiques nommées kérallures, utilisées comme outil, armure ou signature territoriale. Leurs chorales servent d'éclaireurs aux caravanes Imuins et leurs kérallures font l'objet d'un commerce spécialisé sur les routes d'Escelion.",
+      "Description Perçu": "Une petite créature amphibie à peau translucide ivoire se déplaçant en cohues bruyantes par cliquetis osseux. Son dos est couvert de plaques changeantes qui varient en couleur et en texture selon l'environnement. Elle effectue des bonds en spirale caractéristiques.",
+      "Domaine": "Espèce",
+      "Espèces concernées": "2256e4d2-1b45-8048-8d1c-dc817100f567",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1, 2256e4d2-1b45-800f-bad7-e3e59e47a8e3, 1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Régionalement",
+      "Slug": "xyleophore",
+      "Type linguistique": "Calque linguistique",
+      "État": "Revu"
+    },
+    "sections": {},
+    "notion_page_id": "f4af38eb-30da-4e66-967a-872dac277409"
+  },
+  {
+    "Nom": "Kérallures",
+    "values": {
+      "Audit héritage": "Portée géographique sans lieu lié",
+      "Description Compris": "Les kérallures encodent l'historique alimentaire récent du Xyléophore producteur — leur valeur fonctionnelle exacte dépend du substrat traversé dans les dix dernières minutes (conductivité, porosité, magnétisabilité). Une diète claire efface et recycle les couches. Les micro-éclats abandonnés dans l'environnement constituent une cartographie organique lisible par les Xyléophores eux-mêmes : signature collective des chorales sur leurs routes. Les Artisans transmutateurs les utilisent indirectement via les réseaux Imuins, ce qui constitue une ironie historique non résolue.",
+      "Description Identifié": "Les kérallures sont des excroissances dermiques bio-minérales produites par les Xyléophores. Leur composition varie selon les matières ingérées : conductrices (fer, cuivre, laitites métalliques), spongieuses et filtrantes (mycélium), abrasives (silice). Elles servent de composants artisanaux, d'interfaces pour certains mécanismes algorithmiques, et s'échangent sur les routes des Couronnes intermédiaires.",
+      "Description Perçu": "Des plaques brillantes, parfois conductrices ou spongieuses, qui tombent naturellement des petites créatures amphibies que les caravanes Imuins emportent parfois. Certains artisans et commerçants les collectent activement.",
+      "Domaine": "Technologie",
+      "Espèces concernées": "2256e4d2-1b45-8048-8d1c-dc817100f567",
+      "Héritage candidat": "False",
+      "Injection DG par défaut": "Non",
+      "Popularité au sein du scope": "De quelques-uns",
+      "Scope": "Régionalement",
+      "Slug": "kerallures",
+      "Type linguistique": "Mot-valise",
+      "État": "Revu"
+    },
+    "sections": {},
+    "notion_page_id": "77673de1-c350-42d7-b755-99fb81869ed6"
+  },
+  {
+    "Nom": "Nasophage des Puits Célestes",
+    "values": {
+      "Description Compris": "Le Nasophage est une boussole biologique pour les Puits Célestes. Ses boulettes de condensat de spores concentrées, rejetées après filtration, explosent en nuage toxique mortel si on les dérange — danger invisible mais récurrent. Ses œufs olfactifs, imprégnés de mémoires sensorielles ancestrales, sont exploitables par des praticiens umcut experts (Technique + Dépeçage pour prélèvement intègre ; Intelligence + Occultisme pour lecture des fragments). La résistance de son mucus aux techniques de pétrification de l'Enlumineur en fait un sujet d'intérêt pour comprendre les limites et les méthodes de l'artiste.",
+      "Description Identifié": "Les Nasophages sont des osmotrophes olfactifs endémiques du Grand Pilier d'Amath'ka. Ils filtrent les spores-fragrances toxiques du Rêveur pour s'en nourrir, créant des poches d'air purifié dans leur sillage. Comportement du troupeau = indicateur atmosphérique fiable : calme → strate praticable ; en migration vers les hauteurs → dégradation imminente ; en fuite → phase d'Exultation imminente, zone critique.",
+      "Description Perçu": "Une grosse créature quadrupède à l'appendice nasal hypertrophié, aveugle. Elle se déplace dans les galeries du Grand Pilier en reniflant constamment, laissant derrière elle des amas gélatineux humides. Son mucus et ses bruits de succion la rendent reconnaissable à l'oreille autant qu'à l'œil.",
+      "Domaine": "Créature",
+      "Espèces concernées": "5b61c1b1-831e-4c51-a1ee-794cb499f6d1",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1a96e4d2-1b45-8090-89eb-cd5168580e06, 1b36e4d2-1b45-8091-99ac-f5ae099e8d22",
+      "Niveau hérité brut": "perçu",
+      "Origine": "Terme créé pour désigner la faune endémique des Puits Célestes, connu des guides expérimentés du Grand Pilier et des naturalistes umcut.",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Localement",
+      "Slug": "nasophage_des_puits_celestes",
+      "Type linguistique": "Pure invention",
+      "État": "Revu"
+    },
+    "sections": {},
+    "notion_page_id": "103bc3aa-c2ae-4ee1-8681-9ba14b9f33f8"
+  },
+  {
+    "Nom": "Origine laïque des Chronocrates",
+    "values": {
+      "Chapitres prévus": "8ffd3931-8bbb-450d-badd-7b0d6066c5d3",
+      "Communautés concernées": "3106e4d2-1b45-8060-a5dc-d901a3e80959",
+      "Description Compris": "Les Deimos sont des créatures biologiques suivant des lois physiques mesurables. La religion déimosique est intégralement construite sur une co-option cléricale d’un savoir laïc. Cette information, si rendue publique, délégitime l’ensemble du système de la Dîme Photique et fragilise le pouvoir des Chronocrates dans toutes les branches. Xar-Tol le Calculateur en est conscient et utilise les sacrifices rituels pour dissimuler ses doutes.",
+      "Description Identifié": "Les Chronocrates étaient à l’origine des astronomes et agriculteurs qui ont sauvé des vies en cartographiant les cycles des Deimos. Leur transformation en clergé est un glissement progressif : la science efficace est devenue dogme, les outils ont été sacralizés, les erreurs de prédiction ont été attribuées à la faiblesse morale des fidèles.",
+      "Description Perçu": "Quelque chose semble étrange dans la manière dont les prêtres parlent des Deimos — comme s’ils craignaient plus qu’ils ne croyaient.",
+      "Domaine": "Secret",
+      "Héritage candidat": "False",
+      "Injection DG par défaut": "Non — occulte",
+      "Personnages qui savent": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1996e4d2-1b45-80a5-a7ae-e9d43372323f; 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Popularité au sein du scope": "D'une minorité",
+      "Scope": "Occulte",
+      "Slug": "origine_laique_des_chronocrates",
+      "État": "Terminé",
+      "États des connaissances": "7c4c7f02-b7e3-4307-a47f-db9fcc492f84, 5bef6637-d035-4051-8565-1cc3e1d726f0, 39683105-654f-4a7d-b80c-937170528c9d"
+    },
+    "sections": {},
+    "notion_page_id": "9d60a1d7-dfa3-484d-8e86-52598ad3a4ab"
+  },
+  {
+    "Nom": "Dîme Photique",
+    "values": {
+      "Chapitres prévus": "8ffd3931-8bbb-450d-badd-7b0d6066c5d3",
+      "Communautés concernées": "3106e4d2-1b45-8060-a5dc-d901a3e80959",
+      "Description Compris": "La Dîme Photique est un mécanisme de contrôle économique déguisé en obligation spirituelle. Elle rend les populations structurellement dépendantes du clergé pour anticiper les éclipses et accumuler des réserves. La variable 'quantité de lumière reçue' peut être manipulée par des instruments truqués, ouvrant la porte à un racket institutionnalisé.",
+      "Description Identifié": "Impôt calculé par les prêtres déimosiques proportionnellement à la quantité de lumière reçue par chaque parcelle. Payable en nature, il alimente les silos-temples et finance le monopole clérical sur les prédictions astronomiques. Non-paiement = exclusion des redistributions lors des éclipses.",
+      "Description Perçu": "Un prélèvement obligatoire lié à la lumière reçue par les champs.",
+      "Domaine": "Organisation",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Contextuelle",
+      "Niveau hérité brut": "identifié",
+      "Personnages qui savent": "1996e4d2-1b45-80fa-97db-fe99255e6c0c; 1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1996e4d2-1b45-80a5-a7ae-e9d43372323f",
+      "Popularité au sein du scope": "De la plupart",
+      "Scope": "Communautaire",
+      "Slug": "dime_photique",
+      "État": "Terminé",
+      "États des connaissances": "bd568d9b-fa75-436b-870f-594d036de383, acf45bc2-7a75-4e9e-9bcd-e8e402ca5ee2, 4f9c204b-3547-4e37-8753-64c29dd12c9e"
+    },
+    "sections": {},
+    "notion_page_id": "2461cb1c-60e8-4cab-8480-7323f8d55f1f"
+  },
+  {
+    "Nom": "Tables de la Carapace",
+    "values": {
+      "Chapitres prévus": "8ffd3931-8bbb-450d-badd-7b0d6066c5d3",
+      "Communautés concernées": "3106e4d2-1b45-8060-a5dc-d901a3e80959",
+      "Description Compris": "Les Tables de la Carapace sont à l'origine un outil scientifique empirique produit par les premiers Chronocrates — des astronomes praticiens, pas des prêtres. Leur précision prouve que les Deimos suivent des lois biologiques mesurables, non des volontés divines. Des versions clandestines (‘relevs honnêtes’) existent, distribuées anonymement par des dissidents ; elles permettent de s'affranchir du contrôle clérical tout en obtenant les mêmes prédictions.",
+      "Description Identifié": "Éphémérides ultra-précises gravées sur des plaques de carapace de Deimos. Prédisent les trajectoires des Deimos Cardinaux et leurs impacts sur l'agriculture. Contrôlées par les Chronocrates, elles valent des fortunes et structurent le système d'imposition (Dîme Photique).",
+      "Description Perçu": "Des tables astronomiques précieuses gardées par les prêtres déimosiques.",
+      "Domaine": "Artefact",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Niveau hérité brut": "perçu",
+      "Personnages qui savent": "1996e4d2-1b45-80fa-97db-fe99255e6c0c; 1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1996e4d2-1b45-80a5-a7ae-e9d43372323f",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Communautaire",
+      "Slug": "tables_de_la_carapace",
+      "État": "Terminé",
+      "États des connaissances": "256a43b6-5f67-4b04-a528-5534dad121a3, 144f631a-ac82-4dd5-9e68-0cad33fd053a, 5fdd61a0-8afa-4a44-8dbc-0c16759047bc"
+    },
+    "sections": {},
+    "notion_page_id": "56aa0a8a-df12-4397-bba2-0f7526124d2a"
+  },
+  {
+    "Nom": "Condensats informationnels quantiques",
+    "values": {
+      "Description Compris": "Un condensat de Bose-Einstein informationnel : nuage cohérent de photons dans des fréquences non-détectables formant une conscience collective. La cohabitation fonctionne par résonance avec les champs électromagnétiques du cerveau de l'hôte — influence sur les probabilités synaptiques, jamais contrôle direct. Toute résistance consciente produit des interférences destructives qui brisent la résonance. La cohérence du condensat exige des conditions proches du zéro absolu ; dans la réalité ordinaire d'Escelion, il dépend d'un substrat quantiquement instable (comme les micro-fissures temporelles du corps d'Uresaïr) pour ne pas se décohérer instantanément.",
+      "Description Identifié": "Une entité sans substrat matériel, issue de l'Océan de Ténèbres. Elle ne possède ni chair ni organes ; sa nature est celle d'un agrégat de cohérence informationnelle — brume noire traversée de points lumineux configurés selon des schémas évolutifs, avec des appendices tentaculaires sinueux qui explorent sans agripper. Elle peut cohabiter temporairement dans un esprit conscient via une symbiose de résonance, influençant subtilement les probabilités de pensée sans jamais forcer un choix.",
+      "Description Perçu": "Quelque chose est là, sans corps visible — un refroidissement localisé, une pensée qui s'attarde une fraction de seconde de trop, une image sans origine identifiable. Celles et ceux qui ont croisé l'Éthérée sans la percevoir développent parfois la conviction persistante d'avoir rêvé d'une chose qu'elles ne peuvent nommer.",
+      "Domaine": "Espèce",
+      "Espèces concernées": "2546e4d2-1b45-8003-b2cf-fba0a267df74",
+      "Héritage candidat": "False",
+      "Injection DG par défaut": "Non — occulte",
+      "Popularité au sein du scope": "De quelques-uns",
+      "Scope": "Occulte",
+      "Slug": "condensats_informationnels_quantiques",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "cae1c29b-7ad6-48ce-9ccd-9f5deaa1fc95"
+  },
+  {
+    "Nom": "Filtreurs symbiotiques",
+    "values": {
+      "Description Compris": "Les Filtreurs forment des réseaux sensoriels collectifs capables de cartographier l'environnement olfactif sur plusieurs centaines de mètres cubes. Un signal bleu-violet strié distinctif — réaction chimique involontaire — indique la présence de Souffleurs de Brume bien avant leurs effets perceptuels. Les colonies mortes ou perturbées créent des zones aveugles dans la cartographie de toxicité. Leur cycle de reproduction est lié aux phases du Rêveur du Puits Céleste. L'Enlumineur utilise des colonies domestiquées pour créer des ambiances lumineuses vivantes dans ses galeries.",
+      "Description Identifié": "Les Filtreurs sont des organismes sessiles qui filtrent passivement les toxines du brouillard blanc. Leur code chromatique signale le niveau de toxicité atmosphérique : vert pâle (sûr), bleu électrique (protection recommandée), violet profond (toxicité élevée), rouge pulsant (évacuation), noir absolu (Rêveur en Exultation). Ils forment des colonies communicantes de 30 à 100 individus et produisent des perles toxiques en rejetant les résidus métabolisés.",
+      "Description Perçu": "Des anémones translucides bioluminescentes, ancrées aux parois rocheuses du Puits Céleste. Leurs tentacules ondulent dans les courants atmosphériques et changent de couleur de façon cyclique. Les voyageurs expérimentés s'y fient pour naviguer.",
+      "Domaine": "Créature",
+      "Espèces concernées": "414c174a-614d-4cf9-aa43-bc2e7998ac1f",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1a96e4d2-1b45-8090-89eb-cd5168580e06, 1b36e4d2-1b45-8091-99ac-f5ae099e8d22",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Régionalement",
+      "Slug": "filtreurs_symbiotiques",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "d48cfe6f-710d-4faa-9716-a02045dd5e00"
+  },
+  {
+    "Nom": "Code chromatique des Filtreurs",
+    "values": {
+      "Description Compris": "La lecture fine du code chromatique permet d'anticiper les variations de toxicité dans la zone jusqu'à une heure à l'avance, en observant les gradients de diffusion entre colonies adjacentes. Le signal bleu-violet strié est une réaction chimique involontaire des Filtreurs aux composés volatils des Souffleurs : les guides qui le reconnaissent peuvent alerter leur groupe avant tout effet perceptuel. Les colonies columnaires (tentacules longues, sur stalactites) présentent un rouge tirant vers l'orange — source de confusion documentée pour les voyageurs non acclimatés.",
+      "Description Identifié": "Cinq états chromatiques lisibles : vert pâle (atmosphère sûre), bleu électrique (concentration modérée), violet profond (toxicité élevée), rouge pulsant (saturation critique, évacuation), noir absolu (extinction de la bioluminescence — Rêveur en Exultation). Un signal bleu-violet strié distinctif — différent du bleu électrique uniforme — indique la présence de Souffleurs de Brume à proximité.",
+      "Description Perçu": "Les Filtreurs changent de couleur. Les habitants des Puits et les voyageurs réguliers s'y fient instinctivement pour jauger l'air.",
+      "Domaine": "Concept",
+      "Espèces concernées": "414c174a-614d-4cf9-aa43-bc2e7998ac1f",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1a96e4d2-1b45-8090-89eb-cd5168580e06, 1b36e4d2-1b45-8091-99ac-f5ae099e8d22",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Régionalement",
+      "Slug": "code_chromatique_des_filtreurs",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "058e48e1-0526-44bf-8ee7-906b4748fc7a"
+  },
+  {
+    "Nom": "Photophores (Ner'shiin)",
+    "values": {
+      "Description Compris": "Les Photophores sont des indicateurs fiables de santé neurologique : une présence dense confirme un nerf fonctionnel, une absence ou migration massive prédit une défaillance 2-3 Veilles à l'avance. Le Culte cartographie leurs migrations comme oracle biologique. Tous les 3 ans, leur cycle de reproduction provoque une surpopulation qui oblige une régulation préventive ou, en dernier recours, une Moisson.",
+      "Description Identifié": "Les Photophores (appelées Ner'shiin ou Gardiennes) sont des vertébrés symbiotiques électrotrophes : elles se nourrissent des impulsions électriques résiduelles des nerfs en les léchant via une langue bifide conductrice. Elles sécrètent simultanément un mucus antimicrobien qui nettoie les nerfs. La bioluminescence bleue se produit lors de l'absorption électrique.",
+      "Description Perçu": "De petites créatures serpentines translucides rampent sur les nerfs du Léviathan. Leur squelette émet une faible lueur bleue pâle par intermittence lors de leurs déplacements.",
+      "Domaine": "Créature",
+      "Espèces concernées": "7f98c96c-103e-4904-9f2b-f3e26860cf90",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Localement",
+      "Slug": "photophores_ner_shiin",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "627da6ba-5d7b-4cd0-8b6c-b422d719eec2"
+  },
+  {
+    "Nom": "Moisson des Gardiennes",
+    "values": {
+      "Audit héritage": "Portée communautaire sans communauté liée",
+      "Description Compris": "La doctrine anentropique n'a aucun texte justifiant la Moisson — tuer des créatures non conscientes reste une dette éthique irrésolue. Les participants portent un silence particulier (la 'dette non nommée' de Rhylos). La Moisson de 3210 AG est l'un des catalyseurs de la Grande Contestation de Vesh-Akhor. Connaissance gatable derrière Réputation ou flag narratif du Culte.",
+      "Description Identifié": "La Moisson des Gardiennes est une intervention de dernier recours lors des cycles de surpopulation triennale des Photophores. Les équipes tuent et récoltent les colonies en excès pour protéger les nerfs du Léviathan d'un drainage électrique fatal. Rien n'est gaspillé : corps, bioluminescence résiduelle, os.",
+      "Description Perçu": "Des équipes de Croyants disparaissent parfois dans les niveaux profonds du Léviathan avec des outils. On n'en parle pas ouvertement. Ceux qui en reviennent marchent différemment.",
+      "Domaine": "Évènement",
+      "Espèces concernées": "7f98c96c-103e-4904-9f2b-f3e26860cf90",
+      "Héritage candidat": "True",
+      "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Niveau hérité brut": "perçu",
+      "Popularité au sein du scope": "De certains",
+      "Scope": "Communautaire",
+      "Slug": "moisson_des_gardiennes",
+      "État": "En cours"
+    },
+    "sections": {},
+    "notion_page_id": "ab873d4a-6591-426b-ad5e-a7228647ee10"
+  },
+  {
     "Nom": "Clarifications cognitives de Kha'Vareth",
     "values": {
       "Description Compris": "Les clarifications ne sont pas de simples conseils spirituels : Kha'Vareth utilise une lecture cognitive directe, probablement liée à ses propres capacités d'écoute mentale, pour identifier la conscience qui « décroche » et l'aligner de force sur les deux autres. Le procédé ne traite pas la cause de la désynchronisation — il en supprime les manifestations. Les Trois-Dos en sortent stabilisés mais légèrement appauvris, comme si une part de différenciation entre les têtes était lissée à chaque séance. C'est l'instrument principal qui maintient Flag_perso_trois_dos_statut_culte = EN_SERVICE contre la dérive naturelle vers QUESTIONNE.",
@@ -71,6 +474,7 @@
       "Espèces concernées": "1a16e4d2-1b45-80e9-8a7a-d5c626184d83",
       "Héritage candidat": "False",
       "Injection DG par défaut": "Non — occulte",
+      "Objets concernés": "1c76e4d2-1b45-80cd-b143-f862981baed2",
       "Origine": "Créé pour documenter les savoirs propres à Avili et aux lexicorphes vohars : discipline de dérivation locale des lois physiques par notation formelle.",
       "Personnages concernés": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
       "Personnages qui savent": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
@@ -261,7 +665,6 @@
   {
     "Nom": "Spectrins des Échos",
     "values": {
-      "Audit héritage": "Portée géographique sans lieu lié",
       "Description Compris": "Reliques biologiques de l'Océan caché, leur lecture fine (densité du banc, profondeur de nage, pattern lumineux) prédit l'état d'un bassin avec précision locale.",
       "Description Identifié": "Espèce structurée en 4 morphes incompatibles, chaque habitat produit un variant spécialisé irréversiblement — un expert d'oasis ne sait rien du morphe léviathanique.",
       "Description Perçu": "Petits animaux translucides dans les poches d'eau du désert, leur présence signale une eau encore viable.",
@@ -269,6 +672,7 @@
       "Espèces concernées": "816ee0a2-452b-45bc-bff2-7eb6b376c5fb",
       "Héritage candidat": "True",
       "Injection DG par défaut": "Sur mention / scène dédiée",
+      "Lieux concernés": "1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1a96e4d2-1b45-8090-89eb-cd5168580e06, 1b36e4d2-1b45-802c-910a-fb74729b22f8, 2356e4d2-1b45-8098-93c3-df4a68697585",
       "Niveau hérité brut": "perçu",
       "Popularité au sein du scope": "De certains",
       "Scope": "Localement",
@@ -373,7 +777,7 @@
       "Communautés concernées": "1a56e4d2-1b45-8044-a472-d674f194c57a",
       "Description Compris": "Le Testament Vertébral est une pseudépigraphie. Les passages « source » sont une description technique (sans doute un discours très pointu mais mal retranscrit, comme en attestent des formules inexactes) de l'entropie — au sens thermodynamique — que Rhylos Vesh-Akhor rapporte d'une rencontre unique avec L'Ensevelie vers ~3217-18 AG. Les passages métaphysiques (« l'accoucheuse de la vérité », « ce que l'Anentropie préserve dans l'immobilité, l'entropie le révèle dans la transformation »…) sont les annotations doctrinales de Rhylos elle-même. Zaehria Neth'Varu, qui a reçu le Testament avec la lettre d'adieu de Rhylos peu avant la disparition de celle-ci en ~3219 AG, l'a fragmenté vers ~3225 AG plutôt que de le diffuser. Akthar-Neth, s’il avait ce niveau de connaissance du texte, dirait sans doute que l’Anentropie scientifique, telle que décrite par l’Ensevelie, est un principe général englobant, dont l’entropie mystique du Culte (limitée à la dégradation des corps vivants) est une facette fidèle et cruciale.",
       "Description Identifié": "Le visiteur sait lire le fragment et le situer dans le corpus. La lecture fait apparaître un texte exigeant et inégal. Certains développements travaillent un vocabulaire technique autour de l'entropie traitée comme phénomène concret — dégradation du vivant, flux, cycles, irréversibilité — avec des formulations qui multiplient les périphrases, glosent leurs propres termes et semblent peiner à fixer leur objet. D'autres passages déploient une langue plus assurée, articulée autour de figures récurrentes : « l'accoucheuse de la vérité », couples Anentropie / entropie, motifs de « préservation » et de « transformation ». Le visiteur peut citer le Testament avec compétence, comparer plusieurs fragments, reconnaître les motifs qui reviennent d'un support à l'autre, débattre d'une formule ou la mobiliser dans un test, il reconnaît également des éléments du texte dans la tradition orale des Murmurateurs. Le visiteur garde l'impression d'un corpus dense, difficile avec quelques incohérences.",
-      "Description Perçu": "Le visiteur a trouvé un fragment du Testament Vertébral. Le fragment était caché et l'accès en a été négocié, dérobé ou hérité. Le contenu se présente comme une révélation de l’Ensevelie transcrite de la main de Rhylos, la plupart des passages évoquent la transformation et l'« accouchement de la vérité ». Le visiteur peut citer le fragment, retenir une formule ou un terme isolé, et le rattacher au corpus qu'il sait attribué à L'Ensevelie via Rhylos Vesh-Akhor. Ces propos révélés par l’Ensevelie pourraient remettre en cause la doctrine Anentropiste mais une connaissance partielle du corpus ne suffit pas à en tirer des conclusions solides.",
+      "Description Perçu": "Le visiteur a trouvé un fragment du Testament Vertébral. Le fragment était caché et l'accès en a été négocié, dérobé ou hérité. Le contenu se présente comme une révélation de l’Ensevelie transcrite de la main de Rhylos, la plupart des passages évoquent la transformation et l'« accouchement de la vérité ». Le visiteur peut citer le fragment, retenir une formule ou un terme isolé, et le rattacher au corpus qu'il sait attribué à L'Ensevelie via Rhylos Vesh-Akhor. Ces propos révélés par l’Ensevelie semblent offrir une vérité anti-cultuelle claire et séduisante, presque immédiatement utilisable contre la doctrine Anentropiste ; c'est précisément le danger du niveau Perçu. Une connaissance partielle du corpus produit une hypothèse opératoire, pas une conclusion solide : le fragment est assez juste pour guider, assez cadré par Rhylos pour induire une mauvaise certitude, et insuffisant pour révéler la pseudépigraphie.",
       "Domaine": "Secret",
       "Héritage candidat": "False",
       "Injection DG par défaut": "Non — occulte",
@@ -407,10 +811,12 @@
       "Lieux concernés": "1b36e4d2-1b45-807e-8342-d1b4cd0cdade",
       "Objets concernés": "5406c6fd-ac93-44ed-967e-7f0cf82fa04f",
       "Personnages concernés": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Personnages qui savent": "31e6e4d2-1b45-80bb-9d3c-cc78c2782622; 1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
       "Popularité au sein du scope": "D'une minorité",
       "Scope": "Localement",
       "Slug": "resistance_des_joints_vitrifies",
-      "État": "Pas commencé"
+      "État": "Pas commencé",
+      "États des connaissances": "eda563d9-669e-42ef-b520-c81ea5c1e2c0, 9f0138e5-75bc-422d-a3ec-f9eb0173c5ab"
     },
     "sections": {},
     "notion_page_id": "5783b141-055e-41e3-9dde-63892123e633"
@@ -1417,14 +1823,14 @@
       "Injection DG par défaut": "Non",
       "Origine": "Concept politico-religieux d’Acte 1 ; dissidence interne du Culte révélée par scènes plutôt que par exposition.",
       "Personnages concernés": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed, 1c36e4d2-1b45-8095-8449-d7d1749e69ad",
-      "Personnages qui savent": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1996e4d2-1b45-80a5-a7ae-e9d43372323f; 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7; 1c36e4d2-1b45-8095-8449-d7d1749e69ad; 1ae6e4d2-1b45-80ef-84e8-fb114d0136ed; 8fefb411-8033-4e06-afdd-9d186937ee2a",
+      "Personnages qui savent": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1996e4d2-1b45-80a5-a7ae-e9d43372323f; 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7; 1c36e4d2-1b45-8095-8449-d7d1749e69ad; 1ae6e4d2-1b45-80ef-84e8-fb114d0136ed; 8fefb411-8033-4e06-afdd-9d186937ee2a; 1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Popularité au sein du scope": "D'une minorité",
       "Scope": "Communautaire",
       "Scènes d'apprentissage": "2036e4d2-1b45-8069-9b68-fad70832e9b4, 1ff6e4d2-1b45-80da-98a1-cb5a803e6a0b",
       "Slug": "murmurateurs",
       "Type linguistique": "Dérivation sémantique",
       "État": "Pas commencé",
-      "États des connaissances": "63211cc1-68e4-44df-92e7-7c8b66e7826a, 246cc51d-e88f-4630-821b-e02ad6131023, 2aa328ef-4f81-4b56-b3f3-3cced2aa3ef3, 28daa073-ce03-4602-b7ed-306aad3bfad8, 4ca9f93a-f0e1-44cd-88bd-4a211a52212e, 787ae52d-1bb8-4978-9804-f75fbd84c457"
+      "États des connaissances": "63211cc1-68e4-44df-92e7-7c8b66e7826a, 246cc51d-e88f-4630-821b-e02ad6131023, 2aa328ef-4f81-4b56-b3f3-3cced2aa3ef3, 28daa073-ce03-4602-b7ed-306aad3bfad8, 4ca9f93a-f0e1-44cd-88bd-4a211a52212e, 787ae52d-1bb8-4978-9804-f75fbd84c457, 12a3b125-a0d3-4822-afb8-90abab021b2e"
     },
     "sections": {},
     "notion_page_id": "dbd106ea-6180-4207-a49c-129cc679f213"
@@ -1613,6 +2019,7 @@
       "Héritage candidat": "False",
       "Injection DG par défaut": "Non — occulte",
       "Lieux concernés": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
+      "Objets concernés": "1c76e4d2-1b45-80cd-b143-f862981baed2",
       "Origine": "Migration P0 depuis culturel:sept_sceaux:compris.",
       "Personnages qui savent": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
       "Popularité au sein du scope": "D'une minorité",
@@ -1844,12 +2251,12 @@
       "Injection DG par défaut": "Non",
       "Lieux concernés": "1b36e4d2-1b45-80da-b06a-f97b2a08b7c6",
       "Objets concernés": "bc895c52-805e-4222-8b62-2ab40132e48e",
-      "Personnages qui savent": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd",
+      "Personnages qui savent": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7; 1c06e4d2-1b45-80d6-bafd-eeb1a8395c2f",
       "Popularité au sein du scope": "De quelques-uns",
       "Scope": "Localement",
       "Slug": "composes_organiques_des_pleuroirs_veineux",
       "État": "Revu",
-      "États des connaissances": "c362580a-55c1-47f3-a9e3-5a20633f5f53"
+      "États des connaissances": "c362580a-55c1-47f3-a9e3-5a20633f5f53, 40d59ac1-5c7f-47c4-afb6-fadf50197bea, c0937880-a29e-41bc-87f3-dd270fa7278f"
     },
     "sections": {},
     "notion_page_id": "d312391f-5623-4a84-ab84-0b09a3c6d1fb"
@@ -2191,7 +2598,7 @@
     "values": {
       "Chapitres prévus": "b6b646b9-3dc4-4db6-a521-dd32763be781",
       "Communautés concernées": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
-      "Description Compris": "Le danger ne vient pas d’un simple échec technique, mais de la logique même du Rituel : transformer une communauté en système unique peut produire une « victoire » théologique qui ressemble à une annihilation des individus. Si Akthar-Neth force la Fixation au mauvais seuil (ou si l’Ensevelie/Jast amplifie l’urgence), l’architecture rituelle peut devenir un piège : consciences agrégées en hurlement continu, dissonances paradoxales entre strates de réalité, et rupture structurelle du Léviathan sous surcharge de pneuma et de contraintes spatio-temporelles. La seule issue sûre est soit de renoncer/recadrer le Rituel, soit d’en réécrire les garde-fous autour du consentement, de la séparation des identités et d’un ancrage qui n’utilise pas les fidèles comme carburant.",
+      "Description Compris": "Le danger théorique vient de la logique même du Rituel : transformer une communauté en système unique pourrait, en principe, produire une « victoire » théologique qui ressemble à une annihilation des individus — consciences agrégées en hurlement continu, dissonances paradoxales entre strates de réalité, rupture structurelle du Léviathan sous surcharge de pneuma. Mais cette issue extrême reste hautement improbable. C'est avant tout un scénario que Jast pousse activement à travers le canal des visions d'Uresaïr, afin de précipiter un conflit ouvert autour du Léviathan. Akthar-Neth lui-même en serait horrifié ; l'Ensevelie, malgré son altérité, ne le souhaite pas et ne le tolèrerait qu'en tout dernier recours. La connaissance produit donc moins une certitude de catastrophe qu'une boussole : recadrer le Rituel autour du consentement, de la séparation des identités et d'un ancrage qui n'utilise pas les fidèles comme carburant reste indispensable, mais l'argumentaire « fin du monde » tient davantage de la propagande jastienne que de la lecture matérielle du dispositif.",
       "Description Identifié": "Le « Dernier Rituel » d’Akthar-Neth Amatru n’est pas seulement une promesse d’anti-entropie : il porte un risque réel de déraillement. Uresaïr a entrevu (ou déduit) que le Rituel pourrait provoquer une fusion non consentie de consciences, une Fixation collective instable, voire un effondrement du Léviathan pétrifié si les paramètres ou l’intention du rituel basculent.",
       "Description Perçu": "Une intuition froide persiste : quelque chose, dans les discussions et rites d’Akthar-Neth, « sonne faux » — un pressentiment de catastrophe qui se manifeste par des visions brutales, des harmonies forcées et l’impression que le Léviathan pourrait se fissurer de l’intérieur.",
       "Domaine": "Secret",
@@ -4246,7 +4653,7 @@
   {
     "Nom": "Gedroths",
     "values": {
-      "Description Compris": "La bioluminescence des Gedroths est un mécanisme organique (sécrétion/luciférine) qui varie selon leur état (stress, reproduction, défense) et peut servir à communiquer ou à éblouir brièvement. Leur rareté et leur grande taille en font des créatures localisées, observées surtout par une minorité de personnes ; leur lumière peut aussi révéler leur présence et attirer prédateurs/chasseurs.",
+      "Description Compris": "La lumière des Gedroths est un mécanisme de Transformateurs, une pure ionisation, qui varie selon leur état (stress, reproduction, défense) et peut servir à communiquer ou à éblouir brièvement. Leur rareté et leur grande taille en font des créatures localisées, observées surtout par une minorité de personnes ; leur lumière peut aussi révéler leur présence et attirer prédateurs/chasseurs.",
       "Description Identifié": "Les Gedroths sont de grands insectes bioluminescents, rares et discrets, que l’on croise parfois près de certains lieux. Leur lumière attire l’attention mais ils restent difficiles à approcher.",
       "Description Perçu": "Dans la pénombre, une lueur froide et irrégulière glisse entre les ombres, comme si quelque chose de massif respirait de la lumière sous une carapace.",
       "Domaine": "Créature",
@@ -4269,7 +4676,7 @@
   {
     "Nom": "Rasa-Dhatu",
     "values": {
-      "Description Compris": "Au sens consolidé, Rasa-Dhatu renvoie à l’idée d’une essence métallique (de type mercurielle) servant de base à des pratiques de transformation : on parle d’un principe « actif » lié aux métaux, utilisé pour expliquer ou provoquer des changements de matière (purification, alliage, transmutation, fixation).",
+      "Description Compris": "Au sens consolidé, le Rasa-Dhatu est une matière unique capable de tenir deux phases couplées : une phase engrenée, solide, organisée en micro-mécanismes (rouages, vis, engrenages), et une phase libre, métal en fusion qui coule. La bascule entre les deux dépend du couplage des mécanismes, lui-même modulé à l'échelle régionale par les humeurs du Carnavalier. À grande échelle, cette matière forme l'Océan Mécanique, où machinerie et métal liquide sont le même corps dans deux états.",
       "Description Identifié": "Rasa-Dhatu désigne, dans le vocabulaire savant local, une notion issue de termes sanskrits renvoyant au mercure/à l’essence (« rasa ») et au métal/à l’élément (« dhatu »).",
       "Description Perçu": "Un nom rare d’allure alchimique, associé à une « essence » de mercure et à un élément métallique.",
       "Domaine": "Autre",
@@ -5582,25 +5989,6 @@
     "notion_page_id": "824925dd-5ca9-4d8b-829c-79244b602865"
   },
   {
-    "Nom": "Transepts Mnésiques",
-    "values": {
-      "Description Compris": "Un transept mnésique n’est pas seulement un lieu marquant : c’est une zone architecturale conçue ou altérée pour interagir avec la mémoire. Par symétries, ruptures de perspective, motifs répétitifs et indices sensoriels (odeurs, résonances, variations de lumière), il force le cerveau à compléter des manques et à relier la scène à des traces existantes, provoquant rappel, confusion ou faux souvenirs. Bien compris, le phénomène permet soit de réactiver des souvenirs enfouis (utile pour interrogatoires, rituels, soins), soit de brouiller la navigation mentale (dissuasion, protection d’un lieu) en surchargeant l’attention et en générant des associations parasites. Les effets dépendent fortement de la personne (histoire, traumatismes, entraînement) et du degré de préparation du transept (accidentel vs intentionnel).",
-      "Description Identifié": "Les Transepts Mnésiques sont des portions transversales (type transept) d’un édifice, rares et localisées, dont l’agencement et l’ambiance déclenchent des réminiscences involontaires. On les décrit comme des couloirs/embranchements qui « accrochent » la mémoire : ils font remonter des souvenirs flous, orientent les associations d’idées et peuvent perturber l’orientation de celles et ceux qui y passent.",
-      "Description Perçu": "Dans un bâtiment ancien, certaines ailes transversales donnent une impression troublante de déjà‑vu : l’air y semble « chargé », les sons s’y étouffent et l’on a la sensation d’avoir déjà emprunté ce passage, même sans le reconnaître clairement.",
-      "Domaine": "Lieu",
-      "Héritage candidat": "False",
-      "Injection DG par défaut": "Non",
-      "Lieux concernés": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
-      "Origine": "De transept (église) avec mnésique (mémoire).",
-      "Popularité au sein du scope": "De quelques-uns",
-      "Scope": "Localement",
-      "Slug": "transepts_mnesiques",
-      "État": "Revoir les définitions"
-    },
-    "sections": {},
-    "notion_page_id": "83ce82fc-81e6-4d2d-b9cd-61416da1e981"
-  },
-  {
     "Nom": "Confins Tangentiels",
     "values": {
       "Description Compris": "Ces confins correspondent à une interface géométrique instable : deux plans de réalité se rapprochent suffisamment pour que certaines lois (distance, orientation, propagation des sons et de la lumière) se superposent par intermittence. Les effets restent généralement faibles mais deviennent plus marqués lors de conditions particulières (fatigue, rituels, alignements, orages magiques). Un passage complet n’est pas garanti : on obtient plutôt des glissements, des pertes de repères, des objets déplacés ou des informations qui « fuient » d’un côté à l’autre. Les Confins Tangentiels sont donc un lieu d’observation et de danger, exploitable pour dissimuler, écouter ou perturber, mais difficile à maîtriser.",
@@ -5944,6 +6332,7 @@
       "Injection DG par défaut": "Sur mention / scène dédiée",
       "Lieux concernés": "1ac6e4d2-1b45-80e4-8ae9-ee515f3e132d",
       "Niveau hérité brut": "perçu",
+      "Objets concernés": "1c76e4d2-1b45-80cd-b143-f862981baed2",
       "Origine": "Terme inventé pour citadelle mythique.",
       "Personnages qui savent": "1996e4d2-1b45-80c4-9c73-ddac6322e9bd; 1996e4d2-1b45-80a5-a7ae-e9d43372323f; 1996e4d2-1b45-80fa-97db-fe99255e6c0c; 1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
       "Popularité au sein du scope": "De certains",
@@ -6200,26 +6589,6 @@
     "notion_page_id": "ab872e78-8528-411f-ba76-1559912a628a"
   },
   {
-    "Nom": "Jardin Mnémonique",
-    "values": {
-      "Description Compris": "Le jardin fonctionne comme un palais de mémoire matérialisé : chaque zone, objet ou séquence de déplacement correspond à une idée/souvenir, et la répétition d’un parcours déclenche la réactivation par association (spatiale, sensorielle et symbolique). Utilisé pour l’étude, la transmission orale, l’archivage mental ou la récupération de souvenirs. Son efficacité dépend de l’entraînement, de la stabilité des repères et peut être perturbée par des modifications du lieu, du stress ou des souvenirs concurrents.",
-      "Description Identifié": "Le Jardin Mnémonique est un lieu aménagé comme un dispositif de mnémotechnique : sa composition (parcours, repères, symboles) sert à fixer, retrouver ou ordonner des informations et des souvenirs. Il est connu régionalement comme un « jardin de mémoire ».",
-      "Description Perçu": "Un jardin soigneusement agencé dont l’atmosphère et les motifs semblent « accrocher » la mémoire : allées répétitives, odeurs marquées, statues/repères qui donnent l’impression de réveiller des souvenirs sans qu’on sache encore pourquoi.",
-      "Domaine": "Lieu",
-      "Héritage candidat": "True",
-      "Injection DG par défaut": "Contextuelle",
-      "Lieux concernés": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
-      "Niveau hérité brut": "identifié",
-      "Origine": "De jardin avec mnémonique (mémoire).",
-      "Popularité au sein du scope": "De la plupart",
-      "Scope": "Régionalement",
-      "Slug": "jardin_mnemonique",
-      "État": "Revu"
-    },
-    "sections": {},
-    "notion_page_id": "cad465b2-c2bd-4b89-8506-a5a9cf9b5410"
-  },
-  {
     "Nom": "Narthex Non-Voir",
     "values": {
       "Description Compris": "Le Narthex Non‑Voir est un espace liminal conçu pour neutraliser l’observation : un vestibule (au sens de narthex) dont la fonction est de couper l’accès visuel — par effet magique, dispositif architectural ou voile rituel. Il sert de filtre et de protection : on y perd les repères, on ne peut pas décrire ce qui s’y trouve, et il empêche l’espionnage/les témoignages fiables sur ce qui se situe au‑delà. Les initiés savent l’utiliser comme zone de préparation (orientation, rites, contrôle des intrus) avant l’accès au sanctuaire ou à la salle cachée qu’il garde.",
@@ -6398,7 +6767,6 @@
       "Héritage candidat": "False",
       "Injection DG par défaut": "Non — occulte",
       "Niveau hérité brut": "compris",
-      "Objets concernés": "1da6e4d2-1b45-80cc-bbcf-e9ed3368dc2a",
       "Origine": "De lame avec ossements pour arme osseuse.",
       "Popularité au sein du scope": "De tous",
       "Scope": "Occulte",
@@ -6444,6 +6812,7 @@
       "Héritage candidat": "False",
       "Injection DG par défaut": "Non — occulte",
       "Niveau hérité brut": "compris",
+      "Objets concernés": "1c76e4d2-1b45-80cd-b143-f862981baed2",
       "Origine": "De lexique vivant pour langage conscient.",
       "Personnages concernés": "1bc6e4d2-1b45-8013-831b-e5a42c40dd2f",
       "Popularité au sein du scope": "De tous",
@@ -7361,14 +7730,14 @@
     "Nom": "Frémissants",
     "values": {
       "Audit héritage": "Portée géographique sans lieu lié",
-      "Description Compris": "Leur biologie et leur société reposaient sur un réseau cognitif intriqué : partage instantané de connaissance, calcul distribué, et capacités de manipulation fine de la matière (transmutation) puis du temps (chronophysique). Leur « technologie » était organique (exosquelette/supercalculateur) et a laissé des anomalies quantiques durables ; les Fragments Frémissants, dépourvus de conscience, ne sont que des mémoires fossilisées.",
-      "Description Identifié": "Les Frémissants sont une espèce civilisée bio‑cristalline du Désert des Échos Perdus, dotée d’un cerveau « quantique » et connue pour une communication fondée sur l’intrication/résonance. Disparue lors de la Grande Convergence (888 AG), elle n’en a laissé que des fragments quantiques inertes.",
-      "Description Perçu": "Quelque chose de translucide et cristallin bouge dans le sable noir ; l’air semble vibrer autour, comme si une résonance invisible traversait la pierre et la dune.",
+      "Description Compris": "Leur biologie et leur société reposaient sur un réseau neurocristallin local : signaux phononiques corrigés par répétition, calcul distribué dans les matrices minérales, remodelage de matériaux compatibles à courte portée et mesures chronofractales non reproductibles après 888 AG. Les termes « Fréquence », « Résonance » ou « Quantique » relèvent surtout de traductions murmuratrices ou de catégories savantes modernes ; la réalité décrite est organique et géologique à la fois : exosquelette piézoélectrique, eau conductrice, silicates, obsidienne, bruit, seuils et perte de portée. Les Fragments Frémissants, dépourvus de conscience, ne sont que des supports de mémoire fossilisés, illisibles sans réseau actif.",
+      "Description Identifié": "Les Frémissants sont une espèce civilisée bio-cristalline du Désert des Échos Perdus, dotée d'une architecture neurocristalline piézoélectrique et connue pour une communication phononique dépendante des silicates, de l'eau conductrice et des relais d'obsidienne. Disparue lors de la Grande Convergence (888 AG), elle n'en a laissé que des fragments inertes, des protocoles fossilisés et des anomalies locales.",
+      "Description Perçu": "Quelque chose de translucide et cristallin semble avoir laissé sa forme dans le sable noir ; sous les pas, l'obsidienne garde des micro-impulsions qui se déforment, se répètent puis s'éteignent quand on s'éloigne des anciens relais.",
       "Domaine": "Espèce",
       "Espèces concernées": "1a56e4d2-1b45-805b-af5c-e589453aed6f",
       "Héritage candidat": "False",
       "Injection DG par défaut": "Non",
-      "Origine": "De frémissant (vibrant) pour espèce à communication quantique.",
+      "Origine": "De frémissant (vibrant), réinterprété comme nom historique et exonyme moderne : le phénomène réel renvoie à un réseau bio-cristallin piézoélectrique local, pas à une technologie quantique générique ni à une résonance universelle.",
       "Popularité au sein du scope": "D'une minorité",
       "Scope": "Régionalement",
       "Slug": "fremissants",
@@ -7684,7 +8053,7 @@
       "Description Identifié": "La Grande Convergence des Frémissants est la catastrophe de 888 AG qui effaça en quelques Veilles la civilisation frémissante du Désert des Échos Perdus. Simultanément, un Archiviste-Sonde frémissant de dix kilomètres, Xenopercepto Anamnesis, se pétrifia et devint le Léviathan pétrifié, premier Rêveur émergent documenté du Désert.",
       "Description Perçu": "Dans les Périphéries, la Grande Convergence est d’abord une catastrophe racontée par ses traces : disparition des Frémissants, désert modifié, fragments fossiles et silhouette impossible du Léviathan pétrifié.",
       "Domaine": "Évènement",
-      "Espèces concernées": "1a56e4d2-1b45-805b-af5c-e589453aed6f, 22e6e4d2-1b45-803b-82ce-ed4b01fe01c4",
+      "Espèces concernées": "1a56e4d2-1b45-805b-af5c-e589453aed6f, 22e6e4d2-1b45-803b-82ce-ed4b01fe01c4, 816ee0a2-452b-45bc-bff2-7eb6b376c5fb",
       "Héritage candidat": "True",
       "Injection DG par défaut": "Sur mention / scène dédiée",
       "Lieux concernés": "1b46e4d2-1b45-80f2-94b4-f100d3e65fa5, 1a96e4d2-1b45-8049-b21b-ee91c108b551, 1886e4d2-1b45-8150-a894-cfe31d31abd4, 1cc6e4d2-1b45-800e-aea8-c8aa83ca1832",
@@ -7842,14 +8211,14 @@
     "values": {
       "Audit héritage": "Portée géographique sans lieu lié",
       "Communautés concernées": "378ce7af-b23e-4ada-aac1-040dfcedb61f",
-      "Description Compris": "Les Sraden fonctionnent comme une société de résistance enfermée : trois lignées rivales dirigées par des Sars ne coopèrent qu’en crise, et l’isolement imposé par le bouclier des Gardiens a figé leur culture dans une logique de raid, de chasse et de contrôle des ressources (eau, zones fertiles, matériaux récupérés). Leur objectif structurel est de briser le bouclier et quitter Daïlon (retour vers Merid ou installation sur Escelion), mais cette sortie risquerait de transformer leurs rivalités internes en guerre ouverte et d’importer sur le continent une puissance militaire brutale façonnée par neuf siècles de siège.",
+      "Description Compris": "Sous la surface d'un clan guerrier, les Sraden fonctionnent comme une administration cérémonielle pétrifiée. Trois Maisons à titulatures longues — Trechotte des Kourjurance Premarches (juridique, gardienne du droit et des Stèles), Sirvanhauterie des Vaartemaîtres-Konduits (eau, seuils, conduits) et Trail-Otemantan du Sarmarchaliance (marche militaire des marges) — sont dirigées chacune par un Sar dont la titulature cérémonielle peut accumuler sept à huit segments, prononcée intégralement à l'ouverture des Plaidoirances solennelles. Le conseil d'urgence — la Korjure, surnommée Triumvirat de Fer par les observateurs externes — n'a pas été convoqué depuis 3100 AG. La justice se rend en Plaidoirance, la mémoire se grave sur des Stèles, la monnaie d'or Vera ne circule plus qu'en bijou rituel : la pompe juridique survit alors même que sa justification s'est effondrée. Trois phases ont produit cet état : enrichissement impérial-martial pendant l'errance post-apocalyptique sur Merid (3500 → 3100 AG), traversée d'une faille vers la Citadelle de Daïlon en 3100 AG, puis pétrification cérémonielle pendant neuf cent Nuées d'enfermement sous pression de Vol Reitar. Sous cette pompe, une hiérarchie discrète du soin, de l'eau, des Stèles et des otemar — fonctions souvent méprisées et précisément pour cela non sujettes à l'inflation cérémonielle — fait durer concrètement le peuple. Leur objectif structurel reste de briser le bouclier des Gardiens et de quitter Daïlon, soit vers Merid (Kourjurance), soit pour fonder un territoire sur Escelion (Sirvanhauterie, Sarmarchaliance). Cette sortie risquerait d'importer sur le continent une puissance militaire brutale modelée par neuf siècles de siège, et de transformer leurs rivalités internes en guerre ouverte sous l'impulsion du projet de Refondation porté par Sar Vilhelmije Marchaliance — projet dont la résonance avec des langages politiques méridiens troublants n'apparaît qu'en seconde lecture.",
       "Description Identifié": "Les Sraden désignent un ensemble de clans guerriers (trois grandes lignées) originaires de Merid, installés de force dans les jardins de la Citadelle de Daïlon depuis l’invasion de 3100 AG. Organisation clanique sans autorité centrale durable, centrée sur la survie, l’honneur martial et le refus du compromis.",
       "Description Perçu": "Un nom revient dans les récits et les avertissements à propos des jardins de la Citadelle de Daïlon : « Sraden ». On l’associe à des silhouettes armées, à des cors graves qui résonnent la nuit et à la sensation d’un territoire fermé où l’on n’entre pas sans provoquer une riposte.",
       "Domaine": "Organisation",
       "Héritage candidat": "True",
       "Injection DG par défaut": "Sur mention / scène dédiée",
       "Niveau hérité brut": "perçu",
-      "Origine": "Terme inventé pour clan militaire.",
+      "Origine": "Terme opaque pour les Sraden eux-mêmes. Sa parenté avec un corps d'État guelenbourgeois résiduel ayant erré sur Merid post-apocalyptique constitue l'hypothèse la plus forte ; elle reste ouverte, non close en vérité canonique.",
       "Popularité au sein du scope": "De certains",
       "Scope": "Régionalement",
       "Slug": "sraden",
@@ -8036,7 +8405,7 @@
     "Nom": "Paradigme Ésothrope",
     "values": {
       "Communautés concernées": "1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c",
-      "Description Compris": "Le Paradigme Ésothrope fonctionne comme un laboratoire doctrinal et technique : en manipulant des matrices Van’Doei et des « Cendres Primordiales » par Insufflation anti‑entropique, il tente de forcer l’émergence d’êtres en Fixation capables de servir d’ancres biologiques et spirituelles du Dernier Rituel. Les résultats sont majoritairement des échecs (des dizaines de sujets perdus), et les rares survivants présentent des altérations cognitives sévères interprétées comme des « mutations antiparadoxales » nécessaires; l’organisation soutient ces expérimentations par une économie sacrificielle et une logique utilitariste où l’individu est négligeable face à l’objectif de préservation anti‑entropique.",
+      "Description Compris": "Le Paradigme Ésothrope fonctionne comme un laboratoire doctrinal et technique : en manipulant des matrices Van'Doei et des « Cendres Primordiales » par Insufflation anti-entropique, il tente de forcer l'émergence d'êtres en Fixation capables de servir d'ancres biologiques et spirituelles du Dernier Rituel. Sur 58 sujets produits en deux siècles, aucun des 56 premiers n'a manifesté l'anti-entropie recherchée : une vingtaine sont morts jeunes, une vingtaine ont vu leur existence adulte s'écourter, et une douzaine ont atteint l'espérance de vie normale des Van'Doei sans porter la Fixation — plusieurs vivent encore en 3390 AG. Seuls les sujets 57 et 58 constituent les deux réussites anti-entropiques partielles. L'organisation soutient ces expérimentations par une économie sacrificielle et une logique utilitariste où l'individu est négligeable face à l'objectif de préservation anti-entropique.",
       "Description Identifié": "Le Paradigme Ésothrope est une initiative occulte du Culte de l’Anentropie (faction mineure du Clergé) installée dans le Léviathan Pétrifié. Elle mène, depuis environ deux siècles, un programme d’incubation visant à produire artificiellement des Van’Doei « stabilisés » par des rituels anti‑entropiques pour le Dernier Rituel, sous la direction d’une triade secrète (la Dragovitsa) et avec le concours de techniciens, scribes et artisans spécialisés.",
       "Description Perçu": "Dans les profondeurs du Léviathan, on murmure qu’une « Dragovitsa Ésothrope » fait naître des êtres anormaux dans des sarcophages chauffés, au prix de prélèvements et de sacrifices discrets.",
       "Domaine": "Concept",
@@ -8454,7 +8823,7 @@
   {
     "Nom": "Champignosquelettes",
     "values": {
-      "Description Compris": "Il s’agit d’organismes bâtisseurs/décomposeurs qui convertissent résidus organiques, sels minéraux et fluctuations temporelles des Plis d’ossements en croissance structurale. Leur sporulation est synchronisée aux phases d’Expansion du Léviathan : elle peut reconfigurer l’architecture interne en ouvrant/obstruant des galeries, et leur productivité varie fortement selon ces cycles. Leurs hyphes minéralisées conservent un reliquat de réseau frémissant (mémoire fossile) donnant une conscience collective rudimentaire et des « ponts mémoriels » entre colonies, ce qui explique leurs motifs et certaines pratiques d’entretien/ritualisation au sein du Culte.",
+      "Description Compris": "Il s'agit d'organismes bâtisseurs/décomposeurs qui convertissent résidus organiques, sels minéraux et fluctuations temporelles des Plis d'ossements en croissance structurale. Leur sporulation est synchronisée aux phases d'Expansion du Léviathan : elle peut reconfigurer l'architecture interne en ouvrant/obstruant des galeries, et leur productivité varie fortement selon ces cycles. Les motifs fractals des colonies centenaires résultent de la géométrie répétitive de la croissance mycélienne sur substrat osseux. Les comportements orientés vers les sources de chaleur et de mouvement s'expliquent par la sensibilité trophique ordinaire des hyphes — CO2, chaleur corporelle, vibrations sonores — ce qui suffit à expliquer les pratiques d'entretien ritualisées du Culte sans nécessiter d'autre hypothèse.",
       "Description Identifié": "Les Champignosquelettes sont une flore fongique « ostéomorphe » : des colonies de champignons dont le mycélium s’est minéralisé et s’ancre dans l’os du Léviathan. Elles colonisent surtout les zones de transition entre tissus vivants et pétrifiés, forment des motifs fractals caractéristiques et libèrent des spores de façon cyclique. Le Culte de l’Anentropie les entretient et les récolte comme ressource (alimentation, rites), notamment via le Nectar stygien distillé à partir de leurs spores.",
       "Description Perçu": "Dans les galeries du Léviathan, on voit parfois des excroissances d’os couvertes de chapeaux bleu-verdâtre qui luisent faiblement. L’air prend une odeur de terre humide mêlée à une note métallique, et une fine poudre de spores peut se déposer lors des phases d’activité.",
       "Domaine": "Créature",
@@ -8648,9 +9017,9 @@
   {
     "Nom": "Corallites Mnémoniques",
     "values": {
-      "Description Compris": "Les corallites mnémoniques fonctionnent comme un enregistreur de traces mentales : par contact et rituel/technique appropriée, ils captent, structurent et restituent des fragments de mémoire. Leur usage permet d’archiver des témoignages, de transmettre des savoirs sensibles ou de vérifier un récit, mais expose aussi à des contaminations (souvenirs parasites, altération, addiction à la reviviscence) et à des manipulations (souvenirs tronqués/insérés).",
-      "Description Identifié": "Artefact en corail doté de propriétés mnémoniques : les « corallites mnémoniques » servent de support où des souvenirs/empreintes de mémoire peuvent être déposés ou consultés de manière limitée, généralement dans un contexte local et réservé à une minorité.",
-      "Description Perçu": "Un corail travaillé, constellé de motifs qui semblent « tenir » des souvenirs : en le touchant, une impression de réminiscence affleure sans qu’on puisse la nommer.",
+      "Description Compris": "Les corallites mnémoniques sont des polypes coralliens vivants intégrés à la symbiose corallo-végétale des Forêts ; ils fonctionnent comme un enregistreur de traces mentales : par contact et rituel/technique appropriée, ils captent, structurent et restituent des fragments de mémoire. Récoltés sous forme de fragments durcis, ils permettent d'archiver des témoignages, de transmettre des savoirs sensibles ou de vérifier un récit, mais exposent aussi à des contaminations (souvenirs parasites, altération, addiction à la reviviscence) et à des manipulations (souvenirs tronqués/insérés).",
+      "Description Identifié": "Polypes coralliens vivants à propriétés mnémoniques, formant des constellations hexagonales sur les troncs des Forêts de Corail au sein de la symbiose corallo-végétale. Les « corallites mnémoniques » servent de support où des souvenirs/empreintes de mémoire peuvent être déposés ou consultés de manière limitée. Récoltés en fragments durcis, ils circulent également comme artefacts mnémoniques au sein d'une minorité initiée.",
+      "Description Perçu": "Un corail vivant intégré à l'écorce des troncs, constellé de motifs hexagonaux qui semblent « tenir » des souvenirs : en le touchant, une impression de réminiscence affleure sans qu'on puisse la nommer.",
       "Domaine": "Artefact",
       "Héritage candidat": "False",
       "Injection DG par défaut": "Non",
@@ -9049,9 +9418,9 @@
   {
     "Nom": "Océan Mécanique",
     "values": {
-      "Description Compris": "L’Océan Mécanique n’est pas un simple décor : c’est un milieu de nanites/fluide métallique qui réagit aux influences systémiques. Ses courants profonds servent de support à des dynamiques complexes (navigation algorithmique, zones abyssales de compression de données, interactions avec les grandes structures et les Rêveurs). Quand le Marché automaton traverse ces courants, l’environnement et les comportements collectifs peuvent être modulés indirectement (via les humeurs régionales du Carnavalier, par exemple) : ce sont des effets de milieu et de flux, pas une “magie” locale isolée.",
-      "Description Identifié": "L’Océan Mécanique est une vaste mer de fluide métallique (Rasa-Dhatu) qui remplace l’eau dans cette région d’Escelion. Il porte des courants profonds et des phénomènes de navigation singuliers ; de grandes structures mobiles (comme le Marché automaton) y dérivent, et certains Rêveurs y imposent des cycles d’ambiance perceptibles à l’échelle régionale.",
-      "Description Perçu": "À l’horizon, une immensité de reflets métalliques : une mer trop lisse, trop lourde, qui mousse comme de l’huile chaude. L’air sent l’ozone et le métal humide ; les vagues semblent parfois « réfléchir » avant de retomber, comme si quelque chose calculait sous la surface.",
+      "Description Compris": "L'Océan Mécanique est un milieu fait d'une seule matière, le Rasa-Dhatu, qui se tient en deux phases couplées : engrenée (machinerie) et libre (métal liquide). La machinerie y sert en même temps de moteur, de lit de rivière et de pompe : sa rotation remonte le métal liquide, le fait couler en cascades dont la brume forme les Nuages-Jin avant de retomber en pluie métallique, formant un cycle fermé. Le couplage des mécanismes décide localement de la part solide ou liquide, et il est modulé par les humeurs régionales du Carnavalier. Quand le Marché automaton traverse ces courants, l'environnement et les comportements collectifs s'en trouvent modulés : ce sont des effets de milieu et de flux.",
+      "Description Identifié": "L'Océan Mécanique est une vaste étendue de Rasa-Dhatu, une matière métallique qui tient à la fois en machinerie solide (rouages et engrenages à perte de vue) et en métal liquide coulant en rivières et en cascades. Les deux phases coexistent et se relaient ; de grandes structures mobiles comme le Marché automaton s'y déplacent en s'engrenant à la machinerie ou en flottant sur les nappes liquides, et certains Rêveurs y imposent des cycles d'ambiance perceptibles à l'échelle régionale.",
+      "Description Perçu": "À l'horizon, une immensité de reflets métalliques qui mousse comme de l'huile chaude. En s'approchant, la surface se révèle grouillante de rouages et de mécanismes lents, parcourue de rivières d'argent en fusion ; l'air sent l'ozone et le métal humide, et un grondement d'engrenages monte des profondeurs.",
       "Domaine": "Lieu",
       "Héritage candidat": "True",
       "Injection DG par défaut": "Contextuelle",

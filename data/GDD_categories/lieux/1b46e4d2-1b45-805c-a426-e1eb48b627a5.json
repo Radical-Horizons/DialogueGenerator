@@ -1,13 +1,15 @@
 {
   "Nom": "Fosse aux Idoles déchues",
   "values": {
+    "Communautés présentes": "3106e4d2-1b45-8060-a5dc-d901a3e80959",
     "Contenu par": "1b46e4d2-1b45-80f2-94b4-f100d3e65fa5",
     "Date de création de la fiche": "2025-03-12T15:38:00.000Z",
-    "Dernière modification": "2026-05-05T11:29:00.000Z",
+    "Dernière modification": "2026-06-01T17:37:00.000Z",
     "Niveau d’IA": "co-écrit",
     "Résumé IA": "Fosse aux Idoles déchues est une région principale en cours de conception, actuellement « Pas commencé », avec de nombreuses idées de paysages surréalistes et de mécaniques sociales liées à des dettes et des légitimités obsolètes, incluant des statues juridiques, des figures politiques déchues et une ambiance de zone dangereuse mais potentiellement douce, le tout restant à définir.",
     "Taille": "Région",
     "Type": "Région principale",
+    "Zones limitrophes": "1b46e4d2-1b45-8001-ad3d-f3a293347dc1",
     "État": "Pas commencé"
   },
   "sections": {

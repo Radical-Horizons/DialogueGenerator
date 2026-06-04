@@ -1,5 +1,5 @@
 {
-  "Nom": "Cadres d'origine & apprentissage hors-cadre",
+  "Nom": "Cadres d'origine",
   "values": {
     "Besoins humains": "Progression, Maîtrise",
     "Catégorie": "Progression",
@@ -13,6 +13,7 @@
     "Type": "Sous-système"
   },
   "sections": {
+    "preamble": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3A7b92013a-60a4-418f-93b2-3ec236a8a8b6%3ACadres_D_Origine.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223726e4d2-1b45-8133-98e1-f6e1e175a761%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
     "1__but_du_sous-syste_me": "Formaliser **comment un personnage accède normalement à une compétence**, et comment ce cadre peut être dépassé sans créer de plafonds rigides.\nCe sous-système étend <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/> : il ne crée **ni nouvelle ressource**, ni nouvelle monnaie. Il ne crée pas non plus de type de nœud distinct : tous les nœuds restent narratifs. Il ajoute simplement une **règle de coût** pour les compétences acquises **hors-cadre**.\n**Système parent :** <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/>\n**Besoins humains servis :**\n- **Progression** : le joueur voit clairement pourquoi une compétence est accessible, exceptionnelle ou transgressive\n- **Maîtrise** : les règles d’accès sont lisibles et reliées au fictionnel",
     "2__boucle___parcours_utilisateur": "```mermaid\nflowchart TD\n\tA[Personnage veut acquérir une compétence] --> B{Famille ?}\n\tB -->|Biologique / Surnaturel| C[Lire Espèce]\n\tB -->|Culturel / Technologique| D[Lire Communauté d'éducation]\n\tC --> E{Niveau dans le cadre natif ?}\n\tD --> E\n\tE -->|Oui| F[Nœud à 1 point]\n\tE -->|Non| G[Nœud à 2 points + justification narrative]\n\tF --> H[Compétence acquise]\n\tG --> H\n```\n**Scénario nominal**\nUne héroïne veut apprendre une compétence Technologique de niveau **Moyen**. Sa communauté d'éducation a **Technologie : Faible**. Cette compétence n'est donc pas dans le cadre natif. Pour l'obtenir, il faut un nœud narratif relié à un vecteur crédible d'apprentissage : par exemple un PNJ ingénieur, une greffe, ou un séjour de formation. Le joueur atteint ce nœud dans l'arbre et dépense **2 points de progression** : **1 point** pour le bonus habituel de compétence, **1 point supplémentaire** pour l'apprentissage hors-cadre. Le coût narratif, lui, est porté par la position du nœud dans la branche et par la réputation requise auprès du maître ou de la communauté concernée.",
     "4_cadres_d_origine": "- **Espèce** → `Biologie`, `Surnaturel`\n- **Communauté d'éducation** → `Culture`, `Technologie`\nLa communauté actuelle n'accorde pas automatiquement un nouveau cadre ; elle peut seulement **ouvrir des nœuds d'apprentissage**.",
@@ -29,6 +30,7 @@
     "re_sume__ia": "Sous-système de Progression qui définit le cadre d’accès natif aux compétences à partir de l’espèce (Biologie, Surnaturel) et de la communauté d’éducation (Culture, Technologie). Les compétences Nul forment le socle commun accessible à tous. Toute compétence au-dessus du cadre natif reste apprenable via un nœud spécial de progression porté par une justification narrative (mentor, greffe, initiation, mutation, nouvelle communauté, etc.)."
   },
   "section_titles": {
+    "preamble": "Préambule",
     "1__but_du_sous-syste_me": "1. But du sous-système",
     "2__boucle___parcours_utilisateur": "2. Boucle & Parcours utilisateur",
     "4_cadres_d_origine": "4 cadres d'origine",

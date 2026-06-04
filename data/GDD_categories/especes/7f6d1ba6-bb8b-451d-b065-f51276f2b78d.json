@@ -3,12 +3,12 @@
   "values": {
     "Espérance de vie": "40",
     "Règne (ou classe)": "534e5829-6e46-4d38-84d8-b2d37344d711",
-    "Résumé IA": "Pas de contenu",
+    "Résumé IA": "Ferrotissé de la mégafaune sessile (2–6 m de diamètre à maturité), ancrée dans le substrat rocheux par des rhizoïdes métalliques s'enfonçant jusqu'à 15 m. Tire 60–80 % de son énergie de la chimiosynthèse catalytique (cycling Fe²⁺/Fe³⁺). Surfaces colonisées par des symbiotes nettoyeurs. Sénescence par pétrification progressive : les individus très âgés deviennent des monolithes inertes exploités comme gisements par les générations suivantes. Longévité exceptionnelle : 200–400 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Ferrotissé** (Vifs-Formes, Lithotissés) de la **mégafaune sessile** (2–6 m de diamètre à maturité). Ancrés dans le substrat rocheux par des **rhizoïdes métalliques** s'enfonçant jusqu'à 15 m. Tirent 60–80 % de leur énergie de la **chimiosynthèse catalytique** (cycling Fe²⁺/Fe³⁺). Surfaces colonisées par des communautés de symbiotes nettoyeurs. **Sénescence par pétrification** progressive : les individus très âgés deviennent des monolithes inertes exploités comme gisements. Zones volcaniques et géothermales. Longévité : 200–400 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -18,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Pas de contenu"
+    "re_sume__ia": "Ferrotissé de la mégafaune sessile (2–6 m de diamètre à maturité), ancrée dans le substrat rocheux par des rhizoïdes métalliques s'enfonçant jusqu'à 15 m. Tire 60–80 % de son énergie de la chimiosynthèse catalytique (cycling Fe²⁺/Fe³⁺). Surfaces colonisées par des symbiotes nettoyeurs. Sénescence par pétrification progressive : les individus très âgés deviennent des monolithes inertes exploités comme gisements par les générations suivantes. Longévité exceptionnelle : 200–400 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

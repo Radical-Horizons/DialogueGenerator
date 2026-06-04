@@ -1,5 +1,88 @@
 [
   {
+    "Nom": "Premières utilisations documentées des Mange-sable par les nomades du Désert des Échos Perdus",
+    "values": {
+      "Date de début": "3030",
+      "Description": "Vers 3030 AG, contemporaines des premières explorations cartographiques de Zvyk, les pratiques nomades de récolte du liquide corrosif des Mange-sable et d'utilisation de leurs feuilles imperméables comme matériau d'abri ou d'emballage commencent à être transmises entre caravaniers. Ces usages — spatule d'obsidienne pour la récolte, reliquaire de kleptolithe pour la conservation — constituent la base d'un savoir-faire artisanal oral propre aux guides du Nashîr et du Zhakâd.",
+      "Espèces": "1b36e4d2-1b45-8068-a378-d5f8968de470",
+      "Importance": "Mineur",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Type d'événement": "Découverte",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "8efc4674-1edd-4a66-8102-f3ecc30b8967"
+  },
+  {
+    "Nom": "Première récolte rituelle des graines d'iclot par le Culte de l'Anentropie",
+    "values": {
+      "Communautés": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+      "Date de début": "3175",
+      "Description": "Vers 3175 AG, lors de la stabilisation initiale du Culte de l'Anentropie dans le Léviathan Pétrifié, les Croyants découvrent que les graines d'iclot du Khôryn produisent des pigments stables résistant à la chaleur sèche du désert. Cette résistance à la dégradation est interprétée comme un signe anentropique : une graine qui teint sans se décolorer est une victoire sur l'entropie accessible à l'œil nu. La récolte rituelle devient une pratique régulière, donnant naissance aux Encres de Fixation utilisées pour les inscriptions liturgiques des frises des transepts et les marques des Perséverants.",
+      "Espèces": "1b36e4d2-1b45-80b5-a3f6-ceb43f5bff1a",
+      "Importance": "Notable",
+      "Lieux": "1a96e4d2-1b45-8049-b21b-ee91c108b551",
+      "Type d'événement": "Religieux",
+      "Ère": "Ère contemporaine"
+    },
+    "sections": {},
+    "notion_page_id": "bb458d1d-11b8-4262-9f12-cc24be89cb0b"
+  },
+  {
+    "Nom": "Introduction des Rouleurs éternels aux Bibliothèques Veineuses (3303 AG)",
+    "values": {
+      "Date de début": "3303",
+      "Description": "À l'initiative de Kha'Vareth Ardakh, archiviste-ingénieur du Culte de l'Anentropie, les premiers Rouleurs éternels de Marul sont sélectionnés dans les populations sauvages du Désert des Échos Perdus et introduits dans les sphères des Bibliothèques Veineuses du Léviathan pétrifié. Exploitant leur capacité naturelle à naviguer selon les micro-différentiels de gravité, Ardakh conçoit un système d'orientation passive par dispositifs vibratoires ciblés, permettant à ces créatures de transporter les organoïdes fragiles entre les Bibliothèques et la Nef Centrale sans manipulation directe par les archivistes. Cette domestication fonctionnelle, sans dressage, marque la première relation documentée entre une espèce artificielle et les infrastructures archivistiques du Culte.",
+      "Espèces": "1b36e4d2-1b45-80d7-9d84-ccb4e6e8ee52",
+      "Importance": "Mineur",
+      "Type d'événement": "Découverte",
+      "Ère": "Ère contemporaine"
+    },
+    "sections": {},
+    "notion_page_id": "b7e5f522-2cb9-4d39-babb-0484736ea6db"
+  },
+  {
+    "Nom": "Découverte du Nerf Conducteur par Guette-Abîme",
+    "values": {
+      "Date de début": "2047",
+      "Description": "En 2047 AG, l'exploratrice cen'doei Guette-Abîme remonte un réseau de fibres-kelmar depuis l'Océan Mécanique jusqu'à l'Œil de Mirimance, cartographiant pour la première fois le Nerf Conducteur sur 18 kilomètres. Cette découverte établit la connexion organique entre l'Océan et la région orientale, révélant un flux électrique bidirectionnel de 88 Veilles reliant les deux lieux. Le Nerf Conducteur deviendra une route d'accès majeure et un vecteur d'influence du Carnavalier vers l'Œil de Mirimance.",
+      "Importance": "Notable",
+      "Lieux": "2256e4d2-1b45-800f-bad7-e3e59e47a8e3",
+      "Type d'événement": "Découverte",
+      "Ère": "Âge des Doctrines"
+    },
+    "sections": {},
+    "notion_page_id": "849cdc58-8b77-4739-89e1-eb997a4dc751"
+  },
+  {
+    "Nom": "Arrivée des Tu-Numu et fondation de la Mandiba",
+    "values": {
+      "Communautés": "1dd6e4d2-1b45-8074-9a3b-c0eca157003c",
+      "Date de début": "2402",
+      "Date de fin": "2402",
+      "Description": "La corporation héréditaire des Tu-Numu — forgerons-juges endogames venus d'un continent dont les archives ne conservent plus le nom — s'installe en marge des Chaudières Démiurgiques du Quartier des Forges. Leur compétence à lire les manilles comme on lit un khipu est d'abord moquée, puis testée et reconnue par les Quipucamayoc. La cohabitation se stabilise par la Mandiba (« corde de l'accord »), protocole oral encore observé en 3390 AG, qui définit comment trois corps de juridiction — comptable (Quipucamayoc), domestique-liturgique (Maîtres-Forgeurs Van'Doei) et généalogique (Tu-Numu) — tranchent ensemble les litiges par coproduction d'un alliage. Origine du sixième régime de surveillance de la Vieille Ville : la généalogie d'alliage.",
+      "Espèces": "1a16e4d2-1b45-8051-88d9-d744a1bbc095",
+      "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
+      "Ère": "Âge des Singularités"
+    },
+    "sections": {},
+    "notion_page_id": "08eb0c39-2099-4356-8c98-d19fd234e891"
+  },
+  {
+    "Nom": "Le Premier Seuil",
+    "values": {
+      "Date de début": "250",
+      "Description": "Moment fondateur — non daté avec certitude, situé approximativement vers 250 AG, avant la Prise kandarite du Mont — où la figure connue plus tard sous le titre du Pénitent cesse de répondre aux questions qui lui sont posées et commence à les poser. Aucune institution n'a archivé l'instant ; il subsiste uniquement comme inflexion biographique reconstituée par les rares témoins qui ont croisé le Pénitent avant et après. Ses traces restent diffuses mais concrètes autour du Mont : seuils anciens laissés sans inscription, fragments de transcriptions servantes grattés jusqu'à la fibre, et prudence durable des juridictions kandarites envers les décisions prononcées sur un passage ou une porte.",
+      "Importance": "Notable",
+      "Lieux": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
+      "Personnages 1": "a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a",
+      "Type d'événement": "Mythe",
+      "Ère": "Fondation d'Escelion"
+    },
+    "sections": {},
+    "notion_page_id": "79abb4ad-336f-4a47-992e-335a9275a0ae"
+  },
+  {
     "Nom": "Prise kandarite du Mont des Réincarnés",
     "values": {
       "Description": "Arrivée de Laios Sul Kandar sur le Mont, érection du Temple blanc et institution de la Grande Porte. Marque l'année 0 du calendrier interne du Mont, sans correspondance AG stabilisée.",
@@ -7,6 +90,7 @@
       "Importance": "Majeur",
       "Lieux": "0013aaa5-daee-424c-a8c9-a4a5855926a3",
       "Personnages": "a4fdfc35-1930-415d-a8f6-fd4ce87d99e3",
+      "Personnages 1": "a1e588d2-8d0b-4c46-bd2c-52d990dc6d4a, a4fdfc35-1930-415d-a8f6-fd4ce87d99e3",
       "Type d'événement": "Fondation",
       "Ère": "Âge des Doctrines"
     },
@@ -1851,7 +1935,7 @@
     "values": {
       "Date de début": "2000",
       "Date de fin": "2700",
-      "Description": "Développement du Jardin Mnémonique",
+      "Description": "Développement des jardins-oracles annexes de la Bibliothèque Sympathique",
       "Importance": "Modéré",
       "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
       "Type d'événement": "Fondation",
@@ -1903,7 +1987,7 @@
     "values": {
       "Date de début": "1700",
       "Date de fin": "1900",
-      "Description": "Ajout des Chaudières Démiurgiques et du Jardin Mnémonique",
+      "Description": "Ajout des Chaudières Démiurgiques et des jardins-oracles annexes de la Bibliothèque Sympathique",
       "Importance": "Modéré",
       "Lieux": "1a96e4d2-1b45-80bd-aaa6-c4a7f1b6fc6b",
       "Type d'événement": "Fondation",
@@ -2222,7 +2306,7 @@
     "values": {
       "Date de début": "2917",
       "Date de fin": "3045",
-      "Description": "Soulèvement idéologique mené par l’entité appelée l’Hermogène, opposant le déterminisme génétique imposé par les Gardiens du Souvenir. Il prôna la primauté de geis volontaires (serments mystiques) sur les liens héréditaires, ébranlant l’ordre socio-politique établi.",
+      "Description": "Soulèvement idéologique mené par l'entité appelée l'Hermogène, opposant l'autorité herméneutique des Gardiens du Souvenir et leur juridiction sur les souvenirs déposés. Il prôna la primauté de geis volontaires (serments mystiques) sur les obligations imposées par l'archive, ébranlant l'ordre socio-politique établi.",
       "Importance": "Notable",
       "Lieux": "1b46e4d2-1b45-8026-ac02-e1f3a2ba6faf",
       "Type d'événement": "Catastrophe",

@@ -5,13 +5,13 @@
     "Espérance de vie": "60",
     "Présence dans Escelion": "Rare",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "Fiche d'espèce contenant des sections vides détaillant le besoin de l'intrigue, l'apparence, les rôles culturel et narratif, ainsi que l'habitat, l'alimentation, la reproduction, les sous‑espèces et les interactions avec l'écosystème.",
+    "Résumé IA": "Sécrétolaminaire (Vifs-Formes, Lithotissés) produisant des plaquettes laminaires à haut pouvoir réflectif, servant à la fois de leurre (simulation de présences, détraction des prédateurs) et de signalisation (communication optique entre individus). La mue cyclique génère des surfaces miroir caractéristiques. Rare dans Escelion. Longévité : ~60 ans.",
     "Surnaturel": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
+    "re_sume__de_la_fiche": "**Sécrétolaminaire** (Vifs-Formes, Lithotissés) produisant des plaquettes laminaires à **haut pouvoir réflectif**, servant à la fois de **leurre** (simulation de présences, distraction des prédateurs) et de **signalisation optique** entre individus. La mue cyclique génère des surfaces miroir caractéristiques visibles à distance. Rare dans Escelion. Longévité : \\~60 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -21,7 +21,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Fiche d'espèce contenant des sections vides détaillant le besoin de l'intrigue, l'apparence, les rôles culturel et narratif, ainsi que l'habitat, l'alimentation, la reproduction, les sous‑espèces et les interactions avec l'écosystème."
+    "re_sume__ia": "Sécrétolaminaire (Vifs-Formes, Lithotissés) produisant des plaquettes laminaires à haut pouvoir réflectif, servant à la fois de leurre (simulation de présences, détraction des prédateurs) et de signalisation (communication optique entre individus). La mue cyclique génère des surfaces miroir caractéristiques. Rare dans Escelion. Longévité : ~60 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",
