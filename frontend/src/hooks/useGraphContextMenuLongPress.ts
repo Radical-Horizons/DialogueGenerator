@@ -77,7 +77,7 @@ export function useGraphContextMenuLongPress({
       const nodeEl = target.closest('.react-flow__node')
       const nodeId = nodeEl?.getAttribute('data-id') ?? null
       const inPane = target.closest('.react-flow__pane')
-      if (!inPane) return
+      if (!nodeEl && !inPane) return
 
       clearTimer()
       startRef.current = { x: e.clientX, y: e.clientY, nodeId }
@@ -118,6 +118,11 @@ export function useGraphContextMenuLongPress({
   const onPointerCancelCapture = useCallback(() => {
     clearTimer()
   }, [clearTimer])
+
+  useEffect(() => {
+    if (!enabled) clearTimer()
+    return clearTimer
+  }, [enabled, clearTimer])
 
   return {
     onPointerDownCapture,

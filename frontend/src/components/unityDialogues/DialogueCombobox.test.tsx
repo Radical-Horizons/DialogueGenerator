@@ -63,8 +63,22 @@ describe('DialogueCombobox', () => {
 
     const trigger = await screen.findByTestId('dialogue-combobox-trigger')
     await waitFor(() => {
-      expect(trigger).toHaveTextContent(/bravo/i)
+      expect(trigger).toHaveTextContent('Bravo Tale')
     })
+  })
+
+  it('retrouve le dialogue actif même si selectedFilename est fourni sans .json', async () => {
+    const user = userEvent.setup()
+    render(<DialogueCombobox selectedFilename="bravo" onSelect={vi.fn()} />)
+
+    const trigger = await screen.findByTestId('dialogue-combobox-trigger')
+    await waitFor(() => {
+      expect(trigger).toHaveTextContent('Bravo Tale')
+    })
+
+    await user.click(trigger)
+    const items = await screen.findAllByTestId('unity-dialogue-item')
+    expect(items[0]).toHaveAttribute('aria-selected', 'true')
   })
 
   it('ouvre le panneau avec Enter puis avec Espace sur le déclencheur fermé (AC #6)', async () => {

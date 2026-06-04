@@ -44,7 +44,7 @@ export function UnityDialogueDetails({
     try {
       const response = await unityDialoguesAPI.getUnityDialogue(filename)
       setJsonContent(response.json_content)
-      setTitle(formatDialogueTitle(filename))
+      setTitle(response.title?.trim() || formatDialogueTitle(filename))
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {

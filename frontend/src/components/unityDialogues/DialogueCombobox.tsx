@@ -27,7 +27,11 @@ import type { UnityDialogueMetadata } from '../../types/api'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
 import { StyledSelect } from '../shared/StyledSelect'
 import { UnityDialogueItem } from './UnityDialogueItem'
-import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
+import {
+  formatDialogueTitle,
+  getDialogueDisplayTitle,
+  normalizeDialogueFilenameKey,
+} from '../../utils/formatDialogueTitle'
 
 export interface DialogueComboboxRef {
   /**
@@ -223,10 +227,12 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
     }, [])
 
     const activeDialogue = selectedFilename
-      ? dialogues.find((d) => d.filename === selectedFilename) ?? null
+      ? dialogues.find(
+        (d) => normalizeDialogueFilenameKey(d.filename) === normalizeDialogueFilenameKey(selectedFilename)
+      ) ?? null
       : null
     const triggerLabel = activeDialogue
-      ? activeDialogue.title || formatDialogueTitle(activeDialogue.filename)
+      ? getDialogueDisplayTitle(activeDialogue)
       : selectedFilename
         ? formatDialogueTitle(selectedFilename)
         : TRIGGER_LABEL_FALLBACK
@@ -437,7 +443,11 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
                     ref={(el) => setOptionRef(dialogue.filename, el)}
                     dialogue={dialogue}
                     onClick={() => handleItemClick(dialogue)}
-                    isSelected={selectedFilename === dialogue.filename}
+                    isSelected={
+                      !!selectedFilename &&
+                      normalizeDialogueFilenameKey(selectedFilename) ===
+                        normalizeDialogueFilenameKey(dialogue.filename)
+                    }
                     searchQuery={searchQuery}
                     asListboxOption
                     optionId={`${panelId}-opt-${index}`}

@@ -50,6 +50,7 @@ describe('useDialogueListData', () => {
   })
 
   it('charge la liste au montage et expose total/filteredCount', async () => {
+    mockList.mockResolvedValueOnce({ dialogues: [...FIXTURE], total: 99 })
     const { result } = renderHook(() => useDialogueListData())
 
     await waitFor(() => {
@@ -57,7 +58,7 @@ describe('useDialogueListData', () => {
     })
 
     expect(result.current.dialogues).toHaveLength(3)
-    expect(result.current.total).toBe(3)
+    expect(result.current.total).toBe(99)
     expect(result.current.filteredCount).toBe(3)
     expect(result.current.error).toBeNull()
   })

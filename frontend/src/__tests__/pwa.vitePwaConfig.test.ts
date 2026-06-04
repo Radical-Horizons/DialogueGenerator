@@ -13,6 +13,9 @@ describe('PWA Vite config', () => {
     expect(viteConfigRaw).toContain('VitePWA(')
     expect(viteConfigRaw).toContain('devOptions')
     expect(viteConfigRaw).toContain('enabled: false')
+    expect(viteConfigRaw).toContain('navigateFallbackDenylist')
+    expect(viteConfigRaw).toContain('NetworkOnly')
+    expect(viteConfigRaw).toContain('^\\/api(?:\\/|$)')
   })
 })
 

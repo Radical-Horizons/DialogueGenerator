@@ -40,6 +40,12 @@ export function GraphSearchBar({ onClose, embedded = false }: GraphSearchBarProp
 
   const runSearch = useCallback(() => {
     const q = query.trim()
+    if (!q && !speaker) {
+      setResultIds([])
+      setHighlightedNodes([])
+      setCurrentIndex(-1)
+      return
+    }
     const ids = searchNodes(q, speaker ? { speaker } : undefined)
     setResultIds(ids)
     setHighlightedNodes(ids)

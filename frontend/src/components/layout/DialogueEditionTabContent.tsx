@@ -35,7 +35,7 @@ export function DialogueEditionTabContent({
   onGenerateContinuation,
 }: DialogueEditionTabContentProps) {
   const {
-    ref: dialogueEditionWorkspaceRef,
+    ref: dialogueEditionShellRef,
     isNarrow: isDialogueEditionNarrow,
   } = useNarrowInlineSize(PANEL_COMFORT_MIN_WIDTH_PX)
 
@@ -49,6 +49,7 @@ export function DialogueEditionTabContent({
 
   return (
     <div
+      ref={dialogueEditionShellRef}
       style={{
         display: 'flex',
         height: '100%',
@@ -67,7 +68,6 @@ export function DialogueEditionTabContent({
         </div>
       )}
       <div
-        ref={dialogueEditionWorkspaceRef}
         style={unityDialogueWorkspaceColumnStyle}
       >
         <DialogueEditionNarrowProvider value={isDialogueEditionNarrow}>

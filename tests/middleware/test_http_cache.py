@@ -3,6 +3,7 @@ import os
 import pytest
 import time
 from fastapi import FastAPI
+from fastapi import Request
 from fastapi.testclient import TestClient
 from api.middleware.http_cache import HTTPCacheMiddleware, setup_http_cache
 from unittest.mock import patch
@@ -192,6 +193,37 @@ def test_non_api_get_not_cached():
     assert r1.status_code == 200
     assert "X-Cache" not in r1.headers
     assert "X-Cache" not in r2.headers
+
+
+def test_authenticated_get_is_never_shared_between_users():
+    """Deux identités distinctes ne doivent jamais partager une réponse cache serveur."""
+    app = FastAPI()
+
+    @app.get("/api/v1/auth/me")
+    def auth_me(request: Request):
+        return {"token": request.headers.get("Authorization")}
+
+    app.add_middleware(
+        HTTPCacheMiddleware,
+        enabled=True,
+        ttl_gdd=1,
+        ttl_static=60,
+        max_size=100,
+    )
+    client = TestClient(app)
+
+    r1 = client.get("/api/v1/auth/me", headers={"Authorization": "Bearer user-a"})
+    r2 = client.get("/api/v1/auth/me", headers={"Authorization": "Bearer user-b"})
+
+    assert r1.status_code == 200
+    assert r2.status_code == 200
+    assert r1.json() == {"token": "Bearer user-a"}
+    assert r2.json() == {"token": "Bearer user-b"}
+    assert r1.headers.get("X-Cache") != "HIT"
+    assert r2.headers.get("X-Cache") != "HIT"
+    assert r1.headers.get("Cache-Control") == "private, no-store"
+    assert r2.headers.get("Cache-Control") == "private, no-store"
+    assert r2.headers.get("Vary") == "Authorization, Cookie"
 
 
 def test_setup_http_cache():

@@ -44,6 +44,7 @@ export interface UseDialogueListDataReturn {
  */
 export function useDialogueListData(): UseDialogueListDataReturn {
   const [dialogues, setDialogues] = useState<UnityDialogueMetadata[]>([])
+  const [total, setTotal] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortType, setSortType] = useState<DialogueListSortType>('date-desc')
   const [isLoading, setIsLoading] = useState(true)
@@ -55,6 +56,7 @@ export function useDialogueListData(): UseDialogueListDataReturn {
     try {
       const response = await unityDialoguesAPI.listUnityDialogues()
       setDialogues(response.dialogues)
+      setTotal(response.total)
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {
@@ -110,7 +112,7 @@ export function useDialogueListData(): UseDialogueListDataReturn {
   return {
     dialogues,
     filteredDialogues,
-    total: dialogues.length,
+    total,
     filteredCount: filteredDialogues.length,
     searchQuery,
     setSearchQuery,

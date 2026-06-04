@@ -36,9 +36,10 @@ export default defineConfig({
       manifest: pwaManifest,
       // Ne pas mettre `/api` en cache: le backend est dynamique.
       workbox: {
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/],
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            urlPattern: ({ url }) => /^\/api(?:\/|$)/.test(url.pathname),
             handler: 'NetworkOnly',
           },
         ],

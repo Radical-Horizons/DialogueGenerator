@@ -1,6 +1,7 @@
 {
   "name": "DialogueGenerator",
   "short_name": "DialogueGen",
+  "id": "/",
   "description": "Génération et édition de dialogues IA (RPG) — web app",
   "start_url": "/",
   "scope": "/",

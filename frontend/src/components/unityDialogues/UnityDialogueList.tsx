@@ -12,6 +12,7 @@ import type { UnityDialogueMetadata } from '../../types/api'
 import { UnityDialogueItem } from './UnityDialogueItem'
 import { StyledSelect } from '../shared/StyledSelect'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
+import { normalizeDialogueFilenameKey } from '../../utils/formatDialogueTitle'
 
 interface UnityDialogueListProps {
   onSelectDialogue: (dialogue: UnityDialogueMetadata | null) => void
@@ -60,7 +61,10 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   }), [refresh])
 
   const handleItemClick = (dialogue: UnityDialogueMetadata) => {
-    if (selectedFilename === dialogue.filename) {
+    if (
+      selectedFilename &&
+      normalizeDialogueFilenameKey(selectedFilename) === normalizeDialogueFilenameKey(dialogue.filename)
+    ) {
       onSelectDialogue(null)
     } else {
       onSelectDialogue(dialogue)
@@ -178,7 +182,10 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
               key={dialogue.filename}
               dialogue={dialogue}
               onClick={() => handleItemClick(dialogue)}
-              isSelected={selectedFilename === dialogue.filename}
+            isSelected={
+              !!selectedFilename &&
+              normalizeDialogueFilenameKey(selectedFilename) === normalizeDialogueFilenameKey(dialogue.filename)
+            }
               searchQuery={searchQuery}
             />
           ))

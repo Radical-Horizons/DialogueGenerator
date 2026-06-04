@@ -6,7 +6,7 @@ import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
-import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
+import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
 
 export interface UnityDialogueItemProps {
   dialogue: UnityDialogueMetadata
@@ -70,7 +70,7 @@ export const UnityDialogueItem = memo(
         })
       }
 
-      const titleText = formatDialogueTitle(dialogue.filename)
+      const titleText = getDialogueDisplayTitle(dialogue)
 
       const bgForState = isSelected ? theme.state.selected.background : 'transparent'
 
