@@ -9,6 +9,8 @@ import { useGraphStore } from '../../store/graphStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { GenerationOptionsModal } from '../generation/GenerationOptionsModal'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
+import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore()
@@ -35,18 +37,21 @@ export function Header() {
 
   // Fermer les dropdowns quand on clique ailleurs
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (actionsDropdownRef.current && !actionsDropdownRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (event: Event) => {
+      const t = event.target as Node
+      if (actionsDropdownRef.current && !actionsDropdownRef.current.contains(t)) {
         setIsActionsDropdownOpen(false)
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(t)) {
         setIsUserMenuOpen(false)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('pointerdown', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('pointerdown', handleClickOutside)
     }
   }, [])
 
@@ -82,26 +87,23 @@ export function Header() {
       display: 'flex', 
       justifyContent: 'space-between', 
       alignItems: 'center',
+      flexWrap: 'wrap',
+      rowGap: '0.5rem',
       backgroundColor: theme.background.secondary,
       gap: '1rem',
       position: 'relative',
+      minWidth: 0,
+      width: '100%',
+      boxSizing: 'border-box',
     }}>
       {/* Section gauche : Titre */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-        <h1 style={{ margin: 0, color: theme.text.primary, fontSize: '1.25rem', fontWeight: 600, whiteSpace: 'nowrap' }}>DialogueGenerator</h1>
-        <span style={{ 
-          fontSize: '2rem', 
-          fontWeight: 'bold', 
-          color: 'red', 
-          textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-          marginLeft: '1rem'
-        }}>
-        </span>
+        <h1 style={{ margin: 0, color: theme.text.primary, fontSize: remSize('title'), fontWeight: 600, whiteSpace: 'nowrap' }}>DialogueGenerator</h1>
         <span 
           title={`Date de compilation: ${new Date(__BUILD_DATE__).toLocaleString('fr-FR')}`}
           style={{ 
             color: theme.text.secondary, 
-            fontSize: '0.75rem',
+            fontSize: remSize('small'),
             whiteSpace: 'nowrap',
             fontFamily: 'monospace',
           }}
@@ -112,7 +114,7 @@ export function Header() {
       
       {/* Section centrale : Barre de recherche */}
       {isAuthenticated && (
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '600px', margin: '0 auto', minWidth: 0 }}>
           <div
             onClick={handleSearchClick}
             style={{
@@ -121,6 +123,8 @@ export function Header() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
+              minHeight: TOUCH_TARGET_MIN_PX,
+              boxSizing: 'border-box',
               padding: '0.5rem 0.75rem',
               backgroundColor: theme.input.background,
               border: `1px solid ${theme.border.primary}`,
@@ -135,11 +139,11 @@ export function Header() {
               e.currentTarget.style.borderColor = theme.border.primary
             }}
           >
-            <span style={{ color: theme.text.secondary, fontSize: '0.875rem' }}>🔍</span>
+            <span style={{ color: theme.text.secondary, fontSize: remSize('body') }}>🔍</span>
             <span style={{ 
               flex: 1, 
               color: theme.text.secondary, 
-              fontSize: '0.875rem',
+              fontSize: remSize('body'),
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -148,7 +152,7 @@ export function Header() {
             </span>
             <kbd style={{
               padding: '0.125rem 0.375rem',
-              fontSize: '0.75rem',
+              fontSize: remSize('caption'),
               backgroundColor: theme.background.tertiary,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '3px',
@@ -162,7 +166,7 @@ export function Header() {
       )}
       
       {/* Section droite : Options, Actions, Utilisateur */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', flexShrink: 1, minWidth: 0, flexWrap: 'wrap' }}>
         {isAuthenticated && user && actions.handleGenerate && (
           <>
             {/* Bouton Options */}
@@ -173,13 +177,16 @@ export function Header() {
               }}
               style={{
                 padding: '0.35rem 0.75rem',
-                fontSize: '0.875rem',
+                fontSize: remSize('body'),
                 backgroundColor: theme.button.default.background,
                 color: theme.button.default.color,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '4px',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                minWidth: TOUCH_TARGET_MIN_PX,
+                minHeight: TOUCH_TARGET_MIN_PX,
+                boxSizing: 'border-box',
               }}
             >
               Options
@@ -200,7 +207,7 @@ export function Header() {
                 }}
                 style={{
                   padding: '0.35rem 0.75rem',
-                  fontSize: '0.875rem',
+                  fontSize: remSize('body'),
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   border: `1px solid ${theme.border.primary}`,
@@ -210,10 +217,13 @@ export function Header() {
                   alignItems: 'center',
                   gap: '0.25rem',
                   whiteSpace: 'nowrap',
+                  minWidth: TOUCH_TARGET_MIN_PX,
+                  minHeight: TOUCH_TARGET_MIN_PX,
+                  boxSizing: 'border-box',
                 }}
               >
                 Actions
-                <span style={{ fontSize: '0.7rem' }}>▼</span>
+                <span style={{ fontSize: remSize('caption') }}>▼</span>
               </button>
               {isActionsDropdownOpen && (
                 <div
@@ -241,7 +251,7 @@ export function Header() {
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',
-                      fontSize: '0.85rem',
+                      fontSize: remSize('accent'),
                       backgroundColor: 'transparent',
                       color: (actions.isLoading || isGraphGenerating) ? theme.text.secondary : theme.text.primary,
                       border: 'none',
@@ -273,7 +283,7 @@ export function Header() {
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',
-                      fontSize: '0.85rem',
+                      fontSize: remSize('accent'),
                       backgroundColor: 'transparent',
                       color: (actions.isLoading || isGraphGenerating) ? theme.text.secondary : theme.text.primary,
                       border: 'none',
@@ -316,8 +326,8 @@ export function Header() {
               aria-expanded={isUserMenuOpen}
               aria-haspopup="menu"
               style={{
-                width: '36px',
-                height: '36px',
+                width: TOUCH_TARGET_MIN_PX,
+                height: TOUCH_TARGET_MIN_PX,
                 borderRadius: '50%',
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
@@ -326,7 +336,7 @@ export function Header() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.875rem',
+                fontSize: remSize('body'),
                 fontWeight: 'bold',
                 transition: 'transform 0.2s, box-shadow 0.2s',
                 boxShadow: isUserMenuOpen ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
@@ -367,10 +377,10 @@ export function Header() {
                     marginBottom: '0.5rem',
                   }}
                 >
-                  <div style={{ color: theme.text.secondary, fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                  <div style={{ color: theme.text.secondary, fontSize: remSize('small'), marginBottom: '0.25rem' }}>
                     Connecté en tant que
                   </div>
-                  <div style={{ color: theme.text.primary, fontSize: '0.875rem', fontWeight: 'bold' }}>
+                  <div style={{ color: theme.text.primary, fontSize: remSize('body'), fontWeight: 'bold' }}>
                     {user.username}
                   </div>
                 </div>
@@ -383,7 +393,7 @@ export function Header() {
                   style={{
                     width: '100%',
                     padding: '0.5rem 0.75rem',
-                    fontSize: '0.875rem',
+                    fontSize: remSize('body'),
                     backgroundColor: theme.button.default.background,
                     color: theme.button.default.color,
                     border: `1px solid ${theme.border.primary}`,
@@ -404,7 +414,7 @@ export function Header() {
             )}
           </div>
         ) : (
-          <span style={{ color: theme.text.secondary, fontSize: '0.875rem' }}>Non connecté</span>
+          <span style={{ color: theme.text.secondary, fontSize: remSize('body') }}>Non connecté</span>
         )}
       </div>
       

@@ -21,6 +21,7 @@ import { GenerationProgressModal } from './GenerationProgressModal'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
 import { useToast } from '../shared'
+import { StyledSelect } from '../shared/StyledSelect'
 import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS, DEFAULT_MODEL, API_TIMEOUTS } from '../../constants'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import type { DialogueStructure } from '../../types/generation'
@@ -32,7 +33,9 @@ import { usePresetManagement } from '../../hooks/usePresetManagement'
 import { GenerationPanelControls } from './GenerationPanelControls'
 import { GenerationPanelModals } from './GenerationPanelModals'
 import { EstimationBadge } from '../estimation'
-
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
+import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
 
 export function GenerationPanel() {
   // Stores
@@ -369,9 +372,18 @@ export function GenerationPanel() {
     return [...arr, '', '', '', '', '', ''].slice(0, 6) as DialogueStructure
   })()
 
+  const { ref: generationScrollRef, isNarrow: isGenerationNarrow } = useNarrowInlineSize(
+    PANEL_COMFORT_MIN_WIDTH_PX
+  )
+  const genChrome = isGenerationNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.background.panel }}>
-      <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+      <GenerationPanelNarrowProvider value={isGenerationNarrow}>
+      <div
+        ref={generationScrollRef}
+        style={{ padding: genChrome.containerPadding, flex: 1, overflowY: 'auto', minWidth: 0 }}
+      >
         {/* PresetSelector (Task 6) */}
         <PresetSelector
           onPresetLoaded={presets.handlePresetLoaded}
@@ -411,11 +423,25 @@ export function GenerationPanel() {
 
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: isGenerationNarrow ? 'wrap' : 'nowrap',
+            gap: `${genChrome.controlGapRem}rem`,
+            alignItems: 'flex-start',
+          }}
+        >
           {/* Colonne Modèle */}
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: isGenerationNarrow ? '1 1 100%' : '1', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <label htmlFor="model-select" style={{ color: theme.text.primary, fontSize: '0.9rem', fontWeight: 500 }}>
+              <label
+                htmlFor="model-select"
+                style={{
+                  color: theme.text.primary,
+                  fontSize: `${genChrome.labelFontRem}rem`,
+                  fontWeight: 500,
+                }}
+              >
                 Modèle
               </label>
               <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -447,9 +473,16 @@ export function GenerationPanel() {
 
           {/* Colonne Niveau de raisonnement */}
           {(llmModel === "gpt-5.2" || llmModel === "gpt-5.2-pro" || llmModel === "gpt-5-mini" || llmModel === "gpt-5-nano") && (
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: isGenerationNarrow ? '1 1 100%' : '1', minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <label htmlFor="reasoning-effort-select" style={{ color: theme.text.primary, fontSize: '0.9rem', fontWeight: 500 }}>
+                <label
+                  htmlFor="reasoning-effort-select"
+                  style={{
+                    color: theme.text.primary,
+                    fontSize: `${genChrome.labelFontRem}rem`,
+                    fontWeight: 500,
+                  }}
+                >
                   Niveau de raisonnement
                 </label>
                 <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -480,7 +513,7 @@ export function GenerationPanel() {
                   </button>
                 </div>
               </div>
-              <select
+              <StyledSelect
                 id="reasoning-effort-select"
                 value={reasoningEffort || (llmModel === "gpt-5-mini" || llmModel === "gpt-5-nano" ? 'minimal' : 'none')}
                 onChange={(e) => {
@@ -490,13 +523,13 @@ export function GenerationPanel() {
                 }}
                 style={{ 
                   width: '100%', 
-                  padding: '0.5rem', 
+                  padding: genChrome.selectTriggerPadding, 
                   boxSizing: 'border-box',
                   backgroundColor: theme.input.background,
                   border: `1px solid ${theme.input.border}`,
                   color: theme.input.color,
                   borderRadius: '4px',
-                  fontSize: '0.9rem',
+                  fontSize: `${genChrome.selectTextFontRem}rem`,
                 }}
               >
                 {/* Options différentes selon le modèle */}
@@ -516,16 +549,23 @@ export function GenerationPanel() {
                     <option value="high">Élevé (raisonnement approfondi)</option>
                   </>
                 )}
-              </select>
+              </StyledSelect>
             </div>
           )}
           
           {/* Contrôle Top_p */}
-          <div style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              marginTop: isGenerationNarrow ? 0 : '1rem',
+              flex: isGenerationNarrow ? '1 1 100%' : undefined,
+              minWidth: isGenerationNarrow ? 0 : undefined,
+              width: isGenerationNarrow ? '100%' : undefined,
+            }}
+          >
             <label style={{ 
               display: 'block', 
               marginBottom: '0.5rem', 
-              fontSize: '0.9rem',
+              fontSize: `${genChrome.labelFontRem}rem`,
               color: theme.text.secondary,
               fontWeight: 500
             }}>
@@ -539,7 +579,14 @@ export function GenerationPanel() {
                 {topP !== null && topP !== undefined ? `(${topP.toFixed(1)})` : '(non utilisé)'}
               </span>
             </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: `${genChrome.controlGapRem}rem`,
+                flexWrap: isGenerationNarrow ? 'wrap' : 'nowrap',
+              }}
+            >
               <input
                 type="range"
                 min="0"
@@ -575,13 +622,13 @@ export function GenerationPanel() {
                 }}
                 style={{ 
                   width: '80px', 
-                  padding: '0.5rem', 
+                  padding: genChrome.selectTriggerPadding, 
                   boxSizing: 'border-box',
                   backgroundColor: theme.input.background,
                   border: `1px solid ${theme.input.border}`,
                   color: theme.input.color,
                   borderRadius: '4px',
-                  fontSize: '0.9rem',
+                  fontSize: `${genChrome.selectTextFontRem}rem`,
                 }}
               />
               <button
@@ -591,13 +638,13 @@ export function GenerationPanel() {
                   draft.markDirty()
                 }}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   backgroundColor: theme.button.secondary.background,
                   color: theme.button.secondary.color,
                   border: `1px solid ${theme.button.secondary.border}`,
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                 }}
               >
                 Réinitialiser
@@ -692,6 +739,7 @@ export function GenerationPanel() {
         </div>
       )}
       </div>
+      </GenerationPanelNarrowProvider>
       
       {/* Modal de progression streaming (Story 0.2) */}
       <GenerationProgressModal

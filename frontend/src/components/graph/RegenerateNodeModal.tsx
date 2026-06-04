@@ -4,6 +4,8 @@
  */
 import { memo, useState, useEffect } from 'react'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 import type { RegenerationEntry } from '../../types/graph'
 
 export interface RegenerateNodeModalProps {
@@ -52,6 +54,8 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
   onRegenerate,
   onClose,
 }: RegenerateNodeModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   const [instructions, setInstructions] = useState(initialInstructions)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [historyExpanded, setHistoryExpanded] = useState(false)
@@ -97,10 +101,23 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
       style={modalStyle}
       onClick={handleBackdropClick}
     >
-      <div onClick={(e) => e.stopPropagation()} style={panelStyle}>
+      <div
+        ref={panelRef}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          ...panelStyle,
+          padding: isNarrow ? '0.9rem' : panelStyle.padding,
+          minWidth: isNarrow ? 'unset' : panelStyle.minWidth,
+        }}
+      >
         <h3
           id="regenerate-node-modal-title"
-          style={{ marginTop: 0, marginBottom: '1rem', color: theme.text.primary }}
+          style={{
+            marginTop: 0,
+            marginBottom: '1rem',
+            color: theme.text.primary,
+            fontSize: `${typo.titleFontRem}rem`,
+          }}
         >
           Régénérer le nœud
         </h3>
@@ -116,7 +133,7 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
               border: `1px solid ${theme.state.warning?.color ?? '#F5A623'}`,
               borderRadius: '4px',
               color: theme.text.primary,
-              fontSize: '0.85rem',
+              fontSize: `${typo.bodyFontRem}rem`,
             }}
           >
             Contexte GDD mis à jour depuis la génération originale.
@@ -128,7 +145,7 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
             display: 'block',
             marginBottom: '0.35rem',
             color: theme.text.secondary,
-            fontSize: '0.9rem',
+            fontSize: `${typo.subtitleFontRem}rem`,
           }}
         >
           Instructions
@@ -180,7 +197,7 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
                 borderRadius: '4px',
                 color: theme.text.secondary,
                 cursor: 'pointer',
-                fontSize: '0.9rem',
+            fontSize: `${typo.bodyFontRem}rem`,
               }}
             >
               {historyExpanded ? 'Masquer' : 'Historique'} ({history.length})
@@ -193,7 +210,7 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
                   maxHeight: '160px',
                   overflowY: 'auto',
                   color: theme.text.secondary,
-                  fontSize: '0.85rem',
+                  fontSize: `${typo.bodyFontRem}rem`,
                 }}
               >
                 {[...history].reverse().map((entry) => (
@@ -230,7 +247,7 @@ export const RegenerateNodeModal = memo(function RegenerateNodeModal({
                         borderRadius: '4px',
                         color: theme.text.primary,
                         cursor: 'pointer',
-                        fontSize: '0.8rem',
+                        fontSize: `${typo.smallFontRem}rem`,
                       }}
                     >
                       Utiliser

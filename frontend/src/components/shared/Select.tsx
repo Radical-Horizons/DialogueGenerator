@@ -3,6 +3,7 @@
  */
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { theme } from '../../theme'
+import { generationPanelChrome } from '../../theme/responsiveChrome'
 
 export interface SelectOption {
   value: string
@@ -18,6 +19,8 @@ export interface SelectProps {
   disabled?: boolean
   searchable?: boolean
   allowClear?: boolean
+  /** Densité réduite (ex. grille Structure du dialogue en colonne étroite). */
+  compact?: boolean
   style?: React.CSSProperties
   'data-testid'?: string
 }
@@ -30,9 +33,19 @@ export function Select({
   disabled = false,
   searchable = false,
   allowClear = false,
+  compact = false,
   style,
   'data-testid': testId,
 }: SelectProps) {
+  const narrowChrome = generationPanelChrome.narrow
+  const comfyChrome = generationPanelChrome.comfortable
+  const triggerMinHeight = compact
+    ? narrowChrome.selectTriggerMinHeightPx
+    : comfyChrome.selectTriggerMinHeightPx
+  const triggerPadding = compact ? narrowChrome.selectTriggerPadding : comfyChrome.selectTriggerPadding
+  const triggerTextRem = compact ? narrowChrome.selectTextFontRem : comfyChrome.selectTextFontRem
+  const optionPadding = compact ? narrowChrome.dropdownOptionPadding : comfyChrome.dropdownOptionPadding
+  const optionFontRem = compact ? narrowChrome.dropdownOptionFontRem : comfyChrome.dropdownOptionFontRem
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -100,7 +113,7 @@ export function Select({
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         style={{
-          padding: '0.5rem',
+          padding: triggerPadding,
           border: `1px solid ${theme.input.border}`,
           borderRadius: '4px',
           backgroundColor: disabled ? theme.background.secondary : theme.input.background,
@@ -109,7 +122,8 @@ export function Select({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          minHeight: '36px',
+          minHeight: `${triggerMinHeight}px`,
+          boxSizing: 'border-box',
         }}
       >
         <span
@@ -121,6 +135,7 @@ export function Select({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            fontSize: `${triggerTextRem}rem`,
           }}
         >
           {selectedOption ? selectedOption.label : placeholder}
@@ -199,10 +214,10 @@ export function Select({
             {filteredOptions.length === 0 ? (
               <div
                 style={{
-                  padding: '0.75rem',
+                  padding: optionPadding,
                   textAlign: 'center',
                   color: theme.text.secondary,
-                  fontSize: '0.9rem',
+                  fontSize: `${optionFontRem}rem`,
                 }}
               >
                 Aucun résultat
@@ -213,7 +228,7 @@ export function Select({
                   key={option.value}
                   onClick={() => !option.disabled && handleSelect(option.value)}
                   style={{
-                    padding: '0.75rem',
+                    padding: optionPadding,
                     cursor: option.disabled ? 'not-allowed' : 'pointer',
                     backgroundColor:
                       option.value === value
@@ -224,6 +239,7 @@ export function Select({
                       : theme.text.primary,
                     opacity: option.disabled ? 0.5 : 1,
                     borderBottom: `1px solid ${theme.border.primary}`,
+                    fontSize: `${optionFontRem}rem`,
                   }}
                   onMouseEnter={(e) => {
                     if (!option.disabled && option.value !== value) {

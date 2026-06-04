@@ -6,6 +6,8 @@ import * as contextAPI from '../../api/context'
 import { useContextStore } from '../../store/contextStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export function RegionSelector() {
   const [regions, setRegions] = useState<string[]>([])
@@ -52,7 +54,7 @@ export function RegionSelector() {
 
   return (
     <div style={{ padding: '1rem', borderTop: `1px solid ${theme.border.primary}` }}>
-      <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1rem', fontWeight: 'bold' }}>
+      <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: remSize('section'), fontWeight: 'bold' }}>
         Lieux et sous-lieux
       </h3>
       
@@ -61,7 +63,7 @@ export function RegionSelector() {
           padding: '0.5rem', 
           backgroundColor: theme.state.error.background, 
           color: theme.state.error.color, 
-          fontSize: '0.9rem',
+          fontSize: remSize('body'),
           marginBottom: '0.5rem'
         }}>
           {error}
@@ -69,17 +71,17 @@ export function RegionSelector() {
       )}
 
       <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent') }}>
           Région:
         </label>
-        <select
+        <StyledSelect
           value={selectedRegion || ''}
           onChange={(e) => setRegion(e.target.value || null)}
           disabled={isLoading}
           style={{
             width: '100%',
             padding: '0.5rem',
-            fontSize: '0.9rem',
+            fontSize: remSize('body'),
             border: `1px solid ${theme.border.primary}`,
             borderRadius: '4px',
             backgroundColor: theme.background.primary,
@@ -92,16 +94,16 @@ export function RegionSelector() {
               {region}
             </option>
           ))}
-        </select>
+        </StyledSelect>
       </div>
 
       {selectedRegion && (
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent') }}>
             Sous-lieux:
           </label>
           {subLocations.length === 0 ? (
-            <div style={{ fontSize: '0.85rem', color: theme.text.secondary, fontStyle: 'italic' }}>
+            <div style={{ fontSize: remSize('accent'), color: theme.text.secondary, fontStyle: 'italic' }}>
               Aucun sous-lieu disponible pour cette région
             </div>
           ) : (
@@ -122,7 +124,7 @@ export function RegionSelector() {
                     onChange={() => toggleSubLocation(subLoc)}
                     style={{ marginRight: '0.5rem' }}
                   />
-                  <span style={{ fontSize: '0.9rem' }}>{subLoc}</span>
+                  <span style={{ fontSize: remSize('body') }}>{subLoc}</span>
                 </label>
               ))}
             </div>

@@ -6,6 +6,8 @@ import { Select, type SelectOption } from '../shared/Select'
 import { FormField } from '../shared/FormField'
 import { useDialogueStructure } from '../../hooks/useDialogueStructure'
 import { theme } from '../../theme'
+import { generationPanelChrome } from '../../theme/responsiveChrome'
+import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 import type { DialogueStructure, DialogueStructureElement } from '../../types/generation'
 
 const STRUCTURE_OPTIONS: SelectOption[] = [
@@ -34,6 +36,8 @@ export const DialogueStructureWidget = memo(function DialogueStructureWidget({
   value,
   onChange,
 }: DialogueStructureWidgetProps) {
+  const isNarrow = useGenerationPanelNarrow()
+  const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const {
     structure,
     updateElement,
@@ -56,11 +60,12 @@ export const DialogueStructureWidget = memo(function DialogueStructureWidget({
   return (
     <div
       style={{
-        padding: '1rem',
+        padding: chrome.cardPadding,
         border: `1px solid ${theme.border.primary}`,
         borderRadius: '4px',
         backgroundColor: theme.background.panel,
         marginBottom: '1rem',
+        minWidth: 0,
       }}
     >
       <div
@@ -74,7 +79,7 @@ export const DialogueStructureWidget = memo(function DialogueStructureWidget({
         <h3
           style={{
             margin: 0,
-            fontSize: '1rem',
+            fontSize: `${chrome.sectionTitleFontRem}rem`,
             fontWeight: 'bold',
             color: theme.text.primary,
           }}
@@ -110,25 +115,32 @@ export const DialogueStructureWidget = memo(function DialogueStructureWidget({
       </div>
 
       <div
+        data-testid="dialogue-structure-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(6, 1fr)',
-          gap: '0.5rem',
+          gridTemplateColumns: chrome.structureGridTemplateColumns,
+          gap: `${chrome.structureGapRem}rem`,
           marginBottom: '0.5rem',
+          minWidth: 0,
         }}
       >
         {structure.map((element, index) => (
-          <div key={index}>
+          <div key={index} style={{ minWidth: 0 }}>
             <FormField
               label={`Position ${index + 1}`}
               style={{ marginBottom: 0 }}
+              labelStyle={{
+                fontSize: `${chrome.labelFontRem}rem`,
+                marginBottom: isNarrow ? '0.25rem' : '0.5rem',
+              }}
             >
               <Select
                 options={STRUCTURE_OPTIONS}
                 value={element}
                 onChange={(value) => handleElementChange(index, value || '')}
                 placeholder="Vide"
-                style={{ width: '100%' }}
+                compact={isNarrow}
+                style={{ width: '100%', minWidth: 0 }}
               />
             </FormField>
           </div>
@@ -142,7 +154,7 @@ export const DialogueStructureWidget = memo(function DialogueStructureWidget({
             backgroundColor: theme.state.error.background,
             color: theme.state.error.color,
             borderRadius: '4px',
-            fontSize: '0.85rem',
+            fontSize: isNarrow ? '0.78rem' : '0.85rem',
             marginTop: '0.5rem',
           }}
         >

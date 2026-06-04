@@ -6,10 +6,12 @@
 import { memo, useState, useCallback } from 'react'
 import type { ContextSelection, ElementMode } from '../../types/api'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import * as contextAPI from '../../api/context'
 import { useContextStore } from '../../store/contextStore'
 import { useGenerationStore } from '../../store/generationStore'
 import { getErrorMessage } from '../../types/errors'
+import { Badge } from '../shared'
 
 export type EntityType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -70,37 +72,26 @@ const EntityCategoryList = memo(function EntityCategoryList({
               {name}
             </span>
             {onModeChange && (
-              <button
-                type="button"
+              <Badge
+                variant={mode === 'excerpt' ? 'warning' : 'neutral'}
+                size="sm"
+                icon={mode === 'full' ? '📄' : '✂️'}
                 data-testid={`mode-toggle-${entityType}-${name}`}
                 onClick={() => onModeChange(entityType, name, mode === 'full' ? 'excerpt' : 'full')}
-                title={mode === 'full' ? 'Complet — cliquer pour passer en Extrait' : 'Extrait — cliquer pour passer en Complet'}
+                title={
+                  mode === 'full'
+                    ? 'Complet — cliquer pour passer en Extrait'
+                    : 'Extrait — cliquer pour passer en Complet'
+                }
                 style={{
                   flexShrink: 0,
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  border: `1px solid ${theme.border.primary}`,
-                  borderRadius: '4px',
-                  backgroundColor: mode === 'excerpt'
-                    ? theme.state.warning.background || theme.background.secondary
-                    : theme.background.secondary,
-                  color: mode === 'excerpt'
-                    ? theme.state.warning.color || theme.text.secondary
-                    : theme.text.secondary,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
                   minWidth: '60px',
                   justifyContent: 'center',
+                  gap: '0.25rem',
                 }}
               >
-                {mode === 'full' ? '📄' : '✂️'}
-                <span style={{ fontSize: '0.7rem' }}>
-                  {mode === 'full' ? 'Complet' : 'Extrait'}
-                </span>
-              </button>
+                {mode === 'full' ? 'Complet' : 'Extrait'}
+              </Badge>
             )}
             {onRemoveEntity && (
               <button
@@ -110,7 +101,7 @@ const EntityCategoryList = memo(function EntityCategoryList({
                 style={{
                   flexShrink: 0,
                   padding: '0.1rem 0.4rem',
-                  fontSize: '0.8rem',
+                  fontSize: remSize('small'),
                   fontWeight: 'bold',
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '3px',
@@ -164,7 +155,7 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
 
   if (!selections) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary, fontSize: '0.9rem' }}>
+      <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary, fontSize: remSize('body') }}>
         Aucune sélection
       </div>
     )
@@ -180,7 +171,7 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
 
   if (totalSelected === 0) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary, fontSize: '0.9rem' }}>
+      <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary, fontSize: remSize('body') }}>
         Aucune sélection
       </div>
     )
@@ -206,10 +197,10 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
             textAlign: 'left',
           }}
         >
-          <span style={{ fontSize: '0.8rem', color: theme.text.secondary, userSelect: 'none' }}>
+          <span style={{ fontSize: remSize('small'), color: theme.text.secondary, userSelect: 'none' }}>
             {isExpanded ? '▼' : '▶'}
           </span>
-          <strong style={{ fontSize: '0.9rem', color: theme.text.primary }}>Sélections actives ({totalSelected})</strong>
+          <strong style={{ fontSize: remSize('section'), color: theme.text.primary }}>Sélections actives ({totalSelected})</strong>
         </button>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button
@@ -220,7 +211,7 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
             disabled={!sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion}
             style={{
               padding: '0.25rem 0.5rem',
-              fontSize: '0.8rem',
+              fontSize: remSize('small'),
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '4px',
               backgroundColor: theme.button.default.background,
@@ -241,7 +232,7 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
             }}
             style={{
               padding: '0.25rem 0.5rem',
-              fontSize: '0.8rem',
+              fontSize: remSize('small'),
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '4px',
               backgroundColor: theme.button.default.background,
@@ -254,7 +245,7 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
         </div>
       </div>
       {isExpanded && (
-        <div style={{ fontSize: '0.85rem', color: theme.text.secondary, marginTop: '0.75rem' }}>
+        <div style={{ fontSize: remSize('accent'), color: theme.text.secondary, marginTop: '0.75rem' }}>
           <EntityCategoryList
             label="Personnages"
             entityType="characters"

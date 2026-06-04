@@ -3,6 +3,9 @@
  */
 import { useEffect, useMemo, type ReactNode } from 'react'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 import { buildHighlightRanges, type TextRange } from '../../utils/textHighlightRanges'
 
 export interface ContextSectionUsageModalProps {
@@ -54,6 +57,8 @@ export function ContextSectionUsageModal({
   excerpt,
   generatedPlainPreview,
 }: ContextSectionUsageModalProps) {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   const ranges = useMemo(
     () => buildHighlightRanges(generatedPlainPreview, excerpt),
     [generatedPlainPreview, excerpt]
@@ -100,9 +105,10 @@ export function ContextSectionUsageModal({
           borderRadius: 8,
           border: `1px solid ${theme.border.primary}`,
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          padding: '1rem 1.25rem',
+          padding: isNarrow ? '0.85rem' : '1rem 1.25rem',
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         <div
           style={{
@@ -115,7 +121,7 @@ export function ContextSectionUsageModal({
         >
           <h3
             id="context-section-usage-modal-title"
-            style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}
+            style={{ margin: 0, fontSize: `${typo.titleFontRem}rem`, fontWeight: 600 }}
           >
             {sectionTitle} — {entityLabel}
           </h3>
@@ -131,6 +137,7 @@ export function ContextSectionUsageModal({
               background: theme.background.secondary,
               color: theme.text.primary,
               padding: '0.25rem 0.5rem',
+              fontSize: `${typo.bodyFontRem}rem`,
             }}
           >
             Fermer
@@ -139,7 +146,7 @@ export function ContextSectionUsageModal({
         <section style={{ marginBottom: '1rem' }}>
           <div
             style={{
-              fontSize: '0.75rem',
+              fontSize: remSize('small'),
               color: theme.text.secondary,
               marginBottom: '0.35rem',
             }}
@@ -151,7 +158,7 @@ export function ContextSectionUsageModal({
             style={{
               margin: 0,
               whiteSpace: 'pre-wrap',
-              fontSize: '0.8rem',
+              fontSize: remSize('body'),
               padding: '0.5rem',
               background: theme.background.secondary,
               borderRadius: 4,
@@ -163,7 +170,7 @@ export function ContextSectionUsageModal({
         <section>
           <div
             style={{
-              fontSize: '0.75rem',
+              fontSize: remSize('small'),
               color: theme.text.secondary,
               marginBottom: '0.35rem',
             }}
@@ -173,7 +180,7 @@ export function ContextSectionUsageModal({
           <div
             data-testid="context-section-usage-modal-generated"
             style={{
-              fontSize: '0.8rem',
+              fontSize: remSize('body'),
               padding: '0.5rem',
               background: theme.background.secondary,
               borderRadius: 4,

@@ -7,6 +7,7 @@ import * as llmUsageApi from '../../api/llmUsage'
 import type { ContextSectionUsageReport } from '../../api/llmUsage'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 
 function sectionKeysOf(report: ContextSectionUsageReport | null): Set<string> {
   const s = new Set<string>()
@@ -96,7 +97,7 @@ export function ContextComparisonView({
     return (
       <div
         data-testid="context-comparison-idle"
-        style={{ fontSize: '0.8rem', color: theme.text.secondary }}
+        style={{ fontSize: remSize('body'), color: theme.text.secondary }}
       >
         Choisissez un second nœud différent du premier.
       </div>
@@ -105,7 +106,7 @@ export function ContextComparisonView({
 
   if (loading) {
     return (
-      <div data-testid="context-comparison-loading" style={{ fontSize: '0.8rem' }}>
+      <div data-testid="context-comparison-loading" style={{ fontSize: remSize('body') }}>
         Chargement…
       </div>
     )
@@ -115,7 +116,7 @@ export function ContextComparisonView({
     return (
       <div
         data-testid="context-comparison-error"
-        style={{ fontSize: '0.8rem', color: theme.state.error.color }}
+        style={{ fontSize: remSize('body'), color: theme.state.error.color }}
       >
         {error}
       </div>
@@ -123,7 +124,7 @@ export function ContextComparisonView({
   }
 
   return (
-    <div data-testid="context-comparison-view" style={{ fontSize: '0.8rem' }}>
+    <div data-testid="context-comparison-view" style={{ fontSize: remSize('body') }}>
       <div style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Sections (clés)</div>
       <div data-testid="context-comparison-common" style={{ marginBottom: '0.35rem' }}>
         <span style={{ color: theme.text.secondary }}>Communes : </span>

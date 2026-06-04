@@ -29,7 +29,8 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
       dependencies: ['setup'],
-      testIgnore: /auth\.spec\.ts/,
+      // `pwa-installability` exige build + preview (SW désactivé en `vite dev` via vite-plugin-pwa) — voir `playwright.pwa.config.ts`.
+      testIgnore: [/auth\.spec\.ts/, /pwa-installability\.spec\.ts/],
     },
     {
       name: 'chromium-auth-spec',

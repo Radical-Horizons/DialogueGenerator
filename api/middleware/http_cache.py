@@ -78,6 +78,36 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
             )
         else:
             logger.info("Cache HTTP désactivé")
+
+    def _has_auth_credentials(self, request: Request) -> bool:
+        """Indique si la requête transporte une identité utilisateur."""
+        return bool(request.headers.get("Authorization") or request.headers.get("Cookie"))
+
+    def _is_sensitive_path(self, path: str) -> bool:
+        """Indique si le chemin API contient des données utilisateur ou dynamiques."""
+        sensitive_prefixes = (
+            "/api/v1/auth",
+            "/api/v1/documents",
+            "/api/v1/interactions",
+            "/api/v1/dialogues",
+            "/api/v1/unity-dialogues",
+            "/api/v1/presets",
+            "/api/v1/cost",
+            "/api/v1/costs",
+            "/api/v1/config",
+            "/api/v1/context/build",
+            "/api/v1/context/estimate-tokens",
+            "/api/v1/context/linked-elements",
+        )
+        return any(path.startswith(prefix) for prefix in sensitive_prefixes)
+
+    def _apply_private_no_store(self, request: Request, response: Response) -> Response:
+        """Force des headers anti-cache pour les réponses liées à une identité."""
+        if self._has_auth_credentials(request) or self._is_sensitive_path(request.url.path):
+            response.headers["Cache-Control"] = "private, no-store"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Vary"] = "Authorization, Cookie"
+        return response
     
     def _get_cache_key(self, request: Request) -> str:
         """Génère une clé de cache unique pour la requête.
@@ -115,18 +145,9 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
         if not path.startswith("/api/"):
             return False
         
-        # Ne pas mettre en cache les endpoints avec données dynamiques
-        non_cacheable_paths = [
-            "/api/v1/interactions",
-            "/api/v1/dialogues",
-            "/api/v1/context/build",
-            "/api/v1/context/estimate-tokens",
-            "/api/v1/context/linked-elements"
-        ]
-        
-        for non_cacheable in non_cacheable_paths:
-            if path.startswith(non_cacheable):
-                return False
+        # Ne jamais partager une réponse liée à une identité ou à un endpoint dynamique.
+        if self._has_auth_credentials(request) or self._is_sensitive_path(path):
+            return False
         
         return True
     
@@ -162,7 +183,7 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
         # Vérifier si la requête peut être mise en cache
         if not self._is_cacheable(request):
             response = await call_next(request)
-            return response
+            return self._apply_private_no_store(request, response)
         
         # Vérifier le header If-None-Match (ETag)
         cache_key = self._get_cache_key(request)

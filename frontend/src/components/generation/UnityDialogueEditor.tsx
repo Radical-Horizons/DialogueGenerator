@@ -7,8 +7,11 @@ import { memo, useState, useEffect, useCallback, useMemo, useImperativeHandle, f
 import * as dialoguesAPI from '../../api/dialogues'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { useToast } from '../shared'
+import { useDialogueEditionNarrow } from '../unityDialogues/DialogueEditionNarrowContext'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import type {
   UnityDialogueNode,
   UnityDialogueChoice,
@@ -24,6 +27,12 @@ export interface UnityDialogueEditorProps {
   onCancel?: () => void
   extraActions?: ReactNode
   hideHeaderSaveButton?: boolean
+  /**
+   * Slot optionnel placé dans la zone titre du header (Story 17.7).
+   * Utilisé en mode narrow pour héberger un sélecteur de dialogue (`DialogueCombobox`)
+   * — le mode desktop conserve la liste latérale et n'utilise pas ce slot.
+   */
+  headerSelector?: ReactNode
 }
 
 export interface UnityDialogueEditorHandle {
@@ -47,8 +56,13 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
   onCancel,
   extraActions,
   hideHeaderSaveButton = false,
+  headerSelector,
 }, ref) {
   const toast = useToast()
+  const isNarrow = useDialogueEditionNarrow()
+  const chrome = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
+  const { ref: actionsRef, isNarrow: isActionsNarrowMeasured } = useNarrowInlineSize(520)
+  const isActionsNarrow = isNarrow && isActionsNarrowMeasured
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set())
@@ -295,85 +309,160 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
     }}>
       {/* En-tête sticky */}
       <div
+        data-testid="unity-dialogue-editor-toolbar"
+        data-dialogue-edition-narrow={isNarrow ? 'true' : 'false'}
         style={{
           flexShrink: 0,
-          padding: '1rem',
+          padding: chrome.headerPadding,
           borderBottom: `1px solid ${theme.border.primary}`,
           backgroundColor: theme.background.panelHeader,
           display: 'flex',
-          gap: '0.75rem',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
+          flexDirection: isNarrow ? 'column' : 'row',
+          gap: `${chrome.headerLayoutGapRem}rem`,
+          alignItems: isNarrow ? 'stretch' : 'center',
+          justifyContent: 'flex-start',
+          flexWrap: isNarrow ? 'nowrap' : 'wrap',
         }}
       >
-        <div style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0, flex: isNarrow ? undefined : '0 1 auto' }}>
+          {headerSelector && (
+            <div
+              data-testid="unity-dialogue-editor-header-selector"
+              style={{ marginBottom: '0.4rem' }}
+            >
+              {headerSelector}
+            </div>
+          )}
           <div
             style={{
               margin: 0,
               color: theme.text.primary,
-              fontSize: '1.1rem',
+              fontSize: `${chrome.titleFontRem}rem`,
               fontWeight: 700,
-              lineHeight: 1.2,
+              lineHeight: 1.25,
               wordBreak: 'break-word',
             }}
           >
             {title || 'Éditeur de Dialogue Unity'}
           </div>
           {subtitle && (
-            <div style={{ fontSize: '0.85rem', color: theme.text.secondary, marginTop: '0.25rem' }}>
+            <div
+              style={{
+                fontSize: `${chrome.subtitleFontRem}rem`,
+                color: theme.text.secondary,
+                marginTop: `${chrome.subtitleMarginTopRem}rem`,
+              }}
+            >
               {subtitle}
             </div>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          {extraActions}
-          {onCancel && (
-            <button
-              onClick={onCancel}
-              style={{
-                padding: '0.5rem 1rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: theme.button.default.background,
-                color: theme.button.default.color,
-                cursor: 'pointer',
-              }}
-            >
-              Annuler
-            </button>
-          )}
-          {!hideHeaderSaveButton && (
-            <button
-              onClick={handleSave}
-              disabled={isSaving || !isValid}
-              style={{
-                padding: '0.5rem 1rem',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: theme.button.primary.background,
-                color: theme.button.primary.color,
-                cursor: isValid && !isSaving ? 'pointer' : 'not-allowed',
-                opacity: isValid && !isSaving ? 1 : 0.6,
-                fontWeight: 700,
-              }}
-            >
-              {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-            </button>
-          )}
+        <div
+          style={{
+            // flex: 1 remplace le width:100% initial : le wrapper remplit l'espace restant
+            // après le titre (qui est flex: 0 1 auto), ce qui évite le shrink-wrap (≈222px)
+            // tout en laissant les boutons s'aligner à gauche via justifyContent: flex-start.
+            flex: isNarrow ? undefined : '1 1 auto',
+            width: isNarrow ? '100%' : undefined,
+            maxWidth: '100%',
+            minWidth: 0,
+            alignSelf: 'stretch',
+            display: 'block',
+          }}
+          ref={actionsRef}
+        >
+          <div
+            className="unity-dialogue-toolbar-actions"
+            data-actions-narrow={isActionsNarrow ? 'true' : 'false'}
+            style={{
+              display: isActionsNarrow ? 'grid' : 'flex',
+              gridTemplateColumns: isActionsNarrow ? 'minmax(0, 1fr) minmax(0, 1fr)' : undefined,
+              gridTemplateAreas: isActionsNarrow ? '"generate delete" "save cancel"' : undefined,
+              gap: `${chrome.toolbarGapRem}rem`,
+              alignItems: isActionsNarrow ? 'stretch' : 'center',
+              justifyItems: isActionsNarrow ? 'stretch' : undefined,
+              flexWrap: isActionsNarrow ? undefined : isNarrow ? 'wrap' : 'nowrap',
+              justifyContent: isActionsNarrow ? undefined : 'flex-start',
+              minWidth: 0,
+              width: '100%',
+              maxWidth: '100%',
+              overflowX: isActionsNarrow ? undefined : isNarrow ? undefined : 'auto',
+              overflowY: 'hidden',
+            }}
+          >
+            {extraActions}
+            {!hideHeaderSaveButton && (
+              <button
+                onClick={handleSave}
+                disabled={isSaving || !isValid}
+                style={{
+                  gridArea: isActionsNarrow ? 'save' : undefined,
+                  flexShrink: isActionsNarrow ? undefined : 0,
+                  padding: chrome.toolbarButtonPadding,
+                  minHeight: `${chrome.toolbarButtonMinHeightPx}px`,
+                  fontSize: `${chrome.toolbarButtonFontRem}rem`,
+                  fontWeight: chrome.toolbarButtonFontWeight,
+                  lineHeight: 1.25,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.primary.background,
+                  color: theme.button.primary.color,
+                  cursor: isValid && !isSaving ? 'pointer' : 'not-allowed',
+                  opacity: isValid && !isSaving ? 1 : 0.6,
+                  boxSizing: 'border-box',
+                  width: isActionsNarrow ? '100%' : undefined,
+                  minWidth: isActionsNarrow ? 0 : undefined,
+                }}
+              >
+                {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+              </button>
+            )}
+            {onCancel && (
+              <button
+                onClick={onCancel}
+                style={{
+                  gridArea: isActionsNarrow ? 'cancel' : undefined,
+                  flexShrink: isActionsNarrow ? undefined : 0,
+                  padding: chrome.toolbarButtonPadding,
+                  minHeight: `${chrome.toolbarButtonMinHeightPx}px`,
+                  fontSize: `${chrome.toolbarButtonFontRem}rem`,
+                  fontWeight: chrome.toolbarButtonFontWeight,
+                  lineHeight: 1.25,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                  width: isActionsNarrow ? '100%' : undefined,
+                  minWidth: isActionsNarrow ? 0 : undefined,
+                }}
+              >
+                Annuler
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Contenu scrollable */}
-      <div 
-        style={{ 
+      <div
+        data-testid="unity-dialogue-editor-content"
+        style={{
           flex: '1 1 0%',
           minHeight: 0,
+          minWidth: 0,
           height: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: '1rem',
+          padding: chrome.contentPadding,
           boxSizing: 'border-box',
           scrollbarGutter: 'stable',
         }}
@@ -431,8 +520,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
               style={{
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
-                padding: '1rem',
+                padding: chrome.nodeCardPadding,
                 backgroundColor: theme.background.panel,
+                minWidth: 0,
               }}
             >
               {/* En-tête du nœud */}
@@ -485,7 +575,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                     display: 'block',
                     marginBottom: '0.5rem',
                     color: theme.text.primary,
-                    fontSize: '0.9rem',
+                    fontSize: `${chrome.labelFontRem}rem`,
                     fontWeight: 500,
                   }}
                 >
@@ -498,7 +588,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   placeholder="ex: NPC_1, Player, Narrator"
                   style={{
                     width: '100%',
-                    padding: '0.5rem',
+                    minWidth: 0,
+                    padding: chrome.inputPadding,
                     boxSizing: 'border-box',
                     backgroundColor: theme.input.background,
                     border: `1px solid ${theme.input.border}`,
@@ -515,7 +606,7 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                     display: 'block',
                     marginBottom: '0.5rem',
                     color: theme.text.primary,
-                    fontSize: '0.9rem',
+                    fontSize: `${chrome.labelFontRem}rem`,
                     fontWeight: 500,
                   }}
                 >
@@ -528,7 +619,8 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                   rows={5}
                   style={{
                     width: '100%',
-                    padding: '0.5rem',
+                    minWidth: 0,
+                    padding: chrome.inputPadding,
                     boxSizing: 'border-box',
                     backgroundColor: theme.input.background,
                     border: `1px solid ${theme.input.border}`,
@@ -828,18 +920,24 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                           </div>
 
                           {/* Target Node */}
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-                            <div style={{ flex: 1 }}>
-                              <label
-                                style={{
-                                  display: 'block',
-                                  marginBottom: '0.25rem',
-                                  color: theme.text.primary,
-                                  fontSize: '0.85rem',
-                                }}
-                              >
-                                Target Node (ID):
-                              </label>
+                          <div>
+                            <label
+                              style={{
+                                display: 'block',
+                                marginBottom: '0.25rem',
+                                color: theme.text.primary,
+                                fontSize: `${chrome.labelFontRem}rem`,
+                              }}
+                            >
+                              Target Node (ID):
+                            </label>
+                            <div
+                              style={{
+                                display: 'flex',
+                                gap: '0.35rem',
+                                alignItems: 'stretch',
+                              }}
+                            >
                               <input
                                 type="text"
                                 value={choice.targetNode}
@@ -851,8 +949,9 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                 placeholder="ex: NEXT_NODE, END (termine le dialogue)"
                                 list={`node-ids-${node.id}`}
                                 style={{
-                                  width: '100%',
-                                  padding: '0.5rem',
+                                  flex: 1,
+                                  minWidth: 0,
+                                  padding: chrome.inputPadding,
                                   boxSizing: 'border-box',
                                   backgroundColor: theme.input.background,
                                   border: `1px solid ${
@@ -865,27 +964,37 @@ export const UnityDialogueEditor = memo(forwardRef<UnityDialogueEditorHandle, Un
                                   fontFamily: 'monospace',
                                 }}
                               />
-                              <datalist id={`node-ids-${node.id}`}>
-                                {Array.from(nodeIds).map((id) => (
-                                  <option key={id} value={id} />
-                                ))}
-                              </datalist>
+                              <button
+                                type="button"
+                                onClick={() => removeChoice(node.id, choiceIndex)}
+                                aria-label="Supprimer ce choix"
+                                title="Supprimer ce choix"
+                                style={{
+                                  flexShrink: 0,
+                                  alignSelf: 'stretch',
+                                  aspectRatio: 1,
+                                  minWidth: '2.25rem',
+                                  padding: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: `1px solid ${theme.border.primary}`,
+                                  borderRadius: '6px',
+                                  backgroundColor: theme.button.default.background,
+                                  color: theme.button.default.color,
+                                  cursor: 'pointer',
+                                  fontSize: '1rem',
+                                  lineHeight: 1,
+                                }}
+                              >
+                                🗑️
+                              </button>
                             </div>
-                            <button
-                              onClick={() => removeChoice(node.id, choiceIndex)}
-                              style={{
-                                padding: '0.5rem',
-                                border: `1px solid ${theme.border.primary}`,
-                                borderRadius: '6px',
-                                backgroundColor: theme.button.default.background,
-                                color: theme.button.default.color,
-                                cursor: 'pointer',
-                                fontSize: '1.2rem',
-                              }}
-                              title="Supprimer ce choix"
-                            >
-                              🗑️
-                            </button>
+                            <datalist id={`node-ids-${node.id}`}>
+                              {Array.from(nodeIds).map((id) => (
+                                <option key={id} value={id} />
+                              ))}
+                            </datalist>
                           </div>
                           
                           {choiceErrors.length > 0 && (

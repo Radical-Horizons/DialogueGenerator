@@ -15,8 +15,10 @@ import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
+import { StyledSelect } from '../shared/StyledSelect'
 import * as configAPI from '../../api/config'
 import type { LLMModelResponse } from '../../types/api'
 import {
@@ -564,7 +566,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             style={{
               display: 'block',
               marginBottom: '0.5rem',
-              fontSize: '0.85rem',
+              fontSize: remSize('accent'),
               fontWeight: 'bold',
               color: theme.text.secondary,
             }}
@@ -582,7 +584,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               borderRadius: 4,
               backgroundColor: theme.background.panel,
               color: theme.text.secondary,
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontFamily: 'monospace',
             }}
           />
@@ -595,7 +597,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -613,7 +615,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
               }}
             />
           </div>
@@ -625,7 +627,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             style={{
               display: 'block',
               marginBottom: '0.5rem',
-              fontSize: '0.85rem',
+              fontSize: remSize('accent'),
               fontWeight: 'bold',
               color: theme.text.secondary,
             }}
@@ -643,7 +645,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               borderRadius: 4,
               backgroundColor: theme.background.panel,
               color: theme.text.secondary,
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
             }}
           />
         </div>
@@ -655,7 +657,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -673,7 +675,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
               }}
             />
           </div>
@@ -686,7 +688,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -704,7 +706,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
                 fontFamily: 'inherit',
                 resize: 'vertical',
               }}
@@ -719,7 +721,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -737,19 +739,19 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
                 fontFamily: 'monospace',
               }}
             />
             {(errors as FieldErrors<TestNodeData>).test && (
-              <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.state.error.color }}>
+              <div style={{ marginTop: '0.25rem', fontSize: remSize('caption'), color: theme.state.error.color }}>
                 {(errors as FieldErrors<TestNodeData>).test?.message}
               </div>
             )}
             <div
               style={{
                 marginTop: '0.25rem',
-                fontSize: '0.75rem',
+                fontSize: remSize('caption'),
                 color: theme.text.secondary,
                 fontStyle: 'italic',
               }}
@@ -762,7 +764,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         {/* Résultats de test (pour test nodes) */}
         {nodeType === 'testNode' && selectedNodeId && (
           <div style={{ marginBottom: '0.75rem', padding: '0.75rem', backgroundColor: theme.background.secondary, borderRadius: 6, border: `1px solid ${theme.border.primary}` }}>
-            <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', fontWeight: 'bold', color: theme.text.primary }}>
+            <h5 style={{ margin: '0 0 0.75rem 0', fontSize: remSize('accent'), fontWeight: 'bold', color: theme.text.primary }}>
               Connexions de test
             </h5>
             <ConnectionTargetSelect
@@ -810,7 +812,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               border: `1px solid ${theme.border.primary}`,
             }}
           >
-            <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 'bold', color: theme.text.primary }}>
+            <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: remSize('section'), fontWeight: 'bold', color: theme.text.primary }}>
               ✨ Génération IA
             </h3>
             <button
@@ -826,7 +828,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
                 cursor: isGenerating ? 'not-allowed' : 'pointer',
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
                 fontWeight: 'bold',
                 opacity: isGenerating ? 0.7 : 1,
               }}
@@ -865,7 +867,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', color: theme.text.primary }}>
+              <h3 style={{ margin: 0, fontSize: remSize('section'), fontWeight: 'bold', color: theme.text.primary }}>
                 ✨ Génération IA
               </h3>
               <button
@@ -878,7 +880,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                   backgroundColor: showGenerationOptions ? theme.button.primary.background : theme.button.default.background,
                   color: showGenerationOptions ? theme.button.primary.color : theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: remSize('small'),
                 }}
               >
                 {showGenerationOptions ? 'Masquer' : 'Afficher'}
@@ -889,7 +891,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {/* Instructions */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 'bold', color: theme.text.primary }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent'), fontWeight: 'bold', color: theme.text.primary }}>
                     Instructions pour la génération
                   </label>
                   <textarea
@@ -904,7 +906,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       borderRadius: 4,
                       backgroundColor: theme.background.tertiary,
                       color: theme.text.primary,
-                      fontSize: '0.9rem',
+                      fontSize: remSize('body'),
                       fontFamily: 'inherit',
                       resize: 'vertical',
                     }}
@@ -913,10 +915,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 
                 {/* Modèle LLM */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 'bold', color: theme.text.primary }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent'), fontWeight: 'bold', color: theme.text.primary }}>
                     Modèle LLM
                   </label>
-                  <select
+                  <StyledSelect
                     value={llmModel}
                     onChange={(e) => setLlmModel(e.target.value)}
                     style={{
@@ -926,7 +928,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       borderRadius: 4,
                       backgroundColor: theme.background.tertiary,
                       color: theme.text.primary,
-                      fontSize: '0.9rem',
+                      fontSize: remSize('body'),
                     }}
                   >
                     {availableModels.map((model, index) => (
@@ -934,7 +936,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                         {model.display_name || model.model_identifier}
                       </option>
                     ))}
-                  </select>
+                  </StyledSelect>
                 </div>
                 
                 {/* Estimation unifiée (même composant que panneau Générer nœud) */}
@@ -966,7 +968,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       color: theme.button.primary.color,
                       cursor: isGenerating || budgetExceeded ? 'not-allowed' : 'pointer',
                       opacity: isGenerating || budgetExceeded ? 0.6 : 1,
-                      fontSize: '0.9rem',
+                      fontSize: remSize('body'),
                       fontWeight: 'bold',
                     }}
                   >
@@ -993,7 +995,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                           color: theme.button.default.color,
                           cursor: isGenerating || budgetExceeded ? 'not-allowed' : 'pointer',
                           opacity: isGenerating || budgetExceeded ? 0.6 : 1,
-                          fontSize: '0.9rem',
+                          fontSize: remSize('body'),
                         }}
                       >
                         {isGenerating
@@ -1029,7 +1031,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               backgroundColor: theme.button.primary.background,
               color: theme.button.primary.color,
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontWeight: 'bold',
             }}
           >
@@ -1046,7 +1048,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               backgroundColor: theme.button.default.background,
               color: theme.text.primary,
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontWeight: 'bold',
             }}
             title="Dupliquer ce nœud"
@@ -1064,7 +1066,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               backgroundColor: '#E74C3C',
               color: 'white',
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontWeight: 'bold',
             }}
           >
@@ -1153,7 +1155,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
         <label
           style={{
             display: 'block',
-            fontSize: '0.85rem',
+            fontSize: remSize('accent'),
             fontWeight: 'bold',
             color: theme.text.primary,
           }}
@@ -1170,7 +1172,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
             backgroundColor: theme.button.default.background,
             color: theme.button.default.color,
             cursor: 'pointer',
-            fontSize: '0.85rem',
+            fontSize: remSize('small'),
           }}
         >
           + Ajouter un choix
@@ -1186,7 +1188,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
             border: `1px dashed ${theme.border.primary}`,
             textAlign: 'center',
             color: theme.text.secondary,
-            fontSize: '0.85rem',
+            fontSize: remSize('body'),
           }}
         >
           Aucun choix. Cliquez sur "Ajouter un choix" pour en créer un.

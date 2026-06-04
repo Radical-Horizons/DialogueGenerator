@@ -1,9 +1,100 @@
 /**
  * Composant pour les contrôles de génération (sliders tokens, max choix, tags narratifs).
  */
-import { useRef } from 'react'
+import { useRef, type CSSProperties, type RefObject } from 'react'
 import { CONTEXT_TOKENS_LIMITS, COMPLETION_TOKENS_LIMITS } from '../../constants'
 import { theme } from '../../theme'
+import { generationPanelChrome } from '../../theme/responsiveChrome'
+import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+
+const TOKEN_SLIDER_INPUT_STYLE: CSSProperties = {
+  height: '6px',
+  borderRadius: '3px',
+  outline: 'none',
+  WebkitAppearance: 'none',
+  appearance: 'none',
+  padding: 0,
+  margin: 0,
+}
+
+interface TokenSliderRowProps {
+  isNarrow: boolean
+  controlGapRem: number
+  sliderRef: RefObject<HTMLInputElement | null>
+  min: number
+  max: number
+  step: number
+  value: number
+  valueLabel: string
+  valueTitle?: string
+  onChange: (value: number) => void
+}
+
+/** Ligne slider + valeur : côte à côte (confortable) ou valeur sous le curseur (narrow). */
+function TokenSliderRow({
+  isNarrow,
+  controlGapRem,
+  sliderRef,
+  min,
+  max,
+  step,
+  value,
+  valueLabel,
+  valueTitle,
+  onChange,
+}: TokenSliderRowProps) {
+  return (
+    <div
+      data-testid={isNarrow ? 'generation-token-slider-control-narrow' : 'generation-token-slider-control-row'}
+      style={
+        isNarrow
+          ? {
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+              gap: '0.28rem',
+              minWidth: 0,
+              width: '100%',
+            }
+          : {
+              display: 'flex',
+              alignItems: 'center',
+              gap: `${controlGapRem}rem`,
+              minWidth: 0,
+            }
+      }
+    >
+      <input
+        ref={sliderRef}
+        type="range"
+        className="token-slider"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseInt(e.target.value, 10))}
+        style={{
+          ...TOKEN_SLIDER_INPUT_STYLE,
+          ...(isNarrow ? { width: '100%', boxSizing: 'border-box' } : { flex: 1, minWidth: 0 }),
+        }}
+      />
+      <span
+        title={valueTitle}
+        style={{
+          flexShrink: 0,
+          textAlign: 'right',
+          color: theme.text.primary,
+          fontWeight: 'bold',
+          ...(isNarrow
+            ? { alignSelf: 'flex-end' }
+            : { minWidth: valueTitle ? '70px' : '60px' }),
+        }}
+      >
+        {valueLabel}
+      </span>
+    </div>
+  )
+}
 
 export interface GenerationPanelControlsProps {
   /** Max tokens pour contexte */
@@ -51,15 +142,40 @@ export function GenerationPanelControls({
 }: GenerationPanelControlsProps) {
   const maxContextSliderRef = useRef<HTMLInputElement>(null)
   const maxCompletionSliderRef = useRef<HTMLInputElement>(null)
+  const isNarrow = useGenerationPanelNarrow()
+  const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
 
   return (
     <>
-      {/* Sliders de tokens sur une seule ligne */}
-      <div style={{ marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+      {/* Sliders tokens : 2 colonnes (confortable) ou empilés (narrow, proposition 1) */}
+      <div style={{ marginBottom: '1rem', minWidth: 0, overflowX: 'hidden' }}>
+        <div
+          data-testid="generation-token-sliders-row"
+          style={{
+            display: 'flex',
+            flexDirection: isNarrow ? 'column' : 'row',
+            gap: isNarrow ? `${genChrome.controlGapRem}rem` : '1rem',
+            alignItems: 'stretch',
+            minWidth: 0,
+          }}
+        >
           {/* Slider Max tokens contexte */}
-          <div style={{ flex: 1 }}>
-            <label style={{ color: theme.text.primary, display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 500 }}>
+          <div
+            style={{
+              flex: isNarrow ? undefined : 1,
+              minWidth: 0,
+              width: isNarrow ? '100%' : undefined,
+            }}
+          >
+            <label
+              style={{
+                color: theme.text.primary,
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
+                fontWeight: 500,
+              }}
+            >
               Max tokens contexte
             </label>
             {validationErrors.maxContextTokens && (
@@ -67,44 +183,43 @@ export function GenerationPanelControls({
                 {validationErrors.maxContextTokens}
               </div>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <input
-                ref={maxContextSliderRef}
-                type="range"
-                className="token-slider"
-                min={CONTEXT_TOKENS_LIMITS.MIN}
-                max={CONTEXT_TOKENS_LIMITS.MAX}
-                step={CONTEXT_TOKENS_LIMITS.STEP}
-                value={maxContextTokens}
-                onChange={(e) => {
-                  onMaxContextTokensChange(parseInt(e.target.value))
-                  onDirty()
-                }}
-                style={{ 
-                  flex: 1,
-                  height: '6px',
-                  borderRadius: '3px',
-                  outline: 'none',
-                  WebkitAppearance: 'none',
-                  appearance: 'none',
-                  padding: 0,
-                  margin: 0,
-                }}
-              />
-              <span style={{ 
-                minWidth: '60px', 
-                textAlign: 'right',
-                color: theme.text.primary,
-                fontWeight: 'bold',
-              }}>
-                {maxContextTokens >= 1000 ? `${Math.round(maxContextTokens / 1000)}K` : maxContextTokens}
-              </span>
-            </div>
+            <TokenSliderRow
+              isNarrow={isNarrow}
+              controlGapRem={genChrome.controlGapRem}
+              sliderRef={maxContextSliderRef}
+              min={CONTEXT_TOKENS_LIMITS.MIN}
+              max={CONTEXT_TOKENS_LIMITS.MAX}
+              step={CONTEXT_TOKENS_LIMITS.STEP}
+              value={maxContextTokens}
+              valueLabel={
+                maxContextTokens >= 1000
+                  ? `${Math.round(maxContextTokens / 1000)}K`
+                  : String(maxContextTokens)
+              }
+              onChange={(v) => {
+                onMaxContextTokensChange(v)
+                onDirty()
+              }}
+            />
           </div>
 
           {/* Slider Max tokens génération */}
-          <div style={{ flex: 1 }}>
-            <label style={{ color: theme.text.primary, display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 500 }}>
+          <div
+            style={{
+              flex: isNarrow ? undefined : 1,
+              minWidth: 0,
+              width: isNarrow ? '100%' : undefined,
+            }}
+          >
+            <label
+              style={{
+                color: theme.text.primary,
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
+                fontWeight: 500,
+              }}
+            >
               Max tokens génération
             </label>
             {validationErrors.maxCompletionTokens && (
@@ -112,40 +227,35 @@ export function GenerationPanelControls({
                 {validationErrors.maxCompletionTokens}
               </div>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <input
-                ref={maxCompletionSliderRef}
-                type="range"
-                className="token-slider"
-                min={COMPLETION_TOKENS_LIMITS.MIN}
-                max={COMPLETION_TOKENS_LIMITS.MAX}
-                step={COMPLETION_TOKENS_LIMITS.STEP}
-                value={maxCompletionTokens ?? COMPLETION_TOKENS_LIMITS.DEFAULT}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value)
-                  onMaxCompletionTokensChange(value === COMPLETION_TOKENS_LIMITS.DEFAULT ? null : value) // null = valeur par défaut
-                  onDirty()
-                }}
-                style={{ 
-                  flex: 1,
-                  height: '6px',
-                  borderRadius: '3px',
-                  outline: 'none',
-                  WebkitAppearance: 'none',
-                  appearance: 'none',
-                  padding: 0,
-                  margin: 0,
-                }}
-              />
-              <span style={{ 
-                minWidth: '70px', 
-                textAlign: 'right',
-                color: theme.text.primary,
-                fontWeight: 'bold',
-              }}>
-                {maxCompletionTokens ? (maxCompletionTokens >= 1000 ? `${Math.round(maxCompletionTokens / 1000)}K` : maxCompletionTokens) : `Auto (${Math.round(COMPLETION_TOKENS_LIMITS.DEFAULT / 1000)}K)`}
-              </span>
-            </div>
+            <TokenSliderRow
+              isNarrow={isNarrow}
+              controlGapRem={genChrome.controlGapRem}
+              sliderRef={maxCompletionSliderRef}
+              min={COMPLETION_TOKENS_LIMITS.MIN}
+              max={COMPLETION_TOKENS_LIMITS.MAX}
+              step={COMPLETION_TOKENS_LIMITS.STEP}
+              value={maxCompletionTokens ?? COMPLETION_TOKENS_LIMITS.DEFAULT}
+              valueLabel={
+                maxCompletionTokens
+                  ? maxCompletionTokens >= 1000
+                    ? `${Math.round(maxCompletionTokens / 1000)}K`
+                    : String(maxCompletionTokens)
+                  : isNarrow
+                    ? 'Auto'
+                    : `Auto (${Math.round(COMPLETION_TOKENS_LIMITS.DEFAULT / 1000)}K)`
+              }
+              valueTitle={
+                maxCompletionTokens
+                  ? undefined
+                  : `Auto (${Math.round(COMPLETION_TOKENS_LIMITS.DEFAULT / 1000)}K)`
+              }
+              onChange={(v) => {
+                onMaxCompletionTokensChange(
+                  v === COMPLETION_TOKENS_LIMITS.DEFAULT ? null : v,
+                )
+                onDirty()
+              }}
+            />
           </div>
         </div>
         <style>{`

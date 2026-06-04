@@ -14,6 +14,7 @@ import { BudgetSettings } from '../settings/BudgetSettings'
 import { UsageDashboard } from '../usage/UsageDashboard'
 import { GenerationLogsPanel } from '../usage/GenerationLogsPanel'
 import { theme } from '../../theme'
+import { StyledSelect } from '../shared/StyledSelect'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { getAllShortcuts, formatShortcut } from '../../hooks/useKeyboardShortcuts'
 import * as configAPI from '../../api/config'
@@ -23,6 +24,9 @@ import {
   getGddFullSyncCheckpoint,
 } from '../../api/gddNotionSync'
 import { InfoIcon } from '../shared/Tooltip'
+import { remSize } from '../../theme/uiTypography'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 export interface GenerationOptionsModalProps {
   isOpen: boolean
@@ -63,6 +67,8 @@ export function GenerationOptionsModal({
   initialTab = 'general',
 }: GenerationOptionsModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab as TabId)
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(720)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   
   // Mettre à jour l'onglet actif quand initialTab change
   useEffect(() => {
@@ -212,11 +218,12 @@ export function GenerationOptionsModal({
           overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
+        ref={panelRef}
       >
         {/* Header */}
         <div
           style={{
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             display: 'flex',
             justifyContent: 'space-between',
@@ -224,14 +231,14 @@ export function GenerationOptionsModal({
             flexShrink: 0,
           }}
         >
-          <h2 style={{ margin: 0, color: theme.text.primary }}>Options</h2>
+          <h2 style={{ margin: 0, color: theme.text.primary, fontSize: `${typo.titleFontRem}rem` }}>Options</h2>
           <button
             onClick={onClose}
             style={{
               background: 'none',
               border: 'none',
               color: theme.text.secondary,
-              fontSize: '1.5rem',
+              fontSize: `${typo.titleFontRem}rem`,
               cursor: 'pointer',
               padding: '0.25rem 0.5rem',
             }}
@@ -257,13 +264,14 @@ export function GenerationOptionsModal({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: '1rem 1.5rem',
+                  padding: isNarrow ? '0.75rem 0.85rem' : '1rem 1.5rem',
                   border: 'none',
                   borderBottom: activeTab === tab.id ? `3px solid ${theme.border.focus}` : '3px solid transparent',
                   backgroundColor: 'transparent',
                   color: activeTab === tab.id ? theme.text.primary : theme.text.secondary,
                   cursor: 'pointer',
                   fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                  fontSize: `${typo.bodyFontRem}rem`,
                 }}
               >
                 {tabLabel}
@@ -288,7 +296,7 @@ export function GenerationOptionsModal({
             <span
               style={{
                 color: theme.text.primary,
-                fontSize: '0.88rem',
+                fontSize: remSize('body'),
                 lineHeight: 1.45,
                 flex: '1 1 220px',
               }}
@@ -308,7 +316,7 @@ export function GenerationOptionsModal({
                 color: theme.background.panel,
                 cursor: 'pointer',
                 fontWeight: 600,
-                fontSize: '0.85rem',
+                fontSize: remSize('small'),
               }}
             >
               Aller à Notion
@@ -322,7 +330,7 @@ export function GenerationOptionsModal({
             flex: 1,
             overflow: 'auto',
             minHeight: 0,
-            padding: '1.5rem',
+            padding: isNarrow ? '0.9rem' : '1.5rem',
           }}
         >
           {activeTab === 'context' && (
@@ -516,7 +524,7 @@ function ContextTab({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <select
+        <StyledSelect
           value={selectedElementType}
           onChange={(e) => setSelectedElementType(e.target.value)}
           style={{
@@ -526,13 +534,14 @@ function ContextTab({
             backgroundColor: theme.input.background,
             color: theme.input.color,
           }}
+          wrapperStyle={{ width: 'auto' }}
         >
           {elementTypes.map((et) => (
             <option key={et.id} value={et.id}>
               {et.label}
             </option>
           ))}
-        </select>
+        </StyledSelect>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button
             onClick={onDetectAll}
@@ -551,7 +560,7 @@ function ContextTab({
             content={
               <div>
                 <div style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Conseil</div>
-                <div style={{ fontSize: '0.875rem' }}>
+                <div style={{ fontSize: remSize('body') }}>
                   Utilisez ce bouton pour découvrir automatiquement tous les champs disponibles dans vos fiches GDD.
                 </div>
               </div>
@@ -668,12 +677,12 @@ function GeneralTab({
               content={
                 <div>
                   <div style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Modes d'Organisation</div>
-                  <div style={{ fontSize: '0.875rem' }}>
+                  <div style={{ fontSize: remSize('body') }}>
                     <p style={{ margin: '0.25rem 0' }}><strong>Par défaut :</strong> Ordre linéaire selon la configuration</p>
                     <p style={{ margin: '0.25rem 0' }}><strong>Narratif :</strong> Groupement logique (Identité → Caractérisation → Voix → Background → Mécaniques)</p>
                     <p style={{ margin: '0.25rem 0' }}><strong>Minimal :</strong> Seulement les champs essentiels pour la génération</p>
                   </div>
-                  <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: `1px solid ${theme.border.primary}`, fontSize: '0.875rem' }}>
+                  <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: `1px solid ${theme.border.primary}`, fontSize: remSize('body') }}>
                     <strong>Conseil :</strong> Le mode "Narratif" améliore la compréhension du LLM en organisant logiquement les informations.
                   </div>
                 </div>
@@ -681,7 +690,7 @@ function GeneralTab({
               position="right"
             />
           </div>
-          <select
+          <StyledSelect
             value={organization}
             onChange={(e) => setOrganization(e.target.value as 'default' | 'narrative' | 'minimal')}
             style={{
@@ -696,7 +705,7 @@ function GeneralTab({
             <option value="default">Par défaut (ordre de la config)</option>
             <option value="narrative">Narratif (groupé par pertinence)</option>
             <option value="minimal">Minimal (seulement l'essentiel)</option>
-          </select>
+          </StyledSelect>
         </div>
 
         <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -719,7 +728,7 @@ function GeneralTab({
             content={
               <div>
                 <div style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Conseils</div>
-                <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.875rem' }}>
+                <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: remSize('body') }}>
                   <li style={{ marginBottom: '0.25rem' }}>Utilisez "Détecter automatiquement" pour découvrir tous les champs disponibles</li>
                   <li style={{ marginBottom: '0.25rem' }}>Les champs suggérés sont particulièrement pertinents pour le type de génération</li>
                   <li>Utilisez la prévisualisation pour vérifier le contexte avant de générer</li>
@@ -732,7 +741,7 @@ function GeneralTab({
 
         {previewText && (
           <div>
-            <div style={{ marginBottom: '0.5rem', color: theme.text.secondary, fontSize: '0.9rem' }}>
+              <div style={{ marginBottom: '0.5rem', color: theme.text.secondary, fontSize: remSize('body') }}>
               Tokens estimés: {previewTokens}
             </div>
             <pre
@@ -743,7 +752,7 @@ function GeneralTab({
                 borderRadius: '4px',
                 overflow: 'auto',
                 maxHeight: '400px',
-                fontSize: '0.85rem',
+                fontSize: remSize('small'),
                 color: theme.text.primary,
                 whiteSpace: 'pre-wrap',
               }}
@@ -798,7 +807,7 @@ function ShortcutsTab() {
   return (
     <div>
       <h3 style={{ marginTop: 0, color: theme.text.primary, marginBottom: '1rem' }}>Raccourcis clavier</h3>
-      <p style={{ color: theme.text.secondary, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+      <p style={{ color: theme.text.secondary, marginBottom: '1.5rem', fontSize: remSize('body') }}>
         Utilisez ces raccourcis pour accélérer votre workflow. La plupart fonctionnent même lorsque vous êtes dans un champ de saisie.
       </p>
       
@@ -823,7 +832,7 @@ function ShortcutsTab() {
                 backgroundColor: theme.input.background,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '4px',
-                fontSize: '0.85rem',
+                fontSize: remSize('small'),
                 fontFamily: 'monospace',
                 color: theme.text.primary,
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
@@ -864,10 +873,10 @@ function LogsTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 200 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <label htmlFor="logs-dialogue-select" style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>
+        <label htmlFor="logs-dialogue-select" style={{ color: theme.text.secondary, fontSize: remSize('accent') }}>
           Dialogue :
         </label>
-        <select
+        <StyledSelect
           id="logs-dialogue-select"
           value={selectedDialogueId}
           onChange={(e) => setSelectedDialogueId(e.target.value)}
@@ -887,7 +896,7 @@ function LogsTab() {
               {d.title ?? d.filename}
             </option>
           ))}
-        </select>
+        </StyledSelect>
       </div>
       {selectedDialogueId ? (
         <ErrorBoundary
@@ -900,7 +909,7 @@ function LogsTab() {
           <GenerationLogsPanel dialogueId={selectedDialogueId} />
         </ErrorBoundary>
       ) : (
-        <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>
+        <div style={{ color: theme.text.secondary, fontSize: remSize('body') }}>
           Sélectionnez un dialogue pour afficher les logs de génération (prompts, réponses, coûts).
         </div>
       )}

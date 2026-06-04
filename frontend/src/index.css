@@ -13,6 +13,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/**
+ * Base rem responsive : légèrement plus compact qu’un 16px fixe, encore réduit sur tablette / mobile.
+ * Voir `theme/uiTypography.ts` pour l’échelle TS alignée.
+ */
+html {
+  font-size: 93.75%;
+}
+
+@media (max-width: 1024px) {
+  html {
+    font-size: 87.5%;
+  }
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 84.375%;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -62,10 +82,10 @@ select {
   border: 1px solid #3d3d46;
   color: rgba(255, 255, 255, 0.87);
   border-radius: 6px;
-  padding: 0.65rem 0.75rem;
+  padding: 0.55rem 0.65rem;
   font-family: inherit;
-  font-size: 1em;
-  line-height: 1.5;
+  font-size: 0.9375em;
+  line-height: 1.45;
 }
 
 input[type="text"]:focus,
@@ -82,8 +102,8 @@ select:focus {
 button {
   border-radius: 8px;
   border: 1px solid #3d3d46;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  padding: 0.5em 1em;
+  font-size: 0.9375em;
   font-weight: 500;
   font-family: inherit;
   background-color: #333333;
@@ -106,6 +126,31 @@ button:focus,
 button:focus-visible {
   outline: 2px solid #646cff;
   outline-offset: 2px;
+}
+
+/**
+ * Édition de dialogues (UnityDialogueEditor) — toolbar responsive :
+ * en mode narrow, on force une grille 2×2 full-width et des labels centrés.
+ */
+.unity-dialogue-toolbar-actions[data-actions-narrow="true"] {
+  width: 100%;
+  max-width: 100%;
+}
+
+.unity-dialogue-toolbar-actions[data-actions-narrow="true"] > * {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.unity-dialogue-toolbar-actions[data-actions-narrow="true"] button {
+  width: 100% !important;
+  min-height: 33px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  line-height: 1.25 !important;
 }
 
 /**

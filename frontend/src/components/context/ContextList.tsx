@@ -5,9 +5,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, ElementMode } from '../../types/api'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { highlightText } from '../../utils/textHighlight'
 import { getGddEntitySummary } from '../../utils/gddSummary'
 import { useDebounce } from '../../hooks/useDebounce'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export type ContextListItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse | { name: string; data?: Record<string, unknown> }
 
@@ -177,7 +179,7 @@ export function ContextList({
               color: theme.input.color,
             }}
           />
-          <select
+          <StyledSelect
             value={sortType}
             onChange={(e) => setSortType(e.target.value as SortType)}
             style={{
@@ -186,14 +188,15 @@ export function ContextList({
               borderRadius: '4px',
               backgroundColor: theme.input.background,
               color: theme.input.color,
-              fontSize: '0.85rem',
+              fontSize: remSize('accent'),
             }}
+            wrapperStyle={{ width: 'auto' }}
             title="Trier les résultats"
           >
             <option value="name-asc">Nom (A-Z)</option>
             <option value="name-desc">Nom (Z-A)</option>
             <option value="selected-first">Sélectionnés en premier</option>
-          </select>
+          </StyledSelect>
         </div>
       </div>
       <div
@@ -277,7 +280,7 @@ export function ContextList({
                     {entityTypeLabel && (
                       <span
                         style={{
-                          fontSize: '0.7rem',
+                          fontSize: remSize('caption'),
                           padding: '0.15rem 0.4rem',
                           borderRadius: '4px',
                           backgroundColor: theme.background.tertiary,
@@ -290,7 +293,7 @@ export function ContextList({
                     )}
                   </span>
                   {hasData(item) && getGddEntitySummary(item.data) && (
-                    <span style={{ fontSize: '0.8rem', color: theme.text.secondary, lineHeight: 1.2 }}>
+                    <span style={{ fontSize: remSize('body'), color: theme.text.secondary, lineHeight: 1.2 }}>
                       {getGddEntitySummary(item.data)}
                     </span>
                   )}
@@ -311,7 +314,7 @@ export function ContextList({
                         ? theme.state.warning.color || theme.text.secondary
                         : theme.text.secondary,
                       cursor: 'pointer',
-                      fontSize: '0.75rem',
+                      fontSize: remSize('small'),
                       fontWeight: 'bold',
                       display: 'flex',
                       alignItems: 'center',
@@ -321,7 +324,7 @@ export function ContextList({
                     }}
                   >
                     {currentMode === 'full' ? '📄' : '✂️'}
-                    <span style={{ fontSize: '0.7rem' }}>
+                    <span style={{ fontSize: remSize('caption') }}>
                       {currentMode === 'full' ? 'Complet' : 'Extrait'}
                     </span>
                   </button>
@@ -330,7 +333,7 @@ export function ContextList({
             )
           })}
           {loadingMore && (
-            <div style={{ padding: '0.75rem', textAlign: 'center', color: theme.text.secondary, fontSize: '0.9rem' }}>
+            <div style={{ padding: '0.75rem', textAlign: 'center', color: theme.text.secondary, fontSize: remSize('body') }}>
               Chargement…
             </div>
           )}

@@ -12,6 +12,7 @@ import {
 } from '../../api/llmUsage'
 import { getErrorMessage } from '../../types/errors'
 import './GenerationLogsPanel.css'
+import { StyledSelect } from '../shared/StyledSelect'
 
 type PeriodFilter = 'today' | 'week' | 'month'
 type ProviderFilter = 'all' | 'openai' | 'mistral'
@@ -200,27 +201,29 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
         <div className="glp__filters">
           <label>
             Période
-          <select
+          <StyledSelect
             value={period}
             onChange={(e) => setPeriod(e.target.value as PeriodFilter)}
             className="glp__select"
+            wrapperStyle={{ width: 'auto' }}
           >
             <option value="today">Aujourd&apos;hui</option>
             <option value="week">Cette semaine</option>
             <option value="month">Ce mois</option>
-          </select>
+          </StyledSelect>
         </label>
         <label>
           Provider
-          <select
+          <StyledSelect
             value={provider}
             onChange={(e) => setProvider(e.target.value as ProviderFilter)}
             className="glp__select"
+            wrapperStyle={{ width: 'auto' }}
           >
             <option value="all">Tous</option>
             <option value="openai">OpenAI</option>
             <option value="mistral">Mistral</option>
-          </select>
+          </StyledSelect>
         </label>
         </div>
         <div className="glp__export">
