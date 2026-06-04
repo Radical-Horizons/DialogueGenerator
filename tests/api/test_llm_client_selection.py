@@ -44,13 +44,11 @@ def test_llm_factory_creates_openai_client_when_api_key_present(client_with_real
     llm_config = config_service.get_llm_config()
     available_models = config_service.get_available_llm_models()
     
-    # Vérifier que la clé API est présente
+    # Vérifier que la variable de clé API est configurée, puis forcer une valeur
+    # non-placeholder pour que le test reste déterministe en CI (`sk-dummy` est
+    # volontairement traité comme absent par la factory).
     api_key_env_var = llm_config.get("api_key_env_var")
     assert api_key_env_var is not None, "api_key_env_var doit être défini dans la config"
-    
-    api_key = os.getenv(api_key_env_var)
-    if not api_key:
-        pytest.skip(f"Clé API non trouvée dans l'environnement ({api_key_env_var})")
     
     # Tester avec un modèle disponible
     if not available_models:
@@ -63,7 +61,7 @@ def test_llm_factory_creates_openai_client_when_api_key_present(client_with_real
         pytest.skip("Aucun identifiant de modèle trouvé")
     
     # Créer le client
-    with patch('factories.llm_factory.OpenAIClient') as mock_openai_class:
+    with patch.dict(os.environ, {api_key_env_var: "test-openai-key"}), patch('factories.llm_factory.OpenAIClient') as mock_openai_class:
         mock_openai_class.return_value = MagicMock(spec=OpenAIClient)
         
         client = LLMClientFactory.create_client(
