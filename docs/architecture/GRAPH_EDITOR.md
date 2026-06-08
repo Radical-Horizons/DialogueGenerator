@@ -33,12 +33,24 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 
 ### Header
 
+`GraphEditorHeader` expose une toolbar **tri-state** selon la largeur du conteneur (pas seulement le viewport) :
+
+| Mode | Seuil conteneur | Comportement |
+|------|-----------------|--------------|
+| Confortable | ≥1100px | Une rangée horizontale complète |
+| Compact desktop | 640–1099px | Status au-dessus, outils en dessous |
+| Narrow | &lt;640px | Grille verticale ; `DialogueCombobox` injecté via `headerSelector` (story 17.7) |
+
+Mesure : deux instances `useNarrowInlineSize` avec `measureParentClientWidth: true`. Tokens : `graphToolbarChrome` dans `responsiveChrome.ts`. Détail : [`responsive-ui.md`](./responsive-ui.md).
+
+**Actions principales** :
+
 - **Titre** : Éditable, nom du dialogue
 - **Retour** : Retour au dashboard
 - **Auto-layout** : Organise automatiquement les nœuds (Ctrl+L)
 - **Valider** : Vérifie le graphe (Ctrl+K)
 - **Sauvegarder** : Sauvegarde en Unity JSON (Ctrl+S)
-- **Exporter Unity** : Export vers Unity (futur)
+- **Exporter Unity** : Télécharge le JSON Unity depuis le store (`exportToUnity`)
 
 ### Canvas
 
