@@ -12,6 +12,7 @@ function clampContextTokenBudget(value: number): number {
 }
 
 const MAX_OPTIMIZATION_PINS = 200
+const FIELD_DEFAULTS_VERSION = 2
 
 function clampOptimizationPins(keys: string[]): string[] {
   const uniq = [...new Set(keys.map((k) => k.trim()).filter(Boolean))]
@@ -21,6 +22,14 @@ function clampOptimizationPins(keys: string[]): string[] {
 function clampProxyThreshold(n: number): number {
   const x = Number.isFinite(n) ? Math.round(n) : 50
   return Math.min(100, Math.max(1, x))
+}
+
+function isEnabledFlag(value: boolean | string | undefined): boolean {
+  return value === true || value === 'true'
+}
+
+function getAllAvailableFieldPaths(fields: Record<string, FieldInfo> | undefined): string[] {
+  return Object.keys(fields ?? {})
 }
 
 export interface FieldInfo {
@@ -64,6 +73,10 @@ interface ContextConfigState {
   
   // Champs essentiels (toujours sélectionnés, non désélectionnables)
   essentialFields: Record<string, string[]>  // element_type -> essential field paths
+
+  // Types dont la sélection par défaut a déjà été appliquée ou modifiée par l'utilisateur
+  fieldDefaultsInitialized: Record<string, boolean>
+  fieldDefaultsVersion: number
   
   // Mode d'organisation
   organization: 'default' | 'narrative' | 'minimal'
@@ -129,6 +142,8 @@ export const useContextConfigStore = create<ContextConfigState>()(
     (set, get) => ({
       fieldConfigs: { ...defaultFieldConfigs },
       essentialFields: {},
+      fieldDefaultsInitialized: {},
+      fieldDefaultsVersion: FIELD_DEFAULTS_VERSION,
       organization: 'default',
       availableFields: {},
       uniqueFieldsByItem: {},
@@ -160,7 +175,13 @@ export const useContextConfigStore = create<ContextConfigState>()(
         ...state.fieldConfigs,
         [elementType]: fields,
       }
-      return { fieldConfigs: newFieldConfigs }
+      return {
+        fieldConfigs: newFieldConfigs,
+        fieldDefaultsInitialized: {
+          ...state.fieldDefaultsInitialized,
+          [elementType]: true,
+        },
+      }
     })
   },
 
@@ -170,8 +191,8 @@ export const useContextConfigStore = create<ContextConfigState>()(
       // (mais laisser désélectionner les métadonnées essentielles)
       const availableFieldsForType = state.availableFields[elementType] || {}
       const fieldInfo = availableFieldsForType[fieldPath]
-      const isEssential = fieldInfo?.is_essential === true
-      const isMetadata = fieldInfo?.is_metadata === true
+      const isEssential = isEnabledFlag(fieldInfo?.is_essential)
+      const isMetadata = isEnabledFlag(fieldInfo?.is_metadata)
       if (isEssential && !isMetadata) {
         // Champ essentiel du contexte narratif, ne pas permettre la désélection
         return state
@@ -185,14 +206,20 @@ export const useContextConfigStore = create<ContextConfigState>()(
           ? currentFields.filter((f) => f !== fieldPath)
           : [...currentFields, fieldPath],
       }
-      return { fieldConfigs: newFieldConfigs }
+      return {
+        fieldConfigs: newFieldConfigs,
+        fieldDefaultsInitialized: {
+          ...state.fieldDefaultsInitialized,
+          [elementType]: true,
+        },
+      }
     })
   },
 
   selectAllFields: (elementType) => {
     set((state) => {
       const availableFieldsForType = state.availableFields[elementType] || {}
-      const allFieldPaths = Object.keys(availableFieldsForType)
+      const allFieldPaths = getAllAvailableFieldPaths(availableFieldsForType)
       const essentialFieldsForType = state.essentialFields[elementType] || []
       
       // Sélectionner tous les champs (les essentiels sont toujours inclus)
@@ -200,7 +227,13 @@ export const useContextConfigStore = create<ContextConfigState>()(
         ...state.fieldConfigs,
         [elementType]: [...new Set([...essentialFieldsForType, ...allFieldPaths])],
       }
-      return { fieldConfigs: newFieldConfigs }
+      return {
+        fieldConfigs: newFieldConfigs,
+        fieldDefaultsInitialized: {
+          ...state.fieldDefaultsInitialized,
+          [elementType]: true,
+        },
+      }
     })
   },
 
@@ -211,8 +244,8 @@ export const useContextConfigStore = create<ContextConfigState>()(
       const availableFieldsForType = state.availableFields[elementType] || {}
       const essentialFieldsFromDetection = Object.entries(availableFieldsForType)
         .filter(([, fieldInfo]: [string, FieldInfo]) => {
-          const isEssential = fieldInfo.is_essential === true || fieldInfo.is_essential === 'true'
-          const isMetadata = fieldInfo.is_metadata === true || fieldInfo.is_metadata === 'true'
+          const isEssential = isEnabledFlag(fieldInfo.is_essential)
+          const isMetadata = isEnabledFlag(fieldInfo.is_metadata)
           return isEssential && !isMetadata
         })
         .map(([path]) => path)
@@ -227,7 +260,13 @@ export const useContextConfigStore = create<ContextConfigState>()(
         ...state.fieldConfigs,
         [elementType]: [...essentialFieldsForType],
       }
-      return { fieldConfigs: newFieldConfigs }
+      return {
+        fieldConfigs: newFieldConfigs,
+        fieldDefaultsInitialized: {
+          ...state.fieldDefaultsInitialized,
+          [elementType]: true,
+        },
+      }
     })
   },
 
@@ -238,8 +277,8 @@ export const useContextConfigStore = create<ContextConfigState>()(
       const availableFieldsForType = state.availableFields[elementType] || {}
       const essentialMetadataFields = Object.entries(availableFieldsForType)
         .filter(([, fieldInfo]: [string, FieldInfo]) => {
-          const isEssential = fieldInfo.is_essential === true || fieldInfo.is_essential === 'true'
-          const isMetadata = fieldInfo.is_metadata === true || fieldInfo.is_metadata === 'true'
+          const isEssential = isEnabledFlag(fieldInfo.is_essential)
+          const isMetadata = isEnabledFlag(fieldInfo.is_metadata)
           return isEssential && isMetadata
         })
         .map(([path]) => path)
@@ -248,7 +287,13 @@ export const useContextConfigStore = create<ContextConfigState>()(
         ...state.fieldConfigs,
         [elementType]: [...essentialMetadataFields],
       }
-      return { fieldConfigs: newFieldConfigs }
+      return {
+        fieldConfigs: newFieldConfigs,
+        fieldDefaultsInitialized: {
+          ...state.fieldDefaultsInitialized,
+          [elementType]: true,
+        },
+      }
     })
   },
 
@@ -280,9 +325,28 @@ export const useContextConfigStore = create<ContextConfigState>()(
           [elementType]: response.unique_fields_by_item || {},
         }
         
+        const currentFields = state.fieldConfigs[elementType] || []
+        const shouldApplyAllFieldsDefault =
+          state.fieldDefaultsInitialized[elementType] !== true && currentFields.length === 0
+        const newFieldConfigs = shouldApplyAllFieldsDefault
+          ? {
+              ...state.fieldConfigs,
+              [elementType]: getAllAvailableFieldPaths(response.fields),
+            }
+          : state.fieldConfigs
+
+        const newFieldDefaultsInitialized = shouldApplyAllFieldsDefault
+          ? {
+              ...state.fieldDefaultsInitialized,
+              [elementType]: true,
+            }
+          : state.fieldDefaultsInitialized
+
         return {
           availableFields: newAvailableFields,
           uniqueFieldsByItem: newUniqueFieldsByItem,
+          fieldConfigs: newFieldConfigs,
+          fieldDefaultsInitialized: newFieldDefaultsInitialized,
           isLoading: false,
         }
       })
@@ -319,40 +383,52 @@ export const useContextConfigStore = create<ContextConfigState>()(
         essentialFields: response.essential_fields,
       })
       
-      // Ne réinitialiser les fieldConfigs que s'ils sont vides (première ouverture)
-      // Vérifier si au moins un type d'élément a des champs sélectionnés
-      const hasExistingConfigs = Object.values(state.fieldConfigs).some(fields => fields.length > 0)
-      if (!hasExistingConfigs) {
-        // Si aucun champ n'est sélectionné, initialiser avec "tous les champs" par défaut
-        const elementTypes = ['character', 'location', 'item', 'species', 'community'] as const
+      const elementTypes = ['character', 'location', 'item', 'species', 'community'] as const
+      const elementTypesToInitialize = elementTypes.filter((elementType) => {
+        const currentFields = state.fieldConfigs[elementType] || []
+        return state.fieldDefaultsInitialized[elementType] !== true && currentFields.length === 0
+      })
+
+      if (elementTypesToInitialize.length > 0) {
+        // Si un type n'a jamais été configuré, initialiser avec "tous les champs" par défaut.
         const allFieldsDetected: Record<string, string[]> = {}
         const newAvailableFields: Record<string, Record<string, FieldInfo>> = {}
+        const initializedDefaults: Record<string, boolean> = {}
 
-        // Détecter les champs pour tous les types en parallèle (une requête par type)
+        // Détecter les champs en parallèle pour les types encore non initialisés.
         const results = await Promise.allSettled(
-          elementTypes.map((elementType) =>
+          elementTypesToInitialize.map((elementType) =>
             configAPI.getContextFields(elementType).then((fieldsResponse) => ({ elementType, fieldsResponse }))
           )
         )
 
         for (let i = 0; i < results.length; i++) {
-          const elementType = elementTypes[i]
+          const elementType = elementTypesToInitialize[i]
           const result = results[i]
           if (result.status === 'fulfilled') {
             const { fieldsResponse } = result.value
             newAvailableFields[elementType] = fieldsResponse.fields
-            const allFieldPaths = Object.keys(fieldsResponse.fields)
+            const allFieldPaths = getAllAvailableFieldPaths(fieldsResponse.fields)
             const essentialFieldsForType = response.essential_fields[elementType] || []
             allFieldsDetected[elementType] = [...new Set([...essentialFieldsForType, ...allFieldPaths])]
+            initializedDefaults[elementType] = true
           } else {
             console.warn(`Impossible de détecter les champs pour ${elementType}:`, result.reason)
             allFieldsDetected[elementType] = response.default_fields[elementType] || []
+            initializedDefaults[elementType] = true
           }
         }
 
         // Mettre à jour le store avec les champs détectés et disponibles
         set((state) => ({
-          fieldConfigs: allFieldsDetected,
+          fieldConfigs: {
+            ...state.fieldConfigs,
+            ...allFieldsDetected,
+          },
+          fieldDefaultsInitialized: {
+            ...state.fieldDefaultsInitialized,
+            ...initializedDefaults,
+          },
           availableFields: {
             ...state.availableFields,
             ...newAvailableFields,
@@ -369,31 +445,50 @@ export const useContextConfigStore = create<ContextConfigState>()(
     const state = get()
     const elementTypes = ['character', 'location', 'item', 'species', 'community']
     const allFieldsConfig: Record<string, string[]> = {}
+    const initializedDefaults: Record<string, boolean> = {}
     
     for (const elementType of elementTypes) {
       const availableFieldsForType = state.availableFields[elementType] || {}
-      const allFieldPaths = Object.keys(availableFieldsForType)
+      const allFieldPaths = getAllAvailableFieldPaths(availableFieldsForType)
       const essentialFieldsForType = state.essentialFields[elementType] || []
       
       // Sélectionner tous les champs (essentiels + tous les autres)
       allFieldsConfig[elementType] = [...new Set([...essentialFieldsForType, ...allFieldPaths])]
+      initializedDefaults[elementType] = true
     }
     
     set({
       fieldConfigs: allFieldsConfig,
+      fieldDefaultsInitialized: {
+        ...state.fieldDefaultsInitialized,
+        ...initializedDefaults,
+      },
+      fieldDefaultsVersion: FIELD_DEFAULTS_VERSION,
     })
   },
 
   resetToDefault: () => {
     const state = get()
-    // Réinitialiser avec les champs par défaut (incluant les essentiels si connus)
+    // Réinitialiser avec tous les champs disponibles (incluant les essentiels si connus)
     const resetFieldConfigs: Record<string, string[]> = { ...defaultFieldConfigs }
+    const resetDefaultsInitialized: Record<string, boolean> = {}
+    const elementTypes = ['character', 'location', 'item', 'species', 'community']
+
+    for (const elementType of elementTypes) {
+      const allFieldPaths = getAllAvailableFieldPaths(state.availableFields[elementType])
+      resetFieldConfigs[elementType] = allFieldPaths
+      resetDefaultsInitialized[elementType] = allFieldPaths.length > 0
+    }
+
     for (const [elementType, fields] of Object.entries(state.essentialFields)) {
-      resetFieldConfigs[elementType] = [...fields]
+      resetFieldConfigs[elementType] = [...new Set([...fields, ...(resetFieldConfigs[elementType] || [])])]
+      resetDefaultsInitialized[elementType] = resetFieldConfigs[elementType].length > 0
     }
     
     set({
       fieldConfigs: resetFieldConfigs,
+      fieldDefaultsInitialized: resetDefaultsInitialized,
+      fieldDefaultsVersion: FIELD_DEFAULTS_VERSION,
       organization: 'default',
       contextTokenBudgetMax: CONTEXT_TOKENS_LIMITS.DEFAULT,
       contextOptimizationPinnedKeys: [],
@@ -438,6 +533,8 @@ export const useContextConfigStore = create<ContextConfigState>()(
       // Ne persister que fieldConfigs et organization, pas les autres états temporaires
       partialize: (state) => ({
         fieldConfigs: state.fieldConfigs,
+        fieldDefaultsInitialized: state.fieldDefaultsInitialized,
+        fieldDefaultsVersion: state.fieldDefaultsVersion,
         organization: state.organization,
         contextTokenBudgetMax: state.contextTokenBudgetMax,
         contextOptimizationPinnedKeys: state.contextOptimizationPinnedKeys,
@@ -448,6 +545,19 @@ export const useContextConfigStore = create<ContextConfigState>()(
       merge: (persistedState, currentState) => {
         const persisted = persistedState as Partial<ContextConfigState> | undefined
         const persistedFieldConfigs = persisted?.fieldConfigs ?? {}
+        const persistedVersion = persisted?.fieldDefaultsVersion
+        const shouldMigrateFieldDefaults = persistedVersion !== FIELD_DEFAULTS_VERSION
+        const persistedDefaultsInitialized =
+          !shouldMigrateFieldDefaults
+            ? { ...(persisted?.fieldDefaultsInitialized ?? {}) }
+            : {}
+        if (!shouldMigrateFieldDefaults) {
+          for (const [elementType, fields] of Object.entries(persistedFieldConfigs)) {
+            if (fields.length > 0) {
+              persistedDefaultsInitialized[elementType] = true
+            }
+          }
+        }
         const budget =
           persisted?.contextTokenBudgetMax !== undefined
             ? clampContextTokenBudget(persisted.contextTokenBudgetMax)
@@ -468,7 +578,11 @@ export const useContextConfigStore = create<ContextConfigState>()(
         return {
           ...currentState,
           ...persisted,
-          fieldConfigs: { ...defaultFieldConfigs, ...persistedFieldConfigs },
+          fieldConfigs: shouldMigrateFieldDefaults
+            ? { ...defaultFieldConfigs }
+            : { ...defaultFieldConfigs, ...persistedFieldConfigs },
+          fieldDefaultsInitialized: persistedDefaultsInitialized,
+          fieldDefaultsVersion: FIELD_DEFAULTS_VERSION,
           contextTokenBudgetMax: budget,
           contextOptimizationPinnedKeys: pins,
           contextOptimizationStrategy: strat,

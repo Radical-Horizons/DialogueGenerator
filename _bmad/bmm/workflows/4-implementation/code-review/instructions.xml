@@ -171,15 +171,15 @@
   </step>
 
   <step n="5" goal="Update story status and sync sprint tracking">
-    <!-- Determine new status based on review outcome -->
-    <check if="all HIGH and MEDIUM issues fixed AND all ACs implemented">
-      <action>Set {{new_status}} = "done"</action>
-      <action>Update story Status field to "done"</action>
-    </check>
-    <check if="HIGH or MEDIUM issues remain OR ACs not fully implemented">
-      <action>Set {{new_status}} = "in-progress"</action>
-      <action>Update story Status field to "in-progress"</action>
-    </check>
+    <critical>
+      « review » (story + sprint) = uniquement l’étape AMONT après dev-story : implémentation terminée, prêt à lancer la PREMIÈRE code-review. Ce workflow ne doit JAMAIS remettre une story en « review » en sortie (pas de file d’attente humaine fictif).
+      À la fin de code-review, le statut final est **done** ou **in-progress** seulement.
+      Ordre de décision pour {{new_status}} (obligatoire, sans exception « on laisse en review ») :
+      1) Si l’utilisateur a choisi **[2]** à l’étape 4 → {{action_count}} &gt; 0 → {{new_status}} = **in-progress** (action items à traiter).
+      2) Sinon si un finding **HIGH** ou **MEDIUM** de cette revue reste ouvert après l’étape 4, ou un **AC** de la story n’est pas implémenté → {{new_status}} = **in-progress**.
+      3) Sinon — notamment après **[1]** avec corrections HIGH/MEDIUM et AC couverts ; les **LOW** ouverts ne bloquent pas → {{new_status}} = **done**.
+    </critical>
+    <action>Appliquer la règle ci-dessus ; définir {{new_status}} puis mettre à jour le champ Status de la story (ligne « Status: … » en tête de fichier)</action>
     <action>Save story file</action>
 
     <!-- Determine sprint tracking status -->

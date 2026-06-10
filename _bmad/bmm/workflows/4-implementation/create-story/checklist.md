@@ -204,7 +204,7 @@ You will systematically re-do the entire story creation process, but with a crit
 - More detailed technical specifications
 - Better code reuse opportunities
 - Enhanced testing guidance
-- **TDD in tasks:** Every task must have exactly 3 subtasks in order — 🔴 (failing behavioral test), 🟢 (component/area to implement, not the how), 🔵 (named refactor opportunity or explicit no-op). No separate "Phase: testing" task at the end. Tasks defined at behavior level, not implementation-step level.
+- **TDD in tasks:** Every task must have exactly 3 markdown checkbox subtasks `- [ ]` in order — 🔴 (failing behavioral test), 🟢 (component/area to implement, not the how), 🔵 (named refactor opportunity or explicit no-op). Emojis label the phase inside each line; progress must be checked off one phase at a time during dev-story (never bulk check at end). No separate "Phase: testing" task at the end. Tasks defined at behavior level, not implementation-step level.
 
 #### **5.3 Optimization Suggestions (Nice to Have)**
 

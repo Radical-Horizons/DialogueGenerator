@@ -6,6 +6,7 @@
 *Content producer qui a appris à coder, pas dev qui apprend le contenu*
 
 **Context & Background :**
+
 - Utilise DialogueGenerator 40h/semaine (usage intensif)
 - Expert du GDD Alteir (500 pages produites en 1 an avec LLM)
 - Responsable qualité narrative finale
@@ -19,6 +20,7 @@
 Marc génère un dialogue pour **Akthar-Neth** (personnage philosophe) discutant avec le joueur sur **Deimos** (lune-gardienne d'Amatru, monde sans étoiles).
 
 **Génération LLM produit :**
+
 > "Akthar : Oui, les étoiles brillent dans le ciel... Deimos les protège."
 
 **❌ ERREUR DE LORE** : Le monde Amatru n'a PAS d'étoiles (lore établi : ciel vide gardé par Deimos).
@@ -30,7 +32,7 @@ Marc génère un dialogue pour **Akthar-Neth** (personnage philosophe) discutant
 1. **Itération manuelle** : Marc modifie le prompt pour renforcer "absence étoiles"
 2. **Re-génération** : Nouveau nœud, meilleur mais encore trop explicite
 3. **3ème tentative** : Enfin, un nœud subtil et philosophique :
-   > "Akthar : Uresaïr médite sous Deimos... Certains cherchent ce qui n'existe plus. D'autres gardent ce qui demeure."
+  > "Akthar : Uresaïr médite sous Deimos... Certains cherchent ce qui n'existe plus. D'autres gardent ce qui demeure."
 
 **✅ SUCCESS** : Le nœud capture la voice d'Uresaïr (calme, philosophique) ET la lore (Deimos gardien, absence étoiles) SANS l'expliquer explicitement.
 
@@ -41,6 +43,7 @@ Marc sélectionne le nœud parfait. **Mais maintenant il a 8 choix joueur à dé
 Il clique : **"Générer tous les nœuds suivants"**.
 
 DialogueGenerator génère **batch 8 nœuds en 90 secondes**. Marc les review rapidement :
+
 - **6/8 nœuds** : Qualité parfaite, acceptés immédiatement
 - **2/8 nœuds** : Minimes ajustements (reformulation)
 
@@ -49,6 +52,7 @@ DialogueGenerator génère **batch 8 nœuds en 90 secondes**. Marc les review ra
 **Resolution - Le Nouveau Workflow :**
 
 Marc continue l'itération. En **3H**, il a :
+
 - 1 dialogue complet (120 nœuds)
 - 80% des nœuds générés acceptés sans modification
 - Coût total : 0.75€ LLM
@@ -57,32 +61,32 @@ Marc continue l'itération. En **3H**, il a :
 **Milestone atteint** : Dialogue complet de qualité professionnelle en quelques heures.
 
 **Emotional Arc :**
+
 - **Frustration** (context dropping, lore explicite) → **Expérimentation** (itération prompts) → **Découverte** (node parfait) → **Émerveillement** (batch generation qualité) → **Confiance** (workflow rapide + contrôle)
 
 **Edge Cases & Pain Points :**
 
 1. **LLM API down** (OpenAI 503) :
-   - **Current** : Génération échoue, Marc attend ou retry manuel
-   - **Desired (V1.0)** : Fallback automatique Anthropic, 0 friction
-
+  - **Current** : Génération échoue, Marc attend ou retry manuel
+  - **Desired (V1.0)** : Fallback automatique Anthropic, 0 friction
 2. **Context dropping récurrent** (lore non intégrée) :
-   - **Current** : Itération manuelle prompts
-   - **Desired (V2.0)** : Template System anti-context-dropping (instructions optimisées)
-
+  - **Current** : Itération manuelle prompts
+  - **Desired (V2.0)** : Template System anti-context-dropping (instructions optimisées)
 3. **Debug mystérieux** (génération échoue sans raison) :
-   - **Current** : Marc examine logs backend manuellement
-   - **Desired (V1.0)** : Debug Console avec chat LLM intégré (diagnostic automatique)
-
+  - **Current** : Marc examine logs backend manuellement
+  - **Desired (V1.0)** : Debug Console avec chat LLM intégré (diagnostic automatique)
 4. **Session loss** (crash navigateur) :
-   - **Current** : Perte des modifications non sauvegardées
-   - **Desired (V1.0)** : Auto-save toutes les 2min, recovery automatique
+  - **Current** : Perte des modifications non sauvegardées
+  - **Desired (V1.0)** : Auto-save toutes les 2min, recovery automatique
 
 **Required Capabilities :**
+
 - ✅ MVP : Génération continue + batch, validation structure, export Unity fiable
 - 🟡 V1.0 : Multi-provider LLM (fallback), auto-save, debug console, RBAC
 - 🟢 V2.0 : Template System (anti context-dropping), lore checker, LLM judge qualité
 
 **Success Metrics :**
+
 - **Qualité** : >80% nœuds acceptés sans re-génération
 - **Efficacité** : <4H par dialogue complet (120 nœuds)
 - **Coûts** : <1€ par dialogue complet
@@ -96,6 +100,7 @@ Marc continue l'itération. En **3H**, il a :
 *Game Designer / Writer occasionnel, temps limité*
 
 **Context & Background :**
+
 - Utilise DialogueGenerator quelques heures/semaine (usage occasionnel)
 - Connaît bien le lore Alteir, mais pas expert technique de l'outil
 - Temps limité : veut produire rapidement sans friction
@@ -126,6 +131,7 @@ Il ouvre DialogueGenerator. **Dashboard intimidant** : nombreux champs, options 
 **Climax - Le Moment "Connect-the-dots" :**
 
 DialogueGenerator génère le 1er nœud :
+
 > "Tavernier : T'as entendu parler des Nids-Cités ? Y'en a qui disent qu'Avili revient tous les cycles... Moi j'y crois pas, mais les vieux du coin jurent l'avoir vue."
 
 **🎯 Moment "Aha!" :** *"Wow. L'IA a connecté les points : Taverne → Avili → Nids-Cités. Je n'ai pas eu à expliquer les liens, elle a compris le contexte."*
@@ -135,6 +141,7 @@ Mathieu génère 4 choix joueur, puis batch 4 nœuds suivants. **Tout fonctionne
 **Resolution - Autonomie Atteinte :**
 
 En **1H30**, Mathieu a :
+
 - 1 dialogue complet (80 nœuds)
 - Qualité validée (cohérence lore, ton approprié)
 - Export Unity : prêt pour intégration
@@ -143,32 +150,32 @@ En **1H30**, Mathieu a :
 **Auto-save** : Mathieu ferme son navigateur pour une réunion. Quand il revient, **tout son travail est restauré automatiquement**.
 
 **Emotional Arc :**
+
 - **Hésitation** (interface intimidante) → **Guidance** (wizard clair) → **Découverte** (connect-the-dots auto) → **Confiance** (autonomie complète) → **Satisfaction** (production rapide sans friction)
 
 **Edge Cases & Pain Points :**
 
 1. **Interface trop complexe** (mode power par défaut) :
-   - **Current (MVP)** : Mathieu hésite, appelle Marc
-   - **Desired (V1.0)** : Détection automatique skill level → wizard guided activé
-
+  - **Current (MVP)** : Mathieu hésite, appelle Marc
+  - **Desired (V1.0)** : Détection automatique skill level → wizard guided activé
 2. **Perte de travail** (navigateur fermé accidentellement) :
-   - **Current (MVP)** : Modifications perdues
-   - **Desired (V1.0)** : Auto-save toutes les 2min + recovery session automatique
-
+  - **Current (MVP)** : Modifications perdues
+  - **Desired (V1.0)** : Auto-save toutes les 2min + recovery session automatique
 3. **Recherche lente** (GDD 500 pages, difficile de trouver contexte pertinent) :
-   - **Current (MVP)** : Recherche manuelle
-   - **Desired (V1.0)** : Search & Index Layer (metadata search, filtres rapides)
-
+  - **Current (MVP)** : Recherche manuelle
+  - **Desired (V1.0)** : Search & Index Layer (metadata search, filtres rapides)
 4. **Qualité incertaine** (Mathieu pas sûr si le dialogue est bon) :
-   - **Current (MVP)** : Demande validation à Marc
-   - **Desired (V1.5)** : LLM judge qualité automatique (score 8/10) + suggestions
+  - **Current (MVP)** : Demande validation à Marc
+  - **Desired (V1.5)** : LLM judge qualité automatique (score 8/10) + suggestions
 
 **Required Capabilities :**
+
 - 🟡 V1.0 : Wizard Onboarding (guided mode), auto-save, search performante, mode detection
 - 🟢 V1.5 : LLM judge qualité, templates pré-remplis, validation automatique
 - 🟢 V2.0 : Context Intelligence (connect-the-dots automatique)
 
 **Success Metrics :**
+
 - **Autonomie** : >95% sessions sans support Marc
 - **Efficacité** : <2H par dialogue complet (80 nœuds)
 - **Onboarding** : <30min pour 1er dialogue complet produit
@@ -181,6 +188,7 @@ En **1H30**, Mathieu a :
 *Productrice, stakeholder, lecture seule*
 
 **Context & Background :**
+
 - Ne produit pas de dialogues, mais suit la production
 - Besoin de visibilité sur l'avancement (combien de dialogues produits, qualité, métriques)
 - Consulte DialogueGenerator pour reporting stakeholders
@@ -191,6 +199,7 @@ En **1H30**, Mathieu a :
 **Opening Scene - Le Besoin de Visibilité :**
 
 Sophie prépare un rapport mensuel pour les investisseurs :
+
 - **Question 1** : Combien de dialogues complets produits ce mois ?
 - **Question 2** : Quelle est la qualité moyenne (taux acceptation) ?
 - **Question 3** : Sommes-nous on track pour 1M lignes d'ici 2028 ?
@@ -202,6 +211,7 @@ Sophie prépare un rapport mensuel pour les investisseurs :
 **V1.5 : RBAC activé. Sophie a un compte "Viewer".**
 
 Elle se connecte à DialogueGenerator :
+
 - **Dashboard** : Affiche métriques globales
   - **Dialogues produits** : 45 complets (ce mois : +12)
   - **Lignes totales** : 4,500 (progression : +1,200 ce mois)
@@ -213,6 +223,7 @@ Elle se connecte à DialogueGenerator :
 Sophie ouvre un dialogue : **"Akthar-Neth_Taverne_LegendeAvili"**.
 
 Le graphe s'affiche en **mode lecture seule** (pas d'édition possible). Elle peut :
+
 - Naviguer les nœuds
 - Lire le contenu
 - Voir les branches narratives
@@ -222,6 +233,7 @@ Le graphe s'affiche en **mode lecture seule** (pas d'édition possible). Elle pe
 **Resolution - Reporting Autonome :**
 
 Sophie génère un rapport PDF depuis DialogueGenerator (V1.5 feature) :
+
 - Métriques de production (volume, qualité, coûts)
 - Screenshots graphes dialogues clés
 - Projection 2028 : **On track pour 1M lignes**
@@ -229,22 +241,24 @@ Sophie génère un rapport PDF depuis DialogueGenerator (V1.5 feature) :
 **Stakeholders validés.** Sophie n'a pas eu besoin de Marc pour les chiffres.
 
 **Emotional Arc :**
+
 - **Frustration** (dépendance Marc pour chiffres) → **Découverte** (dashboard viewer) → **Confiance** (données fiables) → **Satisfaction** (reporting autonome)
 
 **Edge Cases & Pain Points :**
 
 1. **Accès lecture seule non garanti** (risque édition accidentelle) :
-   - **Current (MVP)** : Pas de RBAC, Sophie pourrait modifier par erreur
-   - **Desired (V1.5)** : RBAC strict (Viewer = read-only garanti)
-
+  - **Current (MVP)** : Pas de RBAC, Sophie pourrait modifier par erreur
+  - **Desired (V1.5)** : RBAC strict (Viewer = read-only garanti)
 2. **Métriques indisponibles** (pas de dashboard analytics) :
-   - **Current (MVP)** : Sophie demande à Marc
-   - **Desired (V1.5)** : Dashboard analytics complet (métriques temps réel)
+  - **Current (MVP)** : Sophie demande à Marc
+  - **Desired (V1.5)** : Dashboard analytics complet (métriques temps réel)
 
 **Required Capabilities :**
+
 - 🟡 V1.5 : RBAC (3 roles : Admin/Writer/Viewer), dashboard analytics, export PDF reporting
 
 **Success Metrics :**
+
 - **Autonomie** : >90% reporting sans support Marc
 - **Fiabilité** : Métriques temps réel, 0 erreurs données
 
@@ -256,6 +270,7 @@ Sophie génère un rapport PDF depuis DialogueGenerator (V1.5 feature) :
 *Unity Developer, responsable intégration dialogues in-game*
 
 **Context & Background :**
+
 - Utilise système de dialogue maison (codé en C# dans Unity) pour intégrer les dialogues
 - Reçoit les JSON produits par DialogueGenerator (export Unity)
 - Ne produit pas de dialogues, mais doit les intégrer sans friction
@@ -267,11 +282,13 @@ Sophie génère un rapport PDF depuis DialogueGenerator (V1.5 feature) :
 **Opening Scene - L'Import Échoue :**
 
 Thomas ouvre DialogueGenerator (compte Viewer). Il voit :
+
 - **"Akthar-Neth_Taverne_LegendeAvili"** - Status: **Exported**
 
 Il télécharge le JSON, l'importe dans Unity via le système de dialogue maison.
 
 **❌ ERREUR Unity :**
+
 ```
 Invalid JSON schema - missing stableID on node 7
 ```
@@ -283,6 +300,7 @@ Invalid JSON schema - missing stableID on node 7
 **V1.0 : JSON Validation Unity stricte activée.**
 
 Marc re-génère le dialogue. **Avant export**, DialogueGenerator exécute :
+
 1. **Schema validation** : Vérifie tous les champs requis (stableID, DisplayName, etc.)
 2. **Structure validation** : Vérifie cohérence nœuds/liens (pas d'orphans, cycles OK)
 3. **Unity compatibility check** : Teste conformité 100% schema custom Unity
@@ -294,6 +312,7 @@ Marc re-génère le dialogue. **Avant export**, DialogueGenerator exécute :
 Thomas télécharge le nouveau JSON. Import Unity → **✅ Success. 0 erreurs.**
 
 Il teste le dialogue in-game :
+
 - Les choix joueur fonctionnent
 - Les branches narratives sont cohérentes
 - Les conditions/variables sont correctes
@@ -307,32 +326,33 @@ Thomas intègre 12 dialogues ce mois. **100% imports réussis, 0 erreurs schema.
 **Nouveau workflow** : DialogueGenerator → Export validé → Unity import → Test in-game → Production.
 
 **Emotional Arc :**
+
 - **Frustration** (import échoue, schema invalide) → **Découverte** (validation stricte activée) → **Confiance** (exports garantis valides) → **Efficacité** (pipeline sans friction)
 
 **Edge Cases & Pain Points :**
 
 1. **Schema Unity change** (système dialogue C# update) :
-   - **Current (MVP)** : Exports cassés après update schema Unity
-   - **Desired (V1.0)** : Validation schema paramétrable (accord dev Unity/IA pour évolutions)
-
+  - **Current (MVP)** : Exports cassés après update schema Unity
+  - **Desired (V1.0)** : Validation schema paramétrable (accord dev Unity/IA pour évolutions)
 2. **Test in-game lent** (besoin d'importer → build → tester) :
-   - **Current (MVP)** : Workflow lourd
-   - **Desired (V2.5)** : Simulation gameplay in-tool (preview branches sans Unity)
-
+  - **Current (MVP)** : Workflow lourd
+  - **Desired (V2.5)** : Simulation gameplay in-tool (preview branches sans Unity)
 3. **Debugging erreurs in-game** (dialogue bugs, conditions incorrectes) :
-   - **Current (MVP)** : Difficile de tracer l'origine (Unity logs peu clairs)
-   - **Desired (V1.5)** : Export logs enrichis (metadata debug, trace génération)
+  - **Current (MVP)** : Difficile de tracer l'origine (Unity logs peu clairs)
+  - **Desired (V1.5)** : Export logs enrichis (metadata debug, trace génération)
 
 **Required Capabilities :**
+
 - ✅ MVP : Export Unity basique (JSON valide structure)
 - 🟡 V1.0 : Validation JSON Unity stricte (100% conformité schema custom Unity)
 - 🟡 V1.5 : Export logs enrichis (metadata debug)
 - 🟢 V2.5 : Simulation gameplay in-tool (preview branches)
 
 **Success Metrics :**
+
 - **Integration** : 100% exports Unity sans erreurs schema
 - **Efficacité** : <5min par dialogue pour import + test in-game
 - **Fiabilité** : 0 bugs schema détectés post-import
 
 ---
-
+

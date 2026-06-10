@@ -5,7 +5,7 @@ alwaysApply: false
 - Tu es autonome pour les tests frontend via l'outil browser. Tu peux te connecter avec le login admin et le mot de passe admin123.
 - **Tests unitaires**: Vitest + React Testing Library dans `frontend/src/test/` et `frontend/src/**/*.test.ts`. Tests rapides, isolation complète, mocks pour API. Tests de parsing dans `frontend/src/hooks/usePromptPreview.test.ts`.
 - **`npm test` dans `frontend/`** = **`vitest run` rapide** (exclut 3 fichiers d’intégration lourds ; liste dans `frontend/vitest.config.ts`). **`npm run test:full`** = suite complète (comme la CI). Le watch = **`npm run test:watch`** (ne se termine pas).
-- **Exécution depuis un agent Cursor** : politique Vitest (filtres, interdits, PowerShell) → **`.cursor/rules/workflow.mdc`**. Ici : patterns de tests, pas la procédure d’orchestration.
+- **Exécution depuis un agent Cursor** : grille T0–T3 → **`.cursor/commands/test-tiers.md`** ; politique Vitest (filtres, interdits, PowerShell) → **`.cursor/rules/workflow.mdc`**. Ici : patterns de tests, pas la procédure d’orchestration.
 - **Tests E2E**: Playwright dans `e2e/`. Tests critiques (auth, navigation, génération), nécessite serveurs lancés. L'environnement E2E est complet (clé API, budget, GDD, etc.) ; tous les tests E2E sont censés passer. Pour l'éditeur de graphe : scoper la liste dans le contexte actif : `page.getByTestId('graph-editor').getByTestId('unity-dialogue-list')` quand le test travaille sur l'onglet Éditeur de Graphe. Specs avec LLM : voir `docs/troubleshooting/e2e-llm.md` pour preflight et dépannage. Post-mortem : `docs/troubleshooting/post-mortem-e2e-llm.md`.
 - **Formulaires (react-hook-form) + Playwright** : `page.fill()` met à jour le DOM mais RHF peut ne pas mettre à jour son store interne (il écoute le `change` natif). Pour vérifier la persistance après save : soit blur explicite (Tab ou clic canvas) avant de déclencher la sauvegarde, soit asserter via API (GET du fichier sauvegardé) plutôt que via reload de la page.
 - **Seed E2E (PUT document)** : en cas de 409 (optimistic locking), réessayer le PUT avec la `revision` renvoyée dans le corps de la réponse jusqu'à succès. Convention utilisée dans `e2e/documents-layout-adr008.spec.ts`.
@@ -72,3 +72,33 @@ const fn = useCallback(() => {
   doSomethingWith(selectionsRef.current)  // toujours frais
 }, [])
 ```
+
+### Hooks de mesure DOM (`useNarrowInlineSize`, `useViewportMode`) en RTL/jsdom
+
+`useNarrowInlineSize` mesure un nœud via `ResizeObserver` + `readLayoutWidthPx` (parent walker `style.width`). En jsdom :
+
+1. **`offsetWidth` / `clientWidth` valent souvent 0** — le hook retombe sur `style.width` en px (ou % remontée aux parents).
+2. **Depuis Story 17.8** : la ref exposée est une **callback ref** — le `ResizeObserver` se rattache dès que le nœud existe, y compris après un **montage tardif** (onglet, drawer). Le bug « `isNarrow` figé à `false` » (ref `null` au 1er `useEffect`) est corrigé ; cf. `frontend/src/hooks/useNarrowInlineSize.test.tsx`.
+3. **`waitFor` long** : si un test attend encore un élément narrow sans que le nœud mesuré ne soit jamais monté ou sans largeur explicite en `style`, vérifier le wiring du test avant de suspecter le hook.
+
+**Patterns de test** :
+
+- **Vrai hook + wrapper dimensionné** : utile pour intégration (ex. `Dashboard.combobox-17_7.test.tsx` — conteneur `width: 480` / `1440` après clic sur l’onglet, le workspace se monte et la callback ref mesure).
+- **Mock du hook** : reste valide pour **accélérer** les suites lourdes ou isoler un composant qui n’a pas besoin de la chaîne Dashboard complète ; utiliser `vi.mock('../../hooks/useNarrowInlineSize', …)` avec des seuils cohérents (`PANEL_COMFORT_MIN_WIDTH_PX`, etc.).
+- **Provider** : `<DialogueEditionNarrowProvider value={true}>` dans `UnityDialogueEditor.narrow.test.tsx` quand le composant sous test consomme déjà ce contexte.
+
+**Attention** : combiner `useViewportMode` (`window.innerWidth`) et `useNarrowInlineSize` sans fixer **à la fois** le viewport jsdom et les `style.width` pertinents peut rester fragile — préférer un mock ciblé si le test n’a pas vocation à couvrir la mesure.
+
+## Diagnostic d'un test Vitest qui semble "bloqué"
+
+Symptôme : `npx vitest run` tourne plusieurs minutes sans output ni progression. Méthode de tri rapide :
+
+1. **Vérifier le coût de startup** — sur Windows, le pipeline Vitest (Vite + esbuild + jsdom + setupFiles) prend **20–40 s** sur un fichier moyen au 1er run (cache froid). En dessous, c'est probablement le démarrage. **Ne pas tuer** avant 60 s sur un fichier non-lourd, 2 min sur un fichier de Dashboard complet.
+2. **Cibler un fichier minimal** — au lieu de `vitest run -t "pattern"` qui transforme **tous** les fichiers du projet pour matcher, lancer `vitest run path/to/specific.test.tsx --reporter=dot`. Diff de temps typique : 1–5 s vs 30–120 s.
+3. **Vérifier la cause d'un `waitFor` long** — si le test attend un élément qui dépend d'un state piloté par un hook DOM (mesure, ResizeObserver, IntersectionObserver, viewport), c'est probablement la cause. Voir section précédente sur `useNarrowInlineSize`.
+4. **`Out-String -Width 200`** sur Windows PowerShell — sans ça, la sortie de `node.exe` peut être tronquée ou bufférisée et donner l'impression d'un blocage muet.
+
+Outils :
+- `npx vitest run <file> --reporter=dot` : reporter compact, idéal en agent.
+- `npx vitest run <file> --reporter=verbose --testTimeout=10000` : timeout par test à 10 s pour forcer un échec rapide.
+- `npx vitest list <pattern>` : lister les tests sans les exécuter (utile pour vérifier qu'un nom matche bien).

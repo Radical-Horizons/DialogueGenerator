@@ -8,23 +8,39 @@ import { useSystemPrompt } from '../../hooks/useSystemPrompt'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
+import { generationPanelChrome } from '../../theme/responsiveChrome'
 import * as configAPI from '../../api/config'
+import {
+  deleteLocalAuthorTemplate,
+  deleteLocalSceneTemplate,
+  listLocalAuthorTemplates,
+  listLocalSceneTemplates,
+  upsertLocalAuthorTemplate,
+  upsertLocalSceneTemplate,
+  type LocalNamedTemplate,
+} from '../../utils/localNamedTemplates'
+import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
   authorProfile: string
+  gameRules: string
   systemPromptOverride: string | null
   onUserInstructionsChange: (instructions: string) => void
   onAuthorProfileChange: (profile: string) => void
+  onGameRulesChange: (rules: string) => void
   onSystemPromptChange: (prompt: string | null) => void
 }
 
 export const SystemPromptEditor = memo(function SystemPromptEditor({
   userInstructions,
   authorProfile,
+  gameRules,
   systemPromptOverride,
   onUserInstructionsChange,
   onAuthorProfileChange,
+  onGameRulesChange,
   onSystemPromptChange,
 }: SystemPromptEditorProps) {
   const {
@@ -70,6 +86,19 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
   const [selectedSceneTemplateId, setSelectedSceneTemplateId] = useState<string | null>(null)
   const [selectedAuthorTemplateId, setSelectedAuthorTemplateId] = useState<string | null>(null)
   const [showTemplatePreview, setShowTemplatePreview] = useState<string | null>(null)
+
+  const [localAuthorTemplates, setLocalAuthorTemplates] = useState<LocalNamedTemplate[]>(() =>
+    listLocalAuthorTemplates()
+  )
+  const [localSceneTemplates, setLocalSceneTemplates] = useState<LocalNamedTemplate[]>(() =>
+    listLocalSceneTemplates()
+  )
+  const [selectedLocalAuthorId, setSelectedLocalAuthorId] = useState('')
+  const [selectedLocalSceneId, setSelectedLocalSceneId] = useState('')
+  const [authorSaveAsOpen, setAuthorSaveAsOpen] = useState(false)
+  const [authorSaveAsName, setAuthorSaveAsName] = useState('')
+  const [sceneSaveAsOpen, setSceneSaveAsOpen] = useState(false)
+  const [sceneSaveAsName, setSceneSaveAsName] = useState('')
 
   useEffect(() => {
     loadTemplates()
@@ -188,12 +217,47 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
     }
   }, [onUserInstructionsChange])
 
+  const refreshLocalAuthorTemplates = useCallback(() => {
+    setLocalAuthorTemplates(listLocalAuthorTemplates())
+  }, [])
+
+  const refreshLocalSceneTemplates = useCallback(() => {
+    setLocalSceneTemplates(listLocalSceneTemplates())
+  }, [])
+
+  const handleConfirmAuthorSaveAs = useCallback(() => {
+    try {
+      upsertLocalAuthorTemplate(authorSaveAsName, authorProfile)
+      refreshLocalAuthorTemplates()
+      setAuthorSaveAsOpen(false)
+      setAuthorSaveAsName('')
+      toast('Modèle d\'auteur local enregistré', 'success')
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement', 'error')
+    }
+  }, [authorSaveAsName, authorProfile, refreshLocalAuthorTemplates, toast])
+
+  const handleConfirmSceneSaveAs = useCallback(() => {
+    try {
+      upsertLocalSceneTemplate(sceneSaveAsName, userInstructions)
+      refreshLocalSceneTemplates()
+      setSceneSaveAsOpen(false)
+      setSceneSaveAsName('')
+      toast('Brief de scène enregistré comme modèle local', 'success')
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement', 'error')
+    }
+  }, [sceneSaveAsName, userInstructions, refreshLocalSceneTemplates, toast])
+
+  const isNarrow = useGenerationPanelNarrow()
+  const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
+
   const tabs: Tab[] = [
     {
       id: 'user-instructions',
       label: 'Instructions de Scène',
       content: (
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           {/* Templates de scène */}
           <div style={{ marginBottom: '1rem' }}>
             {isLoadingTemplates ? (
@@ -201,19 +265,26 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 Chargement des templates...
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: isNarrow ? 'wrap' : 'nowrap',
+                  gap: `${genChrome.controlGapRem}rem`,
+                  alignItems: 'center',
+                }}
+              >
                 <label
                   htmlFor="scene-template-select"
                   style={{
                     color: theme.text.primary,
-                    fontSize: '0.9rem',
+                    fontSize: `${genChrome.labelFontRem}rem`,
                     fontWeight: 500,
-                    whiteSpace: 'nowrap',
+                    whiteSpace: isNarrow ? 'normal' : 'nowrap',
                   }}
                 >
                   Templates de scène:
                 </label>
-                <select
+                <StyledSelect
                   id="scene-template-select"
                   value={selectedSceneTemplateId || ''}
                   onChange={(e) => {
@@ -222,7 +293,6 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                       const template = sceneTemplates.find(t => t.id === templateId)
                       if (template) {
                         setSelectedSceneTemplateId(template.id)
-                        // Remplacer les instructions par le contenu du template
                         onUserInstructionsChange(template.instructions)
                       }
                     } else {
@@ -230,16 +300,19 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                     }
                   }}
                   style={{
-                    width: '220px',
-                    padding: '0.5rem',
+                    width: isNarrow ? '100%' : '220px',
+                    minWidth: 0,
+                    flex: isNarrow ? '1 1 100%' : undefined,
+                    padding: genChrome.selectTriggerPadding,
+                    boxSizing: 'border-box',
                     border: `1px solid ${theme.input.border}`,
                     borderRadius: '4px',
                     backgroundColor: theme.input.background,
                     color: theme.input.color,
-                    fontSize: '0.9rem',
+                    fontSize: `${genChrome.selectTextFontRem}rem`,
                     cursor: 'pointer',
                   }}
-                  title={selectedSceneTemplateId 
+                  title={selectedSceneTemplateId
                     ? sceneTemplates.find(t => t.id === selectedSceneTemplateId)?.description
                     : 'Sélectionner un template de scène'}
                 >
@@ -249,18 +322,18 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                       {template.name}
                     </option>
                   ))}
-                </select>
+                </StyledSelect>
                 {selectedSceneTemplateId && (
                   <button
                     onClick={() => setShowTemplatePreview(selectedSceneTemplateId)}
                     style={{
-                      padding: '0.5rem 1rem',
+                      padding: genChrome.buttonPadding,
                       border: `1px solid ${theme.border.primary}`,
                       borderRadius: '4px',
                       backgroundColor: theme.button.default.background,
                       color: theme.button.default.color,
                       cursor: 'pointer',
-                      fontSize: '0.85rem',
+                      fontSize: `${genChrome.buttonFontRem}rem`,
                       whiteSpace: 'nowrap',
                     }}
                     title="Voir le contenu complet du template"
@@ -318,11 +391,110 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
             </div>
           )}
 
+          <div style={{ marginBottom: '1rem' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: theme.text.primary,
+                fontSize: '0.9rem',
+                fontWeight: 500,
+              }}
+            >
+              Mes briefs (ce navigateur)
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                alignItems: 'center',
+                marginBottom: '0.35rem',
+              }}
+            >
+              <select
+                aria-label="Charger un brief de scène local"
+                value={selectedLocalSceneId}
+                onChange={(e) => {
+                  const id = e.target.value
+                  setSelectedLocalSceneId(id)
+                  if (!id) return
+                  const t = localSceneTemplates.find((x) => x.id === id)
+                  if (t) {
+                    onUserInstructionsChange(t.body)
+                  }
+                }}
+                style={{
+                  padding: '0.45rem 0.6rem',
+                  borderRadius: 6,
+                  border: `1px solid ${theme.border.primary}`,
+                  backgroundColor: theme.input.background,
+                  color: theme.input.color,
+                  fontSize: '0.85rem',
+                  minWidth: 200,
+                }}
+              >
+                <option value="">— Charger —</option>
+                {localSceneTemplates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  setSceneSaveAsOpen(true)
+                  setSceneSaveAsName('')
+                }}
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
+              >
+                Enregistrer sous…
+              </button>
+              {selectedLocalSceneId ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteLocalSceneTemplate(selectedLocalSceneId)
+                    refreshLocalSceneTemplates()
+                    setSelectedLocalSceneId('')
+                    toast('Brief local supprimé', 'success')
+                  }}
+                  style={{
+                    padding: '0.45rem 0.85rem',
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.background.secondary,
+                    color: theme.state.error.color,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Supprimer
+                </button>
+              ) : null}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: theme.text.secondary }}>
+              Stockage local ; même nom = remplacement.
+            </div>
+          </div>
+
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
+              gap: `${genChrome.controlGapRem}rem`,
               marginBottom: '0.5rem',
             }}
           >
@@ -330,23 +502,24 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               htmlFor="user-instructions-textarea"
               style={{
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
+                flex: isNarrow ? '1 1 100%' : undefined,
               }}
             >
               Brief de scène:
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
                 onClick={handleSaveSceneInstructions}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.secondary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 600,
                 }}
                 title="Sauvegarde le brief de scène actuel"
@@ -356,13 +529,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               <button
                 onClick={handleRestoreSceneInstructions}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée"
@@ -388,7 +561,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                   color: theme.input.color,
                   borderRadius: '6px',
                   fontFamily: 'inherit',
-                  fontSize: '0.9rem',
+                  fontSize: `${genChrome.textareaFontRem}rem`,
                   resize: 'vertical',
                   lineHeight: 1.55,
                 }}
@@ -398,7 +571,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                   display: 'flex',
                   justifyContent: 'flex-end',
                   marginTop: '0.25rem',
-                  fontSize: '0.75rem',
+                  fontSize: `${isNarrow ? 0.7 : 0.75}rem`,
                   color: theme.text.secondary,
                 }}
               >
@@ -411,6 +584,86 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               </div>
             </div>
           </FormField>
+          {sceneSaveAsOpen && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="scene-save-as-title"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10050,
+              }}
+              onClick={() => setSceneSaveAsOpen(false)}
+            >
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  backgroundColor: theme.background.panel,
+                  padding: '1.25rem',
+                  borderRadius: 8,
+                  border: `1px solid ${theme.border.primary}`,
+                  minWidth: 320,
+                  maxWidth: '90vw',
+                }}
+              >
+                <h4 id="scene-save-as-title" style={{ marginTop: 0, color: theme.text.primary }}>
+                  Enregistrer le brief sous…
+                </h4>
+                <input
+                  type="text"
+                  value={sceneSaveAsName}
+                  onChange={(e) => setSceneSaveAsName(e.target.value)}
+                  placeholder="Nom du modèle"
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    marginBottom: '1rem',
+                    boxSizing: 'border-box',
+                    borderRadius: 6,
+                    border: `1px solid ${theme.input.border}`,
+                    backgroundColor: theme.input.background,
+                    color: theme.input.color,
+                  }}
+                  autoFocus
+                />
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSceneSaveAsOpen(false)}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.border.primary}`,
+                      backgroundColor: theme.background.secondary,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSceneSaveAs}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.button.primary.background}`,
+                      backgroundColor: theme.button.primary.background,
+                      color: theme.button.primary.color,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ),
     },
@@ -418,7 +671,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       id: 'author-profile',
       label: 'Auteur (global)',
       content: (
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           {/* Templates de profil d'auteur */}
           <div style={{ marginBottom: '1rem' }}>
             <label
@@ -426,7 +679,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 display: 'block',
                 marginBottom: '0.5rem',
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
               }}
             >
@@ -437,14 +690,21 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 Chargement des templates...
               </div>
             ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: `${genChrome.controlGapRem}rem`,
+                  marginBottom: '0.5rem',
+                }}
+              >
                 {authorTemplates.map((template) => (
                   <button
                     key={template.id}
                     onClick={() => handleAuthorTemplateClick(template)}
                     onDoubleClick={() => setShowTemplatePreview(template.id)}
                     style={{
-                      padding: '0.5rem 1rem',
+                      padding: genChrome.buttonPadding,
                       border: `1px solid ${selectedAuthorTemplateId === template.id ? theme.border.focus : theme.border.primary}`,
                       borderRadius: '4px',
                       backgroundColor: selectedAuthorTemplateId === template.id 
@@ -454,7 +714,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                         ? theme.button.primary.color 
                         : theme.button.default.color,
                       cursor: 'pointer',
-                      fontSize: '0.85rem',
+                      fontSize: `${genChrome.buttonFontRem}rem`,
                     }}
                     title={`${template.description}\n\nDouble-clic pour voir le contenu complet`}
                   >
@@ -464,6 +724,107 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 ))}
               </div>
             )}
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: theme.text.primary,
+                fontSize: '0.9rem',
+                fontWeight: 500,
+              }}
+            >
+              Mes modèles (ce navigateur)
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                alignItems: 'center',
+                marginBottom: '0.35rem',
+              }}
+            >
+              <select
+                aria-label="Charger un modèle d'auteur local"
+                value={selectedLocalAuthorId}
+                onChange={(e) => {
+                  const id = e.target.value
+                  setSelectedLocalAuthorId(id)
+                  if (!id) return
+                  const t = localAuthorTemplates.find((x) => x.id === id)
+                  if (t) {
+                    updateProfile(t.body)
+                    onAuthorProfileChange(t.body)
+                    saveProfile(t.body)
+                    setSelectedAuthorTemplateId(null)
+                  }
+                }}
+                style={{
+                  padding: '0.45rem 0.6rem',
+                  borderRadius: 6,
+                  border: `1px solid ${theme.border.primary}`,
+                  backgroundColor: theme.input.background,
+                  color: theme.input.color,
+                  fontSize: '0.85rem',
+                  minWidth: 200,
+                }}
+              >
+                <option value="">— Charger —</option>
+                {localAuthorTemplates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthorSaveAsOpen(true)
+                  setAuthorSaveAsName('')
+                }}
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  border: `1px solid ${theme.border.secondary}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
+                title="Crée ou remplace un modèle nommé dans ce navigateur"
+              >
+                Enregistrer sous…
+              </button>
+              {selectedLocalAuthorId ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteLocalAuthorTemplate(selectedLocalAuthorId)
+                    refreshLocalAuthorTemplates()
+                    setSelectedLocalAuthorId('')
+                    toast('Modèle local supprimé', 'success')
+                  }}
+                  style={{
+                    padding: '0.45rem 0.85rem',
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.background.secondary,
+                    color: theme.state.error.color,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Supprimer
+                </button>
+              ) : null}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: theme.text.secondary }}>
+              Stockage local uniquement ; nom identique = remplacement du modèle.
+            </div>
           </div>
 
           {/* Prévisualisation du template */}
@@ -515,8 +876,10 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
+              gap: `${genChrome.controlGapRem}rem`,
               marginBottom: '0.5rem',
             }}
           >
@@ -524,23 +887,24 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               htmlFor="author-profile-textarea"
               style={{
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
+                flex: isNarrow ? '1 1 100%' : undefined,
               }}
             >
               Profil d'auteur (réutilisable):
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
                 onClick={handleSaveAuthorProfile}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.secondary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 600,
                 }}
                 title="Sauvegarde le profil d'auteur actuel"
@@ -550,13 +914,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               <button
                 onClick={handleRestoreAuthorProfile}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée"
@@ -581,12 +945,127 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 color: theme.input.color,
                 borderRadius: '6px',
                 fontFamily: 'inherit',
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.textareaFontRem}rem`,
                 resize: 'vertical',
                 lineHeight: 1.55,
               }}
             />
           </FormField>
+          {authorSaveAsOpen && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="author-save-as-title"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10050,
+              }}
+              onClick={() => setAuthorSaveAsOpen(false)}
+            >
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  backgroundColor: theme.background.panel,
+                  padding: '1.25rem',
+                  borderRadius: 8,
+                  border: `1px solid ${theme.border.primary}`,
+                  minWidth: 320,
+                  maxWidth: '90vw',
+                }}
+              >
+                <h4 id="author-save-as-title" style={{ marginTop: 0, color: theme.text.primary }}>
+                  Enregistrer le profil sous…
+                </h4>
+                <input
+                  type="text"
+                  value={authorSaveAsName}
+                  onChange={(e) => setAuthorSaveAsName(e.target.value)}
+                  placeholder="Nom du modèle"
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    marginBottom: '1rem',
+                    boxSizing: 'border-box',
+                    borderRadius: 6,
+                    border: `1px solid ${theme.input.border}`,
+                    backgroundColor: theme.input.background,
+                    color: theme.input.color,
+                  }}
+                  autoFocus
+                />
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => setAuthorSaveAsOpen(false)}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.border.primary}`,
+                      backgroundColor: theme.background.secondary,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmAuthorSaveAs}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 6,
+                      border: `1px solid ${theme.button.primary.background}`,
+                      backgroundColor: theme.button.primary.background,
+                      color: theme.button.primary.color,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'game-rules',
+      label: 'Règles du jeu',
+      content: (
+        <div style={{ padding: '1rem' }}>
+          <details>
+            <summary style={{ cursor: 'pointer', color: theme.text.primary, fontWeight: 600 }}>
+              Règles systémiques appliquées au dialogue
+            </summary>
+            <div style={{ marginTop: '0.75rem' }}>
+              <textarea
+                id="game-rules-textarea"
+                value={gameRules}
+                onChange={(e) => onGameRulesChange(e.target.value)}
+                rows={8}
+                placeholder="Ex: Influence/Respect uniquement quand la relation PNJ le justifie. Axes de réputation: Admiration, Prestige, Crainte. Inclure des options liées aux traits requis et aux gains systémiques quand pertinent."
+                style={{
+                  width: '100%',
+                  padding: '0.65rem 0.75rem',
+                  boxSizing: 'border-box',
+                  backgroundColor: theme.input.background,
+                  border: `1px solid ${theme.input.border}`,
+                  color: theme.input.color,
+                  borderRadius: '6px',
+                  fontFamily: 'inherit',
+                  fontSize: '0.9rem',
+                  resize: 'vertical',
+                  lineHeight: 1.55,
+                }}
+              />
+            </div>
+          </details>
         </div>
       ),
     },
@@ -594,7 +1073,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       id: 'system-prompt',
       label: 'Système LLM (avancé)',
       content: (
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           <div
             style={{
               marginBottom: '1rem',
@@ -614,8 +1093,10 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
+              gap: `${genChrome.controlGapRem}rem`,
               marginBottom: '0.5rem',
             }}
           >
@@ -623,25 +1104,26 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               htmlFor="system-prompt-textarea"
               style={{
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
+                flex: isNarrow ? '1 1 100%' : undefined,
               }}
             >
               Prompt Système Principal:
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
                 onClick={handleSaveSystemPrompt}
                 disabled={isLoadingSystemPrompt}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.secondary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
                   opacity: isLoadingSystemPrompt ? 0.6 : 1,
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 600,
                 }}
                 title="Sauvegarde le prompt système actuel"
@@ -652,14 +1134,14 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 onClick={handleRestoreSystemPrompt}
                 disabled={isLoadingSystemPrompt}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
                   opacity: isLoadingSystemPrompt ? 0.6 : 1,
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée (ou le défaut si rien n'est sauvegardé)"
@@ -684,7 +1166,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 color: theme.input.color,
                 borderRadius: '6px',
                 fontFamily: 'monospace',
-                fontSize: '0.85rem',
+                fontSize: isNarrow ? '0.78rem' : '0.85rem',
                 resize: 'vertical',
                 lineHeight: 1.55,
               }}

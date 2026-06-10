@@ -4,6 +4,7 @@ from __future__ import annotations
 from services.gdd_sections_split import (
     extract_gdd_field_value,
     extract_virtual_sections_general_path,
+    normalize_notion_enhanced_markdown_for_section_split,
     split_sections_general_text,
 )
 
@@ -43,6 +44,38 @@ class TestSplitSectionsGeneralText:
         assert len(chunks) == 3
         assert chunks[1][0] == "compact"
         assert chunks[2][0] == "sub"
+
+    def test_heading_strips_notion_color_brace(self) -> None:
+        """Les titres ``##`` ne conservent pas les blocs ``{color="…"}`` (markdown Notion)."""
+        text = 'Pad ' * 12 + '\n## Histoire {color="yellow"}\nCorps ici\n'
+        chunks = split_sections_general_text(text)
+        assert len(chunks) == 2
+        slug, title, body = chunks[1]
+        assert slug == "histoire"
+        assert title == "Histoire"
+        assert "Corps ici" in body
+        assert "color" not in title
+
+
+class TestNormalizeNotionEnhancedMarkdown:
+    """Titres callout ``<span>**…**</span>`` → ``##`` pour le découpeur."""
+
+    def test_span_bold_becomes_h2(self) -> None:
+        raw = (
+            "# Besoin de l'intrigue\n"
+            '<callout icon="/icons/book_green.svg" color="green_bg">\n'
+            '\t<span color="green">**Histoire de l\'espèce**</span>\n'
+            "\t\tLong paragraph about lore.\n"
+            "</callout>\n"
+        )
+        norm = normalize_notion_enhanced_markdown_for_section_split(raw)
+        chunks = split_sections_general_text(norm)
+        slugs = [c[0] for c in chunks]
+        # Le bloc « Besoin » peut être omis si son corps est vide avant le premier ``##``.
+        assert any("histoire" in s for s in slugs)
+        hist_slug = next(s for s in slugs if "histoire" in s)
+        by_slug = {c[0]: c[2] for c in chunks}
+        assert "Long paragraph about lore." in by_slug[hist_slug]
 
 
 class TestExtractGddFieldValue:

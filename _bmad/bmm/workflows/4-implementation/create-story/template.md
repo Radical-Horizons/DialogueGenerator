@@ -17,7 +17,12 @@ so that {{benefit}}.
 ## Tasks / Subtasks
 
 <!-- Each task = one independently testable behavior (SM territory: WHAT, not HOW).
-     Dev Notes contains WHERE/HOW context. Implementation details are the dev's job. -->
+     Dev Notes contains WHERE/HOW context. Implementation details are the dev's job.
+
+     Checkbox discipline (dev-story): flip ONE subtask line at a time — 🔴 [x] only after failing test run,
+     🟢 [x] only after minimal implementation passes tests, 🔵 [x] only after refactor criteria met.
+     Never check 🟢 or 🔵 before 🔴; never check parent Task until all three lines are [x].
+     Emoji (🔴🟢🔵) labels each phase inside the markdown checkbox line. -->
 
 - [ ] Task 1 : [Behavior description] (AC: #)
   - [ ] 🔴 Test échoue : [behavioral assertion — observable outcome, not implementation detail]
@@ -39,6 +44,7 @@ so that {{benefit}}.
 - What to reuse : existing components, actions, or endpoints (brief; key references only, not an exhaustive list)
 - Quality bar : what behaviors must be covered by tests (outcomes), not how to write them
 - Refactor bar (defaults) : dev-story REFACTOR QUALITY CRITERIA — e.g. max ~300 lines per source file touched in a task, ~60 lines per function, no non-trivial duplication, domain naming, single responsibility of exported units; override here if the story needs different numeric limits
+- Fichiers chauds : [fichiers pré-existants > 500 lignes qui seront touchés — indiquer la taille actuelle et la contrainte explicite, ex: "`api/routers/graph.py` (1653 L) — handler ≤ 30 lignes, toute logique dans le service". Laisser vide si aucun fichier chaud concerné.]
 - Conventions : naming, where similar code lives, constraints (e.g. persist via existing save)
 
 ### Project Structure Notes

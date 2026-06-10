@@ -3,6 +3,7 @@
  */
 import apiClient from './client'
 import { buildCostEstimateHeaders, type CostEstimateHeadersInput } from './costEstimateHeaders'
+import { API_TIMEOUTS } from '../constants'
 import type {
   LoadGraphRequest,
   LoadGraphResponse,
@@ -17,8 +18,21 @@ import type {
   NodePromptResponse,
   ValidateGraphRequest,
   ValidateGraphResponse,
+  ValidateSchemaRequest,
+  ValidateSchemaResponse,
+  SimulateFlowRequest,
+  SimulateFlowResponse,
+  ValidateLoreExplicitRequest,
+  ValidateLoreExplicitResponse,
+  EvaluateDialogueQualityRequest,
+  EvaluateDialogueQualityResponse,
   CalculateLayoutRequest,
   CalculateLayoutResponse,
+  DetectAiSlopRequest,
+  DetectAiSlopResponse,
+  DetectContextDroppingRequest,
+  DetectContextDroppingResponse,
+  ContextDroppingRules,
 } from '../types/graph'
 
 /**
@@ -27,7 +41,8 @@ import type {
 export async function loadGraph(request: LoadGraphRequest): Promise<LoadGraphResponse> {
   const response = await apiClient.post<LoadGraphResponse>(
     `/api/v1/unity-dialogues/graph/load`,
-    request
+    request,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }
@@ -38,7 +53,8 @@ export async function loadGraph(request: LoadGraphRequest): Promise<LoadGraphRes
 export async function saveGraph(request: SaveGraphRequest): Promise<SaveGraphResponse> {
   const response = await apiClient.post<SaveGraphResponse>(
     `/api/v1/unity-dialogues/graph/save`,
-    request
+    request,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }
@@ -49,7 +65,8 @@ export async function saveGraph(request: SaveGraphRequest): Promise<SaveGraphRes
 export async function saveGraphAndWrite(request: SaveGraphRequest): Promise<SaveGraphResponse> {
   const response = await apiClient.post<SaveGraphResponse>(
     `/api/v1/unity-dialogues/graph/save-and-write`,
-    request
+    request,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }
@@ -109,6 +126,80 @@ export async function validateGraph(
 }
 
 /**
+ * Contradictions lore explicites (FR38) — faits GDD vs texte nœuds.
+ */
+export async function validateLoreExplicit(
+  request: ValidateLoreExplicitRequest
+): Promise<ValidateLoreExplicitResponse> {
+  const response = await apiClient.post<ValidateLoreExplicitResponse>(
+    `/api/v1/unity-dialogues/graph/validate-lore-explicit`,
+    request
+  )
+  return response.data
+}
+
+/**
+ * Évalue la qualité narrative du graphe via juge LLM (FR42).
+ */
+export async function evaluateDialogueQuality(
+  request: EvaluateDialogueQualityRequest
+): Promise<EvaluateDialogueQualityResponse> {
+  const response = await apiClient.post<EvaluateDialogueQualityResponse>(
+    `/api/v1/unity-dialogues/graph/evaluate-dialogue-quality`,
+    request,
+    { timeout: 120000 }
+  )
+  return response.data
+}
+
+/**
+ * Détecte les motifs « AI slop » (GPT-isms, répétitions, génériques) — FR43.
+ */
+export async function detectAiSlop(request: DetectAiSlopRequest): Promise<DetectAiSlopResponse> {
+  const response = await apiClient.post<DetectAiSlopResponse>(
+    `/api/v1/unity-dialogues/graph/detect-ai-slop`,
+    request,
+    { timeout: 60000 }
+  )
+  return response.data
+}
+
+/**
+ * Détecte l'absence ou l'usage trop indirect du contexte GDD (FR44).
+ */
+export async function detectContextDropping(
+  request: DetectContextDroppingRequest
+): Promise<DetectContextDroppingResponse> {
+  const response = await apiClient.post<DetectContextDroppingResponse>(
+    `/api/v1/unity-dialogues/graph/detect-context-dropping`,
+    request,
+    { timeout: 60000 }
+  )
+  return response.data
+}
+
+/**
+ * Récupère les règles anti-context-dropping persistées (Story 4.10).
+ */
+export async function getContextDroppingRules(): Promise<ContextDroppingRules> {
+  const response = await apiClient.get<ContextDroppingRules>(
+    `/api/v1/validation/rules/context-dropping`
+  )
+  return response.data
+}
+
+/**
+ * Sauvegarde les règles anti-context-dropping (Story 4.10).
+ */
+export async function putContextDroppingRules(rules: ContextDroppingRules): Promise<ContextDroppingRules> {
+  const response = await apiClient.put<ContextDroppingRules>(
+    `/api/v1/validation/rules/context-dropping`,
+    rules
+  )
+  return response.data
+}
+
+/**
  * Calcule un layout automatique pour le graphe.
  */
 export async function calculateLayout(
@@ -117,6 +208,30 @@ export async function calculateLayout(
   const response = await apiClient.post<CalculateLayoutResponse>(
     `/api/v1/unity-dialogues/graph/calculate-layout`,
     request
+  )
+  return response.data
+}
+
+/**
+ * Valide la conformité du graphe courant contre le schéma JSON Unity (FR48).
+ */
+export async function validateSchema(request: ValidateSchemaRequest): Promise<ValidateSchemaResponse> {
+  const response = await apiClient.post<ValidateSchemaResponse>(
+    `/api/v1/unity-dialogues/graph/validate-schema`,
+    request,
+    { timeout: 30000 }
+  )
+  return response.data
+}
+
+/**
+ * Simule le flux de dialogue pour détecter dead ends + cul-de-sacs (FR46).
+ */
+export async function simulateFlow(request: SimulateFlowRequest): Promise<SimulateFlowResponse> {
+  const response = await apiClient.post<SimulateFlowResponse>(
+    `/api/v1/unity-dialogues/graph/simulate-flow`,
+    request,
+    { timeout: 30000 }
   )
   return response.data
 }

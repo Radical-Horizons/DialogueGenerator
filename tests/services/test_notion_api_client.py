@@ -188,7 +188,41 @@ class TestNotionAPIClient:
             )
             called_url = mock_client.post.call_args[0][0]
             assert "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" in called_url
-    
+
+    @pytest.mark.asyncio
+    async def test_query_database_explicit_data_source_when_get_returns_empty(
+        self, notion_client
+    ) -> None:
+        """GET ``data_sources`` vide : les UUID explicites sont quand même interrogés."""
+        database_id = "dddddddd-dddd-dddd-dddd-dddddddddddd"
+        mock_get_response = MagicMock()
+        mock_get_response.json.return_value = {
+            "object": "database",
+            "id": database_id,
+            "data_sources": [],
+        }
+        mock_get_response.raise_for_status = MagicMock()
+        mock_post_response = MagicMock()
+        mock_post_response.json.return_value = {
+            "results": [{"id": "page-from-ds"}],
+            "has_more": False,
+        }
+        mock_post_response.raise_for_status = MagicMock()
+        ds_id = "cccccccc-cccc-cccc-cccc-cccccccccccc"
+        with patch("httpx.AsyncClient") as mock_client_class:
+            mock_client = AsyncMock()
+            mock_client.get = AsyncMock(return_value=mock_get_response)
+            mock_client.post = AsyncMock(return_value=mock_post_response)
+            mock_client_class.return_value.__aenter__.return_value = mock_client
+            result = await notion_client.query_database(
+                database_id,
+                data_source_ids=[ds_id],
+            )
+            assert len(result) == 1
+            assert result[0]["id"] == "page-from-ds"
+            called_url = mock_client.post.call_args[0][0]
+            assert f"data_sources/{ds_id}/query" in called_url
+
     @pytest.mark.asyncio
     async def test_query_database_http_error(self, notion_client):
         """Test de requête de base de données avec erreur HTTP (fallback legacy)."""
@@ -263,6 +297,50 @@ class TestNotionAPIClient:
                 await notion_client.get_page(page_id)
     
     @pytest.mark.asyncio
+    async def test_get_page_content_prefers_page_markdown_endpoint(self, notion_client):
+        """``GET /pages/{id}/markdown`` (API 2026-03-11) évite l’arbre blocs quand il répond."""
+        with patch.object(
+            notion_client, "_try_get_page_markdown", new_callable=AsyncMock
+        ) as mock_md:
+            mock_md.return_value = "## Section\n\nCorps markdown enrichi."
+            with patch.object(
+                notion_client, "_get_all_blocks", new_callable=AsyncMock
+            ) as mock_blocks:
+                out = await notion_client.get_page_content("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+        mock_md.assert_called_once()
+        mock_blocks.assert_not_called()
+        assert "Corps markdown enrichi." in out
+
+    @pytest.mark.asyncio
+    async def test_get_page_content_falls_back_to_blocks_when_markdown_none(
+        self, notion_client
+    ):
+        with patch.object(
+            notion_client, "_try_get_page_markdown", new_callable=AsyncMock
+        ) as mock_md:
+            mock_md.return_value = None
+            with patch.object(
+                notion_client, "_get_all_blocks", new_callable=AsyncMock
+            ) as mock_blocks:
+                mock_blocks.return_value = [
+                    {
+                        "type": "paragraph",
+                        "paragraph": {"rich_text": [{"plain_text": "fallback"}]},
+                    }
+                ]
+                with patch.object(
+                    notion_client,
+                    "_extract_block_text_recursive",
+                    new_callable=AsyncMock,
+                ) as mock_ex:
+                    mock_ex.return_value = "fallback"
+                    out = await notion_client.get_page_content(
+                        "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+                    )
+        mock_blocks.assert_called_once()
+        assert out == "fallback"
+
+    @pytest.mark.asyncio
     async def test_get_page_content_success_if_exists(self, notion_client):
         """Test de récupération du contenu d'une page avec succès si la méthode existe."""
         if not hasattr(notion_client, "get_page_content"):
@@ -270,22 +348,140 @@ class TestNotionAPIClient:
         
         page_id = "test_page_id"
         
-        # Mocker _get_all_blocks pour éviter les appels HTTP réels
-        with patch.object(notion_client, "_get_all_blocks", new_callable=AsyncMock) as mock_get_blocks:
-            mock_get_blocks.return_value = [
-                {
-                    "type": "paragraph",
-                    "paragraph": {
-                        "rich_text": [{"plain_text": "Test content"}]
+        # Mocker _try_get_page_markdown (sinon appel réel Notion avec clé de test invalide)
+        with patch.object(
+            notion_client, "_try_get_page_markdown", new_callable=AsyncMock
+        ) as mock_md:
+            mock_md.return_value = None
+            # Mocker _get_all_blocks pour éviter les appels HTTP réels
+            with patch.object(
+                notion_client, "_get_all_blocks", new_callable=AsyncMock
+            ) as mock_get_blocks:
+                mock_get_blocks.return_value = [
+                    {
+                        "type": "paragraph",
+                        "paragraph": {
+                            "rich_text": [{"plain_text": "Test content"}]
+                        },
                     }
-                }
-            ]
-            
-            # Mocker _extract_block_text_recursive
-            with patch.object(notion_client, "_extract_block_text_recursive", new_callable=AsyncMock) as mock_extract:
-                mock_extract.return_value = "Test content"
-                
-                result = await notion_client.get_page_content(page_id)
+                ]
+
+                # Mocker _extract_block_text_recursive
+                with patch.object(
+                    notion_client,
+                    "_extract_block_text_recursive",
+                    new_callable=AsyncMock,
+                ) as mock_extract:
+                    mock_extract.return_value = "Test content"
+
+                    result = await notion_client.get_page_content(page_id)
                 
                 assert isinstance(result, str)
                 assert len(result) >= 0
+
+    @pytest.mark.asyncio
+    async def test_extract_block_text_table_row_cells(self, notion_client):
+        """Les cellules ``table_row.cells`` sont sérialisées (pas de ``rich_text`` racine)."""
+        block = {
+            "type": "table_row",
+            "table_row": {
+                "cells": [
+                    [{"plain_text": "A1", "type": "text"}],
+                    [{"plain_text": "B1", "type": "text"}],
+                ]
+            },
+        }
+        out = await notion_client._extract_block_text_recursive(block)
+        assert out == "A1 | B1"
+
+    @pytest.mark.asyncio
+    async def test_extract_callout_body_inside_column_list(self, notion_client):
+        """Callout + column_list : le corps vit dans les colonnes sans ``rich_text`` intermédiaire."""
+        blocks_by_id = {
+            "page-root": [
+                {
+                    "id": "co1",
+                    "type": "callout",
+                    "has_children": True,
+                    "callout": {
+                        "rich_text": [
+                            {
+                                "plain_text": "Histoire",
+                                "annotations": {"bold": True, "color": "green"},
+                            }
+                        ]
+                    },
+                }
+            ],
+            "co1": [
+                {
+                    "id": "cl1",
+                    "type": "column_list",
+                    "has_children": True,
+                    "column_list": {},
+                }
+            ],
+            "cl1": [
+                {
+                    "id": "cleft",
+                    "type": "column",
+                    "has_children": True,
+                    "column": {},
+                },
+                {
+                    "id": "cright",
+                    "type": "column",
+                    "has_children": True,
+                    "column": {},
+                },
+            ],
+            "cleft": [
+                {
+                    "type": "paragraph",
+                    "paragraph": {
+                        "rich_text": [{"plain_text": "Corps colonne gauche."}]
+                    },
+                }
+            ],
+            "cright": [
+                {
+                    "type": "paragraph",
+                    "paragraph": {
+                        "rich_text": [{"plain_text": "Corps colonne droite."}]
+                    },
+                }
+            ],
+        }
+
+        async def fake_get_all_blocks(block_id: str, *args, **kwargs):
+            return list(blocks_by_id.get(block_id, []))
+
+        with patch.object(
+            notion_client, "_get_all_blocks", new_callable=AsyncMock
+        ) as mock_gb:
+            mock_gb.side_effect = fake_get_all_blocks
+            root = blocks_by_id["page-root"][0]
+            out = await notion_client._extract_block_text_recursive(root)
+        assert "## Histoire" in (out or "")
+        assert "Corps colonne gauche." in (out or "")
+        assert "Corps colonne droite." in (out or "")
+
+    @pytest.mark.asyncio
+    async def test_extract_child_page_embeds_nested_page(self, notion_client):
+        """Bloc ``child_page`` : récupère le markdown de la sous-page (ID = id du bloc)."""
+        block = {
+            "id": "subpage-uuid",
+            "type": "child_page",
+            "child_page": {"title": "Détail"},
+        }
+        with patch.object(
+            notion_client,
+            "get_page_content",
+            new_callable=AsyncMock,
+        ) as mock_gpc:
+            mock_gpc.return_value = "Ligne interne."
+            out = await notion_client._extract_block_text_recursive(block)
+        mock_gpc.assert_called_once_with("subpage-uuid", _embed_depth=1)
+        assert out is not None
+        assert "## Détail" in out
+        assert "Ligne interne." in out

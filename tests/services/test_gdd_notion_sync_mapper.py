@@ -10,6 +10,7 @@ from services.gdd_notion_sync_mapper import (
     notion_page_to_gdd_record,
     notion_page_to_gdd_record_merge_body_and_properties,
     properties_to_general_text,
+    rich_text_properties_as_markdown_sections,
 )
 
 
@@ -62,8 +63,21 @@ def test_notion_page_to_gdd_record_body_only_split_sections() -> None:
     assert "Glossaire" not in str(rec.get("sections"))
 
 
-def test_notion_page_to_gdd_record_merge_columns_only_in_values() -> None:
-    """Colonnes uniquement dans ``values``, jamais dans ``sections``."""
+def test_rich_text_properties_as_markdown_sections() -> None:
+    md = rich_text_properties_as_markdown_sections(
+        {
+            "Z": {"type": "rich_text", "rich_text": [{"plain_text": "last", "type": "text"}]},
+            "A": {"type": "rich_text", "rich_text": [{"plain_text": "first", "type": "text"}]},
+        }
+    )
+    assert md.startswith("## A")
+    assert "first" in md
+    assert "## Z" in md
+    assert "last" in md
+
+
+def test_notion_page_to_gdd_record_merge_rich_text_columns_into_sections() -> None:
+    """Colonnes ``rich_text`` aussi dans ``sections`` (titres ``##``) en plus de ``values``."""
     page = {
         "properties": {
             "Terme": {
@@ -79,8 +93,8 @@ def test_notion_page_to_gdd_record_merge_columns_only_in_values() -> None:
     rec = notion_page_to_gdd_record_merge_body_and_properties(page, "")
     assert rec["Nom"] == "Alteir"
     assert rec["values"] == {"Glossaire": "Monde"}
-    assert rec["sections"] == {}
-    assert "Glossaire" not in str(rec.get("sections"))
+    assert "glossaire" in rec["sections"]
+    assert "Monde" in rec["sections"]["glossaire"]
 
 
 def test_notion_page_to_gdd_record_merge_body_split_no_prop_blob() -> None:

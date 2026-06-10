@@ -20,6 +20,11 @@ class FlagDefinition(BaseModel):
         defaultValueParsed: Valeur par défaut parsée selon le type (optionnel, calculé côté backend).
         tags: Liste de tags pour la recherche.
         isFavorite: Si le flag est marqué comme favori.
+        semanticType: Type fonctionnel FR89 (bool | compteur | enum | unsupported).
+        scope: Portée enrichie (conversationnel | mécanique).
+        minValue: Borne basse catalogue pour compteur (optionnel).
+        maxValue: Borne haute catalogue pour compteur (optionnel).
+        enumValues: Valeurs enum ordonnées si applicable.
     """
     id: str = Field(..., description="Identifiant unique du flag")
     type: Literal["bool", "int", "float", "string"] = Field(..., description="Type de valeur du flag")
@@ -30,6 +35,11 @@ class FlagDefinition(BaseModel):
     defaultValueParsed: Optional[FlagValue] = Field(None, description="Valeur par défaut parsée selon le type")
     tags: List[str] = Field(default_factory=list, description="Liste de tags")
     isFavorite: bool = Field(default=False, description="Si le flag est marqué comme favori")
+    semanticType: Optional[str] = Field(None, description="Type FR89 dérivé du CSV")
+    scope: Optional[str] = Field(None, description="Portée conversationnel / mécanique")
+    minValue: Optional[FlagValue] = Field(None, description="Min compteur catalogue")
+    maxValue: Optional[FlagValue] = Field(None, description="Max compteur catalogue")
+    enumValues: List[str] = Field(default_factory=list, description="Valeurs enum ordonnées")
 
 
 class InGameFlag(BaseModel):

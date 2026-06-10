@@ -3,6 +3,9 @@
  */
 import { z } from 'zod'
 
+import { choiceEffectsListSchema } from './choiceEffectsSchema'
+import { visibilityConditionsBlockSchema } from './visibilityConditionsSchema'
+
 /**
  * Schéma pour un trait requirement.
  */
@@ -19,6 +22,8 @@ export const choiceSchema = z.object({
   text: z.string().min(1, 'Le texte du choix est requis'),
   targetNode: z.string().optional(),
   condition: z.string().optional(),
+  visibilityConditions: visibilityConditionsBlockSchema.optional(),
+  choiceEffects: choiceEffectsListSchema.optional(),
   traitRequirements: z.array(traitRequirementSchema).optional(),
   test: z.string().optional(),
   testCriticalFailureNode: z.string().optional(),
@@ -50,6 +55,7 @@ export const dialogueNodeDataSchema = z.object({
   title: z.string().optional(),
   speaker: z.string().optional(),
   line: z.string().optional(),
+  visibilityConditions: visibilityConditionsBlockSchema.optional(),
   choices: z.array(choiceSchema).optional(),
   nextNode: z.string().optional(),
   lastGenerationInstructions: z.string().optional(),

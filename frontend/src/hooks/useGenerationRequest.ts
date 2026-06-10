@@ -47,7 +47,7 @@ export interface UseGenerationRequestReturn {
  */
 export function useGenerationRequest(): UseGenerationRequestReturn {
   const { selections } = useContextStore()
-  const { sceneSelection, dialogueStructure, systemPromptOverride } = useGenerationStore()
+  const { sceneSelection, dialogueStructure, systemPromptOverride, gameRules } = useGenerationStore()
   const { authorProfile } = useAuthorProfile()
   const { vocabularyConfig } = useVocabularyStore()
   const { includeNarrativeGuides } = useNarrativeGuidesStore()
@@ -161,6 +161,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
       max_completion_tokens: safeMaxCompletionTokens ?? undefined,
       system_prompt_override: systemPromptOverride || undefined,
       author_profile: authorProfile || undefined,
+      game_rules: gameRules || undefined,
       llm_model_identifier: modelToUse,
       reasoning_effort: params.reasoningEffort ?? undefined,
       top_p: params.topP ?? undefined,
@@ -176,7 +177,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
     }
 
     return request
-  }, [buildContextSelections, validateModel, sceneSelection, systemPromptOverride, authorProfile, vocabularyConfig, includeNarrativeGuides])
+  }, [buildContextSelections, validateModel, sceneSelection, systemPromptOverride, gameRules, authorProfile, vocabularyConfig, includeNarrativeGuides])
 
   return {
     buildContextSelections,

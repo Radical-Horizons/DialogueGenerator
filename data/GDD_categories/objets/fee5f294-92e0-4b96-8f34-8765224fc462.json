@@ -1,0 +1,53 @@
+{
+  "Nom": "Console de lecture du Paradigme",
+  "values": {
+    "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6",
+    "Créé par (personne)": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+    "Date de création": "2026-04-21T17:59:00.000Z",
+    "Dernière modification": "2026-05-26T19:10:00.000Z",
+    "Lieux de présence": "1b36e4d2-1b45-80ce-9d1b-f71e60cb8e53",
+    "Maps": "4c18b2c7-d3e9-4a09-b21a-fc936998d2bf",
+    "Poids": "Lourd",
+    "Rareté": "Unique",
+    "Résumé IA": "Console monumentale du Paradigme Ésothrope installée à l'est du Transept Mnésique. Elle affiche en continu les lectures physiologiques et cognitives attribuées aux treize Sodoirs de la rangée ouest, dont la ligne 3 correspondant au Vivant Fixé. Le phénomène n'est pas secret : ce que la Dragovitsa contrôle, ce n'est pas l'existence du signal, mais le protocole autorisé pour l'interpréter.",
+    "Stackable": "non",
+    "Taille": "Grand",
+    "Type": "Élément de décor",
+    "État": "Pas commencé"
+  },
+  "sections": {
+    "re_sume": "*Nom de l'objet + fonction principale + contexte d'usage. 2 à 4 lignes maximum. Dire immédiatement ce que l'objet apporte à la zone ou au jeu.*",
+    "apparence___nature": "- **Description visuelle :** *Forme, matériaux, état, singularité lisible au premier regard.*\n\t- **Type exact :** *Élément de décor / sous-type éventuel.*\n\t- **Échelle :** *Petit / moyen / grand ; fixe ou déplaçable.*",
+    "origine___ancrage": "- **Origine :** *Naturelle, artisanale, rituelle, industrielle...*\n\t- **Créé par / communauté liée :** *Qui l'a fabriqué, placé ou reconnu ?*\n\t- **Lieu(x) de présence :** *Zone(s) ou sous-zone(s) concernée(s).*",
+    "interaction_principale": "- **Niveau d'interaction :** *N0 ambiance / N1 examen / N2 test / N3 déclencheur* — cf. <mention-page url=\"https://www.notion.so/ed986ac336004d29b4fb8fac7d61857c\"/> pour la définition complète de chaque niveau (volumes, coûts, structure de nœuds).\n\t- **Action joueuse :** *Examiner, activer, sonder, déplacer...*\n\t- **Effet produit :** *Texte, flag, test, objet, ouverture, info, quête...*",
+    "conditions___limites": "- **Signal de discoverabilité :** *Reflet, pulsation, son, commentaire d'hôte...*\n\t- **Compétence / coût :** *Null si aucun ; sinon test et Effort lié.*\n\t- **État persistant :** *Intact, activé, vidé, détruit, déplacé...*",
+    "inventaires_pnj": "*Créer une ligne si un PNJ possède, équipe, stocke ou peut donner cet objet. Remplir surtout Personnage, Type d'accès, Quantité et Contexte narratif.*\n\t<database url=\"https://www.notion.so/3496e4d21b4581cc8f28e3227e09a58f\" inline=\"true\">Données liées</database>",
+    "flags_lie_s": "*Créer une ligne si l'objet a un état suivi par le jeu. Remplir surtout Identifiant, Type de valeur, Portée = **`Objet`** et Objets liés.*\n\t<database url=\"https://www.notion.so/3496e4d21b45815d9085ce0cf01e95b7\" inline=\"true\">Flags liés</database>",
+    "re_sume_2": "Console monumentale d'instruments du Paradigme Ésothrope, installée à l'est du Transept Mnésique. Elle affiche en continu les lectures physiologiques et cognitives attribuées aux treize Sodoirs de la rangée ouest. La ligne 3, correspondant au Vivant Fixé, fluctue depuis vingt Nuées sous le regard de tous. Le phénomène n'est pas caché ; ce que la Dragovitsa monopolise, c'est le droit d'en produire l'interprétation autorisée. OI N1 en lecture de surface, OI N2 avec Technique pour comprendre ce que le protocole montre réellement.",
+    "apparence___nature_2": "- **Description visuelle :** Armature en alliage osseux-métallique fixe, haute de deux corps, composée d'une rangee de capteurs organiques (terminaisons nerveuses pétrifiées reliées aux Sodoirs par des conducteurs sous le sol) et d'un afficheur plan en lame de Gedroth translucide. Les treize lignes de lecture sont gravees en creux et s'illuminent en ambre selon l'intensité des signaux. La ligne 3 pulse d'une lueur légèrement plus lente et irrégulière que les autres.\n\t- **Type exact :** Elément de decor interactif ; instrument de mesure rituel.\n\t- **Échelle :** Grand, fixe, non déplaçable.",
+    "origine___ancrage_2": "- **Origine :** Artisanale-rituelle. Conçue par Kha'Vareth lors de son accession au rang de Parfait, en même temps que le premier Sodoir officiel. Les conducteurs sous le sol du Transept font partie de l'architecture osseuse originale du couloir.\n\t- **Créé par :** Kha'Vareth Ardakh.\n\t- **Lieu de présence :** Transept Mnésique (Nef Centrale, Léviathan pétrifié) — extremité est du couloir, face au sas de contrôle.",
+    "interaction_principale_2": "- **Niveau d'interaction :** N1 (examen libre) / N2 (test Technique moyen).\n\t- **Action joueuse :** Examiner l'afficheur.\n\t- **Effet N1 :** Lecture de surface. Uresaïr constate que treize lignes s'affichent, la plupart stables. La ligne 3 bat différemment et tout, dans la disposition de la console, indique que cette différence est connue, suivie et ritualisée.\n\t- **Effet N2 (Technique réussi) :** Lecture complète. La joueuse comprend que la ligne 3 correspond à une persistance vivante reconnue, et que le protocole n'occulte pas le phénomène : il encadre la manière correcte d'en parler. La console ne révèle donc pas un secret ; elle révèle un monopole d'interprétation.\n\t- **Condition supplémentaire :** Si Kha'Vareth est présent sur la map et que le test N2 réussit, il réagit à l'examen d'Uresäir comme à quelqu'un qui lit au-delà de la liturgie instrumentale, non comme à quelqu'un découvrant un interdit.",
+    "conditions___limites_2": "- **Signal de discoverabilité :** Lueur ambrée visible dès l'entrée dans le Transept, seule source de lumière colorée autre que les Champignosquelettes. Attire naturellement l'oeil.\n\t- **Compétence / coût :** N1 gratuit. N2 : test Technique moyen, pas de coût en Effort.\n\t- **État persistant :** Toujours actif. Non destructible, non modifiable par la joueuse.",
+    "inventaires_pnj_2": "*Kha'Vareth est le concepteur et l'unique opérateur. Il n'est pas propriétaire au sens de l'inventaire ; la console est un élément fixe du Transept.*\n\t<database url=\"https://www.notion.so/d5ee27973a464866894f82518c8c0719\" inline=\"true\" data-source-url=\"collection://67330c50-a35e-4c76-a01d-a788feb3610b\"></database>",
+    "flags_lie_s_2": "- La console ne suit pas un état secret mais un état **canonisé** : elle matérialise la surveillance continue du Vivant Fixé et des autres Sodoirs par le Paradigme et la Dragovitsa.\n\t<database url=\"https://www.notion.so/f10ec94e642a4846ad70e96383af8938\" inline=\"true\" data-source-url=\"collection://33399725-e3e1-4c98-8060-d92a89c0efe0\"></database>",
+    "re_sume__ia": "Console monumentale du Paradigme Ésothrope installée à l'est du Transept Mnésique. Elle affiche en continu les lectures physiologiques et cognitives attribuées aux treize Sodoirs de la rangée ouest, dont la ligne 3 correspondant au Vivant Fixé. Le phénomène n'est pas secret : ce que la Dragovitsa contrôle, ce n'est pas l'existence du signal, mais le protocole autorisé pour l'interpréter."
+  },
+  "section_titles": {
+    "re_sume": "Résumé",
+    "apparence___nature": "Apparence & nature",
+    "origine___ancrage": "Origine & ancrage",
+    "interaction_principale": "Interaction principale",
+    "conditions___limites": "Conditions & limites",
+    "inventaires_pnj": "Inventaires PNJ",
+    "flags_lie_s": "Flags liés",
+    "re_sume_2": "Résumé",
+    "apparence___nature_2": "Apparence & nature",
+    "origine___ancrage_2": "Origine & ancrage",
+    "interaction_principale_2": "Interaction principale",
+    "conditions___limites_2": "Conditions & limites",
+    "inventaires_pnj_2": "Inventaires PNJ",
+    "flags_lie_s_2": "Flags liés",
+    "re_sume__ia": "Résumé IA"
+  },
+  "notion_page_id": "fee5f294-92e0-4b96-8f34-8765224fc462"
+}

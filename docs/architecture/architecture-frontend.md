@@ -260,11 +260,25 @@ Components are organized by feature domain:
 - **ESLint**: Code linting
 - **Prettier**: Code formatting (if configured)
 
+## Responsive UI and PWA (Epic 17)
+
+The shell adapts below **1024px** viewport width (overlay drawers instead of fixed side columns) and individual panels/toolbars adapt to **container width** via `useNarrowInlineSize` and tokens in `frontend/src/theme/responsiveChrome.ts`.
+
+**Full reference**: [Responsive UI and PWA](./responsive-ui.md) — thresholds, `Dashboard` narrow mode, graph toolbar tri-state, PWA manifest/workbox, tests, and pitfalls.
+
+**Key hooks:**
+
+| Hook | Role |
+|------|------|
+| `useViewportMode()` | `mobile` (&lt;768px), `tablet` (&lt;1024px), `desktop` |
+| `useNarrowInlineSize(thresholdPx)` | Container-width narrow detection (`ResizeObserver`) |
+| `useMobileShellKeyboardComfort` | Keyboard inset on narrow shell |
+
+**PWA** (story 17.5): installable via `vite-plugin-pwa`; manifest at `frontend/public/manifest.webmanifest`; service worker disabled in dev; `/api` excluded from Workbox cache. Verify with `npm run test:e2e:pwa`.
+
 ## Future Considerations
 
 ### Potential Improvements
 
 - **Server Components**: If migrating to React Server Components
-- **Streaming**: Server-sent events for progress updates
-- **Offline Support**: Service workers for offline functionality
-- **PWA**: Progressive Web App features
+- **Offline-first PWA**: Current PWA targets installability only; offline asset/API caching is intentionally not enabled

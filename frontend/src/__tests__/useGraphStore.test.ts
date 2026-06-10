@@ -1173,4 +1173,44 @@ describe('useGraphStore - Pending save state', () => {
       expect(choice0?.testCriticalSuccessNode).toBe('NODE_CS')
     })
   })
+
+  describe('saveDialogue FR37 post-validation', () => {
+    it('appelle validateGraph après sauvegarde legacy réussie', async () => {
+      vi.mocked(graphAPI.saveGraphAndWrite).mockResolvedValue({
+        success: true,
+        filename: 'd.json',
+        json_content: '{}',
+        last_seq: 1,
+        ack_seq: 1,
+      })
+      vi.mocked(graphAPI.validateGraph).mockResolvedValue({
+        valid: true,
+        errors: [],
+        warnings: [],
+      })
+      useGraphStore.setState({
+        document: null,
+        documentId: 'doc',
+        dialogueMetadata: {
+          title: 't',
+          filename: 'doc.json',
+          node_count: 1,
+          edge_count: 0,
+        },
+        nodes: [
+          {
+            id: 'START',
+            type: 'dialogueNode',
+            position: { x: 0, y: 0 },
+            data: { id: 'START', displayName: 'S', line: 'hi' },
+          },
+        ],
+        edges: [],
+        clientSeq: 1,
+        isSaving: false,
+      })
+      await useGraphStore.getState().saveDialogue()
+      expect(graphAPI.validateGraph).toHaveBeenCalled()
+    })
+  })
 })

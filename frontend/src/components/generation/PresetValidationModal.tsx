@@ -10,6 +10,9 @@
 import React from 'react';
 import type { PresetValidationResult } from '../../types/preset';
 import { theme } from '../../theme';
+import { remSize } from '../../theme/uiTypography';
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize';
+import { modalTypography } from '../../theme/responsiveChrome';
 
 export interface PresetValidationModalProps {
   /** Contrôle l'affichage de la modal */
@@ -35,6 +38,8 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520);
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable;
   if (!isOpen) return null;
 
   const { valid, warnings, obsoleteRefs } = validationResult;
@@ -59,14 +64,15 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: theme.background.panel,
-          padding: '2rem',
+          padding: isNarrow ? '0.9rem' : '2rem',
           borderRadius: '8px',
-          minWidth: '400px',
+          minWidth: isNarrow ? 'unset' : '400px',
           maxWidth: '600px',
           maxHeight: '80vh',
           overflowY: 'auto',
           border: `1px solid ${theme.border.primary}`,
         }}
+        ref={panelRef}
       >
         <h3 style={{ marginTop: 0, color: theme.text.primary }}>Validation du preset</h3>
 
@@ -82,10 +88,10 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '1.5rem' }}>✅</span>
+              <span style={{ fontSize: remSize('title') }}>✅</span>
               <strong style={{ color: theme.state.success.color }}>Preset valide</strong>
             </div>
-            <div style={{ fontSize: '0.875rem', color: theme.text.secondary }}>
+            <div style={{ fontSize: `${typo.bodyFontRem}rem`, color: theme.text.secondary }}>
               Toutes les références sont valides et existent dans le GDD actuel.
             </div>
           </div>
@@ -103,10 +109,10 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+              <span style={{ fontSize: remSize('title') }}>⚠️</span>
               <strong style={{ color: theme.state.warning.color }}>Preset contient des références obsolètes</strong>
             </div>
-            <div style={{ fontSize: '0.875rem', color: theme.text.secondary, marginBottom: '1rem' }}>
+            <div style={{ fontSize: `${typo.bodyFontRem}rem`, color: theme.text.secondary, marginBottom: '1rem' }}>
               {obsoleteRefs.length} référence(s) obsolète(s) détectée(s). Le preset peut être chargé, mais
               certaines entités peuvent manquer.
             </div>
@@ -126,7 +132,7 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
                   <div
                     key={index}
                     style={{
-                      fontSize: '0.875rem',
+                      fontSize: `${typo.bodyFontRem}rem`,
                       color: theme.text.secondary,
                       marginBottom: index < warnings.length - 1 ? '0.5rem' : 0,
                       display: 'flex',
@@ -154,6 +160,7 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
               borderRadius: '4px',
               color: theme.text.primary,
               cursor: 'pointer',
+              fontSize: `${typo.bodyFontRem}rem`,
             }}
           >
             Annuler
@@ -167,6 +174,7 @@ export const PresetValidationModal: React.FC<PresetValidationModalProps> = ({
               borderRadius: '4px',
               color: 'white',
               cursor: 'pointer',
+              fontSize: `${typo.bodyFontRem}rem`,
             }}
           >
             {valid ? 'Charger' : 'Charger quand même'}

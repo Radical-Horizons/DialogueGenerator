@@ -19,6 +19,7 @@ export interface Toast {
   type: ToastType
   duration?: number
   actions?: ToastAction[]
+  count: number
 }
 
 interface ToastProps {
@@ -98,6 +99,7 @@ function ToastComponent({ toast, onRemove }: ToastProps) {
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: toast.type === 'error' ? 'bold' : 'normal', marginBottom: toast.type === 'error' ? '0.25rem' : 0 }}>
               {toast.type === 'error' ? 'Erreur' : toast.type === 'warning' ? 'Avertissement' : ''}
+              {toast.count > 1 ? ` (x${toast.count})` : ''}
             </div>
             <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{toast.message}</span>
           </div>
@@ -171,12 +173,26 @@ class ToastManager {
   }
 
   show(message: string, type: ToastType = 'info', duration?: number, actions?: ToastAction[]) {
+    if (!actions || actions.length === 0) {
+      const existingToast = this.toasts.find((toast) => toast.message === message && toast.type === type)
+      if (existingToast) {
+        this.toasts = this.toasts.map((toast) =>
+          toast.id === existingToast.id
+            ? { ...toast, count: toast.count + 1, duration }
+            : toast
+        )
+        this.notify()
+        return existingToast.id
+      }
+    }
+
     const toast: Toast = {
       id: `toast-${toastIdCounter++}`,
       message,
       type,
       duration,
       actions,
+      count: 1,
     }
     this.toasts.push(toast)
     this.notify()

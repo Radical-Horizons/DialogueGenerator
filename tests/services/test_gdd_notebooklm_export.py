@@ -9,6 +9,7 @@ from pathlib import Path
 
 from services.gdd_notebooklm_export import (
     build_gdd_notebooklm_zip_bytes,
+    build_notebooklm_markdown_parts,
     eligible_sync_category_files,
 )
 
@@ -65,13 +66,13 @@ def test_build_zip_contains_markdown_and_vision(tmp_path: Path) -> None:
         gdd_root=gdd,
         project_root=tmp_path,
         settings=settings,
-        max_files=9,
+        max_files=64,
     )
     zf = zipfile.ZipFile(BytesIO(raw))
     names = zf.namelist()
     assert any(n.endswith("00-README.md") for n in names)
     md_names = [n for n in names if n.endswith(".md")]
-    assert len(md_names) <= 9
+    assert 1 <= len(md_names) <= 128
     # Pitch page → bucket production (fallback)
     prod = next(n for n in names if n.endswith("08-production-et-autres.md"))
     body = zf.read(prod).decode("utf-8")
@@ -80,3 +81,44 @@ def test_build_zip_contains_markdown_and_vision(tmp_path: Path) -> None:
     uni = next(n for n in names if n.endswith("01-univers-narratif.md"))
     uni_body = zf.read(uni).decode("utf-8")
     assert '"ok": true' in uni_body
+
+
+def test_oversized_bucket_emits_part_files_without_truncation(tmp_path: Path) -> None:
+    """Catégorie monolithique (``Pitch.json``) : pas de dossier shard ``personnages/``."""
+    gdd = tmp_path / "GDD_categories"
+    gdd.mkdir(parents=True)
+    pad = "x" * 25_000
+    records = [{"Nom": f"R{i}", "sections": {"a": pad}} for i in range(30)]
+    (gdd / "Pitch.json").write_text(
+        json.dumps(records, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    settings = {
+        "sources": [
+            {
+                "kind": "page",
+                "category_file": "Pitch.json",
+                "notion_id": _nid(),
+            }
+        ],
+        "included_categories": [],
+    }
+    parts = build_notebooklm_markdown_parts(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=128,
+        max_chars_per_part=80_000,
+    )
+    names = [n for n, _ in parts]
+    assert any(n.startswith("08-production-et-autres-part") for n in names), names
+    assert all("Export tronqué" not in t for _, t in parts)
+    raw = build_gdd_notebooklm_zip_bytes(
+        gdd_root=gdd,
+        project_root=tmp_path,
+        settings=settings,
+        max_files=128,
+    )
+    zf = zipfile.ZipFile(BytesIO(raw))
+    md_all = "".join(zf.read(n).decode("utf-8") for n in zf.namelist() if n.endswith(".md"))
+    assert "Export tronqué" not in md_all

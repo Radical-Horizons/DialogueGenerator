@@ -4,6 +4,7 @@
  */
 import type { Node, Edge } from 'reactflow'
 import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
+import type { DialogueFlagBinding } from '../../types/dialogueFlags'
 
 /** Story 2.14 FR35: snapshot du graphe pour undo/redo (incl. SoT document + layout). */
 export interface GraphSnapshot {
@@ -47,6 +48,10 @@ export interface GraphState {
   isLoading: boolean
   isSaving: boolean
   validationErrors: ValidationErrorDetail[]
+  /** Bandeau contradictions explicites (champ API `summary_explicit_only`, FR39 AC #5). */
+  loreExplicitValidationSummary: string | null
+  /** True pendant l’appel validate-lore-explicit */
+  loreExplicitValidationLoading: boolean
   highlightedNodeIds: string[]
   highlightedCycleNodes: string[]
   intentionalCycles: string[]
@@ -68,6 +73,12 @@ export interface GraphState {
   layout: Record<string, unknown> | null
   documentRevision: number | null
   layoutRevision: number | null
+
+  /** Story 9.1 — liaisons catalogue ↔ valeurs initiales persistées dans le document. */
+  dialogueFlagBindings: DialogueFlagBinding[]
+  setDialogueFlagBindings: (bindings: DialogueFlagBinding[]) => void
+  upsertDialogueFlagBinding: (binding: DialogueFlagBinding) => void
+  removeDialogueFlagBinding: (flagId: string) => void
 
   // Modale confirmation suppression nœud (Supr.)
   showDeleteNodeConfirm: boolean
@@ -108,6 +119,8 @@ export interface GraphState {
   createEmptyNode: (position?: { x: number; y: number }) => Node
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
   updateNode: (nodeId: string, updates: Partial<Node>, skipMarkDirty?: boolean) => void
+  /** Aligner `data.id` sur l'id React Flow (correctif validation missing_stable_id / data.id). */
+  syncNodeDocumentId: (nodeId: string) => void
   /** @param skipMarkDirty Si true, n'appelle pas markDirty (batch: appeler markDirty une fois après). */
   /** @param skipPushUndoSnapshot Si true, ne pousse pas de snapshot (batch: un snapshot avant le lot). */
   deleteNode: (nodeId: string, skipMarkDirty?: boolean, skipPushUndoSnapshot?: boolean) => void
@@ -191,6 +204,8 @@ export interface GraphState {
 
   // Validation
   validateGraph: () => Promise<void>
+  /** FR38 — fusionne les erreurs lore avec la validation structurelle courante */
+  validateLoreExplicit: (contextSelections?: Record<string, unknown>) => Promise<void>
 
   // Persistence
   saveDialogue: () => Promise<SaveGraphResponse>
@@ -244,6 +259,8 @@ export const initialState = {
   isLoading: false,
   isSaving: false,
   validationErrors: [] as ValidationErrorDetail[],
+  loreExplicitValidationSummary: null as string | null,
+  loreExplicitValidationLoading: false,
   highlightedNodeIds: [] as string[],
   highlightedCycleNodes: [] as string[],
   intentionalCycles: (() => {
@@ -267,6 +284,7 @@ export const initialState = {
   layout: null as Record<string, unknown> | null,
   documentRevision: null as number | null,
   layoutRevision: null as number | null,
+  dialogueFlagBindings: [] as DialogueFlagBinding[],
   graphFilters: {} as GraphFilters,
   layoutSpacingMode: 'normal' as GraphLayoutSpacingMode,
   undoStack: [] as GraphSnapshot[],

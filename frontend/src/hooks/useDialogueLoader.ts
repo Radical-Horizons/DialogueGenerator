@@ -8,9 +8,11 @@ import { useGraphStore } from '../store/graphStore'
 import { useGraphViewStore } from '../store/graphViewStore'
 import * as unityDialoguesAPI from '../api/unityDialogues'
 import { getErrorMessage } from '../types/errors'
+import { API_TIMEOUTS } from '../constants'
 import type { UnityDialogueMetadata } from '../types/api'
 import type { UnityDialogueListRef } from '../components/unityDialogues/UnityDialogueList'
 import type { UseToastFn } from '../components/shared'
+import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
 
 interface RouteTarget {
   normalizedDialogueId: string
@@ -19,11 +21,6 @@ interface RouteTarget {
 
 /** Circuit breaker: backoff après 4xx non-409 pour éviter la boucle d'autosave. */
 const AUTOSAVE_4XX_BACKOFF_MS = 10_000
-
-/** Compare dialogue ids whether stored with or without `.json` (liste UI vs documentId stem). */
-function normalizeDialogueFilenameKey(filename: string): string {
-  return filename.replace(/\.json$/i, '').toLowerCase()
-}
 
 export interface UseDialogueLoaderReturn {
   selectedDialogue: UnityDialogueMetadata | null
@@ -111,11 +108,10 @@ export function useDialogueLoader(
 
       const state = useGraphStore.getState()
       const currentFilename = state.dialogueMetadata?.filename ?? state.documentId ?? null
-      const norm = (s: string) => s.replace(/\.json$/i, '').toLowerCase()
       const isSameDialogue =
         !!currentFilename &&
         !!targetFilename &&
-        norm(currentFilename) === norm(targetFilename)
+        normalizeDialogueFilenameKey(currentFilename) === normalizeDialogueFilenameKey(targetFilename)
       
       if (isSameDialogue) {
         setIsLoadingDialogue(false)
@@ -421,8 +417,8 @@ export function useDialogueLoader(
       return
     }
 
-    // Laisser finir une sauvegarde API en cours (autosave ~50 ms ou requête longue) avant Ctrl+S / E2E requestSave.
-    const savingDeadline = Date.now() + 45_000
+    // Laisser finir une sauvegarde API en cours (autosave ou `API_TIMEOUTS.DOCUMENT_IO`) avant Ctrl+S / E2E requestSave.
+    const savingDeadline = Date.now() + API_TIMEOUTS.DOCUMENT_IO + 15_000
     while (useGraphStore.getState().isSaving && Date.now() < savingDeadline) {
       await new Promise<void>((r) => {
         window.setTimeout(r, 100)
@@ -466,29 +462,23 @@ export function useDialogueLoader(
       }
       useGraphViewStore.getState().resetFlush()
       const saveResponse = await saveDialogue()
-      try {
-        await validateGraph()
-        const state = useGraphStore.getState()
-        const errors = state.validationErrors.filter((e) => e.severity === 'error')
-        const warnings = state.validationErrors.filter((e) => e.severity === 'warning')
-        if (errors.length === 0 && warnings.length === 0) {
-          toast(`Dialogue sauvegardé: ${saveResponse.filename} - Graphe valide`, 'success', 3000)
-        } else if (errors.length > 0) {
-          toast(
-            `Dialogue sauvegardé: ${saveResponse.filename} - ${errors.length} erreur(s) et ${warnings.length} avertissement(s)`,
-            'warning',
-            4000
-          )
-        } else {
-          toast(
-            `Dialogue sauvegardé: ${saveResponse.filename} - ${warnings.length} avertissement(s)`,
-            'warning',
-            4000
-          )
-        }
-      } catch (validationErr) {
-        console.error('Erreur lors de la validation automatique:', validationErr)
-        toast(`Dialogue sauvegardé: ${saveResponse.filename}`, 'success', 3000)
+      const state = useGraphStore.getState()
+      const errors = state.validationErrors.filter((e) => e.severity === 'error')
+      const warnings = state.validationErrors.filter((e) => e.severity === 'warning')
+      if (errors.length === 0 && warnings.length === 0) {
+        toast(`Dialogue sauvegardé: ${saveResponse.filename} - Graphe valide`, 'success', 3000)
+      } else if (errors.length > 0) {
+        toast(
+          `Dialogue sauvegardé: ${saveResponse.filename} - ${errors.length} erreur(s) et ${warnings.length} avertissement(s)`,
+          'warning',
+          4000
+        )
+      } else {
+        toast(
+          `Dialogue sauvegardé: ${saveResponse.filename} - ${warnings.length} avertissement(s)`,
+          'warning',
+          4000
+        )
       }
       dialogueListRef.current?.refresh()
     } catch (err) {
@@ -497,7 +487,7 @@ export function useDialogueLoader(
     } finally {
       setIsLoadingDialogue(false)
     }
-  }, [activeDialogueFilename, saveDialogue, validateGraph, toast])
+  }, [activeDialogueFilename, saveDialogue, toast])
 
   const saveRequested = useGraphViewStore((s) => s.saveRequested)
   useEffect(() => {

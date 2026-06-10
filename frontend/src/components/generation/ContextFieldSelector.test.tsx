@@ -211,5 +211,58 @@ describe('ContextFieldSelector', () => {
     expect(screen.getByText(/préambule/i)).toBeInTheDocument()
     expect(screen.getByText(/\[Surface\]/)).toBeInTheDocument()
   })
+
+  it('affiche tous les champs cochés par défaut dans Contexte et Métadonnées', () => {
+    mockUseContextConfigStore.mockReturnValue({
+      availableFields: {
+        character: {
+          Nom: {
+            path: 'Nom',
+            label: 'Nom',
+            type: 'string',
+            depth: 0,
+            frequency: 1,
+            suggested: false,
+            is_metadata: 'true',
+          },
+          'sections._general': {
+            path: 'sections._general',
+            label: 'Sections > General',
+            type: 'string',
+            depth: 1,
+            frequency: 1,
+            suggested: false,
+            is_metadata: false,
+          },
+          Motivation: {
+            path: 'Motivation',
+            label: 'Motivation',
+            type: 'string',
+            depth: 0,
+            frequency: 1,
+            suggested: false,
+            is_metadata: false,
+          },
+        },
+      },
+      uniqueFieldsByItem: {},
+      fieldConfigs: { character: ['Nom', 'sections._general', 'Motivation'] },
+      suggestions: { character: [] },
+      toggleField: mockToggleField,
+      detectFields: mockDetectFields,
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useContextConfigStore>)
+
+    const { rerender } = render(<ContextFieldSelector elementType="character" showOnlyEssential={false} />)
+
+    expect(screen.getAllByRole('checkbox')).toHaveLength(2)
+    expect(screen.getAllByRole('checkbox').every((checkbox) => (checkbox as HTMLInputElement).checked)).toBe(true)
+
+    rerender(<ContextFieldSelector elementType="character" showOnlyEssential={true} />)
+
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1)
+    expect(screen.getByRole('checkbox')).toBeChecked()
+  })
 })
 

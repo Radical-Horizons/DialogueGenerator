@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test'
 
 import { E2E_MS } from './timeouts'
 
-test.describe('Unity Dialogues CRUD Operations [P0]', () => {
+test.describe('Unity Dialogues CRUD Operations [P0]', { tag: '@smoke' }, () => {
   const login = async (page: Page) => {
     const loginHeading = page.getByRole('heading', { name: /connexion/i })
     const isLoginPage = await loginHeading.isVisible({ timeout: E2E_MS.probe }).catch(() => false)

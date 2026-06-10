@@ -11,6 +11,7 @@ function reset() {
     reactFlowInstance: null,
     focusQueue: [],
     pendingFitView: false,
+    pendingFitViewNodeIds: null,
     edgeLabelEditRequest: null,
     contextMenuRequest: null,
     promptViewerNodeId: null,
@@ -19,6 +20,10 @@ function reset() {
     flushCompleted: false,
     saveRequested: false,
     dialogueDeleted: null,
+    visibilityEvalState: { flags: {}, reputation: {} },
+    dialoguePreviewActive: false,
+    previewEffectHistory: [],
+    previewCatalogById: undefined,
   })
 }
 
@@ -45,6 +50,15 @@ describe('graphViewStore', () => {
       expect(useGraphViewStore.getState().pendingFitView).toBe(true)
       useGraphViewStore.getState().clearFitView()
       expect(useGraphViewStore.getState().pendingFitView).toBe(false)
+    })
+  })
+
+  describe('requestFitViewOnNodeIds (FR41)', () => {
+    it('déduplique et ignore les ids vides', () => {
+      useGraphViewStore.getState().requestFitViewOnNodeIds(['a', 'a', '', 'b'])
+      expect(useGraphViewStore.getState().pendingFitViewNodeIds).toEqual(['a', 'b'])
+      useGraphViewStore.getState().clearFitViewNodeIdsRequest()
+      expect(useGraphViewStore.getState().pendingFitViewNodeIds).toBeNull()
     })
   })
 
@@ -142,6 +156,20 @@ describe('graphViewStore', () => {
       expect(useGraphViewStore.getState().dialogueDeleted).toBe('test.json')
       useGraphViewStore.getState().clearDialogueDeleted()
       expect(useGraphViewStore.getState().dialogueDeleted).toBeNull()
+    })
+  })
+
+  describe('Story 9.4 dialogue preview', () => {
+    it('enterDialoguePreview active l’état et exitDialoguePreview réinitialise', () => {
+      useGraphViewStore.getState().enterDialoguePreview({
+        flags: { F: true },
+        reputation: { 'a::b': 2 },
+      })
+      expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(true)
+      expect(useGraphViewStore.getState().visibilityEvalState.flags.F).toBe(true)
+      useGraphViewStore.getState().exitDialoguePreview()
+      expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(false)
+      expect(useGraphViewStore.getState().visibilityEvalState.flags).toEqual({})
     })
   })
 })

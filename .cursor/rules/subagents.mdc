@@ -14,7 +14,7 @@ alwaysApply: false
 | `context-gdd-reviewer` | fast | `core/context/`, `services/context_*`, `services/gdd_*` | Cache GDD, budget token, pipeline contexte |
 | `security-reviewer` | fast | `api/middleware/`, auth, secrets | JWT, CORS, secrets, injection |
 | `backend-services-reviewer` | fast | `services/`, `api/container.py` | Logique métier, Notion sync, Unity export |
-| `test-coverage-reviewer` | fast | `tests/`, `frontend/src/__tests__/` | Couverture manquante, qualité tests |
+| `test-coverage-reviewer` | fast | `tests/`, `frontend/src/__tests__/` | Couverture manquante, qualité tests ; tout test **lent** doit avoir `@pytest.mark.slow` / `integration` et être classé T0–T3 (`.cursor/commands/test-tiers.md`) |
 | `transcript-history-researcher` | fast | `~/.cursor/.../agent-transcripts/` (hors git) | Optionnel : grep/mining sur JSONL de sessions pour rétro **comportement agent / rules** (pas un journal des subagents) |
 | `playwright-e2e-specialist` | fast | `e2e/`, `playwright.config.ts`, graphe/auth E2E | **Exécute** Playwright, corrige specs/helpers (écriture autorisée) ; voir parallélisation ci-dessous |
 
@@ -40,7 +40,7 @@ Use the security-reviewer subagent on the auth module
 
 - **Isoler** les tâches longues (exploration multi-dossiers, revue profonde) dans un subagent → contexte séparé
 - **Paralléliser** : envoyer plusieurs Task() dans le même message quand les zones sont indépendantes
-- **Playwright E2E** : plusieurs `Task` en parallèle, chacun avec **chemins `e2e/*.spec.ts` explicites** dans la commande (pas `npx playwright test` seul). Full suite = **une** passe parent/CI après les lots. Prompt : `.cursor/agents/playwright-e2e-specialist.md` + commande exacte. `subagent_type`: `generalPurpose` — **pas** `readonly`.
+- **Playwright E2E** : par défaut viser **T1/T2** (`npm run test:e2e:smoke` ou liste de specs) ; **T3** (suite entière) = parent ou CI **une fois**. Plusieurs `Task` en parallèle : **chemins `e2e/*.spec.ts` explicites** (pas `npx playwright test` seul). Prompt : `.cursor/agents/playwright-e2e-specialist.md` + commande exacte. `subagent_type`: `generalPurpose` — **pas** `readonly`.
 - **`model: fast`** pour les reviewers qui font surtout de la lecture/grep
 - **`model: inherit`** pour les reviewers qui ont besoin du même raisonnement que le parent (ex. graph-editor)
 - **`readonly: true`** sur les **reviewers** — ils lisent, ils ne modifient pas ; **exception** : `playwright-e2e-specialist` (`readonly: false`) pour exécuter les tests et appliquer des correctifs

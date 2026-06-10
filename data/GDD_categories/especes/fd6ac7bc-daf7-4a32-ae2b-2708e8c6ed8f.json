@@ -1,20 +1,37 @@
 {
   "Nom": "Escarins",
   "values": {
+    "Espérance de vie": "12",
     "Règne (ou classe)": "a489466f-098f-4b19-b83f-6c417a8fe421",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème.",
+    "Résumé IA": "Cyclomorphe matriciel (Polyforme, Vifs-Formes) des falaises et fractures géologiques (Steppe des Éteignoirs, corniches des Puits Célestes). Phase sessile ancrée aux parois rocheuses, photosynthese partielle et captation de particules éoliennes du Cycle Sixing. Production quasi continue de phases mobiles ailées planantes fondant de nouvelles colonies. Longévité : ~12 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.",
-    "besoin_de_l_intrigue": "**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**",
-    "ecosyste_me": "**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+    "re_sume__de_la_fiche": "**Cyclomorphe matriciel** (Polyforme, Vifs-Formes) des falaises et fractures géologiques (**Steppe des Éteignoirs**, corniches des Puits Célestes). Phase sessile ancrée aux parois, photosynthese partielle et captation de particules éoliennes du Cycle Sixing. Production **quasi continue** de phases mobiles ailées planantes fondant de nouvelles colonies. Longévité : \\~12 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "histoire_de_l_espe_ce": "-",
+    "apparence": "<empty-block/>\n\t<empty-block/>",
+    "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
+    "ro_le_dans_l_intrigue": "-",
+    "habitat_naturel": "-",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "-",
+    "mode_de_reproduction": "-",
+    "sous-espe_ces": "-",
+    "fonctionnement_avec_l_e_cosyste_me": "-",
+    "re_sume__ia": "Cyclomorphe matriciel (Polyforme, Vifs-Formes) des falaises et fractures géologiques (Steppe des Éteignoirs, corniches des Puits Célestes). Phase sessile ancrée aux parois rocheuses, photosynthese partielle et captation de particules éoliennes du Cycle Sixing. Production quasi continue de phases mobiles ailées planantes fondant de nouvelles colonies. Longévité : ~12 ans."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "besoin_de_l_intrigue": "Besoin de l'intrigue",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_de_l_espe_ce": "Histoire de l'espèce",
+    "apparence": "Apparence",
+    "ro_le_culturel": "Rôle culturel",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "habitat_naturel": "Habitat naturel",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Mode d'alimentation ou d'obtention de nutriments",
+    "mode_de_reproduction": "Mode de reproduction",
+    "sous-espe_ces": "Sous-espèces",
+    "fonctionnement_avec_l_e_cosyste_me": "Fonctionnement avec l'écosystème",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "fd6ac7bc-daf7-4a32-ae2b-2708e8c6ed8f"
 }

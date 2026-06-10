@@ -88,6 +88,20 @@ class GDDDataAccessor:
         if self._gdd_data is None:
             return []
         return self._gdd_data.narrative_structures
+
+    @property
+    def chapters(self) -> List[Dict[str, Any]]:
+        """Liste des chapitres."""
+        if self._gdd_data is None:
+            return []
+        return self._gdd_data.chapters
+
+    @property
+    def scenes(self) -> List[Dict[str, Any]]:
+        """Liste des scènes."""
+        if self._gdd_data is None:
+            return []
+        return self._gdd_data.scenes
     
     @property
     def macro_structure(self) -> Optional[Dict[str, Any]]:

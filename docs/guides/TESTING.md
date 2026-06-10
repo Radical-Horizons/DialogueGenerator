@@ -257,6 +257,37 @@ class TestContextBuilderRealData:
 - Éviter les caractères Unicode dans les `print()` (problèmes Windows)
 - Utiliser des fichiers de sortie pour les tests avec beaucoup de texte
 
+## Tests frontend responsive et PWA (Vitest)
+
+Epic 17 (FR118–121) s’appuie sur des tests jsdom qui vérifient la bascule narrow/confort **en JavaScript** (pas seulement en CSS media query).
+
+| Domaine | Fichiers exemple |
+|---------|------------------|
+| Hook conteneur | `frontend/src/hooks/useNarrowInlineSize.test.tsx` |
+| Shell / drawers | `frontend/src/components/layout/Dashboard.test.tsx`, `MainLayout.responsive.test.tsx` |
+| Toolbar graphe | `frontend/src/__tests__/GraphEditorHeader.desktopToolbar.test.tsx` |
+| Panneaux narrow | `GenerationPanelControls.narrow.test.tsx`, `UnityDialogueEditor.narrow.test.tsx` |
+| Tactile (FR119) | `frontend/src/__tests__/fr119-touch.chrome.test.tsx`, `GraphCanvas.touchLongPress.test.tsx` |
+| PWA (manifest, config) | `frontend/src/__tests__/pwa.manifest.test.ts`, `pwa.vitePwaConfig.test.ts`, `pwa.indexHtml.test.ts` |
+
+```bash
+# Exemple : hook + shell
+cd frontend && npx vitest run src/hooks/useNarrowInlineSize.test.tsx src/components/layout/Dashboard.test.tsx --reporter=dot
+
+# PWA unitaires
+cd frontend && npx vitest run src/__tests__/pwa --reporter=dot
+```
+
+Référence architecture : [`docs/architecture/responsive-ui.md`](../architecture/responsive-ui.md).
+
+### E2E PWA (build production)
+
+`npm run test:e2e:pwa` utilise `playwright.pwa.config.ts` : build Vite + `preview` sur le port **4173**, puis `e2e/pwa-installability.spec.ts` (manifest + service worker). **Non inclus** dans `npm run test:e2e:verify`.
+
+```bash
+npm run test:e2e:pwa
+```
+
 ## Tests E2E (Playwright) — graphe
 
 Les specs sous `e2e/*.spec.ts` lancent API + frontend (voir `playwright.config.ts`).

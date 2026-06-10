@@ -8,6 +8,7 @@ import type { ContextRelevanceHistoryEntry, ContextRelevanceReport } from '../..
 import { useGraphStore } from '../../store/graphStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { formatContextScorePercent } from '../../utils/contextRelevanceFormat'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -23,6 +24,10 @@ const TYPE_LABELS: Record<string, string> = {
 
 function labelForType(key: string): string {
   return TYPE_LABELS[key] ?? key
+}
+
+function historyRowKey(row: ContextRelevanceHistoryEntry, index: number): string {
+  return `${row.request_id}-${row.timestamp}-${row.node_id ?? 'unknown'}-${index}`
 }
 
 export type ContextRelevancePanelProps = {
@@ -106,7 +111,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
         data-testid="context-relevance-panel"
         style={{
           padding: '0.6rem 0.75rem',
-          fontSize: '0.8rem',
+          fontSize: remSize('body'),
           color: theme.text.secondary,
           borderTop: topRule,
         }}
@@ -122,7 +127,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
         data-testid="context-relevance-panel"
         style={{
           padding: '0.6rem 0.75rem',
-          fontSize: '0.8rem',
+          fontSize: remSize('body'),
           color: theme.text.secondary,
           borderTop: topRule,
         }}
@@ -144,7 +149,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
     >
       <div
         style={{
-          fontSize: '0.85rem',
+          fontSize: remSize('accent'),
           fontWeight: 700,
           marginBottom: '0.35rem',
           color: theme.text.primary,
@@ -153,13 +158,13 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
         Pertinence contexte
       </div>
       {loading && (
-        <div style={{ fontSize: '0.8rem', color: theme.text.secondary }}>Chargement…</div>
+        <div style={{ fontSize: remSize('body'), color: theme.text.secondary }}>Chargement…</div>
       )}
       {error && (
-        <div style={{ fontSize: '0.8rem', color: theme.state.error.color }}>{error}</div>
+        <div style={{ fontSize: remSize('body'), color: theme.state.error.color }}>{error}</div>
       )}
       {!loading && detailMissing && (
-        <div style={{ fontSize: '0.8rem', color: theme.text.secondary }}>
+        <div style={{ fontSize: remSize('body'), color: theme.text.secondary }}>
           Aucune mesure pour ce nœud (pas encore de génération LLM enregistrée).
         </div>
       )}
@@ -167,7 +172,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
         <>
           <div
             data-testid="context-relevance-score"
-            style={{ fontSize: '0.95rem', fontWeight: 600, color: theme.text.primary }}
+            style={{ fontSize: remSize('section'), fontWeight: 600, color: theme.text.primary }}
           >
             Score : {formatContextScorePercent(detail.score_percent)}
             {detail.low_context_warning && (
@@ -175,7 +180,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
                 data-testid="context-relevance-warning"
                 style={{
                   marginLeft: '0.5rem',
-                  fontSize: '0.75rem',
+                  fontSize: remSize('small'),
                   fontWeight: 600,
                   color: '#c9a227',
                 }}
@@ -185,13 +190,13 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
             )}
           </div>
           {detail.low_context_warning && detail.suggestions_hints.length > 0 && (
-            <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem', fontSize: '0.75rem' }}>
+            <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem', fontSize: remSize('small') }}>
               {detail.suggestions_hints.map((hint) => (
                 <li key={hint}>{hint}</li>
               ))}
             </ul>
           )}
-          <div style={{ marginTop: '0.45rem', fontSize: '0.75rem', color: theme.text.secondary }}>
+          <div style={{ marginTop: '0.45rem', fontSize: remSize('small'), color: theme.text.secondary }}>
             Breakdown :
             {Object.entries(detail.breakdown_by_type).map(([k, v]) => (
               <span key={k} style={{ marginLeft: '0.5rem' }}>
@@ -202,7 +207,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
           {detail.reflected_types.length > 0 && (
             <div
               data-testid="context-relevance-reflected"
-              style={{ marginTop: '0.35rem', fontSize: '0.72rem', color: theme.text.secondary }}
+              style={{ marginTop: '0.35rem', fontSize: remSize('caption'), color: theme.text.secondary }}
             >
               <span style={{ fontWeight: 600, color: theme.text.primary }}>Bien reflétés : </span>
               {detail.reflected_types.map((k) => labelForType(k)).join(', ')}
@@ -211,7 +216,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
           {detail.weak_types.length > 0 && (
             <div
               data-testid="context-relevance-weak"
-              style={{ marginTop: '0.2rem', fontSize: '0.72rem', color: theme.text.secondary }}
+              style={{ marginTop: '0.2rem', fontSize: remSize('caption'), color: theme.text.secondary }}
             >
               <span style={{ fontWeight: 600, color: theme.text.primary }}>
                 Peu ou pas détectés :{' '}
@@ -219,7 +224,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
               {detail.weak_types.map((k) => labelForType(k)).join(', ')}
             </div>
           )}
-          <div style={{ marginTop: '0.25rem', fontSize: '0.7rem', color: theme.text.secondary }}>
+          <div style={{ marginTop: '0.25rem', fontSize: remSize('caption'), color: theme.text.secondary }}>
             Méthode : {detail.method} · calcul {detail.computation_ms} ms
           </div>
         </>
@@ -232,7 +237,7 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
           <summary
             style={{
               cursor: 'pointer',
-              fontSize: '0.75rem',
+              fontSize: remSize('small'),
               fontWeight: 600,
               color: theme.text.primary,
               listStyle: 'none',
@@ -247,13 +252,13 @@ export function ContextRelevancePanel({ embedded = false }: ContextRelevancePane
               paddingLeft: '1rem',
               maxHeight: '100px',
               overflowY: 'auto',
-              fontSize: '0.7rem',
+              fontSize: remSize('caption'),
               color: theme.text.secondary,
             }}
           >
-            {history.map((row) => (
+            {history.map((row, index) => (
               <li
-                key={`${row.request_id}-${row.timestamp}`}
+                key={historyRowKey(row, index)}
                 title={`request_id: ${row.request_id}`}
               >
                 {row.timestamp.slice(0, 19)} — nœud {row.node_id ?? '?'} — req {row.request_id} —{' '}

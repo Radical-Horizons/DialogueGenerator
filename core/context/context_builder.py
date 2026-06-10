@@ -402,6 +402,20 @@ class ContextBuilder:
         if self._gdd_data_accessor is None:
             return []
         return self._gdd_data_accessor.narrative_structures
+
+    @property
+    def chapters(self) -> List[Dict[str, Any]]:
+        """Liste des chapitres du GDD."""
+        if self._gdd_data_accessor is None:
+            return []
+        return self._gdd_data_accessor.chapters
+
+    @property
+    def scenes(self) -> List[Dict[str, Any]]:
+        """Liste des scènes du GDD."""
+        if self._gdd_data_accessor is None:
+            return []
+        return self._gdd_data_accessor.scenes
     
     @property
     def macro_structure(self) -> Optional[Dict[str, Any]]:

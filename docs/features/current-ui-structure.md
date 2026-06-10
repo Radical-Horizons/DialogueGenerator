@@ -1,14 +1,28 @@
 # Structure de l'Interface Actuelle - DialogueGenerator
 
-**Date:** 2026-01-14  
+**Date:** 2026-01-14 (responsive Epic 17 : 2026-06-08)  
 **Auteur:** Sally (UX Designer)  
 **Statut:** Documentation de référence
 
 ---
 
+## Modes d'affichage (Epic 17)
+
+| Viewport | Comportement shell |
+|----------|-------------------|
+| **≥1024px** (desktop) | Layout **3 colonnes** redimensionnables (voir ci-dessous) |
+| **768–1023px** (tablette) | Colonne centrale pleine largeur ; panneaux Contexte et Détails en **drawers overlay** (`NarrowOverlayDrawer`) |
+| **&lt;768px** (mobile) | Même principe + confort clavier logiciel (`useMobileShellKeyboardComfort`) et safe areas |
+
+En dessous de 1024px, les tailles de colonnes sauvegardées dans `localStorage` sont normalisées pour éviter un layout illisible.
+
+**Détail technique** (seuils conteneur, toolbar graphe tri-state, PWA, tests) : [`docs/architecture/responsive-ui.md`](../architecture/responsive-ui.md).
+
+---
+
 ## Vue d'Ensemble
 
-L'interface DialogueGenerator est une **Single Page Application (SPA) React** organisée en **3 colonnes verticales principales** :
+L'interface DialogueGenerator est une **Single Page Application (SPA) React**. En **desktop (≥1024px)**, elle est organisée en **3 colonnes verticales principales** :
 
 1. **Colonne Gauche : Contexte** (panneau sélection ressources)
 2. **Colonne Centrale : Génération de Dialogues** (espace de travail principal)
@@ -228,6 +242,7 @@ L'interface propose deux autres vues principales accessibles via les onglets de 
 
 - Wireframes nouvelles features : `_bmad-output/excalidraw-diagrams/wireframe-*-*.excalidraw`
 - Spécifications UX V1.0 : `docs/features/v1.0-ux-specs.md`
-- Architecture frontend : `docs/architecture-frontend.md`
+- Architecture frontend : `docs/architecture/architecture-frontend.md`
+- UI responsive (Epic 17) : `docs/architecture/responsive-ui.md`
 - PRD : `_bmad-output/planning-artifacts/prd.md`
 - Guide screenshots : `docs/features/SCREENSHOTS_TO_TAKE.md`

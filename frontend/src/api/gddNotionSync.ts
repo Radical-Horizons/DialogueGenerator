@@ -51,6 +51,7 @@ export interface GddNotionSyncRunResponse {
   message: string
   updated_entities: number
   partial_errors: string[]
+  mirror_promotion_pending?: boolean
 }
 
 export interface GddNotionSyncStatusResponse {
@@ -62,6 +63,7 @@ export interface GddNotionSyncStatusResponse {
   partial_errors: string[]
   last_archive_relative?: string | null
   last_mirror_rebuild_used?: boolean | null
+  mirror_promotion_pending?: boolean | null
 }
 
 export interface GddNotionSyncProgressResponse {
@@ -96,6 +98,7 @@ export interface GddFullSyncCheckpointResponse {
   sources_completed: number
   completed_category_files: string[]
   eligible_category_files: string[]
+  mirror_promotion_pending?: boolean
 }
 
 export interface GddFullSyncSimpleOkResponse {
@@ -158,26 +161,39 @@ export async function postGddNotionPreviewDatabaseRow(
 export interface PostGddNotionSyncOptions {
   resume?: boolean
   fresh?: boolean
+  /** Limite ce run aux ``category_file`` listés (bases) ; sans suppression des autres bases. */
+  categoryFiles?: string[]
+  /** Applique le staging conservé après erreurs partielles (full=true requis). */
+  applyStagingDespiteErrors?: boolean
 }
 
 export async function postGddNotionSync(
   full = false,
   opts?: PostGddNotionSyncOptions,
 ): Promise<GddNotionSyncRunResponse> {
-  const params: Record<string, boolean> = { full }
+  /** FastAPI attend ``category_file=a&category_file=b`` ; Axios mettrait ``category_file[]`` (ignoré). */
+  const search = new URLSearchParams()
+  search.set('full', full ? 'true' : 'false')
   if (opts?.resume) {
-    params.resume = true
+    search.set('resume', 'true')
   }
   if (opts?.fresh) {
-    params.fresh = true
+    search.set('fresh', 'true')
   }
+  if (opts?.applyStagingDespiteErrors) {
+    search.set('apply_staging_despite_errors', 'true')
+  }
+  for (const raw of opts?.categoryFiles ?? []) {
+    const t = raw.trim()
+    if (t) {
+      search.append('category_file', t)
+    }
+  }
+  const qs = search.toString()
   const { data } = await apiClient.post<GddNotionSyncRunResponse>(
-    '/api/v1/gdd-notion-sync/sync',
+    `/api/v1/gdd-notion-sync/sync?${qs}`,
     undefined,
-    {
-      params,
-      timeout: API_TIMEOUTS.GDD_NOTION_SYNC,
-    },
+    { timeout: API_TIMEOUTS.GDD_NOTION_SYNC },
   )
   return data
 }
@@ -269,8 +285,8 @@ export async function getGddNotionSyncProgress(): Promise<GddNotionSyncProgressR
   return data
 }
 
-/** Télécharge le ZIP Markdown NotebookLM (sources Notion sync + Vision.json, max 10 fichiers). */
-export async function getGddNotebooklmExportZip(maxFiles = 9): Promise<Blob> {
+/** Télécharge le ZIP Markdown NotebookLM (sources Notion sync + Vision.json ; max_files côté API défaut 64). */
+export async function getGddNotebooklmExportZip(maxFiles = 64): Promise<Blob> {
   const { data } = await apiClient.get<Blob>('/api/v1/gdd-notion-sync/notebooklm-export', {
     params: { max_files: maxFiles },
     responseType: 'blob',

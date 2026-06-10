@@ -111,6 +111,13 @@ class GddNotionSyncRunResponse(BaseModel):
     message: str
     updated_entities: int = 0
     partial_errors: List[str] = Field(default_factory=list)
+    mirror_promotion_pending: bool = Field(
+        default=False,
+        description=(
+            "True si le staging d'une sync complète est prêt mais non promu (erreurs "
+            "partielles) — application possible via apply_staging_despite_errors."
+        ),
+    )
 
 
 class GddNotionSyncStatusResponse(BaseModel):
@@ -124,6 +131,10 @@ class GddNotionSyncStatusResponse(BaseModel):
     partial_errors: List[str] = Field(default_factory=list)
     last_archive_relative: Optional[str] = None
     last_mirror_rebuild_used: Optional[bool] = None
+    mirror_promotion_pending: Optional[bool] = Field(
+        default=None,
+        description="True si une promotion miroir depuis le staging est attendue (erreurs partielles).",
+    )
 
 
 class GddNotionSyncProgressResponse(BaseModel):
@@ -164,6 +175,10 @@ class GddFullSyncCheckpointResponse(BaseModel):
     sources_completed: int = 0
     completed_category_files: List[str] = Field(default_factory=list)
     eligible_category_files: List[str] = Field(default_factory=list)
+    mirror_promotion_pending: bool = Field(
+        default=False,
+        description="True si le dernier run complet a laissé le staging non promu.",
+    )
 
 
 class GddFullSyncCheckpointAbandonResponse(BaseModel):

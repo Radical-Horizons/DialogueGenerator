@@ -3,10 +3,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping, MutableSequence, Optional, Sequence, Tuple
 
-from services.gdd_sections_split import split_sections_general_text
+from services.gdd_sections_split import (
+    normalize_notion_enhanced_markdown_for_section_split,
+    split_sections_general_text,
+)
 
-# Bases synchronisées comme **tables** : une source ``kind: database`` suffit ; pas d’appel
-# aux blocs enfants ; export **compact** ``Nom`` + ``values`` (colonnes → chaînes).
+# Bases synchronisées comme **tables** : pas d’appel ``get_page_content`` dès le départ ;
+# export **compact** ``Nom`` + ``values`` (sections vides). Les autres bases peuvent quand
+# même éviter ``get_page_content`` après sonde dynamique (voir ``GddNotionSyncService``).
 NOTION_DATABASE_COMPACT_TABLE_IDS: frozenset[str] = frozenset(
     {
         "22c6e4d2-1b45-8066-b17c-c2af998de0b8",  # Chronologie d'Escelion
@@ -141,10 +145,37 @@ def _format_property_value(prop: Mapping[str, Any]) -> str:
     return ""
 
 
+def rich_text_properties_as_markdown_sections(
+    properties: Mapping[str, Any],
+) -> str:
+    """Produit des blocs ``## Nom de colonne`` pour chaque propriété ``rich_text`` non vide.
+
+    Permet de récupérer du narratif stocké dans les colonnes de la base lorsque le corps
+    de page Notion n'expose pas d'enfants de blocs (API ``results: []``).
+
+    Args:
+        properties: ``page["properties"]`` (API Notion).
+
+    Returns:
+        Markdown concaténé, ou chaîne vide.
+    """
+    parts: List[str] = []
+    for key in sorted(properties.keys()):
+        prop = properties.get(key)
+        if not isinstance(prop, dict) or prop.get("type") != "rich_text":
+            continue
+        txt = _format_property_value(prop).strip()
+        if not txt:
+            continue
+        parts.append(f"## {key}\n\n{txt}")
+    return "\n\n".join(parts)
+
+
 def markdown_body_to_sync_sections(body_text: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """Découpe le markdown du corps de page en sections nommées par slug (titres #/##/###).
 
-    Les colonnes de base Notion ne sont **pas** incluses ici : uniquement ``get_page_content``.
+    Le texte peut inclure des titres ``##`` issus des colonnes ``rich_text`` fusionnées
+    par :func:`notion_page_to_gdd_record_merge_body_and_properties`.
 
     Returns:
         Tuple ``(sections, section_titles)`` avec ``sections[slug] = corps`` et
@@ -153,6 +184,7 @@ def markdown_body_to_sync_sections(body_text: str) -> Tuple[Dict[str, str], Dict
     body = (body_text or "").strip()
     if not body:
         return {}, {}
+    body = normalize_notion_enhanced_markdown_for_section_split(body)
     chunks = split_sections_general_text(body)
     sections: Dict[str, str] = {}
     titles: Dict[str, str] = {}
@@ -247,14 +279,18 @@ def notion_page_to_gdd_record_merge_body_and_properties(
     """Enregistrement GDD pour sync base Notion.
 
     - ``values`` : colonnes (hors titre), texte plat.
-    - ``sections`` : corps de page uniquement, découpé par titres markdown (clés = slugs).
+    - ``sections`` : corps de page + colonnes ``rich_text`` (titres ``##``), découpé par
+      titres markdown (clés = slugs).
     - ``section_titles`` : libellés affichables slug → titre de section.
-    Les colonnes ne sont **pas** fusionnées dans le corps ni dans ``_general``.
     """
     title = extract_page_title(page) or "SansTitre"
     props = page.get("properties") or {}
     values = notion_properties_to_values_flat(props)
-    sections, titles = markdown_body_to_sync_sections(body_text)
+    props_md = rich_text_properties_as_markdown_sections(props)
+    core_body = (body_text or "").strip()
+    if props_md:
+        core_body = f"{core_body}\n\n{props_md}".strip() if core_body else props_md
+    sections, titles = markdown_body_to_sync_sections(core_body)
     out: Dict[str, Any] = {
         "Nom": title,
         "values": values,

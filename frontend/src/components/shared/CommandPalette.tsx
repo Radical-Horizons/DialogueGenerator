@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { filterCommandPaletteItems, type CommandPaletteItem } from '../../hooks/useCommandPalette'
 import * as contextAPI from '../../api/context'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
@@ -13,6 +14,8 @@ import { useGenerationActionsStore } from '../../store/generationActionsStore'
 export interface CommandPaletteProps {
   isOpen: boolean
   onClose: () => void
+  /** Espace au-dessus du clavier logiciel (visual viewport), story 17.4 */
+  keyboardBottomInsetPx?: number
 }
 
 const CATEGORY_LABELS: Record<CommandPaletteItem['category'], string> = {
@@ -24,7 +27,7 @@ const CATEGORY_LABELS: Record<CommandPaletteItem['category'], string> = {
   navigation: 'Navigation',
 }
 
-export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
+export function CommandPalette({ isOpen, onClose, keyboardBottomInsetPx = 0 }: CommandPaletteProps) {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(0)
@@ -242,7 +245,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     if (listRef.current && filteredItems.length > 0) {
       const itemElement = listRef.current.querySelector(`[data-item-index="${highlightedIndex}"]`)
       if (itemElement) {
-        itemElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+        itemElement.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' })
       }
     }
   }, [highlightedIndex, filteredItems.length])
@@ -267,10 +270,12 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       onClick={onClose}
     >
       <div
+        data-shell-keyboard-zone="true"
         style={{
           backgroundColor: theme.background.panel,
           borderRadius: '8px',
           padding: '1rem',
+          paddingBottom: `calc(1rem + ${keyboardBottomInsetPx}px)`,
           width: '90%',
           maxWidth: '600px',
           maxHeight: '60vh',
@@ -278,6 +283,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
           display: 'flex',
           flexDirection: 'column',
+          boxSizing: 'border-box',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -295,7 +301,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           style={{
             width: '100%',
             padding: '0.75rem',
-            fontSize: '1rem',
+            fontSize: remSize('section'),
             backgroundColor: theme.input.background,
             color: theme.text.primary,
             border: `1px solid ${theme.border.primary}`,
@@ -326,7 +332,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               <div key={category} style={{ marginBottom: '1rem' }}>
                 <div
                   style={{
-                    fontSize: '0.75rem',
+                    fontSize: remSize('small'),
                     fontWeight: 'bold',
                     color: theme.text.secondary,
                     textTransform: 'uppercase',
@@ -357,7 +363,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     >
                       <div style={{ fontWeight: isHighlighted ? 'bold' : 'normal' }}>{item.label}</div>
                       {item.description && (
-                        <div style={{ fontSize: '0.85rem', color: theme.text.secondary }}>{item.description}</div>
+                        <div style={{ fontSize: remSize('accent'), color: theme.text.secondary }}>{item.description}</div>
                       )}
                     </div>
                   )
@@ -373,7 +379,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             marginTop: '0.5rem',
             paddingTop: '0.5rem',
             borderTop: `1px solid ${theme.border.primary}`,
-            fontSize: '0.75rem',
+            fontSize: remSize('small'),
             color: theme.text.secondary,
             display: 'flex',
             gap: '1rem',

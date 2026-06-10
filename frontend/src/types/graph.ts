@@ -169,6 +169,14 @@ export interface NodePromptResponse {
 export interface ValidateGraphRequest {
   nodes: unknown[]
   edges: unknown[]
+  /** Document canonique (Story 9.5) pour validation références dialogueFlags */
+  document?: Record<string, unknown> | null
+}
+
+export interface LoreAmbiguityCandidate {
+  name: string
+  category: string
+  gdd_path: string
 }
 
 export interface ValidationErrorDetail {
@@ -176,16 +184,93 @@ export interface ValidationErrorDetail {
   node_id?: string
   message: string
   severity: string
+  /** Story 9.5 — flag catalogue concerné */
+  referenced_flag_id?: string
+  /** Story 9.5 — suggestion typo */
+  suggested_flag_id?: string
   target?: string
   cycle_path?: string
   cycle_nodes?: string[]
   cycle_id?: string
+  /** Référence GDD (FR38 lore) */
+  gdd_reference?: string
+  /** FR39 — sous-type heuristique */
+  lore_subtype?: string
+  /** FR39 — clé stable pour persistance UI */
+  lore_warning_key?: string
+  /** FR39 — candidats GDD (ambiguïté) */
+  ambiguity_candidates?: LoreAmbiguityCandidate[]
+}
+
+/** Fait GDD pour validation lore explicite (aligné Pydantic `GddLoreFactPayload`). */
+export interface GddLoreFactPayload {
+  entity_name: string
+  category: string
+  gdd_path: string
+  vitality: 'alive' | 'dead'
+}
+
+export interface ValidateLoreExplicitRequest {
+  nodes: unknown[]
+  edges: unknown[]
+  context_selections?: Record<string, unknown>
+  scene_instruction?: string
+  gdd_lore_facts?: GddLoreFactPayload[]
+}
+
+export interface ValidateLoreExplicitResponse {
+  valid: boolean
+  errors: ValidationErrorDetail[]
+  warnings: ValidationErrorDetail[]
+  contradiction_count: number
+  nodes_with_contradictions_count: number
+  potential_warnings_count: number
+  nodes_with_potential_warnings_count: number
+  /** FR39 */
+  ambiguity_warnings_count?: number
+  nodes_with_ambiguity_warnings_count?: number
+  /** Résumé agrégé (explicite + potentiel + ambiguïté) — logs / débogage. */
+  summary: string
+  /** Bandeau UI : contradictions explicites uniquement (FR39 AC #5). */
+  summary_explicit_only: string
 }
 
 export interface ValidateGraphResponse {
   valid: boolean
   errors: ValidationErrorDetail[]
   warnings: ValidationErrorDetail[]
+}
+
+/** FR42 — critère renvoyé par le juge LLM. */
+export type DialogueQualityCriterionId =
+  | 'narrative_coherence'
+  | 'characterization'
+  | 'agency'
+  | 'style'
+
+export interface DialogueQualityCriterionDetail {
+  criterion_id: DialogueQualityCriterionId
+  label: string
+  score: number
+  comment: string
+}
+
+export interface EvaluateDialogueQualityRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+  llm_model_identifier?: string | null
+}
+
+export interface EvaluateDialogueQualityResponse {
+  overall_score: number
+  score_variance_margin: number
+  score_variance_note: string
+  criteria: DialogueQualityCriterionDetail[]
+  global_comment?: string | null
+  suggestions: string[]
+  strengths: string[]
+  model_id: string
+  provider: string
 }
 
 export interface CalculateLayoutRequest {
@@ -197,4 +282,140 @@ export interface CalculateLayoutRequest {
 
 export interface CalculateLayoutResponse {
   nodes: Array<{ id: string; position: { x: number; y: number }; [key: string]: unknown }>
+}
+
+/** Options détection AI slop (FR43) — alignées Pydantic `AiSlopDetectionOptions`. */
+export interface AiSlopDetectionOptionsState {
+  include_gpt_isms: boolean
+  include_repetitions: boolean
+  include_generic_phrases: boolean
+  custom_keywords: string[]
+  custom_regex_patterns: string[]
+}
+
+export type AiSlopOccurrenceKind = 'gpt_ism' | 'repetition' | 'generic_phrase'
+
+export interface AiSlopOccurrenceItem {
+  kind: AiSlopOccurrenceKind
+  node_id: string
+  node_display_id?: string | null
+  field: string
+  excerpt: string
+  matched_span: string
+  suggestion: string
+  severity: 'warning'
+}
+
+export interface AiSlopRepetitionGroup {
+  normalized_phrase: string
+  occurrence_count: number
+  node_ids: string[]
+  sample_excerpt: string
+}
+
+export interface DetectAiSlopRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+  options?: AiSlopDetectionOptionsState
+}
+
+export interface DetectAiSlopResponse {
+  summary_gpt_isms: string
+  summary_repetitions: string
+  summary_generic_phrases: string
+  gpt_ism_occurrence_count: number
+  gpt_ism_distinct_node_count: number
+  generic_phrase_occurrence_count: number
+  repetition_group_count: number
+  occurrences: AiSlopOccurrenceItem[]
+  repetition_groups: AiSlopRepetitionGroup[]
+  message?: string | null
+}
+
+/** Options détection context dropping (FR44 / Story 4.10). */
+export interface DetectContextDroppingOptionsState {
+  rules_profile?: 'strict' | 'light'
+  tolerance?: number
+  mandatory_info?: string[]
+  dialogue_type?: string
+  dialogue_type_overrides?: Record<string, { rules_profile?: 'strict' | 'light'; tolerance?: number }>
+}
+
+export type ContextDroppingCaseKind = 'context_dropping' | 'too_subtle' | 'mandatory_missing'
+
+/** Surcharge de règles pour un type de dialogue (Story 4.10). */
+export interface DialogueTypeRuleOverride {
+  rules_profile?: 'strict' | 'light'
+  tolerance?: number
+}
+
+/** Règles anti-context-dropping persistées (Story 4.10). */
+export interface ContextDroppingRules {
+  rules_profile: 'strict' | 'light'
+  tolerance?: number | null
+  mandatory_info: string[]
+  dialogue_type_overrides: Record<string, DialogueTypeRuleOverride>
+  schema_version?: string
+}
+
+export interface ContextDroppingCaseItem {
+  kind: ContextDroppingCaseKind
+  node_id?: string | null
+  node_display_id?: string | null
+  context_label: string
+  message: string
+  suggestion: string
+  severity: 'warning' | 'info'
+}
+
+export interface DetectContextDroppingRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+  context_selections: Record<string, unknown>
+  scene_instruction?: string
+  context_text?: string | null
+  options?: DetectContextDroppingOptionsState
+}
+
+export interface DetectContextDroppingResponse {
+  summary: string
+  case_count: number
+  cases: ContextDroppingCaseItem[]
+  message?: string | null
+  rules_profile_effective: string
+}
+
+/** Requête validation schéma JSON Unity (FR48 / Story 4.13). */
+export interface ValidateSchemaRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+}
+
+/** Réponse validation schéma JSON Unity (FR48 / Story 4.13). */
+export interface ValidateSchemaResponse {
+  is_valid: boolean
+  errors: string[]
+  error_count: number
+}
+
+/** Requête simulation de flux (FR46 / Story 4.11). */
+export interface SimulateFlowRequest {
+  nodes: GraphNodePayload[]
+  edges: GraphEdgePayload[]
+}
+
+/** Statistiques de couverture de simulation (FR47 / Story 4.12). */
+export interface FlowCoverageStats {
+  total_nodes: number
+  accessible_count: number
+  dead_end_count: number
+  cul_de_sac_count: number
+  coverage_percentage: number
+}
+
+/** Réponse simulation de flux (FR46 + FR47). */
+export interface SimulateFlowResponse {
+  dead_ends: ValidationErrorDetail[]
+  cul_de_sacs: ValidationErrorDetail[]
+  coverage?: FlowCoverageStats
 }

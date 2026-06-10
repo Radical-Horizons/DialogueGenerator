@@ -38,6 +38,72 @@ def test_compute_gdd_fingerprint_stable(minimal_gdd_tree: Path) -> None:
     assert compute_gdd_fingerprint(loader) == compute_gdd_fingerprint(loader)
 
 
+def test_compute_gdd_fingerprint_changes_when_shard_json_changes(tmp_path: Path) -> None:
+    """Les shards (ex. especes/) doivent entrer dans l'empreinte du cache disque."""
+    root = tmp_path / "proj"
+    cat = root / "data" / "GDD_categories"
+    data = root / "data"
+    cat.mkdir(parents=True)
+    (data / "Vision.json").write_text("{}", encoding="utf-8")
+    (cat / "personnages.json").write_text('{"personnages": []}', encoding="utf-8")
+    especes = cat / "especes"
+    especes.mkdir()
+    (especes / "a.json").write_text('{"Nom": "A"}', encoding="utf-8")
+    loader = GDDLoader(
+        categories_path=cat,
+        import_path=data,
+        project_root_dir=root,
+        context_builder_dir=root,
+    )
+    fp1 = compute_gdd_fingerprint(loader)
+    (especes / "a.json").write_text('{"Nom": "A2", "x": 1}', encoding="utf-8")
+    fp2 = compute_gdd_fingerprint(loader)
+    assert fp1 != fp2
+
+
+def test_disk_cache_invalidates_when_only_shard_category_changes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Sans monolithe especes.json : modifier un shard invalide le pickle."""
+    monkeypatch.setattr("services.gdd_disk_cache._disk_cache_enabled", lambda: True)
+
+    root = tmp_path / "proj"
+    cat = root / "data" / "GDD_categories"
+    data = root / "data"
+    cat.mkdir(parents=True)
+    (data / "Vision.json").write_text("{}", encoding="utf-8")
+    (cat / "personnages.json").write_text('{"personnages": []}', encoding="utf-8")
+    especes = cat / "especes"
+    especes.mkdir()
+    (especes / "one.json").write_text('{"Nom": "S1"}', encoding="utf-8")
+
+    caplog.set_level(logging.INFO)
+    loader1 = GDDLoader(
+        categories_path=cat,
+        import_path=data,
+        project_root_dir=root,
+        context_builder_dir=root,
+    )
+    loader1.load_all()
+    assert (root / "data" / ".gdd_snapshot" / "gdd_data.pkl").is_file()
+
+    caplog.clear()
+    (especes / "one.json").write_text('{"Nom": "S1b"}', encoding="utf-8")
+    get_gdd_cache().clear()
+
+    loader2 = GDDLoader(
+        categories_path=cat,
+        import_path=data,
+        project_root_dir=root,
+        context_builder_dir=root,
+    )
+    d2 = loader2.load_all()
+    assert any(e.get("Nom") == "S1b" for e in (d2.species or []))
+    assert "GDD chargé depuis le cache disque" not in caplog.text
+
+
 def test_disk_cache_second_load_uses_pickle(
     monkeypatch: pytest.MonkeyPatch,
     minimal_gdd_tree: Path,

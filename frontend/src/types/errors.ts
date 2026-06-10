@@ -27,6 +27,16 @@ export type APIError = AxiosError<APIErrorResponse>
  * et des erreurs réseau (backend inaccessible).
  */
 export function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object') {
+    const maybe = error as { code?: string; message?: string }
+    if (maybe.code === 'ECONNABORTED') {
+      return 'Délai d’attente dépassé. La requête a pris trop de temps (sauvegarde volumineuse ou serveur occupé) — réessayez dans un instant.'
+    }
+    const rawMsg = typeof maybe.message === 'string' ? maybe.message : ''
+    if (/timeout of \d+ms exceeded/i.test(rawMsg)) {
+      return 'Délai d’attente dépassé. La requête a pris trop de temps (sauvegarde volumineuse ou serveur occupé) — réessayez dans un instant.'
+    }
+  }
   if (error && typeof error === 'object' && 'response' in error) {
     const axiosError = error as APIError & { code?: string }
     const errorData = axiosError.response?.data?.error

@@ -1,5 +1,8 @@
 /**
  * Constantes de thème pour l'application (mode sombre).
+ *
+ * Typographie responsive : `index.css` (base `html` + champs globaux), `theme/uiTypography.ts`
+ * (échelle rem pour styles inline), `theme/responsiveChrome.ts` (onglets / panneaux / graphe).
  */
 
 export const theme = {
@@ -82,6 +85,12 @@ export const theme = {
       background: '#3a3a1a',
       color: '#ffd43b',
       border: '#ffc107',
+    },
+    /** Contradictions lore explicites (FR38) — distinct structure / complétude */
+    lore: {
+      background: '#2a1f38',
+      color: '#e9d5ff',
+      border: '#c084fc',
     },
     selected: {
       background: '#1a3a5a',

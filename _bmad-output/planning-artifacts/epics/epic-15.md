@@ -12,6 +12,51 @@ Les utilisateurs peuvent activer/désactiver la sélection automatique via toggl
 
 **Dépendances:** Aucune (service optionnel, peut être développé indépendamment). Compatible Epic 3 (Gestion contexte narratif GDD) mais ne bloque pas.
 
+---
+
+## Contexte GDD Alteir — Ce que le RLM doit explorer
+
+Source : `gdd-systems-reference.md`. Le GDD Alteir contient deux types de données fondamentalement différents que le `GDDToolsProvider` doit exposer au LLM.
+
+### Deux catégories de données GDD
+
+**1. Entités narratives (fiches)** — déjà présentes dans `data/GDD_categories/`
+- Personnages, Lieux, Espèces, Communautés, Objets, Factions
+- Structurées avec sections (`sections.Relations`, `sections.Cosmologie`, etc.)
+- Accessibles via `get_node(id)`, `search_bm25(query)`, `get_related(id)`
+
+**2. Pages systèmes** — dans Notion, partiellement dans `data/GDD_categories/`
+- `Game_Design.json` : 11 systèmes validés (Dialogues, Réputation, Core System, Effort, Déplacements, etc.)
+- `Flags.json` + `Valeurs_de_Flag.json` : catalogue de 343 flags avec scopes/types
+- `Rappel_du_Core_System.json` : 8 caractéristiques, formule Effort pool
+
+**→ Le `GDDToolsProvider` doit exposer les deux catégories via ses outils.**
+
+### Outils GDD critiques pour le contexte dialogue
+
+| Outil | Usage RLM | Données sources |
+|-------|-----------|-----------------|
+| `schema_overview()` | Vue d'ensemble des types disponibles (entités + systèmes) | Catégories GDD |
+| `list_ids(type="Flags", where_field_exists="Flag_perso_*")` | Trouver les flags d'un PNJ | `Flags.json` |
+| `get_related(id, relation_keys=["Flags"])` | Flags liés à un personnage | Relations GDD |
+| `search_bm25("réputation Admiration Prestige Crainte")` | Pages pertinentes sur la réputation | `Game_Design.json` |
+| `get_snippet(id, field="Caractéristiques", around="Sociabilité")` | Extrait autour d'une caractéristique | `Rappel_du_Core_System.json` |
+
+### Règle RLM pour le contexte dialogue (Epic 15 spécifique)
+
+Quand `user_instructions` contient des termes liés aux systèmes de jeu (ex: "flag", "réputation", "test de caractéristique", "cut-scene", "compteur"), le RLM doit :
+1. **Toujours inclure** les pages système pertinentes (`Game_Design`, `Flags`, `Rappel_du_Core_System`) dans `selected_elements`
+2. Annoter ces inclusions avec `justification.reason = "system_page_required"` (pas `hint_explicit`)
+3. Cibler les **extraits** via `get_snippet` plutôt que les pages complètes (réduction tokens)
+
+### Réduction tokens cible avec données système
+
+- Fiche personnage complète : ~3k tokens → avec `section_filters` : ~800 tokens
+- Page système complète (ex: Réputation) : ~5k tokens → snippet pertinent : ~400 tokens
+- **Objectif Phase 1** : 20k+ → 12-15k en incluant ~2 fiches narratives + ~2 snippets système
+
+---
+
 **Implementation Priority:** Epic 15 Story 1 = Service RLM `RLMContextSelector` + Outils GDD `GDDToolsProvider` - **FONDATION** pour toutes les autres stories
 
 **Related ADR:** ADR-005 (RLM Context Selector - Autonomous Context Selection)
@@ -103,6 +148,8 @@ So that **je réduis la friction de sélection manuelle et j'obtiens un contexte
 **Given** un service `GDDToolsProvider` existe
 **When** le service expose outils GDD au LLM via function calling
 **Then** les outils suivants sont disponibles : `get_node(id)`, `get_fields(id, fields[])`, `list_ids(type, where_field_exists, limit)`, `schema_overview()`, `search_bm25(query, top_k, filter_type)`, `search_regex(pattern, field, top_k)`, `search_by_key_value(key, value, exact)`, `get_snippet(id, field, max_chars, around)`, `get_related(id, relation_keys, depth)`, `count(filter)`, `group_by(field, filter)`, `build_table(ids, columns)`, `diff(id_a, id_b, fields)`
+**And** `schema_overview()` retourne les deux catégories de données : entités narratives (Personnages, Lieux, etc.) **et** pages système (Game_Design, Flags, Rappel_du_Core_System)
+**And** `list_ids(type="Flags")` est supporté pour accéder au catalogue de 343 flags avec filtres sur scope/type
 
 **Given** le service utilise modèle GPT-5-mini pour sélection (coût réduit)
 **When** le service explore le GDD
@@ -120,6 +167,8 @@ So that **je réduis la friction de sélection manuelle et j'obtiens un contexte
 - Backend : Créer `services/gdd_tools_provider.py` avec classe `GDDToolsProvider`
   - Abstraction pour exposer outils GDD au LLM via function calling
   - Outils disponibles : `get_node`, `get_fields`, `list_ids`, `schema_overview`, `search_bm25`, `search_regex`, `search_by_key_value`, `get_snippet`, `get_related`, `count`, `group_by`, `build_table`, `diff`
+  - `schema_overview()` doit couvrir les deux catégories : entités narratives + pages système (Game_Design, Flags, Rappel_du_Core_System)
+  - `list_ids(type="Flags")` + filtres scope/type pour accès au catalogue de flags
   - Injection dépendances : `ElementRepository` pour accès GDD
 - Backend : Schémas Pydantic `api/schemas/context.py`
   - `SelectContextRequest` (user_instructions, hints, hints_mode, exclude, expansion_radius, max_tokens_target, seed)
@@ -139,6 +188,11 @@ So that **je réduis la friction de sélection manuelle et j'obtiens un contexte
 - **ElementRepository** : `GDDToolsProvider` utilise `ElementRepository` existant pour accès GDD (pas de duplication)
 - **LLM Client** : `RLMContextSelector` utilise `ILLMClient` existant (via factory) pour appels LLM
 - **Modèle GPT-5-mini** : Utiliser modèle mini pour sélection (coût réduit, qualité suffisante vs génération GPT-5.2)
+
+**Données système GDD Alteir (spécificité projet) :**
+- `Game_Design.json` (11 systèmes), `Flags.json` (343 flags), `Rappel_du_Core_System.json` (8 caractéristiques) sont des sources légitimes pour `GDDToolsProvider`
+- Si `user_instructions` contient des termes système ("flag", "réputation", "test", "cut-scene"), le prompt RLM doit orienter vers `schema_overview()` en premier pour découvrir les pages système disponibles
+- Snippets préférés aux pages complètes pour les pages système (réduction tokens, voir section GDD)
 
 **References:** ADR-005 (RLM Context Selector), FR2-FR3 (Service RLM, Outils GDD), NFR1 (Performance <5s), NFR3 (Reliability fallback gracieux), NFR4 (Testability mocks LLM)
 
@@ -277,7 +331,7 @@ So that **je peux activer/désactiver la sélection automatique et comprendre po
 **Given** les justifications sont affichées (format compact par défaut)
 **When** je clique sur une justification
 **Then** les détails s'affichent on-demand (raison + preuve + trace exploratoire)
-**And** les justifications incluent icône visuelle du type de raison (hint_explicit, deduction_context_cosmologique, mentioned_explicitly, etc.)
+**And** les justifications incluent icône visuelle du type de raison : hint_explicit (✅), deduction_context_cosmologique (🔍), mentioned_explicitly (📝), system_page_required (⚙️ — page système GDD incluse car pertinente au contexte dialogue)
 
 **Given** je désactive le toggle "Auto Selection"
 **When** je lance une sélection de contexte

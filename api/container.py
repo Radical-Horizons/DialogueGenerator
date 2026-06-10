@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from services.dialogue_preview_service import DialoguePreviewService
     from services.gdd_notion_sync_service import GddNotionSyncService
 from core.context.context_builder import ContextBuilder
 from core.prompt.prompt_engine import PromptEngine
@@ -26,6 +27,7 @@ from services.unity_dialogue_generation_service import UnityDialogueGenerationSe
 from services.linked_selector import LinkedSelectorService
 from services.notion_import_service import NotionImportService
 from services.context_rule_service import ContextRuleService
+from services.context_dropping_rules_service import ContextDroppingRulesService
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +66,9 @@ class ServiceContainer:
         self._linked_selector_service: Optional[LinkedSelectorService] = None
         self._notion_import_service: Optional[NotionImportService] = None
         self._context_rule_service: Optional[ContextRuleService] = None
+        self._cd_rules_service: Optional[ContextDroppingRulesService] = None
         self._gdd_notion_sync_service: Optional["GddNotionSyncService"] = None
+        self._dialogue_preview_service: Optional["DialoguePreviewService"] = None
         logger.debug("ServiceContainer initialisé (services à charger au premier accès)")
     
     def get_config_service(self) -> ConfigurationService:
@@ -277,6 +281,22 @@ class ServiceContainer:
             logger.info("NotionImportService initialisé dans le container.")
         return self._notion_import_service
 
+    def get_cd_rules_service(self) -> ContextDroppingRulesService:
+        """Retourne le service de règles anti-context-dropping (Story 4.10).
+
+        Returns:
+            Instance partagée de ``ContextDroppingRulesService`` (singleton container).
+        """
+        if self._cd_rules_service is None:
+            from constants import FilePaths
+
+            root = Path(__file__).resolve().parent.parent
+            self._cd_rules_service = ContextDroppingRulesService(
+                storage_file=root / FilePaths.CONTEXT_DROPPING_RULES_FILE
+            )
+            logger.info("ContextDroppingRulesService initialisé dans le container.")
+        return self._cd_rules_service
+
     def get_context_rule_service(self) -> ContextRuleService:
         """Retourne le service de règles de sélection de contexte GDD.
 
@@ -328,6 +348,19 @@ class ServiceContainer:
 
         root = Path(__file__).resolve().parent.parent
         return resolve_gdd_categories_path(root)
+
+    def get_dialogue_preview_service(self) -> "DialoguePreviewService":
+        """Retourne le service preview document (Story 9.4).
+
+        Returns:
+            Instance singleton de DialoguePreviewService.
+        """
+        if self._dialogue_preview_service is None:
+            from services.dialogue_preview_service import DialoguePreviewService
+
+            self._dialogue_preview_service = DialoguePreviewService()
+            logger.info("DialoguePreviewService initialisé dans le container.")
+        return self._dialogue_preview_service
     
     def get_unity_dialogue_orchestrator(self, request_id: str):
         """Crée un orchestrateur Unity Dialogue avec toutes les dépendances.
@@ -376,5 +409,7 @@ class ServiceContainer:
         self._linked_selector_service = None
         self._notion_import_service = None
         self._context_rule_service = None
+        self._cd_rules_service = None
         self._gdd_notion_sync_service = None
+        self._dialogue_preview_service = None
         logger.info("ServiceContainer réinitialisé (reload détecté).")

@@ -1,5 +1,6 @@
 ---
-workflowType: 'prd'
+
+## workflowType: 'prd'
 date: 2026-01-18
 user_name: Marc
 project_name: DialogueGenerator
@@ -9,7 +10,6 @@ classification:
   epic_priority: "Nice to Have"
   epic_scope: "New Feature - Optional Service"
   phase: "V1 - Post-MVP Enhancement"
----
 
 # Product Requirements Document - RLM Context Selector
 
@@ -37,6 +37,7 @@ classification:
 ### User Success
 
 **Phase 1 (MVP):**
+
 - Réduction friction: Toggle "Auto Selection" à gauche du bouton "Générer" → sélection automatique en 1 clic
 - Réduction tokens: 20k+ → 12-15k tokens sans perte de pertinence mesurable
 - Expliquabilité: Justifications affichées (utilisateur comprend pourquoi élément inclus/exclu)
@@ -45,6 +46,7 @@ classification:
 **Critère de succès:** Utilisateur active toggle et accepte sélection auto >70% du temps (vs sélection manuelle).
 
 **Phase 2 (Amélioration):**
+
 - Granularité chunks ciblés: 6-10k tokens (réduction supplémentaire via field_filters)
 - Cache sélections: TTL 24h (sélections réutilisables)
 - Apprentissage: Système apprend des préférences utilisateur (overrides fréquents)
@@ -54,6 +56,7 @@ classification:
 **Objectif:** Service optionnel nice-to-have pour améliorer expérience utilisateur avancée (power users).
 
 **Métriques Phase 1:**
+
 - Taux activation toggle: >40% utilisateurs
 - Taux override (ajout/force éléments): <30% sélections
 - Réduction tokens moyenne: 15-20k → 12-15k (objectif -25% minimum)
@@ -66,6 +69,7 @@ classification:
 ### MVP (Phase 1)
 
 **Fonctionnalités:**
+
 - Toggle "Auto Selection" dans UI contexte (à gauche du bouton "Générer", panneau de droite)
 - Service RLM `RLMContextSelector` avec sélection autonome (fiches + sous-sections via `section_filters`)
 - Outils GDD exposés au LLM via function calling (`GDDToolsProvider`)
@@ -77,6 +81,7 @@ classification:
 - Fallback gracieux: Si RLM échoue, retourner hints uniquement (pas d'erreur)
 
 **Exclusions MVP:**
+
 - Granularité chunks ciblés (`field_filters` avec `get_relation_chunks`) → Phase 2
 - Cache sélections (TTL 24h) → Phase 2
 - Apprentissage préférences utilisateur → Phase 2
@@ -84,6 +89,7 @@ classification:
 ### Vision (Phase 2)
 
 **Fonctionnalités additionnelles:**
+
 - Granularité chunks ciblés: `field_filters` avec `get_relation_chunks()` (ex: Relations communes entre 2 personnages, 200 tokens vs 2000 tokens)
 - Cache sélections: TTL 24h (hash `user_instructions + sorted(hints) + expansion_radius + max_tokens_target`)
 - Apprentissage utilisateur: Mémoire des préférences (overrides fréquents) pour ajuster suggestions
@@ -266,11 +272,13 @@ classification:
 ## Innovation Analysis
 
 **Paradigme RLM (Recursive Language Models):**
+
 - Innovation: Navigation programmatique du GDD, lecture récursive, mémoire de travail compacte, agrégation progressive.
 - Différenciateur vs RAG classique: Granularité fine (sous-sections → sous-parties), pas juste sélection de fiches.
 - Référence académique: arXiv:2512.24601 (RLM), Hong et al. 2025 (Context Rot).
 
 **Avantage compétitif:**
+
 - Sélection contextuelle intelligente (réduction tokens sans perte pertinence) → meilleure qualité dialogues générés (moins context rot).
 
 ---
@@ -278,6 +286,7 @@ classification:
 ## Project-Type Requirements
 
 **Developer Tool / Web App:**
+
 - Service optionnel (toggle on/off) → pas de breaking changes.
 - Fallback gracieux (sélection manuelle préservée si RLM indisponible).
 - Tests robustes (mocks LLM, mini-GDD) → pas de dépendance LLM réel pour tests unitaires.

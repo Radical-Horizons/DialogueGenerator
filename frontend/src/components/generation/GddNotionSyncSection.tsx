@@ -28,9 +28,13 @@ import {
   type PostGddNotionSyncOptions,
 } from '../../api/gddNotionSync'
 import { GddNotionSyncProgressModal } from './GddNotionSyncProgressModal'
-import { useGddNotionSyncUi } from '../../hooks/useGddNotionSyncUi'
+import { useGddNotionSyncUi, type GddNotionSyncOutcomeTone } from '../../hooks/useGddNotionSyncUi'
 import { useContextStore } from '../../store/contextStore'
 import { theme } from '../../theme'
+import {
+  GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES,
+  isGddNotionSyncSecondaryDatabase,
+} from '../../constants/gddNotionSyncSecondaryDatabases'
 
 function categoryFileMatchesIncluded(categoryFile: string, includedCategories: string[]): boolean {
   const normalized = new Set(
@@ -67,13 +71,43 @@ function refreshContextAfterGddDiskChange(): void {
   st.bumpGddDataRevision()
 }
 
+function gddSyncOutcomeBannerPalette(tone: GddNotionSyncOutcomeTone): {
+  border: string
+  background: string
+  accent: string
+  title: string
+} {
+  if (tone === 'error') {
+    return {
+      border: theme.state.error.border,
+      background: theme.state.error.background,
+      accent: theme.state.error.color,
+      title: 'Synchronisation échouée',
+    }
+  }
+  if (tone === 'warning') {
+    return {
+      border: theme.state.warning.border ?? '#ffc107',
+      background: theme.state.warning.background,
+      accent: theme.state.warning.color,
+      title: 'Synchronisation terminée — action requise',
+    }
+  }
+  return {
+    border: theme.state.success.color,
+    background: theme.state.success.background,
+    accent: theme.state.success.color,
+    title: 'Synchronisation réussie',
+  }
+}
+
 export interface GddNotionSyncSectionProps {
   /** Après mise à jour locale du checkpoint (sync / abandon), rafraîchir l’UI parent (ex. onglet Options). */
   onCheckpointDiskChanged?: () => void
 }
 
 export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncSectionProps) {
-  const { phase, userMessage, run, resetMessage } = useGddNotionSyncUi()
+  const { phase, userMessage, outcomeTone, run, resetMessage } = useGddNotionSyncUi()
   const [serverStatus, setServerStatus] = useState<GddNotionSyncStatusResponse | null>(null)
   const [statusLoadError, setStatusLoadError] = useState<string | null>(null)
 
@@ -226,6 +260,14 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
     setIncludedDbFiles([])
   }, [])
 
+  /** Bases listées comme secondaires dans le dépôt : non cochées par ce raccourci. */
+  const checkEssentialDatabaseSources = useCallback(() => {
+    const secondary = new Set(GDD_NOTION_SYNC_SECONDARY_DATABASE_FILES)
+    setIncludedDbFiles(
+      databaseSources.map((s) => s.category_file).filter((f) => !secondary.has(f)),
+    )
+  }, [databaseSources])
+
   const computeIncludedCategoriesPayload = useCallback((): string[] => {
     const dbs = (config?.sources ?? []).filter((s) => s.kind === 'database')
     const allDbFiles = dbs.map((s) => s.category_file).sort()
@@ -294,7 +336,11 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
           if (r.success) {
             refreshContextAfterGddDiskChange()
           }
-          return { success: r.success, message: r.message }
+          return {
+            success: r.success,
+            message: r.message,
+            softFailure: !r.success && Boolean(r.mirror_promotion_pending),
+          }
         } finally {
           window.clearInterval(poll)
           setProgressOpen(false)
@@ -350,7 +396,7 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
     setNotebooklmExportError(null)
     setNotebooklmExporting(true)
     try {
-      const blob = await getGddNotebooklmExportZip(9)
+      const blob = await getGddNotebooklmExportZip()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -389,6 +435,71 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
         <h3 style={{ margin: '0 0 0.75rem 0', color: theme.text.primary }}>
           Synchronisation GDD (Notion)
         </h3>
+        {(() => {
+          if (!userMessage || phase === 'loading' || !outcomeTone) {
+            return null
+          }
+          const pal = gddSyncOutcomeBannerPalette(outcomeTone)
+          return (
+            <div
+              role="status"
+              aria-live="polite"
+              style={{
+                margin: '0 0 1rem 0',
+                padding: '1rem 1rem 0.9rem',
+                borderRadius: '8px',
+                border: `2px solid ${pal.border}`,
+                backgroundColor: pal.background,
+                boxShadow: theme.shadow.card,
+              }}
+            >
+              <div
+                style={{
+                  color: theme.text.primary,
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  marginBottom: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <span aria-hidden style={{ color: pal.accent, fontSize: '1.15rem' }}>
+                  {outcomeTone === 'error' ? '✕' : outcomeTone === 'warning' ? '!' : '✓'}
+                </span>
+                {pal.title}
+              </div>
+              <p
+                style={{
+                  margin: '0 0 1rem 0',
+                  color: theme.text.primary,
+                  fontSize: '0.92rem',
+                  lineHeight: 1.5,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {userMessage}
+              </p>
+              <button
+                type="button"
+                onClick={resetMessage}
+                style={{
+                  padding: '0.55rem 1.25rem',
+                  borderRadius: '6px',
+                  border: `1px solid ${theme.button.primary.background}`,
+                  backgroundColor: theme.button.primary.background,
+                  color: theme.button.primary.color,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                }}
+              >
+                Fermer ce message
+              </button>
+            </div>
+          )
+        })()}
         <p
           style={{
             margin: '0 0 1rem 0',
@@ -435,10 +546,11 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
               lineHeight: 1.45,
             }}
           >
-            Télécharge un ZIP avec jusqu’à <strong style={{ color: theme.text.primary }}>9 fichiers</strong>{' '}
-            Markdown : le GDD local (bases/pages du périmètre Notion ci-dessous, comme une sync) regroupé par
-            thèmes, plus <code style={{ fontSize: '0.85em' }}>Vision.json</code> en tête du volet univers. Les
-            très gros blocs peuvent être tronqués pour rester exploitables dans NotebookLM.
+            Télécharge un ZIP Markdown : le GDD local (bases/pages du périmètre Notion ci-dessous, comme une
+            sync) regroupé par thèmes, plus <code style={{ fontSize: '0.85em' }}>Vision.json</code> en tête du
+            volet univers. Chaque thème reste sous une limite de taille NotebookLM : les gros regroupements sont
+            découpés en plusieurs fichiers (<code style={{ fontSize: '0.85em' }}>-part02.md</code>, etc.) sans
+            tronquer le texte.
           </p>
           <button
             type="button"
@@ -603,6 +715,18 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                 <strong style={{ color: theme.text.primary }}>que</strong> ces bases — les fiches (sources page) sont
                 alors ignorées sur ce run (évite de parcourir tout le hub). Retirez le filtre pour tout resynchroniser.
                 <br />
+                <strong style={{ color: theme.text.primary }}>Cocher essentiels</strong> : coche toutes les bases sauf
+                celles marquées « secondaire » (liste dans le dépôt, ex. assets, prompts,{' '}
+                <code style={{ fontSize: '0.85em' }}>Caractéristiques_—_Uresaïr_(FP).json</code>) — ce n’est pas un
+                périmètre « jeu minimal », seulement un raccourci pour décocher les tables plutôt outil / hors cœur
+                narratif.
+                <br />
+                <strong style={{ color: theme.text.primary }}>Sync complète (bouton global) avec filtre :</strong> les
+                fichiers (ou dossiers shards) des bases <em>non</em> cochées sont <strong>retirés</strong> du dossier GDD
+                local après promotion du miroir (les fiches page déjà sur disque ne sont pas effacées). Utilisez le
+                bouton <strong>Sync cette base</strong> sur une ligne pour une sync complète <em>uniquement</em> sur cette
+                base sans toucher aux autres.
+                <br />
                 <strong style={{ color: theme.text.primary }}>Sync normale ou complète :</strong> les cases sont
                 enregistrées automatiquement sur le serveur au lancement (inutile de cliquer « Enregistrer » avant).
               </p>
@@ -628,6 +752,15 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                       style={buttonStyle(saving || busy)}
                     >
                       Tout décocher
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!config || saving || busy}
+                      onClick={checkEssentialDatabaseSources}
+                      style={buttonStyle(saving || busy)}
+                      title="Coche toutes les bases sauf la liste « secondaires » du dépôt (voir constante gddNotionSyncSecondaryDatabases)"
+                    >
+                      Cocher essentiels
                     </button>
                   </div>
                   <div
@@ -681,21 +814,38 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
                             />
                             <span style={{ wordBreak: 'break-word' }}>
                               <span style={{ fontWeight: 600 }}>{s.category_file}</span>
+                              {isGddNotionSyncSecondaryDatabase(s.category_file) ? (
+                                <span style={{ color: theme.text.secondary, fontSize: '0.78rem' }}>
+                                  {' '}
+                                  (secondaire)
+                                </span>
+                              ) : null}
                               <span style={{ color: theme.text.secondary, fontSize: '0.8rem' }}>
                                 {' '}
                                 · {s.notion_id}
                               </span>
                             </span>
                           </label>
-                          <button
-                            type="button"
-                            disabled={!config || saving || busy || previewLoading}
-                            onClick={() => void runPreviewOneRow(s.category_file)}
-                            style={buttonStyle(saving || busy || previewLoading)}
-                            title="Récupère la première ligne Notion et le JSON mappé (comme la sync)"
-                          >
-                            Tester 1 ligne
-                          </button>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                            <button
+                              type="button"
+                              disabled={!config || saving || busy || previewLoading}
+                              onClick={() => void runPreviewOneRow(s.category_file)}
+                              style={buttonStyle(saving || busy || previewLoading)}
+                              title="Récupère la première ligne Notion et le JSON mappé (comme la sync)"
+                            >
+                              Tester 1 ligne
+                            </button>
+                            <button
+                              type="button"
+                              disabled={!config || saving || busy}
+                              onClick={() => runGddSync(true, { categoryFiles: [s.category_file] })}
+                              style={buttonStyle(saving || busy)}
+                              title="Sync complète miroir pour cette base seule ; n’efface pas les autres bases du disque"
+                            >
+                              Sync cette base
+                            </button>
+                          </div>
                         </div>
                       )
                     })}
@@ -882,43 +1032,98 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
             </p>
           ) : null}
           {!checkpointBannerError && checkpoint?.resumable && !busy ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => runGddSync(true, { resume: true })}
-                style={buttonStyle(busy, true)}
-              >
-                Reprendre la sync
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => runGddSync(true, { fresh: true })}
-                style={buttonStyle(busy)}
-              >
-                Tout recommencer
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  void (async () => {
-                    try {
-                      await deleteGddFullSyncCheckpoint()
-                      await refreshCheckpoint()
-                      onCheckpointDiskChanged?.()
-                    } catch (e) {
-                      setCheckpointBannerError(
-                        e instanceof Error ? e.message : 'Abandon du checkpoint impossible',
-                      )
-                    }
-                  })()
-                }
-                style={buttonStyle(busy)}
-              >
-                Abandonner (checkpoint + staging)
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {checkpoint.mirror_promotion_pending ? (
+                <div
+                  style={{
+                    padding: '0.55rem 0.65rem',
+                    borderRadius: '6px',
+                    border: `1px solid ${theme.state.warning.color}`,
+                    backgroundColor: theme.background.secondary,
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: '0 0 0.45rem 0',
+                      color: theme.state.warning.color,
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Miroir prêt mais non appliqué (erreurs Notion sur certaines bases)
+                  </p>
+                  <p style={{ margin: '0 0 0.45rem 0', color: theme.text.secondary, fontSize: '0.82rem' }}>
+                    Vous pouvez appliquer le contenu déjà récupéré : les bases absentes du staging restent
+                    inchangées sur disque. Ou reprendre pour retenter les appels Notion.
+                  </p>
+                  {serverStatus?.partial_errors?.length ? (
+                    <ul
+                      style={{
+                        margin: '0 0 0.5rem 1rem',
+                        padding: 0,
+                        color: theme.text.primary,
+                        fontSize: '0.78rem',
+                        maxHeight: '8rem',
+                        overflowY: 'auto',
+                      }}
+                    >
+                      {serverStatus.partial_errors.map((line) => (
+                        <li key={line} style={{ marginBottom: '0.25rem' }}>
+                          {line}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => runGddSync(true, { applyStagingDespiteErrors: true })}
+                      style={buttonStyle(busy, true)}
+                    >
+                      Appliquer le miroir malgré tout
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => runGddSync(true, { resume: true })}
+                  style={buttonStyle(busy, true)}
+                >
+                  Reprendre la sync
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => runGddSync(true, { fresh: true })}
+                  style={buttonStyle(busy)}
+                >
+                  Tout recommencer
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() =>
+                    void (async () => {
+                      try {
+                        await deleteGddFullSyncCheckpoint()
+                        await refreshCheckpoint()
+                        onCheckpointDiskChanged?.()
+                      } catch (e) {
+                        setCheckpointBannerError(
+                          e instanceof Error ? e.message : 'Abandon du checkpoint impossible',
+                        )
+                      }
+                    })()
+                  }
+                  style={buttonStyle(busy)}
+                >
+                  Abandonner (checkpoint + staging)
+                </button>
+              </div>
             </div>
           ) : null}
           {!checkpointBannerError &&
@@ -1098,33 +1303,6 @@ export function GddNotionSyncSection({ onCheckpointDiskChanged }: GddNotionSyncS
             </div>
           )}
         </div>
-        {userMessage && (
-          <p
-            style={{
-              margin: '0 0 0.5rem 0',
-              color: phase === 'error' ? theme.state.error.color : theme.text.secondary,
-              fontSize: '0.9rem',
-            }}
-          >
-            {userMessage}
-            {phase !== 'idle' && phase !== 'loading' && (
-              <button
-                type="button"
-                onClick={resetMessage}
-                style={{
-                  marginLeft: '0.5rem',
-                  border: 'none',
-                  background: 'transparent',
-                  color: theme.text.secondary,
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
-              >
-                Fermer
-              </button>
-            )}
-          </p>
-        )}
         {statusLoadError && (
           <p
             style={{

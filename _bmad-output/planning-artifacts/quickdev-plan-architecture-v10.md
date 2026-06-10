@@ -1,6 +1,7 @@
 # Plan Quickdev — Architecture V1.0 (ADRs + State + Graph)
 
 **Références :**
+
 - `_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md`
 - `docs/architecture/state-management-frontend.md`
 - `docs/architecture/graph-conversion-architecture.md`
@@ -13,12 +14,14 @@
 
 Un quickdev doit rester **court** (1–2 ADRs ou une tranche verticale). Options par ordre de priorité :
 
-| Option | ADR / thème | Effort estimé | Impact |
-|--------|-------------|--------------|--------|
-| **A** | ADR-003 (DisplayName vs stableID) | 1 session | Critique : stabilité graphe, régression évitée |
-| **B** | ADR-001 (Modal streaming LLM) | 1–2 sessions | UX critique : feedback pendant génération |
-| **C** | ADR-006 Phase 1 (seq + écriture atomique backend) | 1 session | Résilience : pas de fichier tronqué, pas d’écrasement récent |
-| **D** | Consolidation Graph (SoT + export canonique) | 0,5 session | Vérifier que tout passe par API `/save` ; pas de `exportToUnity()` pour persistance |
+
+| Option | ADR / thème                                       | Effort estimé | Impact                                                                              |
+| ------ | ------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------- |
+| **A**  | ADR-003 (DisplayName vs stableID)                 | 1 session     | Critique : stabilité graphe, régression évitée                                      |
+| **B**  | ADR-001 (Modal streaming LLM)                     | 1–2 sessions  | UX critique : feedback pendant génération                                           |
+| **C**  | ADR-006 Phase 1 (seq + écriture atomique backend) | 1 session     | Résilience : pas de fichier tronqué, pas d’écrasement récent                        |
+| **D**  | Consolidation Graph (SoT + export canonique)      | 0,5 session   | Vérifier que tout passe par API `/save` ; pas de `exportToUnity()` pour persistance |
+
 
 **Recommandation quickdev unique :** **Option A (ADR-003)** — correctif bien délimité, AC et tests déjà décrits dans l’ADR.
 
@@ -43,29 +46,26 @@ Un quickdev doit rester **court** (1–2 ADRs ou une tranche verticale). Options
 ### 2.3 Tâches dans l’ordre
 
 1. **StableID partout côté front**
-   - Garantir que tout nœud (dialogue, test, end) a un `stableID` (génération UUID si absent).
-   - Dans le store : `nodes` indexés par `stableID` ; `node.id` = `stableID` pour React Flow.
-   - `data.displayName` = libellé éditable (sans modifier `id`).
-
+  - Garantir que tout nœud (dialogue, test, end) a un `stableID` (génération UUID si absent).
+  - Dans le store : `nodes` indexés par `stableID` ; `node.id` = `stableID` pour React Flow.
+  - `data.displayName` = libellé éditable (sans modifier `id`).
 2. **Migration données existantes**
-   - Au chargement (JSON Unity → graph) : si un nœud n’a pas de `stableID`, en générer un et le persister côté backend si le format le permet, ou au moins en mémoire/localStorage pour la session.
-   - Script ou logique de migration : graphes existants (fichiers déjà ouverts) reçoivent des `stableID` à la première sauvegarde.
-
+  - Au chargement (JSON Unity → graph) : si un nœud n’a pas de `stableID`, en générer un et le persister côté backend si le format le permet, ou au moins en mémoire/localStorage pour la session.
+  - Script ou logique de migration : graphes existants (fichiers déjà ouverts) reçoivent des `stableID` à la première sauvegarde.
 3. **Renommage = displayName uniquement**
-   - Renommer un dialogue ne change jamais `node.id` ni les edges ; seule `data.displayName` (et champ métier côté Unity si applicable) est mise à jour.
-   - Vérifier `ChoiceEditor`, `NodeEditorPanel` : pas d’utilisation de `displayName` comme clé de liaison.
-
+  - Renommer un dialogue ne change jamais `node.id` ni les edges ; seule `data.displayName` (et champ métier côté Unity si applicable) est mise à jour.
+  - Vérifier `ChoiceEditor`, `NodeEditorPanel` : pas d’utilisation de `displayName` comme clé de liaison.
 4. **Tests**
-   - Unité : génération `stableID` (unicité), mapping node.id ↔ stableID.
-   - Intégration : sérialisation/désérialisation graphe (load/save) avec stableID.
-   - E2E : renommer un dialogue → connexions et sauvegarde intactes.
+  - Unité : génération `stableID` (unicité), mapping node.id ↔ stableID.
+  - Intégration : sérialisation/désérialisation graphe (load/save) avec stableID.
+  - E2E : renommer un dialogue → connexions et sauvegarde intactes.
 
 ### 2.4 Critères d’acceptation (ADR-003)
 
-- [ ] `node.id` utilise `stableID` (UUID) partout dans React Flow.
-- [ ] Renommer un dialogue préserve toutes les connexions.
-- [ ] Aucun graphe existant corrompu après migration (backward compatibility).
-- [ ] Tests de régression pour collisions displayName (deux nœuds même nom ≠ même id).
+- `node.id` utilise `stableID` (UUID) partout dans React Flow.
+- Renommer un dialogue préserve toutes les connexions.
+- Aucun graphe existant corrompu après migration (backward compatibility).
+- Tests de régression pour collisions displayName (deux nœuds même nom ≠ même id).
 
 ### 2.5 Contraintes (rappels architecture)
 

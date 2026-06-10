@@ -10,7 +10,7 @@ from api.dependencies import (
     get_token_estimation_service,
     get_llm_pricing_service,
 )
-from api.routers.graph import _estimate_cost_cache
+from api.routers.graph_cost import _estimate_cost_cache
 from services.configuration_service import ConfigurationService
 from services.token_estimation_service import TokenEstimationService
 from services.llm_pricing_service import LLMPricingService

@@ -57,6 +57,11 @@ playwright-report/
 playwright/.cache/
 e2e/.auth/
 
+# BMAD / Cursor — état éphémère chaîne AUTO (create-story auto → dev-story → code-review → 1)
+.bmad-auto-chain.pending.json
+.cursor/hooks/bmad-hook-last-run.json
+.cursor/hooks/bmad-chain-debug.log
+
 # Cursor IDE — plans et prefs machine (ne pas versionner)
 # Note: `.cursor/hooks/` est versionné (scripts BMAD / chaîne Cursor) pour rester aligné avec hooks.json.
 .cursor/plans/
@@ -101,7 +106,9 @@ data/GDD_entity_history/
 data/GDD_categories/.archive/
 data/GDD_categories/.staging/
 data/interactions/
-data/UnityData/
+# UnityData : tout ignorer sauf le catalogue flags versionné pour FR89 / pipeline mécaniques.
+data/UnityData/*
+!data/UnityData/FlagCatalog.csv
 
 # Dialogue JSON (générés / sortie Unity)
 Assets/Dialogue/*.json

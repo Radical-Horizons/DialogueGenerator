@@ -51,12 +51,15 @@ class ContextFieldsResponse(BaseModel):
         element_type: Type d'élément (character, location, etc.).
         fields: Dictionnaire des informations sur les champs (clé = path du champ).
         total: Nombre total de champs.
-        unique_fields_by_item: Nombre de fiches avec des champs uniques.
+        unique_fields_by_item: Champs uniques regroupés par fiche.
     """
     element_type: str = Field(..., description="Type d'élément")
     fields: Dict[str, FieldInfo] = Field(default_factory=dict, description="Dictionnaire des champs de contexte")
     total: int = Field(..., description="Nombre total de champs")
-    unique_fields_by_item: int = Field(default=0, description="Nombre de fiches avec des champs uniques")
+    unique_fields_by_item: Dict[str, Dict[str, str]] = Field(
+        default_factory=dict,
+        description="Champs uniques regroupés par fiche",
+    )
 
 
 class ContextFieldSuggestionsRequest(BaseModel):

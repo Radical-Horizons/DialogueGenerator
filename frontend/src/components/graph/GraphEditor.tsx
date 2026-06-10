@@ -7,24 +7,44 @@ import { useCallback, useMemo } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import { useQueryClient } from '@tanstack/react-query'
 import { UnityDialogueList } from '../unityDialogues/UnityDialogueList'
+import { DialogueCombobox } from '../unityDialogues/DialogueCombobox'
 import { GraphCanvas } from './GraphCanvas'
-import { GraphSearchBar } from './GraphSearchBar'
 import { JumpToNodeModal } from './JumpToNodeModal'
 import { GraphFiltersPanel } from './GraphFiltersPanel'
+import { GraphSearchBar } from './GraphSearchBar'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { GraphValidationPanel } from './GraphValidationPanel'
+import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
+import { GraphAiSlopPanel } from './GraphAiSlopPanel'
+import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
+import { FlowSimulationPanel } from './FlowSimulationPanel'
+import { DialoguePreviewPanel } from './preview/DialoguePreviewPanel'
+import { DialoguePreviewBanner } from './preview/DialoguePreviewBanner'
+import { GameSystemsIntegrationPanel } from './systems/GameSystemsIntegrationPanel'
+import { SchemaValidationPanel } from './SchemaValidationPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useToast, ConfirmDialog } from '../shared'
 import { theme } from '../../theme'
+import {
+  unityDialogueListColumnStyle,
+  unityDialogueWorkspaceColumnStyle,
+} from '../../theme/unityDialogueListShell'
 import { resolveGraphRouteTarget } from './graphEditorStandalone'
 import { useDialogueLoader } from '../../hooks/useDialogueLoader'
 import { useGraphToolbar } from '../../hooks/useGraphToolbar'
+import { useDialoguePreview } from '../../hooks/useDialoguePreview'
 import { useBatchOperations } from '../../hooks/useBatchOperations'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import {
+  GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+  PANEL_COMFORT_MIN_WIDTH_PX,
+} from '../../theme/responsiveChrome'
 import type { UnityDialogueMetadata } from '../../types/api'
 
 interface GraphEditorProps {
@@ -53,7 +73,6 @@ export function GraphEditor({
     setSelectedDialogue,
     isLoadingDialogue,
     activeDialogueFilename,
-    activeDialogueTitle,
     hasActiveDialogue,
     handleSave,
     dialogueListRef,
@@ -64,29 +83,78 @@ export function GraphEditor({
     selectedNodeId,
     selectedNodeIds,
     validationErrors: graphValidationErrors,
+    loreExplicitValidationSummary,
     isLoading: isGraphLoading,
+    documentId: graphDocumentId,
   } = useGraphStore()
 
+  const loreDialogueScopeKey = activeDialogueFilename ?? graphDocumentId ?? 'untitled'
+
   const toolbar = useGraphToolbar(toast, activeDialogueFilename, handleSave, isLoadingDialogue)
+  const { ref: workspaceRef, isNarrow: isWorkspaceNarrow } = useNarrowInlineSize(
+    GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
+    { measureParentClientWidth: true }
+  )
+  const {
+    ref: graphEditorContainerRef,
+    isNarrow: isGraphEditorNarrow,
+  } = useNarrowInlineSize(PANEL_COMFORT_MIN_WIDTH_PX)
+
+  const { enterDialoguePreview, exitDialoguePreview } = useDialoguePreview()
+  const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const visibilityEvalStateBanner = useGraphViewStore((s) => s.visibilityEvalState)
 
   const {
     showValidationPanel,
+    showQualityLlmPanel,
+    showAiSlopPanel,
+    showContextDroppingPanel,
+    showFlowSimulationPanel,
+    showDialoguePreviewPanel,
+    setShowDialoguePreviewPanel,
+    showGameSystemsIntegrationPanel,
+    setShowGameSystemsIntegrationPanel,
+    showSchemaValidationPanel,
+    schemaValidationLoading,
+    schemaValidationIsValid,
+    schemaValidationErrors,
+    schemaValidationErrorCount,
+    handleToggleSchemaValidation,
+    handleSchemaErrorClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showAIGenerationPanel,
     setShowAIGenerationPanel,
     showExportFormatDialog,
     setShowExportFormatDialog,
-    showSearchBar,
     showJumpToNodeModal,
     setShowJumpToNodeModal,
     showFiltersPanel,
     setShowFiltersPanel,
     actionsDropdownBtnRef,
-    reactFlowInstance,
     handleExportPNG,
     handleExportSVG,
   } = toolbar
+
+  const handleToggleDialoguePreview = useCallback(() => {
+    if (showDialoguePreviewPanel) {
+      exitDialoguePreview()
+      setShowDialoguePreviewPanel(false)
+    } else {
+      enterDialoguePreview()
+      setShowDialoguePreviewPanel(true)
+    }
+  }, [
+    showDialoguePreviewPanel,
+    exitDialoguePreview,
+    enterDialoguePreview,
+    setShowDialoguePreviewPanel,
+  ])
+
+  const handleCloseDialoguePreviewPanel = useCallback(() => {
+    exitDialoguePreview()
+    setShowDialoguePreviewPanel(false)
+  }, [exitDialoguePreview, setShowDialoguePreviewPanel])
 
   const {
     selectedNodeIdsToDelete,
@@ -101,6 +169,11 @@ export function GraphEditor({
 
   const canEditGraph = hasActiveDialogue && !isGraphLoading && !isLoadingDialogue
 
+  /** Lore explicite peut n’ajouter aucune entrée dans validationErrors (graphe OK) : afficher quand même le résumé. */
+  const showValidationOverlay =
+    showValidationPanel &&
+    (graphValidationErrors.length > 0 || Boolean(loreExplicitValidationSummary))
+
   const handleSelectDialogue = useCallback(
     (dialogue: UnityDialogueMetadata | null) => {
       setSelectedDialogue(dialogue)
@@ -114,51 +187,41 @@ export function GraphEditor({
   return (
     <div
       data-testid="graph-editor"
+      ref={graphEditorContainerRef}
       style={{
         display: 'flex',
         height: '100%',
+        width: '100%',
+        minWidth: 0,
         minHeight: 0,
         overflow: 'hidden',
         flex: 1,
       }}
     >
-      {/* Panneau gauche : Liste des dialogues */}
-      <div
-        style={{
-          width: 'clamp(260px, 22vw, 340px)',
-          minWidth: '240px',
-          borderRight: `1px solid ${theme.border.primary}`,
-          overflow: 'hidden',
-          backgroundColor: theme.background.panel,
-          height: '100%',
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <UnityDialogueList
-          ref={dialogueListRef}
-          onSelectDialogue={handleSelectDialogue}
-          selectedFilename={activeDialogueFilename || null}
-        />
-      </div>
+      {/* Panneau gauche : Liste des dialogues (≤25 % ; droit prioritaire ~75 %) — caché en narrow (Story 17.7) */}
+      {!isGraphEditorNarrow && (
+        <div style={{ ...unityDialogueListColumnStyle, height: '100%' }}>
+          <UnityDialogueList
+            ref={dialogueListRef}
+            onSelectDialogue={handleSelectDialogue}
+            selectedFilename={activeDialogueFilename || null}
+          />
+        </div>
+      )}
 
       {/* Panneau droit : Graphe */}
       <div
         style={{
-          flex: 1,
-          minHeight: 0,
-          overflow: 'hidden',
-          backgroundColor: theme.background.panel,
+          ...unityDialogueWorkspaceColumnStyle,
           display: 'flex',
           flexDirection: 'column',
         }}
+        ref={workspaceRef}
       >
         <GraphEditorHeader
           toolbar={toolbar}
           isLoadingDialogue={isLoadingDialogue}
           hasActiveDialogue={hasActiveDialogue}
-          activeDialogueTitle={activeDialogueTitle ?? null}
           activeDialogueFilename={activeDialogueFilename}
           handleSave={handleSave}
           onBatchTagApply={handleBatchTagSelection}
@@ -167,6 +230,17 @@ export function GraphEditor({
           canEditGraph={canEditGraph}
           isStandalone={isStandalone}
           onBack={onBack}
+          showDialoguePreviewPanel={showDialoguePreviewPanel}
+          onToggleDialoguePreview={handleToggleDialoguePreview}
+          headerSelector={
+            isGraphEditorNarrow ? (
+              <DialogueCombobox
+                ref={dialogueListRef}
+                selectedFilename={activeDialogueFilename || null}
+                onSelect={handleSelectDialogue}
+              />
+            ) : undefined
+          }
         />
 
         {/* Contenu graphe */}
@@ -220,28 +294,75 @@ export function GraphEditor({
                 Chargement du graphe...
               </div>
             ) : (
-              <div
-                data-testid="graph-canvas"
-                style={{ flex: 1, minHeight: 400, overflow: 'hidden', position: 'relative' }}
-              >
-                {showSearchBar && (
+              <>
+                {dialoguePreviewActive ? (
+                  <DialoguePreviewBanner visibilityEvalState={visibilityEvalStateBanner} />
+                ) : null}
+                <div
+                  data-testid="graph-canvas"
+                  style={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}
+                >
+                {toolbar.showSearchBar && !isWorkspaceNarrow && (
                   <GraphSearchBar
                     onClose={() => {
                       toolbar.setShowSearchBar(false)
                     }}
                   />
                 )}
-                <ReactFlowProvider>
-                  <GraphCanvas />
-                </ReactFlowProvider>
-              </div>
+                  <ReactFlowProvider>
+                    <GraphCanvas />
+                  </ReactFlowProvider>
+                </div>
+                  {showDialoguePreviewPanel ? (
+                    <DialoguePreviewPanel onClose={handleCloseDialoguePreviewPanel} />
+                  ) : null}
+                  {showGameSystemsIntegrationPanel ? (
+                    <GameSystemsIntegrationPanel
+                      onClose={() => setShowGameSystemsIntegrationPanel(false)}
+                    />
+                  ) : null}
+              </>
             )}
-            {showValidationPanel && graphValidationErrors.length > 0 && (
+            {showValidationOverlay && (
               <GraphValidationPanel
                 validationErrors={graphValidationErrors}
-                reactFlowInstance={reactFlowInstance}
+                loreExplicitSummary={loreExplicitValidationSummary}
+                loreDialogueScopeKey={loreDialogueScopeKey}
+                onClose={() => toolbar.setShowValidationPanel(false)}
               />
             )}
+            {showQualityLlmPanel && (
+              <GraphQualityLlmPanel
+                onClose={() => toolbar.setShowQualityLlmPanel(false)}
+              />
+            )}
+            {showAiSlopPanel && (
+              <GraphAiSlopPanel onClose={() => toolbar.setShowAiSlopPanel(false)} />
+            )}
+            {showContextDroppingPanel && (
+              <GraphContextDroppingPanel
+                onClose={() => toolbar.setShowContextDroppingPanel(false)}
+              />
+            )}
+            {showFlowSimulationPanel && (
+              <FlowSimulationPanel
+                onClose={() => toolbar.setShowFlowSimulationPanel(false)}
+              />
+            )}
+            <SchemaValidationPanel
+              isOpen={showSchemaValidationPanel}
+              isLoading={schemaValidationLoading}
+              isValid={schemaValidationIsValid}
+              errors={schemaValidationErrors}
+              errorCount={schemaValidationErrorCount}
+              onClose={handleToggleSchemaValidation}
+              onErrorClick={handleSchemaErrorClick}
+            />
             {showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal
                 filename={activeDialogueFilename}

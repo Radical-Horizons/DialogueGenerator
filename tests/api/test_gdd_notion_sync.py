@@ -96,7 +96,7 @@ def test_preview_database_row_ok(client: TestClient, tmp_path: Path) -> None:
             "sources": [
                 {
                     "kind": "database",
-                    "notion_id": "2766e4d2-1b45-8073-b9e3-fa39ae137938",
+                    "notion_id": "1886e4d2-1b45-81df-8b05-fcdd43604be5",
                     "category_file": "Dialogues.json",
                 },
             ],
@@ -203,6 +203,22 @@ def test_post_sync_and_get_status(client: TestClient, tmp_path: Path) -> None:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
 
 
+def test_post_sync_scope_category_file_rejects_resume(client: TestClient, tmp_path: Path) -> None:
+    """category_file + resume=true → 400 (périmètre checkpoint incompatible)."""
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync?full=true&resume=true&category_file=Esp%C3%A8ces.json",
+        )
+        assert r.status_code == 400
+        payload = r.json()
+        msg = str(payload.get("detail") or payload.get("error", {}).get("message") or "").lower()
+        assert "category_file" in msg
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
 def test_post_sync_full_query_param(client: TestClient, tmp_path: Path) -> None:
     pid = "1886e4d2-1b45-8039-b51b-eb3826fce1b5"
 
@@ -287,7 +303,17 @@ def test_put_config_invalid_source(client: TestClient, tmp_path: Path) -> None:
 
 def test_post_sync_mirror_rebuild_without_full_is_ignored(client: TestClient, tmp_path: Path) -> None:
     """mirror_rebuild est déprécié : sans full=true, sync incrémentale (pas 400)."""
-    svc = _build_service(tmp_path)
+    # Token fichier requis : sans lui, CI (sans NOTION_API_KEY) échoue avant le corps sync.
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    gdd = tmp_path / "gdd"
+    gdd.mkdir(parents=True, exist_ok=True)
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd,
+        status_path=tmp_path / "status.json",
+    )
     app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
     try:
         r = client.post("/api/v1/gdd-notion-sync/sync?mirror_rebuild=true")
@@ -408,6 +434,32 @@ def test_sync_resume_requires_full(client: TestClient, tmp_path: Path) -> None:
     app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
     try:
         r = client.post("/api/v1/gdd-notion-sync/sync", params={"resume": True})
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_apply_staging_despite_errors_requires_full(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync",
+            params={"apply_staging_despite_errors": True},
+        )
+        assert r.status_code == 400
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_apply_staging_despite_errors_conflicts_resume(client: TestClient, tmp_path: Path) -> None:
+    svc = _build_service(tmp_path)
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync",
+            params={"full": True, "resume": True, "apply_staging_despite_errors": True},
+        )
         assert r.status_code == 400
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

@@ -15,8 +15,10 @@ import { useGraphViewStore } from '../../store/graphViewStore'
 import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
+import { StyledSelect } from '../shared/StyledSelect'
 import * as configAPI from '../../api/config'
 import type { LLMModelResponse } from '../../types/api'
 import {
@@ -43,6 +45,7 @@ import {
   applyLinearNextNodeFromGraphEdges,
 } from '../../utils/mergeNodeEditorForm'
 import { ChoiceEditor } from './ChoiceEditor'
+import { ConditionEditor } from './conditions/ConditionEditor'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
@@ -130,10 +133,49 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const isFlushingRef = useRef(false)
   const previousSelectedNodeIdRef = useRef<string | null>(null)
   const debouncePushRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const selectedNodeIdRef = useRef<string | null>(selectedNodeId ?? null)
+  const nodeTypeRef = useRef(nodeType)
+  const flushCurrentFormToStoreRef = useRef<() => void>(() => {})
   /** Dernière empreinte des champs « connexion » du nœud sélectionné (évite resync inutile + boucles). */
   const prevConnectionFingerprintRef = useRef<string>('')
 
   const DEBOUNCE_MS = 100
+
+  selectedNodeIdRef.current = selectedNodeId ?? null
+  nodeTypeRef.current = nodeType
+
+  const flushFormToStore = useCallback((nodeId: string, targetNodeType: string) => {
+    const state = useGraphStore.getState()
+    const node = state.nodes.find((n) => n.id === nodeId)
+    if (!node?.data) return
+    const formValues = form.getValues()
+    let merged = mergeNodeFormIntoStoreData(
+      targetNodeType,
+      node.data as Record<string, unknown>,
+      formValues
+    )
+    if (targetNodeType === 'dialogueNode') {
+      merged = applyLinearNextNodeFromGraphEdges(nodeId, merged, state.edges)
+    }
+    if (JSON.stringify(merged) === JSON.stringify(node.data)) return
+    updateNode(nodeId, { data: merged })
+  }, [form, updateNode])
+
+  flushCurrentFormToStoreRef.current = () => {
+    const currentId = selectedNodeIdRef.current
+    if (!currentId) return
+    flushFormToStore(currentId, nodeTypeRef.current)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debouncePushRef.current) {
+        clearTimeout(debouncePushRef.current)
+        debouncePushRef.current = null
+      }
+      flushCurrentFormToStoreRef.current()
+    }
+  }, [])
 
   // ADR-006 : pousser le formulaire vers le store à la saisie (debounce ≤ 100 ms), pas de brouillon.
   // getState() dans le callback : lecture de l'état au moment de l'exécution (après 100 ms), pas dans le render.
@@ -143,20 +185,8 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     if (debouncePushRef.current) clearTimeout(debouncePushRef.current)
     debouncePushRef.current = setTimeout(() => {
       debouncePushRef.current = null
-      const state = useGraphStore.getState()
-      if (state.selectedNodeId !== selectedNodeId) return
-      const node = state.nodes.find((n) => n.id === selectedNodeId)
-      if (!node?.data) return
-      const formValues = form.getValues()
-      let merged = mergeNodeFormIntoStoreData(nodeType, node.data as Record<string, unknown>, formValues)
-      if (nodeType === 'dialogueNode') {
-        merged = applyLinearNextNodeFromGraphEdges(selectedNodeId, merged, state.edges)
-      }
-      // Evite une boucle idle: ne pousse pas au store si le formulaire n'a rien changé.
-      const mergedStr = JSON.stringify(merged)
-      const currentStr = JSON.stringify(node.data)
-      if (mergedStr === currentStr) return
-      updateNode(selectedNodeId, { data: merged })
+      if (useGraphStore.getState().selectedNodeId !== selectedNodeId) return
+      flushFormToStore(selectedNodeId, nodeType)
     }, DEBOUNCE_MS)
     return () => {
       if (debouncePushRef.current) {
@@ -164,7 +194,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         debouncePushRef.current = null
       }
     }
-  }, [watchedValues, selectedNodeId, nodeType, form, updateNode])
+  }, [watchedValues, selectedNodeId, nodeType, flushFormToStore])
 
   // Synchroniser avec le nœud sélectionné ; au changement de nœud, flusher le formulaire vers l’ancien nœud (ADR-006 : filet de sécurité)
   useEffect(() => {
@@ -178,11 +208,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const prevNode = state.nodes.find((n) => n.id === prevId)
       if (prevNode?.data) {
         const prevNodeType = prevNode.type ?? 'dialogueNode'
-        const merged = mergeNodeFormIntoStoreData(
-          prevNodeType,
-          prevNode.data as Record<string, unknown>,
-          values
-        )
+        let merged = mergeNodeFormIntoStoreData(prevNodeType, prevNode.data as Record<string, unknown>, values)
+        if (prevNodeType === 'dialogueNode') {
+          merged = applyLinearNextNodeFromGraphEdges(prevId, merged, state.edges)
+        }
         updateNode(prevId, { data: merged })
       }
       if (debouncePushRef.current) {
@@ -201,6 +230,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           title: (selectedNode.data.title as string) ?? '',
           speaker: selectedNode.data.speaker || '',
           line: selectedNode.data.line || '',
+          visibilityConditions: selectedNode.data.visibilityConditions as
+            | DialogueNodeData['visibilityConditions']
+            | undefined,
           choices,
           nextNode: selectedNode.data.nextNode || '',
         })
@@ -255,6 +287,12 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const merged = applyStoreConnectionFieldsToDialogueFormChoices(storeChoices, formChoices)
       setValue('choices', merged, { shouldDirty: false })
       setValue('nextNode', (selectedNode.data.nextNode as string) || '', { shouldDirty: false })
+      setValue(
+        'visibilityConditions',
+        (selectedNode.data.visibilityConditions as DialogueNodeData['visibilityConditions']) ??
+          undefined,
+        { shouldDirty: false },
+      )
     }
   }, [selectedNodeId, selectedNode, nodeType, form, setValue])
 
@@ -564,7 +602,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             style={{
               display: 'block',
               marginBottom: '0.5rem',
-              fontSize: '0.85rem',
+              fontSize: remSize('accent'),
               fontWeight: 'bold',
               color: theme.text.secondary,
             }}
@@ -582,7 +620,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               borderRadius: 4,
               backgroundColor: theme.background.panel,
               color: theme.text.secondary,
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontFamily: 'monospace',
             }}
           />
@@ -595,7 +633,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -613,7 +651,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
               }}
             />
           </div>
@@ -625,7 +663,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             style={{
               display: 'block',
               marginBottom: '0.5rem',
-              fontSize: '0.85rem',
+              fontSize: remSize('accent'),
               fontWeight: 'bold',
               color: theme.text.secondary,
             }}
@@ -643,7 +681,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               borderRadius: 4,
               backgroundColor: theme.background.panel,
               color: theme.text.secondary,
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
             }}
           />
         </div>
@@ -655,7 +693,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -673,7 +711,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
               }}
             />
           </div>
@@ -686,7 +724,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -704,12 +742,17 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
                 fontFamily: 'inherit',
                 resize: 'vertical',
               }}
             />
           </div>
+        )}
+
+        {/* Story 9.2 — conditions de visibilité (nœud) */}
+        {nodeType === 'dialogueNode' && selectedNodeId && (
+          <ConditionEditor variant="node" />
         )}
         
         {/* Test (pour test nodes) */}
@@ -719,7 +762,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.85rem',
+                fontSize: remSize('accent'),
                 fontWeight: 'bold',
                 color: theme.text.primary,
               }}
@@ -737,19 +780,19 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 borderRadius: 4,
                 backgroundColor: theme.background.tertiary,
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
                 fontFamily: 'monospace',
               }}
             />
             {(errors as FieldErrors<TestNodeData>).test && (
-              <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.state.error.color }}>
+              <div style={{ marginTop: '0.25rem', fontSize: remSize('caption'), color: theme.state.error.color }}>
                 {(errors as FieldErrors<TestNodeData>).test?.message}
               </div>
             )}
             <div
               style={{
                 marginTop: '0.25rem',
-                fontSize: '0.75rem',
+                fontSize: remSize('caption'),
                 color: theme.text.secondary,
                 fontStyle: 'italic',
               }}
@@ -762,7 +805,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         {/* Résultats de test (pour test nodes) */}
         {nodeType === 'testNode' && selectedNodeId && (
           <div style={{ marginBottom: '0.75rem', padding: '0.75rem', backgroundColor: theme.background.secondary, borderRadius: 6, border: `1px solid ${theme.border.primary}` }}>
-            <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', fontWeight: 'bold', color: theme.text.primary }}>
+            <h5 style={{ margin: '0 0 0.75rem 0', fontSize: remSize('accent'), fontWeight: 'bold', color: theme.text.primary }}>
               Connexions de test
             </h5>
             <ConnectionTargetSelect
@@ -810,7 +853,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               border: `1px solid ${theme.border.primary}`,
             }}
           >
-            <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 'bold', color: theme.text.primary }}>
+            <h3 style={{ margin: 0, marginBottom: '0.75rem', fontSize: remSize('section'), fontWeight: 'bold', color: theme.text.primary }}>
               ✨ Génération IA
             </h3>
             <button
@@ -826,7 +869,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 backgroundColor: theme.button.primary.background,
                 color: theme.button.primary.color,
                 cursor: isGenerating ? 'not-allowed' : 'pointer',
-                fontSize: '0.9rem',
+                fontSize: remSize('body'),
                 fontWeight: 'bold',
                 opacity: isGenerating ? 0.7 : 1,
               }}
@@ -865,7 +908,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', color: theme.text.primary }}>
+              <h3 style={{ margin: 0, fontSize: remSize('section'), fontWeight: 'bold', color: theme.text.primary }}>
                 ✨ Génération IA
               </h3>
               <button
@@ -878,7 +921,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                   backgroundColor: showGenerationOptions ? theme.button.primary.background : theme.button.default.background,
                   color: showGenerationOptions ? theme.button.primary.color : theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: remSize('small'),
                 }}
               >
                 {showGenerationOptions ? 'Masquer' : 'Afficher'}
@@ -889,7 +932,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {/* Instructions */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 'bold', color: theme.text.primary }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent'), fontWeight: 'bold', color: theme.text.primary }}>
                     Instructions pour la génération
                   </label>
                   <textarea
@@ -904,7 +947,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       borderRadius: 4,
                       backgroundColor: theme.background.tertiary,
                       color: theme.text.primary,
-                      fontSize: '0.9rem',
+                      fontSize: remSize('body'),
                       fontFamily: 'inherit',
                       resize: 'vertical',
                     }}
@@ -913,10 +956,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                 
                 {/* Modèle LLM */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 'bold', color: theme.text.primary }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: remSize('accent'), fontWeight: 'bold', color: theme.text.primary }}>
                     Modèle LLM
                   </label>
-                  <select
+                  <StyledSelect
                     value={llmModel}
                     onChange={(e) => setLlmModel(e.target.value)}
                     style={{
@@ -926,7 +969,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       borderRadius: 4,
                       backgroundColor: theme.background.tertiary,
                       color: theme.text.primary,
-                      fontSize: '0.9rem',
+                      fontSize: remSize('body'),
                     }}
                   >
                     {availableModels.map((model, index) => (
@@ -934,7 +977,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                         {model.display_name || model.model_identifier}
                       </option>
                     ))}
-                  </select>
+                  </StyledSelect>
                 </div>
                 
                 {/* Estimation unifiée (même composant que panneau Générer nœud) */}
@@ -966,7 +1009,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                       color: theme.button.primary.color,
                       cursor: isGenerating || budgetExceeded ? 'not-allowed' : 'pointer',
                       opacity: isGenerating || budgetExceeded ? 0.6 : 1,
-                      fontSize: '0.9rem',
+                      fontSize: remSize('body'),
                       fontWeight: 'bold',
                     }}
                   >
@@ -993,7 +1036,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
                           color: theme.button.default.color,
                           cursor: isGenerating || budgetExceeded ? 'not-allowed' : 'pointer',
                           opacity: isGenerating || budgetExceeded ? 0.6 : 1,
-                          fontSize: '0.9rem',
+                          fontSize: remSize('body'),
                         }}
                       >
                         {isGenerating
@@ -1029,7 +1072,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               backgroundColor: theme.button.primary.background,
               color: theme.button.primary.color,
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontWeight: 'bold',
             }}
           >
@@ -1046,7 +1089,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               backgroundColor: theme.button.default.background,
               color: theme.text.primary,
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontWeight: 'bold',
             }}
             title="Dupliquer ce nœud"
@@ -1064,7 +1107,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
               backgroundColor: '#E74C3C',
               color: 'white',
               cursor: 'pointer',
-              fontSize: '0.9rem',
+              fontSize: remSize('body'),
               fontWeight: 'bold',
             }}
           >
@@ -1130,6 +1173,8 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
           testCriticalSuccessNode: sc.testCriticalSuccessNode,
           // Préserver choiceId si présent
           choiceId: (sc as Choice & { choiceId?: string })?.choiceId ?? formChoice?.choiceId,
+          visibilityConditions:
+            (sc as Choice).visibilityConditions ?? formChoice?.visibilityConditions,
         }
       }),
     }
@@ -1153,7 +1198,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
         <label
           style={{
             display: 'block',
-            fontSize: '0.85rem',
+            fontSize: remSize('accent'),
             fontWeight: 'bold',
             color: theme.text.primary,
           }}
@@ -1170,7 +1215,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
             backgroundColor: theme.button.default.background,
             color: theme.button.default.color,
             cursor: 'pointer',
-            fontSize: '0.85rem',
+            fontSize: remSize('small'),
           }}
         >
           + Ajouter un choix
@@ -1186,7 +1231,7 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
             border: `1px dashed ${theme.border.primary}`,
             textAlign: 'center',
             color: theme.text.secondary,
-            fontSize: '0.85rem',
+            fontSize: remSize('body'),
           }}
         >
           Aucun choix. Cliquez sur "Ajouter un choix" pour en créer un.

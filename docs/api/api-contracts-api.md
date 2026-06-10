@@ -217,42 +217,68 @@ Export Unity dialogue to YARN file format.
 
 ---
 
-## Graph Editor Endpoints (`/api/v1/graph`)
+## Graph Editor Endpoints (`/api/v1/unity-dialogues/graph`)
 
-### POST `/graph/validate`
-Validate graph structure.
+Tous les routes ci-dessous exigent un **JWT** (`Authorization: Bearer …`), comme les autres routes graphe (`Depends(get_current_user)` dans `api/main.py`). Les schémas détaillés sont dans `api/schemas/graph.py`.
 
-**Request Body:** Graph validation request
+### Persistance et I/O
 
-**Response:** Validation result
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/load` | Charger un graphe depuis le stockage |
+| `POST` | `/unity-dialogues/graph/save` | Sauvegarder le graphe |
+| `POST` | `/unity-dialogues/graph/save-and-write` | Sauvegarde + écriture disque (flux principal client) |
 
-### POST `/graph/layout`
-Calculate graph layout.
+### Validation et flux
 
-**Request Body:** Graph layout request
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/validate` | Structure (orphelins, références, cycles) |
+| `POST` | `/unity-dialogues/graph/validate-schema` | Conformité schéma JSON Unity (FR48) |
+| `POST` | `/unity-dialogues/graph/validate-lore-explicit` | Contradictions lore explicites (texte vs GDD) |
+| `POST` | `/unity-dialogues/graph/simulate-flow` | Simulation de parcours / couverture |
+| `POST` | `/unity-dialogues/graph/calculate-layout` | Recalcul de layout côté serveur |
 
-**Response:** Layout data
+### Qualité graphe (heuristiques + LLM)
 
-### POST `/graph/export`
-Export graph to various formats.
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/detect-ai-slop` | Détection motifs « AI slop » (FR43) |
+| `POST` | `/unity-dialogues/graph/detect-context-dropping` | Détection context dropping vs contexte GDD (FR44) ; fusionne options requête + règles persistées (`ContextDroppingRulesService`) |
+| `POST` | `/unity-dialogues/graph/evaluate-dialogue-quality` | Juge qualité narrative via LLM (FR42) |
 
-**Request Body:** Export request
+### Coût et génération
 
-**Response:** Export data
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `POST` | `/unity-dialogues/graph/estimate-cost` | Estimation coût/tokens |
+| `POST` | `/unity-dialogues/graph/generate-node` | Génération de nœud |
 
-### POST `/graph/import`
-Import graph from format.
+### Historique nœud / prompts
 
-**Request Body:** Import request
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `GET` | `/unity-dialogues/graph/prompt` | Récupération prompt associé au nœud (paramètres query selon schéma) |
+| `POST` | `/unity-dialogues/graph/nodes/{node_id}/accept` | Accepter proposition générée |
+| `POST` | `/unity-dialogues/graph/nodes/{node_id}/reject` | Rejeter |
+| `POST` | `/unity-dialogues/graph/nodes/{node_id}/regenerate` | Régénérer |
 
-**Response:** Imported graph data
+**Schémas** : corps et réponses typés dans `api/schemas/graph.py` (ex. `DetectContextDroppingRequest` / `DetectContextDroppingResponse` avec `kind` : `context_dropping` \| `too_subtle` \| `mandatory_missing`).
 
-### POST `/graph/save`
-Save graph to storage.
+---
 
-**Request Body:** Graph save request
+## Validation rules — context dropping (`/api/v1/validation/rules`)
 
-**Response:** Save confirmation
+Persistance des **règles** utilisées par défaut lors d’un `POST .../detect-context-dropping` (priorité : champs fournis dans la requête > fichier persisté > défauts). Implémentation : `services/context_dropping_rules_service.py` → fichier `data/validation-rules/context-dropping.json` (UTF-8, créé au besoin).
+
+| Méthode | Chemin | Rôle |
+|--------|--------|------|
+| `GET` | `/validation/rules/context-dropping` | Lire les règles (défauts si fichier absent). JSON corrompu → `422` avec message explicite |
+| `PUT` | `/validation/rules/context-dropping` | Remplacer les règles (`ContextDroppingRulesSchema` dans `api/schemas/validation_rules.py`) |
+
+**Corps `PUT` (champs principaux)** : `rules_profile` (`strict` \| `light`), `tolerance` optionnelle `[0,1]`, `mandatory_info` (liste de labels obligatoires dans le graphe), `dialogue_type_overrides`, `schema_version`.
+
+**Auth** : JWT requis (`api/main.py`, router `validation_rules`).
 
 ---
 
@@ -440,6 +466,83 @@ Get field value suggestions.
 
 ---
 
+## GDD Notion Sync Endpoints
+
+All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schemas/gdd_notion_sync.py`.
+
+### GET `/gdd-notion-sync/config`
+
+**Response:** `GddNotionSyncConfigResponse` — `config` (sources, `included_categories`, `sync_interval_minutes`, `auto_sync_enabled`, `archive_retention_count`, `token_configured`, etc.) ; **aucun secret** dans le corps.
+
+### PUT `/gdd-notion-sync/config`
+
+**Request Body:** `GddNotionSyncConfigUpdate` — champs optionnels ; `notion_token` si fourni remplace le fichier token (jamais renvoyé).
+
+**Response:** même forme que GET.
+
+### POST `/gdd-notion-sync/test-connection`
+
+**Response:** `GddNotionConnectionTestResponse` (`ok`, `message`, métadonnées bot optionnelles).
+
+### POST `/gdd-notion-sync/preview-database-row`
+
+**Request Body:** `GddNotionPreviewDatabaseRequest` — `{ "category_file": "..." }` (doit correspondre à une source `database`).
+
+**Response:** `GddNotionPreviewDatabaseResponse` — première ligne mappée comme en sync (debug / UI).
+
+### POST `/gdd-notion-sync/sync`
+
+**Query Parameters:**
+
+- `full` (bool, default `false`) — sync complète (archive, staging, miroir).
+- `mirror_rebuild` (bool) — **déprécié, sans effet**.
+- `resume` (bool) — reprendre une sync complète (`full=true` obligatoire ; mutuellement exclusif avec `fresh`).
+- `fresh` (bool) — abandon checkpoint + nouveau run complet (`full=true` obligatoire).
+
+**Response:** `GddNotionSyncRunResponse` (`success`, `message`, `updated_entities`, `partial_errors`).
+
+### GET `/gdd-notion-sync/full-sync-checkpoint`
+
+**Response:** `GddFullSyncCheckpointResponse` — reprise possible, staging orphelin, fichiers terminés, etc.
+
+### DELETE `/gdd-notion-sync/full-sync-checkpoint`
+
+**Response:** `GddFullSyncCheckpointAbandonResponse` — supprime checkpoint et `.staging/` associé.
+
+### POST `/gdd-notion-sync/full-sync/pause` | `/unpause` | `/cancel`
+
+**Response:** `GddFullSyncPauseResponse` (`ok`, `message`).
+
+### GET `/gdd-notion-sync/status`
+
+**Response:** `GddNotionSyncStatusResponse` — dernier run persisté.
+
+### GET `/gdd-notion-sync/sync-progress`
+
+**Response:** `GddNotionSyncProgressResponse` — polling progression (phase, pages, source courante, `paused`).
+
+### GET `/gdd-notion-sync/notebooklm-export`
+
+**Query Parameters:** `max_files` (int, 1–128, default 64) — nombre max de fichiers Markdown dans le ZIP (README + thèmes et suites `-partNN`).
+
+**Response:** `application/zip` ; en-tête `Content-Disposition: attachment; filename="gdd-notebooklm-export.zip"`. Erreurs : `400` si validation métier (`ValueError`), `500` si lecture disque (`OSError`).
+
+### GET `/gdd-notion-sync/archives`
+
+**Query Parameters:** `limit` (1–100, default 20).
+
+**Response:** `GddArchivesListResponse` — liste de `GddArchiveEntrySchema`.
+
+### POST `/gdd-notion-sync/archives/{archive_id}/restore`
+
+**Request Body (optional):** `GddArchiveRestoreRequest` — `{ "backup_current": true }` par défaut si corps absent.
+
+**Response:** `GddArchiveRestoreResponse` (`ok`, `message`, `new_backup_id` optionnel).
+
+**Guide détaillé (chemins disque, comportement full/resume, NotebookLM) :** [GDD Notion Sync](../guides/GDD_NOTION_SYNC.md).
+
+---
+
 ## Unity Dialogues Endpoints (`/api/v1/unity-dialogues`)
 
 ### GET `/unity-dialogues`
@@ -463,6 +566,85 @@ Create or update Unity dialogue file.
 **Request Body:** Dialogue file data
 
 **Response:** Created/updated file info
+
+---
+
+## Validation rules — context dropping (`/api/v1/validation/rules`)
+
+JWT required (same as other protected routes). Rules are persisted on disk as UTF-8 JSON at `data/validation-rules/context-dropping.json` (see `ContextDroppingRulesService`, `constants.FilePaths.CONTEXT_DROPPING_RULES_FILE`).
+
+### GET `/validation/rules/context-dropping`
+
+**Response:** `ContextDroppingRulesSchema` — `rules_profile` (`strict` \| `light`), optional `tolerance` \[0, 1\], `mandatory_info` (labels), `dialogue_type_overrides`, `schema_version`.
+
+**Errors:** `422` if the on-disk file exists but is not valid JSON or fails schema validation (explicit `detail` message).
+
+### PUT `/validation/rules/context-dropping`
+
+**Request Body:** `ContextDroppingRulesSchema` (replaces the entire persisted document).
+
+**Response:** Saved rules (echo).
+
+**Errors:** `422` on validation failure or write error (`ValueError` / `OSError`).
+
+**Usage:** `POST .../unity-dialogues/graph/detect-context-dropping` merges **request `options`** with these persisted values when a field is omitted — priority: non-null request field **>** persisted **>** defaults (`rules_profile` default `strict`, etc.). Implementation: `api/routers/graph_quality.py` (`_context_dropping_options_to_data`).
+
+---
+
+## Graph editor API (`/api/v1/unity-dialogues/graph`)
+
+All routes below require **JWT** (`Depends(get_current_user)` in `api/main.py`). They're split across `api/routers/graph_io.py`, `graph_generation.py`, `graph_cost.py`, `graph_validation.py`, `graph_quality.py`, `graph_flow.py`, `graph_node_history.py`.
+
+**Typical client:** `frontend/src/api/graph.ts` (timeouts vary per call).
+
+### I/O
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/load` | Load graph into editor session |
+| POST | `/save` | Save graph |
+| POST | `/save-and-write` | Save and write Unity file |
+
+### Generation & cost
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/generate-node` | Generate a new node (LLM) |
+| POST | `/estimate-cost` | Cost estimate for generation |
+
+### Structural & schema validation
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/validate` | Orphans, broken refs, cycles (`GraphValidationService.validate_graph`) |
+| POST | `/validate-schema` | Unity JSON schema conformance (`validate_unity_json` on serialized graph). **Empty `nodes` list → `is_valid: true`** (no-op). |
+| POST | `/validate-lore-explicit` | Explicit lore vs GDD facts (`ContextBuilder` + `validate_explicit_lore_contradictions`) |
+
+### Flow & layout
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/simulate-flow` | Dead ends, cul-de-sacs, **coverage** stats (`GraphValidationService.simulate_flow` + `compute_coverage_stats`) |
+| POST | `/calculate-layout` | Auto-layout (`GraphConversionService.calculate_layout`) |
+
+### Quality (static + LLM)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/detect-ai-slop` | GPT-isms, repetitions, generic phrases (`AISlopDetector`) |
+| POST | `/detect-context-dropping` | GDD context usage vs selections (`ContextDroppingDetector`; rules from request + persisted GET `/validation/rules/context-dropping`) |
+| POST | `/evaluate-dialogue-quality` | LLM judge (`LLMQualityJudgeService`; requires working LLM provider) |
+
+### Node lifecycle (generated nodes)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/prompt` | Prompt payload for node generation context |
+| POST | `/nodes/{node_id}/accept` | Accept pending generated node |
+| POST | `/nodes/{node_id}/reject` | Reject / remove |
+| POST | `/nodes/{node_id}/regenerate` | Regenerate node |
+
+**OpenAPI:** `/api/docs` and `/api/redoc` list full request/response models (`api/schemas/graph.py`, `api/schemas/dialogue_quality.py`).
 
 ---
 

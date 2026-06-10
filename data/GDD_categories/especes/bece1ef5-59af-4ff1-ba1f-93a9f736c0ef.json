@@ -2,24 +2,39 @@
   "Nom": "Psammograveur des Dunes",
   "values": {
     "Biologie": "Moyenne",
-    "Culture": "Nulle",
+    "Espérance de vie": "50",
     "Présence dans Escelion": "Peu courant",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "L'espèce est peu courante dans Escelion, avec une biologie moyenne et aucun aspect culturel ou technologique. Des sections sont prévues pour détailler son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son écosystème, mais elles sont actuellement vides.",
+    "Résumé IA": "Sécrétolaminaire (Vifs-Formes, Lithotissés) des environnements dunaires. Trace des « routes de sable » en strates très fragiles, relues à la tombée des vents : l'exocortex inscrit l'information de navigation dans des dépôts laminaires effacés et réécrits à chaque cycle de vent. Biologie moyenne, sans composante surnaturelle. Peu courant dans Escelion. Longévité : ~50 ans.",
     "Surnaturel": "Nulle",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "preamble": "**Résumé de la fiche**\n\nL'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.\n\nGuides",
-    "besoin_de_l_intrigue": "**Histoire de l'espèce**\n\n**Apparence**\n\n**Rôle culturel**\nEx: Nourriture, imagerie, symbolisme, animaux de compagnie, etc\n\n**Rôle dans l'intrigue**",
-    "ecosyste_me": "**Habitat naturel**\n\n**Mode d'alimentation ou d'obtention de nutriments**\n\n**Mode de reproduction**\n\n**Sous-espèces**\n\n**Fonctionnement avec l'écosystème**"
+    "re_sume__de_la_fiche": "**Sécrétolaminaire** (Vifs-Formes, Lithotissés) des environnements dunaires. Trace des **« routes de sable »** en strates très fragiles relues à la tombée des vents : l'exocortex inscrit l'information de navigation dans des dépôts laminaires effacés et réécrits à chaque cycle de vent. Sans composante surnaturelle. Peu courant dans Escelion. Longévité : \\~50 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
+    "histoire_de_l_espe_ce": "-",
+    "apparence": "<empty-block/>\n\t<empty-block/>",
+    "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
+    "ro_le_dans_l_intrigue": "-",
+    "habitat_naturel": "-",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "-",
+    "mode_de_reproduction": "-",
+    "sous-espe_ces": "-",
+    "fonctionnement_avec_l_e_cosyste_me": "-",
+    "re_sume__ia": "Sécrétolaminaire (Vifs-Formes, Lithotissés) des environnements dunaires. Trace des « routes de sable » en strates très fragiles, relues à la tombée des vents : l'exocortex inscrit l'information de navigation dans des dépôts laminaires effacés et réécrits à chaque cycle de vent. Biologie moyenne, sans composante surnaturelle. Peu courant dans Escelion. Longévité : ~50 ans."
   },
   "section_titles": {
-    "preamble": "Préambule",
-    "besoin_de_l_intrigue": "Besoin de l'intrigue",
-    "ecosyste_me": "Ecosystème"
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_de_l_espe_ce": "Histoire de l'espèce",
+    "apparence": "Apparence",
+    "ro_le_culturel": "Rôle culturel",
+    "ro_le_dans_l_intrigue": "Rôle dans l'intrigue",
+    "habitat_naturel": "Habitat naturel",
+    "mode_d_alimentation_ou_d_obtention_de_nutriments": "Mode d'alimentation ou d'obtention de nutriments",
+    "mode_de_reproduction": "Mode de reproduction",
+    "sous-espe_ces": "Sous-espèces",
+    "fonctionnement_avec_l_e_cosyste_me": "Fonctionnement avec l'écosystème",
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "bece1ef5-59af-4ff1-ba1f-93a9f736c0ef"
 }

@@ -14,6 +14,7 @@ from services.gdd_notion_sync_mirror import (
     partial_errors_block_mirror_promote,
     partial_errors_should_preserve_mirror_staging,
     prune_archives,
+    remove_excluded_database_sources_from_live,
     resolve_archive_dir,
     restore_gdd_from_archive,
 )
@@ -80,6 +81,36 @@ def test_partial_errors_should_preserve_false_on_mixed_errors() -> None:
         "y.json page b: permission denied",
     ]
     assert partial_errors_should_preserve_mirror_staging(partial) is False
+
+
+def test_remove_excluded_database_sources_from_live_deletes_hors_perimetre(
+    tmp_path: Path,
+) -> None:
+    """``included_categories`` non vide : les bases DB exclues sont retirées du live."""
+    gdd = tmp_path / "gdd"
+    gdd.mkdir()
+    (gdd / "keep.json").write_text("[]", encoding="utf-8")
+    (gdd / "drop.json").write_text("[]", encoding="utf-8")
+    sources = [
+        {"kind": "database", "notion_id": "a", "category_file": "keep.json"},
+        {"kind": "database", "notion_id": "b", "category_file": "drop.json"},
+        {"kind": "page", "notion_id": "c", "category_file": "Guide.json"},
+    ]
+    removed = remove_excluded_database_sources_from_live(
+        gdd, sources, included_list=["keep"]
+    )
+    assert "drop.json" in removed
+    assert (gdd / "keep.json").is_file()
+    assert not (gdd / "drop.json").exists()
+
+
+def test_remove_excluded_database_sources_noop_when_included_empty(tmp_path: Path) -> None:
+    gdd = tmp_path / "gdd"
+    gdd.mkdir()
+    (gdd / "x.json").write_text("[]", encoding="utf-8")
+    sources = [{"kind": "database", "notion_id": "a", "category_file": "x.json"}]
+    assert remove_excluded_database_sources_from_live(gdd, sources, []) == []
+    assert (gdd / "x.json").is_file()
 
 
 def test_collect_sync_targets_shard_and_file(tmp_path: Path) -> None:

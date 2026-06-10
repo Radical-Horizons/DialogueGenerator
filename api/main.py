@@ -9,7 +9,7 @@ import sys
 import asyncio
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
 from fastapi.responses import JSONResponse
@@ -498,14 +498,18 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
         Réponse JSON avec format d'erreur standardisé.
     """
     request_id = getattr(request.state, "request_id", "unknown")
-    
+    is_production = os.getenv("ENVIRONMENT", "development") == "production"
+    details = exc.details
+    if is_production and exc.code == "INTERNAL_ERROR":
+        details = {}
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": {
                 "code": exc.code,
                 "message": exc.detail,
-                "details": exc.details,
+                "details": details,
                 "request_id": exc.request_id or request_id
             }
         }
@@ -592,7 +596,29 @@ async def health_check_detailed() -> JSONResponse:
 
 
 # Inclusion des routers
-from api.routers import auth, dialogues, context, config, llm_usage, unity_dialogues, documents, logs, mechanics_flags, graph, streaming, presets, costs
+from api.routers import (
+    auth,
+    config,
+    context,
+    costs,
+    dialogues,
+    documents,
+    graph_cost,
+    graph_flow,
+    graph_generation,
+    graph_io,
+    graph_node_history,
+    graph_quality,
+    graph_validation,
+    llm_usage,
+    logs,
+    mechanics_flags,
+    mechanics_systems,
+    presets,
+    streaming,
+    unity_dialogues,
+)
+from api.routers.auth import get_current_user
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(dialogues.router, prefix="/api/v1/dialogues", tags=["Dialogues"])
@@ -612,9 +638,34 @@ app.include_router(narrative_guides.router)
 
 # Router pour les mechanics (flags in-game)
 app.include_router(mechanics_flags.router)
+app.include_router(mechanics_systems.router)
 
-# Router pour l'éditeur de graphe
-app.include_router(graph.router)
+# Routers éditeur de graphe (Story 4.14 — split api/routers/graph.py)
+_GRAPH_ROUTER_MODULES = (
+    graph_io,
+    graph_generation,
+    graph_cost,
+    graph_validation,
+    graph_quality,
+    graph_flow,
+    graph_node_history,
+)
+for _graph_mod in _GRAPH_ROUTER_MODULES:
+    app.include_router(
+        _graph_mod.router,
+        prefix="/api/v1/unity-dialogues/graph",
+        tags=["Graph Editor"],
+        dependencies=[Depends(get_current_user)],
+    )
+
+# Router pour les règles de validation (Story 4.10) — persistance disque : même auth que le graphe
+from api.routers import validation_rules
+app.include_router(
+    validation_rules.router,
+    prefix="/api/v1",
+    tags=["Validation Rules"],
+    dependencies=[Depends(get_current_user)],
+)
 
 # Router pour les presets de génération
 app.include_router(presets.router, prefix="/api/v1/presets", tags=["Presets"])

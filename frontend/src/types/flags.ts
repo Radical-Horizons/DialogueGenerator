@@ -15,6 +15,12 @@ export interface FlagDefinition {
   defaultValueParsed?: boolean | number | string  // Valeur parsée selon le type
   tags: string[]
   isFavorite: boolean
+  /** Type fonctionnel FR89 (catalogue enrichi). */
+  semanticType?: string
+  scope?: string
+  minValue?: boolean | number | string
+  maxValue?: boolean | number | string
+  enumValues?: string[]
 }
 
 export interface InGameFlag {

@@ -5,6 +5,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import apiClient from '../api/client'
 import * as documentsAPI from '../api/documents'
+import { API_TIMEOUTS } from '../constants'
 
 vi.mock('../api/client', () => ({
   default: {
@@ -39,7 +40,9 @@ describe('documents API', () => {
       vi.mocked(apiClient.get).mockResolvedValue({ data: payload })
       const result = await documentsAPI.getLayout('my-doc')
       expect(result).toEqual(payload)
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/documents/my-doc/layout')
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/documents/my-doc/layout', {
+        timeout: API_TIMEOUTS.DOCUMENT_IO,
+      })
     })
   })
 
@@ -49,7 +52,9 @@ describe('documents API', () => {
       vi.mocked(apiClient.put).mockResolvedValue({ data: { revision: 2 } })
       const result = await documentsAPI.putDocument('my-doc', body)
       expect(result.revision).toBe(2)
-      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/documents/my-doc', body)
+      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/documents/my-doc', body, {
+        timeout: API_TIMEOUTS.DOCUMENT_IO,
+      })
     })
   })
 
@@ -59,7 +64,9 @@ describe('documents API', () => {
       vi.mocked(apiClient.put).mockResolvedValue({ data: { revision: 2 } })
       const result = await documentsAPI.putLayout('my-doc', body)
       expect(result.revision).toBe(2)
-      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/documents/my-doc/layout', body)
+      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/documents/my-doc/layout', body, {
+        timeout: API_TIMEOUTS.DOCUMENT_IO,
+      })
     })
   })
 })

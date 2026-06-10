@@ -2,12 +2,13 @@
  * Handlers ReactFlow : drag, selection, edges, connexions, context menu edges.
  * Extrait de GraphCanvas pour isoler la logique événementielle du rendu JSX.
  */
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, type RefObject } from 'react'
 import type { Connection, Node, NodeChange, EdgeChange } from 'reactflow'
 import { useGraphStore } from '../store/graphStore'
 import { getChoiceIndexFromSourceHandle } from '../utils/choiceHandleIndex'
 import { useGraphViewStore } from '../store/graphViewStore'
 import { collectOutgoingDescendantIds } from '../utils/collectOutgoingDescendantIds'
+import { resolveReactFlowNodeIdUnderPointer } from '../utils/resolveReactFlowNodeIdUnderPointer'
 
 type DragGroupMode = 'multi' | 'with-children' | null
 
@@ -26,6 +27,8 @@ export interface PendingChoiceConnection {
 export interface UseReactFlowHandlersOptions {
   getFlowPosition: (event: MouseEvent | TouchEvent) => { x: number; y: number }
   onChoiceDropOnPane: (position: { x: number; y: number }, pending: PendingChoiceConnection) => void
+  /** Wrapper du graphe : pour rattacher un choix lâché sur le corps d'un nœud (hors rayon de la poignée). */
+  flowContainerRef?: RefObject<HTMLElement | null>
 }
 
 export interface UseReactFlowHandlersReturn {
@@ -315,10 +318,27 @@ export function useReactFlowHandlers(
       const pending = pendingChoiceConnectionRef.current
       pendingChoiceConnectionRef.current = null
       if (!pending || !options?.getFlowPosition || !options?.onChoiceDropOnPane) return
+
+      // Si onConnect n'a pas été appelé (curseur hors rayon de la poignée cible) mais que
+      // l'utilisateur a lâché au-dessus d'un nœud, on complète la connexion comme onConnect.
+      const container = options.flowContainerRef?.current ?? null
+      const targetUnderPointer = container
+        ? resolveReactFlowNodeIdUnderPointer(event, container)
+        : null
+      if (targetUnderPointer && targetUnderPointer !== pending.sourceNodeId) {
+        onConnect({
+          source: pending.sourceNodeId,
+          target: targetUnderPointer,
+          sourceHandle: pending.sourceHandleId,
+          targetHandle: null,
+        })
+        return
+      }
+
       const position = options.getFlowPosition(event)
       options.onChoiceDropOnPane(position, pending)
     },
-    [options]
+    [options, onConnect]
   )
 
   const onNodeDragStart = useCallback(

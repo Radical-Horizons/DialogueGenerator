@@ -12,18 +12,41 @@ import { useKeyboardShortcuts } from './useKeyboardShortcuts'
 import { getErrorMessage } from '../types/errors'
 import type { UseToastFn } from '../components/shared'
 import type { GraphLayoutSpacingMode } from '../store/types/graphState'
+import * as graphAPI from '../api/graph'
 
 export interface UseGraphToolbarReturn {
   showAutoLayoutDropdown: boolean
   setShowAutoLayoutDropdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showActionsDropdown: boolean
   setShowActionsDropdown: (v: boolean | ((prev: boolean) => boolean)) => void
+  showValidationToolsDropdown: boolean
+  setShowValidationToolsDropdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showAIGenerationPanel: boolean
   setShowAIGenerationPanel: (v: boolean) => void
   showExportFormatDialog: boolean
   setShowExportFormatDialog: (v: boolean) => void
   showValidationPanel: boolean
   setShowValidationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showQualityLlmPanel: boolean
+  setShowQualityLlmPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showAiSlopPanel: boolean
+  setShowAiSlopPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showContextDroppingPanel: boolean
+  setShowContextDroppingPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showFlowSimulationPanel: boolean
+  setShowFlowSimulationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  /** Story 9.4 — panneau preview scénario (variables / historique). */
+  showDialoguePreviewPanel: boolean
+  setShowDialoguePreviewPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showGameSystemsIntegrationPanel: boolean
+  setShowGameSystemsIntegrationPanel: (v: boolean | ((prev: boolean) => boolean)) => void
+  showSchemaValidationPanel: boolean
+  schemaValidationLoading: boolean
+  schemaValidationIsValid: boolean
+  schemaValidationErrors: string[]
+  schemaValidationErrorCount: number
+  handleToggleSchemaValidation: () => void
+  handleSchemaErrorClick: (error: string) => void
   showCostBreakdown: boolean
   setShowCostBreakdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showShortcutsTooltip: boolean
@@ -40,6 +63,7 @@ export interface UseGraphToolbarReturn {
   autoLayoutDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownRef: RefObject<HTMLDivElement>
   actionsDropdownBtnRef: RefObject<HTMLButtonElement>
+  validationToolsDropdownRef: RefObject<HTMLDivElement>
   canvasWrapperRef: RefObject<HTMLDivElement>
   reactFlowInstance: ReactFlowInstance | null
   handleAutoLayout: (direction?: 'TB' | 'LR' | 'BT' | 'RL') => Promise<void>
@@ -60,9 +84,21 @@ export function useGraphToolbar(
 ): UseGraphToolbarReturn {
   const [showAutoLayoutDropdown, setShowAutoLayoutDropdown] = useState(false)
   const [showActionsDropdown, setShowActionsDropdown] = useState(false)
+  const [showValidationToolsDropdown, setShowValidationToolsDropdown] = useState(false)
   const [showAIGenerationPanel, setShowAIGenerationPanel] = useState(false)
   const [showExportFormatDialog, setShowExportFormatDialog] = useState(false)
   const [showValidationPanel, setShowValidationPanel] = useState(false)
+  const [showQualityLlmPanel, setShowQualityLlmPanel] = useState(false)
+  const [showAiSlopPanel, setShowAiSlopPanel] = useState(false)
+  const [showContextDroppingPanel, setShowContextDroppingPanel] = useState(false)
+  const [showFlowSimulationPanel, setShowFlowSimulationPanel] = useState(false)
+  const [showDialoguePreviewPanel, setShowDialoguePreviewPanel] = useState(false)
+  const [showGameSystemsIntegrationPanel, setShowGameSystemsIntegrationPanel] = useState(false)
+  const [showSchemaValidationPanel, setShowSchemaValidationPanel] = useState(false)
+  const [schemaValidationLoading, setSchemaValidationLoading] = useState(false)
+  const [schemaValidationIsValid, setSchemaValidationIsValid] = useState(false)
+  const [schemaValidationErrors, setSchemaValidationErrors] = useState<string[]>([])
+  const [schemaValidationErrorCount, setSchemaValidationErrorCount] = useState(0)
   const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
   const [showSearchBar, setShowSearchBar] = useState(false)
@@ -72,6 +108,7 @@ export function useGraphToolbar(
   const autoLayoutDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownRef = useRef<HTMLDivElement>(null)
   const actionsDropdownBtnRef = useRef<HTMLButtonElement>(null)
+  const validationToolsDropdownRef = useRef<HTMLDivElement>(null)
   const canvasWrapperRef = useRef<HTMLDivElement>(null)
 
   const reactFlowInstance = useGraphViewStore((s) => s.reactFlowInstance)
@@ -119,6 +156,16 @@ export function useGraphToolbar(
     document.addEventListener('mousedown', onOutside)
     return () => document.removeEventListener('mousedown', onOutside)
   }, [showActionsDropdown])
+
+  useEffect(() => {
+    if (!showValidationToolsDropdown) return
+    const el = validationToolsDropdownRef.current
+    const onOutside = (e: MouseEvent) => {
+      if (el && !el.contains(e.target as Node)) setShowValidationToolsDropdown(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [showValidationToolsDropdown])
 
   const handleAutoLayout = useCallback(
     async (direction?: 'TB' | 'LR' | 'BT' | 'RL') => {
@@ -220,7 +267,7 @@ export function useGraphToolbar(
         enabled: () => !!useGraphStore.getState().selectedNodeId,
       },
       {
-        key: 'ctrl+f',
+        key: 'ctrl+shift+f',
         handler: (e) => {
           e.preventDefault()
           setShowSearchBar((v) => {
@@ -232,7 +279,7 @@ export function useGraphToolbar(
         enabled: true,
       },
       {
-        key: 'ctrl+shift+f',
+        key: 'ctrl+alt+f',
         handler: (e) => {
           e.preventDefault()
           setShowFiltersPanel((v) => !v)
@@ -386,6 +433,44 @@ export function useGraphToolbar(
     ]
   )
 
+  const handleToggleSchemaValidation = useCallback(async () => {
+    if (showSchemaValidationPanel) {
+      setShowSchemaValidationPanel(false)
+      return
+    }
+    setShowSchemaValidationPanel(true)
+    setSchemaValidationLoading(true)
+    try {
+      const { nodes, edges } = useGraphStore.getState()
+      const payload = {
+        nodes: nodes.map((n) => ({ id: n.id, type: n.type ?? 'dialogueNode', position: n.position, data: n.data })),
+        edges: edges.map((e) => ({ id: e.id, source: e.source, target: e.target, type: e.type, data: e.data as Record<string, unknown> | undefined })),
+      }
+      const res = await graphAPI.validateSchema(payload)
+      setSchemaValidationIsValid(res.is_valid)
+      setSchemaValidationErrors(res.errors)
+      setSchemaValidationErrorCount(res.error_count)
+    } catch (err) {
+      setSchemaValidationErrors([getErrorMessage(err)])
+      setSchemaValidationErrorCount(1)
+      setSchemaValidationIsValid(false)
+    } finally {
+      setSchemaValidationLoading(false)
+    }
+  }, [showSchemaValidationPanel])
+
+  // Tente d'extraire l'index de nœud depuis "[nodes.N...]" et de focaliser le nœud correspondant.
+  const handleSchemaErrorClick = useCallback((error: string) => {
+    const match = /\[nodes\.(\d+)/.exec(error)
+    if (!match) return
+    const nodeIndex = parseInt(match[1], 10)
+    const { nodes } = useGraphStore.getState()
+    const node = nodes[nodeIndex]
+    if (node) {
+      useGraphViewStore.getState().focusNode(node.id)
+    }
+  }, [])
+
   const canUndoNow = canUndo()
   const canRedoNow = canRedo()
 
@@ -394,12 +479,33 @@ export function useGraphToolbar(
     setShowAutoLayoutDropdown,
     showActionsDropdown,
     setShowActionsDropdown,
+    showValidationToolsDropdown,
+    setShowValidationToolsDropdown,
     showAIGenerationPanel,
     setShowAIGenerationPanel,
     showExportFormatDialog,
     setShowExportFormatDialog,
     showValidationPanel,
     setShowValidationPanel,
+    showQualityLlmPanel,
+    setShowQualityLlmPanel,
+    showAiSlopPanel,
+    setShowAiSlopPanel,
+    showContextDroppingPanel,
+    setShowContextDroppingPanel,
+    showFlowSimulationPanel,
+    setShowFlowSimulationPanel,
+    showDialoguePreviewPanel,
+    setShowDialoguePreviewPanel,
+    showGameSystemsIntegrationPanel,
+    setShowGameSystemsIntegrationPanel,
+    showSchemaValidationPanel,
+    schemaValidationLoading,
+    schemaValidationIsValid,
+    schemaValidationErrors,
+    schemaValidationErrorCount,
+    handleToggleSchemaValidation,
+    handleSchemaErrorClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -416,6 +522,7 @@ export function useGraphToolbar(
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,
+    validationToolsDropdownRef,
     canvasWrapperRef,
     reactFlowInstance,
     handleAutoLayout,

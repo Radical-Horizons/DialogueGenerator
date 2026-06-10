@@ -1,4 +1,4 @@
-﻿## Epic 5: Export et intégration Unity
+## Epic 5: Export et intégration Unity
 
 Les utilisateurs peuvent exporter les dialogues vers Unity JSON format avec validation 100% schema conformity. Le système valide avant export, génère logs metadata, permet preview et batch export.
 
@@ -12,6 +12,83 @@ Les utilisateurs peuvent exporter les dialogues vers Unity JSON format avec vali
 
 ---
 
+## Contexte GDD Alteir — Ce que le schéma Unity doit couvrir
+
+Source : `gdd-systems-reference.md`. L'export Unity n'est pas un simple dump JSON de nœuds : il porte l'ensemble des systèmes GDD qui gouvernent les dialogues en jeu.
+
+### Structure d'un nœud dialogue (Unity)
+
+```
+UnityDialogueNode {
+  id, text, speakerTag,
+  choices[]: { text, targetNodeId, conditions[], actions[] },
+  conditions[],           // visibilité/déclenchement du nœud entier
+  actions[],              // effets au déclenchement
+  nextNodeId,             // nœud suivant si pas de choix
+  nodeType,               // "dialogue" | "cutscene" | "memory_exploration"
+  skillCheckConfig?       // { characteristic, DD, successNode, failNode }
+}
+```
+
+### Flags — 3 types distincts à sérialiser
+
+
+| Type                                   | Opérateurs conditions      | Opérateurs actions                    |
+| -------------------------------------- | -------------------------- | ------------------------------------- |
+| `bool`                                 | `is_true`, `is_false`      | `set_true`, `set_false`               |
+| `compteur` (int, min/max GDD)          | `>=`, `<=`, `==`, `>`, `<` | `increment`, `decrement`, `set_value` |
+| `enum` (valeurs ordonnées avec défaut) | `==`, `!=`, `in_list`      | `set_value`                           |
+
+
+Convention de nommage : `Flag_[scope]_[entité]_[description]`
+Scopes : `perso`, `lieu`, `faction`, `systeme`, `quete`, `objet`
+
+### Réputation — règle critique export
+
+Les 3 axes (Admiration, Prestige, Crainte) sont exportés comme **valeur agrégée entière** — le tier dynamique (Sympathie/Faveur/Dévotion) n'est **jamais** stocké dans un champ séparé du JSON Unity (Source of Truth = agrégat).
+
+Condition de réputation dans choices :
+
+```json
+{ "type": "reputation", "faction": "Gardiens", "axis": "Prestige", "operator": ">=", "value": 30 }
+```
+
+Action de réputation :
+
+```json
+{ "type": "reputation_delta", "faction": "Gardiens", "axis": "Admiration", "delta": +5 }
+```
+
+### Tests de caractéristiques (Core System)
+
+Les 8 caractéristiques (Puissance, Agilité, Perception, Intelligence, Créativité, Sociabilité, Technique, Volonté) peuvent conditionner des choix ou déclencher un skill check :
+
+```json
+{
+  "type": "skill_check",
+  "characteristic": "Sociabilité",
+  "DD": 14,
+  "successNodeId": "node_42",
+  "failNodeId": "node_43"
+}
+```
+
+### Types de nœuds spéciaux
+
+- **Cut-scene** (`nodeType: "cutscene"`) : pas de choix interactifs, déclenche séquence animatique. Actions possibles : `trigger_animation`, `camera_movement`, `unlock_memory`.
+- **Exploration de souvenir** (`nodeType: "memory_exploration"`) : exploration de fragments de mémoire, flags `Flag_systeme_memoire_`* modifiés en fin de séquence.
+- **Nœud Influence/Respect** : action `influence_delta` / `respect_delta` avec `{ npcId, delta }`.
+
+### Repères de maintenabilité (alertes non-bloquantes)
+
+- **~1 000 nœuds** par dialogue : alerte de complexité (seuil GDD, pas de blocage export)
+- **~10 flags conversationnels par PNJ** : alerte de maintenabilité
+- **~3 compteurs par PNJ** : alerte de maintenabilité
+
+**→ Ces seuils génèrent des warnings dans le log d'export (Story 5.6), jamais des erreurs bloquantes.**
+
+---
+
 ## ⚠️ GARDE-FOUS - Vérification de l'Existant (Scrum Master)
 
 **OBLIGATOIRE avant création de chaque story de cet epic :**
@@ -19,31 +96,27 @@ Les utilisateurs peuvent exporter les dialogues vers Unity JSON format avec vali
 ### Checklist de Vérification
 
 1. **Fichiers mentionnés dans les stories :**
-   - [ ] Vérifier existence avec `glob_file_search` ou `grep`
-   - [ ] Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
-   - [ ] Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
-
+  - Vérifier existence avec `glob_file_search` ou `grep`
+  - Vérifier chemins corrects (ex: `core/llm/` vs `services/llm/`)
+  - Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
 2. **Composants/Services similaires :**
-   - [ ] Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
-   - [ ] Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
-   - [ ] Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
-   - [ ] Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
-
+  - Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
+  - Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
+  - Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
+  - Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
 3. **Endpoints API :**
-   - [ ] Vérifier namespace cohérent (`/api/v1/dialogues/*` vs autres)
-   - [ ] Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
-   - [ ] Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
-
+  - Vérifier namespace cohérent (`/api/v1/dialogues/`* vs autres)
+  - Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
+  - Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
 4. **Patterns existants :**
-   - [ ] Vérifier patterns Zustand (immutable updates, structure stores)
-   - [ ] Vérifier patterns FastAPI (routers, dependencies, schemas)
-   - [ ] Vérifier patterns React (composants, hooks, modals)
-   - [ ] Respecter conventions de nommage et structure dossiers
-
+  - Vérifier patterns Zustand (immutable updates, structure stores)
+  - Vérifier patterns FastAPI (routers, dependencies, schemas)
+  - Vérifier patterns React (composants, hooks, modals)
+  - Respecter conventions de nommage et structure dossiers
 5. **Documentation des décisions :**
-   - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
-   - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
-   - Si nouveau : Documenter **POURQUOI** pas de réutilisation
+  - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
+  - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
+  - Si nouveau : Documenter **POURQUOI** pas de réutilisation
 
 ---
 
@@ -78,19 +151,25 @@ So that **je peux intégrer le dialogue dans Unity sans erreurs de format**.
 **Then** le chemin est sauvegardé et utilisé pour tous les exports
 **And** le répertoire est créé automatiquement s'il n'existe pas
 
-**Given** un dialogue contient des variables/conditions (voir Epic 9)
+**Given** un dialogue contient des flags (bool/compteur/enum), conditions de réputation ou tests de caractéristiques (voir Epic 9 + GDD Alteir)
 **When** l'export est lancé
-**Then** les variables et conditions sont incluses dans le JSON Unity
-**And** le format Unity pour variables est respecté (structure spécifique Unity)
+**Then** chaque nœud inclut ses `conditions[]` et `actions[]` sérialisés selon le type GDD (bool, compteur, enum, reputation, skill_check)
+**And** les agrégats de réputation sont exportés en valeur entière (le tier dynamique n'est jamais stocké dans le JSON Unity)
+**And** les nœuds cut-scene (`nodeType: "cutscene"`) et exploration de souvenir (`nodeType: "memory_exploration"`) sont exportés avec leur structure spécifique
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/unity/export` (POST) avec conversion graphe → Unity JSON (existant)
 - Service : `GraphConversionService.graph_to_unity_json()` (existant) convertit ReactFlow → Unity
 - Validation : Intégration avec Story 4.13 (validation schéma) avant export
-- Format : JSON Unity strict (tableau de nœuds) avec structure hiérarchique (nextNode, choices, etc.)
+- Format : JSON Unity strict — tableau de `UnityDialogueNode` avec `conditions[]`, `actions[]`, `choices[]`, `nodeType`, `skillCheckConfig` optionnel
+- Sérialisation flags : 3 types GDD (bool/compteur/enum) sérialisés avec opérateurs distincts (voir section GDD ci-dessus)
+- Réputation : Valeur agrégée entière uniquement (tier dynamique jamais stocké)
+- Nœuds spéciaux : `nodeType` "cutscene" / "memory_exploration" exportés avec structure dédiée
+- Warnings export : Seuils GDD dépassés (~1000 nœuds, ~10 flags/PNJ, ~3 compteurs/PNJ) → warnings non-bloquants dans logs
 - Frontend : Bouton "Exporter vers Unity" dans `GraphEditor.tsx` avec confirmation
 - Stockage : Fichier JSON sauvegardé dans répertoire Unity configuré (`unity_dialogues_path`)
-- Tests : Unit (conversion format), Integration (API export), E2E (workflow export complet)
+- Tests : Unit (conversion format incluant flags/réputation/skill_check), Integration (API export), E2E (workflow export complet)
 
 **References:** FR49 (export single dialogue), Story 4.13 (validation schéma), NFR-I1 (Unity Export 100% valid), NFR-P3 (API Response <200ms)
 
@@ -133,6 +212,7 @@ So that **je peux intégrer toute ma bibliothèque de dialogues en une seule op�
 **And** les dialogues déjà exportés restent sauvegardés (pas de rollback)
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/batch-export` (POST) avec liste dialogue IDs
 - Service : `BatchExportService` avec boucle export + gestion erreurs individuelles
 - Validation : Validation schéma pour chaque dialogue avant export (optionnel selon config)
@@ -158,7 +238,7 @@ So that **je peux garantir 100% de conformité avant intégration Unity**.
 **Then** le JSON Unity est validé contre le schéma Unity strict (Pydantic models ou JSON Schema)
 **And** toutes les erreurs de conformité sont détectées (champs manquants, types incorrects, valeurs invalides)
 
-**Given** le JSON contient un champ invalide (ex: type incorrect)
+**Given** le JSON contient un champ invalide (ex: type incorrect, tier de réputation stocké en flag, type de flag non reconnu)
 **When** la validation est lancée
 **Then** une erreur s'affiche "Erreur schéma Unity : champ 'X' a type incorrect (attendu Y, reçu Z)"
 **And** le nœud concerné est identifié
@@ -181,13 +261,15 @@ So that **je peux garantir 100% de conformité avant intégration Unity**.
 **And** je peux comparer mon JSON avec le schéma pour comprendre les erreurs
 
 **Technical Requirements:**
+
 - Backend : Service `UnitySchemaValidator.validate_unity_json()` (existant) avec validation stricte
-- Schéma : Schéma JSON Unity strict (Pydantic models `UnityDialogueNode` ou JSON Schema)
-- Validation : Vérification champs requis, types, valeurs, structure hiérarchique (nextNode, choices, etc.)
+- Schéma : Modèles Pydantic `UnityDialogueNode` couvrant : `conditions[]` (types bool/compteur/enum/reputation/skill_check), `actions[]` (types correspondants), `nodeType` (enum: dialogue/cutscene/memory_exploration), `skillCheckConfig` optionnel (characteristic parmi les 8 GDD, DD entier, successNodeId, failNodeId)
+- Règle réputation : Validation que les tiers dynamiques ne sont pas stockés comme flag (erreur bloquante si violation)
+- Validation seuils GDD : Warnings non-bloquants si >~~1000 nœuds ou >~~10 flags/PNJ ou >~3 compteurs/PNJ
 - API : Endpoint `/api/v1/dialogues/{id}/validate-schema` (POST) retourne erreurs schéma (existant)
 - Frontend : Composant `SchemaValidationPanel.tsx` affiche erreurs avec navigation nœuds + schéma référence
 - Auto-validation : Intégration avec Story 5.1 (export) pour validation automatique avant export
-- Tests : Unit (validation schéma), Integration (API validation), E2E (workflow validation + export)
+- Tests : Unit (validation schéma incluant types GDD), Integration (API validation), E2E (workflow validation + export)
 
 **References:** FR51 (validation schéma Unity), Story 4.13 (validation schéma), Story 5.1 (export), NFR-I1 (Unity Export 100% valid)
 
@@ -229,6 +311,7 @@ So that **je peux transférer les dialogues vers Unity ou les archiver**.
 **And** le téléchargement se fait sans timeout (gestion fichiers volumineux)
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/{id}/download` (GET) retourne fichier JSON avec headers download
 - Batch : Endpoint `/api/v1/dialogues/batch-download` (POST) retourne archive ZIP avec tous les fichiers
 - Frontend : Fonction `downloadJSON(filename, content)` avec création blob + trigger download
@@ -275,6 +358,7 @@ So that **je peux vérifier le contenu et la taille avant de télécharger**.
 **And** le modal se ferme après export réussi
 
 **Technical Requirements:**
+
 - Backend : Endpoint `/api/v1/dialogues/{id}/preview-export` (GET) retourne JSON + métadonnées (taille, nœuds)
 - Format : JSON formaté avec indent 2 espaces pour prévisualisation
 - Taille : Calcul taille fichier estimée (JSON stringifié) avant export réel
@@ -325,9 +409,10 @@ So that **je peux tracer l'historique des exports et identifier les problèmes**
 **And** les logs incluent : timestamp, dialogue, fichier, statut, coût, validation, erreurs
 
 **Technical Requirements:**
+
 - Backend : Service `ExportLogService` avec méthode `log_export(dialogue_id, filename, metadata)` pour stockage logs
 - Stockage : Fichiers JSON `data/logs/exports/YYYY-MM-DD.json` avec logs journaliers
-- Métadonnées : Timestamp, dialogue_id, filename, validation_status, cost, errors, file_size
+- Métadonnées : Timestamp, dialogue_id, filename, validation_status, cost, errors, file_size, warnings_gdd (seuils maintenabilité dépassés : nœuds/flags/compteurs)
 - API : Endpoint `/api/v1/exports/logs` (GET) avec filtres période/statut retourne logs
 - Frontend : Composant `ExportLogsPanel.tsx` avec liste chronologique + filtres + export
 - Format : Logs formatés avec timestamps lisibles, statuts colorés (vert=succès, rouge=échec)

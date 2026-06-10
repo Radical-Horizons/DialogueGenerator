@@ -84,14 +84,16 @@ python -m api.main
 
 **Méthode 3: Via uvicorn directement**
 ```bash
-# Avec le venv activé
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+# Avec le venv activé — port aligné dev (proxy Vite / E2E utilisent 4243 par défaut)
+API_PORT=4243 uvicorn api.main:app --reload --host 0.0.0.0 --port 4243
 ```
 
-L'API sera accessible sur :
-- API: http://localhost:8000
-- Documentation Swagger: http://localhost:8000/api/docs
-- Documentation ReDoc: http://localhost:8000/api/redoc
+Sans `API_PORT`, `python -m api.main` utilise le défaut **`4242`** (`api/main.py`). `npm run dev` fixe **`API_PORT=4243`** via `scripts/dev.js`.
+
+L'API sera accessible sur (exemple port **4243**) :
+- API: http://localhost:4243
+- Documentation Swagger: http://localhost:4243/api/docs
+- Documentation ReDoc: http://localhost:4243/api/redoc
 
 ## Endpoints principaux
 
@@ -141,6 +143,21 @@ L'API sera accessible sur :
 - `GET /api/v1/config/llm` - Configuration LLM
 - `GET /api/v1/config/llm/models` - Modèles disponibles
 - `GET /api/v1/config/context` - Configuration contexte
+
+### Documents canoniques (Story 16.2 + extensions)
+
+- `GET /api/v1/documents/{document_id}` — Document JSON persisté + révision
+- `PUT /api/v1/documents/{document_id}` — Mise à jour avec contrôle de révision
+- `GET /api/v1/documents/{document_id}/layout` — Layout sidecar
+- `PUT /api/v1/documents/{document_id}/layout` — Persistance layout
+- `POST /api/v1/documents/{document_id}/preview` — Preview d'un document avec état simulé (`flag_states`, `reputation_states`) et, depuis **FR94**, `game_systems_state` pour caractéristiques, compétences, Effort, Réputation FR94 et titres. La réponse renvoie les agrégats de masquage, écho `game_systems_state`, et `simulation_limits` lorsque la preview locale ne peut pas reproduire les données runtime complètes (ex. agrégat communautaire Réputation).
+- `POST /api/v1/documents/{document_id}/validate-flag-references` — **FR93** : références de flags (`visibilityConditions`, `choiceEffects`) vs `dialogueFlags` déclarés ; corps optionnel `{ "document": { ... } }` (sinon lecture du fichier persisté). Réponse : `valid`, `summary`, `used_flag_count`, listes `errors` / `warnings` (types `dialogue_flag_undeclared`, `dialogue_flag_unused`), champs optionnels `referenced_flag_id` / `suggested_flag_id` sur les entrées d’erreur.
+
+La même analyse est fusionnée dans `POST /api/v1/unity-dialogues/graph/validate` lorsque le client envoie `document` (repère Story 9.5).
+
+### Mechanics — systèmes de jeu
+
+- `GET /api/v1/mechanics/systems/integration` — **FR94** : catalogue non bloquant des familles utilisables dans les dialogues (`Caractéristiques & Compétences`, `Gestion de l'Effort`, `Réputation`) et état de la source runtime externe (`Unity/API/fichier config`). En local, une source runtime absente renvoie `editing_blocked=false` pour permettre l'édition et la preview simulée.
 
 ### Logs
 

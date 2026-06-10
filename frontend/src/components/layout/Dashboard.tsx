@@ -1,7 +1,15 @@
 /**
  * Composant Dashboard avec layout 3 panneaux redimensionnables.
  */
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 import { ContextSelector } from '../context/ContextSelector'
 import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
 import { GenerationPanel } from '../generation/GenerationPanel'
@@ -12,8 +20,8 @@ import { ContextDetail } from '../context/ContextDetail'
 import { ResizablePanels, type ResizablePanelsRef } from '../shared/ResizablePanels'
 import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { Tabs, type Tab } from '../shared/Tabs'
-import { UnityDialogueList, type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
-import { UnityDialogueDetails } from '../unityDialogues/UnityDialogueDetails'
+import { type UnityDialogueListRef } from '../unityDialogues/UnityDialogueList'
+import { DialogueEditionTabContent } from './DialogueEditionTabContent'
 import { GraphEditor } from '../graph/GraphEditor'
 import { NodeEditorPanel } from '../graph/NodeEditorPanel'
 import { KeyboardShortcutsHelp } from '../shared/KeyboardShortcutsHelp'
@@ -23,8 +31,18 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGraphStore } from '../../store/graphStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { useCommandPalette } from '../../hooks/useCommandPalette'
+import { useViewportMode } from '../../hooks/useViewportMode'
+import { useMobileShellKeyboardComfort } from '../../hooks/useMobileShellKeyboardComfort'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import {
+  SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
+  panelHeaderTitleTypography,
+} from '../../theme/responsiveChrome'
+import { remSize } from '../../theme/uiTypography'
+import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
+import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 
@@ -102,8 +120,10 @@ function PanelCollapseButton({
         display: 'flex',
         alignItems: 'center',
         gap: '0.3rem',
-        padding: '0.2rem 0.45rem',
-        height: 26,
+        padding: '0.35rem 0.5rem',
+        minHeight: TOUCH_TARGET_MIN_PX,
+        minWidth: TOUCH_TARGET_MIN_PX,
+        boxSizing: 'border-box',
         borderRadius: 99,
         border: `1px solid ${borderColor}`,
         backgroundColor: bg,
@@ -119,7 +139,7 @@ function PanelCollapseButton({
     >
       {chevronSide === 'left' && chevron}
       <span style={{
-        fontSize: '0.72rem',
+        fontSize: remSize('caption'),
         fontWeight: 600,
         letterSpacing: '0.03em',
         whiteSpace: 'nowrap',
@@ -137,27 +157,53 @@ function PanelCollapseButton({
 /**
  * Bouton flottant sur le bord du panneau central pour ré-ouvrir un panneau replié.
  * Pill vertical avec une ligne de texte rotée et halo coloré au hover.
+ *
+ * `anchor`:
+ *  - `'center'` (défaut) : centré verticalement — mode comfortable (bureau).
+ *  - `'bottom'` : ancré en bas à `bottomOffset`px du bord — mode narrow, évite de
+ *    couvrir les onglets internes qui occupent le centre du panneau.
  */
 function PanelExpandButton({
   side,
   label,
   onClick,
   ariaLabel,
+  anchor = 'center',
+  bottomOffset = 24,
 }: {
   side: 'left' | 'right'
   label: string
   onClick: () => void
   ariaLabel: string
+  /** Ancrage vertical du pill — 'center' (bureau) ou 'bottom' (narrow). */
+  anchor?: 'center' | 'bottom'
+  /** Distance du bas en px quand `anchor='bottom'`. */
+  bottomOffset?: number
 }) {
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
 
   const accentColor = theme.button.primary.background
-  const scale = pressed ? 0.94 : hovered ? 1.08 : 1
-  const bg = hovered ? `rgba(0,123,255,0.18)` : 'rgba(45, 45, 45, 0.9)'
-  const borderColor = hovered ? accentColor : 'rgba(255,255,255,0.12)'
-  const glow = hovered ? `0 0 18px ${accentColor}55, 0 6px 18px rgba(0,0,0,0.5)` : '0 4px 14px rgba(0,0,0,0.45)'
+  const isActive = hovered || pressed
+  const scale = pressed ? 0.94 : hovered ? 1.05 : 1
   const translateX = hovered ? (side === 'left' ? 2 : -2) : 0
+
+  /* Transparence "très auto" :
+   *   repos  → quasi invisible (15% opacité globale)
+   *   hover/focus → pleinement visible (100%) avec halo accentué */
+  const globalOpacity = isActive ? 1 : 0.38
+  /* Fond opaque même au repos pour éviter que les éléments derrière (ex: flèche native du <select>)
+   * transparaissent à travers le rail — seuls les textes/bords/ombres varient avec l'opacité globale. */
+  const bg = isActive ? `rgba(0,123,255,0.22)` : 'rgba(18, 18, 22, 1)'
+  const borderColor = isActive ? accentColor : 'rgba(255,255,255,0.15)'
+  const glow = isActive
+    ? `0 0 18px ${accentColor}55, 0 6px 18px rgba(0,0,0,0.5)`
+    : '0 2px 8px rgba(0,0,0,0.3)'
+
+  const verticalStyle =
+    anchor === 'bottom'
+      ? { bottom: bottomOffset, transform: `scale(${scale}) translateX(${translateX}px)` }
+      : { top: '50%', transform: `translateY(-50%) scale(${scale}) translateX(${translateX}px)` }
 
   return (
     <button
@@ -170,54 +216,55 @@ function PanelExpandButton({
       aria-label={ariaLabel}
       style={{
         position: 'absolute',
-        [side]: 6,
-        top: '50%',
-        transform: `translateY(-50%) scale(${scale}) translateX(${translateX}px)`,
+        [side]: 4,
+        ...verticalStyle,
         zIndex: 50,
-        width: 22,
+        width: 24,
+        minWidth: 24,
         height: 56,
-        borderRadius: 11,
+        minHeight: 56,
+        borderRadius: 7,
         border: `1px solid ${borderColor}`,
         backgroundColor: bg,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        color: hovered ? '#fff' : theme.text.secondary,
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        color: isActive ? '#fff' : theme.text.secondary,
         cursor: 'pointer',
         boxShadow: glow,
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        opacity: globalOpacity,
+        transition: 'opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 3,
-        padding: '4px 0',
+        gap: 2,
+        padding: '2px 0',
         overflow: 'hidden',
       }}
     >
-      <ChevronIcon direction={side === 'left' ? 'right' : 'left'} size={12} />
+      {/* ‹ › typographiques : rendu fiable, clairement distinct du ▼ des selects */}
+      <span style={{ fontSize: 14, fontWeight: 900, lineHeight: 1, color: 'inherit', userSelect: 'none' }}>
+        {side === 'left' ? '›' : '‹'}
+      </span>
       <span
         style={{
-          fontSize: '0.58rem',
+          fontSize: '0.65rem',
           fontWeight: 700,
-          letterSpacing: '0.06em',
+          letterSpacing: '0.04em',
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
-          transform: side === 'left' ? 'rotate(180deg)' : 'none',
           lineHeight: 1,
-          maxHeight: 34,
           overflow: 'hidden',
           whiteSpace: 'nowrap',
           color: 'inherit',
-          opacity: hovered ? 1 : 0.6,
-          transition: 'opacity 0.18s ease',
-          textTransform: 'uppercase',
         }}
       >
-        {label}
+        {label.slice(0, 3).toUpperCase()}
       </span>
     </button>
   )
 }
+
 
 export function Dashboard() {
   const [selectedContextItem, setSelectedContextItem] = useState<ContextItem | null>(null)
@@ -247,6 +294,38 @@ export function Dashboard() {
   const suppressSizesSyncRef = useRef(false)
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false)
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false)
+  const viewportMode = useViewportMode()
+  /** FR120 : &lt; 1024px — panneaux latéraux en overlay drawer, pas en colonnes compressées */
+  const useNarrowSidePanels = viewportMode !== 'desktop'
+  const { bottomInsetPx: keyboardBottomInsetPx } = useMobileShellKeyboardComfort(useNarrowSidePanels)
+  const shellKeyboardInsetStyle = useMemo(
+    (): CSSProperties => ({
+      paddingBottom: keyboardBottomInsetPx,
+      boxSizing: 'border-box',
+    }),
+    [keyboardBottomInsetPx]
+  )
+  /** Drawer narrow plein écran : ne pas réserver d’inset sous le canvas masqué par l’overlay. */
+  const narrowDrawerObscuresCenter =
+    useNarrowSidePanels && (!isLeftPanelCollapsed || !isRightPanelCollapsed)
+  const centerColumnKeyboardStyle = useMemo(
+    (): CSSProperties => ({
+      paddingBottom: narrowDrawerObscuresCenter ? 0 : keyboardBottomInsetPx,
+      boxSizing: 'border-box',
+    }),
+    [narrowDrawerObscuresCenter, keyboardBottomInsetPx]
+  )
+  const { ref: centerColumnRef, isNarrow: isNarrowCenterColumn } = useNarrowInlineSize(
+    SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
+    { measureParentClientWidth: true }
+  )
+  const panelTitleFontRem = isNarrowCenterColumn
+    ? panelHeaderTitleTypography.narrowFontRem
+    : panelHeaderTitleTypography.comfortableFontRem
+  const showCollapsedLeftAffordance = isLeftPanelCollapsed
+  const showCollapsedRightAffordance = isRightPanelCollapsed
+  const lastViewportModeRef = useRef(viewportMode)
+  const didApplyInitialViewportRef = useRef(false)
   
   // Charger la configuration par défaut au démarrage pour initialiser les fieldConfigs
   // Cela garantit que tous les navigateurs ont la même configuration initiale
@@ -286,13 +365,30 @@ export function Dashboard() {
         handler: () => {
           if (isHelpModalOpen) {
             setIsHelpModalOpen(false)
+            return
+          }
+          if (useNarrowSidePanels) {
+            if (!isLeftPanelCollapsed) {
+              setIsLeftPanelCollapsed(true)
+              return
+            }
+            if (!isRightPanelCollapsed) {
+              setIsRightPanelCollapsed(true)
+            }
           }
         },
         description: 'Fermer les modals/panels',
-        enabled: isHelpModalOpen,
+        enabled:
+          isHelpModalOpen ||
+          (useNarrowSidePanels && (!isLeftPanelCollapsed || !isRightPanelCollapsed)),
       },
     ],
-    [isHelpModalOpen]
+    [
+      isHelpModalOpen,
+      useNarrowSidePanels,
+      isLeftPanelCollapsed,
+      isRightPanelCollapsed,
+    ]
   )
 
   
@@ -408,7 +504,7 @@ export function Dashboard() {
           display: 'flex', 
           flexDirection: 'column', 
           height: '100%',
-          padding: '1rem',
+          padding: '0.65rem',
           overflowY: 'auto',
           overflowX: 'hidden',
         }}>
@@ -444,12 +540,12 @@ export function Dashboard() {
     },
   ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
 
-  // En mode éditeur de graphe : masquer "Prompt". En mode Génération : masquer "Édition de nœud"
+  // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
     if (centerPanelTab === 'graph') {
       return rightPanelTabs.filter((t) => t.id !== 'prompt')
     }
-    if (centerPanelTab === 'generation') {
+    if (centerPanelTab === 'generation' || centerPanelTab === 'edition') {
       return rightPanelTabs.filter((t) => t.id !== 'node')
     }
     return rightPanelTabs
@@ -459,7 +555,7 @@ export function Dashboard() {
   const effectiveRightPanelTab =
     centerPanelTab === 'graph' && rightPanelTab === 'prompt'
       ? 'node'
-      : centerPanelTab === 'generation' && rightPanelTab === 'node'
+      : (centerPanelTab === 'generation' || centerPanelTab === 'edition') && rightPanelTab === 'node'
         ? 'prompt'
         : rightPanelTab
 
@@ -484,7 +580,7 @@ export function Dashboard() {
   useEffect(() => {
     if (centerPanelTab === 'graph' && rightPanelTab === 'prompt') {
       setRightPanelTab('node')
-    } else if (centerPanelTab === 'generation' && rightPanelTab === 'node') {
+    } else if ((centerPanelTab === 'generation' || centerPanelTab === 'edition') && rightPanelTab === 'node') {
       setRightPanelTab('prompt')
     }
   }, [centerPanelTab, rightPanelTab])
@@ -510,32 +606,339 @@ export function Dashboard() {
     []
   )
 
+  useEffect(() => {
+    const isInitialApply = !didApplyInitialViewportRef.current
+    if (!isInitialApply && lastViewportModeRef.current === viewportMode) return
+    didApplyInitialViewportRef.current = true
+    lastViewportModeRef.current = viewportMode
+
+    if (!panelsRef.current) return
+
+    // Capture expanded sizes once before forcing a responsive collapse
+    if (viewportMode !== 'desktop' && !expandedSizesRef.current) {
+      expandedSizesRef.current = panelsRef.current.getSizes()
+    }
+
+    if (viewportMode === 'mobile') {
+      setIsLeftPanelCollapsed(true)
+      setIsRightPanelCollapsed(true)
+      applyCollapsedLayout(true, true)
+      return
+    }
+
+    if (viewportMode === 'tablet') {
+      setIsLeftPanelCollapsed(true)
+      setIsRightPanelCollapsed(true)
+      applyCollapsedLayout(true, true)
+      return
+    }
+
+    // desktop: restore (do not persist; storage remains authoritative)
+    setIsLeftPanelCollapsed(false)
+    setIsRightPanelCollapsed(false)
+    const restore = expandedSizesRef.current
+    if (restore && restore.length >= 3) {
+      suppressSizesSyncRef.current = true
+      panelsRef.current.setSizes(restore, { persist: false })
+      setTimeout(() => {
+        suppressSizesSyncRef.current = false
+      }, 0)
+    }
+  }, [viewportMode, applyCollapsedLayout])
+
+  /**
+   * Narrow : fermer les drawers au changement d’onglet central (génération / édition / graphe).
+   * Évite un overlay modal au-dessus du graphe ou du flux génération (FR120 AC2).
+   */
+  useEffect(() => {
+    if (viewportMode === 'desktop') return
+    setIsLeftPanelCollapsed(true)
+    setIsRightPanelCollapsed(true)
+  }, [centerPanelTab, viewportMode])
+
   const toggleLeftPanel = useCallback(() => {
     const next = !isLeftPanelCollapsed
     if (!expandedSizesRef.current && panelsRef.current) {
       expandedSizesRef.current = panelsRef.current.getSizes()
     }
+    if (viewportMode !== 'desktop' && !next) {
+      setIsRightPanelCollapsed(true)
+    }
     setIsLeftPanelCollapsed(next)
-    applyCollapsedLayout(next, isRightPanelCollapsed)
-  }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed])
+    if (viewportMode !== 'desktop') {
+      applyCollapsedLayout(true, true)
+    } else {
+      applyCollapsedLayout(next, isRightPanelCollapsed)
+    }
+  }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed, viewportMode])
 
   const toggleRightPanel = useCallback(() => {
     const next = !isRightPanelCollapsed
     if (!expandedSizesRef.current && panelsRef.current) {
       expandedSizesRef.current = panelsRef.current.getSizes()
     }
+    if (viewportMode !== 'desktop' && !next) {
+      setIsLeftPanelCollapsed(true)
+    }
     setIsRightPanelCollapsed(next)
-    applyCollapsedLayout(isLeftPanelCollapsed, next)
-  }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed])
+    if (viewportMode !== 'desktop') {
+      applyCollapsedLayout(true, true)
+    } else {
+      applyCollapsedLayout(isLeftPanelCollapsed, next)
+    }
+  }, [applyCollapsedLayout, isLeftPanelCollapsed, isRightPanelCollapsed, viewportMode])
 
 
+
+  const onContextItemSelected = useCallback(
+    (item: ContextItem | null, historyStem?: string | null) => {
+      setSelectedContextItem(item)
+      setSelectedContextHistoryStem(item ? historyStem ?? null : null)
+      if (item) {
+        setRightPanelTab('details')
+      }
+    },
+    []
+  )
+
+  const narrowDetailsHeaderEnd =
+    actions.handleGenerate ? (
+      <SaveStatusIndicator
+        appearance="discreet"
+        status={actions.saveStatus}
+        lastSavedAt={actions.draftLastSavedAt}
+        style={{ flexShrink: 0, maxWidth: 'min(200px, 38vw)' }}
+      />
+    ) : null
+
+  /** Barre d’actions bas du panneau droit (Prompt / Dialogue) — desktop et drawer narrow. */
+  const renderRightActionsFooter = (): ReactNode => {
+    if (
+      !actions.handleGenerate ||
+      (effectiveRightPanelTab !== 'prompt' && effectiveRightPanelTab !== 'dialogue')
+    ) {
+      return null
+    }
+    return (
+      <div
+        style={{
+          padding: '0.5rem 0.75rem',
+          borderTop: `2px solid ${theme.border.primary}`,
+          backgroundColor: theme.background.panelHeader,
+          flexShrink: 0,
+          flexGrow: 0,
+          boxSizing: 'border-box',
+          position: 'relative',
+          zIndex: 10,
+        }}
+      >
+        {(actions.isLoading || generationState.isEstimating || isGraphGenerating) && (
+          <>
+            <div
+              style={{
+                width: '100%',
+                height: '3px',
+                backgroundColor: theme.border.primary,
+                borderRadius: '2px',
+                overflow: 'hidden',
+                marginBottom: '0.5rem',
+                position: 'relative',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  height: '100%',
+                  width: '40%',
+                  backgroundColor: theme.button.primary.background,
+                  animation: 'loading-slide 1.5s ease-in-out infinite',
+                }}
+              />
+            </div>
+            <div
+              style={{
+                fontSize: remSize('small'),
+                color: theme.text.secondary,
+                textAlign: 'center',
+                marginBottom: '0.4rem',
+              }}
+            >
+              {isGraphGenerating
+                ? 'Génération de nœud...'
+                : generationState.isEstimating && !actions.isLoading
+                  ? 'Estimation des tokens...'
+                  : actions.isLoading && !generationState.unityDialogueResponse
+                    ? 'Génération du dialogue...'
+                    : actions.isLoading
+                      ? 'Validation et finalisation...'
+                      : 'Traitement en cours...'}
+            </div>
+            <style>{`
+                  @keyframes loading-slide {
+                    0% {
+                      left: -40%;
+                    }
+                    100% {
+                      left: 100%;
+                    }
+                  }
+                `}</style>
+          </>
+        )}
+        {rightPanelTab === 'dialogue' && unityDialogueResponse ? (
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              onClick={() => unityDialogueEditorRef.current?.handleSave()}
+              disabled={
+                !unityDialogueEditorRef.current?.isValid ||
+                unityDialogueEditorRef.current?.isSaving ||
+                actions.isLoading ||
+                isGraphGenerating
+              }
+              style={{
+                flex: 1,
+                padding: '0.5rem 0.75rem',
+                fontSize: remSize('body'),
+                fontWeight: 700,
+                backgroundColor: theme.button.primary.background,
+                color: theme.button.primary.color,
+                border: 'none',
+                borderRadius: '6px',
+                cursor:
+                  unityDialogueEditorRef.current?.isValid &&
+                  !unityDialogueEditorRef.current?.isSaving &&
+                  !actions.isLoading &&
+                  !isGraphGenerating
+                    ? 'pointer'
+                    : 'not-allowed',
+                opacity:
+                  unityDialogueEditorRef.current?.isValid &&
+                  !unityDialogueEditorRef.current?.isSaving &&
+                  !actions.isLoading &&
+                  !isGraphGenerating
+                    ? 1
+                    : 0.6,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+                boxSizing: 'border-box',
+              }}
+              title="Sauvegarder (Ctrl+S)"
+            >
+              {unityDialogueEditorRef.current?.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+            </button>
+            <button
+              onClick={actions.handleGenerate}
+              disabled={actions.isLoading || isGraphGenerating}
+              style={{
+                padding: '0.5rem',
+                fontSize: remSize('body'),
+                backgroundColor: theme.button.default.background,
+                color: theme.button.default.color,
+                border: `1px solid ${theme.border.primary}`,
+                borderRadius: '6px',
+                cursor: actions.isLoading || isGraphGenerating ? 'not-allowed' : 'pointer',
+                opacity: actions.isLoading || isGraphGenerating ? 0.6 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '44px',
+                height: '44px',
+                transition: 'all 0.2s',
+                boxSizing: 'border-box',
+              }}
+              title="Générer à nouveau (Ctrl+Enter)"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  animation: actions.isLoading || isGraphGenerating ? 'spin 1s linear infinite' : 'none',
+                }}
+              >
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+              </svg>
+              <style>{`
+                    @keyframes spin {
+                      from { transform: rotate(0deg); }
+                      to { transform: rotate(360deg); }
+                    }
+                  `}</style>
+            </button>
+          </div>
+        ) : effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
+          <button
+            onClick={actions.handleGenerate}
+            disabled={actions.isLoading || isGraphGenerating}
+            style={{
+              width: '100%',
+              padding: '0.55rem 0.75rem',
+              fontSize: remSize('section'),
+              fontWeight: 'bold',
+              backgroundColor: theme.button.primary.background,
+              color: theme.button.primary.color,
+              border: 'none',
+              borderRadius: '6px',
+              cursor: actions.isLoading || isGraphGenerating ? 'not-allowed' : 'pointer',
+              opacity: actions.isLoading || isGraphGenerating ? 0.6 : 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s',
+              boxSizing: 'border-box',
+            }}
+            title="Générer (Ctrl+Enter)"
+          >
+            <span>Générer</span>
+            <span
+              style={{
+                fontSize: remSize('caption'),
+                opacity: 0.8,
+                fontWeight: 'normal',
+              }}
+            >
+              Ctrl+Enter
+            </span>
+          </button>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
+    <div
+      data-dashboard-shell="true"
+      style={{
+        height: '100%',
+        minHeight: 0,
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
     <ResizablePanels
+      key={viewportMode}
       ref={panelsRef}
-      storageKey="dashboard_panels"
-      defaultSizes={[20, 50, 30]}
-      minSizes={[200, 400, 250]}
+      storageKey={viewportMode === 'desktop' ? 'dashboard_panels' : undefined}
+      defaultSizes={[20, 58, 22]}
+      minSizes={
+        viewportMode === 'mobile'
+          ? [0, 320, 0]
+          : viewportMode === 'tablet'
+            ? [0, 400, 220]
+            : [200, 400, 200]
+      }
       direction="horizontal"
       style={{
         height: '100%',
@@ -560,7 +963,7 @@ export function Dashboard() {
           position: 'relative',
         }}
       >
-        {!isLeftPanelCollapsed && (
+        {!useNarrowSidePanels && !isLeftPanelCollapsed && (
           <>
             <div
               style={{
@@ -574,7 +977,7 @@ export function Dashboard() {
                 flexShrink: 0,
               }}
             >
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: theme.text.primary }}>
+              <div style={{ fontSize: `${panelTitleFontRem}rem`, fontWeight: 700, color: theme.text.primary }}>
                 {GDD_CONTEXT_PANEL_TITLE}
               </div>
               <PanelCollapseButton
@@ -584,21 +987,14 @@ export function Dashboard() {
                 ariaLabel="Replier le panneau gauche"
               />
             </div>
-            <ContextSelector 
-              onItemSelected={(item, historyStem) => {
-                setSelectedContextItem(item)
-                setSelectedContextHistoryStem(item ? (historyStem ?? null) : null)
-                if (item) {
-                  setRightPanelTab('details')
-                }
-              }}
-            />
+            <ContextSelector onItemSelected={onContextItemSelected} />
           </>
         )}
       </div>
 
       {/* Panneau central: Génération / Édition avec onglets */}
       <div
+        ref={centerColumnRef}
         style={{
           overflow: 'hidden',
           display: 'flex',
@@ -606,10 +1002,14 @@ export function Dashboard() {
           backgroundColor: theme.background.panel,
           height: '100%',
           position: 'relative',
+          minWidth: 0,
+          ...centerColumnKeyboardStyle,
         }}
       >
-        {/* Rails (boutons) visibles quand un panneau latéral est replié */}
-        {isLeftPanelCollapsed && (
+        {/* Rails latéraux — visibles quand un panneau est replié.
+            Transparence "très auto" : quasi invisible au repos (17%), pleinement
+            visible au hover/focus. Centrés verticalement dans les deux modes. */}
+        {showCollapsedLeftAffordance && (
           <PanelExpandButton
             side="left"
             label="GDD"
@@ -617,7 +1017,7 @@ export function Dashboard() {
             ariaLabel="Déplier le panneau gauche"
           />
         )}
-        {isRightPanelCollapsed && (
+        {showCollapsedRightAffordance && (
           <PanelExpandButton
             side="right"
             label="Détails"
@@ -641,45 +1041,14 @@ export function Dashboard() {
               id: 'edition',
               label: '✏️ Édition de Dialogues',
               content: (
-                <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      // Panneau gauche (recherche/liste) volontairement compact pour donner de la place à l'édition
-                      width: 'clamp(260px, 22vw, 340px)',
-                      minWidth: '240px',
-                      borderRight: `1px solid ${theme.border.primary}`,
-                      overflow: 'hidden',
-                      backgroundColor: theme.background.panel,
-                    }}
-                  >
-                    <UnityDialogueList
-                      ref={dialogueListRef}
-                      onSelectDialogue={setSelectedDialogue}
-                      selectedFilename={selectedDialogue?.filename || null}
-                    />
-                  </div>
-                  <div style={{ flex: 1, overflow: 'hidden', backgroundColor: theme.background.panel }}>
-                    {selectedDialogue ? (
-                      <UnityDialogueDetails
-                        filename={selectedDialogue.filename}
-                        onClose={() => setSelectedDialogue(null)}
-                        onDeleted={async () => {
-                          await dialogueListRef.current?.refresh()
-                        }}
-                        onGenerateContinuation={() => {
-                          // Basculer vers l'onglet Génération
-                          setCenterPanelTab('generation')
-                          // TODO: Pré-remplir le contexte avec le dialogue existant pour générer la suite
-                          // Pour l'instant, on bascule juste vers l'onglet génération
-                        }}
-                      />
-                    ) : (
-                      <div style={{ padding: '2rem', textAlign: 'center', color: theme.text.secondary }}>
-                        Sélectionnez un dialogue Unity pour le voir et l'éditer
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <DialogueEditionTabContent
+                  selectedDialogue={selectedDialogue}
+                  setSelectedDialogue={setSelectedDialogue}
+                  dialogueListRef={dialogueListRef}
+                  onGenerateContinuation={() => {
+                    setCenterPanelTab('generation')
+                  }}
+                />
               ),
             },
             {
@@ -711,7 +1080,9 @@ export function Dashboard() {
           position: 'relative',
         }}
       >
-        {isRightPanelCollapsed ? (
+        {useNarrowSidePanels ? (
+          <div style={{ flex: 1, minHeight: 0 }} />
+        ) : isRightPanelCollapsed ? (
           <div style={{ flex: 1, minHeight: 0 }} />
         ) : (
           <>
@@ -742,7 +1113,7 @@ export function Dashboard() {
               flex: 1,
               minWidth: 0,
               textAlign: 'center',
-              fontSize: '0.9rem',
+              fontSize: `${panelTitleFontRem}rem`,
               fontWeight: 700,
               color: theme.text.primary,
             }}
@@ -762,6 +1133,7 @@ export function Dashboard() {
         </div>
         {/* Zone de contenu avec scroll (prend l'espace restant, mais laisse toujours de la place pour le bouton) */}
         <div
+          data-testid="right-panel-keyboard-inset"
           style={{
             flex: 1,
             minHeight: 0,
@@ -769,6 +1141,7 @@ export function Dashboard() {
             flexDirection: 'column',
             overflow: 'hidden',
             position: 'relative',
+            ...shellKeyboardInsetStyle,
           }}
         >
           <Tabs
@@ -782,187 +1155,7 @@ export function Dashboard() {
             contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}
           />
         </div>
-        {/* Boutons en bas (visible sur Prompt et Dialogue généré) */}
-        {actions.handleGenerate && (effectiveRightPanelTab === 'prompt' || effectiveRightPanelTab === 'dialogue') && (
-          <div
-            style={{
-              padding: '0.75rem 1rem',
-              borderTop: `2px solid ${theme.border.primary}`,
-              backgroundColor: theme.background.panelHeader,
-              flexShrink: 0,
-              flexGrow: 0,
-              boxSizing: 'border-box',
-              position: 'relative',
-              zIndex: 10,
-            }}
-          >
-            {/* Barre de progression */}
-            {(actions.isLoading || generationState.isEstimating || isGraphGenerating) && (
-              <>
-                <div
-                  style={{
-                    width: '100%',
-                    height: '4px',
-                    backgroundColor: theme.border.primary,
-                    borderRadius: '2px',
-                    overflow: 'hidden',
-                    marginBottom: '0.75rem',
-                    position: 'relative',
-                  }}
-                >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '100%',
-                      width: '40%',
-                      backgroundColor: theme.button.primary.background,
-                      animation: 'loading-slide 1.5s ease-in-out infinite',
-                    }}
-                  />
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.85rem',
-                    color: theme.text.secondary,
-                    textAlign: 'center',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  {isGraphGenerating
-                    ? 'Génération de nœud...'
-                    : generationState.isEstimating && !actions.isLoading
-                    ? 'Estimation des tokens...'
-                    : actions.isLoading && !generationState.unityDialogueResponse
-                    ? 'Génération du dialogue...'
-                    : actions.isLoading
-                    ? 'Validation et finalisation...'
-                    : 'Traitement en cours...'}
-                </div>
-                <style>{`
-                  @keyframes loading-slide {
-                    0% {
-                      left: -40%;
-                    }
-                    100% {
-                      left: 100%;
-                    }
-                  }
-                `}</style>
-              </>
-            )}
-            {/* Si un dialogue a déjà été généré, afficher Sauvegarder + bouton reload Générer */}
-            {rightPanelTab === 'dialogue' && unityDialogueResponse ? (
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button
-                  onClick={() => unityDialogueEditorRef.current?.handleSave()}
-                  disabled={!unityDialogueEditorRef.current?.isValid || unityDialogueEditorRef.current?.isSaving || actions.isLoading || isGraphGenerating}
-                  style={{
-                    flex: 1,
-                    padding: '0.65rem 1rem',
-                    fontSize: '1rem',
-                    fontWeight: 700,
-                    backgroundColor: theme.button.primary.background,
-                    color: theme.button.primary.color,
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: (unityDialogueEditorRef.current?.isValid && !unityDialogueEditorRef.current?.isSaving && !actions.isLoading && !isGraphGenerating) ? 'pointer' : 'not-allowed',
-                    opacity: (unityDialogueEditorRef.current?.isValid && !unityDialogueEditorRef.current?.isSaving && !actions.isLoading && !isGraphGenerating) ? 1 : 0.6,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s',
-                    boxSizing: 'border-box',
-                  }}
-                  title="Sauvegarder (Ctrl+S)"
-                >
-                  {unityDialogueEditorRef.current?.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-                </button>
-                <button
-                  onClick={actions.handleGenerate}
-                  disabled={actions.isLoading || isGraphGenerating}
-                  style={{
-                    padding: '0.65rem',
-                    fontSize: '1rem',
-                    backgroundColor: theme.button.default.background,
-                    color: theme.button.default.color,
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: '6px',
-                    cursor: (actions.isLoading || isGraphGenerating) ? 'not-allowed' : 'pointer',
-                    opacity: (actions.isLoading || isGraphGenerating) ? 0.6 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '44px',
-                    height: '44px',
-                    transition: 'all 0.2s',
-                    boxSizing: 'border-box',
-                  }}
-                  title="Générer à nouveau (Ctrl+Enter)"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{
-                      animation: actions.isLoading || isGraphGenerating ? 'spin 1s linear infinite' : 'none',
-                    }}
-                  >
-                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-                  </svg>
-                  <style>{`
-                    @keyframes spin {
-                      from { transform: rotate(0deg); }
-                      to { transform: rotate(360deg); }
-                    }
-                  `}</style>
-                </button>
-              </div>
-            ) : (effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt') ? (
-              // Sur l'onglet Prompt ou Dialogue généré sans dialogue, afficher le bouton Générer normal
-              <button
-                onClick={actions.handleGenerate}
-                disabled={actions.isLoading || isGraphGenerating}
-                style={{
-                  width: '100%',
-                  padding: '0.875rem 1rem',
-                  fontSize: '1.1rem',
-                  fontWeight: 'bold',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: (actions.isLoading || isGraphGenerating) ? 'not-allowed' : 'pointer',
-                  opacity: (actions.isLoading || isGraphGenerating) ? 0.6 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  transition: 'all 0.2s',
-                  boxSizing: 'border-box',
-                }}
-                title="Générer (Ctrl+Enter)"
-              >
-                <span>Générer</span>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    opacity: 0.8,
-                    fontWeight: 'normal',
-                  }}
-                >
-                  Ctrl+Enter
-                </span>
-              </button>
-            ) : null}
-          </div>
-        )}
+        {renderRightActionsFooter()}
           </>
         )}
       </div>
@@ -972,6 +1165,56 @@ export function Dashboard() {
         onClose={() => setIsHelpModalOpen(false)}
       />
     </ResizablePanels>
+
+    {useNarrowSidePanels && !isLeftPanelCollapsed && (
+      <NarrowOverlayDrawer
+        open
+        side="left"
+        titleId="dashboard-narrow-gdd-title"
+        title={GDD_CONTEXT_PANEL_TITLE}
+        closeLabel="Fermer le panneau contexte GDD"
+        onClose={() => setIsLeftPanelCollapsed(true)}
+        contentBottomInsetPx={keyboardBottomInsetPx}
+      >
+        <ContextSelector onItemSelected={onContextItemSelected} />
+      </NarrowOverlayDrawer>
+    )}
+
+    {useNarrowSidePanels && !isRightPanelCollapsed && (
+      <NarrowOverlayDrawer
+        open
+        side="right"
+        titleId="dashboard-narrow-details-title"
+        title="Détails"
+        headerEnd={narrowDetailsHeaderEnd}
+        closeLabel="Fermer le panneau détails"
+        onClose={() => setIsRightPanelCollapsed(true)}
+        contentBottomInsetPx={keyboardBottomInsetPx}
+      >
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <Tabs
+            variant="segmented"
+            segmentedSize="drawer-aligned"
+            tabs={visibleRightPanelTabs}
+            activeTabId={effectiveRightPanelTab}
+            onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}
+            style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+            contentStyle={{ overflow: 'hidden', scrollbarGutter: 'stable' }}
+          />
+        </div>
+        {renderRightActionsFooter()}
+      </NarrowOverlayDrawer>
+    )}
+    </div>
   )
 }
 

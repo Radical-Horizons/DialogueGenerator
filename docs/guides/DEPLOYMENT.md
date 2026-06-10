@@ -220,7 +220,7 @@ python -m api.main
 #### 4. Configuration du serveur
 
 - **Port**: Configurer selon les spécifications SmarterASP.net (généralement automatique)
-- **Worker processes**: 1-2 workers selon les ressources
+- **Worker processes** : pour ce projet, les **jobs de génération** et le **SSE streaming** sont **en mémoire par processus**. Sous **Gunicorn**, utiliser **`workers = 1`** (voir `gunicorn.conf.py` / `docs/deployment/gunicorn.conf.example`) ; plusieurs workers sans sticky sessions peuvent provoquer des **404** sur le flux SSE (`GET .../stream`) si la job est créée sur un autre worker. Si vous devez absolument monter en workers, il faut un équilibreur avec sessions persistantes ou une refonte du stockage des jobs — ce n’est pas le déploiement documenté par défaut.
 - **Timeout**: Augmenter pour les requêtes LLM longues (300 secondes recommandé)
 
 ### VPS avec Nginx

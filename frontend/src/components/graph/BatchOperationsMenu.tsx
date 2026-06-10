@@ -4,6 +4,11 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { theme } from '../../theme'
+import {
+  GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+  GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+} from './graphToolbarConstants'
+import { Badge } from '../shared'
 
 const PRESET_TAGS = ['À réviser', 'Validé', 'Brouillon', 'À relire'] as const
 
@@ -27,32 +32,32 @@ export function BatchOperationsMenu({
 
   useEffect(() => {
     if (!tagDropdownOpen) return
-    const handleClickOutside = (e: MouseEvent) => {
-      if (tagDropdownRef.current && !tagDropdownRef.current.contains(e.target as Node)) {
+    const handleDown = (e: Event) => {
+      const t = e.target as Node
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(t)) {
         setTagDropdownOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleDown)
+    document.addEventListener('pointerdown', handleDown)
+    return () => {
+      document.removeEventListener('mousedown', handleDown)
+      document.removeEventListener('pointerdown', handleDown)
+    }
   }, [tagDropdownOpen])
 
   if (selectedNodeIds.length <= 1) return null
 
   return (
     <>
-      <span
-        style={{
-          padding: '0.35rem 0.6rem',
-          borderRadius: '6px',
-          fontSize: '0.85rem',
-          color: theme.text.primary,
-          backgroundColor: theme.background.tertiary,
-          border: `1px solid ${theme.border.primary}`,
-        }}
+      <Badge
+        variant="neutral"
+        size="md"
         title="Sélection multiple (shift-clic ou lasso)"
+        style={{ backgroundColor: theme.background.tertiary, color: theme.text.primary }}
       >
         {selectedNodeIds.length} nœuds sélectionnés
-      </span>
+      </Badge>
       <div
         style={{
           display: 'flex',
@@ -90,13 +95,16 @@ export function BatchOperationsMenu({
                 left: 0,
                 marginTop: '4px',
                 minWidth: '140px',
+                maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+                overflowY: 'auto',
+                overflowX: 'hidden',
                 padding: '4px 0',
                 border: `1px solid ${theme.input.border}`,
                 borderRadius: '6px',
                 backgroundColor: theme.input.background,
                 color: theme.input.color,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                zIndex: 1000,
+                zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
               }}
             >
               {PRESET_TAGS.map((tag) => (

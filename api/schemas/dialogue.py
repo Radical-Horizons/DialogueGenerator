@@ -10,6 +10,7 @@ if str(_root_dir) not in sys.path:
     sys.path.insert(0, str(_root_dir))
 
 from constants import Defaults, ModelNames
+from services.token_estimation_service import DEFAULT_COMPLETION_TOKENS_PER_NODE
 
 
 class ContextSelection(BaseModel):
@@ -30,6 +31,9 @@ class ContextSelection(BaseModel):
         scene_protagonists: Dictionnaire des protagonistes de la scène (sera converti en _scene_protagonists pour le service).
         scene_location: Dictionnaire du lieu de la scène (sera converti en _scene_location pour le service).
         generation_settings: Paramètres de génération additionnels.
+        narrative_structures: Structures narratives à inclure.
+        chapters: Chapitres à inclure.
+        scenes: Scènes à inclure.
     """
     characters_full: List[str] = Field(default_factory=list, description="Liste des personnages (mode complet)")
     characters_excerpt: List[str] = Field(default_factory=list, description="Liste des personnages (mode extrait)")
@@ -42,6 +46,9 @@ class ContextSelection(BaseModel):
     communities_full: List[str] = Field(default_factory=list, description="Liste des communautés (mode complet)")
     communities_excerpt: List[str] = Field(default_factory=list, description="Liste des communautés (mode extrait)")
     dialogues_examples: List[str] = Field(default_factory=list, description="Liste des exemples de dialogues")
+    narrative_structures: List[str] = Field(default_factory=list, description="Structures narratives sélectionnées")
+    chapters: List[str] = Field(default_factory=list, description="Chapitres sélectionnés")
+    scenes: List[str] = Field(default_factory=list, description="Scènes sélectionnées")
     scene_protagonists: Optional[Dict[str, Any]] = Field(None, description="Protagonistes de la scène")
     scene_location: Optional[Dict[str, Any]] = Field(None, description="Lieu de la scène")
     generation_settings: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Paramètres de génération")
@@ -126,6 +133,7 @@ class BasePromptRequest(BaseModel):
     )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     author_profile: Optional[str] = Field(None, description="Profil d'auteur global (style réutilisable entre scènes)")
+    game_rules: Optional[str] = Field(None, description="Règles du jeu spécifiques à appliquer au dialogue")
     max_choices: Optional[int] = Field(None, ge=0, le=8, description="Nombre maximum de choix à générer (0-8, ou None pour laisser l'IA décider librement)")
     choices_mode: Literal["free", "capped"] = Field(default="free", description="Mode de génération des choix")
     narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs pour guider le ton (ex: tension, humour, dramatique)")
@@ -136,6 +144,12 @@ class BasePromptRequest(BaseModel):
     llm_model_identifier: str = Field(
         default=ModelNames.GPT_5_MINI,
         description="Identifiant du modèle LLM (estimation tokens / coût / comptage prompt)",
+    )
+    max_completion_tokens: Optional[int] = Field(
+        default=None,
+        ge=100,
+        le=50000,
+        description="Nombre maximum de tokens de completion à utiliser pour l'estimation de coût",
     )
 
     @field_validator('max_context_tokens')
@@ -210,6 +224,15 @@ class EstimateTokensResponse(BaseModel):
     raw_prompt: str = Field(..., description="Le prompt brut réel qui sera envoyé au LLM")
     prompt_hash: str = Field(..., description="Hash SHA-256 du prompt")
     structured_prompt: Optional[Dict[str, Any]] = Field(None, description="Structure JSON du prompt pour affichage structuré")
+    completion_tokens: int = Field(
+        default=DEFAULT_COMPLETION_TOKENS_PER_NODE,
+        ge=0,
+        description="Tokens de completion retenus pour l'estimation de coût",
+    )
+    estimated_cost_eur: Optional[float] = Field(
+        default=None,
+        description="Coût estimé en euros pour prompt + completion estimée",
+    )
 
     @model_validator(mode="after")
     def _fill_total_estimated_tokens(self) -> "EstimateTokensResponse":
@@ -326,13 +349,6 @@ class PreviewPromptResponse(BaseModel):
 
 class GenerateUnityDialogueRequest(BasePromptRequest):
     """Requête pour générer un nœud de dialogue au format Unity JSON."""
-
-    max_completion_tokens: Optional[int] = Field(
-        None,
-        ge=100,
-        le=50000,
-        description="Nombre maximum de tokens pour la génération (plafond aligné avec le validateur métier).",
-    )
     reasoning_effort: Optional[
         Literal["none", "minimal", "low", "medium", "high", "xhigh"]
     ] = Field(

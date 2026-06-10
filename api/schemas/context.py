@@ -153,6 +153,25 @@ class CommunityListResponse(BaseModel):
     total_pages: Optional[int] = Field(None, description="Nombre total de pages")
 
 
+class NarrativeContextResponse(BaseModel):
+    """Réponse contenant une source de contexte narratif spécialisé."""
+
+    name: str = Field(..., description="Nom de la source")
+    category: Literal["narrative_structures", "chapters", "scenes"] = Field(
+        ...,
+        description="Catégorie narrative",
+    )
+    label: str = Field(..., description="Libellé UI de la catégorie")
+    data: Dict[str, Any] = Field(..., description="Données complètes")
+
+
+class NarrativeContextListResponse(BaseModel):
+    """Liste des sources narratives disponibles."""
+
+    items: List[NarrativeContextResponse] = Field(default_factory=list)
+    total: int = Field(..., description="Nombre total de sources narratives")
+
+
 class RegionListResponse(BaseModel):
     """Réponse contenant la liste des noms du catalogue lieux (clé API ``regions`` inchangée).
     

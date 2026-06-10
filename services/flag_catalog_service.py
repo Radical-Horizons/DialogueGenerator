@@ -6,7 +6,36 @@ import tempfile
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Union
 
+from services.dialogue_flag_validation import (
+    default_counter_bounds,
+    infer_semantic_type,
+)
+
 logger = logging.getLogger(__name__)
+
+_SCOPE_CONVERSATIONAL_CATEGORIES = frozenset({"Event", "Choice", "Item"})
+
+
+def _derive_scope(category: str, scope_override: Optional[str]) -> str:
+    """Déduit la portée FR89 (conversationnel / mécanique) depuis la catégorie GDD."""
+    o = (scope_override or "").strip()
+    if o:
+        return o
+    c = (category or "").strip()
+    return "conversationnel" if c in _SCOPE_CONVERSATIONAL_CATEGORIES else "mécanique"
+
+
+def _parse_optional_numeric(val: Optional[str]) -> Optional[Union[int, float]]:
+    """Parse un nombre depuis une cellule CSV optionnelle."""
+    if val is None:
+        return None
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return float(s) if "." in s else int(s)
+    except ValueError:
+        return None
 
 
 class FlagCatalogService:
@@ -31,6 +60,28 @@ class FlagCatalogService:
         self.csv_path = csv_path.resolve()  # Résoudre le symlink si présent
         self._flags: Optional[List[Dict[str, Any]]] = None
         logger.info(f"FlagCatalogService initialisé avec le chemin: {self.csv_path}")
+
+    def _enrich_flag_definition(self, flag_dict: Dict[str, Any]) -> None:
+        """Complète ``semanticType``, ``scope``, bornes numériques pour les compteurs."""
+        category = str(flag_dict.get("category") or "")
+        flag_type = str(flag_dict.get("type") or "bool").strip().lower()
+        enum_values = flag_dict.get("enumValues")
+        if not isinstance(enum_values, list):
+            enum_values = []
+            flag_dict["enumValues"] = enum_values
+        semantic = infer_semantic_type(flag_type, enum_values)
+        flag_dict["semanticType"] = semantic
+        so = str(flag_dict.get("scopeOverride") or "").strip()
+        flag_dict["scope"] = _derive_scope(category, so or None)
+        lo_d, hi_d = default_counter_bounds(flag_type)
+        if semantic == "compteur":
+            if flag_dict.get("minValue") is None:
+                flag_dict["minValue"] = lo_d
+            if flag_dict.get("maxValue") is None:
+                flag_dict["maxValue"] = hi_d
+        else:
+            flag_dict["minValue"] = None
+            flag_dict["maxValue"] = None
     
     def parse_default_value(self, value_str: str, flag_type: str) -> Union[bool, int, float, str]:
         """Parse une valeur par défaut selon le type du flag.
@@ -133,18 +184,29 @@ class FlagCatalogService:
                     
                     # Parser la valeur par défaut selon le type
                     parsed_default_value = self.parse_default_value(default_value, flag_type)
-                    
+
+                    enum_raw = (row.get("EnumValues") or "").strip()
+                    enum_values = [x.strip() for x in enum_raw.split(";") if x.strip()]
+                    scope_override = (row.get("Scope") or "").strip()
+                    mv_min = _parse_optional_numeric(row.get("MinValue"))
+                    mv_max = _parse_optional_numeric(row.get("MaxValue"))
+
                     flag_dict = {
                         "id": flag_id,
                         "type": flag_type,
                         "category": category,
                         "label": label,
                         "description": description,
-                        "defaultValue": default_value,  # Garder en string pour compatibilité CSV
-                        "defaultValueParsed": parsed_default_value,  # Ajouter la valeur parsée
+                        "defaultValue": default_value,
+                        "defaultValueParsed": parsed_default_value,
                         "tags": tags,
-                        "isFavorite": is_favorite
+                        "isFavorite": is_favorite,
+                        "enumValues": enum_values,
+                        "scopeOverride": scope_override,
+                        "minValue": mv_min,
+                        "maxValue": mv_max,
                     }
+                    self._enrich_flag_definition(flag_dict)
                     flags.append(flag_dict)
             
             self._flags = flags
@@ -162,7 +224,9 @@ class FlagCatalogService:
         self,
         query: Optional[str] = None,
         category: Optional[str] = None,
-        favorites_only: bool = False
+        favorites_only: bool = False,
+        semantic_type: Optional[str] = None,
+        scope: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Recherche des flags selon des critères.
         
@@ -170,6 +234,8 @@ class FlagCatalogService:
             query: Terme de recherche (recherche dans id, label, description, tags).
             category: Filtrer par catégorie.
             favorites_only: Ne retourner que les favoris.
+            semantic_type: Filtre FR89 ``bool`` | ``compteur`` | ``enum`` (``semanticType`` catalogue).
+            scope: Filtre ``conversationnel`` | ``mécanique`` (champ ``scope`` enrichi).
             
         Returns:
             Liste des flags correspondant aux critères.
@@ -184,6 +250,20 @@ class FlagCatalogService:
         # Filtrer par catégorie
         if category:
             results = [f for f in results if f.get("category", "").lower() == category.lower()]
+
+        if semantic_type:
+            st = semantic_type.strip().lower()
+            results = [
+                f for f in results
+                if str(f.get("semanticType", "")).lower() == st
+            ]
+
+        if scope:
+            sc = scope.strip().lower()
+            results = [
+                f for f in results
+                if str(f.get("scope", "")).lower() == sc
+            ]
         
         # Recherche textuelle
         if query:
@@ -240,8 +320,13 @@ class FlagCatalogService:
             "description": definition.get("description", ""),
             "defaultValue": definition.get("defaultValue", ""),
             "tags": definition.get("tags", []),
-            "isFavorite": definition.get("isFavorite", False)
+            "isFavorite": definition.get("isFavorite", False),
+            "enumValues": list(definition.get("enumValues", [])),
+            "scopeOverride": definition.get("scopeOverride", ""),
+            "minValue": definition.get("minValue"),
+            "maxValue": definition.get("maxValue"),
         }
+        self._enrich_flag_definition(normalized)
         
         # Mettre à jour ou ajouter
         if existing_index is not None:
@@ -306,7 +391,20 @@ class FlagCatalogService:
         
         try:
             with os.fdopen(temp_fd, 'w', encoding='utf-8', newline='') as f:
-                fieldnames = ["Id", "Type", "Category", "Label", "Description", "DefaultValue", "Tags", "IsFavorite"]
+                fieldnames = [
+                    "Id",
+                    "Type",
+                    "Category",
+                    "Label",
+                    "Description",
+                    "DefaultValue",
+                    "Tags",
+                    "IsFavorite",
+                    "Scope",
+                    "MinValue",
+                    "MaxValue",
+                    "EnumValues",
+                ]
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
                 writer.writeheader()
                 
@@ -315,7 +413,15 @@ class FlagCatalogService:
                     tags_str = ";".join(flag.get("tags", []))
                     # Convertir isFavorite en string
                     is_favorite_str = "true" if flag.get("isFavorite", False) else "false"
-                    
+                    sem = str(flag.get("semanticType", "")).lower()
+                    mv_min = flag.get("minValue")
+                    mv_max = flag.get("maxValue")
+                    min_str = "" if mv_min is None else str(mv_min)
+                    max_str = "" if mv_max is None else str(mv_max)
+                    if sem != "compteur":
+                        min_str = ""
+                        max_str = ""
+                    enum_str = ";".join(flag.get("enumValues") or [])
                     row = {
                         "Id": flag.get("id", ""),
                         "Type": flag.get("type", "bool"),
@@ -324,7 +430,11 @@ class FlagCatalogService:
                         "Description": flag.get("description", ""),
                         "DefaultValue": flag.get("defaultValue", ""),
                         "Tags": tags_str,
-                        "IsFavorite": is_favorite_str
+                        "IsFavorite": is_favorite_str,
+                        "Scope": flag.get("scopeOverride", "") or "",
+                        "MinValue": min_str,
+                        "MaxValue": max_str,
+                        "EnumValues": enum_str,
                     }
                     writer.writerow(row)
             

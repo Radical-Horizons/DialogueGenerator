@@ -1,0 +1,16 @@
+---
+description: >-
+  Agent Skills Cursor — invariants courts. Apply when creating .cursor/skills,
+  migrating via /migrate-to-skills, or when the user asks how to write skills.
+  Procédure détaillée : skill cursor-skills-authoring.
+alwaysApply: false
+---
+
+# Agent Skills — cœur
+
+- **Skill** = workflow / procédure / scripts ; **rule** = contrainte persistante courte. Ne pas mettre une longue procédure dans une `.mdc`.
+- Dossier **`.cursor/skills/<nom>/SKILL.md`** · `name` = nom du dossier (kebab-case) · jamais `~/.cursor/skills-cursor/`.
+- **`description`** : 3ᵉ personne, QUOI + QUAND (découverte auto) ; option **`paths`** pour scope fichiers ; **`disable-model-invocation: true`** seulement pour slash explicite.
+- Rule métier associée : **quelques lignes** + lien `/nom-skill` — pas de duplication du skill.
+
+**Procédure complète** : `/cursor-skills-authoring` ou `.cursor/skills/cursor-skills-authoring/SKILL.md`

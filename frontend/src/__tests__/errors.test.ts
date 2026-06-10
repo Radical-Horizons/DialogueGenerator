@@ -2,6 +2,16 @@ import { describe, it, expect } from 'vitest'
 import { getErrorMessage } from '../types/errors'
 
 describe('getErrorMessage', () => {
+  it('explique clairement un timeout Axios (autosave)', () => {
+    expect(
+      getErrorMessage({
+        code: 'ECONNABORTED',
+        message: 'timeout of 30000ms exceeded',
+      })
+    ).toMatch(/Délai d’attente dépassé/)
+    expect(getErrorMessage(new Error('timeout of 30000ms exceeded'))).toMatch(/Délai d’attente dépassé/)
+  })
+
   it('reads FastAPI detail string when error envelope absent', () => {
     const err = {
       response: { data: { detail: 'Jeton invalide' } },

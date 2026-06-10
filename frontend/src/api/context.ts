@@ -19,6 +19,7 @@ import type {
   SpeciesListResponse,
   CommunityResponse,
   CommunityListResponse,
+  NarrativeContextListResponse,
   RegionListResponse,
   SubLocationListResponse,
   LinkedElementsRequest,
@@ -136,6 +137,11 @@ export async function listCommunities(params?: ListContextParams): Promise<Commu
  */
 export async function getCommunity(name: string): Promise<CommunityResponse> {
   const response = await apiClient.get<CommunityResponse>(`/api/v1/context/communities/${encodeURIComponent(name)}`)
+  return response.data
+}
+
+export async function listNarrativeContexts(): Promise<NarrativeContextListResponse> {
+  const response = await apiClient.get<NarrativeContextListResponse>('/api/v1/context/narrative-contexts')
   return response.data
 }
 

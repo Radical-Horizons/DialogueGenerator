@@ -25,31 +25,27 @@ Les utilisateurs peuvent utiliser une application stable, fluide et prête pour 
 ### Checklist de Vérification
 
 1. **Fichiers mentionnés dans les stories :**
-   - [ ] Vérifier existence avec `glob_file_search` ou `grep`
-   - [ ] Vérifier chemins corrects (ex: `frontend/src/components/graph/` vs autres)
-   - [ ] Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
-
+  - Vérifier existence avec `glob_file_search` ou `grep`
+  - Vérifier chemins corrects (ex: `frontend/src/components/graph/` vs autres)
+  - Si existe : **DÉCISION** - Étendre ou remplacer ? (documenter dans story)
 2. **Composants/Services similaires :**
-   - [ ] Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
-   - [ ] Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
-   - [ ] Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
-   - [ ] Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
-
+  - Rechercher composants React similaires (`codebase_search` dans `frontend/src/components/`)
+  - Rechercher stores Zustand similaires (`codebase_search` dans `frontend/src/store/`)
+  - Rechercher services Python similaires (`codebase_search` dans `services/`, `core/`)
+  - Si similaire existe : **DÉCISION** - Réutiliser ou créer nouveau ? (documenter dans story)
 3. **Endpoints API :**
-   - [ ] Vérifier namespace cohérent (`/api/v1/dialogues/*` vs autres)
-   - [ ] Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
-   - [ ] Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
-
+  - Vérifier namespace cohérent (`/api/v1/dialogues/`* vs autres)
+  - Vérifier si endpoint similaire existe (`grep` dans `api/routers/`)
+  - Si endpoint similaire : **DÉCISION** - Étendre ou créer nouveau ? (documenter dans story)
 4. **Patterns existants :**
-   - [ ] Vérifier patterns Zustand (immutable updates, structure stores)
-   - [ ] Vérifier patterns FastAPI (routers, dependencies, schemas)
-   - [ ] Vérifier patterns React (composants, hooks, modals)
-   - [ ] Respecter conventions de nommage et structure dossiers
-
+  - Vérifier patterns Zustand (immutable updates, structure stores)
+  - Vérifier patterns FastAPI (routers, dependencies, schemas)
+  - Vérifier patterns React (composants, hooks, modals)
+  - Respecter conventions de nommage et structure dossiers
 5. **Documentation des décisions :**
-   - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
-   - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
-   - Si nouveau : Documenter **POURQUOI** pas de réutilisation
+  - Si remplacement : Documenter **POURQUOI** dans story "Dev Notes"
+  - Si extension : Documenter **COMMENT** (quels champs/méthodes ajouter)
+  - Si nouveau : Documenter **POURQUOI** pas de réutilisation
 
 ---
 
@@ -111,6 +107,7 @@ So that **je peux travailler efficacement sans perdre mon organisation visuelle 
 **And** le graphe est visiblement réorganisé
 
 **Technical Requirements:**
+
 - Frontend : `graphStore.ts::updateNodePosition()` doit détecter TestNodes enfants et mettre à jour leurs positions
 - Frontend : Fonction utilitaire `findFreePosition()` pour détection collision lors création nodes
 - Frontend : Toggle on/off pour activation/désactivation détection collision (settings ou UI)
@@ -124,6 +121,7 @@ So that **je peux travailler efficacement sans perdre mon organisation visuelle 
 **Dev Notes:**
 
 **Problèmes identifiés (confirmés par utilisateur) :**
+
 - ✅ TestNodes ne suivent pas leur parent lors déplacement → **À CORRIGER**
 - ✅ Nodes se chevauchent lors création batch → **À CORRIGER**
 - ⚠️ Auto-layout ne fonctionne pas → **À INVESTIGUER ET CORRIGER**
@@ -131,12 +129,14 @@ So that **je peux travailler efficacement sans perdre mon organisation visuelle 
 - localStorage positions peut être désynchronisé avec dialogue JSON
 
 **Décisions prises (Party Mode 2026-01-23) :**
+
 - TestNodes suivent toujours leur parent (pas de découplage manuel pour V1.0)
 - Détection collision avec ajustement automatique (toggle on/off)
 - Nodes peuvent être déplacés plus loin si nécessaire pour éviter collision
 - Feedback visuel pendant génération : afficher nodes "vides" avant remplissage (amélioration UX)
 
 **Références techniques :**
+
 - `frontend/src/store/graphStore.ts::updateNodePosition()` (ligne 554-583) - À étendre pour TestNodes
 - `frontend/src/store/graphStore.ts::applyAutoLayout()` (ligne 924-975) - À investiguer/corriger
 - `frontend/src/store/graphStore.ts::generateFromNode()` (ligne 704-728) - À étendre avec détection collision
@@ -188,6 +188,7 @@ So that **je peux travailler efficacement sans frustration et voir le progrès e
 **And** je peux réessayer ou continuer à travailler
 
 **Technical Requirements:**
+
 - Frontend : Créer nodes "squelettes" immédiatement lors début génération batch
 - Frontend : Mettre à jour nodes progressivement avec contenu généré (SSE streaming)
 - Frontend : Permettre interaction graphe pendant génération (pas de blocage UI)
@@ -200,18 +201,21 @@ So that **je peux travailler efficacement sans frustration et voir le progrès e
 **Dev Notes:**
 
 **Points de friction identifiés :**
+
 - ⚠️ Pendant génération batch, utilisateur bloqué sans feedback visuel → **NOUVELLE AMÉLIORATION UX**
 - Latence lors chargement graphe large
 - Freeze possible pendant génération LLM (même avec SSE)
 - Transitions entre vues peuvent être lentes
 
 **Optimisations possibles :**
+
 - Créer nodes "squelettes" immédiatement (ID, position, type) avant génération contenu
 - Virtualisation liste nœuds si >100 nœuds
 - Debounce/throttle mises à jour position nœuds
 - Code splitting React (lazy load composants lourds)
 
 **Références techniques :**
+
 - `frontend/src/store/graphStore.ts::generateFromNode()` (ligne 586-777) - À modifier pour créer nodes squelettes
 - `frontend/src/components/graph/AIGenerationPanel.tsx` - Panel génération avec feedback
 - Epic 0 Story 0.2 (Progress Modal SSE) - Réutiliser pour feedback génération
@@ -249,6 +253,7 @@ So that **je peux ajouter de nouvelles fonctionnalités et corriger des bugs fac
 **And** les tests existants sont maintenus (pas de régression)
 
 **Technical Requirements:**
+
 - Analyse : Outil analyse code (SonarQube, ESLint, Pylint) pour identifier code smells
 - Refactorisation : Respecter patterns existants (Zustand, FastAPI, React)
 - Tests : Maintenir coverage >80% après refactorisation (pas de régression)
@@ -258,11 +263,13 @@ So that **je peux ajouter de nouvelles fonctionnalités et corriger des bugs fac
 **Dev Notes:**
 
 **Zones critiques à vérifier :**
+
 - `frontend/src/components/graph/GraphEditor.tsx` (1170 lignes - potentiellement trop gros)
 - `frontend/src/store/graphStore.ts` (1075 lignes - vérifier si peut être décomposé)
 - Services backend avec logique métier complexe
 
 **Critères refactorisation :**
+
 - Composant >500 lignes → Décomposer
 - Fonction >50 lignes → Extraire logique
 - Code dupliqué >3 occurrences → Créer utilitaire/hook
@@ -306,6 +313,7 @@ So that **je peux déployer facilement et maintenir l'application en production*
 **And** le build backend (FastAPI) est prêt pour déploiement (Docker ou serveur)
 
 **Technical Requirements:**
+
 - Configuration : Vérifier `.env.example` contient toutes les variables nécessaires
 - Sécurité : Audit sécurité (pas de secrets hardcodés, validation inputs, CORS configuré)
 - Build : Scripts build production (`npm run build`, `python -m build`)
@@ -316,16 +324,17 @@ So that **je peux déployer facilement et maintenir l'application en production*
 **Dev Notes:**
 
 **Checklist déploiement :**
-- [ ] Variables d'environnement documentées (`.env.example`)
-- [ ] Secrets dans variables d'environnement (pas hardcodés)
-- [ ] `.gitignore` à jour (exclut fichiers sensibles)
-- [ ] Dépendances à jour (audit sécurité)
-- [ ] Build production fonctionne (`npm run build`, backend prêt)
-- [ ] Documentation à jour (`README.md`, `docs/`)
-- [ ] Tests passent (unit + integration + E2E)
-- [ ] Logging configuré (production-ready)
-- [ ] CORS configuré (si API publique)
-- [ ] Health check endpoint (`/api/v1/health`)
+
+- Variables d'environnement documentées (`.env.example`)
+- Secrets dans variables d'environnement (pas hardcodés)
+- `.gitignore` à jour (exclut fichiers sensibles)
+- Dépendances à jour (audit sécurité)
+- Build production fonctionne (`npm run build`, backend prêt)
+- Documentation à jour (`README.md`, `docs/`)
+- Tests passent (unit + integration + E2E)
+- Logging configuré (production-ready)
+- CORS configuré (si API publique)
+- Health check endpoint (`/api/v1/health`)
 
 **References:** NFR-D1 (Deployment Readiness), Architecture Document (déploiement), Epic 0 (infrastructure)
 
@@ -334,6 +343,7 @@ So that **je peux déployer facilement et maintenir l'application en production*
 ## 📊 Estimation Effort
 
 ### Effort Total Estimé (Mise à jour après exploration et décisions)
+
 - **Story 0.9.1 (Bugs comportement) :** 4-6 jours (CRITIQUE)
   - Suivi TestNodes parent : 2-3h
   - Détection collision + ajustement auto : 3-4h
@@ -349,7 +359,9 @@ So that **je peux déployer facilement et maintenir l'application en production*
 - **Total :** 12-19 jours (2.5-4 semaines pour 1 développeur)
 
 ### Recommandation Sprint (Objectif 3 jours - Scope réduit)
+
 **Sprint de préparation production (3 jours - scope ciblé) :**
+
 - Story 0.9.1 (CRITIQUE) : 2-3 jours - Focus sur bugs bloquants
   - ✅ Suivi TestNodes parent (2-3h)
   - ✅ Détection collision + toggle (4-5h)
@@ -368,10 +380,12 @@ So that **je peux déployer facilement et maintenir l'application en production*
 ## 🔗 Dépendances
 
 ### Dépendances Identifiées
+
 - **Epic 0** : Doit être terminé ou presque terminé (stories critiques done)
 - **Aucune dépendance entre stories** - Stories peuvent être travaillées en parallèle
 
 ### Ordre Recommandé
+
 1. **Story 0.9.1** (CRITIQUE) - Commencer immédiatement
 2. **Story 0.9.2** - En parallèle si possible
 3. **Story 0.9.3** - Après analyse code (peut être optionnel si code déjà propre)
@@ -382,25 +396,28 @@ So that **je peux déployer facilement et maintenir l'application en production*
 ## ✅ Definition of Done
 
 Une story est considérée "done" quand :
-- [ ] Tous les Acceptance Criteria sont satisfaits
-- [ ] Code implémenté et testé (unit + integration + E2E si applicable)
-- [ ] Tests passent (>80% coverage pour code critique)
-- [ ] Code review effectué (workflow `code-review`)
-- [ ] Documentation mise à jour si nécessaire
-- [ ] Story marquée `done` dans `sprint-status.yaml`
-- [ ] Aucune régression introduite (tests existants passent)
+
+- Tous les Acceptance Criteria sont satisfaits
+- Code implémenté et testé (unit + integration + E2E si applicable)
+- Tests passent (>80% coverage pour code critique)
+- Code review effectué (workflow `code-review`)
+- Documentation mise à jour si nécessaire
+- Story marquée `done` dans `sprint-status.yaml`
+- Aucune régression introduite (tests existants passent)
 
 ---
 
 ## 📈 Métriques de Succès
 
 ### Métriques Techniques
+
 - **Zero Blocking Bugs** : Story 0.9.1 élimine tous les bugs comportement bloquants
 - **UX Fluide** : Story 0.9.2 élimine friction et latence perceptible
 - **Code Maintenable** : Story 0.9.3 améliore maintenabilité (si nécessaire)
 - **Deployment Ready** : Story 0.9.4 prépare application pour production
 
 ### Métriques Business
+
 - **Production Readiness** : Application stable et prête pour mise en ligne
 - **User Satisfaction** : Expérience fluide sans frustration
 - **Maintainability** : Code propre et facile à maintenir

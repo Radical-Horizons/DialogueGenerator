@@ -74,20 +74,20 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
       {/* En-tête compact */}
       <div
         style={{
-          padding: '0.75rem 1rem',
+          padding: '0.5rem 0.75rem',
           flexShrink: 0,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '1rem',
+          gap: '0.65rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '1.1rem' }}>🧠</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.95rem' }}>🧠</span>
           <div>
             <div
               style={{
-                fontSize: '0.9rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
                 color: theme.text.primary,
               }}
@@ -97,7 +97,7 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
             {reasoningTrace?.effort && (
               <div
                 style={{
-                  fontSize: '0.75rem',
+                  fontSize: '0.68rem',
                   color: theme.text.secondary,
                   marginTop: '0.1rem',
                 }}
@@ -112,13 +112,13 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
             type="button"
             onClick={handleCopyTrace}
             style={{
-              padding: '0.4rem 0.8rem',
+              padding: '0.32rem 0.6rem',
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '4px',
               backgroundColor: theme.background.panel,
               color: theme.text.primary,
               cursor: 'pointer',
-              fontSize: '0.8rem',
+              fontSize: '0.74rem',
               transition: 'background-color 0.2s',
             }}
             onMouseEnter={(e) => {
@@ -136,19 +136,19 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
       {/* Contenu */}
       <div
         style={{
-          maxHeight: '300px',
+          maxHeight: '220px',
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: '0 1rem 1rem 1rem',
+          padding: '0 0.75rem 0.65rem 0.75rem',
         }}
       >
         {isGenerating && !reasoningTrace ? (
           <div
             style={{
-              padding: '1rem',
+              padding: '0.65rem',
               textAlign: 'center',
               color: theme.text.secondary,
-              fontSize: '0.9rem',
+              fontSize: '0.8rem',
             }}
           >
             <span style={{ display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }}>
@@ -176,8 +176,8 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
               >
                 <h4
                   style={{
-                    margin: '0 0 0.5rem 0',
-                    fontSize: '0.85rem',
+                    margin: '0 0 0.4rem 0',
+                    fontSize: '0.78rem',
                     fontWeight: 600,
                     color: theme.text.primary,
                   }}
@@ -186,8 +186,8 @@ export const ReasoningTraceViewer = memo(function ReasoningTraceViewer({
                 </h4>
                 <div
                   style={{
-                    fontSize: '0.85rem',
-                    lineHeight: '1.5',
+                    fontSize: '0.78rem',
+                    lineHeight: '1.45',
                     color: theme.text.secondary,
                     whiteSpace: 'pre-wrap',
                   }}

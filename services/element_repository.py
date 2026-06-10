@@ -18,6 +18,8 @@ class ElementCategory(Enum):
     QUESTS = "quests"
     DIALOGUES = "dialogues_examples"
     NARRATIVE_STRUCTURES = "narrative_structures"
+    CHAPTERS = "chapters"
+    SCENES = "scenes"
 
 
 class ElementRepository:
@@ -37,6 +39,8 @@ class ElementRepository:
         ElementCategory.QUESTS: ["Nom"],
         ElementCategory.DIALOGUES: ["Nom", "Titre", "ID"],
         ElementCategory.NARRATIVE_STRUCTURES: ["Nom"],
+        ElementCategory.CHAPTERS: ["Nom", "Titre", "ID"],
+        ElementCategory.SCENES: ["Nom", "Titre", "ID"],
     }
     
     def __init__(self, gdd_data: GDDData):

@@ -39,6 +39,7 @@
 Located in `[architecture/](./architecture/)`
 
 - [Frontend Architecture](./architecture/architecture-frontend.md) - React application architecture
+- [Responsive UI & PWA (Epic 17)](./architecture/responsive-ui.md) - Viewport vs container breakpoints, drawers, graph toolbar, PWA installability
 - [Backend Architecture](./architecture/architecture-api.md) - FastAPI API architecture
 - [Integration Architecture](./architecture/integration-architecture.md) - Frontend-Backend integration
 - [State Management](./architecture/state-management-frontend.md) - Zustand stores and patterns
@@ -67,6 +68,7 @@ Located in `[api/](./api/)`
 Located in `[guides/](./guides/)`
 
 - [Development Guide](./guides/development-guide.md) - Setup, commands, and workflow
+- [GDD Notion Sync](./guides/GDD_NOTION_SYNC.md) - Sync Notion → disque, archives, export NotebookLM, chemins `data/gdd_notion_sync/`
 - [Development Troubleshooting](./guides/DEVELOPMENT.md) - Development troubleshooting
 - [Deployment Guide](./guides/deployment-guide.md) - Production deployment instructions
 - [Deployment Documentation](./guides/DEPLOYMENT.md) - Deployment documentation
@@ -129,7 +131,8 @@ Located in `[features/](./features/)`
 Located in `[deployment/](./deployment/)`
 
 - **[Production (OVH VPS) — référence](./deployment/PRODUCTION.md)** : hébergement réel du DialogueGenerator (IP, SSH, Nginx, `demo.auto-diffusion.net`). À lire avant les guides génériques.
-- [Gunicorn Configuration](./deployment/gunicorn.conf.example) - Gunicorn configuration example
+- [Gunicorn — exemple](./deployment/gunicorn.conf.example) — modèle à copier vers `gunicorn.conf.py`
+- **Fichier versionné à la racine** : `gunicorn.conf.py` (ex. `workers = 1` pour jobs + SSE en mémoire processus ; voir commentaires dans le fichier)
 - [Nginx Configuration](./deployment/nginx.conf.example) - Nginx configuration example
 - [Web Config](./deployment/web.config.example) - Web configuration example
 
@@ -179,7 +182,7 @@ When creating a brownfield PRD:
 
 ## Documentation Status
 
-**Last Updated**: 2026-03-17
+**Last Updated**: 2026-06-08
 **Structure**: Reorganized into logical categories
 **Parts Documented**: 2 (frontend, api)
 

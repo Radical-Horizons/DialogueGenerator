@@ -188,6 +188,23 @@ export const UnityDialogueViewer = memo(function UnityDialogueViewer({
             Copier JSON
           </button>
         </div>
+
+        <details
+          style={{
+            fontSize: '0.78rem',
+            color: theme.text.secondary,
+            lineHeight: 1.45,
+          }}
+        >
+          <summary style={{ cursor: 'pointer', fontWeight: 600, color: theme.text.primary }}>
+            Où voir les stats du PJ et la réputation ?
+          </summary>
+          <p style={{ margin: '0.45rem 0 0' }}>
+            Ce JSON liste surtout textes et effets de choix. Pour simuler attributs, compétences, effort et
+            axes de réputation pendant la relecture, utilisez l&apos;éditeur de graphe : panneau de conditions
+            et simulation (pas ce viewer seul).
+          </p>
+        </details>
       </div>
 
       {/* Liste des nœuds */}

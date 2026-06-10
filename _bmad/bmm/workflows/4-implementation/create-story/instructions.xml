@@ -15,7 +15,7 @@
     analyze different artifacts simultaneously and thoroughly</critical>
   <critical>❓ SAVE QUESTIONS: If you think of questions or clarifications during analysis, save them for the end after the complete story is
     written</critical>
-  <critical>🎯 ZERO USER INTERVENTION: Process should be fully automated except for initial epic/story selection or missing documents</critical>
+  <critical>🎯 ZERO USER INTERVENTION: Process should be fully automated except for initial epic/story selection or missing documents. When the user does not name a story, epic selection uses the current Git branch when parsable; otherwise the default sprint-status order applies.</critical>
 
   <step n="1" goal="Determine target story">
     <check if="{{story_path}} is provided by user or user provided the epic and story number such as 2-4 or 1.6 or epic 1 story 5">
@@ -63,11 +63,9 @@
       <action>Read ALL lines from beginning to end - do not skip any content</action>
       <action>Parse the development_status section completely</action>
 
-      <action>Find the FIRST story (by reading in order from top to bottom) where:
-        - Key matches pattern: number-number-name (e.g., "1-2-user-auth")
-        - NOT an epic key (epic-X) or retrospective (epic-X-retrospective)
-        - Status value equals "backlog"
-      </action>
+      <critical>Git branch → epic (no explicit story id): infer epic from the current branch when unambiguous; if no backlog story exists in that epic, fall back to the historical global order (first backlog in file).</critical>
+      <action>Clear {{git_branch_epic_num}}. Run `git rev-parse --abbrev-ref HEAD` in the repo root; trim whitespace. For parsing only, strip a leading `origin/` or `remotes/origin/`. Infer one epic number if unambiguous: (a) after case-insensitive leading `Epic/` take consecutive digits; (b) else first path segment matching `(?i)^epic-(\d+)(-|$)`. If multiple conflicting numbers apply, leave empty. If one number: set {{git_branch_epic_num}} to its decimal string without leading zeros (e.g. 04 → 4) so keys like `4-1-…` match.</action>
+      <action>Select backlog story in order: (1) If {{git_branch_epic_num}} is set, choose the FIRST key in file order where the key matches two leading integers then slug (`^\d+-\d+-`), the first integer equals {{git_branch_epic_num}} numerically, the key is NOT `epic-X` or `epic-X-retrospective`, and status is `backlog`. (2) If none chosen and {{git_branch_epic_num}} was set, output in {communication_language} a short note that the branch points to that epic but no backlog story exists there, then continue. (3) If still none chosen, choose the FIRST `backlog` key in file order matching the same two-integer slug pattern and epic/retrospective exclusions (global default).</action>
 
       <check if="no backlog story found">
         <output>📋 No backlog stories found in sprint-status.yaml
@@ -120,11 +118,9 @@
     <action>Read ALL lines from beginning to end - do not skip any content</action>
     <action>Parse the development_status section completely</action>
 
-    <action>Find the FIRST story (by reading in order from top to bottom) where:
-      - Key matches pattern: number-number-name (e.g., "1-2-user-auth")
-      - NOT an epic key (epic-X) or retrospective (epic-X-retrospective)
-      - Status value equals "backlog"
-    </action>
+    <critical>Git branch → epic (no explicit story id): infer epic from the current branch when unambiguous; if no backlog story exists in that epic, fall back to the historical global order (first backlog in file).</critical>
+    <action>Clear {{git_branch_epic_num}}. Run `git rev-parse --abbrev-ref HEAD` in the repo root; trim whitespace. For parsing only, strip a leading `origin/` or `remotes/origin/`. Infer one epic number if unambiguous: (a) after case-insensitive leading `Epic/` take consecutive digits; (b) else first path segment matching `(?i)^epic-(\d+)(-|$)`. If multiple conflicting numbers apply, leave empty. If one number: set {{git_branch_epic_num}} to its decimal string without leading zeros (e.g. 04 → 4) so keys like `4-1-…` match.</action>
+    <action>Select backlog story in order: (1) If {{git_branch_epic_num}} is set, choose the FIRST key in file order where the key matches two leading integers then slug (`^\d+-\d+-`), the first integer equals {{git_branch_epic_num}} numerically, the key is NOT `epic-X` or `epic-X-retrospective`, and status is `backlog`. (2) If none chosen and {{git_branch_epic_num}} was set, output in {communication_language} a short note that the branch points to that epic but no backlog story exists there, then continue. (3) If still none chosen, choose the FIRST `backlog` key in file order matching the same two-integer slug pattern and epic/retrospective exclusions (global default).</action>
 
     <check if="no backlog story found">
       <output>📋 No backlog stories found in sprint-status.yaml
@@ -212,6 +208,23 @@
       </action>
       <action>Extract actionable insights for current story implementation</action>
     </check>
+
+    <!-- Hot files structural check — prevents boiling-frog accumulation -->
+    <action>Identify pre-existing source files (backend + frontend) that this story will likely modify, based on story requirements and previous story patterns.</action>
+    <action>For each candidate file, check its current line count (use Shell: `(Get-Content path).Count` or equivalent).</action>
+    <check if="any pre-existing file to be modified has more than 500 lines">
+      <action>For each such file, record: file path, current line count, and derive the appropriate constraint:
+        - Router/controller file: "handler ≤ 30 lines, delegate all logic to a service; no new business logic in this file"
+        - Service file already > 500 lines: "extract new behavior into a dedicated sub-service or helper module"
+        - UI component file > 500 lines: "new feature in a child component, not inline in the parent"
+      </action>
+      <action>Populate the "Fichiers chauds" field in Dev Notes with these entries (name, current line count, constraint).</action>
+      <action>If extraction would significantly improve architecture AND fits story scope, add a dedicated refactor subtask (🔵) targeting the extraction — not a vague "vérifier taille" check but a concrete before→after.</action>
+      <note>This is the SM's job to catch BEFORE dev — the agent cannot retroactively fix a 1600-line file if the story never mentioned it.</note>
+    </check>
+    <check if="no pre-existing file to be modified exceeds 500 lines">
+      <action>Set "Fichiers chauds" in Dev Notes to "Aucun fichier chaud concerné (tous les fichiers créés ET modifiés sont sous 500 lignes)."</action>
+    </check>
   </step>
 
   <step n="3" goal="Architecture analysis for developer guardrails">
@@ -265,6 +278,8 @@
       A "behavior" = one independently testable user-observable outcome (e.g. "menu appears at cursor", "menu closes on Escape").
       Multiple implementation steps that are ONLY testable together belong in a single GREEN. Never create a subtask per implementation file/line — that produces implementation-step lists, not TDD cycles.
       If a task has more than ~4 implementation steps that are independently testable, SPLIT it into 2 tasks, each with its own 🔴/🟢/🔵.
+
+      FORMAT MARKDOWN (obligatoire): sous chaque tâche, EXACTEMENT 3 lignes `- [ ] …` avec préfixe 🔴 / 🟢 / 🔵 dans le libellé (combinaison cases à cocher + emoji pour lisibilité). INTERDIT : cercles/seuls emojis sans `- [ ]`; INTERDIT : cocher plusieurs sous-étapes en une fois sans avoir exécuté la phase.
 
       FORMAT: Every task gets exactly 3 ordered subtasks — dev agent MUST check in order, cannot batch tests at end:
       🔴 RED: Failing test — one behavioral assertion from the user's perspective (observable outcome, not implementation detail). Must cover all behaviors this task delivers. Example: "🔴 Test échoue : clic droit sur le pane → PaneContextMenu s'affiche ; 'Nouveau nœud' → createEmptyNode() appelé avec la position du clic"

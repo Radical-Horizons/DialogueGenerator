@@ -10,9 +10,12 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Optional, Set
 
-from services.gdd_notion_sync_utils import category_stem_to_list_category_key
+from services.gdd_notion_sync_utils import (
+    category_file_matches_included,
+    category_stem_to_list_category_key,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -413,6 +416,68 @@ def restore_gdd_from_archive(
     return new_rel
 
 
+def resolve_gdd_live_path_for_category_file(gdd_root: Path, category_file: str) -> Path:
+    """Chemin absolu live (fichier monolithe ou dossier shards) pour un ``category_file``."""
+    raw = str(category_file or "").strip()
+    root = gdd_root.resolve()
+    sk = category_stem_to_list_category_key(Path(raw).stem)
+    if sk:
+        return (root / sk).resolve()
+    return (root / raw).resolve()
+
+
+def remove_excluded_database_sources_from_live(
+    gdd_root: Path,
+    sources: Iterable[Any],
+    included_list: List[str],
+) -> List[str]:
+    """Supprime sous ``GDD_categories`` les cibles des bases ``database`` hors ``included_categories``.
+
+    Sans effet si ``included_list`` est vide (périmètre = toutes les bases). Les sources
+    ``page`` ne sont pas concernées. Utilisé après une sync complète miroir pour retirer
+    du disque les JSON des bases décochées.
+
+    Args:
+        gdd_root: Racine ``GDD_categories``.
+        sources: Liste ``settings['sources']``.
+        included_list: Filtre non vide (sinon la fonction ne supprime rien).
+
+    Returns:
+        Chemins relatifs POSIX supprimés (pour journaux).
+    """
+    if not included_list or not any(str(x).strip() for x in included_list):
+        return []
+    removed_rel: List[str] = []
+    gdd = gdd_root.resolve()
+    for src in sources:
+        if not isinstance(src, dict):
+            continue
+        kind = str(src.get("kind", "")).strip().lower()
+        if kind != "database":
+            continue
+        cat_file = str(src.get("category_file", "")).strip()
+        if not cat_file:
+            continue
+        if category_file_matches_included(cat_file, included_list):
+            continue
+        live = resolve_gdd_live_path_for_category_file(gdd, cat_file)
+        if not str(live.resolve()).startswith(str(gdd)):
+            continue
+        if not live.exists():
+            continue
+        rel = live.relative_to(gdd).as_posix()
+        try:
+            if live.is_dir():
+                shutil.rmtree(live)
+            else:
+                live.unlink()
+            removed_rel.append(rel)
+            logger.info("GDD live supprimé (base hors périmètre sync): %s", rel)
+        except OSError as exc:
+            logger.warning("Suppression live impossible %s: %s", live, exc)
+    return removed_rel
+
+
 def collect_sync_targets(gdd_root: Path, category_files: Iterable[str]) -> Set[Path]:
     """Chemins absolus des cibles (fichier monolithe ou dossier shards) à remplacer au promote.
 
@@ -531,6 +596,8 @@ def promote_staging_to_live(
     gdd_root: Path,
     staging_run: Path,
     targets: Set[Path],
+    *,
+    allow_missing_staged: bool = False,
 ) -> None:
     """Pour chaque cible : supprime le live, déplace depuis le staging si présent.
 
@@ -538,6 +605,9 @@ def promote_staging_to_live(
         gdd_root: Racine ``GDD_categories``.
         staging_run: Répertoire racine de ce run (contient ``personnages/``, ``*.json``, etc.).
         targets: Chemins absolus attendus sous ``gdd_root``.
+        allow_missing_staged: Si True, une cible sans artefact dans le staging est ignorée
+            (le fichier ou dossier live est conservé). Utile après une sync complète avec erreurs
+            partielles lorsque l'utilisateur confirme l'application du miroir.
 
     Raises:
         OSError: Échec suppression / déplacement.
@@ -551,14 +621,25 @@ def promote_staging_to_live(
             continue
         rel = live.relative_to(gdd)
         staged = stage_base / rel
-        if live.exists():
-            if live.is_dir():
-                shutil.rmtree(live)
-            else:
-                live.unlink()
         if staged.exists():
+            if live.exists():
+                if live.is_dir():
+                    shutil.rmtree(live)
+                else:
+                    live.unlink()
             live.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(staged), str(live))
+        elif allow_missing_staged:
+            logger.info(
+                "Promotion miroir (reliquats): %s absent du staging — live inchangé.",
+                rel,
+            )
+        else:
+            if live.exists():
+                if live.is_dir():
+                    shutil.rmtree(live)
+                else:
+                    live.unlink()
     remove_staging_run_dir(staging_run)
 
 

@@ -1,0 +1,50 @@
+{
+  "Nom": "Cadres d'origine",
+  "values": {
+    "Besoins humains": "Progression, Maîtrise",
+    "Catégorie": "Progression",
+    "Chapitres liés": "1ee6e4d2-1b45-8042-896e-c3bacf823a9b",
+    "Complexité": "Moyen",
+    "Fréquence": "Ponctuel",
+    "Produit pour": "2be6e4d2-1b45-8007-b2a7-cfcab1bf4400",
+    "Résumé IA": "Sous-système de Progression qui définit le cadre d’accès natif aux compétences à partir de l’espèce (Biologie, Surnaturel) et de la communauté d’éducation (Culture, Technologie). Les compétences Nul forment le socle commun accessible à tous. Toute compétence au-dessus du cadre natif reste apprenable via un nœud spécial de progression porté par une justification narrative (mentor, greffe, initiation, mutation, nouvelle communauté, etc.).",
+    "Statut": "En design",
+    "Systèmes parent": "2bf6e4d2-1b45-80dd-a7f6-d625952fee4a",
+    "Type": "Sous-système"
+  },
+  "sections": {
+    "preamble": "<pdf src=\"file://%7B%22source%22%3A%22attachment%3A7b92013a-60a4-418f-93b2-3ec236a8a8b6%3ACadres_D_Origine.pdf%22%2C%22permissionRecord%22%3A%7B%22table%22%3A%22block%22%2C%22id%22%3A%223726e4d2-1b45-8133-98e1-f6e1e175a761%22%2C%22spaceId%22%3A%221d8d06fb-9245-45c9-8cb0-4cd4d302ed0d%22%7D%7D\"></pdf>",
+    "1__but_du_sous-syste_me": "Formaliser **comment un personnage accède normalement à une compétence**, et comment ce cadre peut être dépassé sans créer de plafonds rigides.\nCe sous-système étend <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/> : il ne crée **ni nouvelle ressource**, ni nouvelle monnaie. Il ne crée pas non plus de type de nœud distinct : tous les nœuds restent narratifs. Il ajoute simplement une **règle de coût** pour les compétences acquises **hors-cadre**.\n**Système parent :** <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/>\n**Besoins humains servis :**\n- **Progression** : le joueur voit clairement pourquoi une compétence est accessible, exceptionnelle ou transgressive\n- **Maîtrise** : les règles d’accès sont lisibles et reliées au fictionnel",
+    "2__boucle___parcours_utilisateur": "```mermaid\nflowchart TD\n\tA[Personnage veut acquérir une compétence] --> B{Famille ?}\n\tB -->|Biologique / Surnaturel| C[Lire Espèce]\n\tB -->|Culturel / Technologique| D[Lire Communauté d'éducation]\n\tC --> E{Niveau dans le cadre natif ?}\n\tD --> E\n\tE -->|Oui| F[Nœud à 1 point]\n\tE -->|Non| G[Nœud à 2 points + justification narrative]\n\tF --> H[Compétence acquise]\n\tG --> H\n```\n**Scénario nominal**\nUne héroïne veut apprendre une compétence Technologique de niveau **Moyen**. Sa communauté d'éducation a **Technologie : Faible**. Cette compétence n'est donc pas dans le cadre natif. Pour l'obtenir, il faut un nœud narratif relié à un vecteur crédible d'apprentissage : par exemple un PNJ ingénieur, une greffe, ou un séjour de formation. Le joueur atteint ce nœud dans l'arbre et dépense **2 points de progression** : **1 point** pour le bonus habituel de compétence, **1 point supplémentaire** pour l'apprentissage hors-cadre. Le coût narratif, lui, est porté par la position du nœud dans la branche et par la réputation requise auprès du maître ou de la communauté concernée.",
+    "4_cadres_d_origine": "- **Espèce** → `Biologie`, `Surnaturel`\n- **Communauté d'éducation** → `Culture`, `Technologie`\nLa communauté actuelle n'accorde pas automatiquement un nouveau cadre ; elle peut seulement **ouvrir des nœuds d'apprentissage**.",
+    "re_gle_du_socle_commun": "Les compétences de niveau **Nul** sont le **socle commun** : tout le monde peut les apprendre ou les exercer normalement.",
+    "mapping_simplifie____niveau_de_cadre": "<table header-row=\"true\">\n<tr>\n<td>**Valeur simplifiée**</td>\n<td>**Niveaux couverts nativement**</td>\n</tr>\n<tr>\n<td>Nulle</td>\n<td>Nul</td>\n</tr>\n<tr>\n<td>Faible</td>\n<td>Très faible + Faible</td>\n</tr>\n<tr>\n<td>Moyenne</td>\n<td>Assez faible + Moyen</td>\n</tr>\n<tr>\n<td>Avancée</td>\n<td>Assez avancé + Avancé</td>\n</tr>\n</table>\n**Très avancé** n'est jamais natif dans ce sous-système ; il requiert toujours un nœud hors-cadre.",
+    "re_gle_me_canique_du_hors-cadre": "Il n'y a pas de type de nœud distinct « hors-cadre ». Quand un nœud de <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/> accorde une compétence au-dessus du cadre d'origine :\n- il coûte **2 points de progression** au total\n- le **premier point** paie le bonus habituel (**+1 compétence**)\n- le **second point** paie l'apprentissage **hors-cadre**\n- le coût narratif est porté par la **position du nœud** dans la branche et par la **réputation requise** auprès du maître, de la communauté ou de la faction",
+    "justifications_narratives_typiques": "- mentor / enseignement spécialisé\n- greffe / appareillage / chirurgie\n- initiation / rituel / transmission\n- mutation / transformation / accident contrôlé\n- immersion prolongée dans une nouvelle communauté",
+    "4__inte_grations": "**Consomme de :**\n- <mention-page url=\"https://www.notion.so/2be6e4d21b458007b2a7cfcab1bf4400\"/> : famille et niveau de cadre de chaque compétence\n- Espèces : `Biologie`, `Surnaturel`\n- Communautés : `Culture`, `Technologie`\n- <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/> : nœuds, points et branches d'apprentissage\n**Produit pour :**\n- <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/> : typologie des nœuds normaux vs hors-cadre\n- <mention-page url=\"https://www.notion.so/2be6e4d21b458007b2a7cfcab1bf4400\"/> : règle d'usage du Niveau de Cadre\n- <mention-page url=\"https://www.notion.so/dda13b502e96491e8e21008865221005\"/> : certains nœuds hors-cadre peuvent exiger un niveau de compréhension préalable\n**Requiert :**\n- <mention-page url=\"https://www.notion.so/2bf6e4d21b4580dda7f6d625952fee4a\"/>\n- <mention-page url=\"https://www.notion.so/2be6e4d21b458007b2a7cfcab1bf4400\"/>",
+    "flags_du_sous-syste_me": "Aucun flag spécifique obligatoire. Les états persistants restent portés par les systèmes appelants (quête, réputation, connaissance, mutation, greffe).",
+    "crite_res_de_succe_s": "- 80% des cas d'apprentissage sont classables sans ambiguïté en **normal** ou **hors-cadre**\n- Le joueur comprend en moins de 10 secondes pourquoi un nœud est hors-cadre\n- Les apprentissages hors-cadre sont perçus comme **exceptionnels mais crédibles**, pas comme arbitraires",
+    "sce_nario_de_playtest": "*Situation* : une héroïne à cadre `Technologie : Faible` veut apprendre une compétence de niveau **Moyen**.\n*Action* : le joueur explore l'arbre de progression de la faction locale.\n*Résultat attendu* : le nœud visé apparaît comme **hors-cadre**, relié à un PNJ ou événement justificatif, et son coût de **2 points** semble légitime une fois le contexte acquis.\n*Signal d'échec* : le joueur ne comprend pas pourquoi ce nœud est spécial, ou a l'impression d'une punition invisible.",
+    "risques": "- **Risque 1 : plafond déguisé** → Mitigation : rappeler partout qu'il s'agit d'un cadre natif, pas d'une interdiction définitive.\n- **Risque 2 : justification floue** → Mitigation : chaque nœud hors-cadre doit expliciter son vecteur d'apprentissage (mentor, greffe, initiation, etc.).",
+    "trac_abilite": "- Couvert par l'Epic du système parent pour l'instant.\n- Si le volume de nœuds hors-cadre devient important, créer une Feature dédiée d'outillage / UI.",
+    "re_sume__ia": "Sous-système de Progression qui définit le cadre d’accès natif aux compétences à partir de l’espèce (Biologie, Surnaturel) et de la communauté d’éducation (Culture, Technologie). Les compétences Nul forment le socle commun accessible à tous. Toute compétence au-dessus du cadre natif reste apprenable via un nœud spécial de progression porté par une justification narrative (mentor, greffe, initiation, mutation, nouvelle communauté, etc.)."
+  },
+  "section_titles": {
+    "preamble": "Préambule",
+    "1__but_du_sous-syste_me": "1. But du sous-système",
+    "2__boucle___parcours_utilisateur": "2. Boucle & Parcours utilisateur",
+    "4_cadres_d_origine": "4 cadres d'origine",
+    "re_gle_du_socle_commun": "Règle du socle commun",
+    "mapping_simplifie____niveau_de_cadre": "Mapping simplifié → Niveau de Cadre",
+    "re_gle_me_canique_du_hors-cadre": "Règle mécanique du hors-cadre",
+    "justifications_narratives_typiques": "Justifications narratives typiques",
+    "4__inte_grations": "4. Intégrations",
+    "flags_du_sous-syste_me": "Flags du sous-système",
+    "crite_res_de_succe_s": "Critères de succès",
+    "sce_nario_de_playtest": "Scénario de playtest",
+    "risques": "Risques",
+    "trac_abilite": "Traçabilité",
+    "re_sume__ia": "Résumé IA"
+  },
+  "notion_page_id": "7f7f50e3-6bf8-491c-b5e4-86e2f9b94988"
+}

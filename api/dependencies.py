@@ -31,6 +31,7 @@ from services.vocabulary_service import VocabularyService
 from services.narrative_guides_service import NarrativeGuidesService
 from services.notion_import_service import NotionImportService
 from services.context_rule_service import ContextRuleService
+from services.context_dropping_rules_service import ContextDroppingRulesService
 from services.prompt_enricher import PromptEnricher
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
@@ -287,6 +288,13 @@ def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
     return container.get_graph_node_orchestrator()
 
 
+def get_llm_quality_judge_service() -> "LLMQualityJudgeService":
+    """Retourne le service juge qualité dialogue (stateless, FR42)."""
+    from services.llm_quality_judge_service import LLMQualityJudgeService
+
+    return LLMQualityJudgeService()
+
+
 def get_token_estimation_service(request: Request) -> TokenEstimationService:
     """Retourne le service d'estimation de tokens (prompt + completion sans appel LLM).
 
@@ -363,6 +371,19 @@ def get_notion_import_service(request: Request) -> NotionImportService:
     """
     container = get_service_container(request)
     return container.get_notion_import_service()
+
+
+def get_cd_rules_service(request: Request) -> ContextDroppingRulesService:
+    """Retourne le service de règles anti-context-dropping (Story 4.10).
+
+    Args:
+        request: La requête HTTP (injecté automatiquement par FastAPI).
+
+    Returns:
+        Instance partagée de ContextDroppingRulesService depuis le ServiceContainer.
+    """
+    container = get_service_container(request)
+    return container.get_cd_rules_service()
 
 
 def get_context_rule_service(request: Request) -> ContextRuleService:
@@ -445,5 +466,56 @@ def get_gdd_notion_sync_service(request: Request):
 
     container = get_service_container(request)
     svc: GddNotionSyncService = container.get_gdd_notion_sync_service()
+    return svc
+
+
+def get_dialogue_flags_service():
+    """Fabrique un service validation des liaisons flags ↔ document (Story 9.1).
+
+    Returns:
+        Instance ``DialogueFlagsService`` avec catalogue CSV injecté.
+    """
+    from services.dialogue_flags_service import DialogueFlagsService
+    from services.flag_catalog_service import FlagCatalogService
+
+    return DialogueFlagsService(FlagCatalogService())
+
+
+def get_visibility_condition_validation_service():
+    """Fabrique la validation Story 9.2 (visibilityConditions vs catalogue).
+
+    Returns:
+        Instance ``VisibilityConditionValidationService`` avec catalogue CSV injecté.
+    """
+    from services.flag_catalog_service import FlagCatalogService
+    from services.visibility_condition_validation import VisibilityConditionValidationService
+
+    return VisibilityConditionValidationService(FlagCatalogService())
+
+
+def get_choice_effect_validation_service():
+    """Fabrique la validation Story 9.3 (choiceEffects vs catalogue)."""
+    from services.choice_effect_validation import ChoiceEffectValidationService
+    from services.flag_catalog_service import FlagCatalogService
+
+    return ChoiceEffectValidationService(FlagCatalogService())
+
+
+def get_dialogue_flag_reference_validation_service():
+    """Fabrique la validation Story 9.5 (références flags vs dialogueFlags)."""
+    from services.dialogue_flag_reference_validation_service import (
+        DialogueFlagReferenceValidationService,
+    )
+    from services.flag_catalog_service import FlagCatalogService
+
+    return DialogueFlagReferenceValidationService(FlagCatalogService())
+
+
+def get_dialogue_preview_service(request: Request):
+    """Retourne DialoguePreviewService (Story 9.4, preview état masque visibilité)."""
+    from services.dialogue_preview_service import DialoguePreviewService
+
+    container = get_service_container(request)
+    svc: DialoguePreviewService = container.get_dialogue_preview_service()
     return svc
 

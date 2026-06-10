@@ -83,22 +83,16 @@ class ContextFieldDetector:
             "types": set(),
             "max_depth": 0,
             "paths": set(),
-            "item_names": set()  # Noms des fiches où le champ apparaît
+            "item_names": set(),  # Noms des fiches où le champ apparaît
+            "metadata_count": 0
         })
         
         total_items = len(sample_data)
         
-        # Déterminer l'ordre des clés racine pour identifier les métadonnées
-        # Les métadonnées sont tous les champs AVANT "Introduction" dans le JSON
-        root_keys_order = []
-        if sample_data:
-            first_item = sample_data[0]
-            if isinstance(first_item, dict):
-                root_keys_order = list(first_item.keys())
-        
         for item in sample_data:
             if not isinstance(item, dict):
                 continue
+            root_keys_order = list(item.keys())
             
             # Identifier la fiche (par son "Nom" ou autre identifiant)
             item_name = self._get_item_name(item)
@@ -113,6 +107,8 @@ class ContextFieldDetector:
                 field_stats[path]["paths"].add(path)
                 if item_name:
                     field_stats[path]["item_names"].add(item_name)
+                if self._is_metadata_field(path, root_keys_order):
+                    field_stats[path]["metadata_count"] += 1
 
         self._expand_sections_general_subfields(field_stats, sample_data)
         
@@ -136,8 +132,8 @@ class ContextFieldDetector:
             # Déterminer la catégorie
             category = self._categorize_field(path, element_type)
             
-            # Déterminer si c'est une métadonnée (tous les champs avant "Introduction")
-            is_metadata = self._is_metadata_field(path, root_keys_order)
+            # Déterminer si c'est une métadonnée fiche par fiche, pas depuis le seul premier item.
+            is_metadata = stats["metadata_count"] > 0 and stats["metadata_count"] >= (stats["count"] / 2)
             
             fields[path] = FieldInfo(
                 path=path,

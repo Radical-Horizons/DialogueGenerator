@@ -30,6 +30,11 @@ export const MODEL_NAMES = {
 export const DEFAULT_MODEL = MODEL_NAMES.GPT_5_MINI
 
 /**
+ * Cible tactile minimale (HIG / WCAG 2.5.5) — chrome shell & toolbar graphe (Story 17.2 FR119).
+ */
+export const TOUCH_TARGET_MIN_PX = 44
+
+/**
  * Limites pour les tokens de contexte.
  * 
  * Ces valeurs doivent correspondre à celles définies dans constants.py (Defaults.MAX_CONTEXT_TOKENS, Defaults.MIN_CONTEXT_TOKENS)
@@ -68,6 +73,11 @@ export const COMPLETION_TOKENS_LIMITS = {
 export const API_TIMEOUTS = {
   /** Timeout par défaut pour les requêtes API rapides (30 secondes) */
   DEFAULT: 30000,
+  /**
+   * Lecture/écriture des documents dialogue (JSON volumineux, I/O disque, validation).
+   * Évite les faux échecs d’autosave sur graphes lents ou machines chargées.
+   */
+  DOCUMENT_IO: 120000,
   /**
    * Sync GDD depuis Notion : export massif (workspace entier) ; le client HTTP ne doit pas
    * couper avant le serveur. 6 h — aligner le proxy dev (`vite.config.ts`) sur cette valeur.

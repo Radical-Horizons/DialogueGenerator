@@ -7,18 +7,28 @@ Note production : le body des PUT (document, layout) n'est pas borné par défau
 En déploiement, imposer une limite (ex. middleware ou reverse proxy) pour éviter
 un DoS par envoi de très gros JSON (layout = objet libre, non validé en taille).
 """
+from copy import deepcopy
 import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from api.dependencies import get_config_service, get_request_id
+from api.dependencies import (
+    get_choice_effect_validation_service,
+    get_config_service,
+    get_dialogue_flag_reference_validation_service,
+    get_dialogue_flags_service,
+    get_dialogue_preview_service,
+    get_request_id,
+    get_visibility_condition_validation_service,
+)
 from api.routers.auth import get_current_user
 from api.exceptions import APIException, NotFoundException, ValidationException, InternalServerException
+from api.schemas.dialogue_preview import DialoguePreviewRequest, DialoguePreviewResponse
 from api.schemas.documents import (
     CheckMigrationResponse,
     DocumentGetResponse,
@@ -28,9 +38,19 @@ from api.schemas.documents import (
     PutDocumentResponse,
     PutLayoutRequest,
     PutLayoutResponse,
+    ValidateFlagReferencesRequest,
+    ValidateFlagReferencesResponse,
 )
 from api.utils.unity_schema_validator import validate_unity_json_structured
 from services.configuration_service import ConfigurationService
+from services.dialogue_flags_service import DialogueFlagsService
+from services.choice_effect_validation import ChoiceEffectValidationService
+from services.visibility_condition_validation import VisibilityConditionValidationService
+from services.dialogue_flag_reference_validation_service import (
+    DialogueFlagReferenceValidationService,
+    analysis_to_validation_api_payload,
+)
+from services.game_systems_social_diagnostics import validate_document_social_systems
 
 logger = logging.getLogger(__name__)
 
@@ -323,6 +343,112 @@ async def get_document(
         )
 
 
+@router.post(
+    "/{document_id}/preview",
+    response_model=DialoguePreviewResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def post_document_preview(
+    document_id: str,
+    body: DialoguePreviewRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+    preview_service: Annotated[Any, Depends(get_dialogue_preview_service)],
+) -> DialoguePreviewResponse:
+    """Évalue la visibilité nœuds/choix pour un état simulé (Story 9.4).
+
+    409 si ``revision`` dans le corps ne correspond pas à la révision persistée.
+    """
+    try:
+        base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
+        document, _ = _read_document_blob(base_dir, doc_id)
+        revision = _read_meta(base_dir, doc_id)
+        try:
+            return preview_service.preview_document(document, body, stored_revision=revision)
+        except ValueError as exc:
+            if str(exc) == "revision_stale":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "code": "revision_stale",
+                        "expected_revision": revision,
+                        "request_id": request_id,
+                    },
+                ) from exc
+            raise
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except (ValidationException, NotFoundException, HTTPException):
+        raise
+    except Exception as e:
+        logger.exception(f"Erreur POST preview document {document_id} (request_id: {request_id})")
+        raise InternalServerException(
+            message="Erreur lors du preview document",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/{document_id}/validate-flag-references",
+    response_model=ValidateFlagReferencesResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def post_validate_flag_references(
+    document_id: str,
+    body: ValidateFlagReferencesRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    flag_ref_svc: Annotated[
+        DialogueFlagReferenceValidationService,
+        Depends(get_dialogue_flag_reference_validation_service),
+    ],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ValidateFlagReferencesResponse:
+    """Valide les références flags vs ``dialogueFlags`` (Story 9.5 / FR93).
+
+    Corps optionnel : si ``document`` est absent, lecture du fichier persisté.
+    """
+    try:
+        base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
+        if body.document is not None:
+            payload = body.document
+        else:
+            payload, _ = _read_document_blob(base_dir, doc_id)
+
+        analysis = flag_ref_svc.analyze_document(payload)
+        err_details, warn_details = analysis_to_validation_api_payload(analysis)
+        return ValidateFlagReferencesResponse(
+            valid=len(err_details) == 0,
+            summary=analysis.summary,
+            used_flag_count=analysis.used_flag_count,
+            errors=err_details,
+            warnings=warn_details,
+        )
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except (ValidationException, NotFoundException):
+        raise
+    except Exception as e:
+        logger.exception(
+            "Erreur POST validate-flag-references %s (request_id: %s)",
+            document_id,
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la validation des références flags",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
 @router.get(
     "/{document_id}/layout",
     response_model=LayoutGetResponse,
@@ -464,6 +590,15 @@ async def put_document(
     document_id: str,
     body: PutDocumentRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    dialogue_flags_service: Annotated[DialogueFlagsService, Depends(get_dialogue_flags_service)],
+    visibility_condition_validation_service: Annotated[
+        VisibilityConditionValidationService,
+        Depends(get_visibility_condition_validation_service),
+    ],
+    choice_effect_validation_service: Annotated[
+        ChoiceEffectValidationService,
+        Depends(get_choice_effect_validation_service),
+    ],
     request_id: Annotated[str, Depends(get_request_id)],
     x_validation_mode: Annotated[str | None, Header(alias="X-Validation-Mode")] = None,
 ) -> PutDocumentResponse | JSONResponse:
@@ -472,7 +607,7 @@ async def put_document(
         base_dir, doc_id = _resolve_document_base(document_id, config_service, request_id)
         base_dir.mkdir(parents=True, exist_ok=True)
 
-        doc = body.document
+        doc = deepcopy(body.document) if isinstance(body.document, dict) else body.document
         client_revision = body.revision
 
         # AC3 : refuser payload type nodes/edges (ancien contrat graphe)
@@ -521,9 +656,45 @@ async def put_document(
         if validation_mode not in ("draft", "export"):
             validation_mode = "draft"
 
+        flag_warnings: list[str] = []
+        if isinstance(doc, dict) and "dialogueFlags" in doc:
+            try:
+                normalized_flags, flag_warnings = dialogue_flags_service.normalize_and_warnings(
+                    doc.get("dialogueFlags")
+                )
+                doc["dialogueFlags"] = normalized_flags
+            except ValueError as exc:
+                raise ValidationException(
+                    message=str(exc),
+                    details={"field": "dialogueFlags"},
+                    request_id=request_id,
+                )
+
+        if isinstance(doc, dict):
+            try:
+                visibility_condition_validation_service.validate_document(doc)
+            except ValueError as exc:
+                raise ValidationException(
+                    message=str(exc),
+                    details={"field": "visibilityConditions"},
+                    request_id=request_id,
+                )
+
+        if isinstance(doc, dict):
+            try:
+                choice_effect_validation_service.validate_document(doc)
+            except ValueError as exc:
+                raise ValidationException(
+                    message=str(exc),
+                    details={"field": "choiceEffects"},
+                    request_id=request_id,
+                )
+
         # Validation (validate_unity_json_structured sans modifier choiceId, ordre choices[], node.id)
         is_valid, errors_structured = validate_unity_json_structured(doc)
         validation_report = [{"code": e.get("code", "validation_error"), "message": e.get("message", ""), "path": e.get("path", "")} for e in errors_structured]
+        if isinstance(doc, dict):
+            validation_report.extend(validate_document_social_systems(doc))
 
         # AC4 export : si validation échoue, refuser persistance et retourner 400 + validationReport
         if validation_mode == "export" and not is_valid:
@@ -555,7 +726,11 @@ async def put_document(
         _write_meta(base_dir, doc_id, new_revision)
 
         logger.info(f"PUT document {doc_id} revision={new_revision} mode={validation_mode} (request_id: {request_id})")
-        return PutDocumentResponse(revision=new_revision, validationReport=validation_report)
+        return PutDocumentResponse(
+            revision=new_revision,
+            validationReport=validation_report,
+            flagThresholdWarnings=flag_warnings,
+        )
     except (APIException, ValidationException, NotFoundException):
         raise
     except Exception as e:

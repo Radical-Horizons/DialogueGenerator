@@ -4,6 +4,7 @@
 import React, { useEffect } from 'react';
 import { useLLMStore } from '../../store/llmStore';
 import { theme } from '../../theme';
+import { StyledSelect } from '../shared/StyledSelect';
 
 export interface ModelSelectorProps {
   style?: React.CSSProperties;
@@ -37,7 +38,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ style }) => {
   };
 
   return (
-    <select
+    <StyledSelect
       id="model-select"
       value={model}
       onChange={(e) => {
@@ -67,6 +68,6 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ style }) => {
           ))}
         </optgroup>
       ))}
-    </select>
+    </StyledSelect>
   );
 };

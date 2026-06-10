@@ -41,7 +41,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
   // Récupérer structuredPrompt depuis le store si non fourni en prop
   const structuredPromptFromStore = useGenerationStore((state) => state.structuredPrompt)
   const structuredPrompt = structuredPromptProp ?? structuredPromptFromStore
-  
+
   const { sections } = usePromptPreview(raw_prompt, structuredPrompt)
   
   const handleCopyPrompt = useCallback(() => {
@@ -56,13 +56,13 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
       })
   }, [raw_prompt, toast])
   
-  // Calculer le total comme la somme des tokens de chaque section
+  // Calculer le total structuré uniquement comme fallback d'affichage.
   const calculatedTotal = sections.reduce((sum, section) => {
     return sum + (section.tokenCount || 0)
   }, 0)
   
-  // Utiliser le total calculé à partir des sections si on a des sections, sinon utiliser tokenCount du backend
-  const displayTotal = sections.length > 0 ? calculatedTotal : (tokenCount ?? null)
+  // Le total backend est la source canonique. Les sections peuvent être tronquées ou estimées côté UI.
+  const displayTotal = tokenCount ?? (sections.length > 0 ? calculatedTotal : null)
 
   return (
     <>
@@ -78,13 +78,26 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
         }}
       >
       <div style={{ 
-        padding: '1rem', 
+        padding: '0.65rem 0.75rem', 
         borderBottom: `1px solid ${theme.border.primary}`,
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.75rem',
+        gap: '0.55rem',
       }}>
+        <div
+          style={{
+            fontSize: '0.78rem',
+            color: theme.text.secondary,
+            lineHeight: 1.45,
+            marginBottom: 2,
+          }}
+        >
+          <span style={{ fontWeight: 600, color: theme.text.primary }}>Total prompt</span> — compte
+          le XML complet envoyé au LLM (prompt système, règles, instructions, contexte GDD, etc.). Ce
+          total diffère du décompte « contexte GDD seul » du panneau de gauche, qui applique uniquement
+          la           limite de tokens du contexte narratif.
+        </div>
         {/* Barre de budget de tokens */}
         <TokenBudgetBar
           structuredPrompt={structuredPrompt}
@@ -100,7 +113,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
               justifyContent: 'flex-end',
               gap: '0.75rem',
               color: theme.text.secondary,
-              fontSize: '0.85rem',
+              fontSize: '0.78rem',
             }}
           >
             {viewMode === 'raw' && (
@@ -108,13 +121,13 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                 type="button"
                 onClick={handleCopyPrompt}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.4rem 0.75rem',
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '4px',
                   backgroundColor: theme.background.secondary,
                   color: theme.text.primary,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: '0.78rem',
                   transition: 'background-color 0.2s',
                   display: 'flex',
                   alignItems: 'center',
@@ -135,13 +148,13 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                 type="button"
                 onClick={toggleAllFn}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.4rem 0.75rem',
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '4px',
                   backgroundColor: theme.background.secondary,
                   color: theme.text.primary,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: '0.78rem',
                   transition: 'background-color 0.2s',
                   marginRight: '0.75rem',
                 }}
@@ -216,7 +229,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
           height: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: '1rem',
+          padding: '0.75rem',
           boxSizing: 'border-box',
           scrollbarGutter: 'stable',
         }}
@@ -226,11 +239,11 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
             <pre
               style={{
                 fontFamily: 'monospace',
-                fontSize: '0.85rem',
-                lineHeight: '1.6',
+                fontSize: '0.78rem',
+                lineHeight: '1.55',
                 color: theme.text.secondary,
                 backgroundColor: theme.background.secondary,
-                padding: '1rem',
+                padding: '0.75rem',
                 borderRadius: '4px',
                 border: `1px solid ${theme.border.primary}`,
                 whiteSpace: 'pre-wrap',

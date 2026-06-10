@@ -19,8 +19,8 @@
 #   - backlog: Story only exists in epic file
 #   - ready-for-dev: Story file created in stories folder
 #   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
-#   - done: Story completed
+#   - review: Ready for the FIRST code-review pass (set by dev-story when impl. complete)
+#   - done: Story completed (including after code-review option [1] when HIGH/MEDIUM cleared — see code-review instructions step 5)
 #
 # Retrospective Status:
 #   - optional: Can be completed but not required
@@ -31,7 +31,7 @@
 # - Epic transitions to 'in-progress' automatically when first story is created
 # - Stories can be worked in parallel if team capacity allows
 # - SM typically creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Dev-story sets 'review' when impl. is complete; then run code-review. End of code-review sets 'done' or 'in-progress' only — never leaves the story on 'review' as a fake "human gate" after fixes ([1]).
 
 generated: '2026-01-25'
 project: DialogueGenerator
@@ -107,35 +107,51 @@ development_status:
   3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
   3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
   epic-3-retrospective: done
-  epic-17: backlog
-  17-1-shell-responsive-breakpoints-layout-320px-fr118: backlog
-  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: backlog
-  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: backlog
-  17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: backlog
-  17-5-pwa-install-manifest-option-fr121: backlog
+  epic-17: done
+  17-1-shell-responsive-breakpoints-layout-320px-fr118: done
+  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
+  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
+  17-6-typographie-densite-adaptive-panneaux-onglets-fr118: done
+  17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
+  17-5-pwa-install-manifest-option-fr121: done
+  17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
+  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
+  epic-17: done
+  17-1-shell-responsive-breakpoints-layout-320px-fr118: done
+  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
+  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
+  17-6-typographie-densite-adaptive-panneaux-onglets-fr118: done
+  17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
+  17-5-pwa-install-manifest-option-fr121: done
+  17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
+  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
   epic-17-retrospective: optional
-  epic-4: in-progress
-  4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: ready-for-dev
-  4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: backlog
-  4-3-détecter-contradictions-lore-explicites-faits-gdd-conflictuels-fr38: backlog
-  4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39: backlog
-  4-5-détecter-nœuds-orphelins-non-connectés-au-graphe-fr40: backlog
-  4-6-détecter-cycles-dans-flux-dialogue-fr41: backlog
-  4-7-évaluer-qualité-dialogue-avec-llm-judge-score-0-10-1-marge-fr42: backlog
-  4-8-détecter-patterns-ai-slop-gpt-isms-répétition-phrases-génériques-fr43: backlog
-  4-9-détecter-context-dropping-lore-explicite-vs-subtil-fr44: backlog
-  4-10-configurer-règles-validation-anti-context-dropping-fr45: backlog
-  4-11-simuler-flux-dialogue-pour-détecter-dead-ends-fr46: backlog
-  4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: backlog
-  4-13-valider-conformité-schéma-json-unity-100-fr48: backlog
-  epic-4-retrospective: optional
-  epic-9: backlog
-  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: backlog
-  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: backlog
-  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: backlog
-  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: backlog
-  9-5-valider-références-variables-détecter-variables-non-définies-fr93: backlog
-  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: backlog
+  epic-dette-technique: backlog
+  dette-1-refactor-grapheditorheader-tri-state-toolbar: backlog
+  epic-dette-technique-retrospective: optional
+  epic-4: done
+  4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done
+  4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: done
+  4-3-détecter-contradictions-lore-explicites-faits-gdd-conflictuels-fr38: done
+  4-4-signaler-incohérences-lore-potentielles-pour-review-humaine-fr39: done
+  4-5-détecter-nœuds-orphelins-non-connectés-au-graphe-fr40: done
+  4-6-détecter-cycles-dans-flux-dialogue-fr41: done
+  4-7-évaluer-qualité-dialogue-avec-llm-judge-score-0-10-1-marge-fr42: done
+  4-8-détecter-patterns-ai-slop-gpt-isms-répétition-phrases-génériques-fr43: done
+  4-9-détecter-context-dropping-lore-explicite-vs-subtil-fr44: done
+  4-10-configurer-règles-validation-anti-context-dropping-fr45: done
+  4-11-simuler-flux-dialogue-pour-détecter-dead-ends-fr46: done
+  4-12-afficher-rapport-couverture-simulation-nœuds-accessibles-inatteignables-fr47: done
+  4-13-valider-conformité-schéma-json-unity-100-fr48: done
+  4-14-refactorer-api-routers-graph-dette-technique: done
+  epic-4-retrospective: done
+  epic-9: in-progress
+  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: done
+  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: done
+  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: done
+  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: done
+  9-5-valider-références-variables-détecter-variables-non-définies-fr93: done
+  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: done
   epic-9-retrospective: optional
   epic-5: backlog
   5-1-exporter-dialogue-single-vers-format-unity-json-fr49: backlog

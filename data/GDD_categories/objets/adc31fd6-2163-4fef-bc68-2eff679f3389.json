@@ -1,0 +1,38 @@
+{
+  "Nom": "Braseros de Cendre Parlante",
+  "values": {
+    "Créé par (communauté)": "1886e4d2-1b45-81b8-ad16-dcfa990112f1",
+    "Date de création": "2026-05-21T12:11:00.000Z",
+    "Dernière modification": "2026-05-30T03:15:00.000Z",
+    "Lieux de présence": "1b36e4d2-1b45-807e-8342-d1b4cd0cdade",
+    "Niveau d’IA": "auto",
+    "Résumé IA": "Encensoirs rituels du Vestibule des Accointances contenant les Cendres parlantes — résidus d'immolations de textes sacrés. Émettent des murmures audibles mais indéchiffrables : vestiges sonores de savoirs détruits, sans contenu récupérable. Dispositif d'opacité épistémique du Culte : la destruction du savoir est publique, ritualisée, et invisible comme destruction. N1 examen, allumés en permanence sauf en QUARANTAINE.",
+    "Stackable": "non",
+    "Taille": "Moyen",
+    "Type": "Élément de décor",
+    "État": "Brouillon IA"
+  },
+  "sections": {
+    "re_sume": "Encensoirs rituels disposés en arc autour de la Pierre de Jugement dans le Vestibule des Accointances (Narthex abyssal). Contiennent les Cendres parlantes — résidus d'immolations rituelles de textes sacrés. Quand ils brûlent, émettent des murmures à basse fréquence — vestiges sonores indéchiffrables de savoirs détruits, sans contenu récupérable. N1 examen sans test : worldbuilding intime sur l'opacité épistémique du Culte.",
+    "apparence___nature": "- **Description visuelle :** Vasques en os ivoire et métal vitrifié, portées par des trépieds ancrés au sol. La surface de l'os est gravée de glyphes Cen — séquences de conservation, pas d'invocations. La braise est d'un rouge sombre, presque noir, sans vacillement même sous courant d'air. Une fumée fine et dense monte en spirale régulière, inodore mais visuellement présente.\n\t- **Type exact :** Élément de décor rituel / encensoir collectif.\n\t- **Échelle :** Moyen ; fixes, non déplaçables (ancrés dans le dallage du Vestibule).",
+    "origine___ancrage": "- **Origine :** Rituelle. Fabriqués lors de la construction du Narthex sous Vokh-Taleth (3280-3295 AG), selon une technique combinant os pétrifié du Léviathan et sable noir vitrifié.\n\t- **Créé par / communauté liée :** <mention-page url=\"https://www.notion.so/1886e4d21b4581b8ad16dcfa990112f1\"/> — Artisans d'Éternité de la Dragovitsa.\n\t- **Lieu(x) de présence :** Vestibule des Accointances, <mention-page url=\"https://www.notion.so/1b36e4d21b45807e8342d1b4cd0cdade\"/>.",
+    "interaction_principale": "- **Niveau d'interaction :** N1 — Examen (panneau narratif court, aucun test, aucun coût).\n\t- **Action joueuse :** S'approcher et appuyer sur `E`.\n\t- **Effet produit :** Panneau narratif par mots-clés sur la nature des Cendres parlantes — résidus d'immolations, murmures sans auteur ni contenu récupérable. Le joueur perçoit des bribes sonores qui semblent signifier quelque chose mais ne livrent rien : le savoir a été détruit, seul le bruit subsiste. Commentaire d'Uresaïr si Respect ≥ 15 : *« Ces voix ont été choisies pour mourir ici. »*. Produit le flag `Flag_narthex_braseros_examines` = vrai ; conditionne une option de dialogue optionnelle avec <mention-page url=\"https://www.notion.so/1ae6e4d21b458082b0bafdf7878ef03c\"/> sur la légitimité de l'immolation des textes.",
+    "conditions___limites": "- **Signal de discoverabilité :** Son ambiant (murmures à basse fréquence audibles à 3-4 unités) + fumée spiralée (animation continue). Les murmures s'intensifient légèrement dans le rayon d'interaction (1,5 u).\n\t- **Compétence / coût :** Aucun (N1 — gratuit).\n\t- **État persistant :** Allumés en continu pendant états Normal et Veille renforcée. Éteints si `Flag_lieu_narthex_acces` = QUARANTAINE (la Dragovitsa interrompt les rites d'accueil).",
+    "inventaires_pnj": "Aucun PNJ ne détient cet objet — élément fixe du Vestibule, non ramassable.",
+    "flags_lie_s": "`Flag_narthex_braseros_examines` (booléen, portée Objet) : passé à vrai à la première interaction N1. Conditionne l'option de dialogue avec Kha'Vareth Ardakh sur l'immolation des textes sacrés.",
+    "remarques_de_conception": "Les Cendres parlantes sont des textes détruits — leur contenu est perdu, seul le murmure subsiste. Ce ne sont pas des vecteurs de transmission mémorielle : aucun enseignement n'est récupérable depuis les cendres. Les murmures sont un artefact acoustique de la combustion, pas un canal d'information. Les fidèles qui croient y entendre des « enseignements » projettent du sens sur du bruit — et la Dragovitsa ne corrige pas.\n\tDispositif d'opacité épistémique incarné dans un objet rituel : la destruction du savoir est visible, permanente, publique — mais le cadrage rituel empêche quiconque de nommer l'acte comme destruction. On brûle le savoir pour n'en garder que la chaleur et l'autorité des voix. Ce détail est lisible pour qui sait regarder, jamais commenté par le Culte. L'opacité opère à trois niveaux : matériel (les textes sont physiquement détruits), épistémique (les fidèles entendent des « enseignements » là où il n'y a que du bruit), politique (la Dragovitsa décide quels textes brûler sans rendre de comptes).\n\tÀ connecter à la thématique centrale du Narthex (vérités visibles, jamais formulées). Relier aussi à la scène des Joints Vitaux : quelqu'un qui a examiné les Braseros peut déduire que le Culte sacrifie délibérément des savoirs « impurs ».",
+    "re_sume__ia": "Encensoirs rituels du Vestibule des Accointances contenant les Cendres parlantes — résidus d'immolations de textes sacrés. Émettent des murmures audibles mais indéchiffrables : vestiges sonores de savoirs détruits, sans contenu récupérable. Dispositif d'opacité épistémique du Culte : la destruction du savoir est publique, ritualisée, et invisible comme destruction. N1 examen, allumés en permanence sauf en QUARANTAINE."
+  },
+  "section_titles": {
+    "re_sume": "Résumé",
+    "apparence___nature": "Apparence & nature",
+    "origine___ancrage": "Origine & ancrage",
+    "interaction_principale": "Interaction principale",
+    "conditions___limites": "Conditions & limites",
+    "inventaires_pnj": "Inventaires PNJ",
+    "flags_lie_s": "Flags liés",
+    "remarques_de_conception": "Remarques de conception",
+    "re_sume__ia": "Résumé IA"
+  },
+  "notion_page_id": "adc31fd6-2163-4fef-bc68-2eff679f3389"
+}

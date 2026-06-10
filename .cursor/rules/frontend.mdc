@@ -18,4 +18,5 @@ alwaysApply: false
 - **Commande dev**: `npm run dev` (depuis racine, lance tout) ou `cd frontend && npm run dev` (frontend seul).
 - **Rafraîchissement**: HMR configuré explicitement, cache désactivé en dev, headers anti-cache automatiques. Si changements non visibles : `npm run dev:clean` (nettoie cache Vite). Voir `docs/DEVELOPMENT.md` pour diagnostic.
 - **Positions graphe**: Source de vérité unique = backend layout (`GET/PUT layout`, API documents). Ne pas persister ni lire les positions depuis localStorage.
+- **Responsive (obligatoire)** : skill `.cursor/skills/dialogue-frontend/SKILL.md` + règle `.cursor/rules/responsive_frontend.mdc` (Epic 17, tokens, tests, preuve UI).
 - **Références**: Voir `README_API.md` pour contrats API.

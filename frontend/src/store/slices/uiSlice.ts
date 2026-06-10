@@ -14,10 +14,19 @@ import {
 } from '../../utils/graphJournal'
 import { useGraphViewStore } from '../graphViewStore'
 import { nodeTargetDisplayLabel } from '../../utils/nodeTargetLabel'
+import { visibleCycleHighlightNodeIds } from '../../utils/graphValidationSummary'
+
+/** Types lore renvoyés par validate-lore-explicit (erreurs + avertissements AC #4). */
+const LORE_VALIDATION_TYPES = new Set<string>([
+  'lore_contradiction_explicit',
+  'lore_contradiction_potential',
+  'lore_potential_ambiguity',
+])
 
 export type UISlice = Pick<
   GraphState,
   | 'validateGraph'
+  | 'validateLoreExplicit'
   | 'setSelectedNode'
   | 'setSelectedNodes'
   | 'clearSelection'
@@ -56,22 +65,17 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
           label: e.label,
           data: e.data,
         })),
+        document: state.document ?? undefined,
       })
 
-      const cycleWarnings = response.warnings.filter(
-        (w) => w.type === 'cycle_detected' && w.cycle_nodes && Array.isArray(w.cycle_nodes)
-      )
-      const cycleNodeIds = new Set<string>()
-      cycleWarnings.forEach((warn) => {
-        if (warn.cycle_nodes && Array.isArray(warn.cycle_nodes)) {
-          warn.cycle_nodes.forEach((nodeId) => cycleNodeIds.add(nodeId))
-        }
-      })
-
-      const newValidationErrors = [...response.errors, ...response.warnings]
+      const loreKept = get().validationErrors.filter((e) => LORE_VALIDATION_TYPES.has(e.type))
+      const newValidationErrors = [...response.errors, ...response.warnings, ...loreKept]
       const prevErrors = get().validationErrors
       const prevCycleNodes = get().highlightedCycleNodes
-      const newCycleNodes = Array.from(cycleNodeIds)
+      const newCycleNodes = visibleCycleHighlightNodeIds(
+        newValidationErrors,
+        get().intentionalCycles
+      )
       const errorsUnchanged =
         prevErrors.length === newValidationErrors.length &&
         newValidationErrors.every((e, i) => prevErrors[i]?.node_id === e.node_id && prevErrors[i]?.type === e.type && prevErrors[i]?.severity === e.severity)
@@ -83,6 +87,58 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
       }
     } catch (error) {
       console.error('Erreur lors de la validation:', error)
+      throw error
+    }
+  },
+
+  validateLoreExplicit: async (contextSelections) => {
+    const selections =
+      contextSelections && typeof contextSelections === 'object' ? contextSelections : {}
+    set({ loreExplicitValidationLoading: true, loreExplicitValidationSummary: null })
+    try {
+      const state = get()
+      const response = await graphAPI.validateLoreExplicit({
+        nodes: state.nodes.map((n) => ({
+          id: n.id,
+          type: n.type,
+          position: n.position,
+          data: n.data,
+        })),
+        edges: state.edges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          type: e.type,
+          label: e.label,
+          data: e.data,
+        })),
+        context_selections: selections,
+        scene_instruction: '',
+        gdd_lore_facts: [],
+      })
+      const structuralAndOther = get().validationErrors.filter(
+        (e) => !LORE_VALIDATION_TYPES.has(e.type)
+      )
+      const loreIssues = [...response.errors, ...(response.warnings ?? [])].map((e) => ({
+        ...e,
+        node_id: e.node_id,
+      }))
+      const mergedValidationErrors = [...structuralAndOther, ...loreIssues]
+      set({
+        validationErrors: mergedValidationErrors,
+        highlightedCycleNodes: visibleCycleHighlightNodeIds(
+          mergedValidationErrors,
+          get().intentionalCycles
+        ),
+        loreExplicitValidationSummary: response.summary_explicit_only,
+        loreExplicitValidationLoading: false,
+      })
+    } catch (error) {
+      console.error('Erreur lors de la validation lore explicite:', error)
+      set({
+        loreExplicitValidationLoading: false,
+        loreExplicitValidationSummary: null,
+      })
       throw error
     }
   },
@@ -205,7 +261,13 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
         }
       }
 
-      return { intentionalCycles: newIntentionalCycles }
+      return {
+        intentionalCycles: newIntentionalCycles,
+        highlightedCycleNodes: visibleCycleHighlightNodeIds(
+          state.validationErrors,
+          newIntentionalCycles
+        ),
+      }
     })
   },
 
@@ -224,7 +286,13 @@ export const createUISlice: StateCreator<GraphState, [], [], UISlice> = (set, ge
         }
       }
 
-      return { intentionalCycles: newIntentionalCycles }
+      return {
+        intentionalCycles: newIntentionalCycles,
+        highlightedCycleNodes: visibleCycleHighlightNodeIds(
+          state.validationErrors,
+          newIntentionalCycles
+        ),
+      }
     })
   },
 

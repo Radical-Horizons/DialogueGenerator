@@ -46,7 +46,14 @@ def _pickle_path(loader: GDDLoader) -> Path:
 
 
 def compute_gdd_fingerprint(loader: GDDLoader) -> str:
-    """Empreinte des chemins GDD + mtimes + tailles (ordre stable)."""
+    """Empreinte des chemins GDD + mtimes + tailles (ordre stable).
+
+    Inclut les répertoires de **shards** (ex. ``especes/*.json``) : sans eux, une sync
+    Notion qui ne met à jour que les shards ne changeait pas l'empreinte et le pickle
+    ``gdd_data.pkl`` restait obsolète alors que le preview (Notion live) était à jour.
+    """
+    from api.utils.gdd_cache import gdd_shard_directory_fingerprint
+
     lines: List[str] = [
         f"categories_path|{loader._categories_path.resolve()}",
         f"import_path|{loader._import_path.resolve()}",
@@ -60,6 +67,16 @@ def compute_gdd_fingerprint(loader: GDDLoader) -> str:
         lines.append("vision|MISSING")
 
     for category_name in loader.CATEGORIES_CONFIG:
+        cfg = loader.CATEGORIES_CONFIG[category_name]
+        if cfg.get("type") == list:
+            sd = loader._resolve_category_shard_directory(category_name)
+            if sd is not None and sd.is_dir():
+                mmax, cnt = gdd_shard_directory_fingerprint(sd)
+                lines.append(
+                    f"{category_name}_shards|{sd.resolve()}|{mmax:.9f}|{cnt}"
+                )
+            else:
+                lines.append(f"{category_name}_shards|MISSING")
         p = loader._resolve_category_json_path(category_name)
         if p is not None:
             st = p.stat()

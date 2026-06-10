@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Annotated
+from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
@@ -120,6 +120,25 @@ async def run_gdd_notion_sync(
             description="Abandonner le checkpoint et lancer une sync complète neuve (full=true requis).",
         ),
     ] = False,
+    category_file: Annotated[
+        Optional[List[str]],
+        Query(
+            description=(
+                "Limiter ce run aux bases listées (noms exacts category_file, ex. Espèces.json). "
+                "N'efface pas les autres bases du disque (contrairement au filtre "
+                "included_categories sur une sync complète). Incompatible avec resume=true."
+            ),
+        ),
+    ] = None,
+    apply_staging_despite_errors: Annotated[
+        bool,
+        Query(
+            description=(
+                "Appliquer le staging conservé après erreurs partielles (full=true requis). "
+                "Incompatible avec resume, fresh et category_file."
+            ),
+        ),
+    ] = False,
 ) -> GddNotionSyncRunResponse:
     """Déclenche une synchronisation immédiate."""
     if resume and not full:
@@ -137,18 +156,53 @@ async def run_gdd_notion_sync(
             status_code=400,
             detail="resume et fresh sont mutuellement exclusifs.",
         )
+    if resume and category_file:
+        raise HTTPException(
+            status_code=400,
+            detail="category_file avec resume=true n'est pas supporté.",
+        )
+    if apply_staging_despite_errors and not full:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors=true nécessite full=true (sync complète).",
+        )
+    if apply_staging_despite_errors and resume:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors est incompatible avec resume=true.",
+        )
+    if apply_staging_despite_errors and fresh:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors est incompatible avec fresh=true.",
+        )
+    if apply_staging_despite_errors and category_file:
+        raise HTTPException(
+            status_code=400,
+            detail="apply_staging_despite_errors est incompatible avec category_file.",
+        )
+    scope_files: Optional[tuple[str, ...]] = None
+    if category_file:
+        scope_norm = tuple(
+            sorted({str(x).strip() for x in category_file if str(x).strip()})
+        )
+        if scope_norm:
+            scope_files = scope_norm
     result = await svc.run_sync(
         force_full=full,
         mirror_rebuild=mirror_rebuild,
         request_id=request_id,
         resume=resume,
         fresh=fresh,
+        run_scope_category_files=scope_files,
+        apply_staging_despite_errors=apply_staging_despite_errors,
     )
     return GddNotionSyncRunResponse(
         success=result.success,
         message=result.message,
         updated_entities=result.updated_entities,
         partial_errors=result.partial_errors,
+        mirror_promotion_pending=result.mirror_promotion_pending,
     )
 
 
@@ -240,10 +294,10 @@ async def download_gdd_notebooklm_export(
         int,
         Query(
             ge=1,
-            le=10,
-            description="Nombre max de fichiers Markdown dans le ZIP (défaut 10).",
+            le=128,
+            description="Nombre max de fichiers Markdown dans le ZIP (README + thèmes et suites -partNN).",
         ),
-    ] = 10,
+    ] = 64,
 ) -> Response:
     """ZIP : GDD local (Notion sync) regroupé en Markdown pour NotebookLM / présentations."""
     try:

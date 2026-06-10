@@ -52,6 +52,14 @@ async def list_flags(
     q: Optional[str] = Query(None, description="Terme de recherche (id, label, description, tags)"),
     category: Optional[str] = Query(None, description="Filtrer par catégorie"),
     favorites_only: bool = Query(False, description="Ne retourner que les favoris"),
+    semantic_type: Optional[str] = Query(
+        None,
+        description="Filtre type FR89 : bool | compteur | enum",
+    ),
+    scope: Optional[str] = Query(
+        None,
+        description="Filtre portée : conversationnel | mécanique",
+    ),
     flag_service: Annotated[FlagCatalogService, Depends(get_flag_catalog_service)] = None,
     request_id: Annotated[str, Depends(get_request_id)] = None
 ) -> FlagsCatalogResponse:
@@ -71,7 +79,9 @@ async def list_flags(
         flags = flag_service.search(
             query=q,
             category=category,
-            favorites_only=favorites_only
+            favorites_only=favorites_only,
+            semantic_type=semantic_type,
+            scope=scope,
         )
         
         # Convertir en modèles Pydantic (inclure defaultValueParsed si présent)
@@ -84,9 +94,14 @@ async def list_flags(
                 label=flag.get("label", ""),
                 description=flag.get("description"),
                 defaultValue=flag.get("defaultValue", ""),
-                defaultValueParsed=flag.get("defaultValueParsed"),  # Inclure la valeur parsée
+                defaultValueParsed=flag.get("defaultValueParsed"),
                 tags=flag.get("tags", []),
-                isFavorite=flag.get("isFavorite", False)
+                isFavorite=flag.get("isFavorite", False),
+                semanticType=flag.get("semanticType"),
+                scope=flag.get("scope"),
+                minValue=flag.get("minValue"),
+                maxValue=flag.get("maxValue"),
+                enumValues=list(flag.get("enumValues") or []),
             )
             flag_definitions.append(flag_def)
         
@@ -145,7 +160,23 @@ async def upsert_flag(
                 request_id=request_id
             )
         
-        updated_flag = FlagDefinition(**flags[0])
+        raw = flags[0]
+        updated_flag = FlagDefinition(
+            id=raw.get("id", ""),
+            type=raw.get("type", "bool"),
+            category=raw.get("category", ""),
+            label=raw.get("label", ""),
+            description=raw.get("description"),
+            defaultValue=raw.get("defaultValue", ""),
+            defaultValueParsed=raw.get("defaultValueParsed"),
+            tags=raw.get("tags", []),
+            isFavorite=raw.get("isFavorite", False),
+            semanticType=raw.get("semanticType"),
+            scope=raw.get("scope"),
+            minValue=raw.get("minValue"),
+            maxValue=raw.get("maxValue"),
+            enumValues=list(raw.get("enumValues") or []),
+        )
         
         return UpsertFlagResponse(
             success=True,

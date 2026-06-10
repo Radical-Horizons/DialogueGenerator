@@ -1,4 +1,5 @@
 """Client pour l'API Notion officielle."""
+import json
 import os
 import logging
 from typing import List, Dict, Any, Optional, Mapping, Tuple
@@ -12,10 +13,30 @@ logger = logging.getLogger(__name__)
 NOTION_VERSION_LEGACY = "2022-06-28"
 # Bases au modèle multi-sources : découverte + query via data_sources (Notion 2025-09-03).
 NOTION_VERSION_DATA_SOURCES = "2025-09-03"
+# Lecture du corps de page en markdown enrichi (alternative à l’arbre ``blocks/.../children``).
+# Réf. : https://developers.notion.com/reference/retrieve-page-markdown
+NOTION_VERSION_PAGE_MARKDOWN = "2026-03-11"
+
+# Types de blocs pouvant porter des enfants même si ``has_children`` est faux (API / clients).
+_STRUCTURAL_BLOCKS_TRY_CHILDREN: frozenset[str] = frozenset(
+    {
+        "column_list",
+        "column",
+        "table",
+        "toggle",
+        "template",
+    }
+)
+
+_MAX_PAGE_EMBED_DEPTH = 6
 
 
 class NotionAPIClient:
-    """Client pour interagir avec l'API Notion officielle."""
+    """Client pour l'API Notion officielle.
+
+    Pour le **corps complet** d'une page (sync GDD, imports), utiliser
+    :meth:`get_page_content` plutôt qu'un parcours ad hoc des blocs racine.
+    """
     
     def __init__(self, api_key: Optional[str] = None):
         """Initialise le client Notion API.
@@ -43,6 +64,59 @@ class NotionAPIClient:
         h = dict(self.headers)
         h["Notion-Version"] = notion_version
         return h
+
+    async def _try_get_page_markdown(self, page_id: str) -> Optional[str]:
+        """Récupère le corps de page via ``GET /v1/pages/{id}/markdown`` (API 2026-03-11).
+
+        Notion expose ce chemin pour un markdown enrichi **complet**, là où
+        ``GET /v1/blocks/{id}/children`` récursif peut omettre du contenu présent
+        dans certains callouts / mises en page.
+
+        Returns:
+            Markdown non vide, ou ``None`` si indisponible (4xx attendu, réseau, JSON invalide).
+        """
+        url = f"{self.base_url}/pages/{page_id}/markdown"
+        headers = self._headers_with_version(NOTION_VERSION_PAGE_MARKDOWN)
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                response = await client.get(url, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+        except httpx.HTTPStatusError as e:
+            code = e.response.status_code
+            if code in (400, 401, 404, 405):
+                logger.info(
+                    "GET /pages/%s/markdown → %s : repli sur l’arbre de blocs",
+                    page_id,
+                    code,
+                )
+                return None
+            logger.error(
+                "GET /pages/%s/markdown erreur HTTP %s : %s",
+                page_id,
+                code,
+                (e.response.text or "")[:500],
+            )
+            raise
+        except (httpx.RequestError, ValueError, TypeError) as e:
+            logger.warning("GET /pages/%s/markdown indisponible (%s), repli blocs", page_id, e)
+            return None
+
+        if not isinstance(data, dict):
+            return None
+        raw_md = data.get("markdown")
+        if not isinstance(raw_md, str):
+            return None
+        md = raw_md.strip()
+        if not md:
+            return None
+        if data.get("truncated"):
+            logger.warning(
+                "Page markdown tronquée (page_id=%s…) unknown_block_ids=%s",
+                str(page_id)[-12:],
+                data.get("unknown_block_ids"),
+            )
+        return md
 
     async def _retrieve_database_for_data_sources(
         self, database_id: str
@@ -251,6 +325,29 @@ class NotionAPIClient:
                         break
             if chosen:
                 return chosen
+            if not ids_in_meta:
+                # GET ``data_sources`` peut être vide alors que la config porte déjà
+                # des UUID copiés depuis Notion (ex. « Copy data source ID »).
+                fallback: List[str] = []
+                seen_fb: set[str] = set()
+                for raw in explicit:
+                    if not isinstance(raw, str) or not str(raw).strip():
+                        continue
+                    try:
+                        norm = normalize_notion_id(raw.strip())
+                    except ValueError:
+                        continue
+                    if norm not in seen_fb:
+                        fallback.append(norm)
+                        seen_fb.add(norm)
+                if fallback:
+                    logger.warning(
+                        "GET database %s : data_sources vide mais "
+                        "notion_data_source_ids=%s — interrogation directe des UUID",
+                        db_meta.get("id"),
+                        explicit,
+                    )
+                    return fallback
             logger.warning(
                 "notion_data_source_ids %s ne correspond à aucun data_source connu "
                 "(base %s) — repli heuristique",
@@ -319,7 +416,10 @@ class NotionAPIClient:
         if not ds_ids:
             logger.warning(
                 "GET database %s (API %s) : aucun data_source_id exploitable "
-                "(data_sources=%r, clés=%s)",
+                "(data_sources=%r, clés=%s). Si la liste est vide alors que la base "
+                "est au modèle multi-sources, vérifier que l'intégration a accès aux "
+                "sources (sinon POST .../databases/.../query peut répondre 400 : "
+                "« does not contain any data sources accessible by this API bot »).",
                 database_id,
                 NOTION_VERSION_DATA_SOURCES,
                 raw_sources,
@@ -434,59 +534,90 @@ class NotionAPIClient:
             response.raise_for_status()
             return response.json()
     
-    async def get_page_content(self, page_id: str) -> str:
-        """Récupère le contenu markdown d'une page Notion.
-        
-        Note: L'API Notion ne retourne pas directement le markdown.
-        Cette méthode récupère les blocs de la page et les convertit en markdown.
-        
+    async def get_page_content(self, page_id: str, *, _embed_depth: int = 0) -> str:
+        """Point d’entrée **canonique** pour le corps complet d’une page Notion (hors colonnes).
+
+        Stratégie robuste (alignée MCP / markdown enrichi Notion) :
+
+        1. ``GET /v1/pages/{page_id}/markdown`` avec ``Notion-Version: 2026-03-11`` ;
+        2. repli sur l’arbre ``GET /v1/blocks/{id}/children`` + extraction récursive si le
+           markdown est indisponible (4xx attendus, réseau, etc.).
+
+        Toute fonctionnalité qui doit « tout le texte de la page » (sync GDD, import guide,
+        sous-pages ``child_page``) doit s’appuyer sur cette méthode — **ne pas** dupliquer
+        un parcours racine blocs-seul pour le corps entier.
+
         Args:
-            page_id: ID de la page.
+            page_id: ID de la page Notion (ou page enfant pour récursion ``child_page``).
+            _embed_depth: Profondeur d'imbrication pour les sous-pages (``child_page``) ;
+                limite interne pour éviter les boucles.
             
         Returns:
-            Contenu markdown de la page.
+            Markdown de la page (enrichi ou reconstruit depuis les blocs).
         """
-        # Récupérer tous les blocs de la page (avec pagination)
+        if _embed_depth > _MAX_PAGE_EMBED_DEPTH:
+            logger.warning(
+                "get_page_content: profondeur d'embed max (%s) atteinte pour page %s",
+                _MAX_PAGE_EMBED_DEPTH,
+                page_id,
+            )
+            return ""
+        # Chemin prioritaire : markdown enrichi (même famille que MCP / agents Notion).
+        md_fast = await self._try_get_page_markdown(page_id)
+        if md_fast is not None:
+            return md_fast
+
+        # Repli : arbre de blocs + récursion (API classique).
         all_blocks = await self._get_all_blocks(page_id)
         
-        # Filtrer les child_page
-        blocks = [b for b in all_blocks if b.get("type") != "child_page"]
+        # Inclure ``child_page`` : le corps peut vivre dans des sous-pages liées.
+        blocks = [b for b in all_blocks if b.get("type") != "child_database"]
         
         # Transformer les blocs en texte markdown (récursif)
         content_parts = []
         for block in blocks:
-            text = await self._extract_block_text_recursive(block)
+            text = await self._extract_block_text_recursive(
+                block, embed_depth=_embed_depth
+            )
             if text:
                 content_parts.append(text)
-        
-        return "\n\n".join(content_parts)
+        out = "\n\n".join(content_parts)
+        return out
     
-    async def _get_all_blocks(self, block_id: str) -> List[Dict[str, Any]]:
+    async def _get_all_blocks(
+        self, block_id: str, *, notion_version: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """Récupère tous les blocs d'une page (avec pagination).
         
         Args:
             block_id: ID de la page ou du bloc parent.
+            notion_version: Si défini, en-tête ``Notion-Version`` explicite (ex. test 2025-09-03).
             
         Returns:
             Liste de tous les blocs.
         """
         url = f"{self.base_url}/blocks/{block_id}/children"
+        req_headers = (
+            self._headers_with_version(notion_version)
+            if notion_version
+            else self.headers
+        )
         
         all_blocks = []
         has_more = True
         start_cursor = None
-        
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             while has_more:
                 params = {}
                 if start_cursor:
                     params["start_cursor"] = start_cursor
-                
+
                 try:
-                    response = await client.get(url, headers=self.headers, params=params)
+                    response = await client.get(url, headers=req_headers, params=params)
                     response.raise_for_status()
                     data = response.json()
-                    
+
                     all_blocks.extend(data.get("results", []))
                     has_more = data.get("has_more", False)
                     start_cursor = data.get("next_cursor")
@@ -497,16 +628,19 @@ class NotionAPIClient:
                 except Exception as e:
                     logger.error(f"Erreur lors de la récupération des blocs: {e}")
                     raise
-        
+
         return all_blocks
     
-    async def _extract_block_text_recursive(self, block: Dict[str, Any]) -> Optional[str]:
+    async def _extract_block_text_recursive(
+        self, block: Dict[str, Any], *, embed_depth: int = 0
+    ) -> Optional[str]:
         """Extrait le texte d'un bloc Notion de manière récursive (avec enfants).
         
         Inspiré de la fonction transform_block de main.py.
         
         Args:
             block: Bloc Notion.
+            embed_depth: Profondeur courante pour résolution des ``child_page``.
             
         Returns:
             Texte du bloc avec ses enfants ou None.
@@ -526,12 +660,78 @@ class NotionAPIClient:
                 text_parts.append(plain_text)
         
         main_text = "".join(text_parts)
+
+        # Lignes de tableau : le texte est dans ``table_row.cells`` (pas dans ``rich_text``).
+        if block_type == "table_row":
+            row_cells = block_data.get("cells") or []
+            parts: List[str] = []
+            for cell in row_cells:
+                if isinstance(cell, list):
+                    cell_plain = "".join(
+                        x.get("plain_text", "") for x in cell if isinstance(x, dict)
+                    ).strip()
+                    parts.append(cell_plain)
+            line = " | ".join(parts).strip()
+            return line if line else None
+
+        # Sous-page : l'ID du bloc est celui de la page enfant (API Notion).
+        if block_type == "child_page":
+            cp = block.get("child_page") or {}
+            title = str(cp.get("title") or "").strip()
+            nested_id = block.get("id")
+            if not nested_id:
+                return f"## {title}" if title else None
+            try:
+                inner = await self.get_page_content(
+                    str(nested_id), _embed_depth=embed_depth + 1
+                )
+            except httpx.HTTPStatusError as e:
+                logger.debug(
+                    "child_page %s : échec get_page_content → %s",
+                    nested_id,
+                    e.response.status_code,
+                )
+                return f"## {title}" if title else None
+            inner = (inner or "").strip()
+            if title and inner:
+                return f"## {title}\n\n{inner}"
+            if inner:
+                return inner
+            return f"## {title}" if title else None
+
+        # Bloc synchronisé : contenu souvent dupliqué depuis ``synced_from.block_id``.
+        if block_type == "synced_block":
+            synced_from = block_data.get("synced_from") or {}
+            src_id: Optional[str] = None
+            if isinstance(synced_from, dict) and synced_from.get("type") == "block_id":
+                raw_src = synced_from.get("block_id")
+                if raw_src:
+                    src_id = str(raw_src)
+            child_blocks_sb: List[Dict[str, Any]] = []
+            if block.get("has_children"):
+                child_blocks_sb = await self._get_all_blocks(block["id"])
+            elif src_id:
+                try:
+                    child_blocks_sb = await self._get_all_blocks(src_id)
+                except httpx.HTTPStatusError:
+                    child_blocks_sb = []
+            else:
+                child_blocks_sb = []
+            parts_sync: List[str] = []
+            for cb in child_blocks_sb:
+                chunk_sb = await self._extract_block_text_recursive(
+                    cb, embed_depth=embed_depth
+                )
+                if chunk_sb:
+                    parts_sync.append(chunk_sb)
+            merged_sb = "\n\n".join(parts_sync).strip()
+            return merged_sb if merged_sb else None
         
         # Gérer les callouts (comme dans main.py)
         if block_type == "callout":
             callout_data = block.get("callout", {})
             rich = callout_data.get("rich_text", [])
-            
+
             # Détecter un sous-titre (texte en gras coloré)
             subtitle = None
             for rt in rich:
@@ -540,79 +740,104 @@ class NotionAPIClient:
                     subtitle = rt.get("plain_text", "").strip()
                     break
             
-            # Récupérer les enfants si présents
+            # Récupérer les enfants : toujours GET /blocks/{id}/children pour les callouts.
+            # Notion renvoie souvent ``has_children: false`` alors que des paragraphes enfants
+            # existent ; un second essai avec ``Notion-Version: 2025-09-03`` peut les exposer.
             children_text = ""
-            if block.get("has_children"):
-                child_blocks = await self._get_all_blocks(block["id"])
-                child_blocks = [b for b in child_blocks if b.get("type") != "child_page"]
-                
-                # Si pas de sous-titre détecté, vérifier si le premier enfant est un heading_2
-                if not subtitle and child_blocks and child_blocks[0].get("type") == "heading_2":
-                    hd = child_blocks[0]
-                    hd_data = hd.get("heading_2", {})
-                    subtitle = "".join(x.get("plain_text", "") for x in hd_data.get("rich_text", [])).strip()
-                    child_blocks = child_blocks[1:]
-                
-                # Si toujours pas de sous-titre, utiliser le texte principal comme sous-titre
-                if not subtitle and main_text:
-                    subtitle = main_text.strip()
-                    # Ne pas inclure le texte principal dans les enfants
-                    main_text = ""
-                
-                # Extraire le contenu des enfants
-                child_texts = []
-                for cb in child_blocks:
-                    child_text = await self._extract_block_text_recursive(cb)
-                    if child_text:
-                        if cb.get("type") == "bulleted_list_item":
-                            child_texts.append(f"• {child_text}")
-                        else:
-                            child_texts.append(child_text)
-                children_text = "\n".join(child_texts) if child_texts else ""
+            raw_callout_children = await self._get_all_blocks(block["id"])
+            child_blocks = list(raw_callout_children)
+            if not child_blocks:
+                try:
+                    retry_raw = await self._get_all_blocks(
+                        block["id"], notion_version=NOTION_VERSION_DATA_SOURCES
+                    )
+                    child_blocks = list(retry_raw)
+                except httpx.HTTPStatusError as e:
+                    logger.debug(
+                        "GET block children (2025-09-03) %s → %s",
+                        block.get("id"),
+                        e.response.status_code,
+                    )
+                    child_blocks = []
+
+            # Si pas de sous-titre détecté, vérifier si le premier enfant est un heading_2
+            if not subtitle and child_blocks and child_blocks[0].get("type") == "heading_2":
+                hd = child_blocks[0]
+                hd_data = hd.get("heading_2", {})
+                subtitle = "".join(x.get("plain_text", "") for x in hd_data.get("rich_text", [])).strip()
+                child_blocks = child_blocks[1:]
+
+            # Si toujours pas de sous-titre, utiliser le texte principal comme sous-titre
+            if not subtitle and main_text:
+                subtitle = main_text.strip()
+                # Ne pas inclure le texte principal dans les enfants
+                main_text = ""
+
+            # Extraire le contenu des enfants
+            child_texts = []
+            for cb in child_blocks:
+                child_text = await self._extract_block_text_recursive(
+                    cb, embed_depth=embed_depth
+                )
+                if child_text:
+                    if cb.get("type") == "bulleted_list_item":
+                        child_texts.append(f"• {child_text}")
+                    else:
+                        child_texts.append(child_text)
+            children_text = "\n".join(child_texts) if child_texts else ""
             
             # Formater le résultat
             if subtitle:
-                # Callout avec sous-titre
+                # Extraire le texte sans le sous-titre (si le sous-titre était dans le rich_text)
+                text_without_subtitle = ""
+                used_rt = False
+                for rt in rich:
+                    ann = rt.get("annotations", {})
+                    if not used_rt and ann.get("bold") and ann.get("color") != "default":
+                        used_rt = True
+                        continue
+                    text_without_subtitle += rt.get("plain_text", "") + " "
+                text_without_subtitle = text_without_subtitle.strip()
+                # Titres en ``##`` pour :func:`split_sections_general_text` (sync GDD).
                 if children_text:
-                    return f"**{subtitle}**\n{children_text}"
-                else:
-                    # Extraire le texte sans le sous-titre (si le sous-titre était dans le rich_text)
-                    text_without_subtitle = ""
-                    used = False
-                    for rt in rich:
-                        ann = rt.get("annotations", {})
-                        if not used and ann.get("bold") and ann.get("color") != "default":
-                            used = True
-                            continue
-                        text_without_subtitle += rt.get("plain_text", "") + " "
-                    text_without_subtitle = text_without_subtitle.strip()
-                    if text_without_subtitle:
-                        return f"**{subtitle}**\n{text_without_subtitle}"
-                    else:
-                        return f"**{subtitle}**"
+                    return f"## {subtitle}\n\n{children_text}"
+                if text_without_subtitle:
+                    return f"## {subtitle}\n\n{text_without_subtitle}"
+                return f"## {subtitle}"
             else:
                 # Callout simple sans sous-titre détecté
                 if children_text:
                     # Si on a des enfants mais pas de sous-titre, utiliser le texte principal comme titre
                     if main_text:
-                        return f"**{main_text}**\n{children_text}"
-                    else:
-                        return children_text
-                else:
-                    return main_text if main_text else None
+                        return f"## {main_text}\n\n{children_text}"
+                    return children_text
+                return main_text if main_text else None
         
-        # Gérer les autres types de blocs
-        if not main_text and block_type not in ["callout"]:
+        # Gérer les autres types de blocs.
+        # Ne pas court-circuiter si ``has_children`` : ``column_list``, ``column``, ``table``,
+        # toggles vides, etc. n'ont souvent pas de ``rich_text`` au nœud racine mais portent
+        # tout le contenu dans leurs enfants (cas typique des callouts Espèces sur Notion).
+        if (
+            not main_text
+            and not block.get("has_children")
+            and block_type not in _STRUCTURAL_BLOCKS_TRY_CHILDREN
+        ):
             return None
         
-        # Récupérer les enfants si présents
+        # Récupérer les enfants si présents (ou types structurels : tentative même si flag faux).
         children_texts = []
-        if block.get("has_children"):
+        try_fetch_children = bool(block.get("has_children")) or (
+            block_type in _STRUCTURAL_BLOCKS_TRY_CHILDREN
+        )
+        if try_fetch_children:
             child_blocks = await self._get_all_blocks(block["id"])
-            child_blocks = [b for b in child_blocks if b.get("type") != "child_page"]
-            
+            child_blocks = [
+                b for b in child_blocks if b.get("type") != "child_database"
+            ]
             for child_block in child_blocks:
-                child_text = await self._extract_block_text_recursive(child_block)
+                child_text = await self._extract_block_text_recursive(
+                    child_block, embed_depth=embed_depth
+                )
                 if child_text:
                     children_texts.append(child_text)
         

@@ -21,6 +21,10 @@ interface FieldNode {
   parent?: FieldNode
 }
 
+function isEnabledFlag(value: boolean | string | undefined): boolean {
+  return value === true || value === 'true'
+}
+
 export function ContextFieldSelector({
   elementType,
   onFieldsChange,
@@ -60,12 +64,12 @@ export function ContextFieldSelector({
     const filteredFields = showOnlyEssential
       ? Object.fromEntries(
           Object.entries(fields).filter(([, fieldInfo]: [string, FieldInfo]) => 
-            fieldInfo.is_metadata === true && !fieldInfo.is_unique
+            isEnabledFlag(fieldInfo.is_metadata) && !fieldInfo.is_unique
           )
         )
       : Object.fromEntries(
           Object.entries(fields).filter(([, fieldInfo]: [string, FieldInfo]) => 
-            fieldInfo.is_metadata !== true && !fieldInfo.is_unique
+            !isEnabledFlag(fieldInfo.is_metadata) && !fieldInfo.is_unique
           )
         )
 
@@ -234,7 +238,7 @@ export function ContextFieldSelector({
     const importance = fieldInfo.importance || 
       (fieldInfo.frequency >= 0.8 ? 'essential' : 
        fieldInfo.frequency >= 0.2 ? 'common' : 'rare')
-    const isEssential = fieldInfo.is_essential === true
+    const isEssential = isEnabledFlag(fieldInfo.is_essential)
     const isInvalid = fieldInfo.is_valid === false
     const isInConfig = fieldInfo.is_in_config === true
     
@@ -274,7 +278,7 @@ export function ContextFieldSelector({
     // Pour l'onglet Contexte uniquement, on garde le comportement "essentiels toujours cochés"
     // (dans l'onglet Métadonnées, un champ essentiel doit rester désélectionnable).
     const isContextTab = showOnlyEssential === false
-    const isEssential = node.fieldInfo.is_essential === true
+    const isEssential = isEnabledFlag(node.fieldInfo.is_essential)
     const isLocked = isContextTab && isEssential
     const isSelected = (isLocked) || selectedFields.includes(node.path)
     // Un champ est une feuille s'il n'a pas d'enfants dans l'arbre affiché
@@ -436,10 +440,10 @@ export function ContextFieldSelector({
   const fields = availableFields[elementType] || {}
   const visibleFields = showOnlyEssential
     ? Object.keys(fields).filter(path => 
-        fields[path]?.is_metadata === true && !fields[path]?.is_unique
+        isEnabledFlag(fields[path]?.is_metadata) && !fields[path]?.is_unique
       )
     : Object.keys(fields).filter(path => 
-        fields[path]?.is_metadata !== true && !fields[path]?.is_unique
+        !isEnabledFlag(fields[path]?.is_metadata) && !fields[path]?.is_unique
       )
   
   const totalFields = visibleFields.length
@@ -450,7 +454,7 @@ export function ContextFieldSelector({
   // Compter uniquement les champs sélectionnés parmi ceux visibles dans l'onglet actuel
   // Note: dans l'onglet Contexte, les champs essentiels restent toujours cochés.
   const visibleSelectedFields = visibleFields.filter(path => {
-    const isEssential = fields[path]?.is_essential === true
+    const isEssential = isEnabledFlag(fields[path]?.is_essential)
     const isContextTab = showOnlyEssential === false
     if (isContextTab && isEssential) {
       return true  // Essentiels du contexte toujours cochés

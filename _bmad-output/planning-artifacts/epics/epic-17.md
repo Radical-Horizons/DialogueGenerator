@@ -1,8 +1,10 @@
 ## Epic 17: Expérience mobile et responsive (web)
 
+**Status:** done — livraison stories **17.1–17.8** ; preuve UI validée en équipe. La story **17.9** (refactor toolbar) est reportée vers l’[Epic Dette technique](epic-dette-technique.md) (Story DT-1).
+
 Les utilisateurs peuvent utiliser DialogueGenerator sur **navigateur mobile et tablette** (largeurs typiques 320px–1023px) sans layout cassé : shell applicatif adaptatif, graphe utilisable au **tactile**, panneaux contexte / édition accessibles via **patterns mobile** (drawers, onglets ou plein écran). Le périmètre reste **web responsive** (pas d’app native iOS/Android dans cet epic).
 
-**FRs covered:** FR118 (layout viewport étroit), FR119 (interactions tactiles), FR120 (panneaux sur narrow), FR121 (PWA installable — option V1.5+)
+**FRs covered:** FR118 (layout viewport étroit + **lisibilité / densité UI** dans panneaux réduits — story 17.6), FR119 (interactions tactiles), FR120 (panneaux sur narrow), FR121 (PWA installable — option V1.5+)
 
 **NFRs covered:** NFR-P4 (UI Interaction Responsiveness), NFR-P5 (Initial Page Load — pas de régression sur mobile)
 
@@ -114,6 +116,34 @@ So that **les champs et CTA restent utilisables**.
 
 ---
 
+### Story 17.6: Typographie et densité adaptatives (panneaux / onglets étroits) (renfort FR118 / NFR-P4)
+
+As a **utilisateur qui réduit la largeur des panneaux ou travaille sur une colonne centrale étroite**,
+I want **que la taille du texte, des boutons et des onglets reste proportionnée à l’espace disponible**,
+So that **je ne me retrouve pas avec des libellés disproportionnés, tronqués de façon illisible ou des contrôles « hors norme » par rapport au conteneur**.
+
+**Acceptance Criteria:**
+
+**Given** une **largeur de conteneur réduite** (colonne centrale du `Dashboard` après redimensionnement des `ResizablePanels`, ou viewport mobile / tablette déjà couverts par 17.1–17.3)  
+**When** j’affiche les **onglets segmentés** (zone centrale et, si applicable, barres d’onglets équivalentes du shell) et les **boutons chrome** associés  
+**Then** les **tailles de police**, **paddings** et **espacements** s’**adaptent** (ex. `clamp()`, `rem` + breakpoints, **container queries** ou équivalent documenté) dans des **bornes** définies : lisibilité minimale respectée (équivalent **≥ ~12px** corps de texte sauf caption documentée), **pas de régression** des cibles tactiles **44×44px** là où la story 17.2 s’applique  
+
+**Given** un viewport **large desktop** avec panneaux confortables  
+**When** je n’ai pas contraint les colonnes au-delà des seuils « confort » définis en implémentation  
+**Then** l’apparence reste **alignée** sur le rendu actuel préféré (pas de micro-texte inutile sur grand écran)
+
+**Given** des libellés d’onglets longs (emojis + texte)  
+**When** la largeur utile est faible  
+**Then** le comportement est **contrôlé** : troncature avec **title** / tooltip accessible, passage à **icône + texte court**, ou **wrap** limité — **sans** chevauchement illisible (comportement produit figé dans les tests)
+
+**References:** FR118 (renfort), NFR-P4, UX `responsive-design-accessibility.md` (section typographie / densité), story 17.1 (breakpoints), 17.2 (touch targets), 17.3 (drawers)
+
+**Note PO / SM :** Cette story **complète** le fil responsive déjà en cours dans l’Epic 17 : le layout peut être correct alors que la **hiérarchie typographique** et la **densité** restent calibrées pour un plein écran alors que le **panneau** est étroit.
+
+**Priorité produit (2026-04-08) :** traiter la **story 17.6 avant la 17.4** (typographie / densité des panneaux avant clavier logiciel & safe areas).
+
+---
+
 ### Story 17.5: PWA — installabilité et manifest (option V1.5+) (FR121)
 
 As a **utilisateur qui revient souvent sur mobile**,
@@ -132,6 +162,24 @@ So that **le lancement est rapide et familier**.
 
 ---
 
+### Story 17.7: Sélecteur de dialogue intégré à la toolbar en mode narrow (FR120)
+
+**Artifact :** `_bmad-output/implementation-artifacts/17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120.md` — `DialogueCombobox`, `useDialogueListData`, intégration `Dashboard` + `GraphEditor`, alignement toolbar narrow.
+
+---
+
+### Story 17.8: Fix `useNarrowInlineSize` — ref montée tardivement (dette 17.7)
+
+**Artifact :** `_bmad-output/implementation-artifacts/17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique.md` — callback ref sur le hook, tests `useNarrowInlineSize.test.tsx`, retrait du mock dans `Dashboard.combobox-17_7.test.tsx`.
+
+---
+
+### Reporté — Story 17.9 → Epic Dette technique
+
+Le refactor `GraphEditorHeader` (tri-state toolbar) n’est **pas** dans le périmètre de livraison Epic 17. Contenu repris tel quel sous **[Epic Dette technique — Story DT-1](epic-dette-technique.md)**.
+
+---
+
 ## Synthèse dépendances stories
 
 | Story | Dépend de |
@@ -141,3 +189,7 @@ So that **le lancement est rapide et familier**.
 | 17.3 | 17.1, 17.2 (recommandé) |
 | 17.4 | 17.1–17.3 (renfort) |
 | 17.5 | 17.1 (indépendant logiquement, peut suivre) |
+| 17.6 | 17.1 (breakpoints / shell) ; **recommandé** après 17.2–17.3 pour ne pas contredire drawers + touch |
+| 17.7 | 17.1, 17.3, 17.6 (narrow / densité / drawers) |
+| 17.8 | 17.7 (diagnostic ref tardive) ; corrige le hook pour **tous** les consommateurs |
+| ~~17.9~~ → **DT-1** | Reportée vers [Epic Dette technique](epic-dette-technique.md) (17.7–17.8 prérequis) |

@@ -1,18 +1,13 @@
 #!/usr/bin/env node
 /**
- * Cursor `beforeSubmitPrompt` hook — second stage of the BMAD chain.
+ * @deprecated Ancien 2e hook `beforeSubmitPrompt`. **Ne plus référencer depuis hooks.json** :
+ * deux processus successifs peuvent recevoir un stdin vide / incohérent selon Cursor, ce qui
+ * empêchait l’armement de la chaîne AUTO. Tout est regroupé dans `bmad-chain-before.js`.
  *
- * Consumes hook input on stdin and allows submission. Replace this script
- * if you need BMAD-specific checks after the first beforeSubmit hook.
+ * Si un clone référence encore ce fichier, il reste un no-op sûr (draine stdin, continue: true).
  */
-
 "use strict";
 
-/**
- * Read the full stdin stream as UTF-8 text.
- *
- * @returns {Promise<string>}
- */
 async function readStdinUtf8() {
   const chunks = [];
   for await (const chunk of process.stdin) {
