@@ -498,14 +498,18 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
         Réponse JSON avec format d'erreur standardisé.
     """
     request_id = getattr(request.state, "request_id", "unknown")
-    
+    is_production = os.getenv("ENVIRONMENT", "development") == "production"
+    details = exc.details
+    if is_production and exc.code == "INTERNAL_ERROR":
+        details = {}
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": {
                 "code": exc.code,
                 "message": exc.detail,
-                "details": exc.details,
+                "details": details,
                 "request_id": exc.request_id or request_id
             }
         }

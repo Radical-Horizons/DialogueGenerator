@@ -65,6 +65,58 @@ def test_post_preview_returns_counts(client: TestClient, mock_config_service: Ma
     assert data["choices_total"] == 1
 
 
+def test_post_preview_invalid_visibility_returns_warning(
+    client: TestClient, mock_config_service: MagicMock, tmp_path: Path
+) -> None:
+    doc_id = "preview-invalid-vc"
+    doc = {
+        "schemaVersion": "1.1.0",
+        "nodes": [
+            {
+                "id": "N1",
+                "speaker": "S",
+                "line": "L",
+                "visibilityConditions": {
+                    "combinator": "AND",
+                    "items": [{"kind": "flag_bool", "flagId": "F"}],
+                },
+                "choices": [],
+            },
+        ],
+    }
+    (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
+    (tmp_path / f"{doc_id}.meta").write_text(json.dumps({"revision": 1}), encoding="utf-8")
+    mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+    response = client.post(
+        f"/api/v1/documents/{doc_id}/preview",
+        json={"revision": 1, "flag_states": {}},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["nodes_masked"] == 0
+    assert len(data["visibility_warnings"]) == 1
+    assert "nodes[N1].visibilityConditions" in data["visibility_warnings"][0]
+
+
+def test_post_preview_rejects_oversized_flag_states(
+    client: TestClient, mock_config_service: MagicMock, tmp_path: Path
+) -> None:
+    from services.dialogue_preview_limits import MAX_PREVIEW_FLAG_STATES
+
+    doc_id = "preview-too-many-flags"
+    doc = {"schemaVersion": "1.1.0", "nodes": []}
+    (tmp_path / f"{doc_id}.json").write_text(json.dumps(doc), encoding="utf-8")
+    (tmp_path / f"{doc_id}.meta").write_text(json.dumps({"revision": 1}), encoding="utf-8")
+    mock_config_service.get_unity_dialogues_path.return_value = tmp_path
+
+    response = client.post(
+        f"/api/v1/documents/{doc_id}/preview",
+        json={"flag_states": {f"F{i}": False for i in range(MAX_PREVIEW_FLAG_STATES + 1)}},
+    )
+    assert response.status_code == 422
+
+
 def test_post_preview_revision_stale_409(client: TestClient, mock_config_service: MagicMock, tmp_path: Path) -> None:
     doc_id = "pv-stale"
     doc = {"schemaVersion": "1.1.0", "nodes": []}

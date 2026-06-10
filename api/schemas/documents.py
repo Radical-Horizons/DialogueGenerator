@@ -2,11 +2,12 @@
 
 Story 16.2 : document canonique, schemaVersion, revision ; pas de nodes/edges au top level.
 """
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from api.schemas.graph import ValidationErrorDetail
+from services.dialogue_preview_limits import MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES
 
 ValidationMode = Literal["draft", "export"]
 
@@ -85,6 +86,19 @@ class ValidateFlagReferencesRequest(BaseModel):
         default=None,
         description="Document canonique à analyser ; si absent, lecture depuis le stockage.",
     )
+
+    @model_validator(mode="after")
+    def _validate_inline_document_size(self) -> Self:
+        """Limite la taille d'un document inline pour éviter un DoS authentifié."""
+        if self.document is None:
+            return self
+        nodes = self.document.get("nodes")
+        if isinstance(nodes, list) and len(nodes) > MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES:
+            raise ValueError(
+                "document.nodes: au plus "
+                f"{MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES} nœuds autorisés"
+            )
+        return self
 
 
 class ValidateFlagReferencesResponse(BaseModel):

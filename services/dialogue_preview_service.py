@@ -68,6 +68,7 @@ class DialoguePreviewService:
         choices_masked = 0
         masked_node_ids: List[str] = []
         masked_choice_refs: List[MaskedChoiceRef] = []
+        visibility_warnings: List[str] = []
 
         for node in nodes:
             if not isinstance(node, dict):
@@ -76,7 +77,13 @@ class DialoguePreviewService:
             if not nid:
                 continue
             nodes_total += 1
-            vc = parse_visibility_block(node.get("visibilityConditions"))
+            node_vc = parse_visibility_block(
+                node.get("visibilityConditions"),
+                path=f"nodes[{nid}].visibilityConditions",
+            )
+            if node_vc.warning:
+                visibility_warnings.append(node_vc.warning)
+            vc = node_vc.block
             if vc and vc.items:
                 if not evaluate_visibility_conditions_block(vc, flags, reputation):
                     nodes_masked += 1
@@ -89,7 +96,13 @@ class DialoguePreviewService:
                     continue
                 choices_total += 1
                 cid = str(ch.get("choiceId") or "").strip()
-                cvc = parse_visibility_block(ch.get("visibilityConditions"))
+                choice_vc = parse_visibility_block(
+                    ch.get("visibilityConditions"),
+                    path=f"nodes[{nid}].choices[{cid or '?'}].visibilityConditions",
+                )
+                if choice_vc.warning:
+                    visibility_warnings.append(choice_vc.warning)
+                cvc = choice_vc.block
                 if cvc and cvc.items:
                     if not evaluate_visibility_conditions_block(cvc, flags, reputation):
                         choices_masked += 1
@@ -110,4 +123,5 @@ class DialoguePreviewService:
             simulation_limits=collect_preview_simulation_limits(
                 body.game_systems_state.model_dump()
             ),
+            visibility_warnings=visibility_warnings,
         )

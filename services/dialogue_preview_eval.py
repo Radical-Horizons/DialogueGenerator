@@ -5,6 +5,7 @@ Alignée sur ``frontend/src/utils/visibilityConditions.ts`` et les schémas Pyda
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Dict, Mapping, Union
 
 from api.schemas.visibility_conditions import (
@@ -85,11 +86,26 @@ def evaluate_visibility_conditions_block(
     return any(results)
 
 
-def parse_visibility_block(raw: Any) -> VisibilityConditionsBlock | None:
-    """Parse YAML/JSON brut vers modèle ; invalide → None."""
+@dataclass(frozen=True)
+class VisibilityParseResult:
+    """Résultat du parse d'un bloc visibilityConditions."""
+
+    block: VisibilityConditionsBlock | None
+    warning: str | None = None
+
+
+def parse_visibility_block(raw: Any, *, path: str = "") -> VisibilityParseResult:
+    """Parse YAML/JSON brut vers modèle ; invalide → bloc absent + avertissement."""
     if raw is None or not isinstance(raw, dict):
-        return None
+        return VisibilityParseResult(block=None)
     try:
-        return VisibilityConditionsBlock.model_validate(raw)
+        return VisibilityParseResult(block=VisibilityConditionsBlock.model_validate(raw))
     except Exception:
-        return None
+        location = path or "visibilityConditions"
+        return VisibilityParseResult(
+            block=None,
+            warning=(
+                f"{location}: conditions de visibilité invalides ; "
+                "preview traité comme toujours visible"
+            ),
+        )

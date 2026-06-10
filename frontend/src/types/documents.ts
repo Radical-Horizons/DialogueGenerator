@@ -66,4 +66,5 @@ export interface DialoguePreviewResponse {
   masked_choice_refs: MaskedChoiceRef[]
   game_systems_state: PreviewGameSystemsState
   simulation_limits: string[]
+  visibility_warnings?: string[]
 }

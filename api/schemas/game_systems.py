@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from services.dialogue_preview_limits import (
+    MAX_PREVIEW_GAME_SYSTEMS_ATTRIBUTES,
+    MAX_PREVIEW_GAME_SYSTEMS_FACTION_TITLES,
+    MAX_PREVIEW_GAME_SYSTEMS_REPUTATION_VALUES,
+    MAX_PREVIEW_GAME_SYSTEMS_SKILLS,
+)
 
 
 class GameSystemFamily(BaseModel):
@@ -47,3 +54,25 @@ class PreviewGameSystemsState(BaseModel):
     effort_pool: float = 10
     reputation_values: dict[str, float] = Field(default_factory=dict)
     faction_titles: dict[str, str] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _validate_map_sizes(self) -> Self:
+        """Limite les cartes d'état simulé transmises au preview."""
+        if len(self.attributes) > MAX_PREVIEW_GAME_SYSTEMS_ATTRIBUTES:
+            raise ValueError(
+                f"attributes: au plus {MAX_PREVIEW_GAME_SYSTEMS_ATTRIBUTES} clés autorisées"
+            )
+        if len(self.skills) > MAX_PREVIEW_GAME_SYSTEMS_SKILLS:
+            raise ValueError(
+                f"skills: au plus {MAX_PREVIEW_GAME_SYSTEMS_SKILLS} clés autorisées"
+            )
+        if len(self.reputation_values) > MAX_PREVIEW_GAME_SYSTEMS_REPUTATION_VALUES:
+            raise ValueError(
+                "reputation_values: au plus "
+                f"{MAX_PREVIEW_GAME_SYSTEMS_REPUTATION_VALUES} clés autorisées"
+            )
+        if len(self.faction_titles) > MAX_PREVIEW_GAME_SYSTEMS_FACTION_TITLES:
+            raise ValueError(
+                f"faction_titles: au plus {MAX_PREVIEW_GAME_SYSTEMS_FACTION_TITLES} clés autorisées"
+            )
+        return self
