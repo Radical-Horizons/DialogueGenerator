@@ -62,16 +62,18 @@ describe('GraphAiSlopPanel', () => {
 
   it('affiche loading puis résumé et une occurrence après succès API', async () => {
     seedStoreOneDialogueNode()
+    let resolveDetect!: (value: DetectAiSlopResponse) => void
     vi.mocked(graphAPI.detectAiSlop).mockImplementation(
       () =>
         new Promise((resolve) => {
-          setTimeout(() => resolve(makeResponse()), 20)
+          resolveDetect = resolve
         })
     )
     const user = userEvent.setup()
     render(<GraphAiSlopPanel onClose={() => undefined} />)
     await user.click(screen.getByTestId('graph-ai-slop-detect'))
     expect(screen.getByRole('button', { name: /Détection/i })).toBeDisabled()
+    resolveDetect(makeResponse())
     expect(await screen.findByTestId('graph-ai-slop-summary')).toBeInTheDocument()
     expect(screen.getByTestId('graph-ai-slop-occurrences')).toBeInTheDocument()
   })
