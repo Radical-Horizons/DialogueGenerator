@@ -21,7 +21,6 @@ import {
 } from '../../utils/graphValidationSummary'
 import {
   GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
-  GRAPH_TOOLBAR_DESKTOP_COMPACT_MAX_WIDTH_PX,
   graphToolbarChrome,
 } from '../../theme/responsiveChrome'
 
@@ -214,17 +213,10 @@ export function GraphEditorHeader({
     GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX,
     { measureParentClientWidth: true }
   )
-  const { ref: compactRef, isNarrow: isCompactDesktopMeasured } = useNarrowInlineSize(
-    GRAPH_TOOLBAR_DESKTOP_COMPACT_MAX_WIDTH_PX,
-    { measureParentClientWidth: true }
-  )
   const chrome = isNarrowToolbar ? graphToolbarChrome.narrow : graphToolbarChrome.comfortable
-  const isCompactDesktop = !isNarrowToolbar && isCompactDesktopMeasured
 
-  const effectiveButtonPadding = isCompactDesktop ? graphToolbarChrome.narrow.buttonPadding : chrome.buttonPadding
-  const effectiveButtonFontSizeRem = isCompactDesktop
-    ? graphToolbarChrome.narrow.buttonFontSizeRem
-    : chrome.buttonFontSizeRem
+  const effectiveButtonPadding = chrome.buttonPadding
+  const effectiveButtonFontSizeRem = chrome.buttonFontSizeRem
   const graphChromeTouch: React.CSSProperties = {
     minWidth: chrome.touchMinPx,
     minHeight: chrome.touchMinPx,
@@ -278,6 +270,7 @@ export function GraphEditorHeader({
 
     return (
       <Badge
+        data-testid="graph-health-badge"
         variant={variant}
         size={size}
         icon={icon}
@@ -774,7 +767,7 @@ export function GraphEditorHeader({
     showSchemaValidationPanel,
   ])
 
-  const renderStatusGroup = (): ReactNode => {
+  const renderSaveStatusIndicator = (): ReactNode => {
     const status: 'saved' | 'saving' | 'unsaved' | 'error' = lastSaveError
       ? 'error'
       : isGraphSaving
@@ -789,7 +782,6 @@ export function GraphEditorHeader({
         : syncStatus
     return (
       <>
-        {renderGraphHealthBadge()}
         {activeDialogueFilename && (
           <SaveStatusIndicator
             status={status}
@@ -836,7 +828,7 @@ export function GraphEditorHeader({
 
   const renderToolsGroup = (): ReactNode => (
     <>
-      {/* Auto-layout avec menu direction */}
+      {/* Menu layout : l'intitulé complet reste dans le title/aria-label. */}
       <div ref={autoLayoutDropdownRef} style={{ position: 'relative' }}>
         <button
           onClick={() => canEditGraph && setShowAutoLayoutDropdown((v) => !v)}
@@ -854,17 +846,20 @@ export function GraphEditorHeader({
             display: 'flex',
             alignItems: 'center',
             gap: '0.35rem',
+            fontWeight: 600,
           }}
           title="Auto-layout (Dagre) — choisir la direction"
           aria-label="Auto-layout (Dagre) — choisir la direction"
         >
-          {isNarrowToolbar ? '📐 Layout' : isCompactDesktop ? '📐' : '📐 Auto-layout'}
-          {!isNarrowToolbar && (
+          <span aria-hidden>📐</span>
+          {!isNarrowToolbar ? (
             <span style={{ textTransform: 'capitalize' }}>
               <Badge variant="neutral" size="sm">
                 {layoutSpacingMode}
               </Badge>
             </span>
+          ) : (
+            <span style={{ textTransform: 'capitalize' }}>{layoutSpacingMode}</span>
           )}
           <span style={{ fontSize: '0.7em', opacity: 0.9 }}>▼</span>
         </button>
@@ -989,7 +984,7 @@ export function GraphEditorHeader({
       {!isNarrowToolbar && (
         <GraphActionsDropdown
           canEditGraph={canEditGraph}
-          isNarrow={isCompactDesktop}
+          isNarrow={false}
           graphChromeTouch={graphChromeTouch}
           buttonPadding={effectiveButtonPadding}
           buttonFontSizeRem={effectiveButtonFontSizeRem}
@@ -1021,7 +1016,7 @@ export function GraphEditorHeader({
         }}
         title="Afficher le breakdown des coûts LLM pour ce dialogue"
       >
-        {isCompactDesktop ? '💰' : '💰 Coûts'}
+        💰 Coûts
       </button>
       {/* Shortcuts (?) avec tooltip */}
       <div style={{ position: 'relative' }}>
@@ -1319,7 +1314,9 @@ export function GraphEditorHeader({
                     disabled={!canUndoNow}
                     style={{
                       ...graphChromeTouch,
-                      padding: effectiveButtonPadding,
+                      width: chrome.touchMinPx,
+                      height: chrome.touchMinPx,
+                      padding: 0,
                       border: `1px solid ${theme.border.primary}`,
                       borderRadius: '6px',
                       backgroundColor: theme.button.default.background,
@@ -1327,11 +1324,14 @@ export function GraphEditorHeader({
                       cursor: canUndoNow ? 'pointer' : 'not-allowed',
                       opacity: canUndoNow ? 1 : 0.6,
                       fontSize: `${effectiveButtonFontSizeRem}rem`,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                     title="Annuler (Ctrl+Z)"
                     aria-label="Annuler"
                   >
-                    {isCompactDesktop ? '↩' : '↩ Undo'}
+                    <span aria-hidden>↩</span>
                   </button>
                   <button
                     type="button"
@@ -1340,7 +1340,9 @@ export function GraphEditorHeader({
                     disabled={!canRedoNow}
                     style={{
                       ...graphChromeTouch,
-                      padding: effectiveButtonPadding,
+                      width: chrome.touchMinPx,
+                      height: chrome.touchMinPx,
+                      padding: 0,
                       border: `1px solid ${theme.border.primary}`,
                       borderRadius: '6px',
                       backgroundColor: theme.button.default.background,
@@ -1348,11 +1350,14 @@ export function GraphEditorHeader({
                       cursor: canRedoNow ? 'pointer' : 'not-allowed',
                       opacity: canRedoNow ? 1 : 0.6,
                       fontSize: `${effectiveButtonFontSizeRem}rem`,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                     title="Refaire (Ctrl+Y)"
                     aria-label="Refaire"
                   >
-                    {isCompactDesktop ? '↪' : '↪ Redo'}
+                    <span aria-hidden>↪</span>
                   </button>
                 </>
               )}
@@ -1408,17 +1413,16 @@ export function GraphEditorHeader({
         )}
       </div>
       <div
-        ref={compactRef}
         data-testid="graph-editor-toolbar-tools"
-        data-graph-toolbar-compact-desktop={isCompactDesktop ? 'true' : 'false'}
+        data-graph-toolbar-compact-desktop="false"
         style={{
           gridArea: isNarrowToolbar ? 'tools' : undefined,
           flex: 1,
           minWidth: 0,
           display: 'flex',
-          flexDirection: !isNarrowToolbar && isCompactDesktop ? 'column' : 'row',
+          flexDirection: 'row',
           gap: `${chrome.groupGapRem}rem`,
-          alignItems: !isNarrowToolbar && isCompactDesktop ? 'stretch' : 'center',
+          alignItems: 'center',
           flexWrap: isNarrowToolbar ? 'wrap' : 'nowrap',
           justifyContent: 'flex-start',
           overflowX: isNarrowToolbar ? undefined : 'visible',
@@ -1481,13 +1485,12 @@ export function GraphEditorHeader({
                       fontSize: `${chrome.buttonFontSizeRem}rem`,
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.35rem',
+                      justifyContent: 'center',
                     }}
                     title="Annuler (Ctrl+Z)"
                     aria-label="Annuler"
                   >
                     <span aria-hidden>↩</span>
-                    Annuler
                   </button>
                   <button
                     type="button"
@@ -1506,13 +1509,12 @@ export function GraphEditorHeader({
                       fontSize: `${chrome.buttonFontSizeRem}rem`,
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.35rem',
+                      justifyContent: 'center',
                     }}
                     title="Refaire (Ctrl+Y)"
                     aria-label="Refaire"
                   >
                     <span aria-hidden>↪</span>
-                    Refaire
                   </button>
                 </>
               )}
@@ -1573,47 +1575,20 @@ export function GraphEditorHeader({
               }}
             >
               {renderBatchOperationsMenu()}
-              {renderStatusGroup()}
+              {renderSaveStatusIndicator()}
               <div style={{ display: 'flex', alignItems: 'center', gap: `${chrome.groupGapRem}rem` }}>
                 {renderToolsGroup()}
               </div>
-            </div>
-          </>
-        ) : !isNarrowToolbar && isCompactDesktop ? (
-          <>
-            <div
-              data-testid="graph-toolbar-row-status"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: `${chrome.groupGapRem}rem`,
-                flexWrap: 'wrap',
-                minWidth: 0,
-              }}
-            >
-              {renderStatusGroup()}
-            </div>
-            <div
-              data-testid="graph-toolbar-row-tools"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: `${chrome.groupGapRem}rem`,
-                flexWrap: 'wrap',
-                minWidth: 0,
-              }}
-            >
-              {isStandalone && renderTitleBlock()}
-              {renderBatchOperationsMenu()}
-              {renderToolsGroup()}
+              {renderGraphHealthBadge()}
             </div>
           </>
         ) : (
           <>
             {!isNarrowToolbar && isStandalone && renderTitleBlock()}
             {renderBatchOperationsMenu()}
-            {renderStatusGroup()}
+            {renderSaveStatusIndicator()}
             {renderToolsGroup()}
+            {renderGraphHealthBadge()}
           </>
         )}
       </div>
