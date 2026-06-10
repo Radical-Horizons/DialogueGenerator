@@ -155,7 +155,8 @@ if (-not (Test-Path $apiMain)) {
 $requiredFiles = @(
     "api/routers/auth.py",
     "api/routers/dialogues.py",
-    "api/routers/graph.py",
+    "api/routers/graph_io.py",
+    "api/routers/graph_validation.py",
     "api/routers/context.py",
     "api/routers/config.py"
 )
@@ -167,7 +168,7 @@ foreach ($file in $requiredFiles) {
     }
 }
 
-if ($errors.Count -eq 0 -and $requiredFiles.Count -eq 5) {
+if ($errors.Count -eq 0 -and $requiredFiles.Count -eq 6) {
     Write-Host "  ✓ Tous les fichiers API sont présents" -ForegroundColor Green
 }
 
