@@ -39,6 +39,7 @@
 Located in `[architecture/](./architecture/)`
 
 - [Frontend Architecture](./architecture/architecture-frontend.md) - React application architecture
+- [Responsive UI & PWA (Epic 17)](./architecture/responsive-ui.md) - Viewport vs container breakpoints, drawers, graph toolbar, PWA installability
 - [Backend Architecture](./architecture/architecture-api.md) - FastAPI API architecture
 - [Integration Architecture](./architecture/integration-architecture.md) - Frontend-Backend integration
 - [State Management](./architecture/state-management-frontend.md) - Zustand stores and patterns
@@ -181,7 +182,7 @@ When creating a brownfield PRD:
 
 ## Documentation Status
 
-**Last Updated**: 2026-04-13
+**Last Updated**: 2026-06-08
 **Structure**: Reorganized into logical categories
 **Parts Documented**: 2 (frontend, api)
 
