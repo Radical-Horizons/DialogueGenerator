@@ -2,12 +2,11 @@
   "Nom": "Vorka",
   "values": {
     "Biologie": "Moyenne",
-    "Culture": "Nulle",
+    "Espérance de vie": "18",
     "Présence dans Escelion": "Peu courant",
     "Règne (ou classe)": "4263f62b-7904-49eb-a0a3-58d23b89c693",
-    "Résumé IA": "Le Vorka est un prédateur et charognard des récifs, caractérisé par un corps en forme d'étoile avec 5 à 8 bras autonomes. Il se reproduit par fragmentation, permettant à chaque bras de survivre et de se régénérer. Son habitat naturel inclut des substrats complexes, et il joue un rôle important dans l'écosystème en nettoyant les organismes nécrosés. Les communautés littorales ont des superstitions à son sujet, le considérant à la fois comme un symbole de chance et de malheur.",
+    "Résumé IA": "Vorka est un prédateur et charognard opportuniste des récifs et zones littorales, doté d’un tronc central discoïde et de 5 à 8 bras épais rayonnants, chaque bras fonctionnant de façon autonome grâce à un nœud nerveux majeur. Il se nourrit en capturant simultanément des proies grâce à ses bras autonomes et contribue à la santé des récifs en nettoyant les parasites et organismes nécrosés. Sa reproduction se fait par fragmentation contrôlée, où un bras détaché régénère un nouvel individu, assurant la dispersion et la régénération de l’espèce. Culturally, il suscite à la fois crainte et respect, inspirant des amulettes protectrices et étant toléré par les pêcheurs pour son rôle écologique.",
     "Surnaturel": "Nulle",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "En cours"
   },
@@ -22,7 +21,7 @@
     "mode_de_reproduction": "**Fragmentation contrôlée** (mode asexué, unique parmi les Appendiculaires réticulés). Un bras porteur d'un nœud mature est volontairement détaché du tronc. Le segment détaché survit grâce à des réserves nutritives accumulées, puis développe progressivement un mini-tronc (bourgeonnement d'organes vitaux rudimentaires) et de nouveaux bras sur plusieurs Nuées. L'individu produit est génétiquement identique mais **cognitivement vierge** : seules les mémoires du nœud d'origine sont conservées.\n\tInvestissement parental nul après fragmentation. La **régénération appendiculaire** est la plus efficace de la classe : un bras perdu peut repousser en plusieurs Nuées, nœud nerveux compris (initialement vierge, nécessitant un apprentissage complet).",
     "sous-espe_ces": "Pas de sous-espèces documentées. Variations mineures de coloration et de nombre de bras (5 à 8) selon les récifs, sans divergence suffisante pour justifier une séparation taxonomique.",
     "fonctionnement_avec_l_e_cosyste_me": "**Mutualisme de nettoyage** avec les organismes fixés des récifs : les Vorka débarrassent les récifs des parasites et organismes nécrosés, accédant en retour à des microhabitats protégés pour la fragmentation reproductive.\n\t**Prédateurs** : petits Chordoformes rapides capables de trancher un bras isolé avant que les coalitions adjacentes ne réagissent ; prédateurs à attaque massive saturant la capacité de réponse multi-bras.\n\tLa fragmentation reproductive assure la **dispersion inter-récifs** : les segments détachés dérivent avec les courants avant de s'ancrer sur de nouveaux substrats.",
-    "re_sume__ia": "Le Vorka est un prédateur et charognard des récifs, caractérisé par un corps en forme d'étoile avec 5 à 8 bras autonomes. Il se reproduit par fragmentation, permettant à chaque bras de survivre et de se régénérer. Son habitat naturel inclut des substrats complexes, et il joue un rôle important dans l'écosystème en nettoyant les organismes nécrosés. Les communautés littorales ont des superstitions à son sujet, le considérant à la fois comme un symbole de chance et de malheur."
+    "re_sume__ia": "Vorka est un prédateur et charognard opportuniste des récifs et zones littorales, doté d’un tronc central discoïde et de 5 à 8 bras épais rayonnants, chaque bras fonctionnant de façon autonome grâce à un nœud nerveux majeur. Il se nourrit en capturant simultanément des proies grâce à ses bras autonomes et contribue à la santé des récifs en nettoyant les parasites et organismes nécrosés. Sa reproduction se fait par fragmentation contrôlée, où un bras détaché régénère un nouvel individu, assurant la dispersion et la régénération de l’espèce. Culturally, il suscite à la fois crainte et respect, inspirant des amulettes protectrices et étant toléré par les pêcheurs pour son rôle écologique."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

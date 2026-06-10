@@ -1,0 +1,39 @@
+{
+  "Nom": "Les cimetières-jardins",
+  "values": {
+    "Contenu par": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
+    "Date de création de la fiche": "2026-05-31T14:03:00.000Z",
+    "Dernière modification": "2026-05-31T14:03:00.000Z",
+    "Monnaie locale": "Concessions de cimetière payées au centre en Seuil ; service des Limoniers réglé en troc et parole donnée.",
+    "Niveau de danger": "Modéré",
+    "Niveau d’IA": "co-écrit",
+    "Rôle": "Lieu unique",
+    "Seuil économique": "7",
+    "Taille": "Site",
+    "Type": "Lieu secondaire",
+    "État": "Brouillon IA"
+  },
+  "sections": {
+    "re_sume__de_la_fiche": "La nécropole des six : le seul sol d'Escelion où des funérailles incompatibles reposent côte à côte, parce que l'Essouffle relâche ce qui ailleurs ferait se nuire leurs techniques. Domaine des Limoniers.",
+    "histoire_du_lieu": "- **Les fosses de la marge (avant 1781 AG)** — la Vieille Ville repousse vers sa frange les morts qu'elle ne veut ni voir ni sentir.\n\t- **L'habitude d'« envoyer aux Lots » (1781 AG à 2102 AG)** — les cités intérieures prennent l'habitude d'y descendre leurs défunts, chacune selon sa technique propre.\n\t- **Le métier des Limoniers** — faire voisiner sans heurt des funérailles incompatibles devient un art, et une dépendance : nulle cité ne peut enterrer ailleurs.",
+    "apparence___ambiance": "Des terrasses de tombes mêlées où la flore pousse trop dru, au point que la nécropole ressemble par endroits à un verger en friche. Sur la même terre : sarcophages cybernétiques de la Grande Radiale, hérissés d'implants, lourds cercueils d'alliage des Chaudières, stèles gravées de la Bibliothèque, simples fosses de jonc des premiers âges.",
+    "forces_en_pre_sence": "- **Les Limoniers** — seuls à savoir coucher ensemble ce qui ne devrait pas se toucher ; ménagés de tous, méprisés par le centre.\n\t- **La Descente** — le cortège par lequel chaque cité livre ses morts, avec son propre attirail funéraire.",
+    "ge_ographie": "Des terrasses basses au cœur du district, jouxtant les Lots maraîchers et traversées par la Veine chaude (couture des Chaudières), où les signatures d'alliage refont surface et brouillent les bornes.",
+    "voies_d_acce_s___transitions": "Depuis le faubourg et la Grande Halle, par où arrivent les convois de la Descente. Les Limoniers et leurs familles y logent, dans les remises et les serres qui jouxtent les fosses.",
+    "me_moire_syste_me": "*À formaliser en Flags : faveur des Limoniers, tentative d'indexation des cimetières par le centre, accès aux caveaux d'un district donné.*",
+    "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://www.notion.so/166982c73cf0494785c50a6df03ff80d\"/>. Remplace l'ancienne « moisson grise ». Une cité manque toujours à l'appel : la Lisière, dont les quasi-immortels ne meurent presque jamais — marqueur d'inégalité, pas oubli de conception.",
+    "monnaie_locale": "Concessions de cimetière payées au centre en Seuil ; service des Limoniers réglé en troc et parole donnée."
+  },
+  "section_titles": {
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_du_lieu": "Histoire du lieu",
+    "apparence___ambiance": "Apparence & Ambiance",
+    "forces_en_pre_sence": "Forces en présence",
+    "ge_ographie": "Géographie",
+    "voies_d_acce_s___transitions": "Voies d'accès & Transitions",
+    "me_moire_syste_me": "Mémoire système",
+    "remarques_de_conception": "Remarques de conception",
+    "monnaie_locale": "Monnaie locale"
+  },
+  "notion_page_id": "52be5b4b-3652-4db3-be80-cdf3546600db"
+}

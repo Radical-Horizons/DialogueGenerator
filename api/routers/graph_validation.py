@@ -8,7 +8,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from api.dependencies import get_context_builder, get_request_id
+from api.dependencies import (
+    get_dialogue_flag_reference_validation_service,
+    get_context_builder,
+    get_request_id,
+)
 from api.exceptions import InternalServerException
 from api.schemas.graph import (
     ValidateGraphRequest,
@@ -21,6 +25,10 @@ from api.schemas.graph import (
 )
 from api.utils.unity_schema_validator import validate_unity_json
 from core.context.context_builder import ContextBuilder
+from services.dialogue_flag_reference_validation_service import (
+    DialogueFlagReferenceValidationService,
+    analysis_to_validation_api_payload,
+)
 from services.graph_conversion_service import GraphConversionService
 from services.graph_validation_service import GraphValidationService
 from services.lore_contradiction_validator import (
@@ -41,6 +49,10 @@ router = APIRouter()
 )
 async def validate_graph(
     request_data: ValidateGraphRequest,
+    flag_ref_service: Annotated[
+        DialogueFlagReferenceValidationService,
+        Depends(get_dialogue_flag_reference_validation_service),
+    ],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> ValidateGraphResponse:
     """Valide un graphe (nœuds orphelins, références cassées, cycles)."""
@@ -60,6 +72,16 @@ async def validate_graph(
             for w in validation_result.warnings
         ]
 
+        flag_errors_n = 0
+        if request_data.document:
+            analysis = flag_ref_service.analyze_document(request_data.document)
+            fe, fw = analysis_to_validation_api_payload(analysis)
+            errors.extend(fe)
+            warnings.extend(fw)
+            flag_errors_n = len(fe)
+
+        merged_valid = validation_result.valid and flag_errors_n == 0
+
         logger.info(
             "Validation effectuée: %s erreurs, %s warnings (request_id: %s)",
             len(errors),
@@ -68,7 +90,7 @@ async def validate_graph(
         )
 
         return ValidateGraphResponse(
-            valid=validation_result.valid,
+            valid=merged_valid,
             errors=errors,
             warnings=warnings,
         )

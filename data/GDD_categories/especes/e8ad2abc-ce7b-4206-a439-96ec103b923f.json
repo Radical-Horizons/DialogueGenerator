@@ -2,17 +2,18 @@
   "Nom": "Velhari",
   "values": {
     "Biologie": "Moyenne",
-    "Culture": "Nulle",
+    "Espérance de vie": "14",
+    "Evénements liés": "53e4e95f-6f0e-4ea2-9340-7abc9a4846da",
+    "Lieux de vie": "af82e765-59e6-4f88-a494-560fd9fe7caf",
     "Présence dans Escelion": "Peu courant",
     "Règne (ou classe)": "8ac374ca-e0ea-4fe4-867b-8be4fe04df2c",
-    "Résumé IA": "Les Velhari sont des Aquavores de morphologie anguillaire, vivant principalement dans les Voies d'Auðumla. Ils se distinguent par leur bouche filtrante et leur peau enzymatique, facilitant l'absorption de nutriments. Leur reproduction se fait lors d'agrégations massives synchronisées avec les Précipitations Nornes, jouant un rôle trophique en redistribuant les micro-nutriments dans leur habitat. Peu courants dans Escelion, ils ont un impact écologique significatif.",
+    "Résumé IA": "Les Velhari sont des Aquavores anguilliformes de 1 à 2 m avec une bouche filtrante et une peau enzymatique, habitant les Voies d'Auðumla où ils filtrent les nutriments grâce aux courants des Urnes de Mímir ; ils forment d’immenses agrégations reproductrices synchronisées aux précipitations Nornes, sont peu courants dans Escelion et jouent un rôle clé de filtre trophique dans leur écosystème.",
     "Surnaturel": "Nulle",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "Les **Velhari** sont des Aquavores de morphologie anguillaire charnue (1-2 m), dotés d'une **bouche filtrante** et d'une **peau enzymatique** qui facilite l'absorption de nutriments dissous. Leur habitat principal sont les **Voies d'Auðumla**, rivières semi-conscientes riches en nutriments régulés par les **Urnes de Mímir**, dont ils exploitent les courants nourriciers. Leur trait le plus distinctif est la formation d'**agrégations reproductrices massives**, synchronisées sur les **Précipitations Nornes** (phase Skuld) — les Déluges cataclysmiques déclenchant des pontes collectives à grande échelle. Peu courants dans Escelion, ils jouent un rôle trophique de filtreurs redistribuant les micro-nutriments au sein des Voies.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
+    "re_sume__de_la_fiche": "Les **Velhari** sont des Aquavores de morphologie anguillaire charnue (1-2 m), dotés d'une **bouche filtrante** et d'une **peau enzymatique** qui facilite l'absorption de nutriments dissous. Leur habitat principal sont les **Voies d'Auðumla**, rivières semi-conscientes riches en nutriments régulés par les **Urnes de Mímir**, dont ils exploitent les courants nourriciers. Leur trait le plus distinctif est la formation d'**agrégations reproductrices massives**, synchronisées sur les **Précipitations Nornes** (phase Skuld) : les Déluges cataclysmiques déclenchant des pontes collectives à grande échelle. Peu courants dans Escelion, ils jouent un rôle trophique de filtreurs redistribuant les micro-nutriments au sein des Voies.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -22,7 +23,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Les Velhari sont des Aquavores de morphologie anguillaire, vivant principalement dans les Voies d'Auðumla. Ils se distinguent par leur bouche filtrante et leur peau enzymatique, facilitant l'absorption de nutriments. Leur reproduction se fait lors d'agrégations massives synchronisées avec les Précipitations Nornes, jouant un rôle trophique en redistribuant les micro-nutriments dans leur habitat. Peu courants dans Escelion, ils ont un impact écologique significatif."
+    "re_sume__ia": "Les Velhari sont des Aquavores anguilliformes de 1 à 2 m avec une bouche filtrante et une peau enzymatique, habitant les Voies d'Auðumla où ils filtrent les nutriments grâce aux courants des Urnes de Mímir ; ils forment d’immenses agrégations reproductrices synchronisées aux précipitations Nornes, sont peu courants dans Escelion et jouent un rôle clé de filtre trophique dans leur écosystème."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

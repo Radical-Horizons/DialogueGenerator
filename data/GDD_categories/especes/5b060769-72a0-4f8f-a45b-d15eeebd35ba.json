@@ -1,13 +1,14 @@
 {
   "Nom": "Mangodes",
   "values": {
+    "Espérance de vie": "45",
     "Règne (ou classe)": "534e5829-6e46-4d38-84d8-b2d37344d711",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle culturel, son habitat naturel, son mode d'alimentation, sa reproduction, et son interaction avec l'écosystème. Les sections sont à compléter selon les spécificités de l'espèce.",
+    "Résumé IA": "Ferrotissé charognard nocturne (1,0–1,6 m, hexapode massif) à plaques dermiques noir-violet d'oxydes de manganèse (MnO₂). Bioaccumulation extrême de métaux lourds toxiques dans des nodules abdominaux spécialisés : chair vénéneuse pour la quasi-totalité des prédateurs. Électroréception via dépôts de MnO₂ (détection de proies enfouies et de gisements). Activité strictement nocturne par photosensibilité cutanée. Solitaires. Déserts métalliques et gisements profonds. Longévité : ~45 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Ferrotissé** (Vifs-Formes, Lithotissés) charognard nocturne (1,0–1,6 m, hexapode massif) à plaques dermiques **noir-violet** d'oxydes de manganèse. **Bioaccumulation extrême** de métaux lourds toxiques dans des nodules abdominaux spécialisés : chair vénéneuse pour la quasi-totalité des prédateurs. **Électroréception** via MnO₂ (détection de proies enfouies et de gisements). Activité strictement nocturne (photosensibilité cutanée). Solitaires. Déserts métalliques et gisements profonds. Longévité : \\~45 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle culturel, son habitat naturel, son mode d'alimentation, sa reproduction, et son interaction avec l'écosystème. Les sections sont à compléter selon les spécificités de l'espèce."
+    "re_sume__ia": "Ferrotissé charognard nocturne (1,0–1,6 m, hexapode massif) à plaques dermiques noir-violet d'oxydes de manganèse (MnO₂). Bioaccumulation extrême de métaux lourds toxiques dans des nodules abdominaux spécialisés : chair vénéneuse pour la quasi-totalité des prédateurs. Électroréception via dépôts de MnO₂ (détection de proies enfouies et de gisements). Activité strictement nocturne par photosensibilité cutanée. Solitaires. Déserts métalliques et gisements profonds. Longévité : ~45 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

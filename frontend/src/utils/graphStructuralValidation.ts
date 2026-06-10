@@ -29,7 +29,10 @@ export type ValidationHighlightKind = 'structural' | 'content' | 'lore'
 export function getValidationHighlightKind(errorTypes: readonly string[]): ValidationHighlightKind | null {
   if (
     errorTypes.some(
-      (t) => STRUCTURAL_VALIDATION_ERROR_TYPES.has(t) || t === 'broken_reference'
+      (t) =>
+        STRUCTURAL_VALIDATION_ERROR_TYPES.has(t) ||
+        t === 'broken_reference' ||
+        t === 'dialogue_flag_undeclared'
     )
   ) {
     return 'structural'

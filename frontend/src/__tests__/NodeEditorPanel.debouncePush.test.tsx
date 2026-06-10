@@ -2,7 +2,7 @@
  * Tests ADR-006 : panneau Détails pousse les champs éditables vers le store à la saisie (debounce ≤ 100 ms).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NodeEditorPanel } from '../components/graph/NodeEditorPanel'
 import { useGraphStore } from '../store/graphStore'
@@ -19,6 +19,14 @@ vi.mock('../store/contextStore', () => ({
 
 vi.mock('../api/config', () => ({
   listLLMModels: vi.fn().mockResolvedValue({ models: [] }),
+}))
+
+vi.mock('../api/flags', () => ({
+  listFlags: vi.fn().mockResolvedValue({ flags: [], total: 0 }),
+}))
+
+vi.mock('../api/context', () => ({
+  listCommunities: vi.fn().mockResolvedValue({ communities: [] }),
 }))
 
 vi.mock('../components/shared', () => ({
@@ -116,6 +124,27 @@ describe('NodeEditorPanel - ADR-006 debounce push to store', () => {
         )
       },
       { timeout: 300 }
+    )
+  })
+
+  it('should flush line input to store when the panel unmounts before debounce fires', () => {
+    const { unmount } = render(
+      <ReactFlowProvider>
+        <NodeEditorPanel />
+      </ReactFlowProvider>
+    )
+
+    const lineInput = screen.getByPlaceholderText('Texte du dialogue...')
+    fireEvent.change(lineInput, { target: { value: 'Unsaved line' } })
+    unmount()
+
+    expect(updateNodeMock).toHaveBeenCalledWith(
+      'START',
+      expect.objectContaining({
+        data: expect.objectContaining({
+          line: 'Unsaved line',
+        }),
+      })
     )
   })
 })

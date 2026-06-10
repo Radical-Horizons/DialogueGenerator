@@ -1,5 +1,9 @@
 import { memo } from 'react'
 import { theme } from '../../theme'
+import {
+  GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+  GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+} from './graphToolbarConstants'
 
 export interface GraphActionsDropdownProps {
   canEditGraph: boolean
@@ -79,8 +83,10 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
             border: `1px solid ${theme.border.primary}`,
             borderRadius: '8px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-            zIndex: 50,
-            overflow: 'hidden',
+            zIndex: GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
+            maxHeight: GRAPH_TOOLBAR_DROPDOWN_MAX_HEIGHT,
+            overflowY: 'auto',
+            overflowX: 'hidden',
           }}
         >
           {renderMenuItems()}

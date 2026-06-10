@@ -1,26 +1,26 @@
 {
   "Nom": "Collier d'os de Morg-Dos",
   "values": {
+    "Actes prévus": "2e0acee9-5107-4256-9e41-3c36344d59b6",
     "Date de création": "2026-04-06T22:09:00.000Z",
-    "Dernière modification": "2026-04-09T18:22:00.000Z",
+    "Dernière modification": "2026-05-26T19:12:00.000Z",
     "Détenu par": "2286e4d2-1b45-80db-b5ea-c9a4c9ba305b",
     "Inventaires PNJ": "c2754c69-4cc6-45ab-99db-d21381c73dfc",
     "Lieux de présence": "1886e4d2-1b45-8150-a894-cfe31d31abd4",
     "Niveau d’IA": "auto",
     "Poids": "Léger",
-    "Qualité": "7",
     "Rareté": "Unique",
-    "Résumé": "Collier d'os de Morg-Dos est un bijou léger de petite taille, unique et de qualité 7, qui n'est pas empilable. Il a été créé le 7 avril 2026 et est dans un état \"pas commencé\", avec un niveau d'IA auto.",
+    "Résumé IA": "Collier d'os de Morg-Dos est un bijou léger de petite taille, unique et de qualité 7, qui n'est pas empilable. Il a été créé le 7 avril 2026 et est dans un état \"pas commencé\", avec un niveau d'IA auto.",
     "Stackable": "non",
     "Taille": "Petit",
     "Type": "Témoignage",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume": "Collier d'os de Morg-Dos est un bijou léger de petite taille, unique et de qualité 7, qui n'est pas empilable. Il a été créé le 7 avril 2026 et est dans un état \"pas commencé\", avec un niveau d'IA auto."
+    "re_sume__ia": "Collier d'os de Morg-Dos est un bijou léger de petite taille, unique et de qualité 7, qui n'est pas empilable. Il a été créé le 7 avril 2026 et est dans un état \"pas commencé\", avec un niveau d'IA auto."
   },
   "section_titles": {
-    "re_sume": "Résumé"
+    "re_sume__ia": "Résumé IA"
   },
   "notion_page_id": "b4af6f58-496a-41ba-b942-dcaeb2e01465"
 }

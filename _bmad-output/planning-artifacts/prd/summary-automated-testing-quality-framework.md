@@ -15,12 +15,14 @@ DialogueGenerator implements a **4-layer quality framework** inspired by EQ-Benc
 **Total annual cost:** ~$1,100 for 1M nodes production (très acceptable)
 
 **Key innovations:**
+
 - **Zero-cost validation** via deterministic tests + baselines (Layers 1-2)
 - **Dual-tier baselines** enable character-specific voice validation + genre-level quality benchmarking
 - **Planescape: Torment baseline** provides marketing-ready quality badge ("PS:T Quality: 8.6/10 ⭐")
 - **Selective LLM judging** (user toggle, 10% sampling) balances quality feedback with cost
 
 **Success criteria:**
+
 - 80%+ generated nodes within baseline thresholds (Slop Score EQ-bench ≤ PS:T+margin, vocab ±0.5, DG Quality Index dans cible)
 - <20% manual revision rate (Marc accepts 80%+ as-is)
 - 70%+ dialogues achieve "PS:T Quality: 8+/10" (marketing benchmark)

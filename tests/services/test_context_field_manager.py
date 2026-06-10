@@ -76,11 +76,10 @@ class TestContextFieldManager:
         assert "Nom" not in result  # Pas de "(extrait)" dans le label
     
     def test_get_field_config_for_mode_excerpt_no_excerpt_fields(self, field_manager):
-        """Test get_field_config_for_mode en mode excerpt sans champs excerpt."""
-        # Utiliser un type qui n'a pas de champs excerpt
+        """Test excerpt sans champs dédiés : repli sur les champs priorité 1."""
         result = field_manager.get_field_config_for_mode("location", "excerpt", ["Nom"])
-        
-        assert result is None
+
+        assert result == ["Nom", "Description"]
     
     def test_filter_fields_by_condition_flags_with_include_dialogue_type(self, field_manager):
         """Test filter_fields_by_condition_flags avec include_dialogue_type=True."""

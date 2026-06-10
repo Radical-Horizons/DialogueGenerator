@@ -169,6 +169,8 @@ export interface NodePromptResponse {
 export interface ValidateGraphRequest {
   nodes: unknown[]
   edges: unknown[]
+  /** Document canonique (Story 9.5) pour validation références dialogueFlags */
+  document?: Record<string, unknown> | null
 }
 
 export interface LoreAmbiguityCandidate {
@@ -182,6 +184,10 @@ export interface ValidationErrorDetail {
   node_id?: string
   message: string
   severity: string
+  /** Story 9.5 — flag catalogue concerné */
+  referenced_flag_id?: string
+  /** Story 9.5 — suggestion typo */
+  suggested_flag_id?: string
   target?: string
   cycle_path?: string
   cycle_nodes?: string[]

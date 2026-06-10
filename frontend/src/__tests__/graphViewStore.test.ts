@@ -20,6 +20,10 @@ function reset() {
     flushCompleted: false,
     saveRequested: false,
     dialogueDeleted: null,
+    visibilityEvalState: { flags: {}, reputation: {} },
+    dialoguePreviewActive: false,
+    previewEffectHistory: [],
+    previewCatalogById: undefined,
   })
 }
 
@@ -152,6 +156,20 @@ describe('graphViewStore', () => {
       expect(useGraphViewStore.getState().dialogueDeleted).toBe('test.json')
       useGraphViewStore.getState().clearDialogueDeleted()
       expect(useGraphViewStore.getState().dialogueDeleted).toBeNull()
+    })
+  })
+
+  describe('Story 9.4 dialogue preview', () => {
+    it('enterDialoguePreview active l’état et exitDialoguePreview réinitialise', () => {
+      useGraphViewStore.getState().enterDialoguePreview({
+        flags: { F: true },
+        reputation: { 'a::b': 2 },
+      })
+      expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(true)
+      expect(useGraphViewStore.getState().visibilityEvalState.flags.F).toBe(true)
+      useGraphViewStore.getState().exitDialoguePreview()
+      expect(useGraphViewStore.getState().dialoguePreviewActive).toBe(false)
+      expect(useGraphViewStore.getState().visibilityEvalState.flags).toEqual({})
     })
   })
 })

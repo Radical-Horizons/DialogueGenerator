@@ -1,11 +1,16 @@
 /**
  * Nœud personnalisé pour afficher un nœud de test d'attribut dans le graphe.
  */
-import { memo } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
+import { useGraphStore } from '../../../store/graphStore'
+import { useGraphViewStore } from '../../../store/graphViewStore'
+import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { TEST_RESULT_EDGE_CONFIG } from '../../../utils/graphEdgeBuilders'
+import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
+import type { NodePromptResponse } from '../../../types/graph'
 import {
   getGraphTopologyWarningKind,
   getValidationHighlightKind,
@@ -68,6 +73,12 @@ export const TestNode = memo(function TestNode({
   data,
   selected,
 }: NodeProps<TestNodeData>) {
+  const graphNodes = useGraphStore((state) => state.nodes)
+  const promptViewerNodeId = useGraphViewStore((s) => s.promptViewerNodeId)
+  const [showPromptModal, setShowPromptModal] = useState(false)
+  const [promptData, setPromptData] = useState<NodePromptResponse | null>(null)
+  const [promptError, setPromptError] = useState<string | null>(null)
+  const [promptLoading, setPromptLoading] = useState(false)
   const test = data.test || 'Test non défini'
   const formattedTest = formatTest(test)
   const errors = data.validationErrors || []
@@ -108,9 +119,31 @@ export const TestNode = memo(function TestNode({
               : hasWarnings
                 ? theme.state.warning.background
                 : '#16a085'
+
+  const openAndLoadPromptModal = useCallback(() => {
+    setShowPromptModal(true)
+    setPromptData(null)
+    setPromptError(null)
+    setPromptLoading(true)
+    const prompt = reconstructNodePromptFromGraph(data.id, graphNodes)
+    if (prompt) {
+      setPromptData(prompt)
+    } else {
+      setPromptError('Impossible de résoudre le choix parent de ce nœud de test')
+    }
+    setPromptLoading(false)
+  }, [data.id, graphNodes])
+
+  useEffect(() => {
+    if (promptViewerNodeId === data.id) {
+      useGraphViewStore.getState().closePromptViewer()
+      openAndLoadPromptModal()
+    }
+  }, [promptViewerNodeId, data.id, openAndLoadPromptModal])
   
   // Barre compacte avec 4 handles
   return (
+    <>
     <div
       data-testid="graph-node-content"
       data-node-type="test"
@@ -307,5 +340,17 @@ export const TestNode = memo(function TestNode({
         title="Réussite critique"
       />
     </div>
+    <PromptViewerModal
+      isOpen={showPromptModal}
+      data={promptData}
+      error={promptError}
+      isLoading={promptLoading}
+      onClose={() => {
+        setShowPromptModal(false)
+        setPromptData(null)
+        setPromptError(null)
+      }}
+    />
+    </>
   )
 })

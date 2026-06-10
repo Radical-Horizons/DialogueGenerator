@@ -66,6 +66,7 @@ describe('PresetSelector', () => {
 
   const mockLoadPresets = vi.fn();
   const mockCreatePreset = vi.fn();
+  const mockUpdatePreset = vi.fn();
   const mockDeletePreset = vi.fn();
   const mockSetSelectedPreset = vi.fn();
   const mockOnPresetLoaded = vi.fn();
@@ -81,6 +82,7 @@ describe('PresetSelector', () => {
       error: null,
       loadPresets: mockLoadPresets,
       createPreset: mockCreatePreset,
+      updatePreset: mockUpdatePreset,
       deletePreset: mockDeletePreset,
       setSelectedPreset: mockSetSelectedPreset,
     });
@@ -91,7 +93,8 @@ describe('PresetSelector', () => {
       render(<PresetSelector onPresetLoaded={mockOnPresetLoaded} />);
 
       expect(screen.getByText(/charger preset/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /sauvegarder/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^enregistrer$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /enregistrer sous/i })).toBeInTheDocument();
     });
 
     it('should load presets on mount', () => {
@@ -108,6 +111,7 @@ describe('PresetSelector', () => {
         error: null,
         loadPresets: mockLoadPresets,
         createPreset: mockCreatePreset,
+        updatePreset: mockUpdatePreset,
         deletePreset: mockDeletePreset,
         setSelectedPreset: mockSetSelectedPreset,
       });
@@ -154,7 +158,7 @@ describe('PresetSelector', () => {
   });
 
   describe('Preset Creation', () => {
-    it('should open modal when "Sauvegarder preset" is clicked', async () => {
+    it('should open modal when "Enregistrer sous" is clicked', async () => {
       const mockCurrentConfiguration = {
         characters: ['char-001'],
         locations: ['loc-001'],
@@ -170,11 +174,11 @@ describe('PresetSelector', () => {
         />
       );
 
-      const saveButton = screen.getByRole('button', { name: /sauvegarder/i });
+      const saveButton = screen.getByRole('button', { name: /enregistrer sous/i });
       fireEvent.click(saveButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/nouveau preset/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /enregistrer sous/i })).toBeInTheDocument();
       });
     });
 
@@ -195,7 +199,7 @@ describe('PresetSelector', () => {
       );
 
       // Ouvrir modal
-      const saveButton = screen.getByRole('button', { name: /sauvegarder/i });
+      const saveButton = screen.getByRole('button', { name: /enregistrer sous/i });
       fireEvent.click(saveButton);
 
       // Remplir formulaire
@@ -210,6 +214,43 @@ describe('PresetSelector', () => {
         expect(mockCreatePreset).toHaveBeenCalledWith({
           name: 'New Preset',
           icon: '📋',
+          configuration: mockCurrentConfiguration,
+        });
+      });
+    });
+
+    it('should update selected preset when "Enregistrer" is clicked', async () => {
+      const mockCurrentConfiguration = {
+        characters: ['char-001'],
+        locations: ['loc-001'],
+        region: 'Test Region',
+        sceneType: 'Première rencontre',
+        instructions: 'Updated instructions',
+      };
+
+      (usePresetStore as unknown as Mock).mockReturnValue({
+        presets: [mockPreset],
+        selectedPreset: mockPreset,
+        isLoading: false,
+        error: null,
+        loadPresets: mockLoadPresets,
+        createPreset: mockCreatePreset,
+        updatePreset: mockUpdatePreset,
+        deletePreset: mockDeletePreset,
+        setSelectedPreset: mockSetSelectedPreset,
+      });
+
+      render(
+        <PresetSelector
+          onPresetLoaded={mockOnPresetLoaded}
+          currentConfiguration={mockCurrentConfiguration}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /^enregistrer$/i }));
+
+      await waitFor(() => {
+        expect(mockUpdatePreset).toHaveBeenCalledWith(mockPreset.id, {
           configuration: mockCurrentConfiguration,
         });
       });
@@ -247,6 +288,7 @@ describe('PresetSelector', () => {
         error: null,
         loadPresets: mockLoadPresets,
         createPreset: mockCreatePreset,
+        updatePreset: mockUpdatePreset,
         deletePreset: mockDeletePreset,
         setSelectedPreset: mockSetSelectedPreset,
       });
@@ -270,6 +312,7 @@ describe('PresetSelector', () => {
         error: 'Failed to load presets',
         loadPresets: mockLoadPresets,
         createPreset: mockCreatePreset,
+        updatePreset: mockUpdatePreset,
         deletePreset: mockDeletePreset,
         setSelectedPreset: mockSetSelectedPreset,
       });

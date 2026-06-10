@@ -1,13 +1,14 @@
 {
   "Nom": "Écallins",
   "values": {
+    "Espérance de vie": "12",
     "Règne (ou classe)": "73ec9bcb-c306-4b1b-be6e-e4702813dc6f",
-    "Résumé IA": "Le document présente une structure pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème. L'utilisation de mise en forme avancée est encouragée pour organiser ces informations.",
+    "Résumé IA": "Terravore (Chordoforme, Vifs-Formes) lézard trapu (40–60 cm) des zones arides et semi-arides (Désert des Échos Perdus, Steppe des Éteignoirs). Écailles géométriques kératinées optimisées pour la thermorégulation diurne active sous les Deimos. Chasseur d'insectes en embuscade. Ectotherme strict. Mues périodiques (renouvellement tous les 3–4 Souffles). Longévité : ~12 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Terravore** (Chordoforme, Vifs-Formes) lézard trapu (40–60 cm) des zones arides et semi-arides (**Désert des Échos Perdus**, Steppe des Éteignoirs). Écailles géométriques kératinées optimisées pour la **thermorégulation diurne active** sous les Deimos. Chasseur d'insectes en embuscade. Ectotherme strict. Mues périodiques. Longévité : \\~12 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "Le document présente une structure pour décrire une nouvelle espèce, incluant des sections sur son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que des détails sur son habitat, son mode d'alimentation, sa reproduction et son interaction avec l'écosystème. L'utilisation de mise en forme avancée est encouragée pour organiser ces informations."
+    "re_sume__ia": "Terravore (Chordoforme, Vifs-Formes) lézard trapu (40–60 cm) des zones arides et semi-arides (Désert des Échos Perdus, Steppe des Éteignoirs). Écailles géométriques kératinées optimisées pour la thermorégulation diurne active sous les Deimos. Chasseur d'insectes en embuscade. Ectotherme strict. Mues périodiques (renouvellement tous les 3–4 Souffles). Longévité : ~12 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

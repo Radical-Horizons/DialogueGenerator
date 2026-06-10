@@ -468,3 +468,54 @@ def get_gdd_notion_sync_service(request: Request):
     svc: GddNotionSyncService = container.get_gdd_notion_sync_service()
     return svc
 
+
+def get_dialogue_flags_service():
+    """Fabrique un service validation des liaisons flags ↔ document (Story 9.1).
+
+    Returns:
+        Instance ``DialogueFlagsService`` avec catalogue CSV injecté.
+    """
+    from services.dialogue_flags_service import DialogueFlagsService
+    from services.flag_catalog_service import FlagCatalogService
+
+    return DialogueFlagsService(FlagCatalogService())
+
+
+def get_visibility_condition_validation_service():
+    """Fabrique la validation Story 9.2 (visibilityConditions vs catalogue).
+
+    Returns:
+        Instance ``VisibilityConditionValidationService`` avec catalogue CSV injecté.
+    """
+    from services.flag_catalog_service import FlagCatalogService
+    from services.visibility_condition_validation import VisibilityConditionValidationService
+
+    return VisibilityConditionValidationService(FlagCatalogService())
+
+
+def get_choice_effect_validation_service():
+    """Fabrique la validation Story 9.3 (choiceEffects vs catalogue)."""
+    from services.choice_effect_validation import ChoiceEffectValidationService
+    from services.flag_catalog_service import FlagCatalogService
+
+    return ChoiceEffectValidationService(FlagCatalogService())
+
+
+def get_dialogue_flag_reference_validation_service():
+    """Fabrique la validation Story 9.5 (références flags vs dialogueFlags)."""
+    from services.dialogue_flag_reference_validation_service import (
+        DialogueFlagReferenceValidationService,
+    )
+    from services.flag_catalog_service import FlagCatalogService
+
+    return DialogueFlagReferenceValidationService(FlagCatalogService())
+
+
+def get_dialogue_preview_service(request: Request):
+    """Retourne DialoguePreviewService (Story 9.4, preview état masque visibilité)."""
+    from services.dialogue_preview_service import DialoguePreviewService
+
+    container = get_service_container(request)
+    svc: DialoguePreviewService = container.get_dialogue_preview_service()
+    return svc
+

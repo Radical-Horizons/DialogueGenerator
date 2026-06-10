@@ -1,0 +1,39 @@
+{
+  "Nom": "Le Mouillage",
+  "values": {
+    "Contenu par": "166982c7-3cf0-4947-85c5-0a6df03ff80d",
+    "Date de création de la fiche": "2026-05-31T14:03:00.000Z",
+    "Dernière modification": "2026-05-31T14:03:00.000Z",
+    "Monnaie locale": "Hors cadastre et hors Seuil : troc, service rendu et discrétion.",
+    "Niveau de danger": "Modéré",
+    "Niveau d’IA": "co-écrit",
+    "Rôle": "Refuge / Campement",
+    "Seuil économique": "7",
+    "Taille": "Site",
+    "Type": "Lieu secondaire",
+    "État": "Brouillon IA"
+  },
+  "sections": {
+    "re_sume__de_la_fiche": "Un quartier entier qui flotte sur la Dormante : refuge des Sans-Lot, les effacé·es de la cité. Le seul lieu d'Escelion où n'être inscrit nulle part devient une condition d'existence plutôt qu'une mort sociale.",
+    "histoire_du_lieu": "- **Né de la dernière Pulsation (3156 AG)** — faute de Lots à border pour les nouvelles arrivantes, le district les laisse s'établir sur l'eau, là où nulle parcelle fixe ne peut exister.\n\t- **L'angle mort (3156 AG à 3390 AG)** — fuyard·es des districts intérieurs, déclassé·es dont la Marque a été corrigée, réfugié·es refoulé·es des Couronnes : tous viennent s'y faire oublier.",
+    "apparence___ambiance": "Péniches amarrées flanc contre flanc, pontons mouvants, chalands reconvertis en logis. Une ville sur l'eau qui clapote et grince, éclairée de lampes basses — l'une des rares lumières que la cité n'a pas allumées elle-même.",
+    "forces_en_pre_sence": "- **Les Sans-Lot** — non pas seulement des pauvres, mais des effacé·es, volontaires ou contraint·es, qui échappent au cadastre du centre comme à la mémoire vivante des Diseurs.\n\t- **Les bateliers** — assurent, contre quelques Marques ou un service, le passage discret de ce que la halle ne doit pas voir.",
+    "voies_d_acce_s___transitions": "Amarré sur la Dormante ; on y accède en barque depuis les quais. Cachette idéale : on s'y perd, on s'y planque, on y recrute qui n'existe officiellement plus.",
+    "la_veille_e_des_seuils_efface_s": "Une fois l'an, on y dit ensemble le souvenir de ceux dont plus aucun registre ni aucun Diseur ne garde le nom. On n'y prononce nul nom propre : on reconnaît seulement qu'il y a eu quelqu'un.",
+    "me_moire_syste_me": "*À formaliser en Flags : statut Sans-Lot du joueur, refuge obtenu au Mouillage, contact batelier.*",
+    "remarques_de_conception": "Sous-lieu des <mention-page url=\"https://www.notion.so/166982c73cf0494785c50a6df03ff80d\"/>. « Être Sans-Lot » est un système de jeu à double tranchant : atout dans les Jardins, handicap partout ailleurs.",
+    "monnaie_locale": "Hors cadastre et hors Seuil : troc, service rendu et discrétion."
+  },
+  "section_titles": {
+    "re_sume__de_la_fiche": "Résumé de la fiche",
+    "histoire_du_lieu": "Histoire du lieu",
+    "apparence___ambiance": "Apparence & Ambiance",
+    "forces_en_pre_sence": "Forces en présence",
+    "voies_d_acce_s___transitions": "Voies d'accès & Transitions",
+    "la_veille_e_des_seuils_efface_s": "La Veillée des Seuils Effacés",
+    "me_moire_syste_me": "Mémoire système",
+    "remarques_de_conception": "Remarques de conception",
+    "monnaie_locale": "Monnaie locale"
+  },
+  "notion_page_id": "fa8c9b8e-dc92-4fc7-ab66-37f773f77c42"
+}

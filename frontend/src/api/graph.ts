@@ -3,6 +3,7 @@
  */
 import apiClient from './client'
 import { buildCostEstimateHeaders, type CostEstimateHeadersInput } from './costEstimateHeaders'
+import { API_TIMEOUTS } from '../constants'
 import type {
   LoadGraphRequest,
   LoadGraphResponse,
@@ -40,7 +41,8 @@ import type {
 export async function loadGraph(request: LoadGraphRequest): Promise<LoadGraphResponse> {
   const response = await apiClient.post<LoadGraphResponse>(
     `/api/v1/unity-dialogues/graph/load`,
-    request
+    request,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }
@@ -51,7 +53,8 @@ export async function loadGraph(request: LoadGraphRequest): Promise<LoadGraphRes
 export async function saveGraph(request: SaveGraphRequest): Promise<SaveGraphResponse> {
   const response = await apiClient.post<SaveGraphResponse>(
     `/api/v1/unity-dialogues/graph/save`,
-    request
+    request,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }
@@ -62,7 +65,8 @@ export async function saveGraph(request: SaveGraphRequest): Promise<SaveGraphRes
 export async function saveGraphAndWrite(request: SaveGraphRequest): Promise<SaveGraphResponse> {
   const response = await apiClient.post<SaveGraphResponse>(
     `/api/v1/unity-dialogues/graph/save-and-write`,
-    request
+    request,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }

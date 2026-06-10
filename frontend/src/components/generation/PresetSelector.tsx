@@ -36,10 +36,12 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable;
   const {
     presets,
+    selectedPreset,
     isLoading,
     error,
     loadPresets,
     createPreset,
+    updatePreset,
     deletePreset,
     setSelectedPreset,
   } = usePresetStore();
@@ -54,6 +56,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   const [snapshotConfiguration, setSnapshotConfiguration] = useState<PresetConfiguration | null>(null);
   /** Soumission création preset — ne pas réutiliser ``isLoading`` du store (chargement liste) pour le bouton Créer. */
   const [isCreatingPreset, setIsCreatingPreset] = useState(false);
+  const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
 
   // Charger presets au montage
   useEffect(() => {
@@ -92,6 +95,23 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       // Error already handled by store
     } finally {
       setIsCreatingPreset(false);
+    }
+  };
+
+  const handleUpdatePreset = async () => {
+    const configToSave = currentConfiguration || getCurrentConfiguration?.() || null;
+    if (!selectedPreset || !configToSave) return;
+
+    setIsUpdatingPreset(true);
+    try {
+      await updatePreset(selectedPreset.id, {
+        configuration: configToSave,
+      });
+      toast('Preset enregistré avec succès', 'success');
+    } catch (error) {
+      // Error already handled by store
+    } finally {
+      setIsUpdatingPreset(false);
     }
   };
 
@@ -245,13 +265,37 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           )}
         </div>
 
-        {/* Bouton "Sauvegarder preset" */}
+        {/* Bouton "Enregistrer" */}
         <button
           type="button"
           data-testid="preset-save-btn"
+          onClick={handleUpdatePreset}
+          disabled={!selectedPreset || (!currentConfiguration && !getCurrentConfiguration) || isUpdatingPreset}
+          title={selectedPreset ? `Enregistrer "${selectedPreset.name}"` : 'Chargez un preset pour l’enregistrer'}
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: theme.button.primary.background,
+            border: 'none',
+            borderRadius: '6px',
+            color: theme.button.primary.color,
+            fontWeight: 600,
+            cursor: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 'pointer' : 'not-allowed',
+            opacity: selectedPreset && (currentConfiguration || getCurrentConfiguration) && !isUpdatingPreset ? 1 : 0.5,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {isUpdatingPreset ? 'Enregistrement…' : 'Enregistrer'}
+        </button>
+
+        {/* Bouton "Enregistrer sous" */}
+        <button
+          type="button"
+          data-testid="preset-save-as-btn"
           onClick={() => {
             const cfg = currentConfiguration || getCurrentConfiguration?.() || null;
             setSnapshotConfiguration(cfg);
+            setNewPresetName(selectedPreset ? `${selectedPreset.name} copie` : '');
+            setNewPresetIcon(selectedPreset?.icon || '📋');
             setIsCreateModalOpen(true);
           }}
           disabled={!currentConfiguration && !getCurrentConfiguration}
@@ -269,7 +313,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             flex: isNarrow ? '1 1 auto' : undefined,
           }}
         >
-          Sauvegarder preset
+          Enregistrer sous
         </button>
 
         {/* Indicateur de statut de sauvegarde */}
@@ -308,7 +352,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
               border: `1px solid ${theme.border.primary}`,
             }}
           >
-            <h3 style={{ marginTop: 0, color: theme.text.primary }}>Nouveau preset</h3>
+            <h3 style={{ marginTop: 0, color: theme.text.primary }}>Enregistrer sous</h3>
 
             <div style={{ marginBottom: '1rem' }}>
               <label

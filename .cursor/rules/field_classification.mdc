@@ -1,10 +1,9 @@
 ---
-description: Classification des champs GDD — métadonnées vs contexte narratif, champs essentiels
-globs:
-  - "**/context_field_detector.py"
-  - "**/context_organizer.py"
-  - "**/api/schemas/config.py"
-  - "**/api/routers/config.py"
+description: >-
+  Classification champs GDD — métadonnées vs contexte narratif (Introduction/sections),
+  champs essentiels ESSENTIAL_* / MINIMAL_FIELDS. Apply when editing context_field_detector,
+  context_organizer, context_construction_service, ContextFieldSelector, contextConfigStore,
+  or config API/schemas for GDD field tabs and essential-field UI.
 alwaysApply: false
 ---
 

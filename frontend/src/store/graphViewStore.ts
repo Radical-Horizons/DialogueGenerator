@@ -15,6 +15,33 @@
 import { create } from 'zustand'
 import type { ReactFlowInstance } from 'reactflow'
 
+import type { FlagDefinition } from '../types/flags'
+import type { ChoiceEffect } from '../types/choiceEffects'
+import type { VisibilityEvalState } from '../types/visibilityConditions'
+import { applyChoiceEffectsToEvalState } from '../utils/choiceEffects'
+import { DEFAULT_EFFORT_POOL } from '../utils/effortPreview'
+
+/** Catalogue flags pour clamp preview (Story 9.4) — réglé par DialoguePreviewPanel. */
+export type PreviewCatalogMap = Record<string, FlagDefinition>
+
+export interface PreviewGameSystemsState {
+  attributes: Record<string, number>
+  skills: Record<string, number>
+  effortPool: number
+  reputationValues: Record<string, number>
+  factionTitles: Record<string, string>
+  simulationLimits: string[]
+}
+
+const DEFAULT_GAME_SYSTEMS_PREVIEW_STATE: PreviewGameSystemsState = {
+  attributes: {},
+  skills: {},
+  effortPool: DEFAULT_EFFORT_POOL,
+  reputationValues: {},
+  factionTitles: {},
+  simulationLimits: [],
+}
+
 export interface GraphViewState {
   // --- Instance React Flow ---
   reactFlowInstance: ReactFlowInstance | null
@@ -44,6 +71,18 @@ export interface GraphViewState {
 
   // --- Dialogue deleted notification ---
   dialogueDeleted: string | null
+
+  /** Story 9.2 — valeurs simulées pour prévisualiser visibilité (flags / réputation). */
+  visibilityEvalState: VisibilityEvalState
+
+  /** Story 9.4 — mode preview scénario (simulation, pas de persistance document). */
+  dialoguePreviewActive: boolean
+  /** Lignes d'historique des effets appliqués en navigation preview. */
+  previewEffectHistory: string[]
+  /** Catalogue pour clamp effets (aligné EffectEditor). */
+  previewCatalogById: PreviewCatalogMap | undefined
+  /** Story 9.6 — état simulé stats FR94 pour rendu preview local. */
+  previewGameSystemsState: PreviewGameSystemsState
 
   // --- Actions : instance ---
   registerReactFlowInstance: (instance: ReactFlowInstance) => void
@@ -85,6 +124,27 @@ export interface GraphViewState {
   // --- Actions : dialogue deleted ---
   notifyDialogueDeleted: (filename: string) => void
   clearDialogueDeleted: () => void
+
+  setVisibilityEvalFlag: (flagId: string, value: boolean | number | string) => void
+  setVisibilityEvalReputation: (axisId: string, factionId: string, value: number) => void
+  clearVisibilityEvalState: () => void
+  /** Story 9.3 : applique les effets d'un choix sur l'état de simulation (ordre respecté). Passer le catalogue pour clamp compteur aligné backend. */
+  applyChoiceEffectsSimulation: (
+    effects: ChoiceEffect[],
+    catalogById?: Record<string, FlagDefinition>,
+  ) => void
+
+  /** Story 9.4 : entre en preview avec état initial (isolé du document). */
+  enterDialoguePreview: (initial: VisibilityEvalState) => void
+  /** Story 9.4 : quitte le preview et efface simulation + historique. */
+  exitDialoguePreview: () => void
+  appendPreviewEffectHistory: (lines: string[]) => void
+  clearPreviewEffectHistory: () => void
+  setPreviewCatalogById: (catalog: PreviewCatalogMap | undefined) => void
+  setPreviewAttribute: (attributeId: string, value: number) => void
+  setPreviewSkill: (skillId: string, value: number) => void
+  setPreviewEffortPool: (value: number) => void
+  setPreviewSimulationLimits: (limits: string[]) => void
 }
 
 export const useGraphViewStore = create<GraphViewState>()((set) => ({
@@ -100,6 +160,11 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
   flushCompleted: false,
   saveRequested: false,
   dialogueDeleted: null,
+  visibilityEvalState: { flags: {}, reputation: {} },
+  dialoguePreviewActive: false,
+  previewEffectHistory: [],
+  previewCatalogById: undefined,
+  previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
 
   registerReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
 
@@ -143,6 +208,95 @@ export const useGraphViewStore = create<GraphViewState>()((set) => ({
 
   notifyDialogueDeleted: (filename) => set({ dialogueDeleted: filename }),
   clearDialogueDeleted: () => set({ dialogueDeleted: null }),
+
+  setVisibilityEvalFlag: (flagId, value) =>
+    set((s) => ({
+      visibilityEvalState: {
+        ...s.visibilityEvalState,
+        flags: { ...s.visibilityEvalState.flags, [flagId]: value },
+      },
+    })),
+  setVisibilityEvalReputation: (axisId, factionId, value) =>
+    set((s) => {
+      const key = `${axisId}::${factionId}`
+      return {
+        visibilityEvalState: {
+          ...s.visibilityEvalState,
+          reputation: { ...s.visibilityEvalState.reputation, [key]: value },
+        },
+      }
+    }),
+  clearVisibilityEvalState: () =>
+    set({ visibilityEvalState: { flags: {}, reputation: {} } }),
+
+  applyChoiceEffectsSimulation: (effects, catalogById) =>
+    set((s) => ({
+      visibilityEvalState: applyChoiceEffectsToEvalState(
+        s.visibilityEvalState,
+        effects,
+        catalogById,
+      ),
+    })),
+
+  enterDialoguePreview: (initial) =>
+    set({
+      dialoguePreviewActive: true,
+      previewEffectHistory: [],
+      visibilityEvalState: {
+        flags: { ...initial.flags },
+        reputation: { ...initial.reputation },
+      },
+    }),
+
+  exitDialoguePreview: () =>
+    set({
+      dialoguePreviewActive: false,
+      previewEffectHistory: [],
+      previewCatalogById: undefined,
+      previewGameSystemsState: DEFAULT_GAME_SYSTEMS_PREVIEW_STATE,
+      visibilityEvalState: { flags: {}, reputation: {} },
+    }),
+
+  appendPreviewEffectHistory: (lines) =>
+    set((s) => ({
+      previewEffectHistory: [...s.previewEffectHistory, ...lines],
+    })),
+
+  clearPreviewEffectHistory: () => set({ previewEffectHistory: [] }),
+
+  setPreviewCatalogById: (catalog) => set({ previewCatalogById: catalog }),
+
+  setPreviewAttribute: (attributeId, value) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        attributes: { ...s.previewGameSystemsState.attributes, [attributeId]: value },
+      },
+    })),
+
+  setPreviewSkill: (skillId, value) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        skills: { ...s.previewGameSystemsState.skills, [skillId]: value },
+      },
+    })),
+
+  setPreviewEffortPool: (value) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        effortPool: Number.isFinite(value) ? value : DEFAULT_EFFORT_POOL,
+      },
+    })),
+
+  setPreviewSimulationLimits: (limits) =>
+    set((s) => ({
+      previewGameSystemsState: {
+        ...s.previewGameSystemsState,
+        simulationLimits: [...limits],
+      },
+    })),
 }))
 
 /** Exposé uniquement en dev pour E2E Playwright (`requestSave` aligné sur la toolbar / Ctrl+S). */

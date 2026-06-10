@@ -44,9 +44,9 @@
   {
     "Nom": "Langage des Arbres",
     "values": {
-      "Cadre (combiné)": "Culturel — Avancé",
+      "Cadre (combiné)": "Biologique — Avancé",
       "Description": "Le Langage des arbres permet de communiquer avec toutes sortes de plantes, mais essentiellement avec des arbres. Cela se fait en forgeant un lien mental qui, une fois créée, permet de communiquer à volonté en restant assez proches. Plus la plante est ancienne, plus la communication avec elle est difficile. Le Langage des Arbres détermine uniquement si les deux interlocuteurs se comprennent - charmer ou intimider une plante nécessitent un test de la compétence adéquate.",
-      "Famille": "Culturel",
+      "Famille": "Biologique",
       "Identifiant": "SKI197",
       "Niveau de Cadre": "Avancé",
       "Statut": "Validée",
@@ -156,11 +156,11 @@
   {
     "Nom": "Connaissances Scientifiques",
     "values": {
-      "Cadre (combiné)": "Culturel — Faible",
+      "Cadre (combiné)": "Culturel — Assez faible",
       "Description": "Connaissances Scientifiques reflète les connaissances académiques d'un personnage dans des domaines tels que les mathématiques et la géométrie. Il s'agit aussi bien de la mémoire immédiate que de la bonne compréhension d'une information auparavant inconnue.",
       "Famille": "Culturel",
       "Identifiant": "SKI180",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
@@ -296,11 +296,11 @@
   {
     "Nom": "Création des Fleurs",
     "values": {
-      "Cadre (combiné)": "Culturel — Faible",
+      "Cadre (combiné)": "Surnaturel — Assez faible",
       "Description": "La Création des fleurs permet de créer de nouvelles sortes de fleurs et de graines, parfois dotées de propriétés spéciales, ou simplement de créer des fleurs déjà existantes à condition d'en avoir déjà vu. De la terre, de l'eau et un peu de soleil suffisent comme matériaux.",
-      "Famille": "Culturel",
+      "Famille": "Surnaturel",
       "Identifiant": "SKI167",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -352,11 +352,11 @@
   {
     "Nom": "Bâtiment",
     "values": {
-      "Cadre (combiné)": "Technologique — Très faible",
+      "Cadre (combiné)": "Technologique — Nul",
       "Description": "Le Bâtiment concerne la réalisation concrète de constructions, de la simple demeure individuelle aux places fortes, usines et édifices collectifs. Cette compétence couvre l'aspect pratique de la construction : érection des murs, pose des toitures, assemblage des structures.",
       "Famille": "Technologique",
       "Identifiant": "SKI171",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -408,11 +408,11 @@
   {
     "Nom": "Industrie mobile",
     "values": {
-      "Cadre (combiné)": "Technologique — Très faible",
+      "Cadre (combiné)": "Technologique — Faible",
       "Description": "L'Industrie Mobile regroupe les méthodes de fabrication de véhicules, de la simple charrette aux véhicules autopropulsés aériens, sous-marins et terrestres.",
       "Famille": "Technologique",
       "Identifiant": "SKI175",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -548,11 +548,11 @@
   {
     "Nom": "Chirurgie",
     "values": {
-      "Cadre (combiné)": "Technologique — Faible",
+      "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La Chirurgie permet de soigner les formes les plus graves de blessures critiques.",
       "Famille": "Technologique",
       "Identifiant": "SKI151",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
@@ -618,11 +618,11 @@
   {
     "Nom": "Éveil des Plantes",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Assez faible",
+      "Cadre (combiné)": "Surnaturel — Faible",
       "Description": "L'Éveil des plantes permet de faire pousser, parfois de façon disproportionnée, diverses plantes et graines. Cet art a divers usages, y compris pour créer un camouflage, obtenir de la nourriture ou obtenir des interlocuteurs avec qui communiquer grâce au langage des arbres.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI156",
-      "Niveau de Cadre": "Assez faible",
+      "Niveau de Cadre": "Faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
@@ -702,11 +702,11 @@
   {
     "Nom": "Canotage",
     "values": {
-      "Cadre (combiné)": "Technologique — Très faible",
+      "Cadre (combiné)": "Technologique — Nul",
       "Description": "Le Canotage représente l'aptitude à manier des embarcations à l'aide de rames.",
       "Famille": "Technologique",
       "Identifiant": "SKI139",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -716,11 +716,11 @@
   {
     "Nom": "Engloutissement des Corps",
     "values": {
-      "Cadre (combiné)": "Biologique — Avancé",
+      "Cadre (combiné)": "Biologique — Moyen",
       "Description": "Engloutissement des Corps s'utilise pour déterminer si un individu arrive à s'approprier une partie de la force d'un cadavre qu'il a dévoré. Il peut ainsi gagner un point dans une compétence de Maîtrise des Armes, de Compétences Physiques, ou de Compétences Savoir-faires, à condition que la compétence de prédilection de la créature (ou de la personne) dévorée fasse bien partie de l'un de ces trois domaines. La difficulté est fixée au niveau actuel de la compétence à augmenter.",
       "Famille": "Biologique",
       "Identifiant": "SKI140",
-      "Niveau de Cadre": "Avancé",
+      "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -814,11 +814,11 @@
   {
     "Nom": "Engloutissement des Âmes",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Assez faible",
+      "Cadre (combiné)": "Surnaturel — Assez avancé",
       "Description": "Engloutissement des Âmes s'utilise pour déterminer si un individu arrive à s'approprier une partie de l'imagination d'un cadavre qu'il a dévoré. Il peut ainsi gagner un point dans une compétence de Création, de Compétences Sociales ou de Maîtrise des Voies, à condition que la compétence de prédilection de la créature (ou de la personne) dévorée fasse bien partie de l'un de ces trois domaines. La difficulté est fixée au niveau actuel de la compétence à augmenter.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI147",
-      "Niveau de Cadre": "Assez faible",
+      "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -828,11 +828,11 @@
   {
     "Nom": "Engloutissement des Esprits",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Assez faible",
+      "Cadre (combiné)": "Surnaturel — Moyen",
       "Description": "Engloutissement des Esprits s'utilise pour déterminer si un individu arrive à s'approprier une partie du savoir d'un cadavre qu'il a dévoré. Il peut ainsi gagner un point dans une compétence d'Art de la Guerre, de Connaissances ou de Roublardises, à condition que la compétence de prédilection de la créature (ou de la personne) dévorée fasse bien partie de l'un de ces trois domaines. La difficulté est fixée au niveau actuel de la compétence à augmenter.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI148",
-      "Niveau de Cadre": "Assez faible",
+      "Niveau de Cadre": "Moyen",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -842,11 +842,11 @@
   {
     "Nom": "Élasticité",
     "values": {
-      "Cadre (combiné)": "Biologique — Avancé",
+      "Cadre (combiné)": "Biologique — Nul",
       "Description": "L'Élasticité est une façon pour le moins originale d'éviter les blessures. L'adepte de cette méthode de défense reçoit volontairement l'attaque, laissant son corps se déformer juste avant l'impact.",
       "Famille": "Biologique",
       "Identifiant": "SKI134",
-      "Niveau de Cadre": "Avancé",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
@@ -856,11 +856,11 @@
   {
     "Nom": "Résistance Parapsychologique",
     "values": {
-      "Cadre (combiné)": "Culturel — Moyen",
+      "Cadre (combiné)": "Culturel — Nul",
       "Description": "Augmente la résistance aux agressions psychologiques (intrusions dans l'esprit, hypnose, etc).",
       "Famille": "Culturel",
       "Identifiant": "SKI135",
-      "Niveau de Cadre": "Moyen",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Défense"
     },
@@ -1024,11 +1024,11 @@
   {
     "Nom": "Archéologie",
     "values": {
-      "Cadre (combiné)": "Culturel — Faible",
+      "Cadre (combiné)": "Culturel — Assez faible",
       "Description": "La compétence \"Archéologie\" sert à explorer et comprendre les vestiges du passé, permettant ainsi d'enrichir notre connaissance des cultures et des sociétés anciennes.",
       "Famille": "Culturel",
       "Identifiant": "SKI126",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
@@ -1094,11 +1094,11 @@
   {
     "Nom": "Magie innée",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Très avancé",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence \"Magie innée\" permet aux personnages de canaliser des pouvoirs surnaturels de manière intuitive, offrant des capacités avancées dans les situations magiques du jeu de rôle.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI121",
-      "Niveau de Cadre": "Très avancé",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1122,11 +1122,11 @@
   {
     "Nom": "Distorsion de la réalité",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Avancé",
+      "Cadre (combiné)": "Surnaturel — Très avancé",
       "Description": "La compétence \"Distorsion de la réalité\" permet de manipuler la perception et l'interprétation des événements par les personnages, créant ainsi des situations surnaturelles et déroutantes dans le cadre du jeu de rôle.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI123",
-      "Niveau de Cadre": "Avancé",
+      "Niveau de Cadre": "Très avancé",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1150,11 +1150,11 @@
   {
     "Nom": "Télékinésie",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Assez faible",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence de télékinésie permet à un personnage de déplacer des objets par la seule force de sa pensée, offrant ainsi des possibilités créatives et stratégiques dans le cadre de jeux de rôle surnaturels.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI108",
-      "Niveau de Cadre": "Assez faible",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1178,11 +1178,11 @@
   {
     "Nom": "Pyrokinésie",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Moyen",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La pyrokinesie permet à un individu de manipuler et de contrôler le feu par la pensée, offrant ainsi des capacités offensives et défensives dans un cadre de jeu de rôle.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI110",
-      "Niveau de Cadre": "Moyen",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1192,11 +1192,11 @@
   {
     "Nom": "Métamorphose",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Moyen",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence \"Métamorphose\" permet aux personnages de se transformer ou d'altérer leur apparence physique, leur conférant ainsi des capacités surnaturelles et une flexibilité tactique en jeu.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI111",
-      "Niveau de Cadre": "Moyen",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -1206,11 +1206,11 @@
   {
     "Nom": "Sorcellerie",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Moyen",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence \"Sorcellerie\" permet aux personnages de manipuler des forces surnaturelles pour réaliser des sorts et des rituels, influençant ainsi le monde qui les entoure.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI112",
-      "Niveau de Cadre": "Moyen",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1248,11 +1248,11 @@
   {
     "Nom": "Magie élémentaire",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Moyen",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La Magie élémentaire permet de manipuler les éléments naturels (feu, eau, air, terre, etc.) pour créer des effets surnaturels variés, des simples manifestations élémentaires jusqu'aux vagues et déferlantes élémentaires massives. Elle offre des avantages stratégiques en combat comme en résolution de problèmes.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI115",
-      "Niveau de Cadre": "Moyen",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -1458,11 +1458,11 @@
   {
     "Nom": "Résistance Énergétique",
     "values": {
-      "Cadre (combiné)": "Biologique — Assez faible",
+      "Cadre (combiné)": "Biologique — Assez avancé",
       "Description": "Augmente la résistance aux brûlures (causées par le feu, les explosions ou les rayons lasers), à la foudre et à la radioactivité.",
       "Famille": "Biologique",
       "Identifiant": "SKI95",
-      "Niveau de Cadre": "Assez faible",
+      "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Défense"
     },
@@ -1486,10 +1486,11 @@
   {
     "Nom": "Endurance",
     "values": {
-      "Cadre (combiné)": "Biologique",
+      "Cadre (combiné)": "Biologique — Nul",
       "Description": "La compétence \"Endurance\" permet aux personnages de résister à des conditions difficiles et de maintenir leur performance sur de longues périodes, favorisant ainsi leur survie et leur efficacité dans un cadre de jeu de rôle biologique.",
       "Famille": "Biologique",
       "Identifiant": "SKI97",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -1513,10 +1514,11 @@
   {
     "Nom": "Mutations naturelles",
     "values": {
-      "Cadre (combiné)": "Biologique",
+      "Cadre (combiné)": "Biologique — Nul",
       "Description": "La compétence \"Mutations naturelles\" permet d'explorer et de comprendre les adaptations biologiques qui se produisent naturellement dans les organismes vivants au sein d'un cadre de jeu de rôle biologique.",
       "Famille": "Biologique",
       "Identifiant": "SKI99",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Physique"
     },
@@ -1708,11 +1710,11 @@
   {
     "Nom": "Bénédictions religieuses",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Faible",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence \"Bénédictions religieuses\" permet d'invoquer des effets surnaturels bénéfiques, influençant positivement le cadre de jeu de rôle à un niveau faible.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI78",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
@@ -1722,10 +1724,11 @@
   {
     "Nom": "Télépathie limitée",
     "values": {
-      "Cadre (combiné)": "Surnaturel",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence \"Télépathie limitée\" permet d'établir une communication mentale restreinte entre les individus, facilitant l'échange d'idées ou d'émotions sans nécessiter de langage verbal.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI79",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
@@ -1735,11 +1738,11 @@
   {
     "Nom": "Divination",
     "values": {
-      "Cadre (combiné)": "Surnaturel — Faible",
+      "Cadre (combiné)": "Surnaturel — Très faible",
       "Description": "La compétence de divination permet d'obtenir des informations ou des aperçus sur des événements futurs ou cachés à travers des méthodes surnaturelles de faible niveau.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI80",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
@@ -1749,10 +1752,11 @@
   {
     "Nom": "Superstition",
     "values": {
-      "Cadre (combiné)": "Surnaturel",
+      "Cadre (combiné)": "Surnaturel — Nul",
       "Description": "La compétence \"Superstition\" sert à influencer les événements et les décisions en s'appuyant sur des croyances surnaturelles, affectant ainsi les actions des personnages dans un cadre de jeu de rôle.",
       "Famille": "Surnaturel",
       "Identifiant": "SKI81",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
@@ -1790,11 +1794,11 @@
   {
     "Nom": "Affaires",
     "values": {
-      "Cadre (combiné)": "Culturel — Faible",
+      "Cadre (combiné)": "Culturel — Assez faible",
       "Description": "Affaires permet au personnage de connaître les procédures commerciales et le monde des affaires en général. Un personnage maîtrisant cette compétence peut convaincre un marchand de lui faire visiter l'arrière-boutique, voire ses entrepôts, ou encore le convaincre de le laisser emprunter certains objets en cas de nécessité.",
       "Famille": "Culturel",
       "Identifiant": "SKI66",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Social"
     },
@@ -1958,11 +1962,11 @@
   {
     "Nom": "Histoire de l'art",
     "values": {
-      "Cadre (combiné)": "Culturel — Faible",
+      "Cadre (combiné)": "Culturel — Assez faible",
       "Description": "La compétence \"Histoire de l'art\" sert à enrichir la compréhension culturelle des individus en explorant les évolutions et les tendances artistiques à travers le temps.",
       "Famille": "Culturel",
       "Identifiant": "SKI63",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Validée",
       "Tags": "Savoir"
     },
@@ -2182,10 +2186,11 @@
   {
     "Nom": "Construction orbitale",
     "values": {
-      "Cadre (combiné)": "Technologique",
+      "Cadre (combiné)": "Technologique — Très avancé",
       "Description": "La compétence \"Construction orbitale\" permet de concevoir et de réaliser des structures technologiques avancées dans un cadre de jeu de rôle futuriste.",
       "Famille": "Technologique",
       "Identifiant": "SKI45",
+      "Niveau de Cadre": "Très avancé",
       "Statut": "Retirée",
       "Tags": "Création"
     },
@@ -2349,11 +2354,11 @@
   {
     "Nom": "Électronique",
     "values": {
-      "Cadre (combiné)": "Technologique — Faible",
+      "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "L'Électronique permet de maîtriser les technologies électriques et électroniques, de la compréhension des principes de l'électricité et des systèmes énergétiques jusqu'à la conception, le développement et l'optimisation de systèmes électroniques complexes.",
       "Famille": "Technologique",
       "Identifiant": "SKI35",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez avancé",
       "Statut": "Validée",
       "Tags": "Création, Savoir"
     },
@@ -2419,11 +2424,11 @@
   {
     "Nom": "Électricité",
     "values": {
-      "Cadre (combiné)": "Technologique — Faible",
+      "Cadre (combiné)": "Technologique — Assez avancé",
       "Description": "La compétence \"Électricité\" sert à comprendre et à appliquer les principes technologiques liés à l'électricité dans un cadre de jeu de rôle, facilitant ainsi l'interaction avec des systèmes énergétiques.",
       "Famille": "Technologique",
       "Identifiant": "SKI29",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez avancé",
       "Statut": "Retirée",
       "Tags": "Savoir"
     },
@@ -2447,11 +2452,11 @@
   {
     "Nom": "Navigation",
     "values": {
-      "Cadre (combiné)": "Technologique — Faible",
+      "Cadre (combiné)": "Technologique — Très faible",
       "Description": "La Navigation permet de diriger un navire ou un vaisseau sur l'eau ou dans l'espace, en utilisant les instruments de navigation, en calculant les trajectoires et en s'adaptant aux conditions environnementales. Cette compétence couvre aussi bien la navigation basique que les manœuvres avancées.",
       "Famille": "Technologique",
       "Identifiant": "SKI21",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Savoir-faire"
     },
@@ -2517,11 +2522,11 @@
   {
     "Nom": "Architecture",
     "values": {
-      "Cadre (combiné)": "Technologique — Faible",
+      "Cadre (combiné)": "Technologique — Très faible",
       "Description": "L'Architecture permet de concevoir et de planifier des structures et des bâtiments, en établissant les plans, les calculs structurels et l'organisation spatiale. Cette compétence couvre la dimension intellectuelle et créative de la construction, de l'esquisse initiale aux plans détaillés.",
       "Famille": "Technologique",
       "Identifiant": "SKI12",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Très faible",
       "Statut": "Validée",
       "Tags": "Création"
     },
@@ -2531,11 +2536,11 @@
   {
     "Nom": "Premiers explosifs",
     "values": {
-      "Cadre (combiné)": "Technologique — Faible",
+      "Cadre (combiné)": "Technologique — Assez faible",
       "Description": "La compétence \"Premiers explosifs\" sert à introduire des éléments technologiques de base dans un cadre de jeu de rôle, permettant aux personnages d'interagir avec des dispositifs technologiques à faible niveau de complexité.",
       "Famille": "Technologique",
       "Identifiant": "SKI13",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Retirée",
       "Tags": "Création"
     },
@@ -2559,11 +2564,11 @@
   {
     "Nom": "Arcs",
     "values": {
-      "Cadre (combiné)": "Technologique — Très faible",
+      "Cadre (combiné)": "Technologique — Nul",
       "Description": "Les Arcs sont des armes à distance s'utilisant à deux mains et nécessitant une certaine dextérité pour le rechargement et dont les projectiles suivent rapidement une trajectoire courbe.",
       "Famille": "Technologique",
       "Identifiant": "SKI15",
-      "Niveau de Cadre": "Très faible",
+      "Niveau de Cadre": "Nul",
       "Statut": "Validée",
       "Tags": "Armes"
     },
@@ -2615,11 +2620,11 @@
   {
     "Nom": "Horlogerie",
     "values": {
-      "Cadre (combiné)": "Technologique — Faible",
+      "Cadre (combiné)": "Technologique — Assez faible",
       "Description": "La compétence \"Horlogerie\" sert à comprendre et à appliquer des concepts technologiques dans un cadre à faible niveau, facilitant ainsi le développement et l'utilisation d'outils techniques adaptés.",
       "Famille": "Technologique",
       "Identifiant": "SKI19",
-      "Niveau de Cadre": "Faible",
+      "Niveau de Cadre": "Assez faible",
       "Statut": "Retirée",
       "Tags": "Création"
     },

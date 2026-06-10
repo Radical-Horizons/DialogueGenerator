@@ -1,13 +1,14 @@
 {
   "Nom": "Abyssaires",
   "values": {
+    "Espérance de vie": "35",
     "Règne (ou classe)": "2fd0f8f6-d104-4357-ae15-4b4eb2212ddc",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle dans l'intrigue, son habitat, son mode d'alimentation, sa reproduction, ses sous-espèces et son interaction avec l'écosystème.",
+    "Résumé IA": "Métamorphe radical des fonds marins des Zones de Mélange résiduel. Phase mobile : larve translucide pélagique (5 cm) dérivant dans les courants Hvergiques pendant 6–8 mois. Phase sessile : immense anémone charnue (2 m de diamètre) ancrée dans les sédiments profonds, filtrant passivement les nutriments par ses tentacules. Métamorphose dans un cocon gélatineux ancré au substrat (2–3 semaines). Reproduction par sporulation massive dispersée par les courants. Espérance de vie ~35 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Métamorphe radical** (Vifs-Formes) des fonds marins des **Zones de Mélange résiduel**. Phase mobile : larve translucide pélagique (5 cm) dérivant dans les courants Hvergiques pendant 6–8 mois. Phase sessile : immense anémone charnue (2 m de diamètre) ancrée dans les sédiments profonds, filtrant passivement les nutriments. Transition dans un **cocon gélatineux** ancré au substrat (2–3 semaines). Reproduction par sporulation massive dispersée par les courants.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle dans l'intrigue, son habitat, son mode d'alimentation, sa reproduction, ses sous-espèces et son interaction avec l'écosystème."
+    "re_sume__ia": "Métamorphe radical des fonds marins des Zones de Mélange résiduel. Phase mobile : larve translucide pélagique (5 cm) dérivant dans les courants Hvergiques pendant 6–8 mois. Phase sessile : immense anémone charnue (2 m de diamètre) ancrée dans les sédiments profonds, filtrant passivement les nutriments par ses tentacules. Métamorphose dans un cocon gélatineux ancré au substrat (2–3 semaines). Reproduction par sporulation massive dispersée par les courants. Espérance de vie ~35 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

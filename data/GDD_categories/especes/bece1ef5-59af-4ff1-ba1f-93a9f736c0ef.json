@@ -2,17 +2,16 @@
   "Nom": "Psammograveur des Dunes",
   "values": {
     "Biologie": "Moyenne",
-    "Culture": "Nulle",
+    "Espérance de vie": "50",
     "Présence dans Escelion": "Peu courant",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "L'espèce est peu courante dans Escelion, avec une biologie moyenne et aucun aspect culturel ou technologique. Des sections sont prévues pour détailler son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son écosystème, mais elles sont actuellement vides.",
+    "Résumé IA": "Sécrétolaminaire (Vifs-Formes, Lithotissés) des environnements dunaires. Trace des « routes de sable » en strates très fragiles, relues à la tombée des vents : l'exocortex inscrit l'information de navigation dans des dépôts laminaires effacés et réécrits à chaque cycle de vent. Biologie moyenne, sans composante surnaturelle. Peu courant dans Escelion. Longévité : ~50 ans.",
     "Surnaturel": "Nulle",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
+    "re_sume__de_la_fiche": "**Sécrétolaminaire** (Vifs-Formes, Lithotissés) des environnements dunaires. Trace des **« routes de sable »** en strates très fragiles relues à la tombée des vents : l'exocortex inscrit l'information de navigation dans des dépôts laminaires effacés et réécrits à chaque cycle de vent. Sans composante surnaturelle. Peu courant dans Escelion. Longévité : \\~50 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -22,7 +21,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'espèce est peu courante dans Escelion, avec une biologie moyenne et aucun aspect culturel ou technologique. Des sections sont prévues pour détailler son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son écosystème, mais elles sont actuellement vides."
+    "re_sume__ia": "Sécrétolaminaire (Vifs-Formes, Lithotissés) des environnements dunaires. Trace des « routes de sable » en strates très fragiles, relues à la tombée des vents : l'exocortex inscrit l'information de navigation dans des dépôts laminaires effacés et réécrits à chaque cycle de vent. Biologie moyenne, sans composante surnaturelle. Peu courant dans Escelion. Longévité : ~50 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

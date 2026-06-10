@@ -1,13 +1,14 @@
 {
   "Nom": "Khystriles",
   "values": {
+    "Espérance de vie": "80",
     "Règne (ou classe)": "3026e4d2-1b45-8030-9b54-d3fb1b86d7cb",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème.",
+    "Résumé IA": "Neurocristallin colonial montagnard (3–8 cm) à exosquelette composite glace-quartz biosynthétisée — cristal exposé, iridescent, spectaculaire. Colonies de 200 à 2 000 individus construisant des cathédrales de glace vivante (nids fractals, amplificateurs optiques, pièges thermiques). Communication par capteurs piézoélectriques hypersensibles via percussions codées transmissibles à plusieurs kilomètres via le substrat. Cristallogenèse optimale aux basses températures nocturnes. Longévité : ~80 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Neurocristallin** (Vifs-Formes, Lithotissés) colonial montagnard (3–8 cm) à exosquelette composite **glace-quartz biosynthétisée** — cristal exposé, iridescent, spectaculaire. Colonies de 200 à 2 000 individus construisant des **cathédrales de glace vivante** (nids fractals, amplificateurs optiques, pièges thermiques). Communication par **percussions piézoélectriques codées** sur les structures cristallines partagées, perceptibles à plusieurs kilomètres via le substrat. Cristallogenèse optimale aux basses températures nocturnes. Longévité : \\~80 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème."
+    "re_sume__ia": "Neurocristallin colonial montagnard (3–8 cm) à exosquelette composite glace-quartz biosynthétisée — cristal exposé, iridescent, spectaculaire. Colonies de 200 à 2 000 individus construisant des cathédrales de glace vivante (nids fractals, amplificateurs optiques, pièges thermiques). Communication par capteurs piézoélectriques hypersensibles via percussions codées transmissibles à plusieurs kilomètres via le substrat. Cristallogenèse optimale aux basses températures nocturnes. Longévité : ~80 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

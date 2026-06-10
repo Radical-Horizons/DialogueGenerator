@@ -22,6 +22,8 @@ export async function listFlags(params?: {
   q?: string
   category?: string
   favoritesOnly?: boolean
+  semantic_type?: string
+  scope?: string
 }): Promise<FlagsCatalogResponse> {
   const response = await apiClient.get<FlagsCatalogResponse>(
     '/api/v1/mechanics/flags',

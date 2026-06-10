@@ -20,11 +20,15 @@ import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
 import { GraphContextDroppingPanel } from './GraphContextDroppingPanel'
 import { FlowSimulationPanel } from './FlowSimulationPanel'
+import { DialoguePreviewPanel } from './preview/DialoguePreviewPanel'
+import { DialoguePreviewBanner } from './preview/DialoguePreviewBanner'
+import { GameSystemsIntegrationPanel } from './systems/GameSystemsIntegrationPanel'
 import { SchemaValidationPanel } from './SchemaValidationPanel'
 import { BatchValidationReportModal } from './BatchValidationReportModal'
 import { DialogueCostModal } from './DialogueCostModal'
 import { GraphExportFormatDialog } from './GraphExportFormatDialog'
 import { useGraphStore } from '../../store/graphStore'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import { useToast, ConfirmDialog } from '../shared'
 import { theme } from '../../theme'
 import {
@@ -34,6 +38,7 @@ import {
 import { resolveGraphRouteTarget } from './graphEditorStandalone'
 import { useDialogueLoader } from '../../hooks/useDialogueLoader'
 import { useGraphToolbar } from '../../hooks/useGraphToolbar'
+import { useDialoguePreview } from '../../hooks/useDialoguePreview'
 import { useBatchOperations } from '../../hooks/useBatchOperations'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
@@ -95,12 +100,20 @@ export function GraphEditor({
     isNarrow: isGraphEditorNarrow,
   } = useNarrowInlineSize(PANEL_COMFORT_MIN_WIDTH_PX)
 
+  const { enterDialoguePreview, exitDialoguePreview } = useDialoguePreview()
+  const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const visibilityEvalStateBanner = useGraphViewStore((s) => s.visibilityEvalState)
+
   const {
     showValidationPanel,
     showQualityLlmPanel,
     showAiSlopPanel,
     showContextDroppingPanel,
     showFlowSimulationPanel,
+    showDialoguePreviewPanel,
+    setShowDialoguePreviewPanel,
+    showGameSystemsIntegrationPanel,
+    setShowGameSystemsIntegrationPanel,
     showSchemaValidationPanel,
     schemaValidationLoading,
     schemaValidationIsValid,
@@ -122,6 +135,26 @@ export function GraphEditor({
     handleExportPNG,
     handleExportSVG,
   } = toolbar
+
+  const handleToggleDialoguePreview = useCallback(() => {
+    if (showDialoguePreviewPanel) {
+      exitDialoguePreview()
+      setShowDialoguePreviewPanel(false)
+    } else {
+      enterDialoguePreview()
+      setShowDialoguePreviewPanel(true)
+    }
+  }, [
+    showDialoguePreviewPanel,
+    exitDialoguePreview,
+    enterDialoguePreview,
+    setShowDialoguePreviewPanel,
+  ])
+
+  const handleCloseDialoguePreviewPanel = useCallback(() => {
+    exitDialoguePreview()
+    setShowDialoguePreviewPanel(false)
+  }, [exitDialoguePreview, setShowDialoguePreviewPanel])
 
   const {
     selectedNodeIdsToDelete,
@@ -197,6 +230,8 @@ export function GraphEditor({
           canEditGraph={canEditGraph}
           isStandalone={isStandalone}
           onBack={onBack}
+          showDialoguePreviewPanel={showDialoguePreviewPanel}
+          onToggleDialoguePreview={handleToggleDialoguePreview}
           headerSelector={
             isGraphEditorNarrow ? (
               <DialogueCombobox
@@ -259,10 +294,19 @@ export function GraphEditor({
                 Chargement du graphe...
               </div>
             ) : (
-              <div
-                data-testid="graph-canvas"
-                style={{ flex: 1, minHeight: 400, overflow: 'hidden', position: 'relative' }}
-              >
+              <>
+                {dialoguePreviewActive ? (
+                  <DialoguePreviewBanner visibilityEvalState={visibilityEvalStateBanner} />
+                ) : null}
+                <div
+                  data-testid="graph-canvas"
+                  style={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}
+                >
                 {toolbar.showSearchBar && !isWorkspaceNarrow && (
                   <GraphSearchBar
                     onClose={() => {
@@ -270,10 +314,19 @@ export function GraphEditor({
                     }}
                   />
                 )}
-                <ReactFlowProvider>
-                  <GraphCanvas />
-                </ReactFlowProvider>
-              </div>
+                  <ReactFlowProvider>
+                    <GraphCanvas />
+                  </ReactFlowProvider>
+                </div>
+                  {showDialoguePreviewPanel ? (
+                    <DialoguePreviewPanel onClose={handleCloseDialoguePreviewPanel} />
+                  ) : null}
+                  {showGameSystemsIntegrationPanel ? (
+                    <GameSystemsIntegrationPanel
+                      onClose={() => setShowGameSystemsIntegrationPanel(false)}
+                    />
+                  ) : null}
+              </>
             )}
             {showValidationOverlay && (
               <GraphValidationPanel

@@ -201,6 +201,7 @@ class UnityDialogueOrchestrator:
                 choices_mode=request_data.choices_mode,
                 narrative_tags=request_data.narrative_tags,
                 author_profile=request_data.author_profile,
+                game_rules=request_data.game_rules,
                 vocabulary_config=request_data.vocabulary_config,
                 include_narrative_guides=request_data.include_narrative_guides,
                 in_game_flags=request_data.in_game_flags,

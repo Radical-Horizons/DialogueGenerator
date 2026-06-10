@@ -5,18 +5,33 @@ import { memo, useState, useCallback, useEffect } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
 import { theme } from '../../../theme'
 import { useGraphStore } from '../../../store/graphStore'
-import { useGraphViewStore } from '../../../store/graphViewStore'
 import { getNodePrompt } from '../../../api/graph'
 import type { NodePromptResponse } from '../../../types/graph'
 import { RegenerateNodeModal } from '../RegenerateNodeModal'
 import { PromptViewerModal } from '../PromptViewerModal'
 import { NODE_DRAG_TOOLTIP } from '../nodeDragTooltip'
 import { useGddStaleIndicator } from '../../../hooks/useGddStaleIndicator'
+import { useGraphViewStore } from '../../../store/graphViewStore'
+import { formatChoiceEffectsSummary } from '../../../utils/choiceEffects'
+import { evaluateChoiceEffortAccess } from '../../../utils/effortPreview'
+import {
+  formatSkillCheckSummary,
+  getChoiceSkillCheckPreview,
+  type SkillCheckDefinition,
+} from '../../../utils/skillChecks'
+import {
+  evaluateVisibilityConditions,
+  formatVisibilityConditionsSummary,
+} from '../../../utils/visibilityConditions'
+import { linesForAppliedChoiceEffects } from '../../../utils/previewEffectHistory'
+import type { ChoiceEffect } from '../../../types/choiceEffects'
+import type { VisibilityConditionsBlock } from '../../../types/visibilityConditions'
 import {
   getGraphTopologyWarningKind,
   getValidationHighlightKind,
   GRAPH_TOPOLOGY_WARNING_STYLES,
 } from '../../../utils/graphStructuralValidation'
+import { reconstructNodePromptFromGraph } from '../../../utils/graphPromptPreview'
 import { Badge } from '../../shared'
 
 interface ValidationError {
@@ -42,7 +57,10 @@ interface DialogueNodeData {
   line?: string
   choices?: Array<{
     text: string
+    choiceId?: string
     targetNode?: string
+    skillCheck?: SkillCheckDefinition
+    effortCost?: number
   }>
   nextNode?: string
   validationErrors?: ValidationError[]
@@ -86,19 +104,44 @@ export const DialogueNode = memo(function DialogueNode({
   const tag = (data.tag as string) || undefined
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredChoiceIndex, setHoveredChoiceIndex] = useState<number | null>(null)
+
+  const visibilityEvalState = useGraphViewStore((s) => s.visibilityEvalState)
+  const dialoguePreviewActive = useGraphViewStore((s) => s.dialoguePreviewActive)
+  const previewGameSystemsState = useGraphViewStore((s) => s.previewGameSystemsState)
+  const applyChoiceEffectsSimulation = useGraphViewStore((s) => s.applyChoiceEffectsSimulation)
+  const appendPreviewEffectHistory = useGraphViewStore((s) => s.appendPreviewEffectHistory)
+  const previewCatalogById = useGraphViewStore((s) => s.previewCatalogById)
+  const nodeVisibility = (data as { visibilityConditions?: VisibilityConditionsBlock })
+    .visibilityConditions
+  const simActive =
+    Object.keys(visibilityEvalState.flags).length > 0 ||
+    Object.keys(visibilityEvalState.reputation).length > 0 ||
+    Object.keys(previewGameSystemsState.attributes).length > 0 ||
+    Object.keys(previewGameSystemsState.skills).length > 0 ||
+    previewGameSystemsState.effortPool !== 10
+  const visibilityEvalMode = dialoguePreviewActive || simActive
+  const nodeVisOk = !visibilityEvalMode || !nodeVisibility?.items?.length
+    ? true
+    : evaluateVisibilityConditions(nodeVisibility, visibilityEvalState).satisfied
+  const showNodeDim =
+    visibilityEvalMode && Boolean(nodeVisibility?.items?.length) && !nodeVisOk
+  const nodeCondSummary = formatVisibilityConditionsSummary(nodeVisibility)
+  const hasNodeCond = Boolean(nodeVisibility?.items?.length)
   
   // Store pour accept/reject et régénération (Story 1.10)
   const acceptNode = useGraphStore((state) => state.acceptNode)
   const rejectNode = useGraphStore((state) => state.rejectNode)
   const regenerateNode = useGraphStore((state) => state.regenerateNode)
+  const graphNodes = useGraphStore((state) => state.nodes)
   const [showRegenerateModal, setShowRegenerateModal] = useState(false)
   const [showPromptModal, setShowPromptModal] = useState(false)
   const [promptData, setPromptData] = useState<NodePromptResponse | null>(null)
   const [promptError, setPromptError] = useState<string | null>(null)
   const [promptLoading, setPromptLoading] = useState(false)
-  const dialogueId = useGraphStore(
-    (s) => s.documentId ?? s.dialogueMetadata.filename ?? 'current'
-  )
+  /** Identifiant document persisté (API documents) — utilisé pour GET prompt serveur. */
+  const persistedDocumentId = useGraphStore((s) => s.documentId)
+  /** Nom de fichier métadonnée (peut exister sans documentId si non sauvegardé). */
+  const dialogueFilename = useGraphStore((s) => s.dialogueMetadata.filename)
 
   const { stale: gddContextStale, checking: gddStaleChecking } = useGddStaleIndicator({
     id: data.id,
@@ -161,17 +204,51 @@ export const DialogueNode = memo(function DialogueNode({
     setPromptData(null)
     setPromptError(null)
     setPromptLoading(true)
+
+    const fallback = reconstructNodePromptFromGraph(data.id, graphNodes)
+    const rawDialogueKey =
+      (persistedDocumentId?.trim() || dialogueFilename?.trim() || '')
+    const skipServerPrompt =
+      rawDialogueKey === '' || rawDialogueKey.toLowerCase() === 'current'
+
+    const normalizeUnityDialogueFileId = (raw: string): string => {
+      const base = raw.replace(/\\/g, '/').split('/').pop() ?? raw
+      return base.replace(/\.json$/i, '').trim()
+    }
+
+    if (skipServerPrompt) {
+      if (fallback) {
+        setPromptData({
+          ...fallback,
+          message: `${fallback.message ?? 'Prompt reconstruit depuis le graphe'} — Aucun dialogue enregistré côté serveur : uniquement reconstruction locale.`,
+        })
+      } else {
+        setPromptError(
+          'Impossible de reconstruire le prompt pour ce nœud (aucun parent ni ligne dans le graphe).'
+        )
+      }
+      setPromptLoading(false)
+      return
+    }
+
     try {
-      const res = await getNodePrompt(dialogueId, data.id)
+      const res = await getNodePrompt(normalizeUnityDialogueFileId(rawDialogueKey), data.id)
       setPromptData(res)
     } catch (err) {
-      setPromptError(
-        err instanceof Error ? err.message : 'Impossible de charger le prompt'
-      )
+      if (fallback) {
+        setPromptData({
+          ...fallback,
+          message: `${fallback.message ?? 'Prompt reconstruit depuis le graphe'} — Le fichier Unity ou l’API n’a pas pu être utilisé (erreur réseau ou dialogue absent du dossier export).`,
+        })
+      } else {
+        setPromptError(
+          err instanceof Error ? err.message : 'Impossible de charger le prompt'
+        )
+      }
     } finally {
       setPromptLoading(false)
     }
-  }, [dialogueId, data.id])
+  }, [persistedDocumentId, dialogueFilename, data.id, graphNodes])
 
   const handleOpenPromptModal = useCallback(
     (e: React.MouseEvent) => {
@@ -276,11 +353,38 @@ export const DialogueNode = memo(function DialogueNode({
         transition: 'all 0.2s ease',
         display: 'flex',
         flexDirection: 'column',
+        opacity: showNodeDim ? 0.52 : 1,
+        filter: showNodeDim ? 'grayscale(35%)' : undefined,
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
+      {/* Story 9.2 — indicateur conditions sur le nœud */}
+      {hasNodeCond && (
+        <div
+          role="img"
+          aria-label="Ce nœud a des conditions de visibilité"
+          title={nodeCondSummary || 'Conditions de visibilité'}
+          style={{
+            position: 'absolute',
+            top: tag ? 26 : 4,
+            left: tag ? 4 : undefined,
+            right: tag ? undefined : hasErrors || hasWarnings ? 56 : 28,
+            padding: '2px 5px',
+            borderRadius: 4,
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            backgroundColor: theme.background.secondary,
+            color: theme.text.secondary,
+            border: `1px solid ${theme.border.primary}`,
+            zIndex: 11,
+          }}
+        >
+          ◆
+        </div>
+      )}
+
       {/* Badge tag (Story 2.11 FR32) */}
       {tag && (
         <Badge
@@ -343,7 +447,9 @@ export const DialogueNode = memo(function DialogueNode({
                         ? '📝'
                         : e.type === 'missing_stable_id'
                           ? '🆔'
-                          : '⚠️'
+                          : e.type === 'dialogue_flag_undeclared'
+                            ? '🏁'
+                            : '⚠️'
             return `${icon} ${e.message}${idx < errors.length - 1 ? '\n' : ''}`
           }).join('')}
         >
@@ -527,7 +633,52 @@ export const DialogueNode = memo(function DialogueNode({
             whiteSpace: 'normal',
           }}
         >
-          {choices[hoveredChoiceIndex].text || `Choix ${hoveredChoiceIndex + 1}`}
+          <div>{choices[hoveredChoiceIndex].text || `Choix ${hoveredChoiceIndex + 1}`}</div>
+          {(() => {
+            const ch = choices[hoveredChoiceIndex] as {
+              visibilityConditions?: VisibilityConditionsBlock
+              condition?: string
+              choiceEffects?: ChoiceEffect[]
+              skillCheck?: SkillCheckDefinition
+              effortCost?: number
+            }
+            const cs = formatVisibilityConditionsSummary(ch.visibilityConditions)
+            const fx = formatChoiceEffectsSummary(ch.choiceEffects)
+            const skillPreview = getChoiceSkillCheckPreview(ch, {
+              attributes: previewGameSystemsState.attributes,
+              skills: previewGameSystemsState.skills,
+            })
+            const skill = ch.skillCheck && skillPreview
+              ? formatSkillCheckSummary(ch.skillCheck, skillPreview)
+              : ''
+            const skillTarget = skillPreview?.targetNode
+              ? `branche: ${skillPreview.targetNode}`
+              : ''
+            const effort = evaluateChoiceEffortAccess(
+              { effortCost: ch.effortCost },
+              { availablePool: previewGameSystemsState.effortPool },
+            )
+            const effortSummary = effort.cost > 0
+              ? effort.accessible
+                ? `Effort: ${effort.cost} PE / ${effort.availablePool} PE disponibles`
+                : effort.disabledReason ?? ''
+              : ''
+            const legacy = ch.condition?.trim()
+            const bits = [
+              cs,
+              skill,
+              skillTarget,
+              effortSummary,
+              fx ? `effets: ${fx}` : '',
+              legacy ? `legacy: ${legacy}` : '',
+            ].filter(Boolean)
+            if (bits.length === 0) return null
+            return (
+              <div style={{ marginTop: 6, fontSize: '0.68rem', color: theme.text.secondary }}>
+                {bits.join(' · ')}
+              </div>
+            )
+          })()}
         </div>
       )}
 
@@ -538,13 +689,69 @@ export const DialogueNode = memo(function DialogueNode({
           const label = choice.text || `Choix ${index + 1}`
           const stableId = (choice as { choiceId?: string }).choiceId ?? `__idx_${index}`
           const handleId = `choice:${stableId}`
+          const choiceVisibility = (
+            choice as { visibilityConditions?: VisibilityConditionsBlock }
+          ).visibilityConditions
+          const choiceEffectsLen = (
+            choice as { choiceEffects?: unknown[] }
+          ).choiceEffects?.length ?? 0
+          const hasChoiceEffects = choiceEffectsLen > 0
+          const choiceVisOk =
+            !visibilityEvalMode || !choiceVisibility?.items?.length
+              ? true
+              : evaluateVisibilityConditions(choiceVisibility, visibilityEvalState).satisfied
+          const dimChoice =
+            visibilityEvalMode && Boolean(choiceVisibility?.items?.length) && !choiceVisOk
+          const choiceFx = (choice as { choiceEffects?: ChoiceEffect[] }).choiceEffects
+          const choiceSkillPreview = getChoiceSkillCheckPreview(
+            choice as { skillCheck?: SkillCheckDefinition },
+            {
+              attributes: previewGameSystemsState.attributes,
+              skills: previewGameSystemsState.skills,
+            },
+          )
+          const choiceSkill = (choice as { skillCheck?: SkillCheckDefinition }).skillCheck
+          const choiceSkillSummary = choiceSkill && choiceSkillPreview
+            ? formatSkillCheckSummary(choiceSkill, choiceSkillPreview)
+            : ''
+          const effortAccess = evaluateChoiceEffortAccess(
+            choice as { effortCost?: number },
+            { availablePool: previewGameSystemsState.effortPool },
+          )
+          const dimByEffort = dialoguePreviewActive && !effortAccess.accessible
+          const choiceAriaParts = [
+            label,
+            choiceSkillSummary,
+            choiceSkillPreview?.targetNode ? `branche ${choiceSkillPreview.targetNode}` : '',
+            effortAccess.cost > 0
+              ? effortAccess.disabledReason ?? `Effort ${effortAccess.cost} PE`
+              : '',
+            hasChoiceEffects ? `${choiceEffectsLen} effet(s)` : '',
+          ].filter(Boolean)
           return (
             <Handle
               key={stableId}
               type="source"
               position={Position.Bottom}
               id={handleId}
+              isConnectable={!dialoguePreviewActive}
               title={label}
+              onPointerDown={(e) => {
+                if (!dialoguePreviewActive) return
+                e.stopPropagation()
+                e.preventDefault()
+                if (!effortAccess.accessible) {
+                  appendPreviewEffectHistory(
+                    effortAccess.disabledReason ? [effortAccess.disabledReason] : [],
+                  )
+                  return
+                }
+                const prev = useGraphViewStore.getState().visibilityEvalState
+                const catalog = previewCatalogById ?? undefined
+                applyChoiceEffectsSimulation(choiceFx ?? [], catalog)
+                const lines = linesForAppliedChoiceEffects(prev, choiceFx, catalog)
+                appendPreviewEffectHistory(lines)
+              }}
               onMouseEnter={() => setHoveredChoiceIndex(index)}
               onMouseLeave={() => setHoveredChoiceIndex((prev) => (prev === index ? null : prev))}
               style={{
@@ -556,7 +763,13 @@ export const DialogueNode = memo(function DialogueNode({
                 left: `${leftPercent}%`,
                 bottom: 10,
                 transform: 'translateX(-50%)',
+                opacity: dimChoice || dimByEffort ? 0.48 : 1,
+                filter: dimChoice || dimByEffort ? 'grayscale(45%)' : undefined,
+                boxShadow: hasChoiceEffects
+                  ? '0 0 0 2px #9B59B6'
+                  : undefined,
               }}
+              aria-label={choiceAriaParts.join(' — ')}
             />
           )
         })}
@@ -566,6 +779,7 @@ export const DialogueNode = memo(function DialogueNode({
         <Handle
           type="source"
           position={Position.Bottom}
+          isConnectable={!dialoguePreviewActive}
           style={{
             background: '#4A90E2',
             width: 12,

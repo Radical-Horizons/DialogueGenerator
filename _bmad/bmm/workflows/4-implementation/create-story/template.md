@@ -17,7 +17,12 @@ so that {{benefit}}.
 ## Tasks / Subtasks
 
 <!-- Each task = one independently testable behavior (SM territory: WHAT, not HOW).
-     Dev Notes contains WHERE/HOW context. Implementation details are the dev's job. -->
+     Dev Notes contains WHERE/HOW context. Implementation details are the dev's job.
+
+     Checkbox discipline (dev-story): flip ONE subtask line at a time — 🔴 [x] only after failing test run,
+     🟢 [x] only after minimal implementation passes tests, 🔵 [x] only after refactor criteria met.
+     Never check 🟢 or 🔵 before 🔴; never check parent Task until all three lines are [x].
+     Emoji (🔴🟢🔵) labels each phase inside the markdown checkbox line. -->
 
 - [ ] Task 1 : [Behavior description] (AC: #)
   - [ ] 🔴 Test échoue : [behavioral assertion — observable outcome, not implementation detail]

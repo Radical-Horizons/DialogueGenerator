@@ -1,13 +1,14 @@
 {
   "Nom": "Rouillards",
   "values": {
+    "Espérance de vie": "35",
     "Règne (ou classe)": "534e5829-6e46-4d38-84d8-b2d37344d711",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle culturel, son habitat naturel, son mode d'alimentation, sa reproduction, et son interaction avec l'écosystème. Les sections sont à compléter selon les spécificités de l'espèce.",
+    "Résumé IA": "Ferrotissé quadrupède amphibien (0,6–1,2 m) des marécages ferrugineux à carapace de rouille régénérative (plaques Fe₂O₃ se dissolvant et se redéposant en continu — rouge-brun profond = bonne santé). Magnétoréception la plus développée de la classe : organe crânien dédié (sinus magnétique) permettant la détection de gisements enfouis et la navigation en eau trouble. Grégaires (groupes de 10–40 individus), hiérarchie par intensité chromatique. Certaines caravanes du Désert les suivent comme boussoles vivantes. Longévité : ~35 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Ferrotissé** (Vifs-Formes, Lithotissés) quadrupède amphibien (0,6–1,2 m) des **marécages ferrugineux** à **carapace de rouille régénérative** (rouge-brun profond = bonne santé). **Magnétoréception** la plus développée de la classe : organe crânien dédié (sinus magnétique) permettant la détection de gisements enfouis et la navigation en eau trouble. Grégaires (10–40 individus), hiérarchie par intensité chromatique. Certaines caravanes du Désert les suivent comme **boussoles vivantes**. Longévité : \\~35 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle culturel, son habitat naturel, son mode d'alimentation, sa reproduction, et son interaction avec l'écosystème. Les sections sont à compléter selon les spécificités de l'espèce."
+    "re_sume__ia": "Ferrotissé quadrupède amphibien (0,6–1,2 m) des marécages ferrugineux à carapace de rouille régénérative (plaques Fe₂O₃ se dissolvant et se redéposant en continu — rouge-brun profond = bonne santé). Magnétoréception la plus développée de la classe : organe crânien dédié (sinus magnétique) permettant la détection de gisements enfouis et la navigation en eau trouble. Grégaires (groupes de 10–40 individus), hiérarchie par intensité chromatique. Certaines caravanes du Désert les suivent comme boussoles vivantes. Longévité : ~35 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

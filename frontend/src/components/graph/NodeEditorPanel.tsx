@@ -45,6 +45,7 @@ import {
   applyLinearNextNodeFromGraphEdges,
 } from '../../utils/mergeNodeEditorForm'
 import { ChoiceEditor } from './ChoiceEditor'
+import { ConditionEditor } from './conditions/ConditionEditor'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
@@ -132,10 +133,49 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const isFlushingRef = useRef(false)
   const previousSelectedNodeIdRef = useRef<string | null>(null)
   const debouncePushRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const selectedNodeIdRef = useRef<string | null>(selectedNodeId ?? null)
+  const nodeTypeRef = useRef(nodeType)
+  const flushCurrentFormToStoreRef = useRef<() => void>(() => {})
   /** Dernière empreinte des champs « connexion » du nœud sélectionné (évite resync inutile + boucles). */
   const prevConnectionFingerprintRef = useRef<string>('')
 
   const DEBOUNCE_MS = 100
+
+  selectedNodeIdRef.current = selectedNodeId ?? null
+  nodeTypeRef.current = nodeType
+
+  const flushFormToStore = useCallback((nodeId: string, targetNodeType: string) => {
+    const state = useGraphStore.getState()
+    const node = state.nodes.find((n) => n.id === nodeId)
+    if (!node?.data) return
+    const formValues = form.getValues()
+    let merged = mergeNodeFormIntoStoreData(
+      targetNodeType,
+      node.data as Record<string, unknown>,
+      formValues
+    )
+    if (targetNodeType === 'dialogueNode') {
+      merged = applyLinearNextNodeFromGraphEdges(nodeId, merged, state.edges)
+    }
+    if (JSON.stringify(merged) === JSON.stringify(node.data)) return
+    updateNode(nodeId, { data: merged })
+  }, [form, updateNode])
+
+  flushCurrentFormToStoreRef.current = () => {
+    const currentId = selectedNodeIdRef.current
+    if (!currentId) return
+    flushFormToStore(currentId, nodeTypeRef.current)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debouncePushRef.current) {
+        clearTimeout(debouncePushRef.current)
+        debouncePushRef.current = null
+      }
+      flushCurrentFormToStoreRef.current()
+    }
+  }, [])
 
   // ADR-006 : pousser le formulaire vers le store à la saisie (debounce ≤ 100 ms), pas de brouillon.
   // getState() dans le callback : lecture de l'état au moment de l'exécution (après 100 ms), pas dans le render.
@@ -145,20 +185,8 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
     if (debouncePushRef.current) clearTimeout(debouncePushRef.current)
     debouncePushRef.current = setTimeout(() => {
       debouncePushRef.current = null
-      const state = useGraphStore.getState()
-      if (state.selectedNodeId !== selectedNodeId) return
-      const node = state.nodes.find((n) => n.id === selectedNodeId)
-      if (!node?.data) return
-      const formValues = form.getValues()
-      let merged = mergeNodeFormIntoStoreData(nodeType, node.data as Record<string, unknown>, formValues)
-      if (nodeType === 'dialogueNode') {
-        merged = applyLinearNextNodeFromGraphEdges(selectedNodeId, merged, state.edges)
-      }
-      // Evite une boucle idle: ne pousse pas au store si le formulaire n'a rien changé.
-      const mergedStr = JSON.stringify(merged)
-      const currentStr = JSON.stringify(node.data)
-      if (mergedStr === currentStr) return
-      updateNode(selectedNodeId, { data: merged })
+      if (useGraphStore.getState().selectedNodeId !== selectedNodeId) return
+      flushFormToStore(selectedNodeId, nodeType)
     }, DEBOUNCE_MS)
     return () => {
       if (debouncePushRef.current) {
@@ -166,7 +194,7 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         debouncePushRef.current = null
       }
     }
-  }, [watchedValues, selectedNodeId, nodeType, form, updateNode])
+  }, [watchedValues, selectedNodeId, nodeType, flushFormToStore])
 
   // Synchroniser avec le nœud sélectionné ; au changement de nœud, flusher le formulaire vers l’ancien nœud (ADR-006 : filet de sécurité)
   useEffect(() => {
@@ -180,11 +208,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const prevNode = state.nodes.find((n) => n.id === prevId)
       if (prevNode?.data) {
         const prevNodeType = prevNode.type ?? 'dialogueNode'
-        const merged = mergeNodeFormIntoStoreData(
-          prevNodeType,
-          prevNode.data as Record<string, unknown>,
-          values
-        )
+        let merged = mergeNodeFormIntoStoreData(prevNodeType, prevNode.data as Record<string, unknown>, values)
+        if (prevNodeType === 'dialogueNode') {
+          merged = applyLinearNextNodeFromGraphEdges(prevId, merged, state.edges)
+        }
         updateNode(prevId, { data: merged })
       }
       if (debouncePushRef.current) {
@@ -203,6 +230,9 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
           title: (selectedNode.data.title as string) ?? '',
           speaker: selectedNode.data.speaker || '',
           line: selectedNode.data.line || '',
+          visibilityConditions: selectedNode.data.visibilityConditions as
+            | DialogueNodeData['visibilityConditions']
+            | undefined,
           choices,
           nextNode: selectedNode.data.nextNode || '',
         })
@@ -257,6 +287,12 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       const merged = applyStoreConnectionFieldsToDialogueFormChoices(storeChoices, formChoices)
       setValue('choices', merged, { shouldDirty: false })
       setValue('nextNode', (selectedNode.data.nextNode as string) || '', { shouldDirty: false })
+      setValue(
+        'visibilityConditions',
+        (selectedNode.data.visibilityConditions as DialogueNodeData['visibilityConditions']) ??
+          undefined,
+        { shouldDirty: false },
+      )
     }
   }, [selectedNodeId, selectedNode, nodeType, form, setValue])
 
@@ -713,6 +749,11 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             />
           </div>
         )}
+
+        {/* Story 9.2 — conditions de visibilité (nœud) */}
+        {nodeType === 'dialogueNode' && selectedNodeId && (
+          <ConditionEditor variant="node" />
+        )}
         
         {/* Test (pour test nodes) */}
         {nodeType === 'testNode' && (
@@ -1132,6 +1173,8 @@ function ChoicesEditor({ onGenerateForChoice, onCreateEmptyNodeForChoice }: Choi
           testCriticalSuccessNode: sc.testCriticalSuccessNode,
           // Préserver choiceId si présent
           choiceId: (sc as Choice & { choiceId?: string })?.choiceId ?? formChoice?.choiceId,
+          visibilityConditions:
+            (sc as Choice).visibilityConditions ?? formChoice?.visibilityConditions,
         }
       }),
     }

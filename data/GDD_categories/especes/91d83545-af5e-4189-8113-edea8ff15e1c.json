@@ -1,13 +1,14 @@
 {
   "Nom": "Torins",
   "values": {
+    "Espérance de vie": "20",
     "Règne (ou classe)": "2fd0f8f6-d104-4357-ae15-4b4eb2212ddc",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle dans l'intrigue, son habitat, son mode d'alimentation, sa reproduction, ses sous-espèces et son interaction avec l'écosystème.",
+    "Résumé IA": "Métamorphe radical de la Steppe des Éteignoirs. Phase mobile : mille-pattes géant (2 m), brouteur de croûtes minérales du Cycle Sixing pendant 2–3 ans. Phase sessile : pilier chitineux vertical (8–12 m), repère visuel emblématique et brise-vent de la steppe, longévité sessile de 30–50 ans. Métamorphose par gangue minérale autocimentée (3–4 mois). Reproduction par capsules larvaires détachées mécaniquement.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Métamorphe radical** (Vifs-Formes) de la **Steppe des Éteignoirs**. Phase mobile : mille-pattes géant (2 m), brouteur de croûtes minérales du Cycle Sixing pendant 2–3 ans. Phase sessile : **pilier chitineux vertical** (8–12 m), repère emblématique et brise-vent de la steppe, longévité sessile de 30–50 ans. Transition dans une gangue minérale autocimentée (3–4 mois). Reproduction par capsules larvaires détachées mécaniquement par le vent et les chocs sismiques.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, incluant son histoire, son apparence, son rôle dans l'intrigue, son habitat, son mode d'alimentation, sa reproduction, ses sous-espèces et son interaction avec l'écosystème."
+    "re_sume__ia": "Métamorphe radical de la Steppe des Éteignoirs. Phase mobile : mille-pattes géant (2 m), brouteur de croûtes minérales du Cycle Sixing pendant 2–3 ans. Phase sessile : pilier chitineux vertical (8–12 m), repère visuel emblématique et brise-vent de la steppe, longévité sessile de 30–50 ans. Métamorphose par gangue minérale autocimentée (3–4 mois). Reproduction par capsules larvaires détachées mécaniquement."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

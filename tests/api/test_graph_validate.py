@@ -249,6 +249,50 @@ class TestGraphValidateCycles:
                     assert warning["cycle_id"] is None
 
 
+class TestValidateGraphMergedFlagReferences:
+    """POST /validate avec champ document (Story 9.5)."""
+
+    def test_merges_flag_reference_errors(self):
+        """document avec flag non déclaré → erreur dialogue_flag_undeclared, valid False."""
+        nodes = [{"id": "START", "type": "startNode", "data": {}}]
+        edges: list = []
+        doc = {
+            "schemaVersion": "1.2.0",
+            "dialogueFlags": [
+                {
+                    "flagId": "PLAYER_KILLED_BOSS",
+                    "type": "bool",
+                    "initialValue": True,
+                }
+            ],
+            "nodes": [
+                {
+                    "id": "N1",
+                    "line": "x",
+                    "visibilityConditions": {
+                        "combinator": "AND",
+                        "items": [
+                            {
+                                "kind": "flag_bool",
+                                "flagId": "NOT_IN_DIALOGUE_FLAGS",
+                                "equals": True,
+                            }
+                        ],
+                    },
+                }
+            ],
+        }
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/validate",
+            json={"nodes": nodes, "edges": edges, "document": doc},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["valid"] is False
+        err_types = {e["type"] for e in data["errors"]}
+        assert "dialogue_flag_undeclared" in err_types
+
+
 class TestSimulateFlowEndpoint:
     """Tests pour POST /api/v1/unity-dialogues/graph/simulate-flow (FR46 / Story 4.11)."""
 

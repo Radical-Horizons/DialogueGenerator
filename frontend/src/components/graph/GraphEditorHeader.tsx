@@ -50,6 +50,9 @@ interface GraphEditorHeaderProps {
   canEditGraph: boolean
   isStandalone: boolean
   onBack?: () => void
+  /** Story 9.4 — preview scénario variables / effets. */
+  showDialoguePreviewPanel?: boolean
+  onToggleDialoguePreview?: () => void
   /**
    * Slot facultatif rendu dans la zone titre du header (Story 17.7).
    * Utilisé en mode narrow pour injecter le sélecteur de dialogue
@@ -68,6 +71,8 @@ export function GraphEditorHeader({
   canEditGraph,
   isStandalone,
   onBack,
+  showDialoguePreviewPanel = false,
+  onToggleDialoguePreview,
   headerSelector,
 }: GraphEditorHeaderProps) {
   const {
@@ -114,6 +119,18 @@ export function GraphEditorHeader({
     setShowAIGenerationPanel,
     showValidationPanel,
     setShowValidationPanel,
+    showQualityLlmPanel,
+    setShowQualityLlmPanel,
+    showAiSlopPanel,
+    setShowAiSlopPanel,
+    showContextDroppingPanel,
+    setShowContextDroppingPanel,
+    showFlowSimulationPanel,
+    setShowFlowSimulationPanel,
+    showGameSystemsIntegrationPanel,
+    setShowGameSystemsIntegrationPanel,
+    showSchemaValidationPanel,
+    handleToggleSchemaValidation,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -471,6 +488,233 @@ export function GraphEditorHeader({
           role="menuitem"
           onClick={() => {
             setShowActionsDropdown(false)
+            setShowQualityLlmPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showQualityLlmPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showQualityLlmPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          🧪 Qualité LLM
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowAiSlopPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showAiSlopPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showAiSlopPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          🧹 Anti-slop IA
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowContextDroppingPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showContextDroppingPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showContextDroppingPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          🧠 Context dropping
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowFlowSimulationPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showFlowSimulationPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showFlowSimulationPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          🔀 Simulation flow
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          data-testid="btn-game-systems-integration-panel"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            setShowGameSystemsIntegrationPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showGameSystemsIntegrationPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          title="Afficher les systèmes de jeu utilisables dans les dialogues (FR94)"
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showGameSystemsIntegrationPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          ⚙️ Systèmes de jeu
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            handleToggleSchemaValidation()
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showSchemaValidationPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showSchemaValidationPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          ✅ Validation schéma
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          data-testid="btn-dialogue-preview"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            onToggleDialoguePreview?.()
+          }}
+          disabled={!hasActiveDialogue || !onToggleDialoguePreview}
+          aria-pressed={showDialoguePreviewPanel}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showDialoguePreviewPanel ? theme.button.default.background : 'transparent',
+            color:
+              !hasActiveDialogue || !onToggleDialoguePreview
+                ? theme.text.secondary
+                : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue && onToggleDialoguePreview ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          title="Preview scénario — simuler variables et effets sans sauvegarder"
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue && onToggleDialoguePreview) {
+              e.currentTarget.style.backgroundColor = theme.state.hover.background
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showDialoguePreviewPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          👁 Preview scénario
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowActionsDropdown(false)
             setShowCostBreakdown((v) => !v)
           }}
           disabled={!hasActiveDialogue}
@@ -504,16 +748,30 @@ export function GraphEditorHeader({
     createEmptyNode,
     handleExportUnity,
     handleOpenExportDialog,
+    handleToggleSchemaValidation,
     hasActiveDialogue,
     nodes,
+    onToggleDialoguePreview,
     reactFlowInstance,
     selectedNodeId,
     setSelectedNode,
     setShowAIGenerationPanel,
     setShowActionsDropdown,
+    setShowAiSlopPanel,
+    setShowContextDroppingPanel,
     setShowCostBreakdown,
     setShowFiltersPanel,
+    setShowFlowSimulationPanel,
+    setShowGameSystemsIntegrationPanel,
     setShowJumpToNodeModal,
+    setShowQualityLlmPanel,
+    showAiSlopPanel,
+    showContextDroppingPanel,
+    showDialoguePreviewPanel,
+    showFlowSimulationPanel,
+    showGameSystemsIntegrationPanel,
+    showQualityLlmPanel,
+    showSchemaValidationPanel,
   ])
 
   const renderStatusGroup = (): ReactNode => {

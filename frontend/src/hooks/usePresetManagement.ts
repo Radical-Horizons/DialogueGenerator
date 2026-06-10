@@ -7,7 +7,6 @@ import { useState, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { usePresetStore } from '../store/presetStore'
 import { useContextStore } from '../store/contextStore'
-import { useContextConfigStore } from '../store/contextConfigStore'
 import { filterObsoleteReferences } from '../utils/presetUtils'
 import { getErrorMessage } from '../types/errors'
 import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
@@ -135,14 +134,6 @@ export function usePresetManagement(
     // Pré-remplir instructions
     setUserInstructions(config.instructions || '')
 
-    // Pré-remplir fieldConfigs si sauvegardé
-    if (config.fieldConfigs) {
-      const { setFieldConfig } = useContextConfigStore.getState()
-      Object.entries(config.fieldConfigs).forEach(([category, fields]) => {
-        setFieldConfig(category, fields as string[])
-      })
-    }
-
     // Pré-remplir les paramètres optionnels LLM si présents dans le preset
     if (config.topP !== undefined && setTopP) {
       setTopP(config.topP)
@@ -213,7 +204,6 @@ export function usePresetManagement(
 
   // Configuration actuelle pour sauvegarde preset
   const getCurrentConfiguration = useCallback(() => {
-    const { fieldConfigs } = useContextConfigStore.getState()
     const contextState = useContextStore.getState()
     const selections = contextState.selections
     const selectedRegion = contextState.selectedRegion
@@ -241,7 +231,6 @@ export function usePresetManagement(
       subLocation: selectedSubLocations?.[0] || sceneSelection.subLocation || undefined,
       sceneType: 'Generic', // TODO: Inférer depuis narrative tags ou instructions
       instructions: options.userInstructions,
-      fieldConfigs,
       contextSelections: selections,
       selectedRegion,
       selectedSubLocations,

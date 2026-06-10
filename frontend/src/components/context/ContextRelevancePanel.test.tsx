@@ -135,6 +135,59 @@ describe('ContextRelevancePanel', () => {
     expect(within(historyBlock).getByText(/req a/)).toBeInTheDocument()
   })
 
+  it('rend les entrées d’historique dupliquées sans warning React key', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockGetNode.mockResolvedValue({
+      dialogue_id: 'd.json',
+      node_id: 'NODE_1',
+      score_percent: 50,
+      breakdown_by_type: {},
+      reflected_types: [],
+      weak_types: [],
+      low_context_warning: false,
+      low_threshold_percent: 30,
+      method: 'keyword_overlap_v2',
+      computation_ms: 1,
+      computed_at: '2020-01-01T00:00:00+00:00',
+      suggestions_hints: [],
+    })
+    mockGetHistory.mockResolvedValue({
+      entries: [
+        {
+          request_id: 'same-request',
+          node_id: 'NODE_1',
+          timestamp: '2020-01-01T10:00:00+00:00',
+          score_percent: 40,
+          low_context_warning: false,
+          breakdown_by_type: {},
+        },
+        {
+          request_id: 'same-request',
+          node_id: 'NODE_1',
+          timestamp: '2020-01-01T10:00:00+00:00',
+          score_percent: 42,
+          low_context_warning: false,
+          breakdown_by_type: {},
+        },
+      ],
+      total_count: 2,
+      dialogue_id: 'd.json',
+    })
+
+    try {
+      render(<ContextRelevancePanel />)
+      await waitFor(() => {
+        expect(screen.getByTestId('context-relevance-history-details')).toBeInTheDocument()
+      })
+      const keyWarnings = consoleErrorSpy.mock.calls.filter((call) =>
+        call.some((arg) => String(arg).includes('Encountered two children with the same key'))
+      )
+      expect(keyWarnings).toHaveLength(0)
+    } finally {
+      consoleErrorSpy.mockRestore()
+    }
+  })
+
   it('traite record_present false comme absence de mesure (200)', async () => {
     mockGetNode.mockResolvedValue({
       record_present: false,

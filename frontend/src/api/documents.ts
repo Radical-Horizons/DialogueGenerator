@@ -3,7 +3,10 @@
  * Story 16.2, 16.3 : GET/PUT /api/v1/documents/{id}, GET/PUT /api/v1/documents/{id}/layout.
  */
 import apiClient from './client'
+import { API_TIMEOUTS } from '../constants'
 import type {
+  DialoguePreviewRequest,
+  DialoguePreviewResponse,
   DocumentGetResponse,
   PutDocumentRequest,
   PutDocumentResponse,
@@ -33,7 +36,8 @@ export async function putDocument(
 ): Promise<PutDocumentResponse> {
   const response = await apiClient.put<PutDocumentResponse>(
     `/api/v1/documents/${encodeURIComponent(documentId)}`,
-    body
+    body,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }
@@ -45,7 +49,8 @@ export async function putDocument(
  */
 export async function getLayout(documentId: string): Promise<LayoutGetResponse> {
   const response = await apiClient.get<LayoutGetResponse>(
-    `/api/v1/documents/${encodeURIComponent(documentId)}/layout`
+    `/api/v1/documents/${encodeURIComponent(documentId)}/layout`,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }
@@ -60,7 +65,24 @@ export async function putLayout(
 ): Promise<PutLayoutResponse> {
   const response = await apiClient.put<PutLayoutResponse>(
     `/api/v1/documents/${encodeURIComponent(documentId)}/layout`,
-    body
+    body,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
+  )
+  return response.data
+}
+
+/**
+ * Preview visibilité pour un état simulé (Story 9.4).
+ * POST /api/v1/documents/{id}/preview
+ */
+export async function postDocumentPreview(
+  documentId: string,
+  body: DialoguePreviewRequest
+): Promise<DialoguePreviewResponse> {
+  const response = await apiClient.post<DialoguePreviewResponse>(
+    `/api/v1/documents/${encodeURIComponent(documentId)}/preview`,
+    body,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO }
   )
   return response.data
 }

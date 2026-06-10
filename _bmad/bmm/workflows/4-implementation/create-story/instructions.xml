@@ -279,6 +279,8 @@
       Multiple implementation steps that are ONLY testable together belong in a single GREEN. Never create a subtask per implementation file/line — that produces implementation-step lists, not TDD cycles.
       If a task has more than ~4 implementation steps that are independently testable, SPLIT it into 2 tasks, each with its own 🔴/🟢/🔵.
 
+      FORMAT MARKDOWN (obligatoire): sous chaque tâche, EXACTEMENT 3 lignes `- [ ] …` avec préfixe 🔴 / 🟢 / 🔵 dans le libellé (combinaison cases à cocher + emoji pour lisibilité). INTERDIT : cercles/seuls emojis sans `- [ ]`; INTERDIT : cocher plusieurs sous-étapes en une fois sans avoir exécuté la phase.
+
       FORMAT: Every task gets exactly 3 ordered subtasks — dev agent MUST check in order, cannot batch tests at end:
       🔴 RED: Failing test — one behavioral assertion from the user's perspective (observable outcome, not implementation detail). Must cover all behaviors this task delivers. Example: "🔴 Test échoue : clic droit sur le pane → PaneContextMenu s'affiche ; 'Nouveau nœud' → createEmptyNode() appelé avec la position du clic"
       🟢 GREEN: Name the component/area to implement — NOT the how. The dev reads Dev Notes for implementation details. Example: "🟢 Implémenter PaneContextMenu + intégration dans GraphCanvas (voir Dev Notes)"

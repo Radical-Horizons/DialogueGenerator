@@ -23,6 +23,7 @@ describe('graphStructuralValidation', () => {
       'structural'
     )
     expect(getValidationHighlightKind(['broken_reference'])).toBe('structural')
+    expect(getValidationHighlightKind(['dialogue_flag_undeclared'])).toBe('structural')
   })
 
   it('FR40 : orphelin prioritaire sur inatteignable pour le style topologie', () => {

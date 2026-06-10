@@ -4,6 +4,7 @@
  */
 import type { Node, Edge } from 'reactflow'
 import type { SaveGraphResponse, ValidationErrorDetail } from '../../types/graph'
+import type { DialogueFlagBinding } from '../../types/dialogueFlags'
 
 /** Story 2.14 FR35: snapshot du graphe pour undo/redo (incl. SoT document + layout). */
 export interface GraphSnapshot {
@@ -72,6 +73,12 @@ export interface GraphState {
   layout: Record<string, unknown> | null
   documentRevision: number | null
   layoutRevision: number | null
+
+  /** Story 9.1 — liaisons catalogue ↔ valeurs initiales persistées dans le document. */
+  dialogueFlagBindings: DialogueFlagBinding[]
+  setDialogueFlagBindings: (bindings: DialogueFlagBinding[]) => void
+  upsertDialogueFlagBinding: (binding: DialogueFlagBinding) => void
+  removeDialogueFlagBinding: (flagId: string) => void
 
   // Modale confirmation suppression nœud (Supr.)
   showDeleteNodeConfirm: boolean
@@ -277,6 +284,7 @@ export const initialState = {
   layout: null as Record<string, unknown> | null,
   documentRevision: null as number | null,
   layoutRevision: null as number | null,
+  dialogueFlagBindings: [] as DialogueFlagBinding[],
   graphFilters: {} as GraphFilters,
   layoutSpacingMode: 'normal' as GraphLayoutSpacingMode,
   undoStack: [] as GraphSnapshot[],

@@ -2,9 +2,12 @@
 
 Story 16.2 : document canonique, schemaVersion, revision ; pas de nodes/edges au top level.
 """
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional, Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from api.schemas.graph import ValidationErrorDetail
+from services.dialogue_preview_limits import MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES
 
 ValidationMode = Literal["draft", "export"]
 
@@ -44,6 +47,10 @@ class PutDocumentResponse(BaseModel):
         default_factory=list,
         description="Erreurs de validation structurées (code, message, path)",
     )
+    flagThresholdWarnings: List[str] = Field(
+        default_factory=list,
+        description="Alertes non bloquantes seuils flags dialogue (Story 9.1)",
+    )
 
 
 # --- Layout (Story 16.3) ---
@@ -66,7 +73,42 @@ class PutLayoutRequest(BaseModel):
 class PutLayoutResponse(BaseModel):
     """Réponse PUT /documents/{id}/layout en succès : revision."""
 
-    revision: int = Field(..., ge=1, description="Nouvelle révision après persistance")
+    revision: int = Field(..., ge=1, description="Numéro de révision après persistance")
+
+
+# --- Validation références flags (Story 9.5 / FR93) ---
+
+
+class ValidateFlagReferencesRequest(BaseModel):
+    """Corps optionnel : document en mémoire ; sinon lecture du fichier persisté."""
+
+    document: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Document canonique à analyser ; si absent, lecture depuis le stockage.",
+    )
+
+    @model_validator(mode="after")
+    def _validate_inline_document_size(self) -> Self:
+        """Limite la taille d'un document inline pour éviter un DoS authentifié."""
+        if self.document is None:
+            return self
+        nodes = self.document.get("nodes")
+        if isinstance(nodes, list) and len(nodes) > MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES:
+            raise ValueError(
+                "document.nodes: au plus "
+                f"{MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES} nœuds autorisés"
+            )
+        return self
+
+
+class ValidateFlagReferencesResponse(BaseModel):
+    """Réponse POST validate-flag-references."""
+
+    valid: bool = Field(..., description="True si aucune erreur bloquante (références manquantes)")
+    summary: str = Field(..., description="Résumé lisible (erreurs, warnings, compteurs)")
+    used_flag_count: int = Field(..., ge=0, description="Nombre de flags distincts référencés")
+    errors: List[ValidationErrorDetail] = Field(default_factory=list)
+    warnings: List[ValidationErrorDetail] = Field(default_factory=list)
 
 
 # --- Migration choiceId (Story 16.5, CI / pre-commit) ---

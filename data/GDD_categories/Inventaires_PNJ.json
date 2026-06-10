@@ -1,5 +1,1019 @@
 [
   {
+    "Nom": "inventory_fragment_os_lexique",
+    "values": {
+      "Contexte narratif": "Fragment d'os de Lexique appartenant à un·e aîné·e de la communauté lexicorphique, récupéré lors de la dispersion de 3314 AG. Dissimulé dans la doublure d'une ceinture. Aucune utilité mécanique identifiée — Ivelhn ne sait pas pourquoi iel le garde. Objet de quête potentiel si la relation atteint Flag_perso_ivelhn_rencontre = ETABLI et que la quête de transmission est initiée.",
+      "ID": "INV123",
+      "Personnage": "be0d841a-6d8a-46d9-8bd1-eb3d8614a9be",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Fragment d'os de Lexique appartenant à un·e aîné·e de la communauté lexicorphique, récupéré lors de la dispersion de 3314 AG. Dissimulé dans la doublure d'une ceinture. Aucune utilité mécanique identifiée — Ivelhn ne sait pas pourquoi iel le garde. Objet de quête potentiel si la relation atteint Flag_perso_ivelhn_rencontre = ETABLI et que la quête de transmission est initiée."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "8e5e2f72-3f5a-405b-b179-474387ce7bb5"
+  },
+  {
+    "Nom": "inventory_cendres_parlantes_ormud",
+    "values": {
+      "Contexte narratif": "Ôrmüd Tlian-Keresh préside à l'Appareillement et supervise la collecte des cendres. Il conserve plusieurs fioles dans les archives liturgiques de la Nef Centrale — officiellement à des fins de vérification doctrinale. Officieusement, il sait ce que les résonances contiennent vraiment, et cette connaissance alimente son compte à rebours. Non transmissibles sans décision active de sa part.",
+      "ID": "INV122",
+      "Objet": "1c06e4d2-1b45-80a7-8db9-e225677931cb",
+      "Personnage": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
+      "Quantité": "3",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Ôrmüd Tlian-Keresh préside à l'Appareillement et supervise la collecte des cendres. Il conserve plusieurs fioles dans les archives liturgiques de la Nef Centrale — officiellement à des fins de vérification doctrinale. Officieusement, il sait ce que les résonances contiennent vraiment, et cette connaissance alimente son compte à rebours. Non transmissibles sans décision active de sa part."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "b7bb51e7-4458-4aed-98e6-1894adc57408"
+  },
+  {
+    "Nom": "inventory_vorkh_barvasinkulien_ferme",
+    "values": {
+      "Contexte narratif": "Vorkh barvasinkulien fermé glissé dans le repli d'un vêtement de fibres nervales. Fionnuala ne l'utilise jamais devant témoins — symbole de son appartenance discrète au Barvasinkul qu'elle refuse d'afficher institutionnellement. Peut être obtenu par le joueur comme Témoignage si Fionnuala accepte un lien de confiance profond (Flag_perso_fionnuala_contacts_cambiaux = 3).",
+      "ID": "INV121",
+      "Personnage": "c52842f2-acd5-42ec-8ffd-92dfb319dfb9",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Vorkh barvasinkulien fermé glissé dans le repli d'un vêtement de fibres nervales. Fionnuala ne l'utilise jamais devant témoins — symbole de son appartenance discrète au Barvasinkul qu'elle refuse d'afficher institutionnellement. Peut être obtenu par le joueur comme Témoignage si Fionnuala accepte un lien de confiance profond (Flag_perso_fionnuala_contacts_cambiaux = 3)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "e22a5bbc-240e-4e58-88fb-1942b581298b"
+  },
+  {
+    "Nom": "inventory_paquets_pheromonaux_cartographes",
+    "values": {
+      "Contexte narratif": "Archives biologiques contenant la cartographie complète des nœuds profonds du Réseau Rhizomorphique, encodée sous forme phéromonale. Non déchiffrables hors du réseau. Potentiellement transmissibles aux hôtes après connexion (Flag_perso_architecte_rhizome_connexion_reseau = ACCORDEE).",
+      "ID": "INV120",
+      "Personnage": "e50cc14d-c6aa-4333-82d8-8bdcefa9c62d",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Archives biologiques contenant la cartographie complète des nœuds profonds du Réseau Rhizomorphique, encodée sous forme phéromonale. Non déchiffrables hors du réseau. Potentiellement transmissibles aux hôtes après connexion (Flag_perso_architecte_rhizome_connexion_reseau = ACCORDEE)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "2db1094d-09fe-4c1c-9f14-254c8c2b8e29"
+  },
+  {
+    "Nom": "inventory_nectar_tellurique",
+    "values": {
+      "Contexte narratif": "Substance vitale extraite des nexus mantiques par capillarité hyphale. L'Architecte-Rhizome en consomme en continu pour maintenir la cohérence de ses nœuds dispersés. Non récoltable directement par les hôtes sans autorisation d'accès au nexus.",
+      "ID": "INV119",
+      "Personnage": "e50cc14d-c6aa-4333-82d8-8bdcefa9c62d",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Substance vitale extraite des nexus mantiques par capillarité hyphale. L'Architecte-Rhizome en consomme en continu pour maintenir la cohérence de ses nœuds dispersés. Non récoltable directement par les hôtes sans autorisation d'accès au nexus."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "41e95cdb-9ec8-48f1-a06d-2a95ef94e5ec"
+  },
+  {
+    "Nom": "inventory_masque_croyant_use",
+    "values": {
+      "Contexte narratif": "Masque de Croyant·e très usé, souvent déplacé sur le côté pendant les soins aux Gedroths. Les lentilles portent des traces de résidu phosphorescent. Port discret, fonctionnel, presque distrait : l'appartenance au Culte de l'Anentropie est assumée mais non revendiquée.",
+      "ID": "INV118",
+      "Personnage": "764c2dbb-47f9-4ddd-a286-a20e53eb1a31",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Masque de Croyant·e très usé, souvent déplacé sur le côté pendant les soins aux Gedroths. Les lentilles portent des traces de résidu phosphorescent. Port discret, fonctionnel, presque distrait : l'appartenance au Culte de l'Anentropie est assumée mais non revendiquée."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "588bb0e4-1c2b-4eb9-bd90-8b9c476e5f00"
+  },
+  {
+    "Nom": "inventory_tablier_maintenance_renforce",
+    "values": {
+      "Contexte narratif": "Tablier de maintenance renforcé par des morceaux de carapaces mortes de Gedroths. Poches remplies de fil, joints, fragments de membrane et petites rations de cendres. Outil de travail et de soin autant que vêtement : tout ce qu'il faut pour maintenir un Gedroth en vie et un conduit habitable.",
+      "ID": "INV117",
+      "Personnage": "764c2dbb-47f9-4ddd-a286-a20e53eb1a31",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Tablier de maintenance renforcé par des morceaux de carapaces mortes de Gedroths. Poches remplies de fil, joints, fragments de membrane et petites rations de cendres. Outil de travail et de soin autant que vêtement : tout ce qu'il faut pour maintenir un Gedroth en vie et un conduit habitable."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "7989b8fb-9b57-4fcf-856b-8e600a0e70da"
+  },
+  {
+    "Nom": "inventory_masque_os_sculpte",
+    "values": {
+      "Contexte narratif": "Masque rudimentaire taillé par Voknir dans un fragment d'os du Léviathan, remplaçant son masque d'origine confisqué lors du bannissement. Signe d'appartenance aux Van'Doï exilés. Voknir refuse de s'en séparer — ne peut pas être obtenu par le joueur directement.",
+      "ID": "INV116",
+      "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Masque rudimentaire taillé par Voknir dans un fragment d'os du Léviathan, remplaçant son masque d'origine confisqué lors du bannissement. Signe d'appartenance aux Van'Doï exilés. Voknir refuse de s'en séparer — ne peut pas être obtenu par le joueur directement."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "4728749f-fb89-4a67-b8b2-2d6690035005"
+  },
+  {
+    "Nom": "inventory_tablier_membrane_gedroth",
+    "values": {
+      "Contexte narratif": "Tablier de travail standard des Croyants de bas rang, augmenté d'une surpièce en membrane de Gedroth cousue après une brûlure aux acides des Bains. Ajout non réglementaire, toléré par indifférence administrative. Marqueur visuel discret de son pragmatisme et de son autonomie.",
+      "ID": "INV115",
+      "Personnage": "77656046-f125-43f4-8167-7a69dae08cf7",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Tablier de travail standard des Croyants de bas rang, augmenté d'une surpièce en membrane de Gedroth cousue après une brûlure aux acides des Bains. Ajout non réglementaire, toléré par indifférence administrative. Marqueur visuel discret de son pragmatisme et de son autonomie."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "fe4f8fba-b5e9-4b96-bd99-eec505a0db6f"
+  },
+  {
+    "Nom": "inventory_masque_van_doei_artisanal",
+    "values": {
+      "Contexte narratif": "Masque Van'Doei de remplacement fabriqué à douze Nuées après la casse de l'original lors d'une crise de fièvre. Matériaux récupérés dans le Léviathan, facture maladroite. Identifiable immédiatement comme non-rituel par quiconque connaît les masques Van'Doei. Objet de quête potentiel si la joueuse s'intéresse à son origine.",
+      "ID": "INV114",
+      "Personnage": "77656046-f125-43f4-8167-7a69dae08cf7",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Masque Van'Doei de remplacement fabriqué à douze Nuées après la casse de l'original lors d'une crise de fièvre. Matériaux récupérés dans le Léviathan, facture maladroite. Identifiable immédiatement comme non-rituel par quiconque connaît les masques Van'Doei. Objet de quête potentiel si la joueuse s'intéresse à son origine."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "4dc8a695-42f9-4c77-aa00-77f68bcc115e"
+  },
+  {
+    "Nom": "inventory_outils_de_maintenance",
+    "values": {
+      "Contexte narratif": "Kit de maintenance standard des galeries du Léviathan : sondes thermiques, outils de remplacement de membranes de Gedroth, fixateurs à résine. La Cinquante-Sixième les a toujours sur elle lors de ses rondes. Pas transmissibles (spécifiques aux systèmes du Léviathan, inutilisables hors contexte).",
+      "ID": "INV113",
+      "Personnage": "77656046-f125-43f4-8167-7a69dae08cf7",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Kit de maintenance standard des galeries du Léviathan : sondes thermiques, outils de remplacement de membranes de Gedroth, fixateurs à résine. La Cinquante-Sixième les a toujours sur elle lors de ses rondes. Pas transmissibles (spécifiques aux systèmes du Léviathan, inutilisables hors contexte)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "fa119e7d-73b7-4277-8f00-34516c03b789"
+  },
+  {
+    "Nom": "inventory_outil_scarification",
+    "values": {
+      "Contexte narratif": "Outil discret permettant à Eonundé de retracer les motifs vaideccanii quand ils s'estompent. Seul rituel d'entretien qu'elle s'accorde. Peut interagir avec le système Connaissances (savoirs vaideccans) et les tests de Perception visuelle si un PNJ cherche à lire les motifs de ses cicatrices.",
+      "ID": "INV112",
+      "Personnage": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Outil discret permettant à Eonundé de retracer les motifs vaideccanii quand ils s'estompent. Seul rituel d'entretien qu'elle s'accorde. Peut interagir avec le système Connaissances (savoirs vaideccans) et les tests de Perception visuelle si un PNJ cherche à lire les motifs de ses cicatrices."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "0433346b-c20a-47d1-97a4-ea1799e75094"
+  },
+  {
+    "Nom": "inventory_epees_dentelees",
+    "values": {
+      "Contexte narratif": "Deux épées courtes à lame dentelée, conçues pour déchirer autant que trancher. Forgées pour prolonger le geste politique d'Eonundé : lacérer les emblèmes de pouvoir, ouvrir les systèmes. Slot Greffon (unique PJ Eonundé) utilisable pour des modules d'amélioration des lames. Actuellement indisponibles — Eonundé est partiellement fusionnée à un mur.",
+      "ID": "INV111",
+      "Personnage": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Quantité": "2",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Deux épées courtes à lame dentelée, conçues pour déchirer autant que trancher. Forgées pour prolonger le geste politique d'Eonundé : lacérer les emblèmes de pouvoir, ouvrir les systèmes. Slot Greffon (unique PJ Eonundé) utilisable pour des modules d'amélioration des lames. Actuellement indisponibles — Eonundé est partiellement fusionnée à un mur."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "50d0c4b1-5e02-4dc9-80fe-b2111f635844"
+  },
+  {
+    "Nom": "inventory_armure_osteomecanique",
+    "values": {
+      "Contexte narratif": "Armure forgée en secret par une artisane Imuin descendante des artisans biomécaniques de Daïlon pré-Vol, à partir des restes d'un golem défaillant de la Citadelle. Plaques d'os poli, tendons rouges, rouages aux articulations. Casque sans visage. Son retrait devient un acte social fort (intimidation, rupture de masque). Actuellement portée lors de sa captivité dans la galerie de L'Enlumineur.",
+      "ID": "INV110",
+      "Personnage": "1996e4d2-1b45-80fa-97db-fe99255e6c0c",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Armure forgée en secret par une artisane Imuin descendante des artisans biomécaniques de Daïlon pré-Vol, à partir des restes d'un golem défaillant de la Citadelle. Plaques d'os poli, tendons rouges, rouages aux articulations. Casque sans visage. Son retrait devient un acte social fort (intimidation, rupture de masque). Actuellement portée lors de sa captivité dans la galerie de L'Enlumineur."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "eb7716b9-c6b4-44a9-8b40-fc475ada9b19"
+  },
+  {
+    "Nom": "inventory_fragments_memoriel_vol_reitar",
+    "values": {
+      "Contexte narratif": "Fragments mémoriels de Vol Reitar hérités lors de l'agrégation de l'Éthérée en 3380 AG. Ces savoirs — cartographie partielle de Daïlon, réseaux de contacts de Vol, logiques de contrôle psychique — constituent le noyau organisateur de l'Éthérée et affleurent involontairement dans ses perceptions et affinités. La joueuse peut les étudier pour débloquer des connaissances sur Vol Reitar et ses œuvres (type Savoir, alimente Connaissances).",
+      "ID": "INV109",
+      "Personnage": "1996e4d2-1b45-8043-9847-ef675478f485",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Fragments mémoriels de Vol Reitar hérités lors de l'agrégation de l'Éthérée en 3380 AG. Ces savoirs — cartographie partielle de Daïlon, réseaux de contacts de Vol, logiques de contrôle psychique — constituent le noyau organisateur de l'Éthérée et affleurent involontairement dans ses perceptions et affinités. La joueuse peut les étudier pour débloquer des connaissances sur Vol Reitar et ses œuvres (type Savoir, alimente Connaissances)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "1e83904a-d79f-4012-88bc-2239cf67e8f2"
+  },
+  {
+    "Nom": "inventory_eau_veineuse_pleuroirs",
+    "values": {
+      "Contexte narratif": "Akthar-Neth conserve plusieurs fioles d'eau veineuse scellées à la cire de Gedroth dans ses quartiers privés du Sanctuaire. Il en contrôle jalousement la distribution dans le cadre du Rituel de la Larme Éternelle. Il est possible d'en obtenir une en gagnant suffisamment sa confiance ou en accédant à ses réserves.",
+      "ID": "INV108",
+      "Objet": "bc895c52-805e-4222-8b62-2ab40132e48e",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Akthar-Neth conserve plusieurs fioles d'eau veineuse scellées à la cire de Gedroth dans ses quartiers privés du Sanctuaire. Il en contrôle jalousement la distribution dans le cadre du Rituel de la Larme Éternelle. Il est possible d'en obtenir une en gagnant suffisamment sa confiance ou en accédant à ses réserves."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "58c4dde3-03d6-49f9-9cf6-6bb739087fea"
+  },
+  {
+    "Nom": "inventory_eau_pure_pleuroirs_khair_gul",
+    "values": {
+      "Contexte narratif": "Khair-gul Kethur stocke de l'eau pure des Pleuroirs pour ses procédures médicales sur les Parfaits. Peut en donner à Uresaïr si la relation est favorable (Réputation Admiration ≥ 30) ou en échange d'une information sur des cas médicaux observés en dehors du Léviathan.",
+      "ID": "INV106",
+      "Objet": "b3fd5f66-a832-4856-ba17-9de6187e41d3",
+      "Personnage": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Quantité": "3",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Khair-gul Kethur stocke de l'eau pure des Pleuroirs pour ses procédures médicales sur les Parfaits. Peut en donner à Uresaïr si la relation est favorable (Réputation Admiration ≥ 30) ou en échange d'une information sur des cas médicaux observés en dehors du Léviathan."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "d8cd1263-f7a1-4732-a0c9-449b2fd104ba"
+  },
+  {
+    "Nom": "inventory_eau_pure_pleuroirs_akthar_neth",
+    "values": {
+      "Contexte narratif": "Akthar-Neth contrôle l'accès aux réserves d'eau des colonies sacrées. En tant qu'Interprète et figure fondatrice du Culte, iel supervise les stocks rituels et peut en accorder lors d'un dialogue de haute confiance (Sociabilité + Diplomatie DD 9) ou après une quête d'allégeance.",
+      "ID": "INV107",
+      "Objet": "b3fd5f66-a832-4856-ba17-9de6187e41d3",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Akthar-Neth contrôle l'accès aux réserves d'eau des colonies sacrées. En tant qu'Interprète et figure fondatrice du Culte, iel supervise les stocks rituels et peut en accorder lors d'un dialogue de haute confiance (Sociabilité + Diplomatie DD 9) ou après une quête d'allégeance."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "32d44b8b-3610-4d38-9c41-06e189aa6149"
+  },
+  {
+    "Nom": "inventory_nectar_stygien",
+    "values": {
+      "Contexte narratif": "En 3390 AG, Nahastra la Saigneuse contrôle exclusivement la récolte et la standardisation technique du Nectar Stygien dans les Bains Parkourétiques, à partir de protocoles plus anciens transmis par les officiants. Elle stocke les trois variantes chromatiques (rouge profond, violet électrique, jaune ambré) dans des contenants en verre scellés à salive de Gedroth. Le joueur peut en obtenir après avoir gagné sa confiance (Réputation Prestige ≥ 30 avec Nahastra) ou en échange d'un service rendu dans les Bains.",
+      "ID": "INV105",
+      "Objet": "1c26e4d2-1b45-80c6-b1cf-c2fea8b389d3",
+      "Personnage": "ec7da632-19b5-4d59-bd18-20a5bd5805d9",
+      "Quantité": "3",
+      "Type d'accès": "Stocké",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "En 3390 AG, Nahastra la Saigneuse contrôle exclusivement la récolte et la standardisation technique du Nectar Stygien dans les Bains Parkourétiques, à partir de protocoles plus anciens transmis par les officiants. Elle stocke les trois variantes chromatiques (rouge profond, violet électrique, jaune ambré) dans des contenants en verre scellés à salive de Gedroth. Le joueur peut en obtenir après avoir gagné sa confiance (Réputation Prestige ≥ 30 avec Nahastra) ou en échange d'un service rendu dans les Bains."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "82fb1495-142b-497e-9633-cbd77ee59815"
+  },
+  {
+    "Nom": "inventory_cle_sanctuaire_du_consensus",
+    "values": {
+      "Contexte narratif": "Clé d'accès biométrique au Sanctuaire du Consensus (sommet Tour Synaptic). Déverrouille l'ascenseur privé et les sous-niveaux où se trouve le Projet Miroir. Obtenir cette clé constitue un prérequis pour la confrontation finale ou pour les joueurs qui infiltrent Synaptic via la quête 'Les non-mesurés'.",
+      "ID": "INV104",
+      "Personnage": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Type d'accès": "Possédé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Clé d'accès biométrique au Sanctuaire du Consensus (sommet Tour Synaptic). Déverrouille l'ascenseur privé et les sous-niveaux où se trouve le Projet Miroir. Obtenir cette clé constitue un prérequis pour la confrontation finale ou pour les joueurs qui infiltrent Synaptic via la quête 'Les non-mesurés'."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "5a59f152-196c-464d-872e-9750fcbd0fba"
+  },
+  {
+    "Nom": "inventory_interface_kokoro_link_directeur",
+    "values": {
+      "Contexte narratif": "Interface de commandement du réseau kokoro-link intégrée dans les nano-filaments de ses trois têtes. Lui donne accès en temps réel aux données émotionnelles de 50 000+ employés. Peut projeter les données sur ses bras publicitaires. Désactiver ou pirater cette interface constitue un objectif stratégique majeur pour les joueurs.",
+      "ID": "INV103",
+      "Personnage": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Type d'accès": "Équipé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Interface de commandement du réseau kokoro-link intégrée dans les nano-filaments de ses trois têtes. Lui donne accès en temps réel aux données émotionnelles de 50 000+ employés. Peut projeter les données sur ses bras publicitaires. Désactiver ou pirater cette interface constitue un objectif stratégique majeur pour les joueurs."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "7a4a5b21-fa4c-4f4c-a203-c139972c96fe"
+  },
+  {
+    "Nom": "inventory_implants_de_lignee",
+    "values": {
+      "Contexte narratif": "Fragments de bio-mémoire hérités du Transloqué fondateur via 5 générations, implantés dans le torse de Tek à 8 Nuées. Pulsent d'une lumière ambrée, contiennent des souvenirs contradictoires qui se dégradent de 15-20% par génération. Tek les considère comme sa légitimité incarnée. Quête 'Échos dans la bio-mémoire' : preuve de la corruption récupérable par les joueurs.",
+      "ID": "INV102",
+      "Personnage": "2f46e4d2-1b45-8054-b997-e9fe5c9da656",
+      "Type d'accès": "Équipé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Fragments de bio-mémoire hérités du Transloqué fondateur via 5 générations, implantés dans le torse de Tek à 8 Nuées. Pulsent d'une lumière ambrée, contiennent des souvenirs contradictoires qui se dégradent de 15-20% par génération. Tek les considère comme sa légitimité incarnée. Quête 'Échos dans la bio-mémoire' : preuve de la corruption récupérable par les joueurs."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "e2e1c1a4-8bf3-4198-a680-19729c9a2711"
+  },
+  {
+    "Nom": "inventory_ossek_gedroth_compagnon",
+    "values": {
+      "Contexte narratif": "Gedroth à 6 pattes apprivoisé en semi-liberté, autorisé par Keth-Ossivane à suivre Drav dans les conduits. Détecte les infiltrations de Pneuma avant tout le monde. Sert de bouillotte vivante par temps froid. Porté à la main gauche, jamais à l'épaule droite (hypertrophiée). Aucune fiche Objet existante.",
+      "ID": "INV101",
+      "Personnage": "aab147fa-ca93-45eb-8462-9747f3601298",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Gedroth à 6 pattes apprivoisé en semi-liberté, autorisé par Keth-Ossivane à suivre Drav dans les conduits. Détecte les infiltrations de Pneuma avant tout le monde. Sert de bouillotte vivante par temps froid. Porté à la main gauche, jamais à l'épaule droite (hypertrophiée). Aucune fiche Objet existante."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "0022f8c5-49eb-4b6c-8b93-d8f0c3ee5e39"
+  },
+  {
+    "Nom": "inventory_grimoire_enchaine_valkazer",
+    "values": {
+      "Contexte narratif": "Petit grimoire fermé suspendu à la ceinture de Valkazer par des chaînes de cuivre. Il ne l'ouvre jamais en public et n'en parle jamais. Le fait qu'il soit enchaîné plutôt que simplement glissé à la ceinture suggère une contrainte intentionnelle — un objet gardé prisonnier autant que préservé. Valkazer pose parfois les doigts dessus dans les moments d'hésitation, puis retire sa main.",
+      "ID": "INV100",
+      "Personnage": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Petit grimoire fermé suspendu à la ceinture de Valkazer par des chaînes de cuivre. Il ne l'ouvre jamais en public et n'en parle jamais. Le fait qu'il soit enchaîné plutôt que simplement glissé à la ceinture suggère une contrainte intentionnelle — un objet gardé prisonnier autant que préservé. Valkazer pose parfois les doigts dessus dans les moments d'hésitation, puis retire sa main."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "f0c49af1-8e3b-4826-bf64-2f2c97ade8bd"
+  },
+  {
+    "Nom": "inventory_lance_decoree_valkazer",
+    "values": {
+      "Contexte narratif": "Lance longue et décorée tenue comme un sceptre, pointée vers le haut lors des déplacements et des confrontations. Elle n'est jamais orientée vers une cible lors des dialogues — fonctionnellement, c'est un axe, pas une arme brandie. Objet le plus lisible de la silhouette de Valkazer, portée par son bras gauche cybernétique supérieur.",
+      "ID": "INV99",
+      "Personnage": "892f2fd2-fbe3-4878-a05d-8d608b01e6bf",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Lance longue et décorée tenue comme un sceptre, pointée vers le haut lors des déplacements et des confrontations. Elle n'est jamais orientée vers une cible lors des dialogues — fonctionnellement, c'est un axe, pas une arme brandie. Objet le plus lisible de la silhouette de Valkazer, portée par son bras gauche cybernétique supérieur."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "d1f07f52-846b-48f7-b16a-a9bf6be6374f"
+  },
+  {
+    "Nom": "inventory_carte_ancienne_du_leviathan",
+    "values": {
+      "Contexte narratif": "Voknir conserve cette carte ancienne comme vestige d'une campagne cartographique antérieure et comme contrepoint matériel à ses scarifications. L'objet peut être remis, consulté ou interprété selon la confiance accordée au Cartographe Déchu.",
+      "ID": "INV98",
+      "Objet": "9187f890-b283-4507-98a4-9da1bf022d4d",
+      "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Voknir conserve cette carte ancienne comme vestige d'une campagne cartographique antérieure et comme contrepoint matériel à ses scarifications. L'objet peut être remis, consulté ou interprété selon la confiance accordée au Cartographe Déchu."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "0213ffd8-c82a-4610-9374-cc142a0b2d50"
+  },
+  {
+    "Nom": "inventory_enlumineur_sujets_consolides_galerie",
+    "values": {
+      "Contexte narratif": "Plusieurs dizaines d'œuvres vivantes intégrées aux parois du Vernissage, à des degrés variables de conscience. Certaines répondent encore à leur nom et servent de sentinelles ou de relais sensoriels à L'Enlumineur. Leur libération constitue un objectif optionnel de la quête principale. Les compagnons d'Eonundé sont inclus (consolidés sans consentement, résonance lumimantique dissonante perceptible pour qui examine les murs).",
+      "ID": "INV97",
+      "Personnage": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Plusieurs dizaines d'œuvres vivantes intégrées aux parois du Vernissage, à des degrés variables de conscience. Certaines répondent encore à leur nom et servent de sentinelles ou de relais sensoriels à L'Enlumineur. Leur libération constitue un objectif optionnel de la quête principale. Les compagnons d'Eonundé sont inclus (consolidés sans consentement, résonance lumimantique dissonante perceptible pour qui examine les murs)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "916b52a7-8a92-44b2-a0cb-16a264801dd6"
+  },
+  {
+    "Nom": "inventory_enlumineur_outils_lumimantiques",
+    "values": {
+      "Contexte narratif": "Ensemble d'instruments de précision en os poli et cristal liquide, hérités et modifiés sur plusieurs décennies. Permettent la manipulation active des réseaux lumimantiques d'un être vivant et la consolidation des émanations sacrificielles en structures stables. Constituent le vecteur mécanique de la consolidation au-delà de la persuasion atmosphérique. Récupérables uniquement après neutralisation complète de L'Enlumineur.",
+      "ID": "INV95",
+      "Personnage": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Ensemble d'instruments de précision en os poli et cristal liquide, hérités et modifiés sur plusieurs décennies. Permettent la manipulation active des réseaux lumimantiques d'un être vivant et la consolidation des émanations sacrificielles en structures stables. Constituent le vecteur mécanique de la consolidation au-delà de la persuasion atmosphérique. Récupérables uniquement après neutralisation complète de L'Enlumineur."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "381d3f84-d678-4b22-adde-94ef0656de1d"
+  },
+  {
+    "Nom": "inventory_enlumineur_tunique_visages_cousus",
+    "values": {
+      "Contexte narratif": "Tunique confectionnée à partir de peaux synthétiques moulées sur des visages réels — portraits préparatoires d'anciens sujets, traités avec une minutie d'archiviste. Identifiable à distance par sa texture organique semi-translucide et la subtile luminescence des couches lumimantiques de conservation. Non récupérable : trop intrinsèquement lié à l'identité de L'Enlumineur. Peut être examinée comme objet interactif N1 lors d'une visite au Vernissage.",
+      "ID": "INV96",
+      "Personnage": "1a96e4d2-1b45-8077-b534-dae9777c6a12",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Tunique confectionnée à partir de peaux synthétiques moulées sur des visages réels — portraits préparatoires d'anciens sujets, traités avec une minutie d'archiviste. Identifiable à distance par sa texture organique semi-translucide et la subtile luminescence des couches lumimantiques de conservation. Non récupérable : trop intrinsèquement lié à l'identité de L'Enlumineur. Peut être examinée comme objet interactif N1 lors d'une visite au Vernissage."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "d69a1c31-0054-4541-ab78-f04359de85ca"
+  },
+  {
+    "Nom": "inventory_stele_des_voeux_contre_ondoyants",
+    "values": {
+      "Contexte narratif": "Akthar-Neth a extrait le basalte, guidé les inscriptions et prononcé la Fixation finale. Il est le gardien rituel de la stèle dans la Nef Centrale. Si Uresaïr détruit la stèle, il déclenche l'arc La Vengeance de l'Exégète. Si elle l'emporte, il perd son levier de contrôle sur le culte.",
+      "ID": "INV94",
+      "Objet": "1ee6e4d2-1b45-80c6-8bb2-e1ec95ec4a8e",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Akthar-Neth a extrait le basalte, guidé les inscriptions et prononcé la Fixation finale. Il est le gardien rituel de la stèle dans la Nef Centrale. Si Uresaïr détruit la stèle, il déclenche l'arc La Vengeance de l'Exégète. Si elle l'emporte, il perd son levier de contrôle sur le culte."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "9dd5d36e-0419-4df2-a6a6-0af632188c10"
+  },
+  {
+    "Nom": "inventory_seuil",
+    "values": {
+      "Contexte narratif": "Grish T'vok porte une réserve de Seuil-8 (environ 30 dc) destinée à ses transactions dans les Couronnes intermédiaires. Le joueur peut en obtenir en échange d'un service ou via un test de Négociation (Sociabilité + Négociation, DD 7).",
+      "ID": "INV93",
+      "Objet": "2dc6e4d2-1b45-80b7-9ff4-c39401c42ccf",
+      "Personnage": "1b46e4d2-1b45-8081-992e-febbfed44a5d",
+      "Quantité": "30",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Grish T'vok porte une réserve de Seuil-8 (environ 30 dc) destinée à ses transactions dans les Couronnes intermédiaires. Le joueur peut en obtenir en échange d'un service ou via un test de Négociation (Sociabilité + Négociation, DD 7)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "e70d95f1-7cd8-4beb-bf7e-aa0c84fcf732"
+  },
+  {
+    "Nom": "inventory_tablier_cuir_osseux",
+    "values": {
+      "Contexte narratif": "Tablier de cuir osseux couvert d'empreintes résiduelles — chaque œuvre gravée a laissé une trace indélébile dans le matériau. Sert de registre secondaire visible des travaux passés. Non obtainable (trop personnel, lié à son identité artisanale), mais examinable comme objet interactif N1 dans l'atelier.",
+      "ID": "INV92",
+      "Personnage": "6e0e1e82-f6af-4065-8025-fcd1b99318fe",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Tablier de cuir osseux couvert d'empreintes résiduelles — chaque œuvre gravée a laissé une trace indélébile dans le matériau. Sert de registre secondaire visible des travaux passés. Non obtainable (trop personnel, lié à son identité artisanale), mais examinable comme objet interactif N1 dans l'atelier."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "6510824c-c26f-4f12-aa0c-1ca229b5445c"
+  },
+  {
+    "Nom": "inventory_carnet_empreintes_maculaires",
+    "values": {
+      "Contexte narratif": "Carnet de fibres de Gedroth où Ossian consigne chaque empreinte après gravure. Contient la preuve géométrique de la dérive des Conducteurs d'Incorporation. Obtainable si Flag_perso_ossian_carnets_acces = TRANSMIS — Ossian le remet volontairement après un dialogue de confiance (Sociabilité + Diplomatie DD 9 ou Admiration ≥ +30). Objet clé pour déclencher la piste des Vrais Sodoirs sans passer par les tests de l'atelier.",
+      "ID": "INV91",
+      "Personnage": "6e0e1e82-f6af-4065-8025-fcd1b99318fe",
+      "Quantité": "1",
+      "Type d'accès": "Récompense potentielle",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Carnet de fibres de Gedroth où Ossian consigne chaque empreinte après gravure. Contient la preuve géométrique de la dérive des Conducteurs d'Incorporation. Obtainable si Flag_perso_ossian_carnets_acces = TRANSMIS — Ossian le remet volontairement après un dialogue de confiance (Sociabilité + Diplomatie DD 9 ou Admiration ≥ +30). Objet clé pour déclencher la piste des Vrais Sodoirs sans passer par les tests de l'atelier."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "e22cec60-9f1f-4c27-8a7c-b26aee7a6b24"
+  },
+  {
+    "Nom": "inventory_fragments_memoriels_absorbes",
+    "values": {
+      "Contexte narratif": "Artefacts mémoriels condensés régurgités si L'Incarnée est forcée à libérer du contenu absorbé (neutralisation, extraction ciblée, négociation réussie). Portent les traces de consciences emprisonnées et peuvent révéler des informations sur les victimes.",
+      "ID": "INV89",
+      "Personnage": "1c76e4d2-1b45-80af-8225-ecdd35b8e367",
+      "Quantité": "1",
+      "Type d'accès": "Récompense potentielle",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Artefacts mémoriels condensés régurgités si L'Incarnée est forcée à libérer du contenu absorbé (neutralisation, extraction ciblée, négociation réussie). Portent les traces de consciences emprisonnées et peuvent révéler des informations sur les victimes."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "b18d49bf-e378-4c35-8193-facc5755be9d"
+  },
+  {
+    "Nom": "inventory_fluide_dore_cristallise",
+    "values": {
+      "Contexte narratif": "Substance dorée sécrétée par L'Incarnée lors d'interactions tendues. Peut être collectée si elle libère une conscience ou est temporairement affaiblie. Potentiel mémoriel ou alchimique non élucidé.",
+      "ID": "INV90",
+      "Personnage": "1c76e4d2-1b45-80af-8225-ecdd35b8e367",
+      "Quantité": "1",
+      "Type d'accès": "Récompense potentielle",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Substance dorée sécrétée par L'Incarnée lors d'interactions tendues. Peut être collectée si elle libère une conscience ou est temporairement affaiblie. Potentiel mémoriel ou alchimique non élucidé."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "4ae5365b-2131-450a-bee5-43e2e5ad53cf"
+  },
+  {
+    "Nom": "inventory_masque_os_blanchi",
+    "values": {
+      "Contexte narratif": "Masque sobre en os blanchi portant la marque de rang d'Accomplie du Culte de l'Anentropie. Sans ornement ni ciselure — contraste délibéré avec les masques élaborés des officiants de cérémonie. Identifie Nahastra comme Accomplie et garde-protocole des Bains. Non récupérable par la joueuse.",
+      "ID": "INV88",
+      "Personnage": "ec7da632-19b5-4d59-bd18-20a5bd5805d9",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Masque sobre en os blanchi portant la marque de rang d'Accomplie du Culte de l'Anentropie. Sans ornement ni ciselure — contraste délibéré avec les masques élaborés des officiants de cérémonie. Identifie Nahastra comme Accomplie et garde-protocole des Bains. Non récupérable par la joueuse."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "4e27e58d-4737-418c-9de8-526b64c0dc5e"
+  },
+  {
+    "Nom": "inventory_urnes_douleurs_transfigurees",
+    "values": {
+      "Contexte narratif": "Petits récipients en os frémissant contenus dans des enveloppes de membrane Gedroth, portés à la ceinture de Nahastra. Tintent légèrement lors de ses déplacements. Recueillent le sang des initiés lors des Épreuvations, transformé en encre rituelle. Inaccessibles à la joueuse sans accord explicite de Nahastra. Peuvent être examinés si Flag_perso_nahastra_archives ≥ 1.",
+      "ID": "INV87",
+      "Personnage": "ec7da632-19b5-4d59-bd18-20a5bd5805d9",
+      "Quantité": "7",
+      "Type d'accès": "Équipé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Petits récipients en os frémissant contenus dans des enveloppes de membrane Gedroth, portés à la ceinture de Nahastra. Tintent légèrement lors de ses déplacements. Recueillent le sang des initiés lors des Épreuvations, transformé en encre rituelle. Inaccessibles à la joueuse sans accord explicite de Nahastra. Peuvent être examinés si Flag_perso_nahastra_archives ≥ 1."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "86005b07-b10f-4758-a0c4-5a9a895a7805"
+  },
+  {
+    "Nom": "inventory_clochettes_os_sans",
+    "values": {
+      "Contexte narratif": "Clochettes en fragments d'os-sans, données par Ôrmüd Tlian-Keresh à Nahastra lors des grandes cérémonies. Il lui a dit qu'elles « chanteront la vérité quand le moment sera venu ». Nahastra les stocke sans les utiliser, en attendant d'avoir des faits. La joueuse peut les examiner si elle gagne l'accès aux effets personnels de Nahastra (Flag_perso_nahastra_archives ≥ 2). Objet de quête lié à la Symphonie des Clochettes.",
+      "ID": "INV86",
+      "Personnage": "ec7da632-19b5-4d59-bd18-20a5bd5805d9",
+      "Type d'accès": "Possédé",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Clochettes en fragments d'os-sans, données par Ôrmüd Tlian-Keresh à Nahastra lors des grandes cérémonies. Il lui a dit qu'elles « chanteront la vérité quand le moment sera venu ». Nahastra les stocke sans les utiliser, en attendant d'avoir des faits. La joueuse peut les examiner si elle gagne l'accès aux effets personnels de Nahastra (Flag_perso_nahastra_archives ≥ 2). Objet de quête lié à la Symphonie des Clochettes."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "42340e52-662c-4a29-99e4-e1e9379f0e55"
+  },
+  {
+    "Nom": "inventory_console_akthar_neth",
+    "values": {
+      "Contexte narratif": "Akthar-Neth Amatru, Exégète et Grand-Père du Culte, exerce une autorité rituelle sur les 72 Consolés du Tunnel vertébral. Il décide des admissions au Rite de l'Élévation, valide les candidatures, préside les Débats Suspendus et interprète les micro-signes des corps fixés. Les Consolés ne sont pas « sa propriété » au sens matériel, mais relèvent narrativement de sa charge : aucun n'est élevé sans son assentiment.",
+      "ID": "INV84",
+      "Objet": "a1d3015c-3e74-4030-8654-aad3645f24f5",
+      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
+      "Quantité": "72",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Akthar-Neth Amatru, Exégète et Grand-Père du Culte, exerce une autorité rituelle sur les 72 Consolés du Tunnel vertébral. Il décide des admissions au Rite de l'Élévation, valide les candidatures, préside les Débats Suspendus et interprète les micro-signes des corps fixés. Les Consolés ne sont pas « sa propriété » au sens matériel, mais relèvent narrativement de sa charge : aucun n'est élevé sans son assentiment."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "ca9d20b0-7ed0-4186-b762-b09b517808a2"
+  },
+  {
+    "Nom": "inventory_console_kha_vareth",
+    "values": {
+      "Contexte narratif": "Kha'Vareth Ardakh, Artisan d'Éternité et Parfait, supervise l'entretien matériel des Consolés : ajustement des chevilles osseuses dans les alcôves du Tunnel Vertébral, préservation des Prosôpons, réparation des vêtements cérémoniels, calibration des Sodoirs associés. Il sait mieux que quiconque la part que les Artisans d'Éternité prennent discrètement dans la dessiccation post-mortem des Consolés, là où la doctrine publique invoque la seule vertu du renoncement. Selon l'issue de son arc : s'il achève le Rite de Consolation (branche « besoin non résolu »), ses pairs achèveront sa propre momification comme il a achevé celle des autres, ironie terminale pour l'architecte qui avait par trois fois refusé sa préservation en Sodoir ; s'il bascule dans le Sodoir ambulant non-euclidien (branche « besoin empire »), il sortira entièrement du registre des Consolés pour devenir une aberration théologique.",
+      "ID": "INV85",
+      "Objet": "a1d3015c-3e74-4030-8654-aad3645f24f5",
+      "Personnage": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Kha'Vareth Ardakh, Artisan d'Éternité et Parfait, supervise l'entretien matériel des Consolés : ajustement des chevilles osseuses dans les alcôves du Tunnel Vertébral, préservation des Prosôpons, réparation des vêtements cérémoniels, calibration des Sodoirs associés. Il sait mieux que quiconque la part que les Artisans d'Éternité prennent discrètement dans la dessiccation post-mortem des Consolés, là où la doctrine publique invoque la seule vertu du renoncement. Selon l'issue de son arc : s'il achève le Rite de Consolation (branche « besoin non résolu »), ses pairs achèveront sa propre momification comme il a achevé celle des autres, ironie terminale pour l'architecte qui avait par trois fois refusé sa préservation en Sodoir ; s'il bascule dans le Sodoir ambulant non-euclidien (branche « besoin empire »), il sortira entièrement du registre des Consolés pour devenir une aberration théologique."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "d4ce4fe5-f35a-41f2-8c39-a2abb76ae776"
+  },
+  {
+    "Nom": "inventory_sacoche_de_maintenance",
+    "values": {
+      "Contexte narratif": "Sacoche de tissu grossier en bandoulière, usée. Contient fil de cuivre, deux éclats de carapace de rechange, résidu phosphorescent séché, et souvent du Lichen-Sang récupéré en route. Outil de travail quotidien du coursier. Peut contenir des messages ou matériaux de maintenance selon les missions en cours.",
+      "ID": "INV83",
+      "Personnage": "aab147fa-ca93-45eb-8462-9747f3601298",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Sacoche de tissu grossier en bandoulière, usée. Contient fil de cuivre, deux éclats de carapace de rechange, résidu phosphorescent séché, et souvent du Lichen-Sang récupéré en route. Outil de travail quotidien du coursier. Peut contenir des messages ou matériaux de maintenance selon les missions en cours."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "8dc8148a-8d37-43f0-8181-6c091d920dc3"
+  },
+  {
+    "Nom": "inventory_masque_compose",
+    "values": {
+      "Contexte narratif": "Bois pétrifié de caverne arrondi avec cinq lentilles en carapaces de Gedroths morts, repassées au résidu phosphorescent. Fabriqué par Keth-Ossivane pour le 1er Nuée de Drav. Trop grand au départ, maintenant calibré. Les lentilles luisent vert-jaune dans l'obscurité totale — outil de navigation, pas signe doctrinal.",
+      "ID": "INV82",
+      "Personnage": "aab147fa-ca93-45eb-8462-9747f3601298",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Bois pétrifié de caverne arrondi avec cinq lentilles en carapaces de Gedroths morts, repassées au résidu phosphorescent. Fabriqué par Keth-Ossivane pour le 1er Nuée de Drav. Trop grand au départ, maintenant calibré. Les lentilles luisent vert-jaune dans l'obscurité totale — outil de navigation, pas signe doctrinal."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "89d383f3-2417-469c-a999-09750aa30828"
+  },
+  {
+    "Nom": "Voile de mousse corallienne (Varek)",
+    "values": {
+      "Contexte narratif": "Voile de mousse corallienne séchée, à demi transparent, porté sur les épaules lors des démembrements rituels collectifs. Symbole de la purification en cours : porté ouvert le reste du temps car dissimuler le corps contredirait le message de transparence corps-esprit.",
+      "ID": "INV80",
+      "Personnage": "22e6e4d2-1b45-80ee-875e-d9f219970f06",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Voile de mousse corallienne séchée, à demi transparent, porté sur les épaules lors des démembrements rituels collectifs. Symbole de la purification en cours : porté ouvert le reste du temps car dissimuler le corps contredirait le message de transparence corps-esprit."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "35553ff5-553d-4fa6-b37b-68370df85731"
+  },
+  {
+    "Nom": "Pagne de fibres coralliennes (Varek)",
+    "values": {
+      "Contexte narratif": "Pagne de fibres coralliennes brutes, non teint, noue bas sur les hanches. Laisse volontairement visibles les cicatrices rituelles et les moignons cauterisés — dissimuler le corps purifié contredirait le message de la pratique khelvortim.",
+      "ID": "INV81",
+      "Personnage": "22e6e4d2-1b45-80ee-875e-d9f219970f06",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Pagne de fibres coralliennes brutes, non teint, noue bas sur les hanches. Laisse volontairement visibles les cicatrices rituelles et les moignons cauterisés — dissimuler le corps purifié contredirait le message de la pratique khelvortim."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "ec2bf928-5d99-4e35-a4fa-c613932ee46b"
+  },
+  {
+    "Nom": "Fioles de Brouillignon (Varek)",
+    "values": {
+      "Contexte narratif": "Fioles suspendues à une ceinture d'algues portée par Varek, contenant des microcircuits à demi-dissous dans du Brouillignon liquide. Utilisées pour la purification des composants résiduels de l'Océan Mécanique. Chaque fiole représente un ancien circuit démantibulé.",
+      "ID": "INV79",
+      "Personnage": "22e6e4d2-1b45-80ee-875e-d9f219970f06",
+      "Quantité": "6",
+      "Type d'accès": "Équipé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Fioles suspendues à une ceinture d'algues portée par Varek, contenant des microcircuits à demi-dissous dans du Brouillignon liquide. Utilisées pour la purification des composants résiduels de l'Océan Mécanique. Chaque fiole représente un ancien circuit démantibulé."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "da550aaf-c8da-4f4d-a083-16279d2e725b"
+  },
+  {
+    "Nom": "inventory_tablier_cuir_veineux",
+    "values": {
+      "Contexte narratif": "Tablier de cuir veineux imperméabilisé au liquide céphalorachidien, couvert de taches permanentes, poches remplies de tubulures de remplacement, scalpels de calibrage et flacons de fluide nutritif de secours. Signe de réputation dans les Scriptoria : un tablier immaculé trahit un novice, les taches de Thalas sont légendaires.",
+      "ID": "INV78",
+      "Personnage": "8fefb411-8033-4e06-afdd-9d186937ee2a",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Tablier de cuir veineux imperméabilisé au liquide céphalorachidien, couvert de taches permanentes, poches remplies de tubulures de remplacement, scalpels de calibrage et flacons de fluide nutritif de secours. Signe de réputation dans les Scriptoria : un tablier immaculé trahit un novice, les taches de Thalas sont légendaires."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "6d9f037b-39a0-430f-8f10-f3504e1c7c78"
+  },
+  {
+    "Nom": "inventory_archives_vol_reitar",
+    "values": {
+      "Contexte narratif": "Les archives complètes des travaux scientifiques de Vol Reitar, cataloguées et conservées par Ilyena dans les souterrains de la Bibliothèque Sympathique depuis la chute de la Citadelle. Ilyena ne s'en sépare pas ; elles peuvent être consultées sur place (accès PARTIEL ou COMPLET selon issue de la quête) mais jamais emportées sans son accord explicite.",
+      "ID": "INV77",
+      "Personnage": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Les archives complètes des travaux scientifiques de Vol Reitar, cataloguées et conservées par Ilyena dans les souterrains de la Bibliothèque Sympathique depuis la chute de la Citadelle. Ilyena ne s'en sépare pas ; elles peuvent être consultées sur place (accès PARTIEL ou COMPLET selon issue de la quête) mais jamais emportées sans son accord explicite."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "adde36e8-ff71-47f7-9196-1bc584e31dcf"
+  },
+  {
+    "Nom": "inventory_traite_gradients_annote",
+    "values": {
+      "Contexte narratif": "Copie personnelle du Traité des Gradients de Vol Reitar, intégralement annotée de la main d'Ilyena sur trois décennies. Les équations qui ornent ses bras en sont extraites. Objet identitaire fort — la montrer au groupe est en soi un niveau de confiance.",
+      "ID": "INV76",
+      "Personnage": "3256e4d2-1b45-80f4-9eeb-de67c6d8955b",
+      "Quantité": "1",
+      "Type d'accès": "Possédé",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Copie personnelle du Traité des Gradients de Vol Reitar, intégralement annotée de la main d'Ilyena sur trois décennies. Les équations qui ornent ses bras en sont extraites. Objet identitaire fort — la montrer au groupe est en soi un niveau de confiance."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "dc48aea0-a1d6-41e1-a8b1-d2998999a199"
+  },
+  {
+    "Nom": "inventory_troisieme_sodoir_transept",
+    "values": {
+      "Contexte narratif": "Sodoir conçu et réalisé clandestinement par Kha'Vareth Ardakh entre 11 et 14 Nuées, dressé dans le Transept Mnésique du Léviathan pétrifié. Non transportable, architectural. Kha'Vareth en est le détenteur narratif dissimulé : il l'a créé, il l'entretient par son silence, il passe devant sans jamais s'arrêter. La conscience enfermée y persiste depuis vingt Nuées. L'objet n'est acquis par la joueuse qu'au sens cognitif — preuve matérielle du Ghost fondateur de l'Artisan.",
+      "ID": "INV75",
+      "Objet": "a76c3a97-922a-4908-bdbf-248586211838",
+      "Personnage": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
+      "Quantité": "1",
+      "Type d'accès": "Stocké",
+      "État": "En cours"
+    },
+    "sections": {
+      "contexte_narratif": "Sodoir conçu et réalisé clandestinement par Kha'Vareth Ardakh entre 11 et 14 Nuées, dressé dans le Transept Mnésique du Léviathan pétrifié. Non transportable, architectural. Kha'Vareth en est le détenteur narratif dissimulé : il l'a créé, il l'entretient par son silence, il passe devant sans jamais s'arrêter. La conscience enfermée y persiste depuis vingt Nuées. L'objet n'est acquis par la joueuse qu'au sens cognitif — preuve matérielle du Ghost fondateur de l'Artisan."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "5506632d-cf6b-49dc-9ab3-a3f649934d9e"
+  },
+  {
+    "Nom": "inventory_urnes_kheridhen",
+    "values": {
+      "Contexte narratif": "Trois urnes rituelles des Cendriers de Kheridhen empruntées lors de l'Affaire (16 Nuées) et jamais restituées. Objet-fardeau non vendable : déclenche la scène de confrontation avec un survivant Kheridhen pendant la quête de recrutement « Le Carnaval des Correspondances ». Genka les conserve sans jamais les nommer directement.",
+      "ID": "INV73",
+      "Objet": "c18c90ee-f0e2-4b7c-96b0-4a2461864e75",
+      "Personnage": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Quantité": "3",
+      "Type d'accès": "Stocké",
+      "État": "Pas commencé"
+    },
+    "sections": {
+      "contexte_narratif": "Trois urnes rituelles des Cendriers de Kheridhen empruntées lors de l'Affaire (16 Nuées) et jamais restituées. Objet-fardeau non vendable : déclenche la scène de confrontation avec un survivant Kheridhen pendant la quête de recrutement « Le Carnaval des Correspondances ». Genka les conserve sans jamais les nommer directement."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "0967b5ff-1297-42ca-a12f-aa51bb37a589"
+  },
+  {
+    "Nom": "inventory_grelet_clochettes_dailleurs",
+    "values": {
+      "Contexte narratif": "Grelet de clochettes hétéroclites assemblé sur la prothèse de bras, une clochette par communauté visitée. Matériau de performance de petite valeur marchande ; déclenche des barks comparatifs quand Genka manipule sa prothèse selon son état émotionnel (rapide/chaotique sous tension, lent/harmonieux dans la confiance).",
+      "ID": "INV74",
+      "Objet": "0c55f9c6-036b-445a-85b9-fbce1ccf1ad9",
+      "Personnage": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Grelet de clochettes hétéroclites assemblé sur la prothèse de bras, une clochette par communauté visitée. Matériau de performance de petite valeur marchande ; déclenche des barks comparatifs quand Genka manipule sa prothèse selon son état émotionnel (rapide/chaotique sous tension, lent/harmonieux dans la confiance)."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "454b0a91-8937-4bfa-ad78-39e4b5b0c8fa"
+  },
+  {
+    "Nom": "inventory_the_ceremonial_ouverture",
+    "values": {
+      "Contexte narratif": "Thé servi à tout nouveau patient sous couvert de protocole d'accueil. Ouvre légèrement l'esprit à la suggestion sans provoquer de somnolence, préparant la Catharsis du Souvenir ou une évaluation discrète. Recette gardée secrète ; une fiole volée ou offerte permet au joueur d'identifier la manipulation, voire de la retourner contre Khair-gul.",
+      "ID": "INV72",
+      "Personnage": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Type d'accès": "Possédé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Thé servi à tout nouveau patient sous couvert de protocole d'accueil. Ouvre légèrement l'esprit à la suggestion sans provoquer de somnolence, préparant la Catharsis du Souvenir ou une évaluation discrète. Recette gardée secrète ; une fiole volée ou offerte permet au joueur d'identifier la manipulation, voire de la retourner contre Khair-gul."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "9317f34a-0933-4cf1-8cb0-5c47328b45e2"
+  },
+  {
+    "Nom": "inventory_baume_de_serenite_perpetuelle",
+    "values": {
+      "Contexte narratif": "Produit phare de Khair-gul, à l'origine de sa réputation. Formule complète connue de lui seul ; il en prépare en quantité variable pour les rites du Culte. La plupart des lots tiennent leurs promesses de sérénité ; certains, destinés à des patients ciblés, sont modifiés pour faciliter un prélèvement. Obtention joueur possible via soin, troc, ou récupération après confrontation.",
+      "ID": "INV71",
+      "Personnage": "1ae6e4d2-1b45-805b-9dc2-e851e5fc3be1",
+      "Type d'accès": "Possédé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Produit phare de Khair-gul, à l'origine de sa réputation. Formule complète connue de lui seul ; il en prépare en quantité variable pour les rites du Culte. La plupart des lots tiennent leurs promesses de sérénité ; certains, destinés à des patients ciblés, sont modifiés pour faciliter un prélèvement. Obtention joueur possible via soin, troc, ou récupération après confrontation."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "0db59113-1250-4a36-a128-a3546ebe3dcf"
+  },
+  {
+    "Nom": "inventory_habit_composite_ossian",
+    "values": {
+      "Contexte narratif": "Habit composite à couches interchangeables : thermique à l'intérieur (vital pour un Van'Doei), terne et neutre à l'extérieur. Dans les Jardins thoraciques, le couvre-nez réglementaire est toujours porté correctement — respect visible des règles facilitant le passage sans attirer l'attention. Permet à Ossian de s'intégrer aussi bien dans les zones du Culte que dans les passages clandestins.",
+      "ID": "INV69",
+      "Personnage": "1d95df62-504c-4349-b8ec-63893118af51",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Habit composite à couches interchangeables : thermique à l'intérieur (vital pour un Van'Doei), terne et neutre à l'extérieur. Dans les Jardins thoraciques, le couvre-nez réglementaire est toujours porté correctement — respect visible des règles facilitant le passage sans attirer l'attention. Permet à Ossian de s'intégrer aussi bien dans les zones du Culte que dans les passages clandestins."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "8a4449d6-d1b7-4571-b78a-976b00bd4378"
+  },
+  {
+    "Nom": "inventory_bandeau_cuir_murmurateur",
+    "values": {
+      "Contexte narratif": "Bandeau de cuir tressé couleur cendre porté autour du bras gauche — couleur Murmurateurs, sans signe distinctif lisible pour qui ne connaît pas le code. Porté en toutes circonstances par Ossian Khäl, y compris dans les zones du Culte. Signe d'appartenance à la communauté murmureuse.",
+      "ID": "INV70",
+      "Personnage": "1d95df62-504c-4349-b8ec-63893118af51",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Bandeau de cuir tressé couleur cendre porté autour du bras gauche — couleur Murmurateurs, sans signe distinctif lisible pour qui ne connaît pas le code. Porté en toutes circonstances par Ossian Khäl, y compris dans les zones du Culte. Signe d'appartenance à la communauté murmureuse."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "ff7106cb-98e9-4675-9094-2012da80b416"
+  },
+  {
+    "Nom": "inventory_sac_recolte_gedroth",
+    "values": {
+      "Contexte narratif": "Sac à dos en membrane de Gedroth renforcée, format calculé pour passer les passages verticaux étroits du Léviathan sans se coincer. Toujours porté par Ossian Khäl même vide — un sac inhabituel signalerait le retour d'un passage aux mauvais observateurs. Signe distinctif de son activité de récolteur.",
+      "ID": "INV68",
+      "Personnage": "1d95df62-504c-4349-b8ec-63893118af51",
+      "Quantité": "1",
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
+    },
+    "sections": {
+      "contexte_narratif": "Sac à dos en membrane de Gedroth renforcée, format calculé pour passer les passages verticaux étroits du Léviathan sans se coincer. Toujours porté par Ossian Khäl même vide — un sac inhabituel signalerait le retour d'un passage aux mauvais observateurs. Signe distinctif de son activité de récolteur."
+    },
+    "section_titles": {
+      "contexte_narratif": "Contexte narratif"
+    },
+    "notion_page_id": "7db63734-f9e9-4814-899e-3322de5d8a58"
+  },
+  {
     "Nom": "inventory_catalogue_materiaux_grish",
     "values": {
       "Contexte narratif": "Recueil de tables de composition et de mémoires matérielles que Grish a constitué au fil de ses pérégrinations : chaque page contient une formule d’alliage absorbé ou expérimenté. L’obtenir ou le consulter débloquerait des options de crafting avancées. Peut être partagé avec les PJ comme récompense narrative de confiance.",
@@ -38,7 +1052,7 @@
   {
     "Nom": "inventory_noeud_de_convergence",
     "values": {
-      "Contexte narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 174 AG, en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ palier Sympathie) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 8).",
+      "Contexte narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 374 AG (date corrigée — cf. Notes de conception), en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ Émergence, +10) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 9, second essai possible après échange approfondi, DD 11).",
       "ID": "INV65",
       "Objet": "26f6e4d2-1b45-809a-b346-d20068dae6bd",
       "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
@@ -47,7 +1061,7 @@
       "État": "Terminé"
     },
     "sections": {
-      "contexte_narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 174 AG, en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ palier Sympathie) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 8)."
+      "contexte_narratif": "Offert à Voknir par Uresaïr lors d'une tempête en 3 374 AG (date corrigée — cf. Notes de conception), en remerciement tacite de ses offrandes passées. Voknir conserve la fiole hermétiquement dans son atelier et ne s'en sépare qu'à contrecœur. La joueuse peut l'obtenir dans le cadre de la quête de recrutement (donné volontairement si Admiration ≥ Émergence, +10) ou en persuadant Voknir de lui confier l'objet (Sociabilité + Diplomatie vs DD 9, second essai possible après échange approfondi, DD 11)."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -127,17 +1141,17 @@
     "notion_page_id": "64b1101a-eca4-4ad5-8e73-f8517e1424fb"
   },
   {
-    "Nom": "inventory_outils_greffe_miniatures",
+    "Nom": "inventory_outils_perfusion_calibrage",
     "values": {
-      "Contexte narratif": "Ensemble d'instruments fins pour le prélèvement et la greffe d'Empreintes maculaires, portés dans les nombreuses poches de son tablier de cuir abrasif. Permettent les greffes en conditions précaires ou en urgence archivistique.",
+      "Contexte narratif": "Ensemble d'instruments fins pour le calibrage des organoïdes neuronaux et le remplacement des tubulures capillaires défaillantes. Portés dans les nombreuses poches du tablier. Permettent les interventions en urgence archivistique sans déplacer l'organoïde de sa gangue — compétence rare dans les Scriptoria, que Thalas a développée sans formation officielle.",
       "ID": "INV60",
       "Personnage": "8fefb411-8033-4e06-afdd-9d186937ee2a",
       "Quantité": "1",
       "Type d'accès": "Équipé",
-      "État": "Pas commencé"
+      "État": "Terminé"
     },
     "sections": {
-      "contexte_narratif": "Ensemble d'instruments fins pour le prélèvement et la greffe d'Empreintes maculaires, portés dans les nombreuses poches de son tablier de cuir abrasif. Permettent les greffes en conditions précaires ou en urgence archivistique."
+      "contexte_narratif": "Ensemble d'instruments fins pour le calibrage des organoïdes neuronaux et le remplacement des tubulures capillaires défaillantes. Portés dans les nombreuses poches du tablier. Permettent les interventions en urgence archivistique sans déplacer l'organoïde de sa gangue — compétence rare dans les Scriptoria, que Thalas a développée sans formation officielle."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -147,15 +1161,15 @@
   {
     "Nom": "inventory_masque_membrane_infrarouge",
     "values": {
-      "Contexte narratif": "Masque d'initiée avancée aux Bibliothèques Veineuses, à membrane translucide aux infrarouges. Thalassa le relève souvent sur le front par habitude professionnelle lors des greffes d'Empreintes maculaires.",
+      "Contexte narratif": "Masque d'initiée avancée aux Bibliothèques Veineuses, à membrane translucide aux infrarouges. Thalas le relève presque toujours sur le front — inutile quand on travaille déjà dans l'infrarouge pur, mais obligatoire pour accéder aux niveaux supérieurs de la hiérarchie des Scriptoria.",
       "ID": "INV59",
       "Personnage": "8fefb411-8033-4e06-afdd-9d186937ee2a",
       "Quantité": "1",
       "Type d'accès": "Équipé",
-      "État": "Pas commencé"
+      "État": "Terminé"
     },
     "sections": {
-      "contexte_narratif": "Masque d'initiée avancée aux Bibliothèques Veineuses, à membrane translucide aux infrarouges. Thalassa le relève souvent sur le front par habitude professionnelle lors des greffes d'Empreintes maculaires."
+      "contexte_narratif": "Masque d'initiée avancée aux Bibliothèques Veineuses, à membrane translucide aux infrarouges. Thalas le relève presque toujours sur le front — inutile quand on travaille déjà dans l'infrarouge pur, mais obligatoire pour accéder aux niveaux supérieurs de la hiérarchie des Scriptoria."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -167,7 +1181,6 @@
     "values": {
       "Contexte narratif": "Journal de poche dont chaque page est remplie d'une écriture mathématique personnelle, illisible sans clé. Contient des observations sur les structures de pouvoir de la Vieille Ville, des fragments d'Équation de Préservation, et peut-être la mémoire externalisée d'Esthir. Objet de quête potentiel pour l'arc mémoriel.",
       "ID": "INV57",
-      "Objet": "a2514e20-f04e-4a10-b800-670f110d4fd8",
       "Personnage": "1996e4d2-1b45-80a5-a7ae-e9d43372323f",
       "Quantité": "1",
       "Type d'accès": "Possédé",
@@ -180,44 +1193,6 @@
       "contexte_narratif": "Contexte narratif"
     },
     "notion_page_id": "36cc954e-7587-456d-8d89-3e229c5830ce"
-  },
-  {
-    "Nom": "inventory_veste_poches_multiples",
-    "values": {
-      "Contexte narratif": "Veste ajustée à nombreuses poches intérieures et extérieures. Vethraak y loge outils de manipulation, faux laissez-passer et petits instruments de calcul. Sélectionnée pour sa fonctionnalité discrète plutôt que pour l'apparence.",
-      "ID": "INV58",
-      "Objet": "bb6e8c90-d656-4de8-9919-5a5e50419f16",
-      "Personnage": "1996e4d2-1b45-80a5-a7ae-e9d43372323f",
-      "Quantité": "1",
-      "Type d'accès": "Équipé",
-      "État": "Pas commencé"
-    },
-    "sections": {
-      "contexte_narratif": "Veste ajustée à nombreuses poches intérieures et extérieures. Vethraak y loge outils de manipulation, faux laissez-passer et petits instruments de calcul. Sélectionnée pour sa fonctionnalité discrète plutôt que pour l'apparence."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "7c3be5b5-9fea-4f9b-bac1-59fa2a754845"
-  },
-  {
-    "Nom": "inventory_medallion_iridescent",
-    "values": {
-      "Contexte narratif": "Médaillon de métal iridescent qui change de couleur selon l'angle de vision. Souvenir d'Esthir, son bien-aimé. Seul objet que Vethraak n'a jamais misé dans une négociation. Son rôle mécanique (cle dé vers arc mémoriel) est à définir.",
-      "ID": "INV56",
-      "Objet": "3dcac8d4-bcc1-4b06-a17d-66caede5303a",
-      "Personnage": "1996e4d2-1b45-80a5-a7ae-e9d43372323f",
-      "Quantité": "1",
-      "Type d'accès": "Possédé",
-      "État": "Pas commencé"
-    },
-    "sections": {
-      "contexte_narratif": "Médaillon de métal iridescent qui change de couleur selon l'angle de vision. Souvenir d'Esthir, son bien-aimé. Seul objet que Vethraak n'a jamais misé dans une négociation. Son rôle mécanique (cle dé vers arc mémoriel) est à définir."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "4401d975-d0b9-47c4-86d0-e22bc7addca8"
   },
   {
     "Nom": "inventory_proteges_articulations_os",
@@ -260,6 +1235,7 @@
     "values": {
       "Contexte narratif": "Besace qu'il ne montre jamais à quiconque. Portait à son flanc depuis quinze Nuées. Contenu inconnu du joueur jusqu'à résolution de Flag_perso_vrek_yolan_besace = CONTENU_RÉVÉLÉ.",
       "ID": "INV53",
+      "Objet": "19712568-f62a-4c63-a66a-a227a499ddd7",
       "Personnage": "31d6e4d2-1b45-80c7-a993-c76e1bdfbbca",
       "Quantité": "1",
       "Type d'accès": "Possédé",
@@ -276,7 +1252,7 @@
   {
     "Nom": "inventory_registre_passagers_perdus",
     "values": {
-      "Contexte narratif": "Cahier imperméable où Kresh consigne les noms de tous les passagers disparus pendant les trajets. Objet narratif central : Kresh peut le lire à voix haute pour Siphon comme litanie funéraire. Son partage avec Uresaïr déclenche Flag_perso_kresh_registre_acces = PARTAGÉ. Aucune fiche Objet liée pour l'instant.",
+      "Contexte narratif": "Cahier impérmeable où Kresh consigne les noms de tous les passagers disparus pendant les trajets. Objet narratif central : Kresh peut le lire à voix haute pour Siphon comme litanie funéraire. Son partage avec Uresaïr déclenche Flag_perso_kresh_registre_acces = ACCORDÉ. Aucune fiche Objet liée pour l'instant.",
       "ID": "INV52",
       "Personnage": "2cc6e4d2-1b45-8062-9d49-f252d825bc90",
       "Quantité": "1",
@@ -284,7 +1260,7 @@
       "État": "En cours"
     },
     "sections": {
-      "contexte_narratif": "Cahier imperméable où Kresh consigne les noms de tous les passagers disparus pendant les trajets. Objet narratif central : Kresh peut le lire à voix haute pour Siphon comme litanie funéraire. Son partage avec Uresaïr déclenche Flag_perso_kresh_registre_acces = PARTAGÉ. Aucune fiche Objet liée pour l'instant."
+      "contexte_narratif": "Cahier impérmeable où Kresh consigne les noms de tous les passagers disparus pendant les trajets. Objet narratif central : Kresh peut le lire à voix haute pour Siphon comme litanie funéraire. Son partage avec Uresaïr déclenche Flag_perso_kresh_registre_acces = ACCORDÉ. Aucune fiche Objet liée pour l'instant."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -370,7 +1346,6 @@
     "values": {
       "Contexte narratif": "Harnais renforcés aux fibres de Gedroth couvrant les six bras et les trois torses fusionnés. Conçus sur mesure pour une entité à la morphologie unique, ils permettent la coordination des six membres lors des ports de charges lourdes. Symbole de leur rôle de porte-faix au sein du Culte. Difficile à retirer volontairement.",
       "ID": "INV47",
-      "Objet": "12bdf106-1579-46a7-91af-518d7d77b2a3",
       "Personnage": "2286e4d2-1b45-80db-b5ea-c9a4c9ba305b",
       "Quantité": "1",
       "Type d'accès": "Équipé",
@@ -385,9 +1360,9 @@
     "notion_page_id": "7d6b2dfe-248c-47c5-a50d-1ce828c9ade1"
   },
   {
-    "Nom": "Bourse de poussière résonante (Korga)",
+    "Nom": "inventory_bourse_poudre_resonante_korga",
     "values": {
-      "Contexte narratif": "Bourse contenant une poussière spéciale que Korga utilise pour détecter les failles et micro-vibrations dans les parois. Outil de diagnostic structurel unique. Accessible si le PJ aide Korga lors d'une inspection (Flag_perso_korga_profondeur_relation_pj ≥ 2).",
+      "Contexte narratif": "Bourse contenant une poussière spéciale que Korga utilise pour détecter les failles et micro-vibrations dans les parois. Outil de diagnostic structurel unique. Accessible si la joueuse aide Korga lors d'une inspection (Compteur_korga_points_observation ≥ 2).",
       "ID": "INV46",
       "Personnage": "2286e4d2-1b45-80f8-a703-dce94ea5a27b",
       "Quantité": "1",
@@ -395,7 +1370,7 @@
       "État": "Pas commencé"
     },
     "sections": {
-      "contexte_narratif": "Bourse contenant une poussière spéciale que Korga utilise pour détecter les failles et micro-vibrations dans les parois. Outil de diagnostic structurel unique. Accessible si le PJ aide Korga lors d'une inspection (Flag_perso_korga_profondeur_relation_pj ≥ 2)."
+      "contexte_narratif": "Bourse contenant une poussière spéciale que Korga utilise pour détecter les failles et micro-vibrations dans les parois. Outil de diagnostic structurel unique. Accessible si la joueuse aide Korga lors d'une inspection (Compteur_korga_points_observation ≥ 2)."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -403,7 +1378,7 @@
     "notion_page_id": "df32b643-f7f6-4bf7-adf1-9b8f14886123"
   },
   {
-    "Nom": "Marteau ossifié (Korga)",
+    "Nom": "inventory_marteau_ossifie_korga",
     "values": {
       "Contexte narratif": "Marteau ossifié hérité de trois générations, transmis à Korga par Thorek le Mesuré. Symbole de sa fonction de rafistoleuse-en-chef. Peut être remis au PJ en récompense de la quête de transmission si Korga le juge digne (Flag_perso_korga_arc_outcome = TRANSMISSION_RÉUSSIE).",
       "ID": "INV45",
@@ -499,7 +1474,7 @@
       "Contexte narratif": "Texte philosophique du Culte sur la nature de l'immobilité parfaite. Raki-Biro l'a mémorisé intégralement et y revient pour structurer ses prophéties. Peut être transmis à Uresaïr comme gage de confiance si le compteur de confiance atteint 2.",
       "ID": "INV40",
       "Objet": "2316e4d2-1b45-8099-a712-f787166a2ca1",
-      "Personnage": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8",
+      "Personnage": "1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1ae6e4d2-1b45-8087-b3ee-f0f29b53a279",
       "Quantité": "1",
       "Type d'accès": "Possédé",
       "État": "Pas commencé"
@@ -513,24 +1488,6 @@
     "notion_page_id": "0234fbe1-6ae9-40e0-b217-8740bed5a9f1"
   },
   {
-    "Nom": "inventory_ceinture_vesicules_ormud",
-    "values": {
-      "Contexte narratif": "Ceinture rituelle portant des vessies remplies des larmes fermentées de ses novices. Portée en permanence, symbole de son rôle de Maître-Flagellant. Le liquide fermenté a des propriétés chimiques non documentées liées aux spores de Champignosquelettes.",
-      "ID": "INV39",
-      "Personnage": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
-      "Quantité": "1",
-      "Type d'accès": "Équipé",
-      "État": "En cours"
-    },
-    "sections": {
-      "contexte_narratif": "Ceinture rituelle portant des vessies remplies des larmes fermentées de ses novices. Portée en permanence, symbole de son rôle de Maître-Flagellant. Le liquide fermenté a des propriétés chimiques non documentées liées aux spores de Champignosquelettes."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "d805c334-8b9a-4f24-b253-948ba9b2e484"
-  },
-  {
     "Nom": "inventory_prosopon_ascetique_ormud",
     "values": {
       "Contexte narratif": "Masque en bois pétrifié d'une simplicité trompeuse : sept trous d'aération géométriques, bords rogés de l'intérieur, veines noires de mycélium rampant sur la surface externe. Lors des jeûnes de 17 jours, des fils d'argent sont cousus à travers les orifices. Porté en permanence ; Ôrmüd ne l'enlève jamais en présence d'autrui.",
@@ -538,7 +1495,7 @@
       "Personnage": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
       "Quantité": "1",
       "Type d'accès": "Équipé",
-      "État": "En cours"
+      "État": "Terminé"
     },
     "sections": {
       "contexte_narratif": "Masque en bois pétrifié d'une simplicité trompeuse : sept trous d'aération géométriques, bords rogés de l'intérieur, veines noires de mycélium rampant sur la surface externe. Lors des jeûnes de 17 jours, des fils d'argent sont cousus à travers les orifices. Porté en permanence ; Ôrmüd ne l'enlève jamais en présence d'autrui."
@@ -556,7 +1513,7 @@
       "Personnage": "1ae6e4d2-1b45-8032-b738-f27c2d471393",
       "Quantité": "7",
       "Type d'accès": "Équipé",
-      "État": "En cours"
+      "État": "Terminé"
     },
     "sections": {
       "contexte_narratif": "Carillons macabres faits à partir des vertèbres de ses quatre disciples immolés. Ôrmüd les porte à la ceinture lors des cérémonies importantes. Ils émettent des harmoniques qui modulent les effets des champignons hallucinogènes et servent de vecteurs d'infection mycélienne. Iel en a distribué 6 à des membres-clés du Culte ; iel en conserve 1 en permanence."
@@ -693,15 +1650,16 @@
   {
     "Nom": "inventory_labrys_de_prehension",
     "values": {
-      "Contexte narratif": "Arme signature du Khetra-Morth : double hache cérémonielle aux lames volontairement émoussées, emblème de la Violence Préservatrice. Navarre la porte en permanence ; c'est à la fois un outil martial et un objet liturgique. Le joueur peut en obtenir une réplique bénie si Navarre est recrutée.",
+      "Contexte narratif": "Arme signature du Khetra-Morth : double hache cérémonielle aux lames volontairement émoussées, portée en permanence par Navarre. L'original est non lootable et sert de texte doctrinal autant que d'arme ; la réplique bénie de fin d'arc transmet au groupe une géométrie de retenue sous forme de Catalyseur, sans remplacer l'objet personnel.",
       "ID": "INV29",
+      "Objet": "a02e0d4e-4ae1-4e38-a28c-491da5b9f461",
       "Personnage": "1ae6e4d2-1b45-80ef-84e8-fb114d0136ed",
       "Quantité": "1",
       "Type d'accès": "Équipé",
       "État": "Terminé"
     },
     "sections": {
-      "contexte_narratif": "Arme signature du Khetra-Morth : double hache cérémonielle aux lames volontairement émoussées, emblème de la Violence Préservatrice. Navarre la porte en permanence ; c'est à la fois un outil martial et un objet liturgique. Le joueur peut en obtenir une réplique bénie si Navarre est recrutée."
+      "contexte_narratif": "Arme signature du Khetra-Morth : double hache cérémonielle aux lames volontairement émoussées, portée en permanence par Navarre. L'original est non lootable et sert de texte doctrinal autant que d'arme ; la réplique bénie de fin d'arc transmet au groupe une géométrie de retenue sous forme de Catalyseur, sans remplacer l'objet personnel."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -799,9 +1757,9 @@
     "notion_page_id": "c26a36a3-6e34-49f6-a0d0-66c86d6d3bc7"
   },
   {
-    "Nom": "Bras de marque mécanique (Kha'Vareth)",
+    "Nom": "Gantelet mécanique du bras de marque (Kha'Vareth)",
     "values": {
-      "Contexte narratif": "Prothèse mécanique de précision remplaçant le bras naturel sacrifié lors d'un accident architectural. Intégrée directement dans la structure osseuse de Kha'Vareth. Sert de bras dominant pour les travaux de micro-précision sur les structures d'Anentropie. Paire de pinces et de lames en alliage osseux-métallique.",
+      "Contexte narratif": "Sur-couche mécanique de précision fixée AUTOUR du bras de marque naturel de Kha'Vareth — le bras Van'Doei surdimensionné reste intact en dessous, avec sa chair, son os et sa lecture architecturale innée. Le gantelet ajoute par-dessus des rouages, des articulations mécaniques, des pinces et des lames en alliage osseux-métallique, utilisés pour les travaux de micro-précision sur les structures d'Anentropie. L'ensemble bras+gantelet doit être maintenu à mi-hauteur en permanence comme un contrepoids.",
       "ID": "INV23",
       "Personnage": "1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c",
       "Quantité": "1",
@@ -809,7 +1767,7 @@
       "État": "Pas commencé"
     },
     "sections": {
-      "contexte_narratif": "Prothèse mécanique de précision remplaçant le bras naturel sacrifié lors d'un accident architectural. Intégrée directement dans la structure osseuse de Kha'Vareth. Sert de bras dominant pour les travaux de micro-précision sur les structures d'Anentropie. Paire de pinces et de lames en alliage osseux-métallique."
+      "contexte_narratif": "Sur-couche mécanique de précision fixée AUTOUR du bras de marque naturel de Kha'Vareth — le bras Van'Doei surdimensionné reste intact en dessous, avec sa chair, son os et sa lecture architecturale innée. Le gantelet ajoute par-dessus des rouages, des articulations mécaniques, des pinces et des lames en alliage osseux-métallique, utilisés pour les travaux de micro-précision sur les structures d'Anentropie. L'ensemble bras+gantelet doit être maintenu à mi-hauteur en permanence comme un contrepoids."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -819,15 +1777,15 @@
   {
     "Nom": "inventory_fragments_os_polis",
     "values": {
-      "Contexte narratif": "Fragments d'os polis conservés dans les poches de Voknir pour des parties de Tangram d'urgence. Objet de confort et de stimulation mentale. Peut être offert comme marque de confiance profonde (Flag_perso_voknir_confiance ≥ 3).",
+      "Contexte narratif": "Fragments d'os polis conservés dans les poches de Voknir pour des parties de Tangram d'urgence. Objet de confort et de stimulation mentale. Peut être offert comme marque de confiance profonde si l'Admiration atteint le palier Sympathie (+10).",
       "ID": "INV22",
       "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
       "Quantité": "7",
       "Type d'accès": "Possédé",
-      "État": "Pas commencé"
+      "État": "Terminé"
     },
     "sections": {
-      "contexte_narratif": "Fragments d'os polis conservés dans les poches de Voknir pour des parties de Tangram d'urgence. Objet de confort et de stimulation mentale. Peut être offert comme marque de confiance profonde (Flag_perso_voknir_confiance ≥ 3)."
+      "contexte_narratif": "Fragments d'os polis conservés dans les poches de Voknir pour des parties de Tangram d'urgence. Objet de confort et de stimulation mentale. Peut être offert comme marque de confiance profonde si l'Admiration atteint le palier Sympathie (+10)."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"
@@ -842,7 +1800,7 @@
       "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
       "Quantité": "3",
       "Type d'accès": "Possédé",
-      "État": "Pas commencé"
+      "État": "Terminé"
     },
     "sections": {
       "contexte_narratif": "Fioles d'encre de moelle que Voknir fabrique en prélevant sa propre substance osseuse. Permet de tracer des cartes auto-actualisantes sur toute surface. Le joueur peut en obtenir en échange d'informations cartographiques ou de services de guidage dans les Plis d'ossements."
@@ -851,24 +1809,6 @@
       "contexte_narratif": "Contexte narratif"
     },
     "notion_page_id": "e84a5699-d645-4a75-8bc1-0468e7d287c2"
-  },
-  {
-    "Nom": "inventory_masque_os_sculpte",
-    "values": {
-      "Contexte narratif": "Masque rudimentaire taillé par Voknir dans un fragment d'os du Léviathan, remplaçant son masque d'origine confisqué lors du bannissement. Signe d'appartenance aux Van'Doei exilés. Voknir refuse de s'en séparer — ne peut pas être obtenu par le joueur directement.",
-      "ID": "INV21",
-      "Personnage": "1c36e4d2-1b45-80f2-8124-e9ddf8d9359e",
-      "Quantité": "1",
-      "Type d'accès": "Équipé",
-      "État": "Pas commencé"
-    },
-    "sections": {
-      "contexte_narratif": "Masque rudimentaire taillé par Voknir dans un fragment d'os du Léviathan, remplaçant son masque d'origine confisqué lors du bannissement. Signe d'appartenance aux Van'Doei exilés. Voknir refuse de s'en séparer — ne peut pas être obtenu par le joueur directement."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "a672b5bf-3013-480c-8bc6-e83afbeea74e"
   },
   {
     "Nom": "inventory_eclat_de_mandala",
@@ -1107,24 +2047,6 @@
     "notion_page_id": "7c6e4383-5a4e-4be8-a78b-ecc299d61e1d"
   },
   {
-    "Nom": "inventory_masque_pyramidal_rituel",
-    "values": {
-      "Contexte narratif": "Porté en permanence par Akthar-Neth depuis plus de deux siècles, ce masque pyramidal en os fossilisé est une capitulation psychologique transformée en liturgie. Le retirer constitue un acte rituel d'une portée symbolique extrême — nul ne l'a vu se découvrir depuis des décennies. Inaccessible au joueur sauf dans la résolution BESOIN_RÉSOLU.",
-      "ID": "INV6",
-      "Personnage": "1ae6e4d2-1b45-80d1-9290-fe72cf1375d7",
-      "Quantité": "1",
-      "Type d'accès": "Équipé",
-      "État": "Pas commencé"
-    },
-    "sections": {
-      "contexte_narratif": "Porté en permanence par Akthar-Neth depuis plus de deux siècles, ce masque pyramidal en os fossilisé est une capitulation psychologique transformée en liturgie. Le retirer constitue un acte rituel d'une portée symbolique extrême — nul ne l'a vu se découvrir depuis des décennies. Inaccessible au joueur sauf dans la résolution BESOIN_RÉSOLU."
-    },
-    "section_titles": {
-      "contexte_narratif": "Contexte narratif"
-    },
-    "notion_page_id": "3be5d578-ffe9-42f6-bfa1-9d0ae5b652a8"
-  },
-  {
     "Nom": "inventory_collection_flacons_influence",
     "values": {
       "Contexte narratif": "73 flacons de résidus neuro-humoraux stockés dans l'étude secrète, classés par date et profil réactionnel. Chacun porte un nom. Nœud moral de la quête \"Les Flacons Murmureurs\" — leur sort détermine l'issue de la confrontation avec Khair-gul.",
@@ -1178,17 +2100,18 @@
     "notion_page_id": "87f88bc7-43ad-4718-bc4f-c02cb69d5fb4"
   },
   {
-    "Nom": "inventory_Gedroth_Tambour",
+    "Nom": "inventory_violon_vagabond",
     "values": {
-      "Contexte narratif": "Symbiose avec son violon-vagabond",
+      "Contexte narratif": "Photophore (Gardienne) extrêmement mutée vivant en symbiose sur la prothèse de bras de Genka. Genka l'appelle « violon-vagabond » : ce mot d'une beauté presque arbitraire sert à désigner ce qui est, en réalité, une guitare électrique vivante — concept qui n'existe nulle part ailleurs sur Escelion. Squelette hypertrophié servant de manche, côtes vestigiales étirées en cordes, métabolisme électrotrophe alimenté par la prothèse et par les nerfs collectés sur les routes.",
       "ID": "INV2",
+      "Objet": "f1cd70ec-39a3-4316-8e7c-57a96a3e88d8",
       "Personnage": "1a16e4d2-1b45-8093-89ad-eae2e28f9b31",
       "Quantité": "1",
-      "Type d'accès": "Stocké",
-      "État": "Pas commencé"
+      "Type d'accès": "Équipé",
+      "État": "Terminé"
     },
     "sections": {
-      "contexte_narratif": "Symbiose avec son violon-vagabond"
+      "contexte_narratif": "Photophore (Gardienne) extrêmement mutée vivant en symbiose sur la prothèse de bras de Genka. Genka l'appelle « violon-vagabond » : ce mot d'une beauté presque arbitraire sert à désigner ce qui est, en réalité, une guitare électrique vivante — concept qui n'existe nulle part ailleurs sur Escelion. Squelette hypertrophié servant de manche, côtes vestigiales étirées en cordes, métabolisme électrotrophe alimenté par la prothèse et par les nerfs collectés sur les routes."
     },
     "section_titles": {
       "contexte_narratif": "Contexte narratif"

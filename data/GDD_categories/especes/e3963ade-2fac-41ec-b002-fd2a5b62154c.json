@@ -2,17 +2,16 @@
   "Nom": "Liseuse de Strates",
   "values": {
     "Biologie": "Avancée",
-    "Culture": "Nulle",
+    "Espérance de vie": "75",
     "Présence dans Escelion": "Rare",
     "Règne (ou classe)": "4605f4af-5a67-4321-97af-d0cc7d8266bd",
-    "Résumé IA": "L'espèce est rare dans Escelion, avec une biologie avancée et un faible aspect surnaturel. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat, mode d'alimentation, reproduction et interaction avec l'écosystème, bien que beaucoup de détails restent à remplir.",
+    "Résumé IA": "Sécrétolaminaire (Vifs-Formes, Lithotissés) petite chasseuse à biologie avancée, réputée quasi impossible à surprendre : lit les dépôts laminaires d'autrui pour anticiper la position des proies et des prédateurs avant même leur arrivée. Exocortex de haute sensibilité mécano-électrique (terminaisons lectrices spécialisées). Rare dans Escelion. Longévité : ~75 ans.",
     "Surnaturel": "Faible",
-    "Technologie": "Nulle",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
+    "re_sume__de_la_fiche": "**Sécrétolaminaire** (Vifs-Formes, Lithotissés) petite chasseuse à biologie avancée, réputée **quasi impossible à surprendre** : lit les dépôts laminaires d'autrui pour anticiper la position des proies et des prédateurs avant même leur arrivée. Exocortex de haute sensibilité mécano-électrique (terminaisons lectrices spécialisées). Rare dans Escelion. Longévité : \\~75 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>\n\n**Guides**",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -22,7 +21,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'espèce est rare dans Escelion, avec une biologie avancée et un faible aspect surnaturel. Des sections sont prévues pour explorer son histoire, son apparence, son rôle culturel et dans l'intrigue, ainsi que son habitat, mode d'alimentation, reproduction et interaction avec l'écosystème, bien que beaucoup de détails restent à remplir."
+    "re_sume__ia": "Sécrétolaminaire (Vifs-Formes, Lithotissés) petite chasseuse à biologie avancée, réputée quasi impossible à surprendre : lit les dépôts laminaires d'autrui pour anticiper la position des proies et des prédateurs avant même leur arrivée. Exocortex de haute sensibilité mécano-électrique (terminaisons lectrices spécialisées). Rare dans Escelion. Longévité : ~75 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

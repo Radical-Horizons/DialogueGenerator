@@ -1,0 +1,100 @@
+
+============================================================
+## Campement & Recrutement
+============================================================
+
+
+============================================================
+## Déplacements
+============================================================
+[heading_2] Conception & Règles (Le Cœur)
+[heading_3] 1. But du système
+[paragraph] Permettre au joueur d'explorer librement le monde d'Escelion en se déplaçant dans l'environnement 2D. Le système de déplacement est la base de l'exploration, permettant de découvrir de nouveaux lieux, d'approcher des PNJ pour dialoguer et de progresser dans l'histoire.
+[paragraph] Fantasy du joueur : Incarner Seigneuresse Uresaïr et parcourir les recoins étranges d'Escelion, guidé par la curiosité et l'exploration.
+[paragraph] Décisions proposées :
+[bulleted_list_item] Choix de la direction à explorer (8 directions)
+[bulleted_list_item] Priorité d'exploration (aller vers objectif ou explorer librement)
+[bulleted_list_item] Rythme d'exploration (marche rapide ou lente)
+[paragraph] Besoins humains servis :
+[paragraph] Découverte — Le déplacement est le vecteur premier de l'exploration : chaque pas dans une direction inconnue nourrit la curiosité et l'envie de révéler ce que le monde cache. Sans mouvement libre, pas de sentiment de découverte. Le système ne sert qu'un seul besoin, mais il en est la condition néces
+[heading_3] 2. Boucle du système
+[paragraph] Exemple concret :
+[paragraph] Le joueur maintient la touche Flèche droite sur le clavier. Le système détecte l'input, calcule la direction Est, vérifie qu'il n'y a pas d'obstacle devant Uresaïr, et la déplace de 5 unités Unity par seconde vers la droite. L'animation de marche direction Est se joue. Quand Uresaïr atteint le bord 
+[heading_3] 2b. Parcours utilisateur
+[paragraph] Scénario nominal — Exploration libre dans la Nef Centrale
+
+============================================================
+## Cut-scenes
+============================================================
+[heading_2] 1. But du sous-système
+[paragraph] Offrir un traitement visuel et narratif fort pour des scènes d'action, visions, révélations ou moments à haute charge émotionnelle, sans recourir à des animations complexes ou à un découpage cinématique lourd.
+[paragraph] Système parent : Dialogues
+[paragraph] Dialogues fournit le moteur narratif de base (arbres JSON, nœuds, branchements, conditions, flags, tests de compétence). Cut-scenes ajoute la couche « comment présenter certains dialogues » : un mode de rendu cinématique plein écran qui remplace temporairement l'interface de dialogue standard par un
+[paragraph] Le sous-système permet au joueur de :
+[bulleted_list_item] Vivre des moments narratifs clés avec une immersion visuelle accrue (image haute résolution plein écran)
+[bulleted_list_item] Effectuer des choix limités mais significatifs (2 à 4 options) dans un contexte de tension dramatique
+[bulleted_list_item] Conserver la mécanique de tests (Effort, Influence, traits) tout en bénéficiant d'une présentation cinématique
+[paragraph] Besoins humains servis :
+[paragraph] Besoin d'évasion — Les cut-scenes plongent le joueur dans des moments visuels spectaculaires (images 4K plein écran, ambiance sonore immersive) qui suspendent le gameplay ordinaire. Ce changement de registre crée une rupture émotionnelle propice à l'émerveillement et à l'absorption narrative.
+[paragraph] Contrôle — Même dans les moments cinématiques, le joueur conserve son agentivité via 2-4 choix et des tests de compétence. Il n'est jamais spectateur passif : les cut-scenes sont des moments où ses décisions ont un impact dramatique amplifié.
+[heading_2] 2. Boucle & Parcours utilisateur
+[heading_3] Parcours nominal : Vision d'Uresaïr (intro)
+[numbered_list_item] Entrée : L'Éthérée émerge dans le sanctuaire → nœud JSON vision_uresair_intro déclenché
+[numbered_list_item] Transition : Commande EnterCutsceneMode("vision_uresair_01") → panneau plein écran s'affiche avec image de la tour en ruines
+
+============================================================
+## Progression (Expérience)
+============================================================
+[heading_2] Conception & Règles (Le Cœur)
+[heading_3] 1. But du système
+[paragraph] Transformer l'exploration et les relations en spécialisation mécanique.
+[paragraph] Le système de progression permet au joueur de :
+[bulleted_list_item] S'intégrer dans les lieux en développant des capacités liées à l'essence thématique de chaque région (ex : au Léviathan, résistance à l'entropie ; au Puits Céleste, adaptation à l'étrange)
+[bulleted_list_item] Se spécialiser dans les forces d'une faction en accomplissant des quêtes pour ses membres, gagnant des bonus reflétant leur expertise (ex : Culte de l’Anentropie → orateur mystique, résistance mentale)
+[bulleted_list_item] Choisir son rôle social en s'alignant fortement avec une faction, ce qui reconfigure ses capacités dans chaque lieu selon sa nouvelle fonction (orateur du Culte, saboteur des Murmurateurs, mercenaire indépendant)
+[paragraph] Le joueur doit décider :
+[bulleted_list_item] Où investir ses points de quête (arbre central du lieu vs arbres de faction)
+[bulleted_list_item] Avec quelle faction s'allier pour débloquer des nœuds spéciaux puissants
+[bulleted_list_item] Quel rôle adopter dans chaque lieu pour optimiser ses capacités selon la situation
+[paragraph] Besoins humains servis :
+[paragraph] Progression — Le système traduit chaque quête accomplie en pouvoir concret via les arbres de nœuds. Le joueur voit sa spécialisation se construire point par point, avec des choix d'investissement qui donnent du poids à chaque décision. « J'ai dépensé 3 points dans la branche Akthar-Neth, je suis plu
+[paragraph] Appartenance — Les arbres de faction et les rôles sociaux ancrent le joueur dans les communautés d'Escelion. Adopter le rôle de « Théomaque Consacrée » au sein du Culte, c'est s'identifier à un groupe et revendiquer une place dans sa hiérarchie. La progression n'est pas abstraite — elle est sociale.
+[heading_3] 2. Boucle du système
+
+============================================================
+## Influence & Respect
+============================================================
+[heading_2] Conception & Règles (Le Cœur)
+[heading_3] 1. But du système
+[paragraph] Mesurer et mettre en scène la dynamique de possession entre l’Éthérée et les personnages jouables possédés (Seigneuresse Uresaïr en First Playable, puis Vethraak et Eonundé), via deux jauges complémentaires :
+[bulleted_list_item] Influence : capacité de pression / levier de l’Éthérée sur le PJ.
+[bulleted_list_item] Respect : confiance, consentement implicite, et propension du PJ à aider spontanément l’Éthérée.
+[paragraph] Fantasy du joueur : sentir que la possession n’est pas une “commande magique”, mais une relation instable où l’on obtient soit un levier (Influence), soit une alliance (Respect).
+[paragraph] Décisions proposées :
+[bulleted_list_item] Forcer une action ou une issue (Influence) au prix d’une dégradation relationnelle.
+[bulleted_list_item] Respecter les limites, attendre, et construire une coopération (Respect) qui déverrouille des aides proactives.
+[bulleted_list_item] Débloquer ou verrouiller des options de dialogue selon des seuils (pas de dépense).
+[paragraph] Besoins humains servis :
+[paragraph] Contrôle — L'Influence donne à l'Éthérée un levier de pression sur les PJ possédés. Le joueur choisit quand et comment exercer ce pouvoir — et assume les conséquences. Ce dilemme entre forcer et persuader est une forme pure de contrôle sur la relation.
+[paragraph] Relation — Le Respect mesure la qualité du lien entre l'Éthérée et chaque PJ. Construire la confiance débloque des aides proactives, des confidences et des moments de coopération. La relation est le cœur du système : la possession comme métaphore de l'alliance inégale.
+[heading_3] 2. Boucle du système
+[paragraph] Exemple (cas simple FP)
+
+============================================================
+## Caractéristiques et Compétences
+============================================================
+[heading_2] Conception & Règles (Le Cœur)
+[heading_3] 1. But du système
+[paragraph] Fournir un moteur de résolution universel, déterministe et transparent pour toutes les actions incertaines d'Alteir.
+[paragraph] Le système compare le score d'un personnage (caractéristiques + compétences + modificateurs) à une difficulté cible pour déterminer le succès ou l'échec d'une action.
+[paragraph] Besoins humains servis :
+[paragraph] Maîtrise — Le système est entièrement déterministe et transparent : le joueur voit son Score, connaît le DD, et sait exactement pourquoi il réussit ou échoue. Cette lisibilité totale transforme chaque test en démonstration de compétence, pas en coup de dés.
+[paragraph] Progression — Les caractéristiques et compétences matérialisent la croissance du personnage en chiffres concrets. Investir un point et voir immédiatement le Score augmenter donne une sensation tangible d'évolution et de spécialisation.
+[heading_3] 2. Boucle du système
+[heading_3] 2b. Parcours utilisateur
+[paragraph] Scénario nominal — Test de Sociabilité en dialogue
+[paragraph] Uresaïr dialogue avec un prêtre méfiant. Une option apparaît : « Invoquer votre statut de Théomaque » avec un indicateur [Sociabilité + Diplomatie vs DD 8]. Le joueur consulte son Score : Sociabilité 7 + Diplomatie 2 = 9. Score ≥ DD → Succès garanti (affiché en vert). Il sélectionne l'option. Sous l
+[paragraph] Scénario limite — Échec critique sur compétence absente
+[paragraph] Uresaïr tente de désamorcer un piège mécanique. Score : Technique 3 + Mécanique 0 = 3 vs DD 9. L'indicateur est rouge vif (écart -6 → zone Sacrifice). Même avec 6 PE d'Effort, le résultat serait un Succès rasé. Le joueur voit qu'un Échec Critique est certain sans investissement massif (Score ≤ DD - 
+[heading_3] 3. Règles & États
+[paragraph] Formule de base : Score = Caractéristique + Compétence + Modificateurs Contextuels

@@ -673,6 +673,34 @@ Alignement ADR-007 (mutations graphe via store) et ADR-008 (projection document)
 
 ---
 
+### ADR-010: Catalogue de flags — source interchangeable ; dialogue ne stocke que des références
+
+**Context:**  
+L’Epic 9 lie des **flags** aux dialogues. Le GDD / Notion décrit une base « Flags » (centaines d’entrées, types bool / compteur / enum). L’application lit aujourd’hui un **CSV Unity** (`FlagCatalogService`, `data/UnityData/FlagCatalog.csv`). On veut pouvoir **passer ultérieurement** à une source synchronisée depuis **Notion** (tables de vérité), tout en gardant la possibilité que l’outil **propose ou crée** des entrées locales si le produit le permet.
+
+**Decision:**  
+1. **Séparation stricte** : le **document dialogue** persiste uniquement des **références** stables aux flags (`flag_id` aligné sur le catalogue, ex. identifiant canon du CSV / futur export Notion) et les **valeurs initiales** choisies pour ce dialogue (selon type). Les **définitions enrichies** (label, min/max, valeurs enum ordonnées, portée, etc.) ne sont **pas** dupliquées en prose dans le document : elles sont **résolues au chargement** via la couche **catalogue** (service + API existants ou évolution nommée de ceux-ci).  
+2. **Couche catalogue = point d’extension** : la **source de vérité du catalogue** peut être **CSV**, **snapshot généré depuis Notion**, ou **hybride** (officiel Notion ∪ flags locaux / brouillon) ; l’UI et la validation des dialogues **ne dépendent** pas du format fichier, seulement d’une API stable « liste définitions + résolution par id ».  
+3. **Création d’entrées dans l’outil** : si le produit autorise de **nouveaux** flags hors Notion, ils entrent dans le même modèle **id + définition** côté catalogue (ou namespace explicite + règle de validation dans une story dédiée, ex. Epic 9.5) — **sans** fusionner définition et liaison dans le blob dialogue.
+
+**Constraints:**  
+- Les PUT document **NE DOIVENT PAS** embarquer une copie complète du catalogue dans chaque dialogue.  
+- Toute évolution du schéma « liaison dialogue → flag » **DOIT** rester compatible avec un futur **import Notion** : ids stables, pas de logique qui suppose que le CSV est la seule vérité éternelle.  
+- La validation « flag inconnu / typo » (Story 9.5) **DOIT** s’appuyer sur l’ensemble des définitions **résolues** au moment de la validation (catalogue effectif).
+
+**Rationale:**  
+Évite double source silencieuse ; migration Notion = changer l’alimentation du catalogue + éventuellement migrer les ids, pas restructurer tous les dialogues. Alignement avec ADR-008 (document canonique : une source de vérité par domaine).
+
+**Risks:**  
+- Dérive si des ids diffèrent entre CSV et Notion — mitigation : table de correspondance ou migration once lors du switch.  
+- Flags « locaux » vs « officiels » — mitigation : politique produit explicite (namespace, badge UI, export Unity).
+
+**Tests Required:**  
+- Unit : persistance dialogue contient seulement références + valeurs initiales ; résolution définition mock catalogue.  
+- Integration : GET document après changement de fichier catalogue (tests : définitions mises à jour, références inchangées).
+
+---
+
 ### Integration Patterns (V1.0 ↔ Baseline)
 
 #### Pattern 1: New API Endpoints (Streaming, Presets)

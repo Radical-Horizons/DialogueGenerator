@@ -32,6 +32,9 @@ class ElementResolver:
         "communities_full": "community",
         "communities_excerpt": "community",
         "quests": "quest",
+        "narrative_structures": "narrative_structure",
+        "chapters": "chapter",
+        "scenes": "scene",
     }
     
     # Mapping des catégories vers les labels pour les marqueurs explicites
@@ -52,6 +55,9 @@ class ElementResolver:
         "communities_full": "COMMUNAUTÉ",
         "communities_excerpt": "COMMUNAUTÉ",
         "quests": "QUÊTE",
+        "narrative_structures": "STRUCTURE",
+        "chapters": "CHAPITRE",
+        "scenes": "SCÈNE",
     }
     
     # Mapping des catégories vers les ElementCategory
@@ -73,6 +79,9 @@ class ElementResolver:
         "communities_excerpt": ElementCategory.COMMUNITIES,
         "quests": ElementCategory.QUESTS,
         "dialogues_examples": ElementCategory.DIALOGUES,
+        "narrative_structures": ElementCategory.NARRATIVE_STRUCTURES,
+        "chapters": ElementCategory.CHAPTERS,
+        "scenes": ElementCategory.SCENES,
     }
     
     def __init__(self, element_repository: Optional[ElementRepository] = None):
@@ -194,7 +203,17 @@ class ElementResolver:
         Returns:
             Dictionnaire avec éléments prioritaires en premier, puis les autres.
         """
-        element_categories_order = ["characters", "species", "communities", "locations", "items", "quests"]
+        element_categories_order = [
+            "characters",
+            "species",
+            "communities",
+            "locations",
+            "items",
+            "quests",
+            "narrative_structures",
+            "chapters",
+            "scenes",
+        ]
         prioritized = {}
         for category_key in element_categories_order:
             if category_key in selected_elements:

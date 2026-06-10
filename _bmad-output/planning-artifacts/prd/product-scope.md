@@ -5,12 +5,14 @@
 **Goal :** Débloquer la production immédiate. Atteindre le moment "aha!" Base.
 
 **Must-Have :**
+
 1. ✅ **Éditeur graphe fonctionnel** (fix display bug, connexions nœuds, édition basique)
 2. ✅ **Génération continue + auto-link** (générer depuis choix, auto-connexion graphe)
 3. ✅ **Validation structurelle** (DisplayName/stableID, nœuds vides, orphans, cycles)
 4. ✅ **Export Unity fiable** (batch export, validation JSON schema)
 
 **Success Criteria MVP :**
+
 - Marc/Mathieu génèrent 1 nœud de qualité en <1min
 - Génération batch 3-8 nœuds en <2min
 - Export Unity sans erreurs (100% conformité schema)
@@ -27,6 +29,7 @@
 8. 🟡 **Simulation Coverage** (run dialogue, dead ends/unreachable, rapport)
 
 **Success Criteria V1.0 :**
+
 - Navigation fluide dialogues 500+ nœuds
 - Refactoring (renommer acteur) propage automatiquement
 - Simulation détecte >95% bugs structurels
@@ -42,6 +45,7 @@
 11. 🟡 **Template System v1** (templates instructions/auteur, personnalisation, validation)
 
 **Success Criteria V1.5 :**
+
 - Coûts LLM <0.01€ par nœud (optimisé)
 - Marc + Mathieu collaborent sans friction
 - Templates améliorent qualité +20% (LLM judge)
@@ -57,6 +61,7 @@
 15. 🟢 **Dialogue History Recommender** (re-utilisation contextes similaires)
 
 **Success Criteria V2.0 :**
+
 - Réduction tokens -50% (5000 → 2500 tokens/prompt)
 - Pertinence contexte >90% (validation humaine)
 - Workflow accéléré : 4H → 2H par dialogue complet
@@ -71,6 +76,7 @@
 18. 🟢 **Multi-LLM Comparison** (génération simultanée, LLM judge, sélection)
 
 **Success Criteria V2.5 :**
+
 - Taux acceptation qualité >90%
 - Feedback loop améliore templates automatiquement
 - Multi-LLM réduit coûts -30%
@@ -88,6 +94,7 @@
 24. ⚪ **Git-like Narrative Versioning** (branches narratives, merge assisté)
 
 **Success Criteria V3.0 :**
+
 - Support 3+ LLM providers
 - Game systems intégrés (conditions/variables/effets)
 - Workflow hybride texte/graphe opérationnel
@@ -95,6 +102,7 @@
 ### Growth Features (Post-MVP)
 
 **Déploiement progressif selon feedback production réelle :**
+
 - DB migration (si filesystem devient douloureux)
 - Advanced search (si volume nécessite)
 - Dashboard analytics (si métriques critiques)
@@ -103,9 +111,9 @@
 ### Vision (Future)
 
 **Long Terme (Post-2028) :**
+
 - Voice-Over metadata integration
 - Real-time collaboration (WebSockets)
 - Multi-game support (réutilisabilité GDD)
 - Community marketplace (templates partagés)
 - Open-source release (si pertinent)
-

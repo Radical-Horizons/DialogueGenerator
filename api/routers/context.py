@@ -15,6 +15,8 @@ from api.schemas.context import (
     SpeciesResponse,
     CommunityListResponse,
     CommunityResponse,
+    NarrativeContextListResponse,
+    NarrativeContextResponse,
     RegionListResponse,
     SubLocationListResponse,
     LinkedElementsRequest,
@@ -225,6 +227,41 @@ async def list_locations(
             page_size=None,
             total_pages=None
         )
+
+
+@router.get(
+    "/narrative-contexts",
+    response_model=NarrativeContextListResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def list_narrative_contexts(
+    request: Request,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> NarrativeContextListResponse:
+    """Liste les sources narratives spécialisées disponibles pour le contexte GDD."""
+    sources: list[tuple[str, str, list[dict[str, Any]]]] = [
+        ("narrative_structures", "Structure narrative", getattr(context_builder, "narrative_structures", [])),
+        ("chapters", "Chapitres", getattr(context_builder, "chapters", [])),
+        ("scenes", "Scènes", getattr(context_builder, "scenes", [])),
+    ]
+    items: list[NarrativeContextResponse] = []
+    for category, label, records in sources:
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            name = record.get("Nom") or record.get("Titre") or record.get("ID")
+            if not name:
+                continue
+            items.append(
+                NarrativeContextResponse(
+                    name=str(name),
+                    category=category,
+                    label=label,
+                    data=record,
+                )
+            )
+    return NarrativeContextListResponse(items=items, total=len(items))
 
 
 @router.get(

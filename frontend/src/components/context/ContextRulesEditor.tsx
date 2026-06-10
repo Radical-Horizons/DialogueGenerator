@@ -310,6 +310,24 @@ export function ContextRulesEditor() {
         </div>
       )}
 
+      <details
+        style={{
+          padding: '0.35rem 0.5rem',
+          borderBottom: `1px solid ${theme.border.primary}`,
+          color: theme.text.secondary,
+          fontSize: '0.78rem',
+        }}
+      >
+        <summary style={{ cursor: 'pointer', color: theme.text.primary }}>
+          Comment les règles sont appliquées
+        </summary>
+        <p style={{ margin: '0.35rem 0 0' }}>
+          Les règles actives du type de dialogue courant sont évaluées par priorité. Une règle déclenche des
+          suggestions quand ses conditions correspondent aux éléments déjà sélectionnés ; `OU` exige au moins
+          une condition, `ET` les exige toutes. Les suggestions restent à valider par l'utilisateur.
+        </p>
+      </details>
+
       {error && (
         <div style={{ padding: '0.3rem 0.5rem', color: theme.state.error.color, fontSize: remSize('small') }}>
           {error}

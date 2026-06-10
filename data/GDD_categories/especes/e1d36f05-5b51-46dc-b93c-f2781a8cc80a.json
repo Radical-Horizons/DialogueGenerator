@@ -1,13 +1,14 @@
 {
   "Nom": "Améthides",
   "values": {
+    "Espérance de vie": "120",
     "Règne (ou classe)": "3026e4d2-1b45-8030-9b54-d3fb1b86d7cb",
-    "Résumé IA": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème.",
+    "Résumé IA": "Neurocristallin prédateur solitaire (40–80 cm, quadrupède félin) à cristal améthyste sous-cutané discret — peau translucide révélant le squelette améthyste uniquement sous stress. Camouflage structural par réfraction active des facettes cristallines sous-cutanées : quasi-invisible à l'affût sur les veines de quartz. Lames d'usure rétractiles (griffes, mâchoires). Cycle reproductif synchronisé avec les phases lunaires. Nocturne et cavernicole strict. Longévité : ~120 ans.",
     "Type": "Faune",
     "État": "Pas commencé"
   },
   "sections": {
-    "re_sume__de_la_fiche": "<empty-block/>\n\t<empty-block/>\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
+    "re_sume__de_la_fiche": "**Neurocristallin** (Vifs-Formes, Lithotissés) prédateur solitaire (40–80 cm, quadrupède félin) à **cristal améthyste sous-cutané discret** — peau translucide révélant le squelette violacé uniquement sous stress ou effort. Spécialité **optique** : camouflage structural par réfraction active des facettes sous-cutanées, quasi-invisible à l'affût sur les veines de quartz. Lames d'usure rétractiles (griffes, mâchoires). Nocturne et cavernicole strict. Cycle reproductif synchronisé avec les phases lunaires. Longévité : \\~120 ans.\n<span color=\"gray\">*L'usage de mise en forme avancée est autorisé et encouragé : hiérarchies de titres, listes à puces ou numérotées, tables, diagrammes Mermaid (toujours préciser une couleur de texte noir), citations et menus dépliants.*</span>",
     "histoire_de_l_espe_ce": "-",
     "apparence": "<empty-block/>\n\t<empty-block/>",
     "ro_le_culturel": "<span color=\"gray\">*Ex: Nourriture, imagerie, symbolisme, animaux de compagnie, etc*</span>\n\t<empty-block/>",
@@ -17,7 +18,7 @@
     "mode_de_reproduction": "-",
     "sous-espe_ces": "-",
     "fonctionnement_avec_l_e_cosyste_me": "-",
-    "re_sume__ia": "L'utilisation de mise en forme avancée est encouragée pour décrire une nouvelle espèce, en abordant son histoire, son apparence, son rôle culturel et son rôle dans l'intrigue. Des sections sont également prévues pour l'écosystème, incluant l'habitat naturel, le mode d'alimentation, la reproduction, les sous-espèces et l'interaction avec l'écosystème."
+    "re_sume__ia": "Neurocristallin prédateur solitaire (40–80 cm, quadrupède félin) à cristal améthyste sous-cutané discret — peau translucide révélant le squelette améthyste uniquement sous stress. Camouflage structural par réfraction active des facettes cristallines sous-cutanées : quasi-invisible à l'affût sur les veines de quartz. Lames d'usure rétractiles (griffes, mâchoires). Cycle reproductif synchronisé avec les phases lunaires. Nocturne et cavernicole strict. Longévité : ~120 ans."
   },
   "section_titles": {
     "re_sume__de_la_fiche": "Résumé de la fiche",

@@ -7,6 +7,9 @@ import { theme } from '../../theme'
 import { useGraphStore } from '../../store/graphStore'
 import type { DialogueNodeData } from '../../schemas/nodeEditorSchema'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
+import { ConditionEditor } from './conditions/ConditionEditor'
+import { EffectEditor } from './effects/EffectEditor'
+import { TraitRequirementsEditor } from '../shared/TraitRequirementsEditor'
 
 export interface ChoiceEditorProps {
   dialogueNodeId: string
@@ -161,39 +164,6 @@ export const ChoiceEditor = memo(function ChoiceEditor({
         />
       )}
       
-      {/* Condition */}
-      <div style={{ marginBottom: '0.75rem' }}>
-        <label
-          style={{
-            display: 'block',
-            marginBottom: '0.5rem',
-            fontSize: '0.85rem',
-            fontWeight: 'bold',
-            color: theme.text.secondary,
-          }}
-        >
-          Condition d'affichage
-        </label>
-        <input
-          type="text"
-          {...register(`choices.${choiceIndex}.condition` as const)}
-          placeholder="Ex: FLAG_NAME, NOT FLAG_NAME, startState == 1"
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: 4,
-            backgroundColor: theme.background.tertiary,
-            color: theme.text.primary,
-            fontSize: '0.85rem',
-            fontFamily: 'monospace',
-          }}
-        />
-        <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.text.secondary, fontStyle: 'italic' }}>
-          Format: FLAG_NAME, NOT FLAG_NAME, ou expression (ex: startState == 1)
-        </div>
-      </div>
-      
       {/* Test d'attribut */}
       <div style={{ marginBottom: '0.75rem' }}>
         <label
@@ -343,53 +313,24 @@ export const ChoiceEditor = memo(function ChoiceEditor({
             color: theme.text.secondary,
           }}
         >
-          Traits requis (format JSON)
+          Traits requis
         </label>
         <Controller
           name={`choices.${choiceIndex}.traitRequirements` as const}
           control={control}
           render={({ field }) => (
-            <textarea
-              {...field}
-              value={field.value ? JSON.stringify(field.value, null, 2) : ''}
-              onChange={(e) => {
-                const value = e.target.value.trim()
-                if (!value) {
-                  field.onChange(undefined)
-                  return
-                }
-                try {
-                  const parsed = JSON.parse(value)
-                  if (Array.isArray(parsed)) {
-                    field.onChange(parsed)
-                  } else {
-                    field.onChange(undefined)
-                  }
-                } catch {
-                  // Garder la valeur pour permettre la saisie progressive
-                  field.onChange(undefined)
-                }
-              }}
-              placeholder='[{"trait": "Autoritaire", "minValue": 5}]'
-              rows={2}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: '0.85rem',
-                fontFamily: 'monospace',
-                resize: 'vertical',
-              }}
+            <TraitRequirementsEditor
+              idPrefix={`choice-${choiceIndex}-trait-requirements`}
+              value={field.value}
+              onChange={field.onChange}
             />
           )}
         />
-        <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: theme.text.secondary, fontStyle: 'italic' }}>
-          Format JSON: {'[{"trait": "NomTrait", "minValue": 5}]'}
-        </div>
       </div>
+
+      <ConditionEditor variant="choice" choiceIndex={choiceIndex} />
+
+      <EffectEditor choiceIndex={choiceIndex} />
     </div>
   )
 })

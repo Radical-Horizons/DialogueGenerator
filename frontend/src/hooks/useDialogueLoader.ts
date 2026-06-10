@@ -8,6 +8,7 @@ import { useGraphStore } from '../store/graphStore'
 import { useGraphViewStore } from '../store/graphViewStore'
 import * as unityDialoguesAPI from '../api/unityDialogues'
 import { getErrorMessage } from '../types/errors'
+import { API_TIMEOUTS } from '../constants'
 import type { UnityDialogueMetadata } from '../types/api'
 import type { UnityDialogueListRef } from '../components/unityDialogues/UnityDialogueList'
 import type { UseToastFn } from '../components/shared'
@@ -416,8 +417,8 @@ export function useDialogueLoader(
       return
     }
 
-    // Laisser finir une sauvegarde API en cours (autosave ~50 ms ou requête longue) avant Ctrl+S / E2E requestSave.
-    const savingDeadline = Date.now() + 45_000
+    // Laisser finir une sauvegarde API en cours (autosave ou `API_TIMEOUTS.DOCUMENT_IO`) avant Ctrl+S / E2E requestSave.
+    const savingDeadline = Date.now() + API_TIMEOUTS.DOCUMENT_IO + 15_000
     while (useGraphStore.getState().isSaving && Date.now() < savingDeadline) {
       await new Promise<void>((r) => {
         window.setTimeout(r, 100)

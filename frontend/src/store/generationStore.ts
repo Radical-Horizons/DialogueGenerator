@@ -16,6 +16,7 @@ interface GenerationState {
   // System prompt
   systemPromptOverride: string | null
   defaultSystemPrompt: string | null
+  gameRules: string
   
   // Source de vérité unique pour le prompt
   rawPrompt: RawPrompt | null
@@ -49,6 +50,7 @@ interface GenerationState {
   setSceneSelection: (selection: Partial<SceneSelection>) => void
   setDialogueStructure: (structure: string[]) => void
   setSystemPromptOverride: (prompt: string | null) => void
+  setGameRules: (rules: string) => void
   setDefaultSystemPrompt: (prompt: string | null) => void
   resetSystemPrompt: () => void
   setRawPrompt: (
@@ -84,12 +86,19 @@ const defaultSceneSelection: SceneSelection = {
 }
 
 const defaultDialogueStructure: string[] = ['PNJ', 'PJ', 'Stop', '', '', '']
+const defaultGameRules = [
+  'Influence et Respect ne doivent être utilisés que si la relation avec le PNJ le justifie.',
+  'Axes de réputation disponibles: Admiration, Prestige, Crainte.',
+  'Quand c’est pertinent, proposer des choix liés aux traits requis et aux gains systémiques plutôt que de les injecter artificiellement.',
+  'Viser un équilibre raisonnable entre options sociales (Influence/Respect), à effets de réputation et neutres selon la scène.',
+].join('\n')
 
 export const useGenerationStore = create<GenerationState>((set) => ({
   sceneSelection: defaultSceneSelection,
   dialogueStructure: defaultDialogueStructure,
   systemPromptOverride: null,
   defaultSystemPrompt: null,
+  gameRules: defaultGameRules,
   rawPrompt: null,
   structuredPrompt: null,
   promptHash: null,
@@ -122,6 +131,9 @@ export const useGenerationStore = create<GenerationState>((set) => ({
 
   setSystemPromptOverride: (prompt) =>
     set({ systemPromptOverride: prompt }),
+
+  setGameRules: (rules) =>
+    set({ gameRules: rules }),
 
   setDefaultSystemPrompt: (prompt) =>
     set({ defaultSystemPrompt: prompt }),

@@ -16,7 +16,7 @@ import type { LLMModelResponse } from '../../types/api'
 import { DialogueStructureWidget } from './DialogueStructureWidget'
 import { SystemPromptEditor } from './SystemPromptEditor'
 import { SceneSelectionWidget } from './SceneSelectionWidget'
-import { InGameFlagsSummary } from './InGameFlagsSummary'
+import { DialogueFlagsPanel } from './DialogueFlagsPanel'
 import { GenerationProgressModal } from './GenerationProgressModal'
 import { ModelSelector } from './ModelSelector'
 import { PresetSelector } from './PresetSelector'
@@ -42,8 +42,10 @@ export function GenerationPanel() {
   const {
     dialogueStructure,
     systemPromptOverride,
+    gameRules,
     setDialogueStructure,
     setSystemPromptOverride,
+    setGameRules,
     // État streaming (Story 0.2)
     isGenerating,
     streamingContent,
@@ -396,6 +398,7 @@ export function GenerationPanel() {
       <SystemPromptEditor
         userInstructions={userInstructions}
         authorProfile={authorProfile}
+        gameRules={gameRules}
         systemPromptOverride={systemPromptOverride}
         onUserInstructionsChange={(value) => {
           setUserInstructions(value)
@@ -403,6 +406,10 @@ export function GenerationPanel() {
         }}
         onAuthorProfileChange={(value) => {
           updateAuthorProfile(value)
+          draft.markDirty()
+        }}
+        onGameRulesChange={(value) => {
+          setGameRules(value)
           draft.markDirty()
         }}
         onSystemPromptChange={(value) => {
@@ -419,7 +426,7 @@ export function GenerationPanel() {
         }}
       />
 
-      <InGameFlagsSummary />
+      <DialogueFlagsPanel />
 
       {/* Sélecteur de modèle LLM (Story 0.3) */}
       <div style={{ marginBottom: '1rem' }}>
@@ -701,7 +708,11 @@ export function GenerationPanel() {
       (() => {
         const tokenCount = orchestrator.tokenCount
         const result = tokenCount != null
-          ? { prompt_tokens: tokenCount, completion_tokens: 0, estimated_cost_eur: null as number | null }
+          ? {
+              prompt_tokens: tokenCount,
+              completion_tokens: orchestrator.completionTokens ?? 0,
+              estimated_cost_eur: orchestrator.estimatedCostEur,
+            }
           : null
         const state = orchestrator.isEstimating
           ? 'loading'
