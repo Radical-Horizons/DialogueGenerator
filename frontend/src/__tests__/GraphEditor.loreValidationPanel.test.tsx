@@ -26,6 +26,7 @@ vi.mock('../components/shared', () => ({
   useToast: () => vi.fn(),
   SaveStatusIndicator: () => React.createElement('div', { 'data-testid': 'save-status-indicator' }),
   ConfirmDialog: () => null,
+  Badge: ({ children }: { children: React.ReactNode }) => React.createElement('span', null, children),
 }))
 
 vi.mock('../utils/graphExport', () => ({

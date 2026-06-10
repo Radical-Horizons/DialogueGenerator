@@ -1,10 +1,14 @@
+import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useShellKeyboardFocusScroller } from '../../hooks/useShellKeyboardFocusScroller'
 import { BrowserRouter } from 'react-router-dom'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
+import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
+import { panelHeaderTitleTypography } from '../../theme/responsiveChrome'
 
 // Mock des stores
 vi.mock('../../store/generationStore')
@@ -36,12 +40,46 @@ vi.mock('../context/ContextSelector', () => ({
   ContextSelector: () => <div data-testid="context-selector">Context Selector</div>,
 }))
 
+vi.mock('../../api/unityDialogues', () => ({
+  listUnityDialogues: vi.fn().mockResolvedValue({ dialogues: [], total: 0 }),
+  getUnityDialogue: vi.fn(),
+  deleteUnityDialogue: vi.fn(),
+  previewUnityDialogue: vi.fn(),
+}))
+
 const mockUseGenerationStore = vi.mocked(useGenerationStore)
 const mockUseGenerationActionsStore = vi.mocked(useGenerationActionsStore)
 const mockUseContextStore = vi.mocked(useContextStore)
 
+function getOpenLeftPanelButton() {
+  return (
+    screen.queryByRole('button', { name: /ouvrir (le panneau )?gdd/i }) ??
+    screen.getByRole('button', { name: /déplier le panneau gauche/i })
+  )
+}
+
+function getOpenRightPanelButton() {
+  return (
+    screen.queryByRole('button', { name: /ouvrir (le panneau )?détails/i }) ??
+    screen.getByRole('button', { name: /déplier le panneau droit/i })
+  )
+}
+
+/** Même listener que `MainLayout` (tests sans layout parent). */
+function TestShellKeyboardFocus({ children }: { children: ReactNode }) {
+  useShellKeyboardFocusScroller(true)
+  return <>{children}</>
+}
+
 describe('Dashboard', () => {
   let Dashboard: typeof import('./Dashboard').Dashboard
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'visualViewport')
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: 768 })
+    window.dispatchEvent(new Event('resize'))
+  })
 
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -343,6 +381,458 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(screen.getByText(/aucun dialogue unity généré/i)).toBeInTheDocument()
     })
+  })
+
+  it('active un mode narrow à 320px: panneaux latéraux repliés mais ré-ouvrables', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    // En mode narrow, le contenu du panneau gauche ne doit pas forcer un 3-panneaux compressé
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    // Et des contrôles explicites permettent de ré-ouvrir les panneaux
+    const expandLeft = getOpenLeftPanelButton()
+    const expandRight = getOpenRightPanelButton()
+    expect(expandLeft).toBeInTheDocument()
+    expect(expandRight).toBeInTheDocument()
+
+    await user.click(expandLeft)
+    expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+  })
+
+  it('active un mode tablette à 768px: drawers GDD + détails (FR120)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 768 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    expect(getOpenLeftPanelButton()).toBeInTheDocument()
+    expect(getOpenRightPanelButton()).toBeInTheDocument()
+
+    await user.click(getOpenLeftPanelButton())
+    await waitFor(() => {
+      const dlg = screen.getByRole('dialog', { name: /contexte gdd/i })
+      expect(dlg).toHaveAttribute('aria-modal', 'true')
+      expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /fermer le panneau contexte gdd/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /fermer le panneau contexte gdd/i }))
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /contexte gdd/i })).not.toBeInTheDocument()
+    })
+
+    await user.click(getOpenRightPanelButton())
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /^détails$/i })).toHaveAttribute('aria-modal', 'true')
+      expect(screen.getByRole('button', { name: /prompt/i })).toBeInTheDocument()
+    })
+  })
+
+  it('mobile 375px: même comportement narrow que 320px (panneaux latéraux repliés)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+    expect(getOpenLeftPanelButton()).toBeInTheDocument()
+  })
+
+  it('desktop 1024px: panneaux latéraux visibles par défaut (non-régression layout 3 colonnes)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+    expect(
+      screen.queryByRole('button', { name: /ouvrir (le panneau )?gdd/i }) ??
+        screen.queryByRole('button', { name: /déplier le panneau gauche/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('FR118 17.6: titre panneau GDD plus compact quand la colonne centrale est étroite (desktop)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    window.dispatchEvent(new Event('resize'))
+
+    const { unmount } = render(
+      <BrowserRouter>
+        <div style={{ width: 1400, height: 700 }}>
+          <Dashboard />
+        </div>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+
+    const titleComfortable = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+    expect(titleComfortable).toHaveStyle({
+      fontSize: `${panelHeaderTitleTypography.comfortableFontRem}rem`,
+    })
+    unmount()
+
+    // Avec defaultSizes [20, 58, 22], conteneur plus étroit pour garder la colonne centrale sous 480px (seuil narrow).
+    render(
+      <BrowserRouter>
+        <div style={{ width: 760, height: 700 }}>
+          <Dashboard />
+        </div>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      const titleNarrow = screen.getByText(GDD_CONTEXT_PANEL_TITLE)
+      expect(titleNarrow).toHaveStyle({
+        fontSize: `${panelHeaderTitleTypography.narrowFontRem}rem`,
+      })
+    })
+  })
+
+  it('FR118 17.6 AC2: onglets segmentés centraux — title complet et pas de scroll horizontal document (Dashboard)', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 1024 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <div style={{ width: 720, height: 700 }}>
+          <Dashboard />
+        </div>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+
+    const generationTab = screen.getByRole('button', { name: '💬 Génération de Dialogues' })
+    expect(generationTab).toHaveAttribute('title', '💬 Génération de Dialogues')
+
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+      document.documentElement.clientWidth + 1
+    )
+  })
+
+  it('mobile: accès à l’onglet Éditeur de Graphe (FR118 zones critiques)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 320 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
+    await user.click(graphTab)
+    expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
+  })
+
+  it('narrow 375px: panneau contexte en overlay dialog + fermeture explicite (FR120)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(getOpenLeftPanelButton())
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toHaveAttribute('aria-modal', 'true')
+      expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
+      expect(screen.getByTestId('context-selector')).toBeInTheDocument()
+    })
+  })
+
+  it('narrow: Escape referme le drawer contexte (FR120 — équivalent clavier)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(getOpenLeftPanelButton())
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /contexte gdd/i })).toBeInTheDocument()
+    })
+
+    await user.keyboard('{Escape}')
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /contexte gdd/i })).not.toBeInTheDocument()
+      expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
+    })
+  })
+
+  it('narrow: fermeture drawer + onglets génération → graphe sans overlay persistant (FR120)', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(getOpenLeftPanelButton())
+    await waitFor(() => {
+      expect(screen.getByTestId('narrow-drawer-backdrop')).toBeInTheDocument()
+    })
+    await user.click(screen.getByRole('button', { name: /fermer le panneau contexte gdd/i }))
+    await waitFor(() => {
+      expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
+    })
+
+    const graphTab = screen.getByRole('button', { name: /éditeur de graphe/i })
+    await user.click(graphTab)
+    expect(screen.getByTestId('graph-editor')).toBeInTheDocument()
+    expect(screen.queryByTestId('narrow-drawer-backdrop')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('17.4 narrow: inset bas via visualViewport sur le drawer détails', async () => {
+    const user = userEvent.setup()
+    const listeners = { resize: new Set<EventListener>() }
+    const vv = {
+      height: 400,
+      offsetTop: 0,
+      width: 375,
+      addEventListener: vi.fn((ev: string, fn: EventListener) => {
+        if (ev === 'resize') listeners.resize.add(fn)
+      }),
+      removeEventListener: vi.fn(),
+    }
+    Object.defineProperty(window, 'visualViewport', { value: vv, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate: vi.fn(),
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(getOpenRightPanelButton())
+    await waitFor(() => {
+      expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
+    })
+
+    const slot = screen.getByTestId('narrow-drawer-scroll-slot')
+    await waitFor(() => {
+      expect(slot).toHaveStyle({ paddingBottom: '400px' })
+    })
+  })
+
+  it('17.4 narrow: focus champ dans drawer détails appelle scrollIntoView', async () => {
+    const user = userEvent.setup()
+    const scrollIntoViewMock = vi.fn()
+    const desc = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
+    try {
+      Object.defineProperty(Element.prototype, 'scrollIntoView', {
+        configurable: true,
+        writable: true,
+        value: scrollIntoViewMock,
+      })
+
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+      Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: 800 })
+      window.dispatchEvent(new Event('resize'))
+
+      mockUseGenerationStore.mockReturnValue({
+        rawPrompt: 'contenu prompt test',
+        tokenCount: 5,
+        promptHash: 'x',
+        isEstimating: false,
+        unityDialogueResponse: null,
+        sceneSelection: {
+          characterA: null,
+          characterB: null,
+          sceneRegion: null,
+          subLocation: null,
+        },
+        dialogueStructure: ['', '', '', '', '', ''] as [string, string, string, string, string, string],
+        systemPromptOverride: null,
+        setDialogueStructure: vi.fn(),
+        setSystemPromptOverride: vi.fn(),
+        setRawPrompt: vi.fn(),
+        setSceneSelection: vi.fn(),
+        setUnityDialogueResponse: vi.fn(),
+        tokensUsed: null,
+        setTokensUsed: vi.fn(),
+        clearGenerationResults: vi.fn(),
+      } as ReturnType<typeof useGenerationStore>)
+
+      mockUseGenerationActionsStore.mockReturnValue({
+        actions: {
+          handleGenerate: vi.fn(),
+          handlePreview: vi.fn(),
+          handleExportUnity: vi.fn(),
+          handleReset: vi.fn(),
+          isLoading: false,
+          isDirty: false,
+          saveStatus: 'saved',
+          draftLastSavedAt: null,
+        },
+      } as ReturnType<typeof useGenerationActionsStore>)
+
+      render(
+        <BrowserRouter>
+          <TestShellKeyboardFocus>
+            <Dashboard />
+          </TestShellKeyboardFocus>
+        </BrowserRouter>
+      )
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+      })
+
+      await user.click(getOpenRightPanelButton())
+      await waitFor(() => {
+        expect(screen.getByTestId('narrow-drawer-right')).toBeInTheDocument()
+      })
+
+      const promptTab = screen.getByRole('button', { name: /^prompt$/i })
+      await user.click(promptTab)
+
+      const checkbox = await screen.findByRole('checkbox')
+      expect(checkbox).toBeTruthy()
+      checkbox.focus()
+      expect(scrollIntoViewMock).toHaveBeenCalled()
+    } finally {
+      if (desc) {
+        Object.defineProperty(Element.prototype, 'scrollIntoView', desc)
+      } else {
+        Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+      }
+    }
+  })
+
+  it('17.4 narrow: CTA Générer dans le drawer avec zone paddée (inset clavier)', async () => {
+    const user = userEvent.setup()
+    const listeners = { resize: new Set<EventListener>() }
+    const vv = {
+      height: 400,
+      offsetTop: 0,
+      width: 375,
+      addEventListener: vi.fn((ev: string, fn: EventListener) => {
+        if (ev === 'resize') listeners.resize.add(fn)
+      }),
+      removeEventListener: vi.fn(),
+    }
+    Object.defineProperty(window, 'visualViewport', { value: vv, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true, writable: true })
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate: vi.fn(),
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <TestShellKeyboardFocus>
+          <Dashboard />
+        </TestShellKeyboardFocus>
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('context-selector')).not.toBeInTheDocument()
+    })
+
+    await user.click(getOpenRightPanelButton())
+    const slot = await screen.findByTestId('narrow-drawer-scroll-slot')
+    await waitFor(() => {
+      expect(slot).toHaveStyle({ paddingBottom: '400px' })
+    })
+
+    const gen = within(slot).getByRole('button', { name: /générer/i })
+    expect(gen).toBeEnabled()
   })
 })
 

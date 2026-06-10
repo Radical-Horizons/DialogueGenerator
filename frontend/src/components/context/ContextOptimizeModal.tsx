@@ -9,6 +9,10 @@ import { useContextConfigStore } from '../../store/contextConfigStore'
 import { buildOptimizeContextRequest } from '../../utils/buildContextOptimizeRequest'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { StyledSelect } from '../shared/StyledSelect'
+import { remSize } from '../../theme/uiTypography'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 type Phase = 'loading' | 'preview' | 'report'
 
@@ -20,6 +24,8 @@ export interface ContextOptimizeModalProps {
 
 export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimizeModalProps) {
   const titleId = useId()
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   const setSelections = useContextStore((s) => s.setSelections)
   const pinnedKeys = useContextConfigStore((s) => s.contextOptimizationPinnedKeys)
   const setPinnedKeys = useContextConfigStore((s) => s.setContextOptimizationPinnedKeys)
@@ -121,20 +127,24 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
           color: theme.text.primary,
           borderRadius: 8,
           border: `1px solid ${theme.border.primary}`,
-          padding: '1rem',
+          padding: isNarrow ? '0.85rem' : '1rem',
           boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
         }}
+        ref={panelRef}
       >
-        <h2 id={titleId} style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>
+        <h2 id={titleId} style={{ margin: '0 0 0.75rem', fontSize: `${typo.titleFontRem}rem` }}>
           Optimiser le contexte
         </h2>
 
-        <section aria-label="Règles d'optimisation" style={{ marginBottom: '0.75rem', fontSize: '0.82rem' }}>
+        <section
+          aria-label="Règles d'optimisation"
+          style={{ marginBottom: '0.75rem', fontSize: `${typo.bodyFontRem}rem` }}
+        >
           <div style={{ marginBottom: 6 }}>
             <label style={{ display: 'block', marginBottom: 4, color: theme.text.secondary }}>
               Stratégie
             </label>
-            <select
+            <StyledSelect
               value={strategy}
               onChange={(e) =>
                 setStrategy(e.target.value === 'aggressive' ? 'aggressive' : 'conservative')
@@ -150,7 +160,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
             >
               <option value="conservative">Conservatrice (réduit d’abord types périphériques)</option>
               <option value="aggressive">Agressive (réduit d’abord personnages / lieux)</option>
-            </select>
+            </StyledSelect>
           </div>
           <div style={{ marginBottom: 6 }}>
             <label style={{ display: 'block', marginBottom: 4, color: theme.text.secondary }}>
@@ -206,7 +216,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
               </button>
             </div>
             {pinnedKeys.length > 0 && (
-              <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem', fontSize: '0.78rem' }}>
+              <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem', fontSize: remSize('small') }}>
                 {pinnedKeys.map((k) => (
                   <li key={k}>
                     {k}{' '}
@@ -219,7 +229,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                         color: theme.state.error.color,
                         cursor: 'pointer',
                         padding: 0,
-                        fontSize: '0.75rem',
+                        fontSize: remSize('caption'),
                       }}
                     >
                       retirer
@@ -231,10 +241,10 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
           </div>
         </section>
 
-        {phase === 'loading' && <p style={{ fontSize: '0.85rem' }}>Calcul de la proposition…</p>}
+        {phase === 'loading' && <p style={{ fontSize: remSize('accent') }}>Calcul de la proposition…</p>}
 
         {error && (
-          <p role="alert" style={{ color: theme.state.error.color, fontSize: '0.85rem' }}>
+          <p role="alert" style={{ color: theme.state.error.color, fontSize: remSize('accent') }}>
             {error}
           </p>
         )}
@@ -251,7 +261,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                   borderRadius: 4,
                   backgroundColor: theme.state.warning.background,
                   color: theme.state.warning.color,
-                  fontSize: '0.8rem',
+                  fontSize: remSize('small'),
                 }}
               >
                 {proposal.warnings.map((w, i) => (
@@ -259,28 +269,28 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                 ))}
               </div>
             )}
-            <p style={{ fontSize: '0.82rem', margin: '0 0 0.5rem' }}>
+            <p style={{ fontSize: remSize('body'), margin: '0 0 0.5rem' }}>
               Tokens sélection : {proposal.selection_tokens_before.toLocaleString()} →{' '}
               {proposal.selection_tokens_after.toLocaleString()} (plafond :{' '}
               {contextTokenBudgetMax.toLocaleString()})
             </p>
             {!proposal.budget_respected && !proposal.no_op && (
-              <p role="alert" style={{ fontSize: '0.82rem', color: theme.state.error.color, margin: '0 0 0.5rem' }}>
+              <p role="alert" style={{ fontSize: remSize('body'), color: theme.state.error.color, margin: '0 0 0.5rem' }}>
                 Le plafond n’est pas atteint — vous ne pouvez pas appliquer cette proposition tant que des
                 entités restent épinglées ou que le budget est trop bas.
               </p>
             )}
-            <p style={{ fontSize: '0.82rem', margin: '0 0 0.5rem' }}>
+            <p style={{ fontSize: remSize('body'), margin: '0 0 0.5rem' }}>
               Proxy pré-génération : {proposal.pre_generation_context_fidelity_proxy_percent} %
             </p>
             {proposal.no_op ? (
-              <p style={{ fontSize: '0.82rem' }}>Aucun changement nécessaire (déjà sous le budget).</p>
+              <p style={{ fontSize: remSize('body') }}>Aucun changement nécessaire (déjà sous le budget).</p>
             ) : (
               <>
-                <p style={{ fontSize: '0.82rem', margin: '0 0 0.25rem' }}>
+                <p style={{ fontSize: remSize('body'), margin: '0 0 0.25rem' }}>
                   {proposal.changes.length} passage(s) Complet → Extrait
                 </p>
-                <ul style={{ fontSize: '0.78rem', maxHeight: 140, overflowY: 'auto', margin: '0 0 0.75rem' }}>
+                <ul style={{ fontSize: remSize('small'), maxHeight: 140, overflowY: 'auto', margin: '0 0 0.75rem' }}>
                   {proposal.changes.slice(0, 50).map((c, i) => (
                     <li key={`${c.entity_type}-${c.entity_name}-${i}`}>
                       {c.entity_type} — {c.entity_name}
@@ -335,7 +345,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
 
         {phase === 'report' && proposal && (
           <div aria-live="polite">
-            <p style={{ fontSize: '0.85rem', margin: '0 0 0.5rem' }}>
+            <p style={{ fontSize: remSize('accent'), margin: '0 0 0.5rem' }}>
               Optimisation appliquée. Tokens économisés :{' '}
               <strong>{proposal.tokens_saved.toLocaleString()}</strong> — entités passées en extrait :{' '}
               <strong>{proposal.changes.length}</strong>

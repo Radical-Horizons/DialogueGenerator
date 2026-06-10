@@ -1,6 +1,6 @@
 ---
 project_name: 'DialogueGenerator'
-user_name: 'Marc'
+user_name: 'Véronique'
 date: '2026-03-04'
 sections_completed: ['technology_stack', 'language_rules', 'framework_rules', 'testing_rules', 'code_quality', 'workflow_rules', 'dont_miss_rules']
 existing_patterns_found: 12

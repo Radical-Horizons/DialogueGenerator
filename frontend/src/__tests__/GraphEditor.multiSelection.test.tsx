@@ -51,36 +51,40 @@ vi.mock('../components/unityDialogues/UnityDialogueList', () => ({
   }),
 }))
 
-vi.mock('../components/shared', () => ({
-  useToast: () => toastMock,
-  SaveStatusIndicator: () => null,
-  ConfirmDialog: ({
-    isOpen,
-    title,
-    message,
-    confirmLabel = 'Confirmer',
-    cancelLabel = 'Annuler',
-    onConfirm,
-    onCancel,
-  }: {
-    isOpen: boolean
-    title: string
-    message: string
-    confirmLabel?: string
-    cancelLabel?: string
-    onConfirm: () => void
-    onCancel: () => void
-  }) =>
-    isOpen
-      ? React.createElement(
-          'div',
-          { role: 'dialog', 'aria-label': title },
-          React.createElement('div', null, message),
-          React.createElement('button', { onClick: onCancel }, cancelLabel),
-          React.createElement('button', { onClick: onConfirm }, confirmLabel)
-        )
-      : null,
-}))
+vi.mock('../components/shared', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return {
+    ...actual,
+    useToast: () => toastMock,
+    SaveStatusIndicator: () => null,
+    ConfirmDialog: ({
+      isOpen,
+      title,
+      message,
+      confirmLabel = 'Confirmer',
+      cancelLabel = 'Annuler',
+      onConfirm,
+      onCancel,
+    }: {
+      isOpen: boolean
+      title: string
+      message: string
+      confirmLabel?: string
+      cancelLabel?: string
+      onConfirm: () => void
+      onCancel: () => void
+    }) =>
+      isOpen
+        ? React.createElement(
+            'div',
+            { role: 'dialog', 'aria-label': title },
+            React.createElement('div', null, message),
+            React.createElement('button', { onClick: onCancel }, cancelLabel),
+            React.createElement('button', { onClick: onConfirm }, confirmLabel)
+          )
+        : null,
+  }
+})
 
 function renderGraphEditor() {
   const queryClient = makeQueryClient()

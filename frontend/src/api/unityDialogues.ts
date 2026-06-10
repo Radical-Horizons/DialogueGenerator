@@ -21,7 +21,9 @@ export async function listUnityDialogues(): Promise<UnityDialogueListResponse> {
  * Lit un fichier de dialogue Unity JSON.
  */
 export async function getUnityDialogue(filename: string): Promise<UnityDialogueReadResponse> {
-  const response = await apiClient.get<UnityDialogueReadResponse>(`/api/v1/unity-dialogues/${filename}`)
+  const response = await apiClient.get<UnityDialogueReadResponse>(
+    `/api/v1/unity-dialogues/${encodeURIComponent(filename)}`
+  )
   return response.data
 }
 
@@ -29,7 +31,7 @@ export async function getUnityDialogue(filename: string): Promise<UnityDialogueR
  * Supprime un fichier de dialogue Unity JSON.
  */
 export async function deleteUnityDialogue(filename: string): Promise<void> {
-  await apiClient.delete(`/api/v1/unity-dialogues/${filename}`)
+  await apiClient.delete(`/api/v1/unity-dialogues/${encodeURIComponent(filename)}`)
 }
 
 /**

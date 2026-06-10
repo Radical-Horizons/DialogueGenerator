@@ -4,6 +4,8 @@
  */
 import { memo, useState, useEffect, useCallback, useRef } from 'react'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 export interface EdgeLabelEditModalProps {
   isOpen: boolean
@@ -22,6 +24,8 @@ export const EdgeLabelEditModal = memo(function EdgeLabelEditModal({
 }: EdgeLabelEditModalProps) {
   const [value, setValue] = useState(initialValue)
   const containerRef = useRef<HTMLDivElement>(null)
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
 
   useEffect(() => {
     if (isOpen) setValue(initialValue)
@@ -80,22 +84,30 @@ export const EdgeLabelEditModal = memo(function EdgeLabelEditModal({
       onClick={onCancel}
     >
       <div
-        ref={containerRef}
+        ref={(el) => {
+          (panelRef as unknown as { current: HTMLDivElement | null }).current = el
+          containerRef.current = el
+        }}
         role="document"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
         style={{
           backgroundColor: theme.background.panel,
-          padding: '1.25rem',
+          padding: isNarrow ? '0.9rem' : '1.25rem',
           borderRadius: '8px',
-          minWidth: '320px',
+          minWidth: isNarrow ? 'unset' : '320px',
           border: `1px solid ${theme.border.primary}`,
         }}
       >
         <h3
           id="edge-label-edit-modal-title"
-          style={{ marginTop: 0, marginBottom: '0.75rem', color: theme.text.primary, fontSize: '1rem' }}
+          style={{
+            marginTop: 0,
+            marginBottom: '0.75rem',
+            color: theme.text.primary,
+            fontSize: `${typo.titleFontRem}rem`,
+          }}
         >
           Modifier le libellé du choix
         </h3>
@@ -117,7 +129,7 @@ export const EdgeLabelEditModal = memo(function EdgeLabelEditModal({
             borderRadius: '4px',
             backgroundColor: theme.background.secondary,
             color: theme.text.primary,
-            fontSize: '0.9rem',
+            fontSize: `${typo.bodyFontRem}rem`,
             boxSizing: 'border-box',
           }}
         />

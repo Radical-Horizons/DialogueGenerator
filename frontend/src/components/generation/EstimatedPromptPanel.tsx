@@ -78,12 +78,12 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
         }}
       >
       <div style={{ 
-        padding: '1rem', 
+        padding: '0.65rem 0.75rem', 
         borderBottom: `1px solid ${theme.border.primary}`,
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.75rem',
+        gap: '0.55rem',
       }}>
         <div
           style={{
@@ -113,7 +113,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
               justifyContent: 'flex-end',
               gap: '0.75rem',
               color: theme.text.secondary,
-              fontSize: '0.85rem',
+              fontSize: '0.78rem',
             }}
           >
             {viewMode === 'raw' && (
@@ -121,13 +121,13 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                 type="button"
                 onClick={handleCopyPrompt}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.4rem 0.75rem',
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '4px',
                   backgroundColor: theme.background.secondary,
                   color: theme.text.primary,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: '0.78rem',
                   transition: 'background-color 0.2s',
                   display: 'flex',
                   alignItems: 'center',
@@ -148,13 +148,13 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
                 type="button"
                 onClick={toggleAllFn}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.4rem 0.75rem',
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '4px',
                   backgroundColor: theme.background.secondary,
                   color: theme.text.primary,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: '0.78rem',
                   transition: 'background-color 0.2s',
                   marginRight: '0.75rem',
                 }}
@@ -229,7 +229,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
           height: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: '1rem',
+          padding: '0.75rem',
           boxSizing: 'border-box',
           scrollbarGutter: 'stable',
         }}
@@ -239,11 +239,11 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
             <pre
               style={{
                 fontFamily: 'monospace',
-                fontSize: '0.85rem',
-                lineHeight: '1.6',
+                fontSize: '0.78rem',
+                lineHeight: '1.55',
                 color: theme.text.secondary,
                 backgroundColor: theme.background.secondary,
-                padding: '1rem',
+                padding: '0.75rem',
                 borderRadius: '4px',
                 border: `1px solid ${theme.border.primary}`,
                 whiteSpace: 'pre-wrap',

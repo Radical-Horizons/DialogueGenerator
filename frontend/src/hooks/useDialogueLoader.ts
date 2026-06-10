@@ -12,6 +12,7 @@ import { API_TIMEOUTS } from '../constants'
 import type { UnityDialogueMetadata } from '../types/api'
 import type { UnityDialogueListRef } from '../components/unityDialogues/UnityDialogueList'
 import type { UseToastFn } from '../components/shared'
+import { normalizeDialogueFilenameKey } from '../utils/formatDialogueTitle'
 
 interface RouteTarget {
   normalizedDialogueId: string
@@ -20,11 +21,6 @@ interface RouteTarget {
 
 /** Circuit breaker: backoff après 4xx non-409 pour éviter la boucle d'autosave. */
 const AUTOSAVE_4XX_BACKOFF_MS = 10_000
-
-/** Compare dialogue ids whether stored with or without `.json` (liste UI vs documentId stem). */
-function normalizeDialogueFilenameKey(filename: string): string {
-  return filename.replace(/\.json$/i, '').toLowerCase()
-}
 
 export interface UseDialogueLoaderReturn {
   selectedDialogue: UnityDialogueMetadata | null
@@ -112,11 +108,10 @@ export function useDialogueLoader(
 
       const state = useGraphStore.getState()
       const currentFilename = state.dialogueMetadata?.filename ?? state.documentId ?? null
-      const norm = (s: string) => s.replace(/\.json$/i, '').toLowerCase()
       const isSameDialogue =
         !!currentFilename &&
         !!targetFilename &&
-        norm(currentFilename) === norm(targetFilename)
+        normalizeDialogueFilenameKey(currentFilename) === normalizeDialogueFilenameKey(targetFilename)
       
       if (isSameDialogue) {
         setIsLoadingDialogue(false)

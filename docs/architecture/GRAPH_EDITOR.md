@@ -214,14 +214,14 @@ Option B : Depuis l'URL
 ### Backend
 
 - **Services** :
-  - `graph_conversion_service.py` : Conversion Unity JSON ↔ ReactFlow
-  - `graph_validation_service.py` : Validation de graphe
-- **API** : `/api/v1/unity-dialogues/graph/*`
-  - `POST /load` : Charger un graphe
-  - `POST /save` : Sauvegarder un graphe
-  - `POST /validate` : Valider un graphe
-  - `POST /generate-node` : Générer un nœud (futur)
-  - `POST /calculate-layout` : Calculer un layout
+  - `services/graph_conversion_service.py` : Conversion Unity JSON ↔ ReactFlow, export pour validation schéma
+  - `services/graph_validation_service.py` : Validation structurelle, simulation de flux (dead ends, cul-de-sacs, couverture)
+  - `services/context_dropping_detector.py` / `services/ai_slop_detector.py` : Analyses qualité « context dropping » et « AI slop »
+  - `services/context_dropping_rules_service.py` : Persistance des règles anti-context-dropping (`data/validation-rules/context-dropping.json`)
+- **API REST** (JWT obligatoire sur ces routes) :
+  - **Graphe** : préfixe `/api/v1/unity-dialogues/graph/` — I/O (`load`, `save`, `save-and-write`), `generate-node`, `estimate-cost`, `validate`, `validate-schema`, `validate-lore-explicit`, `simulate-flow`, `calculate-layout`, `detect-ai-slop`, `detect-context-dropping`, `evaluate-dialogue-quality`, cycle de vie nœuds générés (`prompt`, `nodes/.../accept|reject|regenerate`). Détail et schémas : [Backend API Contracts — Graph editor API](../api/api-contracts-api.md#graph-editor-api-apiv1unity-dialoguesgraph).
+  - **Règles context-dropping** : `/api/v1/validation/rules/context-dropping` (GET/PUT) — utilisées par défaut par `detect-context-dropping` quand les options ne les surchargent pas.
+- **Client TS** : `frontend/src/api/graph.ts`
 
 ### Frontend
 
@@ -233,6 +233,13 @@ Option B : Depuis l'URL
   - `nodes/EndNode.tsx` : Nœud de fin
   - `NodeEditorPanel.tsx` : Panel d'édition
 - **Page** : `GraphEditorPage.tsx`
+
+## API REST (graphe et validation)
+
+L’éditeur consomme l’API sous le préfixe **`/api/v1/unity-dialogues/graph`** (chargement, sauvegarde, validation structurelle, schéma Unity, lore explicite, simulation de flux, détection AI slop / **context dropping**, juge qualité LLM, génération de nœud, etc.). JWT obligatoire sur ces routes.
+
+- **Contrat détaillé** : [`docs/api/api-contracts-api.md`](../api/api-contracts-api.md) (section *Graph Editor Endpoints* et *Validation rules — context dropping*).
+- **Règles anti-context-dropping persistées** : `GET` / `PUT` **`/api/v1/validation/rules/context-dropping`** → fichier `data/validation-rules/context-dropping.json` (voir `ContextDroppingRulesService`).
 
 ## Support
 

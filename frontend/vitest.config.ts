@@ -9,12 +9,12 @@ const __dirname = dirname(__filename)
 
 /**
  * Tests lourds exclus de `npm test` (défaut) pour un retour en minutes, pas en heures.
+ * `Dashboard.test.tsx` est inclus par défaut (régressions layout / responsive / FR120).
  * Suite complète : `npm run test:full` ou CI (VITEST_FULL=1).
  */
 const SLOW_INTEGRATION_TESTS = [
   '**/GraphCanvas.virtualization.test.tsx',
   '**/GenerationPanel.integration.test.tsx',
-  '**/Dashboard.test.tsx',
 ] as const
 
 const runFullSuite = process.env.VITEST_FULL === '1'
@@ -23,6 +23,10 @@ const isCi = process.env.CI === 'true'
 export default defineConfig({
   // @ts-expect-error - Rollup version mismatch between vitest and vite, but works at runtime
   plugins: [react()],
+  /** Aligné sur vite.config (Header affiche la date de build). */
+  define: {
+    __BUILD_DATE__: JSON.stringify('1970-01-01T00:00:00.000Z'),
+  },
   test: {
     environment: 'jsdom',
     globals: true,

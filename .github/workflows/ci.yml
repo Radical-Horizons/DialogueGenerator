@@ -4,7 +4,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
   push:
     branches: [main]
 
@@ -76,3 +76,44 @@ jobs:
           VITEST_FULL: "1"
         run: npx vitest run --max-workers=2
         working-directory: frontend
+
+  pwa:
+    name: PWA installability
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run PWA Playwright smoke
+        env:
+          ENVIRONMENT: development
+          JWT_SECRET_KEY: ci-dummy-secret
+          OPENAI_API_KEY: sk-dummy
+        run: npm run test:e2e:pwa

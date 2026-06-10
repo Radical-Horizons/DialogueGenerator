@@ -7,8 +7,12 @@ import { useSceneSelection } from '../../hooks/useSceneSelection'
 import { useGenerationStore } from '../../store/generationStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { theme } from '../../theme'
+import { generationPanelChrome } from '../../theme/responsiveChrome'
+import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
 
 export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
+  const isNarrow = useGenerationPanelNarrow()
+  const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
   const { data, selection, updateSelection, swapCharacters, randomizeField, isLoading } =
     useSceneSelection()
   const { setSceneSelection } = useGenerationStore()
@@ -79,7 +83,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     label: name,
   }))
 
-  const iconActionSize = 36
+  const iconActionSize = chrome.iconActionSizePx
 
   const randomButtonStyle: React.CSSProperties = {
     width: `${iconActionSize}px`,
@@ -106,7 +110,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     return (
       <div
         style={{
-          padding: '2rem',
+          padding: isNarrow ? '1rem' : '2rem',
           border: `1px dashed ${theme.border.primary}`,
           borderRadius: '8px',
           backgroundColor: theme.background.tertiary,
@@ -127,18 +131,19 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   return (
     <div
       style={{
-        padding: '1rem',
+        padding: chrome.cardPadding,
         border: `1px solid ${theme.border.primary}`,
         borderRadius: '8px',
         backgroundColor: theme.background.tertiary,
         marginBottom: '1rem',
+        minWidth: 0,
       }}
     >
       <h3
         style={{
           marginTop: 0,
           marginBottom: '0.5rem',
-          fontSize: '0.875rem',
+          fontSize: `${chrome.sectionTitleFontRem}rem`,
           fontWeight: 'bold',
           color: theme.text.primary,
         }}
@@ -150,12 +155,21 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
       <div
         style={{
           display: 'flex',
-          gap: '0.5rem',
+          flexWrap: isNarrow ? 'wrap' : 'nowrap',
+          gap: `${chrome.controlGapRem}rem`,
           alignItems: 'center',
           marginBottom: '0.5rem',
         }}
       >
-        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+        <div
+          style={{
+            flex: isNarrow ? '1 1 100%' : '1 1 0',
+            minWidth: 0,
+            display: 'flex',
+            gap: '0.25rem',
+            alignItems: 'center',
+          }}
+        >
           <div style={{ flex: 1 }}>
             <Combobox
               options={characterOptions}
@@ -204,17 +218,26 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
               isLoading || (!selection.characterA && !selection.characterB)
                 ? 0.5
                 : 1,
-            fontSize: '1.15rem',
+            fontSize: isNarrow ? '1rem' : '1.15rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
+            alignSelf: isNarrow ? 'center' : undefined,
           }}
         >
           ⇄
         </button>
 
-        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+        <div
+          style={{
+            flex: isNarrow ? '1 1 100%' : '1 1 0',
+            minWidth: 0,
+            display: 'flex',
+            gap: '0.25rem',
+            alignItems: 'center',
+          }}
+        >
           <div style={{ flex: 1 }}>
             <Combobox
               options={characterOptions}
@@ -246,11 +269,20 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
       <div
         style={{
           display: 'flex',
-          gap: '0.5rem',
+          flexWrap: isNarrow ? 'wrap' : 'nowrap',
+          gap: `${chrome.controlGapRem}rem`,
           alignItems: 'center',
         }}
       >
-        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+        <div
+          style={{
+            flex: isNarrow ? '1 1 100%' : '1 1 0',
+            minWidth: 0,
+            display: 'flex',
+            gap: '0.25rem',
+            alignItems: 'center',
+          }}
+        >
           <div style={{ flex: 1 }}>
             <Combobox
               options={regionOptions}
@@ -285,7 +317,15 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           }}
         />
 
-        <div style={{ flex: '1 1 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+        <div
+          style={{
+            flex: isNarrow ? '1 1 100%' : '1 1 0',
+            minWidth: 0,
+            display: 'flex',
+            gap: '0.25rem',
+            alignItems: 'center',
+          }}
+        >
           <div style={{ flex: 1 }}>
             <Combobox
               options={subLocationOptions}

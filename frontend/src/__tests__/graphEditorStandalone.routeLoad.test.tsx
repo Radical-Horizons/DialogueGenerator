@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { GraphEditor } from '../components/graph/GraphEditor'
 import { useGraphStore } from '../store/graphStore'
 
+const { toastMock } = vi.hoisted(() => ({ toastMock: vi.fn() }))
+
 vi.mock('../components/graph/GraphCanvas', () => ({
   GraphCanvas: () => React.createElement('div', { 'data-testid': 'graph-canvas' }),
 }))
@@ -22,11 +24,16 @@ vi.mock('../components/usage/DialogueCostBreakdown', () => ({
   DialogueCostBreakdown: () => null,
 }))
 
-vi.mock('../components/shared', () => ({
-  useToast: () => vi.fn(),
-  SaveStatusIndicator: () => React.createElement('div', { 'data-testid': 'save-status-indicator' }),
-  ConfirmDialog: () => null,
-}))
+vi.mock('../components/shared', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return {
+    ...actual,
+    useToast: () => toastMock,
+    SaveStatusIndicator: () =>
+      React.createElement('div', { 'data-testid': 'save-status-indicator' }),
+    ConfirmDialog: () => null,
+  }
+})
 
 vi.mock('../utils/graphExport', () => ({
   exportGraphToPNG: vi.fn(),
@@ -44,16 +51,27 @@ vi.mock('../components/unityDialogues/UnityDialogueList', () => ({
   }),
 }))
 
-const getUnityDialogueMock = vi.fn()
+const { getUnityDialogueMock } = vi.hoisted(() => ({
+  getUnityDialogueMock: vi.fn(),
+}))
+
 vi.mock('../api/unityDialogues', () => ({
+  listUnityDialogues: vi.fn().mockResolvedValue({ dialogues: [], total: 0 }),
   getUnityDialogue: (...args: unknown[]) => getUnityDialogueMock(...args),
+  deleteUnityDialogue: vi.fn().mockResolvedValue(undefined),
+  previewUnityDialogue: vi.fn().mockResolvedValue({ preview_text: '', node_count: 0 }),
+}))
+
+vi.mock('../api/documents', () => ({
+  getDocument: vi.fn().mockRejectedValue(new Error('no document')),
+  getLayout: vi.fn().mockRejectedValue(new Error('no layout')),
+  putDocument: vi.fn().mockResolvedValue({ revision: 2 }),
+  putLayout: vi.fn().mockResolvedValue({ revision: 2 }),
 }))
 
 function makeQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { retry: false } } })
 }
-
-const baseGraphStoreState = useGraphStore.getState()
 
 function renderGraphEditor(props?: Partial<React.ComponentProps<typeof GraphEditor>>) {
   const queryClient = makeQueryClient()
@@ -61,7 +79,7 @@ function renderGraphEditor(props?: Partial<React.ComponentProps<typeof GraphEdit
     React.createElement(
       QueryClientProvider,
       { client: queryClient },
-      React.createElement(GraphEditor, props)
+      React.createElement(GraphEditor, props ?? {})
     )
   )
 }
@@ -69,7 +87,8 @@ function renderGraphEditor(props?: Partial<React.ComponentProps<typeof GraphEdit
 describe('GraphEditor standalone mode', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useGraphStore.setState({ ...baseGraphStoreState }, true)
+    toastMock.mockReset()
+    useGraphStore.getState().resetGraph()
   })
 
   afterEach(() => {
@@ -77,27 +96,30 @@ describe('GraphEditor standalone mode', () => {
   })
 
   it("charge un dialogue depuis l'URL standalone", async () => {
-    const loadDialogueMock = vi.fn().mockResolvedValue(undefined)
-    const loadDialogueByDocumentIdMock = vi.fn().mockResolvedValue(undefined)
+    const loadDialogueByDocumentIdMock = vi.fn().mockRejectedValue({
+      response: { status: 404 },
+    })
     const validateGraphMock = vi.fn().mockResolvedValue(undefined)
 
     getUnityDialogueMock.mockResolvedValue({
       json_content: '[{"id":"START","speaker":"PNJ","line":"Bonjour","choices":[]}]',
     })
 
-    useGraphStore.setState({
-      ...useGraphStore.getState(),
-      nodes: [],
-      edges: [],
-      dialogueMetadata: {
-        title: 'Nouveau Dialogue',
-        node_count: 0,
-        edge_count: 0,
+    useGraphStore.setState(
+      {
+        ...useGraphStore.getState(),
+        nodes: [],
+        edges: [],
+        dialogueMetadata: {
+          title: 'Nouveau Dialogue',
+          node_count: 0,
+          edge_count: 0,
+        },
+        loadDialogueByDocumentId: loadDialogueByDocumentIdMock,
+        validateGraph: validateGraphMock,
       },
-      loadDialogue: loadDialogueMock,
-      loadDialogueByDocumentId: loadDialogueByDocumentIdMock,
-      validateGraph: validateGraphMock,
-    }, true)
+      true
+    )
 
     renderGraphEditor({
       mode: 'standalone',
@@ -107,17 +129,15 @@ describe('GraphEditor standalone mode', () => {
     await waitFor(() => {
       expect(getUnityDialogueMock).toHaveBeenCalledWith('route dialogue.json')
     })
-    expect(loadDialogueMock).toHaveBeenCalledWith(
-      '[{"id":"START","speaker":"PNJ","line":"Bonjour","choices":[]}]',
-      undefined,
-      'route dialogue.json'
-    )
-    expect(loadDialogueByDocumentIdMock).not.toHaveBeenCalled()
+    expect(loadDialogueByDocumentIdMock).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(useGraphStore.getState().nodes.some((n) => n.id === 'START')).toBe(true)
+    })
+    expect(useGraphStore.getState().dialogueMetadata.filename).toBe('route dialogue')
     expect(validateGraphMock).toHaveBeenCalled()
   })
 
   it("fallback vers un dialogue Unity legacy quand l'URL standalone est sans extension", async () => {
-    const loadDialogueMock = vi.fn().mockResolvedValue(undefined)
     const loadDialogueByDocumentIdMock = vi.fn().mockRejectedValue({
       response: { status: 404 },
     })
@@ -127,19 +147,21 @@ describe('GraphEditor standalone mode', () => {
       json_content: '[{"id":"START","speaker":"Guide","line":"Fallback","choices":[]}]',
     })
 
-    useGraphStore.setState({
-      ...useGraphStore.getState(),
-      nodes: [],
-      edges: [],
-      dialogueMetadata: {
-        title: 'Nouveau Dialogue',
-        node_count: 0,
-        edge_count: 0,
+    useGraphStore.setState(
+      {
+        ...useGraphStore.getState(),
+        nodes: [],
+        edges: [],
+        dialogueMetadata: {
+          title: 'Nouveau Dialogue',
+          node_count: 0,
+          edge_count: 0,
+        },
+        loadDialogueByDocumentId: loadDialogueByDocumentIdMock,
+        validateGraph: validateGraphMock,
       },
-      loadDialogue: loadDialogueMock,
-      loadDialogueByDocumentId: loadDialogueByDocumentIdMock,
-      validateGraph: validateGraphMock,
-    }, true)
+      true
+    )
 
     renderGraphEditor({
       mode: 'standalone',
@@ -150,11 +172,10 @@ describe('GraphEditor standalone mode', () => {
       expect(loadDialogueByDocumentIdMock).toHaveBeenCalledWith('route-dialogue')
     })
     expect(getUnityDialogueMock).toHaveBeenCalledWith('route-dialogue.json')
-    expect(loadDialogueMock).toHaveBeenCalledWith(
-      '[{"id":"START","speaker":"Guide","line":"Fallback","choices":[]}]',
-      undefined,
-      'route-dialogue.json'
-    )
+    await waitFor(() => {
+      expect(useGraphStore.getState().nodes.some((n) => n.id === 'START')).toBe(true)
+    })
+    expect(useGraphStore.getState().dialogueMetadata.filename).toBe('route-dialogue')
     expect(validateGraphMock).toHaveBeenCalled()
   })
 
@@ -181,24 +202,27 @@ describe('GraphEditor standalone mode', () => {
       revokeObjectURL: revokeObjectURLMock,
     })
 
-    useGraphStore.setState({
-      ...useGraphStore.getState(),
-      nodes: [
-        {
-          id: 'START',
-          type: 'dialogueNode',
-          position: { x: 0, y: 0 },
-          data: { id: 'START', speaker: 'PNJ', line: 'Bonjour', choices: [] },
+    useGraphStore.setState(
+      {
+        ...useGraphStore.getState(),
+        nodes: [
+          {
+            id: 'START',
+            type: 'dialogueNode',
+            position: { x: 0, y: 0 },
+            data: { id: 'START', speaker: 'PNJ', line: 'Bonjour', choices: [] },
+          },
+        ],
+        dialogueMetadata: {
+          title: 'Quest Arc',
+          filename: 'quest_arc',
+          node_count: 1,
+          edge_count: 0,
         },
-      ],
-      dialogueMetadata: {
-        title: 'Quest Arc',
-        filename: 'quest_arc',
-        node_count: 1,
-        edge_count: 0,
+        exportToUnity: exportToUnityMock,
       },
-      exportToUnity: exportToUnityMock,
-    }, true)
+      true
+    )
 
     renderGraphEditor()
 

@@ -5,6 +5,8 @@
 import { memo } from 'react'
 import { useGraphStore } from '../../store/graphStore'
 import { theme } from '../../theme'
+import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
+import { modalTypography } from '../../theme/responsiveChrome'
 
 export const DeleteNodeConfirmModal = memo(function DeleteNodeConfirmModal() {
   const {
@@ -13,6 +15,8 @@ export const DeleteNodeConfirmModal = memo(function DeleteNodeConfirmModal() {
     setShowDeleteNodeConfirm,
     deleteNode,
   } = useGraphStore()
+  const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
+  const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
 
   if (!showDeleteNodeConfirm || !selectedNodeId) return null
 
@@ -48,16 +52,21 @@ export const DeleteNodeConfirmModal = memo(function DeleteNodeConfirmModal() {
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: theme.background.panel,
-          padding: '2rem',
+          padding: isNarrow ? '0.9rem' : '2rem',
           borderRadius: '8px',
-          minWidth: '350px',
+          minWidth: isNarrow ? 'unset' : '350px',
+          maxWidth: '90vw',
           border: `1px solid ${theme.border.primary}`,
         }}
+        ref={panelRef}
       >
-        <h3 id="delete-node-modal-title" style={{ marginTop: 0, color: theme.text.primary }}>
+        <h3
+          id="delete-node-modal-title"
+          style={{ marginTop: 0, color: theme.text.primary, fontSize: `${typo.titleFontRem}rem` }}
+        >
           Supprimer le nœud
         </h3>
-        <p style={{ color: theme.text.secondary }}>
+        <p style={{ color: theme.text.secondary, fontSize: `${typo.bodyFontRem}rem` }}>
           Êtes-vous sûr de vouloir supprimer ce nœud ? Cette action est irréversible.
         </p>
 

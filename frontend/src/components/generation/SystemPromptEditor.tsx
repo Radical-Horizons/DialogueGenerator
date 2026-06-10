@@ -8,6 +8,7 @@ import { useSystemPrompt } from '../../hooks/useSystemPrompt'
 import { useAuthorProfile } from '../../hooks/useAuthorProfile'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
+import { generationPanelChrome } from '../../theme/responsiveChrome'
 import * as configAPI from '../../api/config'
 import {
   deleteLocalAuthorTemplate,
@@ -18,6 +19,8 @@ import {
   upsertLocalSceneTemplate,
   type LocalNamedTemplate,
 } from '../../utils/localNamedTemplates'
+import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+import { StyledSelect } from '../shared/StyledSelect'
 
 export interface SystemPromptEditorProps {
   userInstructions: string
@@ -246,12 +249,15 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
     }
   }, [sceneSaveAsName, userInstructions, refreshLocalSceneTemplates, toast])
 
+  const isNarrow = useGenerationPanelNarrow()
+  const genChrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable
+
   const tabs: Tab[] = [
     {
       id: 'user-instructions',
       label: 'Instructions de Scène',
       content: (
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           {/* Templates de scène */}
           <div style={{ marginBottom: '1rem' }}>
             {isLoadingTemplates ? (
@@ -259,19 +265,26 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 Chargement des templates...
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: isNarrow ? 'wrap' : 'nowrap',
+                  gap: `${genChrome.controlGapRem}rem`,
+                  alignItems: 'center',
+                }}
+              >
                 <label
                   htmlFor="scene-template-select"
                   style={{
                     color: theme.text.primary,
-                    fontSize: '0.9rem',
+                    fontSize: `${genChrome.labelFontRem}rem`,
                     fontWeight: 500,
-                    whiteSpace: 'nowrap',
+                    whiteSpace: isNarrow ? 'normal' : 'nowrap',
                   }}
                 >
                   Templates de scène:
                 </label>
-                <select
+                <StyledSelect
                   id="scene-template-select"
                   value={selectedSceneTemplateId || ''}
                   onChange={(e) => {
@@ -280,7 +293,6 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                       const template = sceneTemplates.find(t => t.id === templateId)
                       if (template) {
                         setSelectedSceneTemplateId(template.id)
-                        // Remplacer les instructions par le contenu du template
                         onUserInstructionsChange(template.instructions)
                       }
                     } else {
@@ -288,16 +300,19 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                     }
                   }}
                   style={{
-                    width: '220px',
-                    padding: '0.5rem',
+                    width: isNarrow ? '100%' : '220px',
+                    minWidth: 0,
+                    flex: isNarrow ? '1 1 100%' : undefined,
+                    padding: genChrome.selectTriggerPadding,
+                    boxSizing: 'border-box',
                     border: `1px solid ${theme.input.border}`,
                     borderRadius: '4px',
                     backgroundColor: theme.input.background,
                     color: theme.input.color,
-                    fontSize: '0.9rem',
+                    fontSize: `${genChrome.selectTextFontRem}rem`,
                     cursor: 'pointer',
                   }}
-                  title={selectedSceneTemplateId 
+                  title={selectedSceneTemplateId
                     ? sceneTemplates.find(t => t.id === selectedSceneTemplateId)?.description
                     : 'Sélectionner un template de scène'}
                 >
@@ -307,18 +322,18 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                       {template.name}
                     </option>
                   ))}
-                </select>
+                </StyledSelect>
                 {selectedSceneTemplateId && (
                   <button
                     onClick={() => setShowTemplatePreview(selectedSceneTemplateId)}
                     style={{
-                      padding: '0.5rem 1rem',
+                      padding: genChrome.buttonPadding,
                       border: `1px solid ${theme.border.primary}`,
                       borderRadius: '4px',
                       backgroundColor: theme.button.default.background,
                       color: theme.button.default.color,
                       cursor: 'pointer',
-                      fontSize: '0.85rem',
+                      fontSize: `${genChrome.buttonFontRem}rem`,
                       whiteSpace: 'nowrap',
                     }}
                     title="Voir le contenu complet du template"
@@ -476,8 +491,10 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
+              gap: `${genChrome.controlGapRem}rem`,
               marginBottom: '0.5rem',
             }}
           >
@@ -485,23 +502,24 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               htmlFor="user-instructions-textarea"
               style={{
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
+                flex: isNarrow ? '1 1 100%' : undefined,
               }}
             >
               Brief de scène:
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
                 onClick={handleSaveSceneInstructions}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.secondary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 600,
                 }}
                 title="Sauvegarde le brief de scène actuel"
@@ -511,13 +529,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               <button
                 onClick={handleRestoreSceneInstructions}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée"
@@ -543,7 +561,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                   color: theme.input.color,
                   borderRadius: '6px',
                   fontFamily: 'inherit',
-                  fontSize: '0.9rem',
+                  fontSize: `${genChrome.textareaFontRem}rem`,
                   resize: 'vertical',
                   lineHeight: 1.55,
                 }}
@@ -553,7 +571,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                   display: 'flex',
                   justifyContent: 'flex-end',
                   marginTop: '0.25rem',
-                  fontSize: '0.75rem',
+                  fontSize: `${isNarrow ? 0.7 : 0.75}rem`,
                   color: theme.text.secondary,
                 }}
               >
@@ -653,7 +671,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       id: 'author-profile',
       label: 'Auteur (global)',
       content: (
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           {/* Templates de profil d'auteur */}
           <div style={{ marginBottom: '1rem' }}>
             <label
@@ -661,7 +679,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 display: 'block',
                 marginBottom: '0.5rem',
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
               }}
             >
@@ -672,14 +690,21 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 Chargement des templates...
               </div>
             ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: `${genChrome.controlGapRem}rem`,
+                  marginBottom: '0.5rem',
+                }}
+              >
                 {authorTemplates.map((template) => (
                   <button
                     key={template.id}
                     onClick={() => handleAuthorTemplateClick(template)}
                     onDoubleClick={() => setShowTemplatePreview(template.id)}
                     style={{
-                      padding: '0.5rem 1rem',
+                      padding: genChrome.buttonPadding,
                       border: `1px solid ${selectedAuthorTemplateId === template.id ? theme.border.focus : theme.border.primary}`,
                       borderRadius: '4px',
                       backgroundColor: selectedAuthorTemplateId === template.id 
@@ -689,7 +714,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                         ? theme.button.primary.color 
                         : theme.button.default.color,
                       cursor: 'pointer',
-                      fontSize: '0.85rem',
+                      fontSize: `${genChrome.buttonFontRem}rem`,
                     }}
                     title={`${template.description}\n\nDouble-clic pour voir le contenu complet`}
                   >
@@ -851,8 +876,10 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
+              gap: `${genChrome.controlGapRem}rem`,
               marginBottom: '0.5rem',
             }}
           >
@@ -860,23 +887,24 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               htmlFor="author-profile-textarea"
               style={{
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
+                flex: isNarrow ? '1 1 100%' : undefined,
               }}
             >
               Profil d'auteur (réutilisable):
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
                 onClick={handleSaveAuthorProfile}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.secondary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 600,
                 }}
                 title="Sauvegarde le profil d'auteur actuel"
@@ -886,13 +914,13 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               <button
                 onClick={handleRestoreAuthorProfile}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: 'pointer',
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée"
@@ -917,7 +945,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 color: theme.input.color,
                 borderRadius: '6px',
                 fontFamily: 'inherit',
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.textareaFontRem}rem`,
                 resize: 'vertical',
                 lineHeight: 1.55,
               }}
@@ -1045,7 +1073,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
       id: 'system-prompt',
       label: 'Système LLM (avancé)',
       content: (
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: genChrome.tabInnerPadding, minWidth: 0 }}>
           <div
             style={{
               marginBottom: '1rem',
@@ -1065,8 +1093,10 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignItems: 'center',
+              gap: `${genChrome.controlGapRem}rem`,
               marginBottom: '0.5rem',
             }}
           >
@@ -1074,25 +1104,26 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
               htmlFor="system-prompt-textarea"
               style={{
                 color: theme.text.primary,
-                fontSize: '0.9rem',
+                fontSize: `${genChrome.labelFontRem}rem`,
                 fontWeight: 500,
+                flex: isNarrow ? '1 1 100%' : undefined,
               }}
             >
               Prompt Système Principal:
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: `${genChrome.controlGapRem}rem`, flexWrap: 'wrap' }}>
               <button
                 onClick={handleSaveSystemPrompt}
                 disabled={isLoadingSystemPrompt}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.secondary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
                   opacity: isLoadingSystemPrompt ? 0.6 : 1,
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 600,
                 }}
                 title="Sauvegarde le prompt système actuel"
@@ -1103,14 +1134,14 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 onClick={handleRestoreSystemPrompt}
                 disabled={isLoadingSystemPrompt}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: genChrome.buttonPadding,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
                   backgroundColor: theme.button.default.background,
                   color: theme.button.default.color,
                   cursor: isLoadingSystemPrompt ? 'not-allowed' : 'pointer',
                   opacity: isLoadingSystemPrompt ? 0.6 : 1,
-                  fontSize: '0.85rem',
+                  fontSize: `${genChrome.buttonFontRem}rem`,
                   fontWeight: 400,
                 }}
                 title="Restaure la dernière version sauvegardée (ou le défaut si rien n'est sauvegardé)"
@@ -1135,7 +1166,7 @@ export const SystemPromptEditor = memo(function SystemPromptEditor({
                 color: theme.input.color,
                 borderRadius: '6px',
                 fontFamily: 'monospace',
-                fontSize: '0.85rem',
+                fontSize: isNarrow ? '0.78rem' : '0.85rem',
                 resize: 'vertical',
                 lineHeight: 1.55,
               }}

@@ -89,6 +89,7 @@
 - **Units** : Utiliser `rem`, `%`, `vw`, `vh` plutôt que `px` fixes
 - **Media queries** : Desktop-first (min-width) avec overrides progressifs pour Epic 17
 - **Flexbox/Grid** : Layout flexibles avec `ResizablePanels`
+- **Typographie & densité (Epic 17 — story 17.6)** : Les panneaux **redimensionnables** imposent des largeurs de colonne variables ; les tailles de texte et paddings **fixes** produisent des onglets / boutons disproportionnés. Prévoir une échelle **fluide** (`clamp()`, variables CSS, et/ou **container queries** sur le conteneur d’onglets) avec plancher de lisibilité et préservation des **44×44px** là où le tactile s’applique (17.2).
 - **Images** : Optimisation pour différentes résolutions (Phase 2 si besoin)
 
 **Accessibility Development :**

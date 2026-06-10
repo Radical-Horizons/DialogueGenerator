@@ -11,6 +11,7 @@ import type {
   CommunityResponse,
 } from '../../types/api'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 import { getGddEntitySummary, extractTextFromGddValue, isSerializedNotionRichTextBlock } from '../../utils/gddSummary'
 import { GDD_INLINE_PROPERTY_KEYS } from './constants'
 import { GddEntityHistoryViewer } from './GddEntityHistoryViewer'
@@ -256,7 +257,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
       >
         <h3 style={{ marginTop: 0, marginBottom: '0.5rem', color: theme.text.primary }}>{item.name}</h3>
         {summary && (
-          <div style={{ marginBottom: '1rem', fontSize: '0.9rem', color: theme.text.secondary, lineHeight: 1.4 }}>
+          <div style={{ marginBottom: '1rem', fontSize: remSize('body'), color: theme.text.secondary, lineHeight: 1.4 }}>
             {summary}
           </div>
         )}
@@ -292,7 +293,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
                   cursor: 'pointer',
                   textAlign: 'left',
                   fontWeight: 600,
-                  fontSize: '0.9rem',
+                  fontSize: remSize('body'),
                 }}
                 aria-expanded={expandedKeys.has('Propriétés')}
                 aria-controls="context-detail-proprietes"
@@ -311,7 +312,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
                   style={{
                     padding: '0.75rem',
                     backgroundColor: theme.background.panel,
-                    fontSize: '0.85rem',
+                    fontSize: remSize('accent'),
                     borderTop: `1px solid ${theme.border.primary}`,
                   }}
                 >
@@ -328,14 +329,14 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
         )}
 
         <div style={{ borderTop: `1px solid ${theme.border.primary}`, paddingTop: '1rem' }}>
-          <h4 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '0.9rem', color: theme.text.primary }}>
+          <h4 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: remSize('section'), color: theme.text.primary }}>
             Sections GDD
           </h4>
           {model.inlineProperties.length === 0 && !hasExpandableContent && (
-            <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>Aucune section</div>
+            <div style={{ color: theme.text.secondary, fontSize: remSize('body') }}>Aucune section</div>
           )}
           {model.inlineProperties.length > 0 && !hasExpandableContent && (
-            <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>Aucune section dépliable</div>
+            <div style={{ color: theme.text.secondary, fontSize: remSize('body') }}>Aucune section dépliable</div>
           )}
 
           {model.generalChunks.map((chunk, index) => {
@@ -373,7 +374,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
                     cursor: 'pointer',
                     textAlign: 'left',
                     fontWeight: 600,
-                    fontSize: '0.9rem',
+                    fontSize: remSize('body'),
                   }}
                   aria-expanded={isExpanded}
                   aria-controls={regionId}
@@ -391,7 +392,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
                     style={{
                       padding: '0.75rem',
                       backgroundColor: theme.background.panel,
-                      fontSize: '0.85rem',
+                      fontSize: remSize('accent'),
                       whiteSpace: 'pre-wrap',
                       color: theme.text.secondary,
                     }}
@@ -439,7 +440,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
                     cursor: 'pointer',
                     textAlign: 'left',
                     fontWeight: 600,
-                    fontSize: '0.9rem',
+                    fontSize: remSize('body'),
                   }}
                   aria-expanded={isExpanded}
                   aria-controls={regionId}
@@ -454,7 +455,7 @@ export function ContextDetail({ item, historyCategoryStem }: ContextDetailProps)
                     id={regionId}
                     role="region"
                     aria-label={sectionLabel}
-                    style={{ padding: '0.75rem', backgroundColor: theme.background.panel, fontSize: '0.85rem' }}
+                    style={{ padding: '0.75rem', backgroundColor: theme.background.panel, fontSize: remSize('accent') }}
                   >
                     {isNestedObj
                       ? Object.entries(value as Record<string, unknown>).map(([k, v]) => (

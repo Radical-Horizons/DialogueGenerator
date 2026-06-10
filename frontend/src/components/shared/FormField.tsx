@@ -3,6 +3,7 @@
  */
 import { ReactNode } from 'react'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
 
 export interface FormFieldProps {
   label: string
@@ -11,6 +12,7 @@ export interface FormFieldProps {
   children: ReactNode
   style?: React.CSSProperties
   htmlFor?: string
+  labelStyle?: React.CSSProperties
 }
 
 export function FormField({
@@ -20,6 +22,7 @@ export function FormField({
   children,
   style,
   htmlFor,
+  labelStyle,
 }: FormFieldProps) {
   return (
     <div
@@ -34,8 +37,9 @@ export function FormField({
           display: 'block',
           marginBottom: '0.5rem',
           color: theme.text.primary,
-          fontSize: '0.9rem',
+          fontSize: remSize('label'),
           fontWeight: 500,
+          ...labelStyle,
         }}
       >
         {label}
@@ -50,7 +54,7 @@ export function FormField({
         <div
           style={{
             marginTop: '0.25rem',
-            fontSize: '0.85rem',
+            fontSize: remSize('accent'),
             color: theme.state.error.color,
           }}
         >

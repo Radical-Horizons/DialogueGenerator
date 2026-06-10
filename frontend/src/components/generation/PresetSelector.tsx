@@ -10,7 +10,9 @@ import React, { useEffect, useState } from 'react';
 import { usePresetStore } from '../../store/presetStore';
 import type { Preset, PresetConfiguration } from '../../types/preset';
 import { theme } from '../../theme';
+import { generationPanelChrome } from '../../theme/responsiveChrome';
 import { useToast, SaveStatusIndicator } from '../shared';
+import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext';
 import type { SaveStatus } from '../shared/SaveStatusIndicator';
 
 export interface PresetSelectorProps {
@@ -30,6 +32,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   getCurrentConfiguration,
   saveStatus,
 }) => {
+  const isNarrow = useGenerationPanelNarrow();
+  const chrome = isNarrow ? generationPanelChrome.narrow : generationPanelChrome.comfortable;
   const {
     presets,
     selectedPreset,
@@ -135,16 +139,29 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       )}
 
       {/* Barre compacte : Charger + Sauvegarder */}
-      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: isNarrow ? 'wrap' : 'nowrap',
+          gap: `${chrome.controlGapRem}rem`,
+          alignItems: 'center',
+        }}
+      >
         {/* Dropdown "Charger preset" */}
-        <div style={{ position: 'relative', flex: 1 }}>
+        <div
+          style={{
+            position: 'relative',
+            flex: isNarrow ? '1 1 100%' : '1',
+            minWidth: 0,
+          }}
+        >
           <button
             type="button"
             data-testid="preset-dropdown-trigger"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             style={{
               width: '100%',
-              padding: '0.5rem 1rem',
+              padding: chrome.buttonPadding,
               backgroundColor: theme.background.secondary,
               border: `1px solid ${theme.border.primary}`,
               borderRadius: '4px',
@@ -153,6 +170,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              fontSize: `${chrome.buttonFontRem}rem`,
+              boxSizing: 'border-box',
             }}
           >
             <span>📋 Charger preset</span>
@@ -281,7 +300,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           }}
           disabled={!currentConfiguration && !getCurrentConfiguration}
           style={{
-            padding: '0.5rem 1rem',
+            padding: chrome.buttonPadding,
             backgroundColor: theme.button.default.background,
             border: `1px solid ${theme.border.secondary}`,
             borderRadius: '6px',
@@ -290,6 +309,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             cursor: currentConfiguration || getCurrentConfiguration ? 'pointer' : 'not-allowed',
             opacity: currentConfiguration || getCurrentConfiguration ? 1 : 0.5,
             whiteSpace: 'nowrap',
+            fontSize: `${chrome.buttonFontRem}rem`,
+            flex: isNarrow ? '1 1 auto' : undefined,
           }}
         >
           Enregistrer sous

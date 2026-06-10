@@ -41,6 +41,18 @@ describe('GraphSearchBar (Story 2.7)', () => {
     expect(screen.getByRole('button', { name: /Fermer/ })).toBeInTheDocument()
   })
 
+  it('does not highlight or focus every node when opened with an empty query', async () => {
+    render(<GraphSearchBar onClose={onClose} />)
+
+    await act(async () => {
+      vi.advanceTimersByTime(250)
+    })
+
+    expect(useGraphStore.getState().highlightedNodeIds).toEqual([])
+    expect(useGraphViewStore.getState().focusQueue).toEqual([])
+    expect(screen.getByText('—')).toBeInTheDocument()
+  })
+
   it('updates highlighted nodes when user types and shows result count', async () => {
     render(<GraphSearchBar onClose={onClose} />)
     const input = screen.getByPlaceholderText(/Rechercher/)

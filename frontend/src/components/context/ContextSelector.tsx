@@ -2,7 +2,8 @@
  * Composant principal de sélection de contexte (panneau Contexte GDD) avec onglets par type d'entité.
  * AC FR11 : Personnages, Lieux (contexte), Objets, Espèces, Communautés.
  */
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
+import type { CSSProperties } from 'react'
 import * as contextAPI from '../../api/context'
 import type { 
   CharacterResponse, 
@@ -41,6 +42,9 @@ import { useContextStore } from '../../store/contextStore'
 import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { remSize } from '../../theme/uiTypography'
+import { contextGddTabChrome, type ContextGddTabDensity } from '../../theme/responsiveChrome'
+import type { UiFontRemKey } from '../../theme/uiTypography'
 
 type TabType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -92,53 +96,68 @@ const TRIGGER_TYPE_MAP: Partial<Record<TabType, string>> = {
   communities: 'community',
 }
 
-// ---------------------------------------------------------------------------
-// Hook overflow : détermine combien d'onglets tiennent dans la barre
-// ---------------------------------------------------------------------------
+/** Bascule `balanced` → `tight` si la barre déborde (proposition 3). */
+function useContextGddTabBarDensity(tabBarRef: React.RefObject<HTMLDivElement | null>) {
+  const [density, setDensity] = useState<ContextGddTabDensity>('balanced')
 
-const GEAR_BTN_W = 38    // px réservés pour le bouton ⚙
-const OVERFLOW_BTN_W = 44 // px réservés pour le bouton "▾ N"
-const TAB_CHAR_PX = 7.5  // px approximatif par caractère (font ~0.85rem)
-const TAB_PAD_PX = 22    // padding fixe par onglet
+  const measure = useCallback(() => {
+    const el = tabBarRef.current
+    if (!el) return
+    const overflows = el.scrollWidth > el.clientWidth + 1
+    if (overflows) {
+      setDensity('tight')
+      return
+    }
+    if (el.clientWidth >= contextGddTabChrome.relaxToBalancedMinWidthPx) {
+      setDensity('balanced')
+    }
+  }, [tabBarRef])
 
-function estimateTabWidth(label: string): number {
-  return Math.ceil(label.length * TAB_CHAR_PX) + TAB_PAD_PX
-}
-
-function useTabOverflow(containerRef: React.RefObject<HTMLDivElement | null>) {
-  const [visibleCount, setVisibleCount] = useState(TAB_DEFS.length)
+  useLayoutEffect(() => {
+    measure()
+  }, [measure, density])
 
   useEffect(() => {
-    const el = containerRef.current
+    const el = tabBarRef.current
     if (!el) return
-
-    const compute = (availableWidth: number) => {
-      // Largeur inconnue (ex : JSDOM) → afficher tous les onglets par défaut
-      if (availableWidth <= 0) {
-        setVisibleCount(TAB_DEFS.length)
-        return
-      }
-      let used = GEAR_BTN_W
-      let count = 0
-      for (let i = 0; i < TAB_DEFS.length; i++) {
-        const tabW = estimateTabWidth(TAB_DEFS[i].label)
-        // Réserver la place du bouton overflow sauf si tous les tabs tiennent
-        const allFit = used + tabW + estimateTabWidth(TAB_DEFS[i + 1]?.label ?? '') <= availableWidth
-        const overflowReserved = i < TAB_DEFS.length - 1 && !allFit ? OVERFLOW_BTN_W : 0
-        if (used + tabW + overflowReserved > availableWidth && count > 0) break
-        used += tabW
-        count++
-      }
-      setVisibleCount(Math.max(1, count))
-    }
-
-    const ro = new ResizeObserver(([entry]) => compute(entry.contentRect.width))
+    const ro = new ResizeObserver(() => {
+      requestAnimationFrame(measure)
+    })
     ro.observe(el)
-    compute(el.getBoundingClientRect().width)
     return () => ro.disconnect()
-  }, [containerRef])
+  }, [measure, tabBarRef])
 
-  return visibleCount
+  return density
+}
+
+function contextGddTabButtonStyle(
+  isActive: boolean,
+  tier: (typeof contextGddTabChrome)['balanced'],
+  tabFontKey: UiFontRemKey,
+): CSSProperties {
+  return {
+    flex: '1 1 auto',
+    minWidth: 0,
+    minHeight: tier.tabMinHeightPx,
+    padding: tier.tabPadding,
+    border: 'none',
+    borderRadius: tier.borderRadiusPx,
+    borderBottom: isActive
+      ? `2px solid ${theme.button.primary.background}`
+      : '2px solid transparent',
+    backgroundColor: isActive ? theme.background.tertiary : 'transparent',
+    color: theme.text.primary,
+    cursor: 'pointer',
+    fontWeight: isActive ? 600 : 400,
+    fontSize: remSize(tabFontKey),
+    lineHeight: 1.2,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    boxSizing: 'border-box',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 }
 
 interface ContextSelectorProps {
@@ -157,10 +176,9 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   const [selectedDetail, setSelectedDetail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showOverflowMenu, setShowOverflowMenu] = useState(false)
   const tabBarRef = useRef<HTMLDivElement>(null)
-  const overflowMenuRef = useRef<HTMLDivElement>(null)
-  const visibleTabCount = useTabOverflow(tabBarRef)
+  const tabBarDensity = useContextGddTabBarDensity(tabBarRef)
+  const tabChromeTier = contextGddTabChrome[tabBarDensity]
   const [charactersPage, setCharactersPage] = useState(1)
   const [charactersTotalPages, setCharactersTotalPages] = useState(1)
   const [locationsPage, setLocationsPage] = useState(1)
@@ -189,18 +207,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     gddDataRevision,
   } = useContextStore()
   const selectedDialogueType = useContextRulesStore((s) => s.selectedDialogueType)
-
-  // Ferme le menu overflow si l'utilisateur clique en dehors
-  useEffect(() => {
-    if (!showOverflowMenu) return
-    const handler = (e: MouseEvent) => {
-      if (overflowMenuRef.current && !overflowMenuRef.current.contains(e.target as Node)) {
-        setShowOverflowMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [showOverflowMenu])
 
   const loadData = useCallback(async () => {
     setIsLoading(true)
@@ -481,141 +487,69 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         paddingBottom: 4,
       }}
     >
-      {/* Barre d'onglets avec overflow dynamique */}
+      {/* Barre d'onglets compacte : 5 onglets + ⚙ sur une ligne (repli caption si débordement) */}
       <div
         ref={tabBarRef}
+        data-context-gdd-tab-density={tabBarDensity}
         style={{
           flexShrink: 0,
           display: 'flex',
+          flexWrap: 'nowrap',
           alignItems: 'stretch',
-          gap: '0.2rem',
-          padding: '4px 6px 2px',
+          gap: tabChromeTier.barGap,
+          padding: tabChromeTier.barPadding,
           borderBottom: `1px solid ${theme.border.primary}`,
           position: 'relative',
           boxSizing: 'border-box',
+          overflow: 'hidden',
         }}
       >
-        {/* Onglets visibles */}
-        {TAB_DEFS.slice(0, visibleTabCount).map(({ key, label }) => (
+        {TAB_DEFS.map(({ key, label }) => (
           <button
             key={key}
             type="button"
             className="context-gdd-tab"
-            onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null, null) }}
-            style={{
-              flex: 1,
-              padding: '0.42rem 0.35rem',
-              border: 'none',
-              borderRadius: '6px',
-              borderBottom: activeTab === key ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
-              backgroundColor: activeTab === key ? theme.background.tertiary : 'transparent',
-              color: theme.text.primary,
-              cursor: 'pointer',
-              fontWeight: activeTab === key ? 'bold' : 'normal',
-              fontSize: '0.85rem',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              minWidth: 0,
-              boxSizing: 'border-box',
+            onClick={() => {
+              setActiveTab(key)
+              setSelectedDetail(null)
+              onItemSelected?.(null, null)
             }}
+            style={contextGddTabButtonStyle(
+              activeTab === key,
+              tabChromeTier,
+              tabChromeTier.tabFontKey,
+            )}
           >
             {label}
           </button>
         ))}
 
-        {/* Bouton overflow "▾ N" — visible quand des onglets débordent */}
-        {visibleTabCount < TAB_DEFS.length && (() => {
-          const overflowTabs = TAB_DEFS.slice(visibleTabCount)
-          const overflowHasActive = overflowTabs.some(t => t.key === activeTab)
-          return (
-            <div ref={overflowMenuRef} style={{ position: 'relative', flexShrink: 0 }}>
-              <button
-                type="button"
-                className="context-gdd-tab"
-                data-testid="btn-overflow-tabs"
-                aria-label="Plus d'onglets"
-                aria-expanded={showOverflowMenu}
-                onClick={() => setShowOverflowMenu(v => !v)}
-                style={{
-                  padding: '0.42rem 0.45rem',
-                  border: 'none',
-                  borderRadius: '6px',
-                  borderBottom: overflowHasActive ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
-                  backgroundColor: overflowHasActive ? theme.background.tertiary : 'transparent',
-                  color: theme.text.primary,
-                  cursor: 'pointer',
-                  fontWeight: overflowHasActive ? 'bold' : 'normal',
-                  fontSize: '0.85rem',
-                  whiteSpace: 'nowrap',
-                  boxSizing: 'border-box',
-                }}
-              >
-                ▾ {overflowTabs.length}
-              </button>
-              {showOverflowMenu && (
-                <div
-                  role="menu"
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    backgroundColor: theme.background.secondary,
-                    border: `1px solid ${theme.border.primary}`,
-                    borderRadius: 4,
-                    zIndex: 200,
-                    minWidth: '9rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                  }}
-                >
-                  {overflowTabs.map(({ key, label }) => (
-                    <button
-                      key={key}
-                      role="menuitem"
-                      onClick={() => { setActiveTab(key); setSelectedDetail(null); onItemSelected?.(null, null); setShowOverflowMenu(false) }}
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        padding: '0.6rem 0.9rem',
-                        border: 'none',
-                        borderLeft: activeTab === key ? `3px solid ${theme.button.primary.background}` : '3px solid transparent',
-                        backgroundColor: activeTab === key ? theme.background.tertiary : 'transparent',
-                        color: theme.text.primary,
-                        cursor: 'pointer',
-                        fontWeight: activeTab === key ? 'bold' : 'normal',
-                        fontSize: '0.85rem',
-                        textAlign: 'left',
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-        })()}
-
-        {/* Bouton Règles (Story 3.4) — toujours visible */}
         <button
           type="button"
           className="context-gdd-tab"
           data-testid="btn-toggle-rules"
           aria-label="Règles de sélection"
           aria-pressed={showRulesEditor}
-          onClick={() => setShowRulesEditor(v => !v)}
+          onClick={() => setShowRulesEditor((v) => !v)}
           title="Règles de sélection de contexte"
           style={{
             flexShrink: 0,
-            padding: '0.42rem 0.45rem',
+            minHeight: tabChromeTier.tabMinHeightPx,
+            padding: tabChromeTier.gearPadding,
             border: 'none',
-            borderRadius: '6px',
-            borderBottom: showRulesEditor ? `2px solid ${theme.button.primary.background}` : '2px solid transparent',
+            borderRadius: tabChromeTier.borderRadiusPx,
+            borderBottom: showRulesEditor
+              ? `2px solid ${theme.button.primary.background}`
+              : '2px solid transparent',
             backgroundColor: showRulesEditor ? theme.background.tertiary : 'transparent',
             color: theme.text.primary,
             cursor: 'pointer',
-            fontSize: '1rem',
+            fontSize: remSize('section'),
+            lineHeight: 1.2,
             boxSizing: 'border-box',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           ⚙
@@ -631,7 +565,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           padding: '0.5rem', 
           backgroundColor: theme.state.error.background, 
           color: theme.state.error.color, 
-          fontSize: '0.9rem' 
+          fontSize: remSize('body') 
         }}>
           {error}
         </div>
@@ -732,7 +666,7 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           style={{
             padding: '0.45rem 0.75rem',
             cursor: 'pointer',
-            fontSize: '0.78rem',
+            fontSize: remSize('small'),
             fontWeight: 600,
             color: theme.text.primary,
             listStyle: 'none',

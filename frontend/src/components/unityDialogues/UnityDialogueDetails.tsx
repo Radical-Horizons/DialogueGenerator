@@ -1,18 +1,26 @@
 /**
  * Composant pour afficher et éditer un dialogue Unity.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import { useGraphViewStore } from '../../store/graphViewStore'
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
+import { unityDialogueEditorChrome } from '../../theme/responsiveChrome'
 import { UnityDialogueEditor } from '../generation/UnityDialogueEditor'
+import { useDialogueEditionNarrow } from './DialogueEditionNarrowContext'
+import { formatDialogueTitle } from '../../utils/formatDialogueTitle'
 
 interface UnityDialogueDetailsProps {
   filename: string
   onClose: () => void
   onDeleted?: () => void | Promise<void>
   onGenerateContinuation?: (dialogueJson: string, dialogueTitle: string) => void
+  /**
+   * Slot optionnel placé dans le header de l'éditeur (Story 17.7).
+   * Forwardé vers `UnityDialogueEditor.headerSelector`.
+   */
+  headerSelector?: ReactNode
 }
 
 export function UnityDialogueDetails({
@@ -20,19 +28,15 @@ export function UnityDialogueDetails({
   onClose,
   onDeleted,
   onGenerateContinuation,
+  headerSelector,
 }: UnityDialogueDetailsProps) {
+  const isNarrow = useDialogueEditionNarrow()
+  const tb = isNarrow ? unityDialogueEditorChrome.narrow : unityDialogueEditorChrome.comfortable
   const [jsonContent, setJsonContent] = useState<string>('')
   const [title, setTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const formatFilename = (filename: string): string => {
-    // Enlever l'extension .json et remplacer les underscores par des espaces
-    const formatted = filename.replace(/\.json$/, '').replace(/_/g, ' ')
-    // Ajouter une majuscule au premier mot
-    return formatted.charAt(0).toUpperCase() + formatted.slice(1)
-  }
 
   const loadDialogue = useCallback(async () => {
     setIsLoading(true)
@@ -40,7 +44,7 @@ export function UnityDialogueDetails({
     try {
       const response = await unityDialoguesAPI.getUnityDialogue(filename)
       setJsonContent(response.json_content)
-      setTitle(formatFilename(filename))
+      setTitle(response.title?.trim() || formatDialogueTitle(filename))
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {
@@ -135,41 +139,64 @@ export function UnityDialogueDetails({
         filename={filename.replace('.json', '')}
         onSave={handleSave}
         onCancel={onClose}
+        headerSelector={headerSelector}
         extraActions={
           <>
             {onGenerateContinuation && (
+              <div style={{ gridArea: isNarrow ? 'generate' : undefined, width: isNarrow ? '100%' : undefined }}>
+                <button
+                  onClick={() => onGenerateContinuation(jsonContent, title)}
+                  style={{
+                    padding: tb.toolbarButtonPadding,
+                    minHeight: `${tb.toolbarButtonMinHeightPx}px`,
+                    border: `1px solid ${theme.border.primary}`,
+                    borderRadius: '6px',
+                    backgroundColor: theme.button.primary.background,
+                    color: theme.button.primary.color,
+                    cursor: 'pointer',
+                    fontSize: `${tb.toolbarButtonFontRem}rem`,
+                    fontWeight: tb.toolbarButtonFontWeight,
+                    lineHeight: 1.25,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxSizing: 'border-box',
+                    width: isNarrow ? '100%' : undefined,
+                    minWidth: isNarrow ? 0 : undefined,
+                  }}
+                  title="Générer un dialogue qui suit celui-ci"
+                >
+                  Générer la suite
+                </button>
+              </div>
+            )}
+            <div style={{ gridArea: isNarrow ? 'delete' : undefined, width: isNarrow ? '100%' : undefined }}>
               <button
-                onClick={() => onGenerateContinuation(jsonContent, title)}
+                onClick={handleDelete}
+                disabled={isDeleting}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: tb.toolbarButtonPadding,
+                  minHeight: `${tb.toolbarButtonMinHeightPx}px`,
                   border: `1px solid ${theme.border.primary}`,
                   borderRadius: '6px',
-                  backgroundColor: theme.button.primary.background,
-                  color: theme.button.primary.color,
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
+                  backgroundColor: '#dc3545',
+                  color: '#ffffff',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  opacity: isDeleting ? 0.6 : 1,
+                  fontSize: `${tb.toolbarButtonFontRem}rem`,
+                  fontWeight: tb.toolbarButtonFontWeight,
+                  lineHeight: 1.25,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                  width: isNarrow ? '100%' : undefined,
+                  minWidth: isNarrow ? 0 : undefined,
                 }}
-                title="Générer un dialogue qui suit celui-ci"
               >
-                Générer la suite
+                {isDeleting ? 'Suppression...' : 'Supprimer'}
               </button>
-            )}
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              style={{
-                padding: '0.5rem 1rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: '6px',
-                backgroundColor: '#dc3545',
-                color: '#ffffff',
-                cursor: isDeleting ? 'not-allowed' : 'pointer',
-                opacity: isDeleting ? 0.6 : 1,
-                fontWeight: 700,
-              }}
-            >
-              {isDeleting ? 'Suppression...' : 'Supprimer'}
-            </button>
+            </div>
           </>
         }
       />
