@@ -17,7 +17,6 @@ Colonne après resize `ResizablePanels` → conteneur. Mobile/tablette overlay �
 |-----------|-----|------|
 | `SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX` | 480 | Rail onglets segmentés |
 | `PANEL_COMFORT_MIN_WIDTH_PX` / `GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX` | 640 | Génération, Unity, toolbar narrow |
-| `GRAPH_TOOLBAR_DESKTOP_COMPACT_MAX_WIDTH_PX` | 1100 | Toolbar 2 rangées |
 | Modales | 520 | `useNarrowInlineSize(520)` + `modalTypography` |
 | `contextGddTabChrome.relaxToBalancedMinWidthPx` | 480 | Repasse `balanced` après `tight` |
 | Viewport desktop | 1024 | `useNarrowSidePanels` |
@@ -35,7 +34,7 @@ Colonne après resize `ResizablePanels` → conteneur. Mobile/tablette overlay �
 |------|---------|
 | Shell | `Dashboard` : `useNarrowSidePanels`, `NarrowOverlayDrawer`, `centerColumnRef` + `measureParentClientWidth: true` |
 | Onglets | `Tabs` segmented ; shell/centre `segmentedSize="touch"` ; drawers `drawer-aligned` (~37px) |
-| Toolbar graphe | Tri-state `GraphEditorHeader` ; deux `useNarrowInlineSize` + `measureParentClientWidth: true` ; `useGraphToolbar` |
+| Toolbar graphe | `GraphEditorHeader` narrow/confort ; `useNarrowInlineSize` + `measureParentClientWidth: true` ; `useGraphToolbar` |
 | Dialogues narrow | `DialogueCombobox` + `useDialogueListData` (17.7) |
 | Contexte GDD | `balanced` → `tight` si `scrollWidth > clientWidth` |
 | Génération | `generationPanelChrome` selon `isNarrow` |

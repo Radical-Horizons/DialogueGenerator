@@ -48,14 +48,6 @@ export const panelExpandRailCaptionTypography = {
  */
 export const GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX = 640
 
-/**
- * Seuil sous lequel le toolbar desktop bascule en mode compact 2 rangées
- * (status au-dessus, outils en dessous), tout en restant au-dessus de la
- * bascule narrow. Calibré sur les tokens `comfortable` actuels du toolbar
- * pour éviter tout overflow horizontal en mode plein écran.
- */
-export const GRAPH_TOOLBAR_DESKTOP_COMPACT_MAX_WIDTH_PX = 1100
-
 /** Même seuil conteneur pour panneau Génération, graphe, etc. */
 export const PANEL_COMFORT_MIN_WIDTH_PX = GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX
 

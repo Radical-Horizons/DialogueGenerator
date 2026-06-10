@@ -51,11 +51,9 @@ function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGra
 
 describe('GraphEditorHeader - SearchRow', () => {
   it('renders SearchRow when showSearchBar is true and hides legacy search button', () => {
-    // Tri-state mode : useNarrowInlineSize est appelé deux fois
-    // (1) toolbarRef narrow=true (2) compactRef narrow=false (no-op en narrow)
+    // Mode narrow : la recherche est rendue sur sa propre rangée.
     vi.spyOn(narrowHook, 'useNarrowInlineSize')
       .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: true }) as NarrowHookReturn)
-      .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: false }) as NarrowHookReturn)
     const toolbar = makeMockToolbar({ showSearchBar: true })
     render(
       <GraphEditorHeader

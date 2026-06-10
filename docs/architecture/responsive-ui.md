@@ -26,7 +26,6 @@ Le layout ne repose pas uniquement sur des media queries CSS. Deux mécanismes c
 |-----------------------------------|-----|------|
 | `SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX` | 480 | Rails d’onglets segmentés |
 | `PANEL_COMFORT_MIN_WIDTH_PX` / `GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX` | 640 | Panneau génération, Unity, toolbar narrow |
-| `GRAPH_TOOLBAR_DESKTOP_COMPACT_MAX_WIDTH_PX` | 1100 | Toolbar graphe en 2 rangées (mode compact desktop) |
 | Modales | 520 | `useNarrowInlineSize(520)` + `modalTypography` |
 | `contextGddTabChrome.relaxToBalancedMinWidthPx` | 480 | Repasse `balanced` après `tight` sur les onglets GDD |
 | Viewport desktop | 1024 | `useNarrowSidePanels` dans `Dashboard` |
@@ -59,7 +58,7 @@ Layout **3 colonnes** redimensionnables (`ResizablePanels`) : Contexte GDD | Gé
 | Zone | Fichiers clés | Pattern |
 |------|---------------|---------|
 | Onglets segmentés | `Tabs.tsx` | `segmentedSize="touch"` sur shell ; `drawer-aligned` (~37px) dans drawers |
-| Toolbar graphe | `GraphEditorHeader.tsx`, `useGraphToolbar.ts` | Tri-state : confortable / compact 2 rangées / narrow ; deux `useNarrowInlineSize` avec `measureParentClientWidth: true` |
+| Toolbar graphe | `GraphEditorHeader.tsx`, `useGraphToolbar.ts` | Narrow / confortable ; `useNarrowInlineSize` avec `measureParentClientWidth: true` |
 | Sélecteur dialogue narrow | `DialogueCombobox.tsx` | Story 17.7 : remplace la colonne liste Unity en toolbar narrow |
 | Contexte GDD | `ContextSelector.tsx` | Densité `balanced` → `tight` si `scrollWidth > clientWidth` |
 | Génération | `GenerationPanel.tsx` | Tokens `generationPanelChrome` selon `isNarrow` |
@@ -68,13 +67,12 @@ Layout **3 colonnes** redimensionnables (`ResizablePanels`) : Contexte GDD | Gé
 | Graphe tactile | `graphViewportInteraction.ts`, `useGraphContextMenuLongPress` | Pan/zoom/pinch conservés ; équivalent clic droit par appui long |
 | Montage tardif DOM | `useNarrowInlineSize.ts` | **Callback ref** (story 17.8) : `ResizeObserver` s’attache quand le nœud apparaît (onglet inactif, drawer) |
 
-### Toolbar graphe — tri-state
+### Toolbar graphe — narrow / confortable
 
-`GraphEditorHeader` combine deux mesures conteneur :
+`GraphEditorHeader` bascule selon la largeur conteneur (`GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX`, 640px) :
 
 1. **Narrow** (`width < 640px`) : grille verticale, libellés raccourcis, sélecteur dialogue injecté via `headerSelector`.
-2. **Compact desktop** (`640px ≤ width < 1100px`) : une rangée status, une rangée outils.
-3. **Confortable** (`≥ 1100px`) : une seule rangée horizontale.
+2. **Confortable** (`≥ 640px`) : une seule rangée horizontale.
 
 Tokens : `graphToolbarChrome.comfortable` / `.narrow`.
 
