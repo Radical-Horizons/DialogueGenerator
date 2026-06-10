@@ -29,6 +29,8 @@ class ElementRepository:
     la normalisation des apostrophes et caractères spéciaux.
     """
     
+    _logged_missing_names: set[str] = set()
+    
     # Mapping des catégories vers les clés de nom à utiliser pour la recherche
     NAME_KEYS_MAP = {
         ElementCategory.CHARACTERS: ["Nom"],
@@ -73,6 +75,36 @@ class ElementRepository:
         # Normaliser les espaces insécables
         normalized = normalized.replace('\u00A0', ' ')
         return normalized.strip()
+    
+    def _alias_tokens(self, element_data: Dict[str, Any]) -> List[str]:
+        """Extrait les alias normalisés d'un élément GDD."""
+        alias_raw = element_data.get("values", {}).get("Alias") if isinstance(element_data.get("values"), dict) else None
+        if not alias_raw:
+            return []
+        return [
+            self._normalize_string_for_matching(part.strip())
+            for part in str(alias_raw).split(",")
+            if part.strip()
+        ]
+    
+    def _matches_alias_or_historical_name(
+        self,
+        element_data: Dict[str, Any],
+        normalized_search_name: str,
+    ) -> bool:
+        """Vérifie alias exact ou forme historique « alias + Nom »."""
+        alias_tokens = self._alias_tokens(element_data)
+        if normalized_search_name in alias_tokens:
+            return True
+        
+        nom = element_data.get("Nom")
+        if not nom:
+            return False
+        normalized_nom = self._normalize_string_for_matching(str(nom))
+        for token in alias_tokens:
+            if normalized_search_name == f"{token} {normalized_nom}".strip():
+                return True
+        return False
     
     def _get_element_list(self, category: ElementCategory) -> List[Dict[str, Any]]:
         """Récupère la liste d'éléments pour une catégorie.
@@ -132,9 +164,19 @@ class ElementRepository:
                         if normalized_element_value == normalized_search_name:
                             return element_data
         
-        logger.warning(
-            f"Élément '{element_name}' non trouvé dans la liste fournie avec les clés {name_keys}."
-        )
+        # Repli : alias et noms historiques (ex. « Seigneuresse Uresaïr » → Nom « Uresaïr »).
+        for element_data in element_list:
+            if not isinstance(element_data, dict):
+                continue
+            if self._matches_alias_or_historical_name(element_data, normalized_search_name):
+                return element_data
+        
+        cache_key = f"{normalized_search_name}|{','.join(name_keys)}"
+        if cache_key not in ElementRepository._logged_missing_names:
+            ElementRepository._logged_missing_names.add(cache_key)
+            logger.warning(
+                f"Élément '{element_name}' non trouvé dans la liste fournie avec les clés {name_keys}."
+            )
         return None
     
     def get_names(self, category: ElementCategory) -> List[str]:

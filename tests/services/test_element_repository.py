@@ -90,6 +90,23 @@ class TestElementRepository:
         assert result is not None
         assert result["Nom"] == "L\u2019épée"
     
+    def test_get_by_name_historical_alias_plus_nom(self):
+        """Nom historique « alias + Nom » (ex. Seigneuresse Uresaïr)."""
+        gdd_data = GDDData(
+            characters=[
+                {
+                    "Nom": "Uresaïr",
+                    "values": {"Alias": "Seigneuresse, La Rebelle Immortelle"},
+                }
+            ]
+        )
+        repo = ElementRepository(gdd_data)
+        
+        result = repo.get_by_name(ElementCategory.CHARACTERS, "Seigneuresse Uresaïr")
+        
+        assert result is not None
+        assert result["Nom"] == "Uresaïr"
+    
     def test_get_all(self, repository):
         """Test de récupération de tous les éléments."""
         characters = repository.get_all(ElementCategory.CHARACTERS)

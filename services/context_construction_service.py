@@ -53,6 +53,8 @@ class ContextConstructionService:
     Respecte le principe SRP : uniquement construction de contexte.
     """
     
+    _logged_missing_elements: set[str] = set()
+    
     def __init__(
         self,
         element_resolver: Optional['ElementResolver'] = None,
@@ -344,7 +346,12 @@ class ContextConstructionService:
                 )
                 
                 if not element_data:
-                    logger.warning(f"Aucune donnée trouvée pour l'élément '{name}' dans la catégorie '{category_key}'.")
+                    missing_key = f"{category_key}:{name}"
+                    if missing_key not in ContextConstructionService._logged_missing_elements:
+                        ContextConstructionService._logged_missing_elements.add(missing_key)
+                        logger.warning(
+                            f"Aucune donnée trouvée pour l'élément '{name}' dans la catégorie '{category_key}'."
+                        )
                     continue
                 
                 # Déterminer le mode de cet élément
