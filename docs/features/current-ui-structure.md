@@ -238,6 +238,30 @@ L'interface propose deux autres vues principales accessibles via les onglets de 
 
 ---
 
+## Éditeur de Graphe — Systèmes de jeu (FR94)
+
+Dans l'onglet **Éditeur de Graphe**, avec un dialogue actif :
+
+### Toolbar — menu Actions
+
+- **⚙️ Systèmes de jeu** (`btn-game-systems-integration-panel`) : ouvre le panneau latéral **Intégration systèmes de jeu** (`GameSystemsIntegrationPanel`).
+  - Liste les trois familles : Caractéristiques & Compétences, Gestion de l'Effort, Réputation.
+  - Affiche l'état de la source runtime (en local : déconnectée, édition non bloquée).
+- Autres entrées du menu Actions : simulation flow, validation schéma, etc. (voir `GraphEditorHeader`).
+
+### Preview scénario
+
+Le panneau **Preview** (`DialoguePreviewPanel`) permet de simuler attributs, compétences, pool d'Effort (défaut 10 PE) et valeurs de réputation FR94. L'état vit dans `graphViewStore.previewGameSystemsState`.
+
+En mode preview actif sur le canvas :
+
+- Les nœuds (`DialogueNode`) affichent les résumés de **skill checks** et grisent les choix dont le **coût Effort** dépasse le pool simulé.
+- Les limites de simulation (`simulation_limits`) s'affichent quand l'agrégat communautaire ne peut pas être reproduit localement.
+
+**Guide détaillé :** [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md)
+
+---
+
 ## Références
 
 - Wireframes nouvelles features : `_bmad-output/excalidraw-diagrams/wireframe-*-*.excalidraw`

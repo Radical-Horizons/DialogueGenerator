@@ -361,6 +361,137 @@ Suggest flags based on context.
 
 ---
 
+## Mechanics Systems Integration (`/api/v1/mechanics/systems`)
+
+### GET `/mechanics/systems/integration`
+Catalogue des familles de systèmes de jeu utilisables dans les dialogues (FR94).
+
+**Response:** `GameSystemsIntegrationCatalogResponse`
+
+```json
+{
+  "families": [
+    {
+      "id": "attributes_skills",
+      "label": "Caractéristiques & Compétences",
+      "description": "Tests tentables : caractéristique + compétence + modificateurs vs DD."
+    },
+    {
+      "id": "effort",
+      "label": "Gestion de l'Effort",
+      "description": "Pool preview par défaut 10 PE, coûts d'Effort et choix grisés si insuffisant."
+    },
+    {
+      "id": "reputation",
+      "label": "Réputation",
+      "description": "Admiration, Prestige et Crainte avec cible sociale et paliers calculés."
+    }
+  ],
+  "runtime_source": {
+    "status": "disconnected",
+    "label": "Source runtime externe (Unity/API/fichier config)",
+    "editing_blocked": false,
+    "message": "Source runtime externe non connectée : édition locale disponible via preview simulée."
+  }
+}
+```
+
+**Comportement actuel :** en local, `runtime_source.status` reste `disconnected` ; `editing_blocked` est `false`. Voir `services/game_systems_integration_service.py`.
+
+**Reste à faire :** connexion runtime live (Unity/API) non implémentée.
+
+---
+
+## Documents Endpoints (`/api/v1/documents`)
+
+Persistance des dialogues canoniques (blob JSON + révision `.meta`, layout sidecar). Implémentation : `api/routers/documents.py`.
+
+### GET `/documents/check-migration`
+Vérifie les documents nécessitant une migration de schéma.
+
+**Response:** `CheckMigrationResponse` (liste de documents à migrer).
+
+### GET `/documents/{document_id}`
+Charge le document JSON persisté et sa révision.
+
+**Response:** `DocumentGetResponse` — `document`, `revision`.
+
+### PUT `/documents/{document_id}`
+Met à jour le document avec contrôle de révision optimiste (409 si conflit).
+
+**Request Body:** `PutDocumentRequest` — `revision`, `document`.
+
+**Response:** `PutDocumentResponse` — inclut `validationReport` (schéma Unity, flags, effets, **diagnostics sociaux FR94**).
+
+Codes diagnostic sociaux possibles dans `validationReport` :
+
+| Code | Condition |
+|------|-----------|
+| `social_system_confusion` | `Influence` ou `Respect` utilisés comme axe de Réputation |
+| `reputation_palier_runtime_only` | `RepPalier*` stocké dans `dialogueFlags` |
+
+### DELETE `/documents/{document_id}`
+Supprime le document et ses fichiers associés (`.meta`, layout).
+
+**Response:** `204 No Content`
+
+### GET `/documents/{document_id}/layout`
+Charge le layout graphe (sidecar, révision `.layout.meta`).
+
+**Response:** `LayoutGetResponse`
+
+### PUT `/documents/{document_id}/layout`
+Persiste le layout avec contrôle de révision.
+
+**Request Body:** `PutLayoutRequest` — `revision`, `layout`.
+
+**Response:** `PutLayoutResponse`
+
+### POST `/documents/{document_id}/preview`
+Preview scénario avec état simulé (flags, réputation legacy, stats FR94).
+
+**Request Body:** `DialoguePreviewRequest`
+
+```json
+{
+  "revision": 3,
+  "flag_states": {},
+  "reputation_states": {},
+  "game_systems_state": {
+    "attributes": { "sociabilite": 4 },
+    "skills": { "tromperie": 3 },
+    "effort_pool": 10,
+    "reputation_values": {
+      "fr94::HEROINE_A::community::garde::Admiration::community_calculated": 35
+    },
+    "faction_titles": { "garde": "garde_capitaine" }
+  }
+}
+```
+
+**Response:** `DialoguePreviewResponse` — agrégats de masquage (`nodes_masked`, `choices_masked`, listes d'IDs), écho `game_systems_state`, `simulation_limits`, `visibility_warnings`.
+
+Exemple `simulation_limits` (agrégat communautaire) :
+
+```json
+[
+  "Agrégat communautaire simulé localement : témoins, propagation et poids PNJ restent responsabilité runtime."
+]
+```
+
+### POST `/documents/{document_id}/validate-flag-references`
+Validation FR93 des références de flags (`visibilityConditions`, `choiceEffects`) vs `dialogueFlags` déclarés.
+
+**Request Body (optionnel):** `{ "document": { ... } }` — sinon lecture du fichier persisté.
+
+**Response:** `ValidateFlagReferencesResponse` — `valid`, `summary`, `errors`, `warnings` (types `dialogue_flag_undeclared`, `dialogue_flag_unused`).
+
+La même analyse est fusionnée dans `POST /api/v1/unity-dialogues/graph/validate` lorsque le client envoie `document`.
+
+**Guide utilisateur :** [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md)
+
+---
+
 ## Configuration Endpoints (`/api/v1/config`)
 
 ### GET `/config`

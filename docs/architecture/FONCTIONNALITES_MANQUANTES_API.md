@@ -1,5 +1,7 @@
 # Fonctionnalités manquantes dans l'API REST
 
+> **Partiellement obsolète (2026-06-12)** — Ce document date d'une analyse desktop → API (janv. 2026). Plusieurs épics ultérieurs sont livrés dans le code (ex. Epic 9 FR89–94, documents API, preview FR94). **En cas d'écart, le code et les tests font foi** ; voir [`docs/api/api-contracts-api.md`](../api/api-contracts-api.md) et [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md).
+
 Ce document liste les fonctionnalités qui étaient présentes dans l'ancienne interface desktop mais qui ne sont pas encore implémentées dans l'API REST, ainsi que les fonctionnalités mentionnées dans le README qui sont partiellement ou non implémentées.
 
 **Note** : Ce document a été mis à jour le 2025-12-25. Unity n'utilise plus le format Yarn (.yarn) mais le format JSON (voir spécification dans ce dossier).
@@ -11,6 +13,19 @@ Ce document liste les fonctionnalités qui étaient présentes dans l'ancienne i
 ## Résumé exécutif
 
 L'API REST couvre les fonctionnalités principales. La plupart des fonctionnalités de l'ancienne interface sont implémentées. Quelques fonctionnalités avancées mentionnées dans le README restent à implémenter.
+
+### Epic 9 — Variables & systèmes de jeu (FR89–94) — implémenté
+
+| Exigence | Statut code | Référence |
+|----------|-------------|-----------|
+| FR89 Catalogue flags dialogue | Livré | `dialogueFlags`, mechanics flags API |
+| FR90 Conditions visibilité | Livré | `visibilityConditions` structurées |
+| FR91 Effets choix | Livré | `choiceEffects` |
+| FR92 Preview scénario flags/réputation | Livré | `POST /documents/{id}/preview` |
+| FR93 Validation références flags | Livré | `validate-flag-references`, graph validate |
+| FR94 Stats systèmes de jeu | Livré | `game_systems_*`, panneau intégration, preview stats |
+
+**Reste à faire (FR94) :** connexion runtime Unity live (`runtime_source.status = connected`) — non implémentée ; preview reste simulée.
 
 ---
 

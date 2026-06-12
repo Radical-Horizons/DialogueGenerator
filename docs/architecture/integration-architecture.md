@@ -344,6 +344,33 @@ apiClient.interceptors.request.use((config) => {
 - **Prometheus**: Backend metrics (if configured)
 - **Usage Tracking**: LLM usage tracked and exposed via API
 
+## Game Systems Preview Flow (FR94)
+
+Deterministic evaluation of dialogue conditions and affordances — **not** LLM-backed.
+
+```
+DialoguePreviewPanel / DialogueNode
+        │  previewGameSystemsState (graphViewStore)
+        ▼
+frontend/src/utils/{skillChecks,effortPreview,reputationFr94,previewSimulationLimits}.ts
+        │  postDocumentPreview (optional server round-trip)
+        ▼
+POST /api/v1/documents/{id}/preview
+        │  DialoguePreviewRequest.game_systems_state
+        ▼
+services/game_systems_{skill_checks,effort,reputation}.py
+        ▼
+DialoguePreviewResponse (masking + simulation_limits)
+```
+
+**Catalogue UI:** `getGameSystemsIntegrationCatalog()` → `GET /mechanics/systems/integration`.
+
+**Reste à faire:** runtime stats feed from Unity (today `runtime_source.status` is always `disconnected` locally).
+
+Guide: [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md)
+
+---
+
 ## Future Integration Points
 
 ### Potential Enhancements

@@ -98,6 +98,12 @@ The backend follows a **layered architecture** with clear separation of concerns
 **Mechanics Flags** (`api/routers/mechanics_flags.py`):
 - Game mechanics flags management
 
+**Mechanics Systems** (`api/routers/mechanics_systems.py`):
+- FR94 integration catalogue (`GET /mechanics/systems/integration`)
+
+**Documents** (`api/routers/documents.py`):
+- Canonical document CRUD, layout sidecar, scenario preview (`game_systems_state`), flag reference validation, social diagnostics on PUT
+
 **Unity Dialogues** (`api/routers/unity_dialogues.py`):
 - Unity dialogue file management
 
@@ -117,6 +123,12 @@ The backend follows a **layered architecture** with clear separation of concerns
 - `context_construction_service.py`: Context building
 - `context_field_validator.py`: Field validation
 - Various catalog services (skills, traits, flags, vocabulary)
+- **Game systems FR94** (pure deterministic logic, mirrored in frontend utils):
+  - `game_systems_integration_service.py`: Static catalogue
+  - `game_systems_skill_checks.py`: Skill check evaluation (4 issues)
+  - `game_systems_effort.py`: Effort pool access
+  - `game_systems_reputation.py`: FR94 conditions, RepPalier, deltas
+  - `game_systems_social_diagnostics.py`: Faction titles, Influence/Respect confusion, document scan
 
 **API Services** (`api/services/`):
 - `auth_service.py`: Authentication logic
