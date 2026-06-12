@@ -115,6 +115,8 @@ export function GraphEditorHeader({
     setShowAutoLayoutDropdown,
     showActionsDropdown,
     setShowActionsDropdown,
+    showValidationToolsDropdown,
+    setShowValidationToolsDropdown,
     setShowAIGenerationPanel,
     showValidationPanel,
     setShowValidationPanel,
@@ -144,6 +146,7 @@ export function GraphEditorHeader({
     autoLayoutDropdownRef,
     actionsDropdownRef,
     actionsDropdownBtnRef,
+    validationToolsDropdownRef,
     reactFlowInstance,
     handleAutoLayout,
     handleOpenExportDialog,
@@ -481,99 +484,6 @@ export function GraphEditorHeader({
           role="menuitem"
           onClick={() => {
             setShowActionsDropdown(false)
-            setShowQualityLlmPanel((v) => !v)
-          }}
-          disabled={!hasActiveDialogue}
-          style={{
-            display: 'block',
-            width: '100%',
-            padding: chrome.dropdownItemPadding,
-            border: 'none',
-            background: showQualityLlmPanel ? theme.button.default.background : 'transparent',
-            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
-            textAlign: 'left',
-            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
-            opacity: hasActiveDialogue ? 1 : 0.6,
-          }}
-          onMouseEnter={(e) => {
-            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = showQualityLlmPanel
-              ? theme.button.default.background
-              : 'transparent'
-          }}
-        >
-          🧪 Qualité LLM
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            setShowActionsDropdown(false)
-            setShowAiSlopPanel((v) => !v)
-          }}
-          disabled={!hasActiveDialogue}
-          style={{
-            display: 'block',
-            width: '100%',
-            padding: chrome.dropdownItemPadding,
-            border: 'none',
-            background: showAiSlopPanel ? theme.button.default.background : 'transparent',
-            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
-            textAlign: 'left',
-            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
-            opacity: hasActiveDialogue ? 1 : 0.6,
-          }}
-          onMouseEnter={(e) => {
-            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = showAiSlopPanel
-              ? theme.button.default.background
-              : 'transparent'
-          }}
-        >
-          🧹 Anti-slop IA
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            setShowActionsDropdown(false)
-            setShowContextDroppingPanel((v) => !v)
-          }}
-          disabled={!hasActiveDialogue}
-          style={{
-            display: 'block',
-            width: '100%',
-            padding: chrome.dropdownItemPadding,
-            border: 'none',
-            background: showContextDroppingPanel ? theme.button.default.background : 'transparent',
-            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
-            textAlign: 'left',
-            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
-            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
-            opacity: hasActiveDialogue ? 1 : 0.6,
-          }}
-          onMouseEnter={(e) => {
-            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = showContextDroppingPanel
-              ? theme.button.default.background
-              : 'transparent'
-          }}
-        >
-          🧠 Context dropping
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            setShowActionsDropdown(false)
             setShowFlowSimulationPanel((v) => !v)
           }}
           disabled={!hasActiveDialogue}
@@ -633,11 +543,131 @@ export function GraphEditorHeader({
         >
           ⚙️ Systèmes de jeu
         </button>
+      </>
+    )
+  }, [
+    addNode,
+    chrome.dropdownItemFontSizeRem,
+    chrome.dropdownItemPadding,
+    createEmptyNode,
+    handleExportUnity,
+    handleOpenExportDialog,
+    hasActiveDialogue,
+    nodes,
+    reactFlowInstance,
+    selectedNodeId,
+    setSelectedNode,
+    setShowAIGenerationPanel,
+    setShowActionsDropdown,
+    setShowFiltersPanel,
+    setShowFlowSimulationPanel,
+    setShowGameSystemsIntegrationPanel,
+    setShowJumpToNodeModal,
+    showFlowSimulationPanel,
+    showGameSystemsIntegrationPanel,
+  ])
+
+  const renderQualityMenuItems = useCallback(() => {
+    return (
+      <>
         <button
           type="button"
           role="menuitem"
           onClick={() => {
-            setShowActionsDropdown(false)
+            setShowValidationToolsDropdown(false)
+            setShowQualityLlmPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showQualityLlmPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showQualityLlmPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          🧪 Qualité LLM
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowValidationToolsDropdown(false)
+            setShowAiSlopPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showAiSlopPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showAiSlopPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          🧹 Anti-slop IA
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowValidationToolsDropdown(false)
+            setShowContextDroppingPanel((v) => !v)
+          }}
+          disabled={!hasActiveDialogue}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: showContextDroppingPanel ? theme.button.default.background : 'transparent',
+            color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
+            opacity: hasActiveDialogue ? 1 : 0.6,
+          }}
+          onMouseEnter={(e) => {
+            if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = showContextDroppingPanel
+              ? theme.button.default.background
+              : 'transparent'
+          }}
+        >
+          🧠 Context dropping
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={() => {
+            setShowValidationToolsDropdown(false)
             handleToggleSchemaValidation()
           }}
           disabled={!hasActiveDialogue}
@@ -669,7 +699,7 @@ export function GraphEditorHeader({
           role="menuitem"
           data-testid="btn-dialogue-preview"
           onClick={() => {
-            setShowActionsDropdown(false)
+            setShowValidationToolsDropdown(false)
             onToggleDialoguePreview?.()
           }}
           disabled={!hasActiveDialogue || !onToggleDialoguePreview}
@@ -706,8 +736,9 @@ export function GraphEditorHeader({
         <button
           type="button"
           role="menuitem"
+          data-testid="btn-cost-breakdown"
           onClick={() => {
-            setShowActionsDropdown(false)
+            setShowValidationToolsDropdown(false)
             setShowCostBreakdown((v) => !v)
           }}
           disabled={!hasActiveDialogue}
@@ -716,18 +747,21 @@ export function GraphEditorHeader({
             width: '100%',
             padding: chrome.dropdownItemPadding,
             border: 'none',
-            background: 'transparent',
+            background: showCostBreakdown ? theme.button.default.background : 'transparent',
             color: !hasActiveDialogue ? theme.text.secondary : theme.text.primary,
             textAlign: 'left',
             fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
             cursor: hasActiveDialogue ? 'pointer' : 'not-allowed',
             opacity: hasActiveDialogue ? 1 : 0.6,
           }}
+          title="Afficher le breakdown des coûts LLM pour ce dialogue"
           onMouseEnter={(e) => {
             if (hasActiveDialogue) e.currentTarget.style.backgroundColor = theme.state.hover.background
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.backgroundColor = showCostBreakdown
+              ? theme.button.default.background
+              : 'transparent'
           }}
         >
           💰 Coûts
@@ -735,37 +769,41 @@ export function GraphEditorHeader({
       </>
     )
   }, [
-    addNode,
     chrome.dropdownItemFontSizeRem,
     chrome.dropdownItemPadding,
-    createEmptyNode,
-    handleExportUnity,
-    handleOpenExportDialog,
     handleToggleSchemaValidation,
     hasActiveDialogue,
-    nodes,
     onToggleDialoguePreview,
-    reactFlowInstance,
-    selectedNodeId,
-    setSelectedNode,
-    setShowAIGenerationPanel,
-    setShowActionsDropdown,
     setShowAiSlopPanel,
     setShowContextDroppingPanel,
     setShowCostBreakdown,
-    setShowFiltersPanel,
-    setShowFlowSimulationPanel,
-    setShowGameSystemsIntegrationPanel,
-    setShowJumpToNodeModal,
     setShowQualityLlmPanel,
+    setShowValidationToolsDropdown,
     showAiSlopPanel,
     showContextDroppingPanel,
+    showCostBreakdown,
     showDialoguePreviewPanel,
-    showFlowSimulationPanel,
-    showGameSystemsIntegrationPanel,
     showQualityLlmPanel,
     showSchemaValidationPanel,
   ])
+
+  const renderQualityDropdown = (isNarrow: boolean): ReactNode => (
+    <GraphActionsDropdown
+      canEditGraph={canEditGraph}
+      isNarrow={isNarrow}
+      graphChromeTouch={isNarrow ? graphChromeTouchNarrow : graphChromeTouch}
+      buttonPadding={isNarrow ? chrome.buttonPadding : effectiveButtonPadding}
+      buttonFontSizeRem={isNarrow ? chrome.buttonFontSizeRem : effectiveButtonFontSizeRem}
+      groupGapRem={chrome.groupGapRem}
+      actionsDropdownRef={validationToolsDropdownRef}
+      showActionsDropdown={showValidationToolsDropdown}
+      setShowActionsDropdown={setShowValidationToolsDropdown}
+      renderMenuItems={renderQualityMenuItems}
+      dropdownLabel="Qualités"
+      dropdownTestId="btn-quality-dropdown"
+      dropdownTitle="Outils qualité et validation du dialogue"
+    />
+  )
 
   const renderSaveStatusIndicator = (): ReactNode => {
     const status: 'saved' | 'saving' | 'unsaved' | 'error' = lastSaveError
@@ -996,28 +1034,7 @@ export function GraphEditorHeader({
           renderMenuItems={renderActionsMenuItems}
         />
       )}
-      <button
-        onClick={() => setShowCostBreakdown((v) => !v)}
-        disabled={!hasActiveDialogue}
-        style={{
-          ...(isNarrowToolbar ? graphChromeTouchNarrow : graphChromeTouch),
-          padding: effectiveButtonPadding,
-          border: `1px solid ${
-            showCostBreakdown ? theme.button.primary.background : theme.border.primary
-          }`,
-          borderRadius: '6px',
-          backgroundColor: showCostBreakdown
-            ? theme.button.primary.background
-            : theme.button.default.background,
-          color: showCostBreakdown ? theme.button.primary.color : theme.button.default.color,
-          cursor: !hasActiveDialogue ? 'not-allowed' : 'pointer',
-          opacity: !hasActiveDialogue ? 0.6 : 1,
-          fontSize: `${effectiveButtonFontSizeRem}rem`,
-        }}
-        title="Afficher le breakdown des coûts LLM pour ce dialogue"
-      >
-        💰 Coûts
-      </button>
+      {!isNarrowToolbar && renderQualityDropdown(false)}
       {/* Shortcuts (?) avec tooltip */}
       <div style={{ position: 'relative' }}>
         <button
@@ -1393,21 +1410,6 @@ export function GraphEditorHeader({
                   🔍
                 </button>
               )}
-              {isNarrowToolbar && (
-                <GraphActionsDropdown
-                  canEditGraph={canEditGraph}
-                  isNarrow={true}
-                  graphChromeTouch={graphChromeTouch}
-                  buttonPadding={chrome.buttonPadding}
-                  buttonFontSizeRem={chrome.buttonFontSizeRem}
-                  groupGapRem={chrome.groupGapRem}
-                  actionsDropdownRef={actionsDropdownRef}
-                  actionsDropdownBtnRef={actionsDropdownBtnRef}
-                  showActionsDropdown={showActionsDropdown}
-                  setShowActionsDropdown={setShowActionsDropdown}
-                  renderMenuItems={renderActionsMenuItems}
-                />
-              )}
             </div>
           </>
         )}
@@ -1563,6 +1565,7 @@ export function GraphEditorHeader({
                 setShowActionsDropdown={setShowActionsDropdown}
                 renderMenuItems={renderActionsMenuItems}
               />
+              {renderQualityDropdown(true)}
             </div>
             <div
               data-testid="graph-toolbar-row-status"

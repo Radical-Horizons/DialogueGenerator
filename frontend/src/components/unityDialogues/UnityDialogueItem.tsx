@@ -1,7 +1,7 @@
 /**
  * Composant pour afficher un item de dialogue Unity dans la liste.
  */
-import { forwardRef, memo, type CSSProperties, type KeyboardEvent } from 'react'
+import { forwardRef, memo, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
@@ -21,6 +21,7 @@ export interface UnityDialogueItemProps {
   optionId?: string
   isActiveOption?: boolean
   onOptionKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void
+  onContextMenu?: (e: MouseEvent<HTMLButtonElement | HTMLDivElement>) => void
 }
 
 const itemInteractiveStyle: CSSProperties = {
@@ -50,6 +51,7 @@ export const UnityDialogueItem = memo(
         optionId,
         isActiveOption = false,
         onOptionKeyDown,
+        onContextMenu,
       },
       ref
     ) {
@@ -131,6 +133,7 @@ export const UnityDialogueItem = memo(
             data-testid="unity-dialogue-item"
             title={titleText}
             onClick={onClick}
+            onContextMenu={onContextMenu}
             onKeyDown={onOptionKeyDown}
             style={{
               ...itemInteractiveStyle,
@@ -160,6 +163,7 @@ export const UnityDialogueItem = memo(
           aria-pressed={isSelected}
           title={titleText}
           onClick={onClick}
+          onContextMenu={onContextMenu}
           style={{
             ...itemInteractiveStyle,
             backgroundColor: bgForState,

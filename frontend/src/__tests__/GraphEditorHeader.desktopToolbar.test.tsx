@@ -127,11 +127,12 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
     expect(autoLayout).not.toHaveTextContent('Auto-layout')
 
     expect(screen.getByTestId('btn-actions-dropdown')).toHaveTextContent('Actions')
+    expect(screen.getByTestId('btn-quality-dropdown')).toHaveTextContent('Qualités')
+    expect(screen.queryByTitle(/breakdown des coûts/i)).toBeNull()
 
-    const costsButton = screen.getByTitle(/breakdown des coûts/i)
+    const qualityDropdown = screen.getByTestId('btn-quality-dropdown')
     const graphHealthBadge = screen.getByTestId('graph-health-badge')
-    expect(costsButton).toHaveTextContent('💰 Coûts')
-    expect(costsButton.compareDocumentPosition(graphHealthBadge) & Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(qualityDropdown.compareDocumentPosition(graphHealthBadge) & Node.DOCUMENT_POSITION_FOLLOWING)
       .toBeTruthy()
   })
 

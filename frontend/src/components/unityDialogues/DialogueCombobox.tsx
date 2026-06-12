@@ -28,6 +28,10 @@ import { useDialogueListData } from '../../hooks/useDialogueListData'
 import { StyledSelect } from '../shared/StyledSelect'
 import { UnityDialogueItem } from './UnityDialogueItem'
 import {
+  DialogueListContextMenu,
+  type DialogueListContextMenuState,
+} from './DialogueListContextMenu'
+import {
   formatDialogueTitle,
   getDialogueDisplayTitle,
   normalizeDialogueFilenameKey,
@@ -71,6 +75,7 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
 
     const [isOpen, setIsOpen] = useState(false)
     const [activeOptionIndex, setActiveOptionIndex] = useState<number | null>(null)
+    const [contextMenu, setContextMenu] = useState<DialogueListContextMenuState | null>(null)
 
     const rootRef = useRef<HTMLDivElement>(null)
     const triggerRef = useRef<HTMLButtonElement>(null)
@@ -93,6 +98,15 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
         close()
       },
       [onSelect, close]
+    )
+
+    const handleItemContextMenu = useCallback(
+      (dialogue: UnityDialogueMetadata, e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setContextMenu({ dialogue, clientX: e.clientX, clientY: e.clientY })
+      },
+      [],
     )
 
     useEffect(() => {
@@ -443,6 +457,7 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
                     ref={(el) => setOptionRef(dialogue.filename, el)}
                     dialogue={dialogue}
                     onClick={() => handleItemClick(dialogue)}
+                    onContextMenu={(e) => handleItemContextMenu(dialogue, e)}
                     isSelected={
                       !!selectedFilename &&
                       normalizeDialogueFilenameKey(selectedFilename) ===
@@ -458,6 +473,14 @@ export const DialogueCombobox = forwardRef<DialogueComboboxRef, DialogueCombobox
               )}
             </div>
           </div>
+        )}
+        {contextMenu && (
+          <DialogueListContextMenu
+            state={contextMenu}
+            onClose={() => setContextMenu(null)}
+            onSelect={(dialogue) => handleItemClick(dialogue)}
+            onDeleted={() => refresh()}
+          />
         )}
       </div>
     )

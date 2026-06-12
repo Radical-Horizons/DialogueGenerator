@@ -5,11 +5,15 @@
  * la gestion locale du raccourci `/` (focus champ recherche) et de
  * l'exposition du `refresh()` via ref impérative.
  */
-import { useEffect, useImperativeHandle, forwardRef, useRef } from 'react'
+import { useCallback, useEffect, useImperativeHandle, forwardRef, useRef, useState } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { UnityDialogueItem } from './UnityDialogueItem'
+import {
+  DialogueListContextMenu,
+  type DialogueListContextMenuState,
+} from './DialogueListContextMenu'
 import { StyledSelect } from '../shared/StyledSelect'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
 import { normalizeDialogueFilenameKey } from '../../utils/formatDialogueTitle'
@@ -38,6 +42,16 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     refresh,
   } = useDialogueListData()
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [contextMenu, setContextMenu] = useState<DialogueListContextMenuState | null>(null)
+
+  const handleItemContextMenu = useCallback(
+    (dialogue: UnityDialogueMetadata, e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setContextMenu({ dialogue, clientX: e.clientX, clientY: e.clientY })
+    },
+    [],
+  )
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -182,15 +196,24 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
               key={dialogue.filename}
               dialogue={dialogue}
               onClick={() => handleItemClick(dialogue)}
-            isSelected={
-              !!selectedFilename &&
-              normalizeDialogueFilenameKey(selectedFilename) === normalizeDialogueFilenameKey(dialogue.filename)
-            }
+              onContextMenu={(e) => handleItemContextMenu(dialogue, e)}
+              isSelected={
+                !!selectedFilename &&
+                normalizeDialogueFilenameKey(selectedFilename) === normalizeDialogueFilenameKey(dialogue.filename)
+              }
               searchQuery={searchQuery}
             />
           ))
         )}
       </div>
+      {contextMenu && (
+        <DialogueListContextMenu
+          state={contextMenu}
+          onClose={() => setContextMenu(null)}
+          onSelect={(dialogue) => onSelectDialogue(dialogue)}
+          onDeleted={() => refresh()}
+        />
+      )}
     </div>
   )
   }
