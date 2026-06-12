@@ -12,6 +12,7 @@ from api.schemas.preset import (
 )
 from services.configuration_service import ConfigurationService
 from core.context.context_builder import ContextBuilder
+from services.gdd_name_resolver import GddNameResolver
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,93 @@ class PresetService:
         # Créer dossier presets si n'existe pas
         self.presets_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"PresetService initialisé avec dossier: {self.presets_dir}")
-    
+
+    def _gdd_name_resolver(self) -> GddNameResolver:
+        """Construit un resolver sur les données GDD courantes."""
+        self.context_builder.load_gdd_files()
+        return GddNameResolver(
+            self.context_builder._gdd_data,
+            self.context_builder._element_repository,
+        )
+
+    @staticmethod
+    def _remap_string_list(values: List[str], resolved_refs: Dict[str, str]) -> List[str]:
+        """Remplace les libellés résolus et déduplique en conservant l'ordre."""
+        seen: set[str] = set()
+        remapped: List[str] = []
+        for value in values:
+            canonical = resolved_refs.get(value, value)
+            if canonical not in seen:
+                seen.add(canonical)
+                remapped.append(canonical)
+        return remapped
+
+    def _apply_resolved_refs_to_preset(self, preset: Preset, resolved_refs: Dict[str, str]) -> Preset:
+        """Applique les noms canoniques sur la configuration d'un preset."""
+        if not resolved_refs:
+            return preset
+
+        config = preset.configuration.model_copy(deep=True)
+        config.characters = self._remap_string_list(config.characters, resolved_refs)
+        config.locations = self._remap_string_list(config.locations, resolved_refs)
+        if config.region in resolved_refs:
+            config.region = resolved_refs[config.region]
+        if config.subLocation and config.subLocation in resolved_refs:
+            config.subLocation = resolved_refs[config.subLocation]
+        if config.selectedRegion and config.selectedRegion in resolved_refs:
+            config.selectedRegion = resolved_refs[config.selectedRegion]
+        if config.selectedSubLocations:
+            config.selectedSubLocations = self._remap_string_list(
+                config.selectedSubLocations,
+                resolved_refs,
+            )
+
+        if config.contextSelections and isinstance(config.contextSelections, dict):
+            selections = dict(config.contextSelections)
+            for key in (
+                "characters_full",
+                "characters_excerpt",
+                "locations_full",
+                "locations_excerpt",
+                "items_full",
+                "items_excerpt",
+                "species_full",
+                "species_excerpt",
+                "communities_full",
+                "communities_excerpt",
+            ):
+                raw = selections.get(key)
+                if isinstance(raw, list):
+                    selections[key] = self._remap_string_list(raw, resolved_refs)
+            config.contextSelections = selections
+
+        return preset.model_copy(update={"configuration": config})
+
+    def _resolve_reference_name(
+        self,
+        resolver: GddNameResolver,
+        *,
+        kind: str,
+        name: str,
+        valid_names: set[str],
+    ) -> tuple[Optional[str], bool]:
+        """Résout une référence preset vers un nom canonique GDD.
+
+        Returns:
+            Tuple (nom canonique ou None, True si résolution alias/fuzzy).
+        """
+        if name in valid_names:
+            return name, False
+
+        if kind == "character":
+            canonical = resolver.resolve_character(name)
+        else:
+            canonical = resolver.resolve_location(name)
+
+        if canonical and canonical in valid_names:
+            return canonical, canonical != name
+        return None, False
+
     def create_preset(self, preset_data: Dict[str, Any]) -> Tuple[Preset, Optional[str]]:
         """Crée un nouveau preset.
         
@@ -79,14 +166,15 @@ class PresetService:
         # Valider références avant sauvegarde
         validation = self.validate_preset_references(preset)
         
+        if validation.resolvedRefs:
+            preset = self._apply_resolved_refs_to_preset(preset, validation.resolvedRefs)
+
         # Auto-cleanup si références obsolètes détectées
         if not validation.valid and validation.obsoleteRefs:
-            # Filtrer personnages obsolètes
             preset.configuration.characters = [
                 c for c in preset.configuration.characters
                 if c not in validation.obsoleteRefs
             ]
-            # Filtrer lieux obsolètes
             preset.configuration.locations = [
                 l for l in preset.configuration.locations
                 if l not in validation.obsoleteRefs
@@ -190,14 +278,15 @@ class PresetService:
         # Valider références avant sauvegarde
         validation = self.validate_preset_references(preset)
         
+        if validation.resolvedRefs:
+            preset = self._apply_resolved_refs_to_preset(preset, validation.resolvedRefs)
+
         # Auto-cleanup si références obsolètes détectées
         if not validation.valid and validation.obsoleteRefs:
-            # Filtrer personnages obsolètes
             preset.configuration.characters = [
                 c for c in preset.configuration.characters
                 if c not in validation.obsoleteRefs
             ]
-            # Filtrer lieux obsolètes
             preset.configuration.locations = [
                 l for l in preset.configuration.locations
                 if l not in validation.obsoleteRefs
@@ -245,37 +334,68 @@ class PresetService:
         Returns:
             Résultat de validation avec warnings si références obsolètes
         """
-        obsolete_refs = []
-        warnings = []
-        
-        # Charger données GDD depuis ContextBuilder
-        gdd_data = self.context_builder.gdd_data
+        obsolete_refs: List[str] = []
+        warnings: List[str] = []
+        resolved_refs: Dict[str, str] = {}
 
-        # Extraire IDs valides depuis GDD (legacy / debug only - GDDDataAccessor.gdd_data retourne {} par design)
-        valid_character_ids = {char.get("id") for char in gdd_data.get("Personnages", []) if char.get("id")}
-        valid_location_ids = {loc.get("id") for loc in gdd_data.get("Lieux", []) if loc.get("id")}
-
-        # Extraire les NOMS valides via ContextBuilder (source-of-truth pour le web)
+        resolver = self._gdd_name_resolver()
         valid_character_names = set(self.context_builder.get_characters_names())
         valid_location_names = set(self.context_builder.get_locations_names())
-        
-        # Vérifier personnages (par nom)
-        for char_name in preset.configuration.characters:
-            if char_name not in valid_character_names:
+
+        character_refs: set[str] = set(preset.configuration.characters)
+        location_refs: set[str] = set(preset.configuration.locations)
+        if preset.configuration.region:
+            location_refs.add(preset.configuration.region)
+        if preset.configuration.subLocation:
+            location_refs.add(preset.configuration.subLocation)
+        if preset.configuration.selectedRegion:
+            location_refs.add(preset.configuration.selectedRegion)
+        for sub_loc in preset.configuration.selectedSubLocations or []:
+            if sub_loc:
+                location_refs.add(sub_loc)
+        if isinstance(preset.configuration.contextSelections, dict):
+            for key in ("characters_full", "characters_excerpt"):
+                raw = preset.configuration.contextSelections.get(key)
+                if isinstance(raw, list):
+                    character_refs.update(str(n) for n in raw if n)
+            for key in ("locations_full", "locations_excerpt"):
+                raw = preset.configuration.contextSelections.get(key)
+                if isinstance(raw, list):
+                    location_refs.update(str(n) for n in raw if n)
+
+        for char_name in sorted(character_refs):
+            canonical, was_resolved = self._resolve_reference_name(
+                resolver,
+                kind="character",
+                name=char_name,
+                valid_names=valid_character_names,
+            )
+            if canonical and was_resolved:
+                resolved_refs[char_name] = canonical
+                warnings.append(f"Character '{char_name}' resolved to '{canonical}'")
+            elif not canonical:
                 obsolete_refs.append(char_name)
                 warnings.append(f"Character '{char_name}' not found in GDD")
-        
-        # Vérifier lieux (par nom)
-        # Note: le frontend stocke actuellement des noms (region/subLocation) dans configuration.locations
-        for loc_name in preset.configuration.locations:
-            if loc_name not in valid_location_names:
+
+        for loc_name in sorted(location_refs):
+            canonical, was_resolved = self._resolve_reference_name(
+                resolver,
+                kind="location",
+                name=loc_name,
+                valid_names=valid_location_names,
+            )
+            if canonical and was_resolved:
+                resolved_refs[loc_name] = canonical
+                warnings.append(f"Location '{loc_name}' resolved to '{canonical}'")
+            elif not canonical:
                 obsolete_refs.append(loc_name)
                 warnings.append(f"Location '{loc_name}' not found in GDD")
-        
+
         result = PresetValidationResult(
             valid=len(obsolete_refs) == 0,
             warnings=warnings,
-            obsoleteRefs=obsolete_refs
+            obsoleteRefs=obsolete_refs,
+            resolvedRefs=resolved_refs,
         )
         
         if not result.valid:

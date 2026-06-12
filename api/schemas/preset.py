@@ -71,3 +71,7 @@ class PresetValidationResult(BaseModel):
     valid: bool = Field(..., description="True si toutes références valides")
     warnings: List[str] = Field(default_factory=list, description="Messages d'avertissement")
     obsoleteRefs: List[str] = Field(default_factory=list, description="Liste IDs références obsolètes")
+    resolvedRefs: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Ancien libellé → Nom canonique GDD (alias ou fuzzy)",
+    )
