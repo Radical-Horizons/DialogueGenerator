@@ -1575,20 +1575,20 @@ export function GraphEditorHeader({
               }}
             >
               {renderBatchOperationsMenu()}
-              {renderSaveStatusIndicator()}
               <div style={{ display: 'flex', alignItems: 'center', gap: `${chrome.groupGapRem}rem` }}>
                 {renderToolsGroup()}
               </div>
               {renderGraphHealthBadge()}
+              {renderSaveStatusIndicator()}
             </div>
           </>
         ) : (
           <>
             {!isNarrowToolbar && isStandalone && renderTitleBlock()}
             {renderBatchOperationsMenu()}
-            {renderSaveStatusIndicator()}
             {renderToolsGroup()}
             {renderGraphHealthBadge()}
+            {renderSaveStatusIndicator()}
           </>
         )}
       </div>
