@@ -161,6 +161,10 @@ vi.mock('../InGameFlagsSummary', () => ({
   InGameFlagsSummary: () => <div data-testid="in-game-flags-summary">In Game Flags</div>,
 }))
 
+vi.mock('../DialogueFlagsPanel', () => ({
+  DialogueFlagsPanel: () => <div data-testid="dialogue-flags-panel">Dialogue Flags</div>,
+}))
+
 vi.mock('../GenerationProgressModal', () => ({
   GenerationProgressModal: () => null,
 }))
@@ -372,9 +376,16 @@ describe('GenerationPanel - Tests Baseline', () => {
       buildMockContextStoreState() as unknown as ReturnType<typeof useContextStore>
     )
 
-    mockUseGraphStore.mockReturnValue({
+    const graphStoreState = {
       loadDialogue: vi.fn().mockResolvedValue(undefined),
-    } as Partial<ReturnType<typeof useGraphStore>>)
+      dialogueFlagBindings: [] as ReturnType<typeof useGraphStore>['dialogueFlagBindings'],
+      upsertDialogueFlagBinding: vi.fn(),
+      removeDialogueFlagBinding: vi.fn(),
+    }
+    mockUseGraphStore.mockImplementation(((selector?: (s: typeof graphStoreState) => unknown) => {
+      if (typeof selector === 'function') return selector(graphStoreState)
+      return graphStoreState
+    }) as typeof useGraphStore)
 
     mockUseLLMStore.mockReturnValue({
       model: 'gpt-4o-mini',
