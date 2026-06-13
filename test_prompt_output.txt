@@ -13,7 +13,7 @@ Ne génère PAS de séquence de nœuds. Le Structured Output garantit le format 
   </contract>
 <technical>
     <generation_instructions>Règles de contenu :
-- Speaker (qui parle) : Ori-Bikar 57 (PNJ interlocuteur)
+- Speaker (qui parle) : Yì Shan, la Montagne Réciproque (PNJ interlocuteur)
 - Choix (choices) : Options du joueur (URESAIR)
 - Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire.
 - Nombre de choix : L'IA décide librement entre 2 et 8 choix selon ce qui est approprié pour la scène. Le nœud DOIT avoir au moins 2 choix.</generation_instructions>
@@ -27,69 +27,219 @@ Les traits peuvent être positifs (ex: 'Courageux') ou négatifs (ex: 'Lâche').
     <characters>
       <character>
         <identity>
-          <nom>Ori-Bikar 57</nom>
-        <alias>L'Enfant-Foudre, Le Briseur Créatif, L'Accident Primordial, Virgule Existentielle</alias>
-        <archetype_litteraire>Rebelle / Destructeur</archetype_litteraire>
-        <occupation>Enfant, apprenti artisan</occupation>
-        <type>PNJ recrutable</type>
+          <nom>Yì Shan, la Montagne Réciproque</nom>
+        <alias>Alias</alias>
+        <archetype_litteraire>Artiste / Cynique, Magicienne / Sorcier</archetype_litteraire>
+        <categorie_d_age>Antique</categorie_d_age>
+        <occupation>Occupation</occupation>
+        <type>PNJ historique</type>
         </identity>
       <characterization>
-          <defauts>Désordonnée, Instable, Imprudente</defauts>
-        <qualite>7.5</qualite>
-        <qualites>Courageuse, Honnête, Empathique</qualites>
+          <defauts_lies>a2788bf9-bdc4-4fb9-a114-a9729d587dd0, 8adf6e71-e871-4072-9c52-e2ab002a3d20</defauts_lies>
+        <qualite>9</qualite>
+        <qualites_liees>56dd03aa-2570-46dd-83c7-e7b8402023c2, a57dbb57-c9d0-48d1-aacc-ebd77c66d3bb, 195a60b9-9114-4d47-ab84-dd2878428f81</qualites_liees>
+        <faiblesses_et_mort>Faiblesses et mort</faiblesses_et_mort>
         </characterization>
       <voice>
-          <langage>Principit</langage>
-        <dialogue_type>Dialogue Type</dialogue_type>
-        <dialogue_du_personnage>Dialogue du personnage</dialogue_du_personnage>
+          <pronoms_pour_dialogues>Nom propre</pronoms_pour_dialogues>
         </voice>
       <background>
-          <relations_principales>1ae6e4d2-1b45-80d1-9290-fe72cf1375d7, 1a16e4d2-1b45-8015-b262-cb7e5d0f01a8, 1ae6e4d2-1b45-8082-b0ba-fdf7878ef03c, 1ae6e4d2-1b45-80ef-84e8-fb114d0136ed, 1fa6e4d2-1b45-8075-ae84-d2617da06d51, 1a16e4d2-1b45-8093-89ad-eae2e28f9b31</relations_principales>
-        <background>Background</background>
+          <histoire>Histoire</histoire>
+        <relations_de_son_vivant>Relations de son vivant</relations_de_son_vivant>
         </background>
+      <mechanics>
+          <extraits_d_archives>Extraits d'archives</extraits_d_archives>
+        </mechanics>
       <informations title="AUTRES INFORMATIONS">
-          <actes_de_presence>2e0acee9-5107-4256-9e41-3c36344d59b6</actes_de_presence>
-        <axe_ideologique>Destruction</axe_ideologique>
-        <communautes>1886e4d2-1b45-81b8-ad16-dcfa990112f1, 1b96e4d2-1b45-80fe-ba1e-f65c0e1e3a3c</communautes>
-        <date_de_creation>2025-01-27T14:40:00.000Z</date_de_creation>
-        <date_de_naissance>3378</date_de_naissance>
-        <date_verification>2026-04-04</date_verification>
-        <derniere_modification>2026-04-04T19:29:00.000Z</derniere_modification>
-        <espece>1a16e4d2-1b45-8051-88d9-d744a1bbc095</espece>
-        <genre>Masculin</genre>
-        <inventaires_pnj>4bbd0b45-3275-4a22-ab67-db84600d5a5d, b10e4a0e-066b-4565-9cbe-f37ff16a7fe9, 9ac83ad4-c79b-42c6-a2d2-31e2cc5162ce</inventaires_pnj>
-        <lieux_de_vie>1886e4d2-1b45-8150-a894-cfe31d31abd4, 1b36e4d2-1b45-80ec-93bd-da8514c1c784</lieux_de_vie>
+          <axe_ideologique>Connexion</axe_ideologique>
+        <concepts_lies>62e3b865-c858-4fa1-961a-eb5767629d38</concepts_lies>
+        <date_de_creation>2026-04-30T14:41:00.000Z</date_de_creation>
+        <date_de_naissance>1</date_de_naissance>
+        <date_verification>2026-06-01</date_verification>
+        <derniere_modification>2026-05-31T23:06:00.000Z</derniere_modification>
+        <espece>22e6e4d2-1b45-80db-8065-d98d26821c2c</espece>
+        <genre>Non défini</genre>
         <niveau_d_ia>co-écrit</niveau_d_ia>
-        <objets_detenus>; ; </objets_detenus>
-        <reponse_au_probleme_moral>Les mots-coffres du système? J'les ouvre, j'mélange tout c'qu'y a d'dans, et j'invente un nouveau langage qui fait danser les murs!</reponse_au_probleme_moral>
-        <resume>Ori-Bikar 57 est un PNJ recruté, décrit comme un enfant de 12 ans avec une instabilité neurologique qui se manifeste par une créativité destructrice. Il incarne la tension entre destruction et création, ayant été conçu pour être une interface créative. Son apparence est celle d'un colosse enfantin, et il utilise son art pour défier l'orthodoxie. Ses relations sont complexes, notamment avec l'Exégète, et il aspire à devenir le "Nouvel Axe" du Culte en éveillant le Léviathan. Ses actions incluent la création d'un prototype secret et le sabotage artistique des structures établies.</resume>
-        <scenes>2b86e4d2-1b45-8087-ac50-cb4035a318db, 2066e4d2-1b45-80ea-a176-d146be176d3b, 6985dc4c-f3e6-492d-90da-6f3d57d37d7e, 7215b6b1-6707-40f4-abf7-f559298503a2, 79c497cc-af03-41ca-9b38-0d2b89af68c1, 9cc28a16-9802-459f-b23b-827bc6399a39</scenes>
-        <age>12</age>
-        <epithete>Le Colosse au masque d'enfant</epithete>
+        <reponse_au_probleme_moral>On résiste au système en restaurant les obligations qu’il transforme en mesures exploitables.</reponse_au_probleme_moral>
+        <resume_ia>Yì‑Shan, la Montagne Réciproque, était un Rêveur primordial du bassin du Tombeau qui stabilisait le territoire grâce à des obligations réciproques gravées dans la pierre, empêchant l’exploitation minière prédatrice ; il a été détruit progressivement entre 2691 et 2734 AG par des ruptures sociales, acoustiques et ontotechniques imposées par Synaptic Dynamics, laissant un cadavre ontologique et des vestiges (murmures de pierre, galeries impossibles) qui continuent d’influencer la stabilité géologique et les résistances ouvrières du site.</resume_ia>
+        <slug>yi_shan_la_montagne_reciproque</slug>
+        <age_ou_nuees_depuis_la_naissance>3389</age_ou_nuees_depuis_la_naissance>
+        <epithete>La montagne qui répondait</epithete>
         <etat>A relire</etat>
-        <preamble>Préambule</preamble>
-        <surface>[Surface]</surface>
-        <profondeur>[Profondeur]</profondeur>
-        <dynamique_psychologique>[Dynamique psychologique]</dynamique_psychologique>
-        <profil_socio_psychologique>Profil socio-psychologique</profil_socio_psychologique>
-        <naissance_et_prime_enfance_incubateur_du_paradigme>Naissance et prime enfance : incubateur du Paradigme</naissance_et_prime_enfance_incubateur_du_paradigme>
-        <adolescence_l_apprenti_dissident>Adolescence : l'apprenti dissident</adolescence_l_apprenti_dissident>
-        <vie_adulte_l_artiste_saboteur>Vie adulte : l'artiste-saboteur</vie_adulte_l_artiste_saboteur>
-        <arcs_narratifs>Arcs Narratifs</arcs_narratifs>
-        <campement_recrutement>Campement &amp;amp; Recrutement</campement_recrutement>
-        <e_tat_au_de_but_du_jeu>État au début du jeu</e_tat_au_de_but_du_jeu>
-        <en_fre_ne_sie_cre_ative>En frénésie créative</en_fre_ne_sie_cre_ative>
-        <en_contemplation_me_lancolique>En contemplation mélancolique</en_contemplation_me_lancolique>
-        <expliquant_ses_cre_ations>Expliquant ses créations</expliquant_ses_cre_ations>
-        <face_a_l_autorite>Face à l'autorité</face_a_l_autorite>
-        <re_ve_lation_intime>Révélation intime</re_ve_lation_intime>
-        <gameplay>Gameplay</gameplay>
-        <notes_finales_me_ta>Notes finales (méta)</notes_finales_me_ta>
-        <notion_page_id>1886e4d2-1b45-80bb-b913-d5392af85620</notion_page_id>
+        <re_sume_de_la_fiche>Résumé de la fiche</re_sume_de_la_fiche>
+        <guides>Guides</guides>
+        <accomplissements>Accomplissements</accomplissements>
+        <myste_res_irre_solus>Mystères irrésolus</myste_res_irre_solus>
+        <vestiges>Vestiges</vestiges>
+        <repre_sentations_visuelles>Représentations visuelles</repre_sentations_visuelles>
+        <influence>Influence</influence>
+        <e_vocations_directes>Évocations directes</e_vocations_directes>
+        <re_percussions_indirectes>Répercussions indirectes</re_percussions_indirectes>
+        <ce_que_les_autres_savent_ignorent_ou_racontent_sur_ce_personnage>Ce que les autres savent, ignorent ou racontent sur ce personnage</ce_que_les_autres_savent_ignorent_ou_racontent_sur_ce_personnage>
+        <me_moire_syste_me_flags>Mémoire système (flags)</me_moire_syste_me_flags>
+        <re_compenses>Récompenses</re_compenses>
+        <que_tes_annexes>Quêtes annexes</que_tes_annexes>
+        <remarques_de_conception>Remarques de conception</remarques_de_conception>
+        <re_ponse_au_proble_me_moral>Réponse au problème moral</re_ponse_au_proble_me_moral>
+        <re_sume_ia>Résumé IA</re_sume_ia>
+        <e_pithe_te>Épithète</e_pithe_te>
+        <notion_page_id>06ed3d91-4c09-4c7c-bb38-8cad4db51ba5</notion_page_id>
         </informations>
       </character>
     </characters>
   </context>
+<narrative_guides>
+    <dialogue_guide>
+      <habillage>	**Niveau de langue**
+	- **Registre variable selon le personnage** : chaque personnage parle selon sa propre personnalité, son origine sociale et culturelle
+	- **Du familier au soutenu** : Le forgeron itinérant Grish peut parler de façon familière et directe, tandis que les érudites de la Bibliothèque Sympathique utilisent un registre soutenu
+	- **Vocabulaire adapté** : chaque espèce et culture a ses propres concepts et expressions (pas de réductionnisme)
+	- **Accord de proximité ou de majorité** : pas de primauté du masculin (cf. )
+	- **Ton général du jeu** : sérieux, introspectif, surréaliste
+
+	**Complexité de langage**
+	- **Phrases de longueur variable** : courtes pour les moments de tension, plus longues pour la contemplation et l'introspection
+	- **Vocabulaire riche et précis**, adapté au personnage et à son contexte culturel
+	- **Anachronismes contextuels acceptés** : certaines zones comme la ont un niveau technologique contemporain ou futuriste, ce qui peut se refléter dans le vocabulaire
+	- **Cible** : joueurs et joueuses matures appréciant la profondeur narrative (références : Planescape: Torment, Disco Elysium, Final Fantasy VII à X, Xenogears, Ursula K. Le Guin)
+
+	**Structure type**
+	- **Entrée en matière** : in medias res pour les dialogues majeurs, contextualisation minimale
+	- **Pas de small talk gratuit** : chaque échange doit servir la narration, les thèmes (Conflits de Conscience, Voyage au Cœur de l'Étrange, Des liens d'acier) ou la caractérisation
+	- **Corps du dialogue** :
+		- 2–10 options de dialogue par interaction (cf. )
+		- Minimum 2 choix significatifs par dialogue important
+		- Pas de choix "neutre" ou "skip" — chaque option doit avoir du poids
+	- **Embranchements** : les choix révèlent les dilemmes moraux sans solution idéale
+	- **Fin** : souvent ouverte ou ambiguë, favorisant la réflexion post-dialogue
+	- **Durée cible** : intégration dans la boucle de 5 minutes (mini-scène)
+</habillage>
+    <technique>	**Nombre de caractères minimum et maximum par ligne**
+	- **Maximum** : ≤ 200 mots par panneau. ≤ 80 mots par choix de réponse.
+	- **Contrainte de doublage** : texte synchronisé avec voix + sous-titres
+
+	**Effets des mots ou des lignes**
+	- **Apparition progressive** du texte (style typewriter, \~50 caractères/seconde)
+	- **Possibilité de skip** : touche/bouton dédiée pour passer l'animation
+	- **Sons d'interface** :
+		- Bip doux synchronisé à l'apparition du texte
+		- Tonalité différente selon le personnage parlant (Uresaïr, Eonundé, Vethraak, PNJ)
+		- Son de validation de choix distinct
+	- **Mise en forme autorisée** (codification JSON) :
+		- **Gras** : `\*\*texte\*\*` pour l'emphase
+		- *Italique* : `\*texte\*` pour les pensées, murmures ou ton particulier
+		- ~~Barré~~ : `\~\~texte\~\~` pour les hésitations, corrections
+		- Couleur : `\texte\` pour mise en valeur sémantique (avec parcimonie)
+		- Pause : `\[wait=X\]` pour créer des silences expressifs
+		- Vitesse : `\[speed=X\]` pour ralentir/accélérer ponctuellement
+	- **Limitation** : pas de surutilisation des effets (privilégier la sobriété)
+</technique>
+    <interactivity>	**Choix dans les dialogues**
+	- **Oui, systématiquement** pour les dialogues
+	- **2 à 10 options** pour les dialogues d'exploration narrative standard (cf. )
+	- **Choix exclusifs** : certains ferment des branches définitivement (pas de retour en arrière)
+	- **Choix récursifs** : certains permettent d'approfondir avant de se décider
+	- **Pas de choix "neutre"** : chaque option a un impact (immédiat ou différé)
+
+	**Embranchements dans les dialogues**
+	- **Tous les choix majeurs** créent un embranchement (visible ou invisible)
+	- **Critères d'embranchement** :
+		- Choix liés aux dilemmes moraux centraux (thème Conflits de Conscience)
+		- Choix impliquant Influence/Respect (système mécanique)
+		- Choix révélant/cachant des informations cruciales au lore
+		- Choix affectant les relations entre héroïnes et PNJ
+	- **Embranchements "silencieux"** : certains impacts ne sont visibles qu'à long terme via :
+		- Tags narratifs
+		- Mémoire conversationnelle (flags booléens + compteurs 0–3 par PNJ)
+		- Décroissance après 3 scènes (sauf flags "permanents")
+	- **Pas d'embranchements neutres** : même les choix d'exploration ont un poids narratif ou relationnel
+
+	**Impacte des embranchements**
+	- **Sur l'histoire** : déblocage/verrouillage de quêtes, révélations narratives, accès à des arcs spécifiques
+	- **Sur les relations** :
+		- Modification **Influence** (pression Éthérée sur PJ possédés)
+		- Modification **Respect** (confiance entre Éthérée et PJ)
+		- Modification **Prestige** (réputation auprès des factions)
+	- **Sur les dialogues futurs** : mémoire conversationnelle active (flags + compteurs)
+	- **Sur les capacités** :
+		- Déblocage/blocage de choix futurs selon seuils Influence/Respect
+		- Accès à certaines compétences ou options tactiques
+	- **Sur l'environnement** : modifications visuelles subtiles (PNJ présents/absents, objets déplacés)
+	- **Sur l'accès** : zones, recrutements, quêtes annexes conditionnées par les choix antérieurs
+	- **Architecture en spirale narrative** : révélations progressives modifient rétroactivement la compréhension du joueur (cf. )
+
+	**Gestion des embranchements**
+	- **Points de convergence** :
+		- Rencontres obligatoires avec les trois héroïnes (Uresaïr au Léviathan, Eonundé au Puits Céleste, groupe à Daïlon)
+		- Affrontements avec Valkazer et révélation finale de Jast
+		- Scènes-clés de l'intrigue principale
+	- **Convergence minimale** : Les dialogues sont volontairement explosifs et peuvent mener à tout. Inspiration du Jeu de rôle sur table.
+	- **Branches "mortes" limitées** : éviter les impasses narratives, privilégier les conséquences ambiguës
+	- **Personnages liés par des événements ignorés** : les héroïnes sont connectées par leur passé commun, révélé progressivement (ex: Vethraak ignore qu'Eonundé est une copie de l'amante qu'il a tuée)
+
+Draft - Dialogue Uresaïr et Ethérée
+</interactivity>
+    </dialogue_guide>
+  <narrative_guide />
+  <extracted_rules>TON:
+- &amp;lt;span color="orange"&amp;gt;**Niveau de langue**&amp;lt;/span&amp;gt;
+	- **Registre variable selon le personnage** : chaque personnage parle selon sa propre personnalité, son origine sociale et culturelle
+	- **Du familier
+- **Les décors**
+	**Esthétique générale :**
+	- Fantasy psychédélique, surfantastique
+	- Surréalisme onirique : léviathans de pierre, cités mécaniques flottantes, étoiles-insectoïdes
+	- Luxe de détails d
+- **Les éléments interactifs**
+	**Objets narratifs majeurs :**
+	- Déclenchent des dialogues formels (comme les PNJ)
+	- Tradition CRPG (ex: Baldur's Gate 2)
+	- Peuvent ouvrir des boîtes de dialogue avec 
+- &amp;lt;span color="orange"&amp;gt;**Complexité de langage**&amp;lt;/span&amp;gt;
+	- **Phrases de longueur variable** : courtes pour les moments de tension, plus longues pour la contemplation et l'introspection
+	- **Vocabulaire 
+- &amp;lt;span color="blue"&amp;gt;**Effets des mots ou des lignes**&amp;lt;/span&amp;gt;
+	- **Apparition progressive** du texte (style typewriter, \~50 caractères/seconde)
+	- **Possibilité de skip** : touche/bouton dédiée pour pa
+
+STRUCTURE:
+- &amp;lt;span color="purple"&amp;gt;**Gestion des embranchements**&amp;lt;/span&amp;gt;
+	- **Points de convergence** :
+		- Rencontres obligatoires avec les trois héroïnes (Uresaïr au Léviathan, Eonundé au Puits Céleste, groupe à 
+- Narration linéaire / directe
+- &amp;lt;span color="blue"&amp;gt;**Nombre de caractères minimum et maximum par ligne**&amp;lt;/span&amp;gt;
+	- **Maximum** : ≤ 200 mots par panneau. ≤ 80 mots par choix de réponse.
+	- **Contrainte de doublage** : texte synchroni
+- **L'exploration de l'esprit / les souvenirs revécus**
+	**Structure en spirale narrative :**[\[5\]](https://www.notion.so/11e6e4d21b45807ab475c02430101469)
+	- Révélations progressives sur le passé des 
+- La Prémisse (John Truby)
+
+INTERDITS:
+- **Les barks**
+	**Nature :** Répliques courtes et non-interactives déclenchées par des événements, exprimant les réactions des héroïnes possédées ou les pensées de l'Éthérée
+	**Contexte technique :**
+	
+- **Fondements philosophiques**
+	- **Matérialisme** : Tout est matière, la "magie" est mal comprise
+	- **Déterminisme** : Pas de mérite, seulement causes et conséquences
+	- **Xénophilie** : L'étranger n
+- **Les animations des personnages**
+	**Système directionnel :**
+	- Sprites 8 directions pour personnages jouables (héroïnes possédées)
+	- Sprites 4 directions pour NPCs standard
+	- Orientation automati
+- **Les cinématiques**
+	**Nature :** Scènes d'action, moments dynamiques et rythmés où le rythme est contrôlé par le design
+	**Format visuel :**
+	- Panneaux illustrés plein écran en séquence
+	- Possibil
+- **Le gameplay**
+	**Objectifs joueurs :**
+	1. **Conscience et Moralité** : Faire réfléchir sur l'impact des décisions, dilemmes sans solution idéale
+	2. **Émerveillement et Inquiétude** : Le "laid" peu
+</extracted_rules>
+  </narrative_guides>
 <scene_instructions>Test de vérification du prompt brut</scene_instructions>
 </prompt>
 
