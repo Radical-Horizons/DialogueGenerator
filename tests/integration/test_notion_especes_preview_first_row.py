@@ -26,9 +26,6 @@ from services.gdd_notion_sync_service import GddNotionSyncService
 # ID base « Espèces » — ``data/gdd_notion_sync/settings.json`` (category_file Espèces.json).
 ESPECES_NOTION_DATABASE_ID = "1886e4d2-1b45-81e9-a768-df06185c1aea"
 
-# Première ligne attendue avec le tri par défaut Notion utilisé en prod (80 lignes, la 1ʳᵉ = cette fiche).
-EXPECTED_FIRST_ROW_NOM = "Rêveurs primordiaux"
-
 # Seuil : une vraie section narrative (histoire / apparence / rôle intrigue) doit porter du texte,
 # pas seulement un titre ou une ligne vide (bug sync callouts / blocs).
 _MIN_NARRATIVE_SECTION_CHARS = 180
@@ -147,10 +144,11 @@ def especes_preview_service(tmp_path: Path, notion_api_key: str) -> GddNotionSyn
 async def test_especes_preview_first_row_has_narrative_sections(
     especes_preview_service: GddNotionSyncService,
 ) -> None:
-    """Test « une ligne » Espèces : la première fiche doit exposer du narratif dans ``sections``.
+    """Test « une ligne » Espèces : la première fiche Notion doit exposer du narratif dans ``sections``.
 
-    Échoue si le pipeline Notion → markdown → slugs ne remplit pas au moins une section
-    Histoire / Apparence / Rôle dans l’intrigue (comportement observé en UI avant correctif).
+    On ne fige pas le ``Nom`` attendu : l’ordre de tri Notion peut changer. L’assertion
+    porte sur la présence de sections Histoire / Apparence / Rôle dans l’intrigue avec
+    assez de corps (comportement observé en UI avant correctif sync callouts).
     """
     raw = await especes_preview_service.preview_database_first_row(
         category_file="Espèces.json",
@@ -162,15 +160,12 @@ async def test_especes_preview_first_row_has_narrative_sections(
     rec = raw.get("mapped_record")
     assert isinstance(rec, dict), "mapped_record manquant."
     nom = str(rec.get("Nom") or "").strip()
-    assert nom == EXPECTED_FIRST_ROW_NOM, (
-        f"La première ligne de la base n’est plus « {EXPECTED_FIRST_ROW_NOM} » mais « {nom} » ; "
-        "l’ordre de tri Notion a peut‑être changé — mettre à jour EXPECTED_FIRST_ROW_NOM ou la requête."
-    )
+    assert nom, "La première ligne de la base Espèces doit avoir un champ Nom non vide."
 
     max_len, slug, title = _max_narrative_body_len(rec)
     assert max_len >= _MIN_NARRATIVE_SECTION_CHARS, (
-        f"Aucune section narrative (Histoire / Apparence / Rôle intrigue) n’a au moins "
-        f"{_MIN_NARRATIVE_SECTION_CHARS} caractères : max observé = {max_len} "
+        f"Fiche « {nom} » : aucune section narrative (Histoire / Apparence / Rôle intrigue) "
+        f"n’a au moins {_MIN_NARRATIVE_SECTION_CHARS} caractères : max observé = {max_len} "
         f"(slug={slug!r}, titre={title!r}). "
         "Cela correspond au bug de sync (callouts sans enfants côté API ou titres sans corps)."
     )

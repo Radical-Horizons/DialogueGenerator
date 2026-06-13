@@ -32,7 +32,7 @@ Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 
 - Prefer **tools over guessing**: search the repo, read callers, open MCP tool descriptors before calling, run commands that **prove** the change (pytest/Vitest ciblé, lint). « Plus petit test utile » = preuve, pas excuse pour éviter une étape de processus requise.
 - **UI / flux utilisateur** : une preuve complète exige aussi **`npm run dev` + vérification dans le navigateur** (pas seulement les tests). Voir `.cursor/rules/workflow.mdc` (section **Preuve UI**).
-- **Run tests, do not only suggest them**: in Agent mode, **execute** the relevant pytest/Vitest/lint commands and report outcomes; do not claim “done” or “green” without command output. Full policy: `.cursor/rules/workflow.mdc` (obligation agents — exécution réelle des tests). **Which command (T0–T3)** : `.cursor/commands/test-tiers.md` and `.cursor/skills/test-runbook.md`.
+- **Run tests, do not only suggest them**: in Agent mode, **execute** the relevant pytest/Vitest/lint commands and report outcomes; do not claim “done” or “green” without command output. When the user asks to **fix a test** (including a CI failure), **re-run that test after the fix** and show pass/fail proof before concluding. Full policy: `.cursor/rules/workflow.mdc` (obligation agents — exécution réelle des tests, section « Correction de tests »). **Which command (T0–T3)** : `.cursor/commands/test-tiers.md` and `.cursor/skills/test-runbook.md`.
 - **Real environment**: you can execute shell commands and network fetches; use them instead of dumping long “you should run…” lists when the task is to verify or fix.
 
 ### Non-obvious caveats
