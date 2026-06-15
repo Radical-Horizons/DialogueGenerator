@@ -16,7 +16,7 @@
 
 En dessous de 1024px, les tailles de colonnes sauvegardées dans `localStorage` sont normalisées pour éviter un layout illisible.
 
-**Détail technique** (seuils conteneur, toolbar graphe tri-state, PWA, tests) : [`docs/architecture/responsive-ui.md`](../architecture/responsive-ui.md).
+**Détail technique** (seuils conteneur, toolbar graphe narrow/confortable, PWA, tests) : [`docs/architecture/responsive-ui.md`](../architecture/responsive-ui.md).
 
 ---
 

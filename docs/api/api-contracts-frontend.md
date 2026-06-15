@@ -83,6 +83,16 @@ Unity dialogue file management:
 - `saveUnityDialogue(data)`: Create/update file
 - `deleteUnityDialogue(filename)`: Delete file
 
+### `documents.ts`
+Canonical document API (optimistic locking, Epic 9 preview):
+- `getDocument(documentId)`: Load document + `schemaVersion` + `revision`
+- `putDocument(documentId, body)`: Persist document (`validationMode`: `draft` \| `export`)
+- `getLayout(documentId)`: Load layout sidecar + `revision`
+- `putLayout(documentId, body)`: Persist layout sidecar
+- `postDocumentPreview(documentId, body)`: Simulate visibility for flag/reputation/game-systems state
+
+Uses `API_TIMEOUTS.DOCUMENT_IO` for I/O-heavy calls. Types: `frontend/src/types/documents.ts`.
+
 ### `llmUsage.ts`
 LLM usage tracking:
 - `getUsageStats(startDate?, endDate?)`: Get usage statistics

@@ -264,7 +264,7 @@ Components are organized by feature domain:
 
 The shell adapts below **1024px** viewport width (overlay drawers instead of fixed side columns) and individual panels/toolbars adapt to **container width** via `useNarrowInlineSize` and tokens in `frontend/src/theme/responsiveChrome.ts`.
 
-**Full reference**: [Responsive UI and PWA](./responsive-ui.md) — thresholds, `Dashboard` narrow mode, graph toolbar tri-state, PWA manifest/workbox, tests, and pitfalls.
+**Full reference**: [Responsive UI and PWA](./responsive-ui.md) — thresholds, `Dashboard` narrow mode, graph toolbar narrow/comfortable (640px), PWA manifest/workbox, tests, and pitfalls.
 
 **Key hooks:**
 

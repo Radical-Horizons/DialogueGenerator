@@ -163,6 +163,31 @@ Veuillez définir une clé secrète sécurisée dans .env ou les variables d'env
 - **Pas de blacklist** : Les tokens ne peuvent pas être révoqués avant expiration
 - **Pas de gestion de sessions** : Pas de suivi des sessions actives
 
+## Limites anti-DoS (Epic 9)
+
+Les endpoints de preview et validation document bornent la taille des payloads **authentifiés** pour éviter un abus CPU/mémoire. Constantes dans `services/dialogue_preview_limits.py` :
+
+| Limite | Valeur | Endpoint / champ |
+|--------|--------|------------------|
+| `MAX_PREVIEW_FLAG_STATES` | 512 | `POST /documents/{id}/preview` → `flag_states` |
+| `MAX_PREVIEW_REPUTATION_STATES` | 256 | `preview` → `reputation_states` |
+| `MAX_PREVIEW_GAME_SYSTEMS_ATTRIBUTES` | 64 | `preview` → `game_systems_state.attributes` |
+| `MAX_PREVIEW_GAME_SYSTEMS_SKILLS` | 128 | `preview` → `game_systems_state.skills` |
+| `MAX_PREVIEW_GAME_SYSTEMS_REPUTATION_VALUES` | 256 | `preview` → `game_systems_state.reputation_values` |
+| `MAX_PREVIEW_GAME_SYSTEMS_FACTION_TITLES` | 64 | `preview` → `game_systems_state.faction_titles` |
+| `MAX_VALIDATE_FLAG_REFERENCES_INLINE_NODES` | 5000 | `POST /documents/{id}/validate-flag-references` → `document.nodes` |
+
+Dépassement → `422` (validation Pydantic) avant exécution métier.
+
+## Réponses d'erreur en production
+
+Quand `ENVIRONMENT=production` :
+
+- Les handlers globaux (`api/main.py`) **n'exposent pas** les détails internes des exceptions non gérées (`INTERNAL_ERROR`, type/message Python).
+- Les `APIException` avec code `INTERNAL_ERROR` ont leur champ `details` vidé.
+
+En développement, les détails restent visibles pour le diagnostic. Voir aussi [API Contracts — Error Handling](../api/api-contracts-api.md).
+
 ## Évolutions futures
 
 - Migration vers une base de données pour les utilisateurs

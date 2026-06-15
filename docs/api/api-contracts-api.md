@@ -543,6 +543,137 @@ All routes require JWT (`Authorization: Bearer <token>`). Schémas : `api/schema
 
 ---
 
+## Document Endpoints (`/api/v1/documents`)
+
+Canonical Unity dialogue documents with optimistic locking (`revision` in sidecar `.meta` files). Layout sidecars live under `Assets/Layouts/` (separate from dialogue JSON in `Assets/Dialogue/`). Implementation: `api/routers/documents.py`, client `frontend/src/api/documents.ts`.
+
+### GET `/documents/check-migration`
+
+Lists v1.1.0 documents missing `choiceId` on at least one choice (CI / pre-commit gate).
+
+**Response:** `CheckMigrationResponse` — `{ "needsMigration": [{ "documentId", "path" }] }`
+
+### GET `/documents/{document_id}`
+
+Load persisted document with `schemaVersion` and `revision`.
+
+**Response:** `DocumentGetResponse` — `{ document, schemaVersion, revision }`
+
+**Errors:** `404` if missing; `400` (`missing_choice_id`) if v1.1.0 document has choices without `choiceId` (except legacy list format normalized on read).
+
+### PUT `/documents/{document_id}`
+
+Validate and persist document. Optimistic locking via `revision` in body.
+
+**Request Body:** `PutDocumentRequest` — `{ document, revision, validationMode? }` where `validationMode` is `draft` (default, non-blocking validation) or `export` (blocking).
+
+**Headers (optional):** `X-Validation-Mode` overrides body `validationMode`.
+
+**Response:** `PutDocumentResponse` — `{ revision, validationReport, flagThresholdWarnings? }`
+
+**Errors:** `409` with current `DocumentGetResponse` if revision stale; `400` (`GRAPH_PAYLOAD_NOT_ACCEPTED`) if legacy `nodes`+`edges` payload without `schemaVersion`.
+
+### DELETE `/documents/{document_id}`
+
+Delete document and associated layout/meta sidecars.
+
+**Response:** `204 No Content`
+
+### GET `/documents/{document_id}/layout`
+
+Load graph layout sidecar (positions, viewport).
+
+**Response:** `LayoutGetResponse` — `{ layout, revision }`
+
+**Errors:** `404` if document or layout missing.
+
+### PUT `/documents/{document_id}/layout`
+
+Persist layout with optimistic locking.
+
+**Request Body:** `PutLayoutRequest` — `{ layout, revision }`
+
+**Response:** `PutLayoutResponse` — `{ revision }`
+
+**Errors:** `409` with current `LayoutGetResponse` if revision stale.
+
+### POST `/documents/{document_id}/preview`
+
+Evaluate node/choice visibility for a simulated game state (Epic 9 — stories 9.4 / 9.6, FR92 / FR94). Reads the **persisted** document from disk (not an inline body).
+
+**Request Body:** `DialoguePreviewRequest`
+
+```json
+{
+  "revision": 3,
+  "flag_states": { "quest_started": true },
+  "reputation_states": { "faction_a": 0.5 },
+  "game_systems_state": {
+    "attributes": {},
+    "skills": {},
+    "effort_pool": 10,
+    "reputation_values": {},
+    "faction_titles": {}
+  }
+}
+```
+
+| Field | Role |
+|-------|------|
+| `revision` | Optional optimistic check; must match stored revision or `409 revision_stale` |
+| `flag_states` | Simulated dialogue flags (max **512** keys) |
+| `reputation_states` | Simulated reputation values (max **256** keys) |
+| `game_systems_state` | FR94 stats overlay — attributes (64), skills (128), reputation_values (256), faction_titles (64) |
+
+Oversized maps return `422` validation error at parse time (`services/dialogue_preview_limits.py`).
+
+**Response:** `DialoguePreviewResponse`
+
+```json
+{
+  "revision": 3,
+  "nodes_total": 12,
+  "nodes_masked": 2,
+  "choices_total": 8,
+  "choices_masked": 1,
+  "masked_node_ids": ["node_3"],
+  "masked_choice_refs": [{ "node_id": "node_1", "choice_id": "c2" }],
+  "game_systems_state": { "...": "echo of request" },
+  "simulation_limits": ["Agrégat communautaire simulé localement : ..."],
+  "visibility_warnings": ["nodes[n1].visibilityConditions: ..."]
+}
+```
+
+| Field | Role |
+|-------|------|
+| `masked_*` | Nodes/choices hidden by unsatisfied visibility conditions |
+| `simulation_limits` | Non-blocking FR94 caveats (e.g. community aggregate keys) |
+| `visibility_warnings` | Invalid visibility DSL treated as always visible in preview |
+
+**Errors:** `404` document missing; `409` if `revision` in body ≠ stored revision.
+
+### POST `/documents/{document_id}/validate-flag-references`
+
+Validate flag references against `dialogueFlags` (Epic 9 — story 9.5, FR93).
+
+**Request Body (optional):** `ValidateFlagReferencesRequest` — `{ document? }`. If `document` omitted, reads from storage. Inline `document.nodes` capped at **5000** nodes.
+
+**Response:** `ValidateFlagReferencesResponse` — `{ valid, summary, used_flag_count, errors[], warnings[] }`
+
+---
+
+## Game Systems Integration (`/api/v1/mechanics/systems`)
+
+### GET `/mechanics/systems/integration`
+
+Catalog of game-system families (attributes/skills, effort, reputation) and runtime connection status for the FR94 integration panel.
+
+**Response:** `GameSystemsIntegrationCatalogResponse` — `{ families[], runtime_source }`
+
+Implementation: `api/routers/mechanics_systems.py`, `services/game_systems_integration_service.py`.
+
+---
+
 ## Unity Dialogues Endpoints (`/api/v1/unity-dialogues`)
 
 ### GET `/unity-dialogues`

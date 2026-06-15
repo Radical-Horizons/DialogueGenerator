@@ -40,6 +40,7 @@ Located in `[architecture/](./architecture/)`
 
 - [Frontend Architecture](./architecture/architecture-frontend.md) - React application architecture
 - [Responsive UI & PWA (Epic 17)](./architecture/responsive-ui.md) - Viewport vs container breakpoints, drawers, graph toolbar, PWA installability
+- [API Contracts — Documents](./api/api-contracts-api.md#document-endpoints-apiv1documents) - Canonical documents, preview simulation (Epic 9), optimistic locking
 - [Backend Architecture](./architecture/architecture-api.md) - FastAPI API architecture
 - [Integration Architecture](./architecture/integration-architecture.md) - Frontend-Backend integration
 - [State Management](./architecture/state-management-frontend.md) - Zustand stores and patterns
