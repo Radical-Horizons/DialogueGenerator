@@ -93,7 +93,7 @@ description: Structure et bonnes pratiques pour les tests pytest
 ## Maintenance
 
 - **Test manquant** : Si un composant/service/endpoint n'a pas de test, le créer immédiatement
-- **Test cassé** : Corriger avant de continuer. Ne pas skip sauf raison documentée
+- **Test cassé** : Corriger avant de continuer. Ne pas skip sauf raison documentée. **Preuve obligatoire** : après toute correction demandée par l’utilisateur (y compris échec CI), **relancer** le test ou la spec touchée et ne pas conclure sans sortie pass/fail — voir `.cursor/rules/workflow.mdc` (section « Correction de tests »).
 - **Refactoring** : Mettre à jour les tests en même temps que le code
 - **Nouvelle fonctionnalité** : Tests requis pour validation, edge cases, erreurs
 - **Couverture** : Viser >80% pour code critique (services, API)

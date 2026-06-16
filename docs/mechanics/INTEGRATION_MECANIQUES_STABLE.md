@@ -1,5 +1,7 @@
 # Intégration mécaniques RPG - Analyse factuelle de ce qui peut être fait de manière stable
 
+> **Périmètre : couche prompt LLM** — Ce document analyse l'injection de traits/compétences dans les **prompts de génération** (`PromptEngine`, catalogues CSV). Ce n'est **pas** la spécification de l'intégration runtime FR94 (skill checks, Effort, Réputation v3, preview scénario). Pour le comportement livré dans l'éditeur de graphe, voir [`docs/guides/game-systems-integration.md`](../guides/game-systems-integration.md) (référence = code + tests).
+
 ## Objectif
 
 Déterminer factuellement ce qui peut être intégré dans le système de génération de dialogues sans risquer de gêner le LLM ou d'avoir un système instable.

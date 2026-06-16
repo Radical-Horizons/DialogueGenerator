@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://alteir.game/dialogue-format.schema.json",
   "title": "Alteir Dialogue JSON Format",
-  "description": "Format JSON pour les dialogues du jeu Alteir. v1.2.0 : id = identifiant stable unique non éditable (préfixe node- ou manual- + alphanum/tirets/underscores). title = libellé éditable. Pseudo-nœud END : seule exception, nœud virtuel de fin ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes.",
+  "description": "Format JSON pour les dialogues du jeu Alteir. v1.2.0 : id = identifiant stable unique non éditable (préfixe node- ou manual- + alphanum/tirets/underscores). title = libellé éditable. Pseudo-nœud END : seule exception, nœud virtuel de fin ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes. FR94 (Story 9.6) : skillCheck, effortCost, reputation_fr94, reputation_delta_fr94, faction_title — aligné sur frontend/src/types et services/game_systems_*.py. Source canonique : docs/resources/ ; copie miroir docs/JsonDocUnity/Documentation/.",
   "version": "1.2.0",
   "type": "object",
   "required": ["schemaVersion", "nodes"],
@@ -35,7 +35,9 @@
         { "$ref": "#/definitions/FlagBoolCondition" },
         { "$ref": "#/definitions/FlagCounterCondition" },
         { "$ref": "#/definitions/FlagEnumCondition" },
-        { "$ref": "#/definitions/ReputationCondition" }
+        { "$ref": "#/definitions/ReputationCondition" },
+        { "$ref": "#/definitions/ReputationConditionFr94" },
+        { "$ref": "#/definitions/FactionTitleCondition" }
       ]
     },
     "FlagBoolCondition": {
@@ -82,6 +84,80 @@
       },
       "additionalProperties": false
     },
+    "ReputationAxisFr94": {
+      "type": "string",
+      "enum": ["Admiration", "Prestige", "Crainte"]
+    },
+    "ReputationTargetKindFr94": {
+      "type": "string",
+      "enum": ["heroine", "npc", "community"]
+    },
+    "ReputationReadModeFr94": {
+      "type": "string",
+      "enum": ["raw_npc", "final_npc", "community_calculated"]
+    },
+    "SocialTargetFr94": {
+      "type": "object",
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "$ref": "#/definitions/ReputationTargetKindFr94" },
+        "id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "ReputationConditionFr94": {
+      "type": "object",
+      "description": "Condition Réputation FR94 — cible sociale et mode de lecture explicites.",
+      "required": ["kind", "heroineId", "target", "axis", "readMode", "operator", "threshold"],
+      "properties": {
+        "kind": { "const": "reputation_fr94" },
+        "heroineId": { "type": "string", "minLength": 1 },
+        "target": { "$ref": "#/definitions/SocialTargetFr94" },
+        "axis": { "$ref": "#/definitions/ReputationAxisFr94" },
+        "readMode": { "$ref": "#/definitions/ReputationReadModeFr94" },
+        "operator": { "$ref": "#/definitions/ComparisonOperator" },
+        "threshold": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "FactionTitleCondition": {
+      "type": "object",
+      "description": "Condition titre de faction — flag one-way ou catalogue titres.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "faction_title" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "titleId": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["flagId"] },
+        { "required": ["titleId"] }
+      ]
+    },
+    "SkillCheckIssue": {
+      "type": "string",
+      "enum": ["succès_critique", "succès", "échec", "échec_critique"]
+    },
+    "SkillCheckDefinition": {
+      "type": "object",
+      "description": "Test tentable caractéristique + compétence vs DD (FR94).",
+      "required": ["attributeId", "skillId", "dc"],
+      "properties": {
+        "attributeId": { "type": "string", "minLength": 1 },
+        "attributeLabel": { "type": "string" },
+        "skillId": { "type": "string", "minLength": 1 },
+        "skillLabel": { "type": "string" },
+        "dc": { "type": "integer" },
+        "modifier": { "type": "integer", "default": 0 },
+        "branches": {
+          "type": "object",
+          "description": "Routage par issue vers targetNode.",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
     "CounterAdjustOperator": {
       "type": "string",
       "enum": ["=", "+=", "-="],
@@ -92,7 +168,8 @@
         { "$ref": "#/definitions/SetBoolEffect" },
         { "$ref": "#/definitions/AdjustCounterEffect" },
         { "$ref": "#/definitions/SetEnumEffect" },
-        { "$ref": "#/definitions/ReputationDeltaEffect" }
+        { "$ref": "#/definitions/ReputationDeltaEffect" },
+        { "$ref": "#/definitions/ReputationDeltaEffectFr94" }
       ]
     },
     "SetBoolEffect": {
@@ -133,6 +210,19 @@
         "kind": { "const": "reputation_delta" },
         "axisId": { "type": "string", "minLength": 1 },
         "factionId": { "type": "string", "minLength": 1 },
+        "delta": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "ReputationDeltaEffectFr94": {
+      "type": "object",
+      "description": "Delta Réputation FR94 avec cible sociale explicite.",
+      "required": ["kind", "heroineId", "target", "axis", "delta"],
+      "properties": {
+        "kind": { "const": "reputation_delta_fr94" },
+        "heroineId": { "type": "string", "minLength": 1 },
+        "target": { "$ref": "#/definitions/SocialTargetFr94" },
+        "axis": { "$ref": "#/definitions/ReputationAxisFr94" },
         "delta": { "type": "number" }
       },
       "additionalProperties": false
@@ -266,6 +356,15 @@
                   "type": "array",
                   "description": "Story 9.3 — effets catalogue (flags + réputation) déclenchés à la sélection ; l'ordre dans le tableau est persisté.",
                   "items": { "$ref": "#/definitions/ChoiceEffectAtom" }
+                },
+                "effortCost": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "FR94 — coût en Points d'Effort (PE) ; grisé en preview si pool simulé insuffisant."
+                },
+                "skillCheck": {
+                  "$ref": "#/definitions/SkillCheckDefinition",
+                  "description": "FR94 — test tentable ; choix toujours visible, routage par issue."
                 }
               }
             }

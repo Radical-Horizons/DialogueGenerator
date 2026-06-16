@@ -217,10 +217,7 @@ describe('FR119 touch targets — chrome', () => {
     expectInlineMinTouch(screen.getByTestId('btn-undo'), 'graph toolbar Undo')
     expectInlineMinTouch(screen.getByTestId('btn-actions-dropdown'), 'graph toolbar Actions')
     expectInlineMinTouch(screen.getByTestId('btn-search-graph'), 'graph toolbar Rechercher')
-    const costBtn = screen
-      .getByTitle('Afficher le breakdown des coûts LLM pour ce dialogue')
-      .closest('button') as HTMLElement
-    expectInlineMinTouch(costBtn, 'graph toolbar Coûts')
+    expectInlineMinTouch(screen.getByTestId('btn-quality-dropdown'), 'graph toolbar Qualités')
     const shortcutsBtn = screen.getByTitle('Raccourcis du graphe').closest('button') as HTMLElement
     expect(shortcutsBtn.style.minHeight).toBe(`${TOUCH_TARGET_MIN_PX}px`)
     expect(shortcutsBtn.style.minWidth).toBe(`${TOUCH_TARGET_MIN_PX}px`)
@@ -261,10 +258,11 @@ describe('FR119 touch targets — chrome', () => {
       'graph toolbar Rechercher (narrow)',
       expectedNarrowMin
     )
-    const costBtn = screen
-      .getByTitle('Afficher le breakdown des coûts LLM pour ce dialogue')
-      .closest('button') as HTMLElement
-    expectInlineMinTouchPx(costBtn, 'graph toolbar Coûts (narrow)', expectedNarrowMin)
+    expectInlineMinTouchPx(
+      screen.getByTestId('btn-quality-dropdown'),
+      'graph toolbar Qualités (narrow)',
+      expectedNarrowMin
+    )
     const shortcutsBtn = screen.getByTitle('Raccourcis du graphe').closest('button') as HTMLElement
     expect(shortcutsBtn.style.minHeight).toBe(`${expectedNarrowMin}px`)
     expect(shortcutsBtn.style.minWidth).toBe(`${expectedNarrowMin}px`)

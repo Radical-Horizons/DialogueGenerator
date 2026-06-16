@@ -8,6 +8,8 @@ from api.utils.notion_cache import get_notion_cache
 
 logger = logging.getLogger(__name__)
 
+_VOCABULARY_CACHE_MISS_LOGGED = False
+
 # Ordre de popularité (du plus au moins populaire)
 # Valeurs réelles depuis Notion : Mondialement, Régionalement, Localement, Communautaire, Occulte
 POPULARITY_ORDER = {
@@ -60,7 +62,13 @@ class VocabularyService:
         vocabulary_data = cache.get("vocabulary")
         
         if vocabulary_data is None:
-            logger.warning("Vocabulaire non trouvé dans le cache. Synchronisation nécessaire.")
+            global _VOCABULARY_CACHE_MISS_LOGGED
+            if not _VOCABULARY_CACHE_MISS_LOGGED:
+                logger.info(
+                    "Vocabulaire non trouvé dans le cache Notion (sync optionnelle). "
+                    "Les requêtes suivantes n'afficheront plus ce message."
+                )
+                _VOCABULARY_CACHE_MISS_LOGGED = True
             return []
         
         terms = vocabulary_data.get("terms", [])

@@ -35,7 +35,13 @@ class APIException(HTTPException):
         self.request_id = request_id
         
         super().__init__(status_code=status_code, detail=message)
-        logger.error(f"APIException [{code}]: {message} (request_id: {request_id})")
+        log_msg = f"APIException [{code}]: {message} (request_id: {request_id})"
+        if status_code >= 500:
+            logger.error(log_msg)
+        elif status_code >= 400:
+            logger.warning(log_msg)
+        else:
+            logger.info(log_msg)
         
         # Envoyer à Sentry si disponible (seulement pour les erreurs 500+)
         if status_code >= 500:

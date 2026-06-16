@@ -194,11 +194,11 @@ describe('useDialogueLoader', () => {
   })
 
   it('dispatches unity-dialogue-deleted and clears dialogue when matching', async () => {
-    const loadDialogueMock = vi.fn().mockResolvedValue(undefined)
+    const loadDialogueByDocumentIdMock = vi.fn().mockResolvedValue(undefined)
     const validateGraphMock = vi.fn().mockResolvedValue(undefined)
     const resetGraphMock = vi.fn()
     useGraphStore.setState({
-      loadDialogue: loadDialogueMock,
+      loadDialogueByDocumentId: loadDialogueByDocumentIdMock,
       validateGraph: validateGraphMock,
       resetGraph: resetGraphMock,
     })

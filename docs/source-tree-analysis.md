@@ -39,6 +39,7 @@ DialogueGenerator/
 │   ├── repositories/     # Data access abstractions
 │   ├── json_renderer/    # Unity JSON rendering
 │   ├── context_serializer/ # Context serialization
+│   ├── game_systems_*.py # FR94 pure evaluators (skill checks, effort, reputation, social diagnostics)
 │   └── [service files]   # Various business services
 │
 ├── models/                # Data models
@@ -91,6 +92,8 @@ DialogueGenerator/
 - `vocabulary.py`: Vocabulary endpoints
 - `narrative_guides.py`: Narrative guides endpoints
 - `mechanics_flags.py`: Game mechanics flags endpoints
+- `mechanics_systems.py`: FR94 game systems integration catalogue
+- `documents.py`: Canonical documents CRUD, preview, validation
 - `unity_dialogues.py`: Unity dialogue file management
 - `llm_usage.py`: LLM usage tracking
 - `logs.py`: Logging endpoints
@@ -133,6 +136,8 @@ DialogueGenerator/
 - `config.ts`: Configuration API calls
 - `vocabulary.ts`: Vocabulary API calls
 - `flags.ts`: Game flags API calls
+- `gameSystemsIntegration.ts`: FR94 catalogue API
+- `documents.ts`: Document CRUD and preview API
 - `narrativeGuides.ts`: Narrative guides API calls
 - `unityDialogues.ts`: Unity dialogue file API calls
 - `llmUsage.ts`: LLM usage API calls
@@ -169,7 +174,15 @@ DialogueGenerator/
 - `generation.ts`: Generation types
 - `graph.ts`: Graph editor types
 - `flags.ts`: Game flags types
+- `gameSystemsIntegration.ts`: FR94 catalogue types
+- `visibilityConditions.ts`, `choiceEffects.ts`, `documents.ts`: FR94 conditions/effects/preview
 - `errors.ts`: Error types
+
+### `frontend/src/utils/` (FR94 evaluators)
+- `skillChecks.ts`, `effortPreview.ts`, `reputationFr94.ts`, `socialDiagnostics.ts`, `previewSimulationLimits.ts`: Mirror backend `services/game_systems_*.py`
+
+### `frontend/src/components/graph/systems/`
+- `GameSystemsIntegrationPanel.tsx`: FR94 catalogue side panel
 
 ### `frontend/src/hooks/`
 **Purpose**: Custom React hooks

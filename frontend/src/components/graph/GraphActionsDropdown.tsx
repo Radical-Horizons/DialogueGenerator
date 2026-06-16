@@ -14,10 +14,16 @@ export interface GraphActionsDropdownProps {
   buttonFontSizeRem: number
   groupGapRem: number
   actionsDropdownRef: React.RefObject<HTMLDivElement>
-  actionsDropdownBtnRef: React.RefObject<HTMLButtonElement>
+  actionsDropdownBtnRef?: React.RefObject<HTMLButtonElement>
   showActionsDropdown: boolean
   setShowActionsDropdown: (next: boolean | ((v: boolean) => boolean)) => void
   renderMenuItems: () => React.ReactNode
+  /** Libellé du déclencheur (défaut : Actions). */
+  dropdownLabel?: string
+  /** data-testid du déclencheur. */
+  dropdownTestId?: string
+  /** title / aria-label du déclencheur. */
+  dropdownTitle?: string
 }
 
 export const GraphActionsDropdown = memo(function GraphActionsDropdown({
@@ -31,6 +37,9 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
   showActionsDropdown,
   setShowActionsDropdown,
   renderMenuItems,
+  dropdownLabel = 'Actions',
+  dropdownTestId = 'btn-actions-dropdown',
+  dropdownTitle = 'Actions sur le graphe',
 }: GraphActionsDropdownProps) {
   return (
     <div
@@ -43,9 +52,9 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
     >
       <button
         ref={actionsDropdownBtnRef}
-        data-testid="btn-actions-dropdown"
+        data-testid={dropdownTestId}
         type="button"
-        aria-label="Actions"
+        aria-label={dropdownLabel}
         aria-haspopup="menu"
         aria-expanded={showActionsDropdown}
         onClick={() => canEditGraph && setShowActionsDropdown((v) => !v)}
@@ -64,9 +73,9 @@ export const GraphActionsDropdown = memo(function GraphActionsDropdown({
           alignItems: 'center',
           gap: '0.35rem',
         }}
-        title="Actions sur le graphe"
+        title={dropdownTitle}
       >
-        {isNarrow ? '⋯' : 'Actions'}
+        {isNarrow ? '⋯' : dropdownLabel}
         {!isNarrow && <span style={{ fontSize: '0.7rem' }}>▼</span>}
       </button>
 

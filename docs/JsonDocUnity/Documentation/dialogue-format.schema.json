@@ -2,335 +2,422 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://alteir.game/dialogue-format.schema.json",
   "title": "Alteir Dialogue JSON Format",
-  "description": "Format JSON pour les dialogues du jeu Alteir. Format racine : tableau de nœuds.",
-  "version": "1.0.0",
-  "type": "array",
-  "items": {
-    "type": "object",
-    "title": "Dialogue Node",
-    "description": "Un nœud de dialogue représentant une ligne de dialogue ou un point de décision.",
-    "required": [
-      "id"
-    ],
-    "properties": {
-      "id": {
-        "type": "string",
-        "description": "Identifiant unique du nœud (SCREAMING_SNAKE_CASE). Obligatoire. Exemples : START, END, NODE_NAME, NODE_SUCCESS, NODE_FAILURE.",
-        "pattern": "^[A-Z][A-Z0-9_]*$",
-        "examples": [
-          "START",
-          "END",
-          "GREETING",
-          "CHOICE_1_SUCCESS"
-        ]
-      },
-      "speaker": {
-        "type": "string",
-        "description": "ID du personnage qui parle (CHARACTER_ID). Optionnel mais recommandé.",
-        "examples": [
-          "NPC_1",
-          "Player",
-          "Narrator"
-        ]
-      },
-      "line": {
-        "type": "string",
-        "description": "Texte du dialogue à afficher. Optionnel mais recommandé.",
-        "examples": [
-          "Bonjour, voyageur !",
-          "Que voulez-vous ?"
-        ]
-      },
-      "nextNode": {
-        "type": "string",
-        "description": "ID du nœud suivant (si pas de choix). Ignoré si choices est présent.",
-        "examples": [
-          "NEXT_NODE",
-          "END"
-        ]
-      },
-      "choices": {
-        "type": "array",
-        "description": "Liste des choix disponibles pour ce nœud. Si présent, nextNode est ignoré. En mode cutscene (cutsceneMode: true), maximum 4 choix.",
+  "description": "Format JSON pour les dialogues du jeu Alteir. v1.2.0 : id = identifiant stable unique non éditable (préfixe node- ou manual- + alphanum/tirets/underscores). title = libellé éditable. Pseudo-nœud END : seule exception, nœud virtuel de fin ; si référencé (nextNode ou targetNode = \"END\"), il n'a pas besoin d'être présent dans nodes. FR94 (Story 9.6) : skillCheck, effortCost, reputation_fr94, reputation_delta_fr94, faction_title — aligné sur frontend/src/types et services/game_systems_*.py. Source canonique : docs/resources/ ; copie miroir docs/JsonDocUnity/Documentation/.",
+  "version": "1.2.0",
+  "type": "object",
+  "required": ["schemaVersion", "nodes"],
+  "definitions": {
+    "VisibilityCombinator": {
+      "type": "string",
+      "enum": ["AND", "OR"],
+      "description": "Combinaison logique entre les conditions atomiques du bloc."
+    },
+    "ComparisonOperator": {
+      "type": "string",
+      "enum": ["=", "!=", ">=", "<=", ">", "<"]
+    },
+    "VisibilityConditions": {
+      "type": "object",
+      "description": "Bloc de conditions de visibilité (Story 9.2) — AND/OR plat sur une liste d'atomes.",
+      "required": ["combinator", "items"],
+      "properties": {
+        "combinator": { "$ref": "#/definitions/VisibilityCombinator" },
         "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/ConditionAtom" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConditionAtom": {
+      "oneOf": [
+        { "$ref": "#/definitions/FlagBoolCondition" },
+        { "$ref": "#/definitions/FlagCounterCondition" },
+        { "$ref": "#/definitions/FlagEnumCondition" },
+        { "$ref": "#/definitions/ReputationCondition" },
+        { "$ref": "#/definitions/ReputationConditionFr94" },
+        { "$ref": "#/definitions/FactionTitleCondition" }
+      ]
+    },
+    "FlagBoolCondition": {
+      "type": "object",
+      "required": ["kind", "flagId", "equals"],
+      "properties": {
+        "kind": { "const": "flag_bool" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "equals": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "FlagCounterCondition": {
+      "type": "object",
+      "required": ["kind", "flagId", "operator", "value"],
+      "properties": {
+        "kind": { "const": "flag_counter" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "operator": { "$ref": "#/definitions/ComparisonOperator" },
+        "value": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "FlagEnumCondition": {
+      "type": "object",
+      "required": ["kind", "flagId", "operator", "value"],
+      "properties": {
+        "kind": { "const": "flag_enum" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "operator": { "type": "string", "enum": ["=", "!="] },
+        "value": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "ReputationCondition": {
+      "type": "object",
+      "required": ["kind", "axisId", "factionId", "operator", "threshold"],
+      "properties": {
+        "kind": { "const": "reputation" },
+        "axisId": { "type": "string", "minLength": 1 },
+        "factionId": { "type": "string", "minLength": 1 },
+        "operator": { "$ref": "#/definitions/ComparisonOperator" },
+        "threshold": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "ReputationAxisFr94": {
+      "type": "string",
+      "enum": ["Admiration", "Prestige", "Crainte"]
+    },
+    "ReputationTargetKindFr94": {
+      "type": "string",
+      "enum": ["heroine", "npc", "community"]
+    },
+    "ReputationReadModeFr94": {
+      "type": "string",
+      "enum": ["raw_npc", "final_npc", "community_calculated"]
+    },
+    "SocialTargetFr94": {
+      "type": "object",
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "$ref": "#/definitions/ReputationTargetKindFr94" },
+        "id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "ReputationConditionFr94": {
+      "type": "object",
+      "description": "Condition Réputation FR94 — cible sociale et mode de lecture explicites.",
+      "required": ["kind", "heroineId", "target", "axis", "readMode", "operator", "threshold"],
+      "properties": {
+        "kind": { "const": "reputation_fr94" },
+        "heroineId": { "type": "string", "minLength": 1 },
+        "target": { "$ref": "#/definitions/SocialTargetFr94" },
+        "axis": { "$ref": "#/definitions/ReputationAxisFr94" },
+        "readMode": { "$ref": "#/definitions/ReputationReadModeFr94" },
+        "operator": { "$ref": "#/definitions/ComparisonOperator" },
+        "threshold": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "FactionTitleCondition": {
+      "type": "object",
+      "description": "Condition titre de faction — flag one-way ou catalogue titres.",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "faction_title" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "titleId": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["flagId"] },
+        { "required": ["titleId"] }
+      ]
+    },
+    "SkillCheckIssue": {
+      "type": "string",
+      "enum": ["succès_critique", "succès", "échec", "échec_critique"]
+    },
+    "SkillCheckDefinition": {
+      "type": "object",
+      "description": "Test tentable caractéristique + compétence vs DD (FR94).",
+      "required": ["attributeId", "skillId", "dc"],
+      "properties": {
+        "attributeId": { "type": "string", "minLength": 1 },
+        "attributeLabel": { "type": "string" },
+        "skillId": { "type": "string", "minLength": 1 },
+        "skillLabel": { "type": "string" },
+        "dc": { "type": "integer" },
+        "modifier": { "type": "integer", "default": 0 },
+        "branches": {
           "type": "object",
-          "title": "Dialogue Choice",
-          "description": "Un choix disponible dans un nœud de dialogue.",
-          "required": [
-            "text",
-            "targetNode"
-          ],
-          "properties": {
-            "text": {
-              "type": "string",
-              "description": "Texte du choix affiché au joueur. Obligatoire.",
-              "examples": [
-                "Accepter",
-                "Refuser",
-                "(Partir)"
-              ]
-            },
-            "targetNode": {
-              "type": "string",
-              "description": "ID du nœud cible lorsque ce choix est sélectionné. Obligatoire.",
-              "examples": [
-                "ACCEPT",
-                "REFUSE",
-                "END"
-              ]
-            },
-            "traitRequirements": {
-              "type": "array",
-              "description": "Liste des exigences de traits pour débloquer ce choix. Optionnel.",
-              "items": {
-                "type": "object",
-                "title": "Trait Requirement",
-                "description": "Exigence de trait pour débloquer un choix.",
-                "required": [
-                  "trait",
-                  "minValue"
-                ],
-                "properties": {
-                  "trait": {
-                    "type": "string",
-                    "description": "Nom du trait requis (ex: \"Courageux\", \"Diplomate\", \"Lâche\", \"Provocateur\"). Obligatoire.",
-                    "examples": [
-                      "Courageux",
-                      "Diplomate",
-                      "Lâche",
-                      "Provocateur"
-                    ]
-                  },
-                  "minValue": {
-                    "type": "integer",
-                    "description": "Valeur minimum requise pour ce trait. Obligatoire.",
-                    "minimum": -100,
-                    "maximum": 100,
-                    "examples": [
-                      5,
-                      10,
-                      -5
-                    ]
-                  }
-                }
-              },
-              "minItems": 1
-            },
-            "allowInfluenceForcing": {
-              "type": "boolean",
-              "description": "Si true, permet de forcer le choix via l'influence même si les traits ne sont pas satisfaits. Optionnel, défaut: false.",
-              "default": false
-            },
-            "influenceThreshold": {
-              "type": "integer",
-              "description": "Seuil d'influence minimum requis pour forcer ce choix. Optionnel, défaut: 0.",
-              "default": 0,
-              "minimum": 0
-            },
-            "influenceDelta": {
-              "type": "integer",
-              "description": "Modification de l'influence appliquée lors de la sélection de ce choix. Optionnel, défaut: 0.",
-              "default": 0
-            },
-            "respectDelta": {
-              "type": "integer",
-              "description": "Modification du respect appliquée lors de la sélection de ce choix. Optionnel, défaut: 0.",
-              "default": 0
-            },
-            "test": {
-              "type": "string",
-              "description": "Test de caractéristique au niveau du choix. Format: \"AttributeType+SkillId:DD\" (ex: \"Raison+Logique:8\"). Si présent, exécuté immédiatement lors de la sélection. Optionnel.",
-              "pattern": "^[A-Za-z]+\\+[A-Za-z]+:\\d+$",
-              "examples": [
-                "Raison+Logique:8",
-                "Puissance+Combat:5"
-              ]
-            },
-            "testCriticalSuccessNode": {
-              "type": "string",
-              "description": "ID du nœud à afficher si le test du choix réussit de manière critique (score >= DD + 5). Optionnel, fallback vers testSuccessNode si non défini.",
-              "examples": [
-                "CHOICE_CRITICAL_SUCCESS",
-                "NEXT"
-              ]
-            },
-            "testSuccessNode": {
-              "type": "string",
-              "description": "ID du nœud à afficher si le test du choix réussit (score >= DD et < DD + 5). Optionnel si testCriticalSuccessNode est défini.",
-              "examples": [
-                "CHOICE_SUCCESS",
-                "NEXT"
-              ]
-            },
-            "testFailureNode": {
-              "type": "string",
-              "description": "ID du nœud à afficher si le test du choix échoue (score >= DD - 5 et < DD). Optionnel si testCriticalFailureNode est défini.",
-              "examples": [
-                "CHOICE_FAILURE",
-                "FALLBACK"
-              ]
-            },
-            "testCriticalFailureNode": {
-              "type": "string",
-              "description": "ID du nœud à afficher si le test du choix échoue de manière critique (score < DD - 5). Optionnel, fallback vers testFailureNode si non défini.",
-              "examples": [
-                "CHOICE_CRITICAL_FAILURE",
-                "FALLBACK"
-              ]
-            },
-            "condition": {
-              "type": "string",
-              "description": "Condition de flag pour afficher/masquer le choix. Format: \"FLAG_NAME\" ou \"NOT FLAG_NAME\". Si présent, le choix n'est affiché que si la condition est satisfaite. Optionnel.",
-              "pattern": "^(NOT )?[A-Z][A-Z0-9_]*$",
-              "examples": [
-                "FLAG_COMPLETED",
-                "NOT FLAG_LOCKED"
-              ]
-            }
-          }
-        },
-        "minItems": 1
+          "description": "Routage par issue vers targetNode.",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
       },
-      "test": {
-        "type": "string",
-        "description": "Test de caractéristique au niveau du nœud. Format: \"AttributeType+SkillId:DD\" (ex: \"Raison+Logique:8\"). Si présent, redirige selon le palier de résultat (criticalSuccessNode, successNode, failureNode, criticalFailureNode).",
-        "pattern": "^[A-Za-z]+\\+[A-Za-z]+:\\d+$",
-        "examples": [
-          "Raison+Logique:8",
-          "Puissance+Combat:5"
-        ]
+      "additionalProperties": false
+    },
+    "CounterAdjustOperator": {
+      "type": "string",
+      "enum": ["=", "+=", "-="],
+      "description": "Opérateurs d'effet sur compteur catalogue (Story 9.3)."
+    },
+    "ChoiceEffectAtom": {
+      "oneOf": [
+        { "$ref": "#/definitions/SetBoolEffect" },
+        { "$ref": "#/definitions/AdjustCounterEffect" },
+        { "$ref": "#/definitions/SetEnumEffect" },
+        { "$ref": "#/definitions/ReputationDeltaEffect" },
+        { "$ref": "#/definitions/ReputationDeltaEffectFr94" }
+      ]
+    },
+    "SetBoolEffect": {
+      "type": "object",
+      "required": ["kind", "flagId", "value"],
+      "properties": {
+        "kind": { "const": "set_bool" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "value": { "type": "boolean" }
       },
-      "criticalSuccessNode": {
-        "type": "string",
-        "description": "ID du nœud à afficher si le test réussit de manière critique (score >= DD + 5). Optionnel, fallback vers successNode si non défini.",
-        "examples": [
-          "TEST_CRITICAL_SUCCESS",
-          "NEXT"
-        ]
+      "additionalProperties": false
+    },
+    "AdjustCounterEffect": {
+      "type": "object",
+      "required": ["kind", "flagId", "operator", "value"],
+      "properties": {
+        "kind": { "const": "adjust_counter" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "operator": { "$ref": "#/definitions/CounterAdjustOperator" },
+        "value": { "type": "number" }
       },
-      "successNode": {
-        "type": "string",
-        "description": "ID du nœud à afficher si le test réussit (score >= DD et < DD + 5). Optionnel si criticalSuccessNode est défini.",
-        "examples": [
-          "TEST_SUCCESS",
-          "NEXT"
-        ]
+      "additionalProperties": false
+    },
+    "SetEnumEffect": {
+      "type": "object",
+      "required": ["kind", "flagId", "value"],
+      "properties": {
+        "kind": { "const": "set_enum" },
+        "flagId": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 }
       },
-      "failureNode": {
-        "type": "string",
-        "description": "ID du nœud à afficher si le test échoue (score >= DD - 5 et < DD). Optionnel si criticalFailureNode est défini.",
-        "examples": [
-          "TEST_FAILURE",
-          "FALLBACK"
-        ]
+      "additionalProperties": false
+    },
+    "ReputationDeltaEffect": {
+      "type": "object",
+      "required": ["kind", "axisId", "factionId", "delta"],
+      "properties": {
+        "kind": { "const": "reputation_delta" },
+        "axisId": { "type": "string", "minLength": 1 },
+        "factionId": { "type": "string", "minLength": 1 },
+        "delta": { "type": "number" }
       },
-      "criticalFailureNode": {
-        "type": "string",
-        "description": "ID du nœud à afficher si le test échoue de manière critique (score < DD - 5). Optionnel, fallback vers failureNode si non défini.",
-        "examples": [
-          "TEST_CRITICAL_FAILURE",
-          "FALLBACK"
-        ]
+      "additionalProperties": false
+    },
+    "ReputationDeltaEffectFr94": {
+      "type": "object",
+      "description": "Delta Réputation FR94 avec cible sociale explicite.",
+      "required": ["kind", "heroineId", "target", "axis", "delta"],
+      "properties": {
+        "kind": { "const": "reputation_delta_fr94" },
+        "heroineId": { "type": "string", "minLength": 1 },
+        "target": { "$ref": "#/definitions/SocialTargetFr94" },
+        "axis": { "$ref": "#/definitions/ReputationAxisFr94" },
+        "delta": { "type": "number" }
       },
-      "isLongRest": {
-        "type": "boolean",
-        "description": "Si true, déclenche un repos long (récupération complète des Points d'Effort). Optionnel, défaut: false.",
-        "default": false
-      },
-      "startState": {
-        "type": "integer",
-        "description": "Identifiant d'état pour les nœuds de démarrage. Utilisé pour les dialogues avec plusieurs points d'entrée selon le contexte. Optionnel, défaut: 0.",
-        "default": 0,
-        "minimum": 0
-      },
-      "cutsceneMode": {
-        "type": "boolean",
-        "description": "Active le mode cutscene pour ce nœud. Optionnel, défaut: false.",
-        "default": false
-      },
-      "cutsceneImageId": {
-        "type": "string",
-        "description": "ID de l'image de cutscene à afficher. Optionnel.",
-        "examples": [
-          "scene_1",
-          "portrait_npc"
-        ]
-      },
-      "cutsceneId": {
-        "type": "string",
-        "description": "ID de la cutscene à déclencher. Optionnel.",
-        "examples": [
-          "cutscene_intro",
-          "cutscene_ending"
-        ]
-      },
-      "exitCutsceneMode": {
-        "type": "boolean",
-        "description": "Sort du mode cutscene. Optionnel, défaut: false.",
-        "default": false
-      },
-      "consequences": {
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": ["1.1.0", "1.2.0"],
+      "description": "Version du schéma du document. 1.1.0 (legacy) ou 1.2.0 (id stable + title)."
+    },
+    "dialogueFlags": {
+      "type": "array",
+      "description": "Story 9.1 — liaisons catalogue flags et valeurs initiales pour ce fichier dialogue.",
+      "items": {
         "type": "object",
-        "description": "Conséquences du nœud (flags narratifs). Optionnel.",
+        "required": ["flagId", "type", "initialValue"],
         "properties": {
-          "flag": {
-            "type": "string",
-            "description": "Flag narratif à définir (ex: \"CADRAN_EMPORTE\", \"GANTELET_DETRUIT\"). Obligatoire.",
-            "pattern": "^[A-Z][A-Z0-9_]*$",
-            "examples": [
-              "CADRAN_EMPORTE",
-              "GANTELET_DETRUIT",
-              "QUEST_COMPLETED"
-            ]
-          },
-          "description": {
-            "type": "string",
-            "description": "Description optionnelle de la conséquence (pour debug/documentation). Optionnel.",
-            "examples": [
-              "Le joueur a emporté le cadran",
-              "Le gantelet a été détruit"
-            ]
-          }
+          "flagId": { "type": "string" },
+          "type": { "type": "string", "enum": ["bool", "compteur", "enum"] },
+          "initialValue": {}
         },
-        "required": [
-          "flag"
-        ]
+        "additionalProperties": false
       }
     },
-    "allOf": [
-      {
-        "if": {
-          "properties": {
-            "cutsceneMode": {
-              "const": true
+    "nodes": {
+      "type": "array",
+      "description": "Liste des nœuds du dialogue. Chaque nœud a un id unique et stable (non éditable). Le pseudo-nœud END peut être référencé sans être présent dans la liste.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "title": "Dialogue Node",
+        "description": "Un nœud de dialogue. id = identifiant stable unique (toutes références) ; title = libellé affiché (éditable).",
+        "required": ["id"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifiant stable et unique du nœud, non éditable. Préfixe node- ou manual- (ex. node-abc123, manual-uuid). Exception : END pour le pseudo-nœud de fin.",
+            "oneOf": [
+              { "const": "END" },
+              { "pattern": "^(node|manual)-[a-zA-Z0-9_-]+$" }
+            ],
+            "examples": ["node-start", "node-a1b2c3d4e5f6", "manual-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "END"]
+          },
+          "visibilityConditions": {
+            "$ref": "#/definitions/VisibilityConditions",
+            "description": "Story 9.2 — conditions structurées d'affichage du nœud (prioritaire sur chaîne legacy si présent)."
+          },
+          "title": {
+            "type": "string",
+            "description": "Libellé affiché dans l'UI (carte nœud, jump-to, panneau). Éditable ; non utilisé pour les références."
+          },
+          "speaker": {
+            "type": "string",
+            "description": "ID du personnage qui parle (CHARACTER_ID). Optionnel mais recommandé.",
+            "examples": ["NPC_1", "Player", "Narrator"]
+          },
+          "line": {
+            "type": "string",
+            "description": "Texte du dialogue à afficher. Optionnel mais recommandé.",
+            "examples": ["Bonjour, voyageur !", "Que voulez-vous ?"]
+          },
+          "nextNode": {
+            "type": "string",
+            "description": "ID du nœud suivant (si pas de choix). Ignoré si choices est présent. Peut être END.",
+            "examples": ["NEXT_NODE", "END"]
+          },
+          "choices": {
+            "type": "array",
+            "description": "Liste des choix disponibles pour ce nœud. Si présent, nextNode est ignoré. En mode cutscene (cutsceneMode: true), maximum 4 choix. Chaque choix doit avoir un choiceId stable (v1.1.0).",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "title": "Dialogue Choice",
+              "description": "Un choix disponible dans un nœud de dialogue. choiceId obligatoire (identité stable, v1.1.0).",
+              "required": ["choiceId", "text", "targetNode"],
+              "properties": {
+                "choiceId": {
+                  "type": "string",
+                  "description": "Identifiant stable du choix (format libre). Obligatoire en v1.1.0. Utilisé pour les edges et la projection UI (ADR-008).",
+                  "examples": ["choice_1", "accept", "refuse"]
+                },
+                "text": {
+                  "type": "string",
+                  "description": "Texte du choix affiché au joueur. Obligatoire.",
+                  "examples": ["Accepter", "Refuser", "(Partir)"]
+                },
+                "targetNode": {
+                  "type": "string",
+                  "description": "ID du nœud cible lorsque ce choix est sélectionné. Obligatoire. Peut être END.",
+                  "examples": ["ACCEPT", "REFUSE", "END"]
+                },
+                "traitRequirements": {
+                  "type": "array",
+                  "description": "Liste des exigences de traits pour débloquer ce choix. Optionnel.",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "title": "Trait Requirement",
+                    "required": ["trait", "minValue"],
+                    "properties": {
+                      "trait": { "type": "string", "examples": ["Courageux", "Diplomate"] },
+                      "minValue": { "type": "integer", "minimum": -100, "maximum": 100 }
+                    }
+                  }
+                },
+                "allowInfluenceForcing": { "type": "boolean", "default": false },
+                "influenceThreshold": { "type": "integer", "default": 0, "minimum": 0 },
+                "influenceDelta": { "type": "integer", "default": 0 },
+                "respectDelta": { "type": "integer", "default": 0 },
+                "test": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z]+\\+[A-Za-z]+:\\d+$",
+                  "examples": ["Raison+Logique:8", "Puissance+Combat:5"]
+                },
+                "testCriticalSuccessNode": { "type": "string", "examples": ["CHOICE_CRITICAL_SUCCESS", "NEXT"] },
+                "testSuccessNode": { "type": "string", "examples": ["CHOICE_SUCCESS", "NEXT"] },
+                "testFailureNode": { "type": "string", "examples": ["CHOICE_FAILURE", "FALLBACK"] },
+                "testCriticalFailureNode": { "type": "string", "examples": ["CHOICE_CRITICAL_FAILURE", "FALLBACK"] },
+                "condition": {
+                  "type": "string",
+                  "pattern": "^(NOT )?[A-Z][A-Z0-9_]*$",
+                  "examples": ["FLAG_COMPLETED", "NOT FLAG_LOCKED"],
+                  "description": "Legacy chaîne (Unity). Les nouvelles conditions utilisent visibilityConditions."
+                },
+                "visibilityConditions": {
+                  "$ref": "#/definitions/VisibilityConditions",
+                  "description": "Story 9.2 — conditions structurées sur ce choix."
+                },
+                "choiceEffects": {
+                  "type": "array",
+                  "description": "Story 9.3 — effets catalogue (flags + réputation) déclenchés à la sélection ; l'ordre dans le tableau est persisté.",
+                  "items": { "$ref": "#/definitions/ChoiceEffectAtom" }
+                },
+                "effortCost": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "FR94 — coût en Points d'Effort (PE) ; grisé en preview si pool simulé insuffisant."
+                },
+                "skillCheck": {
+                  "$ref": "#/definitions/SkillCheckDefinition",
+                  "description": "FR94 — test tentable ; choix toujours visible, routage par issue."
+                }
+              }
             }
+          },
+          "test": {
+            "type": "string",
+            "pattern": "^[A-Za-z]+\\+[A-Za-z]+:\\d+$",
+            "examples": ["Raison+Logique:8", "Puissance+Combat:5"]
+          },
+          "criticalSuccessNode": { "type": "string", "examples": ["TEST_CRITICAL_SUCCESS", "NEXT"] },
+          "successNode": { "type": "string", "examples": ["TEST_SUCCESS", "NEXT"] },
+          "failureNode": { "type": "string", "examples": ["TEST_FAILURE", "FALLBACK"] },
+          "criticalFailureNode": { "type": "string", "examples": ["TEST_CRITICAL_FAILURE", "FALLBACK"] },
+          "isLongRest": { "type": "boolean", "default": false },
+          "startState": { "type": "integer", "default": 0, "minimum": 0 },
+          "cutsceneMode": { "type": "boolean", "default": false },
+          "cutsceneImageId": { "type": "string", "examples": ["scene_1", "portrait_npc"] },
+          "cutsceneId": { "type": "string", "examples": ["cutscene_intro", "cutscene_ending"] },
+          "exitCutsceneMode": { "type": "boolean", "default": false },
+          "consequences": {
+            "type": "object",
+            "properties": {
+              "flag": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "examples": ["CADRAN_EMPORTE", "QUEST_COMPLETED"] },
+              "description": { "type": "string" }
+            },
+            "required": ["flag"]
           }
         },
-        "then": {
-          "properties": {
-            "choices": {
-              "maxItems": 4
-            }
-          }
-        },
-        "else": true
-      }
-    ]
-  },
-  "minItems": 1,
-  "examples": [
-    [
-      {
-        "id": "START",
-        "speaker": "Personnage",
-        "line": "Bonjour !",
-        "choices": [
+        "allOf": [
           {
-            "text": "Répondre",
-            "targetNode": "REPLY"
+            "if": { "properties": { "cutsceneMode": { "const": true } } },
+            "then": { "properties": { "choices": { "maxItems": 4 } } },
+            "else": true
           }
         ]
       }
-    ]
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": "1.2.0",
+      "nodes": [
+        {
+          "id": "node-start",
+          "title": "Ouverture",
+          "speaker": "Personnage",
+          "line": "Bonjour !",
+          "choices": [
+            { "choiceId": "reply", "text": "Répondre", "targetNode": "node-reply" }
+          ]
+        },
+        { "id": "node-reply", "line": "Suite..." }
+      ]
+    }
   ]
 }

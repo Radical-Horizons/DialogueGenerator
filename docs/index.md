@@ -15,15 +15,13 @@
   - Backend: `api/main.py`
 - **Architecture Pattern:** Component-based (Frontend), Layered (Backend)
 
-## Source de vérité (suivi & décisions)
+## Source de vérité
 
-**Pour la planification, les épics/stories, les ADRs canoniques et le suivi d’implémentation récent :** consulter en priorité `**_bmad-output/`** :
+**Le code et les tests font foi** pour le comportement réel de l'application. En cas d'écart entre un document et l'implémentation, vérifier les routers (pi/routers/), services (services/), composants frontend et suites 	ests/api/, 	ests/services/, Vitest ciblés.
 
-- **Planning** : `[_bmad-output/planning-artifacts/](../_bmad-output/planning-artifacts/)` — PRD, architecture, épics, readiness, recherche.
-- **Implémentation** : `[_bmad-output/implementation-artifacts/](../_bmad-output/implementation-artifacts/)` — stories livrées, rétros, notes de suivi alignées sur le travail courant.
-- **Registre ADR** : `[_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md](../_bmad-output/planning-artifacts/architecture/v10-architectural-decisions-adrs.md)`
+**Rôle de docs/** : référence technique durable (architecture, contrats API, guides, troubleshooting), maintenue pour refléter le code. Les sections « Reste à faire » signalent des écarts connus ou du travail non implémenté.
 
-**Rôle de `docs/`** : référence technique durable (architecture détaillée, contrats API, guides, specs, troubleshooting). Certains fichiers sont des **miroirs** ou approfondissements ; en cas d’écart avec `_bmad-output/`, privilégier les artifacts BMad pour l’historique de décision et le statut produit.
+**Contexte produit optionnel** : _bmad-output/ conserve l'historique de planification (épics, stories, ADRs) — utile pour le *pourquoi* d'une feature, pas comme autorité sur le *comment* livré.
 
 ## Documentation Structure
 
@@ -74,6 +72,7 @@ Located in `[guides/](./guides/)`
 - [Deployment Documentation](./guides/DEPLOYMENT.md) - Deployment documentation
 - [Security](./guides/SECURITY.md) - Security documentation
 - [Testing](./guides/TESTING.md) - Testing guide
+- [Game Systems Integration (FR94)](./guides/game-systems-integration.md) - Skill checks, Effort, Réputation FR94, preview simulée, diagnostics
 
 ### Troubleshooting
 
@@ -182,7 +181,7 @@ When creating a brownfield PRD:
 
 ## Documentation Status
 
-**Last Updated**: 2026-06-08
+**Last Updated**: 2026-06-12
 **Structure**: Reorganized into logical categories
 **Parts Documented**: 2 (frontend, api)
 
@@ -195,4 +194,4 @@ When creating a brownfield PRD:
 
 ---
 
-**Note** : Point d’entrée indexé pour la doc technique sous `docs/`. Pour l’IA et l’équipe, le **fil décisionnel et le suivi à jour** sont dans `**_bmad-output/`** ; ce fichier les référence explicitement ci-dessus.
+**Note** : Point d'entrée indexé pour la doc technique sous docs/. Comportement livré = code + tests ; _bmad-output/ = contexte planification optionnel.

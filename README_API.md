@@ -159,6 +159,57 @@ La même analyse est fusionnée dans `POST /api/v1/unity-dialogues/graph/validat
 
 - `GET /api/v1/mechanics/systems/integration` — **FR94** : catalogue non bloquant des familles utilisables dans les dialogues (`Caractéristiques & Compétences`, `Gestion de l'Effort`, `Réputation`) et état de la source runtime externe (`Unity/API/fichier config`). En local, une source runtime absente renvoie `editing_blocked=false` pour permettre l'édition et la preview simulée.
 
+#### Exemple `POST /api/v1/documents/{document_id}/preview` (FR94)
+
+**Requête :**
+
+```json
+{
+  "revision": 3,
+  "flag_states": {},
+  "reputation_states": {},
+  "game_systems_state": {
+    "attributes": { "sociabilite": 4 },
+    "skills": { "tromperie": 3 },
+    "effort_pool": 10,
+    "reputation_values": {
+      "fr94::HEROINE_A::community::garde::Admiration::community_calculated": 35
+    },
+    "faction_titles": { "garde": "garde_capitaine" }
+  }
+}
+```
+
+**Réponse (extrait) :**
+
+```json
+{
+  "revision": 3,
+  "nodes_total": 1,
+  "nodes_masked": 0,
+  "choices_total": 0,
+  "choices_masked": 0,
+  "masked_node_ids": [],
+  "masked_choice_refs": [],
+  "game_systems_state": { "...": "écho de la requête" },
+  "simulation_limits": [
+    "Agrégat communautaire simulé localement : témoins, propagation et poids PNJ restent responsabilité runtime."
+  ],
+  "visibility_warnings": []
+}
+```
+
+Contrats détaillés : [`docs/api/api-contracts-api.md`](docs/api/api-contracts-api.md). Guide utilisateur : [`docs/guides/game-systems-integration.md`](docs/guides/game-systems-integration.md).
+
+#### Diagnostics sociaux (`PUT /api/v1/documents/{document_id}`)
+
+Entrées possibles dans `validationReport` (voir `services/game_systems_social_diagnostics.py`) :
+
+| Code | Message type |
+|------|----------------|
+| `social_system_confusion` | `Influence` ou `Respect` utilisé comme axe de Réputation — appartient au système **Influence & Respect (PJ possédés)** |
+| `reputation_palier_runtime_only` | Tentative de persister un palier `RepPalier*` dans `dialogueFlags` (paliers calculés à la volée en runtime) |
+
 ### Logs
 
 - `GET /api/v1/logs` - Recherche de logs (query params: `start_date`, `end_date`, `level`, `logger`, `request_id`, `endpoint`, `limit`, `offset`)

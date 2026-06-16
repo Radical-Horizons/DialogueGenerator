@@ -9,6 +9,10 @@ Frontend uses **TypeScript** interfaces and types for type safety.
 - `frontend/src/types/generation.ts`: Generation types
 - `frontend/src/types/graph.ts`: Graph editor types
 - `frontend/src/types/flags.ts`: Game flags types
+- `frontend/src/types/gameSystemsIntegration.ts`: FR94 catalogue types
+- `frontend/src/types/visibilityConditions.ts`: Visibility conditions (incl. `reputation_fr94`, `faction_title`)
+- `frontend/src/types/choiceEffects.ts`: Choice effects (incl. `reputation_delta_fr94`)
+- `frontend/src/types/documents.ts`: Document API types (`PreviewGameSystemsState`, preview request/response)
 - `frontend/src/types/errors.ts`: Error types
 
 ## Core Types
@@ -43,6 +47,20 @@ Frontend uses **TypeScript** interfaces and types for type safety.
 
 ### Game Flags (`flags.ts`)
 - `InGameFlag`: Flag with id, value, category, timestamp
+
+### Game Systems Integration (`gameSystemsIntegration.ts`)
+- `GameSystemFamily`: Catalogue family id + label + description
+- `RuntimeSourceState`: Runtime connection (`status`, `editing_blocked`, `message`)
+- `GameSystemsIntegrationCatalog`: Full catalogue response
+
+### Visibility & Effects (FR94)
+- `ReputationConditionFr94`, `FactionTitleCondition` in `visibilityConditions.ts`
+- `ReputationDeltaEffectFr94` in `choiceEffects.ts`
+- `SkillCheckDefinition`, `SkillCheckIssue` in `utils/skillChecks.ts` (choice JSON shape)
+
+### Document Preview (`documents.ts`)
+- `PreviewGameSystemsState`: Frontend preview state (camelCase: `effortPool`, `reputationValues`, `factionTitles`)
+- `DialoguePreviewRequest` / `DialoguePreviewResponse`: API preview contract incl. `simulation_limits`
 
 ### Prompt Structure (`prompt.ts`)
 - `PromptStructure`: Structured prompt with sections

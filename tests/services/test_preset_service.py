@@ -26,20 +26,31 @@ def mock_config_service() -> Mock:
 
 @pytest.fixture
 def mock_context_builder() -> Mock:
-    """Fixture pour ContextBuilder mocké."""
-    builder = Mock()
-    builder.gdd_data = {
-        "Personnages": [
+    """Fixture pour ContextBuilder mocké avec repository GDD réel."""
+    from services.element_repository import ElementRepository
+    from services.gdd_loader import GDDData
+
+    gdd_data = GDDData(
+        characters=[
             {"Nom": "Akthar", "id": "char-001"},
-            {"Nom": "Neth", "id": "char-002"}
+            {"Nom": "Neth", "id": "char-002"},
         ],
-        "Lieux": [
+        locations=[
             {"Nom": "Avili de l'Éternel Retour", "id": "loc-001"},
-            {"Nom": "Temple", "id": "loc-002"}
-        ]
+            {"Nom": "Temple", "id": "loc-002"},
+        ],
+    )
+    repo = ElementRepository(gdd_data)
+    builder = Mock()
+    builder._gdd_data = gdd_data
+    builder._element_repository = repo
+    builder.gdd_data = {
+        "Personnages": gdd_data.characters,
+        "Lieux": gdd_data.locations,
     }
     builder.get_characters_names.return_value = ["Akthar", "Neth"]
     builder.get_locations_names.return_value = ["Avili de l'Éternel Retour", "Temple"]
+    builder.load_gdd_files = Mock()
     return builder
 
 
@@ -404,6 +415,67 @@ class TestPresetServiceErrorHandling:
         with patch("builtins.open", side_effect=OSError("No space left on device")):
             with pytest.raises(OSError, match="No space left on device"):
                 preset_service.create_preset(sample_preset_data)[0]
+
+
+class TestPresetReferenceResolution:
+    """Résolution alias / fuzzy lors de la validation preset."""
+
+    @pytest.fixture
+    def uresair_context_builder(self) -> Mock:
+        """ContextBuilder avec fiche Uresaïr et alias Seigneuresse."""
+        from services.element_repository import ElementRepository
+        from services.gdd_loader import GDDData
+
+        gdd_data = GDDData(
+            characters=[
+                {
+                    "Nom": "Uresaïr",
+                    "values": {"Alias": "Seigneuresse, La Rebelle Immortelle"},
+                }
+            ],
+            locations=[{"Nom": "Temple"}],
+        )
+        repo = ElementRepository(gdd_data)
+        builder = Mock()
+        builder._gdd_data = gdd_data
+        builder._element_repository = repo
+        builder.get_characters_names.return_value = ["Uresaïr"]
+        builder.get_locations_names.return_value = ["Temple"]
+        builder.load_gdd_files = Mock()
+        return builder
+
+    def test_validate_resolves_historical_character_name(
+        self, tmp_path: Path, mock_config_service: Mock, uresair_context_builder: Mock
+    ):
+        """Seigneuresse Uresaïr est résolu en Uresaïr (valid=True)."""
+        from api.schemas.preset import Preset, PresetMetadata, PresetConfiguration
+        from datetime import datetime, timezone
+        from uuid import uuid4
+
+        service = PresetService(
+            mock_config_service,
+            uresair_context_builder,
+            tmp_path / "presets",
+        )
+        preset = Preset(
+            id=str(uuid4()),
+            name="Legacy",
+            icon="📋",
+            metadata=PresetMetadata(created=datetime.now(timezone.utc), modified=datetime.now(timezone.utc)),
+            configuration=PresetConfiguration(
+                characters=["Seigneuresse Uresaïr"],
+                locations=["Temple"],
+                region="Temple",
+                sceneType="Generic",
+                instructions="",
+            ),
+        )
+
+        result = service.validate_preset_references(preset)
+
+        assert result.valid is True
+        assert result.obsoleteRefs == []
+        assert result.resolvedRefs == {"Seigneuresse Uresaïr": "Uresaïr"}
 
 
 class TestPresetAutoCleanup:

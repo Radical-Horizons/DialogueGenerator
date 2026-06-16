@@ -25,48 +25,38 @@ L’instance de référence est sur un **VPS OVH** (Ubuntu) ; déploiement typiq
 4.  Faciliter l'écriture, l'évaluation et la validation de ces dialogues.
 5.  S'intégrer avec une pipeline de production de jeu (export JSON Unity, commit Git).
 
-## État Actuel du Projet (Mai 2024)
+## État actuel du projet (juin 2026)
 
-L'application est en cours de développement actif. Les fonctionnalités suivantes sont implémentées :
+Comportement livré — en cas d'écart avec un document, le **code et les tests** font foi.
 
-*   **Chargement des Données du GDD (`ContextBuilder`)** :
-    *   Lecture des fichiers JSON depuis `data/GDD_categories/` (maintenance manuelle requise - voir `docs/deployment/DATA_MAINTENANCE.md`).
-    *   Chargement de `Vision.json` depuis `data/Vision.json`.
-    *   Les données (personnages, lieux, objets, espèces, communautés, dialogues exemples, structures narratives/macro/micro) sont stockées en mémoire.
-*   **Interface Web (React + FastAPI)** :
-    *   Interface moderne et réactive pour la génération de dialogues.
-    *   Sélection de contexte (personnages, lieux, objets, etc.).
-    *   Génération de dialogues avec variantes multiples.
-    *   Gestion des interactions et export Unity.
-*   **Moteur de Prompt (`PromptEngine`)** :
-    *   Classe `PromptEngine` capable de combiner un *system prompt*, un résumé de contexte (incluant les détails JSON des éléments sélectionnés/cochés), et l'instruction utilisateur pour former un prompt complet.
-    *   *System prompt* par défaut basique inclus, avec une brève introduction au format JSON Unity.
-*   **Client LLM (`LLMClient`)** :
-    *   Interface `IGenerator` définissant la méthode `async generate_variants(prompt, k)`.
-    *   `OpenAIClient` : Implémentation utilisant l'API OpenAI (modèle par défaut actuel : `gpt-5-mini`). Nécessite la variable d'environnement `OPENAI_API_KEY`.
-    *   `DummyLLMClient` : Implémentation factice utilisée en fallback si `OpenAIClient` ne peut s'initialiser (ex: clé API manquante) ou pour des tests rapides. Simule la génération de `k` variantes au format JSON Unity.
-*   **Flux de Génération** :
-    *   Sélection du contexte via l'interface web.
-    *   Configuration des paramètres de génération (personnages, lieu, instructions).
-    *   Construction du prompt complet via `PromptEngine`.
-    *   Appel asynchrone au client LLM configuré (OpenAI ou Dummy).
-    *   Affichage des variantes générées dans l'interface web.
+*   **Interface web (React + FastAPI)** :
+    *   Génération de dialogues LLM avec contexte GDD, variantes, export Unity JSON.
+    *   **Éditeur de graphe** (React Flow) : édition visuelle, validation, autosave, export.
+    *   **UI responsive + PWA** (Epic 17) : drawers tablette/mobile, toolbar graphe adaptative.
+*   **API documents** (`/api/v1/documents/*`) :
+    *   Persistance dialogue canonique + layout sidecar, contrôle de révision.
+    *   Preview scénario (flags, réputation, **stats FR94** : attributs, Effort, skill checks).
+    *   Validation références flags (FR93) et diagnostics sociaux (Influence/Respect vs Réputation).
+*   **Epic 9 — Variables & systèmes de jeu** :
+    *   Flags catalogue, conditions de visibilité, effets de choix.
+    *   **FR94** : panneau « Systèmes de jeu », réputation v3, tests de compétence tentables, coûts Effort.
+*   **GDD & contexte** :
+    *   `ContextBuilder` charge `data/GDD_categories/` et `Vision.json`.
+    *   Sync Notion optionnelle — voir `docs/guides/GDD_NOTION_SYNC.md`.
+*   **LLM** :
+    *   `OpenAIClient` (défaut `gpt-5-mini`) ou `DummyLLMClient` sans clé API.
 
 ## 📚 Documentation
 
-### Documentation la plus récente
+### Documentation technique
 
-**⚠️ La documentation la plus récente et à jour se trouve dans les dossiers artifacts de BMad :**
+- **Référence durable** : [`docs/`](docs/) avec index [`docs/index.md`](docs/index.md) — contrats API, guides, architecture. Maintenue pour refléter le code.
+- **API opérationnelle** : [`README_API.md`](README_API.md)
+- **Agents Cursor** : [`AGENTS.md`](AGENTS.md)
 
-- **Planning Artifacts** : [`_bmad-output/planning-artifacts/`](_bmad-output/planning-artifacts/)
-  - Architecture détaillée, PRD, épics, rapports de préparation à l'implémentation
-  - Contient la documentation de planification la plus récente
-  
-- **Implementation Artifacts** : [`_bmad-output/implementation-artifacts/`](_bmad-output/implementation-artifacts/)
-  - ADRs (Architecture Decision Records), plans de sprint, statut d'implémentation
-  - Contient la documentation d'implémentation la plus récente
+**Source de vérité comportementale** : code (`api/`, `services/`, `frontend/`) + tests (`tests/`, Vitest). En cas d'écart doc ↔ code, le code prime.
 
-**Note** : La documentation dans `docs/` est organisée et structurée, mais peut être moins à jour que celle dans `_bmad-output/`. Consultez d'abord les artifacts BMad pour la documentation la plus récente.
+**Contexte planification optionnel** : [`_bmad-output/`](_bmad-output/) (épics, stories, ADRs) — historique décisionnel, pas autorité sur l'implémentation livrée.
 
 ### Documentation structurée
 

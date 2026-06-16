@@ -46,6 +46,20 @@ describe('UnityDialogueList', () => {
     expect(titleEl).toHaveTextContent('Titre API')
   })
 
+  it('ouvre un menu contextuel au clic droit avec supprimer le dialogue', async () => {
+    const user = userEvent.setup()
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+
+    const item = await screen.findByTestId('unity-dialogue-item')
+    await user.pointer({ keys: '[MouseRight>]', target: item })
+    await user.pointer({ keys: '[/MouseRight]' })
+
+    expect(screen.getByTestId('dialogue-list-context-menu')).toBeInTheDocument()
+    expect(screen.getByTestId('dialogue-list-context-delete')).toHaveTextContent(
+      'Supprimer le dialogue',
+    )
+  })
+
   it('compare la sélection avec ou sans extension .json', async () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()

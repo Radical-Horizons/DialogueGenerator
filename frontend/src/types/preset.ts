@@ -59,4 +59,6 @@ export interface PresetValidationResult {
   valid: boolean;
   warnings: string[];
   obsoleteRefs: string[];
+  /** Ancien libellé → nom canonique GDD (alias ou fuzzy). */
+  resolvedRefs?: Record<string, string>;
 }

@@ -70,6 +70,20 @@ Game mechanics flags API calls:
 - `getFlagCombinations(request)`: Get valid combinations
 - `suggestFlags(request)`: Suggest flags based on context
 
+### `gameSystemsIntegration.ts`
+Game systems catalogue (FR94):
+- `getGameSystemsIntegrationCatalog()`: `GET /api/v1/mechanics/systems/integration`
+
+### `documents.ts`
+Canonical document persistence and preview:
+- `getDocument(documentId)`: `GET /api/v1/documents/{id}`
+- `putDocument(documentId, request)`: `PUT /api/v1/documents/{id}` (includes social diagnostics in validation report)
+- `getLayout(documentId)`: `GET /api/v1/documents/{id}/layout`
+- `putLayout(documentId, request)`: `PUT /api/v1/documents/{id}/layout`
+- `postDocumentPreview(documentId, request)`: `POST /api/v1/documents/{id}/preview` — supports `game_systems_state` and returns `simulation_limits`
+
+Preview state is also mirrored locally in `graphViewStore.previewGameSystemsState` for canvas affordances (skill checks, effort graying).
+
 ### `narrativeGuides.ts`
 Narrative guides API calls:
 - `getNarrativeGuides()`: List guides

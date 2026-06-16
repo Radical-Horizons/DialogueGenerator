@@ -7,7 +7,7 @@ import { useState, useCallback } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { usePresetStore } from '../store/presetStore'
 import { useContextStore } from '../store/contextStore'
-import { filterObsoleteReferences } from '../utils/presetUtils'
+import { preparePresetForApply } from '../utils/presetUtils'
 import { getErrorMessage } from '../types/errors'
 import type { Preset, PresetConfiguration, PresetValidationResult } from '../types/preset'
 
@@ -167,9 +167,13 @@ export function usePresetManagement(
         setPendingPreset(preset)
         setIsValidationModalOpen(true)
       } else {
-        // Appliquer directement si valide
-        applyPreset(preset)
-        toast('Preset chargé avec succès', 'success')
+        applyPreset(preparePresetForApply(preset, validationResult))
+        const resolvedCount = Object.keys(validationResult.resolvedRefs ?? {}).length
+        if (resolvedCount > 0) {
+          toast(`Preset chargé (${resolvedCount} nom(s) GDD mis à jour)`, 'info')
+        } else {
+          toast('Preset chargé avec succès', 'success')
+        }
       }
     } catch (err) {
       const message = getErrorMessage(err)
@@ -179,14 +183,19 @@ export function usePresetManagement(
   
   const handleValidationConfirm = useCallback(() => {
     if (pendingPreset && validationResult) {
-      // Filtrer les références obsolètes avant d'appliquer le preset
-      const filteredPreset = filterObsoleteReferences(pendingPreset, validationResult.obsoleteRefs || [])
-      applyPreset(filteredPreset)
-      
-      // Améliorer toast avec nombre de références obsolètes ignorées
+      applyPreset(preparePresetForApply(pendingPreset, validationResult))
+
       const obsoleteCount = validationResult.obsoleteRefs?.length || 0
-      if (obsoleteCount > 0) {
+      const resolvedCount = Object.keys(validationResult.resolvedRefs ?? {}).length
+      if (obsoleteCount > 0 && resolvedCount > 0) {
+        toast(
+          `Preset chargé : ${resolvedCount} nom(s) mis à jour, ${obsoleteCount} référence(s) ignorée(s)`,
+          'warning',
+        )
+      } else if (obsoleteCount > 0) {
         toast(`Preset chargé avec ${obsoleteCount} référence(s) obsolète(s) ignorée(s)`, 'warning')
+      } else if (resolvedCount > 0) {
+        toast(`Preset chargé (${resolvedCount} nom(s) GDD mis à jour)`, 'info')
       } else {
         toast('Preset chargé avec succès', 'success')
       }

@@ -48,6 +48,29 @@ Game mechanics flags models:
 - Flag validation models
 - Flag combination models
 
+### `game_systems.py`
+Game systems integration models (FR94):
+- `GameSystemFamily`: Catalogue family (`attributes_skills`, `effort`, `reputation`)
+- `RuntimeSourceStatus`: Runtime connection state (`connected` | `disconnected` | `unknown`)
+- `GameSystemsIntegrationCatalogResponse`: Catalogue + runtime source
+- `PreviewGameSystemsState`: Simulated preview state (`attributes`, `skills`, `effort_pool`, `reputation_values`, `faction_titles`) with map size limits
+
+### `dialogue_preview.py`
+Document preview models:
+- `DialoguePreviewRequest`: `revision`, `flag_states`, `reputation_states`, `game_systems_state`
+- `DialoguePreviewResponse`: masking aggregates, `simulation_limits`, `visibility_warnings`
+- `MaskedChoiceRef`: Stable reference for masked choices
+
+### `visibility_conditions.py` / `choice_effects.py`
+Structured conditions and effects (Story 9.2/9.3 + FR94):
+- Legacy: `reputation`, `reputation_delta`
+- FR94: `reputation_fr94`, `reputation_delta_fr94`, `faction_title`
+
+### Social diagnostics (validation report entries)
+Produced by `services/game_systems_social_diagnostics.py` on `PUT /documents/{id}`:
+- `social_system_confusion`: Influence/Respect misused as Réputation axes
+- `reputation_palier_runtime_only`: RepPalier stored in dialogueFlags
+
 ### `graph.py`
 Graph editor models:
 - Graph structure models
