@@ -162,9 +162,14 @@ function contextGddTabButtonStyle(
 
 interface ContextSelectorProps {
   onItemSelected?: (item: ContextItem | null, historyCategoryStem?: string | null) => void
+  onLoadStateChange?: (state: {
+    isLoading: boolean
+    error: string | null
+    refresh: () => void
+  }) => void
 }
 
-export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
+export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSelectorProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('characters')
   const [showRulesEditor, setShowRulesEditor] = useState(false)
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
@@ -298,6 +303,16 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
   useEffect(() => {
     void loadData()
   }, [loadData, gddDataRevision])
+
+  useEffect(() => {
+    onLoadStateChange?.({
+      isLoading,
+      error,
+      refresh: () => {
+        void loadData()
+      },
+    })
+  }, [error, isLoading, loadData, onLoadStateChange])
 
   const handleItemClick = async (name: string) => {
     try {

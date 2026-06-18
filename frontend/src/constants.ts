@@ -42,8 +42,8 @@ export const TOUCH_TARGET_MIN_PX = 44
 export const CONTEXT_TOKENS_LIMITS = {
   /** Minimum autorisé (aligné API max_context_tokens et budget contexte FR20 — plancher sérieux LLM) */
   MIN: 10000,
-  /** Maximum autorisé pour le slider et l'API (100K) */
-  MAX: 100000,
+  /** Maximum autorisé pour le slider et l'API (300K) */
+  MAX: 300000,
   /** Pas du slider */
   STEP: 1000,
   /** Valeur par défaut (50K) */
@@ -89,6 +89,8 @@ export const API_TIMEOUTS = {
   LLM_GENERATION: 300000,
   /** Timeout pour l'annulation d'un job de génération (10 secondes) - Story 0.8 */
   CANCEL_JOB: 10000,
+  /** Construction / estimation contexte GDD volumineux. La perf doit rester quasi instantanée côté serveur. */
+  CONTEXT_ESTIMATION: 120000,
 } as const
 
 

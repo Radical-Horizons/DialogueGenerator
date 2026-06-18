@@ -45,6 +45,11 @@ import { theme } from '../../theme'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
+type ContextLoadState = {
+  isLoading: boolean
+  error: string | null
+  refresh: (() => void) | null
+}
 
 function ChevronIcon({ direction, size = 16 }: { direction: 'left' | 'right'; size?: number }) {
   const isLeft = direction === 'left'
@@ -269,6 +274,11 @@ function PanelExpandButton({
 export function Dashboard() {
   const [selectedContextItem, setSelectedContextItem] = useState<ContextItem | null>(null)
   const [selectedContextHistoryStem, setSelectedContextHistoryStem] = useState<string | null>(null)
+  const [contextLoadState, setContextLoadState] = useState<ContextLoadState>({
+    isLoading: false,
+    error: null,
+    refresh: null,
+  })
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [rightPanelTab, setRightPanelTab] = useState<'prompt' | 'dialogue' | 'node' | 'details'>('prompt')
   const [centerPanelTab, setCenterPanelTab] = useState<'generation' | 'edition' | 'graph'>('generation')
@@ -701,6 +711,10 @@ export function Dashboard() {
     []
   )
 
+  const onContextLoadStateChange = useCallback((state: ContextLoadState) => {
+    setContextLoadState(state)
+  }, [])
+
   const narrowDetailsHeaderEnd =
     actions.handleGenerate ? (
       <SaveStatusIndicator
@@ -719,6 +733,24 @@ export function Dashboard() {
     ) {
       return null
     }
+    const contextRefresh = contextLoadState.refresh
+    const hasContextLoadError = contextLoadState.error !== null
+    const isGenerateActionBlocked =
+      actions.isLoading || isGraphGenerating || contextLoadState.isLoading
+    const isRefreshActionDisabled = contextLoadState.isLoading || !contextRefresh
+    const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer'
+    const primaryActionTitle = hasContextLoadError
+      ? 'Rafraîchir le contexte GDD'
+      : contextLoadState.isLoading
+        ? 'Chargement du contexte GDD en cours'
+        : 'Générer (Ctrl+Enter)'
+    const handlePrimaryGenerateAction = hasContextLoadError
+      ? contextRefresh ?? undefined
+      : actions.handleGenerate
+    const isPrimaryGenerateDisabled = hasContextLoadError
+      ? isRefreshActionDisabled
+      : isGenerateActionBlocked
+
     return (
       <div
         style={{
@@ -732,7 +764,7 @@ export function Dashboard() {
           zIndex: 10,
         }}
       >
-        {(actions.isLoading || generationState.isEstimating || isGraphGenerating) && (
+        {(actions.isLoading || generationState.isEstimating || isGraphGenerating || contextLoadState.isLoading) && (
           <>
             <div
               style={{
@@ -765,7 +797,9 @@ export function Dashboard() {
                 marginBottom: '0.4rem',
               }}
             >
-              {isGraphGenerating
+              {contextLoadState.isLoading && !actions.isLoading && !generationState.isEstimating && !isGraphGenerating
+                ? 'Chargement du contexte...'
+                : isGraphGenerating
                 ? 'Génération de nœud...'
                 : generationState.isEstimating && !actions.isLoading
                   ? 'Estimation des tokens...'
@@ -831,8 +865,8 @@ export function Dashboard() {
               {unityDialogueEditorRef.current?.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
             </button>
             <button
-              onClick={actions.handleGenerate}
-              disabled={actions.isLoading || isGraphGenerating}
+              onClick={handlePrimaryGenerateAction}
+              disabled={isPrimaryGenerateDisabled}
               style={{
                 padding: '0.5rem',
                 fontSize: remSize('body'),
@@ -840,8 +874,8 @@ export function Dashboard() {
                 color: theme.button.default.color,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
-                cursor: actions.isLoading || isGraphGenerating ? 'not-allowed' : 'pointer',
-                opacity: actions.isLoading || isGraphGenerating ? 0.6 : 1,
+                cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
+                opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -850,7 +884,7 @@ export function Dashboard() {
                 transition: 'all 0.2s',
                 boxSizing: 'border-box',
               }}
-              title="Générer à nouveau (Ctrl+Enter)"
+              title={hasContextLoadError ? 'Rafraîchir le contexte GDD' : primaryActionTitle}
             >
               <svg
                 width="20"
@@ -862,7 +896,7 @@ export function Dashboard() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{
-                  animation: actions.isLoading || isGraphGenerating ? 'spin 1s linear infinite' : 'none',
+                  animation: actions.isLoading || isGraphGenerating || contextLoadState.isLoading ? 'spin 1s linear infinite' : 'none',
                 }}
               >
                 <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
@@ -877,8 +911,8 @@ export function Dashboard() {
           </div>
         ) : effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
           <button
-            onClick={actions.handleGenerate}
-            disabled={actions.isLoading || isGraphGenerating}
+            onClick={handlePrimaryGenerateAction}
+            disabled={isPrimaryGenerateDisabled}
             style={{
               width: '100%',
               padding: '0.55rem 0.75rem',
@@ -888,8 +922,8 @@ export function Dashboard() {
               color: theme.button.primary.color,
               border: 'none',
               borderRadius: '6px',
-              cursor: actions.isLoading || isGraphGenerating ? 'not-allowed' : 'pointer',
-              opacity: actions.isLoading || isGraphGenerating ? 0.6 : 1,
+              cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
+              opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -897,18 +931,20 @@ export function Dashboard() {
               transition: 'all 0.2s',
               boxSizing: 'border-box',
             }}
-            title="Générer (Ctrl+Enter)"
+            title={primaryActionTitle}
           >
-            <span>Générer</span>
-            <span
-              style={{
-                fontSize: remSize('caption'),
-                opacity: 0.8,
-                fontWeight: 'normal',
-              }}
-            >
-              Ctrl+Enter
-            </span>
+            <span>{primaryActionLabel}</span>
+            {!hasContextLoadError && (
+              <span
+                style={{
+                  fontSize: remSize('caption'),
+                  opacity: 0.8,
+                  fontWeight: 'normal',
+                }}
+              >
+                Ctrl+Enter
+              </span>
+            )}
           </button>
         ) : null}
       </div>
@@ -987,7 +1023,10 @@ export function Dashboard() {
                 ariaLabel="Replier le panneau gauche"
               />
             </div>
-            <ContextSelector onItemSelected={onContextItemSelected} />
+            <ContextSelector
+              onItemSelected={onContextItemSelected}
+              onLoadStateChange={onContextLoadStateChange}
+            />
           </>
         )}
       </div>
@@ -1176,7 +1215,10 @@ export function Dashboard() {
         onClose={() => setIsLeftPanelCollapsed(true)}
         contentBottomInsetPx={keyboardBottomInsetPx}
       >
-        <ContextSelector onItemSelected={onContextItemSelected} />
+        <ContextSelector
+          onItemSelected={onContextItemSelected}
+          onLoadStateChange={onContextLoadStateChange}
+        />
       </NarrowOverlayDrawer>
     )}
 

@@ -287,6 +287,27 @@ class OptimizeContextChange(BaseModel):
     to_mode: Literal["full", "excerpt"] = Field(..., description="Mode après optimisation")
 
 
+class OptimizeContextEffectReport(BaseModel):
+    """Synthèse lisible des effets d'une proposition d'optimisation."""
+
+    changes_by_entity_type: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Nombre de changements par type d'entité",
+    )
+    pinned_entity_keys: List[str] = Field(
+        default_factory=list,
+        description="Clés d'entités conservées par épinglage",
+    )
+    tokens_before_by_entity_type: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Répartition tokens avant optimisation par type d'entité",
+    )
+    tokens_after_by_entity_type: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Répartition tokens après optimisation par type d'entité",
+    )
+
+
 class OptimizeContextResponse(BaseModel):
     """Proposition d'optimisation de sélection GDD sous budget (FR21)."""
 
@@ -300,6 +321,10 @@ class OptimizeContextResponse(BaseModel):
     changes: List[OptimizeContextChange] = Field(
         default_factory=list,
         description="Liste des passages full→excerpt effectués",
+    )
+    effect_report: OptimizeContextEffectReport = Field(
+        default_factory=OptimizeContextEffectReport,
+        description="Rapport d'effets de l'optimisation pour l'UI",
     )
     pre_generation_context_fidelity_proxy_percent: int = Field(
         ...,
@@ -408,6 +433,12 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
             ValueError: Si aucun personnage n'est sélectionné.
         """
         all_characters = (v.characters_full or []) + (v.characters_excerpt or [])
+        if v.scene_protagonists:
+            all_characters.extend(
+                str(name)
+                for name in v.scene_protagonists.values()
+                if isinstance(name, str) and name.strip()
+            )
         if not all_characters:
             raise ValueError("Au moins un personnage doit être sélectionné pour générer un dialogue Unity")
         return v
@@ -477,6 +508,39 @@ class ExportUnityDialogueResponse(BaseModel):
     success: bool = Field(..., description="Indique si l'export a réussi")
 
 
+class BatchExportFailedItemResponse(BaseModel):
+    """Échec d'export pour un document du batch (Story 5.2)."""
+
+    id: str = Field(..., description="Identifiant document (sans extension)")
+    errors: List[str] = Field(default_factory=list, description="Messages d'erreur")
+
+
+class BatchExportRequest(BaseModel):
+    """Requête export batch Unity JSON (Story 5.2 / FR50)."""
+
+    document_ids: List[str] = Field(..., min_length=1, description="IDs document à exporter")
+    skip_validation: bool = Field(
+        False,
+        description="Si True, écrit sans validation schéma Unity (opt-in)",
+    )
+    filename_strategy: Literal["preserve", "slug"] = Field(
+        "preserve",
+        description="Stratégie de nommage : conserver filename ou slug titre",
+    )
+
+
+class BatchExportResponse(BaseModel):
+    """Réponse export batch Unity JSON."""
+
+    exported: List[str] = Field(default_factory=list, description="Noms de fichiers exportés")
+    failed: List[BatchExportFailedItemResponse] = Field(
+        default_factory=list,
+        description="Documents en échec avec erreurs",
+    )
+    cancelled: bool = Field(False, description="Batch annulé côté client (réservé)")
+    success: bool = Field(..., description="True si au moins un export réussi sans erreur globale")
+
+
 # Schemas pour la bibliothèque Unity Dialogues
 class UnityDialogueMetadata(BaseModel):
     """Métadonnées d'un fichier de dialogue Unity JSON.
@@ -504,6 +568,24 @@ class UnityDialogueListResponse(BaseModel):
     """
     dialogues: List[UnityDialogueMetadata] = Field(..., description="Liste des métadonnées")
     total: int = Field(..., description="Nombre total de fichiers")
+
+
+class UnitySchemaSectionSummary(BaseModel):
+    """Section clé du schéma Unity pour affichage référence (Story 5.3)."""
+
+    name: str = Field(..., description="Nom de la section")
+    description: str = Field(..., description="Description courte")
+    required_fields: List[str] = Field(default_factory=list, description="Champs requis principaux")
+
+
+class UnitySchemaReferenceResponse(BaseModel):
+    """Métadonnées schéma Unity de référence (Story 5.3 / FR51)."""
+
+    available: bool = Field(..., description="True si le fichier schéma est présent")
+    version: Optional[str] = Field(None, description="Version du schéma (ex. 1.2.0)")
+    source_path: str = Field(..., description="Chemin canonique du fichier schéma")
+    required_root_fields: List[str] = Field(default_factory=list)
+    sections: List[UnitySchemaSectionSummary] = Field(default_factory=list)
 
 
 class UnityDialogueReadResponse(BaseModel):

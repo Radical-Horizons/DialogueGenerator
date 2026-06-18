@@ -119,8 +119,10 @@ export function GraphEditor({
     schemaValidationIsValid,
     schemaValidationErrors,
     schemaValidationErrorCount,
+    schemaValidationWarnings,
+    schemaValidationStructuredErrors,
     handleToggleSchemaValidation,
-    handleSchemaErrorClick,
+    handleSchemaIssueClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showAIGenerationPanel,
@@ -360,8 +362,10 @@ export function GraphEditor({
               isValid={schemaValidationIsValid}
               errors={schemaValidationErrors}
               errorCount={schemaValidationErrorCount}
+              warnings={schemaValidationWarnings}
+              structuredErrors={schemaValidationStructuredErrors}
               onClose={handleToggleSchemaValidation}
-              onErrorClick={handleSchemaErrorClick}
+              onIssueClick={handleSchemaIssueClick}
             />
             {showCostBreakdown && activeDialogueFilename && (
               <DialogueCostModal

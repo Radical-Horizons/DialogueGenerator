@@ -52,6 +52,8 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
   const [data, setData] = useState<EstimateTokensResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const requestSeqRef = useRef(0)
+  const abortRef = useRef<AbortController | null>(null)
 
   const latestRef = useRef({
     organization,
@@ -108,16 +110,26 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
       in_game_flags: inGameFlags.length > 0 ? inGameFlags : undefined,
     }
 
+    abortRef.current?.abort()
+    const seq = requestSeqRef.current + 1
+    requestSeqRef.current = seq
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setLoading(true)
     setError(null)
     try {
-      const res = await estimateContextTokens(request)
+      const res = await estimateContextTokens(request, controller.signal)
+      if (requestSeqRef.current !== seq) return
       setData(res)
     } catch (e) {
+      if (controller.signal.aborted || requestSeqRef.current !== seq) return
       setData(null)
       setError(getErrorMessage(e))
     } finally {
-      setLoading(false)
+      if (requestSeqRef.current === seq) {
+        setLoading(false)
+      }
     }
   }, [buildContextSelections])
 
@@ -125,7 +137,10 @@ export function useContextSelectionTokenEstimate(): UseContextSelectionTokenEsti
     const id = window.setTimeout(() => {
       void run()
     }, DEBOUNCE_MS)
-    return () => window.clearTimeout(id)
+    return () => {
+      window.clearTimeout(id)
+      abortRef.current?.abort()
+    }
   }, [selections, organization, fieldConfigs, essentialFields, contextTokenBudgetMax, generationUserInstructions, sceneSelection, systemPromptOverride, gameRules, vocabularyConfig, includeNarrativeGuides, authorProfile, run])
 
   return { data, loading, error, refresh: run }

@@ -60,3 +60,22 @@ def test_compute_selection_empty(mock_builder: MagicMock) -> None:
     )
     assert metrics.selection_tokens == 42
     assert metrics.breakdown == []
+
+
+def test_compute_selection_tokens_can_skip_breakdown(mock_builder: MagicMock) -> None:
+    """Mesure rapide → un seul build, sans lignes de breakdown."""
+    sel = ContextSelection(characters_full=["Alice"], locations_full=["Forest"])
+
+    metrics = compute_context_selection_token_metrics(
+        mock_builder,
+        full_selection=sel,
+        user_instructions=" ",
+        field_configs=None,
+        organization_mode="narrative",
+        measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+        include_breakdown=False,
+    )
+
+    assert metrics.selection_tokens == 42
+    assert metrics.breakdown == []
+    assert mock_builder.build_context_json.call_count == 1

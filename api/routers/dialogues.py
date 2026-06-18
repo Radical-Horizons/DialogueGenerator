@@ -17,7 +17,10 @@ from api.schemas.dialogue import (
     GenerateUnityDialogueRequest,
     GenerateUnityDialogueResponse,
     ExportUnityDialogueRequest,
-    ExportUnityDialogueResponse
+    ExportUnityDialogueResponse,
+    BatchExportRequest,
+    BatchExportResponse,
+    BatchExportFailedItemResponse,
 )
 from pydantic import BaseModel, Field
 from api.dependencies import (
@@ -36,12 +39,19 @@ from services.dialogue_generation_service import DialogueGenerationService
 from services.configuration_service import ConfigurationService
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
-from services.unity_dialogue_export_service import write_unity_dialogue_to_file
+from services.unity_dialogue_export_service import (
+    unity_export_schema_validator,
+    write_unity_dialogue_to_file,
+)
+from services.batch_export_service import batch_export_documents
+from services.unity_export_validation_service import validate_persisted_document
+from api.utils.validate_schema_api import validate_schema_response_from_result
+from api.schemas.graph import ValidateSchemaResponse
 from services.llm_pricing_service import LLMPricingService
 from services.token_estimation_service import DEFAULT_COMPLETION_TOKENS_PER_NODE
 from constants import Defaults
 from services.context_token_budget import compute_context_selection_token_metrics
-from services.context_truncator import cap_context_text_to_budget
+from services.context_truncator import cap_context_text_to_budget, count_tokens_in_prompt_context_element
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from core.llm.llm_client import ILLMClient
 
@@ -365,7 +375,12 @@ async def estimate_tokens(
             context_builder.serialize_context_to_text(structured_context),
             request_data.max_context_tokens,
         )
-        context_tokens = context_builder._count_tokens(context_text)
+        ctx_in_prompt = count_tokens_in_prompt_context_element(built.raw_prompt)
+        context_tokens = (
+            ctx_in_prompt
+            if ctx_in_prompt > 0
+            else context_builder._count_tokens(context_text)
+        )
 
         metrics = compute_context_selection_token_metrics(
             context_builder,
@@ -486,6 +501,7 @@ async def export_unity_dialogue(
             filename=request_data.filename,
             title=request_data.title,
             request_id=request_id,
+            validator=unity_export_schema_validator,
         )
         return ExportUnityDialogueResponse(
             file_path=str(file_path.absolute()),
@@ -498,6 +514,84 @@ async def export_unity_dialogue(
         logger.exception("Erreur lors de l'export Unity JSON (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de l'export du dialogue Unity JSON",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/batch-export",
+    response_model=BatchExportResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def batch_export_unity_dialogues(
+    request_data: BatchExportRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchExportResponse:
+    """Exporte plusieurs dialogues persistés vers Unity JSON (Story 5.2 / FR50)."""
+    try:
+        result = batch_export_documents(
+            config_service,
+            request_data.document_ids,
+            skip_validation=request_data.skip_validation,
+            filename_strategy=request_data.filename_strategy,
+            request_id=request_id,
+        )
+        return BatchExportResponse(
+            exported=result.exported,
+            failed=[
+                BatchExportFailedItemResponse(id=item.id, errors=item.errors)
+                for item in result.failed
+            ],
+            cancelled=result.cancelled,
+            success=len(result.exported) > 0 or len(result.failed) == 0,
+        )
+    except ValidationException:
+        raise
+    except Exception as e:
+        logger.exception("Erreur batch export Unity (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de l'export batch Unity JSON",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/{document_id}/validate-schema",
+    response_model=ValidateSchemaResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def validate_document_schema(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ValidateSchemaResponse:
+    """Valide un document persisté contre le schéma Unity (Story 5.3 / FR51)."""
+    try:
+        result = validate_persisted_document(config_service, document_id, request_id)
+        return validate_schema_response_from_result(result)
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(
+            message=str(exc),
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    except Exception as e:
+        logger.exception(
+            "Erreur validate-schema document %s (request_id: %s)", document_id, request_id
+        )
+        raise InternalServerException(
+            message="Erreur lors de la validation du schéma Unity",
             details={"error": str(e)},
             request_id=request_id,
         )

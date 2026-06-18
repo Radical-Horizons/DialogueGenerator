@@ -1,7 +1,7 @@
 /**
  * Modal optimisation contexte GDD sous budget (FR21).
  */
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { optimizeContextSelection } from '../../api/context'
 import type { ContextSelection, OptimizeContextResponse } from '../../types/api'
 import { useContextStore } from '../../store/contextStore'
@@ -16,6 +16,14 @@ import { modalTypography } from '../../theme/responsiveChrome'
 
 type Phase = 'loading' | 'preview' | 'report'
 
+const PIN_LABELS: Record<string, string> = {
+  characters: 'Personnage',
+  locations: 'Lieu',
+  items: 'Objet',
+  species: 'Espèce',
+  communities: 'Communauté',
+}
+
 export interface ContextOptimizeModalProps {
   open: boolean
   onClose: () => void
@@ -27,6 +35,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
   const { ref: panelRef, isNarrow } = useNarrowInlineSize(520)
   const typo = isNarrow ? modalTypography.narrow : modalTypography.comfortable
   const setSelections = useContextStore((s) => s.setSelections)
+  const selections = useContextStore((s) => s.selections)
   const pinnedKeys = useContextConfigStore((s) => s.contextOptimizationPinnedKeys)
   const setPinnedKeys = useContextConfigStore((s) => s.setContextOptimizationPinnedKeys)
   const strategy = useContextConfigStore((s) => s.contextOptimizationStrategy)
@@ -39,7 +48,35 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
   const [error, setError] = useState<string | null>(null)
   const [proposal, setProposal] = useState<OptimizeContextResponse | null>(null)
   const [snapshotBefore, setSnapshotBefore] = useState<ContextSelection | null>(null)
-  const [pinInput, setPinInput] = useState('')
+  const [selectedPinKey, setSelectedPinKey] = useState('')
+
+  const pinOptions = useMemo(() => {
+    const entries: { key: string; label: string }[] = []
+    const groups: Array<[keyof ContextSelection, string]> = [
+      ['characters_full', 'characters'],
+      ['characters_excerpt', 'characters'],
+      ['locations_full', 'locations'],
+      ['locations_excerpt', 'locations'],
+      ['items_full', 'items'],
+      ['items_excerpt', 'items'],
+      ['species_full', 'species'],
+      ['species_excerpt', 'species'],
+      ['communities_full', 'communities'],
+      ['communities_excerpt', 'communities'],
+    ]
+    const seen = new Set<string>()
+    for (const [selectionKey, entityType] of groups) {
+      const names = selections[selectionKey]
+      if (!Array.isArray(names)) continue
+      for (const name of names) {
+        const key = `${entityType}:${name}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        entries.push({ key, label: `${PIN_LABELS[entityType] ?? entityType} — ${name}` })
+      }
+    }
+    return entries.sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }))
+  }, [selections])
 
   const reset = useCallback(() => {
     setPhase('loading')
@@ -75,7 +112,7 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
     return () => {
       cancelled = true
     }
-  }, [open, reset])
+  }, [open, pinnedKeys, proxyThreshold, reset, strategy])
 
   const handleAccept = useCallback(() => {
     if (!proposal) return
@@ -92,12 +129,11 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
     reset()
   }, [snapshotBefore, setSelections, onClose, reset])
 
-  const addPinFromInput = useCallback(() => {
-    const v = pinInput.trim()
-    if (!v || !v.includes(':')) return
-    setPinnedKeys([...pinnedKeys, v])
-    setPinInput('')
-  }, [pinInput, pinnedKeys, setPinnedKeys])
+  const addSelectedPin = useCallback(() => {
+    if (!selectedPinKey || pinnedKeys.includes(selectedPinKey)) return
+    setPinnedKeys([...pinnedKeys, selectedPinKey])
+    setSelectedPinKey('')
+  }, [pinnedKeys, selectedPinKey, setPinnedKeys])
 
   if (!open) return null
 
@@ -184,13 +220,12 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: 4, color: theme.text.secondary }}>
-              Épingler type:nom (ex. characters:Alice)
+              Épingler une fiche sélectionnée
             </label>
             <div style={{ display: 'flex', gap: 6 }}>
-              <input
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                placeholder="characters:Nom"
+              <StyledSelect
+                value={selectedPinKey}
+                onChange={(e) => setSelectedPinKey(e.target.value)}
                 style={{
                   flex: 1,
                   padding: '0.25rem',
@@ -199,22 +234,35 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
                   backgroundColor: theme.background.secondary,
                   color: theme.text.primary,
                 }}
-              />
+              >
+                <option value="">Choisir une fiche active…</option>
+                {pinOptions.map((option) => (
+                  <option key={option.key} value={option.key} disabled={pinnedKeys.includes(option.key)}>
+                    {option.label}
+                  </option>
+                ))}
+              </StyledSelect>
               <button
                 type="button"
-                onClick={addPinFromInput}
+                onClick={addSelectedPin}
+                disabled={!selectedPinKey}
                 style={{
                   padding: '0.25rem 0.5rem',
                   borderRadius: 4,
                   border: `1px solid ${theme.border.primary}`,
                   backgroundColor: theme.button.secondary.background,
                   color: theme.button.secondary.color,
-                  cursor: 'pointer',
+                  cursor: selectedPinKey ? 'pointer' : 'not-allowed',
                 }}
               >
                 Ajouter
               </button>
             </div>
+            {pinOptions.length === 0 && (
+              <p style={{ margin: '0.35rem 0 0', color: theme.text.secondary, fontSize: remSize('caption') }}>
+                Sélectionnez d’abord une fiche dans le contexte pour pouvoir l’épingler.
+              </p>
+            )}
             {pinnedKeys.length > 0 && (
               <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem', fontSize: remSize('small') }}>
                 {pinnedKeys.map((k) => (
@@ -283,6 +331,21 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
             <p style={{ fontSize: remSize('body'), margin: '0 0 0.5rem' }}>
               Proxy pré-génération : {proposal.pre_generation_context_fidelity_proxy_percent} %
             </p>
+            {proposal.effect_report && (
+              <div style={{ fontSize: remSize('small'), margin: '0 0 0.75rem' }}>
+                <strong>Rapport des effets</strong>
+                <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.1rem' }}>
+                  {Object.entries(proposal.effect_report.changes_by_entity_type).map(([type, count]) => (
+                    <li key={type}>
+                      {PIN_LABELS[type] ?? type} : {count} fiche(s) passées en extrait
+                    </li>
+                  ))}
+                  {proposal.effect_report.pinned_entity_keys.length > 0 && (
+                    <li>Épinglées : {proposal.effect_report.pinned_entity_keys.join(', ')}</li>
+                  )}
+                </ul>
+              </div>
+            )}
             {proposal.no_op ? (
               <p style={{ fontSize: remSize('body') }}>Aucun changement nécessaire (déjà sous le budget).</p>
             ) : (

@@ -113,6 +113,13 @@ export interface OptimizeContextChange {
   to_mode: 'full' | 'excerpt'
 }
 
+export interface OptimizeContextEffectReport {
+  changes_by_entity_type: Record<string, number>
+  pinned_entity_keys: string[]
+  tokens_before_by_entity_type: Record<string, number>
+  tokens_after_by_entity_type: Record<string, number>
+}
+
 /** Réponse POST /context/optimize — proxy pré-génération distinct du scoring post-génération (3.6). */
 export interface OptimizeContextResponse {
   proposed_context_selections: ContextSelection
@@ -120,6 +127,7 @@ export interface OptimizeContextResponse {
   selection_tokens_after: number
   tokens_saved: number
   changes: OptimizeContextChange[]
+  effect_report: OptimizeContextEffectReport
   pre_generation_context_fidelity_proxy_percent: number
   warnings: string[]
   no_op: boolean
@@ -402,6 +410,24 @@ export interface ExportUnityDialogueRequest {
 export interface ExportUnityDialogueResponse {
   file_path: string
   filename: string
+  success: boolean
+}
+
+export interface BatchExportFailedItem {
+  id: string
+  errors: string[]
+}
+
+export interface BatchExportRequest {
+  document_ids: string[]
+  skip_validation?: boolean
+  filename_strategy?: 'preserve' | 'slug'
+}
+
+export interface BatchExportResponse {
+  exported: string[]
+  failed: BatchExportFailedItem[]
+  cancelled?: boolean
   success: boolean
 }
 

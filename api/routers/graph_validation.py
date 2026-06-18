@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Annotated
 
@@ -23,7 +22,8 @@ from api.schemas.graph import (
     ValidateSchemaResponse,
     ValidationErrorDetail,
 )
-from api.utils.unity_schema_validator import validate_unity_json
+from api.utils.validate_schema_api import validate_schema_response_from_result
+from services.unity_export_validation_service import validate_unity_export_document
 from core.context.context_builder import ContextBuilder
 from services.dialogue_flag_reference_validation_service import (
     DialogueFlagReferenceValidationService,
@@ -120,20 +120,28 @@ async def validate_schema(
                 "validate-schema: graphe vide, accepté sans validation (request_id: %s)",
                 request_id,
             )
-            return ValidateSchemaResponse(is_valid=True, errors=[], error_count=0)
+            return ValidateSchemaResponse(
+                is_valid=True,
+                errors=[],
+                error_count=0,
+                warnings=[],
+                structured_errors=[],
+            )
 
-        unity_json_str = GraphConversionService.graph_to_unity_json(
-            request_data.nodes, request_data.edges
+        unity_doc = GraphConversionService.graph_to_unity_document(
+            request_data.nodes,
+            request_data.edges,
+            dialogue_flags=request_data.dialogue_flags,
         )
-        unity_doc = json.loads(unity_json_str)
-        is_valid, errors = validate_unity_json(unity_doc)
+        result = validate_unity_export_document(unity_doc)
         logger.info(
-            "validate-schema: is_valid=%s, %d error(s) (request_id: %s)",
-            is_valid,
-            len(errors),
+            "validate-schema: is_valid=%s, %d error(s), %d warning(s) (request_id: %s)",
+            result.is_valid,
+            result.error_count,
+            len(result.warnings),
             request_id,
         )
-        return ValidateSchemaResponse(is_valid=is_valid, errors=errors, error_count=len(errors))
+        return validate_schema_response_from_result(result)
     except Exception as e:
         logger.exception("Erreur lors de validate-schema (request_id: %s)", request_id)
         raise InternalServerException(

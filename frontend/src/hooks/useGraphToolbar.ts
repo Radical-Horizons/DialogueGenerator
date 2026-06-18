@@ -13,6 +13,13 @@ import { getErrorMessage } from '../types/errors'
 import type { UseToastFn } from '../components/shared'
 import type { GraphLayoutSpacingMode } from '../store/types/graphState'
 import * as graphAPI from '../api/graph'
+import { buildGraphSchemaApiPayload } from '../utils/buildGraphApiPayload'
+import {
+  buildUnityNodeIndexToIdMap,
+  resolveGraphNodeIdFromUnityPath,
+} from '../utils/unityNodeIndexMap'
+import { useUnityExport } from './useUnityExport'
+import type { SchemaValidationIssue } from '../types/graph'
 
 export interface UseGraphToolbarReturn {
   showAutoLayoutDropdown: boolean
@@ -45,8 +52,10 @@ export interface UseGraphToolbarReturn {
   schemaValidationIsValid: boolean
   schemaValidationErrors: string[]
   schemaValidationErrorCount: number
+  schemaValidationWarnings: SchemaValidationIssue[]
+  schemaValidationStructuredErrors: SchemaValidationIssue[]
   handleToggleSchemaValidation: () => void
-  handleSchemaErrorClick: (error: string) => void
+  handleSchemaIssueClick: (issue: SchemaValidationIssue) => void
   showCostBreakdown: boolean
   setShowCostBreakdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showShortcutsTooltip: boolean
@@ -70,6 +79,7 @@ export interface UseGraphToolbarReturn {
   handleOpenExportDialog: () => void
   handleExportPNG: () => Promise<void>
   handleExportSVG: () => Promise<void>
+  handleExportUnity: () => Promise<void>
   undo: () => void
   redo: () => void
   canUndoNow: boolean
@@ -99,6 +109,10 @@ export function useGraphToolbar(
   const [schemaValidationIsValid, setSchemaValidationIsValid] = useState(false)
   const [schemaValidationErrors, setSchemaValidationErrors] = useState<string[]>([])
   const [schemaValidationErrorCount, setSchemaValidationErrorCount] = useState(0)
+  const [schemaValidationWarnings, setSchemaValidationWarnings] = useState<SchemaValidationIssue[]>([])
+  const [schemaValidationStructuredErrors, setSchemaValidationStructuredErrors] = useState<
+    SchemaValidationIssue[]
+  >([])
   const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
   const [showSearchBar, setShowSearchBar] = useState(false)
@@ -441,33 +455,52 @@ export function useGraphToolbar(
     setShowSchemaValidationPanel(true)
     setSchemaValidationLoading(true)
     try {
-      const { nodes, edges } = useGraphStore.getState()
-      const payload = {
-        nodes: nodes.map((n) => ({ id: n.id, type: n.type ?? 'dialogueNode', position: n.position, data: n.data })),
-        edges: edges.map((e) => ({ id: e.id, source: e.source, target: e.target, type: e.type, data: e.data as Record<string, unknown> | undefined })),
-      }
+      const { nodes, edges, dialogueFlagBindings } = useGraphStore.getState()
+      const payload = buildGraphSchemaApiPayload(nodes, edges, dialogueFlagBindings)
       const res = await graphAPI.validateSchema(payload)
       setSchemaValidationIsValid(res.is_valid)
       setSchemaValidationErrors(res.errors)
       setSchemaValidationErrorCount(res.error_count)
+      setSchemaValidationWarnings(res.warnings ?? [])
+      setSchemaValidationStructuredErrors(res.structured_errors ?? [])
     } catch (err) {
       setSchemaValidationErrors([getErrorMessage(err)])
       setSchemaValidationErrorCount(1)
       setSchemaValidationIsValid(false)
+      setSchemaValidationWarnings([])
+      setSchemaValidationStructuredErrors([])
     } finally {
       setSchemaValidationLoading(false)
     }
   }, [showSchemaValidationPanel])
 
-  // Tente d'extraire l'index de nœud depuis "[nodes.N...]" et de focaliser le nœud correspondant.
-  const handleSchemaErrorClick = useCallback((error: string) => {
-    const match = /\[nodes\.(\d+)/.exec(error)
-    if (!match) return
-    const nodeIndex = parseInt(match[1], 10)
+  const { handleExportUnity } = useUnityExport(toast, {
+    setShowSchemaValidationPanel,
+    setSchemaValidationLoading,
+    setSchemaValidationIsValid,
+    setSchemaValidationErrors,
+    setSchemaValidationErrorCount,
+    setSchemaValidationWarnings,
+    setSchemaValidationStructuredErrors,
+  })
+
+  const handleSchemaIssueClick = useCallback((issue: SchemaValidationIssue) => {
+    if (issue.node_id) {
+      useGraphViewStore.getState().focusNode(issue.node_id)
+      return
+    }
     const { nodes } = useGraphStore.getState()
-    const node = nodes[nodeIndex]
-    if (node) {
-      useGraphViewStore.getState().focusNode(node.id)
+    const unityIndexMap = buildUnityNodeIndexToIdMap(nodes)
+    const graphNodeId = resolveGraphNodeIdFromUnityPath(issue.path, unityIndexMap)
+    if (graphNodeId) {
+      useGraphViewStore.getState().focusNode(graphNodeId)
+      return
+    }
+    const legacyMatch = /\[nodes\.(\d+)/.exec(issue.message)
+    if (!legacyMatch) return
+    const legacyId = unityIndexMap.get(parseInt(legacyMatch[1], 10))
+    if (legacyId) {
+      useGraphViewStore.getState().focusNode(legacyId)
     }
   }, [])
 
@@ -504,8 +537,10 @@ export function useGraphToolbar(
     schemaValidationIsValid,
     schemaValidationErrors,
     schemaValidationErrorCount,
+    schemaValidationWarnings,
+    schemaValidationStructuredErrors,
     handleToggleSchemaValidation,
-    handleSchemaErrorClick,
+    handleSchemaIssueClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -529,6 +564,7 @@ export function useGraphToolbar(
     handleOpenExportDialog,
     handleExportPNG,
     handleExportSVG,
+    handleExportUnity,
     undo,
     redo,
     canUndoNow,

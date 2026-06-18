@@ -65,6 +65,7 @@ function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGra
     handleOpenExportDialog: () => {},
     handleExportPNG: async () => {},
     handleExportSVG: async () => {},
+    handleExportUnity: async () => {},
     undo: () => useGraphStore.getState().undo(),
     redo: () => useGraphStore.getState().redo(),
     canUndoNow: false,

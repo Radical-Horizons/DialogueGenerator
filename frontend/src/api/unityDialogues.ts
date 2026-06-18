@@ -8,6 +8,7 @@ import type {
   UnityDialoguePreviewRequest,
   UnityDialoguePreviewResponse,
 } from '../types/api'
+import type { UnitySchemaReferenceResponse } from '../types/graph'
 
 /**
  * Liste tous les fichiers de dialogues Unity JSON.
@@ -43,6 +44,16 @@ export async function previewUnityDialogue(
   const response = await apiClient.post<UnityDialoguePreviewResponse>(
     '/api/v1/unity-dialogues/preview',
     request
+  )
+  return response.data
+}
+
+/**
+ * Métadonnées du schéma Unity de référence (Story 5.3 / FR51).
+ */
+export async function getUnitySchemaReference(): Promise<UnitySchemaReferenceResponse> {
+  const response = await apiClient.get<UnitySchemaReferenceResponse>(
+    '/api/v1/unity-dialogues/schema'
   )
   return response.data
 }

@@ -87,28 +87,13 @@ export function GraphEditorHeader({
     lastSavedAt,
     syncStatus,
     lastAckSeq,
-    dialogueMetadata,
     createEmptyNode,
     addNode,
     setSelectedNode,
     setHighlightedNodes,
-    exportToUnity,
   } = useGraphStore()
   const canUndoNow = useGraphStore((s) => s.undoStack.length > 0)
   const canRedoNow = useGraphStore((s) => s.redoStack.length > 0)
-
-  const handleExportUnity = useCallback(() => {
-    const json = exportToUnity()
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = dialogueMetadata?.filename
-      ? `${dialogueMetadata.filename}.json`
-      : 'dialogue.json'
-    a.click()
-    URL.revokeObjectURL(url)
-  }, [dialogueMetadata?.filename, exportToUnity])
 
   const {
     showAutoLayoutDropdown,
@@ -150,6 +135,7 @@ export function GraphEditorHeader({
     reactFlowInstance,
     handleAutoLayout,
     handleOpenExportDialog,
+    handleExportUnity,
     undo,
     redo,
   } = toolbar
@@ -423,7 +409,7 @@ export function GraphEditorHeader({
           data-testid="btn-export-unity"
           onClick={() => {
             setShowActionsDropdown(false)
-            handleExportUnity()
+            void handleExportUnity()
           }}
           disabled={nodes.length === 0}
           style={{

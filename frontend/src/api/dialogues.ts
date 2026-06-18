@@ -9,12 +9,15 @@ import type {
   GenerateUnityDialogueResponse,
   ExportUnityDialogueRequest,
   ExportUnityDialogueResponse,
+  BatchExportRequest,
+  BatchExportResponse,
   EstimateTokensRequest,
   EstimateTokensResponse,
   PreviewPromptRequest,
   PreviewPromptResponse,
   GenerationJobStatus,
 } from '../types/api'
+import type { ValidateSchemaResponse } from '../types/graph'
 
 // NOTE: generateDialogueVariants et generateInteractionVariants ont été supprimés. Utiliser generateUnityDialogue à la place.
 
@@ -86,9 +89,13 @@ export async function getGenerationJobStatus(job_id: string): Promise<Generation
  * uniquement (sans estimation), utiliser previewPrompt à la place.
  */
 export async function estimateTokens(
-  request: EstimateTokensRequest
+  request: EstimateTokensRequest,
+  signal?: AbortSignal
 ): Promise<EstimateTokensResponse> {
-  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/dialogues/estimate-tokens', request)
+  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/dialogues/estimate-tokens', request, {
+    signal,
+    timeout: API_TIMEOUTS.CONTEXT_ESTIMATION,
+  })
   return response.data
 }
 
@@ -124,6 +131,31 @@ export async function exportUnityDialogue(
   const response = await apiClient.post<ExportUnityDialogueResponse>(
     '/api/v1/dialogues/unity/export',
     request
+  )
+  return response.data
+}
+
+/**
+ * Valide un document persisté contre le schéma Unity (Story 5.3 / FR51).
+ */
+export async function validateDocumentSchema(documentId: string): Promise<ValidateSchemaResponse> {
+  const response = await apiClient.post<ValidateSchemaResponse>(
+    `/api/v1/dialogues/${encodeURIComponent(documentId)}/validate-schema`,
+  )
+  return response.data
+}
+
+/**
+ * Export batch de dialogues persistés vers Unity JSON (Story 5.2).
+ */
+export async function batchExportUnityDialogues(
+  request: BatchExportRequest,
+  signal?: AbortSignal,
+): Promise<BatchExportResponse> {
+  const response = await apiClient.post<BatchExportResponse>(
+    '/api/v1/dialogues/batch-export',
+    request,
+    { signal },
   )
   return response.data
 }

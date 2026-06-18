@@ -145,18 +145,18 @@ development_status:
   4-13-valider-conformité-schéma-json-unity-100-fr48: done
   4-14-refactorer-api-routers-graph-dette-technique: done
   epic-4-retrospective: done
-  epic-9: in-progress
+  epic-9: done
   9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: done
   9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: done
   9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: done
   9-4-preview-scénarios-avec-différents-états-de-variables-fr92: done
   9-5-valider-références-variables-détecter-variables-non-définies-fr93: done
   9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: done
-  epic-9-retrospective: optional
-  epic-5: backlog
-  5-1-exporter-dialogue-single-vers-format-unity-json-fr49: backlog
-  5-2-exporter-batch-plusieurs-dialogues-vers-unity-json-fr50: backlog
-  5-3-valider-json-exporté-contre-schéma-unity-custom-fr51: backlog
+  epic-9-retrospective: done
+  epic-5: in-progress
+  5-1-exporter-dialogue-single-vers-format-unity-json-fr49: done
+  5-2-exporter-batch-plusieurs-dialogues-vers-unity-json-fr50: done
+  5-3-valider-json-exporté-contre-schéma-unity-custom-fr51: done
   5-4-télécharger-fichiers-json-exportés-fr52: backlog
   5-5-prévisualiser-export-avant-téléchargement-structure-json-taille-fr53: backlog
   5-6-générer-logs-export-avec-métadonnées-date-génération-coût-statut-validation-fr54: backlog

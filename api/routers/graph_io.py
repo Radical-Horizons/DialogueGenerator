@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from pathlib import Path
@@ -20,7 +21,11 @@ from api.schemas.graph import (
 )
 from services.configuration_service import ConfigurationService
 from services.graph_conversion_service import GraphConversionService
-from services.unity_dialogue_export_service import read_last_seq, write_unity_dialogue_to_file
+from services.unity_dialogue_export_service import (
+    read_last_seq,
+    unity_export_schema_validator,
+    write_unity_dialogue_to_file,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -175,10 +180,13 @@ async def save_graph_and_write(
     seq > last_seq → écriture atomique + persistance last_seq + ack(seq).
     """
     try:
-        json_content = GraphConversionService.graph_to_unity_json(
+        document = GraphConversionService.graph_to_unity_document(
             request_data.nodes,
             request_data.edges,
+            dialogue_flags=request_data.dialogue_flags,
+            title=request_data.metadata.title,
         )
+        json_content = json.dumps(document, ensure_ascii=False, indent=2)
         sanitized_title = _sanitize_dialogue_title_for_filename(request_data.metadata.title)
         filename_without_ext = sanitized_title[:100] if sanitized_title else "dialogue"
         filename = filename_without_ext + ".json"
@@ -211,7 +219,9 @@ async def save_graph_and_write(
             json_content=json_content,
             filename=filename_without_ext,
             request_id=request_id,
+            validator=unity_export_schema_validator,
             last_seq_after_write=seq,
+            preserve_source_fields=bool(request_data.dialogue_flags),
         )
 
         extra: dict = {}

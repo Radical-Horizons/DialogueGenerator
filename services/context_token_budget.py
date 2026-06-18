@@ -90,6 +90,26 @@ def _count_context_tokens_for_selection_dict(
     return int(context_builder._count_tokens(text))
 
 
+def _breakdown_from_prompt_structure(structured: Any) -> List[ContextTokenBreakdownRow]:
+    """Extrait un breakdown type/mode depuis une structure de contexte déjà construite."""
+    rows_by_key: Dict[Tuple[str, str], int] = {}
+    for section in getattr(structured, "sections", []) or []:
+        for category in getattr(section, "categories", []) or []:
+            entity_type = str(getattr(category, "type", "") or "")
+            if entity_type not in {spec[0] for spec in BUCKET_SPECS}:
+                continue
+            for item in getattr(category, "items", []) or []:
+                metadata = getattr(item, "metadata", None) or {}
+                mode = str(metadata.get("mode") or "full")
+                key = (entity_type, mode if mode in {"full", "excerpt"} else "full")
+                rows_by_key[key] = rows_by_key.get(key, 0) + int(getattr(item, "tokenCount", None) or 0)
+    return [
+        ContextTokenBreakdownRow(entity_type=entity_type, mode=mode, token_count=tokens)
+        for (entity_type, mode), tokens in rows_by_key.items()
+        if tokens > 0
+    ]
+
+
 def compute_context_selection_token_metrics(
     context_builder: Any,
     *,
@@ -98,6 +118,7 @@ def compute_context_selection_token_metrics(
     field_configs: Optional[Dict[str, List[str]]],
     organization_mode: str,
     measurement_max_tokens: int,
+    include_breakdown: bool = True,
 ) -> ContextSelectionTokenMetrics:
     """Calcule les tokens « pleine sélection » et un breakdown par type/mode.
 
@@ -111,37 +132,69 @@ def compute_context_selection_token_metrics(
         field_configs: Config champs contexte (optionnel).
         organization_mode: Mode d'organisation narrative / default / minimal.
         measurement_max_tokens: Plafond technique pour la mesure (ex. MAX_CONTEXT_TOKENS).
+        include_breakdown: Si False, saute les builds isolés par type/mode pour les chemins rapides.
 
     Returns:
         Métriques pour réponse ``/context/estimate-tokens``.
     """
     full_dict = full_selection.model_dump()
 
-    selection_tokens = _count_context_tokens_for_selection_dict(
-        context_builder=context_builder,
-        selection_dict=full_dict,
-        user_instructions=user_instructions,
+    service_dict = full_selection.to_service_dict()
+    structured = context_builder.build_context_json(
+        selected_elements=service_dict,
+        scene_instruction=user_instructions,
         field_configs=field_configs,
         organization_mode=organization_mode,
-        measurement_max_tokens=measurement_max_tokens,
+        max_tokens=measurement_max_tokens,
+        include_dialogue_type=True,
+        element_modes=service_dict.get("_element_modes"),
     )
+    text = context_builder.serialize_context_to_text(structured)
+    selection_tokens = int(context_builder._count_tokens(text))
 
     breakdown: List[ContextTokenBreakdownRow] = []
+    if not include_breakdown:
+        return ContextSelectionTokenMetrics(
+            selection_tokens=selection_tokens,
+            breakdown=breakdown,
+            breakdown_note="Breakdown non calculé pour cette mesure rapide.",
+        )
+
+    structured_breakdown = _breakdown_from_prompt_structure(structured)
+    if structured_breakdown:
+        note = (
+            "Breakdown dérivé de la structure complète déjà construite ; le total affiché pour "
+            "le budget utilise la sélection complète en un seul build."
+        )
+        return ContextSelectionTokenMetrics(
+            selection_tokens=selection_tokens,
+            breakdown=structured_breakdown,
+            breakdown_note=note,
+        )
+
+    non_empty_buckets = [
+        (entity_type, mode)
+        for entity_type, mode in BUCKET_SPECS
+        if full_dict.get(f"{entity_type}_{mode}")
+    ]
     for entity_type, mode in BUCKET_SPECS:
         key = f"{entity_type}_{mode}"
         names = list(full_dict.get(key) or [])
         if not names:
             continue
-        partial = _base_partial_dict(full_dict)
-        partial[key] = names
-        tok = _count_context_tokens_for_selection_dict(
-            context_builder=context_builder,
-            selection_dict=partial,
-            user_instructions=user_instructions,
-            field_configs=field_configs,
-            organization_mode=organization_mode,
-            measurement_max_tokens=measurement_max_tokens,
-        )
+        if len(non_empty_buckets) == 1:
+            tok = selection_tokens
+        else:
+            partial = _base_partial_dict(full_dict)
+            partial[key] = names
+            tok = _count_context_tokens_for_selection_dict(
+                context_builder=context_builder,
+                selection_dict=partial,
+                user_instructions=user_instructions,
+                field_configs=field_configs,
+                organization_mode=organization_mode,
+                measurement_max_tokens=measurement_max_tokens,
+            )
         breakdown.append(
             ContextTokenBreakdownRow(entity_type=entity_type, mode=mode, token_count=tok)
         )

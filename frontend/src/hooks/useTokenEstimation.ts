@@ -3,7 +3,7 @@
  * 
  * Extrait la logique d'estimation de tokens depuis GenerationPanel.
  */
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
@@ -73,6 +73,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   const [estimationError, setEstimationError] = useState<string | null>(null)
   const [completionTokens, setCompletionTokens] = useState<number | null>(null)
   const [estimatedCostEur, setEstimatedCostEur] = useState<number | null>(null)
+  const requestSeqRef = useRef(0)
+  const abortRef = useRef<AbortController | null>(null)
 
   const { selections } = useContextStore()
   const { sceneSelection, dialogueStructure, systemPromptOverride, gameRules, tokenCount, setRawPrompt } = useGenerationStore()
@@ -96,9 +98,10 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.dialogues_examples.length > 0 ||
       selections.narrative_structures.length > 0 ||
       selections.chapters.length > 0 ||
-      selections.scenes.length > 0
+      selections.scenes.length > 0 ||
+      Boolean(sceneSelection.characterA || sceneSelection.characterB)
     )
-  }, [selections])
+  }, [sceneSelection.characterA, sceneSelection.characterB, selections])
 
   const estimateTokens = useCallback(async () => {
     // Permettre l'estimation si on a au moins : instructions, sélections, ou un system prompt
@@ -160,6 +163,12 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     }
     
     // Ne pas effacer le prompt existant pendant l'estimation
+    abortRef.current?.abort()
+    const seq = requestSeqRef.current + 1
+    requestSeqRef.current = seq
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setIsEstimating(true)
     setEstimationError(null)
     // Mettre à jour le store pour afficher "Construction du prompt..." dans le panneau Détails
@@ -175,7 +184,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
 
     try {
       // Utiliser le même endpoint que le budget contexte afin d'éviter les estimations len/4 divergentes.
-      const response = await dialoguesAPI.estimateTokens(promptParams)
+      const response = await dialoguesAPI.estimateTokens(promptParams, controller.signal)
+      if (requestSeqRef.current !== seq) return
       setCompletionTokens(response.completion_tokens ?? null)
       setEstimatedCostEur(response.estimated_cost_eur ?? null)
       
@@ -201,6 +211,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
         )
       }
     } catch (err: unknown) {
+      if (controller.signal.aborted || requestSeqRef.current !== seq) return
       // Ne logger que les erreurs non liées à la connexion (backend non accessible)
       const e = err as { code?: string; response?: { status?: number } } | null
       if (e?.code !== 'ERR_NETWORK' && e?.code !== 'ECONNREFUSED' && e?.response?.status !== 401) {
@@ -226,7 +237,9 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
         'invalidate'
       )
     } finally {
-      setIsEstimating(false)
+      if (requestSeqRef.current === seq) {
+        setIsEstimating(false)
+      }
     }
   }, [
     userInstructions,
@@ -264,7 +277,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.dialogues_examples.length > 0 ||
       selections.narrative_structures.length > 0 ||
       selections.chapters.length > 0 ||
-      selections.scenes.length > 0
+      selections.scenes.length > 0 ||
+      Boolean(sceneSelection.characterA || sceneSelection.characterB)
 
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
     const hasCriteria = Boolean(userInstructions.trim() || hasAnySelections || hasSystemPrompt)
@@ -281,7 +295,10 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       }
     }, debounceMs)
 
-    return () => clearTimeout(timeoutId)
+    return () => {
+      clearTimeout(timeoutId)
+      abortRef.current?.abort()
+    }
   }, [
     userInstructions,
     selections,

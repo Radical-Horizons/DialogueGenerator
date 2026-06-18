@@ -36,4 +36,12 @@ describe('ContextTokenBudgetSection', () => {
     expect(cta.getAttribute('title')).toContain('FR21')
   })
 
+  it('avertit quand le plafond configuré dépasse 100k', async () => {
+    useContextConfigStore.setState({ contextTokenBudgetMax: 150_000 })
+
+    render(<ContextTokenBudgetSection />)
+
+    expect(await screen.findByTestId('context-token-budget-high-cap-warning')).toBeInTheDocument()
+  })
+
 })

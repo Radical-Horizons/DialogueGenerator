@@ -108,6 +108,34 @@ class ContextConstructionService:
         if self._context_truncator is None:
             return max(1, len(text) // 4) if text else 0
         return self._context_truncator.estimate_tokens(text)
+
+    def _with_scene_protagonists_as_characters(
+        self,
+        selected_elements: Dict[str, Any],
+        element_modes: Optional[Dict[str, Dict[str, str]]],
+    ) -> tuple[Dict[str, Any], Optional[Dict[str, Dict[str, str]]]]:
+        """Ajoute les protagonistes de scène à la sélection personnages effective."""
+        scene_protagonists = selected_elements.get("_scene_protagonists")
+        if not isinstance(scene_protagonists, dict):
+            return selected_elements, element_modes
+
+        out = dict(selected_elements)
+        characters = list(out.get("characters") or [])
+        modes = {k: dict(v) for k, v in (element_modes or {}).items()}
+        character_modes = modes.setdefault("characters", {})
+
+        for raw_name in scene_protagonists.values():
+            if not isinstance(raw_name, str):
+                continue
+            name = raw_name.strip()
+            if not name or name in characters:
+                continue
+            characters.append(name)
+            character_modes.setdefault(name, "full")
+
+        if characters:
+            out["characters"] = characters
+        return out, modes if modes else element_modes
     
     def _format_element_content(
         self,
@@ -261,8 +289,9 @@ class ContextConstructionService:
             # Ajouter le nom réel dans les métadonnées
             if context_item.metadata:
                 context_item.metadata["real_name"] = name
+                context_item.metadata["mode"] = element_mode
             else:
-                context_item.metadata = {"real_name": name}
+                context_item.metadata = {"real_name": name, "mode": element_mode}
             context_item.tokenCount = token_count
         
         return context_item
@@ -305,6 +334,10 @@ class ContextConstructionService:
             previous_dialogue_tokens = self._count_tokens(previous_dialogue_formatted) if previous_dialogue_formatted else 0
         
         # Informations sur le GDD avec champs personnalisés
+        selected_elements, element_modes = self._with_scene_protagonists_as_characters(
+            selected_elements,
+            element_modes,
+        )
         prioritized_elements_for_context = (
             self._element_resolver.prioritize_elements(selected_elements)
             if self._element_resolver
@@ -314,6 +347,7 @@ class ContextConstructionService:
         categories = []
         total_tokens = previous_dialogue_tokens
         
+        seen_canonical_by_category: Dict[str, set[str]] = {}
         for category_key, names_list in prioritized_elements_for_context.items():
             if not isinstance(names_list, list) or not names_list:
                 continue
@@ -337,7 +371,7 @@ class ContextConstructionService:
                 fields_to_include = field_configs[element_type]
             
             items = []
-            for idx, name in enumerate(names_list, start=1):
+            for name in names_list:
                 # Résoudre les données de l'élément via ElementResolver
                 element_data = (
                     self._element_resolver.resolve_element_data(category_key, name)
@@ -353,11 +387,22 @@ class ContextConstructionService:
                             f"Aucune donnée trouvée pour l'élément '{name}' dans la catégorie '{category_key}'."
                         )
                     continue
+                canonical_name = str(element_data.get("Nom") or name)
+                seen_for_category = seen_canonical_by_category.setdefault(category_key, set())
+                if canonical_name in seen_for_category:
+                    continue
+                seen_for_category.add(canonical_name)
                 
                 # Déterminer le mode de cet élément
                 element_mode = "full"  # Par défaut
                 if element_modes and category_key in element_modes and name in element_modes[category_key]:
                     element_mode = element_modes[category_key][name]
+                elif (
+                    element_modes
+                    and category_key in element_modes
+                    and canonical_name in element_modes[category_key]
+                ):
+                    element_mode = element_modes[category_key][canonical_name]
                 
                 # Gestion des champs via ContextFieldManager
                 field_manager = self._get_field_manager()
@@ -410,8 +455,8 @@ class ContextConstructionService:
                         element_data=element_data,
                         element_type=element_type,
                         element_label=element_label,
-                        idx=idx,
-                        name=name,
+                        idx=len(items) + 1,
+                        name=canonical_name,
                         filtered_fields=filtered_fields,
                         field_labels_map=field_labels_map,
                         organization_mode=organization_mode,
@@ -423,7 +468,7 @@ class ContextConstructionService:
                 
                 if formatted_content:
                     items.append(ElementBuildResult(
-                        name=name,
+                        name=canonical_name,
                         element_data=element_data,
                         element_mode=element_mode,
                         formatted_content=formatted_content,

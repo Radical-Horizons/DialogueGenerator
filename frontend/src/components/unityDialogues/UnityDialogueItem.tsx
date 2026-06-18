@@ -22,6 +22,10 @@ export interface UnityDialogueItemProps {
   isActiveOption?: boolean
   onOptionKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void
   onContextMenu?: (e: MouseEvent<HTMLButtonElement | HTMLDivElement>) => void
+  /** Mode batch export (Story 5.2) : checkbox de sélection. */
+  batchMode?: boolean
+  isChecked?: boolean
+  onCheckChange?: (checked: boolean) => void
 }
 
 const itemInteractiveStyle: CSSProperties = {
@@ -52,6 +56,9 @@ export const UnityDialogueItem = memo(
         isActiveOption = false,
         onOptionKeyDown,
         onContextMenu,
+        batchMode = false,
+        isChecked = false,
+        onCheckChange,
       },
       ref
     ) {
@@ -122,6 +129,24 @@ export const UnityDialogueItem = memo(
         </>
       )
 
+      const batchCheckbox = batchMode ? (
+        <input
+          type="checkbox"
+          data-testid="unity-dialogue-item-checkbox"
+          checked={isChecked}
+          onChange={(e) => onCheckChange?.(e.target.checked)}
+          aria-label={`Sélectionner ${titleText}`}
+          style={{ marginRight: '0.35rem', flexShrink: 0, marginTop: '0.15rem' }}
+        />
+      ) : null
+
+      const interactiveStyle = {
+        ...itemInteractiveStyle,
+        backgroundColor: bgForState,
+        flex: batchMode ? 1 : undefined,
+        minWidth: 0,
+      }
+
       if (asListboxOption) {
         return (
           <div
@@ -136,7 +161,39 @@ export const UnityDialogueItem = memo(
             onContextMenu={onContextMenu}
             onKeyDown={onOptionKeyDown}
             style={{
-              ...itemInteractiveStyle,
+              ...interactiveStyle,
+              display: batchMode ? 'flex' : itemInteractiveStyle.display,
+              alignItems: batchMode ? 'flex-start' : undefined,
+            }}
+            onMouseEnter={(e) => {
+              if (!isSelected) {
+                e.currentTarget.style.backgroundColor = theme.state.hover.background
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSelected) {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }
+            }}
+          >
+            {batchCheckbox}
+            <div style={{ flex: 1, minWidth: 0 }}>{body}</div>
+          </div>
+        )
+      }
+
+      if (batchMode) {
+        return (
+          <div
+            data-testid="unity-dialogue-item"
+            title={titleText}
+            aria-pressed={isSelected}
+            onContextMenu={onContextMenu}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              width: '100%',
+              borderBottom: `1px solid ${theme.border.primary}`,
               backgroundColor: bgForState,
             }}
             onMouseEnter={(e) => {
@@ -150,7 +207,21 @@ export const UnityDialogueItem = memo(
               }
             }}
           >
-            {body}
+            {batchCheckbox}
+            <button
+              ref={ref as React.Ref<HTMLButtonElement>}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={onClick}
+              onContextMenu={onContextMenu}
+              style={{
+                ...interactiveStyle,
+                borderBottom: 'none',
+                display: 'block',
+              }}
+            >
+              {body}
+            </button>
           </div>
         )
       }
@@ -164,10 +235,7 @@ export const UnityDialogueItem = memo(
           title={titleText}
           onClick={onClick}
           onContextMenu={onContextMenu}
-          style={{
-            ...itemInteractiveStyle,
-            backgroundColor: bgForState,
-          }}
+          style={interactiveStyle}
           onMouseEnter={(e) => {
             if (!isSelected) {
               e.currentTarget.style.backgroundColor = theme.state.hover.background

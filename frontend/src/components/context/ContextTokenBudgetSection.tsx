@@ -17,6 +17,8 @@ const ENTITY_LABELS: Record<string, string> = {
   communities: 'Communautés',
 }
 
+const OPTIMIZATION_WARNING_THRESHOLD = 100_000
+
 export function ContextTokenBudgetSection() {
   const budgetId = useId()
   const statusId = useId()
@@ -36,10 +38,11 @@ export function ContextTokenBudgetSection() {
   /** Mesure « pleine sélection » (plafond technique), peut dépasser le budget utilisateur. */
   const selectionTokens = data?.selection_tokens ?? 0
   const overBudget =
-    contextTokenBudgetMax > 0 && contextTokens > contextTokenBudgetMax
+    contextTokenBudgetMax > 0 && selectionTokens > contextTokenBudgetMax
+  const overOptimizationThreshold = contextTokenBudgetMax > OPTIMIZATION_WARNING_THRESHOLD
   const pct =
     contextTokenBudgetMax > 0
-      ? Math.min(100, (contextTokens / contextTokenBudgetMax) * 100)
+      ? Math.min(100, (selectionTokens / contextTokenBudgetMax) * 100)
       : 0
 
   return (
@@ -94,6 +97,14 @@ export function ContextTokenBudgetSection() {
                 style={{ display: 'block', marginTop: 4, color: theme.state.warning.color }}
               >
                 Budget dépassé — le contexte est tronqué ; réduire la sélection pour plus de marge.
+              </span>
+            )}
+            {overOptimizationThreshold && (
+              <span
+                data-testid="context-token-budget-high-cap-warning"
+                style={{ display: 'block', marginTop: 4, color: theme.state.warning.color }}
+              >
+                Plafond élevé — au-delà de 100 000 tokens, surveillez le coût et les temps de réponse.
               </span>
             )}
           </>
