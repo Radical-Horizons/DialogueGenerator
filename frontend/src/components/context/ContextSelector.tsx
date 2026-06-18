@@ -15,19 +15,29 @@ import type {
 } from '../../types/api'
 import { ContextList } from './ContextList'
 import type { ContextListItem } from './ContextList'
+import {
+  resolveCharacterCanonicalName,
+  resolveGddCanonicalName,
+  resolveLocationCanonicalName,
+} from '../../utils/gddEntityNames'
 
 /** Affiche aussi les noms sélectionnés absents du catalogue API (GDD vide / preset). */
 function mergeListWithSelectedNames(
   items: ContextListItem[],
   selectedNames: string[],
+  resolveName: (name: string) => string = (n) => n,
 ): ContextListItem[] {
   const seen = new Set(items.map((i) => i.name))
+  const seenCanonical = new Set(items.map((i) => resolveName(i.name)))
   const prepend: ContextListItem[] = []
   for (const name of selectedNames) {
-    if (name && !seen.has(name)) {
-      prepend.push({ name, data: {} })
-      seen.add(name)
+    const canonical = resolveName(name)
+    if (!name || seen.has(name) || seenCanonical.has(canonical)) {
+      continue
     }
+    prepend.push({ name: canonical, data: {} })
+    seen.add(canonical)
+    seenCanonical.add(canonical)
   }
   return [...prepend, ...items]
 }
@@ -37,7 +47,6 @@ import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
 import { ContextRulesEditor } from './ContextRulesEditor'
 import { ContextRelevancePanel } from './ContextRelevancePanel'
 import { ContextUsagePanel } from './ContextUsagePanel'
-import { ContextTokenBudgetSection } from './ContextTokenBudgetSection'
 import { useContextStore } from '../../store/contextStore'
 import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
@@ -374,34 +383,39 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
 
   const getCurrentItems = (): ContextListItem[] => {
     if (activeTab === 'characters') {
-      return mergeListWithSelectedNames(characters, [
-        ...(selections.characters_full ?? []),
-        ...(selections.characters_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        characters,
+        [...(selections.characters_full ?? []), ...(selections.characters_excerpt ?? [])],
+        (n) => resolveCharacterCanonicalName(n, characters),
+      )
     }
     if (activeTab === 'locations') {
-      return mergeListWithSelectedNames(locations, [
-        ...(selections.locations_full ?? []),
-        ...(selections.locations_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        locations,
+        [...(selections.locations_full ?? []), ...(selections.locations_excerpt ?? [])],
+        (n) => resolveLocationCanonicalName(n, locations),
+      )
     }
     if (activeTab === 'items') {
-      return mergeListWithSelectedNames(items, [
-        ...(selections.items_full ?? []),
-        ...(selections.items_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        items,
+        [...(selections.items_full ?? []), ...(selections.items_excerpt ?? [])],
+        (n) => resolveGddCanonicalName(n, items),
+      )
     }
     if (activeTab === 'species') {
-      return mergeListWithSelectedNames(species, [
-        ...(selections.species_full ?? []),
-        ...(selections.species_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        species,
+        [...(selections.species_full ?? []), ...(selections.species_excerpt ?? [])],
+        (n) => resolveGddCanonicalName(n, species),
+      )
     }
     if (activeTab === 'communities') {
-      return mergeListWithSelectedNames(communities, [
-        ...(selections.communities_full ?? []),
-        ...(selections.communities_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        communities,
+        [...(selections.communities_full ?? []), ...(selections.communities_excerpt ?? [])],
+        (n) => resolveGddCanonicalName(n, communities),
+      )
     }
     return []
   }
@@ -592,7 +606,6 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         data-testid="narrative-context-selector"
         style={{
           flexShrink: 0,
-          borderBottom: `1px solid ${theme.border.primary}`,
           backgroundColor: theme.background.secondary,
         }}
       >
@@ -640,6 +653,15 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         </div>
       </details>
 
+      <SelectedContextSummary 
+        selections={selections} 
+        onClear={clearSelections}
+        onRemoveEntity={handleRemoveEntity}
+        onModeChange={handleSelectionPanelModeChange}
+        onError={(err) => setError(err)}
+        onSuccess={() => setError(null)}
+      />
+
       <div style={{ flex: '1 1 0', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <ContextList
           items={getCurrentItems()}
@@ -656,17 +678,6 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
           entityTypeLabel={ENTITY_TYPE_LABELS[activeTab]}
           onScrollToBottom={loadMore}
           loadingMore={loadingMore}
-        />
-      </div>
-      <ContextTokenBudgetSection />
-      <div style={{ flex: '0 0 auto' }}>
-        <SelectedContextSummary 
-          selections={selections} 
-          onClear={clearSelections}
-          onRemoveEntity={handleRemoveEntity}
-          onModeChange={handleSelectionPanelModeChange}
-          onError={(err) => setError(err)}
-          onSuccess={() => setError(null)}
         />
       </div>
       <details

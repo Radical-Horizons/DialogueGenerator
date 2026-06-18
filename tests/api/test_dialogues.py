@@ -136,6 +136,31 @@ def test_estimate_tokens(client, mock_dialogue_service):
 @pytest.mark.unit
 @pytest.mark.api
 @pytest.mark.p1
+def test_estimate_tokens_builds_context_once(client, mock_dialogue_service):
+    """L'endpoint ne construit le contexte qu'une seule fois (déduplication FR perf).
+
+    Auparavant : un build pour le prompt + un second build dans
+    ``compute_context_selection_token_metrics``. Désormais la structure est réutilisée.
+    """
+    from services.context_token_budget import clear_context_metrics_cache
+
+    clear_context_metrics_cache()
+    mock_dialogue_service.context_builder.build_context_json.reset_mock()
+    response = client.post(
+        "/api/v1/dialogues/estimate-tokens",
+        json={
+            "context_selections": {"characters_full": ["Character1"]},
+            "user_instructions": "Test instructions",
+            "max_context_tokens": 10000,
+        },
+    )
+    assert response.status_code == 200
+    assert mock_dialogue_service.context_builder.build_context_json.call_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.api
+@pytest.mark.p1
 def test_estimate_tokens_invalid_request(client):
     """Test d'estimation de tokens avec requête invalide."""
     response = client.post(

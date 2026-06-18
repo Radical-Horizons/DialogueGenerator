@@ -3,7 +3,7 @@
  */
 import { create } from 'zustand'
 import type { SceneSelection } from '../types/generation'
-import type { GenerateUnityDialogueResponse, RawPrompt } from '../types/api'
+import type { ContextTokenBreakdownRow, GenerateUnityDialogueResponse, RawPrompt } from '../types/api'
 import type { PromptStructure } from '../types/prompt'
 
 interface GenerationState {
@@ -26,6 +26,10 @@ interface GenerationState {
   previewInputHash: string | null
   tokenCount: number | null
   isEstimating: boolean
+  /** Erreur POST /context/estimate-tokens (compteur unique UI). */
+  contextEstimationError: string | null
+  contextTokenBreakdown: ContextTokenBreakdownRow[]
+  contextBreakdownNote: string
   
   // Résultats de génération
   unityDialogueResponse: GenerateUnityDialogueResponse | null
@@ -61,6 +65,15 @@ interface GenerationState {
     structuredPrompt?: PromptStructure | null,
     previewHashUpdate?: 'invalidate' | 'preserve' | string
   ) => void
+  /** Met à jour le compteur contexte GDD (selection_tokens) sans reconstruire le prompt complet. */
+  setContextTokenEstimate: (update: {
+    selectionTokens: number | null
+    isEstimating: boolean
+    previewInputHash?: string | null | 'preserve' | 'invalidate'
+    contextEstimationError?: string | null
+    contextTokenBreakdown?: ContextTokenBreakdownRow[]
+    contextBreakdownNote?: string
+  }) => void
   setUnityDialogueResponse: (response: GenerateUnityDialogueResponse | null) => void
   setTokensUsed: (tokens: number | null) => void
   clearGenerationResults: () => void
@@ -105,6 +118,9 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   previewInputHash: null,
   tokenCount: null,
   isEstimating: false,
+  contextEstimationError: null,
+  contextTokenBreakdown: [],
+  contextBreakdownNote: '',
   unityDialogueResponse: null,
   tokensUsed: null,
   generationUserInstructions: '',
@@ -160,6 +176,31 @@ export const useGenerationStore = create<GenerationState>((set) => ({
         promptHash: hash,
         isEstimating,
         previewInputHash: nextPreview,
+      }
+    }),
+
+  setContextTokenEstimate: (update) =>
+    set((state) => {
+      let nextPreview = state.previewInputHash
+      const hashUpdate = update.previewInputHash
+      if (hashUpdate === 'invalidate') {
+        nextPreview = null
+      } else if (hashUpdate === 'preserve' || hashUpdate === undefined) {
+        nextPreview = state.previewInputHash
+      } else if (hashUpdate !== null) {
+        nextPreview = hashUpdate
+      }
+
+      return {
+        tokenCount: update.selectionTokens,
+        isEstimating: update.isEstimating,
+        previewInputHash: nextPreview,
+        contextEstimationError:
+          update.contextEstimationError !== undefined ? update.contextEstimationError : state.contextEstimationError,
+        contextTokenBreakdown:
+          update.contextTokenBreakdown !== undefined ? update.contextTokenBreakdown : state.contextTokenBreakdown,
+        contextBreakdownNote:
+          update.contextBreakdownNote !== undefined ? update.contextBreakdownNote : state.contextBreakdownNote,
       }
     }),
 

@@ -116,7 +116,7 @@ def _build_prompt_from_request(
     prompt_engine: PromptEngine,
     skill_service: SkillCatalogService,
     trait_service: TraitCatalogService
-) -> BuiltPrompt:
+) -> tuple[BuiltPrompt, Any]:
     """Fonction helper pour construire un prompt à partir d'une requête.
     
     Args:
@@ -127,7 +127,8 @@ def _build_prompt_from_request(
         trait_service: Service de catalogue des traits injecté.
         
     Returns:
-        BuiltPrompt contenant le prompt construit.
+        Tuple ``(BuiltPrompt, structured_context)``. La structure est construite au plafond
+        de mesure puis le texte est plafonné au budget utilisateur pour le LLM.
         
     Raises:
         ValueError: Si le XML généré est invalide.
@@ -163,13 +164,13 @@ def _build_prompt_from_request(
     if request_data.previous_dialogue_preview:
         context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
     
-    # Construire le contexte JSON (obligatoire, plus de fallback)
+    # Construire le contexte JSON au plafond de mesure ; le budget utilisateur s'applique au texte.
     structured_context = context_builder.build_context_json(
         selected_elements=context_selections_dict,
         scene_instruction=request_data.user_instructions,
         field_configs=request_data.field_configs,
         organization_mode=request_data.organization_mode or "narrative",
-        max_tokens=request_data.max_context_tokens,
+        max_tokens=Defaults.MAX_CONTEXT_TOKENS,
         include_dialogue_type=True,
         element_modes=context_selections_dict.get("_element_modes")
     )
@@ -201,7 +202,7 @@ def _build_prompt_from_request(
         llm_model_identifier=request_data.llm_model_identifier,
     )
 
-    return prompt_engine.build_prompt(prompt_input)
+    return prompt_engine.build_prompt(prompt_input), structured_context
 
 
 @router.post(
@@ -255,7 +256,7 @@ async def preview_prompt(
         )
         
         try:
-            built = _build_prompt_from_request(estimate_request, dialogue_service, prompt_engine, skill_service, trait_service)
+            built, _structured_context = _build_prompt_from_request(estimate_request, dialogue_service, prompt_engine, skill_service, trait_service)
         except ValueError as xml_error:
             # Erreur XML détectée - récupérer les détails depuis l'exception
             if "XML invalide" in str(xml_error) and hasattr(xml_error, 'xml_error_details'):
@@ -337,7 +338,7 @@ async def estimate_tokens(
     try:
         # Construire le prompt en réutilisant la fonction helper
         try:
-            built = _build_prompt_from_request(request_data, dialogue_service, prompt_engine, skill_service, trait_service)
+            built, structured_context = _build_prompt_from_request(request_data, dialogue_service, prompt_engine, skill_service, trait_service)
         except ValueError as xml_error:
             # Erreur XML détectée - récupérer les détails depuis l'exception
             if "XML invalide" in str(xml_error) and hasattr(xml_error, 'xml_error_details'):
@@ -356,31 +357,9 @@ async def estimate_tokens(
             # Si pas de détails XML, re-lancer l'erreur originale
             raise
         
-        # Calculer context_tokens (tokens du contexte seul)
         context_builder = dialogue_service.context_builder
-        context_selections_dict = request_data.context_selections.to_service_dict()
         if request_data.previous_dialogue_preview:
             context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-        
-        structured_context = context_builder.build_context_json(
-            selected_elements=context_selections_dict,
-            scene_instruction=request_data.user_instructions,
-            field_configs=request_data.field_configs,
-            organization_mode=request_data.organization_mode or "narrative",
-            max_tokens=request_data.max_context_tokens,
-            include_dialogue_type=True,
-            element_modes=context_selections_dict.get("_element_modes")
-        )
-        context_text = cap_context_text_to_budget(
-            context_builder.serialize_context_to_text(structured_context),
-            request_data.max_context_tokens,
-        )
-        ctx_in_prompt = count_tokens_in_prompt_context_element(built.raw_prompt)
-        context_tokens = (
-            ctx_in_prompt
-            if ctx_in_prompt > 0
-            else context_builder._count_tokens(context_text)
-        )
 
         metrics = compute_context_selection_token_metrics(
             context_builder,
@@ -389,6 +368,14 @@ async def estimate_tokens(
             field_configs=request_data.field_configs,
             organization_mode=request_data.organization_mode or "narrative",
             measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+            user_budget_max_tokens=request_data.max_context_tokens,
+            prebuilt_structure=structured_context,
+        )
+        ctx_in_prompt = count_tokens_in_prompt_context_element(built.raw_prompt)
+        context_tokens = (
+            ctx_in_prompt
+            if ctx_in_prompt > 0
+            else metrics.context_tokens
         )
         
         # Convertir structured_prompt en dict pour la réponse

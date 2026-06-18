@@ -1,4 +1,5 @@
 """Router pour le contexte GDD."""
+import hashlib
 import logging
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status
@@ -570,27 +571,17 @@ async def estimate_context_tokens(
     request_data: EstimateTokensRequest,
     request: Request,
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
-    dialogue_service: Annotated[DialogueGenerationService, Depends(get_dialogue_generation_service)],
-    prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
-    skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
-    trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
-    request_id: Annotated[str, Depends(get_request_id)]
+    request_id: Annotated[str, Depends(get_request_id)],
 ) -> EstimateTokensResponse:
-    """Estime le nombre de tokens pour un contexte donné.
+    """Estime les tokens de la sélection GDD (panneau budget contexte, FR20).
 
-    Coût: pour le breakdown FR20, ``compute_context_selection_token_metrics`` peut invoquer
-    jusqu'à une construction + sérialisation + comptage par compartiment de sélection non vide
-    (un passage pour la sélection complète, puis un par bucket type/mode), en plus du build
-    prompt complet. Prévoir une charge CPU proportionnelle à la richesse de la sélection.
+    Chemin léger : un seul build contexte + breakdown dérivé de la structure déjà construite.
+    Ne construit pas le prompt LLM complet (réservé à ``/dialogues/estimate-tokens``).
 
     Args:
         request_data: Données de la requête (sélections, instructions).
         request: La requête HTTP.
         context_builder: ContextBuilder injecté.
-        dialogue_service: DialogueGenerationService injecté.
-        prompt_engine: PromptEngine injecté.
-        skill_service: SkillCatalogService injecté.
-        trait_service: TraitCatalogService injecté.
         request_id: ID de la requête.
 
     Returns:
@@ -598,38 +589,6 @@ async def estimate_context_tokens(
         ``context_tokens`` (tronqué au budget requête) vs ``selection_tokens`` (mesure pleine).
     """
     try:
-        # Utiliser la même fonction que dialogues.py pour construire le prompt complet
-        from api.routers.dialogues import _build_prompt_from_request
-        built = _build_prompt_from_request(
-            request_data,
-            dialogue_service,
-            prompt_engine,
-            skill_service,
-            trait_service
-        )
-        
-        # Calculer les tokens du contexte seul
-        context_selections_dict = request_data.context_selections.to_service_dict()
-        structured_context = context_builder.build_context_json(
-            selected_elements=context_selections_dict,
-            scene_instruction=request_data.user_instructions,
-            field_configs=request_data.field_configs,
-            organization_mode=request_data.organization_mode or "narrative",
-            max_tokens=request_data.max_context_tokens,
-            include_dialogue_type=True,
-            element_modes=context_selections_dict.get("_element_modes")
-        )
-        context_text = cap_context_text_to_budget(
-            context_builder.serialize_context_to_text(structured_context),
-            request_data.max_context_tokens,
-        )
-        ctx_in_prompt = count_tokens_in_prompt_context_element(built.raw_prompt)
-        context_tokens = (
-            ctx_in_prompt
-            if ctx_in_prompt > 0
-            else context_builder._count_tokens(context_text)
-        )
-
         metrics = compute_context_selection_token_metrics(
             context_builder,
             full_selection=request_data.context_selections,
@@ -637,26 +596,23 @@ async def estimate_context_tokens(
             field_configs=request_data.field_configs,
             organization_mode=request_data.organization_mode or "narrative",
             measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+            user_budget_max_tokens=request_data.max_context_tokens,
         )
-        
-        # Convertir structured_prompt en dict pour la réponse
-        structured_prompt_dict = None
-        if built.structured_prompt:
-            try:
-                structured_prompt_dict = built.structured_prompt.model_dump()
-            except Exception as e:
-                logger.warning(f"Erreur lors de la conversion du structured_prompt en dict: {e}")
-        
+
+        context_only_hash = hashlib.sha256(
+            f"{metrics.context_tokens}:{metrics.selection_tokens}".encode("utf-8")
+        ).hexdigest()
+
         return EstimateTokensResponse(
-            context_tokens=context_tokens,
+            context_tokens=metrics.context_tokens,
             selection_tokens=metrics.selection_tokens,
             context_token_breakdown=metrics.breakdown,
             context_breakdown_note=metrics.breakdown_note,
-            token_count=built.token_count,
-            total_estimated_tokens=built.token_count,
-            raw_prompt=built.raw_prompt,
-            prompt_hash=built.prompt_hash,
-            structured_prompt=structured_prompt_dict
+            token_count=metrics.context_tokens,
+            total_estimated_tokens=metrics.context_tokens,
+            raw_prompt="",
+            prompt_hash=context_only_hash,
+            structured_prompt=None,
         )
         
     except ValidationException:

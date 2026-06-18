@@ -15,6 +15,14 @@ import type {
   SuggestionItem,
   SuggestionEntityType,
 } from '../types/api'
+import {
+  canonicalizeContextSelections,
+  filterOutCanonicalEntity,
+  mergeContextCharacterNames,
+  normalizeGddNameForMatch,
+  resolveCharacterCanonicalName,
+  resolveLocationCanonicalName,
+} from '../utils/gddEntityNames'
 
 // TTL pour le cache (30 minutes)
 const CACHE_TTL = 30 * 60 * 1000
@@ -109,7 +117,7 @@ const defaultSelections: ContextSelection = {
 }
 
 function normalizeSelections(selections: ContextSelection): ContextSelection {
-  return {
+  const merged = {
     ...defaultSelections,
     ...selections,
     characters_full: Array.isArray(selections.characters_full) ? selections.characters_full : [],
@@ -127,6 +135,14 @@ function normalizeSelections(selections: ContextSelection): ContextSelection {
     chapters: Array.isArray(selections.chapters) ? selections.chapters : [],
     scenes: Array.isArray(selections.scenes) ? selections.scenes : [],
   }
+  const state = useContextStore.getState()
+  return canonicalizeContextSelections(merged, {
+    characters: state.characters,
+    locations: state.locations,
+    items: state.items,
+    species: state.species,
+    communities: state.communities,
+  })
 }
 
 export const useContextStore = create<ContextState>((set, get) => ({
@@ -156,82 +172,123 @@ export const useContextStore = create<ContextState>((set, get) => ({
   },
 
   setElementLists: (lists) => {
-    set({
+    set((state) => ({
       characters: lists.characters,
       locations: lists.locations,
       items: lists.items,
       species: lists.species,
       communities: lists.communities,
       narrativeContexts: lists.narrativeContexts ?? [],
-    })
+      selections: canonicalizeContextSelections(state.selections, {
+        characters: lists.characters,
+        locations: lists.locations,
+        items: lists.items,
+        species: lists.species,
+        communities: lists.communities,
+      }),
+    }))
   },
 
   toggleCharacter: (name: string, mode: ElementMode = 'full') => {
     set((state) => {
-      const isInFull = state.selections.characters_full.includes(name)
-      const isInExcerpt = state.selections.characters_excerpt.includes(name)
+      const canonical = resolveCharacterCanonicalName(name, state.characters)
+      const canonicalKey = normalizeGddNameForMatch(canonical)
+      const isInFull = state.selections.characters_full.some(
+        (n) =>
+          normalizeGddNameForMatch(resolveCharacterCanonicalName(n, state.characters)) ===
+          canonicalKey,
+      )
+      const isInExcerpt = state.selections.characters_excerpt.some(
+        (n) =>
+          normalizeGddNameForMatch(resolveCharacterCanonicalName(n, state.characters)) ===
+          canonicalKey,
+      )
       const isSelected = isInFull || isInExcerpt
       
       if (isSelected) {
-        // Retirer des deux listes
         return {
           selections: {
             ...state.selections,
-            characters_full: state.selections.characters_full.filter((n) => n !== name),
-            characters_excerpt: state.selections.characters_excerpt.filter((n) => n !== name),
+            characters_full: filterOutCanonicalEntity(
+              state.selections.characters_full,
+              canonical,
+              state.characters,
+              resolveCharacterCanonicalName,
+            ),
+            characters_excerpt: filterOutCanonicalEntity(
+              state.selections.characters_excerpt,
+              canonical,
+              state.characters,
+              resolveCharacterCanonicalName,
+            ),
           },
         }
-      } else {
-        // Ajouter dans la liste correspondante
-        if (mode === 'full') {
-          return {
-            selections: {
-              ...state.selections,
-              characters_full: [...state.selections.characters_full, name],
-            },
-          }
-        } else {
-          return {
-            selections: {
-              ...state.selections,
-              characters_excerpt: [...state.selections.characters_excerpt, name],
-            },
-          }
+      }
+      if (mode === 'full') {
+        return {
+          selections: {
+            ...state.selections,
+            characters_full: [...state.selections.characters_full, canonical],
+          },
         }
+      }
+      return {
+        selections: {
+          ...state.selections,
+          characters_excerpt: [...state.selections.characters_excerpt, canonical],
+        },
       }
     })
   },
 
   toggleLocation: (name: string, mode: ElementMode = 'full') => {
     set((state) => {
-      const isInFull = state.selections.locations_full.includes(name)
-      const isInExcerpt = state.selections.locations_excerpt.includes(name)
+      const canonical = resolveLocationCanonicalName(name, state.locations)
+      const canonicalKey = normalizeGddNameForMatch(canonical)
+      const isInFull = state.selections.locations_full.some(
+        (n) =>
+          normalizeGddNameForMatch(resolveLocationCanonicalName(n, state.locations)) ===
+          canonicalKey,
+      )
+      const isInExcerpt = state.selections.locations_excerpt.some(
+        (n) =>
+          normalizeGddNameForMatch(resolveLocationCanonicalName(n, state.locations)) ===
+          canonicalKey,
+      )
       const isSelected = isInFull || isInExcerpt
       
       if (isSelected) {
         return {
           selections: {
             ...state.selections,
-            locations_full: state.selections.locations_full.filter((n) => n !== name),
-            locations_excerpt: state.selections.locations_excerpt.filter((n) => n !== name),
+            locations_full: filterOutCanonicalEntity(
+              state.selections.locations_full,
+              canonical,
+              state.locations,
+              resolveLocationCanonicalName,
+            ),
+            locations_excerpt: filterOutCanonicalEntity(
+              state.selections.locations_excerpt,
+              canonical,
+              state.locations,
+              resolveLocationCanonicalName,
+            ),
           },
         }
-      } else {
-        if (mode === 'full') {
-          return {
-            selections: {
-              ...state.selections,
-              locations_full: [...state.selections.locations_full, name],
-            },
-          }
-        } else {
-          return {
-            selections: {
-              ...state.selections,
-              locations_excerpt: [...state.selections.locations_excerpt, name],
-            },
-          }
+      }
+      if (mode === 'full') {
+        return {
+          selections: {
+            ...state.selections,
+            locations_full: [...state.selections.locations_full, canonical],
+          },
         }
+      }
+      return {
+        selections: {
+          ...state.selections,
+          locations_excerpt: [...state.selections.locations_excerpt, canonical],
+        },
       }
     })
   },
@@ -389,9 +446,25 @@ export const useContextStore = create<ContextState>((set, get) => ({
     
     const fullList = (state.selections[fullKey] as string[]) || []
     const excerptList = (state.selections[excerptKey] as string[]) || []
+
+    const matches = (list: string[]) => {
+      if (elementType === 'characters') {
+        const key = normalizeGddNameForMatch(resolveCharacterCanonicalName(name, state.characters))
+        return list.some(
+          (n) => normalizeGddNameForMatch(resolveCharacterCanonicalName(n, state.characters)) === key,
+        )
+      }
+      if (elementType === 'locations') {
+        const key = normalizeGddNameForMatch(resolveLocationCanonicalName(name, state.locations))
+        return list.some(
+          (n) => normalizeGddNameForMatch(resolveLocationCanonicalName(n, state.locations)) === key,
+        )
+      }
+      return list.includes(name)
+    }
     
-    if (fullList.includes(name)) return 'full'
-    if (excerptList.includes(name)) return 'excerpt'
+    if (matches(fullList)) return 'full'
+    if (matches(excerptList)) return 'excerpt'
     return null
   },
 
@@ -402,7 +475,19 @@ export const useContextStore = create<ContextState>((set, get) => ({
     
     const fullList = (state.selections[fullKey] as string[]) || []
     const excerptList = (state.selections[excerptKey] as string[]) || []
-    
+
+    if (elementType === 'characters') {
+      const key = normalizeGddNameForMatch(resolveCharacterCanonicalName(name, state.characters))
+      return [...fullList, ...excerptList].some(
+        (n) => normalizeGddNameForMatch(resolveCharacterCanonicalName(n, state.characters)) === key,
+      )
+    }
+    if (elementType === 'locations') {
+      const key = normalizeGddNameForMatch(resolveLocationCanonicalName(name, state.locations))
+      return [...fullList, ...excerptList].some(
+        (n) => normalizeGddNameForMatch(resolveLocationCanonicalName(n, state.locations)) === key,
+      )
+    }
     return fullList.includes(name) || excerptList.includes(name)
   },
 

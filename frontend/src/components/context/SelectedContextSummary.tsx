@@ -3,7 +3,7 @@
  * Permet la suppression individuelle (bouton X) et le changement de mode (Complet/Extrait)
  * par entité lorsque les callbacks onRemoveEntity et onModeChange sont fournis.
  */
-import { memo, useState, useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import type { ContextSelection, ElementMode } from '../../types/api'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
@@ -131,7 +131,6 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
   onError,
   onSuccess,
 }: SelectedContextSummaryProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
   const { sceneSelection } = useGenerationStore()
   const { applyLinkedElements } = useContextStore()
 
@@ -153,151 +152,135 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
   const safeLength = (arr: unknown[] | undefined): number =>
     Array.isArray(arr) ? arr.length : 0
 
-  if (!selections) {
-    return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary, fontSize: remSize('body') }}>
-        Aucune sélection
-      </div>
-    )
-  }
-
-  const totalSelected =
-    safeLength(selections.characters_full) + safeLength(selections.characters_excerpt) +
-    safeLength(selections.locations_full) + safeLength(selections.locations_excerpt) +
-    safeLength(selections.items_full) + safeLength(selections.items_excerpt) +
-    safeLength(selections.species_full) + safeLength(selections.species_excerpt) +
-    safeLength(selections.communities_full) + safeLength(selections.communities_excerpt) +
-    safeLength(selections.dialogues_examples)
-
-  if (totalSelected === 0) {
-    return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary, fontSize: remSize('body') }}>
-        Aucune sélection
-      </div>
-    )
-  }
+  const totalSelected = selections
+    ? safeLength(selections.characters_full) + safeLength(selections.characters_excerpt) +
+      safeLength(selections.locations_full) + safeLength(selections.locations_excerpt) +
+      safeLength(selections.items_full) + safeLength(selections.items_excerpt) +
+      safeLength(selections.species_full) + safeLength(selections.species_excerpt) +
+      safeLength(selections.communities_full) + safeLength(selections.communities_excerpt) +
+      safeLength(selections.dialogues_examples)
+    : 0
 
   return (
-    <div style={{ padding: '1rem', paddingBottom: isExpanded ? '1.5rem' : '1rem', borderTop: `1px solid ${theme.border.primary}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <button
-          type="button"
-          data-testid="selected-context-summary-toggle"
-          aria-expanded={isExpanded}
-          onClick={() => setIsExpanded(!isExpanded)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            flex: 1,
-            cursor: 'pointer',
-            background: 'transparent',
-            border: 'none',
-            padding: 0,
-            textAlign: 'left',
-          }}
-        >
-          <span style={{ fontSize: remSize('small'), color: theme.text.secondary, userSelect: 'none' }}>
-            {isExpanded ? '▼' : '▶'}
-          </span>
-          <strong style={{ fontSize: remSize('section'), color: theme.text.primary }}>Sélections actives ({totalSelected})</strong>
-        </button>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              void handleLinkElements()
-            }}
-            disabled={!sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion}
-            style={{
-              padding: '0.25rem 0.5rem',
-              fontSize: remSize('small'),
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              backgroundColor: theme.button.default.background,
-              color: theme.button.default.color,
-              cursor: !sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion
-                ? 'not-allowed' : 'pointer',
-              opacity: !sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion
-                ? 0.5 : 1,
-            }}
-            title="Coche automatiquement les éléments (personnages, lieux) liés aux personnages A/B et à la scène sélectionnés"
-          >
-            Lier Éléments Connexes
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onClear()
-            }}
-            style={{
-              padding: '0.25rem 0.5rem',
-              fontSize: remSize('small'),
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: '4px',
-              backgroundColor: theme.button.default.background,
-              color: theme.button.default.color,
-              cursor: 'pointer',
-            }}
-          >
-            Tout effacer
-          </button>
-        </div>
-      </div>
-      {isExpanded && (
-        <div style={{ fontSize: remSize('accent'), color: theme.text.secondary, marginTop: '0.75rem' }}>
-          <EntityCategoryList
-            label="Personnages"
-            entityType="characters"
-            fullItems={Array.isArray(selections.characters_full) ? selections.characters_full : []}
-            excerptItems={Array.isArray(selections.characters_excerpt) ? selections.characters_excerpt : []}
-            onRemoveEntity={onRemoveEntity}
-            onModeChange={onModeChange}
-          />
-          <EntityCategoryList
-            label="Lieux"
-            entityType="locations"
-            fullItems={Array.isArray(selections.locations_full) ? selections.locations_full : []}
-            excerptItems={Array.isArray(selections.locations_excerpt) ? selections.locations_excerpt : []}
-            onRemoveEntity={onRemoveEntity}
-            onModeChange={onModeChange}
-          />
-          <EntityCategoryList
-            label="Objets"
-            entityType="items"
-            fullItems={Array.isArray(selections.items_full) ? selections.items_full : []}
-            excerptItems={Array.isArray(selections.items_excerpt) ? selections.items_excerpt : []}
-            onRemoveEntity={onRemoveEntity}
-            onModeChange={onModeChange}
-          />
-          <EntityCategoryList
-            label="Espèces"
-            entityType="species"
-            fullItems={Array.isArray(selections.species_full) ? selections.species_full : []}
-            excerptItems={Array.isArray(selections.species_excerpt) ? selections.species_excerpt : []}
-            onRemoveEntity={onRemoveEntity}
-            onModeChange={onModeChange}
-          />
-          <EntityCategoryList
-            label="Communautés"
-            entityType="communities"
-            fullItems={Array.isArray(selections.communities_full) ? selections.communities_full : []}
-            excerptItems={Array.isArray(selections.communities_excerpt) ? selections.communities_excerpt : []}
-            onRemoveEntity={onRemoveEntity}
-            onModeChange={onModeChange}
-          />
-          {safeLength(selections.dialogues_examples) > 0 && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <strong style={{ color: theme.text.primary }}>
-                Exemples de dialogues: {safeLength(selections.dialogues_examples)}
-              </strong>
-              <div style={{ marginLeft: '1rem', marginTop: '0.25rem' }}>
-                {(Array.isArray(selections.dialogues_examples) ? selections.dialogues_examples : []).join(', ')}
-              </div>
+    <details
+      data-testid="selected-context-summary"
+      style={{
+        flexShrink: 0,
+        borderBottom: `1px solid ${theme.border.primary}`,
+        backgroundColor: theme.background.secondary,
+      }}
+    >
+      <summary
+        data-testid="selected-context-summary-toggle"
+        style={{
+          padding: '0.45rem 0.75rem',
+          cursor: 'pointer',
+          fontSize: '0.8rem',
+          fontWeight: 600,
+          color: theme.text.primary,
+        }}
+      >
+        Sélections actives ({totalSelected})
+      </summary>
+      <div style={{ padding: '0.5rem 0.75rem', display: 'grid', gap: '0.4rem' }}>
+        {totalSelected === 0 ? (
+          <span style={{ color: theme.text.secondary, fontSize: '0.75rem' }}>Aucune sélection</span>
+        ) : (
+          <>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  void handleLinkElements()
+                }}
+                disabled={!sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion}
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  fontSize: remSize('small'),
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '4px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: !sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion
+                    ? 'not-allowed' : 'pointer',
+                  opacity: !sceneSelection.characterA && !sceneSelection.characterB && !sceneSelection.sceneRegion
+                    ? 0.5 : 1,
+                }}
+                title="Coche automatiquement les éléments (personnages, lieux) liés aux personnages A/B et à la scène sélectionnés"
+              >
+                Lier Éléments Connexes
+              </button>
+              <button
+                type="button"
+                onClick={() => onClear()}
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  fontSize: remSize('small'),
+                  border: `1px solid ${theme.border.primary}`,
+                  borderRadius: '4px',
+                  backgroundColor: theme.button.default.background,
+                  color: theme.button.default.color,
+                  cursor: 'pointer',
+                }}
+              >
+                Tout effacer
+              </button>
             </div>
-          )}
-        </div>
-      )}
-    </div>
+            <div style={{ fontSize: remSize('accent'), color: theme.text.secondary }}>
+              <EntityCategoryList
+                label="Personnages"
+                entityType="characters"
+                fullItems={Array.isArray(selections?.characters_full) ? selections.characters_full : []}
+                excerptItems={Array.isArray(selections?.characters_excerpt) ? selections.characters_excerpt : []}
+                onRemoveEntity={onRemoveEntity}
+                onModeChange={onModeChange}
+              />
+              <EntityCategoryList
+                label="Lieux"
+                entityType="locations"
+                fullItems={Array.isArray(selections?.locations_full) ? selections.locations_full : []}
+                excerptItems={Array.isArray(selections?.locations_excerpt) ? selections.locations_excerpt : []}
+                onRemoveEntity={onRemoveEntity}
+                onModeChange={onModeChange}
+              />
+              <EntityCategoryList
+                label="Objets"
+                entityType="items"
+                fullItems={Array.isArray(selections?.items_full) ? selections.items_full : []}
+                excerptItems={Array.isArray(selections?.items_excerpt) ? selections.items_excerpt : []}
+                onRemoveEntity={onRemoveEntity}
+                onModeChange={onModeChange}
+              />
+              <EntityCategoryList
+                label="Espèces"
+                entityType="species"
+                fullItems={Array.isArray(selections?.species_full) ? selections.species_full : []}
+                excerptItems={Array.isArray(selections?.species_excerpt) ? selections.species_excerpt : []}
+                onRemoveEntity={onRemoveEntity}
+                onModeChange={onModeChange}
+              />
+              <EntityCategoryList
+                label="Communautés"
+                entityType="communities"
+                fullItems={Array.isArray(selections?.communities_full) ? selections.communities_full : []}
+                excerptItems={Array.isArray(selections?.communities_excerpt) ? selections.communities_excerpt : []}
+                onRemoveEntity={onRemoveEntity}
+                onModeChange={onModeChange}
+              />
+              {safeLength(selections?.dialogues_examples) > 0 && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <strong style={{ color: theme.text.primary }}>
+                    Exemples de dialogues: {safeLength(selections?.dialogues_examples)}
+                  </strong>
+                  <div style={{ marginLeft: '1rem', marginTop: '0.25rem' }}>
+                    {(Array.isArray(selections?.dialogues_examples) ? selections.dialogues_examples : []).join(', ')}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </details>
   )
 })

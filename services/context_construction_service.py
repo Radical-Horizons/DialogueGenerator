@@ -203,9 +203,9 @@ class ContextConstructionService:
         field_labels_map: Dict[str, str],
         organization_mode: str,
         element_mode: str,
-        formatted_content: str,
-        token_count: int,
-        organizer: 'ContextOrganizer'
+        organizer: 'ContextOrganizer',
+        formatted_content: Optional[str] = None,
+        token_count: int = 0,
     ) -> Optional[Any]:
         """Construit un ContextItem JSON depuis les données formatées.
         
@@ -219,16 +219,13 @@ class ContextConstructionService:
             field_labels_map: Map des labels.
             organization_mode: Mode d'organisation.
             element_mode: Mode de l'élément.
-            formatted_content: Contenu formaté.
-            token_count: Nombre de tokens.
+            formatted_content: Contenu texte pré-formaté (optionnel, chemin legacy).
+            token_count: Tokens pré-calculés (optionnel).
             organizer: Instance de ContextOrganizer.
             
         Returns:
             ContextItem ou None si contenu vide.
         """
-        if not formatted_content:
-            return None
-        
         # Si filtered_fields est None, extraire tous les champs disponibles depuis element_data
         fields_to_use = filtered_fields
         if not fields_to_use and element_data:
@@ -269,7 +266,8 @@ class ContextConstructionService:
                 return fields
             
             fields_to_use = extract_all_fields(element_data)
-            logger.debug(f"Champs extraits automatiquement pour {element_type} '{name}': {len(fields_to_use)} champs")
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(f"Champs extraits automatiquement pour {element_type} '{name}': {len(fields_to_use)} champs")
         
         # Toujours créer des sections structurées via organize_context_json
         # (plus de fallback INFORMATIONS)
@@ -292,6 +290,11 @@ class ContextConstructionService:
                 context_item.metadata["mode"] = element_mode
             else:
                 context_item.metadata = {"real_name": name, "mode": element_mode}
+            if token_count <= 0:
+                token_count = int(
+                    context_item.tokenCount
+                    or sum(section.tokenCount or 0 for section in context_item.sections)
+                )
             context_item.tokenCount = token_count
         
         return context_item
@@ -434,22 +437,6 @@ class ContextConstructionService:
                     # Récupérer les labels depuis context_config.json via ContextFieldManager
                     field_labels_map = field_manager.get_field_labels_map(element_type, filtered_fields)
                 
-                # Formatage (via organizer ou fallback)
-                formatted_content = self._format_element_content(
-                    element_data=element_data,
-                    element_type=element_type,
-                    category_key=category_key,
-                    filtered_fields=filtered_fields,
-                    field_labels_map=field_labels_map,
-                    organization_mode=organization_mode,
-                    element_mode=element_mode,
-                    include_dialogue_type=include_dialogue_type,
-                    organizer=organizer
-                )
-                
-                token_count = self._estimate_tokens(formatted_content)
-                
-                # Construction ContextItem si demandé
                 if build_json_items:
                     context_item = self._build_context_item(
                         element_data=element_data,
@@ -461,12 +448,26 @@ class ContextConstructionService:
                         field_labels_map=field_labels_map,
                         organization_mode=organization_mode,
                         element_mode=element_mode,
-                        formatted_content=formatted_content,
-                        token_count=token_count,
-                        organizer=organizer
+                        organizer=organizer,
                     )
-                
-                if formatted_content:
+                    if not context_item:
+                        continue
+                    token_count = int(context_item.tokenCount or 0)
+                else:
+                    formatted_content = self._format_element_content(
+                        element_data=element_data,
+                        element_type=element_type,
+                        category_key=category_key,
+                        filtered_fields=filtered_fields,
+                        field_labels_map=field_labels_map,
+                        organization_mode=organization_mode,
+                        element_mode=element_mode,
+                        include_dialogue_type=include_dialogue_type,
+                        organizer=organizer,
+                    )
+                    token_count = self._estimate_tokens(formatted_content)
+
+                if build_json_items or formatted_content:
                     items.append(ElementBuildResult(
                         name=canonical_name,
                         element_data=element_data,

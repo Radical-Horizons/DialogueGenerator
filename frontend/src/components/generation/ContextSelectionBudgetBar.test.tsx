@@ -1,34 +1,28 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { ContextTokenBudgetSection } from './ContextTokenBudgetSection'
+import { ContextSelectionBudgetBar } from './ContextSelectionBudgetBar'
 import { useContextConfigStore } from '../../store/contextConfigStore'
+import { useGenerationStore } from '../../store/generationStore'
 
-vi.mock('../../hooks/useContextSelectionTokenEstimate', () => ({
-  useContextSelectionTokenEstimate: () => ({
-    data: {
-      context_tokens: 25_000,
-      selection_tokens: 25_000,
-      context_token_breakdown: [
-        { entity_type: 'characters', mode: 'full', token_count: 80 },
-      ],
-      context_breakdown_note: 'Note test breakdown.',
-      token_count: 99,
-      raw_prompt: '',
-      prompt_hash: 'abc',
-    },
-    loading: false,
-    error: null,
-    refresh: vi.fn(),
-  }),
+vi.mock('../../store/generationActionsStore', () => ({
+  useGenerationActionsStore: (selector: (s: { actions: { estimateTokens: () => void } }) => unknown) =>
+    selector({ actions: { estimateTokens: vi.fn() } }),
 }))
 
-describe('ContextTokenBudgetSection', () => {
+describe('ContextSelectionBudgetBar', () => {
   beforeEach(() => {
     useContextConfigStore.setState({ contextTokenBudgetMax: 10_000 })
+    useGenerationStore.setState({
+      tokenCount: 25_000,
+      isEstimating: false,
+      contextEstimationError: null,
+      contextTokenBreakdown: [{ entity_type: 'characters', mode: 'full', token_count: 80 }],
+      contextBreakdownNote: 'Note test breakdown.',
+    })
   })
 
   it('affiche le dépassement de budget et le CTA optimisation actif quand l’API FR21 est activée', async () => {
-    render(<ContextTokenBudgetSection />)
+    render(<ContextSelectionBudgetBar visible />)
 
     expect(await screen.findByTestId('context-token-budget-warning')).toBeInTheDocument()
     const cta = screen.getByTestId('context-optimize-cta')
@@ -39,9 +33,8 @@ describe('ContextTokenBudgetSection', () => {
   it('avertit quand le plafond configuré dépasse 100k', async () => {
     useContextConfigStore.setState({ contextTokenBudgetMax: 150_000 })
 
-    render(<ContextTokenBudgetSection />)
+    render(<ContextSelectionBudgetBar visible />)
 
     expect(await screen.findByTestId('context-token-budget-high-cap-warning')).toBeInTheDocument()
   })
-
 })

@@ -17,6 +17,7 @@ import { EstimatedPromptPanel } from '../generation/EstimatedPromptPanel'
 import { UnityDialogueEditor, type UnityDialogueEditorHandle } from '../generation/UnityDialogueEditor'
 import { ReasoningTraceViewer } from '../generation/ReasoningTraceViewer'
 import { ContextDetail } from '../context/ContextDetail'
+import { ContextSelectionBudgetBar } from '../generation/ContextSelectionBudgetBar'
 import { ResizablePanels, type ResizablePanelsRef } from '../shared/ResizablePanels'
 import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { Tabs, type Tab } from '../shared/Tabs'
@@ -36,13 +37,14 @@ import { useMobileShellKeyboardComfort } from '../../hooks/useMobileShellKeyboar
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
+  panelCollapseButtonChrome,
   panelHeaderTitleTypography,
+  panelSideHeaderChrome,
 } from '../../theme/responsiveChrome'
 import { remSize } from '../../theme/uiTypography'
 import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
-import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
 type ContextLoadState = {
@@ -88,13 +90,17 @@ function PanelCollapseButton({
   label,
   onClick,
   ariaLabel,
+  density = 'comfortable',
 }: {
   direction: 'left' | 'right'
   chevronPosition?: 'left' | 'right'
   label: string
   onClick: () => void
   ariaLabel: string
+  /** Desktop confortable = rail compact ; narrow = cible tactile FR119. */
+  density?: 'comfortable' | 'narrow'
 }) {
+  const collapseChrome = panelCollapseButtonChrome[density]
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
 
@@ -125,9 +131,9 @@ function PanelCollapseButton({
         display: 'flex',
         alignItems: 'center',
         gap: '0.3rem',
-        padding: '0.35rem 0.5rem',
-        minHeight: TOUCH_TARGET_MIN_PX,
-        minWidth: TOUCH_TARGET_MIN_PX,
+        padding: collapseChrome.padding,
+        minHeight: collapseChrome.minHeightPx,
+        minWidth: collapseChrome.minWidthPx,
         boxSizing: 'border-box',
         borderRadius: 99,
         border: `1px solid ${borderColor}`,
@@ -285,7 +291,7 @@ export function Dashboard() {
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const unityDialogueEditorRef = useRef<UnityDialogueEditorHandle>(null)
-  const { rawPrompt, tokenCount, promptHash, isEstimating, unityDialogueResponse, setUnityDialogueResponse } = useGenerationStore()
+  const { rawPrompt, isEstimating, unityDialogueResponse, setUnityDialogueResponse } = useGenerationStore()
   const generationState = useGenerationStore((state) => ({
     isEstimating: state.isEstimating,
     unityDialogueResponse: state.unityDialogueResponse,
@@ -332,6 +338,10 @@ export function Dashboard() {
   const panelTitleFontRem = isNarrowCenterColumn
     ? panelHeaderTitleTypography.narrowFontRem
     : panelHeaderTitleTypography.comfortableFontRem
+  const panelSideHeaderPadding = isNarrowCenterColumn
+    ? panelSideHeaderChrome.narrow.padding
+    : panelSideHeaderChrome.comfortable.padding
+  const panelCollapseDensity = isNarrowCenterColumn ? 'narrow' : 'comfortable'
   const showCollapsedLeftAffordance = isLeftPanelCollapsed
   const showCollapsedRightAffordance = isRightPanelCollapsed
   const lastViewportModeRef = useRef(viewportMode)
@@ -447,8 +457,7 @@ export function Dashboard() {
           <EstimatedPromptPanel
             raw_prompt={rawPrompt}
             isEstimating={isEstimating}
-            tokenCount={tokenCount}
-            promptHash={promptHash}
+            isActive={rightPanelTab === 'prompt' && centerPanelTab !== 'graph'}
           />
         </div>
       ),
@@ -548,7 +557,7 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
+  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
 
   // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
@@ -1003,7 +1012,7 @@ export function Dashboard() {
           <>
             <div
               style={{
-                padding: '0.5rem 0.75rem',
+                padding: panelSideHeaderPadding,
                 borderBottom: `1px solid ${theme.border.primary}`,
                 backgroundColor: theme.background.panelHeader,
                 display: 'flex',
@@ -1021,6 +1030,7 @@ export function Dashboard() {
                 label="Replier"
                 onClick={toggleLeftPanel}
                 ariaLabel="Replier le panneau gauche"
+                density={panelCollapseDensity}
               />
             </div>
             <ContextSelector
@@ -1127,7 +1137,7 @@ export function Dashboard() {
           <>
         <div
           style={{
-            padding: '0.5rem 0.75rem',
+            padding: panelSideHeaderPadding,
             paddingRight: '1.25rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             backgroundColor: theme.background.panelHeader,
@@ -1136,7 +1146,6 @@ export function Dashboard() {
             justifyContent: 'space-between',
             gap: '0.5rem',
             flexShrink: 0,
-            minHeight: 40,
             boxSizing: 'border-box',
           }}
         >
@@ -1146,6 +1155,7 @@ export function Dashboard() {
             label="Replier"
             onClick={toggleRightPanel}
             ariaLabel="Replier le panneau droit"
+            density={panelCollapseDensity}
           />
           <div
             style={{
@@ -1183,6 +1193,9 @@ export function Dashboard() {
             ...shellKeyboardInsetStyle,
           }}
         >
+          <ContextSelectionBudgetBar
+            visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
+          />
           <Tabs
             variant="segmented"
             tabs={visibleRightPanelTabs}
@@ -1243,6 +1256,9 @@ export function Dashboard() {
             position: 'relative',
           }}
         >
+          <ContextSelectionBudgetBar
+            visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
+          />
           <Tabs
             variant="segmented"
             segmentedSize="drawer-aligned"

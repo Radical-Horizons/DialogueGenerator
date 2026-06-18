@@ -5,10 +5,48 @@ de la troncature appliquée lors du build avec ``max_context_tokens``.
 """
 from __future__ import annotations
 
+import hashlib
+import json
+from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 from api.schemas.dialogue import ContextSelection, ContextTokenBreakdownRow
+from services.context_truncator import cap_context_text_to_budget
+
+_METRICS_CACHE_MAXSIZE: int = 64
+_METRICS_CACHE: "OrderedDict[str, ContextSelectionTokenMetrics]" = OrderedDict()
+
+
+def clear_context_metrics_cache() -> None:
+    """Vide le cache LRU des métriques (utilitaire de test)."""
+    _METRICS_CACHE.clear()
+
+
+def _metrics_cache_key(
+    *,
+    gdd_revision: int,
+    full_dict: Dict[str, Any],
+    user_instructions: str,
+    field_configs: Optional[Dict[str, List[str]]],
+    organization_mode: str,
+    measurement_max_tokens: int,
+    include_breakdown: bool,
+    user_budget_max_tokens: Optional[int],
+) -> str:
+    """Calcule une clé de cache stable pour une mesure de tokens contexte."""
+    payload = {
+        "rev": gdd_revision,
+        "sel": full_dict,
+        "instr": user_instructions,
+        "fields": field_configs,
+        "org": organization_mode,
+        "meas": measurement_max_tokens,
+        "breakdown": include_breakdown,
+        "budget": user_budget_max_tokens,
+    }
+    serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 BUCKET_SPECS: Tuple[Tuple[str, str], ...] = (
     ("characters", "full"),
@@ -29,6 +67,7 @@ class ContextSelectionTokenMetrics:
     """Résultat agrégé pour l'UI budget contexte."""
 
     selection_tokens: int
+    context_tokens: int
     breakdown: List[ContextTokenBreakdownRow]
     breakdown_note: str
 
@@ -119,6 +158,8 @@ def compute_context_selection_token_metrics(
     organization_mode: str,
     measurement_max_tokens: int,
     include_breakdown: bool = True,
+    user_budget_max_tokens: Optional[int] = None,
+    prebuilt_structure: Optional[Any] = None,
 ) -> ContextSelectionTokenMetrics:
     """Calcule les tokens « pleine sélection » et un breakdown par type/mode.
 
@@ -133,32 +174,72 @@ def compute_context_selection_token_metrics(
         organization_mode: Mode d'organisation narrative / default / minimal.
         measurement_max_tokens: Plafond technique pour la mesure (ex. MAX_CONTEXT_TOKENS).
         include_breakdown: Si False, saute les builds isolés par type/mode pour les chemins rapides.
+        user_budget_max_tokens: Plafond utilisateur pour ``context_tokens`` (troncature post-sérialisation).
+        prebuilt_structure: Structure déjà construite (évite un second ``build_context_json``).
 
     Returns:
         Métriques pour réponse ``/context/estimate-tokens``.
     """
     full_dict = full_selection.model_dump()
 
-    service_dict = full_selection.to_service_dict()
-    structured = context_builder.build_context_json(
-        selected_elements=service_dict,
-        scene_instruction=user_instructions,
-        field_configs=field_configs,
-        organization_mode=organization_mode,
-        max_tokens=measurement_max_tokens,
-        include_dialogue_type=True,
-        element_modes=service_dict.get("_element_modes"),
-    )
+    gdd_revision = int(getattr(context_builder, "gdd_revision", -1))
+    cache_key: Optional[str] = None
+    if gdd_revision >= 0:
+        cache_key = _metrics_cache_key(
+            gdd_revision=gdd_revision,
+            full_dict=full_dict,
+            user_instructions=user_instructions,
+            field_configs=field_configs,
+            organization_mode=organization_mode,
+            measurement_max_tokens=measurement_max_tokens,
+            include_breakdown=include_breakdown,
+            user_budget_max_tokens=user_budget_max_tokens,
+        )
+        cached = _METRICS_CACHE.get(cache_key)
+        if cached is not None:
+            _METRICS_CACHE.move_to_end(cache_key)
+            return cached
+
+    def _finalize(metrics: ContextSelectionTokenMetrics) -> ContextSelectionTokenMetrics:
+        if cache_key is not None:
+            _METRICS_CACHE[cache_key] = metrics
+            _METRICS_CACHE.move_to_end(cache_key)
+            while len(_METRICS_CACHE) > _METRICS_CACHE_MAXSIZE:
+                _METRICS_CACHE.popitem(last=False)
+        return metrics
+
+    if prebuilt_structure is not None:
+        structured = prebuilt_structure
+    else:
+        service_dict = full_selection.to_service_dict()
+        structured = context_builder.build_context_json(
+            selected_elements=service_dict,
+            scene_instruction=user_instructions,
+            field_configs=field_configs,
+            organization_mode=organization_mode,
+            max_tokens=measurement_max_tokens,
+            include_dialogue_type=True,
+            element_modes=service_dict.get("_element_modes"),
+        )
     text = context_builder.serialize_context_to_text(structured)
     selection_tokens = int(context_builder._count_tokens(text))
+    context_tokens = selection_tokens
+    if user_budget_max_tokens is not None:
+        capped_text = cap_context_text_to_budget(text, user_budget_max_tokens)
+        context_tokens = (
+            selection_tokens
+            if capped_text == text
+            else int(context_builder._count_tokens(capped_text))
+        )
 
     breakdown: List[ContextTokenBreakdownRow] = []
     if not include_breakdown:
-        return ContextSelectionTokenMetrics(
+        return _finalize(ContextSelectionTokenMetrics(
             selection_tokens=selection_tokens,
+            context_tokens=context_tokens,
             breakdown=breakdown,
             breakdown_note="Breakdown non calculé pour cette mesure rapide.",
-        )
+        ))
 
     structured_breakdown = _breakdown_from_prompt_structure(structured)
     if structured_breakdown:
@@ -166,11 +247,12 @@ def compute_context_selection_token_metrics(
             "Breakdown dérivé de la structure complète déjà construite ; le total affiché pour "
             "le budget utilise la sélection complète en un seul build."
         )
-        return ContextSelectionTokenMetrics(
+        return _finalize(ContextSelectionTokenMetrics(
             selection_tokens=selection_tokens,
+            context_tokens=context_tokens,
             breakdown=structured_breakdown,
             breakdown_note=note,
-        )
+        ))
 
     non_empty_buckets = [
         (entity_type, mode)
@@ -204,8 +286,9 @@ def compute_context_selection_token_metrics(
         "total « sélection » car les en-têtes de contexte sont comptés plusieurs fois. "
         "Le total affiché pour le budget utilise la sélection complète en un seul build."
     )
-    return ContextSelectionTokenMetrics(
+    return _finalize(ContextSelectionTokenMetrics(
         selection_tokens=selection_tokens,
+        context_tokens=context_tokens,
         breakdown=breakdown,
         breakdown_note=note,
-    )
+    ))

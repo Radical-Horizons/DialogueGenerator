@@ -31,8 +31,6 @@ interface ContextListProps {
   onScrollToBottom?: () => void
   /** Afficher un indicateur de chargement en bas (suite de pages). */
   loadingMore?: boolean
-  /** Permet de filtrer la liste aux fiches actuellement sélectionnées. */
-  allowSelectedOnlyFilter?: boolean
 }
 
 type SortType = 'name-asc' | 'name-desc' | 'selected-first'
@@ -60,12 +58,10 @@ export function ContextList({
   entityTypeLabel,
   onScrollToBottom,
   loadingMore = false,
-  allowSelectedOnlyFilter = true,
 }: ContextListPropsWithTab) {
   const [searchQueryRaw, setSearchQueryRaw] = useState('')
   const debouncedSearch = useDebounce(searchQueryRaw, 300)
   const [sortType, setSortType] = useState<SortType>('name-asc')
-  const [selectedOnly, setSelectedOnly] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const storageKey = tabId ? `context-list-scroll-${tabId}` : null
@@ -74,10 +70,7 @@ export function ContextList({
     let result = items.filter((item) =>
       item.name.toLowerCase().includes(debouncedSearch.toLowerCase())
     )
-    if (selectedOnly) {
-      result = result.filter((item) => selectedItems.includes(item.name))
-    }
-    
+
     // Appliquer le tri
     result = [...result].sort((a, b) => {
       const aSelected = selectedItems.includes(a.name)
@@ -98,7 +91,7 @@ export function ContextList({
     })
     
     return result
-  }, [items, debouncedSearch, selectedItems, selectedOnly, sortType])
+  }, [items, debouncedSearch, selectedItems, sortType])
 
   const handleScroll = useCallback(() => {
     const el = scrollContainerRef.current
@@ -205,25 +198,6 @@ export function ContextList({
             <option value="selected-first">Sélectionnés en premier</option>
           </StyledSelect>
         </div>
-        {allowSelectedOnlyFilter && (
-          <label
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              color: theme.text.secondary,
-              fontSize: remSize('small'),
-              cursor: 'pointer',
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={selectedOnly}
-              onChange={(e) => setSelectedOnly(e.target.checked)}
-            />
-            Voir uniquement les fiches sélectionnées
-          </label>
-        )}
       </div>
       <div
         ref={scrollContainerRef}
@@ -233,7 +207,7 @@ export function ContextList({
       >
         {filteredItems.length === 0 ? (
           <div style={{ padding: '1rem', textAlign: 'center', color: theme.text.secondary }}>
-            {selectedOnly ? 'Aucune fiche sélectionnée dans cet onglet' : debouncedSearch ? 'Aucun résultat' : 'Aucun élément'}
+            {debouncedSearch ? 'Aucun résultat' : 'Aucun élément'}
           </div>
         ) : (
           <>

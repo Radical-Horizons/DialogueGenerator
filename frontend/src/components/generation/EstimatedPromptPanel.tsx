@@ -1,11 +1,11 @@
 /**
  * Panneau d'affichage du prompt brut (RawPrompt).
- * Source de vérité unique pour ce qui est envoyé au LLM.
+ * Le compteur tokens contexte est affiché une seule fois dans ContextSelectionBudgetBar (panneau droit).
  */
 import { memo, useState, useCallback } from 'react'
 import { usePromptPreview } from '../../hooks/usePromptPreview'
+import { useLazyPromptPreview } from '../../hooks/useLazyPromptPreview'
 import { StructuredPromptView } from './StructuredPromptView'
-import { TokenBudgetBar } from './TokenBudgetBar'
 import { theme } from '../../theme'
 import { useToast } from '../shared'
 import { useGenerationStore } from '../../store/generationStore'
@@ -15,12 +15,10 @@ import type { PromptStructure } from '../../types/prompt'
 export interface EstimatedPromptPanelProps {
   /** Le prompt brut à afficher (RawPrompt) */
   raw_prompt: RawPrompt | null | undefined
-  /** Indique si l'estimation est en cours */
+  /** Indique si l'estimation / construction du prompt est en cours */
   isEstimating?: boolean
-  /** Nombre de tokens */
-  tokenCount?: number | null
-  /** Hash du prompt pour validation */
-  promptHash?: string | null
+  /** Onglet Prompt visible — déclenche le chargement du prompt complet */
+  isActive?: boolean
   /** Structure JSON du prompt (optionnel) */
   structuredPrompt?: PromptStructure | null
 }
@@ -28,25 +26,25 @@ export interface EstimatedPromptPanelProps {
 export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
   raw_prompt,
   isEstimating = false,
-  tokenCount,
+  isActive = true,
   structuredPrompt: structuredPromptProp,
 }: EstimatedPromptPanelProps) {
   const [viewMode, setViewMode] = useState<'raw' | 'structured'>('structured')
   const toast = useToast()
-  
-  // État pour le bouton "Tout déplier" (uniquement en mode structuré)
+
+  useLazyPromptPreview({ enabled: isActive })
+
   const [allExpanded, setAllExpanded] = useState(false)
   const [toggleAllFn, setToggleAllFn] = useState<(() => void) | null>(null)
-  
-  // Récupérer structuredPrompt depuis le store si non fourni en prop
+
   const structuredPromptFromStore = useGenerationStore((state) => state.structuredPrompt)
   const structuredPrompt = structuredPromptProp ?? structuredPromptFromStore
 
   const { sections } = usePromptPreview(raw_prompt, structuredPrompt)
-  
+
   const handleCopyPrompt = useCallback(() => {
     if (!raw_prompt) return
-    
+
     navigator.clipboard.writeText(raw_prompt)
       .then(() => {
         toast('Prompt copié dans le presse-papier', 'success', 2000)
@@ -55,57 +53,32 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
         toast('Erreur lors de la copie', 'error', 2000)
       })
   }, [raw_prompt, toast])
-  
-  // Calculer le total structuré uniquement comme fallback d'affichage.
-  const calculatedTotal = sections.reduce((sum, section) => {
-    return sum + (section.tokenCount || 0)
-  }, 0)
-  
-  // Le total backend est la source canonique. Les sections peuvent être tronquées ou estimées côté UI.
-  const displayTotal = tokenCount ?? (sections.length > 0 ? calculatedTotal : null)
+
+  const isLoadingPrompt = isEstimating && !raw_prompt
 
   return (
-    <>
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          maxHeight: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: theme.background.panel,
-          overflow: 'hidden',
-        }}
-      >
-      <div style={{ 
-        padding: '0.65rem 0.75rem', 
-        borderBottom: `1px solid ${theme.border.primary}`,
-        flexShrink: 0,
+    <div
+      style={{
+        flex: 1,
+        minHeight: 0,
+        maxHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.55rem',
-      }}>
-        <div
-          style={{
-            fontSize: '0.78rem',
-            color: theme.text.secondary,
-            lineHeight: 1.45,
-            marginBottom: 2,
-          }}
-        >
-          <span style={{ fontWeight: 600, color: theme.text.primary }}>Total prompt</span> — compte
-          le XML complet envoyé au LLM (prompt système, règles, instructions, contexte GDD, etc.). Ce
-          total diffère du décompte « contexte GDD seul » du panneau de gauche, qui applique uniquement
-          la           limite de tokens du contexte narratif.
-        </div>
-        {/* Barre de budget de tokens */}
-        <TokenBudgetBar
-          structuredPrompt={structuredPrompt}
-          tokenCount={displayTotal}
-          isEstimating={isEstimating}
-          maxTokens={null}
-        />
-        {raw_prompt && !isEstimating && (
+        backgroundColor: theme.background.panel,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          padding: '0.65rem 0.75rem',
+          borderBottom: `1px solid ${theme.border.primary}`,
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.55rem',
+        }}
+      >
+        {raw_prompt && !isLoadingPrompt && (
           <div
             style={{
               display: 'flex',
@@ -222,8 +195,8 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
           </div>
         )}
       </div>
-      <div 
-        style={{ 
+      <div
+        style={{
           flex: '1 1 0%',
           minHeight: 0,
           height: 0,
@@ -254,8 +227,8 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
               {raw_prompt}
             </pre>
           ) : (
-            <StructuredPromptView 
-              prompt={raw_prompt} 
+            <StructuredPromptView
+              prompt={raw_prompt}
               structuredPrompt={structuredPrompt}
               sections={sections}
               onToggleStateChange={(expanded, toggleFn) => {
@@ -270,17 +243,18 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
               padding: '2rem',
               textAlign: 'center',
               color: theme.text.secondary,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.75rem',
             }}
           >
-            {isEstimating
-              ? 'Construction du prompt...'
+            {isLoadingPrompt
+              ? 'Construction du prompt…'
               : 'Aucun prompt disponible. Configurez votre génération.'}
           </div>
         )}
       </div>
     </div>
-    </>
   )
 })
-
-

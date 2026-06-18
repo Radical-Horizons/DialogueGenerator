@@ -10,6 +10,7 @@ import { buildOptimizeContextRequest } from '../../utils/buildContextOptimizeReq
 import { getErrorMessage } from '../../types/errors'
 import { theme } from '../../theme'
 import { StyledSelect } from '../shared/StyledSelect'
+import { InfoIcon } from '../shared/Tooltip'
 import { remSize } from '../../theme/uiTypography'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { modalTypography } from '../../theme/responsiveChrome'
@@ -219,9 +220,21 @@ export function ContextOptimizeModal({ open, onClose, onApplied }: ContextOptimi
             />
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: 4, color: theme.text.secondary }}>
-              Épingler une fiche sélectionnée
-            </label>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ color: theme.text.secondary }}>
+                Épingler une fiche sélectionnée
+              </label>
+              <InfoIcon
+                content={
+                  <div style={{ fontSize: remSize('body'), maxWidth: '18rem' }}>
+                    Protège une fiche active contre la réduction automatique : elle reste en mode{' '}
+                    <strong>Complet</strong> pendant l&apos;optimisation sous budget tokens. Les autres
+                    fiches pourront passer en <strong>Extrait</strong> selon la stratégie choisie.
+                  </div>
+                }
+                position="right"
+              />
+            </div>
             <div style={{ display: 'flex', gap: 6 }}>
               <StyledSelect
                 value={selectedPinKey}

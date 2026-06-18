@@ -181,17 +181,19 @@ describe('FR119 touch targets — chrome', () => {
     expect(userBtn.style.height).toBe(`${TOUCH_TARGET_MIN_PX}px`)
   })
 
-  it('Tabs segmentés : minHeight / minWidth 44px sur les boutons', () => {
+  it('Tabs segmentés : minHeight / minWidth 44px en colonne étroite (FR119 mobile)', () => {
     render(
-      <Tabs
-        variant="segmented"
-        activeTabId="a"
-        onTabChange={() => {}}
-        tabs={[
-          { id: 'a', label: 'Onglet A', content: <div /> },
-          { id: 'b', label: 'Onglet B', content: <div /> },
-        ]}
-      />
+      <div style={{ width: 320 }}>
+        <Tabs
+          variant="segmented"
+          activeTabId="a"
+          onTabChange={() => {}}
+          tabs={[
+            { id: 'a', label: 'Onglet A', content: <div /> },
+            { id: 'b', label: 'Onglet B', content: <div /> },
+          ]}
+        />
+      </div>
     )
     expectInlineMinTouch(screen.getByRole('button', { name: 'Onglet A' }) as HTMLElement, 'tab A')
   })

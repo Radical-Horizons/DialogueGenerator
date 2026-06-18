@@ -102,7 +102,7 @@ class FieldDeduplicator:
             if len(paths) > 1
         }
         
-        if duplicates:
+        if duplicates and logger.isEnabledFor(logging.DEBUG):
             logger.debug(
                 f"Doublons détectés: {len(duplicates)} groupes de valeurs dupliquées"
             )
@@ -182,7 +182,8 @@ class FieldDeduplicator:
             if has_children:
                 # Ce chemin est un parent avec des enfants inclus, le marquer pour suppression
                 paths_to_remove.add(path)
-                logger.debug(f"Suppression parent '{path}' car enfants présents")
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(f"Suppression parent '{path}' car enfants présents")
         
         # Filtrer en préservant l'ordre
         fields_to_include = [p for p in fields_to_include if p not in paths_to_remove]
@@ -222,9 +223,10 @@ class FieldDeduplicator:
                 if path != best_path:
                     paths_to_remove.add(path)
             
-            logger.debug(
-                f"Déduplication: conservé '{best_path}', supprimé {[p for p in relevant_paths if p != best_path]}"
-            )
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    f"Déduplication: conservé '{best_path}', supprimé {[p for p in relevant_paths if p != best_path]}"
+                )
         
         # Appliquer la déduplication en préservant l'ordre
         deduplicated = [
@@ -232,8 +234,8 @@ class FieldDeduplicator:
             if field not in paths_to_remove
         ]
         
-        if len(deduplicated) < len(fields_to_include):
-            logger.info(
+        if len(deduplicated) < len(fields_to_include) and logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
                 f"Déduplication: {len(fields_to_include)} -> {len(deduplicated)} champs "
                 f"({len(fields_to_include) - len(deduplicated)} doublons supprimés)"
             )

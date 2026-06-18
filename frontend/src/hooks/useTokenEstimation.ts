@@ -1,21 +1,23 @@
 /**
- * Hook pour estimer les tokens du prompt avec debounce.
- * 
- * Extrait la logique d'estimation de tokens depuis GenerationPanel.
+ * Estimation debouncée des tokens contexte GDD (POST /api/v1/context/estimate-tokens).
+ * Source unique pour le compteur UI — ne reconstruit pas le prompt complet.
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { estimateContextTokens } from '../api/context'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
 import { useVocabularyStore } from '../store/vocabularyStore'
 import { useNarrativeGuidesStore } from '../store/narrativeGuidesStore'
 import { useAuthorProfile } from '../hooks/useAuthorProfile'
-import { useFlagsStore } from '../store/flagsStore'
-import * as dialoguesAPI from '../api/dialogues'
-// NOTE: estimateTokensUtil supprimé - utiliser uniquement token_count du backend
-import { getErrorMessage } from '../types/errors'
 import { useGenerationRequest } from './useGenerationRequest'
-import { computeStateHash, type PromptStateParams } from '../utils/hashUtils'
+import { getErrorMessage } from '../types/errors'
+import { computeStateHash } from '../utils/hashUtils'
+import { buildPromptStateParams, buildTokenEstimateRequest } from '../utils/buildTokenEstimateRequest'
+
+const DEBOUNCE_MS = 500
+const DEBOUNCE_FIRST_MS = 100
+
 export interface UseTokenEstimationOptions {
   /** Instructions utilisateur */
   userInstructions: string
@@ -40,22 +42,14 @@ export interface UseTokenEstimationReturn {
   estimateTokens: () => Promise<void>
   /** Indique si l'estimation est en cours */
   isEstimating: boolean
-  /** Nombre de tokens estimé */
+  /** selection_tokens (contexte GDD) */
   tokenCount: number | null
-  completionTokens: number | null
-  estimatedCostEur: number | null
   /** Erreur d'estimation */
   estimationError: string | null
 }
 
 /**
- * Hook pour estimer les tokens du prompt avec debounce automatique.
- * 
- * L'estimation se déclenche automatiquement avec un debounce de 500ms
- * quand les paramètres changent.
- * 
- * @param options - Options d'estimation
- * @returns Fonction d'estimation manuelle et état
+ * Hook pour estimer les tokens de sélection contexte avec debounce automatique.
  */
 export function useTokenEstimation(options: UseTokenEstimationOptions): UseTokenEstimationReturn {
   const {
@@ -69,19 +63,28 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     toast,
   } = options
 
-  const [isEstimating, setIsEstimating] = useState(false)
   const [estimationError, setEstimationError] = useState<string | null>(null)
-  const [completionTokens, setCompletionTokens] = useState<number | null>(null)
-  const [estimatedCostEur, setEstimatedCostEur] = useState<number | null>(null)
   const requestSeqRef = useRef(0)
   const abortRef = useRef<AbortController | null>(null)
 
   const { selections } = useContextStore()
-  const { sceneSelection, dialogueStructure, systemPromptOverride, gameRules, tokenCount, setRawPrompt } = useGenerationStore()
+  const fieldConfigs = useContextConfigStore((s) => s.fieldConfigs)
+  const essentialFields = useContextConfigStore((s) => s.essentialFields)
+  const organization = useContextConfigStore((s) => s.organization)
+  const {
+    sceneSelection,
+    dialogueStructure,
+    systemPromptOverride,
+    gameRules,
+    tokenCount,
+    setContextTokenEstimate,
+  } = useGenerationStore()
   const { vocabularyConfig } = useVocabularyStore()
   const { includeNarrativeGuides } = useNarrativeGuidesStore()
   const { authorProfile } = useAuthorProfile()
   const { buildContextSelections } = useGenerationRequest()
+
+  const isEstimating = useGenerationStore((s) => s.isEstimating)
 
   const hasSelections = useCallback(() => {
     return (
@@ -104,142 +107,112 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   }, [sceneSelection.characterA, sceneSelection.characterB, selections])
 
   const estimateTokens = useCallback(async () => {
-    // Permettre l'estimation si on a au moins : instructions, sélections, ou un system prompt
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
     if (!userInstructions.trim() && !hasSelections() && !hasSystemPrompt) {
-      setCompletionTokens(null)
-      setEstimatedCostEur(null)
-      setRawPrompt(null, null, null, false, null)
+      setEstimationError(null)
+      setContextTokenEstimate({
+        selectionTokens: null,
+        isEstimating: false,
+        previewInputHash: 'invalidate',
+        contextEstimationError: null,
+        contextTokenBreakdown: [],
+        contextBreakdownNote: '',
+      })
       return
     }
 
-    // Construire les paramètres pour le calcul du hash
     const contextSelections = buildContextSelections()
-    
-    // Récupérer les fieldConfigs et organization depuis le store
-    const { fieldConfigs, essentialFields, organization } = useContextConfigStore.getState()
-    
-    // Inclure les champs essentiels dans la config
-    const fieldConfigsWithEssential: Record<string, string[]> = {}
-    for (const [elementType, fields] of Object.entries(fieldConfigs)) {
-      const essential = essentialFields[elementType] || []
-      fieldConfigsWithEssential[elementType] = [...new Set([...essential, ...fields])]
-    }
-    
-    // Récupérer les flags sélectionnés
-    const { getSelectedFlagsArray } = useFlagsStore.getState()
-    const inGameFlags = getSelectedFlagsArray()
-    
-    // Utiliser une valeur par défaut si userInstructions est vide (backend exige min_length=1)
     const userInstructionsValue = userInstructions.trim() || ' '
-    
-    // Construire les paramètres pour le hash
-    const promptParams: PromptStateParams = {
-      user_instructions: userInstructionsValue,
-      context_selections: contextSelections,
-      npc_speaker_id: sceneSelection.characterB || undefined,
-      max_context_tokens: maxContextTokens,
-      max_completion_tokens: maxCompletionTokens,
-      system_prompt_override: systemPromptOverride || undefined,
-      game_rules: gameRules || undefined,
-      author_profile: authorProfile || undefined,
-      max_choices: maxChoices ?? undefined,
-      choices_mode: choicesMode,
-      narrative_tags: narrativeTags.length > 0 ? narrativeTags : undefined,
-      vocabulary_config: vocabularyConfig ? (vocabularyConfig as unknown as Record<string, string>) : undefined,
-      include_narrative_guides: includeNarrativeGuides,
-      previous_dialogue_preview: previousDialoguePreview || undefined,
-      field_configs: Object.keys(fieldConfigsWithEssential).length > 0 ? fieldConfigsWithEssential : undefined,
-      organization_mode: organization,
-      in_game_flags: inGameFlags.length > 0 ? inGameFlags : undefined,
-    }
-    
-    // Calculer le hash AVANT l'appel API pour vérifier le cache
+
+    const promptParams = buildPromptStateParams({
+      userInstructions: userInstructionsValue,
+      contextSelections,
+      maxContextTokens,
+      maxCompletionTokens,
+      maxChoices,
+      choicesMode,
+      narrativeTags,
+      systemPromptOverride,
+      gameRules,
+      authorProfile,
+      vocabularyConfig: vocabularyConfig
+        ? (vocabularyConfig as unknown as Record<string, string>)
+        : null,
+      includeNarrativeGuides,
+      previousDialoguePreview,
+      npcSpeakerId: sceneSelection.characterB,
+    })
+
     const computedHash = await computeStateHash(promptParams)
     const { previewInputHash, tokenCount: currentTokenCount } = useGenerationStore.getState()
 
     if (computedHash === previewInputHash && currentTokenCount !== null) {
       return
     }
-    
-    // Ne pas effacer le prompt existant pendant l'estimation
+
     abortRef.current?.abort()
     const seq = requestSeqRef.current + 1
     requestSeqRef.current = seq
     const controller = new AbortController()
     abortRef.current = controller
 
-    setIsEstimating(true)
     setEstimationError(null)
-    // Mettre à jour le store pour afficher "Construction du prompt..." dans le panneau Détails
-    const stateBeforeCall = useGenerationStore.getState()
-    setRawPrompt(
-      stateBeforeCall.rawPrompt,
-      stateBeforeCall.tokenCount,
-      stateBeforeCall.promptHash,
-      true,
-      stateBeforeCall.structuredPrompt,
-      'preserve'
-    )
+    setContextTokenEstimate({
+      selectionTokens: currentTokenCount,
+      isEstimating: true,
+      previewInputHash: 'preserve',
+      contextEstimationError: null,
+    })
 
     try {
-      // Utiliser le même endpoint que le budget contexte afin d'éviter les estimations len/4 divergentes.
-      const response = await dialoguesAPI.estimateTokens(promptParams, controller.signal)
+      const request = buildTokenEstimateRequest({
+        userInstructions: userInstructionsValue,
+        contextSelections,
+        maxContextTokens,
+        maxCompletionTokens,
+        maxChoices,
+        choicesMode,
+        narrativeTags,
+        systemPromptOverride,
+        gameRules,
+        authorProfile,
+        vocabularyConfig: vocabularyConfig
+          ? (vocabularyConfig as unknown as Record<string, string>)
+          : null,
+        includeNarrativeGuides,
+        previousDialoguePreview,
+        npcSpeakerId: sceneSelection.characterB,
+      })
+
+      const response = await estimateContextTokens(request, controller.signal)
       if (requestSeqRef.current !== seq) return
-      setCompletionTokens(response.completion_tokens ?? null)
-      setEstimatedCostEur(response.estimated_cost_eur ?? null)
-      
-      const priorBackendHash = useGenerationStore.getState().promptHash
-      if (priorBackendHash !== response.prompt_hash || priorBackendHash === null) {
-        setRawPrompt(
-          response.raw_prompt,
-          response.token_count,
-          response.prompt_hash,
-          false,
-          response.structured_prompt || null,
-          computedHash
-        )
-      } else {
-        const stateAfter = useGenerationStore.getState()
-        setRawPrompt(
-          stateAfter.rawPrompt,
-          stateAfter.tokenCount,
-          stateAfter.promptHash,
-          false,
-          stateAfter.structuredPrompt,
-          'preserve'
-        )
-      }
+
+      setEstimationError(null)
+      setContextTokenEstimate({
+        selectionTokens: response.selection_tokens,
+        isEstimating: false,
+        previewInputHash: computedHash,
+        contextEstimationError: null,
+        contextTokenBreakdown: response.context_token_breakdown,
+        contextBreakdownNote: response.context_breakdown_note,
+      })
     } catch (err: unknown) {
       if (controller.signal.aborted || requestSeqRef.current !== seq) return
-      // Ne logger que les erreurs non liées à la connexion (backend non accessible)
       const e = err as { code?: string; response?: { status?: number } } | null
       if (e?.code !== 'ERR_NETWORK' && e?.code !== 'ECONNREFUSED' && e?.response?.status !== 401) {
-        console.error('Erreur lors de l\'estimation:', err)
+        console.error('Erreur lors de l\'estimation contexte:', err)
         const errorMessage = getErrorMessage(err)
         setEstimationError(errorMessage)
-        // Afficher un toast pour informer l'utilisateur de l'erreur
         if (toast) {
           toast(errorMessage, 'error', 5000)
         }
       }
-      // Ne pas effacer le prompt existant si l'estimation échoue
-      // Le prompt précédent reste visible pour l'utilisateur
-      const currentState = useGenerationStore.getState()
-      setCompletionTokens(null)
-      setEstimatedCostEur(null)
-      setRawPrompt(
-        currentState.rawPrompt,
-        currentState.tokenCount,
-        currentState.promptHash,
-        false,
-        null,
-        'invalidate'
-      )
-    } finally {
-      if (requestSeqRef.current === seq) {
-        setIsEstimating(false)
-      }
+      setContextTokenEstimate({
+        selectionTokens: useGenerationStore.getState().tokenCount,
+        isEstimating: false,
+        previewInputHash: 'invalidate',
+        contextEstimationError: getErrorMessage(err),
+      })
     }
   }, [
     userInstructions,
@@ -251,7 +224,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     hasSelections,
     maxContextTokens,
     buildContextSelections,
-    setRawPrompt,
+    setContextTokenEstimate,
     systemPromptOverride,
     gameRules,
     vocabularyConfig,
@@ -261,7 +234,6 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     choicesMode,
   ])
 
-  // Debounce automatique de l'estimation (500ms, ou 100ms si on a des critères mais pas encore de prompt)
   useEffect(() => {
     const hasAnySelections =
       selections.characters_full.length > 0 ||
@@ -282,16 +254,22 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
 
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
     const hasCriteria = Boolean(userInstructions.trim() || hasAnySelections || hasSystemPrompt)
-    const hasNoPromptYet = useGenerationStore.getState().rawPrompt == null
-    const debounceMs = hasCriteria && hasNoPromptYet ? 100 : 500
+    const debounceMs =
+      hasCriteria && useGenerationStore.getState().tokenCount == null ? DEBOUNCE_FIRST_MS : DEBOUNCE_MS
 
     const timeoutId = setTimeout(() => {
       if (hasCriteria) {
         void estimateTokens()
       } else {
-        setCompletionTokens(null)
-        setEstimatedCostEur(null)
-        setRawPrompt(null, null, null, false, null)
+        setEstimationError(null)
+        setContextTokenEstimate({
+          selectionTokens: null,
+          isEstimating: false,
+          previewInputHash: 'invalidate',
+          contextEstimationError: null,
+          contextTokenBreakdown: [],
+          contextBreakdownNote: '',
+        })
       }
     }, debounceMs)
 
@@ -302,6 +280,9 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
   }, [
     userInstructions,
     selections,
+    fieldConfigs,
+    essentialFields,
+    organization,
     authorProfile,
     maxChoices,
     narrativeTags,
@@ -312,7 +293,7 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     dialogueStructure,
     systemPromptOverride,
     gameRules,
-    setRawPrompt,
+    setContextTokenEstimate,
     vocabularyConfig,
     includeNarrativeGuides,
   ])
@@ -321,8 +302,6 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     estimateTokens,
     isEstimating,
     tokenCount,
-    completionTokens,
-    estimatedCostEur,
     estimationError,
   }
 }

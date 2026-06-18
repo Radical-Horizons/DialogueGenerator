@@ -68,8 +68,6 @@ export interface UseGenerationOrchestratorReturn {
   estimateTokens: () => Promise<void>
   isEstimating: boolean
   tokenCount: number | null
-  completionTokens: number | null
-  estimatedCostEur: number | null
   estimationError: string | null
   
   // Validation
@@ -174,8 +172,6 @@ export function useGenerationOrchestrator(
     estimateTokens: estimation.estimateTokens,
     isEstimating: estimation.isEstimating,
     tokenCount: estimation.tokenCount,
-    completionTokens: estimation.completionTokens,
-    estimatedCostEur: estimation.estimatedCostEur,
     estimationError: estimation.estimationError,
     
     // Validation (UX uniquement)
