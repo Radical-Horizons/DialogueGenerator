@@ -121,6 +121,9 @@ Assets/Layouts/*.layout.json
 # Temporary files
 tmp/vitest-report.json
 tmp/vitest-*.json
+/vitest-*.txt
+/pytest-*.txt
+/measure-out.txt
 *.tmp
 *.bak
 *.swp
