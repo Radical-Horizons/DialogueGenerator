@@ -19,6 +19,8 @@ import {
   resolveGraphNodeIdFromUnityPath,
 } from '../utils/unityNodeIndexMap'
 import { useUnityExport } from './useUnityExport'
+import { useUnityExportDownload } from './useUnityExportDownload'
+import type { LastExportDownload } from './useUnityExportDownload'
 import type { SchemaValidationIssue } from '../types/graph'
 
 export interface UseGraphToolbarReturn {
@@ -84,6 +86,10 @@ export interface UseGraphToolbarReturn {
   redo: () => void
   canUndoNow: boolean
   canRedoNow: boolean
+  lastExportDownload: LastExportDownload | null
+  isExportDownloading: boolean
+  handleDownloadLastExport: () => void
+  dismissExportDownload: () => void
 }
 
 export function useGraphToolbar(
@@ -474,6 +480,8 @@ export function useGraphToolbar(
     }
   }, [showSchemaValidationPanel])
 
+  const exportDownload = useUnityExportDownload()
+
   const { handleExportUnity } = useUnityExport(toast, {
     setShowSchemaValidationPanel,
     setSchemaValidationLoading,
@@ -482,7 +490,7 @@ export function useGraphToolbar(
     setSchemaValidationErrorCount,
     setSchemaValidationWarnings,
     setSchemaValidationStructuredErrors,
-  })
+  }, exportDownload)
 
   const handleSchemaIssueClick = useCallback((issue: SchemaValidationIssue) => {
     if (issue.node_id) {
@@ -569,5 +577,9 @@ export function useGraphToolbar(
     redo,
     canUndoNow,
     canRedoNow,
+    lastExportDownload: exportDownload.lastExportDownload,
+    isExportDownloading: exportDownload.isDownloading,
+    handleDownloadLastExport: exportDownload.handleDownloadLastExport,
+    dismissExportDownload: exportDownload.dismissDownload,
   }
 }

@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Annotated, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import Response
 
 from api.routers.auth import get_current_user
 from starlette.requests import Request
@@ -21,6 +22,7 @@ from api.schemas.dialogue import (
     BatchExportRequest,
     BatchExportResponse,
     BatchExportFailedItemResponse,
+    BatchDownloadRequest,
 )
 from pydantic import BaseModel, Field
 from api.dependencies import (
@@ -45,6 +47,10 @@ from services.unity_dialogue_export_service import (
 )
 from services.batch_export_service import batch_export_documents
 from services.unity_export_validation_service import validate_persisted_document
+from services.unity_dialogue_download_service import (
+    build_batch_download_zip,
+    read_document_download_payload,
+)
 from api.utils.validate_schema_api import validate_schema_response_from_result
 from api.schemas.graph import ValidateSchemaResponse
 from services.llm_pricing_service import LLMPricingService
@@ -543,6 +549,69 @@ async def batch_export_unity_dialogues(
             details={"error": str(e)},
             request_id=request_id,
         )
+
+
+@router.get("/{document_id}/download")
+async def download_unity_dialogue(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> Response:
+    """Télécharge un dialogue Unity exporté sur disque (Story 5.4 / FR52)."""
+    try:
+        content, filename = read_document_download_payload(
+            config_service, document_id, request_id
+        )
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(
+            message=str(exc),
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    return Response(
+        content=content.encode("utf-8"),
+        media_type="application/json;charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.post("/batch-download")
+async def batch_download_unity_dialogues(
+    request_data: BatchDownloadRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> Response:
+    """Télécharge une archive ZIP des fichiers exportés (Story 5.4 / FR52)."""
+    try:
+        zip_bytes, zip_name = build_batch_download_zip(
+            config_service,
+            request_data.filenames,
+            compression=request_data.compression,
+            request_id=request_id,
+        )
+    except FileNotFoundError as exc:
+        raise NotFoundException(
+            resource_type="Fichier export Unity",
+            resource_id=str(exc),
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(message=str(exc), request_id=request_id)
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{zip_name}"'},
+    )
 
 
 @router.post(

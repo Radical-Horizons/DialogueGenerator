@@ -160,3 +160,34 @@ export async function batchExportUnityDialogues(
   return response.data
 }
 
+export interface BatchDownloadRequest {
+  filenames: string[]
+  compression?: 'store' | 'deflate'
+}
+
+/**
+ * Télécharge une archive ZIP des fichiers exportés (Story 5.4 / FR52).
+ */
+export async function batchDownloadUnityDialogues(
+  request: BatchDownloadRequest,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  const response = await apiClient.post<Blob>(
+    '/api/v1/dialogues/batch-download',
+    request,
+    { responseType: 'blob', signal },
+  )
+  return response.data
+}
+
+/**
+ * Télécharge un dialogue Unity exporté sur disque (Story 5.4 / FR52).
+ */
+export async function downloadUnityDialogue(documentId: string, signal?: AbortSignal): Promise<Blob> {
+  const response = await apiClient.get<Blob>(
+    `/api/v1/dialogues/${encodeURIComponent(documentId)}/download`,
+    { responseType: 'blob', signal },
+  )
+  return response.data
+}
+

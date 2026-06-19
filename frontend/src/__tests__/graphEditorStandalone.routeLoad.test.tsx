@@ -69,6 +69,21 @@ vi.mock('../api/documents', () => ({
   putLayout: vi.fn().mockResolvedValue({ revision: 2 }),
 }))
 
+const { validateSchemaMock, saveGraphAndWriteMock } = vi.hoisted(() => ({
+  validateSchemaMock: vi.fn(),
+  saveGraphAndWriteMock: vi.fn(),
+}))
+
+vi.mock('../api/graph', () => ({
+  loadGraph: vi.fn(),
+  saveGraph: vi.fn(),
+  saveGraphAndWrite: (...args: unknown[]) => saveGraphAndWriteMock(...args),
+  validateSchema: (...args: unknown[]) => validateSchemaMock(...args),
+  generateNode: vi.fn(),
+  validateGraph: vi.fn(),
+  calculateLayout: vi.fn(),
+}))
+
 function makeQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { retry: false } } })
 }
@@ -88,6 +103,8 @@ describe('GraphEditor standalone mode', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     toastMock.mockReset()
+    validateSchemaMock.mockReset()
+    saveGraphAndWriteMock.mockReset()
     useGraphStore.getState().resetGraph()
   })
 
@@ -179,8 +196,7 @@ describe('GraphEditor standalone mode', () => {
     expect(validateGraphMock).toHaveBeenCalled()
   })
 
-  it('exporte le JSON Unity courant', async () => {
-    const exportToUnityMock = vi.fn().mockReturnValue('{"ok":true}')
+  it('exporte le JSON Unity courant via bannière Télécharger (Story 5.4)', async () => {
     const createObjectURLMock = vi.fn().mockReturnValue('blob:test-export')
     const revokeObjectURLMock = vi.fn()
 
@@ -202,6 +218,13 @@ describe('GraphEditor standalone mode', () => {
       revokeObjectURL: revokeObjectURLMock,
     })
 
+    validateSchemaMock.mockResolvedValue({ is_valid: true, errors: [], error_count: 0 })
+    saveGraphAndWriteMock.mockResolvedValue({
+      success: true,
+      filename: 'quest_arc.json',
+      json_content: '{"schemaVersion":"1.1.0","nodes":[{"id":"START"}]}',
+    })
+
     useGraphStore.setState(
       {
         ...useGraphStore.getState(),
@@ -210,7 +233,19 @@ describe('GraphEditor standalone mode', () => {
             id: 'START',
             type: 'dialogueNode',
             position: { x: 0, y: 0 },
-            data: { id: 'START', speaker: 'PNJ', line: 'Bonjour', choices: [] },
+            data: {
+              stableId: 'node-a1b2c3d4e5f6789012345678abcdef01',
+              displayName: 'Ouverture',
+              line: 'Bonjour',
+              speaker: 'PNJ',
+              choices: [{ choiceId: 'choice_reply', text: 'Répondre' }],
+            },
+          },
+          {
+            id: 'END',
+            type: 'endNode',
+            position: { x: 0, y: 200 },
+            data: { line: '' },
           },
         ],
         dialogueMetadata: {
@@ -219,7 +254,6 @@ describe('GraphEditor standalone mode', () => {
           node_count: 1,
           edge_count: 0,
         },
-        exportToUnity: exportToUnityMock,
       },
       true
     )
@@ -230,10 +264,14 @@ describe('GraphEditor standalone mode', () => {
     await user.click(screen.getByRole('button', { name: /actions/i }))
     await user.click(screen.getByRole('menuitem', { name: /export unity/i }))
 
-    expect(exportToUnityMock).toHaveBeenCalled()
+    const downloadBanner = await screen.findByTestId('export-download-banner')
+    expect(downloadBanner).toBeTruthy()
+    expect(screen.getByTestId('export-download-filename')).toHaveTextContent('quest_arc.json')
+
+    await user.click(screen.getByTestId('export-download-button'))
+
     expect(createObjectURLMock).toHaveBeenCalledOnce()
     expect(anchor.download).toBe('quest_arc.json')
-    expect(anchor.href).toBe('blob:test-export')
     expect(anchorClickSpy).toHaveBeenCalledOnce()
 
     createElementSpy.mockRestore()

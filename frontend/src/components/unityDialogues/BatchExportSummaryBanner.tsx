@@ -1,5 +1,5 @@
 /**
- * Résumé de fin d'export batch (Story 5.2 AC #3).
+ * Résumé de fin d'export batch (Story 5.2 AC #3, Story 5.4 download).
  */
 import type { CSSProperties } from 'react'
 import { theme } from '../../theme'
@@ -10,14 +10,18 @@ import type { BatchExportSummaryState } from '../../hooks/useBatchUnityExport'
 
 export interface BatchExportSummaryBannerProps {
   summary: BatchExportSummaryState
+  isDownloading: boolean
   onDismiss: () => void
   onRetryFailed: () => void
+  onDownloadAll: () => void
 }
 
 export function BatchExportSummaryBanner({
   summary,
+  isDownloading,
   onDismiss,
   onRetryFailed,
+  onDownloadAll,
 }: BatchExportSummaryBannerProps) {
   const headline = formatBatchExportSummary(
     summary.exportedCount,
@@ -50,6 +54,20 @@ export function BatchExportSummaryBanner({
         </div>
       )}
       <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+        {summary.exportedCount > 0 && (
+          <button
+            type="button"
+            data-testid="batch-export-download-all"
+            onClick={onDownloadAll}
+            disabled={isDownloading}
+            style={actionButtonStyle}
+          >
+            Télécharger tous
+          </button>
+        )}
+        {isDownloading && (
+          <span data-testid="batch-export-download-progress">Téléchargement en cours…</span>
+        )}
         {summary.failedCount > 0 && (
           <button
             type="button"

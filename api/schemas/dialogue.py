@@ -603,6 +603,16 @@ class BatchExportResponse(BaseModel):
     success: bool = Field(..., description="True si au moins un export réussi sans erreur globale")
 
 
+class BatchDownloadRequest(BaseModel):
+    """Requête téléchargement batch ZIP (Story 5.4 / FR52)."""
+
+    filenames: List[str] = Field(..., min_length=1, description="Noms de fichiers exportés")
+    compression: Literal["store", "deflate"] = Field(
+        "deflate",
+        description="Niveau de compression ZIP",
+    )
+
+
 # Schemas pour la bibliothèque Unity Dialogues
 class UnityDialogueMetadata(BaseModel):
     """Métadonnées d'un fichier de dialogue Unity JSON.

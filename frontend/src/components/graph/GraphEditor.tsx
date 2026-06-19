@@ -15,6 +15,7 @@ import { GraphSearchBar } from './GraphSearchBar'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
+import { ExportDownloadBanner } from '../unityDialogues/ExportDownloadBanner'
 import { GraphValidationPanel } from './GraphValidationPanel'
 import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
@@ -244,6 +245,15 @@ export function GraphEditor({
             ) : undefined
           }
         />
+
+        {toolbar.lastExportDownload && (
+          <ExportDownloadBanner
+            exportDownload={toolbar.lastExportDownload}
+            isDownloading={toolbar.isExportDownloading}
+            onDownload={toolbar.handleDownloadLastExport}
+            onDismiss={toolbar.dismissExportDownload}
+          />
+        )}
 
         {/* Contenu graphe */}
         {!hasActiveDialogue && nodes.length === 0 ? (

@@ -14,6 +14,7 @@ import {
   extractValidationErrors,
   isUnityPathUnavailableError,
 } from '../utils/graphApiErrors'
+import type { UseUnityExportDownloadResult } from './useUnityExportDownload'
 
 export interface UnityExportSchemaState {
   setShowSchemaValidationPanel: (open: boolean) => void
@@ -35,6 +36,7 @@ export interface UnityExportSchemaState {
 export function useUnityExport(
   toast: UseToastFn,
   schemaState: UnityExportSchemaState,
+  downloadState: Pick<UseUnityExportDownloadResult, 'registerSuccessfulExport'>,
 ): { handleExportUnity: () => Promise<void> } {
   const {
     setShowSchemaValidationPanel,
@@ -45,6 +47,8 @@ export function useUnityExport(
     setSchemaValidationWarnings,
     setSchemaValidationStructuredErrors,
   } = schemaState
+
+  const { registerSuccessfulExport } = downloadState
 
   const handleExportUnity = useCallback(async () => {
     const state = useGraphStore.getState()
@@ -81,6 +85,7 @@ export function useUnityExport(
         document_id: state.documentId ?? undefined,
       })
 
+      registerSuccessfulExport(response.json_content, response.filename)
       toast(`Dialogue exporté : ${response.filename}`, 'success', 3000)
     } catch (err) {
       const validationErrors = extractValidationErrors(err)
@@ -108,6 +113,7 @@ export function useUnityExport(
     setSchemaValidationErrorCount,
     setSchemaValidationWarnings,
     setSchemaValidationStructuredErrors,
+    registerSuccessfulExport,
   ])
 
   return { handleExportUnity }

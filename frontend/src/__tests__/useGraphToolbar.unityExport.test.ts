@@ -133,6 +133,10 @@ describe('useGraphToolbar handleExportUnity (Story 5.1)', () => {
 
     expect(graphAPI.saveGraphAndWrite).toHaveBeenCalledTimes(1)
     expect(toastMock).toHaveBeenCalledWith('Dialogue exporté : Test_Export.json', 'success', 3000)
+    expect(result.current.lastExportDownload).toEqual({
+      jsonContent: '{"schemaVersion":"1.1.0","nodes":[]}',
+      filename: 'Test_Export.json',
+    })
   })
 
   it('repeated export always calls saveGraphAndWrite (no seq skip)', async () => {

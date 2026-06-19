@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import * as dialoguesAPI from '../../api/dialogues'
 import { UnityDialogueList } from './UnityDialogueList'
+import { triggerBlobDownloadAsync } from '../../utils/downloadBlob'
 
 vi.mock('../../api/unityDialogues', () => ({
   listUnityDialogues: vi.fn(),
@@ -14,6 +15,8 @@ vi.mock('../../api/unityDialogues', () => ({
 
 vi.mock('../../api/dialogues', () => ({
   batchExportUnityDialogues: vi.fn(),
+  batchDownloadUnityDialogues: vi.fn(),
+  downloadUnityDialogue: vi.fn(),
 }))
 
 vi.mock('../../store/graphStore', () => ({
@@ -34,6 +37,24 @@ vi.mock('../shared', async (importOriginal) => {
 
 const mockList = vi.mocked(unityDialoguesAPI.listUnityDialogues)
 const batchExportMock = vi.mocked(dialoguesAPI.batchExportUnityDialogues)
+const batchDownloadMock = vi.mocked(dialoguesAPI.batchDownloadUnityDialogues)
+const downloadUnityDialogueMock = vi.mocked(dialoguesAPI.downloadUnityDialogue)
+
+vi.mock('../../utils/downloadBlob', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../utils/downloadBlob')>()
+  return {
+    ...actual,
+    triggerBlobDownload: vi.fn(),
+    triggerBlobDownloadAsync: vi.fn(async () => {}),
+    downloadWithProgress: vi.fn(async (fetchBlob, _name, onLoading) => {
+      onLoading(true)
+      await fetchBlob()
+      onLoading(false)
+    }),
+  }
+})
+
+const triggerBlobDownloadAsyncMock = vi.mocked(triggerBlobDownloadAsync)
 
 const THREE_DIALOGUES = {
   dialogues: [
@@ -66,6 +87,7 @@ describe('UnityDialogueList batch export', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
+    downloadUnityDialogueMock.mockResolvedValue(new Blob(['{}'], { type: 'application/json' }))
     useGraphStoreMock.mockImplementation((selector) =>
       selector({
         hasUnsavedChanges: false,
@@ -207,6 +229,80 @@ describe('UnityDialogueList batch export', () => {
 
     await waitFor(() => {
       expect(batchExportMock).not.toHaveBeenCalled()
+    })
+  })
+
+  it('batch 2 succès → Télécharger tous déclenche ZIP batch-download', async () => {
+    const user = userEvent.setup()
+    batchExportMock.mockImplementation(async (req) => ({
+      exported: [`${req.document_ids[0]}.json`],
+      failed: [],
+      success: true,
+    }))
+
+    batchDownloadMock.mockResolvedValue(new Blob(['zip'], { type: 'application/zip' }))
+
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+    await screen.findByTestId('unity-dialogue-list')
+    await user.click(screen.getByTestId('batch-select-all'))
+    await user.click(screen.getByTestId('batch-export-start'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('batch-export-download-all')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByTestId('batch-export-download-all'))
+
+    await waitFor(() => {
+      expect(batchDownloadMock).toHaveBeenCalledWith({
+        filenames: ['doc_a.json', 'doc_b.json', 'doc_c.json'],
+        compression: 'deflate',
+      })
+    })
+  })
+
+  it('option JSON individuel → téléchargements séquentiels sans ZIP', async () => {
+    const user = userEvent.setup()
+    batchExportMock
+      .mockResolvedValueOnce({ exported: ['doc_a.json'], failed: [], success: true })
+      .mockResolvedValueOnce({ exported: ['doc_b.json'], failed: [], success: true })
+
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+    await screen.findByTestId('unity-dialogue-list')
+    await user.click(screen.getByTestId('download-export-options-toggle'))
+    await user.selectOptions(screen.getByTestId('download-option-batch-format'), 'individual')
+    await user.click(screen.getByTestId('batch-select-all'))
+    await user.click(screen.getByTestId('batch-export-start'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('batch-export-download-all')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByTestId('batch-export-download-all'))
+
+    await waitFor(() => {
+      expect(batchDownloadMock).not.toHaveBeenCalled()
+      expect(triggerBlobDownloadAsyncMock).toHaveBeenCalled()
+    })
+  })
+
+  it('menu contextuel Télécharger appelle GET download bibliothèque (Story 5.4 AC #6)', async () => {
+    const user = userEvent.setup()
+    render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
+    await screen.findByTestId('unity-dialogue-list')
+
+    const firstItem = screen.getByText('Dialogue A').closest('[data-testid]')
+    expect(firstItem).toBeTruthy()
+    await user.pointer({ keys: '[MouseRight>]', target: screen.getByText('Dialogue A') })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dialogue-list-context-download')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByTestId('dialogue-list-context-download'))
+
+    await waitFor(() => {
+      expect(downloadUnityDialogueMock).toHaveBeenCalledWith('doc_a')
     })
   })
 })

@@ -22,6 +22,7 @@ interface DialogueListContextMenuProps {
   onClose: () => void
   onSelect?: (dialogue: UnityDialogueMetadata) => void
   onValidateSchema?: (dialogue: UnityDialogueMetadata) => void
+  onDownload?: (dialogue: UnityDialogueMetadata) => void
   onDeleted?: () => void | Promise<void>
 }
 
@@ -30,6 +31,7 @@ export function DialogueListContextMenu({
   onClose,
   onSelect,
   onValidateSchema,
+  onDownload,
   onDeleted,
 }: DialogueListContextMenuProps) {
   const { dialogue } = state
@@ -40,7 +42,7 @@ export function DialogueListContextMenu({
     state.clientX,
     state.clientY,
     220,
-    onValidateSchema ? 160 : 120,
+    onValidateSchema ? 200 : 120,
   )
 
   const title = getDialogueDisplayTitle(dialogue)
@@ -150,6 +152,26 @@ export function DialogueListContextMenu({
           }}
         >
           Valider le schéma Unity
+        </button>
+      )}
+      {onDownload && (
+        <button
+          type="button"
+          role="menuitem"
+          data-testid="dialogue-list-context-download"
+          style={menuItemStyle}
+          onClick={() => {
+            onDownload(dialogue)
+            onClose()
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          Télécharger
         </button>
       )}
       <button

@@ -22,7 +22,14 @@ import { useBatchUnityExport, toDocumentId } from '../../hooks/useBatchUnityExpo
 import { useDocumentSchemaValidation } from '../../hooks/useDocumentSchemaValidation'
 import { BatchExportToolbar } from './BatchExportToolbar'
 import { BatchExportSummaryBanner } from './BatchExportSummaryBanner'
+import { DownloadExportOptionsPanel } from './DownloadExportOptionsPanel'
 import { SchemaValidationPanel } from '../graph/SchemaValidationPanel'
+import {
+  loadDownloadExportOptions,
+  saveDownloadExportOptions,
+  type DownloadExportOptions,
+} from '../../utils/downloadExportOptions'
+import { downloadAllExportedFiles, downloadPersistedUnityDialogue } from '../../utils/unityExportDownload'
 import { useGraphStore } from '../../store/graphStore'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
 
@@ -42,6 +49,11 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   function UnityDialogueList({ onSelectDialogue, selectedFilename }, ref) {
   const toast = useToast()
   const batch = useBatchUnityExport(toast)
+  const [downloadOptions, setDownloadOptionsState] = useState<DownloadExportOptions>(() =>
+    loadDownloadExportOptions(),
+  )
+  const [showDownloadOptionsPanel, setShowDownloadOptionsPanel] = useState(false)
+  const [isBatchDownloading, setIsBatchDownloading] = useState(false)
   const docSchemaValidation = useDocumentSchemaValidation()
   const hasUnsavedChanges = useGraphStore((s) => s.hasUnsavedChanges)
   const openDocumentId = useGraphStore((s) => s.documentId)
@@ -136,6 +148,44 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     openFilename,
     toast,
   ])
+
+  const setDownloadOptions = useCallback((options: DownloadExportOptions) => {
+    setDownloadOptionsState(options)
+    saveDownloadExportOptions(options)
+  }, [])
+
+  const handleDownloadAllExported = useCallback(async () => {
+    if (!batch.batchSummary || batch.batchSummary.exportedFilenames.length === 0) {
+      return
+    }
+    try {
+      await downloadAllExportedFiles(
+        batch.batchSummary.exportedFilenames,
+        downloadOptions,
+        setIsBatchDownloading,
+      )
+    } catch (err) {
+      toast(`Erreur téléchargement : ${err instanceof Error ? err.message : String(err)}`, 'error')
+    }
+  }, [batch.batchSummary, downloadOptions, toast])
+
+  const handleDownloadDialogue = useCallback(
+    async (dialogue: UnityDialogueMetadata) => {
+      const docId = toDocumentId(dialogue.filename)
+      try {
+        await downloadPersistedUnityDialogue(
+          docId,
+          dialogue.filename,
+          downloadOptions,
+          setIsBatchDownloading,
+          dialogue.title,
+        )
+      } catch (err) {
+        toast(`Erreur téléchargement : ${err instanceof Error ? err.message : String(err)}`, 'error')
+      }
+    },
+    [toast],
+  )
 
   if (isLoading) {
     return (
@@ -258,12 +308,41 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
         onOptionsChange={batch.setBatchOptions}
       />
 
+      <div style={{ padding: '0 0.5rem' }}>
+        <button
+          type="button"
+          data-testid="download-export-options-toggle"
+          onClick={() => setShowDownloadOptionsPanel((open) => !open)}
+          style={{
+            marginTop: '0.35rem',
+            padding: '0.3rem 0.5rem',
+            fontSize: remSize('small'),
+            border: `1px solid ${theme.border.primary}`,
+            borderRadius: '4px',
+            backgroundColor: theme.button.default.background,
+            color: theme.button.default.color,
+            cursor: 'pointer',
+          }}
+        >
+          Options téléchargement
+        </button>
+        {showDownloadOptionsPanel && (
+          <div style={{ marginTop: '0.35rem' }}>
+            <DownloadExportOptionsPanel options={downloadOptions} onChange={setDownloadOptions} />
+          </div>
+        )}
+      </div>
+
       {batch.batchSummary && (
         <BatchExportSummaryBanner
           summary={batch.batchSummary}
+          isDownloading={isBatchDownloading}
           onDismiss={batch.dismissSummary}
           onRetryFailed={() => {
             void batch.retryFailedExports()
+          }}
+          onDownloadAll={() => {
+            void handleDownloadAllExported()
           }}
         />
       )}
@@ -306,6 +385,9 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           onClose={() => setContextMenu(null)}
           onSelect={(dialogue) => onSelectDialogue(dialogue)}
           onValidateSchema={handleValidateDocumentSchema}
+          onDownload={(dialogue) => {
+            void handleDownloadDialogue(dialogue)
+          }}
           onDeleted={() => refresh()}
         />
       )}

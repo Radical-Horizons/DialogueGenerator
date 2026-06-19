@@ -31,6 +31,7 @@ export interface BatchExportSummaryState {
   failedCount: number
   cancelled: boolean
   failed: BatchExportFailedItem[]
+  exportedFilenames: string[]
 }
 
 export interface UseBatchUnityExportResult {
@@ -170,6 +171,7 @@ export function useBatchUnityExport(toast: UseToastFn): UseBatchUnityExportResul
         failedCount: failed.length,
         cancelled,
         failed,
+        exportedFilenames: [...exported],
       }
       setBatchSummary(summary)
       toast(formatBatchExportSummary(summary.exportedCount, summary.failedCount, cancelled), cancelled ? 'warning' : 'success', 5000)
