@@ -18,6 +18,12 @@ def clear_gdd_runtime_caches() -> None:
         get_gdd_cache().clear()
     except (ImportError, AttributeError, OSError) as exc:
         logger.debug("clear_gdd_runtime_caches: ignoré (%s)", exc)
+    try:
+        from services.gdd_context_precompile import clear_precompile_context_builder
+
+        clear_precompile_context_builder()
+    except ImportError as exc:
+        logger.debug("clear_precompile_context_builder: ignoré (%s)", exc)
 
 
 def reload_context_builder_if_loaded(container: Any) -> None:

@@ -14,11 +14,17 @@ describe('ContextSelectionBudgetBar', () => {
     useContextConfigStore.setState({ contextTokenBudgetMax: 10_000 })
     useGenerationStore.setState({
       tokenCount: 25_000,
+      promptTokenCount: 28_000,
       isEstimating: false,
       contextEstimationError: null,
-      contextTokenBreakdown: [{ entity_type: 'characters', mode: 'full', token_count: 80 }],
-      contextBreakdownNote: 'Note test breakdown.',
     })
+  })
+
+  it('affiche le total prompt et la sous-ligne GDD', async () => {
+    render(<ContextSelectionBudgetBar visible />)
+
+    expect(await screen.findByTestId('prompt-token-total')).toHaveTextContent('~28')
+    expect(screen.getByTestId('context-gdd-token-subline')).toHaveTextContent('~25')
   })
 
   it('affiche le dépassement de budget et le CTA optimisation actif quand l’API FR21 est activée', async () => {
@@ -30,11 +36,21 @@ describe('ContextSelectionBudgetBar', () => {
     expect(cta.getAttribute('title')).toContain('FR21')
   })
 
-  it('avertit quand le plafond configuré dépasse 100k', async () => {
-    useContextConfigStore.setState({ contextTokenBudgetMax: 150_000 })
+  it('affiche « Contexte élevé » quand la sélection dépasse 100k tokens', async () => {
+    useContextConfigStore.setState({ contextTokenBudgetMax: 200_000 })
+    useGenerationStore.setState({ tokenCount: 120_000, promptTokenCount: 125_000 })
 
     render(<ContextSelectionBudgetBar visible />)
 
-    expect(await screen.findByTestId('context-token-budget-high-cap-warning')).toBeInTheDocument()
+    expect(await screen.findByTestId('context-token-high-context-warning')).toHaveTextContent('Contexte élevé')
+  })
+
+  it('n’affiche pas « Contexte élevé » quand seul le plafond dépasse 100k', () => {
+    useContextConfigStore.setState({ contextTokenBudgetMax: 150_000 })
+    useGenerationStore.setState({ tokenCount: 25_000 })
+
+    render(<ContextSelectionBudgetBar visible />)
+
+    expect(screen.queryByTestId('context-token-high-context-warning')).not.toBeInTheDocument()
   })
 })

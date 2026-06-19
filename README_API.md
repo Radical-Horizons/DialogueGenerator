@@ -2,6 +2,8 @@
 
 API REST FastAPI pour la génération de dialogues IA pour jeux de rôle.
 
+> **Agents** : quickstart partiel seulement. Invocation → `.cursor/skills/api-runbook/SKILL.md` + `npm run api:invoke`. Contrats complets → [`docs/api/api-contracts-api.md`](docs/api/api-contracts-api.md). Commande Cursor → `.cursor/commands/api-runbook.md`.
+
 Cette API est utilisée par l'**interface web React** (interface principale).
 
 ## Démarrage rapide
@@ -111,16 +113,7 @@ L'API sera accessible sur (exemple port **4243**) :
 - `POST /api/v1/dialogues/preview-prompt` - Prévisualiser le prompt brut construit (sans estimation de tokens)
 - `POST /api/v1/dialogues/estimate-tokens` - Estimer tokens et retourner le prompt brut (pour l'estimation avant génération)
 
-### Interactions
-
-- `GET /api/v1/interactions` - Liste interactions
-- `GET /api/v1/interactions/{id}` - Détails interaction
-- `GET /api/v1/interactions/{id}/parents` - Interactions parentes
-- `GET /api/v1/interactions/{id}/children` - Interactions enfants
-- `GET /api/v1/interactions/{id}/context-path` - Chemin complet de contexte (parents jusqu'à la racine)
-- `POST /api/v1/interactions` - Créer interaction
-- `PUT /api/v1/interactions/{id}` - Mettre à jour
-- `DELETE /api/v1/interactions/{id}` - Supprimer
+> **Note** : l'ancien module `/api/v1/interactions/*` (CRUD interactions) a été retiré. Utiliser les documents Unity / unity-dialogues à la place.
 
 ### Contexte GDD
 

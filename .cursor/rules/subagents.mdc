@@ -8,6 +8,7 @@ alwaysApply: false
 
 | Nom | Modèle | Scope principal | Quand l'utiliser |
 |-----|--------|-----------------|------------------|
+| `api-operator` | fast | Appels REST live (sync GDD, contexte, health) | Exécuter un endpoint ; skill `api-runbook` |
 | `api-contracts-reviewer` | fast | `api/routers/`, `api/schemas/`, `frontend/src/api/` | Drift schema/router/client, status codes |
 | `graph-editor-reviewer` | inherit | `frontend/src/store/*Slice*`, `components/graph/` | Zustand, React Flow, flush NodeEditorPanel |
 | `llm-pipeline-reviewer` | fast | `core/llm/`, `services/llm_*`, `api/routers/streaming.py` | Streaming SSE, coûts, token counting |

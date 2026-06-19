@@ -1,0 +1,21 @@
+(node:55740) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-9.0.2, pluggy-1.6.0 -- F:\Projets\Notion_Scrapper\DialogueGenerator\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: F:\Projets\Notion_Scrapper\DialogueGenerator
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0, mock-3.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... [INFO    ] api.utils.logging_config:setup_logging:252 Logging fichier activ├®: dossier=data\logs, r├®tention=30 jours
+[INFO    ] api.utils.logging_config:setup_logging:305 Logging configur├®: format=text, level=DEBUG, console=DEBUG, file=DEBUG, environment=development, fichier=activ├®
+[INFO    ] api.middleware.rate_limiter:get_rate_limiter:22 Rate limiting d├®sactiv├®
+[INFO    ] api.main:<module>:371 Middleware anti-cache activ├® en d├®veloppement
+[INFO    ] api.middleware.http_cache:setup_http_cache:323 Middleware de cache HTTP d├®sactiv├® en d├®veloppement (pour garantir le rafra├«chissement)
+[INFO    ] api.utils.metrics:setup_prometheus_metrics:31 M├®triques Prometheus activ├®es (endpoint: /metrics)
+[INFO    ] api.main:<module>:712 Frontend statique mont├® depuis: F:\Projets\Notion_Scrapper\DialogueGenerator\frontend\dist (mode: development)
+ERROR: file or directory not found: or
+
+collected 0 items
+
+============================ no tests ran in 0.01s ============================

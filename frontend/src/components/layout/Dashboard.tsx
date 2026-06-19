@@ -77,24 +77,18 @@ function ChevronIcon({ direction, size = 16 }: { direction: 'left' | 'right'; si
 }
 
 /**
- * Bouton d'en-tête pour replier un panneau latéral.
- * Affiche un chevron + label court; le label disparaît sur les petits panneaux via overflow hidden.
- */
-/**
- * direction : sens de repliement (détermine l'icône chevron et son animation).
- * chevronPosition : côté où le chevron apparaît par rapport au label (défaut = même côté que direction).
+ * Bouton d'en-tête pour replier un panneau latéral (desktop).
+ * Icône chevron seule ; l'intention est portée par `aria-label` / `title`.
  */
 function PanelCollapseButton({
   direction,
   chevronPosition,
-  label,
   onClick,
   ariaLabel,
   density = 'comfortable',
 }: {
   direction: 'left' | 'right'
   chevronPosition?: 'left' | 'right'
-  label: string
   onClick: () => void
   ariaLabel: string
   /** Desktop confortable = rail compact ; narrow = cible tactile FR119. */
@@ -141,25 +135,13 @@ function PanelCollapseButton({
         color: textColor,
         cursor: 'pointer',
         flexShrink: 0,
-        overflow: 'hidden',
-        maxWidth: 90,
+        justifyContent: 'center',
         transform: `scale(${scale})`,
         transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
       }}
     >
       {chevronSide === 'left' && chevron}
-      <span style={{
-        fontSize: remSize('caption'),
-        fontWeight: 600,
-        letterSpacing: '0.03em',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        lineHeight: 1,
-      }}>
-        {label}
-      </span>
       {chevronSide === 'right' && chevron}
     </button>
   )
@@ -745,14 +727,19 @@ export function Dashboard() {
     const contextRefresh = contextLoadState.refresh
     const hasContextLoadError = contextLoadState.error !== null
     const isGenerateActionBlocked =
-      actions.isLoading || isGraphGenerating || contextLoadState.isLoading
+      actions.isLoading ||
+      isGraphGenerating ||
+      contextLoadState.isLoading ||
+      generationState.isEstimating
     const isRefreshActionDisabled = contextLoadState.isLoading || !contextRefresh
     const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer'
     const primaryActionTitle = hasContextLoadError
       ? 'Rafraîchir le contexte GDD'
       : contextLoadState.isLoading
         ? 'Chargement du contexte GDD en cours'
-        : 'Générer (Ctrl+Enter)'
+        : generationState.isEstimating
+          ? 'Estimation du contexte en cours'
+          : 'Générer (Ctrl+Enter)'
     const handlePrimaryGenerateAction = hasContextLoadError
       ? contextRefresh ?? undefined
       : actions.handleGenerate
@@ -905,7 +892,13 @@ export function Dashboard() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{
-                  animation: actions.isLoading || isGraphGenerating || contextLoadState.isLoading ? 'spin 1s linear infinite' : 'none',
+                  animation:
+                    actions.isLoading ||
+                    isGraphGenerating ||
+                    contextLoadState.isLoading ||
+                    generationState.isEstimating
+                      ? 'spin 1s linear infinite'
+                      : 'none',
                 }}
               >
                 <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
@@ -1027,7 +1020,6 @@ export function Dashboard() {
               </div>
               <PanelCollapseButton
                 direction="left"
-                label="Replier"
                 onClick={toggleLeftPanel}
                 ariaLabel="Replier le panneau gauche"
                 density={panelCollapseDensity}
@@ -1152,7 +1144,6 @@ export function Dashboard() {
           <PanelCollapseButton
             direction="right"
             chevronPosition="right"
-            label="Replier"
             onClick={toggleRightPanel}
             ariaLabel="Replier le panneau droit"
             density={panelCollapseDensity}

@@ -80,6 +80,7 @@ class ContextConstructionService:
         self._context_truncator = context_truncator
         self._previous_dialogue_manager = previous_dialogue_manager
         self._context_config = context_config or {}
+        self._context_builder: Optional[Any] = None
     
     def _get_field_manager(self) -> 'ContextFieldManager':
         """Retourne le ContextFieldManager, en levant une erreur si non initialisé.
@@ -238,8 +239,10 @@ class ContextConstructionService:
                 """
                 fields = []
                 for key, value in data.items():
-                    # Ignorer les champs techniques ou vides
+                    # Ignorer les champs techniques, métadonnées UI ou vides
                     if key.startswith("_") or value is None:
+                        continue
+                    if not prefix and key in ("section_titles", "notion_page_id"):
                         continue
                     
                     field_path = f"{prefix}.{key}" if prefix else key
@@ -281,9 +284,9 @@ class ContextConstructionService:
         )
         
         if context_item:
-            # Définir l'ID et le nom
+            # Définir l'ID et le nom affiché (nom canonique de la fiche GDD)
             context_item.id = f"{element_label}_{idx}"
-            context_item.name = f"{element_label} {idx}"
+            context_item.name = name
             # Ajouter le nom réel dans les métadonnées
             if context_item.metadata:
                 context_item.metadata["real_name"] = name
@@ -438,18 +441,53 @@ class ContextConstructionService:
                     field_labels_map = field_manager.get_field_labels_map(element_type, filtered_fields)
                 
                 if build_json_items:
-                    context_item = self._build_context_item(
-                        element_data=element_data,
-                        element_type=element_type,
-                        element_label=element_label,
-                        idx=len(items) + 1,
-                        name=canonical_name,
-                        filtered_fields=filtered_fields,
-                        field_labels_map=field_labels_map,
-                        organization_mode=organization_mode,
-                        element_mode=element_mode,
-                        organizer=organizer,
-                    )
+                    context_item = None
+                    idx = len(items) + 1
+                    if getattr(self, "_context_builder", None) is not None:
+                        try:
+                            from services.gdd_context_precompile import try_load_cached_context_item
+
+                            context_item = try_load_cached_context_item(
+                                category_key=category_key,
+                                canonical_name=canonical_name,
+                                element_data=element_data,
+                                organization_mode=organization_mode,
+                                element_mode=element_mode,
+                                field_configs=field_configs,
+                                element_label=element_label,
+                                idx=idx,
+                            )
+                        except (ImportError, OSError, TypeError, ValueError) as cache_exc:
+                            logger.debug(
+                                "Cache précompile non utilisé pour %s/%s: %s",
+                                category_key,
+                                canonical_name,
+                                cache_exc,
+                            )
+                    if context_item is None:
+                        context_item = self._build_context_item(
+                            element_data=element_data,
+                            element_type=element_type,
+                            element_label=element_label,
+                            idx=idx,
+                            name=canonical_name,
+                            filtered_fields=filtered_fields,
+                            field_labels_map=field_labels_map,
+                            organization_mode=organization_mode,
+                            element_mode=element_mode,
+                            organizer=organizer,
+                        )
+                        if context_item and getattr(self, "_context_builder", None) is not None:
+                            from services.gdd_context_precompile import persist_context_item_variant
+
+                            persist_context_item_variant(
+                                self._context_builder,
+                                category_key=category_key,
+                                record=element_data,
+                                organization_mode=organization_mode,
+                                element_mode=element_mode,
+                                field_configs=field_configs,
+                            )
                     if not context_item:
                         continue
                     token_count = int(context_item.tokenCount or 0)
@@ -547,10 +585,10 @@ class ContextConstructionService:
         for category in build_result.categories:
             context_parts.append(f"\n--- {category.category_title.upper()} ---")
             
-            for idx, item in enumerate(category.items, start=1):
+            for item in category.items:
                 # Ajouter le marqueur explicite AVANT le contenu de l'élément si demandé
                 if include_element_markers:
-                    context_parts.append(f"--- {category.element_label} {idx} ---")
+                    context_parts.append(f"--- {item.name} ---")
                 context_parts.append(item.formatted_content)
         
         # Construction finale
@@ -641,20 +679,21 @@ class ContextConstructionService:
                 categories=categories
             ))
         
-        # Calculer le total de tokens
-        total_tokens = sum(section.tokenCount or 0 for section in sections)
-        
-        # Créer la structure complète
+        # Créer la structure complète puis réconcilier les tokenCount (1× tiktoken, somme = total)
         metadata = PromptMetadata(
-            totalTokens=total_tokens,
+            totalTokens=0,
             generatedAt=datetime.now().isoformat(),
             organizationMode=organization_mode
         )
-        
-        return PromptStructure(
+
+        structure = PromptStructure(
             sections=sections,
             metadata=metadata
         )
+
+        from services.context_token_reconciler import reconcile_prompt_structure_token_counts
+
+        return reconcile_prompt_structure_token_counts(structure)
     
     def build_context(
         self,

@@ -1,0 +1,1950 @@
+
+ RUN  v4.0.16 F:/Projets/Notion_Scrapper/DialogueGenerator/frontend
+
+stderr | src/components/context/SelectedContextSummary.test.tsx > SelectedContextSummary > le compteur correspond exactement au nombre d'├®l├®ments uniques dans chaque cat├®gorie
+Warning: Encountered two children with the same key, `Personnage 1`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted ÔÇö the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at EntityCategoryList2 (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/context/SelectedContextSummary.tsx:23:3)
+    at div
+    at div
+    at div
+    at details
+    at ContextPanelAccordionSection (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/context/ContextPanelAccordion.tsx:104:3)
+    at SelectedContextSummary2 (F:/Projets/Notion_Scrapper/DialogueGenerator/frontend/src/components/context/SelectedContextSummary.tsx:139:3)
+
+┬À┬À┬À┬Àxx┬À┬À┬Àx┬À┬Àx┬À┬Àx┬À┬À┬À┬À┬À┬À┬Àx┬À┬À┬À┬À┬Àx┬À┬À┬Àxx┬À┬À┬À┬À┬À┬À
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 9 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > affiche le header avec compteur 0 si suggestions est vide
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions \(0\)/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p
+    style="margin: 0px; padding: 0.25rem 0px; color: rgba(255, 255, 255, 0.75); font-size: 0.75rem; font-style: italic;"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 500; color: rgba(255, 255, 255, 0.75);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (0)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <p
+          style="margin: 0px; padding: 0.25rem 0px; color: rgba(255, 255, 255, 0.75); font-size: 0.75rem; font-style: italic;"
+        >
+          S├®lectionnez une entit├® pour voir les suggestions li├®es.
+        </p>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:45:19
+     43| 
+     44|     render(<ContextSuggestionsPanel />)
+     45|     expect(screen.getByRole('button', { name: /suggestions \(0\)/i }))ÔÇª
+       |                   ^
+     46|   })
+     47| 
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > suggestions vides et panneau ouvert ÔåÆ affiche message placeholder
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p
+    style="margin: 0px; padding: 0.25rem 0px; color: rgba(255, 255, 255, 0.75); font-size: 0.75rem; font-style: italic;"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 500; color: rgba(255, 255, 255, 0.75);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (0)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <p
+          style="margin: 0px; padding: 0.25rem 0px; color: rgba(255, 255, 255, 0.75); font-size: 0.75rem; font-style: italic;"
+        >
+          S├®lectionnez une entit├® pour voir les suggestions li├®es.
+        </p>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:59:29
+     57| 
+     58|     render(<ContextSuggestionsPanel />)
+     59|     await user.click(screen.getByRole('button', { name: /suggestions/iÔÇª
+       |                             ^
+     60|     expect(screen.getByText(/s├®lectionnez une entit├®/i)).toBeInTheDocuÔÇª
+     61|   })
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[2/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > affiche le header repli├® par d├®faut (contenu masqu├®)
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Accepter tout Personnages":
+  <button
+    aria-label="Accepter tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Personnages":
+  <button
+    aria-label="Ignorer tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Akthar":
+  <button
+    aria-label="Accepter Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Akthar":
+  <button
+    aria-label="Ignorer Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter Tharr":
+  <button
+    aria-label="Accepter Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Tharr":
+  <button
+    aria-label="Ignorer Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter tout Lieux":
+  <button
+    aria-label="Accepter tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Lieux":
+  <button
+    aria-label="Ignorer tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Nef Centrale":
+  <button
+    aria-label="Accepter Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Nef Centrale":
+  <button
+    aria-label="Ignorer Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: rgba(255, 255, 255, 0.95);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (3)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Personnages
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Akthar
+            </span>
+            <button
+              aria-label="Accepter Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Tharr
+            </span>
+            <button
+              aria-label="Accepter Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Lieux
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Nef Centrale
+            </span>
+            <button
+              aria-label="Accepter Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:65:19
+     63|   it('affiche le header repli├® par d├®faut (contenu masqu├®)', () => {
+     64|     render(<ContextSuggestionsPanel />)
+     65|     expect(screen.getByRole('button', { name: /suggestions/i })).toBeIÔÇª
+       |                   ^
+     66|     expect(screen.queryByText(/akthar/i)).not.toBeInTheDocument()
+     67|     expect(screen.queryByText(/nef centrale/i)).not.toBeInTheDocument()
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[3/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > clic sur le header ÔåÆ d├®ploie le panneau et affiche les suggestions group├®es
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Accepter tout Personnages":
+  <button
+    aria-label="Accepter tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Personnages":
+  <button
+    aria-label="Ignorer tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Akthar":
+  <button
+    aria-label="Accepter Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Akthar":
+  <button
+    aria-label="Ignorer Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter Tharr":
+  <button
+    aria-label="Accepter Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Tharr":
+  <button
+    aria-label="Ignorer Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter tout Lieux":
+  <button
+    aria-label="Accepter tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Lieux":
+  <button
+    aria-label="Ignorer tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Nef Centrale":
+  <button
+    aria-label="Accepter Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Nef Centrale":
+  <button
+    aria-label="Ignorer Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: rgba(255, 255, 255, 0.95);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (3)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Personnages
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Akthar
+            </span>
+            <button
+              aria-label="Accepter Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Tharr
+            </span>
+            <button
+              aria-label="Accepter Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Lieux
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Nef Centrale
+            </span>
+            <button
+              aria-label="Accepter Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:74:29
+     72|     render(<ContextSuggestionsPanel />)
+     73| 
+     74|     await user.click(screen.getByRole('button', { name: /suggestions/iÔÇª
+       |                             ^
+     75| 
+     76|     expect(screen.getByText(/akthar/i)).toBeInTheDocument()
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[4/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > clic "Accepter" sur une suggestion ÔåÆ acceptSuggestion appel├®
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Accepter tout Personnages":
+  <button
+    aria-label="Accepter tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Personnages":
+  <button
+    aria-label="Ignorer tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Akthar":
+  <button
+    aria-label="Accepter Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Akthar":
+  <button
+    aria-label="Ignorer Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter Tharr":
+  <button
+    aria-label="Accepter Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Tharr":
+  <button
+    aria-label="Ignorer Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter tout Lieux":
+  <button
+    aria-label="Accepter tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Lieux":
+  <button
+    aria-label="Ignorer tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Nef Centrale":
+  <button
+    aria-label="Accepter Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Nef Centrale":
+  <button
+    aria-label="Ignorer Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: rgba(255, 255, 255, 0.95);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (3)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Personnages
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Akthar
+            </span>
+            <button
+              aria-label="Accepter Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Tharr
+            </span>
+            <button
+              aria-label="Accepter Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Lieux
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Nef Centrale
+            </span>
+            <button
+              aria-label="Accepter Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:86:29
+     84|     const user = userEvent.setup()
+     85|     render(<ContextSuggestionsPanel />)
+     86|     await user.click(screen.getByRole('button', { name: /suggestions/iÔÇª
+       |                             ^
+     87| 
+     88|     await user.click(screen.getByRole('button', { name: /accepter akthÔÇª
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[5/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > clic "Ignorer" sur une suggestion ÔåÆ ignoreSuggestion appel├®
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Accepter tout Personnages":
+  <button
+    aria-label="Accepter tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Personnages":
+  <button
+    aria-label="Ignorer tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Akthar":
+  <button
+    aria-label="Accepter Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Akthar":
+  <button
+    aria-label="Ignorer Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter Tharr":
+  <button
+    aria-label="Accepter Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Tharr":
+  <button
+    aria-label="Ignorer Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter tout Lieux":
+  <button
+    aria-label="Accepter tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Lieux":
+  <button
+    aria-label="Ignorer tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Nef Centrale":
+  <button
+    aria-label="Accepter Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Nef Centrale":
+  <button
+    aria-label="Ignorer Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: rgba(255, 255, 255, 0.95);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (3)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Personnages
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Akthar
+            </span>
+            <button
+              aria-label="Accepter Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Tharr
+            </span>
+            <button
+              aria-label="Accepter Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Lieux
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Nef Centrale
+            </span>
+            <button
+              aria-label="Accepter Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:96:29
+     94|     const user = userEvent.setup()
+     95|     render(<ContextSuggestionsPanel />)
+     96|     await user.click(screen.getByRole('button', { name: /suggestions/iÔÇª
+       |                             ^
+     97| 
+     98|     await user.click(screen.getByRole('button', { name: /ignorer akthaÔÇª
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[6/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > clic "Accepter tout" pour un groupe ÔåÆ acceptAllSuggestionsByType appel├®
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Accepter tout Personnages":
+  <button
+    aria-label="Accepter tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Personnages":
+  <button
+    aria-label="Ignorer tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Akthar":
+  <button
+    aria-label="Accepter Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Akthar":
+  <button
+    aria-label="Ignorer Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter Tharr":
+  <button
+    aria-label="Accepter Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Tharr":
+  <button
+    aria-label="Ignorer Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter tout Lieux":
+  <button
+    aria-label="Accepter tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Lieux":
+  <button
+    aria-label="Ignorer tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Nef Centrale":
+  <button
+    aria-label="Accepter Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Nef Centrale":
+  <button
+    aria-label="Ignorer Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: rgba(255, 255, 255, 0.95);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (3)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Personnages
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Akthar
+            </span>
+            <button
+              aria-label="Accepter Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Tharr
+            </span>
+            <button
+              aria-label="Accepter Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Lieux
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Nef Centrale
+            </span>
+            <button
+              aria-label="Accepter Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:106:29
+    104|     const user = userEvent.setup()
+    105|     render(<ContextSuggestionsPanel />)
+    106|     await user.click(screen.getByRole('button', { name: /suggestions/iÔÇª
+       |                             ^
+    107| 
+    108|     await user.click(screen.getByRole('button', { name: /accepter toutÔÇª
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[7/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > clic "Ignorer tout" pour un groupe ÔåÆ ignoreAllSuggestionsByType appel├®
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Accepter tout Personnages":
+  <button
+    aria-label="Accepter tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Personnages":
+  <button
+    aria-label="Ignorer tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Akthar":
+  <button
+    aria-label="Accepter Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Akthar":
+  <button
+    aria-label="Ignorer Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter Tharr":
+  <button
+    aria-label="Accepter Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Tharr":
+  <button
+    aria-label="Ignorer Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter tout Lieux":
+  <button
+    aria-label="Accepter tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Lieux":
+  <button
+    aria-label="Ignorer tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Nef Centrale":
+  <button
+    aria-label="Accepter Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Nef Centrale":
+  <button
+    aria-label="Ignorer Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: rgba(255, 255, 255, 0.95);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (3)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Personnages
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Akthar
+            </span>
+            <button
+              aria-label="Accepter Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Tharr
+            </span>
+            <button
+              aria-label="Accepter Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Lieux
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Nef Centrale
+            </span>
+            <button
+              aria-label="Accepter Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:116:29
+    114|     const user = userEvent.setup()
+    115|     render(<ContextSuggestionsPanel />)
+    116|     await user.click(screen.getByRole('button', { name: /suggestions/iÔÇª
+       |                             ^
+    117| 
+    118|     await user.click(screen.getByRole('button', { name: /ignorer tout ÔÇª
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[8/9]ÔÄ»
+
+ FAIL  src/components/context/ContextSuggestionsPanel.test.tsx > ContextSuggestionsPanel > second clic sur le header ÔåÆ replie le panneau
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/suggestions/i`
+
+Here are the accessible roles:
+
+  group:
+
+  Name "":
+  <details
+    class="context-panel-accordion-section"
+    data-testid="context-suggestions-panel"
+    style="border-bottom: 1px solid rgb(61, 61, 70);"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Accepter tout Personnages":
+  <button
+    aria-label="Accepter tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Personnages":
+  <button
+    aria-label="Ignorer tout Personnages"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Akthar":
+  <button
+    aria-label="Accepter Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Akthar":
+  <button
+    aria-label="Ignorer Akthar"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter Tharr":
+  <button
+    aria-label="Accepter Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Tharr":
+  <button
+    aria-label="Ignorer Tharr"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  Name "Accepter tout Lieux":
+  <button
+    aria-label="Accepter tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+  />
+
+  Name "Ignorer tout Lieux":
+  <button
+    aria-label="Ignorer tout Lieux"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+  />
+
+  Name "Accepter Nef Centrale":
+  <button
+    aria-label="Accepter Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+  />
+
+  Name "Ignorer Nef Centrale":
+  <button
+    aria-label="Ignorer Nef Centrale"
+    style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <details
+      class="context-panel-accordion-section"
+      data-testid="context-suggestions-panel"
+      style="border-bottom: 1px solid rgb(61, 61, 70);"
+    >
+      <summary
+        style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: rgba(255, 255, 255, 0.95);"
+      >
+        <span
+          class="context-panel-chevron"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="12"
+            style="display: block;"
+            viewBox="0 0 24 24"
+            width="12"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+            />
+          </svg>
+        </span>
+        Suggestions (3)
+      </summary>
+      <div
+        style="padding: 0px 0.75rem 0.5rem;"
+      >
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Personnages
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Personnages"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Akthar
+            </span>
+            <button
+              aria-label="Accepter Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Akthar"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Tharr
+            </span>
+            <button
+              aria-label="Accepter Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Tharr"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+        <div
+          style="margin-bottom: 0.4rem;"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;"
+          >
+            <span
+              style="font-weight: 500; color: rgba(255, 255, 255, 0.95);"
+            >
+              Lieux
+            </span>
+            <span>
+              <button
+                aria-label="Accepter tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75);"
+              >
+                Ô£ô Tout
+              </button>
+              <button
+                aria-label="Ignorer tout Lieux"
+                style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(37, 37, 44); color: rgba(255, 255, 255, 0.75); margin-left: 0.25rem;"
+              >
+                Ô£ò Tout
+              </button>
+            </span>
+          </div>
+          <div
+            style="display: flex; align-items: center; gap: 0.4rem; padding-left: 0.5rem; margin-bottom: 0.15rem;"
+          >
+            <span
+              style="flex: 1 1 0%; color: rgba(255, 255, 255, 0.95);"
+            >
+              Nef Centrale
+            </span>
+            <button
+              aria-label="Accepter Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(26, 58, 42); color: rgb(255, 255, 255);"
+            >
+              Ô£ô
+            </button>
+            <button
+              aria-label="Ignorer Nef Centrale"
+              style="border: medium; cursor: pointer; border-radius: 3px; padding: 1px 6px; font-size: 0.6875rem; font-weight: 600; background-color: rgb(58, 26, 26); color: rgb(255, 107, 107);"
+            >
+              Ô£ò
+            </button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/context/ContextSuggestionsPanel.test.tsx:126:29
+    124|     const user = userEvent.setup()
+    125|     render(<ContextSuggestionsPanel />)
+    126|     await user.click(screen.getByRole('button', { name: /suggestions/iÔÇª
+       |                             ^
+    127|     expect(screen.getByText(/akthar/i)).toBeInTheDocument()
+    128| 
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[9/9]ÔÄ»
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  9 failed | 32 passed (41)
+   Start at  23:36:58
+   Duration  4.00s (transform 585ms, setup 866ms, import 1.40s, tests 5.05s, environment 2.85s)
+

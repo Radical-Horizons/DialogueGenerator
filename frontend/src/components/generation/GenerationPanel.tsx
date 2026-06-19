@@ -251,17 +251,19 @@ export function GenerationPanel() {
   }, [loadModels])
 
   // Raccourcis clavier
+  const isGenerateShortcutBlocked = isLoading || orchestrator.isEstimating
+
   useKeyboardShortcuts(
     [
       {
         key: 'ctrl+enter',
         handler: () => {
-          if (!isLoading) {
+          if (!isGenerateShortcutBlocked) {
             orchestrator.handleGenerate()
           }
         },
         description: 'Générer un dialogue',
-        enabled: !isLoading,
+        enabled: !isGenerateShortcutBlocked,
       },
       {
         key: 'ctrl+n',
@@ -271,7 +273,7 @@ export function GenerationPanel() {
         description: 'Nouveau dialogue (réinitialiser)',
       },
     ],
-    [isLoading, orchestrator.handleGenerate, orchestrator.handleReset]
+    [isGenerateShortcutBlocked, orchestrator.handleGenerate, orchestrator.handleReset]
   )
 
   const { setActions } = useGenerationActionsStore()

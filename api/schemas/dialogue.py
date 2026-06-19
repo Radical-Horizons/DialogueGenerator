@@ -246,6 +246,68 @@ class EstimateTokensResponse(BaseModel):
         return self
 
 
+class PrecomputedEntityRef(BaseModel):
+    """Référence à une fiche GDD pour lecture tokens précompilés."""
+
+    entity_type: Literal["characters", "locations", "items", "species", "communities"] = Field(
+        ...,
+        description="Catégorie de sélection API",
+    )
+    name: str = Field(..., min_length=1, description="Nom canonique GDD (champ Nom)")
+    mode: Literal["full", "excerpt"] = Field(default="full", description="Mode full ou excerpt")
+
+
+class PrecomputedEntityTokensRequest(BaseModel):
+    """Requête de lecture tokens depuis le cache disque de précompilation."""
+
+    entities: List[PrecomputedEntityRef] = Field(..., min_length=1, max_length=64)
+    organization_mode: str = Field(default="narrative", description="Mode d'organisation du contexte")
+    field_configs: Optional[Dict[str, List[str]]] = Field(
+        None,
+        description="Profil champs (identique estimate-tokens) ; repli sur standard si miss",
+    )
+    include_prompt_overhead: bool = Field(
+        default=False,
+        description="Inclure les sections prompt hors GDD (contrat, guides, etc.)",
+    )
+    user_instructions: str = Field(default=" ", description="Instructions scène (overhead)")
+    include_narrative_guides: bool = Field(default=True)
+    system_prompt_override: Optional[str] = None
+    game_rules: Optional[str] = None
+    author_profile: Optional[str] = None
+    vocabulary_config: Optional[Dict[str, str]] = None
+
+
+class PrecomputedEntityTokenRow(BaseModel):
+    """Tokens précompilés pour une fiche."""
+
+    entity_type: str
+    name: str
+    mode: str
+    token_count: int = Field(..., ge=0)
+    cache_hit: bool = Field(..., description="True si lu depuis le cache disque (sans reconcile global)")
+    profile_fallback: bool = Field(
+        default=False,
+        description="True si profil standard utilisé car le profil demandé était absent",
+    )
+    context_item: Optional[Dict[str, Any]] = Field(
+        None,
+        description="ContextItem sérialisé (pour fusion UI incrémentale)",
+    )
+
+
+class PrecomputedEntityTokensResponse(BaseModel):
+    """Somme des tokens précompilés pour les fiches demandées."""
+
+    entities: List[PrecomputedEntityTokenRow]
+    selection_tokens_sum: int = Field(..., ge=0)
+    prompt_overhead_tokens: int = Field(default=0, ge=0)
+    prompt_overhead_sections: Optional[List[Dict[str, Any]]] = Field(
+        None,
+        description="Sections prompt hors GDD (si include_prompt_overhead)",
+    )
+
+
 class ContextOptimizationRules(BaseModel):
     """Règles MVP pour POST /context/optimize (FR21) — persistées côté client."""
 

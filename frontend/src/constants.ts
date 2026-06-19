@@ -91,6 +91,8 @@ export const API_TIMEOUTS = {
   CANCEL_JOB: 10000,
   /** Construction / estimation contexte GDD volumineux. La perf doit rester quasi instantanée côté serveur. */
   CONTEXT_ESTIMATION: 120000,
+  /** Lookup tokens précompilés par fiche (cache disque). */
+  PRECOMPUTED_ENTITY_TOKENS: 15000,
 } as const
 
 

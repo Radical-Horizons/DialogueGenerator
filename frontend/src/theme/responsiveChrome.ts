@@ -42,7 +42,7 @@ export const panelSideHeaderChrome = {
   },
 } as const
 
-/** Bouton « Replier » des panneaux latéraux (desktop uniquement). */
+/** Bouton chevron de repli des panneaux latéraux (desktop uniquement). */
 export const panelCollapseButtonChrome = {
   comfortable: {
     padding: '0.18rem 0.45rem',

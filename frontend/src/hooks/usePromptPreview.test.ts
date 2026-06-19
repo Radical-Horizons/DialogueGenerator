@@ -31,15 +31,14 @@ Occupation/Rôle: Mage
       expect(charactersSection?.children).toBeDefined()
       expect(charactersSection?.children?.length).toBe(2)
 
-      // Vérifier PNJ 1
-      const pnj1 = charactersSection?.children?.find(c => c.title === 'PNJ 1')
+      // Vérifier les noms de fiche extraits du contenu
+      const pnj1 = charactersSection?.children?.find(c => c.title === 'Personnage 1')
       expect(pnj1).toBeDefined()
       expect(pnj1?.content).toContain('Personnage 1')
       expect(pnj1?.content).toContain('Alias 1')
       expect(pnj1?.content).toContain('Guerrier')
 
-      // Vérifier PNJ 2
-      const pnj2 = charactersSection?.children?.find(c => c.title === 'PNJ 2')
+      const pnj2 = charactersSection?.children?.find(c => c.title === 'Personnage 2')
       expect(pnj2).toBeDefined()
       expect(pnj2?.content).toContain('Personnage 2')
       expect(pnj2?.content).toContain('Alias 2')
@@ -71,14 +70,32 @@ Type: Arme
       const locationsSection = section2A?.children?.find(c => c.title === 'LOCATIONS')
       expect(locationsSection).toBeDefined()
       expect(locationsSection?.children?.length).toBe(2)
-      expect(locationsSection?.children?.find(c => c.title === 'LIEU 1')).toBeDefined()
-      expect(locationsSection?.children?.find(c => c.title === 'LIEU 2')).toBeDefined()
+      expect(locationsSection?.children?.find(c => c.title === 'Lieu 1')).toBeDefined()
+      expect(locationsSection?.children?.find(c => c.title === 'Lieu 2')).toBeDefined()
 
       // Vérifier les objets
       const itemsSection = section2A?.children?.find(c => c.title === 'ITEMS')
       expect(itemsSection).toBeDefined()
       expect(itemsSection?.children?.length).toBe(1)
-      expect(itemsSection?.children?.find(c => c.title === 'OBJET 1')).toBeDefined()
+      expect(itemsSection?.children?.find(c => c.title === 'Objet 1')).toBeDefined()
+    })
+
+    it('devrait parser les marqueurs avec noms de fiches explicites', () => {
+      const prompt = `### SECTION 2A. CONTEXTE GDD
+
+--- CHARACTERS ---
+--- Elara ---
+Nom: Elara
+Occupation: Mage
+--- Grog ---
+Nom: Grog
+Occupation: Guerrier
+`
+
+      const sections = parsePromptSections(prompt)
+      const section2A = sections.find(s => s.title.includes('SECTION 2A'))
+      const charactersSection = section2A?.children?.find(c => c.title === 'CHARACTERS')
+      expect(charactersSection?.children?.map(c => c.title)).toEqual(['Elara', 'Grog'])
     })
 
     it('devrait utiliser le fallback sur "Nom:" si aucun marqueur explicite trouvé', () => {
@@ -123,8 +140,8 @@ Alias (extrait): Alias 2
       const charactersSection = section2A?.children?.find(c => c.title === 'CHARACTERS')
       expect(charactersSection).toBeDefined()
       expect(charactersSection?.children?.length).toBe(2)
-      expect(charactersSection?.children?.find(c => c.title === 'PNJ 1')).toBeDefined()
-      expect(charactersSection?.children?.find(c => c.title === 'PNJ 2')).toBeDefined()
+      expect(charactersSection?.children?.find(c => c.title === 'Personnage 1')).toBeDefined()
+      expect(charactersSection?.children?.find(c => c.title === 'Personnage 2')).toBeDefined()
     })
   })
   it('devrait parser une SECTION 2A avec sections imbriquées CHARACTERS', () => {
@@ -166,13 +183,14 @@ Contenu des guides narratifs...
     // Vérifier que les sections imbriquées sont détectées
     // On devrait avoir des wrappers "PNJ 1", "PNJ 2" avec des sections IDENTITÉ, CARACTÉRISATION en enfants
     const hasCharacterSections = section2A?.children?.some(
-      child => child.title === 'PNJ 1' || child.title === 'PNJ 2' || child.title.includes('PNJ')
+      child => child.title === "Akthar-Neth Amatru, l'Exégète" || child.title === 'Valkazer Reitar'
     )
     expect(hasCharacterSections).toBe(true)
     
-    // Vérifier que les wrappers ont bien des enfants
-    const pnjWrappers = section2A?.children?.filter(child => child.title.includes('PNJ'))
-    pnjWrappers?.forEach(wrapper => {
+    const characterWrappers = section2A?.children?.filter(
+      child => child.title === "Akthar-Neth Amatru, l'Exégète" || child.title === 'Valkazer Reitar'
+    )
+    characterWrappers?.forEach(wrapper => {
       expect(wrapper.children).toBeDefined()
       expect(wrapper.children?.length).toBeGreaterThan(0)
     })
@@ -181,7 +199,7 @@ Contenu des guides narratifs...
     expect(section2A?.content).toContain('CONTEXTE GÉNÉRAL DE LA SCÈNE')
   })
 
-  it('devrait parser une SECTION 2A avec un seul personnage (avec wrapper PNJ 1)', () => {
+  it('devrait parser une SECTION 2A avec un seul personnage (wrapper au nom de la fiche)', () => {
     const prompt = `### SECTION 2A. CONTEXTE GDD
 
 **CONTEXTE GÉNÉRAL DE LA SCÈNE**
@@ -204,12 +222,14 @@ Contenu...
     expect(section2A).toBeDefined()
     expect(section2A?.children).toBeDefined()
 
-    // Avec un seul personnage, on devrait quand même avoir un wrapper "PNJ 1" pour la séparation visuelle
-    const hasCharacterWrapper = section2A?.children?.some(child => child.title === 'PNJ 1' || child.title.includes('PNJ'))
+    const hasCharacterWrapper = section2A?.children?.some(
+      child => child.title === "Akthar-Neth Amatru, l'Exégète"
+    )
     expect(hasCharacterWrapper).toBe(true)
 
-    // Le wrapper devrait avoir des enfants (sections IDENTITÉ, CARACTÉRISATION)
-    const pnjWrapper = section2A?.children?.find(child => child.title === 'PNJ 1' || child.title.includes('PNJ'))
+    const pnjWrapper = section2A?.children?.find(
+      child => child.title === "Akthar-Neth Amatru, l'Exégète"
+    )
     expect(pnjWrapper?.children).toBeDefined()
     expect(pnjWrapper?.children?.length).toBeGreaterThan(0)
     
@@ -218,7 +238,7 @@ Contenu...
     expect(hasIdentity || hasCaracterisation).toBe(true)
   })
 
-  it('devrait parser une SECTION 2A avec plusieurs personnages (avec wrappers CHARACTER 1, CHARACTER 2)', () => {
+  it('devrait parser une SECTION 2A avec plusieurs personnages (wrappers au nom de chaque fiche)', () => {
     const prompt = `### SECTION 2A. CONTEXTE GDD
 
 **CONTEXTE GÉNÉRAL DE LA SCÈNE**
@@ -246,9 +266,10 @@ Contenu...
     expect(section2A).toBeDefined()
     expect(section2A?.children).toBeDefined()
 
-    // Avec plusieurs personnages, on devrait avoir des wrappers "PNJ 1", "PNJ 2"
-    const characterWrappers = section2A?.children?.filter(child => child.title === 'PNJ 1' || child.title === 'PNJ 2' || child.title.includes('PNJ'))
-    expect(characterWrappers?.length).toBeGreaterThanOrEqual(2)
+    const characterWrappers = section2A?.children?.filter(
+      child => child.title === "Akthar-Neth Amatru, l'Exégète" || child.title === 'Valkazer Reitar'
+    )
+    expect(characterWrappers?.length).toBe(2)
 
     // Chaque wrapper devrait avoir des enfants (sections IDENTITÉ, CARACTÉRISATION)
     characterWrappers?.forEach(wrapper => {
@@ -429,7 +450,7 @@ Contenu...
     expect(charactersSection).toBeDefined()
 
     const pnjSection = charactersSection?.children?.find(
-      (c) => c.title === 'PNJ 1' || c.title.includes('PNJ')
+      (c) => c.title === "Akthar-Neth Amatru, l'Exégète"
     )
     expect(pnjSection).toBeDefined()
     expect(pnjSection?.content).toContain('Akthar-Neth')
@@ -458,7 +479,8 @@ describe('parsePromptFromJson', () => {
               items: [
                 {
                   id: 'PNJ_1',
-                  name: 'PNJ 1',
+                  name: 'Akthar-Neth Amatru',
+                  metadata: { real_name: 'Akthar-Neth Amatru', element_name: 'Akthar-Neth Amatru' },
                   sections: [
                     {
                       title: 'IDENTITÉ',
@@ -495,7 +517,7 @@ describe('parsePromptFromJson', () => {
     expect(result[1].title).toBe('CHARACTERS')
     expect(result[1].children).toBeDefined()
     expect(result[1].children).toHaveLength(1)
-    expect(result[1].children![0].title).toBe('PNJ 1')
+    expect(result[1].children![0].title).toBe('Akthar-Neth Amatru')
     expect(result[1].children![0].children).toBeDefined()
     expect(result[1].children![0].children).toHaveLength(2)
   })

@@ -307,6 +307,7 @@ class ContextBuilder:
             self._context_construction_service._context_truncator = self._context_truncator
             self._context_construction_service._previous_dialogue_manager = self._previous_dialogue_manager
             self._context_construction_service._context_config = self.context_config
+        self._context_construction_service._context_builder = self
 
         # Invalider les caches dérivés (les données GDD viennent d'être (re)chargées).
         self._gdd_revision += 1

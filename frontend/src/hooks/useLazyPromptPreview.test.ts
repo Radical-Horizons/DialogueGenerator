@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useLazyPromptPreview } from './useLazyPromptPreview'
 import * as dialoguesAPI from '../api/dialogues'
@@ -74,8 +74,19 @@ describe('useLazyPromptPreview', () => {
     })
   })
 
-  it('auto-charge le prompt au mount quand l’onglet Prompt est déjà actif (refresh)', async () => {
+  it('ne charge pas automatiquement le prompt au mount', async () => {
     renderHook(() => useLazyPromptPreview({ enabled: true }))
+
+    await new Promise((resolve) => setTimeout(resolve, 250))
+    expect(dialoguesAPI.previewPrompt).not.toHaveBeenCalled()
+  })
+
+  it('charge le prompt sur demande explicite', async () => {
+    const { result } = renderHook(() => useLazyPromptPreview({ enabled: true }))
+
+    await act(async () => {
+      await result.current.requestPreview()
+    })
 
     await waitFor(() => {
       expect(dialoguesAPI.previewPrompt).toHaveBeenCalledTimes(1)

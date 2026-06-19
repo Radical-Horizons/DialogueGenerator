@@ -2,7 +2,7 @@
  * Panneau d'affichage du prompt brut (RawPrompt).
  * Le compteur tokens contexte est affiché une seule fois dans ContextSelectionBudgetBar (panneau droit).
  */
-import { memo, useState, useCallback } from 'react'
+import { memo, useState, useCallback, useEffect } from 'react'
 import { usePromptPreview } from '../../hooks/usePromptPreview'
 import { useLazyPromptPreview } from '../../hooks/useLazyPromptPreview'
 import { StructuredPromptView } from './StructuredPromptView'
@@ -32,7 +32,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
   const [viewMode, setViewMode] = useState<'raw' | 'structured'>('structured')
   const toast = useToast()
 
-  useLazyPromptPreview({ enabled: isActive })
+  const { requestPreview } = useLazyPromptPreview({ enabled: isActive })
 
   const [allExpanded, setAllExpanded] = useState(false)
   const [toggleAllFn, setToggleAllFn] = useState<(() => void) | null>(null)
@@ -41,6 +41,8 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
   const structuredPrompt = structuredPromptProp ?? structuredPromptFromStore
 
   const { sections } = usePromptPreview(raw_prompt, structuredPrompt)
+  const hasStructuredPrompt = Boolean(structuredPrompt && sections.length > 0)
+  const hasPromptPreview = Boolean(raw_prompt || hasStructuredPrompt)
 
   const handleCopyPrompt = useCallback(() => {
     if (!raw_prompt) return
@@ -54,7 +56,21 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
       })
   }, [raw_prompt, toast])
 
-  const isLoadingPrompt = isEstimating && !raw_prompt
+  const handleViewModeChange = useCallback((nextMode: 'raw' | 'structured') => {
+    setViewMode(nextMode)
+    if (nextMode === 'raw' && !raw_prompt) {
+      void requestPreview()
+    }
+  }, [raw_prompt, requestPreview])
+
+  useEffect(() => {
+    if (viewMode === 'raw' && !raw_prompt && isActive) {
+      void requestPreview()
+    }
+  }, [isActive, raw_prompt, requestPreview, viewMode])
+
+  const isLoadingPrompt = isEstimating && !hasPromptPreview
+  const isLoadingRawPrompt = viewMode === 'raw' && isEstimating && !raw_prompt
 
   return (
     <div
@@ -78,7 +94,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
           gap: '0.55rem',
         }}
       >
-        {raw_prompt && !isLoadingPrompt && (
+        {hasPromptPreview && !isLoadingPrompt && (
           <div
             style={{
               display: 'flex',
@@ -156,7 +172,7 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
               <input
                 type="checkbox"
                 checked={viewMode === 'structured'}
-                onChange={(e) => setViewMode(e.target.checked ? 'structured' : 'raw')}
+                onChange={(e) => handleViewModeChange(e.target.checked ? 'structured' : 'raw')}
                 style={{
                   opacity: 0,
                   width: 0,
@@ -207,28 +223,40 @@ export const EstimatedPromptPanel = memo(function EstimatedPromptPanel({
           scrollbarGutter: 'stable',
         }}
       >
-        {raw_prompt ? (
+        {hasPromptPreview ? (
           viewMode === 'raw' ? (
-            <pre
-              style={{
-                fontFamily: 'monospace',
-                fontSize: '0.78rem',
-                lineHeight: '1.55',
-                color: theme.text.secondary,
-                backgroundColor: theme.background.secondary,
-                padding: '0.75rem',
-                borderRadius: '4px',
-                border: `1px solid ${theme.border.primary}`,
-                whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word',
-                margin: 0,
-              }}
-            >
-              {raw_prompt}
-            </pre>
+            raw_prompt ? (
+              <pre
+                style={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.78rem',
+                  lineHeight: '1.55',
+                  color: theme.text.secondary,
+                  backgroundColor: theme.background.secondary,
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  border: `1px solid ${theme.border.primary}`,
+                  whiteSpace: 'pre-wrap',
+                  wordWrap: 'break-word',
+                  margin: 0,
+                }}
+              >
+                {raw_prompt}
+              </pre>
+            ) : (
+              <div
+                style={{
+                  padding: '2rem',
+                  textAlign: 'center',
+                  color: theme.text.secondary,
+                }}
+              >
+                {isLoadingRawPrompt ? 'Construction du prompt brut…' : 'Chargement du prompt brut…'}
+              </div>
+            )
           ) : (
             <StructuredPromptView
-              prompt={raw_prompt}
+              prompt={raw_prompt ?? ''}
               structuredPrompt={structuredPrompt}
               sections={sections}
               onToggleStateChange={(expanded, toggleFn) => {

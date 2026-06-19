@@ -1,5 +1,5 @@
 /**
- * Construction partagée du corps POST /context/estimate-tokens et /dialogues/preview-prompt.
+ * Construction partagée des requêtes POST /dialogues/estimate-tokens et /dialogues/preview-prompt.
  */
 import type { EstimateTokensRequest } from '../types/api'
 import type { PromptStateParams } from './hashUtils'
@@ -23,7 +23,7 @@ export interface BuildTokenEstimateRequestInput {
   npcSpeakerId?: string | null
 }
 
-function buildFieldConfigsWithEssential(): Record<string, string[]> {
+export function buildFieldConfigsWithEssential(): Record<string, string[]> {
   const { fieldConfigs, essentialFields } = useContextConfigStore.getState()
   const out: Record<string, string[]> = {}
   for (const [elementType, fields] of Object.entries(fieldConfigs)) {

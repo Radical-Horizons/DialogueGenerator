@@ -2,7 +2,7 @@
 import copy
 import logging
 from collections import OrderedDict, defaultdict
-from typing import List, Dict, Optional, Tuple
+from typing import Any, List, Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -363,6 +363,15 @@ class ContextOrganizer:
                 label = f"{label} (extrait)"
         
         return label
+
+    @staticmethod
+    def _assign_section_content(section_content: Dict[str, Any], label: str, value: Any) -> None:
+        """Assigne une valeur sans écraser un contenu plus riche (collision de libellés)."""
+        existing = section_content.get(label)
+        if existing is not None and isinstance(existing, str) and isinstance(value, str):
+            if len(value.strip()) <= len(existing.strip()):
+                return
+        section_content[label] = value
     
     def _categorize_field(self, path: str, element_type: str) -> Optional[str]:
         """Catégorise un champ selon son chemin."""
@@ -498,8 +507,7 @@ class ContextOrganizer:
                 continue
             
             label = self._generate_label(field_path, field_labels_map, element_mode)
-            # Stocker la structure Python directement
-            section_content[label] = value
+            self._assign_section_content(section_content, label, value)
         
         if section_content:
             # Retourner avec raw_content (structure Python) au lieu de content (texte)
@@ -543,8 +551,7 @@ class ContextOrganizer:
                         continue
                     
                     label = self._generate_label(field_path, field_labels_map, element_mode)
-                    # Stocker la structure Python directement, pas de conversion en texte
-                    section_content[label] = value
+                    self._assign_section_content(section_content, label, value)
                 
                 if section_content:
                     # Créer une section avec raw_content (structure Python) au lieu de content (texte)
@@ -566,7 +573,7 @@ class ContextOrganizer:
                         continue
                     
                     label = self._generate_label(field_path, field_labels_map, element_mode)
-                    section_content[label] = value
+                    self._assign_section_content(section_content, label, value)
                 
                 if section_content:
                     sections.append(ItemSection(

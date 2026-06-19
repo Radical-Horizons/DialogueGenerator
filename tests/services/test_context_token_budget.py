@@ -5,6 +5,7 @@ import pytest
 
 from api.schemas.dialogue import ContextSelection
 from constants import Defaults
+from models.prompt_structure import PromptMetadata, PromptStructure
 from services.context_token_budget import (
     clear_context_metrics_cache,
     compute_context_selection_token_metrics,
@@ -131,6 +132,14 @@ def test_metrics_cache_invalidated_on_revision_change(mock_builder: MagicMock) -
 def test_metrics_reuses_prebuilt_structure(mock_builder: MagicMock) -> None:
     """prebuilt_structure fourni → aucun build_context_json (chemin /dialogues)."""
     sel = ContextSelection(characters_full=["Alice"])
+    prebuilt = PromptStructure(
+        sections=[],
+        metadata=PromptMetadata(
+            totalTokens=50,
+            generatedAt="2026-01-01T00:00:00",
+            organizationMode="narrative",
+        ),
+    )
     metrics = compute_context_selection_token_metrics(
         mock_builder,
         full_selection=sel,
@@ -138,7 +147,37 @@ def test_metrics_reuses_prebuilt_structure(mock_builder: MagicMock) -> None:
         field_configs=None,
         organization_mode="narrative",
         measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
-        prebuilt_structure={"prebuilt": True},
+        prebuilt_structure=prebuilt,
     )
-    assert metrics.selection_tokens == 42
+    assert metrics.selection_tokens == 50
+    assert metrics.serialized_text == "context-text"
     assert mock_builder.build_context_json.call_count == 0
+
+
+def test_prebuilt_with_total_tokens_skips_second_reconcile(mock_builder: MagicMock) -> None:
+    """Structure déjà réconciliée → pas de second reconcile."""
+    from unittest.mock import patch
+
+    sel = ContextSelection(characters_full=["Alice"])
+    prebuilt = PromptStructure(
+        sections=[],
+        metadata=PromptMetadata(
+            totalTokens=99,
+            generatedAt="2026-01-01T00:00:00",
+            organizationMode="narrative",
+        ),
+    )
+    with patch(
+        "services.context_token_budget.reconcile_prompt_structure_token_counts"
+    ) as mock_reconcile:
+        metrics = compute_context_selection_token_metrics(
+            mock_builder,
+            full_selection=sel,
+            user_instructions=" ",
+            field_configs=None,
+            organization_mode="narrative",
+            measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+            prebuilt_structure=prebuilt,
+        )
+    mock_reconcile.assert_not_called()
+    assert metrics.selection_tokens == 99

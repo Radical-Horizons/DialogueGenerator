@@ -8,6 +8,8 @@ import type {
   EstimateTokensResponse,
   OptimizeContextRequest,
   OptimizeContextResponse,
+  PrecomputedEntityTokensRequest,
+  PrecomputedEntityTokensResponse,
 } from '../types/api'
 import type {
   CharacterResponse,
@@ -268,6 +270,21 @@ export async function estimateContextTokens(
     signal,
     timeout: API_TIMEOUTS.CONTEXT_ESTIMATION,
   })
+  return response.data
+}
+
+/**
+ * Tokens précompilés par fiche (cache disque) — chemin rapide ajout incrémental.
+ */
+export async function fetchPrecomputedEntityTokens(
+  body: PrecomputedEntityTokensRequest,
+  signal?: AbortSignal,
+): Promise<PrecomputedEntityTokensResponse> {
+  const response = await apiClient.post<PrecomputedEntityTokensResponse>(
+    '/api/v1/context/precomputed-entity-tokens',
+    body,
+    { signal, timeout: API_TIMEOUTS.PRECOMPUTED_ENTITY_TOKENS },
+  )
   return response.data
 }
 

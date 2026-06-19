@@ -105,6 +105,8 @@ class TextSerializer:
                                     content = self._raw_content_to_text(item_section.raw_content)
                                 text_parts.append(content)
                                 text_parts.append("")  # Ligne vide entre sections
+            elif section.content:
+                text_parts.append(section.content)
             else:
                 # Autres types de sections
                 if section.title:

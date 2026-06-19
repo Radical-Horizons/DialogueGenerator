@@ -18,7 +18,6 @@ import type {
 import {
   canonicalizeContextSelections,
   filterOutCanonicalEntity,
-  mergeContextCharacterNames,
   normalizeGddNameForMatch,
   resolveCharacterCanonicalName,
   resolveLocationCanonicalName,

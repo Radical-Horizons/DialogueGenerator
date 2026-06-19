@@ -1,5 +1,5 @@
 /**
- * Charge le prompt complet quand l'onglet Prompt est visible (POST /dialogues/preview-prompt).
+ * Charge le prompt complet à la demande (POST /dialogues/preview-prompt).
  *
  * Ne lance pas preview-prompt tant que l'utilisateur est sur un autre onglet du panneau droit.
  */
@@ -25,7 +25,7 @@ export interface UseLazyPromptPreviewReturn {
   requestPreview: () => Promise<void>
 }
 
-/** Preview prompt : auto-fetch dès que l'onglet Prompt est actif (y compris au refresh). */
+/** Preview prompt : chargement manuel, car le payload complet est lourd. */
 export function useLazyPromptPreview(
   options: UseLazyPromptPreviewOptions
 ): UseLazyPromptPreviewReturn {
@@ -51,6 +51,8 @@ export function useLazyPromptPreview(
   const abortRef = useRef<AbortController | null>(null)
 
   const requestPreview = useCallback(async () => {
+    if (!enabled) return
+
     const userInstructions = generationUserInstructions
     const hasAnySelections =
       selections.characters_full.length > 0 ||
@@ -157,22 +159,16 @@ export function useLazyPromptPreview(
     authorProfile,
     rawPrompt,
     previewInputHash,
+    enabled,
     buildContextSelections,
     setRawPrompt,
   ])
 
   useEffect(() => {
-    if (!enabled) return
-
-    const timeoutId = window.setTimeout(() => {
-      void requestPreview()
-    }, 150)
-
-    return () => {
-      window.clearTimeout(timeoutId)
+    if (!enabled) {
       abortRef.current?.abort()
     }
-  }, [enabled, requestPreview])
+  }, [enabled])
 
   return { requestPreview }
 }

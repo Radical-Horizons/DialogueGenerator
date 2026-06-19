@@ -12,6 +12,7 @@ import { useContextStore } from '../../store/contextStore'
 import { useGenerationStore } from '../../store/generationStore'
 import { getErrorMessage } from '../../types/errors'
 import { Badge } from '../shared'
+import { ContextPanelAccordionSection } from './ContextPanelAccordion'
 
 export type EntityType = 'characters' | 'locations' | 'items' | 'species' | 'communities'
 
@@ -162,27 +163,13 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
     : 0
 
   return (
-    <details
-      data-testid="selected-context-summary"
-      style={{
-        flexShrink: 0,
-        borderBottom: `1px solid ${theme.border.primary}`,
-        backgroundColor: theme.background.secondary,
-      }}
+    <ContextPanelAccordionSection
+      testId="selected-context-summary"
+      summaryTestId="selected-context-summary-toggle"
+      title={`Sélections actives (${totalSelected})`}
+      muted={totalSelected === 0}
     >
-      <summary
-        data-testid="selected-context-summary-toggle"
-        style={{
-          padding: '0.45rem 0.75rem',
-          cursor: 'pointer',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          color: theme.text.primary,
-        }}
-      >
-        Sélections actives ({totalSelected})
-      </summary>
-      <div style={{ padding: '0.5rem 0.75rem', display: 'grid', gap: '0.4rem' }}>
+      <div style={{ display: 'grid', gap: '0.4rem' }}>
         {totalSelected === 0 ? (
           <span style={{ color: theme.text.secondary, fontSize: '0.75rem' }}>Aucune sélection</span>
         ) : (
@@ -281,6 +268,6 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
           </>
         )}
       </div>
-    </details>
+    </ContextPanelAccordionSection>
   )
 })

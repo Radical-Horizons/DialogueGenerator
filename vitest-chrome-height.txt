@@ -1,0 +1,10 @@
+
+ RUN  v4.0.16 F:/Projets/Notion_Scrapper/DialogueGenerator/frontend
+
+┬À┬À┬À┬À
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  23:25:33
+   Duration  2.21s (transform 449ms, setup 535ms, import 746ms, tests 459ms, environment 1.74s)
+

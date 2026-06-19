@@ -313,6 +313,56 @@ describe('Dashboard', () => {
     })
   })
 
+  it('désactive Générer pendant l\'estimation du contexte (sélection fiches)', async () => {
+    mockUseGenerationStore.mockReturnValue({
+      rawPrompt: '',
+      tokenCount: 0,
+      promptHash: null,
+      isEstimating: true,
+      unityDialogueResponse: null,
+      sceneSelection: {
+        characterA: null,
+        characterB: null,
+        sceneRegion: null,
+        subLocation: null,
+      },
+      dialogueStructure: ['', '', '', '', '', ''] as [string, string, string, string, string, string],
+      systemPromptOverride: null,
+      setDialogueStructure: vi.fn(),
+      setSystemPromptOverride: vi.fn(),
+      setRawPrompt: vi.fn(),
+      setSceneSelection: vi.fn(),
+      setUnityDialogueResponse: vi.fn(),
+      tokensUsed: null,
+      setTokensUsed: vi.fn(),
+      clearGenerationResults: vi.fn(),
+    } as ReturnType<typeof useGenerationStore>)
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate: vi.fn(),
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    const generateButton = await screen.findByRole('button', { name: /générer/i })
+    await waitFor(() => {
+      expect(generateButton).toBeDisabled()
+      expect(screen.getByText(/estimation des tokens/i)).toBeInTheDocument()
+    })
+  })
+
   it('remplace Générer par Rafraîchir le contexte après une erreur de chargement', async () => {
     const handleGenerate = vi.fn()
     mockContextSelectorState.loadState = {

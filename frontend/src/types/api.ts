@@ -159,6 +159,41 @@ export interface EstimateTokensResponse {
   estimated_cost_eur?: number | null
 }
 
+export interface PrecomputedEntityRef {
+  entity_type: 'characters' | 'locations' | 'items' | 'species' | 'communities'
+  name: string
+  mode?: ElementMode
+}
+
+export interface PrecomputedEntityTokensRequest {
+  entities: PrecomputedEntityRef[]
+  organization_mode?: string
+  field_configs?: Record<string, string[]>
+  include_prompt_overhead?: boolean
+  user_instructions?: string
+  include_narrative_guides?: boolean
+  system_prompt_override?: string | null
+  game_rules?: string | null
+  author_profile?: string | null
+  vocabulary_config?: Record<string, string> | null
+}
+
+export interface PrecomputedEntityTokenRow {
+  entity_type: string
+  name: string
+  mode: string
+  token_count: number
+  cache_hit: boolean
+  context_item?: Record<string, unknown> | null
+}
+
+export interface PrecomputedEntityTokensResponse {
+  entities: PrecomputedEntityTokenRow[]
+  selection_tokens_sum: number
+  prompt_overhead_tokens?: number
+  prompt_overhead_sections?: import('./prompt').PromptSection[]
+}
+
 export interface PreviewPromptRequest extends BasePromptRequest {
   field_configs?: Record<string, string[]>
   organization_mode?: string

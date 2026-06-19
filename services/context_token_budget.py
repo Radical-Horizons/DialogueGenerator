@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from api.schemas.dialogue import ContextSelection, ContextTokenBreakdownRow
 from services.context_truncator import cap_context_text_to_budget
+from services.context_token_reconciler import reconcile_prompt_structure_token_counts
 
 _METRICS_CACHE_MAXSIZE: int = 64
 _METRICS_CACHE: "OrderedDict[str, ContextSelectionTokenMetrics]" = OrderedDict()
@@ -70,6 +71,7 @@ class ContextSelectionTokenMetrics:
     context_tokens: int
     breakdown: List[ContextTokenBreakdownRow]
     breakdown_note: str
+    serialized_text: str = ""
 
 
 def _empty_context_selection_dict() -> Dict[str, Any]:
@@ -210,6 +212,11 @@ def compute_context_selection_token_metrics(
 
     if prebuilt_structure is not None:
         structured = prebuilt_structure
+        reconciled_total = int(
+            getattr(getattr(structured, "metadata", None), "totalTokens", 0) or 0
+        )
+        if reconciled_total <= 0:
+            reconcile_prompt_structure_token_counts(structured)
     else:
         service_dict = full_selection.to_service_dict()
         structured = context_builder.build_context_json(
@@ -222,7 +229,9 @@ def compute_context_selection_token_metrics(
             element_modes=service_dict.get("_element_modes"),
         )
     text = context_builder.serialize_context_to_text(structured)
-    selection_tokens = int(context_builder._count_tokens(text))
+    selection_tokens = int(getattr(getattr(structured, "metadata", None), "totalTokens", 0) or 0)
+    if selection_tokens <= 0:
+        selection_tokens = int(context_builder._count_tokens(text))
     context_tokens = selection_tokens
     if user_budget_max_tokens is not None:
         capped_text = cap_context_text_to_budget(text, user_budget_max_tokens)
@@ -239,19 +248,31 @@ def compute_context_selection_token_metrics(
             context_tokens=context_tokens,
             breakdown=breakdown,
             breakdown_note="Breakdown non calculé pour cette mesure rapide.",
+            serialized_text=text,
         ))
 
     structured_breakdown = _breakdown_from_prompt_structure(structured)
     if structured_breakdown:
+        reconciled_total = int(getattr(getattr(structured, "metadata", None), "totalTokens", 0) or 0)
+        if reconciled_total > 0:
+            selection_tokens = reconciled_total
+            if user_budget_max_tokens is not None:
+                capped_text = cap_context_text_to_budget(text, user_budget_max_tokens)
+                context_tokens = (
+                    selection_tokens
+                    if capped_text == text
+                    else int(context_builder._count_tokens(capped_text))
+                )
         note = (
-            "Breakdown dérivé de la structure complète déjà construite ; le total affiché pour "
-            "le budget utilise la sélection complète en un seul build."
+            "Les lignes sont la somme des fiches par type/mode ; le total « sélection » "
+            "égale la somme des catégories (un seul encodage tiktoken sur le texte sérialisé)."
         )
         return _finalize(ContextSelectionTokenMetrics(
             selection_tokens=selection_tokens,
             context_tokens=context_tokens,
             breakdown=structured_breakdown,
             breakdown_note=note,
+            serialized_text=text,
         ))
 
     non_empty_buckets = [
@@ -291,4 +312,5 @@ def compute_context_selection_token_metrics(
         context_tokens=context_tokens,
         breakdown=breakdown,
         breakdown_note=note,
+        serialized_text=text,
     ))

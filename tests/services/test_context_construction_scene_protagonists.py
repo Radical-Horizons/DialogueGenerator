@@ -76,3 +76,23 @@ def test_scene_protagonists_are_added_and_aliases_deduplicated() -> None:
     )
 
     assert [item.name for item in result.categories[0].items] == ["Alice", "Bob"]
+
+
+def test_build_context_json_uses_canonical_item_names() -> None:
+    """Les ContextItem JSON portent le nom canonique de la fiche, pas PNJ 1/2."""
+    service = ContextConstructionService(
+        element_resolver=_Resolver(),
+        context_field_manager=_FieldManager(),
+    )
+
+    result = service.build_context_json(
+        selected_elements={"characters": ["Alice", "Bob"]},
+        scene_instruction=" ",
+        field_configs=None,
+        organization_mode="narrative",
+        max_tokens=300_000,
+    )
+
+    context_section = next(s for s in result.sections if s.categories)
+    character_items = context_section.categories[0].items
+    assert [item.name for item in character_items] == ["Alice", "Bob"]

@@ -44,6 +44,7 @@ function mergeListWithSelectedNames(
 import { SelectedContextSummary } from './SelectedContextSummary'
 import type { EntityType } from './SelectedContextSummary'
 import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
+import { ContextPanelAccordionGroup, ContextPanelAccordionSection } from './ContextPanelAccordion'
 import { ContextRulesEditor } from './ContextRulesEditor'
 import { ContextRelevancePanel } from './ContextRelevancePanel'
 import { ContextUsagePanel } from './ContextUsagePanel'
@@ -600,68 +601,6 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
         </div>
       )}
 
-      <ContextSuggestionsPanel />
-
-      <details
-        data-testid="narrative-context-selector"
-        style={{
-          flexShrink: 0,
-          backgroundColor: theme.background.secondary,
-        }}
-      >
-        <summary
-          style={{
-            padding: '0.45rem 0.75rem',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: theme.text.primary,
-          }}
-        >
-          Ajouter contexte narratif
-        </summary>
-        <div style={{ padding: '0.5rem 0.75rem', display: 'grid', gap: '0.4rem' }}>
-          {([
-            ['narrative_structures', 'Structure narrative'],
-            ['chapters', 'Chapitres'],
-            ['scenes', 'Scènes'],
-          ] as const).map(([category, label]) => (
-            <div key={category}>
-              <div style={{ color: theme.text.secondary, fontSize: '0.75rem', marginBottom: '0.2rem' }}>
-                {label}
-              </div>
-              <div style={{ display: 'grid', gap: '0.2rem', maxHeight: '7rem', overflowY: 'auto' }}>
-                {narrativeGroups[category].map((item) => (
-                  <label
-                    key={`${category}:${item.name}`}
-                    style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', color: theme.text.primary, fontSize: '0.78rem' }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isNarrativeSelected(category, item.name)}
-                      onChange={() => toggleNarrativeContext(category, item.name)}
-                    />
-                    <span>{item.name}</span>
-                  </label>
-                ))}
-                {narrativeGroups[category].length === 0 && (
-                  <span style={{ color: theme.text.tertiary, fontSize: '0.75rem' }}>Aucune source disponible.</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </details>
-
-      <SelectedContextSummary 
-        selections={selections} 
-        onClear={clearSelections}
-        onRemoveEntity={handleRemoveEntity}
-        onModeChange={handleSelectionPanelModeChange}
-        onError={(err) => setError(err)}
-        onSuccess={() => setError(null)}
-      />
-
       <div style={{ flex: '1 1 0', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <ContextList
           items={getCurrentItems()}
@@ -680,31 +619,65 @@ export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSe
           loadingMore={loadingMore}
         />
       </div>
-      <details
-        data-testid="context-llm-diagnostics"
-        style={{
-          flexShrink: 0,
-          borderTop: `1px solid ${theme.border.primary}`,
-          backgroundColor: theme.background.secondary,
-        }}
-      >
-        <summary
-          style={{
-            padding: '0.45rem 0.75rem',
-            cursor: 'pointer',
-            fontSize: remSize('small'),
-            fontWeight: 600,
-            color: theme.text.primary,
-            listStyle: 'none',
-          }}
+
+      <ContextPanelAccordionGroup>
+        <ContextSuggestionsPanel />
+
+        <ContextPanelAccordionSection
+          testId="narrative-context-selector"
+          title="Ajouter contexte narratif"
         >
-          Diagnostic LLM — pertinence et sections GDD
-        </summary>
-        <div>
+          <div style={{ display: 'grid', gap: '0.4rem' }}>
+            {([
+              ['narrative_structures', 'Structure narrative'],
+              ['chapters', 'Chapitres'],
+              ['scenes', 'Scènes'],
+            ] as const).map(([category, label]) => (
+              <div key={category}>
+                <div style={{ color: theme.text.secondary, fontSize: '0.75rem', marginBottom: '0.2rem' }}>
+                  {label}
+                </div>
+                <div style={{ display: 'grid', gap: '0.2rem', maxHeight: '7rem', overflowY: 'auto' }}>
+                  {narrativeGroups[category].map((item) => (
+                    <label
+                      key={`${category}:${item.name}`}
+                      style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', color: theme.text.primary, fontSize: '0.78rem' }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isNarrativeSelected(category, item.name)}
+                        onChange={() => toggleNarrativeContext(category, item.name)}
+                      />
+                      <span>{item.name}</span>
+                    </label>
+                  ))}
+                  {narrativeGroups[category].length === 0 && (
+                    <span style={{ color: theme.text.tertiary, fontSize: '0.75rem' }}>Aucune source disponible.</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </ContextPanelAccordionSection>
+
+        <SelectedContextSummary 
+          selections={selections} 
+          onClear={clearSelections}
+          onRemoveEntity={handleRemoveEntity}
+          onModeChange={handleSelectionPanelModeChange}
+          onError={(err) => setError(err)}
+          onSuccess={() => setError(null)}
+        />
+
+        <ContextPanelAccordionSection
+          testId="context-llm-diagnostics"
+          title="Diagnostic LLM — pertinence et sections GDD"
+          bodyStyle={{ padding: 0 }}
+        >
           <ContextRelevancePanel embedded />
           <ContextUsagePanel />
-        </div>
-      </details>
+        </ContextPanelAccordionSection>
+      </ContextPanelAccordionGroup>
     </div>
   )
 }
