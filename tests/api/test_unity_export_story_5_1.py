@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -13,6 +14,7 @@ from api.main import app
 from api.utils.unity_schema_validator import validate_unity_json
 from services.graph_conversion_service import GraphConversionService
 from services.unity_dialogue_export_service import write_unity_dialogue_to_file
+from services.unity_export_validation_service import validate_unity_export_document
 
 client = TestClient(app)
 
@@ -142,6 +144,83 @@ class TestUnityExportSuccess:
         assert content.get("schemaVersion") == "1.1.0"
         assert len(content["nodes"]) == 2
 
+    def test_new_wired_dialogue_two_nodes_passes_schema_and_export(
+        self, unity_tmp_path: Path
+    ) -> None:
+        """Parcours neuf : graphe câblé (2 répliques + END) → validation 0 erreur → écriture."""
+        node_a = "node-a1b2c3d4e5f6789012345678abcdef01"
+        node_b = "node-b2c3d4e5f678901234567890abcdef12"
+        graph = {
+            "nodes": [
+                {
+                    "id": node_a,
+                    "type": "dialogueNode",
+                    "position": {"x": 0, "y": 0},
+                    "data": {
+                        "stableId": node_a,
+                        "displayName": "Ouverture",
+                        "line": "Bienvenue, voyageur.",
+                        "speaker": "Aubergiste",
+                        "choices": [{"choiceId": "go_on", "text": "Continuer"}],
+                    },
+                },
+                {
+                    "id": node_b,
+                    "type": "dialogueNode",
+                    "position": {"x": 0, "y": 150},
+                    "data": {
+                        "stableId": node_b,
+                        "displayName": "Suite",
+                        "line": "La nuit tombe.",
+                        "speaker": "Aubergiste",
+                        "choices": [{"choiceId": "leave", "text": "Partir"}],
+                    },
+                },
+                {
+                    "id": "END",
+                    "type": "endNode",
+                    "position": {"x": 0, "y": 300},
+                    "data": {"line": ""},
+                },
+            ],
+            "edges": [
+                {
+                    "id": "e1",
+                    "source": node_a,
+                    "target": node_b,
+                    "data": {"edgeType": "choice", "choiceIndex": 0},
+                },
+                {
+                    "id": "e2",
+                    "source": node_b,
+                    "target": "END",
+                    "data": {"edgeType": "choice", "choiceIndex": 0},
+                },
+            ],
+            "metadata": {
+                "title": "Retro Golden Path",
+                "node_count": 3,
+                "edge_count": 2,
+            },
+        }
+        unity_doc = json.loads(
+            GraphConversionService.graph_to_unity_json(graph["nodes"], graph["edges"])
+        )
+        validation = validate_unity_export_document(unity_doc)
+        assert validation.is_valid, validation.errors
+
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write",
+            json=graph,
+        )
+        assert response.status_code == 200
+        written = unity_tmp_path / "Retro_Golden_Path.json"
+        assert written.exists()
+        on_disk = json.loads(written.read_text(encoding="utf-8"))
+        assert validate_unity_export_document(on_disk).is_valid
+        choice = on_disk["nodes"][0]["choices"][0]
+        assert choice["targetNode"] == node_b
+
 
 @pytest.mark.api
 class TestExportPreservesGddFields:
@@ -238,6 +317,129 @@ class TestExportPreservesGddFields:
         choice = json.loads(unity_json)["nodes"][0]["choices"][0]
         assert choice.get("skillCheck") == skill_check
         assert choice.get("visibilityConditions") == rep_block
+
+    def test_export_preserves_choice_effects(self) -> None:
+        """Review 5.1 — choiceEffects survivent à la conversion."""
+        effects = [
+            {
+                "kind": "flag_bool",
+                "flagId": "FLAG_TEST",
+                "operator": "set",
+                "value": True,
+            }
+        ]
+        nodes = [
+            {
+                "id": _VALID_NODE_ID,
+                "type": "dialogueNode",
+                "position": {"x": 0, "y": 0},
+                "data": {
+                    "stableId": _VALID_NODE_ID,
+                    "displayName": "N1",
+                    "line": "Hello",
+                    "speaker": "NPC",
+                    "choices": [
+                        {
+                            "choiceId": "c1",
+                            "text": "Act",
+                            "choiceEffects": effects,
+                        }
+                    ],
+                },
+            },
+            {"id": "END", "type": "endNode", "position": {"x": 0, "y": 200}, "data": {"line": ""}},
+        ]
+        edges = [
+            {
+                "id": "e1",
+                "source": _VALID_NODE_ID,
+                "target": "END",
+                "data": {"edgeType": "choice", "choiceIndex": 0},
+            }
+        ]
+        choice = json.loads(GraphConversionService.graph_to_unity_json(nodes, edges))["nodes"][0][
+            "choices"
+        ][0]
+        assert choice.get("choiceEffects") == effects
+
+    def test_export_preserves_node_type(self) -> None:
+        """Review 5.1 — nodeType spécial exporté."""
+        nodes = [
+            {
+                "id": _VALID_NODE_ID,
+                "type": "dialogueNode",
+                "position": {"x": 0, "y": 0},
+                "data": {
+                    "stableId": _VALID_NODE_ID,
+                    "displayName": "Cut",
+                    "line": "…",
+                    "speaker": "NPC",
+                    "nodeType": "cutscene",
+                },
+            },
+            {"id": "END", "type": "endNode", "position": {"x": 0, "y": 200}, "data": {"line": ""}},
+        ]
+        edges = [
+            {
+                "id": "e1",
+                "source": _VALID_NODE_ID,
+                "target": "END",
+                "data": {"edgeType": "next", "choiceIndex": None},
+            }
+        ]
+        exported = json.loads(GraphConversionService.graph_to_unity_json(nodes, edges))["nodes"][0]
+        assert exported.get("nodeType") == "cutscene"
+
+    def test_graph_export_excludes_test_nodes(self) -> None:
+        """Review 5.1 — testNode absent du JSON Unity."""
+        nodes = [
+            {
+                "id": _VALID_NODE_ID,
+                "type": "dialogueNode",
+                "position": {"x": 0, "y": 0},
+                "data": {
+                    "stableId": _VALID_NODE_ID,
+                    "displayName": "N1",
+                    "line": "Hello",
+                    "speaker": "NPC",
+                    "choices": [{"choiceId": "c1", "text": "Go"}],
+                },
+            },
+            {
+                "id": "test-node-1",
+                "type": "testNode",
+                "position": {"x": 0, "y": 100},
+                "data": {"id": "test-node-1", "line": "Test"},
+            },
+            {"id": "END", "type": "endNode", "position": {"x": 0, "y": 200}, "data": {"line": ""}},
+        ]
+        edges = [
+            {
+                "id": "e1",
+                "source": _VALID_NODE_ID,
+                "target": "END",
+                "data": {"edgeType": "choice", "choiceIndex": 0},
+            }
+        ]
+        doc = json.loads(GraphConversionService.graph_to_unity_json(nodes, edges))
+        ids = {n["id"] for n in doc["nodes"]}
+        assert "test-node-1" not in ids
+        assert _VALID_NODE_ID in ids
+
+
+@pytest.mark.api
+class TestUnityExportPerformance:
+    """NFR-P3 — latence export API (Epic 5 retro A1)."""
+
+    def test_save_and_write_under_200ms_small_graph(self, unity_tmp_path: Path) -> None:
+        start = time.perf_counter()
+        response = client.post(
+            "/api/v1/unity-dialogues/graph/save-and-write",
+            json=_VALID_GRAPH,
+        )
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        assert response.status_code == 200
+        assert elapsed_ms < 200, f"export took {elapsed_ms:.1f} ms (NFR-P3)"
 
 
 @pytest.mark.api

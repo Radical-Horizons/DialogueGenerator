@@ -4,6 +4,8 @@ import logging
 import re
 from typing import List, Dict, Any, Tuple, Optional
 
+from services.unity_export_normalizer import normalize_unity_export_document
+
 logger = logging.getLogger(__name__)
 
 
@@ -370,7 +372,9 @@ class GraphConversionService:
             GraphConversionService._rebuild_connections(unity_nodes, edges)
 
             # Format canonique : même format que document DialogueGenerator / Unity (schemaVersion + nodes)
-            document = {"schemaVersion": "1.1.0", "nodes": unity_nodes}
+            document = normalize_unity_export_document(
+                {"schemaVersion": "1.1.0", "nodes": unity_nodes}
+            )
             json_content = json.dumps(document, indent=2, ensure_ascii=False)
 
             logger.info(f"Conversion réussie: {len(unity_nodes)} nœuds Unity")

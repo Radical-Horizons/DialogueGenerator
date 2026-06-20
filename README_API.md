@@ -322,6 +322,18 @@ Chaque entrée de log contient :
   "environment": "production"
 }
 ```
+
+## Export Unity (Epic 5 — matrice preview / export / batch)
+
+| Action | Endpoint / UI | Persistance disque | Validation schéma |
+|--------|---------------|-------------------|-------------------|
+| Prévisualiser (graphe) | `POST /api/v1/documents/{id}/unity-export/preview` · menu **Actions → Prévisualiser export** | Non | Oui (réponse JSON normalisée) |
+| Exporter (graphe) | `POST /api/v1/documents/{id}/unity-export` · **Export Unity** | Oui (`Assets/Dialogue/…`) | Oui avant écriture |
+| Batch (liste) | `POST /api/v1/unity-dialogues/batch-export` · page `/unity-dialogues` | Oui | Oui par fichier |
+| Journal export | `GET /api/v1/unity-dialogues/export-log` | — | — |
+
+Normalisation pré-validation : choix placeholder `__idx_*` sans texte ni cible, champs `null`/vides (`influenceDelta`, `respectDelta`, `condition`, `test`, `title`). Service : `services/unity_export_normalizer.py`. Migration legacy : `python scripts/normalize_unity_dialogues.py` (dry-run) puis `--apply`.
+
 - `GET /api/v1/config/unity-dialogues-path` - Chemin configuré des dialogues Unity
 - `PUT /api/v1/config/unity-dialogues-path` - Configurer le chemin des dialogues Unity
 

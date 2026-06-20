@@ -17,6 +17,7 @@ from typing import Callable, List, Optional, Tuple, Any, Dict
 
 from services.configuration_service import ConfigurationService
 from api.exceptions import ValidationException
+from services.unity_export_normalizer import normalize_unity_export_document
 from services.unity_export_validation_service import unity_export_schema_validator
 
 logger = logging.getLogger(__name__)
@@ -144,6 +145,8 @@ def write_unity_dialogue_to_file(
             details={"json_content": "Format attendu: [] ou { \"schemaVersion\": \"1.1.0\", \"nodes\": [...] }"},
             request_id=request_id,
         )
+
+    document = normalize_unity_export_document(document, in_place=True)
 
     validate_fn = validator or unity_export_schema_validator
     is_valid, validation_errors = validate_fn(document)

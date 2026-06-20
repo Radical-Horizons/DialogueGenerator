@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from services.configuration_service import ConfigurationService
 from services.unity_dialogue_download_service import read_document_download_payload
+from services.unity_export_normalizer import prepare_unity_export_document
 from services.unity_export_validation_service import validate_unity_export_document
 from services.unity_graph_export_serialization import (
     count_unity_nodes,
@@ -97,11 +98,13 @@ def preview_persisted_document(
     )
     document = json.loads(json_content)
     validation = validate_unity_export_document(document)
+    prepared = prepare_unity_export_document(document)
+    preview_json = json.dumps(prepared, ensure_ascii=False, indent=2)
     doc_id = safe_document_id(document_id)
     return ExportPreviewResult(
-        json_content=json_content,
-        size_bytes=json_content_size_bytes(json_content),
-        node_count=count_unity_nodes(document),
+        json_content=preview_json,
+        size_bytes=json_content_size_bytes(preview_json),
+        node_count=count_unity_nodes(prepared),
         filename=filename,
         schema_valid=validation.is_valid,
         errors=validation.errors,

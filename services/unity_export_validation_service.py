@@ -21,6 +21,7 @@ from services.unity_persisted_document_io import (
     resolve_unity_dir,
     safe_document_id,
 )
+from services.unity_export_normalizer import normalize_unity_export_document
 from services.unity_schema_error_formatter import format_structured_error_to_french
 
 
@@ -172,6 +173,7 @@ def validate_unity_export_document(
         Résultat avec erreurs bloquantes et avertissements non bloquants.
     """
     document = _normalize_document(json_data)
+    document = normalize_unity_export_document(document, in_place=True)
 
     schema_valid, schema_errors = validate_unity_json_structured(document)
     gdd_errors_raw: List[Dict[str, Any]] = []
