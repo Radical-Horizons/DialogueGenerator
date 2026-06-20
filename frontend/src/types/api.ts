@@ -466,6 +466,25 @@ export interface BatchExportResponse {
   success: boolean
 }
 
+export interface BatchExportPreviewRequest {
+  document_ids: string[]
+}
+
+export interface BatchExportPreviewItem {
+  document_id: string
+  filename: string
+  size_bytes: number
+  node_count: number
+  json_preview: string
+  json_preview_truncated: boolean
+}
+
+export interface BatchExportPreviewResponse {
+  items: BatchExportPreviewItem[]
+  total_size_bytes: number
+  dialogue_count: number
+}
+
 // Unity Dialogues Library
 export interface UnityDialogueMetadata {
   filename: string

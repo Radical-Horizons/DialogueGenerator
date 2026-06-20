@@ -11,13 +11,15 @@ import type {
   ExportUnityDialogueResponse,
   BatchExportRequest,
   BatchExportResponse,
+  BatchExportPreviewRequest,
+  BatchExportPreviewResponse,
   EstimateTokensRequest,
   EstimateTokensResponse,
   PreviewPromptRequest,
   PreviewPromptResponse,
   GenerationJobStatus,
 } from '../types/api'
-import type { ValidateSchemaResponse } from '../types/graph'
+import type { ValidateSchemaResponse, ExportPreviewResponse } from '../types/graph'
 
 // NOTE: generateDialogueVariants et generateInteractionVariants ont été supprimés. Utiliser generateUnityDialogue à la place.
 
@@ -155,6 +157,35 @@ export async function batchExportUnityDialogues(
   const response = await apiClient.post<BatchExportResponse>(
     '/api/v1/dialogues/batch-export',
     request,
+    { signal },
+  )
+  return response.data
+}
+
+/**
+ * Preview export batch bibliothèque (Story 5.5 / FR53).
+ */
+export async function batchPreviewUnityDialogues(
+  request: BatchExportPreviewRequest,
+  signal?: AbortSignal,
+): Promise<BatchExportPreviewResponse> {
+  const response = await apiClient.post<BatchExportPreviewResponse>(
+    '/api/v1/dialogues/batch-preview-export',
+    request,
+    { signal },
+  )
+  return response.data
+}
+
+/**
+ * Preview export d'un dialogue persisté (Story 5.5 / FR53).
+ */
+export async function previewUnityDialogueExport(
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<ExportPreviewResponse> {
+  const response = await apiClient.get<ExportPreviewResponse>(
+    `/api/v1/dialogues/${encodeURIComponent(documentId)}/preview-export`,
     { signal },
   )
   return response.data

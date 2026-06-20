@@ -136,6 +136,7 @@ export function GraphEditorHeader({
     handleAutoLayout,
     handleOpenExportDialog,
     handleExportUnity,
+    handlePreviewExport,
     undo,
     redo,
   } = toolbar
@@ -438,6 +439,38 @@ export function GraphEditorHeader({
         <button
           type="button"
           role="menuitem"
+          data-testid="btn-preview-export"
+          onClick={() => {
+            setShowActionsDropdown(false)
+            void handlePreviewExport()
+          }}
+          disabled={nodes.length === 0}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: chrome.dropdownItemPadding,
+            border: 'none',
+            background: 'transparent',
+            color: nodes.length === 0 ? theme.text.secondary : theme.text.primary,
+            textAlign: 'left',
+            fontSize: `${chrome.dropdownItemFontSizeRem}rem`,
+            cursor: nodes.length === 0 ? 'not-allowed' : 'pointer',
+            opacity: nodes.length === 0 ? 0.6 : 1,
+          }}
+          onMouseEnter={(e) => {
+            if (nodes.length > 0) e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+          title="Prévisualiser l'export Unity avant téléchargement"
+          aria-label="Prévisualiser export"
+        >
+          👁 Prévisualiser export
+        </button>
+        <button
+          type="button"
+          role="menuitem"
           data-testid="btn-filters-panel"
           onClick={() => {
             setShowActionsDropdown(false)
@@ -537,6 +570,7 @@ export function GraphEditorHeader({
     chrome.dropdownItemPadding,
     createEmptyNode,
     handleExportUnity,
+    handlePreviewExport,
     handleOpenExportDialog,
     hasActiveDialogue,
     nodes,

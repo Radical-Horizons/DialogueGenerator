@@ -53,6 +53,17 @@ class SaveGraphResponse(BaseModel):
     last_seq: Optional[int] = Field(None, description="Dernier seq connu pour ce document (ADR-006)")
 
 
+class ExportPreviewResponse(BaseModel):
+    """Réponse preview export graphe ou bibliothèque (Story 5.5 / FR53)."""
+
+    json_content: str = Field(..., description="JSON Unity formaté indent 2")
+    size_bytes: int = Field(..., description="Taille UTF-8 en octets")
+    node_count: int = Field(..., description="Nombre de nœuds exportés")
+    filename: str = Field(..., description="Nom de fichier estimé")
+    schema_valid: bool = Field(True, description="Conformité schéma Unity")
+    errors: List[str] = Field(default_factory=list, description="Erreurs validation si invalide")
+
+
 class EstimateCostRequest(BaseModel):
     """Requête pour estimer le coût LLM avant génération (même structure que GenerateNodeRequest)."""
     parent_node_id: str = Field(..., description="ID du nœud parent")

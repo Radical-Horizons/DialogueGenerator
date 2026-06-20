@@ -60,6 +60,15 @@ export interface SaveGraphResponse {
   last_seq?: number
 }
 
+export interface ExportPreviewResponse {
+  json_content: string
+  size_bytes: number
+  node_count: number
+  filename: string
+  schema_valid: boolean
+  errors: string[]
+}
+
 export interface GenerateNodeRequest {
   parent_node_id: string
   parent_node_content: Record<string, unknown>

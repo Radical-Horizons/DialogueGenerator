@@ -23,6 +23,9 @@ from api.schemas.dialogue import (
     BatchExportResponse,
     BatchExportFailedItemResponse,
     BatchDownloadRequest,
+    BatchExportPreviewRequest,
+    BatchExportPreviewResponse,
+    BatchExportPreviewItemResponse,
 )
 from pydantic import BaseModel, Field
 from api.dependencies import (
@@ -33,7 +36,9 @@ from api.dependencies import (
     get_llm_pricing_service,
     get_skill_catalog_service,
     get_trait_catalog_service,
-    get_unity_dialogue_orchestrator
+    get_unity_dialogue_orchestrator,
+    get_export_log_service,
+    get_llm_usage_service,
 )
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from api.exceptions import InternalServerException, ValidationException, NotFoundException, OpenAIException
@@ -46,13 +51,24 @@ from services.unity_dialogue_export_service import (
     write_unity_dialogue_to_file,
 )
 from services.batch_export_service import batch_export_documents
+from services.export_log_recorder import (
+    extract_validation_errors,
+    record_unity_export_failure,
+    record_unity_export_success,
+)
+from services.export_log_service import ExportLogService
+from services.llm_usage_service import LLMUsageService
 from services.unity_export_validation_service import validate_persisted_document
 from services.unity_dialogue_download_service import (
     build_batch_download_zip,
     read_document_download_payload,
 )
+from services.unity_export_preview_service import (
+    preview_batch_documents,
+    preview_persisted_document,
+)
 from api.utils.validate_schema_api import validate_schema_response_from_result
-from api.schemas.graph import ValidateSchemaResponse
+from api.schemas.graph import ExportPreviewResponse, ValidateSchemaResponse
 from services.llm_pricing_service import LLMPricingService
 from services.token_estimation_service import DEFAULT_COMPLETION_TOKENS_PER_NODE
 from constants import Defaults
@@ -470,6 +486,8 @@ async def export_unity_dialogue(
     request_data: ExportUnityDialogueRequest,
     request: Request,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
+    llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> ExportUnityDialogueResponse:
     """Exporte un dialogue Unity JSON vers un fichier.
@@ -487,7 +505,14 @@ async def export_unity_dialogue(
         ValidationException: Si le chemin Unity n'est pas configuré ou si le JSON est invalide.
         InternalServerException: Si l'écriture du fichier échoue.
     """
+    target_filename = request_data.filename or "dialogue.json"
+    parsed_document: Dict[str, Any] | None = None
     try:
+        parsed = json.loads(request_data.json_content)
+        if isinstance(parsed, dict):
+            parsed_document = parsed
+        elif isinstance(parsed, list):
+            parsed_document = {"schemaVersion": "1.2.0", "nodes": parsed}
         file_path, filename = write_unity_dialogue_to_file(
             config_service=config_service,
             json_content=request_data.json_content,
@@ -496,14 +521,48 @@ async def export_unity_dialogue(
             request_id=request_id,
             validator=unity_export_schema_validator,
         )
+        record_unity_export_success(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document or {"schemaVersion": "1.2.0", "nodes": []},
+            filename=filename,
+        )
         return ExportUnityDialogueResponse(
             file_path=str(file_path.absolute()),
             filename=filename,
             success=True,
         )
-    except ValidationException:
+    except ValidationException as exc:
+        record_unity_export_failure(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document,
+            filename=target_filename,
+            errors=extract_validation_errors(exc),
+        )
         raise
+    except OSError as exc:
+        record_unity_export_failure(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document,
+            filename=target_filename,
+            errors=[f"Erreur d'écriture disque: {exc}"],
+        )
+        logger.exception("Erreur disque export Unity JSON (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de l'export du dialogue Unity JSON",
+            details={"error": str(exc)},
+            request_id=request_id,
+        )
     except Exception as e:
+        record_unity_export_failure(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document,
+            filename=target_filename,
+            errors=[str(e)],
+        )
         logger.exception("Erreur lors de l'export Unity JSON (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de l'export du dialogue Unity JSON",
@@ -520,6 +579,8 @@ async def export_unity_dialogue(
 async def batch_export_unity_dialogues(
     request_data: BatchExportRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
+    llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> BatchExportResponse:
     """Exporte plusieurs dialogues persistés vers Unity JSON (Story 5.2 / FR50)."""
@@ -530,6 +591,8 @@ async def batch_export_unity_dialogues(
             skip_validation=request_data.skip_validation,
             filename_strategy=request_data.filename_strategy,
             request_id=request_id,
+            export_log_service=export_log_service,
+            llm_usage_service=llm_usage_service,
         )
         return BatchExportResponse(
             exported=result.exported,
@@ -547,6 +610,48 @@ async def batch_export_unity_dialogues(
         raise InternalServerException(
             message="Erreur lors de l'export batch Unity JSON",
             details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.get("/{document_id}/preview-export", response_model=ExportPreviewResponse)
+async def preview_unity_dialogue_export(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ExportPreviewResponse:
+    """Preview export bibliothèque sans téléchargement (Story 5.5 / FR53)."""
+    try:
+        result = preview_persisted_document(config_service, document_id, request_id)
+        return ExportPreviewResponse(
+            json_content=result.json_content,
+            size_bytes=result.size_bytes,
+            node_count=result.node_count,
+            filename=result.filename,
+            schema_valid=result.schema_valid,
+            errors=result.errors,
+        )
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(
+            message=str(exc),
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    except Exception as exc:
+        logger.exception(
+            "Erreur preview-export document %s (request_id: %s)", document_id, request_id
+        )
+        raise InternalServerException(
+            message="Erreur lors de la prévisualisation export",
+            details={"error": str(exc)},
             request_id=request_id,
         )
 
@@ -581,6 +686,51 @@ async def download_unity_dialogue(
         media_type="application/json;charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.post("/batch-preview-export", response_model=BatchExportPreviewResponse)
+async def batch_preview_unity_dialogue_export(
+    request_data: BatchExportPreviewRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchExportPreviewResponse:
+    """Preview export batch bibliothèque (Story 5.5 / FR53)."""
+    try:
+        result = preview_batch_documents(
+            config_service, request_data.document_ids, request_id
+        )
+        return BatchExportPreviewResponse(
+            items=[
+                BatchExportPreviewItemResponse(
+                    document_id=item.document_id,
+                    filename=item.filename,
+                    size_bytes=item.size_bytes,
+                    node_count=item.node_count,
+                    json_preview=item.json_preview,
+                    json_preview_truncated=item.json_preview_truncated,
+                )
+                for item in result.items
+            ],
+            total_size_bytes=result.total_size_bytes,
+            dialogue_count=result.dialogue_count,
+        )
+    except FileNotFoundError as exc:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=str(exc),
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(message=str(exc), request_id=request_id)
+    except Exception as exc:
+        logger.exception("Erreur batch preview-export (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de la prévisualisation export batch",
+            details={"error": str(exc)},
+            request_id=request_id,
+        )
 
 
 @router.post("/batch-download")

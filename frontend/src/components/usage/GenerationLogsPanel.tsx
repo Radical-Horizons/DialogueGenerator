@@ -14,44 +14,15 @@ import { getErrorMessage } from '../../types/errors'
 import './GenerationLogsPanel.css'
 import { StyledSelect } from '../shared/StyledSelect'
 
-type PeriodFilter = 'today' | 'week' | 'month'
+import {
+  csvEscape,
+  downloadLogBlob,
+  formatLogTimestamp,
+  getPeriodRange,
+  type PeriodFilter,
+} from '../../utils/logPanelUtils'
+
 type ProviderFilter = 'all' | 'openai' | 'mistral'
-
-function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
-function getPeriodRange(period: PeriodFilter): { start_date: string; end_date: string } {
-  const end = new Date()
-  const end_date = toDateString(end)
-  const start = new Date()
-  if (period === 'today') {
-    start.setHours(0, 0, 0, 0)
-    return { start_date: toDateString(start), end_date }
-  }
-  if (period === 'week') {
-    start.setDate(start.getDate() - 7)
-    return { start_date: toDateString(start), end_date }
-  }
-  // month
-  start.setDate(start.getDate() - 30)
-  return { start_date: toDateString(start), end_date }
-}
-
-function formatTimestamp(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-  } catch {
-    return iso
-  }
-}
 
 function formatCostEur(eur: number): string {
   if (eur < 0.0001) return `€${eur.toFixed(6)}`
@@ -72,13 +43,6 @@ function filterByProvider(entries: GenerationLogEntry[], provider: ProviderFilte
     if (provider === 'mistral') return m.includes('mistral')
     return true
   })
-}
-
-/** Escape and quote CSV field per RFC 4180 (commas, newlines, double-quotes). */
-function csvEscape(value: unknown): string {
-  const s = value === null || value === undefined ? '' : String(value)
-  const escaped = s.replace(/"/g, '""')
-  return /[,"\n\r]/.test(escaped) ? `"${escaped}"` : escaped
 }
 
 export interface GenerationLogsPanelProps {
@@ -158,12 +122,7 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
               const csv = [header, ...rows].join('\n')
               return new Blob([csv], { type: 'text/csv;charset=utf-8' })
             })()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `generation-logs-${dialogueId}-${new Date().toISOString().slice(0, 10)}.${format}`
-      a.click()
-      URL.revokeObjectURL(url)
+      downloadLogBlob(blob, `generation-logs-${dialogueId}`, format)
     },
     [entries, dialogueId]
   )
@@ -276,7 +235,7 @@ export function GenerationLogsPanel({ dialogueId }: GenerationLogsPanelProps) {
                     }
                   }}
                 >
-                  <td>{formatTimestamp(entry.timestamp)}</td>
+                  <td>{formatLogTimestamp(entry.timestamp)}</td>
                   <td className="glp__node-id">{entry.node_id ?? '—'}</td>
                   <td>{formatCostEur(entry.cost_eur)}</td>
                   <td>{entry.total_tokens.toLocaleString()}</td>

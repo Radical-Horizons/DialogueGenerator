@@ -158,8 +158,8 @@ development_status:
   5-2-exporter-batch-plusieurs-dialogues-vers-unity-json-fr50: done
   5-3-valider-json-exporté-contre-schéma-unity-custom-fr51: done
   5-4-télécharger-fichiers-json-exportés-fr52: done
-  5-5-prévisualiser-export-avant-téléchargement-structure-json-taille-fr53: backlog
-  5-6-générer-logs-export-avec-métadonnées-date-génération-coût-statut-validation-fr54: backlog
+  5-5-prévisualiser-export-avant-téléchargement-structure-json-taille-fr53: done
+  5-6-générer-logs-export-avec-métadonnées-date-génération-coût-statut-validation-fr54: done
   epic-5-retrospective: optional
   epic-6: backlog
   6-1-créer-templates-custom-dinstructions-pour-génération-dialogue-fr55: backlog

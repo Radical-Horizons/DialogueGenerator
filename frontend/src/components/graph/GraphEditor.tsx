@@ -16,6 +16,7 @@ import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { ExportDownloadBanner } from '../unityDialogues/ExportDownloadBanner'
+import { ExportPreviewModal } from '../unityDialogues/ExportPreviewModal'
 import { GraphValidationPanel } from './GraphValidationPanel'
 import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
 import { GraphAiSlopPanel } from './GraphAiSlopPanel'
@@ -254,6 +255,18 @@ export function GraphEditor({
             onDismiss={toolbar.dismissExportDownload}
           />
         )}
+
+        <ExportPreviewModal
+          isOpen={toolbar.previewOpen}
+          mode={toolbar.previewMode}
+          isLoading={toolbar.previewLoading}
+          error={toolbar.previewError}
+          singlePreview={toolbar.singlePreview}
+          batchPreview={toolbar.batchPreview}
+          isExporting={toolbar.isExportingFromPreview}
+          onClose={toolbar.closePreview}
+          onExport={toolbar.handleExportFromPreview}
+        />
 
         {/* Contenu graphe */}
         {!hasActiveDialogue && nodes.length === 0 ? (

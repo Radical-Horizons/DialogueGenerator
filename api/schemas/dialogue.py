@@ -613,6 +613,34 @@ class BatchDownloadRequest(BaseModel):
     )
 
 
+class BatchExportPreviewRequest(BaseModel):
+    """Requête preview export batch (Story 5.5 / FR53)."""
+
+    document_ids: List[str] = Field(..., min_length=1, description="IDs document sans extension")
+
+
+class BatchExportPreviewItemResponse(BaseModel):
+    """Item preview batch."""
+
+    document_id: str = Field(..., description="Identifiant document")
+    filename: str = Field(..., description="Nom fichier export")
+    size_bytes: int = Field(..., description="Taille UTF-8 octets")
+    node_count: int = Field(..., description="Nombre de nœuds")
+    json_preview: str = Field(..., description="Aperçu JSON (éventuellement tronqué)")
+    json_preview_truncated: bool = Field(
+        False,
+        description="True si l'aperçu est tronqué pour perf",
+    )
+
+
+class BatchExportPreviewResponse(BaseModel):
+    """Réponse preview export batch."""
+
+    items: List[BatchExportPreviewItemResponse] = Field(default_factory=list)
+    total_size_bytes: int = Field(..., description="Taille totale estimée")
+    dialogue_count: int = Field(..., description="Nombre de dialogues")
+
+
 # Schemas pour la bibliothèque Unity Dialogues
 class UnityDialogueMetadata(BaseModel):
     """Métadonnées d'un fichier de dialogue Unity JSON.

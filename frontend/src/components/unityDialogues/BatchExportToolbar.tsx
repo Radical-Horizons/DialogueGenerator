@@ -19,6 +19,7 @@ export interface BatchExportToolbarProps {
   batchOptions: BatchExportOptions
   onToggleSelectAll: () => void
   onStartExport: () => void
+  onStartPreview?: () => void
   onCancelExport: () => void
   onToggleOptions: () => void
   onOptionsChange: (options: BatchExportOptions) => void
@@ -33,6 +34,7 @@ export function BatchExportToolbar({
   batchOptions,
   onToggleSelectAll,
   onStartExport,
+  onStartPreview,
   onCancelExport,
   onToggleOptions,
   onOptionsChange,
@@ -80,6 +82,17 @@ export function BatchExportToolbar({
         >
           Exporter batch
         </button>
+        {onStartPreview && (
+          <button
+            type="button"
+            data-testid="batch-preview-export"
+            onClick={onStartPreview}
+            disabled={isBatchExporting || checkedCount === 0}
+            style={toolbarButtonStyle}
+          >
+            Prévisualiser export batch
+          </button>
+        )}
         {isBatchExporting && (
           <button
             type="button"

@@ -20,8 +20,11 @@ import {
 } from '../utils/unityNodeIndexMap'
 import { useUnityExport } from './useUnityExport'
 import { useUnityExportDownload } from './useUnityExportDownload'
+import { useUnityExportPreview } from './useUnityExportPreview'
 import type { LastExportDownload } from './useUnityExportDownload'
-import type { SchemaValidationIssue } from '../types/graph'
+import type { SchemaValidationIssue, ExportPreviewResponse } from '../types/graph'
+import type { BatchExportPreviewResponse } from '../types/api'
+import type { ExportPreviewModalMode } from '../components/unityDialogues/ExportPreviewModal'
 
 export interface UseGraphToolbarReturn {
   showAutoLayoutDropdown: boolean
@@ -82,6 +85,16 @@ export interface UseGraphToolbarReturn {
   handleExportPNG: () => Promise<void>
   handleExportSVG: () => Promise<void>
   handleExportUnity: () => Promise<void>
+  handlePreviewExport: () => Promise<void>
+  previewOpen: boolean
+  previewMode: ExportPreviewModalMode
+  previewLoading: boolean
+  previewError: string | null
+  singlePreview: ExportPreviewResponse | null
+  batchPreview: BatchExportPreviewResponse | null
+  isExportingFromPreview: boolean
+  handleExportFromPreview: () => Promise<void>
+  closePreview: () => void
   undo: () => void
   redo: () => void
   canUndoNow: boolean
@@ -492,6 +505,16 @@ export function useGraphToolbar(
     setSchemaValidationStructuredErrors,
   }, exportDownload)
 
+  const exportPreview = useUnityExportPreview(toast, {
+    setShowSchemaValidationPanel,
+    setSchemaValidationLoading,
+    setSchemaValidationIsValid,
+    setSchemaValidationErrors,
+    setSchemaValidationErrorCount,
+    setSchemaValidationWarnings,
+    setSchemaValidationStructuredErrors,
+  }, exportDownload)
+
   const handleSchemaIssueClick = useCallback((issue: SchemaValidationIssue) => {
     if (issue.node_id) {
       useGraphViewStore.getState().focusNode(issue.node_id)
@@ -573,6 +596,16 @@ export function useGraphToolbar(
     handleExportPNG,
     handleExportSVG,
     handleExportUnity,
+    handlePreviewExport: exportPreview.handlePreviewExport,
+    previewOpen: exportPreview.previewOpen,
+    previewMode: exportPreview.previewMode,
+    previewLoading: exportPreview.previewLoading,
+    previewError: exportPreview.previewError,
+    singlePreview: exportPreview.singlePreview,
+    batchPreview: exportPreview.batchPreview,
+    isExportingFromPreview: exportPreview.isExportingFromPreview,
+    handleExportFromPreview: exportPreview.handleExportFromPreview,
+    closePreview: exportPreview.closePreview,
     undo,
     redo,
     canUndoNow,

@@ -14,6 +14,7 @@ vi.mock('../api/graph', () => ({
   loadGraph: vi.fn(),
   saveGraph: vi.fn(),
   saveGraphAndWrite: vi.fn(),
+  previewGraphExport: vi.fn(),
   validateSchema: vi.fn(),
   generateNode: vi.fn(),
   validateGraph: vi.fn(),

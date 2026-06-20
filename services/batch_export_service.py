@@ -14,6 +14,9 @@ from typing import Callable, List, Literal, Optional, Tuple
 
 from api.exceptions import ValidationException
 from services.configuration_service import ConfigurationService
+from services.export_log_recorder import extract_validation_errors, record_batch_export_item
+from services.export_log_service import ExportLogService
+from services.llm_usage_service import LLMUsageService
 from services.unity_dialogue_export_service import write_unity_dialogue_to_file
 from services.unity_export_validation_service import unity_export_schema_validator
 from services.unity_persisted_document_io import (
@@ -124,6 +127,8 @@ def batch_export_documents(
     skip_validation: bool = False,
     filename_strategy: FilenameStrategy = "preserve",
     request_id: Optional[str] = None,
+    export_log_service: Optional[ExportLogService] = None,
+    llm_usage_service: Optional[LLMUsageService] = None,
 ) -> BatchExportResult:
     """Exporte plusieurs documents persistés ; continue après échecs individuels.
 
@@ -144,7 +149,13 @@ def batch_export_documents(
     result = BatchExportResult()
 
     for doc_id in document_ids:
+        document: Optional[dict] = None
+        output_filename: Optional[str] = None
         try:
+            doc_id_safe = safe_document_id(doc_id)
+            unity_dir = resolve_unity_dir(config_service, request_id)
+            document = read_document_blob(unity_dir, doc_id_safe)
+            output_filename = _resolve_output_filename(doc_id_safe, document, filename_strategy)
             _file_path, filename = export_persisted_document(
                 config_service,
                 doc_id,
@@ -154,33 +165,84 @@ def batch_export_documents(
             )
             result.exported.append(filename)
             logger.info("Batch export OK: %s → %s", doc_id, filename)
+            if export_log_service is not None and llm_usage_service is not None:
+                record_batch_export_item(
+                    export_log_service,
+                    llm_usage_service,
+                    document_id=doc_id_safe,
+                    filename=filename,
+                    export_status="success",
+                    document=document,
+                    skip_validation=skip_validation,
+                )
         except FileNotFoundError:
-            result.failed.append(
-                BatchExportFailedItem(id=doc_id, errors=[f"Document {doc_id} non trouvé"])
-            )
+            err = [f"Document {doc_id} non trouvé"]
+            result.failed.append(BatchExportFailedItem(id=doc_id, errors=err))
+            if export_log_service is not None and llm_usage_service is not None:
+                record_batch_export_item(
+                    export_log_service,
+                    llm_usage_service,
+                    document_id=doc_id,
+                    filename=f"{safe_document_id(doc_id)}.json",
+                    export_status="failure",
+                    errors=err,
+                    skip_validation=skip_validation,
+                )
         except ValidationException as exc:
-            errors = _extract_validation_errors(exc)
+            errors = extract_validation_errors(exc)
             result.failed.append(BatchExportFailedItem(id=doc_id, errors=errors))
+            if export_log_service is not None and llm_usage_service is not None:
+                record_batch_export_item(
+                    export_log_service,
+                    llm_usage_service,
+                    document_id=doc_id,
+                    filename=output_filename or f"{doc_id}.json",
+                    export_status="failure",
+                    errors=errors,
+                    document=document,
+                    skip_validation=skip_validation,
+                )
         except ValueError as exc:
-            result.failed.append(BatchExportFailedItem(id=doc_id, errors=[str(exc)]))
+            err = [str(exc)]
+            result.failed.append(BatchExportFailedItem(id=doc_id, errors=err))
+            if export_log_service is not None and llm_usage_service is not None:
+                record_batch_export_item(
+                    export_log_service,
+                    llm_usage_service,
+                    document_id=doc_id,
+                    filename=output_filename or f"{doc_id}.json",
+                    export_status="failure",
+                    errors=err,
+                    document=document,
+                    skip_validation=skip_validation,
+                )
         except json.JSONDecodeError as exc:
-            result.failed.append(
-                BatchExportFailedItem(id=doc_id, errors=[f"JSON invalide: {exc}"])
-            )
+            err = [f"JSON invalide: {exc}"]
+            result.failed.append(BatchExportFailedItem(id=doc_id, errors=err))
+            if export_log_service is not None and llm_usage_service is not None:
+                record_batch_export_item(
+                    export_log_service,
+                    llm_usage_service,
+                    document_id=doc_id,
+                    filename=f"{doc_id}.json",
+                    export_status="failure",
+                    errors=err,
+                    skip_validation=skip_validation,
+                )
         except OSError as exc:
             logger.warning("Batch export écriture disque échouée pour %s: %s", doc_id, exc)
-            result.failed.append(
-                BatchExportFailedItem(id=doc_id, errors=[f"Erreur d'écriture disque: {exc}"])
-            )
+            err = [f"Erreur d'écriture disque: {exc}"]
+            result.failed.append(BatchExportFailedItem(id=doc_id, errors=err))
+            if export_log_service is not None and llm_usage_service is not None:
+                record_batch_export_item(
+                    export_log_service,
+                    llm_usage_service,
+                    document_id=doc_id,
+                    filename=output_filename or f"{doc_id}.json",
+                    export_status="failure",
+                    errors=err,
+                    document=document,
+                    skip_validation=skip_validation,
+                )
 
     return result
-
-
-def _extract_validation_errors(exc: ValidationException) -> List[str]:
-    """Extrait les messages d'erreur depuis une ValidationException."""
-    details = exc.details or {}
-    raw = details.get("validation_errors")
-    if isinstance(raw, list) and raw:
-        return [str(e) for e in raw if e]
-    message = exc.message or "Erreur de validation"
-    return [message]

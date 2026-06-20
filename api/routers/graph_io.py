@@ -10,9 +10,10 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, status
 
-from api.dependencies import get_config_service, get_request_id
+from api.dependencies import get_config_service, get_export_log_service, get_llm_usage_service, get_request_id
 from api.exceptions import InternalServerException, ValidationException
 from api.schemas.graph import (
+    ExportPreviewResponse,
     GraphMetadata,
     LoadGraphRequest,
     LoadGraphResponse,
@@ -20,11 +21,23 @@ from api.schemas.graph import (
     SaveGraphResponse,
 )
 from services.configuration_service import ConfigurationService
+from services.export_log_recorder import (
+    record_graph_export_failure,
+    record_graph_export_success,
+    record_graph_export_validation_exception,
+)
+from services.export_log_service import ExportLogService
 from services.graph_conversion_service import GraphConversionService
+from services.llm_usage_service import LLMUsageService
 from services.unity_dialogue_export_service import (
     read_last_seq,
     unity_export_schema_validator,
     write_unity_dialogue_to_file,
+)
+from services.unity_export_preview_service import preview_graph_export
+from services.unity_graph_export_serialization import (
+    export_filename_from_title,
+    graph_to_unity_json_content,
 )
 
 logger = logging.getLogger(__name__)
@@ -172,6 +185,8 @@ async def save_graph(
 async def save_graph_and_write(
     request_data: SaveGraphRequest,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
+    llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     request_id: Annotated[str, Depends(get_request_id)] = None,
 ) -> SaveGraphResponse:
     """Convertit le graphe en Unity JSON, valide et écrit le fichier sur disque (un seul appel).
@@ -180,16 +195,14 @@ async def save_graph_and_write(
     seq > last_seq → écriture atomique + persistance last_seq + ack(seq).
     """
     try:
-        document = GraphConversionService.graph_to_unity_document(
+        document, json_content = graph_to_unity_json_content(
             request_data.nodes,
             request_data.edges,
             dialogue_flags=request_data.dialogue_flags,
             title=request_data.metadata.title,
         )
-        json_content = json.dumps(document, ensure_ascii=False, indent=2)
-        sanitized_title = _sanitize_dialogue_title_for_filename(request_data.metadata.title)
-        filename_without_ext = sanitized_title[:100] if sanitized_title else "dialogue"
-        filename = filename_without_ext + ".json"
+        filename = export_filename_from_title(request_data.metadata.title)
+        filename_without_ext = filename[:-5] if filename.lower().endswith(".json") else filename
         document_key = filename_without_ext
 
         seq = request_data.seq
@@ -224,6 +237,13 @@ async def save_graph_and_write(
             preserve_source_fields=bool(request_data.dialogue_flags),
         )
 
+        record_graph_export_success(
+            export_log_service,
+            llm_usage_service,
+            document=document,
+            filename=filename_out,
+        )
+
         extra: dict = {}
         if seq is not None:
             extra["ack_seq"] = seq
@@ -241,11 +261,27 @@ async def save_graph_and_write(
             json_content=json_content,
             **extra,
         )
-    except ValidationException:
+    except ValidationException as exc:
+        record_graph_export_validation_exception(
+            export_log_service,
+            llm_usage_service,
+            document=document,
+            filename=filename,
+            exc=exc,
+        )
         raise
     except ValueError as e:
         logger.warning("Validation error lors de save-and-write (request_id: %s): %s", request_id, e)
-        raise ValidationException(message=str(e), request_id=request_id)
+        err_msg = str(e)
+        if "document" in locals() and "filename" in locals():
+            record_graph_export_failure(
+                export_log_service,
+                llm_usage_service,
+                document=document,
+                filename=filename,
+                errors=[err_msg],
+            )
+        raise ValidationException(message=err_msg, request_id=request_id)
     except Exception as e:
         logger.exception("Erreur lors de la sauvegarde du graphe (request_id: %s)", request_id)
         raise InternalServerException(
@@ -253,3 +289,39 @@ async def save_graph_and_write(
             details={"error": str(e)},
             request_id=request_id,
         )
+
+
+@router.post(
+    "/preview-export",
+    response_model=ExportPreviewResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def preview_graph_export_route(
+    request_data: SaveGraphRequest,
+    request_id: Annotated[str, Depends(get_request_id)] = None,
+) -> ExportPreviewResponse:
+    """Preview export graphe sans écriture disque (Story 5.5 / FR53)."""
+    try:
+        result = preview_graph_export(
+            request_data.nodes,
+            request_data.edges,
+            dialogue_flags=request_data.dialogue_flags,
+            title=request_data.metadata.title,
+        )
+        return ExportPreviewResponse(
+            json_content=result.json_content,
+            size_bytes=result.size_bytes,
+            node_count=result.node_count,
+            filename=result.filename,
+            schema_valid=result.schema_valid,
+            errors=result.errors,
+        )
+    except ValueError as exc:
+        raise ValidationException(message=str(exc), request_id=request_id) from exc
+    except Exception as exc:
+        logger.exception("Erreur preview-export graphe (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de la prévisualisation export",
+            details={"error": str(exc)},
+            request_id=request_id,
+        ) from exc
