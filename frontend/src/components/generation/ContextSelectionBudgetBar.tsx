@@ -1,7 +1,7 @@
 /**
  * Compteur prompt complet + sous-ligne sélection GDD (budget / optimisation FR20–FR21).
  */
-import { useCallback, useId, useState } from 'react'
+import { useCallback, useId, useState, type ReactNode } from 'react'
 import { useContextConfigStore } from '../../store/contextConfigStore'
 import { useGenerationStore } from '../../store/generationStore'
 import { useGenerationActionsStore } from '../../store/generationActionsStore'
@@ -16,6 +16,38 @@ const HIGH_CONTEXT_WARNING_THRESHOLD = 100_000
 export interface ContextSelectionBudgetBarProps {
   /** Masquer sur graphe / autres vues sans génération. */
   visible?: boolean
+}
+
+function StatusPill({
+  children,
+  tone,
+  testId,
+}: {
+  children: ReactNode
+  tone: 'warning' | 'error'
+  testId?: string
+}) {
+  const color = tone === 'error' ? theme.state.error.color : theme.state.warning.color
+  return (
+    <span
+      data-testid={testId}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '0.12rem 0.45rem',
+        borderRadius: 999,
+        fontSize: remSize('caption'),
+        fontWeight: 600,
+        lineHeight: 1.25,
+        color,
+        backgroundColor: `${color}18`,
+        border: `1px solid ${color}44`,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {children}
+    </span>
+  )
 }
 
 export function ContextSelectionBudgetBar({ visible = true }: ContextSelectionBudgetBarProps) {
@@ -41,10 +73,9 @@ export function ContextSelectionBudgetBar({ visible = true }: ContextSelectionBu
   const overBudget =
     contextTokenBudgetMax > 0 && gddTokens > contextTokenBudgetMax
   const highContext = gddTokens > HIGH_CONTEXT_WARNING_THRESHOLD
-  const pct =
-    contextTokenBudgetMax > 0
-      ? Math.min(100, (gddTokens / contextTokenBudgetMax) * 100)
-      : 0
+  const pctRaw =
+    contextTokenBudgetMax > 0 ? (gddTokens / contextTokenBudgetMax) * 100 : 0
+  const barPct = Math.min(100, pctRaw)
   const hasEstimate = selectionTokens != null
 
   return (
@@ -54,7 +85,7 @@ export function ContextSelectionBudgetBar({ visible = true }: ContextSelectionBu
         flexShrink: 0,
         borderBottom: `1px solid ${theme.border.primary}`,
         backgroundColor: theme.background.tertiary,
-        padding: '0.45rem 0.65rem',
+        padding: '0.5rem 0.75rem',
         fontSize: remSize('body'),
       }}
       aria-labelledby={`${budgetId}-title`}
@@ -65,97 +96,167 @@ export function ContextSelectionBudgetBar({ visible = true }: ContextSelectionBu
         aria-live="polite"
         aria-busy={isEstimating}
         data-testid="context-token-budget-status"
-        style={{ color: theme.text.primary, marginBottom: '0.25rem' }}
       >
-        {isEstimating && 'Estimation…'}
+        {isEstimating && (
+          <span style={{ color: theme.text.secondary }}>Estimation…</span>
+        )}
         {!isEstimating && estimationError && (
           <span style={{ color: theme.state.error.color }}>{estimationError}</span>
         )}
-        {!isEstimating && !estimationError && hasEstimate && (
-          <>
-            Prompt :{' '}
-            <strong data-testid="prompt-token-total">
-              {formatContextTokensApprox(promptTokens)}
-            </strong>
-            <span
-              style={{ display: 'block', marginTop: 4, color: theme.text.secondary, fontSize: remSize('caption') }}
-              data-testid="context-gdd-token-subline"
-            >
-              dont sélection GDD :{' '}
-              <strong>{formatContextTokensApprox(gddTokens)}</strong> /{' '}
-              <strong>{contextTokenBudgetMax.toLocaleString()}</strong>
-            </span>
-            {overBudget && (
-              <span
-                data-testid="context-token-budget-warning"
-                style={{ display: 'block', marginTop: 4, color: theme.state.warning.color, fontSize: remSize('caption') }}
-              >
-                Budget dépassé — réduire la sélection ou optimiser.
-              </span>
-            )}
-            {highContext && (
-              <span
-                data-testid="context-token-high-context-warning"
-                style={{ display: 'block', marginTop: 4, color: theme.state.warning.color, fontSize: remSize('caption') }}
-              >
-                Contexte élevé
-              </span>
-            )}
-          </>
-        )}
         {!isEstimating && !estimationError && !hasEstimate && (
           <span style={{ color: theme.text.secondary }}>Sélectionnez du contexte pour estimer.</span>
+        )}
+        {!isEstimating && !estimationError && hasEstimate && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: '0.65rem',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ flex: '1 1 12rem', minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  flexWrap: 'wrap',
+                  gap: '0.35rem 0.5rem',
+                  color: theme.text.primary,
+                }}
+              >
+                <span style={{ color: theme.text.secondary, fontSize: remSize('caption') }}>
+                  Prompt
+                </span>
+                <strong
+                  data-testid="prompt-token-total"
+                  style={{ fontSize: remSize('body'), fontWeight: 700 }}
+                >
+                  {formatContextTokensApprox(promptTokens)}
+                </strong>
+                <span
+                  aria-hidden
+                  style={{ color: theme.border.primary, userSelect: 'none' }}
+                >
+                  ·
+                </span>
+                <span
+                  data-testid="context-gdd-token-subline"
+                  style={{
+                    color: theme.text.secondary,
+                    fontSize: remSize('caption'),
+                  }}
+                >
+                  GDD{' '}
+                  <strong style={{ color: theme.text.primary }}>
+                    {formatContextTokensApprox(gddTokens)}
+                  </strong>
+                  {' / '}
+                  <strong style={{ color: theme.text.primary }}>
+                    {contextTokenBudgetMax.toLocaleString()}
+                  </strong>
+                </span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                flexWrap: 'wrap',
+                gap: '0.35rem',
+                flex: '0 1 auto',
+              }}
+            >
+              {overBudget && (
+                <StatusPill tone="error" testId="context-token-budget-warning">
+                  Budget dépassé
+                </StatusPill>
+              )}
+              {highContext && (
+                <StatusPill tone="warning" testId="context-token-high-context-warning">
+                  Contexte élevé
+                </StatusPill>
+              )}
+              {overBudget && (
+                <button
+                  type="button"
+                  data-testid="context-optimize-cta"
+                  disabled={!CONTEXT_OPTIMIZE_API_ENABLED}
+                  onClick={() => CONTEXT_OPTIMIZE_API_ENABLED && setOptimizeOpen(true)}
+                  title={
+                    CONTEXT_OPTIMIZE_API_ENABLED
+                      ? 'Optimiser le contexte (FR21)'
+                      : 'Disponible après optimisation automatique (FR21)'
+                  }
+                  style={{
+                    padding: '0.22rem 0.55rem',
+                    fontSize: remSize('small'),
+                    borderRadius: 6,
+                    border: 'none',
+                    backgroundColor: CONTEXT_OPTIMIZE_API_ENABLED
+                      ? theme.button.primary.background
+                      : theme.background.secondary,
+                    color: CONTEXT_OPTIMIZE_API_ENABLED
+                      ? theme.button.primary.color
+                      : theme.text.secondary,
+                    cursor: CONTEXT_OPTIMIZE_API_ENABLED ? 'pointer' : 'not-allowed',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Optimiser le contexte
+                </button>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
       {hasEstimate && (
         <div
           style={{
-            height: 5,
-            borderRadius: 3,
-            backgroundColor: theme.background.secondary,
-            overflow: 'hidden',
-            marginBottom: overBudget ? '0.35rem' : 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            marginTop: '0.4rem',
           }}
           aria-hidden
         >
           <div
             style={{
-              height: '100%',
-              width: `${pct}%`,
-              backgroundColor: overBudget ? theme.state.error.color : theme.button.primary.background,
-              transition: 'width 0.2s ease',
-            }}
-          />
-        </div>
-      )}
-
-      {overBudget && (
-        <div style={{ marginTop: '0.35rem' }}>
-          <button
-            type="button"
-            data-testid="context-optimize-cta"
-            disabled={!CONTEXT_OPTIMIZE_API_ENABLED}
-            onClick={() => CONTEXT_OPTIMIZE_API_ENABLED && setOptimizeOpen(true)}
-            title={
-              CONTEXT_OPTIMIZE_API_ENABLED
-                ? 'Optimiser le contexte (FR21)'
-                : 'Disponible après optimisation automatique (FR21)'
-            }
-            style={{
-              padding: '0.2rem 0.45rem',
-              fontSize: remSize('small'),
-              borderRadius: 4,
-              border: `1px solid ${theme.border.primary}`,
-              backgroundColor: CONTEXT_OPTIMIZE_API_ENABLED
-                ? theme.button.primary.background
-                : theme.background.tertiary,
-              color: CONTEXT_OPTIMIZE_API_ENABLED ? theme.button.primary.color : theme.text.secondary,
-              cursor: CONTEXT_OPTIMIZE_API_ENABLED ? 'pointer' : 'not-allowed',
+              flex: 1,
+              height: 6,
+              borderRadius: 999,
+              backgroundColor: theme.background.secondary,
+              overflow: 'hidden',
             }}
           >
-            Optimiser le contexte
-          </button>
+            <div
+              style={{
+                height: '100%',
+                width: `${barPct}%`,
+                backgroundColor: overBudget
+                  ? theme.state.error.color
+                  : theme.button.primary.background,
+                transition: 'width 0.2s ease',
+              }}
+            />
+          </div>
+          <span
+            style={{
+              flexShrink: 0,
+              minWidth: '2.75rem',
+              textAlign: 'right',
+              fontSize: remSize('caption'),
+              fontWeight: 600,
+              color: overBudget ? theme.state.error.color : theme.text.secondary,
+            }}
+          >
+            {Math.round(pctRaw)}%
+          </span>
         </div>
       )}
 
