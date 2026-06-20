@@ -5,74 +5,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { useGraphStore } from '../store/graphStore'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
-import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
 import {
   GRAPH_TOOLBAR_DROPDOWN_Z_INDEX,
   GRAPH_TOOL_FLOATING_PANEL_Z_INDEX,
 } from '../components/graph/graphToolbarConstants'
-
-function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGraphToolbarReturn {
-  return {
-    showAutoLayoutDropdown: false,
-    setShowAutoLayoutDropdown: () => {},
-    showActionsDropdown: false,
-    setShowActionsDropdown: () => {},
-    showValidationToolsDropdown: false,
-    setShowValidationToolsDropdown: () => {},
-    showAIGenerationPanel: false,
-    setShowAIGenerationPanel: () => {},
-    showExportFormatDialog: false,
-    setShowExportFormatDialog: () => {},
-    showValidationPanel: false,
-    setShowValidationPanel: () => {},
-    showQualityLlmPanel: false,
-    setShowQualityLlmPanel: () => {},
-    showAiSlopPanel: false,
-    setShowAiSlopPanel: () => {},
-    showContextDroppingPanel: false,
-    setShowContextDroppingPanel: () => {},
-    showFlowSimulationPanel: false,
-    setShowFlowSimulationPanel: () => {},
-    showDialoguePreviewPanel: false,
-    setShowDialoguePreviewPanel: () => {},
-    showSchemaValidationPanel: false,
-    schemaValidationLoading: false,
-    schemaValidationIsValid: true,
-    schemaValidationErrors: [],
-    schemaValidationErrorCount: 0,
-    handleToggleSchemaValidation: () => {},
-    handleSchemaErrorClick: () => {},
-    showCostBreakdown: false,
-    setShowCostBreakdown: () => {},
-    showShortcutsTooltip: false,
-    setShowShortcutsTooltip: () => {},
-    showSearchBar: false,
-    setShowSearchBar: () => {},
-    showJumpToNodeModal: false,
-    setShowJumpToNodeModal: () => {},
-    showFiltersPanel: false,
-    setShowFiltersPanel: () => {},
-    layoutDirection: 'TB',
-    layoutSpacingMode: 'normal',
-    setLayoutSpacingMode: () => {},
-    autoLayoutDropdownRef: { current: null },
-    actionsDropdownRef: { current: null },
-    actionsDropdownBtnRef: { current: null },
-    validationToolsDropdownRef: { current: null },
-    canvasWrapperRef: { current: null },
-    reactFlowInstance: null,
-    handleAutoLayout: async () => {},
-    handleOpenExportDialog: () => {},
-    handleExportPNG: async () => {},
-    handleExportSVG: async () => {},
-    handleExportUnity: async () => {},
-    undo: () => useGraphStore.getState().undo(),
-    redo: () => useGraphStore.getState().redo(),
-    canUndoNow: false,
-    canRedoNow: false,
-    ...overrides,
-  }
-}
+import { makeMockToolbar } from './graphEditorHeaderTestUtils'
 
 describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
   beforeEach(() => {
@@ -84,7 +21,7 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     render(
       <GraphEditorHeader
         toolbar={toolbar}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
@@ -104,7 +41,7 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     render(
       <GraphEditorHeader
         toolbar={toolbar}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
@@ -123,7 +60,7 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     const toolbar = makeMockToolbar()
     const props = {
       toolbar,
-      isLoadingDialogue: false,
+
       hasActiveDialogue: true,
       activeDialogueFilename: 'test.json',
       handleSave: async () => {},
@@ -165,7 +102,7 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     render(
       <GraphEditorHeader
         toolbar={toolbar}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
@@ -195,7 +132,7 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     render(
       <GraphEditorHeader
         toolbar={toolbar}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueTitle="Test"
         activeDialogueFilename="test.json"
@@ -269,7 +206,7 @@ describe('GraphEditorHeader - Undo/Redo (Story 2.14)', () => {
     render(
       <GraphEditorHeader
         toolbar={toolbar}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
         handleSave={async () => {}}

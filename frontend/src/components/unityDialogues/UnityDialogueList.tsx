@@ -150,7 +150,7 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       return
     }
     await batchPreview.handleBatchPreviewExport(ids)
-  }, [batch.checkedDocumentIds, batchPreview.handleBatchPreviewExport])
+  }, [batch.checkedDocumentIds, batchPreview])
 
   const handleStartBatchExport = useCallback(() => {
     const ids = Array.from(batch.checkedDocumentIds)

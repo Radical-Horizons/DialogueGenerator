@@ -1,6 +1,6 @@
 ## Epic 17: Expérience mobile et responsive (web)
 
-**Status:** done — livraison stories **17.1–17.8** ; preuve UI validée en équipe. La story **17.9** (refactor toolbar) est reportée vers l’[Epic Dette technique](epic-dette-technique.md) (Story DT-1).
+**Status:** in-progress — stories **17.1–17.8** done ; **17.9–17.11** (refactor toolbar, 3 US séquentielles) en cours.
 
 Les utilisateurs peuvent utiliser DialogueGenerator sur **navigateur mobile et tablette** (largeurs typiques 320px–1023px) sans layout cassé : shell applicatif adaptatif, graphe utilisable au **tactile**, panneaux contexte / édition accessibles via **patterns mobile** (drawers, onglets ou plein écran). Le périmètre reste **web responsive** (pas d’app native iOS/Android dans cet epic).
 
@@ -174,9 +174,64 @@ So that **le lancement est rapide et familier**.
 
 ---
 
-### Reporté — Story 17.9 → Epic Dette technique
+### Story 17.9: Extraire sous-composants presentation `GraphEditorHeader` (toolbar responsive)
 
-Le refactor `GraphEditorHeader` (tri-state toolbar) n’est **pas** dans le périmètre de livraison Epic 17. Contenu repris tel quel sous **[Epic Dette technique — Story DT-1](epic-dette-technique.md)**.
+As a **développeur**,
+I want **extraire le JSX presentation de la toolbar en sous-composants dédiés (`GraphToolbarStatusRow`, `GraphToolbarToolsRow`, `GraphToolbarTitleBlock`)**,
+So that **le fichier header devienne lisible sans changer le comportement responsive/tactile déjà validé (17.1–17.8)**.
+
+**Scope :** déplacement JSX + props ; **pas** d’extraction de logique layout dans cette story (→ 17.10).
+
+**Modèle layout actuel (binaire, pas de compact desktop intermédiaire) :** confort ≥640px (1 rangée) ; narrow &lt;640px (grille + 2 rangées dans tools).
+
+**Acceptance Criteria:**
+
+- **Given** desktop confortable et narrow, **When** j’utilise la toolbar (batch, layout, actions, coûts, undo/redo, save status, recherche), **Then** comportement et UI restent équivalents (tolérance CSS minime).
+- **Given** le code, **When** j’ouvre `GraphEditorHeader.tsx`, **Then** les trois sous-composants existent sous `frontend/src/components/graph/` et le header orchestre surtout le câblage.
+- **Tests** : suite Vitest toolbar existante verte + lint.
+
+**Artifact :** `17-9-extraire-sous-composants-grapheditorheader-tri-state.md`
+
+---
+
+### Story 17.10: Extraire logique layout `useGraphToolbarLayoutMode`
+
+As a **développeur**,
+I want **centraliser la logique narrow / confort (seuil `useNarrowInlineSize`, tokens `graphToolbarChrome`, choix de rangées) dans un hook dédié**,
+So that **les bascules layout soient testables par contrat sans relire 1000+ lignes de JSX**.
+
+**Scope :** extraction logique **existante** depuis `GraphEditorHeader` ; comportement inchangé — **pas** d’implémentation d’un état « compact desktop » 640–1099 (backlog produit séparé).
+
+**Acceptance Criteria:**
+
+- **Given** le hook, **When** la largeur conteneur bascule sous/au-dessus de 640px, **Then** le contrat expose `isNarrow`, `chrome`, et la structure de rangées attendue (1 rangée confort vs grille narrow) sans duplication dans le JSX.
+- **Given** le refactor, **When** je lis `GraphEditorHeader.tsx`, **Then** il est réduit à orchestration + appels hook (objectif **&lt;1000 lignes** post-17.9 ; &lt;800 si faisable sans scope creep).
+- **Tests** : tests contrat hook + suite toolbar Vitest verte + lint.
+
+**Dépend de :** Story 17.9.
+
+**Artifact :** `17-10-extraire-hook-usegraphtoolbartristate-tri-state.md`
+
+---
+
+### Story 17.11: Hardening tests toolbar — anti double-mount et mocks
+
+As a **développeur**,
+I want **des tests anti-régression explicites (dont un seul mount `SaveStatusIndicator` par mode layout) et des mocks harmonisés**,
+So that **les refactors futurs sur la toolbar ne réintroduisent pas double-mount / overflow observés en Epic 17**.
+
+**Scope :** tests + mocks uniquement ; pas de changement produit.
+
+**Acceptance Criteria:**
+
+- **Given** la toolbar en mode confort **ou** narrow, **When** les tests s’exécutent, **Then** un test vérifie qu’`SaveStatusIndicator` n’est monté qu’**une fois** (query `data-testid` ou spy mount count).
+- **Given** les tests `GraphEditorHeader.*`, **When** fixtures partagées, **Then** `makeMockToolbar` / mock `useNarrowInlineSize` sont factorisés (pas de duplication divergente par fichier).
+- **Preuve UI** : confort → narrow → confort sans scroll horizontal indésirable ni écran noir.
+- **Tests** : `GraphEditorHeader.desktopToolbar`, `searchRow`, `undoRedo`, `GraphEditor.multiSelection` + lint.
+
+**Dépend de :** Story 17.10.
+
+**Artifact :** `17-11-hardening-tests-grapheditorheader-anti-double-mount.md`
 
 ---
 
@@ -192,4 +247,6 @@ Le refactor `GraphEditorHeader` (tri-state toolbar) n’est **pas** dans le pér
 | 17.6 | 17.1 (breakpoints / shell) ; **recommandé** après 17.2–17.3 pour ne pas contredire drawers + touch |
 | 17.7 | 17.1, 17.3, 17.6 (narrow / densité / drawers) |
 | 17.8 | 17.7 (diagnostic ref tardive) ; corrige le hook pour **tous** les consommateurs |
-| ~~17.9~~ → **DT-1** | Reportée vers [Epic Dette technique](epic-dette-technique.md) (17.7–17.8 prérequis) |
+| 17.9 | 17.7–17.8 (toolbar stable) |
+| 17.10 | 17.9 |
+| 17.11 | 17.10 |

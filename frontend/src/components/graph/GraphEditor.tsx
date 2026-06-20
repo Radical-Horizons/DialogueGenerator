@@ -224,7 +224,6 @@ export function GraphEditor({
       >
         <GraphEditorHeader
           toolbar={toolbar}
-          isLoadingDialogue={isLoadingDialogue}
           hasActiveDialogue={hasActiveDialogue}
           activeDialogueFilename={activeDialogueFilename}
           handleSave={handleSave}

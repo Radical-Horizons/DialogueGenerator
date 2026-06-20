@@ -1,60 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import type { UseGraphToolbarReturn } from '../hooks/useGraphToolbar'
 import { GraphEditorHeader } from '../components/graph/GraphEditorHeader'
-import * as narrowHook from '../hooks/useNarrowInlineSize'
-
-type NarrowHookReturn = ReturnType<typeof narrowHook.useNarrowInlineSize>
-
-function makeMockToolbar(overrides: Partial<UseGraphToolbarReturn> = {}): UseGraphToolbarReturn {
-  return {
-    showAutoLayoutDropdown: false,
-    setShowAutoLayoutDropdown: () => {},
-    showActionsDropdown: false,
-    setShowActionsDropdown: () => {},
-    showAIGenerationPanel: false,
-    setShowAIGenerationPanel: () => {},
-    showExportFormatDialog: false,
-    setShowExportFormatDialog: () => {},
-    showValidationPanel: false,
-    setShowValidationPanel: () => {},
-    showCostBreakdown: false,
-    setShowCostBreakdown: () => {},
-    showShortcutsTooltip: false,
-    setShowShortcutsTooltip: () => {},
-    showSearchBar: false,
-    setShowSearchBar: () => {},
-    showJumpToNodeModal: false,
-    setShowJumpToNodeModal: () => {},
-    showFiltersPanel: false,
-    setShowFiltersPanel: () => {},
-    layoutDirection: 'TB',
-    layoutSpacingMode: 'normal',
-    setLayoutSpacingMode: () => {},
-    autoLayoutDropdownRef: { current: null },
-    actionsDropdownRef: { current: null },
-    actionsDropdownBtnRef: { current: null },
-    canvasWrapperRef: { current: null },
-    reactFlowInstance: null,
-    handleAutoLayout: async () => {},
-    handleOpenExportDialog: () => {},
-    handleExportPNG: async () => {},
-    handleExportSVG: async () => {},
-    undo: () => {},
-    redo: () => {},
-    canUndoNow: true,
-    canRedoNow: true,
-    ...overrides,
-  }
-}
-
-/**
- * Mocks `useNarrowInlineSize` for the toolbar narrow threshold.
- */
-function mockNarrowToolbar(narrowToolbar: boolean): void {
-  vi.spyOn(narrowHook, 'useNarrowInlineSize')
-    .mockImplementationOnce(() => ({ ref: () => {}, isNarrow: narrowToolbar }) as NarrowHookReturn)
-}
+import { makeMockToolbar, mockNarrowToolbar } from './graphEditorHeaderTestUtils'
 
 describe('GraphEditorHeader - Desktop toolbar density', () => {
   beforeEach(() => {
@@ -67,7 +14,7 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
     render(
       <GraphEditorHeader
         toolbar={makeMockToolbar()}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
@@ -98,7 +45,7 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
     render(
       <GraphEditorHeader
         toolbar={makeMockToolbar()}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
         handleSave={async () => {}}
@@ -142,7 +89,7 @@ describe('GraphEditorHeader - Desktop toolbar density', () => {
     render(
       <GraphEditorHeader
         toolbar={makeMockToolbar()}
-        isLoadingDialogue={false}
+
         hasActiveDialogue={true}
         activeDialogueFilename="test.json"
         handleSave={async () => {}}

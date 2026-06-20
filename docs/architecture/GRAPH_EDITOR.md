@@ -33,15 +33,16 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 
 ### Header
 
-`GraphEditorHeader` expose une toolbar **tri-state** selon la largeur du conteneur (pas seulement le viewport) :
+`GraphEditorHeader` expose une toolbar **binaire** selon la largeur du conteneur (pas seulement le viewport) :
 
 | Mode | Seuil conteneur | Comportement |
 |------|-----------------|--------------|
-| Confortable | ≥1100px | Une rangée horizontale complète |
-| Compact desktop | 640–1099px | Status au-dessus, outils en dessous |
-| Narrow | &lt;640px | Grille verticale ; `DialogueCombobox` injecté via `headerSelector` (story 17.7) |
+| Confortable (full) | ≥640px (`GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX`) | Une rangée horizontale complète |
+| Narrow | &lt;640px | Grille verticale (2 rangées actions/status dans la zone tools) ; `DialogueCombobox` injecté via `headerSelector` (story 17.7) |
 
-Mesure : deux instances `useNarrowInlineSize` avec `measureParentClientWidth: true`. Tokens : `graphToolbarChrome` dans `responsiveChrome.ts`. Détail : [`responsive-ui.md`](./responsive-ui.md).
+Mesure : hook `useGraphToolbarLayoutMode` (`frontend/src/hooks/useGraphToolbarLayoutMode.ts`) — encapsule `useNarrowInlineSize(GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX, { measureParentClientWidth: true })`. Tokens : `graphToolbarChrome` dans `responsiveChrome.ts`. Détail : [`responsive-ui.md`](./responsive-ui.md).
+
+*Note : un état « compact desktop » intermédiaire (640–1099 vs full ≥1100) était envisagé en doc antérieure — **non implémenté** ; backlog produit séparé si besoin.*
 
 **Actions principales** :
 

@@ -16,10 +16,6 @@ const ENTITY_TO_CATEGORY_TITLE: Record<EntityType, string> = {
   communities: 'COMMUNITIES',
 }
 
-const CATEGORY_TITLE_TO_ENTITY: Record<string, EntityType> = Object.fromEntries(
-  Object.entries(ENTITY_TO_CATEGORY_TITLE).map(([k, v]) => [v, k as EntityType]),
-) as Record<string, EntityType>
-
 export interface EntityContextItemEntry {
   entityType: EntityType
   name: string

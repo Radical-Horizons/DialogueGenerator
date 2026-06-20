@@ -204,7 +204,7 @@ describe('FR119 touch targets — chrome', () => {
       <div style={{ width: '900px' }}>
         <GraphEditorHeader
           toolbar={toolbar}
-          isLoadingDialogue={false}
+
           hasActiveDialogue={true}
           activeDialogueFilename="f.json"
           handleSave={async () => {}}
@@ -231,7 +231,7 @@ describe('FR119 touch targets — chrome', () => {
       <div style={{ width: '320px' }}>
         <GraphEditorHeader
           toolbar={toolbar}
-          isLoadingDialogue={false}
+
           hasActiveDialogue={true}
           activeDialogueFilename="f.json"
           handleSave={async () => {}}

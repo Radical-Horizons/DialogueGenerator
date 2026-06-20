@@ -18,11 +18,8 @@
 - **Epic 3**: [Gestion du contexte narratif (GDD)](epic-03.md)  
   Les utilisateurs peuvent explorer, sélectionner et utiliser le Game Design Document (500+ pages) pour enrichir la génération de dialogues. Le système permet le browse des entités (personnages, lieux, régions), sélection manuelle/automatique, règles de contexte, budget tokens, et sync Notion (V2.0+).
 
-- **Epic 17**: [Expérience mobile et responsive (web)](epic-17.md) — **done** (17.1–17.8 ; preuve UI validée en équipe)  
+- **Epic 17**: [Expérience mobile et responsive (web)](epic-17.md) — **in-progress** (17.1–17.8 done ; **17.9–17.11** refactor toolbar)  
   Les utilisateurs peuvent utiliser DialogueGenerator sur mobile/tablette (web responsive) : shell adaptatif, tactiles sur le graphe, panneaux en drawers/plein écran, PWA optionnelle (V1.5+).
-
-- **Epic Dette technique**: [Refactorings et durcissements hors livraison](epic-dette-technique.md) — **backlog**  
-  Dette reportée depuis les epics livrés (ex. refactor `GraphEditorHeader` tri-state, ancienne story 17.9 → DT-1). À traiter après les epics de livraison en cours sauf décision PO.
 
 - **Epic 4**: [Validation et assurance qualité](epic-04.md)  
   Les utilisateurs peuvent valider la qualité, cohérence et conformité structurelle des dialogues avant export. Le système détecte orphans, cycles, nœuds vides, contradictions lore, "AI slop", context dropping, et fournit LLM judge scoring + simulation flow.

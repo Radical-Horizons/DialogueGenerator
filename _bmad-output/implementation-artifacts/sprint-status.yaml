@@ -39,6 +39,8 @@ project_key: dialogue-generator
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
 development_status:
+  # Flat list (not nested YAML): each epic block = epic → stories → retrospective, then the NEXT epic starts.
+  # Order = delivery sequence (see epic-list.md): 0 → 16 → 1–3 → 17 → 4–15 — not strict epic ID sort.
   epic-0: done
   0-1-fix-graph-editor-stableid-adr-003: done
   0-2-progress-feedback-modal-avec-sse-streaming-adr-001: done
@@ -107,28 +109,19 @@ development_status:
   3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
   3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
   epic-3-retrospective: done
-  epic-17: done
+  epic-17: in-progress
   17-1-shell-responsive-breakpoints-layout-320px-fr118: done
   17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
   17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
-  17-6-typographie-densite-adaptive-panneaux-onglets-fr118: done
   17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
   17-5-pwa-install-manifest-option-fr121: done
-  17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
-  17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
-  epic-17: done
-  17-1-shell-responsive-breakpoints-layout-320px-fr118: done
-  17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
-  17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
   17-6-typographie-densite-adaptive-panneaux-onglets-fr118: done
-  17-4-clavier-logiciel-safe-areas-renfort-mobile-fr118-120: done
-  17-5-pwa-install-manifest-option-fr121: done
   17-7-selecteur-dialogue-toolbar-narrow-suppression-colonne-gauche-fr120: done
   17-8-fix-usenarrowinlinesize-ref-tardive-dette-technique: done
+  17-9-extraire-sous-composants-grapheditorheader-tri-state: done
+  17-10-extraire-hook-usegraphtoolbartristate-tri-state: done
+  17-11-hardening-tests-grapheditorheader-anti-double-mount: done
   epic-17-retrospective: optional
-  epic-dette-technique: backlog
-  dette-1-refactor-grapheditorheader-tri-state-toolbar: backlog
-  epic-dette-technique-retrospective: optional
   epic-4: done
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: done
@@ -145,15 +138,7 @@ development_status:
   4-13-valider-conformité-schéma-json-unity-100-fr48: done
   4-14-refactorer-api-routers-graph-dette-technique: done
   epic-4-retrospective: done
-  epic-9: done
-  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: done
-  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: done
-  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: done
-  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: done
-  9-5-valider-références-variables-détecter-variables-non-définies-fr93: done
-  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: done
-  epic-9-retrospective: done
-  epic-5: in-progress
+  epic-5: done
   5-1-exporter-dialogue-single-vers-format-unity-json-fr49: done
   5-2-exporter-batch-plusieurs-dialogues-vers-unity-json-fr50: done
   5-3-valider-json-exporté-contre-schéma-unity-custom-fr51: done
@@ -193,6 +178,14 @@ development_status:
   8-8-valider-en-batch-plusieurs-dialogues-fr87: backlog
   8-9-générer-en-batch-depuis-plusieurs-nœuds-de-départ-fr88: backlog
   epic-8-retrospective: optional
+  epic-9: done
+  9-1-définir-variables-et-flags-dans-dialogues-v10-fr89: done
+  9-2-définir-conditions-de-visibilité-sur-nœuds-si-variable-x-y-afficher-nœud-fr90: done
+  9-3-définir-effets-déclenchés-par-choix-joueur-set-variable-unlock-flag-fr91: done
+  9-4-preview-scénarios-avec-différents-états-de-variables-fr92: done
+  9-5-valider-références-variables-détecter-variables-non-définies-fr93: done
+  9-6-intégrer-stats-systèmes-de-jeu-attributs-personnage-réputation-v30-fr94: done
+  epic-9-retrospective: done
   epic-10: backlog
   10-1-restaurer-session-après-crash-navigateur-fr96: backlog
   10-2-sauvegarder-manuellement-le-progrès-dialogue-fr97: backlog
