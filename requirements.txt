@@ -9,7 +9,8 @@ pydantic>=2.0 # Ajout pour les modèles de données et la validation de schéma
 pytest-cov>=2.12 # Ajout pour la couverture de tests 
 pytest-mock>=3.6 # Ajout pour la fixture 'mocker'
 # API REST FastAPI
-fastapi>=0.104.0
+fastapi>=0.104.0,<0.139.0
+starlette>=0.46.0,<1.0.0
 uvicorn[standard]>=0.24.0
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4

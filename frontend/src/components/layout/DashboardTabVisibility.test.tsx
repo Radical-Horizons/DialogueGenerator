@@ -15,11 +15,22 @@ vi.mock('../../store/contextConfigStore', () => ({
   })),
 }))
 vi.mock('../../store/graphStore', () => ({
-  useGraphStore: vi.fn((selector?: (state: { selectedNodeId: string | null; nodes: unknown[]; isGenerating: boolean }) => unknown) => {
+  useGraphStore: vi.fn((selector?: (state: {
+    selectedNodeId: string | null
+    nodes: unknown[]
+    isGenerating: boolean
+    dialogueMetadata: { title: string; filename?: string; node_count: number; edge_count: number }
+  }) => unknown) => {
     const state = {
       selectedNodeId: null,
       nodes: [],
       isGenerating: false,
+      dialogueMetadata: {
+        title: 'Nouveau Dialogue',
+        filename: 'nouveau_dialogue.json',
+        node_count: 0,
+        edge_count: 0,
+      },
     }
     return typeof selector === 'function' ? selector(state) : state
   }),
@@ -29,6 +40,9 @@ vi.mock('../../api/config', () => ({
 }))
 vi.mock('../../api/unityDialogues', () => ({
   listUnityDialogues: vi.fn().mockResolvedValue({ dialogues: [], total: 0 }),
+  getUnityDialogue: vi.fn(),
+  deleteUnityDialogue: vi.fn(),
+  previewUnityDialogue: vi.fn(),
 }))
 
 vi.mock('../generation/GenerationPanel', () => ({
