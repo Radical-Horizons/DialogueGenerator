@@ -19,6 +19,7 @@ import { useDialogueListData } from '../../hooks/useDialogueListData'
 import { normalizeDialogueFilenameKey } from '../../utils/formatDialogueTitle'
 import { useToast } from '../shared'
 import { useBatchUnityExport, toDocumentId } from '../../hooks/useBatchUnityExport'
+import { useRegisterUnityBatchExportMenu } from '../../hooks/useRegisterUnityBatchExportMenu'
 import { useDocumentSchemaValidation } from '../../hooks/useDocumentSchemaValidation'
 import { useUnityExportPreview } from '../../hooks/useUnityExportPreview'
 import { BatchExportToolbar } from './BatchExportToolbar'
@@ -212,6 +213,42 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
     [toast, downloadOptions],
   )
 
+  const batchMenuActions = useMemo(
+    () => ({
+      onToggleSelectAll: () => {
+        if (batch.checkedDocumentIds.size === filteredDocumentIds.length) {
+          batch.clearChecks()
+        } else {
+          batch.selectAllFiltered(filteredDocumentIds)
+        }
+      },
+      onStartExport: handleStartBatchExport,
+      onStartPreview: () => {
+        void handleStartBatchPreview()
+      },
+      onCancelExport: batch.cancelBatchExport,
+      onToggleBatchOptions: () => batch.setShowOptionsPanel(!batch.showOptionsPanel),
+      onOpenExportLogs: () => setShowExportLogsPanel(true),
+      onToggleDownloadOptions: () => setShowDownloadOptionsPanel((open) => !open),
+    }),
+    [
+      batch,
+      filteredDocumentIds,
+      handleStartBatchExport,
+      handleStartBatchPreview,
+    ],
+  )
+
+  useRegisterUnityBatchExportMenu({
+    filteredCount: filteredCount,
+    checkedCount: batch.checkedDocumentIds.size,
+    isBatchExporting: batch.isBatchExporting,
+    batchProgress: batch.batchProgress,
+    showBatchOptionsPanel: batch.showOptionsPanel,
+    showDownloadOptionsPanel,
+    actions: batchMenuActions,
+  })
+
   if (isLoading) {
     return (
       <div style={{ padding: '0.65rem', textAlign: 'center', fontSize: remSize('body'), color: theme.text.secondary }}>
@@ -313,70 +350,6 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
         </div>
       </div>
 
-      <BatchExportToolbar
-        checkedCount={batch.checkedDocumentIds.size}
-        filteredCount={filteredCount}
-        isBatchExporting={batch.isBatchExporting}
-        batchProgress={batch.batchProgress}
-        showOptionsPanel={batch.showOptionsPanel}
-        batchOptions={batch.batchOptions}
-        onToggleSelectAll={() => {
-          if (batch.checkedDocumentIds.size === filteredDocumentIds.length) {
-            batch.clearChecks()
-          } else {
-            batch.selectAllFiltered(filteredDocumentIds)
-          }
-        }}
-        onStartExport={handleStartBatchExport}
-        onStartPreview={() => void handleStartBatchPreview()}
-        onCancelExport={batch.cancelBatchExport}
-        onToggleOptions={() => batch.setShowOptionsPanel(!batch.showOptionsPanel)}
-        onOptionsChange={batch.setBatchOptions}
-      />
-
-      <div style={{ padding: '0 0.5rem' }}>
-        <button
-          type="button"
-          data-testid="export-logs-toggle"
-          onClick={() => setShowExportLogsPanel(true)}
-          style={{
-            marginTop: '0.35rem',
-            marginRight: '0.35rem',
-            padding: '0.3rem 0.5rem',
-            fontSize: remSize('small'),
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: '4px',
-            backgroundColor: theme.button.default.background,
-            color: theme.button.default.color,
-            cursor: 'pointer',
-          }}
-        >
-          Logs d&apos;export
-        </button>
-        <button
-          type="button"
-          data-testid="download-export-options-toggle"
-          onClick={() => setShowDownloadOptionsPanel((open) => !open)}
-          style={{
-            marginTop: '0.35rem',
-            padding: '0.3rem 0.5rem',
-            fontSize: remSize('small'),
-            border: `1px solid ${theme.border.primary}`,
-            borderRadius: '4px',
-            backgroundColor: theme.button.default.background,
-            color: theme.button.default.color,
-            cursor: 'pointer',
-          }}
-        >
-          Options téléchargement
-        </button>
-        {showDownloadOptionsPanel && (
-          <div style={{ marginTop: '0.35rem' }}>
-            <DownloadExportOptionsPanel options={downloadOptions} onChange={setDownloadOptions} />
-          </div>
-        )}
-      </div>
-
       {batch.batchSummary && (
         <BatchExportSummaryBanner
           summary={batch.batchSummary}
@@ -453,6 +426,99 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
         batchPreview={batchPreview.batchPreview}
         onClose={batchPreview.closePreview}
       />
+      {batch.showOptionsPanel && (
+        <div
+          role="dialog"
+          aria-label="Options export batch"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1850,
+            backgroundColor: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+          onClick={() => batch.setShowOptionsPanel(false)}
+        >
+          <div
+            style={{
+              width: 'min(420px, 96vw)',
+              padding: '0.75rem',
+              backgroundColor: theme.background.panel,
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '8px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <BatchExportToolbar
+              controlsHidden
+              checkedCount={batch.checkedDocumentIds.size}
+              filteredCount={filteredCount}
+              isBatchExporting={batch.isBatchExporting}
+              batchProgress={batch.batchProgress}
+              showOptionsPanel
+              batchOptions={batch.batchOptions}
+              onToggleSelectAll={batchMenuActions.onToggleSelectAll}
+              onStartExport={handleStartBatchExport}
+              onStartPreview={() => void handleStartBatchPreview()}
+              onCancelExport={batch.cancelBatchExport}
+              onToggleOptions={() => batch.setShowOptionsPanel(false)}
+              onOptionsChange={batch.setBatchOptions}
+            />
+          </div>
+        </div>
+      )}
+      {showDownloadOptionsPanel && (
+        <div
+          role="dialog"
+          aria-label="Options téléchargement"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1850,
+            backgroundColor: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+          onClick={() => setShowDownloadOptionsPanel(false)}
+        >
+          <div
+            style={{
+              width: 'min(420px, 96vw)',
+              padding: '0.75rem',
+              backgroundColor: theme.background.panel,
+              border: `1px solid ${theme.border.primary}`,
+              borderRadius: '8px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DownloadExportOptionsPanel options={downloadOptions} onChange={setDownloadOptions} />
+          </div>
+        </div>
+      )}
+      {batch.isBatchExporting && (
+        <BatchExportToolbar
+          controlsHidden
+          checkedCount={batch.checkedDocumentIds.size}
+          filteredCount={filteredCount}
+          isBatchExporting={batch.isBatchExporting}
+          batchProgress={batch.batchProgress}
+          showOptionsPanel={false}
+          batchOptions={batch.batchOptions}
+          onToggleSelectAll={batchMenuActions.onToggleSelectAll}
+          onStartExport={handleStartBatchExport}
+          onStartPreview={() => void handleStartBatchPreview()}
+          onCancelExport={batch.cancelBatchExport}
+          onToggleOptions={() => batch.setShowOptionsPanel(true)}
+          onOptionsChange={batch.setBatchOptions}
+        />
+      )}
       {showExportLogsPanel && (
         <div
           role="dialog"

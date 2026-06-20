@@ -23,6 +23,8 @@ export interface BatchExportToolbarProps {
   onCancelExport: () => void
   onToggleOptions: () => void
   onOptionsChange: (options: BatchExportOptions) => void
+  /** Masque les contrôles (menu Actions toolbar) ; conserve options + progression. */
+  controlsHidden?: boolean
 }
 
 export function BatchExportToolbar({
@@ -38,21 +40,31 @@ export function BatchExportToolbar({
   onCancelExport,
   onToggleOptions,
   onOptionsChange,
+  controlsHidden = false,
 }: BatchExportToolbarProps) {
   const allSelected = filteredCount > 0 && checkedCount === filteredCount
+
+  if (controlsHidden && !showOptionsPanel && !(isBatchExporting && batchProgress)) {
+    return null
+  }
 
   return (
     <div
       data-testid="batch-export-toolbar"
-      style={{
-        padding: '0.45rem 0.5rem',
-        borderBottom: `1px solid ${theme.border.primary}`,
-        backgroundColor: theme.background.panelHeader,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.35rem',
-      }}
+      style={
+        controlsHidden
+          ? undefined
+          : {
+              padding: '0.45rem 0.5rem',
+              borderBottom: `1px solid ${theme.border.primary}`,
+              backgroundColor: theme.background.panelHeader,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem',
+            }
+      }
     >
+      {!controlsHidden && (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
         <label
           style={{
@@ -113,6 +125,7 @@ export function BatchExportToolbar({
           Options export batch
         </button>
       </div>
+      )}
 
       {isBatchExporting && batchProgress && (
         <div

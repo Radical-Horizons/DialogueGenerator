@@ -16,6 +16,7 @@ import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
 import { ExportDownloadBanner } from '../unityDialogues/ExportDownloadBanner'
+import { BatchExportProgressBanner } from '../unityDialogues/BatchExportProgressBanner'
 import { ExportPreviewModal } from '../unityDialogues/ExportPreviewModal'
 import { GraphValidationPanel } from './GraphValidationPanel'
 import { GraphQualityLlmPanel } from './GraphQualityLlmPanel'
@@ -254,6 +255,8 @@ export function GraphEditor({
             onDismiss={toolbar.dismissExportDownload}
           />
         )}
+
+        <BatchExportProgressBanner />
 
         <ExportPreviewModal
           isOpen={toolbar.previewOpen}

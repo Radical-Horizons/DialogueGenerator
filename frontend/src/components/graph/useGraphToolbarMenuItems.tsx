@@ -4,6 +4,7 @@
 import { useCallback, type CSSProperties } from 'react'
 import type { Node } from '@xyflow/react'
 import type { ReactFlowInstance } from '@xyflow/react'
+import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
 import { theme } from '../../theme'
 import {
   MANUAL_NODE_OFFSET_X,
@@ -46,6 +47,14 @@ export interface GraphToolbarMenuItemsParams {
   showSchemaValidationPanel: boolean
   setShowCostBreakdown: (next: boolean | ((v: boolean) => boolean)) => void
   showCostBreakdown: boolean
+}
+
+function menuSeparatorStyle(): CSSProperties {
+  return {
+    height: 1,
+    margin: '0.25rem 0.5rem',
+    backgroundColor: theme.border.primary,
+  }
 }
 
 function dropdownItemStyle(
@@ -104,7 +113,13 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
     showCostBreakdown,
   } = params
 
+  const unityBatchExportMenu = useUnityBatchExportMenuStore((s) => s.menu)
+
   const renderActionsMenuItems = useCallback(() => {
+    const batch = unityBatchExportMenu
+    const batchDisabled = !batch || batch.isBatchExporting
+    const batchExportDisabled = batchDisabled || batch.checkedCount === 0
+
     return (
       <>
         <button
@@ -297,6 +312,152 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
         >
           ⚙️ Systèmes de jeu
         </button>
+        {batch && (
+          <>
+            <div role="separator" style={menuSeparatorStyle()} />
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="batch-select-all"
+              onClick={() => {
+                setShowActionsDropdown(false)
+                batch.actions.onToggleSelectAll()
+              }}
+              disabled={batchDisabled || batch.filteredCount === 0}
+              style={dropdownItemStyle(chrome, batch.allSelected, batchDisabled || batch.filteredCount === 0)}
+              onMouseEnter={(e) => {
+                if (!batchDisabled && batch.filteredCount > 0) {
+                  e.currentTarget.style.backgroundColor = theme.state.hover.background
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = batch.allSelected
+                  ? theme.button.default.background
+                  : 'transparent'
+              }}
+            >
+              {batch.allSelected ? '☑ Tout désélectionner' : '☐ Tout sélectionner'}
+              {batch.checkedCount > 0 ? ` (${batch.checkedCount})` : ''}
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="batch-export-start"
+              onClick={() => {
+                setShowActionsDropdown(false)
+                batch.actions.onStartExport()
+              }}
+              disabled={batchExportDisabled}
+              style={dropdownItemStyle(chrome, false, batchExportDisabled)}
+              onMouseEnter={(e) => {
+                if (!batchExportDisabled) e.currentTarget.style.backgroundColor = theme.state.hover.background
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              📦 Exporter batch
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="batch-preview-export"
+              onClick={() => {
+                setShowActionsDropdown(false)
+                batch.actions.onStartPreview()
+              }}
+              disabled={batchExportDisabled}
+              style={dropdownItemStyle(chrome, false, batchExportDisabled)}
+              onMouseEnter={(e) => {
+                if (!batchExportDisabled) e.currentTarget.style.backgroundColor = theme.state.hover.background
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              👁 Prévisualiser export batch
+            </button>
+            {batch.isBatchExporting && (
+              <button
+                type="button"
+                role="menuitem"
+                data-testid="batch-export-stop"
+                onClick={() => {
+                  setShowActionsDropdown(false)
+                  batch.actions.onCancelExport()
+                }}
+                style={{ ...dropdownItemStyle(chrome, false, false), color: theme.state.error.color }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.state.hover.background
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                ⏹ Arrêter l&apos;export batch
+              </button>
+            )}
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="batch-export-options"
+              onClick={() => {
+                setShowActionsDropdown(false)
+                batch.actions.onToggleBatchOptions()
+              }}
+              disabled={batchDisabled}
+              style={dropdownItemStyle(chrome, batch.showBatchOptionsPanel, batchDisabled)}
+              onMouseEnter={(e) => {
+                if (!batchDisabled) e.currentTarget.style.backgroundColor = theme.state.hover.background
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = batch.showBatchOptionsPanel
+                  ? theme.button.default.background
+                  : 'transparent'
+              }}
+            >
+              ⚙️ Options export batch
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="export-logs-toggle"
+              onClick={() => {
+                setShowActionsDropdown(false)
+                batch.actions.onOpenExportLogs()
+              }}
+              style={dropdownItemStyle(chrome, false, false)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme.state.hover.background
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              📜 Logs d&apos;export
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="download-export-options-toggle"
+              onClick={() => {
+                setShowActionsDropdown(false)
+                batch.actions.onToggleDownloadOptions()
+              }}
+              style={dropdownItemStyle(chrome, batch.showDownloadOptionsPanel, false)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme.state.hover.background
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = batch.showDownloadOptionsPanel
+                  ? theme.button.default.background
+                  : 'transparent'
+              }}
+            >
+              ⬇ Options téléchargement
+            </button>
+          </>
+        )}
       </>
     )
   }, [
@@ -319,6 +480,7 @@ export function useGraphToolbarMenuItems(params: GraphToolbarMenuItemsParams) {
     setShowJumpToNodeModal,
     showFlowSimulationPanel,
     showGameSystemsIntegrationPanel,
+    unityBatchExportMenu,
   ])
 
   const renderQualityMenuItems = useCallback(() => {

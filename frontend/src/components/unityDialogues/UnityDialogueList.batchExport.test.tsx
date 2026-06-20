@@ -2,12 +2,55 @@
  * Story 5.2 — UnityDialogueList batch export UI.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import * as unityDialoguesAPI from '../../api/unityDialogues'
 import * as dialoguesAPI from '../../api/dialogues'
 import { UnityDialogueList } from './UnityDialogueList'
 import { triggerBlobDownloadAsync } from '../../utils/downloadBlob'
+import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
+
+async function waitForBatchMenu() {
+  await waitFor(() => {
+    expect(useUnityBatchExportMenuStore.getState().menu).not.toBeNull()
+  })
+  return useUnityBatchExportMenuStore.getState().menu!
+}
+
+async function batchSelectAll() {
+  const menu = await waitForBatchMenu()
+  await act(async () => {
+    menu.actions.onToggleSelectAll()
+  })
+}
+
+async function batchStartExport() {
+  const menu = await waitForBatchMenu()
+  await act(async () => {
+    menu.actions.onStartExport()
+  })
+}
+
+async function batchStopExport() {
+  const menu = await waitForBatchMenu()
+  await act(async () => {
+    menu.actions.onCancelExport()
+  })
+}
+
+async function openBatchExportOptions() {
+  const menu = await waitForBatchMenu()
+  await act(async () => {
+    menu.actions.onToggleBatchOptions()
+  })
+}
+
+async function openDownloadExportOptions() {
+  const menu = await waitForBatchMenu()
+  await act(async () => {
+    menu.actions.onToggleDownloadOptions()
+  })
+}
 
 vi.mock('../../api/unityDialogues', () => ({
   listUnityDialogues: vi.fn(),
@@ -87,6 +130,7 @@ describe('UnityDialogueList batch export', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
+    useUnityBatchExportMenuStore.getState().unregisterMenu()
     downloadUnityDialogueMock.mockResolvedValue(new Blob(['{}'], { type: 'application/json' }))
     useGraphStoreMock.mockImplementation((selector) =>
       selector({
@@ -104,17 +148,16 @@ describe('UnityDialogueList batch export', () => {
   })
 
   it('coche 3 dialogues et affiche la progression Export batch : 1/3 … 3/3', async () => {
-    const user = userEvent.setup()
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
 
     await screen.findByTestId('unity-dialogue-list')
-    await user.click(screen.getByTestId('batch-select-all'))
+    await batchSelectAll()
 
     const checkboxes = screen.getAllByTestId('unity-dialogue-item-checkbox')
     expect(checkboxes).toHaveLength(3)
     checkboxes.forEach((cb) => expect(cb).toBeChecked())
 
-    await user.click(screen.getByTestId('batch-export-start'))
+    await batchStartExport()
 
     await waitFor(() => {
       expect(batchExportMock).toHaveBeenCalledTimes(3)
@@ -130,8 +173,9 @@ describe('UnityDialogueList batch export', () => {
     const user = userEvent.setup()
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
 
-    await screen.findByTestId('batch-export-toolbar')
-    await user.click(screen.getByTestId('batch-export-options'))
+    await screen.findByTestId('unity-dialogue-list')
+    await openBatchExportOptions()
+    await screen.findByTestId('batch-export-options-panel')
 
     const validateCheckbox = screen.getByTestId('batch-option-validate')
     expect(validateCheckbox).toBeChecked()
@@ -159,8 +203,8 @@ describe('UnityDialogueList batch export', () => {
 
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
     await screen.findByTestId('unity-dialogue-list')
-    await user.click(screen.getByTestId('batch-select-all'))
-    await user.click(screen.getByTestId('batch-export-start'))
+    await batchSelectAll()
+    await batchStartExport()
 
     await waitFor(() => {
       expect(pendingResolvers.length).toBeGreaterThanOrEqual(1)
@@ -171,7 +215,7 @@ describe('UnityDialogueList batch export', () => {
       expect(screen.getByTestId('batch-export-progress')).toHaveTextContent('2/3')
     })
 
-    await user.click(screen.getByTestId('batch-export-stop'))
+    await batchStopExport()
     pendingResolvers[1]()
 
     await waitFor(() => {
@@ -197,7 +241,7 @@ describe('UnityDialogueList batch export', () => {
     const items = screen.getAllByTestId('unity-dialogue-item-checkbox')
     await user.click(items[0])
     await user.click(items[1])
-    await user.click(screen.getByTestId('batch-export-start'))
+    await batchStartExport()
 
     await waitFor(() => {
       expect(screen.getByTestId('batch-export-failures-list')).toBeInTheDocument()
@@ -224,8 +268,8 @@ describe('UnityDialogueList batch export', () => {
 
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
     await screen.findByTestId('unity-dialogue-list')
-    await user.click(screen.getByTestId('batch-select-all'))
-    await user.click(screen.getByTestId('batch-export-start'))
+    await batchSelectAll()
+    await batchStartExport()
 
     await waitFor(() => {
       expect(batchExportMock).not.toHaveBeenCalled()
@@ -244,8 +288,8 @@ describe('UnityDialogueList batch export', () => {
 
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
     await screen.findByTestId('unity-dialogue-list')
-    await user.click(screen.getByTestId('batch-select-all'))
-    await user.click(screen.getByTestId('batch-export-start'))
+    await batchSelectAll()
+    await batchStartExport()
 
     await waitFor(() => {
       expect(screen.getByTestId('batch-export-download-all')).toBeInTheDocument()
@@ -269,10 +313,11 @@ describe('UnityDialogueList batch export', () => {
 
     render(<UnityDialogueList onSelectDialogue={() => {}} selectedFilename={null} />)
     await screen.findByTestId('unity-dialogue-list')
-    await user.click(screen.getByTestId('download-export-options-toggle'))
+    await openDownloadExportOptions()
+    await screen.findByTestId('download-export-options-panel')
     await user.selectOptions(screen.getByTestId('download-option-batch-format'), 'individual')
-    await user.click(screen.getByTestId('batch-select-all'))
-    await user.click(screen.getByTestId('batch-export-start'))
+    await batchSelectAll()
+    await batchStartExport()
 
     await waitFor(() => {
       expect(screen.getByTestId('batch-export-download-all')).toBeInTheDocument()
