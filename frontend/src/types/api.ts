@@ -443,9 +443,10 @@ export interface ExportUnityDialogueRequest {
 }
 
 export interface ExportUnityDialogueResponse {
-  file_path: string
   filename: string
   success: boolean
+  /** @deprecated Non renvoyé par l'API — utiliser filename */
+  file_path?: string | null
 }
 
 export interface BatchExportFailedItem {

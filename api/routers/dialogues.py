@@ -61,6 +61,7 @@ from services.llm_usage_service import LLMUsageService
 from services.unity_export_validation_service import validate_persisted_document
 from services.unity_dialogue_download_service import (
     build_batch_download_zip,
+    content_disposition_attachment,
     read_document_download_payload,
 )
 from services.unity_export_preview_service import (
@@ -528,7 +529,6 @@ async def export_unity_dialogue(
             filename=filename,
         )
         return ExportUnityDialogueResponse(
-            file_path=str(file_path.absolute()),
             filename=filename,
             success=True,
         )
@@ -552,7 +552,6 @@ async def export_unity_dialogue(
         logger.exception("Erreur disque export Unity JSON (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de l'export du dialogue Unity JSON",
-            details={"error": str(exc)},
             request_id=request_id,
         )
     except Exception as e:
@@ -566,7 +565,6 @@ async def export_unity_dialogue(
         logger.exception("Erreur lors de l'export Unity JSON (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de l'export du dialogue Unity JSON",
-            details={"error": str(e)},
             request_id=request_id,
         )
 
@@ -609,7 +607,6 @@ async def batch_export_unity_dialogues(
         logger.exception("Erreur batch export Unity (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de l'export batch Unity JSON",
-            details={"error": str(e)},
             request_id=request_id,
         )
 
@@ -651,7 +648,6 @@ async def preview_unity_dialogue_export(
         )
         raise InternalServerException(
             message="Erreur lors de la prévisualisation export",
-            details={"error": str(exc)},
             request_id=request_id,
         )
 
@@ -684,7 +680,7 @@ async def download_unity_dialogue(
     return Response(
         content=content.encode("utf-8"),
         media_type="application/json;charset=utf-8",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={"Content-Disposition": content_disposition_attachment(filename)},
     )
 
 

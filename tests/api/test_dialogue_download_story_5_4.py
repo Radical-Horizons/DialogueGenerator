@@ -118,3 +118,45 @@ class TestPostBatchDownload:
             json={"filenames": ["missing.json"]},
         )
         assert response.status_code == 404
+
+
+@pytest.mark.api
+class TestExportWritePathTraversal:
+    """POST /api/v1/dialogues/unity/export — même garde-fous que le download (Story 5.4)."""
+
+    def test_export_rejects_path_traversal_filename(self, unity_tmp_path: Path) -> None:
+        outside = unity_tmp_path.parent / "outside_escape.json"
+        payload = {
+            "json_content": json.dumps(_VALID_DOCUMENT, ensure_ascii=False),
+            "title": "Test",
+            "filename": "../../outside_escape.json",
+        }
+        response = client.post("/api/v1/dialogues/unity/export", json=payload)
+        assert response.status_code == 422
+        assert not outside.exists()
+
+    def test_export_writes_only_under_unity_dir(self, unity_tmp_path: Path) -> None:
+        valid_node_id = "node-a1b2c3d4e5f6789012345678abcdef01"
+        document = {
+            "schemaVersion": "1.2.0",
+            "nodes": [
+                {
+                    "id": valid_node_id,
+                    "line": "Bonjour",
+                    "speaker": "PNJ",
+                    "choices": [{"choiceId": "c1", "text": "OK", "targetNode": "END"}],
+                },
+                {"id": "END", "line": ""},
+            ],
+        }
+        payload = {
+            "json_content": json.dumps(document, ensure_ascii=False),
+            "title": "Quest Arc",
+            "filename": "quest_arc.json",
+        }
+        response = client.post("/api/v1/dialogues/unity/export", json=payload)
+        assert response.status_code == 200
+        body = response.json()
+        assert body["filename"] == "quest_arc.json"
+        assert "file_path" not in body or body.get("file_path") is None
+        assert (unity_tmp_path / "quest_arc.json").is_file()

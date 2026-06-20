@@ -134,6 +134,24 @@ class TestUnifiedValidationVerdict:
 
 
 @pytest.mark.unit
+class TestWriteExportPathTraversal:
+    """write_unity_dialogue_to_file — basename sûr et confinement répertoire Unity."""
+
+    def test_rejects_path_traversal_filename(self, tmp_path: Path) -> None:
+        mock_config = MagicMock()
+        mock_config.get_unity_dialogues_path.return_value = str(tmp_path)
+        from api.exceptions import ValidationException
+
+        with pytest.raises(ValidationException):
+            write_unity_dialogue_to_file(
+                config_service=mock_config,
+                json_content=json.dumps(_minimal_document(), ensure_ascii=False),
+                filename="../../outside.json",
+            )
+        assert not (tmp_path.parent / "outside.json").exists()
+
+
+@pytest.mark.unit
 class TestGddThresholdWarnings:
     """AC #5 — avertissements non bloquants seuils GDD."""
 

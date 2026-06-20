@@ -17,6 +17,7 @@ from typing import Callable, List, Optional, Tuple, Any, Dict
 
 from services.configuration_service import ConfigurationService
 from api.exceptions import ValidationException
+from services.unity_dialogue_download_service import safe_export_filename
 from services.unity_export_normalizer import normalize_unity_export_document
 from services.unity_export_validation_service import unity_export_schema_validator
 
@@ -24,6 +25,70 @@ logger = logging.getLogger(__name__)
 
 # Nom du fichier sidecar pour last_seq (ADR-006): {stem}.seq à côté du .json
 SEQ_SUFFIX = ".seq"
+
+
+def _resolve_export_basename(
+    filename: Optional[str],
+    title: Optional[str],
+    request_id: Optional[str],
+) -> str:
+    """Dérive un nom de fichier export sûr (basename, sans path traversal).
+
+    Args:
+        filename: Nom fourni par le client (optionnel).
+        title: Titre pour génération slug si filename absent.
+        request_id: ID requête pour ValidationException.
+
+    Returns:
+        Nom de fichier se terminant par ``.json``.
+
+    Raises:
+        ValidationException: Si le nom client est invalide.
+    """
+    if filename:
+        try:
+            return safe_export_filename(filename)
+        except ValueError as exc:
+            raise ValidationException(
+                message="Nom de fichier export invalide",
+                details={"filename": str(exc)},
+                request_id=request_id,
+            ) from exc
+    if title:
+        slug = re.sub(r"[^\w\s-]", "", title.lower())
+        slug = re.sub(r"[-\s]+", "_", slug)[:100] or "dialogue"
+        return f"{slug}.json"
+    return "dialogue.json"
+
+
+def _resolve_export_path(
+    unity_dir: Path,
+    basename: str,
+    request_id: Optional[str],
+) -> Path:
+    """Résout le chemin d'écriture et vérifie qu'il reste sous ``unity_dir``.
+
+    Args:
+        unity_dir: Répertoire Unity configuré.
+        basename: Nom de fichier (basename sûr).
+        request_id: ID requête pour ValidationException.
+
+    Returns:
+        Chemin absolu résolu du fichier cible.
+
+    Raises:
+        ValidationException: Si le chemin résolu sort du répertoire Unity.
+    """
+    file_path = (unity_dir / basename).resolve()
+    try:
+        file_path.relative_to(unity_dir.resolve())
+    except ValueError as exc:
+        raise ValidationException(
+            message="Nom de fichier export invalide",
+            details={"filename": "Chemin hors du répertoire Unity configuré"},
+            request_id=request_id,
+        ) from exc
+    return file_path
 
 
 def _document_key_from_filename(name: str) -> str:
@@ -160,23 +225,12 @@ def write_unity_dialogue_to_file(
             request_id=request_id,
         )
 
-    if filename:
-        name = filename
-    elif title:
-        slug = re.sub(r"[^\w\s-]", "", title.lower())
-        slug = re.sub(r"[-\s]+", "_", slug)
-        name = slug[:100]
-    else:
-        name = "dialogue"
-
-    if not name.endswith(".json"):
-        name += ".json"
-
-    file_path = unity_dir / name
+    name = _resolve_export_basename(filename, title, request_id)
+    file_path = _resolve_export_path(unity_dir, name, request_id)
     formatted = json.dumps(document, indent=2, ensure_ascii=False)
 
     # ADR-006: Écriture atomique (tmp → fsync → rename) pour éviter fichier tronqué
-    tmp_path = unity_dir / (name + ".tmp")
+    tmp_path = file_path.with_suffix(file_path.suffix + ".tmp")
     tmp_path.write_text(formatted, encoding="utf-8")
     try:
         with open(tmp_path, "r+b") as f:

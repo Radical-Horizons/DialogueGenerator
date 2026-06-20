@@ -59,6 +59,5 @@ async def get_export_logs(
         logger.exception("Erreur GET export logs (request_id: %s)", request_id)
         raise InternalServerException(
             message="Erreur lors de la récupération des logs d'export",
-            details={"error": str(exc)},
             request_id=request_id,
         )

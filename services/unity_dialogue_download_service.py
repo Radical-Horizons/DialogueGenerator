@@ -13,6 +13,20 @@ from services.unity_persisted_document_io import resolve_unity_dir, safe_documen
 ZipCompression = Literal["store", "deflate"]
 
 
+def content_disposition_attachment(filename: str) -> str:
+    """Construit un en-tête Content-Disposition sûr pour pièce jointe JSON.
+
+    Args:
+        filename: Nom de fichier (basename attendu).
+
+    Returns:
+        Valeur d'en-tête ``attachment; filename="..."`` sans guillemets ni sauts de ligne.
+    """
+    safe_name = safe_export_filename(filename)
+    header_value = safe_name.replace('"', "").replace("\r", "").replace("\n", "")
+    return f'attachment; filename="{header_value}"'
+
+
 def safe_export_filename(filename: str) -> str:
     """Valide un nom de fichier export (basename uniquement, pas de path traversal).
 

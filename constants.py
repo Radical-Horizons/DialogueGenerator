@@ -89,6 +89,8 @@ class Defaults:
     DEFAULT_MAX_COMPLETION_TOKENS = 5000  # Valeur par défaut pour la génération de dialogues
     # Plafond mensuel par défaut (USD) pour un utilisateur sans entrée dans cost_budgets.json (0 = illimité si défini explicitement)
     DEFAULT_MONTHLY_LLM_QUOTA_USD = 10.0
+    # Plafond batch export / download / preview Unity (FR50–FR53)
+    UNITY_EXPORT_BATCH_MAX_ITEMS = 64
 
 class ConfigFiles:
     pass  # Placeholder for future config file constants if needed 

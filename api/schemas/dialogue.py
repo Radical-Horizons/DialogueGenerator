@@ -561,13 +561,16 @@ class ExportUnityDialogueResponse(BaseModel):
     """Réponse pour l'export d'un dialogue Unity JSON.
     
     Attributes:
-        file_path: Chemin absolu du fichier créé.
         filename: Nom du fichier créé.
         success: Indique si l'export a réussi.
+        file_path: Déprécié — absent des réponses API (évite la fuite de chemins serveur).
     """
-    file_path: str = Field(..., description="Chemin absolu du fichier créé")
     filename: str = Field(..., description="Nom du fichier créé")
     success: bool = Field(..., description="Indique si l'export a réussi")
+    file_path: Optional[str] = Field(
+        None,
+        description="Déprécié — non renseigné (utiliser filename)",
+    )
 
 
 class BatchExportFailedItemResponse(BaseModel):
@@ -580,7 +583,12 @@ class BatchExportFailedItemResponse(BaseModel):
 class BatchExportRequest(BaseModel):
     """Requête export batch Unity JSON (Story 5.2 / FR50)."""
 
-    document_ids: List[str] = Field(..., min_length=1, description="IDs document à exporter")
+    document_ids: List[str] = Field(
+        ...,
+        min_length=1,
+        max_length=Defaults.UNITY_EXPORT_BATCH_MAX_ITEMS,
+        description="IDs document à exporter",
+    )
     skip_validation: bool = Field(
         False,
         description="Si True, écrit sans validation schéma Unity (opt-in)",
@@ -606,7 +614,12 @@ class BatchExportResponse(BaseModel):
 class BatchDownloadRequest(BaseModel):
     """Requête téléchargement batch ZIP (Story 5.4 / FR52)."""
 
-    filenames: List[str] = Field(..., min_length=1, description="Noms de fichiers exportés")
+    filenames: List[str] = Field(
+        ...,
+        min_length=1,
+        max_length=Defaults.UNITY_EXPORT_BATCH_MAX_ITEMS,
+        description="Noms de fichiers exportés",
+    )
     compression: Literal["store", "deflate"] = Field(
         "deflate",
         description="Niveau de compression ZIP",
@@ -616,7 +629,12 @@ class BatchDownloadRequest(BaseModel):
 class BatchExportPreviewRequest(BaseModel):
     """Requête preview export batch (Story 5.5 / FR53)."""
 
-    document_ids: List[str] = Field(..., min_length=1, description="IDs document sans extension")
+    document_ids: List[str] = Field(
+        ...,
+        min_length=1,
+        max_length=Defaults.UNITY_EXPORT_BATCH_MAX_ITEMS,
+        description="IDs document sans extension",
+    )
 
 
 class BatchExportPreviewItemResponse(BaseModel):
