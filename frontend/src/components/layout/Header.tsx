@@ -8,6 +8,8 @@ import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useGraphStore } from '../../store/graphStore'
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { GenerationOptionsModal } from '../generation/GenerationOptionsModal'
+import { UnityBatchExportActionsMenuItems } from '../unityDialogues/UnityBatchExportActionsMenuItems'
+import { useUnityBatchExportMenuStore } from '../../store/unityBatchExportMenuStore'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import { TOUCH_TARGET_MIN_PX } from '../../constants'
@@ -17,6 +19,7 @@ export function Header() {
   const commandPalette = useCommandPalette()
   const { actions } = useGenerationActionsStore()
   const { isGenerating: isGraphGenerating } = useGraphStore()
+  const unityBatchExportMenu = useUnityBatchExportMenuStore((s) => s.menu)
   
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false)
   const [optionsModalInitialTab, setOptionsModalInitialTab] = useState<
@@ -201,6 +204,7 @@ export function Header() {
               }}
             >
               <button
+                data-testid="header-actions-dropdown"
                 onClick={(e) => {
                   e.stopPropagation()
                   setIsActionsDropdownOpen(!isActionsDropdownOpen)
@@ -236,7 +240,7 @@ export function Header() {
                     borderRadius: '4px',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                     zIndex: 1000,
-                    minWidth: '150px',
+                    minWidth: '220px',
                   }}
                 >
                   <button
@@ -258,7 +262,7 @@ export function Header() {
                       textAlign: 'left',
                       cursor: (actions.isLoading || isGraphGenerating) ? 'not-allowed' : 'pointer',
                       opacity: (actions.isLoading || isGraphGenerating) ? 0.6 : 1,
-                      borderRadius: '4px 4px 0 0',
+                      borderRadius: unityBatchExportMenu ? '4px 4px 0 0' : '4px 4px 0 0',
                     }}
                     onMouseEnter={(e) => {
                       if (!actions.isLoading && !isGraphGenerating) {
@@ -290,7 +294,7 @@ export function Header() {
                       textAlign: 'left',
                       cursor: (actions.isLoading || isGraphGenerating) ? 'not-allowed' : 'pointer',
                       opacity: (actions.isLoading || isGraphGenerating) ? 0.6 : 1,
-                      borderRadius: '0 0 4px 4px',
+                      borderRadius: unityBatchExportMenu ? 0 : '0 0 4px 4px',
                     }}
                     onMouseEnter={(e) => {
                       if (!actions.isLoading && !isGraphGenerating) {
@@ -303,6 +307,12 @@ export function Header() {
                   >
                     Reset
                   </button>
+                  {unityBatchExportMenu && (
+                    <UnityBatchExportActionsMenuItems
+                      batch={unityBatchExportMenu}
+                      onClose={() => setIsActionsDropdownOpen(false)}
+                    />
+                  )}
                 </div>
               )}
             </div>
