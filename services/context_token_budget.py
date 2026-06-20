@@ -212,6 +212,10 @@ def compute_context_selection_token_metrics(
 
     if prebuilt_structure is not None:
         structured = prebuilt_structure
+        if isinstance(structured, dict):
+            from models.prompt_structure import PromptStructure
+
+            structured = PromptStructure.model_validate(structured)
         reconciled_total = int(
             getattr(getattr(structured, "metadata", None), "totalTokens", 0) or 0
         )

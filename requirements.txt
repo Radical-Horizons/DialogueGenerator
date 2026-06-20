@@ -8,9 +8,9 @@ pytest-asyncio>=0.24.0  # requis pour asyncio_default_fixture_loop_scope (pytest
 pydantic>=2.0 # Ajout pour les modèles de données et la validation de schéma 
 pytest-cov>=2.12 # Ajout pour la couverture de tests 
 pytest-mock>=3.6 # Ajout pour la fixture 'mocker'
-# API REST FastAPI
-fastapi>=0.104.0,<0.139.0
-starlette>=0.46.0,<0.52.0
+# API REST FastAPI — pin aligné CI/dev (FastAPI 0.138 casse prometheus + TestClient sur _IncludedRouter)
+fastapi>=0.104.0,<0.129.0
+starlette>=0.40.0,<0.51.0
 uvicorn[standard]>=0.24.0
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4

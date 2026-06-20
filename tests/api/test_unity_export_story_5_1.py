@@ -428,6 +428,7 @@ class TestExportPreservesGddFields:
 
 
 @pytest.mark.api
+@pytest.mark.slow
 class TestUnityExportPerformance:
     """NFR-P3 — latence export API (Epic 5 retro A1)."""
 

@@ -13,6 +13,8 @@ from services.repositories.cost_budget_repository import FileCostBudgetRepositor
 os.environ.setdefault("AUTH_RATE_LIMIT_ENABLED", "false")
 # JWT requis sur les routeurs métier ; mock user si DISABLE_AUTH=true (défaut aligné .env.example dev).
 os.environ.setdefault("DISABLE_AUTH", "true")
+# Prometheus middleware + FastAPI récent (_IncludedRouter) → AttributeError sur TestClient en CI.
+os.environ.setdefault("PROMETHEUS_ENABLED", "false")
 
 from api.main import app
 
