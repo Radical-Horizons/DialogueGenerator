@@ -190,8 +190,10 @@ export function Tabs({
                       justifyContent: 'center',
                     }
                   : {
-                      minHeight: TOUCH_TARGET_MIN_PX,
-                      minWidth: TOUCH_TARGET_MIN_PX,
+                      minHeight: segTypography.tabMinHeightPx,
+                      minWidth: isSegmentedBarNarrow
+                        ? TOUCH_TARGET_MIN_PX
+                        : segTypography.tabMinHeightPx,
                       boxSizing: 'border-box',
                       padding: segTypography.buttonPadding,
                       borderRadius: '8px',

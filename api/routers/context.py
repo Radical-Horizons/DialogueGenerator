@@ -1,5 +1,7 @@
 """Router pour le contexte GDD."""
+import hashlib
 import logging
+from datetime import datetime
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Request, status
 
@@ -39,6 +41,9 @@ from api.schemas.dialogue import (
     EstimateTokensResponse,
     OptimizeContextRequest,
     OptimizeContextResponse,
+    PrecomputedEntityTokensRequest,
+    PrecomputedEntityTokensResponse,
+    PrecomputedEntityTokenRow,
 )
 from api.schemas.gdd_context_stale import (
     GddContentFingerprintRequest,
@@ -47,6 +52,7 @@ from api.schemas.gdd_context_stale import (
     GddEntityHistoryEventPublic,
 )
 from constants import Defaults
+from models.prompt_structure import PromptMetadata, PromptSection, PromptStructure
 from services.context_token_budget import compute_context_selection_token_metrics
 from services.context_truncator import (
     cap_context_text_to_budget,
@@ -68,13 +74,149 @@ from core.context.context_builder import ContextBuilder
 from services.linked_selector import LinkedSelectorService
 from services.dialogue_generation_service import DialogueGenerationService
 from services.context_rule_service import ContextRuleService
-from core.prompt.prompt_engine import PromptEngine
+from core.prompt.prompt_engine import PromptEngine, PromptInput
+from utils.xml_utils import extract_text_from_element
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
+
+
+def _load_prompt_catalogs(
+    skill_service: SkillCatalogService,
+    trait_service: TraitCatalogService,
+) -> tuple[List[str], List[str]]:
+    """Charge les catalogues prompt hors GDD (compétences / traits)."""
+    skills_list: List[str] = []
+    try:
+        skills_list = skill_service.load_skills()
+    except Exception as exc:
+        logger.warning("Erreur lors du chargement des compétences: %s", exc, exc_info=True)
+
+    traits_list: List[str] = []
+    try:
+        traits_list = trait_service.get_trait_labels()
+    except Exception as exc:
+        logger.warning("Erreur lors du chargement des traits: %s", exc, exc_info=True)
+
+    return skills_list, traits_list
+
+
+def _resolve_npc_speaker_id(
+    request_data: EstimateTokensRequest,
+) -> str:
+    """Détermine le speaker PNJ avec la même convention que le flux prompt."""
+    service_selection = request_data.context_selections.to_service_dict()
+    npc_speaker_id = request_data.npc_speaker_id
+    selected_characters = service_selection.get("characters", [])
+    if not npc_speaker_id and selected_characters:
+        return str(selected_characters[0])
+    if not npc_speaker_id:
+        return "PNJ"
+    return npc_speaker_id
+
+
+def _build_prompt_input_without_structured_context(
+    request_data: EstimateTokensRequest,
+    *,
+    context_text: Optional[str],
+    skills_list: List[str],
+    traits_list: List[str],
+) -> PromptInput:
+    """Construit l'input prompt pour les sections non-GDD uniquement."""
+    return PromptInput(
+        user_instructions=request_data.user_instructions,
+        npc_speaker_id=_resolve_npc_speaker_id(request_data),
+        player_character_id="URESAIR",
+        context_summary=context_text,
+        structured_context=None,
+        scene_location=None,
+        max_choices=request_data.max_choices,
+        choices_mode=request_data.choices_mode,
+        narrative_tags=request_data.narrative_tags,
+        author_profile=request_data.author_profile,
+        game_rules=request_data.game_rules,
+        vocabulary_config=request_data.vocabulary_config,
+        include_narrative_guides=request_data.include_narrative_guides,
+        skills_list=skills_list,
+        traits_list=traits_list,
+        in_game_flags=None,
+        max_context_tokens=request_data.max_context_tokens,
+        llm_model_identifier=request_data.llm_model_identifier,
+    )
+
+
+def _build_lightweight_prompt_structure(
+    request_data: EstimateTokensRequest,
+    prompt_engine: PromptEngine,
+    skill_service: SkillCatalogService,
+    trait_service: TraitCatalogService,
+    structured_context: PromptStructure,
+    context_text: str,
+) -> tuple[int, PromptStructure]:
+    """Construit une structure prompt affichable sans créer le raw XML complet."""
+    skills_list, traits_list = _load_prompt_catalogs(skill_service, trait_service)
+    prompt_input = _build_prompt_input_without_structured_context(
+        request_data,
+        context_text=context_text,
+        skills_list=skills_list,
+        traits_list=traits_list,
+    )
+    builder = getattr(prompt_engine, "_prompt_builder", None)
+    if builder is None:
+        raise RuntimeError("PromptBuilder non initialisé dans PromptEngine")
+
+    section_specs = (
+        (builder._build_contract_section, "other", "SECTION 0. CONTRAT GLOBAL"),
+        (builder._build_technical_section, "other", "SECTION 1. INSTRUCTIONS TECHNIQUES (NORMATIVES)"),
+        (builder._build_narrative_guides_section, "other", "SECTION 2B. GUIDES NARRATIFS"),
+        (builder._build_vocabulary_section, "other", "SECTION 2C. VOCABULAIRE ALTEIR"),
+        (builder._build_scene_instructions_section, "instruction", "SECTION 3. INSTRUCTIONS DE SCÈNE (PRIORITÉ EFFECTIVE)"),
+    )
+
+    sections: List[PromptSection] = []
+    prompt_overhead_tokens = 0
+    model_id = request_data.llm_model_identifier or "gpt-5.2"
+    for build_section, section_type, title in section_specs:
+        elem = build_section(prompt_input)
+        if elem is None:
+            continue
+        content = extract_text_from_element(elem)
+        if not content:
+            continue
+        token_count = prompt_engine._count_tokens(content, model_id)
+        prompt_overhead_tokens += token_count
+        sections.append(
+            PromptSection(
+                type=section_type,
+                title=title,
+                content=content,
+                tokenCount=token_count,
+            )
+        )
+
+    for section in structured_context.sections:
+        sections.append(section)
+
+    total_tokens = prompt_overhead_tokens + int(structured_context.metadata.totalTokens or 0)
+    generated_at = getattr(structured_context.metadata, "generatedAt", None)
+    if not isinstance(generated_at, str):
+        generated_at = datetime.now().isoformat()
+    organization_mode = getattr(structured_context.metadata, "organizationMode", None)
+    if not isinstance(organization_mode, str):
+        organization_mode = request_data.organization_mode or "narrative"
+
+    prompt_structure = PromptStructure(
+        sections=sections,
+        metadata=PromptMetadata(
+            totalTokens=total_tokens,
+            generatedAt=generated_at,
+            organizationMode=organization_mode,
+        ),
+    )
+    return prompt_overhead_tokens, prompt_structure
 
 
 @router.get(
@@ -562,6 +704,99 @@ async def build_context(
 
 
 @router.post(
+    "/precomputed-entity-tokens",
+    response_model=PrecomputedEntityTokensResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def precomputed_entity_tokens(
+    request_data: PrecomputedEntityTokensRequest,
+    context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
+    prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
+    skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
+    trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> PrecomputedEntityTokensResponse:
+    """Tokens précompilés par fiche (cache disque) — ajout/retrait incrémental UI.
+
+    Ne reconstruit pas la sélection entière : lecture O(1) par fiche en cache hit.
+    """
+    from services.gdd_context_precompile import lookup_precomputed_entity_tokens
+
+    try:
+        raw_entities = [e.model_dump() for e in request_data.entities]
+        rows = lookup_precomputed_entity_tokens(
+            context_builder,
+            raw_entities,
+            organization_mode=request_data.organization_mode or "narrative",
+            field_configs=request_data.field_configs,
+        )
+        parsed = [PrecomputedEntityTokenRow.model_validate(r) for r in rows]
+        total = sum(r.token_count for r in parsed)
+        overhead_tokens = 0
+        overhead_sections: Optional[List[Dict[str, Any]]] = None
+        if request_data.include_prompt_overhead:
+            from api.schemas.dialogue import ContextSelection, EstimateTokensRequest
+
+            empty_selection = ContextSelection()
+            overhead_request = EstimateTokensRequest(
+                user_instructions=request_data.user_instructions or " ",
+                context_selections=empty_selection,
+                organization_mode=request_data.organization_mode or "narrative",
+                include_narrative_guides=request_data.include_narrative_guides,
+                system_prompt_override=request_data.system_prompt_override,
+                game_rules=request_data.game_rules,
+                author_profile=request_data.author_profile,
+                vocabulary_config=request_data.vocabulary_config,
+                field_configs=request_data.field_configs,
+            )
+            empty_context = PromptStructure(
+                sections=[
+                    PromptSection(
+                        type="context",
+                        title="CONTEXTE GÉNÉRAL DE LA SCÈNE",
+                        content="",
+                        tokenCount=0,
+                        categories=[],
+                    )
+                ],
+                metadata=PromptMetadata(
+                    totalTokens=0,
+                    generatedAt=datetime.now().isoformat(),
+                    organizationMode=request_data.organization_mode or "narrative",
+                ),
+            )
+            overhead_tokens, overhead_structure = _build_lightweight_prompt_structure(
+                overhead_request,
+                prompt_engine,
+                skill_service,
+                trait_service,
+                structured_context=empty_context,
+                context_text="",
+            )
+            overhead_sections = [
+                section.model_dump()
+                for section in overhead_structure.sections
+                if section.type != "context"
+            ]
+        return PrecomputedEntityTokensResponse(
+            entities=parsed,
+            selection_tokens_sum=total,
+            prompt_overhead_tokens=overhead_tokens,
+            prompt_overhead_sections=overhead_sections,
+        )
+    except Exception as e:
+        logger.exception(
+            "Erreur lookup tokens précompilés (request_id: %s)",
+            request_id,
+        )
+        raise InternalServerException(
+            message="Erreur lors de la lecture des tokens précompilés",
+            details={"error": str(e)},
+            request_id=request_id,
+        )
+
+
+@router.post(
     "/estimate-tokens",
     response_model=EstimateTokensResponse,
     status_code=status.HTTP_200_OK
@@ -570,27 +805,20 @@ async def estimate_context_tokens(
     request_data: EstimateTokensRequest,
     request: Request,
     context_builder: Annotated[ContextBuilder, Depends(get_context_builder)],
-    dialogue_service: Annotated[DialogueGenerationService, Depends(get_dialogue_generation_service)],
     prompt_engine: Annotated[PromptEngine, Depends(get_prompt_engine)],
     skill_service: Annotated[SkillCatalogService, Depends(get_skill_catalog_service)],
     trait_service: Annotated[TraitCatalogService, Depends(get_trait_catalog_service)],
-    request_id: Annotated[str, Depends(get_request_id)]
+    request_id: Annotated[str, Depends(get_request_id)],
 ) -> EstimateTokensResponse:
-    """Estime le nombre de tokens pour un contexte donné.
+    """Estime les tokens de la sélection GDD (panneau budget contexte, FR20).
 
-    Coût: pour le breakdown FR20, ``compute_context_selection_token_metrics`` peut invoquer
-    jusqu'à une construction + sérialisation + comptage par compartiment de sélection non vide
-    (un passage pour la sélection complète, puis un par bucket type/mode), en plus du build
-    prompt complet. Prévoir une charge CPU proportionnelle à la richesse de la sélection.
+    Chemin léger : un seul build contexte + breakdown dérivé de la structure déjà construite.
+    Ne construit pas le prompt LLM complet (réservé à ``/dialogues/estimate-tokens``).
 
     Args:
         request_data: Données de la requête (sélections, instructions).
         request: La requête HTTP.
         context_builder: ContextBuilder injecté.
-        dialogue_service: DialogueGenerationService injecté.
-        prompt_engine: PromptEngine injecté.
-        skill_service: SkillCatalogService injecté.
-        trait_service: TraitCatalogService injecté.
         request_id: ID de la requête.
 
     Returns:
@@ -598,38 +826,16 @@ async def estimate_context_tokens(
         ``context_tokens`` (tronqué au budget requête) vs ``selection_tokens`` (mesure pleine).
     """
     try:
-        # Utiliser la même fonction que dialogues.py pour construire le prompt complet
-        from api.routers.dialogues import _build_prompt_from_request
-        built = _build_prompt_from_request(
-            request_data,
-            dialogue_service,
-            prompt_engine,
-            skill_service,
-            trait_service
-        )
-        
-        # Calculer les tokens du contexte seul
-        context_selections_dict = request_data.context_selections.to_service_dict()
+        service_dict = request_data.context_selections.to_service_dict()
         structured_context = context_builder.build_context_json(
-            selected_elements=context_selections_dict,
+            selected_elements=service_dict,
             scene_instruction=request_data.user_instructions,
             field_configs=request_data.field_configs,
             organization_mode=request_data.organization_mode or "narrative",
-            max_tokens=request_data.max_context_tokens,
+            max_tokens=Defaults.MAX_CONTEXT_TOKENS,
             include_dialogue_type=True,
-            element_modes=context_selections_dict.get("_element_modes")
+            element_modes=service_dict.get("_element_modes"),
         )
-        context_text = cap_context_text_to_budget(
-            context_builder.serialize_context_to_text(structured_context),
-            request_data.max_context_tokens,
-        )
-        ctx_in_prompt = count_tokens_in_prompt_context_element(built.raw_prompt)
-        context_tokens = (
-            ctx_in_prompt
-            if ctx_in_prompt > 0
-            else context_builder._count_tokens(context_text)
-        )
-
         metrics = compute_context_selection_token_metrics(
             context_builder,
             full_selection=request_data.context_selections,
@@ -637,26 +843,37 @@ async def estimate_context_tokens(
             field_configs=request_data.field_configs,
             organization_mode=request_data.organization_mode or "narrative",
             measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+            user_budget_max_tokens=request_data.max_context_tokens,
+            prebuilt_structure=structured_context,
         )
-        
-        # Convertir structured_prompt en dict pour la réponse
-        structured_prompt_dict = None
-        if built.structured_prompt:
-            try:
-                structured_prompt_dict = built.structured_prompt.model_dump()
-            except Exception as e:
-                logger.warning(f"Erreur lors de la conversion du structured_prompt en dict: {e}")
-        
+
+        context_only_hash = hashlib.sha256(
+            f"{metrics.context_tokens}:{metrics.selection_tokens}".encode("utf-8")
+        ).hexdigest()
+        context_text = cap_context_text_to_budget(
+            metrics.serialized_text or context_builder.serialize_context_to_text(structured_context),
+            request_data.max_context_tokens,
+        )
+        prompt_overhead_tokens, structured_prompt = _build_lightweight_prompt_structure(
+            request_data,
+            prompt_engine,
+            skill_service,
+            trait_service,
+            structured_context=structured_context,
+            context_text=context_text,
+        )
+        prompt_token_count = metrics.context_tokens + prompt_overhead_tokens
+
         return EstimateTokensResponse(
-            context_tokens=context_tokens,
+            context_tokens=metrics.context_tokens,
             selection_tokens=metrics.selection_tokens,
             context_token_breakdown=metrics.breakdown,
             context_breakdown_note=metrics.breakdown_note,
-            token_count=built.token_count,
-            total_estimated_tokens=built.token_count,
-            raw_prompt=built.raw_prompt,
-            prompt_hash=built.prompt_hash,
-            structured_prompt=structured_prompt_dict
+            token_count=prompt_token_count,
+            total_estimated_tokens=prompt_token_count,
+            raw_prompt="",
+            prompt_hash=context_only_hash,
+            structured_prompt=structured_prompt.model_dump(),
         )
         
     except ValidationException:

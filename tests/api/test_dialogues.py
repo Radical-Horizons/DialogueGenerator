@@ -36,12 +36,20 @@ def mock_dialogue_service():
     Ce mock isole les tests des dépendances réelles (GDD, LLM, etc.).
     """
     from core.prompt.prompt_engine import BuiltPrompt
-    
+    from models.prompt_structure import PromptMetadata, PromptStructure
+
     mock_service = MagicMock(spec=DialogueGenerationService)
     mock_service.context_builder = MagicMock()
     # Aligné sur le pipeline réel (_build_prompt_from_request / estimate-tokens) : JSON → texte → tiktoken.
     mock_service.context_builder.build_context_json = MagicMock(
-        return_value={"_test": "structured_context"}
+        return_value=PromptStructure(
+            sections=[],
+            metadata=PromptMetadata(
+                totalTokens=100,
+                generatedAt="2026-01-01T00:00:00",
+                organizationMode="narrative",
+            ),
+        )
     )
     mock_service.context_builder.serialize_context_to_text = MagicMock(
         return_value="context text"
@@ -131,6 +139,31 @@ def test_estimate_tokens(client, mock_dialogue_service):
     assert "token_count" in data  # Le champ s'appelle token_count, pas total_estimated_tokens
     assert isinstance(data["context_tokens"], int)
     assert isinstance(data["token_count"], int)
+
+
+@pytest.mark.unit
+@pytest.mark.api
+@pytest.mark.p1
+def test_estimate_tokens_builds_context_once(client, mock_dialogue_service):
+    """L'endpoint ne construit le contexte qu'une seule fois (déduplication FR perf).
+
+    Auparavant : un build pour le prompt + un second build dans
+    ``compute_context_selection_token_metrics``. Désormais la structure est réutilisée.
+    """
+    from services.context_token_budget import clear_context_metrics_cache
+
+    clear_context_metrics_cache()
+    mock_dialogue_service.context_builder.build_context_json.reset_mock()
+    response = client.post(
+        "/api/v1/dialogues/estimate-tokens",
+        json={
+            "context_selections": {"characters_full": ["Character1"]},
+            "user_instructions": "Test instructions",
+            "max_context_tokens": 10000,
+        },
+    )
+    assert response.status_code == 200
+    assert mock_dialogue_service.context_builder.build_context_json.call_count == 1
 
 
 @pytest.mark.unit

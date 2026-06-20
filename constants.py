@@ -83,12 +83,14 @@ class Defaults:
     MAX_TOKENS_MODEL = 32000  # Recommandation OpenAI: 25000+ tokens pour reasoning summary
     INTERACTION_AUTOSAVE_INTERVAL_MS = 300000 # 5 minutes (nouvelle constante)
     # Limites pour les tokens de contexte (utilisées par l'API et le frontend)
-    MAX_CONTEXT_TOKENS = 100000  # Maximum autorisé pour max_context_tokens
+    MAX_CONTEXT_TOKENS = 300000  # Maximum autorisé pour max_context_tokens
     MIN_CONTEXT_TOKENS = 10000  # Plancher sérieux contexte LLM + budget FR20 (Pydantic ge=, UI slider min)
     # Valeur par défaut pour max_completion_tokens (quand None)
     DEFAULT_MAX_COMPLETION_TOKENS = 5000  # Valeur par défaut pour la génération de dialogues
     # Plafond mensuel par défaut (USD) pour un utilisateur sans entrée dans cost_budgets.json (0 = illimité si défini explicitement)
     DEFAULT_MONTHLY_LLM_QUOTA_USD = 10.0
+    # Plafond batch export / download / preview Unity (FR50–FR53)
+    UNITY_EXPORT_BATCH_MAX_ITEMS = 64
 
 class ConfigFiles:
     pass  # Placeholder for future config file constants if needed 

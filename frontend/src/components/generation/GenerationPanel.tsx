@@ -32,7 +32,6 @@ import { usePresetManagement } from '../../hooks/usePresetManagement'
 // Composants UI extraits
 import { GenerationPanelControls } from './GenerationPanelControls'
 import { GenerationPanelModals } from './GenerationPanelModals'
-import { EstimationBadge } from '../estimation'
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import { PANEL_COMFORT_MIN_WIDTH_PX, generationPanelChrome } from '../../theme/responsiveChrome'
 import { GenerationPanelNarrowProvider } from './GenerationPanelNarrowContext'
@@ -252,17 +251,19 @@ export function GenerationPanel() {
   }, [loadModels])
 
   // Raccourcis clavier
+  const isGenerateShortcutBlocked = isLoading || orchestrator.isEstimating
+
   useKeyboardShortcuts(
     [
       {
         key: 'ctrl+enter',
         handler: () => {
-          if (!isLoading) {
+          if (!isGenerateShortcutBlocked) {
             orchestrator.handleGenerate()
           }
         },
         description: 'Générer un dialogue',
-        enabled: !isLoading,
+        enabled: !isGenerateShortcutBlocked,
       },
       {
         key: 'ctrl+n',
@@ -272,7 +273,7 @@ export function GenerationPanel() {
         description: 'Nouveau dialogue (réinitialiser)',
       },
     ],
-    [isLoading, orchestrator.handleGenerate, orchestrator.handleReset]
+    [isGenerateShortcutBlocked, orchestrator.handleGenerate, orchestrator.handleReset]
   )
 
   const { setActions } = useGenerationActionsStore()
@@ -286,6 +287,7 @@ export function GenerationPanel() {
     handleResetAll: orchestrator.handleResetAll,
     handleResetInstructions: orchestrator.handleResetInstructions,
     handleResetSelections: orchestrator.handleResetSelections,
+    estimateTokens: orchestrator.estimateTokens,
   })
   
   // Mettre à jour la ref quand les handlers changent
@@ -298,6 +300,7 @@ export function GenerationPanel() {
       handleResetAll: orchestrator.handleResetAll,
       handleResetInstructions: orchestrator.handleResetInstructions,
       handleResetSelections: orchestrator.handleResetSelections,
+      estimateTokens: orchestrator.estimateTokens,
     }
   }, [
     orchestrator.handleGenerate,
@@ -307,6 +310,7 @@ export function GenerationPanel() {
     orchestrator.handleResetAll,
     orchestrator.handleResetInstructions,
     orchestrator.handleResetSelections,
+    orchestrator.estimateTokens,
   ])
 
   // Exposer les handlers via le store pour Dashboard
@@ -316,6 +320,7 @@ export function GenerationPanel() {
       handlePreview: handlersRef.current.handlePreview,
       handleExportUnity: handlersRef.current.handleExportUnity,
       handleReset: handlersRef.current.handleReset,
+      estimateTokens: handlersRef.current.estimateTokens,
       isLoading,
       isDirty: draft.isDirty,
       saveStatus: draft.saveStatus,
@@ -330,6 +335,7 @@ export function GenerationPanel() {
       handlePreview: handlersRef.current.handlePreview,
       handleExportUnity: handlersRef.current.handleExportUnity,
       handleReset: handlersRef.current.handleReset,
+      estimateTokens: handlersRef.current.estimateTokens,
       isLoading,
       isDirty: draft.isDirty,
       saveStatus: draft.saveStatus,
@@ -703,40 +709,6 @@ export function GenerationPanel() {
         }}
         onDirty={draft.markDirty}
       />
-
-      {/* Estimation unifiée (même composant que graphe) : tokens + coût si backend exposé */
-      (() => {
-        const tokenCount = orchestrator.tokenCount
-        const result = tokenCount != null
-          ? {
-              prompt_tokens: tokenCount,
-              completion_tokens: orchestrator.completionTokens ?? 0,
-              estimated_cost_eur: orchestrator.estimatedCostEur,
-            }
-          : null
-        const state = orchestrator.isEstimating
-          ? 'loading'
-          : orchestrator.estimationError
-            ? 'error'
-            : result != null
-              ? 'success'
-              : 'idle'
-        return (
-          <div style={{ marginTop: '0.75rem' }}>
-            <EstimationBadge
-              result={result}
-              state={state}
-              error={orchestrator.estimationError}
-              onEstimate={orchestrator.estimateTokens}
-              budgetExceeded={false}
-              budgetWarning90={false}
-              showWhenIdle={true}
-            />
-          </div>
-        )
-      })()}
-
-
 
       {error && (
         <div style={{ 

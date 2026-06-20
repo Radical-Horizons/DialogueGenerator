@@ -1,11 +1,29 @@
 """Service pour gérer la configuration et le filtrage des champs de contexte."""
 import logging
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+from services.gdd_sections_split import extract_gdd_field_value
 
 if TYPE_CHECKING:
     from core.context.context_builder import ContextBuilder
 
 logger = logging.getLogger(__name__)
+
+# Repli excerpt lorsque les chemins config n'ont pas de valeur sur la fiche (structure Notion shard).
+_EXCERPT_FALLBACK_PATHS: Dict[str, tuple[str, ...]] = {
+    "character": (
+        "Introduction.Résumé de la fiche",
+        "Nom",
+    ),
+    "location": (
+        "Introduction.Résumé de la fiche",
+        "Nom",
+        "Description",
+    ),
+    "item": ("Introduction.Résumé de la fiche", "Nom"),
+    "species": ("Introduction.Résumé de la fiche", "Nom"),
+    "community": ("Introduction.Résumé de la fiche", "Nom"),
+}
 
 
 class ContextFieldManager:
@@ -75,6 +93,89 @@ class ContextFieldManager:
         if priority_one_fields:
             return list(dict.fromkeys(priority_one_fields))
         return custom_fields
+
+    @staticmethod
+    def _field_has_content(element_data: Dict[str, Any], field_path: str) -> bool:
+        """True si le chemin produit une valeur non vide sur cette fiche."""
+        value = extract_gdd_field_value(element_data, field_path)
+        if value is None:
+            return False
+        if isinstance(value, str):
+            return bool(value.strip())
+        if isinstance(value, (list, dict)):
+            return len(value) > 0
+        return True
+
+    @staticmethod
+    def _discover_summary_section_paths(element_data: Dict[str, Any]) -> List[str]:
+        """Repère les sections résumé (clés ``re_sume*``, ``resume*``) dans les fiches shard."""
+        sections = element_data.get("sections")
+        if not isinstance(sections, dict):
+            return []
+        paths: List[str] = []
+        for key in sections:
+            key_lower = str(key).lower()
+            if "resume" in key_lower or "re_sume" in key_lower or "summary" in key_lower:
+                paths.append(f"sections.{key}")
+        return paths
+
+    def _fields_with_content(
+        self,
+        element_data: Dict[str, Any],
+        field_paths: List[str],
+    ) -> List[str]:
+        """Conserve uniquement les chemins qui ont une valeur sur ``element_data``."""
+        return [path for path in field_paths if self._field_has_content(element_data, path)]
+
+    def resolve_fields_for_element(
+        self,
+        element_type: str,
+        element_data: Dict[str, Any],
+        mode: str,
+        custom_fields: Optional[List[str]] = None,
+        include_dialogue_type: bool = True,
+    ) -> Optional[List[str]]:
+        """Résout les champs à inclure pour une fiche, avec repli excerpt si config vide.
+
+        Args:
+            element_type: Type d'élément (character, location, …).
+            element_data: Données GDD de la fiche.
+            mode: ``full`` ou ``excerpt``.
+            custom_fields: Surcharge champs (mode full).
+            include_dialogue_type: Inclure les champs conditionnés au type de dialogue.
+
+        Returns:
+            Liste de chemins prêts pour l'organizer, ou ``None`` en mode full sans filtre explicite.
+        """
+        if mode == "full":
+            if custom_fields is None:
+                return None
+            populated = self._fields_with_content(element_data, custom_fields)
+            if not populated:
+                return None
+            return self.filter_fields_by_condition_flags(
+                element_type, populated, include_dialogue_type=include_dialogue_type
+            )
+
+        candidate_paths: List[str] = []
+        configured = self.get_field_config_for_mode(element_type, "excerpt", custom_fields) or []
+        candidate_paths.extend(configured)
+        candidate_paths.extend(_EXCERPT_FALLBACK_PATHS.get(element_type.lower(), ()))
+        candidate_paths.extend(self._discover_summary_section_paths(element_data))
+
+        deduped_candidates = list(dict.fromkeys(candidate_paths))
+        populated = self._fields_with_content(element_data, deduped_candidates)
+        if not populated:
+            logger.warning(
+                "Mode excerpt sans contenu pour %s '%s' — aucun champ exploitable.",
+                element_type,
+                element_data.get("Nom", "?"),
+            )
+            return []
+
+        return self.filter_fields_by_condition_flags(
+            element_type, populated, include_dialogue_type=include_dialogue_type
+        )
     
     def filter_fields_by_condition_flags(
         self,

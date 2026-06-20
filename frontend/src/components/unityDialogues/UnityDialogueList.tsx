@@ -5,7 +5,7 @@
  * la gestion locale du raccourci `/` (focus champ recherche) et de
  * l'exposition du `refresh()` via ref impérative.
  */
-import { useCallback, useEffect, useImperativeHandle, forwardRef, useRef, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, forwardRef, useMemo, useRef, useState } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
 import type { UnityDialogueMetadata } from '../../types/api'
@@ -17,6 +17,27 @@ import {
 import { StyledSelect } from '../shared/StyledSelect'
 import { useDialogueListData } from '../../hooks/useDialogueListData'
 import { normalizeDialogueFilenameKey } from '../../utils/formatDialogueTitle'
+import { useToast } from '../shared'
+import { useBatchUnityExport, toDocumentId } from '../../hooks/useBatchUnityExport'
+import { useDocumentSchemaValidation } from '../../hooks/useDocumentSchemaValidation'
+import { useUnityExportPreview } from '../../hooks/useUnityExportPreview'
+import { BatchExportToolbar } from './BatchExportToolbar'
+import { BatchExportSummaryBanner } from './BatchExportSummaryBanner'
+import { ExportPreviewModal } from './ExportPreviewModal'
+import { ExportLogsPanel } from './ExportLogsPanel'
+import { DownloadExportOptionsPanel } from './DownloadExportOptionsPanel'
+import { SchemaValidationPanel } from '../graph/SchemaValidationPanel'
+import {
+  loadDownloadExportOptions,
+  saveDownloadExportOptions,
+  type DownloadExportOptions,
+} from '../../utils/downloadExportOptions'
+import { downloadAllExportedFiles, downloadPersistedUnityDialogue } from '../../utils/unityExportDownload'
+import { useGraphStore } from '../../store/graphStore'
+import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
+
+const BATCH_UNSAVED_WARNING =
+  'Le dialogue ouvert a des modifications non sauvegardées. Sauvegardez avant de l’inclure dans l’export batch.'
 
 interface UnityDialogueListProps {
   onSelectDialogue: (dialogue: UnityDialogueMetadata | null) => void
@@ -29,6 +50,18 @@ export interface UnityDialogueListRef {
 
 export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueListProps>(
   function UnityDialogueList({ onSelectDialogue, selectedFilename }, ref) {
+  const toast = useToast()
+  const batch = useBatchUnityExport(toast)
+  const [downloadOptions, setDownloadOptionsState] = useState<DownloadExportOptions>(() =>
+    loadDownloadExportOptions(),
+  )
+  const [showDownloadOptionsPanel, setShowDownloadOptionsPanel] = useState(false)
+  const [showExportLogsPanel, setShowExportLogsPanel] = useState(false)
+  const [isBatchDownloading, setIsBatchDownloading] = useState(false)
+  const docSchemaValidation = useDocumentSchemaValidation()
+  const hasUnsavedChanges = useGraphStore((s) => s.hasUnsavedChanges)
+  const openDocumentId = useGraphStore((s) => s.documentId)
+  const openFilename = useGraphStore((s) => s.dialogueMetadata.filename)
   const {
     filteredDialogues,
     total,
@@ -43,6 +76,24 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
   } = useDialogueListData()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [contextMenu, setContextMenu] = useState<DialogueListContextMenuState | null>(null)
+  const batchPreview = useUnityExportPreview(
+    toast,
+    {
+      setShowSchemaValidationPanel: () => undefined,
+      setSchemaValidationLoading: () => undefined,
+      setSchemaValidationIsValid: () => undefined,
+      setSchemaValidationErrors: () => undefined,
+      setSchemaValidationErrorCount: () => undefined,
+      setSchemaValidationWarnings: () => undefined,
+      setSchemaValidationStructuredErrors: () => undefined,
+    },
+    { registerSuccessfulExport: () => undefined },
+  )
+
+  const filteredDocumentIds = useMemo(
+    () => filteredDialogues.map((d) => toDocumentId(d.filename)),
+    [filteredDialogues],
+  )
 
   const handleItemContextMenu = useCallback(
     (dialogue: UnityDialogueMetadata, e: React.MouseEvent) => {
@@ -84,6 +135,82 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
       onSelectDialogue(dialogue)
     }
   }
+
+  const handleValidateDocumentSchema = useCallback(
+    (dialogue: UnityDialogueMetadata) => {
+      const docId = toDocumentId(dialogue.filename)
+      void docSchemaValidation.validateDocument(docId, getDialogueDisplayTitle(dialogue))
+    },
+    [docSchemaValidation],
+  )
+
+  const handleStartBatchPreview = useCallback(async () => {
+    const ids = Array.from(batch.checkedDocumentIds)
+    if (ids.length === 0) {
+      return
+    }
+    await batchPreview.handleBatchPreviewExport(ids)
+  }, [batch.checkedDocumentIds, batchPreview])
+
+  const handleStartBatchExport = useCallback(() => {
+    const ids = Array.from(batch.checkedDocumentIds)
+    const currentDocKey = normalizeDialogueFilenameKey(
+      openDocumentId ?? openFilename ?? '',
+    )
+    if (
+      hasUnsavedChanges &&
+      currentDocKey &&
+      ids.some((id) => normalizeDialogueFilenameKey(id) === currentDocKey)
+    ) {
+      toast(BATCH_UNSAVED_WARNING, 'warning')
+      return
+    }
+    void batch.startBatchExport(ids)
+  }, [
+    batch,
+    hasUnsavedChanges,
+    openDocumentId,
+    openFilename,
+    toast,
+  ])
+
+  const setDownloadOptions = useCallback((options: DownloadExportOptions) => {
+    setDownloadOptionsState(options)
+    saveDownloadExportOptions(options)
+  }, [])
+
+  const handleDownloadAllExported = useCallback(async () => {
+    if (!batch.batchSummary || batch.batchSummary.exportedFilenames.length === 0) {
+      return
+    }
+    try {
+      await downloadAllExportedFiles(
+        batch.batchSummary.exportedFilenames,
+        downloadOptions,
+        setIsBatchDownloading,
+      )
+    } catch (err) {
+      toast(`Erreur téléchargement : ${err instanceof Error ? err.message : String(err)}`, 'error')
+    }
+  }, [batch.batchSummary, downloadOptions, toast])
+
+  const handleDownloadDialogue = useCallback(
+    async (dialogue: UnityDialogueMetadata) => {
+      const docId = toDocumentId(dialogue.filename)
+      try {
+        await downloadPersistedUnityDialogue(
+          docId,
+          dialogue.filename,
+          downloadOptions,
+          setIsBatchDownloading,
+          dialogue.title,
+        )
+      } catch (err) {
+        toast(`Erreur téléchargement : ${err instanceof Error ? err.message : String(err)}`, 'error')
+      }
+    },
+    [toast, downloadOptions],
+  )
 
   if (isLoading) {
     return (
@@ -185,13 +312,94 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           {searchQuery && ` (sur ${total} total)`}
         </div>
       </div>
+
+      <BatchExportToolbar
+        checkedCount={batch.checkedDocumentIds.size}
+        filteredCount={filteredCount}
+        isBatchExporting={batch.isBatchExporting}
+        batchProgress={batch.batchProgress}
+        showOptionsPanel={batch.showOptionsPanel}
+        batchOptions={batch.batchOptions}
+        onToggleSelectAll={() => {
+          if (batch.checkedDocumentIds.size === filteredDocumentIds.length) {
+            batch.clearChecks()
+          } else {
+            batch.selectAllFiltered(filteredDocumentIds)
+          }
+        }}
+        onStartExport={handleStartBatchExport}
+        onStartPreview={() => void handleStartBatchPreview()}
+        onCancelExport={batch.cancelBatchExport}
+        onToggleOptions={() => batch.setShowOptionsPanel(!batch.showOptionsPanel)}
+        onOptionsChange={batch.setBatchOptions}
+      />
+
+      <div style={{ padding: '0 0.5rem' }}>
+        <button
+          type="button"
+          data-testid="export-logs-toggle"
+          onClick={() => setShowExportLogsPanel(true)}
+          style={{
+            marginTop: '0.35rem',
+            marginRight: '0.35rem',
+            padding: '0.3rem 0.5rem',
+            fontSize: remSize('small'),
+            border: `1px solid ${theme.border.primary}`,
+            borderRadius: '4px',
+            backgroundColor: theme.button.default.background,
+            color: theme.button.default.color,
+            cursor: 'pointer',
+          }}
+        >
+          Logs d&apos;export
+        </button>
+        <button
+          type="button"
+          data-testid="download-export-options-toggle"
+          onClick={() => setShowDownloadOptionsPanel((open) => !open)}
+          style={{
+            marginTop: '0.35rem',
+            padding: '0.3rem 0.5rem',
+            fontSize: remSize('small'),
+            border: `1px solid ${theme.border.primary}`,
+            borderRadius: '4px',
+            backgroundColor: theme.button.default.background,
+            color: theme.button.default.color,
+            cursor: 'pointer',
+          }}
+        >
+          Options téléchargement
+        </button>
+        {showDownloadOptionsPanel && (
+          <div style={{ marginTop: '0.35rem' }}>
+            <DownloadExportOptionsPanel options={downloadOptions} onChange={setDownloadOptions} />
+          </div>
+        )}
+      </div>
+
+      {batch.batchSummary && (
+        <BatchExportSummaryBanner
+          summary={batch.batchSummary}
+          isDownloading={isBatchDownloading}
+          onDismiss={batch.dismissSummary}
+          onRetryFailed={() => {
+            void batch.retryFailedExports()
+          }}
+          onDownloadAll={() => {
+            void handleDownloadAllExported()
+          }}
+        />
+      )}
+
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '0.5rem', minHeight: 0 }}>
         {filteredDialogues.length === 0 ? (
           <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: remSize('body'), color: theme.text.secondary }}>
             {searchQuery ? 'Aucun dialogue trouvé' : 'Aucun dialogue Unity'}
           </div>
         ) : (
-          filteredDialogues.map((dialogue) => (
+          filteredDialogues.map((dialogue) => {
+            const docId = toDocumentId(dialogue.filename)
+            return (
             <UnityDialogueItem
               key={dialogue.filename}
               dialogue={dialogue}
@@ -202,8 +410,17 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
                 normalizeDialogueFilenameKey(selectedFilename) === normalizeDialogueFilenameKey(dialogue.filename)
               }
               searchQuery={searchQuery}
+              batchMode
+              isChecked={batch.checkedDocumentIds.has(docId)}
+              onCheckChange={(checked) => {
+                const isChecked = batch.checkedDocumentIds.has(docId)
+                if (checked !== isChecked) {
+                  batch.toggleDocumentCheck(docId)
+                }
+              }}
             />
-          ))
+            )
+          })
         )}
       </div>
       {contextMenu && (
@@ -211,8 +428,59 @@ export const UnityDialogueList = forwardRef<UnityDialogueListRef, UnityDialogueL
           state={contextMenu}
           onClose={() => setContextMenu(null)}
           onSelect={(dialogue) => onSelectDialogue(dialogue)}
+          onValidateSchema={handleValidateDocumentSchema}
+          onDownload={(dialogue) => {
+            void handleDownloadDialogue(dialogue)
+          }}
           onDeleted={() => refresh()}
         />
+      )}
+      <SchemaValidationPanel
+        isOpen={docSchemaValidation.isOpen}
+        isLoading={docSchemaValidation.isLoading}
+        isValid={docSchemaValidation.isValid}
+        errors={docSchemaValidation.errors}
+        errorCount={docSchemaValidation.errorCount}
+        warnings={docSchemaValidation.warnings}
+        structuredErrors={docSchemaValidation.structuredErrors}
+        onClose={docSchemaValidation.close}
+      />
+      <ExportPreviewModal
+        isOpen={batchPreview.previewOpen && batchPreview.previewMode === 'batch'}
+        mode="batch"
+        isLoading={batchPreview.previewLoading}
+        error={batchPreview.previewError}
+        batchPreview={batchPreview.batchPreview}
+        onClose={batchPreview.closePreview}
+      />
+      {showExportLogsPanel && (
+        <div
+          role="dialog"
+          aria-label="Logs d'export"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1900,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+            display: 'flex',
+            alignItems: 'stretch',
+            justifyContent: 'flex-end',
+          }}
+          onClick={() => setShowExportLogsPanel(false)}
+        >
+          <div
+            style={{
+              width: 'min(520px, 96vw)',
+              height: '100%',
+              backgroundColor: theme.background.panel,
+              borderLeft: `1px solid ${theme.border.primary}`,
+              overflow: 'auto',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExportLogsPanel onClose={() => setShowExportLogsPanel(false)} />
+          </div>
+        </div>
       )}
     </div>
   )

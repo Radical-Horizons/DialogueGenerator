@@ -7,6 +7,7 @@ import type { SceneSelection } from '../types/generation'
 import { useContextStore } from '../store/contextStore'
 import { useGenerationStore } from '../store/generationStore'
 import { suggestionRefreshAfterSceneChange } from '../utils/contextSuggestionSync'
+import { mergeContextCharacterNames } from '../utils/gddEntityNames'
 
 export interface SceneSelectionData {
   characters: string[]
@@ -226,74 +227,98 @@ export function useSceneSelection() {
     })
   }, [storeSceneSelection])
 
-  // Synchronisation avec contextStore : mapper les sélections de contexte vers la sélection de scène
-  // MAIS seulement si l'état local est vide ET que le store n'a pas de valeurs sauvegardées
+  // Contexte GDD → scène : les 2 premiers personnages alimentent PJ/PNJ (indépendamment du lieu).
   useEffect(() => {
-    // Ne pas synchroniser si le store a déjà des valeurs (priorité au draft sauvegardé)
-    const hasStoreSelection = storeSceneSelection.characterA || storeSceneSelection.characterB || storeSceneSelection.sceneRegion
+    const storeHasCharacters =
+      storeSceneSelection.characterA || storeSceneSelection.characterB
+    if (storeHasCharacters) {
+      return
+    }
+
+    const characters = useContextStore.getState().characters
+    const allCharacters = mergeContextCharacterNames(
+      Array.isArray(contextSelections.characters_full) ? contextSelections.characters_full : [],
+      Array.isArray(contextSelections.characters_excerpt) ? contextSelections.characters_excerpt : [],
+      characters,
+    )
+    const characterA = allCharacters[0] ?? null
+    const characterB = allCharacters[1] ?? null
+
+    setSelection((prev) => {
+      if (prev.characterA === characterA && prev.characterB === characterB) {
+        return prev
+      }
+      return {
+        ...prev,
+        characterA,
+        characterB,
+      }
+    })
+  }, [
+    contextSelections.characters_full,
+    contextSelections.characters_excerpt,
+    storeSceneSelection.characterA,
+    storeSceneSelection.characterB,
+  ])
+
+  // Contexte GDD → scène : lieux (seulement si scène entièrement vide côté store).
+  useEffect(() => {
+    const hasStoreSelection =
+      storeSceneSelection.characterA ||
+      storeSceneSelection.characterB ||
+      storeSceneSelection.sceneRegion
     if (hasStoreSelection) {
       return
     }
 
     setSelection((prevSelection) => {
-      // Ne synchroniser que si la sélection de scène est vide (pour éviter d'écraser les sélections manuelles)
-      const hasSceneSelection = prevSelection.characterA || prevSelection.characterB || prevSelection.sceneRegion
-      
+      const hasSceneSelection =
+        prevSelection.characterA || prevSelection.characterB || prevSelection.sceneRegion
+
       if (hasSceneSelection) {
         return prevSelection
       }
-      
-      // Mapper les personnages : les 2 premiers deviennent characterA et characterB
-      // Fusionner les listes full et excerpt
-      const allCharacters = [
-        ...(Array.isArray(contextSelections.characters_full) ? contextSelections.characters_full : []),
-        ...(Array.isArray(contextSelections.characters_excerpt) ? contextSelections.characters_excerpt : [])
-      ]
-      const characterA = allCharacters[0] || null
-      const characterB = allCharacters[1] || null
-      
-      // Mapper les lieux : le premier lieu devient sceneRegion ou subLocation
+
       let sceneRegion: string | null = null
       let subLocation: string | null = null
-      
-      // Si une région est sélectionnée dans contextStore, l'utiliser
+
       if (contextRegion) {
         sceneRegion = contextRegion
-        // Si des sous-lieux sont sélectionnés, utiliser le premier
         if (contextSubLocations.length > 0) {
           subLocation = contextSubLocations[0]
         }
       } else {
-        // Fusionner les listes full et excerpt pour les lieux
         const allLocations = [
           ...(Array.isArray(contextSelections.locations_full) ? contextSelections.locations_full : []),
-          ...(Array.isArray(contextSelections.locations_excerpt) ? contextSelections.locations_excerpt : [])
+          ...(Array.isArray(contextSelections.locations_excerpt) ? contextSelections.locations_excerpt : []),
         ]
         if (allLocations.length > 0) {
-          // Sinon, utiliser le premier lieu de la liste
-          // On suppose que c'est une région (pas un sous-lieu)
           sceneRegion = allLocations[0]
         }
       }
-      
-      // Mettre à jour seulement si quelque chose a changé
+
       if (
-        characterA !== prevSelection.characterA ||
-        characterB !== prevSelection.characterB ||
         sceneRegion !== prevSelection.sceneRegion ||
         subLocation !== prevSelection.subLocation
       ) {
         return {
-          characterA,
-          characterB,
+          ...prevSelection,
           sceneRegion,
           subLocation,
         }
       }
-      
+
       return prevSelection
     })
-  }, [contextSelections, contextRegion, contextSubLocations, storeSceneSelection.characterA, storeSceneSelection.characterB, storeSceneSelection.sceneRegion])
+  }, [
+    contextSelections.locations_full,
+    contextSelections.locations_excerpt,
+    contextRegion,
+    contextSubLocations,
+    storeSceneSelection.characterA,
+    storeSceneSelection.characterB,
+    storeSceneSelection.sceneRegion,
+  ])
 
   // Synchronisation inverse : mettre à jour contextStore quand sceneSelection change
   useEffect(() => {

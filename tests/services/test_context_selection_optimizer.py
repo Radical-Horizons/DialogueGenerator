@@ -43,6 +43,7 @@ def test_optimize_no_op_when_under_budget() -> None:
     def fake_metrics(_b, *, full_selection, **kwargs):
         return ContextSelectionTokenMetrics(
             selection_tokens=100,
+            context_tokens=100,
             breakdown=[],
             breakdown_note="test",
         )
@@ -89,6 +90,7 @@ def test_optimize_moves_full_to_excerpt_until_budget(monkeypatch: pytest.MonkeyP
     def fake_metrics(_b, *, full_selection, **kwargs):
         return ContextSelectionTokenMetrics(
             selection_tokens=token_fn(full_selection),
+            context_tokens=token_fn(full_selection),
             breakdown=[],
             breakdown_note="test",
         )
@@ -128,6 +130,7 @@ def test_pinned_skipped(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_metrics(_b, *, full_selection, **kwargs):
         return ContextSelectionTokenMetrics(
             selection_tokens=token_fn(full_selection),
+            context_tokens=token_fn(full_selection),
             breakdown=[],
             breakdown_note="test",
         )
@@ -163,6 +166,7 @@ def test_proxy_warning_below_threshold(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_metrics(_b, *, full_selection, **kwargs):
         return ContextSelectionTokenMetrics(
             selection_tokens=token_fn(full_selection),
+            context_tokens=token_fn(full_selection),
             breakdown=[],
             breakdown_note="test",
         )
@@ -196,6 +200,7 @@ def test_budget_respected_false_when_impossible(monkeypatch: pytest.MonkeyPatch)
     def fake_metrics(_b, *, full_selection, **kwargs):
         return ContextSelectionTokenMetrics(
             selection_tokens=token_fn(full_selection),
+            context_tokens=token_fn(full_selection),
             breakdown=[],
             breakdown_note="test",
         )

@@ -34,6 +34,7 @@ jobs:
           ENVIRONMENT: development
           JWT_SECRET_KEY: ci-dummy-secret
           OPENAI_API_KEY: sk-dummy
+          PROMETHEUS_ENABLED: "false"
         run: python -m pytest tests/ -m "not slow" -v --tb=short
 
       - name: Run tests (push main — suite complète, tier T3)
@@ -42,6 +43,7 @@ jobs:
           ENVIRONMENT: development
           JWT_SECRET_KEY: ci-dummy-secret
           OPENAI_API_KEY: sk-dummy
+          PROMETHEUS_ENABLED: "false"
         run: python -m pytest tests/ -v --tb=short
 
   frontend:

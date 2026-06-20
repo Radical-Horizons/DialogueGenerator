@@ -9,12 +9,17 @@ import type {
   GenerateUnityDialogueResponse,
   ExportUnityDialogueRequest,
   ExportUnityDialogueResponse,
+  BatchExportRequest,
+  BatchExportResponse,
+  BatchExportPreviewRequest,
+  BatchExportPreviewResponse,
   EstimateTokensRequest,
   EstimateTokensResponse,
   PreviewPromptRequest,
   PreviewPromptResponse,
   GenerationJobStatus,
 } from '../types/api'
+import type { ValidateSchemaResponse, ExportPreviewResponse } from '../types/graph'
 
 // NOTE: generateDialogueVariants et generateInteractionVariants ont été supprimés. Utiliser generateUnityDialogue à la place.
 
@@ -86,9 +91,13 @@ export async function getGenerationJobStatus(job_id: string): Promise<Generation
  * uniquement (sans estimation), utiliser previewPrompt à la place.
  */
 export async function estimateTokens(
-  request: EstimateTokensRequest
+  request: EstimateTokensRequest,
+  signal?: AbortSignal
 ): Promise<EstimateTokensResponse> {
-  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/dialogues/estimate-tokens', request)
+  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/dialogues/estimate-tokens', request, {
+    signal,
+    timeout: API_TIMEOUTS.CONTEXT_ESTIMATION,
+  })
   return response.data
 }
 
@@ -124,6 +133,91 @@ export async function exportUnityDialogue(
   const response = await apiClient.post<ExportUnityDialogueResponse>(
     '/api/v1/dialogues/unity/export',
     request
+  )
+  return response.data
+}
+
+/**
+ * Valide un document persisté contre le schéma Unity (Story 5.3 / FR51).
+ */
+export async function validateDocumentSchema(documentId: string): Promise<ValidateSchemaResponse> {
+  const response = await apiClient.post<ValidateSchemaResponse>(
+    `/api/v1/dialogues/${encodeURIComponent(documentId)}/validate-schema`,
+  )
+  return response.data
+}
+
+/**
+ * Export batch de dialogues persistés vers Unity JSON (Story 5.2).
+ */
+export async function batchExportUnityDialogues(
+  request: BatchExportRequest,
+  signal?: AbortSignal,
+): Promise<BatchExportResponse> {
+  const response = await apiClient.post<BatchExportResponse>(
+    '/api/v1/dialogues/batch-export',
+    request,
+    { signal },
+  )
+  return response.data
+}
+
+/**
+ * Preview export batch bibliothèque (Story 5.5 / FR53).
+ */
+export async function batchPreviewUnityDialogues(
+  request: BatchExportPreviewRequest,
+  signal?: AbortSignal,
+): Promise<BatchExportPreviewResponse> {
+  const response = await apiClient.post<BatchExportPreviewResponse>(
+    '/api/v1/dialogues/batch-preview-export',
+    request,
+    { signal },
+  )
+  return response.data
+}
+
+/**
+ * Preview export d'un dialogue persisté (Story 5.5 / FR53).
+ */
+export async function previewUnityDialogueExport(
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<ExportPreviewResponse> {
+  const response = await apiClient.get<ExportPreviewResponse>(
+    `/api/v1/dialogues/${encodeURIComponent(documentId)}/preview-export`,
+    { signal },
+  )
+  return response.data
+}
+
+export interface BatchDownloadRequest {
+  filenames: string[]
+  compression?: 'store' | 'deflate'
+}
+
+/**
+ * Télécharge une archive ZIP des fichiers exportés (Story 5.4 / FR52).
+ */
+export async function batchDownloadUnityDialogues(
+  request: BatchDownloadRequest,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  const response = await apiClient.post<Blob>(
+    '/api/v1/dialogues/batch-download',
+    request,
+    { responseType: 'blob', signal },
+  )
+  return response.data
+}
+
+/**
+ * Télécharge un dialogue Unity exporté sur disque (Story 5.4 / FR52).
+ */
+export async function downloadUnityDialogue(documentId: string, signal?: AbortSignal): Promise<Blob> {
+  const response = await apiClient.get<Blob>(
+    `/api/v1/dialogues/${encodeURIComponent(documentId)}/download`,
+    { responseType: 'blob', signal },
   )
   return response.data
 }

@@ -13,7 +13,7 @@ alwaysApply: false
 - **Gestion d'erreurs**: Exceptions hiérarchisées (`api/exceptions.py`), handler global, logging structuré avec request_id. Voir `.cursor/rules/logging.mdc` pour le système de logs complet (archivage, API de consultation).
 - **Sécurité**: HTTPS en production, CORS configuré, validation inputs, pas de secrets dans logs/réponses. Les endpoints de debug/diagnostic doivent être gardés via une dépendance partagée et rester désactivés par défaut hors développement, sauf override explicite de configuration.
 - **Cache HTTP**: Désactivé automatiquement en développement (middleware `DevNoCacheMiddleware`), activé en production avec TTL configurable. Voir `api/middleware/http_cache.py`.
-- **Documentation**: OpenAPI/Swagger automatique via FastAPI (`/api/docs`), maintenir les docstrings.
+- **Documentation**: OpenAPI/Swagger en dev (`/api/docs`, `/api/openapi.json`). Contrats détaillés : `docs/api/api-contracts-api.md`. **Invocation agents** : `.cursor/skills/api-runbook/SKILL.md` + `scripts/Invoke-DialogueApi.ps1` (pas `README_API.md` seul — quickstart partiel).
 - **Tests**: `tests/api/` avec pytest, tests unitaires routers + intégration API, mocks pour services externes.
 - **Commande dev**: `npm run dev` (depuis racine, lance tout) ou `python -m api.main` (API seul).
-- **Références**: Voir `README_API.md` pour détails complets, `docs/DEPLOYMENT.md` pour déploiement.
+- **Références**: `docs/api/api-contracts-api.md` (contrats), `.cursor/skills/api-runbook/SKILL.md` (appels agents), `README_API.md` (quickstart humain).

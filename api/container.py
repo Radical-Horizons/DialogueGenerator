@@ -23,6 +23,7 @@ from services.trait_catalog_service import TraitCatalogService
 from services.preset_service import PresetService
 from services.dialogue_generation_service import DialogueGenerationService
 from services.llm_usage_service import LLMUsageService
+from services.export_log_service import ExportLogService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from services.linked_selector import LinkedSelectorService
 from services.notion_import_service import NotionImportService
@@ -61,6 +62,7 @@ class ServiceContainer:
         self._preset_service: Optional[PresetService] = None
         self._dialogue_generation_service: Optional[DialogueGenerationService] = None
         self._llm_usage_service: Optional[LLMUsageService] = None
+        self._export_log_service: Optional[ExportLogService] = None
         self._unity_generation_service: Optional[UnityDialogueGenerationService] = None
         self._graph_node_orchestrator: Optional["GraphNodeOrchestrator"] = None
         self._linked_selector_service: Optional[LinkedSelectorService] = None
@@ -228,6 +230,17 @@ class ServiceContainer:
             self._llm_usage_service = create_llm_usage_service()
             logger.info("LLMUsageService initialisé dans le container.")
         return self._llm_usage_service
+    
+    def get_export_log_service(self) -> ExportLogService:
+        """Retourne le service de logs export Unity.
+
+        Returns:
+            Instance de ExportLogService.
+        """
+        if self._export_log_service is None:
+            self._export_log_service = ExportLogService()
+            logger.info("ExportLogService initialisé dans le container.")
+        return self._export_log_service
     
     def get_unity_dialogue_generation_service(self) -> UnityDialogueGenerationService:
         """Retourne le service de génération Unity Dialogue.

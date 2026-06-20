@@ -603,6 +603,7 @@ from api.routers import (
     costs,
     dialogues,
     documents,
+    exports,
     graph_cost,
     graph_flow,
     graph_generation,
@@ -628,6 +629,7 @@ app.include_router(documents.router, prefix="/api/v1/documents", tags=["Document
 app.include_router(context.router, prefix="/api/v1/context", tags=["Context"])
 app.include_router(config.router, prefix="/api/v1/config", tags=["Configuration"])
 app.include_router(llm_usage.router, prefix="/api/v1/llm-usage", tags=["LLM Usage"])
+app.include_router(exports.router, prefix="/api/v1/exports", tags=["Exports"])
 app.include_router(costs.router, prefix="/api/v1/costs", tags=["Cost Governance"])
 app.include_router(logs.router)
 

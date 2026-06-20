@@ -120,6 +120,28 @@ class GddNotionSyncRunResponse(BaseModel):
     )
 
 
+class GddNotionSyncEntityRequest(BaseModel):
+    """Corps POST sync d'une entité GDD par nom (fuzzy)."""
+
+    name: str = Field(..., description="Libellé utilisateur (ex. Uresaïr, Valkazer Reitar)")
+    category_file: str = Field(
+        default="Personnages.json",
+        description="Fichier cible settings (base Notion database)",
+    )
+
+
+class GddNotionSyncEntityResponse(BaseModel):
+    """Résultat sync ciblée d'une entité."""
+
+    success: bool
+    message: str
+    query_name: str
+    resolved_name: Optional[str] = None
+    notion_page_id: Optional[str] = None
+    gdd_relative_path: Optional[str] = None
+    last_edited_time: Optional[str] = None
+
+
 class GddNotionSyncStatusResponse(BaseModel):
     """Statut persisté de la dernière synchronisation."""
 

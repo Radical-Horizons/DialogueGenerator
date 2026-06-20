@@ -16,6 +16,7 @@ import { useLLMStore } from '../../../store/llmStore'
 import { useAuthorProfile } from '../../../hooks/useAuthorProfile'
 import { useCostGovernance } from '../../../hooks/useCostGovernance'
 import * as dialoguesAPI from '../../../api/dialogues'
+import * as contextAPI from '../../../api/context'
 import * as configAPI from '../../../api/config'
 
 // Mock des stores et hooks
@@ -103,6 +104,7 @@ vi.mock('../../../hooks/useGenerationOrchestrator', () => ({
 
 // Mock des APIs
 vi.mock('../../../api/dialogues')
+vi.mock('../../../api/context')
 vi.mock('../../../api/config')
 
 // Types pour les props des composants mockés
@@ -260,6 +262,7 @@ const mockUseLLMStore = vi.mocked(useLLMStore)
 const mockUseAuthorProfile = vi.mocked(useAuthorProfile)
 const mockUseCostGovernance = vi.mocked(useCostGovernance)
 const mockDialoguesAPI = vi.mocked(dialoguesAPI)
+const mockContextAPI = vi.mocked(contextAPI)
 const mockConfigAPI = vi.mocked(configAPI)
 
 describe('GenerationPanel - Tests Baseline', () => {
@@ -288,6 +291,11 @@ describe('GenerationPanel - Tests Baseline', () => {
       systemPromptOverride: null,
       promptHash: null,
       tokenCount: 0,
+      isEstimating: false,
+      contextEstimationError: null,
+      contextTokenBreakdown: [],
+      contextBreakdownNote: '',
+      previewInputHash: null,
       structuredPrompt: null,
       isGenerating: false,
       streamingContent: '',
@@ -299,6 +307,7 @@ describe('GenerationPanel - Tests Baseline', () => {
       setDialogueStructure: vi.fn(),
       setSystemPromptOverride: vi.fn(),
       setRawPrompt: vi.fn(),
+      setContextTokenEstimate: vi.fn(),
       setSceneSelection: vi.fn(),
       setUnityDialogueResponse: vi.fn(),
       setTokensUsed: vi.fn(),
@@ -428,7 +437,7 @@ describe('GenerationPanel - Tests Baseline', () => {
       status: 'pending',
     } as Awaited<ReturnType<typeof dialoguesAPI.createGenerationJob>>)
 
-    mockDialoguesAPI.estimateTokens.mockResolvedValue({
+    mockContextAPI.estimateContextTokens.mockResolvedValue({
       context_tokens: 0,
       selection_tokens: 0,
       context_token_breakdown: [],
@@ -436,7 +445,7 @@ describe('GenerationPanel - Tests Baseline', () => {
       token_count: 1000,
       raw_prompt: '',
       prompt_hash: 'est-mock',
-    } as Awaited<ReturnType<typeof dialoguesAPI.estimateTokens>>)
+    } as Awaited<ReturnType<typeof contextAPI.estimateContextTokens>>)
 
     mockDialoguesAPI.previewPrompt.mockResolvedValue({
       raw_prompt: '',

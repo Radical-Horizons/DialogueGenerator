@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useShellKeyboardFocusScroller } from '../../hooks/useShellKeyboardFocusScroller'
@@ -9,6 +9,15 @@ import { useGenerationActionsStore } from '../../store/generationActionsStore'
 import { useContextStore } from '../../store/contextStore'
 import { GDD_CONTEXT_PANEL_TITLE } from '../context/constants'
 import { panelHeaderTitleTypography } from '../../theme/responsiveChrome'
+
+const mockContextRefresh = vi.hoisted(() => vi.fn())
+const mockContextSelectorState = vi.hoisted(() => ({
+  loadState: {
+    isLoading: false,
+    error: null as string | null,
+    refresh: mockContextRefresh,
+  },
+}))
 
 // Mock des stores
 vi.mock('../../store/generationStore')
@@ -36,9 +45,25 @@ vi.mock('../graph/GraphEditor', () => ({
   GraphEditor: () => <div data-testid="graph-editor">Graph Editor</div>,
 }))
 
-vi.mock('../context/ContextSelector', () => ({
-  ContextSelector: () => <div data-testid="context-selector">Context Selector</div>,
-}))
+vi.mock('../context/ContextSelector', async () => {
+  const React = await vi.importActual<typeof import('react')>('react')
+
+  return {
+    ContextSelector: ({
+      onLoadStateChange,
+    }: {
+      onLoadStateChange?: (state: typeof mockContextSelectorState.loadState) => void
+    }) => {
+      React.useEffect(() => {
+        if (mockContextSelectorState.loadState.isLoading || mockContextSelectorState.loadState.error) {
+          onLoadStateChange?.(mockContextSelectorState.loadState)
+        }
+      }, [onLoadStateChange])
+
+      return <div data-testid="context-selector">Context Selector</div>
+    },
+  }
+})
 
 vi.mock('../../api/unityDialogues', () => ({
   listUnityDialogues: vi.fn().mockResolvedValue({ dialogues: [], total: 0 }),
@@ -83,6 +108,11 @@ describe('Dashboard', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
+    mockContextSelectorState.loadState = {
+      isLoading: false,
+      error: null,
+      refresh: mockContextRefresh,
+    }
     Dashboard = (await import('./Dashboard')).Dashboard
     
     mockUseGenerationStore.mockReturnValue({
@@ -249,6 +279,122 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /générer/i })).toBeInTheDocument()
     })
+  })
+
+  it('désactive Générer pendant le chargement du contexte', async () => {
+    mockContextSelectorState.loadState = {
+      isLoading: true,
+      error: null,
+      refresh: mockContextRefresh,
+    }
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate: vi.fn(),
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    const generateButton = await screen.findByRole('button', { name: /générer/i })
+    await waitFor(() => {
+      expect(generateButton).toBeDisabled()
+      expect(screen.getByText(/chargement du contexte/i)).toBeInTheDocument()
+    })
+  })
+
+  it('désactive Générer pendant l\'estimation du contexte (sélection fiches)', async () => {
+    mockUseGenerationStore.mockReturnValue({
+      rawPrompt: '',
+      tokenCount: 0,
+      promptHash: null,
+      isEstimating: true,
+      unityDialogueResponse: null,
+      sceneSelection: {
+        characterA: null,
+        characterB: null,
+        sceneRegion: null,
+        subLocation: null,
+      },
+      dialogueStructure: ['', '', '', '', '', ''] as [string, string, string, string, string, string],
+      systemPromptOverride: null,
+      setDialogueStructure: vi.fn(),
+      setSystemPromptOverride: vi.fn(),
+      setRawPrompt: vi.fn(),
+      setSceneSelection: vi.fn(),
+      setUnityDialogueResponse: vi.fn(),
+      tokensUsed: null,
+      setTokensUsed: vi.fn(),
+      clearGenerationResults: vi.fn(),
+    } as ReturnType<typeof useGenerationStore>)
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate: vi.fn(),
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    const generateButton = await screen.findByRole('button', { name: /générer/i })
+    await waitFor(() => {
+      expect(generateButton).toBeDisabled()
+      expect(screen.getByText(/estimation des tokens/i)).toBeInTheDocument()
+    })
+  })
+
+  it('remplace Générer par Rafraîchir le contexte après une erreur de chargement', async () => {
+    const handleGenerate = vi.fn()
+    mockContextSelectorState.loadState = {
+      isLoading: false,
+      error: 'Erreur de chargement',
+      refresh: mockContextRefresh,
+    }
+    mockUseGenerationActionsStore.mockReturnValue({
+      actions: {
+        handleGenerate,
+        handlePreview: vi.fn(),
+        handleExportUnity: vi.fn(),
+        handleReset: vi.fn(),
+        isLoading: false,
+        isDirty: false,
+        saveStatus: 'saved',
+        draftLastSavedAt: null,
+      },
+    } as ReturnType<typeof useGenerationActionsStore>)
+
+    render(
+      <BrowserRouter>
+        <Dashboard />
+      </BrowserRouter>
+    )
+
+    const refreshButton = await screen.findByRole('button', { name: /rafraîchir le contexte/i })
+    expect(refreshButton).toBeEnabled()
+
+    await userEvent.setup().click(refreshButton)
+    expect(mockContextRefresh).toHaveBeenCalledTimes(1)
+    expect(handleGenerate).not.toHaveBeenCalled()
   })
 
   it('affiche le statut brouillon discret quand le brouillon n’est pas synchronisé', async () => {

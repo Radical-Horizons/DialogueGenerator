@@ -38,6 +38,10 @@ class SaveGraphRequest(BaseModel):
     metadata: GraphMetadata = Field(..., description="Métadonnées du graphe")
     seq: Optional[int] = Field(None, description="Séquence monotone côté client (ADR-006)")
     document_id: Optional[str] = Field(None, description="ID stable du document (ex. filename)")
+    dialogue_flags: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="Liaisons dialogueFlags GDD à inclure à l'export (Story 5.3)",
+    )
 
 
 class SaveGraphResponse(BaseModel):
@@ -47,6 +51,17 @@ class SaveGraphResponse(BaseModel):
     json_content: str = Field(..., description="Contenu Unity JSON généré")
     ack_seq: Optional[int] = Field(None, description="Séquence reconnue par le serveur (ADR-006)")
     last_seq: Optional[int] = Field(None, description="Dernier seq connu pour ce document (ADR-006)")
+
+
+class ExportPreviewResponse(BaseModel):
+    """Réponse preview export graphe ou bibliothèque (Story 5.5 / FR53)."""
+
+    json_content: str = Field(..., description="JSON Unity formaté indent 2")
+    size_bytes: int = Field(..., description="Taille UTF-8 en octets")
+    node_count: int = Field(..., description="Nombre de nœuds exportés")
+    filename: str = Field(..., description="Nom de fichier estimé")
+    schema_valid: bool = Field(True, description="Conformité schéma Unity")
+    errors: List[str] = Field(default_factory=list, description="Erreurs validation si invalide")
 
 
 class EstimateCostRequest(BaseModel):
@@ -329,19 +344,42 @@ class ValidateSchemaRequest(BaseModel):
 
     nodes: List[Dict[str, Any]] = Field(..., description="Nœuds ReactFlow")
     edges: List[Dict[str, Any]] = Field(..., description="Arêtes ReactFlow")
+    dialogue_flags: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="Liaisons dialogueFlags GDD pour validation export (Story 5.3)",
+    )
+
+
+class SchemaValidationIssueDetail(BaseModel):
+    """Erreur ou avertissement structuré validation schéma Unity (Story 5.3 / FR51)."""
+
+    code: str = Field(..., description="Code machine stable")
+    message: str = Field(..., description="Message utilisateur en français")
+    path: Optional[str] = Field(default=None, description="Chemin JSON (dot notation)")
+    node_id: Optional[str] = Field(default=None, description="Identifiant nœud si résolu")
 
 
 class ValidateSchemaResponse(BaseModel):
-    """Réponse de validation conformité schéma JSON Unity (FR48 / Story 4.13).
+    """Réponse de validation conformité schéma JSON Unity (FR48 / Story 4.13, FR51).
 
     ``is_valid`` : True si le document Unity produit est 100% conforme au schéma.
     ``errors`` : liste des messages d'erreur (vide si conforme).
     ``error_count`` : raccourci ``len(errors)`` pour faciliter l'affichage UI.
+    ``warnings`` : avertissements GDD non bloquants (Story 5.3).
+    ``structured_errors`` : erreurs structurées avec code/path/node_id.
     """
 
     is_valid: bool = Field(..., description="True si le schéma Unity est conforme à 100%")
     errors: List[str] = Field(..., description="Messages d'erreur détectés")
     error_count: int = Field(..., description="Nombre d'erreurs (== len(errors))")
+    warnings: List[SchemaValidationIssueDetail] = Field(
+        default_factory=list,
+        description="Avertissements non bloquants (seuils GDD, volumétrie)",
+    )
+    structured_errors: List[SchemaValidationIssueDetail] = Field(
+        default_factory=list,
+        description="Erreurs structurées pour navigation vers nœuds",
+    )
 
 
 class CalculateLayoutRequest(BaseModel):

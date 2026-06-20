@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Annotated, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import Response
 
 from api.routers.auth import get_current_user
 from starlette.requests import Request
@@ -17,7 +18,14 @@ from api.schemas.dialogue import (
     GenerateUnityDialogueRequest,
     GenerateUnityDialogueResponse,
     ExportUnityDialogueRequest,
-    ExportUnityDialogueResponse
+    ExportUnityDialogueResponse,
+    BatchExportRequest,
+    BatchExportResponse,
+    BatchExportFailedItemResponse,
+    BatchDownloadRequest,
+    BatchExportPreviewRequest,
+    BatchExportPreviewResponse,
+    BatchExportPreviewItemResponse,
 )
 from pydantic import BaseModel, Field
 from api.dependencies import (
@@ -28,7 +36,9 @@ from api.dependencies import (
     get_llm_pricing_service,
     get_skill_catalog_service,
     get_trait_catalog_service,
-    get_unity_dialogue_orchestrator
+    get_unity_dialogue_orchestrator,
+    get_export_log_service,
+    get_llm_usage_service,
 )
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from api.exceptions import InternalServerException, ValidationException, NotFoundException, OpenAIException
@@ -36,12 +46,35 @@ from services.dialogue_generation_service import DialogueGenerationService
 from services.configuration_service import ConfigurationService
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
-from services.unity_dialogue_export_service import write_unity_dialogue_to_file
+from services.unity_dialogue_export_service import (
+    unity_export_schema_validator,
+    write_unity_dialogue_to_file,
+)
+from services.batch_export_service import batch_export_documents
+from services.export_log_recorder import (
+    extract_validation_errors,
+    record_unity_export_failure,
+    record_unity_export_success,
+)
+from services.export_log_service import ExportLogService
+from services.llm_usage_service import LLMUsageService
+from services.unity_export_validation_service import validate_persisted_document
+from services.unity_dialogue_download_service import (
+    build_batch_download_zip,
+    content_disposition_attachment,
+    read_document_download_payload,
+)
+from services.unity_export_preview_service import (
+    preview_batch_documents,
+    preview_persisted_document,
+)
+from api.utils.validate_schema_api import validate_schema_response_from_result
+from api.schemas.graph import ExportPreviewResponse, ValidateSchemaResponse
 from services.llm_pricing_service import LLMPricingService
 from services.token_estimation_service import DEFAULT_COMPLETION_TOKENS_PER_NODE
 from constants import Defaults
 from services.context_token_budget import compute_context_selection_token_metrics
-from services.context_truncator import cap_context_text_to_budget
+from services.context_truncator import cap_context_text_to_budget, count_tokens_in_prompt_context_element
 from services.unity_dialogue_orchestrator import UnityDialogueOrchestrator
 from core.llm.llm_client import ILLMClient
 
@@ -106,7 +139,7 @@ def _build_prompt_from_request(
     prompt_engine: PromptEngine,
     skill_service: SkillCatalogService,
     trait_service: TraitCatalogService
-) -> BuiltPrompt:
+) -> tuple[BuiltPrompt, Any]:
     """Fonction helper pour construire un prompt à partir d'une requête.
     
     Args:
@@ -117,7 +150,8 @@ def _build_prompt_from_request(
         trait_service: Service de catalogue des traits injecté.
         
     Returns:
-        BuiltPrompt contenant le prompt construit.
+        Tuple ``(BuiltPrompt, structured_context)``. La structure est construite au plafond
+        de mesure puis le texte est plafonné au budget utilisateur pour le LLM.
         
     Raises:
         ValueError: Si le XML généré est invalide.
@@ -153,13 +187,13 @@ def _build_prompt_from_request(
     if request_data.previous_dialogue_preview:
         context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
     
-    # Construire le contexte JSON (obligatoire, plus de fallback)
+    # Construire le contexte JSON au plafond de mesure ; le budget utilisateur s'applique au texte.
     structured_context = context_builder.build_context_json(
         selected_elements=context_selections_dict,
         scene_instruction=request_data.user_instructions,
         field_configs=request_data.field_configs,
         organization_mode=request_data.organization_mode or "narrative",
-        max_tokens=request_data.max_context_tokens,
+        max_tokens=Defaults.MAX_CONTEXT_TOKENS,
         include_dialogue_type=True,
         element_modes=context_selections_dict.get("_element_modes")
     )
@@ -191,7 +225,7 @@ def _build_prompt_from_request(
         llm_model_identifier=request_data.llm_model_identifier,
     )
 
-    return prompt_engine.build_prompt(prompt_input)
+    return prompt_engine.build_prompt(prompt_input), structured_context
 
 
 @router.post(
@@ -245,7 +279,7 @@ async def preview_prompt(
         )
         
         try:
-            built = _build_prompt_from_request(estimate_request, dialogue_service, prompt_engine, skill_service, trait_service)
+            built, _structured_context = _build_prompt_from_request(estimate_request, dialogue_service, prompt_engine, skill_service, trait_service)
         except ValueError as xml_error:
             # Erreur XML détectée - récupérer les détails depuis l'exception
             if "XML invalide" in str(xml_error) and hasattr(xml_error, 'xml_error_details'):
@@ -327,7 +361,7 @@ async def estimate_tokens(
     try:
         # Construire le prompt en réutilisant la fonction helper
         try:
-            built = _build_prompt_from_request(request_data, dialogue_service, prompt_engine, skill_service, trait_service)
+            built, structured_context = _build_prompt_from_request(request_data, dialogue_service, prompt_engine, skill_service, trait_service)
         except ValueError as xml_error:
             # Erreur XML détectée - récupérer les détails depuis l'exception
             if "XML invalide" in str(xml_error) and hasattr(xml_error, 'xml_error_details'):
@@ -346,26 +380,9 @@ async def estimate_tokens(
             # Si pas de détails XML, re-lancer l'erreur originale
             raise
         
-        # Calculer context_tokens (tokens du contexte seul)
         context_builder = dialogue_service.context_builder
-        context_selections_dict = request_data.context_selections.to_service_dict()
         if request_data.previous_dialogue_preview:
             context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
-        
-        structured_context = context_builder.build_context_json(
-            selected_elements=context_selections_dict,
-            scene_instruction=request_data.user_instructions,
-            field_configs=request_data.field_configs,
-            organization_mode=request_data.organization_mode or "narrative",
-            max_tokens=request_data.max_context_tokens,
-            include_dialogue_type=True,
-            element_modes=context_selections_dict.get("_element_modes")
-        )
-        context_text = cap_context_text_to_budget(
-            context_builder.serialize_context_to_text(structured_context),
-            request_data.max_context_tokens,
-        )
-        context_tokens = context_builder._count_tokens(context_text)
 
         metrics = compute_context_selection_token_metrics(
             context_builder,
@@ -374,6 +391,14 @@ async def estimate_tokens(
             field_configs=request_data.field_configs,
             organization_mode=request_data.organization_mode or "narrative",
             measurement_max_tokens=Defaults.MAX_CONTEXT_TOKENS,
+            user_budget_max_tokens=request_data.max_context_tokens,
+            prebuilt_structure=structured_context,
+        )
+        ctx_in_prompt = count_tokens_in_prompt_context_element(built.raw_prompt)
+        context_tokens = (
+            ctx_in_prompt
+            if ctx_in_prompt > 0
+            else metrics.context_tokens
         )
         
         # Convertir structured_prompt en dict pour la réponse
@@ -462,6 +487,8 @@ async def export_unity_dialogue(
     request_data: ExportUnityDialogueRequest,
     request: Request,
     config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
+    llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
     request_id: Annotated[str, Depends(get_request_id)]
 ) -> ExportUnityDialogueResponse:
     """Exporte un dialogue Unity JSON vers un fichier.
@@ -479,25 +506,294 @@ async def export_unity_dialogue(
         ValidationException: Si le chemin Unity n'est pas configuré ou si le JSON est invalide.
         InternalServerException: Si l'écriture du fichier échoue.
     """
+    target_filename = request_data.filename or "dialogue.json"
+    parsed_document: Dict[str, Any] | None = None
     try:
+        parsed = json.loads(request_data.json_content)
+        if isinstance(parsed, dict):
+            parsed_document = parsed
+        elif isinstance(parsed, list):
+            parsed_document = {"schemaVersion": "1.2.0", "nodes": parsed}
         file_path, filename = write_unity_dialogue_to_file(
             config_service=config_service,
             json_content=request_data.json_content,
             filename=request_data.filename,
             title=request_data.title,
             request_id=request_id,
+            validator=unity_export_schema_validator,
+        )
+        record_unity_export_success(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document or {"schemaVersion": "1.2.0", "nodes": []},
+            filename=filename,
         )
         return ExportUnityDialogueResponse(
-            file_path=str(file_path.absolute()),
             filename=filename,
             success=True,
+        )
+    except ValidationException as exc:
+        record_unity_export_failure(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document,
+            filename=target_filename,
+            errors=extract_validation_errors(exc),
+        )
+        raise
+    except OSError as exc:
+        record_unity_export_failure(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document,
+            filename=target_filename,
+            errors=[f"Erreur d'écriture disque: {exc}"],
+        )
+        logger.exception("Erreur disque export Unity JSON (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de l'export du dialogue Unity JSON",
+            request_id=request_id,
+        )
+    except Exception as e:
+        record_unity_export_failure(
+            export_log_service,
+            llm_usage_service,
+            document=parsed_document,
+            filename=target_filename,
+            errors=[str(e)],
+        )
+        logger.exception("Erreur lors de l'export Unity JSON (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de l'export du dialogue Unity JSON",
+            request_id=request_id,
+        )
+
+
+@router.post(
+    "/batch-export",
+    response_model=BatchExportResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def batch_export_unity_dialogues(
+    request_data: BatchExportRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    export_log_service: Annotated[ExportLogService, Depends(get_export_log_service)],
+    llm_usage_service: Annotated[LLMUsageService, Depends(get_llm_usage_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchExportResponse:
+    """Exporte plusieurs dialogues persistés vers Unity JSON (Story 5.2 / FR50)."""
+    try:
+        result = batch_export_documents(
+            config_service,
+            request_data.document_ids,
+            skip_validation=request_data.skip_validation,
+            filename_strategy=request_data.filename_strategy,
+            request_id=request_id,
+            export_log_service=export_log_service,
+            llm_usage_service=llm_usage_service,
+        )
+        return BatchExportResponse(
+            exported=result.exported,
+            failed=[
+                BatchExportFailedItemResponse(id=item.id, errors=item.errors)
+                for item in result.failed
+            ],
+            cancelled=result.cancelled,
+            success=len(result.exported) > 0 or len(result.failed) == 0,
         )
     except ValidationException:
         raise
     except Exception as e:
-        logger.exception("Erreur lors de l'export Unity JSON (request_id: %s)", request_id)
+        logger.exception("Erreur batch export Unity (request_id: %s)", request_id)
         raise InternalServerException(
-            message="Erreur lors de l'export du dialogue Unity JSON",
+            message="Erreur lors de l'export batch Unity JSON",
+            request_id=request_id,
+        )
+
+
+@router.get("/{document_id}/preview-export", response_model=ExportPreviewResponse)
+async def preview_unity_dialogue_export(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ExportPreviewResponse:
+    """Preview export bibliothèque sans téléchargement (Story 5.5 / FR53)."""
+    try:
+        result = preview_persisted_document(config_service, document_id, request_id)
+        return ExportPreviewResponse(
+            json_content=result.json_content,
+            size_bytes=result.size_bytes,
+            node_count=result.node_count,
+            filename=result.filename,
+            schema_valid=result.schema_valid,
+            errors=result.errors,
+        )
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(
+            message=str(exc),
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    except Exception as exc:
+        logger.exception(
+            "Erreur preview-export document %s (request_id: %s)", document_id, request_id
+        )
+        raise InternalServerException(
+            message="Erreur lors de la prévisualisation export",
+            request_id=request_id,
+        )
+
+
+@router.get("/{document_id}/download")
+async def download_unity_dialogue(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> Response:
+    """Télécharge un dialogue Unity exporté sur disque (Story 5.4 / FR52)."""
+    try:
+        content, filename = read_document_download_payload(
+            config_service, document_id, request_id
+        )
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(
+            message=str(exc),
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    return Response(
+        content=content.encode("utf-8"),
+        media_type="application/json;charset=utf-8",
+        headers={"Content-Disposition": content_disposition_attachment(filename)},
+    )
+
+
+@router.post("/batch-preview-export", response_model=BatchExportPreviewResponse)
+async def batch_preview_unity_dialogue_export(
+    request_data: BatchExportPreviewRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> BatchExportPreviewResponse:
+    """Preview export batch bibliothèque (Story 5.5 / FR53)."""
+    try:
+        result = preview_batch_documents(
+            config_service, request_data.document_ids, request_id
+        )
+        return BatchExportPreviewResponse(
+            items=[
+                BatchExportPreviewItemResponse(
+                    document_id=item.document_id,
+                    filename=item.filename,
+                    size_bytes=item.size_bytes,
+                    node_count=item.node_count,
+                    json_preview=item.json_preview,
+                    json_preview_truncated=item.json_preview_truncated,
+                )
+                for item in result.items
+            ],
+            total_size_bytes=result.total_size_bytes,
+            dialogue_count=result.dialogue_count,
+        )
+    except FileNotFoundError as exc:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=str(exc),
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(message=str(exc), request_id=request_id)
+    except Exception as exc:
+        logger.exception("Erreur batch preview-export (request_id: %s)", request_id)
+        raise InternalServerException(
+            message="Erreur lors de la prévisualisation export batch",
+            details={"error": str(exc)},
+            request_id=request_id,
+        )
+
+
+@router.post("/batch-download")
+async def batch_download_unity_dialogues(
+    request_data: BatchDownloadRequest,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> Response:
+    """Télécharge une archive ZIP des fichiers exportés (Story 5.4 / FR52)."""
+    try:
+        zip_bytes, zip_name = build_batch_download_zip(
+            config_service,
+            request_data.filenames,
+            compression=request_data.compression,
+            request_id=request_id,
+        )
+    except FileNotFoundError as exc:
+        raise NotFoundException(
+            resource_type="Fichier export Unity",
+            resource_id=str(exc),
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(message=str(exc), request_id=request_id)
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{zip_name}"'},
+    )
+
+
+@router.post(
+    "/{document_id}/validate-schema",
+    response_model=ValidateSchemaResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def validate_document_schema(
+    document_id: str,
+    config_service: Annotated[ConfigurationService, Depends(get_config_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> ValidateSchemaResponse:
+    """Valide un document persisté contre le schéma Unity (Story 5.3 / FR51)."""
+    try:
+        result = validate_persisted_document(config_service, document_id, request_id)
+        return validate_schema_response_from_result(result)
+    except FileNotFoundError:
+        raise NotFoundException(
+            resource_type="Document dialogue",
+            resource_id=document_id,
+            request_id=request_id,
+        )
+    except ValidationException:
+        raise
+    except ValueError as exc:
+        raise ValidationException(
+            message=str(exc),
+            details={"document_id": document_id},
+            request_id=request_id,
+        )
+    except Exception as e:
+        logger.exception(
+            "Erreur validate-schema document %s (request_id: %s)", document_id, request_id
+        )
+        raise InternalServerException(
+            message="Erreur lors de la validation du schéma Unity",
             details={"error": str(e)},
             request_id=request_id,
         )

@@ -42,7 +42,7 @@ describe('ContextSuggestionsPanel', () => {
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSuggestionsPanel />)
-    expect(screen.getByRole('button', { name: /suggestions \(0\)/i })).toBeInTheDocument()
+    expect(screen.getByTestId('context-suggestions-panel-toggle')).toHaveTextContent(/suggestions \(0\)/i)
   })
 
   it('suggestions vides et panneau ouvert → affiche message placeholder', async () => {
@@ -56,22 +56,22 @@ describe('ContextSuggestionsPanel', () => {
     } as ReturnType<typeof useContextStore>)
 
     render(<ContextSuggestionsPanel />)
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
     expect(screen.getByText(/sélectionnez une entité/i)).toBeInTheDocument()
   })
 
   it('affiche le header replié par défaut (contenu masqué)', () => {
     render(<ContextSuggestionsPanel />)
-    expect(screen.getByRole('button', { name: /suggestions/i })).toBeInTheDocument()
-    expect(screen.queryByText(/akthar/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/nef centrale/i)).not.toBeInTheDocument()
+    expect(screen.getByTestId('context-suggestions-panel-toggle')).toBeInTheDocument()
+    expect(screen.getByText(/akthar/i)).not.toBeVisible()
+    expect(screen.getByText(/nef centrale/i)).not.toBeVisible()
   })
 
   it('clic sur le header → déploie le panneau et affiche les suggestions groupées', async () => {
     const user = userEvent.setup()
     render(<ContextSuggestionsPanel />)
 
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
 
     expect(screen.getByText(/akthar/i)).toBeInTheDocument()
     expect(screen.getByText(/tharr/i)).toBeInTheDocument()
@@ -83,7 +83,7 @@ describe('ContextSuggestionsPanel', () => {
   it('clic "Accepter" sur une suggestion → acceptSuggestion appelé', async () => {
     const user = userEvent.setup()
     render(<ContextSuggestionsPanel />)
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
 
     await user.click(screen.getByRole('button', { name: /accepter akthar/i }))
 
@@ -93,7 +93,7 @@ describe('ContextSuggestionsPanel', () => {
   it('clic "Ignorer" sur une suggestion → ignoreSuggestion appelé', async () => {
     const user = userEvent.setup()
     render(<ContextSuggestionsPanel />)
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
 
     await user.click(screen.getByRole('button', { name: /ignorer akthar/i }))
 
@@ -103,7 +103,7 @@ describe('ContextSuggestionsPanel', () => {
   it('clic "Accepter tout" pour un groupe → acceptAllSuggestionsByType appelé', async () => {
     const user = userEvent.setup()
     render(<ContextSuggestionsPanel />)
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
 
     await user.click(screen.getByRole('button', { name: /accepter tout personnages/i }))
 
@@ -113,7 +113,7 @@ describe('ContextSuggestionsPanel', () => {
   it('clic "Ignorer tout" pour un groupe → ignoreAllSuggestionsByType appelé', async () => {
     const user = userEvent.setup()
     render(<ContextSuggestionsPanel />)
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
 
     await user.click(screen.getByRole('button', { name: /ignorer tout personnages/i }))
 
@@ -123,10 +123,10 @@ describe('ContextSuggestionsPanel', () => {
   it('second clic sur le header → replie le panneau', async () => {
     const user = userEvent.setup()
     render(<ContextSuggestionsPanel />)
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
     expect(screen.getByText(/akthar/i)).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /suggestions/i }))
-    expect(screen.queryByText(/akthar/i)).not.toBeInTheDocument()
+    await user.click(screen.getByTestId('context-suggestions-panel-toggle'))
+    expect(screen.getByText(/akthar/i)).not.toBeVisible()
   })
 })

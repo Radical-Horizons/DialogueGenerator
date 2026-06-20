@@ -246,6 +246,68 @@ class EstimateTokensResponse(BaseModel):
         return self
 
 
+class PrecomputedEntityRef(BaseModel):
+    """Référence à une fiche GDD pour lecture tokens précompilés."""
+
+    entity_type: Literal["characters", "locations", "items", "species", "communities"] = Field(
+        ...,
+        description="Catégorie de sélection API",
+    )
+    name: str = Field(..., min_length=1, description="Nom canonique GDD (champ Nom)")
+    mode: Literal["full", "excerpt"] = Field(default="full", description="Mode full ou excerpt")
+
+
+class PrecomputedEntityTokensRequest(BaseModel):
+    """Requête de lecture tokens depuis le cache disque de précompilation."""
+
+    entities: List[PrecomputedEntityRef] = Field(..., min_length=1, max_length=64)
+    organization_mode: str = Field(default="narrative", description="Mode d'organisation du contexte")
+    field_configs: Optional[Dict[str, List[str]]] = Field(
+        None,
+        description="Profil champs (identique estimate-tokens) ; repli sur standard si miss",
+    )
+    include_prompt_overhead: bool = Field(
+        default=False,
+        description="Inclure les sections prompt hors GDD (contrat, guides, etc.)",
+    )
+    user_instructions: str = Field(default=" ", description="Instructions scène (overhead)")
+    include_narrative_guides: bool = Field(default=True)
+    system_prompt_override: Optional[str] = None
+    game_rules: Optional[str] = None
+    author_profile: Optional[str] = None
+    vocabulary_config: Optional[Dict[str, str]] = None
+
+
+class PrecomputedEntityTokenRow(BaseModel):
+    """Tokens précompilés pour une fiche."""
+
+    entity_type: str
+    name: str
+    mode: str
+    token_count: int = Field(..., ge=0)
+    cache_hit: bool = Field(..., description="True si lu depuis le cache disque (sans reconcile global)")
+    profile_fallback: bool = Field(
+        default=False,
+        description="True si profil standard utilisé car le profil demandé était absent",
+    )
+    context_item: Optional[Dict[str, Any]] = Field(
+        None,
+        description="ContextItem sérialisé (pour fusion UI incrémentale)",
+    )
+
+
+class PrecomputedEntityTokensResponse(BaseModel):
+    """Somme des tokens précompilés pour les fiches demandées."""
+
+    entities: List[PrecomputedEntityTokenRow]
+    selection_tokens_sum: int = Field(..., ge=0)
+    prompt_overhead_tokens: int = Field(default=0, ge=0)
+    prompt_overhead_sections: Optional[List[Dict[str, Any]]] = Field(
+        None,
+        description="Sections prompt hors GDD (si include_prompt_overhead)",
+    )
+
+
 class ContextOptimizationRules(BaseModel):
     """Règles MVP pour POST /context/optimize (FR21) — persistées côté client."""
 
@@ -287,6 +349,27 @@ class OptimizeContextChange(BaseModel):
     to_mode: Literal["full", "excerpt"] = Field(..., description="Mode après optimisation")
 
 
+class OptimizeContextEffectReport(BaseModel):
+    """Synthèse lisible des effets d'une proposition d'optimisation."""
+
+    changes_by_entity_type: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Nombre de changements par type d'entité",
+    )
+    pinned_entity_keys: List[str] = Field(
+        default_factory=list,
+        description="Clés d'entités conservées par épinglage",
+    )
+    tokens_before_by_entity_type: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Répartition tokens avant optimisation par type d'entité",
+    )
+    tokens_after_by_entity_type: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Répartition tokens après optimisation par type d'entité",
+    )
+
+
 class OptimizeContextResponse(BaseModel):
     """Proposition d'optimisation de sélection GDD sous budget (FR21)."""
 
@@ -300,6 +383,10 @@ class OptimizeContextResponse(BaseModel):
     changes: List[OptimizeContextChange] = Field(
         default_factory=list,
         description="Liste des passages full→excerpt effectués",
+    )
+    effect_report: OptimizeContextEffectReport = Field(
+        default_factory=OptimizeContextEffectReport,
+        description="Rapport d'effets de l'optimisation pour l'UI",
     )
     pre_generation_context_fidelity_proxy_percent: int = Field(
         ...,
@@ -408,6 +495,12 @@ class GenerateUnityDialogueRequest(BasePromptRequest):
             ValueError: Si aucun personnage n'est sélectionné.
         """
         all_characters = (v.characters_full or []) + (v.characters_excerpt or [])
+        if v.scene_protagonists:
+            all_characters.extend(
+                str(name)
+                for name in v.scene_protagonists.values()
+                if isinstance(name, str) and name.strip()
+            )
         if not all_characters:
             raise ValueError("Au moins un personnage doit être sélectionné pour générer un dialogue Unity")
         return v
@@ -468,13 +561,102 @@ class ExportUnityDialogueResponse(BaseModel):
     """Réponse pour l'export d'un dialogue Unity JSON.
     
     Attributes:
-        file_path: Chemin absolu du fichier créé.
         filename: Nom du fichier créé.
         success: Indique si l'export a réussi.
+        file_path: Déprécié — absent des réponses API (évite la fuite de chemins serveur).
     """
-    file_path: str = Field(..., description="Chemin absolu du fichier créé")
     filename: str = Field(..., description="Nom du fichier créé")
     success: bool = Field(..., description="Indique si l'export a réussi")
+    file_path: Optional[str] = Field(
+        None,
+        description="Déprécié — non renseigné (utiliser filename)",
+    )
+
+
+class BatchExportFailedItemResponse(BaseModel):
+    """Échec d'export pour un document du batch (Story 5.2)."""
+
+    id: str = Field(..., description="Identifiant document (sans extension)")
+    errors: List[str] = Field(default_factory=list, description="Messages d'erreur")
+
+
+class BatchExportRequest(BaseModel):
+    """Requête export batch Unity JSON (Story 5.2 / FR50)."""
+
+    document_ids: List[str] = Field(
+        ...,
+        min_length=1,
+        max_length=Defaults.UNITY_EXPORT_BATCH_MAX_ITEMS,
+        description="IDs document à exporter",
+    )
+    skip_validation: bool = Field(
+        False,
+        description="Si True, écrit sans validation schéma Unity (opt-in)",
+    )
+    filename_strategy: Literal["preserve", "slug"] = Field(
+        "preserve",
+        description="Stratégie de nommage : conserver filename ou slug titre",
+    )
+
+
+class BatchExportResponse(BaseModel):
+    """Réponse export batch Unity JSON."""
+
+    exported: List[str] = Field(default_factory=list, description="Noms de fichiers exportés")
+    failed: List[BatchExportFailedItemResponse] = Field(
+        default_factory=list,
+        description="Documents en échec avec erreurs",
+    )
+    cancelled: bool = Field(False, description="Batch annulé côté client (réservé)")
+    success: bool = Field(..., description="True si au moins un export réussi sans erreur globale")
+
+
+class BatchDownloadRequest(BaseModel):
+    """Requête téléchargement batch ZIP (Story 5.4 / FR52)."""
+
+    filenames: List[str] = Field(
+        ...,
+        min_length=1,
+        max_length=Defaults.UNITY_EXPORT_BATCH_MAX_ITEMS,
+        description="Noms de fichiers exportés",
+    )
+    compression: Literal["store", "deflate"] = Field(
+        "deflate",
+        description="Niveau de compression ZIP",
+    )
+
+
+class BatchExportPreviewRequest(BaseModel):
+    """Requête preview export batch (Story 5.5 / FR53)."""
+
+    document_ids: List[str] = Field(
+        ...,
+        min_length=1,
+        max_length=Defaults.UNITY_EXPORT_BATCH_MAX_ITEMS,
+        description="IDs document sans extension",
+    )
+
+
+class BatchExportPreviewItemResponse(BaseModel):
+    """Item preview batch."""
+
+    document_id: str = Field(..., description="Identifiant document")
+    filename: str = Field(..., description="Nom fichier export")
+    size_bytes: int = Field(..., description="Taille UTF-8 octets")
+    node_count: int = Field(..., description="Nombre de nœuds")
+    json_preview: str = Field(..., description="Aperçu JSON (éventuellement tronqué)")
+    json_preview_truncated: bool = Field(
+        False,
+        description="True si l'aperçu est tronqué pour perf",
+    )
+
+
+class BatchExportPreviewResponse(BaseModel):
+    """Réponse preview export batch."""
+
+    items: List[BatchExportPreviewItemResponse] = Field(default_factory=list)
+    total_size_bytes: int = Field(..., description="Taille totale estimée")
+    dialogue_count: int = Field(..., description="Nombre de dialogues")
 
 
 # Schemas pour la bibliothèque Unity Dialogues
@@ -504,6 +686,24 @@ class UnityDialogueListResponse(BaseModel):
     """
     dialogues: List[UnityDialogueMetadata] = Field(..., description="Liste des métadonnées")
     total: int = Field(..., description="Nombre total de fichiers")
+
+
+class UnitySchemaSectionSummary(BaseModel):
+    """Section clé du schéma Unity pour affichage référence (Story 5.3)."""
+
+    name: str = Field(..., description="Nom de la section")
+    description: str = Field(..., description="Description courte")
+    required_fields: List[str] = Field(default_factory=list, description="Champs requis principaux")
+
+
+class UnitySchemaReferenceResponse(BaseModel):
+    """Métadonnées schéma Unity de référence (Story 5.3 / FR51)."""
+
+    available: bool = Field(..., description="True si le fichier schéma est présent")
+    version: Optional[str] = Field(None, description="Version du schéma (ex. 1.2.0)")
+    source_path: str = Field(..., description="Chemin canonique du fichier schéma")
+    required_root_fields: List[str] = Field(default_factory=list)
+    sections: List[UnitySchemaSectionSummary] = Field(default_factory=list)
 
 
 class UnityDialogueReadResponse(BaseModel):

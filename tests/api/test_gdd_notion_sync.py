@@ -550,3 +550,71 @@ def test_notebooklm_export_zip(client: TestClient, tmp_path: Path) -> None:
         assert any(n.endswith(".md") for n in zf.namelist())
     finally:
         app.dependency_overrides.pop(get_gdd_notion_sync_service, None)
+
+
+def test_sync_entity_by_name(client: TestClient, tmp_path: Path) -> None:
+    """Sync ciblée d'une fiche personnage par nom fuzzy."""
+    page_id = "1996e4d2-1b45-80c4-9c73-ddac6322e9bd"
+    gdd = tmp_path / "gdd"
+    shard_dir = gdd / "personnages"
+    shard_dir.mkdir(parents=True)
+    (shard_dir / f"{page_id}.json").write_text(
+        json.dumps({"Nom": "Uresaïr", "notion_page_id": page_id}),
+        encoding="utf-8",
+    )
+
+    class FakeClient:
+        async def get_page(self, pid: str) -> dict:
+            return {
+                "id": pid,
+                "last_edited_time": "2026-06-18T19:11:00.000Z",
+                "properties": {
+                    "Name": {
+                        "type": "title",
+                        "title": [{"plain_text": "Uresaïr"}],
+                    },
+                },
+            }
+
+        async def get_page_content(self, pid: str) -> str:
+            return "Corps mis a jour"
+
+    store = GddNotionSyncConfigStore(tmp_path / "settings.json", tmp_path / "token.secret")
+    store.write_token("dummy-token")
+    store.save_settings(
+        {
+            "schema_version": 1,
+            "sync_interval_minutes": 60,
+            "auto_sync_enabled": False,
+            "sources": [
+                {
+                    "kind": "database",
+                    "notion_id": "1886e4d2-1b45-81a2-9340-f77f5f2e5885",
+                    "category_file": "Personnages.json",
+                },
+            ],
+            "included_categories": [],
+        }
+    )
+    svc = GddNotionSyncService(
+        config_store=store,
+        manifest_path=tmp_path / "manifest.json",
+        gdd_categories_path=gdd,
+        status_path=tmp_path / "status.json",
+    )
+    svc._client_factory = lambda _t: FakeClient()  # type: ignore[method-assign]
+    app.dependency_overrides[get_gdd_notion_sync_service] = lambda: svc
+    try:
+        r = client.post(
+            "/api/v1/gdd-notion-sync/sync-entity",
+            json={"name": "Uresair", "category_file": "Personnages.json"},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data["success"] is True
+        assert data["resolved_name"] == "Uresaïr"
+        assert data["notion_page_id"] == page_id
+        written = json.loads((shard_dir / f"{page_id}.json").read_text(encoding="utf-8"))
+        assert "Corps mis a jour" in json.dumps(written)
+    finally:
+        app.dependency_overrides.pop(get_gdd_notion_sync_service, None)

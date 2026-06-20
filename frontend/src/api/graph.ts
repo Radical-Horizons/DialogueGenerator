@@ -9,6 +9,7 @@ import type {
   LoadGraphResponse,
   SaveGraphRequest,
   SaveGraphResponse,
+  ExportPreviewResponse,
   GenerateNodeRequest,
   GenerateNodeResponse,
   EstimateCostRequest,
@@ -20,6 +21,7 @@ import type {
   ValidateGraphResponse,
   ValidateSchemaRequest,
   ValidateSchemaResponse,
+  ExportPreviewResponse,
   SimulateFlowRequest,
   SimulateFlowResponse,
   ValidateLoreExplicitRequest,
@@ -67,6 +69,20 @@ export async function saveGraphAndWrite(request: SaveGraphRequest): Promise<Save
     `/api/v1/unity-dialogues/graph/save-and-write`,
     request,
     { timeout: API_TIMEOUTS.DOCUMENT_IO }
+  )
+  return response.data
+}
+
+/**
+ * Preview export graphe sans écriture disque (Story 5.5 / FR53).
+ */
+export async function previewGraphExport(
+  request: SaveGraphRequest,
+): Promise<ExportPreviewResponse> {
+  const response = await apiClient.post<ExportPreviewResponse>(
+    `/api/v1/unity-dialogues/graph/preview-export`,
+    request,
+    { timeout: API_TIMEOUTS.DOCUMENT_IO },
   )
   return response.data
 }

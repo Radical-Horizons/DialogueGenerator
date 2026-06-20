@@ -1,21 +1,51 @@
 /**
- * Hook pour estimer les tokens du prompt avec debounce.
- * 
- * Extrait la logique d'estimation de tokens depuis GenerationPanel.
+ * Estimation debouncée du prompt total léger + sélection GDD (POST /context/estimate-tokens).
+ * Ne charge pas le prompt brut : l'onglet Prompt le fait uniquement sur demande.
  */
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { estimateContextTokens, fetchPrecomputedEntityTokens } from '../api/context'
 import { useGenerationStore } from '../store/generationStore'
 import { useContextStore } from '../store/contextStore'
 import { useContextConfigStore } from '../store/contextConfigStore'
 import { useVocabularyStore } from '../store/vocabularyStore'
 import { useNarrativeGuidesStore } from '../store/narrativeGuidesStore'
 import { useAuthorProfile } from '../hooks/useAuthorProfile'
-import { useFlagsStore } from '../store/flagsStore'
-import * as dialoguesAPI from '../api/dialogues'
-// NOTE: estimateTokensUtil supprimé - utiliser uniquement token_count du backend
-import { getErrorMessage } from '../types/errors'
 import { useGenerationRequest } from './useGenerationRequest'
-import { computeStateHash, type PromptStateParams } from '../utils/hashUtils'
+import { getErrorMessage } from '../types/errors'
+import type { ContextSelection } from '../types/api'
+import { computeStateHash } from '../utils/hashUtils'
+import { buildFieldConfigsWithEssential, buildPromptStateParams, buildTokenEstimateRequest } from '../utils/buildTokenEstimateRequest'
+import {
+  buildEntityContextItemsFromStructuredPrompt,
+  buildEntityTokenCacheFromStructuredPrompt,
+  findAdditionsOnly,
+  findRemovalsOnly,
+  listAllSelectionEntities,
+  selectionFingerprint,
+  type SelectionEntityDelta,
+} from '../utils/contextEntityTokenCache'
+import {
+  fetchPrecomputedBootstrap,
+  isBootstrapComplete,
+} from '../utils/precomputedBootstrap'
+
+const EMPTY_CONTEXT_SELECTION: ContextSelection = {
+  characters_full: [],
+  characters_excerpt: [],
+  locations_full: [],
+  locations_excerpt: [],
+  items_full: [],
+  items_excerpt: [],
+  species_full: [],
+  species_excerpt: [],
+  communities_full: [],
+  communities_excerpt: [],
+  dialogues_examples: [],
+  narrative_structures: [],
+  chapters: [],
+  scenes: [],
+}
+
 export interface UseTokenEstimationOptions {
   /** Instructions utilisateur */
   userInstructions: string
@@ -40,22 +70,16 @@ export interface UseTokenEstimationReturn {
   estimateTokens: () => Promise<void>
   /** Indique si l'estimation est en cours */
   isEstimating: boolean
-  /** Nombre de tokens estimé */
+  /** selection_tokens (contexte GDD — budget / optimisation) */
   tokenCount: number | null
-  completionTokens: number | null
-  estimatedCostEur: number | null
+  /** token_count (prompt complet envoyé au LLM) */
+  promptTokenCount: number | null
   /** Erreur d'estimation */
   estimationError: string | null
 }
 
 /**
- * Hook pour estimer les tokens du prompt avec debounce automatique.
- * 
- * L'estimation se déclenche automatiquement avec un debounce de 500ms
- * quand les paramètres changent.
- * 
- * @param options - Options d'estimation
- * @returns Fonction d'estimation manuelle et état
+ * Hook pour estimer le prompt complet et la sélection GDD avec debounce automatique.
  */
 export function useTokenEstimation(options: UseTokenEstimationOptions): UseTokenEstimationReturn {
   const {
@@ -69,17 +93,77 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     toast,
   } = options
 
-  const [isEstimating, setIsEstimating] = useState(false)
   const [estimationError, setEstimationError] = useState<string | null>(null)
-  const [completionTokens, setCompletionTokens] = useState<number | null>(null)
-  const [estimatedCostEur, setEstimatedCostEur] = useState<number | null>(null)
+  const requestSeqRef = useRef(0)
+  const abortRef = useRef<AbortController | null>(null)
 
   const { selections } = useContextStore()
-  const { sceneSelection, dialogueStructure, systemPromptOverride, gameRules, tokenCount, setRawPrompt } = useGenerationStore()
+  const fieldConfigs = useContextConfigStore((s) => s.fieldConfigs)
+  const essentialFields = useContextConfigStore((s) => s.essentialFields)
+  const organization = useContextConfigStore((s) => s.organization)
+  const {
+    sceneSelection,
+    dialogueStructure,
+    systemPromptOverride,
+    gameRules,
+    tokenCount,
+    promptTokenCount,
+    setContextTokenEstimate,
+  } = useGenerationStore()
+  const applyOptimisticEntityRemovals = useGenerationStore((s) => s.applyOptimisticEntityRemovals)
+  const applyOptimisticEntityAdditions = useGenerationStore((s) => s.applyOptimisticEntityAdditions)
+  const applyBootstrapFromPrecomputed = useGenerationStore((s) => s.applyBootstrapFromPrecomputed)
+  const setEntityTokenCache = useGenerationStore((s) => s.setEntityTokenCache)
+  const prevSelectionsRef = useRef<ContextSelection | null>(null)
+  const lastBootstrapFingerprintRef = useRef<string | null>(null)
+  const lastEstimationConfigRef = useRef<string | null>(null)
+  const bootstrapPromiseRef = useRef<Promise<boolean> | null>(null)
+  const [contextConfigHydrated, setContextConfigHydrated] = useState(
+    () => useContextConfigStore.persist.hasHydrated(),
+  )
+
+  useEffect(() => {
+    if (useContextConfigStore.persist.hasHydrated()) {
+      setContextConfigHydrated(true)
+      return
+    }
+    return useContextConfigStore.persist.onFinishHydration(() => {
+      setContextConfigHydrated(true)
+    })
+  }, [])
+
   const { vocabularyConfig } = useVocabularyStore()
   const { includeNarrativeGuides } = useNarrativeGuidesStore()
   const { authorProfile } = useAuthorProfile()
   const { buildContextSelections } = useGenerationRequest()
+
+  const estimationConfigKey = useMemo(
+    () =>
+      JSON.stringify({
+        organization,
+        fieldConfigs,
+        essentialFields,
+        userInstructions,
+        includeNarrativeGuides,
+        systemPromptOverride,
+        gameRules,
+        authorProfile,
+        vocabularyConfig,
+      }),
+    [
+      organization,
+      fieldConfigs,
+      essentialFields,
+      userInstructions,
+      includeNarrativeGuides,
+      systemPromptOverride,
+      gameRules,
+      authorProfile,
+      vocabularyConfig,
+    ],
+  )
+
+  const isEstimating = useGenerationStore((s) => s.isEstimating)
 
   const hasSelections = useCallback(() => {
     return (
@@ -96,137 +180,286 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.dialogues_examples.length > 0 ||
       selections.narrative_structures.length > 0 ||
       selections.chapters.length > 0 ||
-      selections.scenes.length > 0
+      selections.scenes.length > 0 ||
+      Boolean(sceneSelection.characterA || sceneSelection.characterB)
     )
-  }, [selections])
+  }, [sceneSelection.characterA, sceneSelection.characterB, selections])
+
+  const buildBootstrapInput = useCallback(
+    (targetSelections: ContextSelection) => {
+      const fieldConfigsWithEssential = buildFieldConfigsWithEssential()
+      return {
+        selections: targetSelections,
+        organizationMode: organization,
+        fieldConfigs:
+          Object.keys(fieldConfigsWithEssential).length > 0
+            ? fieldConfigsWithEssential
+            : undefined,
+        userInstructions: userInstructions.trim() || ' ',
+        includeNarrativeGuides,
+        systemPromptOverride,
+        gameRules,
+        authorProfile,
+        vocabularyConfig: vocabularyConfig
+          ? (vocabularyConfig as unknown as Record<string, string>)
+          : null,
+      }
+    },
+    [
+      organization,
+      userInstructions,
+      includeNarrativeGuides,
+      systemPromptOverride,
+      gameRules,
+      authorProfile,
+      vocabularyConfig,
+    ],
+  )
+
+  const bootstrapSelection = useCallback(
+    async (targetSelections: ContextSelection): Promise<boolean> => {
+      if (bootstrapPromiseRef.current) {
+        return bootstrapPromiseRef.current
+      }
+
+      const expectedCount = listAllSelectionEntities(targetSelections).length
+      if (expectedCount === 0) {
+        return false
+      }
+
+      const run = async (): Promise<boolean> => {
+        abortRef.current?.abort()
+        const seq = requestSeqRef.current + 1
+        requestSeqRef.current = seq
+        const controller = new AbortController()
+        abortRef.current = controller
+
+        try {
+          const result = await fetchPrecomputedBootstrap(
+            buildBootstrapInput(targetSelections),
+            controller.signal,
+          )
+          if (requestSeqRef.current !== seq) {
+            return true
+          }
+          if (!isBootstrapComplete(result, expectedCount)) {
+            return false
+          }
+
+          applyBootstrapFromPrecomputed(targetSelections, {
+            entities: result.entities,
+            overheadSections: result.overheadSections,
+          })
+          lastBootstrapFingerprintRef.current = result.fingerprint
+          lastEstimationConfigRef.current = estimationConfigKey
+          setEstimationError(null)
+          return true
+        } catch (err: unknown) {
+          if (controller.signal.aborted || requestSeqRef.current !== seq) {
+            return false
+          }
+          console.warn('Bootstrap précompilé échoué, repli estimate-tokens:', err)
+          return false
+        } finally {
+          bootstrapPromiseRef.current = null
+        }
+      }
+
+      bootstrapPromiseRef.current = run()
+      return bootstrapPromiseRef.current
+    },
+    [applyBootstrapFromPrecomputed, buildBootstrapInput, estimationConfigKey],
+  )
+
+  const applyIncrementalAdditions = useCallback(
+    async (additions: SelectionEntityDelta[]): Promise<boolean> => {
+      abortRef.current?.abort()
+      const seq = requestSeqRef.current + 1
+      requestSeqRef.current = seq
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      const fieldConfigsWithEssential = buildFieldConfigsWithEssential()
+      try {
+        const response = await fetchPrecomputedEntityTokens(
+          {
+            entities: additions.map((a) => ({
+              entity_type: a.entityType,
+              name: a.name,
+              mode: a.mode,
+            })),
+            organization_mode: organization,
+            field_configs:
+              Object.keys(fieldConfigsWithEssential).length > 0
+                ? fieldConfigsWithEssential
+                : undefined,
+          },
+          controller.signal,
+        )
+        if (requestSeqRef.current !== seq) {
+          return true
+        }
+
+        applyOptimisticEntityAdditions(
+          response.entities
+            .filter((row) => row.context_item && row.token_count > 0)
+            .map((row) => ({
+              entityType: row.entity_type,
+              name: row.name,
+              mode: row.mode as 'full' | 'excerpt',
+              token_count: row.token_count,
+              context_item: row.context_item as import('../types/prompt').ContextItem,
+            })),
+          selections,
+        )
+        setEstimationError(null)
+        return response.entities.every((row) => row.context_item && row.token_count > 0)
+      } catch (err: unknown) {
+        if (controller.signal.aborted || requestSeqRef.current !== seq) {
+          return false
+        }
+        console.warn('Lookup tokens précompilés échoué, repli estimate-tokens:', err)
+        return false
+      }
+    },
+    [organization, applyOptimisticEntityAdditions, selections],
+  )
 
   const estimateTokens = useCallback(async () => {
-    // Permettre l'estimation si on a au moins : instructions, sélections, ou un system prompt
     const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
     if (!userInstructions.trim() && !hasSelections() && !hasSystemPrompt) {
-      setCompletionTokens(null)
-      setEstimatedCostEur(null)
-      setRawPrompt(null, null, null, false, null)
+      setEstimationError(null)
+      setContextTokenEstimate({
+        selectionTokens: null,
+        promptTokenCount: null,
+        isEstimating: false,
+        previewInputHash: 'invalidate',
+        contextEstimationError: null,
+        contextTokenBreakdown: [],
+        contextBreakdownNote: '',
+        rawPrompt: null,
+        structuredPrompt: null,
+        promptHash: null,
+      })
       return
     }
 
-    // Construire les paramètres pour le calcul du hash
     const contextSelections = buildContextSelections()
-    
-    // Récupérer les fieldConfigs et organization depuis le store
-    const { fieldConfigs, essentialFields, organization } = useContextConfigStore.getState()
-    
-    // Inclure les champs essentiels dans la config
-    const fieldConfigsWithEssential: Record<string, string[]> = {}
-    for (const [elementType, fields] of Object.entries(fieldConfigs)) {
-      const essential = essentialFields[elementType] || []
-      fieldConfigsWithEssential[elementType] = [...new Set([...essential, ...fields])]
-    }
-    
-    // Récupérer les flags sélectionnés
-    const { getSelectedFlagsArray } = useFlagsStore.getState()
-    const inGameFlags = getSelectedFlagsArray()
-    
-    // Utiliser une valeur par défaut si userInstructions est vide (backend exige min_length=1)
     const userInstructionsValue = userInstructions.trim() || ' '
-    
-    // Construire les paramètres pour le hash
-    const promptParams: PromptStateParams = {
-      user_instructions: userInstructionsValue,
-      context_selections: contextSelections,
-      npc_speaker_id: sceneSelection.characterB || undefined,
-      max_context_tokens: maxContextTokens,
-      max_completion_tokens: maxCompletionTokens,
-      system_prompt_override: systemPromptOverride || undefined,
-      game_rules: gameRules || undefined,
-      author_profile: authorProfile || undefined,
-      max_choices: maxChoices ?? undefined,
-      choices_mode: choicesMode,
-      narrative_tags: narrativeTags.length > 0 ? narrativeTags : undefined,
-      vocabulary_config: vocabularyConfig ? (vocabularyConfig as unknown as Record<string, string>) : undefined,
-      include_narrative_guides: includeNarrativeGuides,
-      previous_dialogue_preview: previousDialoguePreview || undefined,
-      field_configs: Object.keys(fieldConfigsWithEssential).length > 0 ? fieldConfigsWithEssential : undefined,
-      organization_mode: organization,
-      in_game_flags: inGameFlags.length > 0 ? inGameFlags : undefined,
-    }
-    
-    // Calculer le hash AVANT l'appel API pour vérifier le cache
-    const computedHash = await computeStateHash(promptParams)
-    const { previewInputHash, tokenCount: currentTokenCount } = useGenerationStore.getState()
 
-    if (computedHash === previewInputHash && currentTokenCount !== null) {
+    const promptParams = buildPromptStateParams({
+      userInstructions: userInstructionsValue,
+      contextSelections,
+      maxContextTokens,
+      maxCompletionTokens,
+      maxChoices,
+      choicesMode,
+      narrativeTags,
+      systemPromptOverride,
+      gameRules,
+      authorProfile,
+      vocabularyConfig: vocabularyConfig
+        ? (vocabularyConfig as unknown as Record<string, string>)
+        : null,
+      includeNarrativeGuides,
+      previousDialoguePreview,
+      npcSpeakerId: sceneSelection.characterB,
+    })
+
+    const computedHash = await computeStateHash(promptParams)
+    const { previewInputHash, tokenCount: currentTokenCount, promptTokenCount: currentPromptTokenCount } =
+      useGenerationStore.getState()
+
+    if (
+      computedHash === previewInputHash &&
+      currentTokenCount !== null &&
+      currentPromptTokenCount !== null
+    ) {
       return
     }
-    
-    // Ne pas effacer le prompt existant pendant l'estimation
-    setIsEstimating(true)
+
+    abortRef.current?.abort()
+    const seq = requestSeqRef.current + 1
+    requestSeqRef.current = seq
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setEstimationError(null)
-    // Mettre à jour le store pour afficher "Construction du prompt..." dans le panneau Détails
-    const stateBeforeCall = useGenerationStore.getState()
-    setRawPrompt(
-      stateBeforeCall.rawPrompt,
-      stateBeforeCall.tokenCount,
-      stateBeforeCall.promptHash,
-      true,
-      stateBeforeCall.structuredPrompt,
-      'preserve'
-    )
+    setContextTokenEstimate({
+      selectionTokens: currentTokenCount,
+      promptTokenCount: currentPromptTokenCount,
+      isEstimating: true,
+      previewInputHash: 'preserve',
+      contextEstimationError: null,
+    })
 
     try {
-      // Utiliser le même endpoint que le budget contexte afin d'éviter les estimations len/4 divergentes.
-      const response = await dialoguesAPI.estimateTokens(promptParams)
-      setCompletionTokens(response.completion_tokens ?? null)
-      setEstimatedCostEur(response.estimated_cost_eur ?? null)
-      
-      const priorBackendHash = useGenerationStore.getState().promptHash
-      if (priorBackendHash !== response.prompt_hash || priorBackendHash === null) {
-        setRawPrompt(
-          response.raw_prompt,
-          response.token_count,
-          response.prompt_hash,
-          false,
-          response.structured_prompt || null,
-          computedHash
-        )
-      } else {
-        const stateAfter = useGenerationStore.getState()
-        setRawPrompt(
-          stateAfter.rawPrompt,
-          stateAfter.tokenCount,
-          stateAfter.promptHash,
-          false,
-          stateAfter.structuredPrompt,
-          'preserve'
-        )
-      }
+      const request = buildTokenEstimateRequest({
+        userInstructions: userInstructionsValue,
+        contextSelections,
+        maxContextTokens,
+        maxCompletionTokens,
+        maxChoices,
+        choicesMode,
+        narrativeTags,
+        systemPromptOverride,
+        gameRules,
+        authorProfile,
+        vocabularyConfig: vocabularyConfig
+          ? (vocabularyConfig as unknown as Record<string, string>)
+          : null,
+        includeNarrativeGuides,
+        previousDialoguePreview,
+        npcSpeakerId: sceneSelection.characterB,
+      })
+
+      const response = await estimateContextTokens(request, controller.signal)
+      if (requestSeqRef.current !== seq) return
+
+      setEstimationError(null)
+      const entityCache = buildEntityTokenCacheFromStructuredPrompt(
+        response.structured_prompt ?? null,
+        contextSelections,
+      )
+      const entityItemsCache = buildEntityContextItemsFromStructuredPrompt(
+        response.structured_prompt ?? null,
+        contextSelections,
+      )
+      const promptOverhead = response.token_count - response.selection_tokens
+      setEntityTokenCache(entityCache)
+      setContextTokenEstimate({
+        selectionTokens: response.selection_tokens,
+        promptTokenCount: response.token_count,
+        isEstimating: false,
+        previewInputHash: computedHash,
+        contextEstimationError: null,
+        contextTokenBreakdown: response.context_token_breakdown,
+        contextBreakdownNote: response.context_breakdown_note,
+        structuredPrompt: response.structured_prompt ?? null,
+        promptHash: response.prompt_hash ?? null,
+        entityTokenByKey: entityCache,
+        entityContextItemsByKey: entityItemsCache,
+        promptOverheadTokens: promptOverhead,
+      })
     } catch (err: unknown) {
-      // Ne logger que les erreurs non liées à la connexion (backend non accessible)
+      if (controller.signal.aborted || requestSeqRef.current !== seq) return
       const e = err as { code?: string; response?: { status?: number } } | null
       if (e?.code !== 'ERR_NETWORK' && e?.code !== 'ECONNREFUSED' && e?.response?.status !== 401) {
-        console.error('Erreur lors de l\'estimation:', err)
+        console.error('Erreur lors de l\'estimation du prompt:', err)
         const errorMessage = getErrorMessage(err)
         setEstimationError(errorMessage)
-        // Afficher un toast pour informer l'utilisateur de l'erreur
         if (toast) {
           toast(errorMessage, 'error', 5000)
         }
       }
-      // Ne pas effacer le prompt existant si l'estimation échoue
-      // Le prompt précédent reste visible pour l'utilisateur
-      const currentState = useGenerationStore.getState()
-      setCompletionTokens(null)
-      setEstimatedCostEur(null)
-      setRawPrompt(
-        currentState.rawPrompt,
-        currentState.tokenCount,
-        currentState.promptHash,
-        false,
-        null,
-        'invalidate'
-      )
-    } finally {
-      setIsEstimating(false)
+      const current = useGenerationStore.getState()
+      setContextTokenEstimate({
+        selectionTokens: current.tokenCount,
+        promptTokenCount: current.promptTokenCount,
+        isEstimating: false,
+        previewInputHash: 'invalidate',
+        contextEstimationError: getErrorMessage(err),
+      })
     }
   }, [
     userInstructions,
@@ -238,7 +471,8 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     hasSelections,
     maxContextTokens,
     buildContextSelections,
-    setRawPrompt,
+    setContextTokenEstimate,
+    setEntityTokenCache,
     systemPromptOverride,
     gameRules,
     vocabularyConfig,
@@ -248,8 +482,17 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     choicesMode,
   ])
 
-  // Debounce automatique de l'estimation (500ms, ou 100ms si on a des critères mais pas encore de prompt)
   useEffect(() => {
+    if (!contextConfigHydrated) {
+      return
+    }
+
+    const previousSelections = prevSelectionsRef.current ?? EMPTY_CONTEXT_SELECTION
+    const removals = findRemovalsOnly(previousSelections, selections)
+    const additions = findAdditionsOnly(previousSelections, selections)
+    const currentFingerprint = selectionFingerprint(selections)
+    prevSelectionsRef.current = selections
+
     const hasAnySelections =
       selections.characters_full.length > 0 ||
       selections.characters_excerpt.length > 0 ||
@@ -264,27 +507,75 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
       selections.dialogues_examples.length > 0 ||
       selections.narrative_structures.length > 0 ||
       selections.chapters.length > 0 ||
-      selections.scenes.length > 0
+      selections.scenes.length > 0 ||
+      Boolean(sceneSelection.characterA || sceneSelection.characterB)
 
-    const hasSystemPrompt = systemPromptOverride && systemPromptOverride.trim().length > 0
-    const hasCriteria = Boolean(userInstructions.trim() || hasAnySelections || hasSystemPrompt)
-    const hasNoPromptYet = useGenerationStore.getState().rawPrompt == null
-    const debounceMs = hasCriteria && hasNoPromptYet ? 100 : 500
-
-    const timeoutId = setTimeout(() => {
-      if (hasCriteria) {
-        void estimateTokens()
-      } else {
-        setCompletionTokens(null)
-        setEstimatedCostEur(null)
-        setRawPrompt(null, null, null, false, null)
+    if (removals && removals.length > 0) {
+      abortRef.current?.abort()
+      if (applyOptimisticEntityRemovals(removals, selections)) {
+        lastBootstrapFingerprintRef.current = currentFingerprint
+        return
       }
-    }, debounceMs)
+    }
 
-    return () => clearTimeout(timeoutId)
+    const alreadyBootstrapped =
+      tokenCount != null && lastBootstrapFingerprintRef.current === currentFingerprint
+
+    if (additions && additions.length === 1 && alreadyBootstrapped) {
+      void (async () => {
+        const ok = await applyIncrementalAdditions(additions)
+        if (!ok) {
+          const booted = await bootstrapSelection(selections)
+          if (!booted) void estimateTokens()
+        }
+      })()
+      return
+    }
+
+    if (hasAnySelections) {
+      const configChanged = estimationConfigKey !== lastEstimationConfigRef.current
+      const needsBootstrap =
+        tokenCount == null ||
+        lastBootstrapFingerprintRef.current !== currentFingerprint ||
+        configChanged
+
+      if (needsBootstrap) {
+        void (async () => {
+          const booted = await bootstrapSelection(selections)
+          if (!booted) void estimateTokens()
+        })()
+        return
+      }
+
+      // Sélection inchangée (ex. hydratation fieldConfigs au lancement) : ne pas relancer estimate-tokens.
+      return
+    }
+
+    setEstimationError(null)
+    setContextTokenEstimate({
+      selectionTokens: null,
+      promptTokenCount: null,
+      isEstimating: false,
+      previewInputHash: 'invalidate',
+      contextEstimationError: null,
+      contextTokenBreakdown: [],
+      contextBreakdownNote: '',
+      rawPrompt: null,
+      structuredPrompt: null,
+      promptHash: null,
+      entityTokenByKey: {},
+      entityContextItemsByKey: {},
+      promptOverheadTokens: null,
+    })
+    setEntityTokenCache({})
+    lastBootstrapFingerprintRef.current = null
+    lastEstimationConfigRef.current = null
   }, [
     userInstructions,
     selections,
+    fieldConfigs,
+    essentialFields,
+    organization,
     authorProfile,
     maxChoices,
     narrativeTags,
@@ -295,17 +586,23 @@ export function useTokenEstimation(options: UseTokenEstimationOptions): UseToken
     dialogueStructure,
     systemPromptOverride,
     gameRules,
-    setRawPrompt,
+    setContextTokenEstimate,
+    applyOptimisticEntityRemovals,
+    applyIncrementalAdditions,
+    bootstrapSelection,
+    setEntityTokenCache,
     vocabularyConfig,
     includeNarrativeGuides,
+    estimationConfigKey,
+    tokenCount,
+    contextConfigHydrated,
   ])
 
   return {
     estimateTokens,
     isEstimating,
     tokenCount,
-    completionTokens,
-    estimatedCostEur,
+    promptTokenCount,
     estimationError,
   }
 }

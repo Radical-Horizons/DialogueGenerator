@@ -12,11 +12,26 @@ Les utilisateurs peuvent exporter les dialogues vers Unity JSON format avec vali
 
 ---
 
+## Index des user stories (seules sections `### Story N.M:` ci-dessous)
+
+| Story | Titre | FR |
+|-------|-------|-----|
+| **5.1** | Exporter dialogue single vers format Unity JSON | FR49 |
+| **5.2** | Exporter batch plusieurs dialogues vers Unity JSON | FR50 |
+| **5.3** | Valider JSON exporté contre schéma Unity custom | FR51 |
+| **5.4** | Télécharger fichiers JSON exportés | FR52 |
+| **5.5** | Prévisualiser export avant téléchargement | FR53 |
+| **5.6** | Générer logs export avec métadonnées | FR54 |
+
+> Les sections **Contexte GDD** et **Garde-fous** (titres `####` ou `##`) ne sont **pas** des user stories — ne pas les ajouter à `sprint-status.yaml`.
+
+---
+
 ## Contexte GDD Alteir — Ce que le schéma Unity doit couvrir
 
 Source : `gdd-systems-reference.md`. L'export Unity n'est pas un simple dump JSON de nœuds : il porte l'ensemble des systèmes GDD qui gouvernent les dialogues en jeu.
 
-### Structure d'un nœud dialogue (Unity)
+#### Structure d'un nœud dialogue (Unity)
 
 ```
 UnityDialogueNode {
@@ -30,7 +45,7 @@ UnityDialogueNode {
 }
 ```
 
-### Flags — 3 types distincts à sérialiser
+#### Flags — 3 types distincts à sérialiser
 
 
 | Type                                   | Opérateurs conditions      | Opérateurs actions                    |
@@ -43,7 +58,7 @@ UnityDialogueNode {
 Convention de nommage : `Flag_[scope]_[entité]_[description]`
 Scopes : `perso`, `lieu`, `faction`, `systeme`, `quete`, `objet`
 
-### Réputation — règle critique export
+#### Réputation — règle critique export
 
 Les 3 axes (Admiration, Prestige, Crainte) sont exportés comme **valeur agrégée entière** — le tier dynamique (Sympathie/Faveur/Dévotion) n'est **jamais** stocké dans un champ séparé du JSON Unity (Source of Truth = agrégat).
 
@@ -59,7 +74,7 @@ Action de réputation :
 { "type": "reputation_delta", "faction": "Gardiens", "axis": "Admiration", "delta": +5 }
 ```
 
-### Tests de caractéristiques (Core System)
+#### Tests de caractéristiques (Core System)
 
 Les 8 caractéristiques (Puissance, Agilité, Perception, Intelligence, Créativité, Sociabilité, Technique, Volonté) peuvent conditionner des choix ou déclencher un skill check :
 
@@ -73,13 +88,15 @@ Les 8 caractéristiques (Puissance, Agilité, Perception, Intelligence, Créativ
 }
 ```
 
-### Types de nœuds spéciaux
+#### Types de nœuds spéciaux
+
+Scope couvert par les stories **5.1** (sérialisation export) et **5.3** (validation schéma) — pas des US séparées.
 
 - **Cut-scene** (`nodeType: "cutscene"`) : pas de choix interactifs, déclenche séquence animatique. Actions possibles : `trigger_animation`, `camera_movement`, `unlock_memory`.
 - **Exploration de souvenir** (`nodeType: "memory_exploration"`) : exploration de fragments de mémoire, flags `Flag_systeme_memoire_`* modifiés en fin de séquence.
 - **Nœud Influence/Respect** : action `influence_delta` / `respect_delta` avec `{ npcId, delta }`.
 
-### Repères de maintenabilité (alertes non-bloquantes)
+#### Repères de maintenabilité (alertes non-bloquantes)
 
 - **~1 000 nœuds** par dialogue : alerte de complexité (seuil GDD, pas de blocage export)
 - **~10 flags conversationnels par PNJ** : alerte de maintenabilité
@@ -93,7 +110,7 @@ Les 8 caractéristiques (Puissance, Agilité, Perception, Intelligence, Créativ
 
 **OBLIGATOIRE avant création de chaque story de cet epic :**
 
-### Checklist de Vérification
+#### Checklist de Vérification
 
 1. **Fichiers mentionnés dans les stories :**
   - Vérifier existence avec `glob_file_search` ou `grep`

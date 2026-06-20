@@ -1,35 +1,40 @@
 /**
  * E2E : dialogue minimal avec branche (choix) + export Unity JSON.
  *
- * Valide le flux Dashboard → Éditeur de graphe → graphe chargé → Actions → Export Unity
- * (téléchargement blob côté client).
+ * Valide le flux Dashboard → Éditeur de graphe → Actions → Export Unity
+ * (validate-schema bloquant puis save-and-write serveur — Story 5.1).
  */
 import { test, expect, type Page } from '@playwright/test'
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
 import { uniqueE2EDocumentId, seedDocumentWithRetry, openDashboardGraphTabAndSelectDocument } from './helpers'
 import { E2E_MS, E2E_TEST_TIMEOUT_MS } from './timeouts'
 
 const API_BASE = process.env.API_BASE ?? 'http://127.0.0.1:4243'
 const FIXTURE_PREFIX = 'e2e-small-dialogue-unity-export'
 
+const NODE_A = 'node-a1b2c3d4e5f6789012345678abcdef01'
+const NODE_B = 'node-b2c3d4e5f678901234567890abcdef12'
+
 const FIXTURE_DOC = {
   schemaVersion: '1.1.0',
   nodes: [
     {
-      id: 'node-root',
+      id: NODE_A,
+      stableId: NODE_A,
+      displayName: 'Racine',
       speaker: 'E2E',
       line: 'Racine avec un choix',
       choices: [
         {
           choiceId: 'e2e_go_next',
           text: 'Aller au nœud suivant',
-          targetNode: 'node-next',
+          targetNode: NODE_B,
         },
       ],
     },
     {
-      id: 'node-next',
+      id: NODE_B,
+      stableId: NODE_B,
+      displayName: 'Suite',
       speaker: 'E2E',
       line: 'Nœud cible du choix.',
     },
@@ -73,7 +78,7 @@ test.describe('Graph — petit dialogue + export Unity', () => {
     await deleteFixture(request, uniqueE2EDocumentId(FIXTURE_PREFIX, testInfo))
   })
 
-  test('graphe avec choix : arêtes visibles, Export Unity télécharge un JSON valide', async ({
+  test('graphe avec choix : Export Unity via API + toast succès', async ({
     page,
     request,
   }, testInfo) => {
@@ -86,18 +91,36 @@ test.describe('Graph — petit dialogue + export Unity', () => {
 
     const graphEditor = page.getByTestId('graph-editor')
     await graphEditor.getByTestId('btn-actions-dropdown').click()
-    const downloadPromise = page.waitForEvent('download', { timeout: E2E_MS.graphField })
+
+    const validatePromise = page.waitForResponse(
+      (r) => r.url().includes('/validate-schema') && r.request().method() === 'POST',
+      { timeout: E2E_MS.graphField }
+    )
+    const writePromise = page.waitForResponse(
+      (r) => r.url().includes('/save-and-write') && r.request().method() === 'POST',
+      { timeout: E2E_MS.graphField }
+    )
+
     await page.getByTestId('btn-export-unity').click()
-    const download = await downloadPromise
 
-    expect(download.suggestedFilename()).toMatch(/\.json$/i)
+    const validateResponse = await validatePromise
+    expect(validateResponse.ok()).toBe(true)
+    const validateBody = (await validateResponse.json()) as { is_valid: boolean }
+    expect(validateBody.is_valid).toBe(true)
 
-    const outDir = test.info().outputDir
-    await fs.mkdir(outDir, { recursive: true })
-    const savePath = path.join(outDir, download.suggestedFilename())
-    await download.saveAs(savePath)
-    const raw = await fs.readFile(savePath, 'utf-8')
-    const parsed = JSON.parse(raw) as { schemaVersion?: string; nodes?: unknown[] }
+    const writeResponse = await writePromise
+    expect(writeResponse.ok()).toBe(true)
+    const body = (await writeResponse.json()) as {
+      success: boolean
+      filename: string
+      json_content: string
+    }
+    expect(body.success).toBe(true)
+    expect(body.filename).toMatch(/\.json$/i)
+
+    await expect(page.getByText(/Dialogue exporté/i)).toBeVisible({ timeout: E2E_MS.ui })
+
+    const parsed = JSON.parse(body.json_content) as { schemaVersion?: string; nodes?: unknown[] }
     expect(parsed.schemaVersion).toBe('1.1.0')
     expect(Array.isArray(parsed.nodes)).toBe(true)
     expect(parsed.nodes!.length).toBeGreaterThanOrEqual(2)

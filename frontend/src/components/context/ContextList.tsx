@@ -70,7 +70,7 @@ export function ContextList({
     let result = items.filter((item) =>
       item.name.toLowerCase().includes(debouncedSearch.toLowerCase())
     )
-    
+
     // Appliquer le tri
     result = [...result].sort((a, b) => {
       const aSelected = selectedItems.includes(a.name)

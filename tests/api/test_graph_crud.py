@@ -30,6 +30,10 @@ from api.schemas.graph import (
     CalculateLayoutResponse
 )
 
+# IDs conformes schéma Unity v1.2.0 (32 hex) — utilisés par sample_graph_nodes_edges
+_SAMPLE_NODE_A = "node-a1b2c3d4e5f6789012345678abcdef01"
+_SAMPLE_NODE_B = "node-b2c3d4e5f678901234567890abcdef12"
+
 
 @pytest.fixture
 def client():
@@ -63,26 +67,29 @@ def sample_unity_json():
 
 @pytest.fixture
 def sample_graph_nodes_edges():
-    """Nœuds et edges ReactFlow de test."""
+    """Nœuds et edges ReactFlow de test (schéma Unity v1.2.0)."""
     return (
         [
             {
-                "id": "START",
-                "type": "dialogue",
+                "id": _SAMPLE_NODE_A,
+                "type": "dialogueNode",
                 "data": {
-                    "id": "START",
-                    "label": "Bonjour !",
+                    "id": _SAMPLE_NODE_A,
+                    "stableId": _SAMPLE_NODE_A,
+                    "displayName": "Bonjour",
                     "speaker": "PNJ",
                     "line": "Bonjour !",
+                    "choices": [{"choiceId": "choice_1", "text": "Réponse 1"}],
                 },
                 "position": {"x": 0, "y": 0},
             },
             {
-                "id": "NODE_1",
-                "type": "dialogue",
+                "id": _SAMPLE_NODE_B,
+                "type": "dialogueNode",
                 "data": {
-                    "id": "NODE_1",
-                    "label": "Suite du dialogue",
+                    "id": _SAMPLE_NODE_B,
+                    "stableId": _SAMPLE_NODE_B,
+                    "displayName": "Suite",
                     "speaker": "PNJ",
                     "line": "Suite du dialogue",
                 },
@@ -92,10 +99,10 @@ def sample_graph_nodes_edges():
         [
             {
                 "id": "e1",
-                "source": "START",
-                "target": "NODE_1",
+                "source": _SAMPLE_NODE_A,
+                "target": _SAMPLE_NODE_B,
                 "sourceHandle": "choice-0",
-                "targetHandle": None,
+                "data": {"edgeType": "choice", "choiceIndex": 0},
             }
         ],
     )
@@ -235,12 +242,12 @@ class TestGraphSave:
 
         Story 1.5 — Édition manuelle des nœuds (persistance via save)."""
         nodes, edges = sample_graph_nodes_edges
-        # Copie avec édition du line du nœud NODE_1
+        # Copie avec édition du line du nœud B
         edited_line = "Suite du dialogue (éditée manuellement)"
         nodes_edited = []
         for n in nodes:
             n_copy = dict(n)
-            if n_copy.get("id") == "NODE_1":
+            if n_copy.get("id") == _SAMPLE_NODE_B:
                 n_copy["data"] = dict(n_copy.get("data", {}))
                 n_copy["data"]["line"] = edited_line
             nodes_edited.append(n_copy)
@@ -259,7 +266,7 @@ class TestGraphSave:
         assert data["success"] is True
         doc = json.loads(data["json_content"])
         unity = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
-        node1 = next((n for n in unity if n.get("id") == "NODE_1"), None)
+        node1 = next((n for n in unity if n.get("id") == _SAMPLE_NODE_B), None)
         assert node1 is not None
         assert node1.get("line") == edited_line
 
@@ -272,9 +279,9 @@ class TestGraphSave:
 
         Story 1.8 — Suppression de nœuds (persistance via save)."""
         nodes, edges = sample_graph_nodes_edges
-        # Suppression de NODE_1 : garder seulement START, et retirer l'edge vers NODE_1
-        nodes_without_one = [n for n in nodes if n.get("id") != "NODE_1"]
-        edges_without_one = [e for e in edges if e.get("target") != "NODE_1"]
+        # Suppression du nœud B : garder seulement A, retirer l'edge vers B
+        nodes_without_one = [n for n in nodes if n.get("id") != _SAMPLE_NODE_B]
+        edges_without_one = [e for e in edges if e.get("target") != _SAMPLE_NODE_B]
         assert len(nodes_without_one) == 1
         assert len(edges_without_one) == 0
         request_data = {
@@ -293,7 +300,7 @@ class TestGraphSave:
         doc = json.loads(data["json_content"])
         unity = doc["nodes"] if isinstance(doc, dict) and "nodes" in doc else doc
         assert len(unity) == 1
-        assert unity[0]["id"] == "START"
+        assert unity[0]["id"] == _SAMPLE_NODE_A
 
 
 @pytest.mark.api

@@ -13,6 +13,8 @@ from api.schemas.dialogue import (
     UnityDialogueReadResponse,
     UnityDialoguePreviewRequest,
     UnityDialoguePreviewResponse,
+    UnitySchemaReferenceResponse,
+    UnitySchemaSectionSummary,
 )
 from api.dependencies import (
     get_config_service,
@@ -20,6 +22,7 @@ from api.dependencies import (
 )
 from api.exceptions import NotFoundException, ValidationException, InternalServerException
 from services.configuration_service import ConfigurationService
+from api.utils.unity_schema_validator import load_unity_schema, schema_exists
 
 logger = logging.getLogger(__name__)
 
@@ -147,6 +150,52 @@ async def list_unity_dialogues(
             details={"error": str(e)},
             request_id=request_id
         )
+
+
+_SCHEMA_SOURCE = "docs/resources/dialogue-format.schema.json"
+
+
+@router.get(
+    "/schema",
+    response_model=UnitySchemaReferenceResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_unity_schema_reference(
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> UnitySchemaReferenceResponse:
+    """Retourne les métadonnées du schéma Unity de référence (Story 5.3 / FR51)."""
+    schema = load_unity_schema()
+    sections = [
+        UnitySchemaSectionSummary(
+            name="nodes",
+            description="Liste des nœuds dialogue (id stable, line, speaker, choices…)",
+            required_fields=["id"],
+        ),
+        UnitySchemaSectionSummary(
+            name="choices",
+            description="Choix joueur par nœud — choiceId, text, targetNode obligatoires (v1.1+)",
+            required_fields=["choiceId", "text", "targetNode"],
+        ),
+        UnitySchemaSectionSummary(
+            name="visibilityConditions",
+            description="Conditions structurées d'affichage nœud/choix (Story 9.2)",
+            required_fields=["combinator", "items"],
+        ),
+        UnitySchemaSectionSummary(
+            name="dialogueFlags",
+            description="Liaisons flags GDD — interdit RepPalier* (runtime FR94)",
+            required_fields=["flagId", "type", "initialValue"],
+        ),
+    ]
+    version = str(schema.get("version")) if isinstance(schema, dict) and schema.get("version") else None
+    logger.debug("Schéma Unity référence: available=%s version=%s (request_id=%s)", schema_exists(), version, request_id)
+    return UnitySchemaReferenceResponse(
+        available=schema_exists(),
+        version=version,
+        source_path=_SCHEMA_SOURCE,
+        required_root_fields=["schemaVersion", "nodes"],
+        sections=sections,
+    )
 
 
 @router.get(

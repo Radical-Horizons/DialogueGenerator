@@ -803,23 +803,23 @@ class TestContextBuilderContextBuilding:
             max_tokens=10000
         )
         
-        # Vérifier la présence des marqueurs pour les personnages
-        assert "--- PNJ 1 ---" in context_str
-        assert "--- PNJ 2 ---" in context_str
+        # Vérifier la présence des marqueurs pour les personnages (nom de fiche)
+        assert "--- Elara ---" in context_str
+        assert "--- Grog ---" in context_str
         assert "--- CHARACTERS ---" in context_str
         
         # Vérifier la présence des marqueurs pour les lieux
-        assert "--- LIEU 1 ---" in context_str
+        assert "--- La Bibliothèque Infinie ---" in context_str
         assert "--- LOCATIONS ---" in context_str
         
         # Vérifier la présence des marqueurs pour les objets
-        assert "--- OBJET 1 ---" in context_str
+        assert "--- Amulette de Clairvoyance ---" in context_str
         assert "--- ITEMS ---" in context_str
         
-        # Vérifier que les marqueurs sont dans le bon ordre (PNJ 1 avant PNJ 2)
-        pnj1_idx = context_str.find("--- PNJ 1 ---")
-        pnj2_idx = context_str.find("--- PNJ 2 ---")
-        assert pnj1_idx < pnj2_idx, "PNJ 1 devrait apparaître avant PNJ 2"
+        # Vérifier que les marqueurs sont dans le bon ordre (Elara avant Grog)
+        elara_idx = context_str.find("--- Elara ---")
+        grog_idx = context_str.find("--- Grog ---")
+        assert elara_idx < grog_idx, "Elara devrait apparaître avant Grog"
         
         # Vérifier que le contenu suit les marqueurs
         assert "Elara" in context_str
@@ -840,13 +840,13 @@ class TestContextBuilderContextBuilding:
             max_tokens=10000
         )
         
-        # Les marqueurs doivent être présents même en mode narrative
-        assert "--- PNJ 1 ---" in context_str
-        assert "--- PNJ 2 ---" in context_str
+        # Les marqueurs doivent être présents même en mode narrative (nom de fiche)
+        assert "--- Elara ---" in context_str
+        assert "--- Grog ---" in context_str
         assert "--- CHARACTERS ---" in context_str
         
         # En mode narrative, il peut y avoir des sections de niveau 4 (IDENTITÉ, etc.)
-        # mais les marqueurs d'éléments (PNJ 1, PNJ 2) doivent toujours être présents
+        # mais les marqueurs d'éléments utilisent le nom canonique de la fiche
 
 class TestContextBuilderLinkedElements:
     @pytest.fixture

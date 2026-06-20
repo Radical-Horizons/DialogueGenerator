@@ -1,7 +1,8 @@
 """Service pour organiser intelligemment les sections du contexte dans le prompt."""
+import copy
 import logging
-from typing import List, Dict, Optional, Tuple
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
+from typing import Any, List, Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,9 @@ except ImportError:
     # Fallback si les modèles ne sont pas encore disponibles
     ContextItem = None
     ItemSection = None
+
+_ORGANIZE_JSON_CACHE: "OrderedDict[tuple, ContextItem]" = OrderedDict()
+_ORGANIZE_JSON_CACHE_MAX = 128
 
 
 class ContextOrganizer:
@@ -359,6 +363,15 @@ class ContextOrganizer:
                 label = f"{label} (extrait)"
         
         return label
+
+    @staticmethod
+    def _assign_section_content(section_content: Dict[str, Any], label: str, value: Any) -> None:
+        """Assigne une valeur sans écraser un contenu plus riche (collision de libellés)."""
+        existing = section_content.get(label)
+        if existing is not None and isinstance(existing, str) and isinstance(value, str):
+            if len(value.strip()) <= len(existing.strip()):
+                return
+        section_content[label] = value
     
     def _categorize_field(self, path: str, element_type: str) -> Optional[str]:
         """Catégorise un champ selon son chemin."""
@@ -412,8 +425,8 @@ class ContextOrganizer:
         # Dédupliquer les champs AVANT l'organisation
         if self.deduplicator and fields_to_include:
             deduplicated_fields = self.deduplicator.deduplicate_fields(fields_to_include, element_data)
-            if len(deduplicated_fields) < len(fields_to_include):
-                logger.info(
+            if len(deduplicated_fields) < len(fields_to_include) and logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
                     f"[{element_type}] Déduplication: {len(fields_to_include)} -> {len(deduplicated_fields)} champs"
                 )
             fields_to_include = deduplicated_fields
@@ -427,6 +440,18 @@ class ContextOrganizer:
         
         if not validated_fields:
             return None
+
+        cache_key = (
+            element_type,
+            str(element_data.get("Nom", "")),
+            organization_mode,
+            element_mode or "full",
+            tuple(validated_fields),
+        )
+        cached_item = _ORGANIZE_JSON_CACHE.get(cache_key)
+        if cached_item is not None:
+            _ORGANIZE_JSON_CACHE.move_to_end(cache_key)
+            return copy.deepcopy(cached_item)
         
         # Organiser selon le mode
         if organization_mode == "narrative":
@@ -448,13 +473,17 @@ class ContextOrganizer:
         # Extraire le nom de l'élément pour les métadonnées
         element_name = element_data.get("Nom", "Unknown")
         
-        return ContextItem(
+        result = ContextItem(
             id="",  # Sera défini par le caller
             name="",  # Sera défini par le caller
             sections=sections,
             tokenCount=total_token_count,
             metadata={"element_name": element_name}
         )
+        _ORGANIZE_JSON_CACHE[cache_key] = copy.deepcopy(result)
+        if len(_ORGANIZE_JSON_CACHE) > _ORGANIZE_JSON_CACHE_MAX:
+            _ORGANIZE_JSON_CACHE.popitem(last=False)
+        return result
     
     def _organize_default_json(
         self,
@@ -478,8 +507,7 @@ class ContextOrganizer:
                 continue
             
             label = self._generate_label(field_path, field_labels_map, element_mode)
-            # Stocker la structure Python directement
-            section_content[label] = value
+            self._assign_section_content(section_content, label, value)
         
         if section_content:
             # Retourner avec raw_content (structure Python) au lieu de content (texte)
@@ -523,8 +551,7 @@ class ContextOrganizer:
                         continue
                     
                     label = self._generate_label(field_path, field_labels_map, element_mode)
-                    # Stocker la structure Python directement, pas de conversion en texte
-                    section_content[label] = value
+                    self._assign_section_content(section_content, label, value)
                 
                 if section_content:
                     # Créer une section avec raw_content (structure Python) au lieu de content (texte)
@@ -546,7 +573,7 @@ class ContextOrganizer:
                         continue
                     
                     label = self._generate_label(field_path, field_labels_map, element_mode)
-                    section_content[label] = value
+                    self._assign_section_content(section_content, label, value)
                 
                 if section_content:
                     sections.append(ItemSection(

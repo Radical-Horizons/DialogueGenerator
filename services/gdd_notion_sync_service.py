@@ -458,6 +458,21 @@ class GddNotionSyncService:
                     nom,
                     exc,
                 )
+            try:
+                from services.gdd_context_precompile import (
+                    get_or_create_precompile_context_builder,
+                    precompile_entity,
+                )
+
+                cb = get_or_create_precompile_context_builder()
+                precompile_entity(cb, category_stem=stem, record=dict(rec_out))
+            except Exception as exc:
+                logger.warning(
+                    "Précompilation contexte ignorée (%s / %s): %s",
+                    stem,
+                    nom,
+                    exc,
+                )
 
     @staticmethod
     def _data_source_ids_from_settings_source(
@@ -768,6 +783,259 @@ class GddNotionSyncService:
             msg = redact_notion_token_from_text(str(exc))
             logger.warning("Test connexion Notion échoué: %s", msg)
             return {"ok": False, "message": f"Échec connexion Notion — {msg}"}
+
+    async def sync_entity_by_name(
+        self,
+        *,
+        name: str,
+        category_file: str = "Personnages.json",
+        request_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Synchronise une seule entité GDD depuis Notion (résolution fuzzy du nom)."""
+        async with self._run_lock:
+            return await self._sync_entity_by_name_locked(
+                name=name,
+                category_file=category_file,
+                request_id=request_id,
+            )
+
+    async def _sync_entity_by_name_locked(
+        self,
+        *,
+        name: str,
+        category_file: str,
+        request_id: Optional[str],
+    ) -> Dict[str, Any]:
+        from services.gdd_notion_entity_sync import resolve_entity_page
+
+        query = (name or "").strip()
+        cat_file = (category_file or "").strip()
+        if not query:
+            return {
+                "success": False,
+                "message": "Le paramètre name est requis.",
+                "query_name": query,
+                "resolved_name": None,
+                "notion_page_id": None,
+                "gdd_relative_path": None,
+                "last_edited_time": None,
+            }
+        if not cat_file:
+            return {
+                "success": False,
+                "message": "Le paramètre category_file est requis.",
+                "query_name": query,
+                "resolved_name": None,
+                "notion_page_id": None,
+                "gdd_relative_path": None,
+                "last_edited_time": None,
+            }
+
+        token = self._store.read_token()
+        if not token:
+            return {
+                "success": False,
+                "message": "Token Notion absent : configurez notion_token.secret ou NOTION_API_KEY.",
+                "query_name": query,
+                "resolved_name": None,
+                "notion_page_id": None,
+                "gdd_relative_path": None,
+                "last_edited_time": None,
+            }
+
+        settings = self._store.load_settings()
+        sources = settings.get("sources") or []
+        source: Optional[Dict[str, Any]] = None
+        for src in sources:
+            if not isinstance(src, dict):
+                continue
+            if str(src.get("category_file", "")).strip() != cat_file:
+                continue
+            if str(src.get("kind", "")).strip().lower() != "database":
+                continue
+            source = src
+            break
+        if source is None:
+            return {
+                "success": False,
+                "message": f"Aucune source Notion database pour category_file={cat_file!r}.",
+                "query_name": query,
+                "resolved_name": None,
+                "notion_page_id": None,
+                "gdd_relative_path": None,
+                "last_edited_time": None,
+            }
+
+        resolution = resolve_entity_page(
+            self._gdd_categories_path,
+            cat_file,
+            query,
+        )
+        client = self._client_factory(token)
+        retry_policy = SyncBackoffPolicy()
+        notion_id = str(source.get("notion_id", "")).strip()
+        ds_ids = self._data_source_ids_from_settings_source(source)
+
+        if not resolution.notion_page_id:
+            try:
+
+                async def _load_pages() -> List[Mapping[str, Any]]:
+                    return await self._fetch_pages(client, "database", notion_id, ds_ids)
+
+                pages = await self._notion_read_with_retries(
+                    _load_pages, retry_policy=retry_policy
+                )
+            except _SYNC_RECOVERABLE as exc:
+                msg = redact_notion_token_from_text(str(exc))
+                return {
+                    "success": False,
+                    "message": f"Impossible de lister Notion pour {cat_file}: {msg}",
+                    "query_name": query,
+                    "resolved_name": resolution.resolved_name,
+                    "notion_page_id": None,
+                    "gdd_relative_path": None,
+                    "last_edited_time": None,
+                }
+            resolution = resolve_entity_page(
+                self._gdd_categories_path,
+                cat_file,
+                query,
+                notion_pages=list(pages),
+            )
+
+        if not resolution.notion_page_id:
+            return {
+                "success": False,
+                "message": f"Aucune fiche trouvée pour {query!r} dans {cat_file}.",
+                "query_name": query,
+                "resolved_name": resolution.resolved_name,
+                "notion_page_id": None,
+                "gdd_relative_path": None,
+                "last_edited_time": None,
+            }
+
+        page_id = resolution.notion_page_id
+        full_page: Dict[str, Any]
+        rec_out: Dict[str, Any]
+        try:
+
+            async def _read_meta() -> Dict[str, Any]:
+                return await client.get_page(page_id)
+
+            full_page = await self._notion_read_with_retries(
+                _read_meta, retry_policy=retry_policy
+            )
+            try:
+                norm_source_id = normalize_notion_id(notion_id)
+            except ValueError:
+                norm_source_id = ""
+            compact_table = database_id_is_compact_table_export(norm_source_id)
+            if compact_table:
+                rec_out = notion_page_to_compact_row_record(full_page)
+            else:
+
+                async def _read_body() -> str:
+                    return await client.get_page_content(page_id)
+
+                body = await self._notion_read_with_retries(
+                    _read_body, retry_policy=retry_policy
+                )
+                rec_out = notion_page_to_gdd_record_merge_body_and_properties(
+                    full_page, body
+                )
+            pid_str = str(page_id or "").strip()
+            if pid_str:
+                try:
+                    rec_out["notion_page_id"] = normalize_notion_id(pid_str)
+                except ValueError:
+                    rec_out["notion_page_id"] = pid_str
+        except _SYNC_RECOVERABLE as exc:
+            msg = redact_notion_token_from_text(str(exc))
+            return {
+                "success": False,
+                "message": f"Échec lecture Notion pour {page_id}: {msg}",
+                "query_name": query,
+                "resolved_name": resolution.resolved_name,
+                "notion_page_id": page_id,
+                "gdd_relative_path": resolution.gdd_relative_path,
+                "last_edited_time": None,
+            }
+
+        if is_record_empty_for_sync(rec_out):
+            return {
+                "success": False,
+                "message": "Fiche Notion vide (corps et colonnes absents).",
+                "query_name": query,
+                "resolved_name": str(rec_out.get("Nom") or resolution.resolved_name),
+                "notion_page_id": page_id,
+                "gdd_relative_path": resolution.gdd_relative_path,
+                "last_edited_time": full_page.get("last_edited_time"),
+            }
+
+        shard_list_key = category_stem_to_list_category_key(Path(cat_file).stem)
+        use_shards = shard_list_key is not None
+        out_root = self._gdd_categories_path
+        gdd_rel = resolution.gdd_relative_path
+        pid_str = str(page_id or "").strip()
+        try:
+            if use_shards and shard_list_key is not None:
+                shard_dir = out_root / shard_list_key
+                shard_dir.mkdir(parents=True, exist_ok=True)
+                try:
+                    nid_shard = normalize_notion_id(pid_str)
+                    shard_name = f"{nid_shard}.json"
+                except ValueError:
+                    safe = "".join(c for c in pid_str if c.isalnum() or c in "-_")[:72] or "page"
+                    shard_name = f"{safe}.json"
+                shard_path = shard_dir / shard_name
+                write_json_atomic(shard_path, rec_out)
+                gdd_rel = f"{shard_list_key}/{shard_name}"
+            else:
+                out_path = out_root / cat_file
+                existing_raw = read_json_file(out_path, default=[])
+                existing = existing_raw if isinstance(existing_raw, list) else []
+                merged = merge_records_by_nom(existing, [rec_out])
+                write_json_atomic(out_path, merged)
+                gdd_rel = cat_file
+        except _SYNC_RECOVERABLE as exc:
+            msg = redact_notion_token_from_text(str(exc))
+            return {
+                "success": False,
+                "message": f"Échec écriture disque: {msg}",
+                "query_name": query,
+                "resolved_name": str(rec_out.get("Nom") or resolution.resolved_name),
+                "notion_page_id": page_id,
+                "gdd_relative_path": gdd_rel,
+                "last_edited_time": full_page.get("last_edited_time"),
+            }
+
+        manifest = load_manifest(self._manifest_path)
+        edited = str(full_page.get("last_edited_time") or "")
+        if edited:
+            manifest.set_edited(page_id, edited)
+            save_manifest(self._manifest_path, manifest)
+
+        self._append_entity_history(
+            cat_file,
+            shard_list_key,
+            use_shards,
+            [(pid_str, rec_out)],
+        )
+        self._clear_gdd_file_cache_and_notify_context()
+        canonical = str(rec_out.get("Nom") or resolution.resolved_name or query)
+        log_sync_event(
+            f"Sync entité {cat_file}: {canonical} ({page_id})",
+            request_id=request_id,
+        )
+        return {
+            "success": True,
+            "message": f"{canonical} synchronisé depuis Notion.",
+            "query_name": query,
+            "resolved_name": canonical,
+            "notion_page_id": page_id,
+            "gdd_relative_path": gdd_rel,
+            "last_edited_time": full_page.get("last_edited_time"),
+        }
 
     async def run_sync(
         self,

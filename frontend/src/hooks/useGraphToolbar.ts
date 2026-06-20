@@ -13,6 +13,18 @@ import { getErrorMessage } from '../types/errors'
 import type { UseToastFn } from '../components/shared'
 import type { GraphLayoutSpacingMode } from '../store/types/graphState'
 import * as graphAPI from '../api/graph'
+import { buildGraphSchemaApiPayload } from '../utils/buildGraphApiPayload'
+import {
+  buildUnityNodeIndexToIdMap,
+  resolveGraphNodeIdFromUnityPath,
+} from '../utils/unityNodeIndexMap'
+import { useUnityExport } from './useUnityExport'
+import { useUnityExportDownload } from './useUnityExportDownload'
+import { useUnityExportPreview } from './useUnityExportPreview'
+import type { LastExportDownload } from './useUnityExportDownload'
+import type { SchemaValidationIssue, ExportPreviewResponse } from '../types/graph'
+import type { BatchExportPreviewResponse } from '../types/api'
+import type { ExportPreviewModalMode } from '../components/unityDialogues/ExportPreviewModal'
 
 export interface UseGraphToolbarReturn {
   showAutoLayoutDropdown: boolean
@@ -45,8 +57,10 @@ export interface UseGraphToolbarReturn {
   schemaValidationIsValid: boolean
   schemaValidationErrors: string[]
   schemaValidationErrorCount: number
+  schemaValidationWarnings: SchemaValidationIssue[]
+  schemaValidationStructuredErrors: SchemaValidationIssue[]
   handleToggleSchemaValidation: () => void
-  handleSchemaErrorClick: (error: string) => void
+  handleSchemaIssueClick: (issue: SchemaValidationIssue) => void
   showCostBreakdown: boolean
   setShowCostBreakdown: (v: boolean | ((prev: boolean) => boolean)) => void
   showShortcutsTooltip: boolean
@@ -70,10 +84,25 @@ export interface UseGraphToolbarReturn {
   handleOpenExportDialog: () => void
   handleExportPNG: () => Promise<void>
   handleExportSVG: () => Promise<void>
+  handleExportUnity: () => Promise<void>
+  handlePreviewExport: () => Promise<void>
+  previewOpen: boolean
+  previewMode: ExportPreviewModalMode
+  previewLoading: boolean
+  previewError: string | null
+  singlePreview: ExportPreviewResponse | null
+  batchPreview: BatchExportPreviewResponse | null
+  isExportingFromPreview: boolean
+  handleExportFromPreview: () => Promise<void>
+  closePreview: () => void
   undo: () => void
   redo: () => void
   canUndoNow: boolean
   canRedoNow: boolean
+  lastExportDownload: LastExportDownload | null
+  isExportDownloading: boolean
+  handleDownloadLastExport: () => void
+  dismissExportDownload: () => void
 }
 
 export function useGraphToolbar(
@@ -99,6 +128,10 @@ export function useGraphToolbar(
   const [schemaValidationIsValid, setSchemaValidationIsValid] = useState(false)
   const [schemaValidationErrors, setSchemaValidationErrors] = useState<string[]>([])
   const [schemaValidationErrorCount, setSchemaValidationErrorCount] = useState(0)
+  const [schemaValidationWarnings, setSchemaValidationWarnings] = useState<SchemaValidationIssue[]>([])
+  const [schemaValidationStructuredErrors, setSchemaValidationStructuredErrors] = useState<
+    SchemaValidationIssue[]
+  >([])
   const [showCostBreakdown, setShowCostBreakdown] = useState(false)
   const [showShortcutsTooltip, setShowShortcutsTooltip] = useState(false)
   const [showSearchBar, setShowSearchBar] = useState(false)
@@ -441,33 +474,64 @@ export function useGraphToolbar(
     setShowSchemaValidationPanel(true)
     setSchemaValidationLoading(true)
     try {
-      const { nodes, edges } = useGraphStore.getState()
-      const payload = {
-        nodes: nodes.map((n) => ({ id: n.id, type: n.type ?? 'dialogueNode', position: n.position, data: n.data })),
-        edges: edges.map((e) => ({ id: e.id, source: e.source, target: e.target, type: e.type, data: e.data as Record<string, unknown> | undefined })),
-      }
+      const { nodes, edges, dialogueFlagBindings } = useGraphStore.getState()
+      const payload = buildGraphSchemaApiPayload(nodes, edges, dialogueFlagBindings)
       const res = await graphAPI.validateSchema(payload)
       setSchemaValidationIsValid(res.is_valid)
       setSchemaValidationErrors(res.errors)
       setSchemaValidationErrorCount(res.error_count)
+      setSchemaValidationWarnings(res.warnings ?? [])
+      setSchemaValidationStructuredErrors(res.structured_errors ?? [])
     } catch (err) {
       setSchemaValidationErrors([getErrorMessage(err)])
       setSchemaValidationErrorCount(1)
       setSchemaValidationIsValid(false)
+      setSchemaValidationWarnings([])
+      setSchemaValidationStructuredErrors([])
     } finally {
       setSchemaValidationLoading(false)
     }
   }, [showSchemaValidationPanel])
 
-  // Tente d'extraire l'index de nœud depuis "[nodes.N...]" et de focaliser le nœud correspondant.
-  const handleSchemaErrorClick = useCallback((error: string) => {
-    const match = /\[nodes\.(\d+)/.exec(error)
-    if (!match) return
-    const nodeIndex = parseInt(match[1], 10)
+  const exportDownload = useUnityExportDownload()
+
+  const { handleExportUnity } = useUnityExport(toast, {
+    setShowSchemaValidationPanel,
+    setSchemaValidationLoading,
+    setSchemaValidationIsValid,
+    setSchemaValidationErrors,
+    setSchemaValidationErrorCount,
+    setSchemaValidationWarnings,
+    setSchemaValidationStructuredErrors,
+  }, exportDownload)
+
+  const exportPreview = useUnityExportPreview(toast, {
+    setShowSchemaValidationPanel,
+    setSchemaValidationLoading,
+    setSchemaValidationIsValid,
+    setSchemaValidationErrors,
+    setSchemaValidationErrorCount,
+    setSchemaValidationWarnings,
+    setSchemaValidationStructuredErrors,
+  }, exportDownload)
+
+  const handleSchemaIssueClick = useCallback((issue: SchemaValidationIssue) => {
+    if (issue.node_id) {
+      useGraphViewStore.getState().focusNode(issue.node_id)
+      return
+    }
     const { nodes } = useGraphStore.getState()
-    const node = nodes[nodeIndex]
-    if (node) {
-      useGraphViewStore.getState().focusNode(node.id)
+    const unityIndexMap = buildUnityNodeIndexToIdMap(nodes)
+    const graphNodeId = resolveGraphNodeIdFromUnityPath(issue.path, unityIndexMap)
+    if (graphNodeId) {
+      useGraphViewStore.getState().focusNode(graphNodeId)
+      return
+    }
+    const legacyMatch = /\[nodes\.(\d+)/.exec(issue.message)
+    if (!legacyMatch) return
+    const legacyId = unityIndexMap.get(parseInt(legacyMatch[1], 10))
+    if (legacyId) {
+      useGraphViewStore.getState().focusNode(legacyId)
     }
   }, [])
 
@@ -504,8 +568,10 @@ export function useGraphToolbar(
     schemaValidationIsValid,
     schemaValidationErrors,
     schemaValidationErrorCount,
+    schemaValidationWarnings,
+    schemaValidationStructuredErrors,
     handleToggleSchemaValidation,
-    handleSchemaErrorClick,
+    handleSchemaIssueClick,
     showCostBreakdown,
     setShowCostBreakdown,
     showShortcutsTooltip,
@@ -529,9 +595,24 @@ export function useGraphToolbar(
     handleOpenExportDialog,
     handleExportPNG,
     handleExportSVG,
+    handleExportUnity,
+    handlePreviewExport: exportPreview.handlePreviewExport,
+    previewOpen: exportPreview.previewOpen,
+    previewMode: exportPreview.previewMode,
+    previewLoading: exportPreview.previewLoading,
+    previewError: exportPreview.previewError,
+    singlePreview: exportPreview.singlePreview,
+    batchPreview: exportPreview.batchPreview,
+    isExportingFromPreview: exportPreview.isExportingFromPreview,
+    handleExportFromPreview: exportPreview.handleExportFromPreview,
+    closePreview: exportPreview.closePreview,
     undo,
     redo,
     canUndoNow,
     canRedoNow,
+    lastExportDownload: exportDownload.lastExportDownload,
+    isExportDownloading: exportDownload.isDownloading,
+    handleDownloadLastExport: exportDownload.handleDownloadLastExport,
+    dismissExportDownload: exportDownload.dismissDownload,
   }
 }

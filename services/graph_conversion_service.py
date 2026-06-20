@@ -4,6 +4,8 @@ import logging
 import re
 from typing import List, Dict, Any, Tuple, Optional
 
+from services.unity_export_normalizer import normalize_unity_export_document
+
 logger = logging.getLogger(__name__)
 
 
@@ -370,7 +372,9 @@ class GraphConversionService:
             GraphConversionService._rebuild_connections(unity_nodes, edges)
 
             # Format canonique : même format que document DialogueGenerator / Unity (schemaVersion + nodes)
-            document = {"schemaVersion": "1.1.0", "nodes": unity_nodes}
+            document = normalize_unity_export_document(
+                {"schemaVersion": "1.1.0", "nodes": unity_nodes}
+            )
             json_content = json.dumps(document, indent=2, ensure_ascii=False)
 
             logger.info(f"Conversion réussie: {len(unity_nodes)} nœuds Unity")
@@ -379,6 +383,35 @@ class GraphConversionService:
         except Exception as e:
             logger.exception(f"Erreur lors de la conversion ReactFlow → Unity")
             raise ValueError(f"Erreur de conversion: {e}")
+
+    @staticmethod
+    def graph_to_unity_document(
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        *,
+        dialogue_flags: Optional[List[Dict[str, Any]]] = None,
+        title: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Convertit un graphe ReactFlow en document Unity canonique pour validation/export.
+
+        Inclut ``dialogueFlags`` et ``title`` lorsque fournis (Story 5.3 / FR51).
+
+        Args:
+            nodes: Nœuds ReactFlow.
+            edges: Arêtes ReactFlow.
+            dialogue_flags: Liaisons GDD racine (RepPalier, seuils).
+            title: Titre document optionnel.
+
+        Returns:
+            Document ``{ schemaVersion, nodes, … }``.
+        """
+        json_content = GraphConversionService.graph_to_unity_json(nodes, edges)
+        document = json.loads(json_content)
+        if dialogue_flags:
+            document["dialogueFlags"] = dialogue_flags
+        if title:
+            document["title"] = title
+        return document
     
     @staticmethod
     def _rebuild_connections(unity_nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]) -> None:
