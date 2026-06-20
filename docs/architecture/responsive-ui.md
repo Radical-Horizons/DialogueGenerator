@@ -126,7 +126,7 @@ Config Playwright dédiée : `playwright.pwa.config.ts` (non incluse dans `npm r
 
 1. `npm run dev`
 2. Redimensionner à **≥320px** de large (DevTools device mode).
-3. Vérifier : pas de scroll horizontal document, drawers &lt;1024px, toolbar graphe aux trois états.
+3. Vérifier : pas de scroll horizontal document, drawers &lt;1024px, toolbar graphe narrow / confortable (seuil 640px conteneur).
 
 Référence agents : `.cursor/skills/dialogue-frontend/SKILL.md` et `.cursor/rules/responsive_frontend.mdc`.
 

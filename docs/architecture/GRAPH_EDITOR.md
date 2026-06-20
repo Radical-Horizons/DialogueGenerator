@@ -33,15 +33,16 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 
 ### Header
 
-`GraphEditorHeader` expose une toolbar **tri-state** selon la largeur du conteneur (pas seulement le viewport) :
+`GraphEditorHeader` expose une toolbar **binaire** (narrow / confortable) selon la largeur du conteneur (pas seulement le viewport) :
 
 | Mode | Seuil conteneur | Comportement |
 |------|-----------------|--------------|
-| Confortable | ≥1100px | Une rangée horizontale complète |
-| Compact desktop | 640–1099px | Status au-dessus, outils en dessous |
+| Confortable | ≥640px (`GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX`) | Une rangée horizontale complète |
 | Narrow | &lt;640px | Grille verticale ; `DialogueCombobox` injecté via `headerSelector` (story 17.7) |
 
-Mesure : deux instances `useNarrowInlineSize` avec `measureParentClientWidth: true`. Tokens : `graphToolbarChrome` dans `responsiveChrome.ts`. Détail : [`responsive-ui.md`](./responsive-ui.md).
+Mesure : une instance `useNarrowInlineSize` avec `measureParentClientWidth: true`. Tokens : `graphToolbarChrome.comfortable` / `.narrow` dans `responsiveChrome.ts`. Détail : [`responsive-ui.md`](./responsive-ui.md).
+
+> **Note (2026-06)** : l’ancien mode intermédiaire « compact desktop » (640–1099px, deux rangées) a été retiré ; le refactor tri-state complet reste en dette technique (DT-1).
 
 **Actions principales** :
 
