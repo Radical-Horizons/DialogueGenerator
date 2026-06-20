@@ -412,33 +412,43 @@ class ContextConstructionService:
                 
                 # Gestion des champs via ContextFieldManager
                 field_manager = self._get_field_manager()
-                fields_for_element = field_manager.get_field_config_for_mode(
-                    element_type,
-                    element_mode,
-                    fields_to_include
-                )
-                
                 formatted_content = ""
                 context_item = None
                 token_count = 0
-                
-                # Filtrer les champs avec condition_flag via ContextFieldManager
                 filtered_fields = None
-                field_labels_map = {}
-                
-                if fields_for_element:
-                    filtered_fields = field_manager.filter_fields_by_condition_flags(
+                field_labels_map: Dict[str, str] = {}
+
+                if element_mode == "excerpt":
+                    resolved_fields = field_manager.resolve_fields_for_element(
                         element_type,
-                        fields_for_element,
-                        include_dialogue_type=include_dialogue_type
+                        element_data,
+                        element_mode,
+                        fields_to_include,
+                        include_dialogue_type=include_dialogue_type,
                     )
-                    
-                    if not filtered_fields:
-                        # Aucun champ après filtrage, passer au suivant
+                    if not resolved_fields:
                         continue
-                    
-                    # Récupérer les labels depuis context_config.json via ContextFieldManager
-                    field_labels_map = field_manager.get_field_labels_map(element_type, filtered_fields)
+                    filtered_fields = resolved_fields
+                    field_labels_map = field_manager.get_field_labels_map(
+                        element_type, filtered_fields
+                    )
+                else:
+                    fields_for_element = field_manager.get_field_config_for_mode(
+                        element_type,
+                        element_mode,
+                        fields_to_include
+                    )
+                    if fields_for_element:
+                        filtered_fields = field_manager.filter_fields_by_condition_flags(
+                            element_type,
+                            fields_for_element,
+                            include_dialogue_type=include_dialogue_type,
+                        )
+                        if not filtered_fields:
+                            continue
+                        field_labels_map = field_manager.get_field_labels_map(
+                            element_type, filtered_fields
+                        )
                 
                 if build_json_items:
                     context_item = None
