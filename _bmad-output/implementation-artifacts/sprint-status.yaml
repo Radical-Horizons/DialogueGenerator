@@ -109,7 +109,7 @@ development_status:
   3-10-configurer-budget-tokens-pour-sélection-contexte-fr20: done
   3-11-optimiser-contexte-pour-respecter-budget-tokens-tout-en-maintenant-pertinence-fr21: done
   epic-3-retrospective: done
-  epic-17: in-progress
+  epic-17: done
   17-1-shell-responsive-breakpoints-layout-320px-fr118: done
   17-2-touch-targets-gestes-graphe-équivalents-souris-fr119: done
   17-3-panneaux-contexte-éditeur-narrow-drawers-fr120: done
@@ -121,7 +121,7 @@ development_status:
   17-9-extraire-sous-composants-grapheditorheader-tri-state: done
   17-10-extraire-hook-usegraphtoolbartristate-tri-state: done
   17-11-hardening-tests-grapheditorheader-anti-double-mount: done
-  epic-17-retrospective: optional
+  epic-17-retrospective: done
   epic-4: done
   4-1-valider-structure-nœuds-champs-requis-displayname-stableid-text-fr36: done
   4-2-détecter-nœuds-vides-contenu-texte-manquant-fr37: done
@@ -145,7 +145,7 @@ development_status:
   5-4-télécharger-fichiers-json-exportés-fr52: done
   5-5-prévisualiser-export-avant-téléchargement-structure-json-taille-fr53: done
   5-6-générer-logs-export-avec-métadonnées-date-génération-coût-statut-validation-fr54: done
-  epic-5-retrospective: optional
+  epic-5-retrospective: done
   epic-6: backlog
   6-1-créer-templates-custom-dinstructions-pour-génération-dialogue-fr55: backlog
   6-2-sauvegarder-éditer-et-supprimer-templates-fr56: backlog

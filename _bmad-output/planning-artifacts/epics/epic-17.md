@@ -1,6 +1,6 @@
 ## Epic 17: Expérience mobile et responsive (web)
 
-**Status:** in-progress — stories **17.1–17.8** done ; **17.9–17.11** (refactor toolbar, 3 US séquentielles) en cours.
+**Status:** done — stories **17.1–17.11** done ; rétrospective **2026-06-20** (`epic-17-retro-2026-06-20.md`).
 
 Les utilisateurs peuvent utiliser DialogueGenerator sur **navigateur mobile et tablette** (largeurs typiques 320px–1023px) sans layout cassé : shell applicatif adaptatif, graphe utilisable au **tactile**, panneaux contexte / édition accessibles via **patterns mobile** (drawers, onglets ou plein écran). Le périmètre reste **web responsive** (pas d’app native iOS/Android dans cet epic).
 
