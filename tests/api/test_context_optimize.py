@@ -33,6 +33,7 @@ def optimize_client(monkeypatch, mock_context_builder_opt):
     def fake_metrics(_b, *, full_selection, **kwargs):
         return ContextSelectionTokenMetrics(
             selection_tokens=token_fn(full_selection),
+            context_tokens=token_fn(full_selection),
             breakdown=[],
             breakdown_note="test",
         )

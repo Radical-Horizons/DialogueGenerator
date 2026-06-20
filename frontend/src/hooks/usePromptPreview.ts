@@ -57,6 +57,34 @@ function estimateTokensFast(text: string): number {
   return Math.max(1, Math.ceil(text.length / 4))
 }
 
+/** Sections GDD internes (pas des noms de fiches). */
+const KNOWN_GDD_SECTION_TITLES = new Set([
+  'IDENTITÉ', 'IDENTITE', 'CARACTÉRISATION', 'CARACTERISATION',
+  'DESCRIPTION', 'INFORMATIONS', 'HISTOIRE', 'RELATIONS',
+  'CONTEXTE', 'GÉOGRAPHIE', 'GEOGRAPHIE', 'ÉCOSYSTÈME', 'ECOSYSTEME',
+])
+
+/** Extrait le nom affichable d'une fiche depuis son contenu texte. */
+function extractElementDisplayName(content: string, fallback: string): string {
+  const nomMatch = content.match(/^Nom(?:\s*\(extrait\))?:\s*(.+)$/m)
+  if (nomMatch?.[1]?.trim()) {
+    return nomMatch[1].trim()
+  }
+  return fallback
+}
+
+/** Nom affiché d'un item JSON (priorité aux métadonnées backend). */
+function resolveContextItemDisplayName(item: { name: string; metadata?: { element_name?: string; real_name?: string } }): string {
+  return item.metadata?.real_name ?? item.metadata?.element_name ?? item.name
+}
+
+function isNamedElementMarker(title: string): boolean {
+  const upperTitle = title.toUpperCase()
+  if (isLevel2Category(title)) return false
+  if (KNOWN_GDD_SECTION_TITLES.has(upperTitle)) return false
+  return true
+}
+
 /**
  * Vérifie si une section est une catégorie de niveau 2
  */
@@ -174,7 +202,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
           if (itemContent.length === 0) continue
 
           categoryChildren.push({
-            title: `${marker.label} ${marker.number}`,
+            title: extractElementDisplayName(itemContent, `${marker.label} ${marker.number}`),
             content: itemContent,
             hasJson: hasJsonContent(itemContent),
             tokenCount: estimateTokensFast(itemContent),
@@ -191,6 +219,52 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
         })
 
         // Passer à la prochaine catégorie
+        i = j
+        continue
+      }
+
+      // Format avec noms de fiches : --- Elara --- / --- La Bibliothèque ---
+      const namedElementMarkers: Array<{ index: number; title: string; markerLength: number }> = []
+      const namedMarkerRegex = /^--- (.+?) ---$/gm
+      let namedMatch: RegExpExecArray | null
+      while ((namedMatch = namedMarkerRegex.exec(categoryContent)) !== null) {
+        const markerTitle = namedMatch[1].trim()
+        if (markerTitle && isNamedElementMarker(markerTitle)) {
+          namedElementMarkers.push({
+            index: namedMatch.index,
+            title: markerTitle,
+            markerLength: namedMatch[0].length,
+          })
+        }
+      }
+
+      if (namedElementMarkers.length > 0) {
+        const categoryChildren: PromptSection[] = []
+
+        for (let idx = 0; idx < namedElementMarkers.length; idx++) {
+          const marker = namedElementMarkers[idx]
+          const start = marker.index + marker.markerLength
+          const end = idx < namedElementMarkers.length - 1 ? namedElementMarkers[idx + 1].index : categoryContent.length
+          const itemContent = categoryContent.substring(start, end).trim()
+          if (itemContent.length === 0) continue
+
+          categoryChildren.push({
+            title: extractElementDisplayName(itemContent, marker.title),
+            content: itemContent,
+            hasJson: hasJsonContent(itemContent),
+            tokenCount: estimateTokensFast(itemContent),
+          })
+        }
+
+        const categoryTokenCount = categoryChildren.reduce((sum, c) => sum + (c.tokenCount || 0), 0)
+        children.push({
+          title: categoryTitle,
+          content: '',
+          hasJson: false,
+          tokenCount: categoryTokenCount,
+          children: categoryChildren,
+        })
+
         i = j
         continue
       }
@@ -229,7 +303,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
 
             if (itemContent.length > 0) {
               categoryChildren.push({
-                title: `${itemName} ${idx + 1}`,
+                title: extractElementDisplayName(itemContent, `${itemName} ${idx + 1}`),
                 content: itemContent,
                 hasJson: hasJsonContent(itemContent),
                 tokenCount: estimateTokensFast(itemContent),
@@ -239,7 +313,7 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
         } else if (categoryContent.trim().length > 0) {
           // Aucun pattern trouvé, traiter comme un seul élément
           categoryChildren.push({
-            title: `${itemName} 1`,
+            title: extractElementDisplayName(categoryContent, `${itemName} 1`),
             content: categoryContent,
             hasJson: hasJsonContent(categoryContent),
             tokenCount: estimateTokensFast(categoryContent),
@@ -319,12 +393,12 @@ function parseSubSections(content: string): { children: PromptSection[], remaini
         })
       }
       
-      // Toujours créer des wrappers avec balises distinctives (PNJ1, PNJ2, etc.)
-      // même pour un seul élément, pour une meilleure séparation visuelle
+      // Wrappers par fiche : titre = nom GDD si détectable dans le contenu
       items.forEach((item, idx) => {
         const itemTokenCount = item.sections.reduce((sum, sec) => sum + (sec.tokenCount || 0), 0)
+        const aggregatedContent = item.sections.map((sec) => sec.content).join('\n')
         children.push({
-          title: `${itemName} ${idx + 1}`,
+          title: extractElementDisplayName(aggregatedContent, `${itemName} ${idx + 1}`),
           content: '',
           hasJson: false,
           tokenCount: itemTokenCount,
@@ -395,6 +469,7 @@ export function parsePromptFromJson(promptJson: PromptStructure | null | undefin
     const categoryChildren: PromptSection[] = []
     
     for (const item of category.items) {
+      const displayName = resolveContextItemDisplayName(item)
       // Si l'item a une seule section avec titre vide ou "INFORMATIONS", afficher le contenu directement
       // Sinon, créer des sections pour chaque section de l'item
       const hasSingleInfoSection = item.sections.length === 1 && 
@@ -417,7 +492,7 @@ export function parsePromptFromJson(promptJson: PromptStructure | null | undefin
         // Aplatir : afficher le contenu directement dans l'item
         const sectionContent = getSectionContent(item.sections[0])
         categoryChildren.push({
-          title: item.name,
+          title: displayName,
           content: sectionContent,
           hasJson: hasJsonContent(sectionContent),
           tokenCount: item.tokenCount
@@ -439,14 +514,14 @@ export function parsePromptFromJson(promptJson: PromptStructure | null | undefin
         // Si après filtrage on n'a qu'une section, aplatir aussi
         if (itemChildren.length === 1) {
           categoryChildren.push({
-            title: item.name,
+            title: displayName,
             content: itemChildren[0].content,
             hasJson: itemChildren[0].hasJson,
             tokenCount: item.tokenCount
           })
         } else if (itemChildren.length > 1) {
           categoryChildren.push({
-            title: item.name,
+            title: displayName,
             content: '', // Le contenu est dans les children
             hasJson: false,
             tokenCount: item.tokenCount,
@@ -455,7 +530,7 @@ export function parsePromptFromJson(promptJson: PromptStructure | null | undefin
         } else {
           // Aucune section valide, créer quand même l'item avec contenu vide
           categoryChildren.push({
-            title: item.name,
+            title: displayName,
             content: '',
             hasJson: false,
             tokenCount: item.tokenCount
@@ -464,7 +539,7 @@ export function parsePromptFromJson(promptJson: PromptStructure | null | undefin
       } else {
         // Aucune section, créer l'item vide
         categoryChildren.push({
-          title: item.name,
+          title: displayName,
           content: '',
           hasJson: false,
           tokenCount: item.tokenCount

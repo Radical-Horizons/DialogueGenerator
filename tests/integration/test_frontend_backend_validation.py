@@ -324,6 +324,14 @@ class TestPydanticValidators:
         except ValueError as e:
             # THEN: ValueError doit être levée
             assert str(Defaults.MAX_CONTEXT_TOKENS) in str(e) or "maximum" in str(e).lower()
+
+        request = GenerateUnityDialogueRequest(
+            user_instructions="Test",
+            context_selections=context_selection,
+            max_context_tokens=300_000,
+            llm_model_identifier="gpt-5-mini",
+        )
+        assert request.max_context_tokens == Defaults.MAX_CONTEXT_TOKENS
     
     def test_pydantic_validates_max_completion_tokens(self):
         """TEST INTÉGRATION : Validator Pydantic valide max_completion_tokens."""

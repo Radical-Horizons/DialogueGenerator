@@ -236,3 +236,20 @@ class TestFieldDeduplicator:
         assert "Background.Context" not in deduplicated
         assert "Background.Appearance" not in deduplicated
         assert "Background.Relationships" not in deduplicated
+
+    def test_deduplicate_fields_drops_section_titles_when_sections_present(
+        self, deduplicator: FieldDeduplicator
+    ) -> None:
+        """Les titres UI ne doivent pas masquer le corps ``sections.<slug>``."""
+        data = {
+            "Nom": "PNJ",
+            "sections": {"biographie": "Long corps narratif"},
+            "section_titles": {"biographie": "Biographie"},
+        }
+        fields = [
+            "sections.biographie",
+            "section_titles.biographie",
+            "notion_page_id",
+        ]
+        result = deduplicator.deduplicate_fields(fields, data)
+        assert result == ["sections.biographie"]

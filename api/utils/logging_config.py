@@ -280,8 +280,21 @@ def setup_logging() -> None:
     if log_format == "text":  # En développement (format texte)
         logging.getLogger("api.middleware.http_cache").setLevel(logging.INFO)
         logging.getLogger("api.utils.gdd_cache").setLevel(logging.INFO)
-        # Réduire aussi les logs DEBUG du context_builder en développement
-        logging.getLogger("context_builder").setLevel(logging.INFO)
+        # Hot path contexte (estimate-tokens) : les logs DEBUG par champ/élément des
+        # modules de construction/sérialisation sont très volumineux et dominent le
+        # temps de réponse (I/O fichier JSON). On les plafonne à INFO en développement,
+        # même si LOG_LEVEL=DEBUG, pour garder les estimations rapides.
+        # Opt-in explicite via LOG_CONTEXT_VERBOSE=true pour déboguer ce pipeline.
+        context_verbose = os.getenv("LOG_CONTEXT_VERBOSE", "false").lower() in ("true", "1", "yes", "on")
+        if not context_verbose:
+            for noisy_logger in (
+                "core.context.context_builder",
+                "services.context_construction_service",
+                "services.context_organizer",
+                "services.context_serializer",
+                "services.context_serializer.deduplicator",
+            ):
+                logging.getLogger(noisy_logger).setLevel(logging.INFO)
     
     # Ajouter l'environnement au logger context
     # (sera enrichi par le middleware)

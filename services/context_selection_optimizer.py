@@ -12,6 +12,7 @@ from api.schemas.dialogue import (
     ContextOptimizationRules,
     ContextSelection,
     OptimizeContextChange,
+    OptimizeContextEffectReport,
     OptimizeContextResponse,
 )
 from constants import Defaults
@@ -85,8 +86,36 @@ def _measure(
         field_configs=field_configs,
         organization_mode=organization_mode,
         measurement_max_tokens=measurement_max_tokens,
+        include_breakdown=False,
     )
     return int(m.selection_tokens)
+
+
+def _tokens_by_entity_type(metrics_breakdown: List[Any]) -> Dict[str, int]:
+    """Agrège un breakdown token par type d'entité."""
+    out: Dict[str, int] = {}
+    for row in metrics_breakdown:
+        out[row.entity_type] = out.get(row.entity_type, 0) + int(row.token_count)
+    return out
+
+
+def _build_effect_report(
+    *,
+    changes: List[OptimizeContextChange],
+    rules: ContextOptimizationRules,
+    before_breakdown: List[Any],
+    after_breakdown: List[Any],
+) -> OptimizeContextEffectReport:
+    """Construit le rapport d'effets affichable par le frontend."""
+    changes_by_type: Dict[str, int] = {}
+    for change in changes:
+        changes_by_type[change.entity_type] = changes_by_type.get(change.entity_type, 0) + 1
+    return OptimizeContextEffectReport(
+        changes_by_entity_type=changes_by_type,
+        pinned_entity_keys=sorted(_pin_set(rules)),
+        tokens_before_by_entity_type=_tokens_by_entity_type(before_breakdown),
+        tokens_after_by_entity_type=_tokens_by_entity_type(after_breakdown),
+    )
 
 
 def compute_pre_generation_fidelity_proxy_percent(
@@ -140,6 +169,14 @@ def optimize_context_selection(
         organization_mode=organization_mode,
         measurement_max_tokens=measurement_max_tokens,
     )
+    before_metrics_for_report = compute_context_selection_token_metrics(
+        context_builder,
+        full_selection=work,
+        user_instructions=user_instructions,
+        field_configs=field_configs,
+        organization_mode=organization_mode,
+        measurement_max_tokens=measurement_max_tokens,
+    )
 
     if tokens_before <= budget_tokens:
         return OptimizeContextResponse(
@@ -152,6 +189,12 @@ def optimize_context_selection(
             warnings=[],
             no_op=True,
             budget_respected=True,
+            effect_report=_build_effect_report(
+                changes=[],
+                rules=rules,
+                before_breakdown=before_metrics_for_report.breakdown,
+                after_breakdown=before_metrics_for_report.breakdown,
+            ),
         )
 
     changes: List[OptimizeContextChange] = []
@@ -200,6 +243,14 @@ def optimize_context_selection(
         organization_mode=organization_mode,
         measurement_max_tokens=measurement_max_tokens,
     )
+    after_metrics_for_report = compute_context_selection_token_metrics(
+        context_builder,
+        full_selection=work,
+        user_instructions=user_instructions,
+        field_configs=field_configs,
+        organization_mode=organization_mode,
+        measurement_max_tokens=measurement_max_tokens,
+    )
     tokens_saved = max(0, tokens_before - tokens_after)
     proxy = compute_pre_generation_fidelity_proxy_percent(tokens_before, tokens_after)
 
@@ -228,4 +279,10 @@ def optimize_context_selection(
         warnings=warnings,
         no_op=False,
         budget_respected=budget_respected,
+        effect_report=_build_effect_report(
+            changes=changes,
+            rules=rules,
+            before_breakdown=before_metrics_for_report.breakdown,
+            after_breakdown=after_metrics_for_report.breakdown,
+        ),
     )

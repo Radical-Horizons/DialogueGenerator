@@ -111,7 +111,18 @@ def test_api_endpoint_uses_correct_llm_client(client_with_real_config):
     mock_context_builder = MagicMock()
     mock_context_builder._count_tokens = MagicMock(return_value=100)
     mock_context_builder.build_context = MagicMock(return_value="test context")
-    mock_context_builder.build_context_json = MagicMock(return_value={})
+    from models.prompt_structure import PromptMetadata, PromptStructure
+
+    mock_context_builder.build_context_json = MagicMock(
+        return_value=PromptStructure(
+            sections=[],
+            metadata=PromptMetadata(
+                totalTokens=100,
+                generatedAt="2026-01-01T00:00:00",
+                organizationMode="narrative",
+            ),
+        )
+    )
     mock_context_builder.serialize_context_to_text = MagicMock(return_value="")
     
     from core.prompt.prompt_engine import BuiltPrompt

@@ -9,6 +9,7 @@ export interface GenerationPanelActions {
   handlePreview: (() => void) | null
   handleExportUnity: (() => void) | null
   handleReset: (() => void) | null
+  estimateTokens: (() => Promise<void>) | null
   isLoading: boolean
   isDirty: boolean
   /** Brouillon génération (localStorage) — pour libellé discret dans le panneau droit. */
@@ -27,6 +28,7 @@ export const useGenerationActionsStore = create<GenerationActionsState>((set) =>
     handlePreview: null,
     handleExportUnity: null,
     handleReset: null,
+    estimateTokens: null,
     isLoading: false,
     isDirty: false,
     saveStatus: 'saved',

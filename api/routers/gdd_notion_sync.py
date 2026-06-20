@@ -23,6 +23,8 @@ from api.schemas.gdd_notion_sync import (
     GddNotionSyncConfigPublic,
     GddNotionSyncConfigResponse,
     GddNotionSyncConfigUpdate,
+    GddNotionSyncEntityRequest,
+    GddNotionSyncEntityResponse,
     GddNotionSyncProgressResponse,
     GddNotionSyncRunResponse,
     GddNotionSyncStatusResponse,
@@ -204,6 +206,21 @@ async def run_gdd_notion_sync(
         partial_errors=result.partial_errors,
         mirror_promotion_pending=result.mirror_promotion_pending,
     )
+
+
+@router.post("/sync-entity", response_model=GddNotionSyncEntityResponse)
+async def sync_gdd_notion_entity(
+    body: GddNotionSyncEntityRequest,
+    svc: Annotated[GddNotionSyncService, Depends(get_gdd_notion_sync_service)],
+    request_id: Annotated[str, Depends(get_request_id)],
+) -> GddNotionSyncEntityResponse:
+    """Synchronise une seule entité GDD depuis Notion (résolution fuzzy du nom)."""
+    raw = await svc.sync_entity_by_name(
+        name=body.name.strip(),
+        category_file=body.category_file.strip(),
+        request_id=request_id,
+    )
+    return GddNotionSyncEntityResponse.model_validate(raw)
 
 
 @router.get(

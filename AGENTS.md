@@ -15,6 +15,16 @@ DialogueGenerator is a React + FastAPI app for generating RPG dialogues via LLMs
 
 Both can be started together with `npm run dev` (uses `node scripts/dev.js`).
 
+### Calling the API (agents)
+
+For **sync GDD**, **context**, **documents**, **graph**, or any backend action: **call the REST API**, do not reimplement logic in one-off scripts.
+
+1. **Cookbook first** : `.cursor/skills/api-runbook/references/cookbook.md` — if the task matches, **run the command immediately** (no code search, no curl, no reading `Invoke-DialogueApi.ps1`).
+2. Invoke : `npm run api:invoke -- -Method … -Path …` (single invocation path).
+3. Sync personnages (Uresaïr, Valkazer, etc.) : health → `POST /api/v1/gdd-notion-sync/sync?category_file=Personnages.json` → `GET …/status` — **3 commands max**.
+4. Rule / skill / command : `api_usage.mdc` · `api-runbook/SKILL.md` · `api-runbook.md` · subagent **`api-operator`**.
+5. Long contracts : `docs/api/api-contracts-api.md` · live schema : `/api/openapi.json` (only when **not** in cookbook).
+
 ### Mandat d'agentivité
 
 - **Priorité** : meilleur résultat produit et respect des processus du repo — pas l'auto-limitation sur tokens, nombre de subagents ou « scope minimal » au détriment d'une revue ou d'un diagnostic complets.
@@ -56,6 +66,7 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 
 | Subagent | Model | Purpose |
 |----------|-------|---------|
+| `api-operator` | fast | Execute REST API calls (sync, context, health) — see api-runbook skill |
 | `api-contracts-reviewer` | fast | Schema/router/client drift |
 | `graph-editor-reviewer` | inherit | Zustand slices, React Flow, stale closures |
 | `llm-pipeline-reviewer` | fast | Streaming SSE, cost governance, LLM clients |
@@ -85,6 +96,7 @@ Specialized reviewers — invoke with `/name` or naturally. See `.cursor/rules/s
 - **Frontend lint** : `npm --prefix frontend run lint`
 - **Frontend tests (T1)** : `cd frontend && npx vitest run src/chemin/Fichier.test.ts --reporter=dot` ou `npm run test:quick` ; **T3** : `VITEST_FULL=1` + `npm run test:full` / `test:ci` selon `workflow.mdc`
 - **Start dev**: `npm run dev` or start backend/frontend separately as shown above
+- **Call API (agents)**: `.cursor/commands/api-runbook.md` · `npm run api:invoke -- -Method GET -Path /health`
 
 ## Learned User Preferences
 

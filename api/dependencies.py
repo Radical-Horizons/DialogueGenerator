@@ -23,6 +23,7 @@ from services.linked_selector import LinkedSelectorService
 from services.repositories.llm_usage_repository import FileLLMUsageRepository
 from services.repositories.cost_budget_repository import FileCostBudgetRepository
 from services.llm_usage_service import LLMUsageService
+from services.export_log_service import ExportLogService
 from services.llm_pricing_service import LLMPricingService
 from services.token_estimation_service import TokenEstimationService
 from services.cost_governance_service import CostGovernanceService
@@ -218,6 +219,11 @@ def create_llm_usage_service() -> LLMUsageService:
 def get_llm_usage_service(request: Request) -> LLMUsageService:
     """Retourne le service de tracking d'utilisation LLM (singleton du ``ServiceContainer``)."""
     return get_service_container(request).get_llm_usage_service()
+
+
+def get_export_log_service(request: Request) -> ExportLogService:
+    """Retourne le service de journalisation export Unity."""
+    return get_service_container(request).get_export_log_service()
 
 
 def get_request_id(request: Request) -> str:

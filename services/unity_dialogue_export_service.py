@@ -4,7 +4,7 @@ SOLID:
 - SRP: Une seule responsabilité — valider (schéma Unity) et persister le JSON
   dans le répertoire configuré. Pas de conversion graphe/Unity (faite par l'appelant).
 - DIP: ConfigurationService et validator sont injectés (pas d'instanciation du chemin
-  ni du validateur concret dans la logique métier). Par défaut validator=UnityJsonRenderer.
+  ni du validateur concret dans la logique métier). Par défaut validate_unity_json (Story 5.1).
 
 ADR-006: Écriture atomique (tmp → fsync → rename) et persistance last_seq par document (sidecar).
 """
@@ -16,8 +16,10 @@ from pathlib import Path
 from typing import Callable, List, Optional, Tuple, Any, Dict
 
 from services.configuration_service import ConfigurationService
-from services.json_renderer.unity_json_renderer import UnityJsonRenderer
 from api.exceptions import ValidationException
+from services.unity_dialogue_download_service import safe_export_filename
+from services.unity_export_normalizer import normalize_unity_export_document
+from services.unity_export_validation_service import unity_export_schema_validator
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +27,68 @@ logger = logging.getLogger(__name__)
 SEQ_SUFFIX = ".seq"
 
 
-def _default_validator(nodes: List[Dict[str, Any]]) -> Tuple[bool, List[str]]:
-    """Validateur par défaut (UnityJsonRenderer). Permet DIP : le service dépend d'un callable."""
-    return UnityJsonRenderer().validate_nodes(nodes)
+def _resolve_export_basename(
+    filename: Optional[str],
+    title: Optional[str],
+    request_id: Optional[str],
+) -> str:
+    """Dérive un nom de fichier export sûr (basename, sans path traversal).
+
+    Args:
+        filename: Nom fourni par le client (optionnel).
+        title: Titre pour génération slug si filename absent.
+        request_id: ID requête pour ValidationException.
+
+    Returns:
+        Nom de fichier se terminant par ``.json``.
+
+    Raises:
+        ValidationException: Si le nom client est invalide.
+    """
+    if filename:
+        try:
+            return safe_export_filename(filename)
+        except ValueError as exc:
+            raise ValidationException(
+                message="Nom de fichier export invalide",
+                details={"filename": str(exc)},
+                request_id=request_id,
+            ) from exc
+    if title:
+        slug = re.sub(r"[^\w\s-]", "", title.lower())
+        slug = re.sub(r"[-\s]+", "_", slug)[:100] or "dialogue"
+        return f"{slug}.json"
+    return "dialogue.json"
+
+
+def _resolve_export_path(
+    unity_dir: Path,
+    basename: str,
+    request_id: Optional[str],
+) -> Path:
+    """Résout le chemin d'écriture et vérifie qu'il reste sous ``unity_dir``.
+
+    Args:
+        unity_dir: Répertoire Unity configuré.
+        basename: Nom de fichier (basename sûr).
+        request_id: ID requête pour ValidationException.
+
+    Returns:
+        Chemin absolu résolu du fichier cible.
+
+    Raises:
+        ValidationException: Si le chemin résolu sort du répertoire Unity.
+    """
+    file_path = (unity_dir / basename).resolve()
+    try:
+        file_path.relative_to(unity_dir.resolve())
+    except ValueError as exc:
+        raise ValidationException(
+            message="Nom de fichier export invalide",
+            details={"filename": "Chemin hors du répertoire Unity configuré"},
+            request_id=request_id,
+        ) from exc
+    return file_path
 
 
 def _document_key_from_filename(name: str) -> str:
@@ -79,12 +140,16 @@ def write_unity_dialogue_to_file(
     filename: Optional[str] = None,
     title: Optional[str] = None,
     request_id: Optional[str] = None,
-    validator: Optional[Callable[[List[Dict[str, Any]]], Tuple[bool, List[str]]]] = None,
+    validator: Optional[Callable[[Dict[str, Any]], Tuple[bool, List[str]]]] = None,
     last_seq_after_write: Optional[int] = None,
+    preserve_source_fields: bool = False,
 ) -> Tuple[Path, str]:
     """Valide le JSON Unity et l'écrit dans le répertoire configuré (écriture atomique ADR-006).
-    Accepte tableau de nœuds ou document { schemaVersion, nodes } ; écrit toujours en format
-    canonique (même format que document DialogueGenerator / Unity).
+    Accepte tableau de nœuds ou document { schemaVersion, nodes }.
+
+    Par défaut, écrit le format canonique ``{ schemaVersion, nodes }``. Avec
+    ``preserve_source_fields=True``, réécrit le document source tel quel (batch export
+    de documents persistés — conserve ``title``, ``dialogueFlags``, etc.).
 
     Args:
         config_service: Service de configuration (chemin Unity).
@@ -92,8 +157,9 @@ def write_unity_dialogue_to_file(
         filename: Nom de fichier optionnel (sans ou avec .json).
         title: Titre utilisé pour générer le nom de fichier si filename absent.
         request_id: ID de requête pour les exceptions.
-        validator: Callable (nodes) -> (is_valid, errors). Par défaut UnityJsonRenderer.
+        validator: Callable (document) -> (is_valid, errors). Par défaut pipeline export FR51.
         last_seq_after_write: Si fourni, persiste ce seq dans le sidecar après écriture (ADR-006).
+        preserve_source_fields: Conserver les champs hors ``nodes`` du document source.
 
     Returns:
         Tuple (chemin absolu du fichier écrit, nom du fichier).
@@ -134,7 +200,10 @@ def write_unity_dialogue_to_file(
                 details={"json_content": "nodes doit être un tableau []"},
                 request_id=request_id,
             )
-        document = {"schemaVersion": json_data.get("schemaVersion", "1.1.0"), "nodes": nodes}
+        if preserve_source_fields:
+            document = json_data
+        else:
+            document = {"schemaVersion": json_data.get("schemaVersion", "1.1.0"), "nodes": nodes}
     else:
         raise ValidationException(
             message="Le JSON Unity doit être un tableau de nœuds ou un document (schemaVersion, nodes)",
@@ -142,8 +211,10 @@ def write_unity_dialogue_to_file(
             request_id=request_id,
         )
 
-    validate_fn = validator or _default_validator
-    is_valid, validation_errors = validate_fn(nodes)
+    document = normalize_unity_export_document(document, in_place=True)
+
+    validate_fn = validator or unity_export_schema_validator
+    is_valid, validation_errors = validate_fn(document)
     if not is_valid:
         raise ValidationException(
             message="Le dialogue Unity contient des erreurs de validation",
@@ -154,23 +225,12 @@ def write_unity_dialogue_to_file(
             request_id=request_id,
         )
 
-    if filename:
-        name = filename
-    elif title:
-        slug = re.sub(r"[^\w\s-]", "", title.lower())
-        slug = re.sub(r"[-\s]+", "_", slug)
-        name = slug[:100]
-    else:
-        name = "dialogue"
-
-    if not name.endswith(".json"):
-        name += ".json"
-
-    file_path = unity_dir / name
+    name = _resolve_export_basename(filename, title, request_id)
+    file_path = _resolve_export_path(unity_dir, name, request_id)
     formatted = json.dumps(document, indent=2, ensure_ascii=False)
 
     # ADR-006: Écriture atomique (tmp → fsync → rename) pour éviter fichier tronqué
-    tmp_path = unity_dir / (name + ".tmp")
+    tmp_path = file_path.with_suffix(file_path.suffix + ".tmp")
     tmp_path.write_text(formatted, encoding="utf-8")
     try:
         with open(tmp_path, "r+b") as f:

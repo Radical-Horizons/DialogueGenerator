@@ -44,4 +44,23 @@ describe('DialogueListContextMenu', () => {
     expect(onDeleted).toHaveBeenCalled()
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('affiche Télécharger et appelle onDownload (Story 5.4 AC #6)', async () => {
+    const user = userEvent.setup()
+    const onDownload = vi.fn()
+    const onClose = vi.fn()
+
+    render(
+      <DialogueListContextMenu
+        state={{ dialogue, clientX: 100, clientY: 120 }}
+        onClose={onClose}
+        onDownload={onDownload}
+      />,
+    )
+
+    await user.click(screen.getByTestId('dialogue-list-context-download'))
+
+    expect(onDownload).toHaveBeenCalledWith(dialogue)
+    expect(onClose).toHaveBeenCalled()
+  })
 })

@@ -45,6 +45,11 @@ export interface SaveGraphRequest {
   metadata: GraphMetadata
   seq?: number
   document_id?: string
+  dialogue_flags?: Array<{
+    flagId: string
+    type: string
+    initialValue: boolean | number | string
+  }>
 }
 
 export interface SaveGraphResponse {
@@ -53,6 +58,15 @@ export interface SaveGraphResponse {
   json_content: string
   ack_seq?: number
   last_seq?: number
+}
+
+export interface ExportPreviewResponse {
+  json_content: string
+  size_bytes: number
+  node_count: number
+  filename: string
+  schema_valid: boolean
+  errors: string[]
 }
 
 export interface GenerateNodeRequest {
@@ -389,13 +403,43 @@ export interface DetectContextDroppingResponse {
 export interface ValidateSchemaRequest {
   nodes: GraphNodePayload[]
   edges: GraphEdgePayload[]
+  dialogue_flags?: Array<{
+    flagId: string
+    type: string
+    initialValue: boolean | number | string
+  }>
 }
 
-/** Réponse validation schéma JSON Unity (FR48 / Story 4.13). */
+/** Erreur ou avertissement structuré validation schéma Unity (Story 5.3 / FR51). */
+export interface SchemaValidationIssue {
+  code: string
+  message: string
+  path?: string
+  node_id?: string
+}
+
+/** Réponse validation schéma JSON Unity (FR48 / Story 4.13, FR51). */
 export interface ValidateSchemaResponse {
   is_valid: boolean
   errors: string[]
   error_count: number
+  warnings?: SchemaValidationIssue[]
+  structured_errors?: SchemaValidationIssue[]
+}
+
+/** Métadonnées schéma Unity de référence (Story 5.3). */
+export interface UnitySchemaSectionSummary {
+  name: string
+  description: string
+  required_fields: string[]
+}
+
+export interface UnitySchemaReferenceResponse {
+  available: boolean
+  version: string | null
+  source_path: string
+  required_root_fields: string[]
+  sections: UnitySchemaSectionSummary[]
 }
 
 /** Requête simulation de flux (FR46 / Story 4.11). */

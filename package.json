@@ -59,7 +59,8 @@
     "diagnose:prod-context": "node scripts/getPythonPath.js scripts/diagnose_prod_context_validation.py",
     "start:prod": "powershell -ExecutionPolicy Bypass -File scripts/start-production.ps1",
     "start:debug": "powershell -ExecutionPolicy Bypass -File scripts/start-debug.ps1",
-    "start:api": "node scripts/getPythonPath.js -m api.main"
+    "start:api": "powershell -ExecutionPolicy Bypass -Command \"$env:API_PORT='4243'; node scripts/getPythonPath.js -m api.main\"",
+    "api:invoke": "powershell -ExecutionPolicy Bypass -File scripts/Invoke-DialogueApi.ps1"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

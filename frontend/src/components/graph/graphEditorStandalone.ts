@@ -1,6 +1,9 @@
 /**
  * Helpers pour le mode standalone de l'éditeur de graphe.
  */
+import { triggerBlobDownloadAsync } from '../../utils/downloadBlob'
+import type { DownloadFilenameStrategy } from '../../utils/downloadExportOptions'
+import { resolveDownloadExportFilename } from '../../utils/downloadExportOptions'
 
 export interface GraphRouteTarget {
   decodedDialogueId: string
@@ -43,15 +46,22 @@ export function buildUnityExportFilename(filename?: string | null): string {
 /**
  * Télécharge le JSON Unity courant sur le poste client.
  */
-export function downloadUnityExport(
+export async function downloadUnityExport(
   jsonContent: string,
-  filename?: string | null
-): void {
-  const blob = new Blob([jsonContent], { type: 'application/json' })
-  const objectUrl = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = objectUrl
-  link.download = buildUnityExportFilename(filename)
-  link.click()
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
+  filename?: string | null,
+  callbacks?: { onDownloadStart?: () => void; onDownloadEnd?: () => void },
+  filenameStrategy: DownloadFilenameStrategy = 'preserve',
+): Promise<void> {
+  const resolvedFilename = resolveDownloadExportFilename({
+    strategy: filenameStrategy,
+    sourceFilename: filename ?? 'dialogue_export',
+    jsonContent,
+  })
+  const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' })
+  await triggerBlobDownloadAsync({
+    blob,
+    filename: resolvedFilename,
+    onProgressStart: callbacks?.onDownloadStart,
+    onProgressEnd: callbacks?.onDownloadEnd,
+  })
 }

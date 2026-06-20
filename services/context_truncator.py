@@ -150,6 +150,25 @@ class ContextTruncator:
         return '\n'.join(truncated_lines)
 
 
+_SHARED_TRUNCATOR: Optional["ContextTruncator"] = None
+
+
+def get_shared_truncator() -> "ContextTruncator":
+    """Retourne une instance ``ContextTruncator`` partagée (tokenizer tiktoken réutilisé).
+
+    Évite de recréer un tokenizer à chaque appel des helpers de comptage/troncature
+    (chemin chaud estimate-tokens). Le ``ContextTruncator`` est sans état mutable entre
+    appels, donc le partage est sûr.
+
+    Returns:
+        Instance singleton de ``ContextTruncator``.
+    """
+    global _SHARED_TRUNCATOR
+    if _SHARED_TRUNCATOR is None:
+        _SHARED_TRUNCATOR = ContextTruncator()
+    return _SHARED_TRUNCATOR
+
+
 def cap_context_text_to_budget(text: Union[str, Any, None], max_tokens: int) -> str:
     """Tronque un texte de contexte sérialisé s'il dépasse ``max_tokens``.
 
@@ -171,7 +190,7 @@ def cap_context_text_to_budget(text: Union[str, Any, None], max_tokens: int) -> 
         return text if isinstance(text, str) else ""
     if not isinstance(text, str):
         text = json.dumps(text, ensure_ascii=False) if isinstance(text, (dict, list)) else str(text)
-    truncator = ContextTruncator()
+    truncator = get_shared_truncator()
     if truncator.count_tokens(text) <= max_tokens:
         return text
     return truncator.truncate_context(text, max_tokens)
@@ -197,4 +216,4 @@ def count_tokens_in_prompt_context_element(raw_xml: str) -> int:
     inner = match.group(1).strip()
     if not inner:
         return 0
-    return ContextTruncator().count_tokens(inner)
+    return get_shared_truncator().count_tokens(inner)

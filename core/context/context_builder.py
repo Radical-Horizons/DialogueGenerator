@@ -161,6 +161,10 @@ class ContextBuilder:
         
         # GDDData (sera chargé par load_gdd_files)
         self._gdd_data: Optional['GDDData'] = None
+
+        # Compteur monotone incrémenté à chaque (re)chargement GDD. Sert de jeton
+        # d'invalidation pour les caches dérivés (ex. métriques de tokens contexte).
+        self._gdd_revision: int = 0
         
         # ElementRepository (sera créé après load_gdd_files)
         self._element_repository: Optional['ElementRepository'] = element_repository
@@ -303,7 +307,20 @@ class ContextBuilder:
             self._context_construction_service._context_truncator = self._context_truncator
             self._context_construction_service._previous_dialogue_manager = self._previous_dialogue_manager
             self._context_construction_service._context_config = self.context_config
-    
+        self._context_construction_service._context_builder = self
+
+        # Invalider les caches dérivés (les données GDD viennent d'être (re)chargées).
+        self._gdd_revision += 1
+
+    @property
+    def gdd_revision(self) -> int:
+        """Jeton d'invalidation incrémenté à chaque ``load_gdd_files()``.
+
+        Returns:
+            Numéro de révision courant des données GDD en mémoire.
+        """
+        return self._gdd_revision
+
     # Propriétés pour compatibilité rétroactive (délèguent à GDDDataAccessor)
     @property
     def characters(self) -> List[Dict[str, Any]]:

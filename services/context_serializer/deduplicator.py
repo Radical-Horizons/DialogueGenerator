@@ -8,6 +8,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Métadonnées UI / export Notion — jamais injectées dans le prompt (corps dans ``sections.<slug>``).
+_METADATA_FIELD_PREFIXES: tuple[str, ...] = ("section_titles.",)
+_METADATA_ROOT_KEYS: frozenset[str] = frozenset({"section_titles", "notion_page_id"})
+
 
 class FieldDeduplicator:
     """Détecte et déduplique les champs avant la sérialisation."""
@@ -102,7 +106,7 @@ class FieldDeduplicator:
             if len(paths) > 1
         }
         
-        if duplicates:
+        if duplicates and logger.isEnabledFor(logging.DEBUG):
             logger.debug(
                 f"Doublons détectés: {len(duplicates)} groupes de valeurs dupliquées"
             )
@@ -139,6 +143,34 @@ class FieldDeduplicator:
         
         # Sinon, prendre le chemin imbriqué le plus court
         return sorted(nested_paths, key=lambda p: (p.count('.'), len(p), p))[0]
+
+    @staticmethod
+    def _is_metadata_field_path(path: str) -> bool:
+        """True si le chemin ne doit pas alimenter le contexte narratif."""
+        if path in _METADATA_ROOT_KEYS:
+            return True
+        return any(path.startswith(prefix) for prefix in _METADATA_FIELD_PREFIXES)
+
+    @staticmethod
+    def _drop_section_title_paths_when_body_present(
+        fields_to_include: List[str],
+    ) -> List[str]:
+        """Retire ``section_titles.<slug>`` lorsque ``sections.<slug>`` est déjà sélectionné."""
+        section_slugs = {
+            path[len("sections.") :]
+            for path in fields_to_include
+            if path.startswith("sections.") and "." not in path[len("sections.") :]
+        }
+        if not section_slugs:
+            return fields_to_include
+        return [
+            path
+            for path in fields_to_include
+            if not (
+                path.startswith("section_titles.")
+                and path[len("section_titles.") :] in section_slugs
+            )
+        ]
     
     def deduplicate_fields(
         self, 
@@ -165,6 +197,11 @@ class FieldDeduplicator:
         """
         if not fields_to_include:
             return []
+
+        fields_to_include = [
+            path for path in fields_to_include if not self._is_metadata_field_path(path)
+        ]
+        fields_to_include = self._drop_section_title_paths_when_body_present(fields_to_include)
         
         # ÉTAPE 1 : Supprimer les chemins parents si leurs enfants sont présents
         # Ex: Si "Caractérisation.Faiblesse" est présent, supprimer "Caractérisation"
@@ -182,7 +219,8 @@ class FieldDeduplicator:
             if has_children:
                 # Ce chemin est un parent avec des enfants inclus, le marquer pour suppression
                 paths_to_remove.add(path)
-                logger.debug(f"Suppression parent '{path}' car enfants présents")
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(f"Suppression parent '{path}' car enfants présents")
         
         # Filtrer en préservant l'ordre
         fields_to_include = [p for p in fields_to_include if p not in paths_to_remove]
@@ -222,9 +260,10 @@ class FieldDeduplicator:
                 if path != best_path:
                     paths_to_remove.add(path)
             
-            logger.debug(
-                f"Déduplication: conservé '{best_path}', supprimé {[p for p in relevant_paths if p != best_path]}"
-            )
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    f"Déduplication: conservé '{best_path}', supprimé {[p for p in relevant_paths if p != best_path]}"
+                )
         
         # Appliquer la déduplication en préservant l'ordre
         deduplicated = [
@@ -232,8 +271,8 @@ class FieldDeduplicator:
             if field not in paths_to_remove
         ]
         
-        if len(deduplicated) < len(fields_to_include):
-            logger.info(
+        if len(deduplicated) < len(fields_to_include) and logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
                 f"Déduplication: {len(fields_to_include)} -> {len(deduplicated)} champs "
                 f"({len(fields_to_include) - len(deduplicated)} doublons supprimés)"
             )

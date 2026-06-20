@@ -18,7 +18,7 @@ alwaysApply: true
 - Migration web terminée (API REST FastAPI + Frontend React):
   - Frontend React (`frontend/`) ↔ API REST FastAPI (`api/`) ↔ Services existants (`services/`) ↔ LLM/GDD/Storage
   - L'UI desktop et le frontend web sont tous deux des clients de l'API. La logique métier reste dans `services/` (réutilisable).
-  - Voir `.cursor/rules/backend_api.mdc` et `.cursor/rules/frontend.mdc` pour détails, `README_API.md` pour documentation complète.
+  - Voir `.cursor/rules/backend_api.mdc`, `.cursor/rules/api_usage.mdc`, `.cursor/skills/api-runbook/SKILL.md` ; contrats → `docs/api/api-contracts-api.md` ; quickstart partiel → `README_API.md`.
 
 - Outils: avant d’inférer, localiser la source réelle (recherche sémantique + grep). Si une API “récente” est incertaine (Cursor rules, OpenAI SDK, Qt), valider via navigateur/web.
 

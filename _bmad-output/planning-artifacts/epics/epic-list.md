@@ -62,10 +62,6 @@ Les utilisateurs peuvent monitorer les métriques de performance du système (te
 
 Les utilisateurs peuvent naviguer l'éditeur de graphe entièrement au clavier avec indicateurs de focus visibles. Le système supporte personnalisation contraste couleurs (WCAG AA), et lecteurs d'écran avec ARIA labels (V2.0+).
 
-## Epic 17: Expérience mobile et responsive (web) — **done**
+## Epic 17: Expérience mobile et responsive (web) — **in-progress**
 
-Les utilisateurs peuvent utiliser l’application sur navigateur mobile et tablette (viewports étroits) avec shell adaptatif, interactions tactiles sur le graphe et panneaux accessibles en patterns mobile. PWA installable en option (V1.5+). Voir [epic-17.md](epic-17.md). Refactor toolbar (ex-17.9) reporté vers l’Epic Dette technique.
-
-## Epic Dette technique — **backlog**
-
-Refactorings et durcissements hors livraison fonctionnelle (ex. découpage `GraphEditorHeader`, story DT-1). Voir [epic-dette-technique.md](epic-dette-technique.md).
+Les utilisateurs peuvent utiliser l’application sur navigateur mobile et tablette (viewports étroits) avec shell adaptatif, interactions tactiles sur le graphe et panneaux accessibles en patterns mobile. PWA installable en option (V1.5+). Voir [epic-17.md](epic-17.md). Stories **17.9–17.11** (refactor toolbar, 3 US séquentielles) complètent l’epic.

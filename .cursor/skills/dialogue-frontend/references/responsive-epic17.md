@@ -1,6 +1,6 @@
 # Responsive Epic 17 — référence détaillée
 
-Référence produit : FR118–121, stories **17.1–17.8** (Epic 17 **done**), artifacts `_bmad-output/implementation-artifacts/17-*`. Refactor toolbar (ex-17.9) → Epic Dette technique, story **DT-1** (`epic-dette-technique.md`).
+Référence produit : FR118–121, stories **17.1–17.11**, artifacts `_bmad-output/implementation-artifacts/17-*`. Epic 17 **in-progress** jusqu’à clôture **17.11**.
 
 ## Deux axes de mesure
 
@@ -34,7 +34,7 @@ Colonne après resize `ResizablePanels` → conteneur. Mobile/tablette overlay �
 |------|---------|
 | Shell | `Dashboard` : `useNarrowSidePanels`, `NarrowOverlayDrawer`, `centerColumnRef` + `measureParentClientWidth: true` |
 | Onglets | `Tabs` segmented ; shell/centre `segmentedSize="touch"` ; drawers `drawer-aligned` (~37px) |
-| Toolbar graphe | `GraphEditorHeader` narrow/confort ; `useNarrowInlineSize` + `measureParentClientWidth: true` ; `useGraphToolbar` |
+| Toolbar graphe | `GraphEditorHeader` + `useGraphToolbarLayoutMode` (17.10) ; `measureParentClientWidth: true` ; `useGraphToolbar` |
 | Dialogues narrow | `DialogueCombobox` + `useDialogueListData` (17.7) |
 | Contexte GDD | `balanced` → `tight` si `scrollWidth > clientWidth` |
 | Génération | `generationPanelChrome` selon `isNarrow` |
@@ -58,7 +58,9 @@ Colonne après resize `ResizablePanels` → conteneur. Mobile/tablette overlay �
 | 17.6 | Typo/densité | `responsiveChrome.ts` |
 | 17.7 | Combobox toolbar | `DialogueCombobox.test.tsx` |
 | 17.8 | Callback ref hook | `useNarrowInlineSize.test.tsx` |
-| ~~17.9~~ → **DT-1** | Refactor toolbar (Epic Dette technique) | `GraphEditorHeader.*.test.tsx`, anti double-mount |
+| 17.9 | Extraction UI toolbar | sous-composants ; tests toolbar existants |
+| 17.10 | Hook layout binaire | `useGraphToolbarLayoutMode` + tests contrat (640px) |
+| 17.11 | Hardening tests | anti double-mount `SaveStatusIndicator`, fixture partagée, preuve UI |
 
 Coordination : Epic 14 (ARIA), Epic 12 (raccourcis desktop), `graph_editor.mdc` + `mergeNodeFormIntoStoreData`.
 

@@ -98,6 +98,7 @@ data/gdd_notion_sync/full_sync_checkpoint.manifest.json
 
 # Snapshot pickle GDD (cache local, régénéré si les JSON sources changent)
 data/.gdd_snapshot/
+data/.gdd_context_precompile/
 
 # Historique d’entités GDD (persisté localement par gdd_entity_history)
 data/GDD_entity_history/
@@ -120,6 +121,9 @@ Assets/Layouts/*.layout.json
 # Temporary files
 tmp/vitest-report.json
 tmp/vitest-*.json
+/vitest-*.txt
+/pytest-*.txt
+/measure-out.txt
 *.tmp
 *.bak
 *.swp

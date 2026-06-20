@@ -15,29 +15,39 @@ import type {
 } from '../../types/api'
 import { ContextList } from './ContextList'
 import type { ContextListItem } from './ContextList'
+import {
+  resolveCharacterCanonicalName,
+  resolveGddCanonicalName,
+  resolveLocationCanonicalName,
+} from '../../utils/gddEntityNames'
 
 /** Affiche aussi les noms sélectionnés absents du catalogue API (GDD vide / preset). */
 function mergeListWithSelectedNames(
   items: ContextListItem[],
   selectedNames: string[],
+  resolveName: (name: string) => string = (n) => n,
 ): ContextListItem[] {
   const seen = new Set(items.map((i) => i.name))
+  const seenCanonical = new Set(items.map((i) => resolveName(i.name)))
   const prepend: ContextListItem[] = []
   for (const name of selectedNames) {
-    if (name && !seen.has(name)) {
-      prepend.push({ name, data: {} })
-      seen.add(name)
+    const canonical = resolveName(name)
+    if (!name || seen.has(name) || seenCanonical.has(canonical)) {
+      continue
     }
+    prepend.push({ name: canonical, data: {} })
+    seen.add(canonical)
+    seenCanonical.add(canonical)
   }
   return [...prepend, ...items]
 }
 import { SelectedContextSummary } from './SelectedContextSummary'
 import type { EntityType } from './SelectedContextSummary'
 import { ContextSuggestionsPanel } from './ContextSuggestionsPanel'
+import { ContextPanelAccordionGroup, ContextPanelAccordionSection } from './ContextPanelAccordion'
 import { ContextRulesEditor } from './ContextRulesEditor'
 import { ContextRelevancePanel } from './ContextRelevancePanel'
 import { ContextUsagePanel } from './ContextUsagePanel'
-import { ContextTokenBudgetSection } from './ContextTokenBudgetSection'
 import { useContextStore } from '../../store/contextStore'
 import { useContextRulesStore } from '../../store/contextRulesStore'
 import { getErrorMessage } from '../../types/errors'
@@ -162,9 +172,14 @@ function contextGddTabButtonStyle(
 
 interface ContextSelectorProps {
   onItemSelected?: (item: ContextItem | null, historyCategoryStem?: string | null) => void
+  onLoadStateChange?: (state: {
+    isLoading: boolean
+    error: string | null
+    refresh: () => void
+  }) => void
 }
 
-export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
+export function ContextSelector({ onItemSelected, onLoadStateChange }: ContextSelectorProps = {}) {
   const [activeTab, setActiveTab] = useState<TabType>('characters')
   const [showRulesEditor, setShowRulesEditor] = useState(false)
   const [characters, setCharacters] = useState<CharacterResponse[]>([])
@@ -299,6 +314,16 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
     void loadData()
   }, [loadData, gddDataRevision])
 
+  useEffect(() => {
+    onLoadStateChange?.({
+      isLoading,
+      error,
+      refresh: () => {
+        void loadData()
+      },
+    })
+  }, [error, isLoading, loadData, onLoadStateChange])
+
   const handleItemClick = async (name: string) => {
     try {
       let item: ContextItem | { name: string; data: Record<string, unknown> } | null = null
@@ -359,34 +384,39 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
 
   const getCurrentItems = (): ContextListItem[] => {
     if (activeTab === 'characters') {
-      return mergeListWithSelectedNames(characters, [
-        ...(selections.characters_full ?? []),
-        ...(selections.characters_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        characters,
+        [...(selections.characters_full ?? []), ...(selections.characters_excerpt ?? [])],
+        (n) => resolveCharacterCanonicalName(n, characters),
+      )
     }
     if (activeTab === 'locations') {
-      return mergeListWithSelectedNames(locations, [
-        ...(selections.locations_full ?? []),
-        ...(selections.locations_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        locations,
+        [...(selections.locations_full ?? []), ...(selections.locations_excerpt ?? [])],
+        (n) => resolveLocationCanonicalName(n, locations),
+      )
     }
     if (activeTab === 'items') {
-      return mergeListWithSelectedNames(items, [
-        ...(selections.items_full ?? []),
-        ...(selections.items_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        items,
+        [...(selections.items_full ?? []), ...(selections.items_excerpt ?? [])],
+        (n) => resolveGddCanonicalName(n, items),
+      )
     }
     if (activeTab === 'species') {
-      return mergeListWithSelectedNames(species, [
-        ...(selections.species_full ?? []),
-        ...(selections.species_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        species,
+        [...(selections.species_full ?? []), ...(selections.species_excerpt ?? [])],
+        (n) => resolveGddCanonicalName(n, species),
+      )
     }
     if (activeTab === 'communities') {
-      return mergeListWithSelectedNames(communities, [
-        ...(selections.communities_full ?? []),
-        ...(selections.communities_excerpt ?? []),
-      ])
+      return mergeListWithSelectedNames(
+        communities,
+        [...(selections.communities_full ?? []), ...(selections.communities_excerpt ?? [])],
+        (n) => resolveGddCanonicalName(n, communities),
+      )
     }
     return []
   }
@@ -571,60 +601,6 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
         </div>
       )}
 
-      <ContextSuggestionsPanel />
-
-      <details
-        data-testid="narrative-context-selector"
-        style={{
-          flexShrink: 0,
-          borderBottom: `1px solid ${theme.border.primary}`,
-          backgroundColor: theme.background.secondary,
-        }}
-      >
-        <summary
-          style={{
-            padding: '0.45rem 0.75rem',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: theme.text.primary,
-          }}
-        >
-          Ajouter contexte narratif
-        </summary>
-        <div style={{ padding: '0.5rem 0.75rem', display: 'grid', gap: '0.4rem' }}>
-          {([
-            ['narrative_structures', 'Structure narrative'],
-            ['chapters', 'Chapitres'],
-            ['scenes', 'Scènes'],
-          ] as const).map(([category, label]) => (
-            <div key={category}>
-              <div style={{ color: theme.text.secondary, fontSize: '0.75rem', marginBottom: '0.2rem' }}>
-                {label}
-              </div>
-              <div style={{ display: 'grid', gap: '0.2rem', maxHeight: '7rem', overflowY: 'auto' }}>
-                {narrativeGroups[category].map((item) => (
-                  <label
-                    key={`${category}:${item.name}`}
-                    style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', color: theme.text.primary, fontSize: '0.78rem' }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isNarrativeSelected(category, item.name)}
-                      onChange={() => toggleNarrativeContext(category, item.name)}
-                    />
-                    <span>{item.name}</span>
-                  </label>
-                ))}
-                {narrativeGroups[category].length === 0 && (
-                  <span style={{ color: theme.text.tertiary, fontSize: '0.75rem' }}>Aucune source disponible.</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </details>
-
       <div style={{ flex: '1 1 0', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <ContextList
           items={getCurrentItems()}
@@ -643,8 +619,47 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           loadingMore={loadingMore}
         />
       </div>
-      <ContextTokenBudgetSection />
-      <div style={{ flex: '0 0 auto' }}>
+
+      <ContextPanelAccordionGroup>
+        <ContextSuggestionsPanel />
+
+        <ContextPanelAccordionSection
+          testId="narrative-context-selector"
+          title="Ajouter contexte narratif"
+        >
+          <div style={{ display: 'grid', gap: '0.4rem' }}>
+            {([
+              ['narrative_structures', 'Structure narrative'],
+              ['chapters', 'Chapitres'],
+              ['scenes', 'Scènes'],
+            ] as const).map(([category, label]) => (
+              <div key={category}>
+                <div style={{ color: theme.text.secondary, fontSize: '0.75rem', marginBottom: '0.2rem' }}>
+                  {label}
+                </div>
+                <div style={{ display: 'grid', gap: '0.2rem', maxHeight: '7rem', overflowY: 'auto' }}>
+                  {narrativeGroups[category].map((item) => (
+                    <label
+                      key={`${category}:${item.name}`}
+                      style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', color: theme.text.primary, fontSize: '0.78rem' }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isNarrativeSelected(category, item.name)}
+                        onChange={() => toggleNarrativeContext(category, item.name)}
+                      />
+                      <span>{item.name}</span>
+                    </label>
+                  ))}
+                  {narrativeGroups[category].length === 0 && (
+                    <span style={{ color: theme.text.tertiary, fontSize: '0.75rem' }}>Aucune source disponible.</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </ContextPanelAccordionSection>
+
         <SelectedContextSummary 
           selections={selections} 
           onClear={clearSelections}
@@ -653,32 +668,16 @@ export function ContextSelector({ onItemSelected }: ContextSelectorProps = {}) {
           onError={(err) => setError(err)}
           onSuccess={() => setError(null)}
         />
-      </div>
-      <details
-        data-testid="context-llm-diagnostics"
-        style={{
-          flexShrink: 0,
-          borderTop: `1px solid ${theme.border.primary}`,
-          backgroundColor: theme.background.secondary,
-        }}
-      >
-        <summary
-          style={{
-            padding: '0.45rem 0.75rem',
-            cursor: 'pointer',
-            fontSize: remSize('small'),
-            fontWeight: 600,
-            color: theme.text.primary,
-            listStyle: 'none',
-          }}
+
+        <ContextPanelAccordionSection
+          testId="context-llm-diagnostics"
+          title="Diagnostic LLM — pertinence et sections GDD"
+          bodyStyle={{ padding: 0 }}
         >
-          Diagnostic LLM — pertinence et sections GDD
-        </summary>
-        <div>
           <ContextRelevancePanel embedded />
           <ContextUsagePanel />
-        </div>
-      </details>
+        </ContextPanelAccordionSection>
+      </ContextPanelAccordionGroup>
     </div>
   )
 }

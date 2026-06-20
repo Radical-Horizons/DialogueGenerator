@@ -80,6 +80,7 @@ class ContextConstructionService:
         self._context_truncator = context_truncator
         self._previous_dialogue_manager = previous_dialogue_manager
         self._context_config = context_config or {}
+        self._context_builder: Optional[Any] = None
     
     def _get_field_manager(self) -> 'ContextFieldManager':
         """Retourne le ContextFieldManager, en levant une erreur si non initialisé.
@@ -108,6 +109,34 @@ class ContextConstructionService:
         if self._context_truncator is None:
             return max(1, len(text) // 4) if text else 0
         return self._context_truncator.estimate_tokens(text)
+
+    def _with_scene_protagonists_as_characters(
+        self,
+        selected_elements: Dict[str, Any],
+        element_modes: Optional[Dict[str, Dict[str, str]]],
+    ) -> tuple[Dict[str, Any], Optional[Dict[str, Dict[str, str]]]]:
+        """Ajoute les protagonistes de scène à la sélection personnages effective."""
+        scene_protagonists = selected_elements.get("_scene_protagonists")
+        if not isinstance(scene_protagonists, dict):
+            return selected_elements, element_modes
+
+        out = dict(selected_elements)
+        characters = list(out.get("characters") or [])
+        modes = {k: dict(v) for k, v in (element_modes or {}).items()}
+        character_modes = modes.setdefault("characters", {})
+
+        for raw_name in scene_protagonists.values():
+            if not isinstance(raw_name, str):
+                continue
+            name = raw_name.strip()
+            if not name or name in characters:
+                continue
+            characters.append(name)
+            character_modes.setdefault(name, "full")
+
+        if characters:
+            out["characters"] = characters
+        return out, modes if modes else element_modes
     
     def _format_element_content(
         self,
@@ -175,9 +204,9 @@ class ContextConstructionService:
         field_labels_map: Dict[str, str],
         organization_mode: str,
         element_mode: str,
-        formatted_content: str,
-        token_count: int,
-        organizer: 'ContextOrganizer'
+        organizer: 'ContextOrganizer',
+        formatted_content: Optional[str] = None,
+        token_count: int = 0,
     ) -> Optional[Any]:
         """Construit un ContextItem JSON depuis les données formatées.
         
@@ -191,16 +220,13 @@ class ContextConstructionService:
             field_labels_map: Map des labels.
             organization_mode: Mode d'organisation.
             element_mode: Mode de l'élément.
-            formatted_content: Contenu formaté.
-            token_count: Nombre de tokens.
+            formatted_content: Contenu texte pré-formaté (optionnel, chemin legacy).
+            token_count: Tokens pré-calculés (optionnel).
             organizer: Instance de ContextOrganizer.
             
         Returns:
             ContextItem ou None si contenu vide.
         """
-        if not formatted_content:
-            return None
-        
         # Si filtered_fields est None, extraire tous les champs disponibles depuis element_data
         fields_to_use = filtered_fields
         if not fields_to_use and element_data:
@@ -213,8 +239,10 @@ class ContextConstructionService:
                 """
                 fields = []
                 for key, value in data.items():
-                    # Ignorer les champs techniques ou vides
+                    # Ignorer les champs techniques, métadonnées UI ou vides
                     if key.startswith("_") or value is None:
+                        continue
+                    if not prefix and key in ("section_titles", "notion_page_id"):
                         continue
                     
                     field_path = f"{prefix}.{key}" if prefix else key
@@ -241,7 +269,8 @@ class ContextConstructionService:
                 return fields
             
             fields_to_use = extract_all_fields(element_data)
-            logger.debug(f"Champs extraits automatiquement pour {element_type} '{name}': {len(fields_to_use)} champs")
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(f"Champs extraits automatiquement pour {element_type} '{name}': {len(fields_to_use)} champs")
         
         # Toujours créer des sections structurées via organize_context_json
         # (plus de fallback INFORMATIONS)
@@ -255,14 +284,20 @@ class ContextConstructionService:
         )
         
         if context_item:
-            # Définir l'ID et le nom
+            # Définir l'ID et le nom affiché (nom canonique de la fiche GDD)
             context_item.id = f"{element_label}_{idx}"
-            context_item.name = f"{element_label} {idx}"
+            context_item.name = name
             # Ajouter le nom réel dans les métadonnées
             if context_item.metadata:
                 context_item.metadata["real_name"] = name
+                context_item.metadata["mode"] = element_mode
             else:
-                context_item.metadata = {"real_name": name}
+                context_item.metadata = {"real_name": name, "mode": element_mode}
+            if token_count <= 0:
+                token_count = int(
+                    context_item.tokenCount
+                    or sum(section.tokenCount or 0 for section in context_item.sections)
+                )
             context_item.tokenCount = token_count
         
         return context_item
@@ -305,6 +340,10 @@ class ContextConstructionService:
             previous_dialogue_tokens = self._count_tokens(previous_dialogue_formatted) if previous_dialogue_formatted else 0
         
         # Informations sur le GDD avec champs personnalisés
+        selected_elements, element_modes = self._with_scene_protagonists_as_characters(
+            selected_elements,
+            element_modes,
+        )
         prioritized_elements_for_context = (
             self._element_resolver.prioritize_elements(selected_elements)
             if self._element_resolver
@@ -314,6 +353,7 @@ class ContextConstructionService:
         categories = []
         total_tokens = previous_dialogue_tokens
         
+        seen_canonical_by_category: Dict[str, set[str]] = {}
         for category_key, names_list in prioritized_elements_for_context.items():
             if not isinstance(names_list, list) or not names_list:
                 continue
@@ -337,7 +377,7 @@ class ContextConstructionService:
                 fields_to_include = field_configs[element_type]
             
             items = []
-            for idx, name in enumerate(names_list, start=1):
+            for name in names_list:
                 # Résoudre les données de l'élément via ElementResolver
                 element_data = (
                     self._element_resolver.resolve_element_data(category_key, name)
@@ -353,77 +393,131 @@ class ContextConstructionService:
                             f"Aucune donnée trouvée pour l'élément '{name}' dans la catégorie '{category_key}'."
                         )
                     continue
+                canonical_name = str(element_data.get("Nom") or name)
+                seen_for_category = seen_canonical_by_category.setdefault(category_key, set())
+                if canonical_name in seen_for_category:
+                    continue
+                seen_for_category.add(canonical_name)
                 
                 # Déterminer le mode de cet élément
                 element_mode = "full"  # Par défaut
                 if element_modes and category_key in element_modes and name in element_modes[category_key]:
                     element_mode = element_modes[category_key][name]
+                elif (
+                    element_modes
+                    and category_key in element_modes
+                    and canonical_name in element_modes[category_key]
+                ):
+                    element_mode = element_modes[category_key][canonical_name]
                 
                 # Gestion des champs via ContextFieldManager
                 field_manager = self._get_field_manager()
-                fields_for_element = field_manager.get_field_config_for_mode(
-                    element_type,
-                    element_mode,
-                    fields_to_include
-                )
-                
                 formatted_content = ""
                 context_item = None
                 token_count = 0
-                
-                # Filtrer les champs avec condition_flag via ContextFieldManager
                 filtered_fields = None
-                field_labels_map = {}
-                
-                if fields_for_element:
-                    filtered_fields = field_manager.filter_fields_by_condition_flags(
+                field_labels_map: Dict[str, str] = {}
+
+                if element_mode == "excerpt":
+                    resolved_fields = field_manager.resolve_fields_for_element(
                         element_type,
-                        fields_for_element,
-                        include_dialogue_type=include_dialogue_type
+                        element_data,
+                        element_mode,
+                        fields_to_include,
+                        include_dialogue_type=include_dialogue_type,
                     )
-                    
-                    if not filtered_fields:
-                        # Aucun champ après filtrage, passer au suivant
+                    if not resolved_fields:
                         continue
-                    
-                    # Récupérer les labels depuis context_config.json via ContextFieldManager
-                    field_labels_map = field_manager.get_field_labels_map(element_type, filtered_fields)
+                    filtered_fields = resolved_fields
+                    field_labels_map = field_manager.get_field_labels_map(
+                        element_type, filtered_fields
+                    )
+                else:
+                    fields_for_element = field_manager.get_field_config_for_mode(
+                        element_type,
+                        element_mode,
+                        fields_to_include
+                    )
+                    if fields_for_element:
+                        filtered_fields = field_manager.filter_fields_by_condition_flags(
+                            element_type,
+                            fields_for_element,
+                            include_dialogue_type=include_dialogue_type,
+                        )
+                        if not filtered_fields:
+                            continue
+                        field_labels_map = field_manager.get_field_labels_map(
+                            element_type, filtered_fields
+                        )
                 
-                # Formatage (via organizer ou fallback)
-                formatted_content = self._format_element_content(
-                    element_data=element_data,
-                    element_type=element_type,
-                    category_key=category_key,
-                    filtered_fields=filtered_fields,
-                    field_labels_map=field_labels_map,
-                    organization_mode=organization_mode,
-                    element_mode=element_mode,
-                    include_dialogue_type=include_dialogue_type,
-                    organizer=organizer
-                )
-                
-                token_count = self._estimate_tokens(formatted_content)
-                
-                # Construction ContextItem si demandé
                 if build_json_items:
-                    context_item = self._build_context_item(
+                    context_item = None
+                    idx = len(items) + 1
+                    if getattr(self, "_context_builder", None) is not None:
+                        try:
+                            from services.gdd_context_precompile import try_load_cached_context_item
+
+                            context_item = try_load_cached_context_item(
+                                category_key=category_key,
+                                canonical_name=canonical_name,
+                                element_data=element_data,
+                                organization_mode=organization_mode,
+                                element_mode=element_mode,
+                                field_configs=field_configs,
+                                element_label=element_label,
+                                idx=idx,
+                            )
+                        except (ImportError, OSError, TypeError, ValueError) as cache_exc:
+                            logger.debug(
+                                "Cache précompile non utilisé pour %s/%s: %s",
+                                category_key,
+                                canonical_name,
+                                cache_exc,
+                            )
+                    if context_item is None:
+                        context_item = self._build_context_item(
+                            element_data=element_data,
+                            element_type=element_type,
+                            element_label=element_label,
+                            idx=idx,
+                            name=canonical_name,
+                            filtered_fields=filtered_fields,
+                            field_labels_map=field_labels_map,
+                            organization_mode=organization_mode,
+                            element_mode=element_mode,
+                            organizer=organizer,
+                        )
+                        if context_item and getattr(self, "_context_builder", None) is not None:
+                            from services.gdd_context_precompile import persist_context_item_variant
+
+                            persist_context_item_variant(
+                                self._context_builder,
+                                category_key=category_key,
+                                record=element_data,
+                                organization_mode=organization_mode,
+                                element_mode=element_mode,
+                                field_configs=field_configs,
+                            )
+                    if not context_item:
+                        continue
+                    token_count = int(context_item.tokenCount or 0)
+                else:
+                    formatted_content = self._format_element_content(
                         element_data=element_data,
                         element_type=element_type,
-                        element_label=element_label,
-                        idx=idx,
-                        name=name,
+                        category_key=category_key,
                         filtered_fields=filtered_fields,
                         field_labels_map=field_labels_map,
                         organization_mode=organization_mode,
                         element_mode=element_mode,
-                        formatted_content=formatted_content,
-                        token_count=token_count,
-                        organizer=organizer
+                        include_dialogue_type=include_dialogue_type,
+                        organizer=organizer,
                     )
-                
-                if formatted_content:
+                    token_count = self._estimate_tokens(formatted_content)
+
+                if build_json_items or formatted_content:
                     items.append(ElementBuildResult(
-                        name=name,
+                        name=canonical_name,
                         element_data=element_data,
                         element_mode=element_mode,
                         formatted_content=formatted_content,
@@ -501,10 +595,10 @@ class ContextConstructionService:
         for category in build_result.categories:
             context_parts.append(f"\n--- {category.category_title.upper()} ---")
             
-            for idx, item in enumerate(category.items, start=1):
+            for item in category.items:
                 # Ajouter le marqueur explicite AVANT le contenu de l'élément si demandé
                 if include_element_markers:
-                    context_parts.append(f"--- {category.element_label} {idx} ---")
+                    context_parts.append(f"--- {item.name} ---")
                 context_parts.append(item.formatted_content)
         
         # Construction finale
@@ -595,20 +689,21 @@ class ContextConstructionService:
                 categories=categories
             ))
         
-        # Calculer le total de tokens
-        total_tokens = sum(section.tokenCount or 0 for section in sections)
-        
-        # Créer la structure complète
+        # Créer la structure complète puis réconcilier les tokenCount (1× tiktoken, somme = total)
         metadata = PromptMetadata(
-            totalTokens=total_tokens,
+            totalTokens=0,
             generatedAt=datetime.now().isoformat(),
             organizationMode=organization_mode
         )
-        
-        return PromptStructure(
+
+        structure = PromptStructure(
             sections=sections,
             metadata=metadata
         )
+
+        from services.context_token_reconciler import reconcile_prompt_structure_token_counts
+
+        return reconcile_prompt_structure_token_counts(structure)
     
     def build_context(
         self,

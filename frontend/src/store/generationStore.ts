@@ -3,8 +3,19 @@
  */
 import { create } from 'zustand'
 import type { SceneSelection } from '../types/generation'
-import type { GenerateUnityDialogueResponse, RawPrompt } from '../types/api'
-import type { PromptStructure } from '../types/prompt'
+import type { ContextSelection } from '../types/api'
+import type { ContextTokenBreakdownRow, GenerateUnityDialogueResponse, RawPrompt } from '../types/api'
+import type { ContextItem, PromptSection, PromptStructure } from '../types/prompt'
+import {
+  entityTokenCacheKey,
+  type EntityType,
+} from '../utils/contextEntityTokenCache'
+import {
+  buildStructuredFromBootstrap,
+  computeTotalsFromStructuredPrompt,
+  reconcileStructuredPromptTotals,
+  rebuildContextFromEntityCache,
+} from '../utils/structuredPromptMerge'
 
 interface GenerationState {
   // Sélection de scène
@@ -25,7 +36,19 @@ interface GenerationState {
   /** Hash des paramètres d’entrée (SHA des params normalisés) — aligné avec computeStateHash ; sert au cache d’estimation. */
   previewInputHash: string | null
   tokenCount: number | null
+  /** Tokens du prompt complet (POST /dialogues/estimate-tokens → token_count). */
+  promptTokenCount: number | null
   isEstimating: boolean
+  /** Erreur POST /context/estimate-tokens (compteur unique UI). */
+  contextEstimationError: string | null
+  contextTokenBreakdown: ContextTokenBreakdownRow[]
+  contextBreakdownNote: string
+  /** Tokens par fiche (clé entityTokenCacheKey) — soustraction locale au retrait. */
+  entityTokenByKey: Record<string, number>
+  /** ContextItem par fiche — reconstruction prompt structuré incrémental. */
+  entityContextItemsByKey: Record<string, ContextItem>
+  /** Overhead prompt (hors GDD), mis en cache après 1ère estimation complète. */
+  promptOverheadTokens: number | null
   
   // Résultats de génération
   unityDialogueResponse: GenerateUnityDialogueResponse | null
@@ -60,6 +83,51 @@ interface GenerationState {
     isEstimating: boolean,
     structuredPrompt?: PromptStructure | null,
     previewHashUpdate?: 'invalidate' | 'preserve' | string
+  ) => void
+  /** Met à jour les compteurs (prompt complet + sélection GDD) et optionnellement le preview. */
+  setContextTokenEstimate: (update: {
+    selectionTokens: number | null
+    promptTokenCount?: number | null
+    isEstimating: boolean
+    previewInputHash?: string | null | 'preserve' | 'invalidate'
+    contextEstimationError?: string | null
+    contextTokenBreakdown?: ContextTokenBreakdownRow[]
+    contextBreakdownNote?: string
+    rawPrompt?: RawPrompt | null
+    structuredPrompt?: PromptStructure | null
+    promptHash?: string | null
+    entityTokenByKey?: Record<string, number>
+    entityContextItemsByKey?: Record<string, ContextItem>
+    promptOverheadTokens?: number | null
+  }) => void
+  setEntityTokenCache: (cache: Record<string, number>) => void
+  applyOptimisticEntityRemovals: (
+    removals: Array<{ entityType: string; name: string; mode: 'full' | 'excerpt' }>,
+    selections: ContextSelection,
+  ) => boolean
+  applyOptimisticEntityAdditions: (
+    additions: Array<{
+      entityType: string
+      name: string
+      mode: 'full' | 'excerpt'
+      token_count: number
+      context_item?: ContextItem | null
+    }>,
+    selections: ContextSelection,
+  ) => void
+  syncIncrementalContextFromCache: (selections: ContextSelection) => void
+  applyBootstrapFromPrecomputed: (
+    selections: ContextSelection,
+    payload: {
+      entities: Array<{
+        entityType: string
+        name: string
+        mode: 'full' | 'excerpt'
+        token_count: number
+        context_item?: ContextItem | null
+      }>
+      overheadSections?: PromptSection[] | null
+    },
   ) => void
   setUnityDialogueResponse: (response: GenerateUnityDialogueResponse | null) => void
   setTokensUsed: (tokens: number | null) => void
@@ -104,7 +172,14 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   promptHash: null,
   previewInputHash: null,
   tokenCount: null,
+  promptTokenCount: null,
   isEstimating: false,
+  contextEstimationError: null,
+  contextTokenBreakdown: [],
+  contextBreakdownNote: '',
+  entityTokenByKey: {},
+  entityContextItemsByKey: {},
+  promptOverheadTokens: null,
   unityDialogueResponse: null,
   tokensUsed: null,
   generationUserInstructions: '',
@@ -162,6 +237,191 @@ export const useGenerationStore = create<GenerationState>((set) => ({
         previewInputHash: nextPreview,
       }
     }),
+
+  setContextTokenEstimate: (update) =>
+    set((state) => {
+      let nextPreview = state.previewInputHash
+      const hashUpdate = update.previewInputHash
+      if (hashUpdate === 'invalidate') {
+        nextPreview = null
+      } else if (hashUpdate === 'preserve' || hashUpdate === undefined) {
+        nextPreview = state.previewInputHash
+      } else if (hashUpdate !== null) {
+        nextPreview = hashUpdate
+      }
+
+      return {
+        tokenCount: update.selectionTokens,
+        promptTokenCount:
+          update.promptTokenCount !== undefined ? update.promptTokenCount : state.promptTokenCount,
+        isEstimating: update.isEstimating,
+        previewInputHash: nextPreview,
+        contextEstimationError:
+          update.contextEstimationError !== undefined ? update.contextEstimationError : state.contextEstimationError,
+        contextTokenBreakdown:
+          update.contextTokenBreakdown !== undefined ? update.contextTokenBreakdown : state.contextTokenBreakdown,
+        contextBreakdownNote:
+          update.contextBreakdownNote !== undefined ? update.contextBreakdownNote : state.contextBreakdownNote,
+        ...(update.rawPrompt !== undefined ? { rawPrompt: update.rawPrompt } : {}),
+        ...(update.structuredPrompt !== undefined ? { structuredPrompt: update.structuredPrompt } : {}),
+        ...(update.promptHash !== undefined ? { promptHash: update.promptHash } : {}),
+        ...(update.entityTokenByKey !== undefined ? { entityTokenByKey: update.entityTokenByKey } : {}),
+        ...(update.entityContextItemsByKey !== undefined
+          ? { entityContextItemsByKey: update.entityContextItemsByKey }
+          : {}),
+        ...(update.promptOverheadTokens !== undefined
+          ? { promptOverheadTokens: update.promptOverheadTokens }
+          : {}),
+      }
+    }),
+
+  setEntityTokenCache: (cache) => set({ entityTokenByKey: cache }),
+
+  applyOptimisticEntityRemovals: (removals, selections) => {
+    const state = useGenerationStore.getState()
+    if (state.tokenCount == null && Object.keys(state.entityContextItemsByKey).length === 0) {
+      return false
+    }
+
+    for (const { entityType, name, mode } of removals) {
+      const key = entityTokenCacheKey(entityType as EntityType, name, mode)
+      if (state.entityTokenByKey[key] == null && state.entityContextItemsByKey[key] == null) {
+        return false
+      }
+    }
+
+    set((current) => {
+      const entityTokenByKey = { ...current.entityTokenByKey }
+      const entityContextItemsByKey = { ...current.entityContextItemsByKey }
+      for (const { entityType, name, mode } of removals) {
+        const key = entityTokenCacheKey(entityType as EntityType, name, mode)
+        delete entityTokenByKey[key]
+        delete entityContextItemsByKey[key]
+      }
+      return { entityTokenByKey, entityContextItemsByKey }
+    })
+
+    useGenerationStore.getState().syncIncrementalContextFromCache(selections)
+    return true
+  },
+
+  syncIncrementalContextFromCache: (selections) => {
+    set((current) => {
+      const structuredPrompt = rebuildContextFromEntityCache(
+        current.structuredPrompt,
+        selections,
+        current.entityContextItemsByKey,
+      )
+      const { selectionTokens, promptTokens } = computeTotalsFromStructuredPrompt(structuredPrompt)
+      const entityTokenByKey: Record<string, number> = {}
+      for (const [key, item] of Object.entries(current.entityContextItemsByKey)) {
+        if (item.tokenCount != null) {
+          entityTokenByKey[key] = item.tokenCount
+        }
+      }
+
+      const breakdown: ContextTokenBreakdownRow[] = []
+      const contextSection = structuredPrompt.sections.find((s) => s.type === 'context')
+      for (const category of contextSection?.categories ?? []) {
+        const entityType = category.type
+        if (!entityType) continue
+        breakdown.push({
+          entity_type: entityType,
+          mode: 'full',
+          token_count: category.tokenCount ?? 0,
+        })
+      }
+
+      return {
+        structuredPrompt,
+        tokenCount: selectionTokens,
+        promptTokenCount: promptTokens,
+        isEstimating: false,
+        previewInputHash: null,
+        contextEstimationError: null,
+        contextTokenBreakdown: breakdown,
+        entityTokenByKey,
+      }
+    })
+  },
+
+  applyOptimisticEntityAdditions: (additions, selections) => {
+    set((current) => {
+      const entityTokenByKey = { ...current.entityTokenByKey }
+      const entityContextItemsByKey = { ...current.entityContextItemsByKey }
+
+      for (const { entityType, name, mode, token_count, context_item } of additions) {
+        if (!context_item || token_count <= 0) continue
+        const key = entityTokenCacheKey(entityType as EntityType, name, mode)
+        entityTokenByKey[key] = token_count
+        entityContextItemsByKey[key] = {
+          ...context_item,
+          name: context_item.name ?? name,
+          tokenCount: token_count,
+        }
+      }
+
+      return { entityTokenByKey, entityContextItemsByKey }
+    })
+    useGenerationStore.getState().syncIncrementalContextFromCache(selections)
+  },
+
+  applyBootstrapFromPrecomputed: (selections, payload) => {
+    const entityTokenByKey: Record<string, number> = {}
+    const entityContextItemsByKey: Record<string, ContextItem> = {}
+    const entries = payload.entities
+      .filter((row) => row.context_item && row.token_count > 0)
+      .map((row) => {
+        const key = entityTokenCacheKey(
+          row.entityType as EntityType,
+          row.name,
+          row.mode,
+        )
+        const item: ContextItem = {
+          ...row.context_item!,
+          name: row.context_item!.name ?? row.name,
+          tokenCount: row.token_count,
+        }
+        entityTokenByKey[key] = row.token_count
+        entityContextItemsByKey[key] = item
+        return {
+          entityType: row.entityType as EntityType,
+          name: row.name,
+          mode: row.mode,
+          tokenCount: row.token_count,
+          contextItem: item,
+        }
+      })
+
+    const structuredPrompt = reconcileStructuredPromptTotals(
+      buildStructuredFromBootstrap(payload.overheadSections ?? undefined, entries),
+    )
+    const { selectionTokens, promptTokens } = computeTotalsFromStructuredPrompt(structuredPrompt)
+    const breakdown: ContextTokenBreakdownRow[] = []
+    const contextSection = structuredPrompt.sections.find((s) => s.type === 'context')
+    for (const category of contextSection?.categories ?? []) {
+      if (!category.type) continue
+      breakdown.push({
+        entity_type: category.type,
+        mode: 'full',
+        token_count: category.tokenCount ?? 0,
+      })
+    }
+    const overhead = promptTokens - selectionTokens
+
+    set({
+      structuredPrompt,
+      tokenCount: selectionTokens,
+      promptTokenCount: promptTokens,
+      isEstimating: false,
+      previewInputHash: null,
+      contextEstimationError: null,
+      contextTokenBreakdown: breakdown,
+      entityTokenByKey,
+      entityContextItemsByKey,
+      promptOverheadTokens: overhead > 0 ? overhead : null,
+    })
+  },
 
   setUnityDialogueResponse: (response) =>
     set({ unityDialogueResponse: response }),

@@ -204,7 +204,7 @@ describe('contextConfigStore', () => {
     useContextConfigStore.getState().setContextTokenBudgetMax(50)
     expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(10_000)
     useContextConfigStore.getState().setContextTokenBudgetMax(999_999)
-    expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(100_000)
+    expect(useContextConfigStore.getState().contextTokenBudgetMax).toBe(300_000)
   })
 
   it('devrait permettre de nettoyer l\'erreur', () => {

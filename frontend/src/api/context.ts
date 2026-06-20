@@ -2,11 +2,14 @@
  * API client pour le contexte GDD (personnages, lieux, objets).
  */
 import apiClient from './client'
+import { API_TIMEOUTS } from '../constants'
 import type {
   EstimateTokensRequest,
   EstimateTokensResponse,
   OptimizeContextRequest,
   OptimizeContextResponse,
+  PrecomputedEntityTokensRequest,
+  PrecomputedEntityTokensResponse,
 } from '../types/api'
 import type {
   CharacterResponse,
@@ -259,8 +262,29 @@ export async function putRulesByDialogueType(
 /**
  * Estime les tokens du contexte + prompt (identique au flux génération, endpoint contexte).
  */
-export async function estimateContextTokens(body: EstimateTokensRequest): Promise<EstimateTokensResponse> {
-  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/context/estimate-tokens', body)
+export async function estimateContextTokens(
+  body: EstimateTokensRequest,
+  signal?: AbortSignal
+): Promise<EstimateTokensResponse> {
+  const response = await apiClient.post<EstimateTokensResponse>('/api/v1/context/estimate-tokens', body, {
+    signal,
+    timeout: API_TIMEOUTS.CONTEXT_ESTIMATION,
+  })
+  return response.data
+}
+
+/**
+ * Tokens précompilés par fiche (cache disque) — chemin rapide ajout incrémental.
+ */
+export async function fetchPrecomputedEntityTokens(
+  body: PrecomputedEntityTokensRequest,
+  signal?: AbortSignal,
+): Promise<PrecomputedEntityTokensResponse> {
+  const response = await apiClient.post<PrecomputedEntityTokensResponse>(
+    '/api/v1/context/precomputed-entity-tokens',
+    body,
+    { signal, timeout: API_TIMEOUTS.PRECOMPUTED_ENTITY_TOKENS },
+  )
   return response.data
 }
 
@@ -270,7 +294,9 @@ export async function estimateContextTokens(body: EstimateTokensRequest): Promis
 export async function optimizeContextSelection(
   body: OptimizeContextRequest
 ): Promise<OptimizeContextResponse> {
-  const response = await apiClient.post<OptimizeContextResponse>('/api/v1/context/optimize', body)
+  const response = await apiClient.post<OptimizeContextResponse>('/api/v1/context/optimize', body, {
+    timeout: API_TIMEOUTS.CONTEXT_ESTIMATION,
+  })
   return response.data
 }
 

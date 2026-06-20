@@ -113,6 +113,13 @@ export interface OptimizeContextChange {
   to_mode: 'full' | 'excerpt'
 }
 
+export interface OptimizeContextEffectReport {
+  changes_by_entity_type: Record<string, number>
+  pinned_entity_keys: string[]
+  tokens_before_by_entity_type: Record<string, number>
+  tokens_after_by_entity_type: Record<string, number>
+}
+
 /** Réponse POST /context/optimize — proxy pré-génération distinct du scoring post-génération (3.6). */
 export interface OptimizeContextResponse {
   proposed_context_selections: ContextSelection
@@ -120,6 +127,7 @@ export interface OptimizeContextResponse {
   selection_tokens_after: number
   tokens_saved: number
   changes: OptimizeContextChange[]
+  effect_report: OptimizeContextEffectReport
   pre_generation_context_fidelity_proxy_percent: number
   warnings: string[]
   no_op: boolean
@@ -149,6 +157,41 @@ export interface EstimateTokensResponse {
   structured_prompt?: import('./prompt').PromptStructure
   completion_tokens?: number
   estimated_cost_eur?: number | null
+}
+
+export interface PrecomputedEntityRef {
+  entity_type: 'characters' | 'locations' | 'items' | 'species' | 'communities'
+  name: string
+  mode?: ElementMode
+}
+
+export interface PrecomputedEntityTokensRequest {
+  entities: PrecomputedEntityRef[]
+  organization_mode?: string
+  field_configs?: Record<string, string[]>
+  include_prompt_overhead?: boolean
+  user_instructions?: string
+  include_narrative_guides?: boolean
+  system_prompt_override?: string | null
+  game_rules?: string | null
+  author_profile?: string | null
+  vocabulary_config?: Record<string, string> | null
+}
+
+export interface PrecomputedEntityTokenRow {
+  entity_type: string
+  name: string
+  mode: string
+  token_count: number
+  cache_hit: boolean
+  context_item?: Record<string, unknown> | null
+}
+
+export interface PrecomputedEntityTokensResponse {
+  entities: PrecomputedEntityTokenRow[]
+  selection_tokens_sum: number
+  prompt_overhead_tokens?: number
+  prompt_overhead_sections?: import('./prompt').PromptSection[]
 }
 
 export interface PreviewPromptRequest extends BasePromptRequest {
@@ -400,9 +443,47 @@ export interface ExportUnityDialogueRequest {
 }
 
 export interface ExportUnityDialogueResponse {
-  file_path: string
   filename: string
   success: boolean
+  /** @deprecated Non renvoyé par l'API — utiliser filename */
+  file_path?: string | null
+}
+
+export interface BatchExportFailedItem {
+  id: string
+  errors: string[]
+}
+
+export interface BatchExportRequest {
+  document_ids: string[]
+  skip_validation?: boolean
+  filename_strategy?: 'preserve' | 'slug'
+}
+
+export interface BatchExportResponse {
+  exported: string[]
+  failed: BatchExportFailedItem[]
+  cancelled?: boolean
+  success: boolean
+}
+
+export interface BatchExportPreviewRequest {
+  document_ids: string[]
+}
+
+export interface BatchExportPreviewItem {
+  document_id: string
+  filename: string
+  size_bytes: number
+  node_count: number
+  json_preview: string
+  json_preview_truncated: boolean
+}
+
+export interface BatchExportPreviewResponse {
+  items: BatchExportPreviewItem[]
+  total_size_bytes: number
+  dialogue_count: number
 }
 
 // Unity Dialogues Library

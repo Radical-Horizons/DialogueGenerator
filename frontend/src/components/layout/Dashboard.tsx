@@ -17,6 +17,7 @@ import { EstimatedPromptPanel } from '../generation/EstimatedPromptPanel'
 import { UnityDialogueEditor, type UnityDialogueEditorHandle } from '../generation/UnityDialogueEditor'
 import { ReasoningTraceViewer } from '../generation/ReasoningTraceViewer'
 import { ContextDetail } from '../context/ContextDetail'
+import { ContextSelectionBudgetBar } from '../generation/ContextSelectionBudgetBar'
 import { ResizablePanels, type ResizablePanelsRef } from '../shared/ResizablePanels'
 import { SaveStatusIndicator } from '../shared/SaveStatusIndicator'
 import { Tabs, type Tab } from '../shared/Tabs'
@@ -36,15 +37,21 @@ import { useMobileShellKeyboardComfort } from '../../hooks/useMobileShellKeyboar
 import { useNarrowInlineSize } from '../../hooks/useNarrowInlineSize'
 import {
   SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX,
+  panelCollapseButtonChrome,
   panelHeaderTitleTypography,
+  panelSideHeaderChrome,
 } from '../../theme/responsiveChrome'
 import { remSize } from '../../theme/uiTypography'
 import { NarrowOverlayDrawer } from './NarrowOverlayDrawer'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, UnityDialogueMetadata } from '../../types/api'
 import { theme } from '../../theme'
-import { TOUCH_TARGET_MIN_PX } from '../../constants'
 
 type ContextItem = CharacterResponse | LocationResponse | ItemResponse | SpeciesResponse | CommunityResponse
+type ContextLoadState = {
+  isLoading: boolean
+  error: string | null
+  refresh: (() => void) | null
+}
 
 function ChevronIcon({ direction, size = 16 }: { direction: 'left' | 'right'; size?: number }) {
   const isLeft = direction === 'left'
@@ -70,26 +77,24 @@ function ChevronIcon({ direction, size = 16 }: { direction: 'left' | 'right'; si
 }
 
 /**
- * Bouton d'en-tête pour replier un panneau latéral.
- * Affiche un chevron + label court; le label disparaît sur les petits panneaux via overflow hidden.
- */
-/**
- * direction : sens de repliement (détermine l'icône chevron et son animation).
- * chevronPosition : côté où le chevron apparaît par rapport au label (défaut = même côté que direction).
+ * Bouton d'en-tête pour replier un panneau latéral (desktop).
+ * Icône chevron seule ; l'intention est portée par `aria-label` / `title`.
  */
 function PanelCollapseButton({
   direction,
   chevronPosition,
-  label,
   onClick,
   ariaLabel,
+  density = 'comfortable',
 }: {
   direction: 'left' | 'right'
   chevronPosition?: 'left' | 'right'
-  label: string
   onClick: () => void
   ariaLabel: string
+  /** Desktop confortable = rail compact ; narrow = cible tactile FR119. */
+  density?: 'comfortable' | 'narrow'
 }) {
+  const collapseChrome = panelCollapseButtonChrome[density]
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
 
@@ -120,9 +125,9 @@ function PanelCollapseButton({
         display: 'flex',
         alignItems: 'center',
         gap: '0.3rem',
-        padding: '0.35rem 0.5rem',
-        minHeight: TOUCH_TARGET_MIN_PX,
-        minWidth: TOUCH_TARGET_MIN_PX,
+        padding: collapseChrome.padding,
+        minHeight: collapseChrome.minHeightPx,
+        minWidth: collapseChrome.minWidthPx,
         boxSizing: 'border-box',
         borderRadius: 99,
         border: `1px solid ${borderColor}`,
@@ -130,25 +135,13 @@ function PanelCollapseButton({
         color: textColor,
         cursor: 'pointer',
         flexShrink: 0,
-        overflow: 'hidden',
-        maxWidth: 90,
+        justifyContent: 'center',
         transform: `scale(${scale})`,
         transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
       }}
     >
       {chevronSide === 'left' && chevron}
-      <span style={{
-        fontSize: remSize('caption'),
-        fontWeight: 600,
-        letterSpacing: '0.03em',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        lineHeight: 1,
-      }}>
-        {label}
-      </span>
       {chevronSide === 'right' && chevron}
     </button>
   )
@@ -269,13 +262,18 @@ function PanelExpandButton({
 export function Dashboard() {
   const [selectedContextItem, setSelectedContextItem] = useState<ContextItem | null>(null)
   const [selectedContextHistoryStem, setSelectedContextHistoryStem] = useState<string | null>(null)
+  const [contextLoadState, setContextLoadState] = useState<ContextLoadState>({
+    isLoading: false,
+    error: null,
+    refresh: null,
+  })
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [rightPanelTab, setRightPanelTab] = useState<'prompt' | 'dialogue' | 'node' | 'details'>('prompt')
   const [centerPanelTab, setCenterPanelTab] = useState<'generation' | 'edition' | 'graph'>('generation')
   const [selectedDialogue, setSelectedDialogue] = useState<UnityDialogueMetadata | null>(null)
   const dialogueListRef = useRef<UnityDialogueListRef>(null)
   const unityDialogueEditorRef = useRef<UnityDialogueEditorHandle>(null)
-  const { rawPrompt, tokenCount, promptHash, isEstimating, unityDialogueResponse, setUnityDialogueResponse } = useGenerationStore()
+  const { rawPrompt, isEstimating, unityDialogueResponse, setUnityDialogueResponse } = useGenerationStore()
   const generationState = useGenerationStore((state) => ({
     isEstimating: state.isEstimating,
     unityDialogueResponse: state.unityDialogueResponse,
@@ -322,6 +320,10 @@ export function Dashboard() {
   const panelTitleFontRem = isNarrowCenterColumn
     ? panelHeaderTitleTypography.narrowFontRem
     : panelHeaderTitleTypography.comfortableFontRem
+  const panelSideHeaderPadding = isNarrowCenterColumn
+    ? panelSideHeaderChrome.narrow.padding
+    : panelSideHeaderChrome.comfortable.padding
+  const panelCollapseDensity = isNarrowCenterColumn ? 'narrow' : 'comfortable'
   const showCollapsedLeftAffordance = isLeftPanelCollapsed
   const showCollapsedRightAffordance = isRightPanelCollapsed
   const lastViewportModeRef = useRef(viewportMode)
@@ -437,8 +439,7 @@ export function Dashboard() {
           <EstimatedPromptPanel
             raw_prompt={rawPrompt}
             isEstimating={isEstimating}
-            tokenCount={tokenCount}
-            promptHash={promptHash}
+            isActive={rightPanelTab === 'prompt' && centerPanelTab !== 'graph'}
           />
         </div>
       ),
@@ -538,7 +539,7 @@ export function Dashboard() {
         </div>
       ),
     },
-  ], [unityDialogueResponse, rawPrompt, isEstimating, tokenCount, promptHash, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
+  ], [unityDialogueResponse, rawPrompt, isEstimating, rightPanelTab, centerPanelTab, selectedContextItem, selectedContextHistoryStem, actions.isLoading, generationState.isEstimating, isGraphGenerating, setUnityDialogueResponse])
 
   // En mode éditeur de graphe : masquer "Prompt". Hors graphe : masquer "Édition de nœud".
   const visibleRightPanelTabs = useMemo(() => {
@@ -701,6 +702,10 @@ export function Dashboard() {
     []
   )
 
+  const onContextLoadStateChange = useCallback((state: ContextLoadState) => {
+    setContextLoadState(state)
+  }, [])
+
   const narrowDetailsHeaderEnd =
     actions.handleGenerate ? (
       <SaveStatusIndicator
@@ -719,6 +724,29 @@ export function Dashboard() {
     ) {
       return null
     }
+    const contextRefresh = contextLoadState.refresh
+    const hasContextLoadError = contextLoadState.error !== null
+    const isGenerateActionBlocked =
+      actions.isLoading ||
+      isGraphGenerating ||
+      contextLoadState.isLoading ||
+      generationState.isEstimating
+    const isRefreshActionDisabled = contextLoadState.isLoading || !contextRefresh
+    const primaryActionLabel = hasContextLoadError ? 'Rafraîchir le contexte' : 'Générer'
+    const primaryActionTitle = hasContextLoadError
+      ? 'Rafraîchir le contexte GDD'
+      : contextLoadState.isLoading
+        ? 'Chargement du contexte GDD en cours'
+        : generationState.isEstimating
+          ? 'Estimation du contexte en cours'
+          : 'Générer (Ctrl+Enter)'
+    const handlePrimaryGenerateAction = hasContextLoadError
+      ? contextRefresh ?? undefined
+      : actions.handleGenerate
+    const isPrimaryGenerateDisabled = hasContextLoadError
+      ? isRefreshActionDisabled
+      : isGenerateActionBlocked
+
     return (
       <div
         style={{
@@ -732,7 +760,7 @@ export function Dashboard() {
           zIndex: 10,
         }}
       >
-        {(actions.isLoading || generationState.isEstimating || isGraphGenerating) && (
+        {(actions.isLoading || generationState.isEstimating || isGraphGenerating || contextLoadState.isLoading) && (
           <>
             <div
               style={{
@@ -765,7 +793,9 @@ export function Dashboard() {
                 marginBottom: '0.4rem',
               }}
             >
-              {isGraphGenerating
+              {contextLoadState.isLoading && !actions.isLoading && !generationState.isEstimating && !isGraphGenerating
+                ? 'Chargement du contexte...'
+                : isGraphGenerating
                 ? 'Génération de nœud...'
                 : generationState.isEstimating && !actions.isLoading
                   ? 'Estimation des tokens...'
@@ -831,8 +861,8 @@ export function Dashboard() {
               {unityDialogueEditorRef.current?.isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
             </button>
             <button
-              onClick={actions.handleGenerate}
-              disabled={actions.isLoading || isGraphGenerating}
+              onClick={handlePrimaryGenerateAction}
+              disabled={isPrimaryGenerateDisabled}
               style={{
                 padding: '0.5rem',
                 fontSize: remSize('body'),
@@ -840,8 +870,8 @@ export function Dashboard() {
                 color: theme.button.default.color,
                 border: `1px solid ${theme.border.primary}`,
                 borderRadius: '6px',
-                cursor: actions.isLoading || isGraphGenerating ? 'not-allowed' : 'pointer',
-                opacity: actions.isLoading || isGraphGenerating ? 0.6 : 1,
+                cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
+                opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -850,7 +880,7 @@ export function Dashboard() {
                 transition: 'all 0.2s',
                 boxSizing: 'border-box',
               }}
-              title="Générer à nouveau (Ctrl+Enter)"
+              title={hasContextLoadError ? 'Rafraîchir le contexte GDD' : primaryActionTitle}
             >
               <svg
                 width="20"
@@ -862,7 +892,13 @@ export function Dashboard() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{
-                  animation: actions.isLoading || isGraphGenerating ? 'spin 1s linear infinite' : 'none',
+                  animation:
+                    actions.isLoading ||
+                    isGraphGenerating ||
+                    contextLoadState.isLoading ||
+                    generationState.isEstimating
+                      ? 'spin 1s linear infinite'
+                      : 'none',
                 }}
               >
                 <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
@@ -877,8 +913,8 @@ export function Dashboard() {
           </div>
         ) : effectiveRightPanelTab === 'dialogue' || effectiveRightPanelTab === 'prompt' ? (
           <button
-            onClick={actions.handleGenerate}
-            disabled={actions.isLoading || isGraphGenerating}
+            onClick={handlePrimaryGenerateAction}
+            disabled={isPrimaryGenerateDisabled}
             style={{
               width: '100%',
               padding: '0.55rem 0.75rem',
@@ -888,8 +924,8 @@ export function Dashboard() {
               color: theme.button.primary.color,
               border: 'none',
               borderRadius: '6px',
-              cursor: actions.isLoading || isGraphGenerating ? 'not-allowed' : 'pointer',
-              opacity: actions.isLoading || isGraphGenerating ? 0.6 : 1,
+              cursor: isPrimaryGenerateDisabled ? 'not-allowed' : 'pointer',
+              opacity: isPrimaryGenerateDisabled ? 0.6 : 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -897,18 +933,20 @@ export function Dashboard() {
               transition: 'all 0.2s',
               boxSizing: 'border-box',
             }}
-            title="Générer (Ctrl+Enter)"
+            title={primaryActionTitle}
           >
-            <span>Générer</span>
-            <span
-              style={{
-                fontSize: remSize('caption'),
-                opacity: 0.8,
-                fontWeight: 'normal',
-              }}
-            >
-              Ctrl+Enter
-            </span>
+            <span>{primaryActionLabel}</span>
+            {!hasContextLoadError && (
+              <span
+                style={{
+                  fontSize: remSize('caption'),
+                  opacity: 0.8,
+                  fontWeight: 'normal',
+                }}
+              >
+                Ctrl+Enter
+              </span>
+            )}
           </button>
         ) : null}
       </div>
@@ -967,7 +1005,7 @@ export function Dashboard() {
           <>
             <div
               style={{
-                padding: '0.5rem 0.75rem',
+                padding: panelSideHeaderPadding,
                 borderBottom: `1px solid ${theme.border.primary}`,
                 backgroundColor: theme.background.panelHeader,
                 display: 'flex',
@@ -982,12 +1020,15 @@ export function Dashboard() {
               </div>
               <PanelCollapseButton
                 direction="left"
-                label="Replier"
                 onClick={toggleLeftPanel}
                 ariaLabel="Replier le panneau gauche"
+                density={panelCollapseDensity}
               />
             </div>
-            <ContextSelector onItemSelected={onContextItemSelected} />
+            <ContextSelector
+              onItemSelected={onContextItemSelected}
+              onLoadStateChange={onContextLoadStateChange}
+            />
           </>
         )}
       </div>
@@ -1088,7 +1129,7 @@ export function Dashboard() {
           <>
         <div
           style={{
-            padding: '0.5rem 0.75rem',
+            padding: panelSideHeaderPadding,
             paddingRight: '1.25rem',
             borderBottom: `1px solid ${theme.border.primary}`,
             backgroundColor: theme.background.panelHeader,
@@ -1097,16 +1138,15 @@ export function Dashboard() {
             justifyContent: 'space-between',
             gap: '0.5rem',
             flexShrink: 0,
-            minHeight: 40,
             boxSizing: 'border-box',
           }}
         >
           <PanelCollapseButton
             direction="right"
             chevronPosition="right"
-            label="Replier"
             onClick={toggleRightPanel}
             ariaLabel="Replier le panneau droit"
+            density={panelCollapseDensity}
           />
           <div
             style={{
@@ -1144,6 +1184,9 @@ export function Dashboard() {
             ...shellKeyboardInsetStyle,
           }}
         >
+          <ContextSelectionBudgetBar
+            visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
+          />
           <Tabs
             variant="segmented"
             tabs={visibleRightPanelTabs}
@@ -1176,7 +1219,10 @@ export function Dashboard() {
         onClose={() => setIsLeftPanelCollapsed(true)}
         contentBottomInsetPx={keyboardBottomInsetPx}
       >
-        <ContextSelector onItemSelected={onContextItemSelected} />
+        <ContextSelector
+          onItemSelected={onContextItemSelected}
+          onLoadStateChange={onContextLoadStateChange}
+        />
       </NarrowOverlayDrawer>
     )}
 
@@ -1201,6 +1247,9 @@ export function Dashboard() {
             position: 'relative',
           }}
         >
+          <ContextSelectionBudgetBar
+            visible={centerPanelTab === 'generation' || centerPanelTab === 'edition'}
+          />
           <Tabs
             variant="segmented"
             segmentedSize="drawer-aligned"
