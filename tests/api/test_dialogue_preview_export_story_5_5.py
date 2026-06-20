@@ -89,6 +89,7 @@ class TestGraphPreviewExport:
         assert "nodes" in parsed
 
     def test_invalid_graph_returns_schema_valid_false(self):
+        """Choix sans choiceId stable → schéma invalide (speaker seul n'est plus requis)."""
         invalid_graph = {
             **_VALID_GRAPH,
             "nodes": [
@@ -98,13 +99,27 @@ class TestGraphPreviewExport:
                     "position": {"x": 0, "y": 0},
                     "data": {
                         "stableId": _VALID_NODE_ID,
-                        "displayName": "Sans speaker",
+                        "displayName": "Choix invalide",
                         "line": "Bonjour",
-                        "choices": [],
+                        "speaker": "PNJ",
+                        "choices": [{"text": "Accepter"}],
                     },
+                },
+                {
+                    "id": "END",
+                    "type": "endNode",
+                    "position": {"x": 0, "y": 200},
+                    "data": {"line": ""},
+                },
+            ],
+            "edges": [
+                {
+                    "id": "e1",
+                    "source": _VALID_NODE_ID,
+                    "target": "END",
+                    "data": {"edgeType": "choice", "choiceIndex": 0},
                 }
             ],
-            "edges": [],
         }
         response = client.post(
             "/api/v1/unity-dialogues/graph/preview-export",

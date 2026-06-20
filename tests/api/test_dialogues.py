@@ -36,12 +36,20 @@ def mock_dialogue_service():
     Ce mock isole les tests des dépendances réelles (GDD, LLM, etc.).
     """
     from core.prompt.prompt_engine import BuiltPrompt
-    
+    from models.prompt_structure import PromptMetadata, PromptStructure
+
     mock_service = MagicMock(spec=DialogueGenerationService)
     mock_service.context_builder = MagicMock()
     # Aligné sur le pipeline réel (_build_prompt_from_request / estimate-tokens) : JSON → texte → tiktoken.
     mock_service.context_builder.build_context_json = MagicMock(
-        return_value={"_test": "structured_context"}
+        return_value=PromptStructure(
+            sections=[],
+            metadata=PromptMetadata(
+                totalTokens=100,
+                generatedAt="2026-01-01T00:00:00",
+                organizationMode="narrative",
+            ),
+        )
     )
     mock_service.context_builder.serialize_context_to_text = MagicMock(
         return_value="context text"
