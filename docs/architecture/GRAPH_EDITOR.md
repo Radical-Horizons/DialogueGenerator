@@ -42,7 +42,7 @@ L'éditeur de graphe narratif permet de visualiser, éditer et gérer les dialog
 
 Mesure : hook `useGraphToolbarLayoutMode` (`frontend/src/hooks/useGraphToolbarLayoutMode.ts`) — encapsule `useNarrowInlineSize(GRAPH_TOOLBAR_COMFORT_MIN_WIDTH_PX, { measureParentClientWidth: true })`. Tokens : `graphToolbarChrome` dans `responsiveChrome.ts`. Détail : [`responsive-ui.md`](./responsive-ui.md).
 
-*Note : un état « compact desktop » intermédiaire (640–1099 vs full ≥1100) était envisagé en doc antérieure — **non implémenté** ; backlog produit séparé si besoin.*
+> **Note (2026-06)** : l'ancien mode intermédiaire « compact desktop » (640–1099px, deux rangées) a été retiré ; le refactor tri-state complet est couvert par les stories 17.9–17.11 (plus de dette DT-1 séparée).
 
 **Actions principales** :
 
