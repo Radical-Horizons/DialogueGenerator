@@ -172,7 +172,7 @@ export function Tabs({
                       borderRadius: drawerTab.borderRadiusPx,
                       border: 'none',
                       backgroundColor:
-                        tab.id === activeTabId ? theme.background.panel : 'transparent',
+                        tab.id === activeTabId ? theme.state.selected.background : 'transparent',
                       color:
                         tab.id === activeTabId
                           ? theme.text.primary
@@ -199,7 +199,7 @@ export function Tabs({
                       borderRadius: '8px',
                       border: 'none',
                       backgroundColor:
-                        tab.id === activeTabId ? theme.background.panel : 'transparent',
+                        tab.id === activeTabId ? theme.state.selected.background : 'transparent',
                       color:
                         tab.id === activeTabId
                           ? theme.text.primary

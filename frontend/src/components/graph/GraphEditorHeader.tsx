@@ -191,6 +191,7 @@ export function GraphEditorHeader({
     renderQualityMenuItems,
     showShortcutsTooltip,
     setShowShortcutsTooltip,
+    selectedNodeId,
   }
 
   const statusRowProps = {

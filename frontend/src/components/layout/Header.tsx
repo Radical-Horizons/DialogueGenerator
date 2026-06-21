@@ -246,38 +246,6 @@ export function Header() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      if (actions.handleExportUnity) {
-                        actions.handleExportUnity()
-                      }
-                      setIsActionsDropdownOpen(false)
-                    }}
-                    disabled={actions.isLoading || isGraphGenerating}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      fontSize: remSize('accent'),
-                      backgroundColor: 'transparent',
-                      color: (actions.isLoading || isGraphGenerating) ? theme.text.secondary : theme.text.primary,
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: (actions.isLoading || isGraphGenerating) ? 'not-allowed' : 'pointer',
-                      opacity: (actions.isLoading || isGraphGenerating) ? 0.6 : 1,
-                      borderRadius: unityBatchExportMenu ? '4px 4px 0 0' : '4px 4px 0 0',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!actions.isLoading && !isGraphGenerating) {
-                        e.currentTarget.style.backgroundColor = theme.background.secondary
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    Exporter (Unity)
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
                       if (actions.handleReset) {
                         actions.handleReset()
                       }
@@ -294,7 +262,7 @@ export function Header() {
                       textAlign: 'left',
                       cursor: (actions.isLoading || isGraphGenerating) ? 'not-allowed' : 'pointer',
                       opacity: (actions.isLoading || isGraphGenerating) ? 0.6 : 1,
-                      borderRadius: unityBatchExportMenu ? 0 : '0 0 4px 4px',
+                      borderRadius: unityBatchExportMenu ? '4px 4px 0 0' : '4px',
                     }}
                     onMouseEnter={(e) => {
                       if (!actions.isLoading && !isGraphGenerating) {

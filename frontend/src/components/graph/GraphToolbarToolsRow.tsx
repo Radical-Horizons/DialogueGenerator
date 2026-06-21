@@ -9,6 +9,7 @@ import { theme } from '../../theme'
 import { GraphActionsDropdown } from './GraphActionsDropdown'
 import { NODE_DRAG_TOOLTIP } from './nodeDragTooltip'
 import { GraphToolbarUndoRedoButtons } from './GraphToolbarUndoRedoButtons'
+import { useGraphViewStore } from '../../store/graphViewStore'
 import {
   GRAPH_SHORTCUTS_TOOLTIP_ESTIMATE_WIDTH_PX,
   GRAPH_SHORTCUTS_TOOLTIP_GAP_PX,
@@ -51,6 +52,55 @@ export interface GraphToolbarToolsRowProps {
   renderQualityMenuItems: () => React.ReactNode
   showShortcutsTooltip: boolean
   setShowShortcutsTooltip: React.Dispatch<React.SetStateAction<boolean>>
+  selectedNodeId: string | null
+}
+
+function GraphToolbarFocusNodeButton({
+  isNarrowToolbar,
+  chromeStyles,
+  selectedNodeId,
+  hasActiveDialogue,
+}: Pick<
+  GraphToolbarToolsRowProps,
+  'isNarrowToolbar' | 'chromeStyles' | 'selectedNodeId' | 'hasActiveDialogue'
+>) {
+  const { graphChromeTouch, graphChromeTouchNarrow, effectiveButtonPadding, effectiveButtonFontSizeRem } =
+    chromeStyles
+  const disabled = !selectedNodeId || !hasActiveDialogue
+
+  return (
+    <button
+      type="button"
+      data-testid="btn-focus-selected-node"
+      disabled={disabled}
+      onClick={() => {
+        if (selectedNodeId) {
+          useGraphViewStore.getState().focusNode(selectedNodeId)
+        }
+      }}
+      style={{
+        ...(isNarrowToolbar ? graphChromeTouchNarrow : graphChromeTouch),
+        padding: effectiveButtonPadding,
+        border: `1px solid ${theme.border.primary}`,
+        borderRadius: '6px',
+        backgroundColor: theme.button.default.background,
+        color: theme.button.default.color,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.55 : 1,
+        fontSize: `${effectiveButtonFontSizeRem}rem`,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.35rem',
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+      }}
+      title="Recentrer sur le nœud sélectionné (double-clic sur un nœud)"
+      aria-label="Recentrer sur le nœud sélectionné"
+    >
+      <span aria-hidden>◎</span>
+      {!isNarrowToolbar && <span>Nœud</span>}
+    </button>
+  )
 }
 
 function GraphToolbarShortcutsButton({
@@ -486,12 +536,20 @@ export function GraphToolbarToolsGroup(props: GraphToolbarToolsRowProps) {
     renderActionsMenuItems,
     showShortcutsTooltip,
     setShowShortcutsTooltip,
+    selectedNodeId,
+    hasActiveDialogue,
   } = props
   const { graphChromeTouch, effectiveButtonPadding, effectiveButtonFontSizeRem } = chromeStyles
 
   return (
     <>
       <GraphToolbarLayoutDropdown {...props} />
+      <GraphToolbarFocusNodeButton
+        isNarrowToolbar={isNarrowToolbar}
+        chromeStyles={chromeStyles}
+        selectedNodeId={selectedNodeId}
+        hasActiveDialogue={hasActiveDialogue}
+      />
       {!isNarrowToolbar && (
         <GraphActionsDropdown
           canEditGraph={canEditGraph}
@@ -624,6 +682,12 @@ export function GraphToolbarToolsRow(props: GraphToolbarToolsRowProps) {
             Recherche
           </button>
         )}
+        <GraphToolbarFocusNodeButton
+          isNarrowToolbar
+          chromeStyles={chromeStyles}
+          selectedNodeId={props.selectedNodeId}
+          hasActiveDialogue={hasActiveDialogue}
+        />
         <GraphActionsDropdown
           canEditGraph={canEditGraph}
           isNarrow={false}

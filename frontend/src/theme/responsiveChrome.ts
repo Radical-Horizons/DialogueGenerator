@@ -15,11 +15,10 @@ export const SEGMENTED_CHROME_COMFORT_MIN_WIDTH_PX = 480
 export const segmentedTabTypography = {
   comfortable: {
     fontSizeRem: 0.8,
-    /** Padding vertical réduit : même typo, rail plus bas sur desktop. */
-    buttonPadding: '0.18rem 0.62rem',
+    buttonPadding: '0.14rem 0.62rem',
     rowGapRem: 0.2,
-    rowPadding: '0.18rem 0.5rem',
-    tabMinHeightPx: 30,
+    rowPadding: '0.14rem 0.5rem',
+    tabMinHeightPx: 28,
   },
   narrow: {
     /** Plancher lisibilité ≈ 12px si root 16px */
@@ -141,13 +140,13 @@ const unityDialogueEditorPaddingHorizontal = {
  */
 export const contextGddTabChrome = {
   balanced: {
-    tabPadding: '0.24rem 0.1rem',
-    gearPadding: '0.24rem 0.14rem',
-    barPadding: '0.32rem 0.42rem 0',
-    barGap: '0.18rem',
+    tabPadding: '0.14rem 0.1rem',
+    gearPadding: '0.18rem 0.14rem',
+    barPadding: '0.14rem 0.42rem 0',
+    barGap: '0.16rem',
     borderRadiusPx: 6,
-    /** Compromis harmonie vs onglets segmentés Détails (44px) tout en gardant 5 libellés sur une ligne. */
-    tabMinHeightPx: 37,
+    /** Compromis : plus bas que 44px touch, plus aéré que le compact extrême. */
+    tabMinHeightPx: 30,
     tabFontKey: 'accent',
   },
   tight: {

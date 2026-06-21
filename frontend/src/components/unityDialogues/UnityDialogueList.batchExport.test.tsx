@@ -189,7 +189,6 @@ describe('UnityDialogueList batch export', () => {
   })
 
   it('arrête le batch en cours — résumé partiel annulé', async () => {
-    const user = userEvent.setup()
     const pendingResolvers: Array<() => void> = []
 
     batchExportMock.mockImplementation(
@@ -252,7 +251,6 @@ describe('UnityDialogueList batch export', () => {
   })
 
   it('bloque l’export batch si le dialogue ouvert a des modifications non sauvegardées', async () => {
-    const user = userEvent.setup()
     useGraphStoreMock.mockImplementation((selector) =>
       selector({
         hasUnsavedChanges: true,

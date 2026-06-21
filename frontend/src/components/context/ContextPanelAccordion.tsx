@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { Badge } from '../shared'
 
 const ACCORDION_STYLES = `
   .context-panel-accordion-section > summary {
@@ -72,6 +73,8 @@ export interface ContextPanelAccordionSectionProps {
   defaultOpen?: boolean
   /** Style atténué pour sections vides ou inactives. */
   muted?: boolean
+  /** Compteur affiché en badge à droite du titre. */
+  badgeCount?: number
   bodyStyle?: CSSProperties
 }
 
@@ -82,6 +85,7 @@ export function ContextPanelAccordionSection({
   summaryTestId,
   defaultOpen = false,
   muted = false,
+  badgeCount,
   bodyStyle,
 }: ContextPanelAccordionSectionProps) {
   return (
@@ -99,7 +103,7 @@ export function ContextPanelAccordionSection({
           display: 'flex',
           alignItems: 'center',
           gap: '0.35rem',
-          padding: '0.45rem 0.75rem',
+          padding: '0.4rem 0.75rem',
           cursor: 'pointer',
           fontSize: remSize('small'),
           fontWeight: muted ? 500 : 600,
@@ -109,7 +113,12 @@ export function ContextPanelAccordionSection({
         <span className="context-panel-chevron">
           <ChevronRightIcon />
         </span>
-        {title}
+        <span style={{ flex: 1, minWidth: 0 }}>{title}</span>
+        {badgeCount != null && (
+          <Badge variant={badgeCount > 0 ? 'info' : 'neutral'} size="sm">
+            {badgeCount}
+          </Badge>
+        )}
       </summary>
       <div
         style={{

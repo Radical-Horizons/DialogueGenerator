@@ -166,7 +166,8 @@ export const SelectedContextSummary = memo(function SelectedContextSummary({
     <ContextPanelAccordionSection
       testId="selected-context-summary"
       summaryTestId="selected-context-summary-toggle"
-      title={`Sélections actives (${totalSelected})`}
+      title="Sélections actives"
+      badgeCount={totalSelected}
       muted={totalSelected === 0}
     >
       <div style={{ display: 'grid', gap: '0.4rem' }}>

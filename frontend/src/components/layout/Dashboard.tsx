@@ -1189,6 +1189,7 @@ export function Dashboard() {
           />
           <Tabs
             variant="segmented"
+            segmentedSize="drawer-aligned"
             tabs={visibleRightPanelTabs}
             activeTabId={effectiveRightPanelTab}
             onTabChange={(tabId) => setRightPanelTab(tabId as 'prompt' | 'dialogue' | 'node' | 'details')}

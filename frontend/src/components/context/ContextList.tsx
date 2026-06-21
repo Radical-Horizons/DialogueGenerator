@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import type { CharacterResponse, LocationResponse, ItemResponse, SpeciesResponse, CommunityResponse, ElementMode } from '../../types/api'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { listItemSelectionStyle } from '../../theme/selectionTokens'
 import { highlightText } from '../../utils/textHighlight'
 import { getGddEntitySummary } from '../../utils/gddSummary'
 import { useDebounce } from '../../hooks/useDebounce'
@@ -215,6 +216,7 @@ export function ContextList({
             const isSelected = selectedItems.includes(item.name)
             const isDetailSelected = selectedDetail === item.name
             const currentMode = getElementMode ? getElementMode(item.name) : null
+            const selectionStyle = listItemSelectionStyle(isSelected)
 
             const handleModeClick = (e: React.MouseEvent) => {
               e.stopPropagation()
@@ -230,22 +232,28 @@ export function ContextList({
                 style={{
                   padding: '0.65rem 0.75rem',
                   marginBottom: '0.5rem',
-                  border: isSelected
-                    ? `2px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
+                  borderTop: isSelected
+                    ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
+                    : `1px solid rgba(255, 255, 255, 0.06)`,
+                  borderRight: isSelected
+                    ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
+                    : `1px solid rgba(255, 255, 255, 0.06)`,
+                  borderBottom: isSelected
+                    ? `1px solid ${currentMode === 'excerpt' ? theme.border.primary : theme.button.primary.background}`
                     : `1px solid rgba(255, 255, 255, 0.06)`,
                   borderRadius: '10px',
+                  ...selectionStyle,
                   backgroundColor: isSelected
                     ? theme.state.selected.background
                     : isDetailSelected
                       ? theme.background.panel
                       : theme.background.tertiary,
                   boxShadow: isSelected ? theme.shadow.card : '0 1px 4px rgba(0, 0, 0, 0.25)',
-                  color: theme.text.primary,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
+                  transition: 'background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease',
                 }}
                 onClick={() => onItemClick(item.name)}
                 onMouseEnter={(e) => {

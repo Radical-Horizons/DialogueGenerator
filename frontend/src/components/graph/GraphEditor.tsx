@@ -15,6 +15,7 @@ import { GraphSearchBar } from './GraphSearchBar'
 import { AIGenerationPanel } from './AIGenerationPanel'
 import { DeleteNodeConfirmModal } from './DeleteNodeConfirmModal'
 import { GraphEditorHeader } from './GraphEditorHeader'
+import { GraphContextBreadcrumb } from './GraphContextBreadcrumb'
 import { ExportDownloadBanner } from '../unityDialogues/ExportDownloadBanner'
 import { BatchExportProgressBanner } from '../unityDialogues/BatchExportProgressBanner'
 import { ExportPreviewModal } from '../unityDialogues/ExportPreviewModal'
@@ -246,6 +247,8 @@ export function GraphEditor({
             ) : undefined
           }
         />
+
+        <GraphContextBreadcrumb />
 
         {toolbar.lastExportDownload && (
           <ExportDownloadBanner

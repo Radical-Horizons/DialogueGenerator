@@ -1,9 +1,10 @@
 /**
  * Composant pour afficher un item de dialogue Unity dans la liste.
  */
-import { forwardRef, memo, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
+import { forwardRef, memo, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import { listItemSelectionStyle } from '../../theme/selectionTokens'
 import type { UnityDialogueMetadata } from '../../types/api'
 import { highlightText } from '../../utils/textHighlight'
 import { getDialogueDisplayTitle } from '../../utils/formatDialogueTitle'
@@ -62,6 +63,9 @@ export const UnityDialogueItem = memo(
       },
       ref
     ) {
+      const [isHovered, setIsHovered] = useState(false)
+      const showFilename = isSelected || isHovered
+
       const formatSize = (bytes: number): string => {
         if (bytes < 1024) return `${bytes} B`
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -81,7 +85,7 @@ export const UnityDialogueItem = memo(
 
       const titleText = getDialogueDisplayTitle(dialogue)
 
-      const bgForState = isSelected ? theme.state.selected.background : 'transparent'
+      const selectionStyle = listItemSelectionStyle(isSelected)
 
       const body = (
         <>
@@ -89,37 +93,40 @@ export const UnityDialogueItem = memo(
             data-testid="unity-dialogue-item-title"
             style={{
               fontSize: remSize('unityListTitle'),
-              fontWeight: 600,
-              lineHeight: 1.25,
-              marginBottom: '0.2rem',
+              fontWeight: isSelected ? 700 : 600,
+              lineHeight: 1.2,
+              marginBottom: showFilename ? '0.15rem' : '0.1rem',
               display: '-webkit-box',
               WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
+              WebkitLineClamp: 1,
               overflow: 'hidden',
               wordBreak: 'break-word',
+              color: isSelected ? theme.text.primary : theme.text.secondary,
             }}
           >
             {highlightText(titleText, searchQuery)}
           </div>
+          {showFilename && (
+            <div
+              style={{
+                fontSize: '0.65rem',
+                color: theme.text.tertiary,
+                marginBottom: '0.15rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {highlightText(dialogue.filename, searchQuery)}
+            </div>
+          )}
           <div
             style={{
-              fontSize: '0.7rem',
-              color: theme.text.tertiary,
-              marginBottom: '0.2rem',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {highlightText(dialogue.filename, searchQuery)}
-          </div>
-          <div
-            style={{
-              fontSize: remSize('caption'),
+              fontSize: '0.65rem',
               color: theme.text.tertiary,
               display: 'flex',
               flexWrap: 'wrap',
-              gap: '0.35rem',
+              gap: '0.3rem',
             }}
           >
             <span>{formatSize(dialogue.size_bytes)}</span>
@@ -142,9 +149,24 @@ export const UnityDialogueItem = memo(
 
       const interactiveStyle = {
         ...itemInteractiveStyle,
-        backgroundColor: bgForState,
+        ...selectionStyle,
         flex: batchMode ? 1 : undefined,
         minWidth: 0,
+      }
+
+      const hoverHandlers = {
+        onMouseEnter: (e: MouseEvent<HTMLElement>) => {
+          setIsHovered(true)
+          if (!isSelected) {
+            e.currentTarget.style.backgroundColor = theme.state.hover.background
+          }
+        },
+        onMouseLeave: (e: MouseEvent<HTMLElement>) => {
+          setIsHovered(false)
+          if (!isSelected) {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }
+        },
       }
 
       if (asListboxOption) {
@@ -165,16 +187,7 @@ export const UnityDialogueItem = memo(
               display: batchMode ? 'flex' : itemInteractiveStyle.display,
               alignItems: batchMode ? 'flex-start' : undefined,
             }}
-            onMouseEnter={(e) => {
-              if (!isSelected) {
-                e.currentTarget.style.backgroundColor = theme.state.hover.background
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isSelected) {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }
-            }}
+            {...hoverHandlers}
           >
             {batchCheckbox}
             <div style={{ flex: 1, minWidth: 0 }}>{body}</div>
@@ -194,18 +207,10 @@ export const UnityDialogueItem = memo(
               alignItems: 'flex-start',
               width: '100%',
               borderBottom: `1px solid ${theme.border.primary}`,
-              backgroundColor: bgForState,
+              ...selectionStyle,
             }}
-            onMouseEnter={(e) => {
-              if (!isSelected) {
-                e.currentTarget.style.backgroundColor = theme.state.hover.background
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isSelected) {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }
-            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             {batchCheckbox}
             <button
@@ -236,16 +241,7 @@ export const UnityDialogueItem = memo(
           onClick={onClick}
           onContextMenu={onContextMenu}
           style={interactiveStyle}
-          onMouseEnter={(e) => {
-            if (!isSelected) {
-              e.currentTarget.style.backgroundColor = theme.state.hover.background
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isSelected) {
-              e.currentTarget.style.backgroundColor = 'transparent'
-            }
-          }}
+          {...hoverHandlers}
         >
           {body}
         </button>

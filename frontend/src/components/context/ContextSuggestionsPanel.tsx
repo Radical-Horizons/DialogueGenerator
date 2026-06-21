@@ -41,7 +41,8 @@ export function ContextSuggestionsPanel() {
     <ContextPanelAccordionSection
       testId="context-suggestions-panel"
       summaryTestId="context-suggestions-panel-toggle"
-      title={`Suggestions (${suggestions.length})`}
+      title="Suggestions"
+      badgeCount={suggestions.length}
       muted={suggestions.length === 0}
       bodyStyle={{ padding: '0 0.75rem 0.5rem' }}
     >

@@ -16,6 +16,13 @@ import { useContextStore } from '../../store/contextStore'
 import { useToast } from '../shared'
 import { theme } from '../../theme'
 import { remSize } from '../../theme/uiTypography'
+import {
+  editableFieldInputStyle,
+  editableFieldLabelStyle,
+  editableFieldTextareaStyle,
+  readonlyFieldInputStyle,
+  readonlyFieldLabelStyle,
+} from '../../theme/fieldTokens'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
 import { StyledSelect } from '../shared/StyledSelect'
@@ -598,29 +605,13 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
       >
         {/* ID du nœud (readonly, stable) */}
         <div>
-          <label
-            style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontSize: remSize('accent'),
-              fontWeight: 'bold',
-              color: theme.text.secondary,
-            }}
-          >
-            ID (stable)
-          </label>
+          <label style={readonlyFieldLabelStyle()}>ID (stable)</label>
           <input
             type="text"
             {...register('id')}
             readOnly
             style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: 4,
-              backgroundColor: theme.background.panel,
-              color: theme.text.secondary,
-              fontSize: remSize('body'),
+              ...readonlyFieldInputStyle(),
               fontFamily: 'monospace',
             }}
           />
@@ -629,89 +620,33 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         {/* Titre (éditable, pour dialogueNode) */}
         {nodeType === 'dialogueNode' && (
           <div>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: remSize('accent'),
-                fontWeight: 'bold',
-                color: theme.text.primary,
-              }}
-            >
-              Titre
-            </label>
+            <label style={editableFieldLabelStyle()}>Titre</label>
             <input
               type="text"
               {...register('title')}
               placeholder="Libellé du nœud (affichage)"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: remSize('body'),
-              }}
+              style={editableFieldInputStyle()}
             />
           </div>
         )}
 
         {/* Type de nœud */}
         <div>
-          <label
-            style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontSize: remSize('accent'),
-              fontWeight: 'bold',
-              color: theme.text.secondary,
-            }}
-          >
-            Type
-          </label>
-          <input
-            type="text"
-            value={nodeType}
-            readOnly
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: `1px solid ${theme.border.primary}`,
-              borderRadius: 4,
-              backgroundColor: theme.background.panel,
-              color: theme.text.secondary,
-              fontSize: remSize('body'),
-            }}
-          />
+          <label style={readonlyFieldLabelStyle()}>Type</label>
+          <input type="text" value={nodeType} readOnly style={readonlyFieldInputStyle()} />
         </div>
         
         {/* Speaker (pour dialogue nodes) */}
         {nodeType === 'dialogueNode' && (
           <div>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: remSize('accent'),
-                fontWeight: 'bold',
-                color: theme.text.primary,
-              }}
-            >
-              Speaker
-            </label>
+            <label style={editableFieldLabelStyle()}>Speaker</label>
             <input
               type="text"
               {...register('speaker')}
               placeholder="Nom du personnage"
               style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).speaker ? theme.state.error.border : theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: remSize('body'),
+                ...editableFieldInputStyle(),
+                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).speaker ? theme.state.error.border : theme.border.secondary}`,
               }}
             />
           </div>
@@ -720,31 +655,14 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
         {/* Line (dialogue) */}
         {(nodeType === 'dialogueNode' || nodeType === 'testNode') && (
           <div>
-            <label
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: remSize('accent'),
-                fontWeight: 'bold',
-                color: theme.text.primary,
-              }}
-            >
-              Dialogue
-            </label>
+            <label style={editableFieldLabelStyle()}>Dialogue</label>
             <textarea
               {...register('line')}
               placeholder="Texte du dialogue..."
               rows={9}
               style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).line ? theme.state.error.border : theme.border.primary}`,
-                borderRadius: 4,
-                backgroundColor: theme.background.tertiary,
-                color: theme.text.primary,
-                fontSize: remSize('body'),
-                fontFamily: 'inherit',
-                resize: 'vertical',
+                ...editableFieldTextareaStyle('9rem'),
+                border: `1px solid ${(errors as FieldErrors<DialogueNodeData>).line ? theme.state.error.border : theme.border.secondary}`,
               }}
             />
           </div>
