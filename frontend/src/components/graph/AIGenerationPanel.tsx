@@ -20,6 +20,9 @@ import {
   countExpandedBatchNodesForChoices,
   getChoiceDisplayLabel,
 } from '../../utils/graphChoiceLabels'
+import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
+import { resolveDramatisFromSelections } from '../../utils/sceneDramatis'
+import { useGenerationStore } from '../../store/generationStore'
 
 interface AIGenerationPanelProps {
   parentNodeId: string | null
@@ -34,6 +37,7 @@ export function AIGenerationPanel({
 }: AIGenerationPanelProps) {
   const { generateFromNode, isGenerating, nodes, edges } = useGraphStore()
   const { selections } = useContextStore()
+  const sceneSelection = useGenerationStore((state) => state.sceneSelection)
   const toast = useToast()
   const { checkBudget } = useCostGovernance()
   
@@ -114,7 +118,12 @@ export function AIGenerationPanel({
       ...(selections.characters_full || []),
       ...(selections.characters_excerpt || []),
     ]
-    const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+    const dramatis = resolveDramatisFromSelections({
+      sceneSelection,
+      sceneProtagonists: selections.scene_protagonists,
+      contextCharacters: allCharacters,
+    })
+    const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
     
     // Si les instructions sont vides, on utilisera un texte par défaut côté backend
     const finalInstructions = userInstructions.trim() || "Ecris la réponse du PNJ à ce que dit le PJ"
@@ -140,6 +149,7 @@ export function AIGenerationPanel({
             context_selections: selections,
             max_choices: maxChoices,
             npc_speaker_id: npcSpeakerId,
+            player_character_id: dramatis.playerCharacterId,
             narrative_tags: narrativeTags.length > 0 ? narrativeTags : undefined,
             llm_model_identifier: llmModel,
             target_choice_index: targetChoiceIndex ?? null,
@@ -199,6 +209,7 @@ export function AIGenerationPanel({
     narrativeTags,
     llmModel,
     selections,
+    sceneSelection,
     generateFromNode,
     toast,
     onGenerated,
@@ -225,20 +236,32 @@ export function AIGenerationPanel({
   // useMemo évite de recréer l'objet à chaque render (référence stable pour useEffect dans le badge).
   // Doit être avant tout return conditionnel (règles des hooks React).
   const estimateRequest = useMemo(
-    () =>
-      parentNodeId && parentNode
-        ? {
-            parent_node_id: parentNodeId,
-            parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
-            user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
-            context_selections: selections as unknown as Record<string, unknown>,
-            max_choices: maxChoices ?? undefined,
-            llm_model_identifier: llmModel,
-            target_choice_index: targetChoiceIndex ?? undefined,
-            generate_all_choices: generateAllChoices,
-          }
-        : null,
-    [parentNodeId, parentNode, userInstructions, selections, maxChoices, llmModel, targetChoiceIndex, generateAllChoices]
+    () => {
+      if (!parentNodeId || !parentNode) return null
+      const allCharacters = [
+        ...(selections.characters_full || []),
+        ...(selections.characters_excerpt || []),
+      ]
+      const dramatis = resolveDramatisFromSelections({
+        sceneSelection,
+        sceneProtagonists: selections.scene_protagonists,
+        contextCharacters: allCharacters,
+      })
+      return {
+        parent_node_id: parentNodeId,
+        parent_node_content: (parentNode.data ?? {}) as Record<string, unknown>,
+        user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
+        context_selections: selections as unknown as Record<string, unknown>,
+        max_choices: maxChoices ?? undefined,
+        llm_model_identifier: llmModel,
+        target_choice_index: targetChoiceIndex ?? undefined,
+        generate_all_choices: generateAllChoices,
+        dialogue_nodes: serializeDialogueNodesForApi(nodes),
+        npc_speaker_id: dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined,
+        player_character_id: dramatis.playerCharacterId,
+      }
+    },
+    [parentNodeId, parentNode, userInstructions, selections, sceneSelection, maxChoices, llmModel, targetChoiceIndex, generateAllChoices, nodes]
   )
   
   if (!parentNodeId || !parentNode) {

@@ -34,9 +34,7 @@ def _normalize_to_document(data: Union[List[Dict[str, Any]], Dict[str, Any]]) ->
     raise ValueError("Format invalide: dict avec 'nodes' ou liste de nœuds attendu")
 
 
-def _stable_choice_id(node_id: str, choice_index: int) -> str:
-    """Génère un choiceId stable déterministe (choice_<nodeId>_<index>)."""
-    return f"choice_{node_id}_{choice_index}"
+from services.document_choice_id_service import ensure_document_choice_ids
 
 
 def migrate_document(doc: Union[List[Dict[str, Any]], Dict[str, Any]]) -> Dict[str, Any]:
@@ -53,14 +51,7 @@ def migrate_document(doc: Union[List[Dict[str, Any]], Dict[str, Any]]) -> Dict[s
     data = _normalize_to_document(doc)
     if data.get("schemaVersion") != "1.1.0":
         data["schemaVersion"] = "1.1.0"
-    nodes = data.get("nodes", [])
-    for node in nodes:
-        node_id = node.get("id", "")
-        choices = node.get("choices") or []
-        for idx, choice in enumerate(choices):
-            if not choice.get("choiceId"):
-                choice["choiceId"] = _stable_choice_id(node_id, idx)
-    return data
+    return ensure_document_choice_ids(data, in_place=True)
 
 
 def migrate_file(path: Path, dry_run: bool = False) -> bool:

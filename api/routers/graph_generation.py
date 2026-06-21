@@ -16,7 +16,7 @@ from api.dependencies import (
 )
 from api.exceptions import AllLLMProvidersUnavailableError, InternalServerException, ValidationException
 from api.routers.graph_cost import fingerprint_for_selections_safe, try_compute_context_relevance
-from api.routers.graph_router_helpers import create_llm_client_for_router
+from api.routers.graph_router_helpers import create_llm_client_for_router, resolve_and_enrich_graph_context
 from api.schemas.graph import GenerateNodeRequest, GenerateNodeResponse, SuggestedConnection
 from core.context.context_builder import ContextBuilder
 from services.configuration_service import ConfigurationService
@@ -56,16 +56,25 @@ async def generate_node(
             request_id,
         )
 
+        dramatis, enriched_context = resolve_and_enrich_graph_context(
+            request_data.context_selections,
+            player_character_id=request_data.player_character_id,
+            npc_speaker_id=request_data.npc_speaker_id,
+            context_builder=context_builder,
+        )
+
         result = await orchestrator.generate(
             llm_client=llm_client,
             parent_node_id=request_data.parent_node_id,
             parent_node_content=request_data.parent_node_content,
             user_instructions=request_data.user_instructions,
-            context_selections=request_data.context_selections,
+            context_selections=enriched_context,
             system_prompt_override=request_data.system_prompt_override,
             max_choices=request_data.max_choices,
             target_choice_index=request_data.target_choice_index,
             generate_all_choices=request_data.generate_all_choices,
+            dialogue_nodes=request_data.dialogue_nodes,
+            player_character_id=dramatis.player_character_id,
         )
 
         suggested_connections = [
@@ -93,9 +102,7 @@ async def generate_node(
 
         gdd_fp = fingerprint_for_selections_safe(
             context_builder,
-            request_data.context_selections
-            if isinstance(request_data.context_selections, dict)
-            else {},
+            enriched_context,
         )
 
         return GenerateNodeResponse(

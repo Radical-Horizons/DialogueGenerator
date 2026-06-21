@@ -56,12 +56,14 @@ import { ConditionEditor } from './conditions/ConditionEditor'
 import { ConnectionTargetSelect } from './ConnectionTargetSelect'
 import { useEstimation } from '../../hooks/useEstimation'
 import { EstimationBadge } from '../estimation'
+import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
 
 export const NodeEditorPanel = memo(function NodeEditorPanel() {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
   const selectedNode = useGraphStore(
     useShallow((s) => s.nodes.find((n) => n.id === s.selectedNodeId) ?? null)
   )
+  const graphNodes = useGraphStore((s) => s.nodes)
   const {
     updateNode,
     generateFromNode,
@@ -568,9 +570,10 @@ export const NodeEditorPanel = memo(function NodeEditorPanel() {
             user_instructions: userInstructions.trim() || 'Ecris la réponse du PNJ à ce que dit le PJ',
             context_selections: selections as unknown as Record<string, unknown>,
             llm_model_identifier: llmModel,
+            dialogue_nodes: serializeDialogueNodesForApi(graphNodes),
           }
         : null,
-    [selectedNodeId, selectedNode, userInstructions, selections, llmModel]
+    [selectedNodeId, selectedNode, userInstructions, selections, llmModel, graphNodes]
   )
   const { result: estimationResult, state: estimationState, error: estimationError, runEstimate, budgetExceeded, budgetWarning90 } = useEstimation({
     type: 'graph',

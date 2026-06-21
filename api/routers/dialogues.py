@@ -44,6 +44,7 @@ from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from api.exceptions import InternalServerException, ValidationException, NotFoundException, OpenAIException
 from services.dialogue_generation_service import DialogueGenerationService
 from services.configuration_service import ConfigurationService
+from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.unity_dialogue_export_service import (
@@ -174,16 +175,24 @@ def _build_prompt_from_request(
         logger.warning(f"Erreur lors du chargement des traits: {e}", exc_info=True)
         # Continuer avec une liste vide si le chargement échoue
 
-    # 3. Déterminer le PNJ speaker
-    npc_speaker_id = request_data.npc_speaker_id
-    all_characters = context_selections_dict.get('characters', [])
-    if not npc_speaker_id and all_characters:
-        npc_speaker_id = all_characters[0]
-    elif not npc_speaker_id:
-        npc_speaker_id = "PNJ"
+    # 3. Résoudre PJ/PNJ et enrichir le contexte
+    context_builder = dialogue_service.context_builder
+    dramatis = resolve_scene_dramatis(
+        player_character_id=request_data.player_character_id,
+        npc_speaker_id=request_data.npc_speaker_id,
+        context_selections=request_data.context_selections.model_dump(),
+    )
+    enriched_context = enrich_context_selections_for_scene(
+        request_data.context_selections,
+        dramatis,
+        character_catalog=context_builder.get_characters_names(),
+        random_excerpt_count=1,
+    )
+    context_selections_dict = enriched_context.to_service_dict()
+    npc_speaker_id = dramatis.npc_speaker_id
+    player_character_id = dramatis.player_character_id
 
     # 4. Construire le contexte GDD via ContextBuilder
-    context_builder = dialogue_service.context_builder
     if request_data.previous_dialogue_preview:
         context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
     
@@ -207,12 +216,12 @@ def _build_prompt_from_request(
     prompt_input = PromptInput(
         user_instructions=request_data.user_instructions,
         npc_speaker_id=npc_speaker_id,
-        player_character_id="URESAIR",
+        player_character_id=player_character_id,
         skills_list=skills_list,
         traits_list=traits_list,
         context_summary=context_text,
         structured_context=structured_context,
-        scene_location=request_data.context_selections.scene_location,
+        scene_location=enriched_context.scene_location,
         max_choices=request_data.max_choices,
         choices_mode=request_data.choices_mode,
         narrative_tags=request_data.narrative_tags,
@@ -263,6 +272,7 @@ async def preview_prompt(
             context_selections=request_data.context_selections,
             user_instructions=request_data.user_instructions,
             npc_speaker_id=request_data.npc_speaker_id,
+            player_character_id=request_data.player_character_id,
             max_context_tokens=request_data.max_context_tokens,
             system_prompt_override=request_data.system_prompt_override,
             author_profile=request_data.author_profile,
@@ -881,9 +891,12 @@ async def get_raw_json_context(
             logger.warning(f"Erreur lors du chargement des traits (request_id: {request_id}): {e}", exc_info=True)
             # Continuer avec une liste vide si le chargement échoue
         
-        # Déterminer le PNJ interlocuteur
-        all_characters = context_selections_dict.get('characters', [])
-        npc_speaker_id = request_data.npc_speaker_id or (all_characters[0] if all_characters else "UNKNOWN")
+        dramatis = resolve_scene_dramatis(
+            player_character_id=request_data.player_character_id,
+            npc_speaker_id=request_data.npc_speaker_id,
+            context_selections=request_data.context_selections.model_dump(),
+        )
+        npc_speaker_id = dramatis.npc_speaker_id
         
         context_text_for_prompt = cap_context_text_to_budget(
             context_builder.serialize_context_to_text(structured_context),
@@ -892,7 +905,7 @@ async def get_raw_json_context(
         prompt_input = PromptInput(
             user_instructions=request_data.user_instructions,
             npc_speaker_id=npc_speaker_id,
-            player_character_id="URESAIR",
+            player_character_id=dramatis.player_character_id,
             skills_list=skills_list,
             traits_list=traits_list,
             context_summary=context_text_for_prompt,

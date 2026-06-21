@@ -8,8 +8,35 @@ from typing import Any, Optional
 from factories.llm_factory import LLMClientFactory
 from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
+from services.scene_dramatis import SceneDramatis, enrich_context_selections_for_scene, resolve_scene_dramatis
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_and_enrich_graph_context(
+    context_selections: dict,
+    *,
+    player_character_id: Optional[str] = None,
+    npc_speaker_id: Optional[str] = None,
+    context_builder: Optional[Any] = None,
+) -> tuple[SceneDramatis, dict]:
+    """Résout PJ/PNJ et enrichit le contexte GDD pour la génération graphe."""
+    character_catalog = None
+    if context_builder is not None:
+        character_catalog = context_builder.get_characters_names()
+    dramatis = resolve_scene_dramatis(
+        player_character_id=player_character_id,
+        npc_speaker_id=npc_speaker_id,
+        context_selections=context_selections,
+    )
+    enriched = enrich_context_selections_for_scene(
+        context_selections,
+        dramatis,
+        character_catalog=character_catalog,
+        random_excerpt_count=1,
+    )
+    enriched_dict = enriched.model_dump() if hasattr(enriched, "model_dump") else dict(enriched)
+    return dramatis, enriched_dict
 
 
 def create_llm_client_for_router(

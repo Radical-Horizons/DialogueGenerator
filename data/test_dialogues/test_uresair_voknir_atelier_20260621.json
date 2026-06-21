@@ -1,0 +1,1621 @@
+{
+  "schemaVersion": "1.2.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous êtes venue, Seigneuresse. J'ai repris mes mesures parmi les os — les Plis se plient d'une façon qui n'appartient ni au temps ni à la géométrie ordinaire. J'ai une carte qui garde les cicatrices des échos ; elle vous montrera des angles où la culpabilité se loge. Je peux la déployer ici, mais sachez que nommer ces replis fait remuer des choses qui ne se contentent pas d'être regardées.",
+      "consequences": {
+        "flag": "visited_voknir_atelier",
+        "description": "Uresaïr a consulté Voknir ; accès potentiel à la carte des Plis et aux fragments liés à Deshkarta."
+      },
+      "choices": [
+        {
+          "text": "Montrez-la. Je veux voir chaque fissure et chaque nom — et l'assumer.",
+          "targetNode": "node-16a8d3cfd7ba4e04973f5c37f19acbb9",
+          "traitRequirements": [
+            {
+              "trait": "Autoritaire",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_0"
+        },
+        {
+          "text": "Expliquez-moi vos angles. Comment lit-on les replis sans réveiller ce qui dort ?",
+          "targetNode": "node-3c0b3b02aae845d996b28bc3c3bf4851",
+          "traitRequirements": [
+            {
+              "trait": "Lucide",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_1"
+        },
+        {
+          "text": "Cachez-la. Aujourd'hui, je préfère l'ignorance — que la carte repose et que je reste étrangère à ces noms.",
+          "targetNode": "node-77f0e553832c410d91499bc4e869a3b5",
+          "traitRequirements": [
+            {
+              "trait": "Défaitiste",
+              "minValue": 5
+            }
+          ],
+          "choiceId": "choice_START_2"
+        }
+      ]
+    },
+    {
+      "id": "node-16a8d3cfd7ba4e04973f5c37f19acbb9",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Vous l'avez demandé — et je ne saurais nier ce que cela attire. Il déroule la carte comme on ouvre une cage : des lamelles d'os s'entrelacent, les encres bruissent comme des souvenirs. Regardez : les angles se découpent en crevasses où la culpabilité rampe, et certains noms semblent luire d'une lueur qui n'appartient pas au monde présent. Sachez que, en les nommant, vous faites plus que savoir ; vous vous ancrez à leurs échos.",
+      "consequences": {
+        "flag": "CARTE_DEPLOYE",
+        "description": "La carte des Plis est déployée dans l'atelier ; des angles et des noms sont visibles. L'acte de regarder active des échos susceptibles d'influer sur la suite."
+      },
+      "choices": [
+        {
+          "text": "Lisez-les pour moi. Dites-moi qui est nommé, et où se tiennent leurs angles. Je porterai ces noms si nécessaire, mais je dois les entendre à voix haute.",
+          "targetNode": "node-25b0b32f6438431486eafeb6d83caedd",
+          "choiceId": "choice_node-16a8d3cfd7ba4e04973f5c37f19acbb9_0"
+        },
+        {
+          "text": "Montrez seulement les fissures. Je veux voir la géométrie des Plis, pas leurs étiquettes. Si je comprends les angles, j'aurai peut-être une manière de les contourner.",
+          "targetNode": "node-674cf3853c7d480abd0140179bf99152",
+          "choiceId": "choice_node-16a8d3cfd7ba4e04973f5c37f19acbb9_1"
+        },
+        {
+          "text": "Si je porte ces noms, quel prix en attendez-vous de moi ? Expliquez les conséquences de chaque écho : je refuse d'accepter un fardeau sans savoir combien il pèsera.",
+          "targetNode": "node-eb9896876cfe4a338a641887b2b4d0b4",
+          "choiceId": "choice_node-16a8d3cfd7ba4e04973f5c37f19acbb9_2"
+        }
+      ]
+    },
+    {
+      "id": "node-3c0b3b02aae845d996b28bc3c3bf4851",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Les angles ne se lisent pas comme une carte de rues, Uresaïr. On les frôle : la lumière que vous y jetez, l'odeur qui s'y accroche, le silence qui s'y pointe — ce sont là les balises. Nommer un repli, même à voix basse, tire un fil ; parfois il n'entraîne qu'une plainte, parfois il ouvre une bouche. Je peux vous montrer sans parler ; je peux vous montrer en parlant, mais sachez que chaque mot laisse une empreinte sur la chair des échos.",
+      "consequences": {
+        "flag": "MiseEnGardePlis",
+        "description": "Voknir a averti que nommer les replis peut réveiller des choses; le joueur sait qu'il y a un risque moral et réel."
+      },
+      "choices": [
+        {
+          "text": "Montrez‑m'en un angle, lentement. Que dois‑je observer en premier ?",
+          "targetNode": "node-52ac016624404e9bb1e837120ca7a542",
+          "choiceId": "choice_node-3c0b3b02aae845d996b28bc3c3bf4851_0"
+        },
+        {
+          "text": "Je ne veux pas que quoi que ce soit se réveille. Déployez la carte à distance et parlez‑moi de ce que vous voyez, sans nommer les replis.",
+          "targetNode": "node-8d6ad46ef274480798f8b5a1a541a304",
+          "choiceId": "choice_node-3c0b3b02aae845d996b28bc3c3bf4851_1"
+        },
+        {
+          "text": "Si nommer les replis remue les choses, enseignez‑moi par gestes. Montrez‑moi comment sentir une culpabilité sans prononcer son nom.",
+          "targetNode": "node-95a7d3e1b4274879a6400b57f6c415f8",
+          "choiceId": "choice_node-3c0b3b02aae845d996b28bc3c3bf4851_2"
+        }
+      ]
+    },
+    {
+      "id": "node-77f0e553832c410d91499bc4e869a3b5",
+      "speaker": "Voknir",
+      "line": "Vous voulez l'ignorance. Je ne suis pas surpris — beaucoup préfèrent que les angles restent invisibles. Très bien : je peux replier la carte sur elle-même, l'enfermer dans un étui d'os, et sceller les échos qui la parcourent. Sachez seulement que cacher un nom ne l'efface pas ; la culpabilité s'insinue autrement, elle apprend des passages secrets dans les Plis. Si vous me demandez de la taire, je l'exécuterai, mais je laisserai un fil — minime et discret — au cas où vous voudriez retrouver ce que vous avez refusé.",
+      "consequences": {
+        "flag": "MAP_HIDDEN",
+        "description": "La carte est scellée et cachée par Voknir. Un repère discret est laissé pour un éventuel retour."
+      },
+      "choices": [
+        {
+          "text": "Cachez-la. Scellez-la dans votre atelier et que personne n'en entende parler. Je veux qu'elle cesse d'ouvrir des portes dans ma tête.",
+          "targetNode": "node-64da8c62080647f6b8232414185e53fc",
+          "choiceId": "choice_node-77f0e553832c410d91499bc4e869a3b5_0"
+        },
+        {
+          "text": "Cachez-la, mais laissez-moi un fil. Un signe discret, un mot que je seul(e) connaîtrais — pour ne pas trébucher si je dois revenir.",
+          "targetNode": "node-8239376da61541ad98ee7ee7242938c2",
+          "choiceId": "choice_node-77f0e553832c410d91499bc4e869a3b5_1"
+        },
+        {
+          "text": "Non. Ne la cachez pas — montrez-la moi en privé. Si la culpabilité a des angles, je préfère les voir et les apprivoiser plutôt que de les laisser grandir dans l'ombre.",
+          "targetNode": "node-144b3f68b8a548eb8e8587df7e87d1a1",
+          "choiceId": "choice_node-77f0e553832c410d91499bc4e869a3b5_2"
+        }
+      ]
+    },
+    {
+      "id": "node-52ac016624404e9bb1e837120ca7a542",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Approchez, mais gardez vos gestes mesurés et votre voix close : le moindre nom écarte un voile. Observez d'abord la lumière qui vient frôler un repli — là où elle se courbe, la matière des échos devient plus fine et la culpabilité s'y accroche comme une pellicule. Ensuite, prêtez l'oreille au silence autour de cet endroit : il n'est pas vide, il tire des fils de plainte quand on le frôle. Je vais déplier la carte ; dites seulement quand je dois pointer, et n'allez pas plus loin que ce que vos yeux peuvent soutenir.",
+      "consequences": {
+        "flag": "Angle_Demande",
+        "description": "Uresaïr a demandé qu'un angle lui soit démontré ; le cartographe déplie une portion de la carte et alerte sur la sensibilité du repli."
+      },
+      "choices": [
+        {
+          "text": "Montrez‑m'en un, lentement. Indiquez‑moi quand regarder et ce que je dois retenir en premier ; je ne prononcerai pas de nom.",
+          "targetNode": "node-01a3e856686446a9a48e0244506c3828",
+          "choiceId": "choice_node-52ac016624404e9bb1e837120ca7a542_0"
+        },
+        {
+          "text": "Je veux poser la main, doucement, sur l'ombre du repli. Si un fil se tend, je veux le sentir plutôt que l'entendre.",
+          "targetNode": "node-c77562a6148242039131e0355551f264",
+          "choiceId": "choice_node-52ac016624404e9bb1e837120ca7a542_1"
+        },
+        {
+          "text": "Parlez‑m'en à voix basse : nommez les signes sans prononcer le repli. Dites‑moi ce que je dois reconnaître sans appeler l'écho.",
+          "targetNode": "node-66ed38a7342849f8aba0f948586ec21a",
+          "choiceId": "choice_node-52ac016624404e9bb1e837120ca7a542_2"
+        }
+      ]
+    },
+    {
+      "id": "node-8d6ad46ef274480798f8b5a1a541a304",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je n'étendrai pas la carte contre la table — je la ferai flotter, tenue par filaments d'os et de silence à une longueur sûre. Je vous décrirai uniquement les impressions : la chaleur d'un pli, l'odeur qui s'y accroche, la façon dont la lumière s'y boit sans s'y refléter. Écoutez les changements; je tairai tout nom propre, et si quelque chose grogne, je replie sans délai.",
+      "consequences": {
+        "flag": "CARTE_DEPLOYEE_A_DISTANCE",
+        "description": "La carte est déployée à distance ; des échos peuvent répondre. Voknir observe et parle sans nommer les replis."
+      },
+      "choices": [
+        {
+          "text": "Déployez-la. Décrivez‑moi ce que vous voyez en termes de chaleur, de texture et de mouvement — sans jamais nommer un repli.",
+          "targetNode": "node-9bc4871029314f5799bf61919522fe30",
+          "choiceId": "choice_node-8d6ad46ef274480798f8b5a1a541a304_0"
+        },
+        {
+          "text": "Parlez doucement de ce qui change quand la carte s'ouvre : est‑ce que l'air se tend, est‑ce que des odeurs se déplacent ? Coupez tout si quelque chose grogne.",
+          "targetNode": "node-98d3db7e67bf48529bc2cc7a58c5d50f",
+          "choiceId": "choice_node-8d6ad46ef274480798f8b5a1a541a304_1"
+        },
+        {
+          "text": "Si vous voyez la culpabilité, ne la nommez pas ; dites‑moi seulement si elle pèse comme un plomb ou se glisse comme un courant. Soyez précis sur l'effet, pas sur l'étiquette.",
+          "targetNode": "node-50ae203648324377bbde184ab826d92a",
+          "choiceId": "choice_node-8d6ad46ef274480798f8b5a1a541a304_2"
+        }
+      ]
+    },
+    {
+      "id": "node-95a7d3e1b4274879a6400b57f6c415f8",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Nous n'emprunterons pas la langue des replis. Approchez‑vous de la table : posez la paume, paume ouverte, et laissez votre souffle caler le rythme de la carte. Je guiderai vos doigts, je tracerai un angle avec l'ongle ; vous sentirez d'abord une tension sourde, puis un micro‑frisson qui marque la présence de culpabilité. Si un repli menace d'ouvrir la bouche, je fermerai la poche de chair avant que vos lèvres n'aient à prononcer quoi que ce soit.",
+      "consequences": {
+        "flag": "RepliFrôlé",
+        "description": "Uresaïr a commencé l'apprentissage gestuel de Voknir sans nommer explicitement les replis."
+      },
+      "choices": [
+        {
+          "text": "Faites-le. Guidez ma main sur la carte : montrez‑moi où poser la paume, comment effleurer un repli sans l'appeler. Je resterai immobile et je suivrai vos gestes jusqu'à ce que vous jugiez l'exercice terminé.",
+          "targetNode": "node-f7ec0ed5e4ee4f4da4618fa92c73a810",
+          "choiceId": "choice_node-95a7d3e1b4274879a6400b57f6c415f8_0"
+        },
+        {
+          "text": "Montrez‑moi par la lumière et l'odeur : déployez un fragment et indiquez les gestes pour orienter la lampe et approcher un chiffon. Apprenez‑moi à reconnaître les balises sensorielles sans que nous prononcions un seul nom.",
+          "targetNode": "node-9050314b618543e38129740aa666fc35",
+          "choiceId": "choice_node-95a7d3e1b4274879a6400b57f6c415f8_1"
+        },
+        {
+          "text": "Je préfère observer d'abord. Déployez la carte et agissez sans toucher ma main ; laissez‑moi apprendre de vos gestes et reconnaître le frisson. Interrompez immédiatement si quelque chose devient trop vif.",
+          "targetNode": "node-39da6dc189444b05a2272282e31e0012",
+          "choiceId": "choice_node-95a7d3e1b4274879a6400b57f6c415f8_2"
+        }
+      ]
+    },
+    {
+      "id": "node-64da8c62080647f6b8232414185e53fc",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je plierai la carte sur elle-même, l'enfermerai dans une gaine d'os et en martèlerai les échos jusqu'à ce qu'ils n'osent plus chanter. Comprenez cependant que nommer un repli et le faire taire sont deux arts différents : j'atténuerai les angles pour qu'ils ne puissent plus creuser vos nuits, mais il restera une mémoire, ténue comme une cicatrice. Si vous exigez l'oubli absolu, je peux tenter l'effacement brutal — il coûtera quelque chose que vous portez sans le savoir. Dites-moi comment vous voulez que je procède.",
+      "consequences": {
+        "flag": "MAP_SEAL_PREPARED",
+        "description": "Voknir a commencé le processus de scellement : la carte est repliée et prête à être enfermée dans une gaine d'os. Les échos sont mis en sommeil, mais l'effacement total reste incertain."
+      },
+      "choices": [
+        {
+          "text": "Scellez-la entièrement. Pas de fil, pas de clé, pas de note. Enterrez-la dans votre atelier et que personne n'en entende parler ; je veux que ces portes se ferment définitivement.",
+          "targetNode": "node-19572842f07a43acb2acf9738df955cd",
+          "choiceId": "choice_node-64da8c62080647f6b8232414185e53fc_0"
+        },
+        {
+          "text": "Laissez un fil, mais rendez-le inaccessible : scellez-le dans un reliquaire que moi seule pourra ouvrir. Si je viens le chercher, faites en sorte que je doive payer un prix — un rituel ou une épreuve — pour l'obtenir.",
+          "targetNode": "node-8039b8fc7b8d46ad9c7da1d618ec1531",
+          "choiceId": "choice_node-64da8c62080647f6b8232414185e53fc_1"
+        },
+        {
+          "text": "Cachez-la, mais dites-moi ce que cela fera à la culpabilité en moi. Si je la tais, va-t-elle pousser ailleurs ? Je veux savoir quel prix j'accepte en la faisant taire.",
+          "targetNode": "node-6adce906c99e4cfa8afe09d32a83917b",
+          "choiceId": "choice_node-64da8c62080647f6b8232414185e53fc_2"
+        }
+      ]
+    },
+    {
+      "id": "node-8239376da61541ad98ee7ee7242938c2",
+      "speaker": "Voknir",
+      "line": "Très bien. J'enfermerai la carte dans un étui d'os, scellerai les échos et plierai les angles de sorte qu'ils ne mordent plus votre sommeil. Mais je laisserai un fil — mince comme un nerf, presque invisible — qui répondra à un signe ou à un mot que vous seul pouvez connaître. Sachez toutefois que même un fil peut tirer un écho : prononcer votre mot réveillera quelque chose qui écoutera ; gardez-le pour les moments où il faudra revenir. Dites-moi si vous me le confiez maintenant, ou si je dois choisir et marquer simplement l'étui d'un indice discret.",
+      "consequences": {
+        "flag": "Carte_Scellee",
+        "description": "La carte est scellée dans un étui d'os et les échos sont liés."
+      },
+      "choices": [
+        {
+          "text": "Cachez-la, mais laissez-moi un fil. Un signe discret, un mot que je seul connaîtrai — pour ne pas trébucher si je dois revenir.",
+          "targetNode": "node-f3bd73b2a1094e6bb7df176c858a0951",
+          "choiceId": "choice_node-8239376da61541ad98ee7ee7242938c2_0"
+        },
+        {
+          "text": "Je ne le dirai pas maintenant. Marquez seulement le fil ; je garderai le mot pour moi et viendrai le murmurer si nécessaire.",
+          "targetNode": "node-103681940e134e3380bbba7387cbf6af",
+          "choiceId": "choice_node-8239376da61541ad98ee7ee7242938c2_1"
+        },
+        {
+          "text": "Très bien. Je vous le confie : gravez sur l'étui le mot « Séran » et ménagez une encoche minuscule que je reconnaîtrai.",
+          "targetNode": "node-0c4859ea41e347a893ada5173cd73086",
+          "choiceId": "choice_node-8239376da61541ad98ee7ee7242938c2_2"
+        }
+      ]
+    },
+    {
+      "id": "node-144b3f68b8a548eb8e8587df7e87d1a1",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous ordonnez, Seigneuresse. Je déplierai la carte dans l'alcôve, à l'abri des regards et des oreilles des Plis ; seuls les os y prendront garde. Je n'appellerai pas les noms à haute voix, mais je vous montrerai les angles et les cicatrices ; savoir ce qui se cache là-chose éveille toujours quelque chose, prenez-le en compte. Si vous souhaitez que je laisse un fil minime pour retrouver ces replis, dites-le maintenant ; je l'attacherai à la carte et le scellerai de mon sceau.",
+      "choices": [
+        {
+          "text": "Montrez-la en privé, sans réserve. Je veux voir chaque angle et accepter ce que la carte nomme. Parlez bas si un nom doit être évoqué, mais ne me cachez rien de ce qui est tracé.",
+          "targetNode": "node-adce3bfc853b481180758eb54f15ae51",
+          "choiceId": "choice_node-144b3f68b8a548eb8e8587df7e87d1a1_0"
+        },
+        {
+          "text": "Montrez-la, mais ne prononcez aucun nom à voix haute. Je veux discerner les formes, les cicatrices et les passages sans réveiller les échos par la voix. Si un nom doit être noté, inscrivez-le seulement sur le parchemin, pas à l'oral.",
+          "targetNode": "node-74982e10b2ea4ee6912d2fab06546ae3",
+          "choiceId": "choice_node-144b3f68b8a548eb8e8587df7e87d1a1_1"
+        },
+        {
+          "text": "Montrez-la et laissez le fil minime que vous avez proposé. Scellez ce fil à la carte avec votre marque pour que je puisse y revenir quand il le faudra. Je veux une trace, subtile et verrouillée, qui ne serve que moi.",
+          "targetNode": "node-a7d1762ec01f4d16b09709d4dfc6060c",
+          "choiceId": "choice_node-144b3f68b8a548eb8e8587df7e87d1a1_2"
+        }
+      ]
+    },
+    {
+      "id": "node-25b0b32f6438431486eafeb6d83caedd",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Vous l'avez demandé, et la carte ouvre sa gorge d'os pour parler. Écoutez : « Sera, celle qui rompit le serment » — son angle se tient sous la dernière côte, là où la culpabilité se recroqueville comme une langue froide. « Orun de l'Écho creux » — son pli vit dans le couloir des anciens marchés, il palpite quand on rend une dette. « La Mère sans Nom » — son angle est au centre, un vide qui renvoie les regards et attire les autres replis. Prenez garde : nommer ces êtres les ancre, et leurs échos viendront frôler qui les porte.",
+      "consequences": {
+        "flag": "NomsEntendus",
+        "description": "Uresaïr a entendu la lecture des noms et des angles ; les échos commencent à s'ancrer autour d'elle."
+      },
+      "choices": [
+        {
+          "text": "Répétez chaque nom, lentement. Je veux les entendre distinctement, un par un, et savoir exactement où se tiennent leurs angles. Je les porterai si nécessaire.",
+          "targetNode": "node-e63147bdb0f742458edfe94e370f2def",
+          "choiceId": "choice_node-25b0b32f6438431486eafeb6d83caedd_0"
+        },
+        {
+          "text": "Montrez-moi ces angles sur la carte. Dites-moi comment ils se replient, où la culpabilité s'accroche, et si l'on peut les contourner ou les refermer. Je veux une méthode, pas seulement des noms.",
+          "targetNode": "node-0828b30457924d5889d833f731544d03",
+          "choiceId": "choice_node-25b0b32f6438431486eafeb6d83caedd_1"
+        },
+        {
+          "text": "Y a-t-il un nom que vous refusez de prononcer ? Si quelque chose vous arrête, dites-le maintenant — je dois savoir ce que vous craignez, cartographe.",
+          "targetNode": "node-4bc657dbf6984db8a2f17d32c32b3a7a",
+          "choiceId": "choice_node-25b0b32f6438431486eafeb6d83caedd_2"
+        }
+      ]
+    },
+    {
+      "id": "node-674cf3853c7d480abd0140179bf99152",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous le voulez, Seigneuresse. Je tairai les noms et n'ouvrirai que les plaies géométriques : observez leurs artères d'ombre et leurs arêtes. La carte se replie en éventail d'ossements, et seules les cassures tracent des routes de tension — angles vifs, courbes qui se referment. Sachez cependant que les Plis gardent une musique ; même vus sans étiquette, ils se referment différemment lorsqu'on cherche à les fuir.",
+      "consequences": {
+        "flag": "SAW_FISSURES_ONLY",
+        "description": "Uresaïr a consulté la carte en ne dévoilant que les fissures ; les noms restent tus, mais les échos persistent faiblement."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Montrez-les entièrement. Tracez chaque arête et chaque point d'inflexion — sans rien nommer. Je veux pouvoir suivre la topographie des Plis et repérer des trajectoires sûres.",
+          "targetNode": "node-92306c216add489d90e9e327ae8bc8cc",
+          "choiceId": "choice_node-674cf3853c7d480abd0140179bf99152_0"
+        },
+        {
+          "text": "Indiquez seulement où il est dangereux de passer. Un balisage bref, suffisant pour que je ne pose pas le pied sur des pièges invisibles.",
+          "targetNode": "node-bc7879f4888648808b02f5d308dd8857",
+          "choiceId": "choice_node-674cf3853c7d480abd0140179bf99152_1"
+        },
+        {
+          "text": "Avertissez-moi : en voyant ces angles, courrai-je un risque d'être liée à leurs échos ? Si la géométrie seule peut m'ancrer, je deviendrai peut-être plus prudente et nommerai ce qu'il faudra.",
+          "targetNode": "node-475c8193c1b54c9abff9763b8d39b05b",
+          "choiceId": "choice_node-674cf3853c7d480abd0140179bf99152_2"
+        }
+      ]
+    },
+    {
+      "id": "node-eb9896876cfe4a338a641887b2b4d0b4",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Si vous portez ces noms, vous ne faites pas que retenir une histoire : vous lui donnez un point d'attache en vous. Certains échos sont des images — vous revivrez, en coupures nettes, les fautes d'un autre jusqu'à en conserver l'odeur et la colère ; d'autres sont des dettes — des étrangers viendront réclamer ou fuir selon ce que vous portez ; d'autres enfin fracturent le monde autour de vous, rendant les Plis plus affamés et changeant la géométrie du réel à votre passage. Par exemple, « Le Chant d'Abandon » vous condamne à entendre les voix de ceux que vous n'avez pas sauvés ; « La Cassure du Serment » attire la défiance et rompt vos alliances ; « L'Heure de l'Ombre » avance vos heures et use votre chair ; « Le Souffle du Remords » vous lie à un lieu et vous empêche de le quitter. Rompre totalement un lien est rare et coûteux : on peut atténuer la charge par rituels, échanges ou expiation, mais toujours à un prix.",
+      "choices": [
+        {
+          "text": "Je porterai « Le Chant d'Abandon ». Donnez‑m'en l'écho. Si je dois entendre leurs voix pour tenter de réparer, qu'il en soit ainsi.",
+          "targetNode": "node-bb17e2e94e754a82926ab6f99abf3062",
+          "choiceId": "choice_node-eb9896876cfe4a338a641887b2b4d0b4_0"
+        },
+        {
+          "text": "Je prends « La Cassure du Serment » — si cela me donne le levier pour défaire des alliances corrompues, j'en assume la charge. Indiquez-moi les signes visibles et les garde‑fous pour que l'écho travaille sans me dévorer.",
+          "targetNode": "node-152bb1f4455b47f4acd54b9329db0589",
+          "choiceId": "choice_node-eb9896876cfe4a338a641887b2b4d0b4_1"
+        },
+        {
+          "text": "Je refuse « L'Heure de l'Ombre ». Je ne troquerai pas ma durée pour un pouvoir. Si c'est le prix, je n'en veux pas.",
+          "targetNode": "node-ecc40f4f71ae4d14ac3464a66f281c9e",
+          "choiceId": "choice_node-eb9896876cfe4a338a641887b2b4d0b4_2"
+        }
+      ]
+    },
+    {
+      "id": "node-f7ec0ed5e4ee4f4da4618fa92c73a810",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Approchez‑vous. Posez la paume à plat, doigts légèrement écartés, le pouce tourné vers l'angle où les os se recroisent ; laissez votre avant‑bras reposer sur la table afin que votre main n'ait plus qu'à répondre. Je frôlerai votre peau du bord de l'ongle, je tracerai un angle court et net — sentez la tension qui mue sous la surface, comme une corde tendue sous un doigt. Si le repli commence à ouvrir la bouche, je placerai ma main sur la poche et tirerai le pli fermé avant que le son ne puisse naître. Restez immobile, respirez lentement : vous recevrez d'abord un frisson léger, puis la carte vous montrera le chemin des culpabilités sans qu'il soit besoin de nommer l'une d'elles.",
+      "consequences": {
+        "flag": "map_touched",
+        "description": "Uresaïr a posé la main sur la carte : les échos des Plis s'activent, rendant perceptibles les cicatrices où la culpabilité se loge."
+      },
+      "choices": [
+        {
+          "text": "Faites‑le. Guidez ma main sur la carte : montrez‑moi où poser la paume, comment effleurer un repli sans l'appeler. Je resterai immobile et je suivrai vos gestes jusqu'à ce que vous jugiez l'exercice terminé.",
+          "targetNode": "node-2c23dc21ee464ae28478c6c5cdf8f6a0",
+          "choiceId": "choice_node-f7ec0ed5e4ee4f4da4618fa92c73a810_0"
+        },
+        {
+          "text": "Très bien. Je pose la paume, mais si je sens une bouche s'ouvrir, je vous ordonne de la fermer immédiatement. Montrez‑moi le geste précis, lent et mesuré.",
+          "targetNode": "node-dabd1e97cebe446094b9333096b4f59d",
+          "choiceId": "choice_node-f7ec0ed5e4ee4f4da4618fa92c73a810_1"
+        },
+        {
+          "text": "Je veux apprendre à sentir sans mots. Faites seulement les gestes nécessaires pour la sécurité ; dites‑m'en assez pour que je sache quand me retirer. Je suivrai vos doigts et garderai le silence.",
+          "targetNode": "node-67307c0a50df40438c42d1526a8b9074",
+          "choiceId": "choice_node-f7ec0ed5e4ee4f4da4618fa92c73a810_2"
+        }
+      ]
+    },
+    {
+      "id": "node-9050314b618543e38129740aa666fc35",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je déplie un fragment — regardez comment ses arêtes renvoient la lampe en faisceaux brisés. Placez la lampe à la hauteur que je trace du doigt : un angle aigu montrera les rides fines, un angle large fera palpiter une bouche. Approchez le chiffon sans le poser ; laissez son bord goûter l'air à distance, et notez la variation d'odeur qui suit la lueur. Si un repli menace d'ouvrir la bouche, je comprimerai la poche de chair avant que vous n'ayez à prononcer un nom.",
+      "consequences": {
+        "flag": "fragment_deploye",
+        "description": "Un fragment des Plis est déployé ; des balises sensorielles (lumière/odeur) sont visibles."
+      },
+      "choices": [
+        {
+          "text": "Montrez‑moi d'abord la lumière. Indiquez l'angle précis pour la lampe et je suivrai votre main, paume contre la table pour sentir la vibration.",
+          "targetNode": "node-5ad2b504a21e440dae140f53107ac28d",
+          "choiceId": "choice_node-9050314b618543e38129740aa666fc35_0"
+        },
+        {
+          "text": "Apprenez‑moi l'odeur. Donnez‑moi le chiffon et dites‑moi comment l'approcher sans le poser : je veux distinguer la nuance qui trahit la culpabilité.",
+          "targetNode": "node-7b8bf9a756674dd8b16104002e641ccc",
+          "choiceId": "choice_node-9050314b618543e38129740aa666fc35_1"
+        },
+        {
+          "text": "Faites les deux à la fois : orientez la lampe pendant que je tiens le chiffon à la bonne distance. Enseignez‑moi à lire l'accord entre la lueur et la brise.",
+          "targetNode": "node-c9d9152d6237410fb53fda482220b196",
+          "choiceId": "choice_node-9050314b618543e38129740aa666fc35_2"
+        }
+      ]
+    },
+    {
+      "id": "node-39da6dc189444b05a2272282e31e0012",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je déploierai la carte et j'agirai sans poser ma main sur la vôtre ; observez mes doigts et la façon dont je souligne un angle, la lumière qui s'y accroche et la tension qui traverse la peau. Vous sentirez d'abord un frisson sourd, puis une nuance plus précise — une note qui dit « culpabilité » sans nom — et je vous signalerai tout mouvement anormal. Si un repli menace d'ouvrir la bouche, je fermerai la poche et j'interromprai la démonstration sur-le-champ ; dites « stop » à tout moment et je m'arrêterai.",
+      "consequences": {
+        "flag": "observation_mode",
+        "description": "Uresaïr observe sans toucher ; Voknir déploie la carte et retient tout contact direct."
+      },
+      "choices": [
+        {
+          "text": "Je préfère observer d'abord. Déployez la carte et agissez sans toucher ma main ; laissez‑moi apprendre de vos gestes et reconnaître le frisson. Interrompez immédiatement si quelque chose devient trop vif.",
+          "targetNode": "node-2d0243d2d98844f5974c8adfba287626",
+          "choiceId": "choice_node-39da6dc189444b05a2272282e31e0012_0"
+        },
+        {
+          "text": "Expliquez‑moi brièvement quels signes visuels je dois chercher : la lueur qui se colle aux angles, la tension de la peau, l'ombre qui s'étire ? Je veux pouvoir nommer mentalement ces balises pour savoir quand dire « stop ».",
+          "targetNode": "node-6a19975850db4fa28dca38fa4dacaf7c",
+          "choiceId": "choice_node-39da6dc189444b05a2272282e31e0012_1"
+        },
+        {
+          "text": "Si un repli ouvre la bouche, coupez tout et dites‑moi quelle direction suivre pour me retirer en sécurité ; je veux apprendre à reculer sans utiliser la langue des replis. Ne laissez aucune chose parler sans que je puisse m'éloigner.",
+          "targetNode": "node-f222cfbafeb64f6aa28aa007533a6d61",
+          "choiceId": "choice_node-39da6dc189444b05a2272282e31e0012_2"
+        }
+      ]
+    },
+    {
+      "id": "node-9bc4871029314f5799bf61919522fe30",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. La carte flotte entre nous, tenue par filaments d'os et de silence, à une distance que vos mains ne franchiront pas. J'y lis des courants de chaleur qui ne se conforment ni au soleil ni à la nuit : des poches tièdes qui collent à l'air, et des zones glacées qui sucent la lumière sans la rendre. La texture paraît inégale — parfois granuleuse, parfois lisse comme une peau tendue, toujours marquée d'une usure qui ressemble à de la honte. Un mouvement y passe comme un souffle long et affleurant; si quelque chose gémit ou ouvre une bouche, je refermerai la toile sans délai.",
+      "consequences": {
+        "flag": "Carte_Decrite_Sensorielle",
+        "description": "Voknir a décrit la carte en termes sensoriels; l'acte laisse une empreinte ténue qui peut attirer l'attention des échos si la description continue."
+      },
+      "choices": [
+        {
+          "text": "Décrivez davantage la chaleur. Où se loge-t-elle, comment elle se propage — est-ce une chaleur qui rassure ou qui oppresse ? Parlez‑moi sans nommer.",
+          "targetNode": "node-a9243fcc0a794fd7b498656ac4d111d7",
+          "choiceId": "choice_node-9bc4871029314f5799bf61919522fe30_0"
+        },
+        {
+          "text": "Parlez de la texture et des odeurs qui s'y accrochent. Dites‑moi si c'est rugueux comme du vieux parchemin, visqueux comme de la chair, ou autre; précisez l'odeur sans nommer ce qui la cause.",
+          "targetNode": "node-59a3a5c38064421790c38a179d30d4b9",
+          "choiceId": "choice_node-9bc4871029314f5799bf61919522fe30_1"
+        },
+        {
+          "text": "Parlez du mouvement. Est‑ce qu'il circule, qu'il pulse, qu'il s'accroche à la carte comme une bête qui rôde ? Dites‑moi ce que ressentent l'air et la lumière quand cela passe.",
+          "targetNode": "node-16643e3891c24c6c87fd334fd6998ad2",
+          "choiceId": "choice_node-9bc4871029314f5799bf61919522fe30_2"
+        }
+      ]
+    },
+    {
+      "id": "node-98d3db7e67bf48529bc2cc7a58c5d50f",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je l'étends à distance, retenue par filaments d'os et de silence, comme vous l'avez demandé. L'air se tend d'abord, finement, comme si quelqu'un pressait la pièce contre une oreille : la lumière se ploie en cercles sourds qui ne renvoient rien, et des odeurs anciennes — cire rance, fer oublié, poussière de prières — glissent le long des motifs. Par instants, une chaleur fugace circule, puis se retire comme une respiration courte, laissant un froid piquant. Si un grognement perce ou qu'un appui change, je replie aussitôt sans hésiter.",
+      "choices": [
+        {
+          "text": "Parlez doucement de l'air : dites‑moi s'il se charge, devient lourd, ou se déchire en courants. Coupez tout si une vibration sourde commence.",
+          "targetNode": "node-c9a2ad3650fa459289c880065a230a51",
+          "choiceId": "choice_node-98d3db7e67bf48529bc2cc7a58c5d50f_0"
+        },
+        {
+          "text": "Concentrez‑vous sur les odeurs : décrivez celles qui se déplacent, la façon dont elles s'attachent ou se délient. Si une senteur prend une tournure âpre ou animale, stoppez immédiatement.",
+          "targetNode": "node-2eb7827a7aa04146b2f6ed30905a5655",
+          "choiceId": "choice_node-98d3db7e67bf48529bc2cc7a58c5d50f_1"
+        },
+        {
+          "text": "Surveillez la lumière et la chaleur : dites si des taches froides ou chaudes apparaissent et vers où elles se dirigent. Repliez sans délai à la moindre plainte.",
+          "targetNode": "node-f1bdf199740b482ead5c37c7599de1c0",
+          "choiceId": "choice_node-98d3db7e67bf48529bc2cc7a58c5d50f_2"
+        }
+      ]
+    },
+    {
+      "id": "node-50ae203648324377bbde184ab826d92a",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je distingue deux impressions distinctes. Ici, une charge froide et compacte, qui s'enfonce dans la cage et pèse comme un lingot ; elle ralentit la respiration et courbe les épaules, rendant chaque mot plus lourd à former. Là‑bas, un voile fluide qui se faufile entre les os : il ne serre pas, il entraîne — vos gestes deviennent hésitants, comme tirés par un courant invisible. Je tairai leur nom; dites‑moi laquelle vous souhaitez que j'explore — l'entrave qui pèse ou le courant qui glisse.",
+      "choices": [
+        {
+          "text": "Concentrez‑vous sur la charge qui pèse comme un lingot. Décrivez précisément comment elle affecte le corps — la respiration, la marche, l'appétit — et toute odeur ou sensation thermique qui l'accompagne.",
+          "targetNode": "node-612359775b5540bea71572c936d05fc4",
+          "choiceId": "choice_node-50ae203648324377bbde184ab826d92a_0"
+        },
+        {
+          "text": "Suivez le courant qui se glisse. Dites‑moi comment il se propage entre les gestes et les pensées, ce qu'il vide ou ce qu'il transporte, et si son passage laisse une trace perceptible.",
+          "targetNode": "node-cd3bd7379d7c43cbad5d94e13b0a9a13",
+          "choiceId": "choice_node-50ae203648324377bbde184ab826d92a_1"
+        },
+        {
+          "text": "Donnez‑moi un bref contraste des deux — deux phrases chacune — afin que je choisisse ensuite lequel vous voulez que l'on dissèque. Restez succincte et sans nommer.",
+          "targetNode": "node-981fd715929d42c4b308a022e4efa64c",
+          "choiceId": "choice_node-50ae203648324377bbde184ab826d92a_2"
+        }
+      ]
+    },
+    {
+      "id": "node-19572842f07a43acb2acf9738df955cd",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Vous l'avez demandé : je briserai les fils, ferai disparaître les notes et enfermerai la carte dans une gaine d'os que je scellerai par un martèlement rituel. Je l'enterrerai sous les fondations de mon atelier, au cœur des Plis d'ossements, et j'effacerai toute trace qui permettrait de la retrouver. Comprenez cependant que l'effacement absolu exige un tribut : un souvenir, un nom — quelque chose en vous qui sert de clé — s'effacera avec la carte. Si vous êtes certaine, je commence tout de suite.",
+      "consequences": {
+        "flag": "CARTE_SCELLEE_ENTIEREMENT",
+        "description": "La carte est scellée et enterrée dans l'atelier de Voknir ; l'acte d'effacement consumera un souvenir lié à la carte."
+      },
+      "choices": [
+        {
+          "text": "Scellez-la entièrement. Pas de fil, pas de clé, pas de note. Enterrez-la dans votre atelier et que personne n'en entende parler ; je veux que ces portes se ferment définitivement.",
+          "targetNode": "node-19161faff0374c23ba2cfc52bea978b2",
+          "choiceId": "choice_node-19572842f07a43acb2acf9738df955cd_0"
+        }
+      ]
+    },
+    {
+      "id": "node-8039b8fc7b8d46ad9c7da1d618ec1531",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je forgerai un reliquaire d'os et d'éther, scellé par votre empreinte — un liant façonné pour n'obéir qu'à vous. Pour l'ouvrir, je lierai à la boîte un rituel qui exigera un prix : une offrande, un nom rendu, ou une épreuve imposée par les Plis. Le fil subsistera, caché dans un canal connu de moi seul — inaccessible sauf si la relique consent ou si vous avez payé le prix. Voulez-vous que je détaille les formes du prix, que nous en fixions une tout de suite, ou préférez-vous des garanties supplémentaires ?",
+      "consequences": {
+        "flag": "fil_scelle",
+        "description": "La carte est scellée dans un reliquaire lié à Uresaïr. Un fil discret subsiste, accessible uniquement après accomplissement d'un rituel ou d'une épreuve."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "J'accepte. Détaillez-moi les formes possibles du prix — offrande, nom rendu, épreuve — et leurs conséquences. Donnez-moi aussi un calendrier pour le rituel.",
+          "targetNode": "node-6c0695fe239f4a0cb09cc9df3036a0b8",
+          "choiceId": "choice_node-8039b8fc7b8d46ad9c7da1d618ec1531_0"
+        },
+        {
+          "text": "Fixons l'épreuve maintenant. Je préfère une tâche à accomplir plutôt que la perte d'un souvenir ; décrivez ce que je devrai subir ou offrir.",
+          "targetNode": "node-a45413a1a0774481bdd3a6a215652a06",
+          "choiceId": "choice_node-8039b8fc7b8d46ad9c7da1d618ec1531_1"
+        },
+        {
+          "text": "Je veux des garanties. Aucune autre main, aucun autre chant ne devra créer ou déverrouiller ce reliquaire. Scellez-le sous serment et inscrivez le serment dans vos propres os.",
+          "targetNode": "node-1afbcba7cff34297a2b18b0a412698be",
+          "choiceId": "choice_node-8039b8fc7b8d46ad9c7da1d618ec1531_2"
+        }
+      ]
+    },
+    {
+      "id": "node-6adce906c99e4cfa8afe09d32a83917b",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Si je la plie et que je l'enferme, la carte cessera d'exposer ses angles au jour. La culpabilité que vous y avez touchée perdra sa voix, elle deviendra sourde et se dissimulera dans les recoins — habitudes, rêves, une façon de détourner le regard. Certains replis apprennent à se glisser dans le geste : une main qui hésite, un mot qu'on ravale, une peur qui s'accroche au sommeil. L'effacement brutal est possible, mais il arrache plus qu'un écho ; il réclame un tribut, un fragment de vous que vous ne nommez pas encore.",
+      "consequences": {
+        "flag": "MAP_SEALING_OFFERED",
+        "description": "Voknir propose de sceller la carte et avertit des conséquences : la culpabilité deviendra sourde et pourra migrer. Un effacement total est possible mais coûtera un sacrifice inconnu."
+      },
+      "choices": [
+        {
+          "text": "Cachez-la. Mais dites-moi, sans détours : si vous la taisez, où ira la culpabilité en moi ? Se logera-t-elle ailleurs, dans mes gestes ou dans mes rêves ? Je veux connaître exactement le prix que j'accepte avant que vous n'agissiez.",
+          "targetNode": "node-1f45505c85024c45ab665ae3645e3649",
+          "choiceId": "choice_node-6adce906c99e4cfa8afe09d32a83917b_0"
+        },
+        {
+          "text": "Cachez-la, mais laissez ce fil minuscule dont vous parliez. Je veux pouvoir revenir si la trace me ronge, même si cela signifie sentir parfois une légère traction au bord de ma mémoire.",
+          "targetNode": "node-e6f4f3ed2e7b4d688ff47336cb0a69de",
+          "choiceId": "choice_node-6adce906c99e4cfa8afe09d32a83917b_1"
+        },
+        {
+          "text": "Non. Effacez-la complètement. Si cela doit coûter quelque chose, dites-moi ce que vous réclamez : un nom, un souvenir, une part de ma voix ? Je préfère savoir ce que je sacrifie.",
+          "targetNode": "node-ce29af71aa6342bb95ae5ea9058996d3",
+          "choiceId": "choice_node-6adce906c99e4cfa8afe09d32a83917b_2"
+        }
+      ]
+    },
+    {
+      "id": "node-01a3e856686446a9a48e0244506c3828",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je n'écarterai qu'un coin de la carte — un seul repli, assez petit pour que vos yeux ne se perdent pas. Regardez la courbure de la lumière quand je pose la pointe d'os ; là où elle s'amincit, la culpabilité se colle comme une pellicule. Écoutez le silence qui l'habite : il tisse des fils et parfois des respirations retenues ; retenez le détail que je vais pointer et dites « retenez » quand il vous suffira — je n'en prononcerai aucun nom.",
+      "choices": [
+        {
+          "text": "Montrez‑m'en d'abord la lumière. Dites quand la lueur se plie et je fixerai ce point jusqu'à ce que vous me demandiez de lâcher.",
+          "targetNode": "node-baeca3e035114ee48767848a8f371f7c",
+          "choiceId": "choice_node-01a3e856686446a9a48e0244506c3828_0"
+        },
+        {
+          "text": "Faites‑m'écouter avant de regarder. Je veux entendre le silence autour du repli ; guidez‑moi du doigt et je ne prononcerai aucun nom.",
+          "targetNode": "node-8e7378439aeb47eaaf1d6b84d8ecb4cb",
+          "choiceId": "choice_node-01a3e856686446a9a48e0244506c3828_1"
+        },
+        {
+          "text": "Ne montrez‑que la bordure. Je suivrai la pointe de votre os et retiendrai tout ce qui paraît anormal — dites « retenez » quand j'en ai assez.",
+          "targetNode": "node-096869338b1e43b4822388b3d963e1d7",
+          "choiceId": "choice_node-01a3e856686446a9a48e0244506c3828_2"
+        }
+      ]
+    },
+    {
+      "id": "node-c77562a6148242039131e0355551f264",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Posez votre main comme on effleure une aile : sans poids, sans question trop vive. Vous sentirez d'abord une résistance sourde, comme un fil qui se tend sous la paume ; ne tirez pas, laissez‑le vibrer contre votre peau. Si la chose appelle une bouche, je refermerai la carte immédiatement — mais sachez que refermer ne rend pas toujours ce qui s'est éveillé muet.",
+      "choices": [
+        {
+          "text": "Je pose la main, doucement, sur l'ombre du repli. Je laisse la paume à plat, sans presser, et j'essaie de sentir la résistance comme on écoute une corde. Si je perçois un fil, je le signale d'un geste discret afin que vous sachiez s'il faut refermer la carte.",
+          "targetNode": "node-9dd2dcc00027489a9499725e4ee4aca7",
+          "choiceId": "choice_node-c77562a6148242039131e0355551f264_0"
+        },
+        {
+          "text": "Avant que je touche, guidez ma main vers l'endroit précis et dites‑m'en quand je dois m'arrêter. Restez muet à ce moment‑là : je veux que ce soit ma peau qui entende, pas votre voix. Si vous voyez quelque chose changer, un simple signe suffira pour que je retire ma main.",
+          "targetNode": "node-ebc780d5a6dc4467b588914333f741ce",
+          "choiceId": "choice_node-c77562a6148242039131e0355551f264_1"
+        },
+        {
+          "text": "Attendez — j'observe encore un instant; je préfère sentir d'abord l'ombre au bord du repli plutôt que d'y aller sans repère. Si un fil se tend et devient une bouche, je reculerai et je vous demanderai de refermer la carte sans hésitation. Préparez‑vous à agir rapidement.",
+          "targetNode": "node-defdf7e27a08495b9d286e2695a98b5a",
+          "choiceId": "choice_node-c77562a6148242039131e0355551f264_2"
+        }
+      ]
+    },
+    {
+      "id": "node-66ed38a7342849f8aba0f948586ec21a",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je n'appellerai pas le repli ; je vous dirai ses signes. Observez la lumière : elle n'entre pas, elle effleure, laissant un bord plus pâle où la poussière se plaque comme un souvenir. Sentez l'air : il porte un goût de fer et de verre chauffé, et le silence ici a un fil qui frémit, pas de voix mais une tension que votre oreille saura reconnaître.",
+      "consequences": {
+        "flag": "Carte_Depliee",
+        "description": "La carte est déployée et Voknir montre un repli par signes sans prononcer son nom."
+      },
+      "choices": [
+        {
+          "text": "Montrez‑moi ce bord pâle. Guidez mon regard : où placer mes yeux pour que la lumière me parle sans que je la nomme ?",
+          "targetNode": "node-936a9574c2914d0cb1cfadb97f149327",
+          "choiceId": "choice_node-66ed38a7342849f8aba0f948586ec21a_0"
+        },
+        {
+          "text": "Décrivez ce goût et ce silence : quels indices sensoriels me diront que je frôle le repli sans l'appeler ? Je veux pouvoir les reconnaître à l'avance.",
+          "targetNode": "node-3a2cd353c00f4bc4bdd5df29f3eef262",
+          "choiceId": "choice_node-66ed38a7342849f8aba0f948586ec21a_1"
+        },
+        {
+          "text": "Je garderai le silence et ne toucherai que l'air autour. Indiquez‑moi quels gestes sont sûrs et lesquels risquent d'ouvrir une bouche d'écho.",
+          "targetNode": "node-7b90f78c3706445db258e56dcb386f6f",
+          "choiceId": "choice_node-66ed38a7342849f8aba0f948586ec21a_2"
+        }
+      ]
+    },
+    {
+      "id": "node-f3bd73b2a1094e6bb7df176c858a0951",
+      "speaker": "Voknir",
+      "line": "Très bien. Prononcez-le ici, ou décrivez le signe : je lierai ce son ou cette marque au fil et l'enfermerai avec la carte. Si vous préférez que je choisisse, je marquerai l'étui d'un indice si discret que seuls ceux qui savent où regarder le trouveront. Sachez seulement que chaque marque ou mot est un appel ; l'acte de lier éveillera quelque chose qui écoutera. Que décidez-vous ?",
+      "choices": [
+        {
+          "text": "Je vous le confie maintenant. Écoutez-le, scellez-le sur le fil, et que nul son n'échappe de votre bouche.",
+          "targetNode": "node-698f5b8863ae45b08b9d74b68629501d",
+          "choiceId": "choice_node-f3bd73b2a1094e6bb7df176c858a0951_0"
+        },
+        {
+          "text": "Non le mot : un signe. Creusez un point très fin sur l'étui, un repère que je seul saurais lire à la lumière d'une lune brisée.",
+          "targetNode": "node-a495829e7b2545ae81d26fedb71fab6f",
+          "choiceId": "choice_node-f3bd73b2a1094e6bb7df176c858a0951_1"
+        },
+        {
+          "text": "Faites-le à votre façon. Choisissez un indice, gravez-le, et laissez le fil ; je reviendrai si le besoin m'enserre.",
+          "targetNode": "node-d5f47d618e5246e3a3c2c428cfeca5b9",
+          "choiceId": "choice_node-f3bd73b2a1094e6bb7df176c858a0951_2"
+        }
+      ]
+    },
+    {
+      "id": "node-103681940e134e3380bbba7387cbf6af",
+      "speaker": "Voknir",
+      "line": "Comme vous le voulez, Seigneuresse. Je marquerai le fil d’un nœud si fin qu’il ne trahira rien à quiconque n’en connaît pas la langue ; il répondra seulement à votre signe. L’étui restera scellé, et les échos s’apaiseront jusqu’à ce que votre mot les réveille. Gardez ce secret proche : même un fil peut tirer une réminiscence imprévue.",
+      "consequences": {
+        "flag": "fil_marque",
+        "description": "Voknir marque discrètement un fil sur l’étui ; un indice minime est laissé pour permettre de réveiller la carte ultérieurement si le mot secret est prononcé."
+      },
+      "choices": [
+        {
+          "text": "Je ne vous le dirai pas maintenant. Marquez seulement le fil ; je garderai le mot pour moi et viendrai le murmurer si le besoin s’en fait sentir. Veillez à n’y laisser aucun autre signe — pas d’odeur, pas de couture visible. Si un écho vient à rôder, ce sera à moi de décider quand l’appeler.",
+          "targetNode": "node-f24fc861d2334387afef41980446d149",
+          "choiceId": "choice_node-103681940e134e3380bbba7387cbf6af_0"
+        }
+      ]
+    },
+    {
+      "id": "node-0c4859ea41e347a893ada5173cd73086",
+      "speaker": "Voknir",
+      "line": "Très bien. Je graverai « Séran » sur l'étui, en incisant les lettres dans l'os de façon à ce qu'elles restent discrètes pour quiconque n'en connaît pas la clef. Je ménagerai une encoche minuscule, presque invisible, placée selon votre signe afin que vous puissiez la reconnaître au toucher. Je scellerai les échos et replierai les Plis autour de l'étui, mais sachez que prononcer le mot ou tirer sur le fil réveillera une oreille qui écoute. Si vous avez d'autres précautions à demander, dites-les maintenant; sinon je commence la besogne.",
+      "consequences": {
+        "flag": "ETUI_GRAVE_SERAN",
+        "description": "L'étui est gravé du mot « Séran » et une encoche minuscule a été pratiquée. Un fil d'écho a été préservé, lié au mot."
+      },
+      "isLongRest": false,
+      "choices": [
+        {
+          "text": "Très bien. Je vous le confie : gravez sur l'étui le mot « Séran » et ménagez une encoche minuscule que je reconnaîtrai. Que la gravure reste discrète et précise; évitez tout ornement inutile.",
+          "targetNode": "node-d81df36805f1459fa71a45493f7f6132",
+          "choiceId": "choice_node-0c4859ea41e347a893ada5173cd73086_0"
+        }
+      ]
+    },
+    {
+      "id": "node-92306c216add489d90e9e327ae8bc8cc",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Vous l'avez voulu sans noms : j'écarte les lamelles et je laisse paraître la trame nue — arêtes, courbes, points d'inflexion. Regardez : chaque arête se dessine comme une crête d'ombre, chaque bascule creuse une cuvette où la tension s'accumule. Je ne nomme rien ; je n'ajoute que traits et intersections. Prenez garde toutefois : exposer la géométrie invite les Plis à compenser leur balancement.",
+      "consequences": {
+        "flag": "MapExposed",
+        "description": "La carte révèle chaque arête et point d'inflexion, attirant l'attention des Plis et ancrant Uresaïr à leurs échos."
+      },
+      "choices": [
+        {
+          "text": "Montrez-les entièrement. Tracez chaque arête et chaque point d'inflexion — sans rien nommer. Je veux pouvoir suivre la topographie des Plis et repérer des trajectoires sûres.",
+          "targetNode": "node-a3c85eb9cf0642c1becb9df60e917d71",
+          "choiceId": "choice_node-92306c216add489d90e9e327ae8bc8cc_0"
+        },
+        {
+          "text": "Marquez, pour moi, les trajectoires praticables par un fil d'encre sombre ; laissez le reste pâlir et s'effacer. Je verrai moi-même si une ligne peut être suivie sans éveiller autre chose.",
+          "targetNode": "node-cac790a1c3014feb98068e3d46689def",
+          "choiceId": "choice_node-92306c216add489d90e9e327ae8bc8cc_1"
+        },
+        {
+          "text": "Si, en la révélant, les Plis se meuvent, repliez-la sur l'instant. Je veux voir, mais pas au prix d'une onde qui jaillit et nous frôle.",
+          "targetNode": "node-3329d65feddc4ba691b5bcfcf5a1e633",
+          "choiceId": "choice_node-92306c216add489d90e9e327ae8bc8cc_2"
+        }
+      ]
+    },
+    {
+      "id": "node-bc7879f4888648808b02f5d308dd8857",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Écoutez : ne marchez jamais là où trois arêtes se rejoignent — leurs croisements tricotent des pièges qui retiennent le pas et la conscience. Évitez les plis concaves qui luissent d'encre : ils aspirent l'empreinte et transforment la route en miroir tranchant. Ne frôlez pas les jonctions contre les vertèbres d'os aux bords fendus ; là, le monde se recoud en griffe et les Plis mordent.",
+      "consequences": {
+        "flag": "Balisage_minimal",
+        "description": "La carte a été marquée avec un balisage bref ; Uresaïr connaît les zones à éviter."
+      },
+      "choices": [
+        {
+          "text": "Dites‑moi précisément où ne pas poser le pied. Donnez‑moi des repères visuels simples, rien d'autre.",
+          "targetNode": "node-f87b52c49b484fca9596e58d8a48e3dd",
+          "choiceId": "choice_node-bc7879f4888648808b02f5d308dd8857_0"
+        },
+        {
+          "text": "Marquez seulement les lignes dangereuses sur la carte. Je transmettrai ces balises à mon escorte et je ne m'attarderai pas ici.",
+          "targetNode": "node-4d55a976786c435cb8e897986a280fd4",
+          "choiceId": "choice_node-bc7879f4888648808b02f5d308dd8857_1"
+        },
+        {
+          "text": "C'est suffisant. Rangez la carte. Je garderai ces directions en tête et j'éviterai les passages que vous avez nommés.",
+          "targetNode": "node-670ec7e7eba34cefb535c149c244bc72",
+          "choiceId": "choice_node-bc7879f4888648808b02f5d308dd8857_2"
+        }
+      ]
+    },
+    {
+      "id": "node-475c8193c1b54c9abff9763b8d39b05b",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous demandez un avertissement, Seigneuresse, et je vous le donne. Voir la géométrie des Plis peut suffire à tisser un fil ; la vision elle‑même incline certains échos à reconnaître un foyer. Prononcer un nom l'ancre plus profondément, mais la contemplation seule n'est pas sans effet : elle laisse une empreinte, fine, qui peut attirer ou repousser selon l'intention. Si vous le souhaitez, je peux poser une maigre barrière avant que vous ne regardiez, ou vous exposer sans voile — le choix changera la musique qui s'ensuit.",
+      "consequences": {
+        "flag": "ViewedGeometry",
+        "description": "Uresaïr a observé la géométrie des Plis et a été avertie des risques d'ancrage."
+      },
+      "choices": [
+        {
+          "text": "Je comprends le danger. Je nommerai ce qu'il faudra, mais pas plus qu'il ne le faut : montrez‑moi la géométrie et je m'en tiendrai à des mesures, pas à des jugements.",
+          "targetNode": "node-879f5665ff7e4c10ae344464e0d8be08",
+          "choiceId": "choice_node-475c8193c1b54c9abff9763b8d39b05b_0"
+        },
+        {
+          "text": "Je refuse les noms. Montrez‑moi seulement les angles et les lignes ; aidez‑moi à tracer des contournements et je m'en tiendrai à l'abstraction, sans prononcer de vérités qui pourraient s'accrocher.",
+          "targetNode": "node-26bd8f898232432f9f9cf1435b08cbb1",
+          "choiceId": "choice_node-475c8193c1b54c9abff9763b8d39b05b_1"
+        },
+        {
+          "text": "Posez d'abord une protection — un fil, un sceau, quelque chose qui empêche l'écho de m'atteindre lorsque je regarde. Sans cela, je ne prendrai pas le risque de m'exposer.",
+          "targetNode": "node-531dc17bcbed460b8830ff8a939cfc5e",
+          "choiceId": "choice_node-475c8193c1b54c9abff9763b8d39b05b_2"
+        }
+      ]
+    },
+    {
+      "id": "node-e63147bdb0f742458edfe94e370f2def",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Écoutez, lentement. Sera, celle qui rompit le serment — son angle se tient sous la dernière côte, là où le souffle devient un fardeau et où la culpabilité se recroqueville comme une langue froide. Orun de l'Écho creux — son pli habite le couloir des anciens marchés, il palpite quand on rend une dette et rappelle les promesses non tenues. La Mère sans Nom — son angle est au centre même de ces Plis, un vide qui renvoie les regards et attire les autres replis. En prononçant ces noms, vous les ancrez ; attendez-vous à sentir leurs frôlements si vous choisissez de les porter.",
+      "consequences": {
+        "flag": "ECHO_ANCHORED",
+        "description": "Les noms prononcés s'ancrent aux Plis ; leurs échos peuvent frôler qui les porte."
+      },
+      "choices": [
+        {
+          "text": "Je les prends. Dites-moi comment les porter : où poser la main, quel mot garder en pensée pour contenir leur poids.",
+          "targetNode": "node-5612b7d16c2f45129af5f843a92736ff",
+          "choiceId": "choice_node-e63147bdb0f742458edfe94e370f2def_0"
+        },
+        {
+          "text": "Répétez encore, plus lentement, en marquant chaque syllabe. Dites-moi si la douleur se manifeste aussitôt ou si elle guette plus tard.",
+          "targetNode": "node-e9d7dbbd4ef24058980b9488c0bb2a00",
+          "choiceId": "choice_node-e63147bdb0f742458edfe94e370f2def_1"
+        },
+        {
+          "text": "Y a-t-il un remède, un contre-angle, ou devrai-je apprendre à vivre avec leur écho ? Expliquez-moi comment me défendre contre leur traction.",
+          "targetNode": "node-28490efdca034f209d1478d8812906da",
+          "choiceId": "choice_node-e63147bdb0f742458edfe94e370f2def_2"
+        }
+      ]
+    },
+    {
+      "id": "node-0828b30457924d5889d833f731544d03",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Regardez : les Plis se meuvent comme des articulations d'une cage — certains se replient sur eux-mêmes en spirales serrées, d'autres forment des lèvres ouvertes où la culpabilité vient s'accrocher comme une peau. Sur la carte, tracez la trajectoire des lamelles d'os ; là où elles se chevauchent, la culpabilité s'amasse et palpite. Pour les contourner, on suit des lignes d'ombre ; pour les refermer, il faut resserrer les lamelles en brodant une mémoire précise qui leur colle la langue.",
+      "consequences": {
+        "flag": "AnglesRevealed",
+        "description": "Uresaïr a vu la disposition des angles et appris qu'en les nommant elle attire leurs échos ; une méthode pour les sceller a été esquissée."
+      },
+      "choices": [
+        {
+          "text": "Montrez-moi ces angles sur la carte, phrase par phrase. Dites-moi comment ils se replient, où la culpabilité s’accroche et si l’on peut les contourner ou les refermer. Je veux une méthode précise, pas seulement des noms.",
+          "targetNode": "node-03f1dc95a0df4785b821f868f25d5e57",
+          "choiceId": "choice_node-0828b30457924d5889d833f731544d03_0"
+        },
+        {
+          "text": "Enseignez-moi la méthode que vous emploieriez vous-même. Quels gestes, quels mots et quels matériaux faut-il pour resserrer les lamelles et coller la mémoire aux jointures ? Je prendrai soin d’appliquer vos instructions à la lettre.",
+          "targetNode": "node-8f03b58e85f54f73a14db08831d83a44",
+          "choiceId": "choice_node-0828b30457924d5889d833f731544d03_1"
+        },
+        {
+          "text": "Avant d’agir, dites-moi ce qui se produira si je referme un pli : quels échos je risque d’attirer et si l’opération est réversible. Je dois savoir si l’on peut sceller sans me lier définitivement à ces noms.",
+          "targetNode": "node-e23ca0449067416486d5b481242e42ff",
+          "choiceId": "choice_node-0828b30457924d5889d833f731544d03_2"
+        }
+      ]
+    },
+    {
+      "id": "node-4bc657dbf6984db8a2f17d32c32b3a7a",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Il y a un nom que je refuse de prononcer. Ce n'est pas une omission par lâcheté : ce nom se nourrit de l'annonce et change la pièce où il retentit — il arrache des lamelles de silence et les rend vivantes. Si je le dis, il saura que nous l'avons nommé, et il viendra habiter ce lieu, ou pire, ce porteur. Je peux vous montrer l'angle où il se tient, mais je ne le ferai pas à voix haute.",
+      "consequences": {
+        "flag": "REFUSE_NAME",
+        "description": "Voknir refuse de prononcer un nom dangereux ; l'angle est connu mais le nom reste tu."
+      },
+      "choices": [
+        {
+          "text": "Dites-le. Je prendrai le risque à votre place. Si cela doit m'atteindre, je l'assumerai sans vous demander grâce.",
+          "targetNode": "node-68a2d833120342a08b58662229d1aba1",
+          "choiceId": "choice_node-4bc657dbf6984db8a2f17d32c32b3a7a_0"
+        },
+        {
+          "text": "Vous avez raison de vous retenir. Montrez-moi l'angle sur la carte — sans prononcer le nom — et expliquez en détail ce que vous craignez qu'il fasse.",
+          "targetNode": "node-697b26ef8b3040f6b0dba03b891cad78",
+          "choiceId": "choice_node-4bc657dbf6984db8a2f17d32c32b3a7a_1"
+        },
+        {
+          "text": "Cachez-le plutôt que de le nommer : tracez son pli d'une encre qui effaçe, ou marquez-le d'un sceau. Je veux une méthode pour l'ignorer qui tienne.",
+          "targetNode": "node-8bd7b94c57294aed9127b0ba99ed6b79",
+          "choiceId": "choice_node-4bc657dbf6984db8a2f17d32c32b3a7a_2"
+        }
+      ]
+    },
+    {
+      "id": "node-adce3bfc853b481180758eb54f15ae51",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. J'écarte les os et j'étale la carte dans l'alcôve où les Plis n'entendront que des ombres ; seuls vos yeux et les miens la parcourront. Je ne prononcerai les noms qu'à voix basse, contre votre oreille, et je vous montrerai chaque angle, chaque cicatrice tracée. Sachez toutefois que nommer ces replis peut éveiller des choses : dites si vous voulez que j'interrompe immédiatement.",
+      "consequences": {
+        "flag": "MapDisplayed_Private",
+        "description": "La carte est déployée dans l'alcôve ; sa lecture est réservée à Uresaïr et à Voknir. Les Plis peuvent percevoir le mouvement des noms si ceux-ci sont murmurés."
+      },
+      "choices": [
+        {
+          "text": "Montrez-la en privé, sans réserve. Je veux voir chaque angle et accepter ce que la carte nomme. Parlez bas si un nom doit être évoqué, mais ne me cachez rien de ce qui est tracé.",
+          "targetNode": "node-d90e0b89764048a1b54fb31a7261c813",
+          "choiceId": "choice_node-adce3bfc853b481180758eb54f15ae51_0"
+        },
+        {
+          "text": "Montrez-la, oui, mais attachez ce fil minime et scellez-le après lecture. Si je dois retrouver ces replis plus tard, qu'un signe discret me guide sans exposer la carte aux Plis. Faites-le pour ma tranquillité et pour la prudence.",
+          "targetNode": "node-33a80501f9404d51a7e736919edc06e2",
+          "choiceId": "choice_node-adce3bfc853b481180758eb54f15ae51_1"
+        },
+        {
+          "text": "Montrez-moi tout et prononcez les noms clairement, à voix basse mais distincte. Je dois entendre à quoi la culpabilité s'accroche pour la nommer moi‑même. N'omettez rien, même si les Plis semblent frémir.",
+          "targetNode": "node-95065f97fe8f49efb6c1b03c813c4063",
+          "choiceId": "choice_node-adce3bfc853b481180758eb54f15ae51_2"
+        }
+      ]
+    },
+    {
+      "id": "node-74982e10b2ea4ee6912d2fab06546ae3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous l'avez ordonné, Seigneuresse. J'étendrai la carte dans l'alcôve; seules les pierres et les os en garderont la garde. Je ne prononcerai aucun nom à haute voix — je pointerai les angles, décrirai les cicatrices et indiquerai les passages sans les nommer. Si un nom doit être consigné, je l'écrirai sur le parchemin et le scellerai sous mon sceau; dites-moi enfin si vous voulez qu'un fil minime soit attaché à l'étui pour permettre un retour.",
+      "consequences": {
+        "flag": "CarteDéployéePrivée",
+        "description": "La carte est dépliée en privé dans l'alcôve; Voknir refuse de prononcer les noms. Décision à prendre sur la présence d'un fil minime et l'inscription scellée des noms."
+      },
+      "choices": [
+        {
+          "text": "Laissez un fil minime. Attachez-le à l'étui, scellez-le, et cachez la méthode de son retrait dans votre mémoriel; je veux pouvoir retrouver ces replis si le besoin s'en fait sentir.",
+          "targetNode": "node-38f3192a1f84499692d9153ede24f428",
+          "choiceId": "choice_node-74982e10b2ea4ee6912d2fab06546ae3_0"
+        },
+        {
+          "text": "Aucun fil. Scellez la carte dans l'étui d'os et retirez toute trace: ni nom écrit, ni point de repère. Si quelque chose doit rester inconnu, qu'il le demeure.",
+          "targetNode": "node-d20f1c9245d6492ca515f71f697590e3",
+          "choiceId": "choice_node-74982e10b2ea4ee6912d2fab06546ae3_1"
+        },
+        {
+          "text": "Montrez-moi uniquement les formes et les directions: pointez les angles, décrivez la profondeur des cicatrices et les passages, mais n'inscrivez aucun nom, même sur le parchemin.",
+          "targetNode": "node-0e9cf1ceed104a1c8e1511af7a8642c2",
+          "choiceId": "choice_node-74982e10b2ea4ee6912d2fab06546ae3_2"
+        }
+      ]
+    },
+    {
+      "id": "node-a7d1762ec01f4d16b09709d4dfc6060c",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous ordonnez, Seigneuresse. Je déplierai la carte dans l'alcôve, à l'abri des regards et des oreilles des Plis ; seuls les os y prendront garde. J'attacherai un fil si mince — tressé d'une fibre d'os et d'écaille — et j'y apposerai ma marque pour en verrouiller l'accès : il n'existera qu'en présence de votre empreinte. Prenez garde toutefois : même scellé, un fil garde une mémoire ; il peut chuchoter à qui sait écouter les replis que vous avez choisis d'abandonner.",
+      "consequences": {
+        "flag": "FIL_MINIME_SCELLE",
+        "description": "Voknir attache un fil minime à la carte et le scelle de sa marque. La trace existe, scellée et discrète, permettant à la Seigneuresse de retrouver ces replis ultérieurement."
+      },
+      "choices": [
+        {
+          "text": "Faites-le. Déployez-la dans l'alcôve et scellez le fil à la carte avec votre marque. Je veux qu'il soit discret et verrouillé, accessible seulement à moi.",
+          "targetNode": "node-3d66af85d2784bde91edc8459d47ffa3",
+          "choiceId": "choice_node-a7d1762ec01f4d16b09709d4dfc6060c_0"
+        },
+        {
+          "text": "Avant de sceller, dites-moi comment s'ouvre ce verrou. Que faut-il pour retrouver ce fil sans alerter les Plis ?",
+          "targetNode": "node-c2f60b2530c84db7a86df31405537cc3",
+          "choiceId": "choice_node-a7d1762ec01f4d16b09709d4dfc6060c_1"
+        }
+      ]
+    },
+    {
+      "id": "node-bb17e2e94e754a82926ab6f99abf3062",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Vous le porterez : sachez que le Chant d'Abandon n'est pas une lame mais une chambre pleine de voix — d'abord un filigrane de murmures, puis des appels qui vous arrachent au présent quand ils ont besoin d'être entendus. La carte se replie et tremble; des lamelles d'os vous effleurent la peau et déposent une petite braise d'écho qui brûlera comme mémoire. Vous entendrez les voix des abandonnés — reproches, prières et souvenirs courts — parfois en plein éveil, parfois en rêve, et elles vous conduiront vers des lieux et des gestes que vous n'auriez pas choisis autrement. Si vous voulez porter cela sans y être consumée, acceptez un sceau provisoire ou préparez-vous à payer l'expia­tion que réclameront ces voix.",
+      "consequences": {
+        "flag": "Porte_Le_Chant_dAbandon",
+        "description": "Uresaïr s'attache à l'écho : elle entendra régulièrement les voix des abandonnés, verra des visions liées à leurs derniers instants, et certaines portes émotionnelles ou géométriques s'ouvriront ou se fermeront en sa présence. Des rituels et offrandes peuvent atténuer cet ancrage, mais jamais l'effacer totalement."
+      },
+      "choices": [
+        {
+          "text": "Je porterai « Le Chant d'Abandon ». Donnez‑m'en l'écho. Si je dois entendre leurs voix pour tenter de réparer, qu'il en soit ainsi.",
+          "targetNode": "node-3f5fea85adc2488d90f319207058e1ae",
+          "choiceId": "choice_node-bb17e2e94e754a82926ab6f99abf3062_0"
+        },
+        {
+          "text": "Atténuez‑le d'abord. Posez ce sceau provisoire dont vous parlez et expliquez ce qu'il exigera — je veux porter l'écho sans être avalée.",
+          "targetNode": "node-e1a530ecf0974f3b9d07982ac4161079",
+          "choiceId": "choice_node-bb17e2e94e754a82926ab6f99abf3062_1"
+        },
+        {
+          "text": "Montrez‑moi encore la fissure. Nommez les premières voix : je veux savoir qui me réclamera et ce qu'ils diront.",
+          "targetNode": "node-10c6991841bd4e5bb0b0832e69c31242",
+          "choiceId": "choice_node-bb17e2e94e754a82926ab6f99abf3062_2"
+        }
+      ]
+    },
+    {
+      "id": "node-152bb1f4455b47f4acd54b9329db0589",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous l'avez nommé — qu'il en soit ainsi. La Cassure du Serment se manifeste d'abord par des fissures que les autres voient avant que vous ne les sentiez : une hésitation au contact des mains, un sceau terni, une phrase promise qui se perd sur la langue. Vous entendrez parfois un craquement sourd quand une confiance se rompt, et la peau près du cœur peut se dessiner d'une ligne pâle, comme une couture invisible. Pour survivre à cet écho, il faut des garde‑fous précis : des témoins vivants, des ancrages matériels, et des rituels de contention — jamais une seule mesure.",
+      "consequences": {
+        "flag": "LaCassureDuSerment_Portee",
+        "description": "Uresaïr a accepté l'écho « La Cassure du Serment ». Les effets interpersonnels et géométriques commencent à se manifester aux Plis."
+      },
+      "choices": [
+        {
+          "text": "Dites‑m'en plus sur ces signes visibles : comment les lire, et quelles réactions immédiates dois‑je attendre des alliés quand la Cassure travaille ? Précisez aussi un protocole simple à appliquer dès qu'une fissure apparaît.",
+          "targetNode": "node-2e8c13134762450aa991ff1ebf82a280",
+          "choiceId": "choice_node-152bb1f4455b47f4acd54b9329db0589_0"
+        },
+        {
+          "text": "Montrez‑moi comment lier cet écho à un objet temporaire — une amulette ou un éclat d'os — afin que je puisse l'utiliser comme levier sans m'envelopper entièrement. Donnez les étapes et les limites du lien.",
+          "targetNode": "node-dfec7ee1103841eabe190b8929ff06a8",
+          "choiceId": "choice_node-152bb1f4455b47f4acd54b9329db0589_1"
+        },
+        {
+          "text": "Que demandez‑vous en échange pour sceller cet ancrage ? Soyez clair : je veux connaître votre prix — rituel, dette, ou marque — afin de mesurer si je l'accepte vraiment.",
+          "targetNode": "node-2053255a73984ced89ad64991dc2c0c3",
+          "choiceId": "choice_node-152bb1f4455b47f4acd54b9329db0589_2"
+        }
+      ]
+    },
+    {
+      "id": "node-ecc40f4f71ae4d14ac3464a66f281c9e",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous refusez « L'Heure de l'Ombre ». Fort bien — renoncer à ce tribut préserve vos heures, mais ne rend pas pour autant la carte inoffensive. Le vide laissé sur les Plis attire parfois d'autres accroches : des noms voisins peuvent se tordre pour combler l'absence, et la géométrie autour de vous peut s'accentuer ou se fissurer différemment. Si vous voulez que ce nom n'ait aucune prise, il faudra un rituel, un échange ou une prise de sang qui déplacera la tension ailleurs.",
+      "consequences": {
+        "flag": "REFUSE_HEURE_DE_LOMBRE",
+        "description": "Uresaïr a refusé lier 'L'Heure de l'Ombre' à elle. La carte note le refus ; les Plis peuvent réagir en cherchant d'autres points d'ancrage."
+      },
+      "choices": [
+        {
+          "text": "Je refuse « L'Heure de l'Ombre ». Je ne troquerai pas ma durée pour un pouvoir. Si c'est le prix, je n'en veux pas.",
+          "targetNode": "node-d6abb4b6336c4fe8aa1a2bbab5bb90a3",
+          "choiceId": "choice_node-ecc40f4f71ae4d14ac3464a66f281c9e_0"
+        },
+        {
+          "text": "Si vous pouvez empêcher qu'il se tienne comme un vide attirant, dites-moi comment. Je veux une mesure qui protège mes heures sans déplacer la menace sur d'autres innocents.",
+          "targetNode": "node-b0311ed9181c49029c653e8263f12238",
+          "choiceId": "choice_node-ecc40f4f71ae4d14ac3464a66f281c9e_1"
+        },
+        {
+          "text": "Cachez-le, masquez sa trace sur la carte ou transférez-le ailleurs. Je refuse qu'il me suive, mais j'accepterai qu'une autre attache porte le nom si cela préserve le monde autour.",
+          "targetNode": "node-efc7d73faac149fb9c2ace7e948d2686",
+          "choiceId": "choice_node-ecc40f4f71ae4d14ac3464a66f281c9e_2"
+        }
+      ]
+    },
+    {
+      "id": "node-c9a2ad3650fa459289c880065a230a51",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "L'air se charge d'abord comme un linge humide posé sur la nuque : il devient dense, épais de pensées qui s'alourdissent et collent aux poumons. Par endroits il s'effile en courants, de minces lambeaux qui tirent la peau et portent des odeurs anciennes — cire, fer, sel — comme des messages froissés. D'autres fois il se déchire en poches froides qui aspirent la lumière, ou se gonfle, pesant, ralentissant le souffle. Si une vibration sourde commence, si quelque chose grogne ou que les coutures frémissent, je couperai la carte et le silence retombera sans délai."
+    },
+    {
+      "id": "node-2eb7827a7aa04146b2f6ed30905a5655",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je passe les narines au‑dessus des replis, comme on lit une plaie sans la toucher. D'abord la cire rance, lourde et presque sucrée, qui s'accroche en pellicules — elle colle aux souvenirs comme un vernis; puis un relent de fer, froid et sec, qui file en filaments métalliques et se dissout quand on l'ausculte de trop près. Un poussiéreux d'encens éteint et de linge ancien s'insinue entre eux, se délite en courants qui se lient ou se détachent selon la lumière ; parfois un souffle laisse une trace minérale, presque salée. —Arrêtez— je sens une tournure plus basse, animale ; je replie sans prolonger."
+    },
+    {
+      "id": "node-f1bdf199740b482ead5c37c7599de1c0",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "J'observe, Seigneuresse. À mesure que la carte s'ouvre, des taches froides naissent d'abord le long des veines osseuses, comme si l'ombre tirait un voile ; elles glissent ensuite, lentement, vers le centre des motifs. Parfois une tache chaude jaillit, courte et humide, et se dirige en arcs vers un bord, comme une respiration cherchant une sortie. Si une plainte, un raclement, ou un frémissement vocalise, je replie sur‑le‑champ et rien ne sortira de ces replis.",
+      "consequences": {
+        "flag": "map_observed",
+        "description": "Le cartographe a décrit la direction et la nature des taches sans nommer de replis ; la carte reste en place tant qu'aucune plainte n'est entendue."
+      }
+    },
+    {
+      "id": "node-5ad2b504a21e440dae140f53107ac28d",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Tendez la lampe devant vous, à la hauteur de la poitrine, puis suivez mon doigt : alignez le faisceau sur la jonction entre la troisième et la quatrième arête — inclinez légèrement vers la droite, autour de trente degrés. Posez la paume sur la table, doigts ouverts, talon de la main proche du nœud osseux ; laissez-la reposer sans serrer. Quand la lueur frôlera la ride du repli, vous sentirez d'abord une vibration sourde sous la paume ; signalez‑moi seulement si elle s'amplifie.",
+      "consequences": {
+        "flag": "LAMPE_ORIENTEE",
+        "description": "La lampe est placée suivant l'angle indiqué; la carte a réagi faiblement, révélant une ride suspecte aux Plis."
+      }
+    },
+    {
+      "id": "node-7b8bf9a756674dd8b16104002e641ccc",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Voici le chiffon — un carré de lin qui a déjà bu des halètements des Plis ; ne le posez pas : tenez‑le par deux coins, comme si vous teniez la branche d'un fragile compas. Gardez‑le à la distance d'une paume du nez, inclinez‑le d'un degré et laissez son bord caresser l'air ; déplacez‑le en arc lent dans le faisceau de la lampe et inspirez trois fois, toujours par le nez, en notant l'ordre des notes : fer, poussière, puis une amertume qui frotte la honte. Si un repli menace d'ouvrir une bouche, je comprimerai la poche de chair avant que vous n'ayez à prononcer quoi que ce soit.",
+      "consequences": {
+        "flag": "ChiffonDistribue",
+        "description": "Uresaïr a reçu le chiffon et les instructions pour l'approcher ; elle est prête à sentir les notes des Plis."
+      }
+    },
+    {
+      "id": "node-c9d9152d6237410fb53fda482220b196",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Vous tiendrez la lampe comme je l'indique : commencez par un angle aigu, puis ouvrez lentement jusqu'à sentir la peau des rides s'étirer ; observez la façon dont la lueur se fracture en facettes. Tenez le chiffon par son bord, à distance — laissez‑le goûter l'air sans le poser ; son arête recueillera des odeurs qui trahissent une culpabilité enfouie. Calons nos souffles, et je guiderai votre main du doigt : quand la lumière et la brise s'accordent, une vibration sourde vous traversera. Si un repli menace d'ouvrir la bouche, je comprimerai la couture de chair pour la refermer avant que vous n'ayez à parler.",
+      "consequences": {
+        "flag": "tentative_lampe_chiffon",
+        "description": "Uresaïr et Voknir tentent une lecture conjointe du fragment en combinant l'orientation de la lampe et la distance du chiffon."
+      }
+    },
+    {
+      "id": "node-2c23dc21ee464ae28478c6c5cdf8f6a0",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Posez votre paume là où le tissu osseux forme un V étroit — le pouce doit longer l'angle, les autres doigts ouverts vers l'extérieur. Je poserai mon index à l'intérieur du pli et je tracerai un arc court : sentez la tension comme une corde qu'on effleure, puis attendez le frisson. Si le repli amorce une bouche, je fermerai la poche d'os d'un geste sec ; ne parlez pas, ne cherchez pas à nommer. Restez attentive à l'odeur, au souffle : ce sont eux qui vous diront si le pli a été touché sans être réveillé.",
+      "consequences": {
+        "flag": "CarteFrôlée",
+        "description": "Uresaïr a été guidée une première fois sur la carte ; les Plis ont réagi faiblement."
+      }
+    },
+    {
+      "id": "node-dabd1e97cebe446094b9333096b4f59d",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Posez la paume à plat, doigts écartés juste assez pour suivre les lignes de la carte ; gardez le poignet détendu et le regard légèrement détourné, afin que votre attention n'accentue pas le repli. Je glisserai le bord de l'ongle le long d'un angle court et sec, puis j'appuierai avec la pulpe du doigt sur la peau à l'endroit où la tension se concentre — le geste est lent, mesuré, comme pour fermer une serrure. Si une bouche commence à s'ouvrir, je poserai la main sur la poche et tirerai le pli fermé d'un mouvement ferme mais sans hâte : vous sentirez une pression froide, puis le repli se refermera et la surface retombera en silence.",
+      "consequences": {
+        "flag": "MainPosée",
+        "description": "La paume d'Uresaïr est en contact avec la carte; Voknir est prêt à refermer un repli si nécessaire."
+      }
+    },
+    {
+      "id": "node-67307c0a50df40438c42d1526a8b9074",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je n'énoncerai que ce qui préserve votre chair : j'effleurerai la paume, je tracerai un angle précis et j'indiquerai par un contact bref quand retirer la main. Attendez le frisson sourd — c'est la présence d'une culpabilité légère ; si la tension se durcit comme un fil qu'on tend, retirez‑vous. Si le repli menace d'ouvrir la bouche, je poserai la paume sur votre poignet et l'enfoncerai doucement pour refermer la poche ; ce sera votre signal que la chose a tenté de parler. Restez immobile, ne forcez pas la carte ; suivez le rythme de votre souffle et laissez mes doigts parler pour vous.",
+      "consequences": {
+        "flag": "sensing_initiated",
+        "description": "L'exercice commence : Voknir guide la main d'Uresaïr et un protocole de sécurité non verbal est établi."
+      }
+    },
+    {
+      "id": "node-2d0243d2d98844f5974c8adfba287626",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je déploie la carte et laisse affleurer les lignes des Plis — observez la façon dont la lumière s'accroche et dont mes doigts dessinent un angle. Je passerai mon ongle au-dessus d'un point précis ; vous verrez une crispation et sentirez un frisson sourd qui annonce la culpabilité. Dites « stop » à tout instant si cela devient trop vif ; je refermerai la poche et interromprai la démonstration.",
+      "consequences": {
+        "flag": "CARTE_DEPLIEE",
+        "description": "La carte est déployée et la démonstration commence. Les Plis sont exposés aux observations."
+      }
+    },
+    {
+      "id": "node-6a19975850db4fa28dca38fa4dacaf7c",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Cherchez trois choses, Seigneuresse. La lueur : elle colle aux arêtes comme une perle sale — si elle se détache en filaments ou devient vibrante, le repli se prépare à parler. La tension : de fines rides qui se tendent à la surface de la peau, comme des cordes pincées ; si elles se durcissent ou se bloquent, reculez. L'ombre : quand elle s'étire en langue ou qu'elle se fige en creux trop net, elle aspire la lumière et l'attention — nommez mentalement « lueur, tension, ombre » et dites « stop » au moindre décalage.",
+      "consequences": {
+        "flag": "SIGNAUX_VISUELS_APPRIS",
+        "description": "Uresaïr a appris les balises visuelles de base pour repérer les replis de culpabilité : lueur, tension, ombre."
+      }
+    },
+    {
+      "id": "node-f222cfbafeb64f6aa28aa007533a6d61",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Si un repli menace d'ouvrir la bouche, j'interromprai la démonstration à la seconde : je refermerai la poche de chair et j'éloignerai vos doigts du pli. Pour que vous puissiez reculer sans prononcer un mot, j'emploierai trois gestes simples et visibles — un coup bref de l'ongle, un souffle dirigé, un balayage de la paume — chacun indiquant une direction précise à suivre. Sur mon signal muet, vous ferez un pas mesuré vers l'angle indiqué ; si la situation exige une sortie complète, je montrerai la route la plus sûre jusqu'à la balustrade. Dites « stop » ou faites le signe convenu, et tout cessera sur-le-champ.",
+      "consequences": {
+        "flag": "RetreatProtocolLearned",
+        "description": "Uresaïr apprend le protocole muet de retrait; Voknir promet d'interrompre la démonstration et d'indiquer une direction sûre si un repli s'ouvre."
+      }
+    },
+    {
+      "id": "node-a9243fcc0a794fd7b498656ac4d111d7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Les poches de chaleur se logent aux endroits où la surface s'incurve vers l'intérieur, comme si la matière retenait un souffle. Elles ne se diffusent pas à la manière d'un feu : parfois elles coulent lentement le long d'une couture, glissant comme de l'huile chaude ; parfois elles explosent en vagues qui battent contre l'air puis se retirent. Certaines sont basses et lourdes, apaisantes comme une couverture qui enveloppe — d'autres sont aiguës et collantes, qui serrent la cage et rendent la respiration ardue. Quand la lumière ou le silence les frôle, elles se referment ou palpitent, et si elles sont dérangées elles laissent derrière elles une odeur de sel et de honte.",
+      "consequences": {
+        "flag": "HeatDescribed",
+        "description": "Voknir a décrit la nature de la chaleur : localisation, propagation et impression émotionnelle."
+      }
+    },
+    {
+      "id": "node-59a3a5c38064421790c38a179d30d4b9",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous demandez la nature des surfaces et des parfums qui s'y accrochent, Seigneuresse. Parfois la matière répond comme un vieux parchemin : rugueuse, couchée en couches sèches qui crissent si l'on frôle l'air au‑dessus — on a l'impression qu'elle pourrait se brosser en poussière. À d'autres endroits, elle colle comme une pellicule tiède et visqueuse, brillante sans refléter la lumière, et qui laisse sur les doigts une sensation d'huile froide que même le savon n'efface pas tout à fait. Les odeurs s'emmêlent : un âcreté de cuir ancien, une pointe âpre et ferreuse qui rappelle le métal rongé, et sous tout cela une note étrangement sucrée comme d'un fruit trop mûr qu'on a laissé trop longtemps dans l'ombre.",
+      "consequences": {
+        "flag": "ApercuTexturesEtOdeurs",
+        "description": "Le cartographe a décrit les textures et les odeurs sans nommer de replis ; l'auditeur conserve une impression sensorielle détaillée."
+      }
+    },
+    {
+      "id": "node-16643e3891c24c6c87fd334fd6998ad2",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Le mouvement n'est ni un chemin ni un prédateur immobile ; il glisse comme un pouls étiré à la surface de la carte. Parfois il circule en courbes lentes, ramenant des courants d'air tiède qui caressent et s'évanouissent, parfois il pulse — des secousses brèves qui font vibrer la lumière jusqu'à la peau des os. Il peut aussi s'accrocher, se coller aux lisières comme une langue humide; alors l'air s'alourdit et la lumière semble se recroqueviller, avalée sans bruit. Je garderai la toile close au moindre frémissement qui menace de devenir voix, mais je vous décris ce qui passe entre deux replis, rien de plus.",
+      "consequences": {
+        "flag": "MovementDescribed",
+        "description": "Le cartographe décrit le mouvement: le PJ perçoit chaleur, pression et retrait de la lumière."
+      }
+    },
+    {
+      "id": "node-19161faff0374c23ba2cfc52bea978b2",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Vous l'avez ordonné : je refermerai la carte sur elle‑même, la ligaturerai d'os et martèlerai les échos jusqu'à ce qu'ils n'osent plus chanter. Je l'ensevelirai sous les fondations de mon atelier, au cœur des Plis d'ossements, là où les empreintes se perdent et ne retrouvent jamais le chemin. Sachez cependant que l'abîme réclame un prix : pour faire tomber un nom, quelque chose en vous qui lui servait de clé devra s'effacer ; dites si vous acceptez ce tribut.",
+      "consequences": {
+        "flag": "CarteScellee",
+        "description": "La carte est scellée et ensevelie sous l'atelier. Les échos qui la parcouraient sont étouffés."
+      }
+    },
+    {
+      "id": "node-1f45505c85024c45ab665ae3645e3649",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Si je plie et scelle la carte, sa voix s'éteindra ici, mais la culpabilité ne mourra pas : elle apprendra d'autres refuges. Elle s'insinuera en habitudes — une main qui se retire, un mot que vous ravalez — et reviendra en rêves sous la forme d'images qui tournent sans fin. Le prix tangible que je puis nommer maintenant est un fragment de souvenir : une touche, une couleur, une sensation que vous gardez et que je peux prélever pour refermer l'angle. Si vous voulez l'oubli absolu, il faudra consentir à ce prélèvement ; sinon, je scellerai la carte et laisserai un fil discret pour que vous puissiez, un jour, la retrouver.",
+      "consequences": {
+        "flag": "CarteScellée",
+        "description": "La carte est enfermée dans une gaine d'os. La culpabilité se déplace vers habitudes, gestes et rêves ; un fil discret est laissé si l'on souhaite retrouver les replis. L'effacement total exige le sacrifice d'un fragment de mémoire personnel."
+      }
+    },
+    {
+      "id": "node-e6f4f3ed2e7b4d688ff47336cb0a69de",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je plierai la carte, l'enfermerai dans une gaine d'os et martèlerai les échos jusqu'à les étouffer, mais je laisserai le fil minuscule que vous souhaitez. Ce fil sera une suture presque imperceptible — un lien ténu que vous pourrez retrouver si vous tirez doucement, sans pour autant laisser la carte se déployer en vous. Attendez-vous à de légères tractions : un motif qui revient en rêve, un mot qui vous échappe au bord de la langue, un frisson comme si quelque chose cherchait à respirer. Si la trace devient lourde, dites-le ; je pourrai rompre la suture ou la renforcer selon ce que vous voudrez.",
+      "consequences": {
+        "flag": "fil_minuscule_laissé",
+        "description": "Un fil discret relie Uresaïr à la carte scellée; il permet un retour ultérieur mais provoquera parfois de légères sensations et réminiscences."
+      }
+    },
+    {
+      "id": "node-ce29af71aa6342bb95ae5ea9058996d3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous exigez l'effacement complet. Comprenez bien : ce n'est pas seulement faire taire la carte, c'est arracher une fibre de vous pour que l'angle perde son appui. Je demanderai soit un nom que vous portez comme un talisman, soit un souvenir entier — la scène qui nourrit la culpabilité —, soit une portion de votre voix : un mot, un timbre, une façon de prononcer qui rendra la culpabilité muette. Choisissez ce que vous donnez ; sans choix explicite, je prélèverai ce qui est le plus lié à la blessure, et le prix sera irréversible.",
+      "consequences": {
+        "flag": "EffacementProposé",
+        "description": "Voknir propose l'effacement brutal ; l'acte réclamera un sacrifice (nom, souvenir ou portion de voix) et marquera la PJ."
+      }
+    },
+    {
+      "id": "node-612359775b5540bea71572c936d05fc4",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "La charge s'accroche à la cage comme un lingot posé sur le diaphragme : à l'inspiration l'air s'arrête au milieu, chaque souffle devient court et contraint, comme aspirer à travers un tissu serré. La marche se transforme en une succession de pas mesurés et prudents — vos hanches se verrouillent, les genoux ploient plus tôt, et l'ensemble du corps se rabaisse pour compenser le poids, donnant l'impression de traîner l'ombre d'un fardeau. L'appétit s'émousse : les saveurs se recroquevillent, la faim s'absente ou se fait lourde et rétive, manger devient un effort qui pèse sur l'estomac. Thermiquement, elle apporte une froideur dense qui fige la peau sans brûler, comme une plaque de métal glacée posée sur le thorax; parfois monte une odeur âcre, de cuivre mêlé à poussière sèche, qui colle à la gorge.",
+      "consequences": {
+        "flag": "CHARGE_LINGOT_EXAMINEE",
+        "description": "Uresaïr a fait décrire précisément les effets de la charge pesante ; ces impressions pourront guider des actions futures ou déclencher une réponse sécuritaire de Voknir."
+      }
+    },
+    {
+      "id": "node-cd3bd7379d7c43cbad5d94e13b0a9a13",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Le courant n'entre pas d'un seul point : il glisse comme une huile froide entre les articulations du geste. Il s'insinue d'abord dans l'intention, délitant la netteté d'une décision, puis il épouse le mouvement et le prolonge d'une fraction de seconde — vos doigts arrivent où votre volonté n'avait pas voulu qu'ils aillent. Il vide surtout la certitude : les images s'effacent comme si l'on soufflait sur des cendres, mais il emporte aussi des miettes — nuances, noms effacés, liaisons sentimentales qui collent aux paumes. Sa trace est subtile : un retard imperceptible dans la mémoire du corps, un goût métallique qui persiste à la langue, et parfois une marque plus visible, une pâleur de l'empreinte où la lumière ne tient plus.",
+      "consequences": {
+        "flag": "COURANT_EXPLORÉ",
+        "description": "Le cartographe a cartographié le passage du courant; Uresaïr peut tenter une exploration plus précise ou se retirer."
+      }
+    },
+    {
+      "id": "node-981fd715929d42c4b308a022e4efa64c",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Une charge froide et compacte s'appuie contre la cage : elle s'enfonce, alourdit la respiration et courbe les épaules, rendant chaque mot un effort. Le monde y devient presque immobile, chaque geste semblant devoir lutter contre un aimant invisible.\n\nUn voile fluide se faufile entre les os : il n'écrase pas mais entraîne, faisant dériver vos mains et vos décisions comme si elles suivaient un courant. Les actions deviennent hésitantes, étirées, et vous avez l'impression d'être poussée hors de votre trajectoire."
+    },
+    {
+      "id": "node-baeca3e035114ee48767848a8f371f7c",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Je vais simplement effleurer l'angle avec la pointe d'os. Regardez la lueur là où elle se tend et s'amincit ; vous verrez la matière des échos s'effilocher comme une membrane. Fixez ce point quand je vous le dirai ; ne prononcez aucun nom, contentez‑vous de retenir. Quand ce sera suffisant, dites « retenez » et je refermerai le pli.",
+      "consequences": {
+        "flag": "FOCUS_ON_LIGHT",
+        "description": "Uresaïr concentre son attention sur la lumière du repli indiqué par Voknir."
+      }
+    },
+    {
+      "id": "node-8e7378439aeb47eaaf1d6b84d8ecb4cb",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Posez votre doigt sur la pointe d'os que je tends — ne le déplacez pas, laissez mon doigt tracer sans nommer. Écoutez : d'abord un froissement comme d'un tissu vieux de siècles, puis un souffle retenu qui s'attarde au bord ; parfois, au creux, il y a un petit glissement, comme une langue qui recule. Dites « retenez » quand cela vous suffit et je n'écarterai pas davantage le repli.",
+      "consequences": {
+        "flag": "listened_before_looking",
+        "description": "Uresaïr a écouté le repli avant de le regarder ; le souvenir sonore est désormais marqué sur la carte des échos."
+      }
+    },
+    {
+      "id": "node-096869338b1e43b4822388b3d963e1d7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Ainsi soit‑il. Je n'écarterai que l'écume du repli — la bordure, assez pour que vos yeux la suivent sans se perdre. Gardez votre regard fixé sur la pointe d'os : là où la lumière s'effile, cherchez la pellicule et le souffle retenu derrière. Si un nom veut se former à vos lèvres, étouffez‑le ; dites « retenez » quand vous aurez pris ce qui vous suffit.",
+      "consequences": {
+        "flag": "BORDURE_EXPOSEE",
+        "description": "Le repli bordé a été partiellement dévoilé ; une trace des échos s'y accroche."
+      }
+    },
+    {
+      "id": "node-6c0695fe239f4a0cb09cc9df3036a0b8",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Il y a trois formes principales de prix que je peux lier au reliquaire : l'offrande, le nom rendu, et l'épreuve — chacune façonne la dette et ses retombées différemment.\nL'offrande exige que vous me remettiez quelque chose de tangible ou d'essentiel — un objet chargé d'importance, un fragment de sang, ou un souvenir cristallisé — en échange d'une scansion nette; le rituel peut être mené d'une nuit et scelle immédiatement, mais la perte est matérielle et parfois irrévocable.\nLe nom rendu exige que vous prononciez un nom que vous abandonnez — en le rendant, vous sacrifiez la capacité de l'évoquer ou de le conserver tel qu'il était ; le reliquaire se nourrit de cette renonciation et la cache, mais une absence se fera sentir dans vos souvenirs et dans la façon dont le monde répond à ce nom.\nL'épreuve est un trajet dans les Plis : vous affrontez trois angles choisis par la carte, rendez ce qu'ils réclament, et revenez ; c'est la voie la plus dangereuse mais aussi celle qui permet le plus de contrôle sur la dette. Pour le calendrier : je peux forger la boîte en vingt-quatre heures et mener un rituel de scellement en une seule nuit (rapide, plus brutal), l'étaler sur trois nuits consécutives (équilibre entre risque et coût), ou l'étendre sur une lune entière de veilles fractionnées (lent, minimise les pertes matérielles mais accroît l'exposition aux échos)."
+    },
+    {
+      "id": "node-a45413a1a0774481bdd3a6a215652a06",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Il y a trois voies que je puis lier au reliquaire : une offrande tangible, un rituel de nom rendu, ou une traversée des Plis. L'offrande exigera que vous déposiez quelque chose qui porte votre attachement — un anneau, une lettre, une parcelle de votre chair — et que je la consume en os et éther pour en marquer le prix. Le rituel du nom demandé vous forcera à prononcer une confession dans la boîte ; le mot sera lié au fil et pèsera sur votre voix jusqu'à la fin du cycle que nous fixerons. La traversée demandera que vous descendiez dans un canal de Plis que je façonnerai : vous y affrontrez des angles qui tordent le sens et les échos ; si vous revenez avec le fil, la relique s'ouvrira."
+    },
+    {
+      "id": "node-1afbcba7cff34297a2b18b0a412698be",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Vous exigez des garanties, et je les ferai inscrire là où ma parole ne peut être effacée : dans mes os. Je sculpterai votre serment en runes d'os, lierai chaque lettre à mon nom et à mon sang, et scellerai la boîte pour qu'aucune autre main ni aucun chant n'en connaisse la clé. Sachez cependant qu'attacher ainsi mon être est un prix — un silence prendra racine dans mes veines; certains refrains me deviendront étrangers tant que le serment tiendra. Voulez-vous des témoins au rituel, ou préférez-vous que cela reste entre nous et les Plis ?",
+      "consequences": {
+        "flag": "ReliquaireSermentInscrit",
+        "description": "Voknir inscrit le serment dans ses os; le reliquaire est lié à Uresaïr et ne peut être ouvert que par elle sauf si un rituel majeur est accepté."
+      }
+    },
+    {
+      "id": "node-d81df36805f1459fa71a45493f7f6132",
+      "speaker": "Voknir",
+      "line": "Très bien, Seigneuresse. J'inciserai « Séran » avec la précision d'une lame froide, en donnant aux lettres la discrétion que vous exigez ; l'encoche sera minime, placée selon le signe que vous avez tracé. Je refermerai les Plis autour de l'étui, scellerai les échos et laisserai le fil — si ténu qu'il pourrait être pris pour une faille dans l'os. Sachez seulement que, même discret, ce fil répondra à votre mot ; prononcez-le à bon escient.",
+      "consequences": {
+        "flag": "ETUI_SCELLE_SERAN",
+        "description": "L'étui est gravé du mot « Séran », scellé. Une encoche minuscule et un fil discret restent comme unique accès futur."
+      }
+    },
+    {
+      "id": "node-9dd2dcc00027489a9499725e4ee4aca7",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Posez la main avec douceur et laissez‑la là comme on pose une question à demi‑murmurée ; ne cherchez pas à tirer ni à pincer. Vous sentirez une tension sourde, parfois chaude, parfois comme du verre fin : laissez‑la vibrer sous votre paume et observez comment la lumière sur la carte ploie autour du point. Si un fil se tend et qu'une bouche commence à s'ouvrir, faites‑moi un signe discret — je refermerai la carte aussitôt, mais sachez que fermer n'éteint pas toujours ce qui a été nommé."
+    },
+    {
+      "id": "node-ebc780d5a6dc4467b588914333f741ce",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Approchez la main vers l'ombre qui se love à la jonction du cinquième os courbé : posez la paume à plat, les doigts alignés, sans appuyer. Arrêtez‑vous dès que vous sentez une pellicule plus froide ou une tension sourde sous la peau — c'est la limite que je ne vous demanderai pas de franchir. Je resterai muet pendant que vous touchez ; si la chose se met à bouger ou à appeler, je frapperai trois fois, doucement, contre la table pour que vous retiriez votre main. N'oubliez pas : votre peau doit nommer, non votre bouche.",
+      "consequences": {
+        "flag": "MainGuidée",
+        "description": "Uresaïr a posé la main sur le repli ; Voknir signifiera par trois frappes si le repli réagit."
+      }
+    },
+    {
+      "id": "node-defdf7e27a08495b9d286e2695a98b5a",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Restez immobile et laissez vos doigts à la lisière de l'ombre ; je garderai la carte ouverte d'une main, prêt à la refermer. Si un fil s'étire en bouche, je tirerai le voile aussitôt, mais préparez‑vous à reculer — certains éveils aiment la lumière du recul. Dites quand vous êtes prête, et je n'emploierai que le geste.",
+      "consequences": {
+        "flag": "map_open_guarded",
+        "description": "La carte est ouverte et Voknir se tient prêt à la refermer sur commande ; Uresaïr garde l'initiative tactile."
+      }
+    },
+    {
+      "id": "node-f24fc861d2334387afef41980446d149",
+      "speaker": "Voknir",
+      "line": "Très bien, Seigneuresse. Je ferai un nœud si fin que seul votre regard en reconnaîtra la langue ; l’étui n’aura ni couture visible ni parfum pour trahir son contenu. J’ôterai tout éclat qui pourrait retenir un écho et poserai un contre-sceau d’os pour étouffer la vibration. Sachez cependant qu’un fil, même muet, porte une mémoire — c’est vous qui déciderez si elle doit parler.",
+      "consequences": {
+        "flag": "FIL_MARQUE",
+        "description": "Le cartographe a marqué un fil discret sur l'étui ; l'étui est scellé et les échos ont été atténués."
+      }
+    },
+    {
+      "id": "node-698f5b8863ae45b08b9d74b68629501d",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je lierai votre mot au fil et enfermerai l'écho dans l'étui d'os, sans que ma bouche ne le laisse fuiter. Pour accomplir la liaison, il me faudra recevoir le signe — mais je respecterai votre commandement de silence. Dites-moi comment vous voulez me le confier : posé contre l'étui, tracé sur l'os, ou gravé pour que je le scelle sans paroles.",
+      "consequences": {
+        "flag": "FIL_LIE",
+        "description": "Le mot est lié au fil et la carte est scellée dans un étui d'os. Lier un mot attire un écouteur : un écho pourrait désormais guetter cet appel."
+      }
+    },
+    {
+      "id": "node-a495829e7b2545ae81d26fedb71fab6f",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je ne lierai pas le son : je creuserai un point si fin que la poussière l'effacera à la première pluie, mais il restera lisible à qui sait détourner la lumière. Je l'entaillerai à l'intérieur du rebord, à l'endroit où la chair des os s'aligne — un trou minuscule, un sourd indice que vous reconnaîtrez sous une lune brisée. Sachez que même ce signe attire l'attention des Plis ; il est plus sûr qu'un mot, mais il n'est pas muet pour ce qui écoute les angles. Voulez-vous que je vous montre où il sera placé, ou préférez-vous que je l'enferme tout de suite sans témoin ?",
+      "consequences": {
+        "flag": "carte_scellee_avec_marque",
+        "description": "L'étui est scellé; un point très fin est gravé à l'intérieur du rebord, repère secret lié à Uresaïr."
+      }
+    },
+    {
+      "id": "node-d5f47d618e5246e3a3c2c428cfeca5b9",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je choisirai pour vous un indice si discret qu'il ne chuchotera qu'aux regards qui savent écouter : un petit cercle brisé gravé près du fermoir, un pli d'os tourné pour former un angle qui répondra au fil. J'enlacerai ce fil au signe et scellerai la carte dans son étui d'os ; le fil restera muet jusqu'à ce que le signe soit rencontré. Prenez garde toutefois : même le plus discret des appels éveillera un écho, et cet écho saura que vous l'avez convoqué.",
+      "consequences": {
+        "flag": "ETUI_MARQUE",
+        "description": "Voknir a gravé un petit cercle brisé sur l'étui, lié le fil dormant au signe et scellé la carte. Le fil répondra uniquement au repère ; réveiller le fil attirera un écho."
+      }
+    },
+    {
+      "id": "node-936a9574c2914d0cb1cfadb97f149327",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Baissez légèrement le regard, pas d'un coup : cherchez la lisière où la lumière s'amincit, pas le centre de la tache mais son pourtour. Fixez un point à la frontière entre la clarté et l'ombre ; la poussière s'y agglomère en stries, comme des cicatrices. Respirez doucement et laissez votre attention suivre le frémissement de l'air — si la limite semble vibrer, n'en prononcez pas le nom, contentez‑vous d'en noter la texture.",
+      "consequences": {
+        "flag": "observed_pale_edge",
+        "description": "Uresaïr a observé le bord pâle sous la guidance de Voknir."
+      }
+    },
+    {
+      "id": "node-3a2cd353c00f4bc4bdd5df29f3eef262",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Écoutez avec la bouche et avec la peau. Le goût vient d'abord en couches : un fer poli, tiède, qui laisse un fond amer comme d'anciennes lames ; dessus, une scorie de verre chaud qui gratte la langue, fine et brève. Il y a aussi une sécheresse poudreuse, comme de la craie remuée, une pellicule qui s'accroche au palais et qui persiste quand on respire lentement. Le silence, lui, n'est pas vide : il serre la poitrine, rend vos propres battements distincts, puis révèle un frottement minuscule — un cliquetis, un souffle qui se courbe et qui s'attarde juste à la frontière de l'ouïe.",
+      "consequences": {
+        "flag": "signe_repli_appris",
+        "description": "Uresaïr a mémorisé les indices sensoriels permettant de repérer un repli sans le nommer. L'acte d'apprentissage augmente la sensibilité aux échos."
+      }
+    },
+    {
+      "id": "node-7b90f78c3706445db258e56dcb386f6f",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Gardez le silence, et que vos mains n'aient pas l'air de chercher — elles doivent passer, non s'arrêter. Les gestes sûrs sont des balayages lents, paume vers le bas, comme si vous peigniez une ombre ; arrêtez‑vous avant d'atteindre le bord pâle où la lumière se courbe. Évitez les doigts pointés, les pinces, les cercles, et surtout n'allumez pas de flamme ni ne prononcez un nom : ces mouvements tirent des fils qui ouvrent des bouches. Je vais d'abord indiquer avec mon pointeur d'os ; imitez mes mouvements sans fixer le repli et sans prétendre le nommer.",
+      "consequences": {
+        "flag": "Guide_de_gestes_deploye",
+        "description": "Voknir commencera à montrer des gestes sûrs avec son pointeur d'os. Le joueur peut imiter ou demander davantage de précision."
+      }
+    },
+    {
+      "id": "node-03f1dc95a0df4785b821f868f25d5e57",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien — écoutez phrase par phrase. 'Sera, celle qui rompit le serment' : son angle se loge sous la dernière côte; la lamelle s'enroule en spirale serrée et la culpabilité s'y accroche comme une langue froide; pour la contourner, glissez une ligne d'ombre le long du sillon; pour la refermer, brodez une mémoire précise qui recolle les bords. 'Orun de l'Écho creux' : son pli vit dans le couloir des anciens marchés, il forme des lèvres ouvertes qui palpitent lorsqu'on rend une dette; on le contourne en suivant les pas qu'il réclame, et on le scelle en cousant la parole rendue sur la muqueuse des lamelles. 'La Mère sans Nom' : son angle est au centre, un vide qui renvoie et attire les autres replis; on ne la ferme pas comme un autre pli — on la détourne en comblant le vide d'une mémoire étrangère, ou on l'ancre délibérément en prononçant son nom à voix basse, sachant que nommer la lie plus profondément.",
+      "consequences": {
+        "flag": "AnglesDevoiles",
+        "description": "Uresaïr a reçu une lecture phrase par phrase des angles et des méthodes pour les contourner ou les refermer."
+      }
+    },
+    {
+      "id": "node-8f03b58e85f54f73a14db08831d83a44",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Pour resserrer les lamelles, il vous faudra d'abord purifier l'os : chauffez les lamelles au feu noir jusqu'à ce qu'elles émettent un chant aigu, puis frottez-les d'une pâte de moëlle, d'encre et d'eau de source qui garde les reflets du soir. Le geste consiste à pincer la jointure, appuyer votre pouce comme une clé et tirer la langue d'ombre qui coule entre deux côtes, tandis que vous brodez la mémoire avec un fil tressé de soie nocturne et de cheveux de revenant. Les mots sont courts, répétitifs et précis — des verbes d'attache et des noms imposés — prononcer « Retiens — Lie — Repose » en cadence, en marquant chaque mot d'un coup sec du doigt ; chauffez ensuite la couture avec une aiguille d'os pour sceller. Sachez-le : chaque action ancre l'écho, et si vous manquez la cadence, la culpabilité mordra plus fort ou se déploiera ailleurs.",
+      "consequences": {
+        "flag": "BindingMethodRevealed",
+        "description": "Uresaïr connaît désormais la méthode pratique pour resserrer les lamelles ; l'emploi de la méthode ancrera les échos nommés et attirera leur attention."
+      }
+    },
+    {
+      "id": "node-e23ca0449067416486d5b481242e42ff",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous voulez savoir ce qui survient quand on resserre un Pli. La fermeture scelle l'angle : l'écho ne s'éteint pas, il s'apaise et se concentre — il peut palper vos rêves, tordre vos paroles, ou faire affleurer souvenirs et douleurs quand le monde froisse la peau. L'opération est réversible, mais à un coût : il faut défaire le brodage avec un fil de mémoire contraire, un rituel lent qui laisse des cicatrices et un nom accroché comme une balise. Il existe des méthodes pour sceller sans vous lier définitivement — délégation, gages d'oubli, ou substituts — mais chacune exige un prix précis et une signature étrangère."
+    },
+    {
+      "id": "node-879f5665ff7e4c10ae344464e0d8be08",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Vous vous tiendrez aux mesures — cela contraint la voix qui surgira, mais ne la supprime pas. Je peux tresser une maigre barrière : elle atténuera les échos et rendra flous certains détails, au prix d'une image partielle. À nu, la carte révèle plus de fractures, mais chaque angle a la volonté de s'accrocher ; nommer un pli l'ancre. Dites-moi comment vous voulez que je l'ouvre."
+    },
+    {
+      "id": "node-26bd8f898232432f9f9cf1435b08cbb1",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Vous choisissiez l'abstraction : je tairai les étiquettes et n'appellerai rien de ce qui dort dans les fissures. Je peux poser une maigre barrière qui atténuera l'empreinte que votre regard laisse, ou vous exposer sans voile et laisser la géométrie vibrer telle qu'elle est. Dites comment vous souhaitez que je vous assiste pour tracer des contournements — par geste, par guide verbal, ou par protection entre vous et la carte.",
+      "consequences": {
+        "flag": "NoNamesChosen",
+        "description": "Uresaïr refuse les noms; la carte sera montrée sans étiquettes. Voknir propose une barrière optionnelle avant la consultation."
+      }
+    },
+    {
+      "id": "node-531dc17bcbed460b8830ff8a939cfc5e",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je tisserai un fil fait d'os et de silence — un sceau maigre qui n'aveuglera pas la vue mais ralentira l'écho. Sachez cependant que tout rempart atténue autant qu'il déforme : certaines fissures paraîtront plus nettes, d'autres plus lointaines. Dites‑moi quelle force vous désirez, et je l'ajusterai avant que vos yeux ne croisent la carte."
+    },
+    {
+      "id": "node-a3c85eb9cf0642c1becb9df60e917d71",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Vous l'avez demandé — j'écarte toute pudeur des lamelles et je laisse paraître la trame nue. Regardez : chaque arête se découpe en traits d'ombre, chaque point d'inflexion creuse une tasse où la tension se concentre ; j'esquisse les routes et les contre-courants qui les traversent. Je ne nomme rien, mais sachez que les Plis ajusteront leur cadence à mesure que vos yeux parcourent la carte.",
+      "consequences": {
+        "flag": "CarteDevoilee",
+        "description": "La topographie des Plis est exposée; les Plis réagissent aux regards qui tracent leurs arêtes."
+      }
+    },
+    {
+      "id": "node-cac790a1c3014feb98068e3d46689def",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. J'entrelace un fil d'encre sombre le long des arêtes qui présentent une voie praticable — je n'en nomme aucune, je n'ajoute que la trace. Les autres fissures pâliront et se refermeront, mais sachez que marquer une ligne l'ancre à la carte et peut, parfois, appeler une réponse des Plis. Si vous le désirez, je commence et vous laisserez juger sur le terrain.",
+      "consequences": {
+        "flag": "TrajectoiresMarquees",
+        "description": "Des trajectoires praticables ont été marquées à l'encre sombre ; les autres fissures ont pâli. Le marquage peut ancrer les Plis et attirer des échos."
+      }
+    },
+    {
+      "id": "node-3329d65feddc4ba691b5bcfcf5a1e633",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous le souhaitez, Seigneuresse. J'observerai le moindre frémissement et refermerai la carte avant qu'une onde ne puisse vous atteindre. Sachez toutefois que refermer les lamelles est une action : même le geste d'enfermer peut produire un écho, plus sourd mais présent. Dites votre volonté et je ferai en sorte que la carte obéisse.",
+      "consequences": {
+        "flag": "MapTensioned",
+        "description": "Les Plis sont en alerte ; la carte répond au moindre mouvement. Voknir est prêt à la replier sur demande."
+      }
+    },
+    {
+      "id": "node-f87b52c49b484fca9596e58d8a48e3dd",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Regardez ces repères simples et visuels : évitez toute zone où trois arêtes d'os se rejoignent en étoile — elles forment un motif pointu et sombre sur la carte. Ne posez pas le pied dans les plis concaves qui brillent d'une lueur noire comme de l'encre; ils apparaissent comme croissants luisants et profonds. Fuyez les jonctions le long des vertèbres fendues où l'os est poli et strié en éventail ; ces bandes sont plus claires et hérissées. Enfin, ne marchez jamais sur les fines fissures qui « respirent » — on les voit s'ouvrir et se refermer comme une bouche minuscule.",
+      "consequences": {
+        "flag": "ReceivedVisualMarkers",
+        "description": "Uresaïr a reçu des repères visuels simples pour éviter les pièges des Plis."
+      }
+    },
+    {
+      "id": "node-4d55a976786c435cb8e897986a280fd4",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous l'ordonnez, Seigneuresse. Je n'indiquerai que les lignes qui mènent au piège : un trait sombre sur les arêtes où trois faces convergent, des hachures épaisses le long des plis concaves, et de petits chevrons près des vertèbres fendues. Ces marques sont des avertissements, non des protections — elles vous diront où ne pas poser le pied. Faites prévenir votre escorte ; restez peu de temps et ne laissez pas vos yeux s'attarder sur ces cicatrices.",
+      "consequences": {
+        "flag": "MAP_BALISEE",
+        "description": "Les lignes dangereuses ont été marquées sur la carte. L'escorte peut en être informée."
+      },
+      "isLongRest": false
+    },
+    {
+      "id": "node-670ec7e7eba34cefb535c149c244bc72",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je referme la carte et la glisse dans son étui d'os; elle se replie en silence comme un animal blessé. Sachez cependant que connaître la géométrie n'efface pas son chant : vos pas porteront toujours quelque réverbère de ces plis. Allez, marchez comme si vous connaissiez la cadence — et évitez bien les croisements, les plis concaves et les jonctions fendue."
+    },
+    {
+      "id": "node-5612b7d16c2f45129af5f843a92736ff",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Si vous les prenez, il faut nommer la forme et tenir un mot pour la contenir. Pour Sera, posez la paume sur la dernière côte, là où le souffle se plie ; pour Orun, appuyez l'intérieur du poignet comme on sent une dette battre ; pour la Mère sans Nom, placez les deux mains au creux du ventre, au centre des Plis. Le mot en pensée doit être court et précis — 'Retenir' pour Sera, 'Compte' pour Orun, 'Centre' pour la Mère — répété trois fois en silence. Choisissez comment vous voulez les porter : enfermer en vous, tresser au cuir de votre chair, ou déléguer une part à la carte elle-même — chacune change la nature du frôlement à venir.",
+      "consequences": {
+        "flag": "Noms_Ancrés",
+        "description": "Uresaïr a choisi de porter les noms. Les échos des Plis sont désormais attachés et pourront se manifester selon la méthode choisie."
+      }
+    },
+    {
+      "id": "node-e9d7dbbd4ef24058980b9488c0bb2a00",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je vais les prononcer lentement, syllabe par syllabe, et vous dire si la douleur frappe tout de suite ou si elle guette. Se-ra — Se- / ra — celle qui rompit le serment : son angle est sous la dernière côte ; la douleur est immédiate, un coup sec à l'expiration, comme un ongle qui pince. O-run de l'É-cho creux — O- / run — son pli vit dans le couloir des anciens marchés ; il se rappelle plutôt plus tard, une pesanteur sourde qui monte quand une dette est évoquée. La Mè-re sans Nom — La- / mè-re / sans / Nom — au centre des Plis : son vide s'installe et s'élargit, souvent différé, parfois seulement perceptible après la nuit, ou engendré par un rêve."
+    },
+    {
+      "id": "node-28490efdca034f209d1478d8812906da",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Il n'existe pas de guérison simple pour les Plis. On peut, toutefois, forger des contre-angles : lieux ou gestes qui renvoient la traction — sceller un pli par une contre-incision d'os, suspendre un poids qui tire en sens inverse, ou lier un nom à un autre point pour que l'écho suive ailleurs. Je peux vous enseigner à cartographier et ancrer un contre-angle, à attacher un nom à un substitut matériel, ou à tisser l'écho à votre propre pli pour qu'il travaille pour vous. Choisissez ; chaque méthode calme la traction d'une manière, mais impose aussi un prix.",
+      "consequences": {
+        "flag": "HeardDefenses",
+        "description": "Uresaïr a entendu les méthodes de défense contre la traction des Plis ; cela ouvre des options d'ancrage ou de substitution."
+      },
+      "isLongRest": false
+    },
+    {
+      "id": "node-d90e0b89764048a1b54fb31a7261c813",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. J'écarte les lambeaux d'os et j'étale la carte dans l'alcôve : ses lignes sont des entailles, ses plis murmurent comme de lointains ossements. Les angles se dessinent en relief, chargés de cicatrices que l'on peut suivre du doigt ; je vous les montrerai et, si vous le voulez, je pourrai en murmurer le nom à votre oreille. Sachez cependant que nommer un angle peut éveiller ce qui dort dans les Plis ; je m'arrêterai au moindre frémissement. Voulez-vous que je commence ?",
+      "consequences": {
+        "flag": "map_unfolded",
+        "description": "La carte est déployée dans l'alcôve ; seuls Voknir et Uresaïr l'observent."
+      }
+    },
+    {
+      "id": "node-33a80501f9404d51a7e736919edc06e2",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous le voulez, Seigneuresse. Je nouerai un fil minime, un cheveu d'os presque invisible, au bord de la carte, puis j'apposerai mon sceau et le scellerai une fois la lecture achevée. Je vous montrerai chaque angle et chaque cicatrice en murmurant si un nom doit être évoqué ; je ne prononcerai rien à voix haute. Sachez toutefois que nommer peut ouvrir des passages : si vous le jugez nécessaire, dites si je dois interrompre immédiatement.",
+      "consequences": {
+        "flag": "FIL_MINIME_SCELLE",
+        "description": "Un fil minime est attaché à la carte et scellé par Voknir, permettant une récupération discrète ultérieure."
+      }
+    },
+    {
+      "id": "node-95065f97fe8f49efb6c1b03c813c4063",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous le demandez, Seigneuresse. Je parlerai bas, mais distinctement : j'énoncerai chaque nom, chaque angle où la culpabilité s'accroche, afin que vous puissiez lui donner un signe. Sachez que ces mots font frémir les Plis ; il se peut que quelque chose réponde, mais je n'interromprai que si vous le commandez. Approchez-vous, et dites-moi si la voix devient trop lourde pour vos oreilles.",
+      "consequences": {
+        "flag": "NamesVoiced",
+        "description": "Voknir commence à prononcer les noms tracés sur la carte. Les Plis frémissent faiblement — quelque chose a entendu."
+      }
+    },
+    {
+      "id": "node-38f3192a1f84499692d9153ede24f428",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je fixerai un fil minime à l'étui — un filament d'os plus fin qu'un cheveu, conçu pour n'être qu'un point faible discret. Je scellerai le point d'attache sous mon sceau et consignerai la méthode de retrait dans mon mémoriel, chiffrée par des échos que seul votre lien saura dénouer. Je cacherai cette méthode dans les replis de mes souvenirs; si un jour vous exigez son usage, je vous la rendrai, mais sachez qu'ouvrir ces passages remue toujours quelque chose.",
+      "consequences": {
+        "flag": "fil_minime_attache",
+        "description": "Un fil minime est fixé à l'étui de la carte. Le point d'attache est scellé sous le sceau de Voknir et la méthode de retrait est cachée, chiffrée dans son mémoriel, accessible uniquement sur ordre de la Seigneuresse."
+      },
+      "isLongRest": false
+    },
+    {
+      "id": "node-d20f1c9245d6492ca515f71f697590e3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Aucun fil ne touchera l'étui : j'effacerai chaque trace, brûlerai les griffures d'encre et refermerai la carte dans son enveloppe d'os, scellée par mon sceau. Je n'inscrirai aucun nom et ne laisserai aucun repère visible ; les Plis seuls connaîtront ce qui demeure. Prenez garde cependant : ce que l'on enterre sans nom peut encore peser sur le sommeil et l'attention, invisible mais présent.",
+      "consequences": {
+        "flag": "map_fully_sealed",
+        "description": "La carte est scellée dans un étui d'os sans noms ni repères ; l'accès futur est rendu intentionnellement difficile."
+      }
+    },
+    {
+      "id": "node-0e9cf1ceed104a1c8e1511af7a8642c2",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Comme vous ordonnez, Seigneuresse. J'écarterai la carte dans l'alcôve et je pointerai chaque angle avec un pointeur d'os, décrivant la profondeur des cicatrices et la direction des passages sans jamais prononcer un nom. Je n'inscrirai aucun nom sur le parchemin et je n'attacherai aucun fil de rappel. Prenez garde toutefois : voir ces replis suffit parfois à réveiller des échos — gouvernez votre regard.",
+      "consequences": {
+        "flag": "MAP_VIEWED_FORMS_ONLY",
+        "description": "La carte a été examinée sans noms; aucune inscription nominative ni fil de rappel n'a été ajouté."
+      }
+    },
+    {
+      "id": "node-3d66af85d2784bde91edc8459d47ffa3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien, Seigneuresse. Je déplierai la carte dans l'alcôve, sous la voûte d'ossements, où ni regard ni souffle des Plis ne pourront atteindre ses angles. J'attacherai ce fil si mince — tressé d'os et d'écaille — et j'y apposerai ma marque : seul votre empreinte le déliera. Je scellerai le tout d'un anneau de silence ; prenez garde cependant qu'un fil, même verrouillé, garde une mémoire et peut chuchoter à qui sait écouter.",
+      "consequences": {
+        "flag": "carte_scellee_avec_fil",
+        "description": "La carte est scellée dans l'alcôve avec un fil lié à l'empreinte d'Uresaïr. Seule sa présence peut lever le sceau."
+      },
+      "isLongRest": false
+    },
+    {
+      "id": "node-c2f60b2530c84db7a86df31405537cc3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Le verrou n'est pas une serrure de fer mais une mémoire tissée. Le fil reconnaît votre empreinte — un mélange de chaleur, de rythme de pouls et d'intention que j'inclus au scellement par ma marque ; rien de ce que vous dite à voix haute ne déclenchera l'ouverture. Pour le retrouver sans alerter les Plis, il faudra trois choses : votre présence seule contre la carte, le geste précis que je vais vous apprendre (une pression sur un point d'ossature et un mouvement de torsion d'un doigt), et le silence absolu — aucun mot, aucune offrande rituelle qui puisse attirer les échos. Si vous le souhaitez, je vous montrerai le point et le geste ici, dans l'alcôve, et je scellerai de façon à ce que seule votre empreinte puisse tirer ce fil."
+    },
+    {
+      "id": "node-68a2d833120342a08b58662229d1aba1",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous avez demandé à entendre ce qui ne veut pas l'être. Je le dirai une fois, et seulement ainsi — écoutez sans répéter. Le nom est Nhalgûr, le Silence Dévorant. Son angle se tient où les Plis se referment sur la première faute ; en l'annonçant, vous l'attirez, et il cherchera un hôte parmi ceux qui l'ont entendu.",
+      "consequences": {
+        "flag": "NhalgurPronounced",
+        "description": "Le nom interdit a été prononcé. Nhalgûr commence à s'attacher à l'auditeur; des échos pourront frôler son esprit et la carte se fait plus affamée."
+      }
+    },
+    {
+      "id": "node-697b26ef8b3040f6b0dba03b891cad78",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Je ne prononcerai pas sa syllabe. Regardez : les lamelles s'écartent et, au centre de la carte, un creux se forme comme la morsure d'une clé — un angle qui n'est ni ligne ni point, mais l'entrelacement de trois replis. Ce lieu absorbe la parole dite à son propos et la façonne en choses qui marchent; nommé, il arrache des lamelles de silence et les rend vivantes, puis elles cherchent hôte — la pièce, le porteur, ce qui porte un nom. Je crains qu'il n'altère la géométrie des souvenirs, qu'il rende les angles voisins voraces et que la culpabilité devienne une langue qui vous habite et vous parle sans merci.",
+      "consequences": {
+        "flag": "ANGLE_SANS_NOM_DEVOILE",
+        "description": "L'angle sans nom a été montré sur la carte; le groupe sait où il se tient mais non son nom. Voir les répercussions narratives possibles : échos, hantises, ancrages."
+      }
+    },
+    {
+      "id": "node-8bd7b94c57294aed9127b0ba99ed6b79",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Vous voulez l'occulter plutôt que le crier : il existe plusieurs façons de tracer un pli sans l'appeler, mais chacune réclame un tribut. Je peux le dessiner d'une encre qui s'efface — la forme demeure, la voix se dissipe, mais l'encre avale un souvenir pour payer son silence. Je peux aussi sceller le pli sous un anneau d'os creux : il retiendra l'écho tant que l'anneau reste entier, et s'ouvrira en exhalant ce qu'il garde. Enfin, je peux inscrire le nom sur un ruban que je consumerai, laissant une cicatrice que vous sentirez sans que personne ne puisse prononcer la chose contenue.",
+      "consequences": {
+        "flag": "PliOcculté",
+        "description": "Un pli a été marqué sans que le nom soit prononcé. Son écho est contenu, mais la mesure est instable et demande un entretien ou un tribut."
+      }
+    },
+    {
+      "id": "node-3f5fea85adc2488d90f319207058e1ae",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Puisque vous l'avez choisi, je scelle l'écho à votre nom — non comme une marque visible, mais comme un fil de mémoire tissé dans la peau qui entend. La carte s'ouvre encore ; des lamelles d'os effleurent votre épaule et déposent une petite braise qui vibrera selon les besoins des voix. Elles commenceront comme un murmure au bord du monde ; si vous refusez le sceau, elles viendront plus vite et plus nettes. Voulez‑vous le sceau provisoire pour l'atténuer, ou le porter sans retenue ?",
+      "consequences": {
+        "flag": "Chant_dAbandon_Assigne",
+        "description": "Uresaïr porte désormais « Le Chant d'Abandon ». Les voix des abandonnés commenceront à se manifester ; un sceau provisoire peut être apposé pour retarder leur force."
+      }
+    },
+    {
+      "id": "node-e1a530ecf0974f3b9d07982ac4161079",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Le sceau que je propose ne bannit pas l'écho : il le comprime, tressant une cage d'os et d'encre qui abaisse son intensité et le retient aux marges de votre conscience. Pour l'apposer, j'aurai besoin d'un point d'ancrage — un souvenir que vous offrirez comme contrepoids — d'une offrande périodique (sang, veille, ou un fragment qui vous appartient) pour le renouveler, et d'un serment précis que vous tiendrez si les voix réclament réparation. Tant que vous entretenez l'offrande, le sceau amortira les appels; si vous négligez le rituel, l'écho se brisera et reviendra plus vorace qu'avant.",
+      "consequences": {
+        "flag": "SealOffered",
+        "description": "Voknir propose un sceau provisoire et détaille ses exigences : ancrage mémoriel, offrande périodique et serment. Le sceau tiendra tant que l'offrande est entretenue."
+      }
+    },
+    {
+      "id": "node-10c6991841bd4e5bb0b0832e69c31242",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Regardez de nouveau : la fissure s'ouvre comme une lamelle, et les échos s'y collent comme des étiquettes à demi effacées. Je nomme seulement les premières voix — leurs premières plaintes, et où elles cherchent refuge — pour que vous sachiez qui vous réclame et comment elles frapperont votre pensée. Écoutez :\n\n« La Mère aux Mains Creuses » — elle chuchotera : « Pourquoi m'as‑tu laissée derrière la porte ? » ; elle vous tirera vers des foyers abandonnés où la chaleur s'est refroidie. \n\n« L'Enfant sous la Pierre » — il dira : « Ma main cherche la vôtre, près de la fontaine glacée » ; il vous mènera à des lieux d'effondrement et fera vibrer votre sommeil. \n\n« Le Forçat de la Pendaison » — il murmure : « J'ai attendu votre promesse sous la corde » ; il réclamera réparation et trouble les alliances par la honte qu'il porte. \n\n« Le Voyageur aux Oubliés » — sa voix appelle : « Ne passez pas sans regarder derrière vous » ; il fera apparaître des pistes et des objets que vous n'auriez pas remarqués, et parfois attirera des étrangers qui revendiquent ce qu'ils perdent.",
+      "consequences": {
+        "flag": "ChantReception",
+        "description": "Uresaïr a reçu les premières voix du Chant d'Abandon ; ces échos commenceront à appeler vers des lieux et des réparations spécifiques."
+      }
+    },
+    {
+      "id": "node-2e8c13134762450aa991ff1ebf82a280",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Les signes sont à la fois simples et traîtres. D'abord, observez les ruptures dans la cadence sociale : une poignée de main qui manque de poids, un sourire trop lent, une phrase promise qui se défait en hésitation — ce sont des fissures que les autres voient avant vous. Ensuite, cherchez les marques physiques : une ligne pâle près du cœur, une zone froide à la paume, ou un métal ancien qui ternit quand la Cassure approche. Enfin, l'atmosphère change : le mot juste se perd, les souvenirs s'éclaircissent, et parfois vous entendrez un craquement comme d'os qui se remettent en place.\nQuand la Cassure travaille, attendez de la distance, une formalisation soudaine des voix, et des gestes répétés pour compenser l'incertitude ; certains alliés deviendront excessivement précis, d'autres se retireront. Le protocole immédiat est simple et mesurable : (1) marquer — dites le nom de l'écho à voix claire et placez un témoin matériel (un éclat d'os, un anneau terni) près de la personne; (2) témoigner — convoquez au moins deux témoins neutres pour attester de l'état antérieur du serment; (3) sceller — prononcez la phrase de contention (trois mots choisis par vous) en appuyant le témoin sur la fissure; (4) consigner — inscrivez l'acte sur la carte et laissez le témoin sur place vingt-quatre heures. Ces étapes ralentissent la Cassure ; elles ne la guériront pas, mais elles empêchent qu'elle ne morde davantage.",
+      "consequences": {
+        "flag": "Cassure_Identified",
+        "description": "La Cassure du Serment a été observée et un protocole de contention basique a été initié."
+      }
+    },
+    {
+      "id": "node-dfec7ee1103841eabe190b8929ff06a8",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. On peut confiner La Cassure du Serment dans un objet afin que l'écho agisse comme levier sans vous engloutir, mais ce confinement est un compromis fragile. L'opération exige un relais matériel — amulette, éclat d'os — la carte pour trancher les angles, un ancrage organique et des sceaux de contention ; chaque étape s'accompagne d'une limite de temps et d'usure. Je vais vous décrire les étapes précises et les limites : préparez-vous à écouter des gestes qui plient la géométrie et à sacrifier quelque chose de réel pour acheter ce répit.",
+      "consequences": {
+        "flag": "ECHO_LIE_AU_RELIQUAT",
+        "description": "L'écho est lié temporairement à un objet. Il fonctionne comme levier mais s'use avec les activations et peut fuir ou se briser, rendant l'écho plus violent lors d'une rupture."
+      }
+    },
+    {
+      "id": "node-2053255a73984ced89ad64991dc2c0c3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous voulez des comptes clairs — très bien. Pour sceller La Cassure du Serment, il faut toujours trois éléments conjoints : un rituel d'ostéographie, une dette formelle et une marque d'attache. Le rituel emploie une encre tirée des lamelles des Plis, la prononciation d'une formule qui fissure et recoud, et la présence d'un témoin vivant pour servir de miroir ; la dette est une faveur inscrite dans mon registre — exécutable par vous ou vos héritiers — et la marque est une suture d'os tracée près du cœur, visible ou non selon votre choix. Sachez enfin que chaque paiement atténue différemment la voracité des Plis : plus la dette est lourde, moins l'écho rongera votre entourage, mais plus je pourrai réclamer ensuite.",
+      "consequences": {
+        "flag": "CassureDuSerment_Scellee",
+        "description": "L'ancrage est scellé sur la Seigneuresse ; la Cassure du Serment devient active, entraînant obligations, marque visible et l'attention des Plis telle que décrite."
+      }
+    },
+    {
+      "id": "node-d6abb4b6336c4fe8aa1a2bbab5bb90a3",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Vous refusez « L'Heure de l'Ombre ». Très bien — votre refus laisse un vide dans la trame des Plis qui ne restera pas muet. Ce vide attire : des noms voisins peuvent se tordre pour combler l'absence, et la carte, irritée, cherchera une autre prise. Si vous voulez qu'aucune accroche ne prenne racine, il faudra un rituel ou un échange ; je peux en proposer trois voies, chacune avec son prix.",
+      "consequences": {
+        "flag": "REFUSE_HEURE_DE_LOMBRE",
+        "description": "Uresaïr a refusé « L'Heure de l'Ombre ». Le vide laissé dans les Plis augmente le risque d'accrochage par des noms voisins."
+      }
+    },
+    {
+      "id": "node-b0311ed9181c49029c653e8263f12238",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Oui — il existe des manières d'empêcher le vide d'attirer d'autres âmes, mais aucune n'est sans sacrifice. On peut ancrer le nom à un objet inanimé : un reliquaire d'os, un cadran muet, une page scellée ; il portera la faim et demandera entretien ou offrande, sans déléguer à des vivants. Je peux, à la place, l'inscrire dans ma carte : le pli le retiendra ici, mais j'en deviendrai le foyer — ma santé, ma mémoire et ma liberté s'en ressentiront. Enfin, il est possible de l'enfermer au cœur même des Plis, en consommant une portion du lieu ; cela corrompt le site plutôt que des personnes, et rend l'endroit dangereux et évité."
+    },
+    {
+      "id": "node-efc7d73faac149fb9c2ace7e948d2686",
+      "speaker": "Voknir Esh'Maradel",
+      "line": "Très bien. Si vous refusez que « L'Heure de l'Ombre » vous touche, il faut lui donner autre chose à saisir — ou l'obscurcir sur la carte de manière à tromper les Plis. Cela se fait par trois voies principales : le masquage (une encre d'oubli et votre sang), le transfert (lier le nom à un objet ou à un porteur volontaire), ou la déchirure dans les os (enterrer le nom au cœur des Plis, ce qui attire la faim). Chacune exige un tribut et promet des répercussions : le masquage laisse des rémanences, le transfert fait peser la charge sur un autre, et la déchirure change la géométrie autour du lieu.",
+      "consequences": {
+        "flag": "MasquagePropose",
+        "description": "Voknir a proposé trois méthodes pour éviter que le nom n'attache Uresaïr : masquage, transfert, ou enfouissement dans les Plis. Chacune a un coût narratif."
+      }
+    }
+  ]
+}

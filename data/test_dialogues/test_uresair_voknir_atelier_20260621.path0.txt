@@ -1,0 +1,18 @@
+--- Nœud 1 (START) ---
+Voknir Esh'Maradel: Vous êtes venue, Seigneuresse. J'ai repris mes mesures parmi les os — les Plis se plient d'une façon qui n'appartient ni au temps ni à la géométrie ordinaire. J'ai une carte qui garde les cicatrices des échos ; elle vous montrera des angles où la culpabilité se loge. Je peux la déployer ici, mais sachez que nommer ces replis fait remuer des choses qui ne se contentent pas d'être regardées.
+→ Uresaïr (choix): Montrez-la. Je veux voir chaque fissure et chaque nom — et l'assumer.
+
+--- Nœud 2 (node-16a8d3cfd7ba4e04973f5c37f19acbb9) ---
+Voknir Esh'Maradel: Très bien. Vous l'avez demandé — et je ne saurais nier ce que cela attire. Il déroule la carte comme on ouvre une cage : des lamelles d'os s'entrelacent, les encres bruissent comme des souvenirs. Regardez : les angles se découpent en crevasses où la culpabilité rampe, et certains noms semblent luire d'une lueur qui n'appartient pas au monde présent. Sachez que, en les nommant, vous faites plus que savoir ; vous vous ancrez à leurs échos.
+→ Uresaïr (choix): Lisez-les pour moi. Dites-moi qui est nommé, et où se tiennent leurs angles. Je porterai ces noms si nécessaire, mais je dois les entendre à voix haute.
+
+--- Nœud 3 (node-25b0b32f6438431486eafeb6d83caedd) ---
+Voknir Esh'Maradel: Très bien. Vous l'avez demandé, et la carte ouvre sa gorge d'os pour parler. Écoutez : « Sera, celle qui rompit le serment » — son angle se tient sous la dernière côte, là où la culpabilité se recroqueville comme une langue froide. « Orun de l'Écho creux » — son pli vit dans le couloir des anciens marchés, il palpite quand on rend une dette. « La Mère sans Nom » — son angle est au centre, un vide qui renvoie les regards et attire les autres replis. Prenez garde : nommer ces êtres les ancre, et leurs échos viendront frôler qui les porte.
+→ Uresaïr (choix): Répétez chaque nom, lentement. Je veux les entendre distinctement, un par un, et savoir exactement où se tiennent leurs angles. Je les porterai si nécessaire.
+
+--- Nœud 4 (node-e63147bdb0f742458edfe94e370f2def) ---
+Voknir Esh'Maradel: Très bien. Écoutez, lentement. Sera, celle qui rompit le serment — son angle se tient sous la dernière côte, là où le souffle devient un fardeau et où la culpabilité se recroqueville comme une langue froide. Orun de l'Écho creux — son pli habite le couloir des anciens marchés, il palpite quand on rend une dette et rappelle les promesses non tenues. La Mère sans Nom — son angle est au centre même de ces Plis, un vide qui renvoie les regards et attire les autres replis. En prononçant ces noms, vous les ancrez ; attendez-vous à sentir leurs frôlements si vous choisissez de les porter.
+→ Uresaïr (choix): Je les prends. Dites-moi comment les porter : où poser la main, quel mot garder en pensée pour contenir leur poids.
+
+--- Nœud 5 (node-5612b7d16c2f45129af5f843a92736ff) ---
+Voknir Esh'Maradel: Si vous les prenez, il faut nommer la forme et tenir un mot pour la contenir. Pour Sera, posez la paume sur la dernière côte, là où le souffle se plie ; pour Orun, appuyez l'intérieur du poignet comme on sent une dette battre ; pour la Mère sans Nom, placez les deux mains au creux du ventre, au centre des Plis. Le mot en pensée doit être court et précis — 'Retenir' pour Sera, 'Compte' pour Orun, 'Centre' pour la Mère — répété trois fois en silence. Choisissez comment vous voulez les porter : enfermer en vous, tresser au cuir de votre chair, ou déléguer une part à la carte elle-même — chacune change la nature du frôlement à venir.

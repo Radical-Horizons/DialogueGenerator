@@ -38,6 +38,7 @@ import {
 import { useToast } from '../shared'
 import { getErrorMessage } from '../../types/errors'
 import { DEFAULT_MODEL } from '../../constants'
+import { resolveDramatisFromSelections } from '../../utils/sceneDramatis'
 import { getChoiceIndexFromSourceHandle } from '../../utils/choiceHandleIndex'
 import { clampContextMenuToViewport } from '../../utils/contextMenuPlacement'
 import {
@@ -335,11 +336,16 @@ export const GraphCanvas = memo(function GraphCanvas() {
         ...(sel.characters_full || []),
         ...(sel.characters_excerpt || []),
       ]
-      const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+      const dramatis = resolveDramatisFromSelections({
+        sceneProtagonists: sel.scene_protagonists,
+        contextCharacters: allCharacters,
+      })
+      const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
       const instructions = 'Continue la conversation de manière naturelle'
       const result = await generateFromNode(dropChoiceMenu.sourceNodeId, instructions, {
         context_selections: sel,
         npc_speaker_id: npcSpeakerId,
+        player_character_id: dramatis.playerCharacterId,
         llm_model_identifier: DEFAULT_MODEL,
         target_choice_index: choiceIndexFromDrop,
       })
@@ -363,11 +369,16 @@ export const GraphCanvas = memo(function GraphCanvas() {
           ...(sel.characters_full || []),
           ...(sel.characters_excerpt || []),
         ]
-        const npcSpeakerId = allCharacters.length > 0 ? allCharacters[0] : undefined
+        const dramatis = resolveDramatisFromSelections({
+          sceneProtagonists: sel.scene_protagonists,
+          contextCharacters: allCharacters,
+        })
+        const npcSpeakerId = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : undefined
         const instructions = 'Continue la conversation de manière naturelle'
         const result = await generateFromNode(testNodeId, instructions, {
           context_selections: sel,
           npc_speaker_id: npcSpeakerId,
+          player_character_id: dramatis.playerCharacterId,
           llm_model_identifier: DEFAULT_MODEL,
         })
         toast('Nœud généré avec succès', 'success', 2000)

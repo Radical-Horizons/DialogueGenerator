@@ -76,12 +76,19 @@ export interface GenerateNodeRequest {
   context_selections: Record<string, unknown>
   max_choices?: number | null
   npc_speaker_id?: string
+  player_character_id?: string
   system_prompt_override?: string
   narrative_tags?: string[]
   llm_model_identifier?: string
   target_choice_index?: number | null
   generate_all_choices?: boolean
   dialogue_id?: string
+  dialogue_nodes?: Array<{
+    id: string
+    speaker: string
+    line: string
+    choices: Array<{ text: string; targetNode?: string }>
+  }>
 }
 
 /** Requête pour estimer le coût avant génération (même structure que GenerateNodeRequest). */
@@ -92,11 +99,13 @@ export interface EstimateCostRequest {
   context_selections: Record<string, unknown>
   max_choices?: number | null
   npc_speaker_id?: string
+  player_character_id?: string
   system_prompt_override?: string
   narrative_tags?: string[]
   llm_model_identifier?: string
   target_choice_index?: number | null
   generate_all_choices?: boolean
+  dialogue_nodes?: GenerateNodeRequest['dialogue_nodes']
 }
 
 export interface EstimateCostPerNodeBreakdown {
@@ -162,6 +171,8 @@ export interface RegenerateNodeRequest {
   system_prompt_override?: string
   llm_model_identifier?: string
   via_choice_index?: number
+  player_character_id?: string
+  dialogue_nodes?: GenerateNodeRequest['dialogue_nodes']
 }
 
 export interface RegenerateNodeResponse {

@@ -605,6 +605,7 @@ from api.routers import (
     documents,
     exports,
     graph_cost,
+    graph_expansion,
     graph_flow,
     graph_generation,
     graph_io,
@@ -646,6 +647,7 @@ app.include_router(mechanics_systems.router)
 _GRAPH_ROUTER_MODULES = (
     graph_io,
     graph_generation,
+    graph_expansion,
     graph_cost,
     graph_validation,
     graph_quality,

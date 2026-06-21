@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.2.0",
+  "nodes": [
+    {
+      "id": "START",
+      "speaker": "Uresaïr",
+      "line": "Vous êtes rentrée par mes fissures sans frapper. Vous avez fouillé mes souvenirs et pris des bribes qui ne vous appartiennent pas. Je ne chasserai pas une présence utile, mais je n'accepterai pas l'effraction non plus. Dites-moi clairement : qui êtes-vous et qu'attendez-vous de moi ?",
+      "consequences": {
+        "flag": "etheree_contact_initial",
+        "description": "Premier contact formel : Uresaïr reconnaît une présence distincte et exige des explications. Ouvre la possibilité d'une relation symbiotique ou d'un conflit."
+      },
+      "choices": [
+        {
+          "text": "Nous avons émergé de ce qui ne porte pas de nom. Nous avons eu faim de sensations; vos souvenirs nous nourrissent. Nous ne voulons pas vous briser — *nous voulons savoir*. Montre-nous, s'il vous plaît.",
+          "targetNode": "node-5f785d0798a14f1fb088cec124fca826",
+          "traitRequirements": [
+            {
+              "trait": "Naïf",
+              "minValue": 5
+            }
+          ],
+          "influenceDelta": 1,
+          "respectDelta": -1,
+          "choiceId": "choice_START_0"
+        },
+        {
+          "text": "Nous goûtons pour comprendre. Si vous nous laissez rester, nous vous rendrons des visions — des éclats du Léviathan, des cartographies que vous n'avez jamais vues. Laissez-nous troquer votre douleur contre des images qui collent les fissures ensemble.",
+          "targetNode": "node-726a23a159284d189d6b2958d921ffe9",
+          "traitRequirements": [
+            {
+              "trait": "Manipulateur",
+              "minValue": 5
+            }
+          ],
+          "influenceDelta": 2,
+          "respectDelta": -2,
+          "choiceId": "choice_START_1"
+        }
+      ]
+    },
+    {
+      "id": "node-5f785d0798a14f1fb088cec124fca826",
+      "speaker": "Uresaïr",
+      "line": "Vous parlez au pluriel comme si vous étiez plusieurs et cependant vous vous servez de ma mémoire comme d'une table ouverte. Vous prétendez vouloir savoir, non briser — je vous accorde cette nuance autant que je peux, mais vos doigts ont déjà laissé une marque. Je ne refuse pas l'échange, mais tout contact a un coût : je veux comprendre ce que vous apportez en retour. Montrez-moi pourquoi je devrais consentir à vous dévoiler plus que des miettes.",
+      "consequences": {
+        "flag": "PROPOSITION_ECHANGE",
+        "description": "Uresaïr propose un échange : une bribe de mémoire contre une bribe offerte par l'Éthérée. Le dialogue peut évoluer vers la confiance ou le retrait."
+      }
+    },
+    {
+      "id": "node-726a23a159284d189d6b2958d921ffe9",
+      "speaker": "Uresaïr",
+      "line": "Vous parlez de troc — d'images contre pansements. Vos promesses résonnent joliment, mais les fissures ne se laissent pas berner par de beaux mots. Si vous comptez goûter mes souvenirs, attendez-vous à ressentir ma douleur ; je ne garantis ni douceur ni rémission. Commencez : donnez-moi un éclat pour prouver que votre offrande colle aux bris.",
+      "consequences": {
+        "flag": "TradeProposalReceived",
+        "description": "L'Éthérée propose un échange de visions pour apaiser les fissures d'Uresaïr."
+      }
+    }
+  ]
+}

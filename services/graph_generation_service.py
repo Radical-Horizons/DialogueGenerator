@@ -4,6 +4,7 @@ import logging
 from typing import List, Dict, Any, Optional, Callable, Tuple
 
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceContent
+from services.dialogue_path_context import build_enriched_generation_prompt
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService, _stable_node_id
 from core.llm.llm_client import ILLMClient
 
@@ -73,7 +74,9 @@ class GraphGenerationService:
         llm_client: ILLMClient,
         system_prompt_override: Optional[str] = None,
         max_choices: Optional[int] = None,
-        progress_callback: Optional[Callable[[int, int], None]] = None
+        progress_callback: Optional[Callable[[int, int], None]] = None,
+        dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
+        player_choice_label: str = "PJ",
     ) -> Dict[str, Any]:
         """Génère la suite pour chaque choix du parent sans cible (ou END).
 
@@ -179,15 +182,15 @@ class GraphGenerationService:
                     )
 
             choice_text = choice.get("text", "")
-            enriched_instructions = f"""Contexte précédent:
-{parent_speaker}: {parent_line}
-
-Réponse du joueur:
-{choice_text}
-
-Instructions pour la suite:
-{instructions}
-"""
+            enriched_instructions = build_enriched_generation_prompt(
+                nodes=dialogue_nodes,
+                parent_node_id=str(parent_id),
+                parent_speaker=parent_speaker,
+                parent_line=parent_line,
+                user_instructions=instructions,
+                choice_text=choice_text,
+                player_choice_label=player_choice_label,
+            )
             try:
                 response = await self.generation_service.generate_dialogue_node(
                     llm_client=llm_client,

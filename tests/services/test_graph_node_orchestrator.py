@@ -61,6 +61,34 @@ class TestHelperFunctions:
         assert "Bye" in result
         assert "Continue" in result
 
+    def test_build_enriched_instructions_with_path(self):
+        nodes = [
+            {
+                "id": "START",
+                "speaker": "PNJ",
+                "line": "Start line",
+                "choices": [{"text": "Go", "targetNode": "P"}],
+            },
+            {
+                "id": "P",
+                "speaker": "PNJ",
+                "line": "Parent line",
+                "choices": [],
+            },
+        ]
+        result = _build_enriched_instructions(
+            "PNJ",
+            "Parent line",
+            "Continue",
+            choice_text="Go",
+            dialogue_nodes=nodes,
+            parent_node_id="P",
+            player_choice_label="PJ",
+        )
+        assert "Historique du dialogue" in result
+        assert "Start line" in result
+        assert "PJ: Go" in result
+
     def test_build_enriched_instructions_without_choice(self):
         result = _build_enriched_instructions("PNJ", "Hello", "Continue")
         assert "PNJ: Hello" in result

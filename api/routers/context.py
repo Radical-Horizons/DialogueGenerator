@@ -78,6 +78,7 @@ from core.prompt.prompt_engine import PromptEngine, PromptInput
 from utils.xml_utils import extract_text_from_element
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
+from services.scene_dramatis import resolve_scene_dramatis
 
 logger = logging.getLogger(__name__)
 
@@ -104,18 +105,20 @@ def _load_prompt_catalogs(
     return skills_list, traits_list
 
 
+def _resolve_dramatis(request_data: EstimateTokensRequest) -> "SceneDramatis":
+    """Résout PJ/PNJ selon les règles Alteir."""
+    return resolve_scene_dramatis(
+        player_character_id=request_data.player_character_id,
+        npc_speaker_id=request_data.npc_speaker_id,
+        context_selections=request_data.context_selections.model_dump(),
+    )
+
+
 def _resolve_npc_speaker_id(
     request_data: EstimateTokensRequest,
 ) -> str:
     """Détermine le speaker PNJ avec la même convention que le flux prompt."""
-    service_selection = request_data.context_selections.to_service_dict()
-    npc_speaker_id = request_data.npc_speaker_id
-    selected_characters = service_selection.get("characters", [])
-    if not npc_speaker_id and selected_characters:
-        return str(selected_characters[0])
-    if not npc_speaker_id:
-        return "PNJ"
-    return npc_speaker_id
+    return _resolve_dramatis(request_data).npc_speaker_id
 
 
 def _build_prompt_input_without_structured_context(
@@ -126,10 +129,11 @@ def _build_prompt_input_without_structured_context(
     traits_list: List[str],
 ) -> PromptInput:
     """Construit l'input prompt pour les sections non-GDD uniquement."""
+    dramatis = _resolve_dramatis(request_data)
     return PromptInput(
         user_instructions=request_data.user_instructions,
-        npc_speaker_id=_resolve_npc_speaker_id(request_data),
-        player_character_id="URESAIR",
+        npc_speaker_id=dramatis.npc_speaker_id,
+        player_character_id=dramatis.player_character_id,
         context_summary=context_text,
         structured_context=None,
         scene_location=None,

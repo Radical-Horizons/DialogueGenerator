@@ -2,7 +2,11 @@
 import re
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Literal
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from api.schemas.dialogue import ContextSelection
+from constants import ModelNames
+from services.scene_dramatis import context_has_location
 
 from services.ai_slop_detector import (
     MAX_CUSTOM_REGEX_PATTERN_CHARS,
@@ -72,11 +76,19 @@ class EstimateCostRequest(BaseModel):
     context_selections: Dict[str, Any] = Field(..., description="Sélection de contexte GDD")
     max_choices: Optional[int] = Field(None, description="Nombre maximum de choix (0-8)")
     npc_speaker_id: Optional[str] = Field(None, description="ID du PNJ interlocuteur")
+    player_character_id: Optional[str] = Field(
+        None,
+        description="PJ jouable (voix des choices)",
+    )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs")
     llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
     target_choice_index: Optional[int] = Field(None, description="Index du choix spécifique (si None, tous les choix sans targetNode)")
     generate_all_choices: bool = Field(False, description="Si True, estimation pour un nœud par choix sans targetNode")
+    dialogue_nodes: Optional[List[Dict[str, Any]]] = Field(
+        None,
+        description="Nœuds du graphe pour reconstruire le chemin ancêtre dans le prompt",
+    )
 
 
 class EstimateCostPerNodeBreakdown(BaseModel):
@@ -116,12 +128,20 @@ class GenerateNodeRequest(BaseModel):
     context_selections: Dict[str, Any] = Field(..., description="Sélection de contexte GDD")
     max_choices: Optional[int] = Field(None, description="Nombre maximum de choix (0-8)")
     npc_speaker_id: Optional[str] = Field(None, description="ID du PNJ interlocuteur")
+    player_character_id: Optional[str] = Field(
+        None,
+        description="PJ jouable (voix des choices)",
+    )
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     narrative_tags: Optional[List[str]] = Field(None, description="Tags narratifs")
     llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
     target_choice_index: Optional[int] = Field(None, description="Index du choix spécifique à connecter (si None, génère pour tous les choix sans targetNode)")
     generate_all_choices: bool = Field(False, description="Si True, génère un nœud pour chaque choix sans targetNode")
     dialogue_id: Optional[str] = Field(None, description="ID du dialogue (pour annotation post-hoc des coûts)")
+    dialogue_nodes: Optional[List[Dict[str, Any]]] = Field(
+        None,
+        description="Nœuds du graphe pour reconstruire le chemin ancêtre dans le prompt",
+    )
 
 
 class SuggestedConnection(BaseModel):
@@ -416,6 +436,11 @@ class RegenerateNodeRequest(BaseModel):
     system_prompt_override: Optional[str] = Field(None, description="Surcharge du system prompt")
     llm_model_identifier: Optional[str] = Field(None, description="Identifiant du modèle LLM")
     via_choice_index: Optional[int] = Field(None, description="Index du choix parent (si connexion par choix)")
+    player_character_id: Optional[str] = Field(None, description="PJ jouable (voix des choices)")
+    dialogue_nodes: Optional[List[Dict[str, Any]]] = Field(
+        None,
+        description="Nœuds du graphe pour reconstruire le chemin ancêtre dans le prompt",
+    )
 
 
 class RegenerateNodeResponse(BaseModel):
@@ -608,4 +633,59 @@ class DetectContextDroppingResponse(BaseModel):
     rules_profile_effective: str = Field(
         ...,
         description="Profil réellement appliqué (strict ou light)",
+    )
+
+
+class ExpandTreeRequest(BaseModel):
+    """Requête pour générer un dialogue complet par expansion BFS."""
+
+    user_instructions: str = Field(..., min_length=1, description="Instructions pour la scène")
+    context_selections: ContextSelection = Field(..., description="Sélection GDD")
+    max_depth: int = Field(4, ge=1, le=6, description="Rounds de choix PJ après le START")
+    max_choices: int = Field(3, ge=1, le=8, description="Choix PJ par nœud intermédiaire")
+    npc_speaker_id: Optional[str] = Field(None, description="PNJ interlocuteur")
+    player_character_id: Optional[str] = Field(None, description="PJ jouable (voix des choices)")
+    llm_model_identifier: str = Field(
+        default=ModelNames.GPT_5_MINI,
+        description="Modèle LLM — expand-tree impose gpt-5-mini (~120 appels)",
+    )
+    title: str = Field("Dialogue auto", description="Titre du dialogue")
+    document_id: Optional[str] = Field(None, description="Identifiant document (auto si absent)")
+    persist: bool = Field(True, description="Persister le document sur disque")
+    dry_run: bool = Field(False, description="Estimation coût sans appel LLM")
+
+    @model_validator(mode="after")
+    def validate_location_present(self) -> "ExpandTreeRequest":
+        """Un lieu GDD est requis pour ancrer la scène."""
+        if not context_has_location(self.context_selections):
+            raise ValueError(
+                "Un lieu est requis (locations_full, locations_excerpt ou scene_location)."
+            )
+        return self
+
+    @field_validator("llm_model_identifier")
+    @classmethod
+    def validate_expand_tree_model_is_mini(cls, value: str) -> str:
+        """Impose gpt-5-mini : expansion BFS = centaines d'appels LLM."""
+        if value != ModelNames.GPT_5_MINI:
+            raise ValueError(
+                f"L'expansion d'arbre requiert {ModelNames.GPT_5_MINI} "
+                f"(coût maîtrisé sur ~120 appels). Reçu: {value}"
+            )
+        return value
+
+
+class ExpandTreeResponse(BaseModel):
+    """Réponse après expansion d'arbre de dialogue."""
+
+    document: Dict[str, Any] = Field(..., description="Document Unity (schemaVersion + nodes)")
+    node_count: int = Field(..., description="Nombre total de nœuds générés")
+    llm_calls_estimated: int = Field(..., description="Appels LLM effectués ou estimés")
+    levels_expanded: int = Field(..., description="Niveaux BFS effectivement expandus")
+    document_id: str = Field(..., description="Identifiant du document")
+    failed_parents: List[str] = Field(default_factory=list, description="Parents en échec")
+    cost_usd: Optional[float] = Field(None, description="Coût USD estimé (dry-run ou cumul)")
+    llm_model_identifier: str = Field(
+        default=ModelNames.GPT_5_MINI,
+        description="Modèle LLM effectivement utilisé",
     )

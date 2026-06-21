@@ -5,6 +5,7 @@ import type { StateCreator } from 'zustand'
 import type { Node } from 'reactflow'
 import type { GraphState } from '../types/graphState'
 import type { Choice } from '../../schemas/nodeEditorSchema'
+import { serializeDialogueNodesForApi } from '../../utils/dialoguePathContext'
 import * as graphAPI from '../../api/graph'
 import { markNodeDeleted } from '../../api/llmUsage'
 import { normalizeTestBars } from '../../utils/graphNormalizers'
@@ -168,6 +169,8 @@ export const createGenerationSlice: StateCreator<
         typeof options.max_choices === 'number' ? options.max_choices : null
       const npcSpeakerId =
         typeof options.npc_speaker_id === 'string' ? options.npc_speaker_id : undefined
+      const playerCharacterId =
+        typeof options.player_character_id === 'string' ? options.player_character_id : undefined
       const systemPromptOverride =
         typeof options.system_prompt_override === 'string'
           ? options.system_prompt_override
@@ -192,6 +195,7 @@ export const createGenerationSlice: StateCreator<
       const dialogueIdForCosts = state.dialogueMetadata.filename || undefined
       // Ne pas envoyer de test vide pour un choix (évite 422 après suppression du TestNode)
       const normalizedContent = normalizeParentContentForGeneration(parentNodeContent)
+      const dialogueNodesForApi = serializeDialogueNodesForApi(state.nodes)
       const response = await graphAPI.generateNode(
         {
           parent_node_id: parentNodeId,
@@ -200,12 +204,14 @@ export const createGenerationSlice: StateCreator<
           context_selections: contextSelections,
           max_choices: maxChoices,
           npc_speaker_id: npcSpeakerId,
+          player_character_id: playerCharacterId,
           system_prompt_override: systemPromptOverride,
           narrative_tags: narrativeTags,
           llm_model_identifier: llmModelIdentifier,
           target_choice_index: targetChoiceIndex,
           generate_all_choices: generateAllChoices,
           dialogue_id: dialogueIdForCosts,
+          dialogue_nodes: dialogueNodesForApi,
         },
         { llmModelIdentifier: llmModelIdentifier ?? undefined }
       )
@@ -618,6 +624,14 @@ export const createGenerationSlice: StateCreator<
           ? (snap as Record<string, unknown>)
           : {}
 
+      const regenProtagonists = regenSelections.scene_protagonists as
+        | { personnage_a?: string; personnage_b?: string }
+        | undefined
+      const regenPlayerId =
+        typeof regenProtagonists?.personnage_a === 'string'
+          ? regenProtagonists.personnage_a
+          : undefined
+
       const response = await graphAPI.regenerateNode(nodeId, {
         dialogue_id: dialogueId,
         new_instructions: newInstructions,
@@ -626,6 +640,8 @@ export const createGenerationSlice: StateCreator<
         parent_node_content: parentNode.data as Record<string, unknown>,
         context_selections: regenSelections,
         via_choice_index,
+        player_character_id: regenPlayerId,
+        dialogue_nodes: serializeDialogueNodesForApi(state.nodes),
       })
       const existingHistory = (existingData.regenerationHistory as Array<{ instructions: string; timestamp: string; generationId: string }>) ?? []
       const newEntry = {

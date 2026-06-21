@@ -157,6 +157,7 @@ export function useGenerationRequest(): UseGenerationRequestReturn {
       user_instructions: userInstructionsValue,
       context_selections: contextSelections,
       npc_speaker_id: sceneSelection.characterB || undefined,
+      player_character_id: sceneSelection.characterA || undefined,
       max_context_tokens: params.maxContextTokens,
       max_completion_tokens: safeMaxCompletionTokens ?? undefined,
       system_prompt_override: systemPromptOverride || undefined,

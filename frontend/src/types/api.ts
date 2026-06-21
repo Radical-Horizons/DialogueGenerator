@@ -73,6 +73,7 @@ export interface BasePromptRequest {
   user_instructions: string
   context_selections: ContextSelection
   npc_speaker_id?: string
+  player_character_id?: string
   max_context_tokens: number
   system_prompt_override?: string
   author_profile?: string

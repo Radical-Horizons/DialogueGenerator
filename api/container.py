@@ -65,6 +65,7 @@ class ServiceContainer:
         self._export_log_service: Optional[ExportLogService] = None
         self._unity_generation_service: Optional[UnityDialogueGenerationService] = None
         self._graph_node_orchestrator: Optional["GraphNodeOrchestrator"] = None
+        self._dialogue_tree_expansion_service: Optional["DialogueTreeExpansionService"] = None
         self._linked_selector_service: Optional[LinkedSelectorService] = None
         self._notion_import_service: Optional[NotionImportService] = None
         self._context_rule_service: Optional[ContextRuleService] = None
@@ -268,6 +269,17 @@ class ServiceContainer:
             )
             logger.info("GraphNodeOrchestrator initialisé dans le container.")
         return self._graph_node_orchestrator
+
+    def get_dialogue_tree_expansion_service(self) -> "DialogueTreeExpansionService":
+        """Retourne le service d'expansion BFS de dialogues complets."""
+        if self._dialogue_tree_expansion_service is None:
+            from services.dialogue_tree_expansion_service import DialogueTreeExpansionService
+
+            self._dialogue_tree_expansion_service = DialogueTreeExpansionService(
+                graph_orchestrator=self.get_graph_node_orchestrator(),
+            )
+            logger.info("DialogueTreeExpansionService initialisé dans le container.")
+        return self._dialogue_tree_expansion_service
     
     def get_linked_selector_service(self) -> LinkedSelectorService:
         """Retourne le service de sélection d'éléments liés.
@@ -419,6 +431,7 @@ class ServiceContainer:
         self._llm_usage_service = None
         self._unity_generation_service = None
         self._graph_node_orchestrator = None
+        self._dialogue_tree_expansion_service = None
         self._linked_selector_service = None
         self._notion_import_service = None
         self._context_rule_service = None

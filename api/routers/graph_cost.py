@@ -28,7 +28,8 @@ from core.context.context_builder import ContextBuilder
 from services.configuration_service import ConfigurationService
 from services.llm_pricing_service import LLMPricingService
 from services.llm_usage_service import LLMUsageService
-from services.token_estimation_service import TokenEstimationService
+from constants import PlayableCharacters
+from services.scene_dramatis import resolve_scene_dramatis
 
 logger = logging.getLogger(__name__)
 
@@ -62,11 +63,28 @@ def _build_representative_prompt_for_estimate(
     parent_node_content: dict,
     user_instructions: str,
     context_selections: dict,
+    *,
+    parent_node_id: Optional[str] = None,
+    dialogue_nodes: Optional[list] = None,
+    player_choice_label: str = PlayableCharacters.DEFAULT_PLAYER,
 ) -> str:
     """Construit un prompt représentatif pour l'estimation (sans appel LLM)."""
+    context_blob = json.dumps(context_selections, ensure_ascii=False) if context_selections else ""
+    if dialogue_nodes and parent_node_id:
+        from services.dialogue_path_context import build_enriched_generation_prompt
+
+        prompt_body = build_enriched_generation_prompt(
+            nodes=dialogue_nodes,
+            parent_node_id=parent_node_id,
+            parent_speaker=str(parent_node_content.get("speaker") or "PNJ"),
+            parent_line=str(parent_node_content.get("line") or ""),
+            user_instructions=user_instructions or "",
+            player_choice_label=player_choice_label,
+        )
+        return f"{context_blob}\n\n{prompt_body}" if context_blob else prompt_body
+
     parent_speaker = parent_node_content.get("speaker", "PNJ")
     parent_line = parent_node_content.get("line", "")
-    context_blob = json.dumps(context_selections, ensure_ascii=False) if context_selections else ""
     return (
         f"{context_blob}\n\n"
         f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
@@ -163,10 +181,18 @@ async def estimate_cost(
             request_data.llm_model_identifier,
             config_service,
         )
+        dramatis = resolve_scene_dramatis(
+            player_character_id=request_data.player_character_id,
+            npc_speaker_id=request_data.npc_speaker_id,
+            context_selections=request_data.context_selections,
+        )
         representative_prompt = _build_representative_prompt_for_estimate(
             request_data.parent_node_content,
             request_data.user_instructions,
             request_data.context_selections,
+            parent_node_id=request_data.parent_node_id,
+            dialogue_nodes=request_data.dialogue_nodes,
+            player_choice_label=dramatis.player_character_id,
         )
         batch_count = _batch_count_from_request(request_data)
         cache_key = _estimate_cost_cache_key(representative_prompt, model_id, batch_count)

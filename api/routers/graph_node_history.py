@@ -36,9 +36,10 @@ from api.schemas.graph import (
 )
 from core.context.context_builder import ContextBuilder
 from services.configuration_service import ConfigurationService
+from services.dialogue_path_context import build_enriched_generation_prompt
 from services.graph_node_orchestrator import GraphNodeOrchestrator
 from services.llm_usage_service import LLMUsageService
-from api.routers.graph_router_helpers import create_llm_client_for_router
+from api.routers.graph_router_helpers import create_llm_client_for_router, resolve_and_enrich_graph_context
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,10 @@ def _validate_dialogue_exists(
         )
 
 
-_DEFAULT_INSTRUCTIONS = "Ecris la réponse du PNJ à ce que dit le PJ"
+_DEFAULT_INSTRUCTIONS = (
+    "Ecris la réponse du PNJ à ce que dit le PJ. "
+    "2 à 5 phrases, concis et jouable ; même registre tu/vous que le START."
+)
 
 
 def _load_unity_nodes_from_dialogue(
@@ -127,26 +131,23 @@ def _reconstruct_prompt_for_node(
         if parent_node is not None:
             break
     if not parent_node:
-        parent_speaker = "PNJ"
-        parent_line = ""
-        choice_text = None
-        instructions = _DEFAULT_INSTRUCTIONS
-    else:
-        parent_speaker = parent_node.get("speaker", "PNJ")
-        parent_line = parent_node.get("line", "")
-        instructions = _DEFAULT_INSTRUCTIONS
-    if choice_text is not None:
-        raw = (
-            f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
-            f"Réponse du joueur:\n{choice_text}\n\n"
-            f"Instructions pour la suite:\n{instructions}\n"
+        return build_enriched_generation_prompt(
+            nodes=nodes,
+            parent_node_id=str(node.get("id", node_id)),
+            parent_speaker=str(node.get("speaker") or "PNJ"),
+            parent_line=str(node.get("line") or ""),
+            user_instructions=_DEFAULT_INSTRUCTIONS,
         )
-    else:
-        raw = (
-            f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
-            f"Instructions pour la suite:\n{instructions}\n"
-        )
-    return raw
+
+    parent_id = str(parent_node.get("id", ""))
+    return build_enriched_generation_prompt(
+        nodes=nodes,
+        parent_node_id=parent_id,
+        parent_speaker=str(parent_node.get("speaker") or "PNJ"),
+        parent_line=str(parent_node.get("line") or ""),
+        user_instructions=_DEFAULT_INSTRUCTIONS,
+        choice_text=choice_text,
+    )
 
 
 @router.get(
@@ -284,16 +285,24 @@ async def regenerate_node(
             request_id,
         )
 
+        dramatis, enriched_context = resolve_and_enrich_graph_context(
+            request_data.context_selections or {},
+            player_character_id=request_data.player_character_id,
+            context_builder=context_builder,
+        )
+
         result = await orchestrator.generate(
             llm_client=llm_client,
             parent_node_id=request_data.parent_node_id,
             parent_node_content=request_data.parent_node_content,
             user_instructions=request_data.new_instructions,
-            context_selections=request_data.context_selections,
+            context_selections=enriched_context,
             system_prompt_override=request_data.system_prompt_override,
             max_choices=None,
             target_choice_index=request_data.via_choice_index,
             generate_all_choices=False,
+            dialogue_nodes=request_data.dialogue_nodes,
+            player_character_id=dramatis.player_character_id,
         )
 
         if not result.nodes:
@@ -327,9 +336,7 @@ async def regenerate_node(
         try_compute_context_relevance(usage_service, request_id)
         gdd_fp = fingerprint_for_selections_safe(
             context_builder,
-            request_data.context_selections
-            if isinstance(request_data.context_selections, dict)
-            else {},
+            enriched_context,
         )
         return RegenerateNodeResponse(
             node=new_node,

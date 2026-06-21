@@ -18,12 +18,23 @@ from typing import Any, Dict, List, Optional
 
 from core.llm.llm_client import ILLMClient
 from models.dialogue_structure.unity_dialogue_node import UnityDialogueChoiceContent
+from constants import PlayableCharacters
+from services.dialogue_path_context import (
+    DialoguePathStep,
+    build_ancestor_path_steps,
+    build_enriched_generation_prompt,
+    format_generation_prompt,
+)
 from services.graph_generation_service import GraphGenerationService
 from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_INSTRUCTIONS = "Ecris la réponse du PNJ à ce que dit le PJ"
+DEFAULT_INSTRUCTIONS = (
+    "Ecris la réponse du PNJ à ce que dit le PJ. "
+    "2 à 5 phrases, concis et jouable ; même registre tu/vous que le START."
+)
+DEFAULT_PLAYER_CHARACTER = PlayableCharacters.DEFAULT_PLAYER
 
 TEST_RESULT_MAPPINGS: list[tuple[str, str]] = [
     ("testCriticalFailureNode", "critical-failure"),
@@ -81,22 +92,48 @@ def _build_test_connections(
     return connections
 
 
+def _resolve_path_steps(
+    dialogue_nodes: Optional[List[Dict[str, Any]]],
+    parent_node_id: str,
+) -> Optional[List[DialoguePathStep]]:
+    """Chemin ancêtre complet si la liste de nœuds est fournie."""
+    if not dialogue_nodes:
+        return None
+    steps = build_ancestor_path_steps(dialogue_nodes, parent_node_id)
+    return steps or None
+
+
 def _build_enriched_instructions(
     parent_speaker: str,
     parent_line: str,
     user_instructions: str,
     choice_text: Optional[str] = None,
+    *,
+    dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
+    parent_node_id: Optional[str] = None,
+    path_steps: Optional[List[DialoguePathStep]] = None,
+    player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
 ) -> str:
-    """Construit le prompt enrichi avec le contexte parent."""
-    if choice_text is not None:
-        return (
-            f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
-            f"Réponse du joueur:\n{choice_text}\n\n"
-            f"Instructions pour la suite:\n{user_instructions}\n"
+    """Construit le prompt enrichi avec le chemin ancêtre ou le parent immédiat."""
+    if path_steps is None and dialogue_nodes and parent_node_id:
+        path_steps = _resolve_path_steps(dialogue_nodes, parent_node_id)
+
+    if path_steps:
+        return format_generation_prompt(
+            path_steps,
+            user_instructions,
+            choice_text,
+            player_choice_label=player_choice_label,
         )
-    return (
-        f"Contexte précédent:\n{parent_speaker}: {parent_line}\n\n"
-        f"Instructions pour la suite:\n{user_instructions}\n"
+
+    return build_enriched_generation_prompt(
+        nodes=None,
+        parent_node_id=parent_node_id or "",
+        parent_speaker=parent_speaker,
+        parent_line=parent_line,
+        user_instructions=user_instructions,
+        choice_text=choice_text,
+        player_choice_label=player_choice_label,
     )
 
 
@@ -125,6 +162,8 @@ class GraphNodeOrchestrator:
         max_choices: Optional[int] = None,
         target_choice_index: Optional[int] = None,
         generate_all_choices: bool = False,
+        dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
+        player_character_id: Optional[str] = None,
     ) -> GenerationResult:
         """Point d'entrée unique – dispatche vers le bon mode de génération.
 
@@ -133,6 +172,7 @@ class GraphNodeOrchestrator:
         """
         parent_choices: list = parent_node_content.get("choices", [])
         instructions = _resolve_instructions(user_instructions)
+        choice_label = player_character_id or DEFAULT_PLAYER_CHARACTER
 
         if generate_all_choices:
             return await self._generate_batch(
@@ -144,6 +184,8 @@ class GraphNodeOrchestrator:
                 context_selections=context_selections or {},
                 system_prompt_override=system_prompt_override,
                 max_choices=max_choices,
+                dialogue_nodes=dialogue_nodes,
+                player_choice_label=choice_label,
             )
 
         parent_speaker = parent_node_content.get("speaker", "PNJ")
@@ -177,6 +219,8 @@ class GraphNodeOrchestrator:
                 instructions=instructions,
                 system_prompt_override=system_prompt_override,
                 max_choices=max_choices,
+                dialogue_nodes=dialogue_nodes,
+                player_choice_label=choice_label,
             )
 
         if target_choice_index is not None and not parent_choices:
@@ -192,6 +236,8 @@ class GraphNodeOrchestrator:
             system_prompt_override=system_prompt_override,
             max_choices=max_choices,
             target_choice_index=target_choice_index,
+            dialogue_nodes=dialogue_nodes,
+            player_choice_label=choice_label,
         )
 
     # ------------------------------------------------------------------
@@ -209,6 +255,8 @@ class GraphNodeOrchestrator:
         context_selections: Dict[str, Any],
         system_prompt_override: Optional[str],
         max_choices: Optional[int],
+        dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
+        player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
     ) -> GenerationResult:
         if not parent_choices:
             raise ValueError("Aucun choix disponible pour la génération batch.")
@@ -223,6 +271,8 @@ class GraphNodeOrchestrator:
             system_prompt_override=system_prompt_override,
             max_choices=max_choices,
             progress_callback=None,
+            dialogue_nodes=dialogue_nodes,
+            player_choice_label=player_choice_label,
         )
 
         generated_nodes = batch_result["nodes"]
@@ -335,6 +385,8 @@ class GraphNodeOrchestrator:
         instructions: str,
         system_prompt_override: Optional[str],
         max_choices: Optional[int],
+        dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
+        player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
     ) -> GenerationResult:
         if not (0 <= target_choice_index < len(parent_choices)):
             raise ValueError(f"Index de choix invalide: {target_choice_index}.")
@@ -357,7 +409,13 @@ class GraphNodeOrchestrator:
 
         choice_text = choice_data.get("text", "")
         enriched = _build_enriched_instructions(
-            parent_speaker, parent_line, instructions, choice_text=choice_text
+            parent_speaker,
+            parent_line,
+            instructions,
+            choice_text=choice_text,
+            dialogue_nodes=dialogue_nodes,
+            parent_node_id=parent_node_id,
+            player_choice_label=player_choice_label,
         )
         return await self._generate_and_enrich(
             llm_client=llm_client,
@@ -426,8 +484,17 @@ class GraphNodeOrchestrator:
         system_prompt_override: Optional[str],
         max_choices: Optional[int],
         target_choice_index: Optional[int],
+        dialogue_nodes: Optional[List[Dict[str, Any]]] = None,
+        player_choice_label: str = DEFAULT_PLAYER_CHARACTER,
     ) -> GenerationResult:
-        enriched = _build_enriched_instructions(parent_speaker, parent_line, instructions)
+        enriched = _build_enriched_instructions(
+            parent_speaker,
+            parent_line,
+            instructions,
+            dialogue_nodes=dialogue_nodes,
+            parent_node_id=parent_node_id,
+            player_choice_label=player_choice_label,
+        )
         return await self._generate_and_enrich(
             llm_client=llm_client,
             parent_node_id=parent_node_id,

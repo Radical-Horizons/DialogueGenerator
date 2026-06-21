@@ -152,8 +152,9 @@ class PromptBuilder:
         gen_elem = ET.SubElement(technical_elem, "generation_instructions")
         gen_parts = [
             "Règles de contenu :",
-            f"- Speaker (qui parle) : {input.npc_speaker_id} (PNJ interlocuteur)",
-            f"- Choix (choices) : Options du joueur ({input.player_character_id})",
+            f"- Speaker (répliques `line`) : {input.npc_speaker_id} — interlocuteur de la scène",
+            f"- Choix (`choices`) : voix du PJ {input.player_character_id}",
+            "- L'Éthérée ne doit jamais apparaître comme speaker ; ses répliques passent par les choices.",
             "- Tests d'attributs : Format 'AttributeType+SkillId:DD' (ex: 'Raison+Rhétorique:8'). La compétence est obligatoire."
         ]
         

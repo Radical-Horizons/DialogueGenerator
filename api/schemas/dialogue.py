@@ -125,6 +125,10 @@ class BasePromptRequest(BaseModel):
     user_instructions: str = Field(..., min_length=1, description="Instructions spécifiques pour la scène")
     context_selections: ContextSelection = Field(..., description="Sélections de contexte GDD")
     npc_speaker_id: Optional[str] = Field(None, description="ID du PNJ interlocuteur (si None, utiliser le premier personnage sélectionné)")
+    player_character_id: Optional[str] = Field(
+        None,
+        description="PJ jouable (Uresaïr, L'Éthérée, Vethraak, Eonundé) — voix des choices",
+    )
     max_context_tokens: int = Field(
         default=Defaults.CONTEXT_TOKENS,
         ge=Defaults.MIN_CONTEXT_TOKENS,

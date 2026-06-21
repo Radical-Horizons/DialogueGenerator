@@ -71,6 +71,17 @@ class ModelNames:
     # Liste des modèles qui peuvent avoir des problèmes avec le structured output
     MODELS_WITH_STRUCTURED_OUTPUT_ISSUES = [GPT_5_MINI, GPT_5_NANO]
 
+class PlayableCharacters:
+    """PJ jouables Alteir — source de vérité partagée backend/frontend."""
+
+    URESAIR = "Uresaïr"
+    ETHEEREE = "L'Éthérée"
+    VETHRAAK = "Vethraak"
+    EONUNDE = "Eonundé Alinen-Egan"
+    NAMES: tuple[str, ...] = (URESAIR, ETHEEREE, VETHRAAK, EONUNDE)
+    DEFAULT_PLAYER = ETHEEREE
+
+
 class Defaults:
     CONTEXT_TOKENS = 10000  # Plancher produit aligné MIN_CONTEXT_TOKENS (contexte LLM utilisable)
     VARIANTS_COUNT = 2

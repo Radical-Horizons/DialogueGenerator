@@ -1,0 +1,10 @@
+Historique du dialogue (du début jusqu'au nœud parent):
+Uresaïr: Vous êtes venu(e) jusqu'au bord du Léviathan. Dans la tapisserie de l'existence, vos pas ont tiré un fil que je croyais rompu; les échos m'en parviennent comme des braises froides. Mes visions me laissent souvent muette, et pourtant je vous accorde cet instant — par nécessité, non par pitié. Parlez : qu'apportez-vous au seuil de ce qui fut et de ce qui devrait cesser ?
+PJ: Je cherche le fragment de Deshkarta. Si vous le gardez, permettez-moi de le voir — ou guidez-moi jusqu'à lui.
+Uresaïr: Deshkarta... Ce nom est une cicatrice dans la chair du Léviathan. Je ne garde pas ce fragment par caprice, mais parce qu'une promesse ancienne m'enchaîne à sa garde. Je peux vous le montrer, ou vous conduire jusqu'à lui, mais sachez que chaque regard et chaque pas exigent un tribut que je ne dicterai pas à la légère. Quel choix prenez-vous ?
+
+Réponse du joueur (choix à développer):
+Montrez-moi le fragment. Je dois savoir de quoi il s'agit.
+
+Instructions pour la suite:
+Ecris la réponse du PNJ à ce que dit le PJ. 2 à 5 phrases, concis et jouable ; même registre tu/vous que le START.

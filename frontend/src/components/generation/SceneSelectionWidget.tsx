@@ -9,6 +9,11 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
 import { theme } from '../../theme'
 import { generationPanelChrome } from '../../theme/responsiveChrome'
 import { useGenerationPanelNarrow } from './GenerationPanelNarrowContext'
+import {
+  filterNpcCharacterOptions,
+  filterPlayableCharacterOptions,
+  isValidNpc,
+} from '../../utils/sceneDramatis'
 
 export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
   const isNarrow = useGenerationPanelNarrow()
@@ -42,9 +47,13 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
 
   const handleCharacterAChange = useCallback(
     (value: string | null) => {
-      updateSelection({ characterA: value })
+      const updates: Partial<typeof selection> = { characterA: value }
+      if (value && selection.characterB && !isValidNpc(selection.characterB, value)) {
+        updates.characterB = null
+      }
+      updateSelection(updates)
     },
-    [updateSelection]
+    [updateSelection, selection.characterB]
   )
 
   const handleCharacterBChange = useCallback(
@@ -68,7 +77,17 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
     [updateSelection]
   )
 
-  const characterOptions: ComboboxOption[] = data.characters.map((name) => ({
+  const playerCharacterOptions: ComboboxOption[] = filterPlayableCharacterOptions(
+    data.characters,
+  ).map((name) => ({
+    value: name,
+    label: name,
+  }))
+
+  const npcCharacterOptions: ComboboxOption[] = filterNpcCharacterOptions(
+    data.characters,
+    selection.characterA,
+  ).map((name) => ({
     value: name,
     label: name,
   }))
@@ -172,7 +191,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
         >
           <div style={{ flex: 1 }}>
             <Combobox
-              options={characterOptions}
+              options={playerCharacterOptions}
               value={selection.characterA}
               onChange={handleCharacterAChange}
               placeholder="PJ: (Aucun) - Rechercher..."
@@ -184,12 +203,12 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           </div>
           <button
             onClick={() => randomizeField('characterA')}
-            disabled={isLoading || data.characters.length === 0}
+            disabled={isLoading || playerCharacterOptions.length === 0}
             title="PJ Aléatoire"
             style={{
               ...randomButtonStyle,
-              cursor: isLoading || data.characters.length === 0 ? 'not-allowed' : 'pointer',
-              opacity: isLoading || data.characters.length === 0 ? 0.5 : 1,
+              cursor: isLoading || playerCharacterOptions.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: isLoading || playerCharacterOptions.length === 0 ? 0.5 : 1,
             }}
           >
             🎲
@@ -240,7 +259,7 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
         >
           <div style={{ flex: 1 }}>
             <Combobox
-              options={characterOptions}
+              options={npcCharacterOptions}
               value={selection.characterB}
               onChange={handleCharacterBChange}
               placeholder="PNJ: (Aucun) - Rechercher..."
@@ -252,12 +271,12 @@ export const SceneSelectionWidget = memo(function SceneSelectionWidget() {
           </div>
           <button
             onClick={() => randomizeField('characterB')}
-            disabled={isLoading || data.characters.length === 0}
+            disabled={isLoading || npcCharacterOptions.length === 0}
             title="PNJ Aléatoire"
             style={{
               ...randomButtonStyle,
-              cursor: isLoading || data.characters.length === 0 ? 'not-allowed' : 'pointer',
-              opacity: isLoading || data.characters.length === 0 ? 0.5 : 1,
+              cursor: isLoading || npcCharacterOptions.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: isLoading || npcCharacterOptions.length === 0 ? 0.5 : 1,
             }}
           >
             🎲

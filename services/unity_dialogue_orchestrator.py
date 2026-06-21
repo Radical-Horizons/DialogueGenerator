@@ -10,13 +10,14 @@ from typing import AsyncGenerator, Callable, Dict, Any, Optional
 from dataclasses import dataclass
 
 from services.dialogue_generation_service import DialogueGenerationService
+from services.unity_dialogue_generation_service import UnityDialogueGenerationService
 from core.prompt.prompt_engine import PromptEngine, PromptInput, BuiltPrompt
 from services.skill_catalog_service import SkillCatalogService
 from services.trait_catalog_service import TraitCatalogService
 from services.configuration_service import ConfigurationService
 from services.llm_usage_service import LLMUsageService
 from services.context_truncator import cap_context_text_to_budget
-from services.unity_dialogue_generation_service import UnityDialogueGenerationService
+from services.scene_dramatis import enrich_context_selections_for_scene, resolve_scene_dramatis
 from services.json_renderer.unity_json_renderer import UnityJsonRenderer
 from api.schemas.dialogue import GenerateUnityDialogueRequest, GenerateUnityDialogueResponse
 from api.exceptions import InternalServerException, ValidationException
@@ -132,19 +133,31 @@ class UnityDialogueOrchestrator:
                 yield GenerationEvent(type='error', data={'message': 'Génération annulée', 'code': 'cancelled'})
                 return
             
-            # 1. Convertir ContextSelection en dict
-            context_selections_dict = request_data.context_selections.to_service_dict()
-            all_characters = context_selections_dict.get('characters', [])
+            # 1. Résoudre PJ/PNJ et enrichir le contexte GDD (fiches + aléatoire excerpt)
+            context_builder = self.dialogue_service.context_builder
+            character_catalog = context_builder.get_characters_names()
+            dramatis = resolve_scene_dramatis(
+                player_character_id=request_data.player_character_id,
+                npc_speaker_id=request_data.npc_speaker_id,
+                context_selections=request_data.context_selections.model_dump(),
+            )
+            enriched_context = enrich_context_selections_for_scene(
+                request_data.context_selections,
+                dramatis,
+                character_catalog=character_catalog,
+                random_excerpt_count=1,
+            )
+            context_selections_dict = enriched_context.to_service_dict()
+            all_characters = context_selections_dict.get("characters", [])
             if not all_characters:
                 raise ValidationException(
                     message="Au moins un personnage doit être sélectionné",
-                    request_id=self.request_id
+                    request_id=self.request_id,
                 )
+            npc_speaker_id = dramatis.npc_speaker_id
+            player_character_id = dramatis.player_character_id
             
-            # 2. Déterminer le PNJ interlocuteur
-            npc_speaker_id = request_data.npc_speaker_id or all_characters[0]
-            
-            # 3. Charger catalogues (services injectés)
+            # 2. Charger catalogues (services injectés)
             skills_list = []
             try:
                 skills_list = self.skill_service.load_skills()
@@ -165,8 +178,7 @@ class UnityDialogueOrchestrator:
                 )
                 # Continuer avec une liste vide si le chargement échoue
             
-            # 4. Construire le contexte GDD (JSON obligatoire, plus de fallback)
-            context_builder = self.dialogue_service.context_builder
+            # 3. Construire le contexte GDD (JSON obligatoire, plus de fallback)
             if request_data.previous_dialogue_preview:
                 context_builder.set_previous_dialogue_context(request_data.previous_dialogue_preview)
             
@@ -187,16 +199,16 @@ class UnityDialogueOrchestrator:
                 request_data.max_context_tokens,
             )
             
-            # 5. Construire le prompt Unity via le builder unique
+            # 4. Construire le prompt Unity via le builder unique
             prompt_input = PromptInput(
                 user_instructions=request_data.user_instructions,
                 npc_speaker_id=npc_speaker_id,
-                player_character_id="URESAIR",
+                player_character_id=player_character_id,
                 skills_list=skills_list,
                 traits_list=traits_list,
                 context_summary=context_summary,
                 structured_context=structured_context,
-                scene_location=request_data.context_selections.scene_location,
+                scene_location=enriched_context.scene_location,
                 max_choices=request_data.max_choices,
                 choices_mode=request_data.choices_mode,
                 narrative_tags=request_data.narrative_tags,

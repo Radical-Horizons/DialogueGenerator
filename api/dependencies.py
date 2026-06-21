@@ -294,6 +294,12 @@ def get_graph_node_orchestrator(request: Request) -> "GraphNodeOrchestrator":
     return container.get_graph_node_orchestrator()
 
 
+def get_dialogue_tree_expansion_service(request: Request) -> "DialogueTreeExpansionService":
+    """Retourne le service d'expansion BFS de dialogues complets."""
+    container = get_service_container(request)
+    return container.get_dialogue_tree_expansion_service()
+
+
 def get_llm_quality_judge_service() -> "LLMQualityJudgeService":
     """Retourne le service juge qualité dialogue (stateless, FR42)."""
     from services.llm_quality_judge_service import LLMQualityJudgeService

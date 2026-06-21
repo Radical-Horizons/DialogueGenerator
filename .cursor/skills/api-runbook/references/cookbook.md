@@ -74,8 +74,43 @@ pwsh -File scripts/Invoke-DialogueApi.ps1 -Method GET -Path '/api/v1/context/cha
 | Preview FR94 | `POST /api/v1/documents/{id}/preview` |
 | Valider graphe | `POST /api/v1/unity-dialogues/graph/validate` |
 | Coût génération nœud | `POST /api/v1/unity-dialogues/graph/estimate-cost` |
+| **Expansion dialogue complet (BFS)** | `POST /api/v1/unity-dialogues/graph/expand-tree` |
 
 Préfixe graphe : `/api/v1/unity-dialogues/graph/*` — voir [`references/router-map.md`](router-map.md).
+
+### Expansion dialogue autonome (arbre complet)
+
+Dry-run (estimation ~121 appels LLM, modèle **gpt-5-mini** imposé) :
+
+```powershell
+npm run generate:dialogue-tree -- --dry-run --depth 4 --choices 3 --characters Uresaïr
+```
+
+Génération réelle (petit arbre depth=2) :
+
+```powershell
+npm run generate:dialogue-tree -- --depth 2 --choices 3 --characters Uresaïr --title "Rencontre test"
+```
+
+Run complet avec PJ/PNJ/lieu scène (ex. Uresaïr chez Voknir) :
+
+```powershell
+npm run generate:dialogue-tree -- `
+  --depth 4 --choices 3 `
+  --player Uresaïr --npc "Voknir Esh'Maradel" `
+  --characters Uresaïr "Voknir Esh'Maradel" `
+  --scene-region "Plis d'ossements" --sub-location "Atelier de Voknir" `
+  --title "Uresaïr chez Voknir" --document-id test_uresair_voknir `
+  --print-path --save-json data/test_dialogues/test_uresair_voknir.json
+```
+
+Flags utiles : `--player`, `--npc`, `--scene-region`, `--sub-location`, `--print-path`, `--path-choice`, `--save-json`.
+
+Via API directe :
+
+```powershell
+npm run api:invoke -- -Method POST -Path /api/v1/unity-dialogues/graph/expand-tree -BodyJson '{"user_instructions":"Scène courte","context_selections":{"characters_full":["Uresaïr"]},"max_depth":2,"max_choices":3,"persist":false,"dry_run":true}'
+```
 
 ## Dialogues & LLM
 

@@ -2,44 +2,42 @@ import type { Node } from 'reactflow'
 import type { Choice } from '../schemas/nodeEditorSchema'
 import type { NodePromptResponse } from '../types/graph'
 import { getParentChoiceForTestNode } from './testNodeSync'
+import {
+  buildEnrichedGenerationPrompt,
+  serializeDialogueNodesForApi,
+} from './dialoguePathContext'
 
-const DEFAULT_INSTRUCTIONS = 'Ecris la réponse du PNJ à ce que dit le PJ'
+const DEFAULT_INSTRUCTIONS =
+  'Ecris la réponse du PNJ à ce que dit le PJ. ' +
+  '2 à 5 phrases, concis et jouable ; même registre tu/vous que le START.'
 
 function textValue(value: unknown): string {
   return typeof value === 'string' ? value : ''
 }
 
-function buildPrompt(parentLine: string, parentSpeaker: string, choiceText?: string): string {
-  if (choiceText !== undefined) {
-    return [
-      'Contexte précédent:',
-      `${parentSpeaker}: ${parentLine}`,
-      '',
-      'Réponse du joueur:',
-      choiceText,
-      '',
-      'Instructions pour la suite:',
-      DEFAULT_INSTRUCTIONS,
-      '',
-    ].join('\n')
-  }
-  return [
-    'Contexte précédent:',
-    `${parentSpeaker}: ${parentLine}`,
-    '',
-    'Instructions pour la suite:',
-    DEFAULT_INSTRUCTIONS,
-    '',
-  ].join('\n')
+function buildPromptFromGraph(
+  nodes: Node[],
+  parentNode: Node,
+  choiceText?: string,
+): string {
+  const snapshots = serializeDialogueNodesForApi(nodes)
+  return buildEnrichedGenerationPrompt({
+    nodes: snapshots,
+    parentNodeId: parentNode.id,
+    parentSpeaker: textValue(parentNode.data?.speaker) || 'PNJ',
+    parentLine: textValue(parentNode.data?.line),
+    userInstructions: DEFAULT_INSTRUCTIONS,
+    choiceText,
+  })
 }
 
 export function reconstructNodePromptFromGraph(nodeId: string, nodes: Node[]): NodePromptResponse | null {
   const testParent = getParentChoiceForTestNode(nodeId, nodes)
   if (testParent) {
     return {
-      raw_prompt: buildPrompt(
-        textValue(testParent.dialogueNode.data?.line),
-        textValue(testParent.dialogueNode.data?.speaker) || 'PNJ',
+      raw_prompt: buildPromptFromGraph(
+        nodes,
+        testParent.dialogueNode,
         testParent.choice.text || '',
       ),
       prompt_tokens: null,
@@ -58,9 +56,9 @@ export function reconstructNodePromptFromGraph(nodeId: string, nodes: Node[]): N
     const choice = choices.find((c) => c.targetNode === nodeId)
     if (choice) {
       return {
-        raw_prompt: buildPrompt(
-          textValue(candidateParent.data?.line),
-          textValue(candidateParent.data?.speaker) || 'PNJ',
+        raw_prompt: buildPromptFromGraph(
+          nodes,
+          candidateParent,
           choice.text || '',
         ),
         prompt_tokens: null,
@@ -73,7 +71,7 @@ export function reconstructNodePromptFromGraph(nodeId: string, nodes: Node[]): N
   }
 
   return {
-    raw_prompt: buildPrompt(textValue(node.data?.line), textValue(node.data?.speaker) || 'PNJ'),
+    raw_prompt: buildPromptFromGraph(nodes, node),
     prompt_tokens: null,
     completion_tokens: null,
     timestamp: null,

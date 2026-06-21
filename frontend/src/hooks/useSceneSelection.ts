@@ -8,6 +8,13 @@ import { useContextStore } from '../store/contextStore'
 import { useGenerationStore } from '../store/generationStore'
 import { suggestionRefreshAfterSceneChange } from '../utils/contextSuggestionSync'
 import { mergeContextCharacterNames } from '../utils/gddEntityNames'
+import {
+  DEFAULT_PLAYER_CHARACTER,
+  isValidNpc,
+  randomNpcCharacter,
+  randomPlayableCharacter,
+  resolveSceneDramatis,
+} from '../utils/sceneDramatis'
 
 export interface SceneSelectionData {
   characters: string[]
@@ -241,8 +248,12 @@ export function useSceneSelection() {
       Array.isArray(contextSelections.characters_excerpt) ? contextSelections.characters_excerpt : [],
       characters,
     )
-    const characterA = allCharacters[0] ?? null
-    const characterB = allCharacters[1] ?? null
+    const dramatis = resolveSceneDramatis({
+      sceneProtagonists: contextSelections.scene_protagonists,
+      contextCharacters: allCharacters,
+    })
+    const characterA = dramatis.playerCharacterId
+    const characterB = dramatis.npcSpeakerId !== 'PNJ' ? dramatis.npcSpeakerId : null
 
     setSelection((prev) => {
       if (prev.characterA === characterA && prev.characterB === characterB) {
@@ -478,17 +489,19 @@ export function useSceneSelection() {
   const randomizeField = useCallback(
     (field: keyof SceneSelection) => {
       if (field === 'characterA' || field === 'characterB') {
-        if (data.characters.length > 0) {
-          const randomIndex = Math.floor(Math.random() * data.characters.length)
-          const randomChar = data.characters[randomIndex]
-          // Éviter de choisir le même personnage pour A et B si possible
-          const otherField = field === 'characterA' ? 'characterB' : 'characterA'
-          if (randomChar === selection[otherField] && data.characters.length > 1) {
-            const nextIndex = (randomIndex + 1) % data.characters.length
-            updateSelection({ [field]: data.characters[nextIndex] })
-          } else {
-            updateSelection({ [field]: randomChar })
+        if (field === 'characterA') {
+          const nextPlayer = randomPlayableCharacter(selection.characterB)
+          const updates: Partial<SceneSelection> = { characterA: nextPlayer }
+          if (selection.characterB && !isValidNpc(selection.characterB, nextPlayer)) {
+            updates.characterB = randomNpcCharacter(data.characters, nextPlayer)
           }
+          updateSelection(updates)
+          return
+        }
+        const playerId = selection.characterA ?? DEFAULT_PLAYER_CHARACTER
+        const nextNpc = randomNpcCharacter(data.characters, playerId)
+        if (nextNpc) {
+          updateSelection({ characterB: nextNpc })
         }
       } else if (field === 'sceneRegion') {
         if (data.regions.length > 0) {
